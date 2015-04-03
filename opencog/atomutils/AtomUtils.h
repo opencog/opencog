@@ -35,6 +35,8 @@ namespace opencog
  *  @{
  */
 
+const bool NO_SUBCLASSES = false;
+
 /**
  * General purpose utilities for processing atoms in the Atom.
  *
@@ -82,7 +84,101 @@ UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
  */
 UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
+/**
+ * Returns a list of all the EvaluationLinks with Predicates of the given type
+ * that the atom specified by 'target' participates in. 
+ * (C++ implementation of cog-get-pred)
+ *
+  * For example, given existence of the following:
+ *
+ *     EvaluationLink
+ *        PredicateNode "IsA"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "mammal"
+ *
+ *     EvaluationLink
+ *        PredicateNode "IsA"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "vertebrate"
+ *
+ *     EvaluationLink
+ *        PredicateNode "eats"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "meat"
+ *
+ * and, given a get_predicates target of:
+ *
+ *     ConceptNode "dog"
+ *
+ * and predicateType PREDICATE_NODE (or "PredicateNode"), then get_predicates
+ * returns evaluation links for:
+ *  
+ *     dog IsA mammal
+ *     dog IsA vertebrate
+ *     dog eats meat
+ *
+ * @param target Search for predicates that target.
+ * @param predicateType Search only for predicates of this type.
+ * @param subClasses Follow subtypes of linkType too.
+ */
+HandleSeq get_predicates(const Handle& target, 
+                         Type predicateType=PREDICATE_NODE,
+                         bool subClasses=true);
+
+/**
+ * Returns a list of all the EvaluationLinks with the specified predicate
+ * that the atom specified by 'target' participates in. 
+ *
+ * For example, given the following:
+ *
+ *     EvaluationLink
+ *        PredicateNode "IsA"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "mammal"
+ *
+ *     EvaluationLink
+ *        PredicateNode "IsA"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "vertebrate"
+ *
+ *     EvaluationLink
+ *        PredicateNode "eats"
+ *        ListLink
+ *           ConceptNode "dog"
+ *           ConceptNode "meat"
+ *
+ * then, given a target of:
+ *
+ *     ConceptNode "dog"
+ *
+ * and predicate:
+ *
+ *     PredicateNode "IsA"
+ *
+ * then get_predicates_for returns a list of all of the EvaluationLinks in 
+ * which the dog has the "IsA" predicate, but not the one for "eats". So:
+ * 
+ *     dog IsA mammal 
+ *     dog IsA vertebrate
+ *
+ * but NOT:
+ *
+ *     dog eats meat
+ *
+ * @param target Search for predicates that target.
+ * @param predicateType Search only for predicates of this type.
+ * @param subClasses Follow subtypes of linkType too.
+ */
+HandleSeq get_predicates_for(const Handle& target, 
+                             const Handle& predicate);
+
 /** @}*/
 }
+
 
 #endif // _OPENCOG_ATOM_UTILS_H
