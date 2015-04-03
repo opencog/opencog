@@ -6,7 +6,7 @@
 
 (define pln-rule-deduction
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))

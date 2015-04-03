@@ -6,7 +6,7 @@
 
 (define pln-rule-modus-ponens
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
         (ImplicationLink

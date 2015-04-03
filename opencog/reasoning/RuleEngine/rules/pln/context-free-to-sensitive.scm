@@ -12,7 +12,7 @@
 
 (define pln-rule-context-free-to-sensitive
     (BindLink
-        (ListLink
+        (VariableList
             (VariableNode "$A")
             (VariableNode "$C"))
         (ImplicationLink
