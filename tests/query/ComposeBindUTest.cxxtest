@@ -1,5 +1,5 @@
 /*
- * tests/query/ComposeUTest.cxxtest
+ * tests/query/ComposeBindUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -68,7 +68,7 @@ public:
 
 		cogserver().loadModules();
 
-		config().set("SCM_PRELOAD", "tests/query/compose.scm");
+		config().set("SCM_PRELOAD", "tests/query/compose-bind.scm");
 		load_scm_files_from_config(*as);
 
 	}
@@ -84,8 +84,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_double_define(void);
-	void test_simple_compose(void);
+	void test_simple_match(void);
 };
 
 void ComposeUTest::tearDown(void)
@@ -97,62 +96,19 @@ void ComposeUTest::setUp(void)
 }
 
 /*
- * Test double-definition of a DefineLink.  Double definitions
- * should not be posible.
- */
-void ComposeUTest::test_double_define(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle defun_a = eval->eval_h("(defun-a)");
-	TSM_ASSERT("Failed to load definition", defun_a != Handle::UNDEFINED);
-
-	// Disable logging to avoid dreck on stdout
-	logger().setLevel(Logger::NONE);
-
-	// Inserting a second atom with the same name should throw.
-	bool caught = false;
-	try
-	{
-		Handle defun_b = eval->eval_h("(defun-b)");
-	}
-	catch (const RuntimeException& ex)
-	{
-		caught = true;
-	}
-	logger().setLevel(Logger::DEBUG);
-	TSM_ASSERT("Failed to catch exception", caught == true);
-
-	// Inserting the same atom a second time should be harmless.
-	Handle refun = eval->eval_h("(defun-a)");
-	TSM_ASSERT("Failed to reload definition", defun_a == refun);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-/*
  * Basic ComposeLink unit test.
  */
-void ComposeUTest::test_simple_compose(void)
+void ComposeUTest::test_simple_match(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle hdef = eval->eval_h("(defun-a)");
-	printf("Get a defintion: %s\n", hdef->toString().c_str());
-	DefineLinkPtr defun = DefineLinkCast(hdef);
-	TSM_ASSERT("Excepected to get a definion", defun != NULL);
+	Handle hans = eval->eval_h("expected-answer");
+	Handle hgnd = eval->eval_h("(cog-bind (simple-call))");
 
-	Handle hcomp = eval->eval_h("composer");
-	printf("Get a composer: %s\n", hcomp->toString().c_str());
-	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
-	TSM_ASSERT("Excepected to get a ComposeLink", compr != NULL);
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
 
-	Handle hresult = compr->compose();
-	// We must place it in the atomspace, the composer doesn't do that.
-	hresult = as->getAtom(hresult);
-	printf("Got the result: %s\n", hresult->toString().c_str());
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
-	Handle hexpected = eval->eval_h("bogo-a");
-	TSM_ASSERT("Excepected to get desired result", hresult == hexpected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
