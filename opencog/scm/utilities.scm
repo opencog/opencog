@@ -650,7 +650,11 @@
   atom 'anchor'.
 
   Thus, for example, suppose the atom-space contains a link of the
-  form (ReferenceLink (ConceptNode \"asdf\") (WordNode \"pqrs\"))
+  form 
+        (ReferenceLink
+            (ConceptNode \"asdf\")
+            (WordNode \"pqrs\")
+        )
   Then, the call
      (cog-get-link 'ReferenceLink 'ConceptNode (WordNode \"pqrs\"))
   will return a list containing that link. Note that \"endpoint-type\"
