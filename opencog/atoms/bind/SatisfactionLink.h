@@ -58,8 +58,12 @@ protected:
 	std::vector<Handle> _clauses;
 
 	/// The graph components. Set by validate_clauses()
-	std::vector<Handle> _virtuals;
-	std::vector<Handle> _nonvirts;
+	/// "virtual" clauses are those that contain virtual links.
+	/// "recursive" clauses are those that contain ComposeLink.
+	/// "fixed" clauses are those that are neither of the above.
+	std::vector<Handle> _fixed;
+	std::vector<Handle> _recursive;
+	std::vector<Handle> _virtual;
 	std::set<std::vector<Handle>> _components;
 
 	// Validate the clauses inside the body

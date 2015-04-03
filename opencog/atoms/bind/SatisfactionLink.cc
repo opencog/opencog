@@ -111,7 +111,7 @@ void SatisfactionLink::unbundle_clauses(const Handle& clauses)
  * connected if they contain a common variable.
  *
  * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list, _virtuals and _nonvirts.
+ * them out into a distinct list, _virtual, _recursive and _fixed.
  *
  * It also partition the clauses into a set of connected components,
  * _components.
@@ -163,13 +163,17 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GREATER_THAN_LINK))
 		    and any_variable_in_tree(clause, vars))
-			_virtuals.push_back(clause);
+			_virtual.push_back(clause);
+		else if (contains_atomtype(clause, COMPOSE_LINK))
+		{
+			_recursive.push_back(clause);
+		}
 		else
-			_nonvirts.push_back(clause);
+			_fixed.push_back(clause);
 	}
 
 	// Split the non virtual clauses into connected components
-	get_connected_components(vars, _nonvirts, _components);
+	get_connected_components(vars, _fixed, _components);
 
 #ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
 	// For now, the virtual links must be at the top. Not sure

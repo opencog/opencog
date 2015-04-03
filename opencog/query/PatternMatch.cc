@@ -55,13 +55,13 @@ using namespace opencog;
  */
 void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
-   if (check_conn and 0 == _virtuals.size()) check_connectivity(_components);
-   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+   if (check_conn and 0 == _virtual.size()) check_connectivity(_components);
+   PatternMatch::do_match(pmc, _varset, _virtual, _components);
 }
 
 void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 {
-   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+   PatternMatch::do_match(pmc, _varset, _virtual, _components);
 }
 
 /* ===================== END OF FILE ===================== */
