@@ -1,6 +1,6 @@
 ;
 ; Definition for a specific puzzle
-; Hand-typed-in version of 
+; Hand-typed-in version of
 ; http://www.theguardian.com/lifeandstyle/2014/oct/17/sudoku-2944-hard
 ;
 ; XXX As of 18 October 2014, the pattern matcher fails to find a
@@ -45,7 +45,9 @@
 (define (puzzle)
 	(BindLink
 		; There are eighty-one variables! 81 = 9x9 cells
-		(variable-decls)
+		(VariableList
+			(variable-decls)
+		)
 		(ImplicationLink
 			(AndLink
 				; For this puzzle, 24 of the variables are fixed immediately.
@@ -82,7 +84,7 @@
 				(EvaluationLink (PredicateNode "fix95") (VariableNode "$cell_95"))
 				(EvaluationLink (PredicateNode "fix98") (VariableNode "$cell_98"))
 
-				; Aside from the above 24 constraints, there are another 
+				; Aside from the above 24 constraints, there are another
 				; there are 81+27 constraints. 81 of these say that each
 				; of the 81 variables must be a number.  The remaining 27
 				; constraints state that nine columns, rows and boxes must
@@ -90,7 +92,9 @@
 				(sudoku-constraints)
 			)
 			; The solution
-			(variable-decls)
+			(ListLink
+				(variable-decls)
+			)
 		)
 	)
 )
