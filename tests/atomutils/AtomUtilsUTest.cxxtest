@@ -95,7 +95,6 @@ void AtomUtilsUTest::test_get_outgoing_nodes()
 	                 UnorderedHandleSet({P}));
 }
 
-
 // Test get_outgoing_nodes()
 void AtomUtilsUTest::test_get_predicates()
 {
@@ -105,29 +104,28 @@ void AtomUtilsUTest::test_get_predicates()
 		bacon = as.addNode(CONCEPT_NODE, "bacon"),
 		programmer_bacon = as.addLink(LIST_LINK, programmer, bacon),
 		eats = as.addNode(PREDICATE_NODE, "eats"),
-		eatsEvaluationLink = as.addLink(EVALUATION_LINK, eats,
+		programmerEatsBacon = as.addLink(EVALUATION_LINK, eats,
 										programmer_bacon),
 		lover = as.addNode(DEFINED_RELATIONSHIP_NODE, "lover"),
-		loverEvaluationLink = as.addLink(EVALUATION_LINK, lover,
+		programmerBaconLover = as.addLink(EVALUATION_LINK, lover,
 										 programmer_bacon),
 		anotherNode = as.addNode(CONCEPT_NODE, "pigs"),
 		anotherLink = as.addLink(LIST_LINK, anotherNode, bacon);
 		
 	// Test get_predicates(default).
-	HandleSeq shouldGetHandles {eatsEvaluationLink, loverEvaluationLink};
-	TS_ASSERT_EQUALS(get_predicates(bacon), shouldGetHandles);
+	HandleSeq baconReferences {programmerEatsBacon, programmerBaconLover};
+	TS_ASSERT_EQUALS(get_predicates(bacon), baconReferences);
 
 	// Test get_predicates with specific type.
-	HandleSeq shouldGetHandlesTwo {loverEvaluationLink};
-	TS_ASSERT_EQUALS(get_predicates(bacon, DEFINED_RELATIONSHIP_NODE),
-	                 shouldGetHandlesTwo);
+	HandleSeq baconLovers {programmerBaconLover};
+	TS_ASSERT_EQUALS(get_predicates(bacon, DEFINED_RELATIONSHIP_NODE), 
+					 baconLovers);
 
 	// Test get_predicates with specific type and no subclasses.
-	HandleSeq shouldGetHandlesThree {eatsEvaluationLink};
+	HandleSeq eatersOfBacon {programmerEatsBacon};
 	TS_ASSERT_EQUALS(get_predicates(bacon, PREDICATE_NODE, NO_SUBCLASSES),
-	                 shouldGetHandlesThree);
+	                 eatersOfBacon);
 }
-
 
 // Test get_outgoing_nodes()
 void AtomUtilsUTest::test_get_predicates_for()
