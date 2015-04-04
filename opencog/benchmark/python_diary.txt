@@ -380,3 +380,46 @@ Test scheme_eval_h(+ 2 2)                      44.901µs          22,271
 Bind - cog-bind - Scheme                       88.626µs          11,283
 Add nodes - cog-new-node - Scheme              97.150µs          10,293
 Add nodes - ConceptNode sugar - Scheme         84.870µs          11,782
+
+
+04 April 2015
+-------------
+Added three new tests to compare speeds for new C++ and Cython versions
+of cog-get-pred and a new function get_predicates_for which returns only
+returns evaluation links with a specific predicate. The Cython version is
+67 times faster since it can avoid the Scheme interpreter overhead.
+
+As measure by Curtis on:
+  MacBook Pro - Retina, 15-inch, Early 2013
+  Intel Core i7 2.7 Ghz - Quad core
+  16GB 1600 Mhz DDR3
+
+Linux running under boot2docker VirtualBox VM in a Docker container with:
+  Ubuntu 14.04.2 LTS (trusty)
+  Python 2.7.6
+  gcc (Ubuntu 4.8.2-19ubuntu1) 4.8.2
+  guile (GNU Guile) 2.0.9
+
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              4.627µs         216,143
+Add nodes - Cython (500K)                       4.734µs         211,251
+Add fully connected nodes                       5.800µs         172,399
+Bare atom traversal 100K - by type              0.003µs     333,092,757
+Resolve Handle 10K - by type                    0.420µs       2,381,165
+Resolve Handle 100K - by type                   0.319µs       3,135,133
+Resolve Handle 1M - by type                     0.312µs       3,204,695
+Get and Traverse 100K - by type                 0.657µs       1,522,818
+Yield Get and Traverse 100K - by type           0.420µs       2,381,177
+Get Outgoing                                    0.944µs       1,059,799
+Get Outgoing - no temporary list                0.933µs       1,071,909
+Yield Get Outgoing                              0.766µs       1,305,331
+Bind - stub_bindlink - Cython                   0.164µs       6,093,768
+Bind - bindlink - Cython                       14.514µs          68,899
+Test scheme_eval_h(+ 2 2)                      75.527µs          13,240
+Bind - cog-bind - Scheme                       98.502µs          10,152
+Add nodes - cog-new-node - Scheme             125.868µs           7,944
+Add nodes - ConceptNode sugar - Scheme        111.437µs           8,973
+Predicates get_predicates                       1.995µs         501,140
+Predicates get_predicates_for                   1.793µs         557,721
+Predicates cog-get-pred - Scheme              135.691µs           7,369

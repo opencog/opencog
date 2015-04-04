@@ -41,10 +41,10 @@ Add fully connected nodes
 
 import argparse
 import time, datetime
-from opencog.atomspace import AtomSpace, TruthValue, Handle, types
+from opencog.atomspace import AtomSpace, TruthValue, Handle, Atom, types
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
-from opencog.bindlink import stub_bindlink, bindlink, validate_bindlink
+from opencog.bindlink import stub_bindlink, bindlink
 
 __authors__ = 'Cosmo Harrigan, Curtis Faith'
 
@@ -66,14 +66,15 @@ verbosity_group.add_argument("-c", "--columns", action="store_true", default=Tru
 test_group = parser.add_mutually_exclusive_group()
 test_group.add_argument("-a", "--all",  default=False, action="store_true", help="run all tests")
 test_group.add_argument("-t", "--test", type=str, default='spread',
-                        choices=['spread','node', 'bindlink', 'traverse', 'scheme', 'get_vs_xget'],
+                        choices=['spread','node', 'bindlink', 'traverse', 'scheme', 'get_vs_xget', 'predicates'],
                         help="R|Test to benchmark, where:\n"
                              "  spread      - a spread of tests across areas (default)\n"
                              "  node        - atomspace node operations \n"
                              "  bindlink    - all the bindlink forms\n"
                              "  traverse    - traversal of atomspace lists\n"
                              "  scheme      - scheme evaluation functions\n"
-                             "  get_vs_xget - compare get to xget functions")
+                             "  get_vs_xget - compare get to xget functions\n"
+                             "  predicates  - predicate retrieval functions")
 parser.add_argument("-i", "--iterations", metavar='N', type=int, default=10, help="iterations to average (default=10)")
 args = parser.parse_args()
 
@@ -213,6 +214,40 @@ def prep_bind_scheme(atomspace):
         '''
     scheme_eval_h(atomspace, scheme_query)
 
+def prep_predicates(atomspace):
+    scheme.__init__(atomspace)
+    for scheme_file in scheme_preload:
+        load_scm(atomspace, scheme_file)
+
+    # Define dogs relationships
+    scheme_dog_predicates = \
+        '''
+        (EvaluationLink
+            (PredicateNode "IsA")
+            (ListLink
+                (ConceptNode "dog")
+                (ConceptNode "mammal")
+            )
+        )
+        (EvaluationLink
+            (PredicateNode "IsA")
+            (ListLink
+                (ConceptNode "dog")
+                (ConceptNode "animal")
+            )
+        )
+        (EvaluationLink
+            (PredicateNode "Loves")
+            (ListLink
+                (ConceptNode "dog")
+                (ConceptNode "biscuits")
+            )
+        )
+        '''
+    scheme_eval_h(atomspace, scheme_dog_predicates)
+    dog = atomspace.add_node(types.ConceptNode, "dog")
+    isA = atomspace.add_node(types.PredicateNode, "IsA")
+    return dog, isA
 
 # Tests
 
@@ -326,12 +361,6 @@ def test_bind(atomspace, prep_handle):
         result = bindlink(atomspace, prep_handle)
     return n
 
-def test_validate_bindlink(atomspace, prep_handle):
-    n = 10000
-    for i in xrange(n):
-        result = validate_bindlink(atomspace, prep_handle)
-    return n
-
 
 # Scheme tests
 
@@ -361,6 +390,28 @@ def test_add_nodes_sugar(atomspace, prep_handle):
     n = 10000
     for i in xrange(n):
         scheme = '\'ConceptNode "' + str(i) + '" (cog-new-stv 0.5 0.5)'
+        scheme_eval_h(atomspace, scheme)
+    return n
+
+# Predicate tests
+def test_get_predicates(atomspace, prep_result):
+    dog, isA = prep_result
+    n = 100000
+    for i in xrange(n):
+        result = atomspace.get_predicates(dog)
+    return n
+
+def test_get_predicates_for(atomspace, prep_result):
+    dog, isA = prep_result
+    n = 100000
+    for i in xrange(n):
+        result = atomspace.get_predicates_for(dog, isA)
+    return n
+
+def test_get_predicates_scheme(atomspace, prep_result):
+    scheme = '(cog-get-pred (ConceptNode "dog") \'PredicateNode)'
+    n = 1000
+    for i in xrange(n):
         scheme_eval_h(atomspace, scheme)
     return n
 
@@ -415,34 +466,38 @@ def do_test(prep, test, description, op_time_adjustment):
 # build complex predicates etc. without affecting test times.
 # Prep function     # Test function         # Test description
 tests = [
-(['all'],                   None,               None,                       "-- Testing Node Adds --"),
-(['node','spread'],         prep_none,          test_add_nodes,             "Add nodes - Cython"),
-(['node'],                  prep_none,          test_add_nodes_large,       "Add nodes - Cython (500K)"),
-(['node'],                  prep_none,          test_add_connected,         "Add fully connected nodes"),
+(['all'],                   None,                   None,                       "-- Testing Node Adds --"),
+(['node','spread'],         prep_none,              test_add_nodes,             "Add nodes - Cython"),
+(['node'],                  prep_none,              test_add_nodes_large,       "Add nodes - Cython (500K)"),
+(['node'],                  prep_none,              test_add_connected,         "Add fully connected nodes"),
 
-(['all'],                   None,               None,                       "-- Testing Atom Traversal --"),
-(['traverse'],              prep_traverse_100K, test_bare_traversal,        "Bare atom traversal 100K - by type"),
-(['traverse'],              prep_traverse_10K,  test_resolve_traversal,     "Resolve Handle 10K - by type"),
-(['traverse','spread'],     prep_traverse_100K, test_resolve_traversal,     "Resolve Handle 100K - by type"),
-(['traverse'],              prep_traverse_1M,   test_resolve_traversal,     "Resolve Handle 1M - by type"),
+(['all'],                   None,                   None,                       "-- Testing Atom Traversal --"),
+(['traverse'],              prep_traverse_100K,     test_bare_traversal,        "Bare atom traversal 100K - by type"),
+(['traverse'],              prep_traverse_10K,      test_resolve_traversal,     "Resolve Handle 10K - by type"),
+(['traverse','spread'],     prep_traverse_100K,     test_resolve_traversal,     "Resolve Handle 100K - by type"),
+(['traverse'],              prep_traverse_1M,       test_resolve_traversal,     "Resolve Handle 1M - by type"),
 
-(['all'],                   None,               None,                       "-- Testing Get versus Yield-based Get --"),
-(['get_vs_xget'],           prep_get_100K,      test_get_traverse,          "Get and Traverse 100K - by type"),
-(['get_vs_xget'],           prep_get_100K,      test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
-(['get_vs_xget'],           prep_get_outgoing,  test_get_outgoing,          "Get Outgoing"),
-(['get_vs_xget'],           prep_get_outgoing,  test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
-(['get_vs_xget'],           prep_get_outgoing,  test_xget_outgoing,         "Yield Get Outgoing"),
+(['all'],                   None,                   None,                       "-- Testing Get versus Yield-based Get --"),
+(['get_vs_xget'],           prep_get_100K,          test_get_traverse,          "Get and Traverse 100K - by type"),
+(['get_vs_xget'],           prep_get_100K,          test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
+(['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing,          "Get Outgoing"),
+(['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
+(['get_vs_xget'],           prep_get_outgoing,      test_xget_outgoing,         "Yield Get Outgoing"),
 
-(['all'],                   None,               None,                       "-- Testing Bind --"),
-(['bindlink'],              prep_none,          test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
-(['bindlink','spread'],     prep_bind_python,   test_bind,                  "Bind - bindlink - Cython"),
-(['bindlink'],              prep_bind_python,   test_validate_bindlink,     "Bind - validate_bindlink - Cython"),
+(['all'],                   None,                   None,                       "-- Testing Bind --"),
+(['bindlink'],              prep_none,              test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
+(['bindlink','spread'],     prep_bind_python,       test_bind,                  "Bind - bindlink - Cython"),
 
-(['all'],                   None,               None,                       "-- Testing Scheme Eval --"),
-(['scheme','spread'],       prep_scheme,        test_scheme_eval,           "Test scheme_eval_h(+ 2 2)"),
-(['scheme'],                prep_bind_scheme,   test_bind_scheme,           "Bind - cog-bind - Scheme"),
-(['scheme'],                prep_scheme,        test_add_nodes_scheme,      "Add nodes - cog-new-node - Scheme"),
-(['scheme'],                prep_scheme,        test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
+(['all'],                   None,                   None,                       "-- Testing Scheme Eval --"),
+(['scheme','spread'],       prep_scheme,            test_scheme_eval,           "Test scheme_eval_h(+ 2 2)"),
+(['scheme'],                prep_bind_scheme,       test_bind_scheme,           "Bind - cog-bind - Scheme"),
+(['scheme'],                prep_scheme,            test_add_nodes_scheme,      "Add nodes - cog-new-node - Scheme"),
+(['scheme'],                prep_scheme,            test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
+
+(['all'],                   None,                   None,                       "-- Testing Get Predicates --"),
+(['predicates','spread'],   prep_predicates,        test_get_predicates,        "Predicates get_predicates"),
+(['predicates'],            prep_predicates,        test_get_predicates_for,    "Predicates get_predicates_for"),
+(['predicates'],            prep_predicates,        test_get_predicates_scheme, "Predicates cog-get-pred - Scheme"),
 ]
 
 
