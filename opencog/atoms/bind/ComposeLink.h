@@ -63,8 +63,9 @@ public:
 
 	ComposeLink(Link &l);
 
+	const HandleSeq& getArgs(void) const;
 	Handle compose(void);
-	void satisfy(PatternMatchCallback*);
+	void satisfy(PatternMatchCallback*, const HandleSeq&);
 };
 
 typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;

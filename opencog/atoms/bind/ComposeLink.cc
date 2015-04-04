@@ -72,6 +72,13 @@ ComposeLink::ComposeLink(Link &l)
 	init(l.getOutgoingSet());
 }
 
+/// Simply return the arguments to be composed.
+const HandleSeq& ComposeLink::getArgs(void) const
+{
+	LinkPtr args(LinkCast(_outgoing[1]));
+	return args->getOutgoingSet();
+}
+
 /// Compose this link with the defined link, and return the result.
 Handle ComposeLink::compose(void)
 {
@@ -88,9 +95,8 @@ Handle ComposeLink::compose(void)
 	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
 	LambdaLinkPtr lam(ldefun->get_definition());
 
-	// Get the arguments
-	LinkPtr args(LinkCast(_outgoing[1]));
-	return lam->substitute(args->getOutgoingSet());
+	// Substitute the arguments
+	return lam->substitute(getArgs());
 }
 
 /* ===================== END OF FILE ===================== */

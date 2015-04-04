@@ -64,7 +64,8 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
    PatternMatch::do_match(pmc, _varset, _virtual, _components);
 }
 
-void ComposeLink::satisfy(PatternMatchCallback* pmc)
+void ComposeLink::satisfy(PatternMatchCallback* pmc,
+                          const HandleSeq& args)
 {
 printf ("duuuuuuuuuuuuude called the compose satter\n");
 }

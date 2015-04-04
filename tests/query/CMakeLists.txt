@@ -46,7 +46,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(ComposeUTest)
 # disable - under development
-#	ADD_CXXTEST(ComposeBindUTest)
+	ADD_CXXTEST(ComposeBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)

@@ -56,8 +56,9 @@ class PatternMatchEngine
 		bool note_root(const Handle&);
 		
 		// -------------------------------------------
-		// Recurisve tree comparison algorithm.
+		// Recursive tree comparison algorithm.
 		bool tree_compare(const Handle&, const Handle&);
+		bool compose_compare(const LinkPtr&, const LinkPtr&);
 		int depth;      // Recursion depth for tree_compare.
 		bool in_quote;  // Everything is literal in a quote.
 

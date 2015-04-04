@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atoms/bind/ComposeLink.h>
 #include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -193,17 +192,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		return true;
 	}
 
-	// If the pattern is defined elsewhere, not here, then we have
-	// to go to where it is defined, and pattern match things there.
-	// The tricky part is that we have to pass on our current state,
-	// i.e. the variables that we do have, the groundings we already
-	// have, and see if that makes things work.
-	if (COMPOSE_LINK == tp)
-	{
-		ComposeLinkPtr cpl(ComposeLinkCast(hp));
-		cpl->satisfy(NULL);
-	}
-
 	// If they're the same atom, then clearly they match.
 	// ... but only if hp is a constant i.e. contains no bound variables)
 	if (hp == hg)
@@ -315,6 +303,12 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			}
 		}
 #endif
+		// If the pattern is defined elsewhere, not here, then we have
+		// to go to where it is defined, and pattern match things there.
+		if (COMPOSE_LINK == tp)
+		{
+			return compose_compare(lp, lg);
+		}
 
 		// Let the callback perform basic checking.
 		bool match = pmc->link_match(lp, lg);

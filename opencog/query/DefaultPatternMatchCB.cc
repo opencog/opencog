@@ -30,7 +30,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+ #define DEBUG
 #ifdef DEBUG
 #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
