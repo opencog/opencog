@@ -89,8 +89,15 @@ class FindAtoms
 				classserver().getChildrenRecursive(t, inserter(_target_types));
 			}
 		}
-		inline FindAtoms(Type ta, Type tb)
-			: _target_types({ta, tb}) {}
+		inline FindAtoms(Type ta, Type tb, bool subclass = false)
+			: _target_types({ta, tb})
+		{
+			if (subclass)
+			{
+				classserver().getChildrenRecursive(ta, inserter(_target_types));
+				classserver().getChildrenRecursive(tb, inserter(_target_types));
+			}
+		}
 		inline FindAtoms(const std::set<Handle>& selection)
 			: _target_types(),
 			 _target_atoms(selection) {}
