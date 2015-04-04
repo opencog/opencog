@@ -216,6 +216,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected a VariableList holding variable declarations");
 	}
+	build_index();
 }
 
 /* ================================================================= */
