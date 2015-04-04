@@ -77,7 +77,7 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
-	Handle substitute_nocheck(const Handle&, const HandleSeq&);
+	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
 public:
 	VariableList(const HandleSeq& vardecls,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -89,11 +89,26 @@ public:
 
 	VariableList(Link&);
 
-	const VariableTypeMap& get_typemap(void) { return _typemap; }
-	bool is_type(const Handle&);
-	bool is_type(const HandleSeq&);
+	// Return he list of variables we are holding.
+	const HandleSeq& get_variables(void) const { return _varseq; }
 
-	Handle substitute(const Handle&, const HandleSeq&);
+	// Return the type restrivtions ffor the variables.
+	const VariableTypeMap& get_typemap(void) const { return _typemap; }
+
+	// Return true if we are holding a single variable, and the handle is
+	// satisfies any type restrictions. Else return false.
+	bool is_type(const Handle&) const;
+
+	// Return true if the sequence is of the same length as the variable
+	// declarations we are holding, and if they satisfy all of the type
+	// restrictions.
+	bool is_type(const HandleSeq&) const;
+
+	// Given the tree `tree` containing variables in it, create and
+	// return a new tree with the indicated values `vals` substituted
+	// for the variables. The vals must pass the typecheck, else an
+	// exception is thrown.
+	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;

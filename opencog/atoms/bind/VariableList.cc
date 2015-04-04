@@ -256,7 +256,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
  * be a TypeChoice, and so the handle must be one of the types in the
  * TypeChoice.
  */
-bool VariableList::is_type(const Handle& h)
+bool VariableList::is_type(const Handle& h) const
 {
 	// The arity must be one for there to be a match.
 	if (1 != _varset.size()) return false;
@@ -284,7 +284,7 @@ bool VariableList::is_type(const Handle& h)
  * on the wiki; We would need the general pattern matcher to do type
  * checking, in that situation.
  */
-bool VariableList::is_type(const HandleSeq& hseq)
+bool VariableList::is_type(const HandleSeq& hseq) const
 {
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
@@ -362,7 +362,8 @@ void VariableList::build_index(void)
  * Again, only a substitution is performed, there is not evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
+Handle VariableList::substitute(const Handle& fun,
+                                const HandleSeq& args) const
 {
 	if (args.size() != _varseq.size())
 		throw InvalidParamException(TRACE_INFO,
@@ -377,7 +378,7 @@ Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
 }
 
 Handle VariableList::substitute_nocheck(const Handle& fun,
-                                        const HandleSeq& args)
+                                        const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, Arity>::const_iterator idx;
