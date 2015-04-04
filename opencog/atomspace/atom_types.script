@@ -151,4 +151,12 @@ QUANTITY_LINK <- ORDERED_LINK
 // Basic arithmetic operators
 PLUS_LINK <- UNORDERED_LINK
 TIMES_LINK <- UNORDERED_LINK
-GREATER_THAN_LINK <- ORDERED_LINK
+
+// A VirtualLink is equivalent to an EvaluationLink, with a
+// GroundedPredicateNode in it, except that the GPN is "built in".
+// So, for example, GreaterThanLink is equivalent to an EvaluationLink
+// with a GroundedPredicateNode "c++:greater_than".  Its defined this
+// way to gain some performance. The base type must be VirtualLink, to
+// make it easier to find these things.
+VIRTUAL_LINK <- EVALUATION_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK
