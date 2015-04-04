@@ -198,6 +198,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
 		_varset.insert(hdecls);
+		_varseq.push_back(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
