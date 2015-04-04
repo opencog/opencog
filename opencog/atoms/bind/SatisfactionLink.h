@@ -59,10 +59,8 @@ protected:
 
 	/// The graph components. Set by validate_clauses()
 	/// "virtual" clauses are those that contain virtual links.
-	/// "recursive" clauses are those that contain ComposeLink.
-	/// "fixed" clauses are those that are neither of the above.
+	/// "fixed" clauses are those that do not.
 	std::vector<Handle> _fixed;
-	std::vector<Handle> _recursive;
 	std::vector<Handle> _virtual;
 	std::set<std::vector<Handle>> _components;
 

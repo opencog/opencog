@@ -111,7 +111,7 @@ void SatisfactionLink::unbundle_clauses(const Handle& clauses)
  * connected if they contain a common variable.
  *
  * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list, _virtual, _recursive and _fixed.
+ * them out into a distinct list, _virtual; the rest go in _fixed.
  *
  * It also partition the clauses into a set of connected components,
  * _components.
@@ -152,24 +152,41 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	// The GreaterThanLink is a link type that implicitly contains
 	// a GroundedPredicate for numeric greater-than relations. So
 	// we search for that too.
-	//
-	// XXX FIXME, the check below is not quite correct; for example,
-	// it would tag the following as virtual, although it is not:
-	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
-	// (ListLink (ConceptNode "Stuff"))))  -- the var is there but not
-	// in the GPN.
-	for (Handle clause: clauses)
+	for (const Handle& clause: clauses)
 	{
-		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GREATER_THAN_LINK))
-		    and any_unquoted_in_tree(clause, vars))
-			_virtual.push_back(clause);
-		else if (contains_atomtype(clause, COMPOSE_LINK))
+		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
+		fgpn.find_atoms(clause);
+		if (0 < fgpn.least_holders.size())
 		{
-			_recursive.push_back(clause);
+			for (const Handle& sh : fgpn.least_holders)
+			{
+				if (any_unquoted_in_tree(sh, vars))
+				{
+					_virtual.push_back(clause);
+					break;
+				}
+			}
 		}
 		else
-			_fixed.push_back(clause);
+		{
+			FindAtoms fgtl(VIRTUAL_LINK, true); // subclasses of VirtualLink
+			fgtl.find_atoms(clause);
+			if (0 < fgtl.least_holders.size())
+			{
+				// Unlike the above, its varset, not least_holders...
+				// because its a link...
+				for (const Handle& sh : fgpn.varset)
+				{
+					if (any_unquoted_in_tree(sh, vars))
+					{
+						_virtual.push_back(clause);
+						break;
+					}
+				}
+			}
+			else
+				_fixed.push_back(clause);
+		}
 	}
 
 	// Split the non virtual clauses into connected components
