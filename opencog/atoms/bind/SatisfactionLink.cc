@@ -167,35 +167,25 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 		bool have_virt = false;
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 		fgpn.find_atoms(clause);
-		if (0 < fgpn.least_holders.size())
-		{
-			for (const Handle& sh : fgpn.least_holders)
+		for (const Handle& sh : fgpn.least_holders)
+			if (any_unquoted_in_tree(sh, vars))
 			{
-				if (any_unquoted_in_tree(sh, vars))
-				{
-					have_virt = true;
-					break;
-				}
+				have_virt = true;
+				break;
 			}
-		}
 
 		if (not have_virt)
 		{
 			FindAtoms fgtl(VIRTUAL_LINK, true); // subclasses of VirtualLink
 			fgtl.find_atoms(clause);
-			if (0 < fgtl.least_holders.size())
-			{
-				// Unlike the above, its varset, not least_holders...
-				// because its a link...
-				for (const Handle& sh : fgpn.varset)
+			// Unlike the above, its varset, not least_holders...
+			// because its a link...
+			for (const Handle& sh : fgtl.varset)
+				if (any_unquoted_in_tree(sh, vars))
 				{
-					if (any_unquoted_in_tree(sh, vars))
-					{
-						have_virt = true;
-						break;
-					}
+					have_virt = true;
+					break;
 				}
-			}
 		}
 
 		if (have_virt)
