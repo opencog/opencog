@@ -7,7 +7,7 @@
 		(ConceptNode "some-name")
 		(SatisfactionLink
 			(VariableNode "$some-var")
-			(AndLink
+			(AssociativeLink
 				(ConceptNode "random-atom")
 				(VariableNode "$some-var")
 			)
@@ -21,7 +21,7 @@
 		(ConceptNode "some-name")
 		(SatisfactionLink
 			(VariableNode "$other-var")
-			(ListLink
+			(InheritanceLink
 				(VariableNode "$other-var")
 				(ConceptNode "other-atom")
 			)
@@ -41,7 +41,7 @@
 
 ; The expected result of beta-reducing defun-a with composer
 (define bogo-a
-	(AndLink
+	(AssociativeLink
 		(ConceptNode "random-atom")
 		(ConceptNode "bogosity")
 	)
@@ -53,7 +53,7 @@
 		(ConceptNode "quoter")
 		(SatisfactionLink
 			(VariableNode "$other-var")
-			(OrLink
+			(AttractionLink
 				(VariableNode "$other-var")
 				(ConceptNode "other-atom")
 				(QuoteLink
@@ -76,7 +76,7 @@
 
 ; The expected result of composing defun-a with composer
 (define yeah-quote
-	(OrLink
+	(AttractionLink
 		(ConceptNode "yeah, right")
 		(ConceptNode "other-atom")
 		(QuoteLink

@@ -77,29 +77,4 @@ LambdaLink::LambdaLink(Link &l)
 	init(l.getOutgoingSet());
 }
 
-/* ================================================================= */
-/**
- * Unpack a LambdaLink into vardecls and body
- * Very similar to the constructors.
- */
-void LambdaLink::unbundle_body(const Handle& hlambda)
-{
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hlambda));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink");
-
-	// Type must be as expected
-	Type tscope = hlambda->getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
-	}
-
-	init(lbl->getOutgoingSet());
-}
-
 /* ===================== END OF FILE ===================== */

@@ -128,7 +128,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	bool bogus = remove_constants(vars, clauses);
 	if (bogus)
 	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
+		logger().warn("%s: Constant clauses removed from pattern",
 		              __FUNCTION__);
 	}
 

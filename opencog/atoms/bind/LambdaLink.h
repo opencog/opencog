@@ -54,9 +54,6 @@ protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-	// Extract variable decls and the body.
-	void unbundle_body(const Handle&);
-
 	LambdaLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
