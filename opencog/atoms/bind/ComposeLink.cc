@@ -98,7 +98,7 @@ LambdaLinkPtr ComposeLink::getDefinition(void) const
 }
 
 /// Compose this link with the defined link, and return the result.
-Handle ComposeLink::compose(void)
+Handle ComposeLink::compose(void) const
 {
 	// Substitute the arguments
 	return getDefinition()->substitute(getArgs());

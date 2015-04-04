@@ -40,15 +40,58 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-/// The CompseLink is used to specify a set of values that are to be
-/// attached to the variables of a function named by a a DefineLink.
-/// Thus, a ComposeLink acts much like function composition: it
+/// The ComposeLink is used to specify a set of values that are to be
+/// attached to the variables of a function named by a DefineLink.
+/// Thus, a ComposeLink vaguely resembles a "function call", except that
+/// no actual call is made (nor is any grounding or evaluation made).
+/// The ComposeLink merely serves to specify the values that will be
+/// passed to the named function. Perhaps "SubstitutionLink" might be a
+/// better name: it specifies what will e substituted.  The actual
+/// substitution does not take place until the `substitute` method is
+/// called.  Note, however, that the substitute
 /// substitutes values for variables.  It does not actually perform any
-/// calling, evaluation or grounding; it merely served to identify the
+/// calling, evaluation or grounding; it merely serves to identify the
 /// named function with which it is to be composed.
 ///
-/// The intended use of this link type is to define recursive patterns
-/// the pattern matcher to solve.
+/// The ComposeLink must have the following form:
+///
+///      ComposeLink
+///          SomeNamingAtom
+///          SomeOrderedLink
+///             Argument_1
+///             Argument_2
+///             ...
+///             Argument_N
+///
+/// The "SomeNamingAtom" will typically be a Node, a ConceptNode or a
+/// PredicteNode, but it doesn't have to be.  However, it MUST appear
+/// as the name of a DefineLink; that is, there MUST be a corresponding
+/// DefineLink of the form
+///
+///      DefineLink
+///          SomeNamingAtom
+///          LambdaLink   ;;; Or SatisfactionLink or BindLink....
+///              Vardecls
+///              BodyAtom
+///
+/// The "SomeNamingAtom" must be exactly the same in the Define and the
+/// Compose; this is how the ComposeLink is able to find the defined
+/// body.  The DefineLink does not have to be created before the
+/// ComposeLink is created; however, it must exist by the time the
+/// composition is used.  The DefineLink has to name either a
+/// LambdaLink, or one of the link types inheriting from it (e.g. a
+/// BindLink or SatisfactionLink).
+///
+/// The "SomeOrderedLink" holds the set of arguments associated with the
+/// name.  These arguments may be "values", or they may be
+/// VariableNodes, or a mixture of the two.  A "value" is anything that
+/// is not a VariableNode.  If the arguments are values, then they MUST
+/// obey the type restrictions specified in the LambdaLink.  If they are
+/// VariableNodes, then they inherit the type restrictions from the
+/// LambdaLink.
+///
+/// The intended use of this link type is to specify (name) patterns
+/// that will be expanded during the course of a  pattern match.  The 
 class ComposeLink : public Link
 {
 protected:
@@ -64,9 +107,11 @@ public:
 
 	ComposeLink(Link &l);
 
-	const HandleSeq& getArgs(void) const;
-	LambdaLinkPtr getDefinition(void) const;
-	Handle compose(void);
+	// Return the arguments that this link was defined with.
+	const HandleSeq& get_args(void) const;
+	const HandleSeq& get_local_args(void) const;
+	LambdaLinkPtr get_definition(void) const;
+	Handle compose(void) const;
 	void satisfy(PatternMatchCallback*, const HandleSeq&);
 };
 

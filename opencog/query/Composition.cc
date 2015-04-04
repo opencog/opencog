@@ -41,30 +41,40 @@ using namespace opencog;
 bool PatternMatchEngine::compose_compare(const LinkPtr& lp,
                                          const LinkPtr& lg)
 {
-	// If the pattern is defined elsewhere, not here, then we have
-	// to go to where it is defined, and pattern match things there.
-	// The tricky part is that we have to pass on our current state,
-	// i.e. the variables that we do have, the groundings we already
-	// have, and see if that makes things work.
+	// If we are here, the pattern is defined in a DefineLink. We
+	// must match to that. There seem to be two strategies for doing
+	// that:  Method A: rename all of the variables in the defined
+	// pattern to be the variables we are actually using in the
+	// top-level search.  This seems easy, but it is wrong, for two
+	// reasons. One reason is that, after renaming, we will have
+	// created a pattern that is probably not in the atomspace.
+	// That means that the pattern will have atoms with invalid UUID's
+	// in them, causing trouble down the line. The other problem is
+	// that the variables in the defined target now look like perfectly
+	// good grounding candidates, and so get found and reported as valid
+	// grounds. So, for these two reasons, the simple, "obvious" method
+	// A is out. Instead, we implement method B: we rename the variables
+	// that the match engine is carrying, to correspond with the variable
+	// names that are native to the definition. This way, insde the body
+	// of the definition, everything looks "normal", and should thus
+	// proceed as formal.  Of course, on exit, we have to unmasquerade. 
+
 	ComposeLinkPtr cpl(ComposeLinkCast(lp));
+
+	// First, we masquerade
+// XXX TODO respect  the type definitions, too!!!!
+#if 0
+	var_solutn_stack.push(var_grounding);
+	const HandleSeq& local_args(cpl->get_local_args
+	for (const Handle& arg : cpl->get_args())
+	{
+		
+	}
+#endif
+
 
 	Handle expanded_pattern(cpl->compose());
 	return tree_compare(expanded_pattern, Handle(lg));
-#if 0
-	// Get the args that the compose link is expecting...
-	const HandleSeq& args = cpl->getArgs();
-	HandleSeq grounds;
-	for (const Handle& harg : args)
-	{
-		const Handle& gnd(var_grounding[harg]);
-		if (Handle::UNDEFINED != gnd)
-			grounds.push_back(gnd);
-		else
-			grounds.push_back(harg);
-	}
-	cpl->satisfy(pmc, grounds);
-	return true; // XXX this is totally wrong
-#endif
 }
 
 /* ===================== END OF FILE ===================== */
