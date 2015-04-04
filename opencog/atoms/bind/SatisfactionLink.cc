@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/ComposeLink.h>
 
 #include "SatisfactionLink.h"
 
@@ -152,8 +153,17 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	// The GreaterThanLink is a link type that implicitly contains
 	// a GroundedPredicate for numeric greater-than relations. So
 	// we search for that too.
-	for (const Handle& clause: clauses)
+	for (Handle clause: clauses)
 	{
+		// If any of te top-most clauses are ComposeLinks, expand
+		// them now. Trying to defer such expansion to later is
+		// just asking for a headache.
+		if (COMPOSE_LINK == clause->getType())
+		{
+			ComposeLinkPtr cmps(ComposeLinkCast(clause));
+			clause = cmps->compose();
+		}
+
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 		fgpn.find_atoms(clause);
 		if (0 < fgpn.least_holders.size())
