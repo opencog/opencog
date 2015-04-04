@@ -1084,13 +1084,10 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	if (_cnf_clauses.empty()) return;
 
 	// Preparation prior to search.
-	// Find everything that contains GPN's or GSN's.
-	FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
+	// Find everything that contains GPN's or the like.
+	FindAtoms fgpn(GROUNDED_PREDICATE_NODE, VIRTUAL_LINK, true);
 	fgpn.find_atoms(_cnf_clauses);
-	FindAtoms fgtl(GREATER_THAN_LINK);
-	fgtl.holders = fgpn.holders;
-	fgtl.find_atoms(_cnf_clauses);
-	_evaluatable = fgtl.holders;
+	_evaluatable = fgpn.holders;
 
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
@@ -1112,13 +1109,20 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		cl++;
 	}
 
-	printf("\nPredicate includes the following optional clauses:\n");
-	cl = 0;
-	for (Handle h : _optionals)
+	if (0 < _optionals.size())
 	{
-		printf("Optional clause %d: ", cl);
-		prt(h);
-		cl++;
+		printf("Predicate includes the following optional clauses:\n");
+		cl = 0;
+		for (Handle h : _optionals)
+		{
+			printf("Optional clause %d: ", cl);
+			prt(h);
+			cl++;
+		}
+	}
+	else
+	{
+		printf("No optional clauses\n");
 	}
 
 	// Print out the bound variables in the predicate.
