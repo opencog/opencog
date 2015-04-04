@@ -495,9 +495,9 @@ tests = [
 (['scheme'],                prep_scheme,            test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
 
 (['all'],                   None,                   None,                       "-- Testing Get Predicates --"),
-(['predicates','spread'],   prep_predicates,        test_get_predicates,        "Predicates get_predicates"),
-(['predicates'],            prep_predicates,        test_get_predicates_for,    "Predicates get_predicates_for"),
-(['predicates'],            prep_predicates,        test_get_predicates_scheme, "Predicates cog-get-pred - Scheme"),
+(['predicates','spread'],   prep_predicates,        test_get_predicates,        "Predicates - get_predicates"),
+(['predicates'],            prep_predicates,        test_get_predicates_for,    "Predicates - get_predicates_for"),
+(['predicates'],            prep_predicates,        test_get_predicates_scheme, "Predicates - cog-get-pred - Scheme"),
 ]
 
 
