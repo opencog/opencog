@@ -38,6 +38,14 @@ using namespace opencog;
 
 /* ================================================================= */
 
+/* Reset the current variable grounding to the last grounding pushed
+ * onto the stack. */
+#define POPGND(soln,stack) {         \
+	OC_ASSERT(not stack.empty(), "Unbalanced grounding stack"); \
+	soln = stack.top();               \
+	stack.pop();                      \
+}
+
 bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
                                        const LinkPtr& lg)
 {
@@ -61,20 +69,45 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
-	// First, we masquerade
+	// First, we masquerade: replace the redex vars by the vars
+	// that they wrap.
 // XXX TODO respect  the type definitions, too!!!!
-#if 0
 	var_solutn_stack.push(var_grounding);
-	const HandleSeq& local_args(cpl->get_local_args
-	for (const Handle& arg : cpl->get_args())
+	const HandleSeq& local_args(cpl->get_local_args());
+	const HandleSeq& redex_args(cpl->get_args());
+	size_t sz = redex_args.size();
+	for (size_t i=0; i< sz; i++)
 	{
-		
+		auto iter = var_grounding.find(redex_args[i]);
+		if (iter == var_grounding.end()) continue;
+		var_grounding.insert({local_args[i], iter->second});
+		var_grounding.erase(redex_args[i]);
 	}
-#endif
+	bool have_match = tree_compare(Handle(lp), Handle(lg));
 
+	// No match; restore original grounding and quit
+	if (not have_match)
+	{
+		POPGND(var_grounding, var_solutn_stack);
+		return false;
+	}
 
-	Handle expanded_pattern(cpl->beta_reduce());
-	return tree_compare(expanded_pattern, Handle(lg));
+	// If there is a match, then maybe we grounded some variables.
+	// If so, we need to unmasquerade them.
+	SolnMap tmp;
+	for (size_t i=0; i< sz; i++)
+	{
+		auto iter = var_grounding.find(local_args[i]);
+		if (iter != var_grounding.end())
+			tmp.insert({redex_args[i], iter->second});
+	}
+	POPGND(var_grounding, var_solutn_stack);
+
+	// Now, copy them into the grounding
+	for (const std::pair<Handle, Handle> pare : tmp)
+		var_grounding.insert(pare);
+
+	return true;
 }
 
 /* ===================== END OF FILE ===================== */

@@ -79,6 +79,12 @@ const HandleSeq& BetaRedex::get_args(void) const
 	return args->getOutgoingSet();
 }
 
+/// Return the matching arguments from the lambda
+const HandleSeq& BetaRedex::get_local_args(void) const
+{
+	return get_definition()->get_variables();
+}
+
 /// Get the definition (the body) of the function (without renaming the
 /// variables).
 LambdaLinkPtr BetaRedex::get_definition(void) const
