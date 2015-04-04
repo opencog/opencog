@@ -164,6 +164,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 			clause = cmps->compose();
 		}
 
+		bool have_virt = false;
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 		fgpn.find_atoms(clause);
 		if (0 < fgpn.least_holders.size())
@@ -172,12 +173,13 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 			{
 				if (any_unquoted_in_tree(sh, vars))
 				{
-					_virtual.push_back(clause);
+					have_virt = true;
 					break;
 				}
 			}
 		}
-		else
+
+		if (not have_virt)
 		{
 			FindAtoms fgtl(VIRTUAL_LINK, true); // subclasses of VirtualLink
 			fgtl.find_atoms(clause);
@@ -189,14 +191,17 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 				{
 					if (any_unquoted_in_tree(sh, vars))
 					{
-						_virtual.push_back(clause);
+						have_virt = true;
 						break;
 					}
 				}
 			}
-			else
-				_fixed.push_back(clause);
 		}
+
+		if (have_virt)
+			_virtual.push_back(clause);
+		else
+			_fixed.push_back(clause);
 	}
 
 	// Split the non virtual clauses into connected components
