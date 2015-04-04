@@ -79,8 +79,9 @@ const HandleSeq& ComposeLink::getArgs(void) const
 	return args->getOutgoingSet();
 }
 
-/// Compose this link with the defined link, and return the result.
-Handle ComposeLink::compose(void)
+/// Get the definition (the body) of the function (without renaming the
+/// variables).
+LambdaLinkPtr ComposeLink::getDefinition(void) const
 {
 	// Is the defined link actually defined?
 	// We cannot do this check when the ctor runs, since it might
@@ -89,14 +90,18 @@ Handle ComposeLink::compose(void)
    _outgoing[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
    if (1 != ename.size())
       throw InvalidParamException(TRACE_INFO,
-         "Cannot compose with an undefined function!");
+         "Cannot find defined function!");
 
 	// Get the the defined function
 	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
-	LambdaLinkPtr lam(ldefun->get_definition());
+	return ldefun->get_definition();
+}
 
+/// Compose this link with the defined link, and return the result.
+Handle ComposeLink::compose(void)
+{
 	// Substitute the arguments
-	return lam->substitute(getArgs());
+	return getDefinition()->substitute(getArgs());
 }
 
 /* ===================== END OF FILE ===================== */

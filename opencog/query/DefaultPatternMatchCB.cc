@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/ComposeLink.h>
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
@@ -91,26 +92,32 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
+	// Iterate over all the handles in the outgoing set.
+	// Find the deepest one that contains a constant, and start
+	// the search there.  If there are two at the same depth,
+	// then start with the skinnier one.
 	size_t deepest = depth;
 	start = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	// Iterate over all the handles in the outgoing set.
-	// Find the deepest one that contains a constant, and start
-	// the search there.  If there are two at the same depth,
-	// then start with the skinnier one.
+	// If there is a ComposeLink, then search it's definition instead.
+	// but do this only at depth zero, so as to get us started; otherwise
+	// we risk infinite descent if the compose is recursive.
 	LinkPtr ll(LinkCast(h));
-	const std::vector<Handle> &vh = ll->getOutgoingSet();
-	for (size_t i = 0; i < vh.size(); i++) {
-
+	if (0 == depth and COMPOSE_LINK == ll->getType())
+	{
+		ComposeLinkPtr cpl(ComposeLinkCast(ll));
+		ll = cpl->getDefinition();
+	}
+	for (Handle hunt : ll->getOutgoingSet())
+	{
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		Handle hunt(vh[i]);
-		if (QUOTE_LINK == vh[i]->getType())
+		if (QUOTE_LINK == hunt->getType())
 			hunt = LinkCast(hunt)->getOutgoingAtom(0);
 
 		Handle s(find_starter(hunt, brdepth, sbr, brwid));
@@ -269,7 +276,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		for (size_t i = 0; i < sz; i++) {
 			Handle h(iset[i]);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
+			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
 			       h->toShortString().c_str());
 			bool rc = pme->do_candidate(_root, _starter_pred, h);
 			if (rc) break;
