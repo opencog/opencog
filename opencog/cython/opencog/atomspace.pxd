@@ -183,3 +183,16 @@ cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
         TimeServer()
 
+
+cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
+    # C++: 
+    #   
+    #   HandleSeq get_predicates(const Handle& target, 
+    #                     Type predicateType=PREDICATE_NODE,
+    #                     bool subClasses=true)
+    #   void finalize_opencog();
+    #   void configuration_load(const char* configFile);
+    #
+    cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
+    cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
+
