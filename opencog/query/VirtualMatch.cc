@@ -310,6 +310,7 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
 	if (nvcomps.size() == 1 and virtuals.empty()) {
+		dbgprt("No Virtuals; ordinary solver: ====================== ");
 		// Split in positive and negative clauses
 		std::vector<Handle> affirm, negate;
 		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);

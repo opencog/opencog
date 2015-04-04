@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/ComposeLink.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Logger.h>
 
@@ -35,9 +36,9 @@ using namespace opencog;
  *
  * Given a BindLink containing variable declarations and an
  * ImplicationLink, this method will "evaluate" the implication,
- * matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
+ * matching the predicate, and creating a grounded implicand,
+ * assuming the predicate can be satisfied. Thus, for example,
+ * given the structure
  *
  *    BindLink
  *       ListLink
@@ -61,6 +62,11 @@ void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 {
    PatternMatch::do_match(pmc, _varset, _virtual, _components);
+}
+
+void ComposeLink::satisfy(PatternMatchCallback* pmc)
+{
+printf ("duuuuuuuuuuuuude called the compose satter\n");
 }
 
 /* ===================== END OF FILE ===================== */

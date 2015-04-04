@@ -22,6 +22,7 @@
  */
 
 #include <opencog/util/oc_assert.h>
+#include <opencog/atoms/bind/ComposeLink.h>
 #include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -190,6 +191,17 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		prtmsg("$$ ground term: ", hg);
 		var_grounding[hp] = hg;
 		return true;
+	}
+
+	// If the pattern is defined elsewhere, not here, then we have
+	// to go to where it is defined, and pattern match things there.
+	// The tricky part is that we have to pass on our current state,
+	// i.e. the variables that we do have, the groundings we already
+	// have, and see if that makes things work.
+	if (COMPOSE_LINK == tp)
+	{
+		ComposeLinkPtr cpl(ComposeLinkCast(hp));
+		cpl->satisfy(NULL);
 	}
 
 	// If they're the same atom, then clearly they match.

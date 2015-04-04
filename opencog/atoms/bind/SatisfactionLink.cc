@@ -153,17 +153,8 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	// The GreaterThanLink is a link type that implicitly contains
 	// a GroundedPredicate for numeric greater-than relations. So
 	// we search for that too.
-	for (Handle clause: clauses)
+	for (const Handle& clause: clauses)
 	{
-		// If any of te top-most clauses are ComposeLinks, expand
-		// them now. Trying to defer such expansion to later is
-		// just asking for a headache.
-		if (COMPOSE_LINK == clause->getType())
-		{
-			ComposeLinkPtr cmps(ComposeLinkCast(clause));
-			clause = cmps->compose();
-		}
-
 		bool have_virt = false;
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 		fgpn.find_atoms(clause);
@@ -176,7 +167,9 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 
 		if (not have_virt)
 		{
-			FindAtoms fgtl(VIRTUAL_LINK, true); // subclasses of VirtualLink
+			// Subclasses of VirtualLink, e.g. GreaterThanLink, which
+			// are essentially a kind of EvaluationLink holding a GPN
+			FindAtoms fgtl(VIRTUAL_LINK, true);
 			fgtl.find_atoms(clause);
 			// Unlike the above, its varset, not least_holders...
 			// because its a link...

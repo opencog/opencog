@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
@@ -63,6 +64,7 @@ public:
 	ComposeLink(Link &l);
 
 	Handle compose(void);
+	void satisfy(PatternMatchCallback*);
 };
 
 typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;
