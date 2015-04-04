@@ -30,6 +30,7 @@
 #include <set>
 #include <vector>
 
+#include <opencog/util/functional.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Handle.h>
@@ -80,8 +81,14 @@ class FindAtoms
 		std::set<Handle> holders;
 		std::set<Handle> least_holders;
 
-		inline FindAtoms(Type t)
-			: _target_types({t}) {}
+		inline FindAtoms(Type t, bool subclass = false)
+			: _target_types({t})
+		{
+			if (subclass)
+			{
+				classserver().getChildrenRecursive(t, inserter(_target_types));
+			}
+		}
 		inline FindAtoms(Type ta, Type tb)
 			: _target_types({ta, tb}) {}
 		inline FindAtoms(const std::set<Handle>& selection)
