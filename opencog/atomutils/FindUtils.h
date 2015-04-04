@@ -81,10 +81,12 @@ class FindAtoms
 		std::set<Handle> least_holders;
 
 		inline FindAtoms(Type t)
-			: _var_type(t) {}
+			: _target_types({t}) {}
+		inline FindAtoms(Type ta, Type tb)
+			: _target_types({ta, tb}) {}
 		inline FindAtoms(const std::set<Handle>& selection)
-			: _var_type(NOTYPE),
-			 _var_domain(selection) {}
+			: _target_types(),
+			 _target_atoms(selection) {}
 
 		/**
 		 * Create a set of all of the target atoms/types that lie in the
@@ -110,7 +112,7 @@ class FindAtoms
 		inline Loco find_rec(const Handle& h)
 		{
 			Type t = h->getType();
-			if ((t == _var_type) or _var_domain.count(h) == 1)
+			if (1 == _target_types.count(t) or _target_atoms.count(h) == 1)
 			{
 				varset.insert(h);
 				return IMM; //! Don't explore link-typed vars!
@@ -137,8 +139,8 @@ class FindAtoms
 		}
 
 	private:
-		Type _var_type;
-		std::set<Handle> _var_domain;
+		std::set<Type> _target_types;
+		std::set<Handle> _target_atoms;
 };
 
 /**
