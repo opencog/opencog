@@ -68,33 +68,6 @@ VariableList::VariableList(Type t, const HandleSeq& oset,
 	validate_vardecl(oset);
 }
 
-// Crazy rule-violating ctor: auto-build a variable list from
-// just a single variable, or a list of them.
-VariableList::VariableList(const Handle& h,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(VARIABLE_LIST, HandleSeq(), tv, av)
-{
-	// Type must be reasonable
-	Type tscope = h->getType();
-	if (VARIABLE_NODE == tscope or TYPED_VARIABLE_LINK == tscope)
-	{
-		_outgoing.push_back(h);
-		validate_vardecl(_outgoing);
-		return;
-	}
-	else if (classserver().isA(tscope, VARIABLE_LIST))
-	{
-		_type = tscope;
-		_outgoing = LinkCast(h)->getOutgoingSet();
-		if (VARIABLE_LIST == tscope)
-			validate_vardecl(_outgoing);
-		return;
-	}
-	const std::string& tname = classserver().getTypeName(tscope);
-	throw InvalidParamException(TRACE_INFO,
-		"Expecting a VariableList, got %s", tname.c_str());
-}
-
 VariableList::VariableList(Link &l)
 	: Link(l)
 {
@@ -216,7 +189,6 @@ void VariableList::get_vartype(const Handle& htypelink)
  *
  * As a side-effect, the variables and type restrictions are unpacked.
  */
-
 void VariableList::validate_vardecl(const Handle& hdecls)
 {
 	// Expecting the declaration list to be either a single

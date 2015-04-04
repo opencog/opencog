@@ -83,10 +83,6 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	VariableList(const Handle& varcdecls,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
 	VariableList(Link&);
 
 	// Return he list of variables we are holding.
