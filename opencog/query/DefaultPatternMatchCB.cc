@@ -108,7 +108,7 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	if (0 == depth and COMPOSE_LINK == ll->getType())
 	{
 		ComposeLinkPtr cpl(ComposeLinkCast(ll));
-		ll = cpl->getDefinition();
+		ll = LinkCast(cpl->compose());
 	}
 	for (Handle hunt : ll->getOutgoingSet())
 	{
