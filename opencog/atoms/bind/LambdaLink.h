@@ -76,9 +76,16 @@ public:
 
 	LambdaLink(Link &l);
 
-	Handle substitute (const HandleSeq& seq)
+	// Return the list of variables that are bound up in this lambda
+	const HandleSeq& get_variables(void) const
+	{ return _vardecl->get_variables(); }
+
+	// Take the list of values `vals`, and substitute them in for the
+	// variables in the body of this lambda. The values must satisfy all
+	// type restrictions, else an exception will be thrown.
+	Handle substitute (const HandleSeq& vals) const
 	{
-		return _vardecl->substitute(_body, seq);
+		return _vardecl->substitute(_body, vals);
 	}
 };
 
