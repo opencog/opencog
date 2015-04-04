@@ -243,7 +243,62 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(a1 in self.space)
         self.assertTrue(h2 in self.space)
 
-        self.assertTrue(len(self.space), 3)
+        self.assertEquals(len(self.space), 3)
+
+    def test_get_predicates(self):
+        dog = self.space.add_node(types.ConceptNode, "dog")
+        mammal = self.space.add_node(types.ConceptNode, "mammal")
+        canine = self.space.add_node(types.ConceptNode, "canine")
+        animal = self.space.add_node(types.ConceptNode, "animal")
+        dog_mammal = self.space.add_link(types.ListLink, [dog, mammal])
+        dog_canine = self.space.add_link(types.ListLink, [dog, canine])
+        dog_animal = self.space.add_link(types.ListLink, [dog, animal])
+        isA = self.space.add_node(types.PredicateNode, "IsA")
+        dogIsAMammal = self.space.add_link(types.EvaluationLink, [isA, dog_mammal])
+        dogIsACanine = self.space.add_link(types.EvaluationLink, [isA, dog_canine])
+        dogIsAAnimal = self.space.add_link(types.EvaluationLink, [isA, dog_animal])
+
+        dog_predicates = self.space.get_predicates(dog)
+        self.assertEquals(len(dog_predicates), 3)
+
+        count = 0
+        for dogIs in self.space.xget_predicates(dog):
+            count += 1
+        self.assertEquals(count, 3)
+
+    def test_get_predicates_for(self):
+        dog = self.space.add_node(types.ConceptNode, "dog")
+        mammal = self.space.add_node(types.ConceptNode, "mammal")
+        canine = self.space.add_node(types.ConceptNode, "canine")
+        animal = self.space.add_node(types.ConceptNode, "animal")
+        dog_mammal = self.space.add_link(types.ListLink, [dog, mammal])
+        dog_canine = self.space.add_link(types.ListLink, [dog, canine])
+        dog_animal = self.space.add_link(types.ListLink, [dog, animal])
+        isA = self.space.add_node(types.PredicateNode, "IsA")
+        dogIsAMammal = self.space.add_link(types.EvaluationLink, [isA, dog_mammal])
+        dogIsACanine = self.space.add_link(types.EvaluationLink, [isA, dog_canine])
+        dogIsAAnimal = self.space.add_link(types.EvaluationLink, [isA, dog_animal])
+
+        human = self.space.add_node(types.ConceptNode, "human")
+        dog_human = self.space.add_link(types.ListLink, [dog, human])
+        loves = self.space.add_node(types.PredicateNode, "loves")
+        dogLovesHumans = self.space.add_link(types.EvaluationLink, [loves, dog_human])
+
+        dog_predicates = self.space.get_predicates_for(dog, isA)
+        self.assertEquals(len(dog_predicates), 3)
+
+        dog_predicates = self.space.get_predicates_for(dog, loves)
+        self.assertEquals(len(dog_predicates), 1)
+
+        count = 0
+        for dogIsA in self.space.xget_predicates_for(dog, isA):
+            count += 1
+        self.assertEquals(count, 3)
+
+        count = 0
+        for dogLoves in self.space.xget_predicates_for(dog, loves):
+            count += 1
+        self.assertEquals(count, 1)
 
 class AtomTest(TestCase):
 
