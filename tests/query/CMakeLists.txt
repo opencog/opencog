@@ -44,9 +44,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(SubstitutionUTest)
-	ADD_CXXTEST(ComposeUTest)
-# disable - under development
-	ADD_CXXTEST(ComposeBindUTest)
+	ADD_CXXTEST(BetaRedexUTest)
+	ADD_CXXTEST(RedexBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
@@ -75,14 +74,14 @@ ADD_CUSTOM_TARGET (qtest
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
 # might be.
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/beta-redex.scm
+    ${PROJECT_BINARY_DIR}/tests/query/beta-redex.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-crime.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-crime.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/compose.scm
-    ${PROJECT_BINARY_DIR}/tests/query/compose.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater-compute.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm

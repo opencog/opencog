@@ -1,5 +1,5 @@
 ;
-; data for ComposeBindUTest
+; data for RedexBindUTest
 ;
 ;
 ;; The data that we expect to be able to match
@@ -50,7 +50,7 @@
 			(VariableNode "$var-two")
 		)
 		(ImplicationLink
-			(ComposeLink
+			(BetaRedex
 				(ConceptNode "two-argument-pattern")
 				(ListLink
 					(VariableNode "$var-one")
