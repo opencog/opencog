@@ -23,7 +23,7 @@
 
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/ComposeLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
@@ -105,10 +105,10 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 	// but do this only at depth zero, so as to get us started; otherwise
 	// we risk infinite descent if the compose is recursive.
 	LinkPtr ll(LinkCast(h));
-	if (0 == depth and COMPOSE_LINK == ll->getType())
+	if (0 == depth and BETA_REDEX == ll->getType())
 	{
-		ComposeLinkPtr cpl(ComposeLinkCast(ll));
-		ll = LinkCast(cpl->compose());
+		BetaRedexPtr cpl(BetaRedexCast(ll));
+		ll = LinkCast(cpl->beta_reduce());
 	}
 	for (Handle hunt : ll->getOutgoingSet())
 	{

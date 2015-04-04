@@ -1,7 +1,7 @@
 /*
- * ComposeLink.cc
+ * BetaRedex.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -26,11 +26,11 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/bind/DefineLink.h>
 
-#include "ComposeLink.h"
+#include "BetaRedex.h"
 
 using namespace opencog;
 
-void ComposeLink::init(const HandleSeq& oset)
+void BetaRedex::init(const HandleSeq& oset)
 {
 	// Must have name and body
 	if (2 != oset.size())
@@ -40,40 +40,40 @@ void ComposeLink::init(const HandleSeq& oset)
 	Type ot = oset[1]->getType();
 	if (not classserver().isA(ot, ORDERED_LINK))
       throw InvalidParamException(TRACE_INFO,
-         "Expecting and ordered list of arguments!");
+         "Expecting an ordered list of arguments!");
 }
 
-ComposeLink::ComposeLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(COMPOSE_LINK, oset, tv, av)
+BetaRedex::BetaRedex(const HandleSeq& oset,
+                     TruthValuePtr tv, AttentionValuePtr av)
+	: Link(BETA_REDEX, oset, tv, av)
 {
 	init(oset);
 }
 
-ComposeLink::ComposeLink(const Handle& name, const Handle& defn,
+BetaRedex::BetaRedex(const Handle& name, const Handle& args,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(COMPOSE_LINK, HandleSeq({name, defn}), tv, av)
+	: Link(BETA_REDEX, HandleSeq({name, args}), tv, av)
 {
 	init(getOutgoingSet());
 }
 
-ComposeLink::ComposeLink(Link &l)
+BetaRedex::BetaRedex(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, COMPOSE_LINK))
+	if (not classserver().isA(tscope, BETA_REDEX))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ComposeLink, got %s", tname.c_str());
+			"Expecting a BetaRedex, got %s", tname.c_str());
 	}
 
 	init(l.getOutgoingSet());
 }
 
 /// Simply return the arguments to be composed.
-const HandleSeq& ComposeLink::getArgs(void) const
+const HandleSeq& BetaRedex::get_args(void) const
 {
 	LinkPtr args(LinkCast(_outgoing[1]));
 	return args->getOutgoingSet();
@@ -81,7 +81,7 @@ const HandleSeq& ComposeLink::getArgs(void) const
 
 /// Get the definition (the body) of the function (without renaming the
 /// variables).
-LambdaLinkPtr ComposeLink::getDefinition(void) const
+LambdaLinkPtr BetaRedex::get_definition(void) const
 {
 	// Is the defined link actually defined?
 	// We cannot do this check when the ctor runs, since it might
@@ -98,10 +98,10 @@ LambdaLinkPtr ComposeLink::getDefinition(void) const
 }
 
 /// Compose this link with the defined link, and return the result.
-Handle ComposeLink::compose(void) const
+Handle BetaRedex::beta_reduce(void) const
 {
 	// Substitute the arguments
-	return getDefinition()->substitute(getArgs());
+	return get_definition()->substitute(get_args());
 }
 
 /* ===================== END OF FILE ===================== */

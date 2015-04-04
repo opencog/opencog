@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/bind/ComposeLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
@@ -38,8 +38,8 @@ using namespace opencog;
 
 /* ================================================================= */
 
-bool PatternMatchEngine::compose_compare(const LinkPtr& lp,
-                                         const LinkPtr& lg)
+bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
+                                       const LinkPtr& lg)
 {
 	// If we are here, the pattern is defined in a DefineLink. We
 	// must match to that. There seem to be two strategies for doing
@@ -59,7 +59,7 @@ bool PatternMatchEngine::compose_compare(const LinkPtr& lp,
 	// of the definition, everything looks "normal", and should thus
 	// proceed as formal.  Of course, on exit, we have to unmasquerade. 
 
-	ComposeLinkPtr cpl(ComposeLinkCast(lp));
+	BetaRedexPtr cpl(BetaRedexCast(lp));
 
 	// First, we masquerade
 // XXX TODO respect  the type definitions, too!!!!
@@ -73,7 +73,7 @@ bool PatternMatchEngine::compose_compare(const LinkPtr& lp,
 #endif
 
 
-	Handle expanded_pattern(cpl->compose());
+	Handle expanded_pattern(cpl->beta_reduce());
 	return tree_compare(expanded_pattern, Handle(lg));
 }
 

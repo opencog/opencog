@@ -25,7 +25,6 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/ComposeLink.h>
 
 #include "SatisfactionLink.h"
 

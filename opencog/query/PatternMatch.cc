@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/ComposeLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Logger.h>
 
@@ -64,7 +64,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
    PatternMatch::do_match(pmc, _varset, _virtual, _components);
 }
 
-void ComposeLink::satisfy(PatternMatchCallback* pmc,
+void BetaRedex::satisfy(PatternMatchCallback* pmc,
                           const HandleSeq& args)
 {
 printf ("duuuuuuuuuuuuude called the compose satter\n");

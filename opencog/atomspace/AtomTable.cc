@@ -39,8 +39,8 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/ComposeLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/atoms/bind/VariableList.h>
@@ -289,9 +289,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             atom = createBindLink(*LinkCast(atom));
-    } else if (COMPOSE_LINK == atom_type) {
-        if (NULL == ComposeLinkCast(atom))
-            atom = createComposeLink(*LinkCast(atom));
+    } else if (BETA_REDEX == atom_type) {
+        if (NULL == BetaRedexCast(atom))
+            atom = createBetaRedex(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
@@ -332,8 +332,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             LinkPtr lll(LinkCast(atom));
             if (BIND_LINK == atom_type) {
                 atom = createBindLink(*lll);
-            } else if (COMPOSE_LINK == atom_type) {
-                atom = createComposeLink(*lll);
+            } else if (BETA_REDEX == atom_type) {
+                atom = createBetaRedex(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
             } else if (LAMBDA_LINK == atom_type) {

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/ComposeLink.h
+ * opencog/atoms/BetaRedex.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_COMPOSE_LINK_H
-#define _OPENCOG_COMPOSE_LINK_H
+#ifndef _OPENCOG_BETA_REDEX_H
+#define _OPENCOG_BETA_REDEX_H
 
 #include <map>
 
@@ -34,28 +34,27 @@ namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental ComposeLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 
-/// The ComposeLink is used to specify a set of values that are to be
-/// attached to the variables of a function named by a DefineLink.
-/// Thus, a ComposeLink vaguely resembles a "function call", except that
+/// The BetaRedex link is used to specify a set of values that are to
+/// be attached to the variables of a function named by a DefineLink.
+/// Thus, a BetaRedex vaguely resembles a "function call", except that
 /// no actual call is made (nor is any grounding or evaluation made).
-/// The ComposeLink merely serves to specify the values that will be
-/// passed to the named function. Perhaps "SubstitutionLink" might be a
-/// better name: it specifies what will e substituted.  The actual
-/// substitution does not take place until the `substitute` method is
-/// called.  Note, however, that the substitute
-/// substitutes values for variables.  It does not actually perform any
-/// calling, evaluation or grounding; it merely serves to identify the
-/// named function with which it is to be composed.
+/// The BetaRedex merely serves to specify the values that will be
+/// passed to the named function. The name `BetaRedex` comes from the
+/// concept of beta reduction in lambda calculus. The actual
+/// substitution (beta-reduction) does not take place until the
+/// `substitute` method is called.  Note, however, that the substitute
+/// method only substitutes; it does not perform any evaluation,
+/// grounding or calling. Thus, it is just a beta reduction, and nothing
+/// more.
 ///
-/// The ComposeLink must have the following form:
+/// The intended use of this link type is to specify (name) patterns
+/// that will be expanded during the course of a  pattern match.  The 
 ///
-///      ComposeLink
+/// The BetaRedex link must have the following form:
+///
+///      BetaRedex
 ///          SomeNamingAtom
 ///          SomeOrderedLink
 ///             Argument_1
@@ -75,56 +74,62 @@ namespace opencog
 ///              BodyAtom
 ///
 /// The "SomeNamingAtom" must be exactly the same in the Define and the
-/// Compose; this is how the ComposeLink is able to find the defined
+/// BetaRedex; this is how the BetaRedex is able to find the defined
 /// body.  The DefineLink does not have to be created before the
-/// ComposeLink is created; however, it must exist by the time the
+/// BetaRedex is created; however, it must exist by the time the
 /// composition is used.  The DefineLink has to name either a
 /// LambdaLink, or one of the link types inheriting from it (e.g. a
 /// BindLink or SatisfactionLink).
 ///
 /// The "SomeOrderedLink" holds the set of arguments associated with the
-/// name.  These arguments may be "values", or they may be
-/// VariableNodes, or a mixture of the two.  A "value" is anything that
-/// is not a VariableNode.  If the arguments are values, then they MUST
-/// obey the type restrictions specified in the LambdaLink.  If they are
+/// name.  These arguments may be "values", or they may be VariableNodes,
+/// or a mixture of the two.  A "value" is anything that is not a
+/// VariableNode.  If the arguments are values, then they MUST obey
+/// the type restrictions specified in the LambdaLink.  If they are
 /// VariableNodes, then they inherit the type restrictions from the
 /// LambdaLink.
 ///
-/// The intended use of this link type is to specify (name) patterns
-/// that will be expanded during the course of a  pattern match.  The 
-class ComposeLink : public Link
+class BetaRedex : public Link
 {
 protected:
 	void init(const HandleSeq&);
 public:
-	ComposeLink(const HandleSeq&,
+	BetaRedex(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ComposeLink(const Handle& varcdecls, const Handle& body,
+	BetaRedex(const Handle& name, const Handle& args,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ComposeLink(Link &l);
+	BetaRedex(Link &l);
 
-	// Return the arguments that this link was defined with.
+	// Return the arguments of this redex.
 	const HandleSeq& get_args(void) const;
+
+	// Return the arguments of the lambda
 	const HandleSeq& get_local_args(void) const;
+
+	// Return the lambda
 	LambdaLinkPtr get_definition(void) const;
-	Handle compose(void) const;
+
+	// Return the substitution of the redex args in the lambda.
+	Handle beta_reduce(void) const;
+
+	//junk
 	void satisfy(PatternMatchCallback*, const HandleSeq&);
 };
 
-typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;
-static inline ComposeLinkPtr ComposeLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ComposeLink>(a); }
-static inline ComposeLinkPtr ComposeLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ComposeLink>(a); }
+typedef std::shared_ptr<BetaRedex> BetaRedexPtr;
+static inline BetaRedexPtr BetaRedexCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<BetaRedex>(a); }
+static inline BetaRedexPtr BetaRedexCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<BetaRedex>(a); }
 
 // XXX temporary hack ...
-#define createComposeLink std::make_shared<ComposeLink>
+#define createBetaRedex std::make_shared<BetaRedex>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_COMPOSE_LINK_H
+#endif // _OPENCOG_BETA_REDEX_H

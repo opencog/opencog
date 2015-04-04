@@ -81,7 +81,7 @@ QUOTE_LINK <- ORDERED_LINK
 // Pattern and function declaration
 LAMBDA_LINK <- VARIABLE_LIST
 DEFINE_LINK <- ORDERED_LINK
-COMPOSE_LINK <- ORDERED_LINK
+BETA_REDEX <- ORDERED_LINK
 
 // Scoping and Logical quantifiers
 SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings
