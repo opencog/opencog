@@ -24,8 +24,8 @@
  * Created by Linas Vepstas February 2008
  */
 
-#ifndef _OPENCOG_PATTERN_UTILS_H
-#define _OPENCOG_PATTERN_UTILS_H
+#ifndef _OPENCOG_FIND_UTILS_H
+#define _OPENCOG_FIND_UTILS_H
 
 #include <set>
 #include <vector>
@@ -302,23 +302,6 @@ static inline bool contains_atomtype(const Handle& clause, Type atom_type)
 	return false;
 }
 
-// Make sure that variables can be found in the clauses.
-// See C file for description
-bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses);
-
-
-// See C file for description
-void get_connected_components(const std::set<Handle> &vars,
-                              const std::vector<Handle> &clauses,
-                              std::set<std::vector<Handle>> &compset);
-
-// Split clauses into positive and negative clauses (a negative clause
-// starts with NotLink)
-void split_clauses_pos_neg(const std::vector<Handle>& clauses,
-                           std::vector<Handle>& affirm,
-                           std::vector<Handle>& negate);
-
 } // namespace opencog
 
-#endif // _OPENCOG_PATTERN_UTILS_H
+#endif // _OPENCOG_FIND_UTILS_H

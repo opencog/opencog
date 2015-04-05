@@ -7,6 +7,7 @@ ADD_LIBRARY (lambda SHARED
 	BindLink.cc
 	DefineLink.cc
 	LambdaLink.cc
+	PatternUtils.cc
 	SatisfactionLink.cc
 	VariableList.cc
 )

@@ -26,6 +26,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include "PatternUtils.h"
 #include "SatisfactionLink.h"
 
 using namespace opencog;
