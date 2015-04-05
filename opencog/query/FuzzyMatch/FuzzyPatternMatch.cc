@@ -48,10 +48,8 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
     HandleSeq preds;
     preds.push_back(hg);
 
-    HandleSeq negs;
-
     PatternMatchEngine pme;
-    pme.match(&fpmcb, vars, preds, negs);
+    pme.match(&fpmcb, vars, preds);
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.

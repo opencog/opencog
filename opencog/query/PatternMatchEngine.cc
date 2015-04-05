@@ -1084,11 +1084,14 @@ void PatternMatchEngine::clear(void)
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
                                const std::set<Handle> &vars,
-                               const std::vector<Handle> &clauses,
-                               const std::vector<Handle> &negations)
+                               const std::vector<Handle> &component)
 {
 	// Clear all state.
 	clear();
+
+	// Split in positive and negative clauses
+	HandleSeq clauses, negations;
+	split_clauses_pos_neg(component, clauses, negations);
 
 	_bound_vars = vars;
 	_cnf_clauses = clauses;

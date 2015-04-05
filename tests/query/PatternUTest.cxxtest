@@ -241,10 +241,8 @@ void PatternUTest::test_simple_link(void)
 	std::vector<Handle> preds;
 	preds.push_back(he);
 
-	std::vector<Handle> negs;
-
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds, negs);
+	pme.match(&pmcb, vars, preds);
 
 	// Should find only one solution.
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -297,10 +295,8 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hl1);
 	preds.push_back(hl2);
 
-	std::vector<Handle> negs;
-
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds, negs);
+	pme.match(&pmcb, vars, preds);
 
 	// Should find two solutions:
 	// var_x = soln_b
@@ -358,10 +354,8 @@ void PatternUTest::test_eval(void)
 	std::vector<Handle> preds;
 	preds.push_back(heval);
 
-	std::vector<Handle> negs;
-
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds, negs);
+	pme.match(&pmcb, vars, preds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -385,10 +379,8 @@ void PatternUTest::test_eval(void)
 	std::vector<Handle> spreds;
 	spreds.push_back(hshort_eval);
 
-	std::vector<Handle> snegs;
-
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, svars, spreds, snegs);
+	pme.match(&pmcb, svars, spreds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -403,7 +395,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hshort_eval);
 	vars.insert(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, vars, preds, negs);
+	pme.match(&pmcb, vars, preds);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

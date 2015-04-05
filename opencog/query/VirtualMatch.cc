@@ -311,11 +311,8 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// we can directly match the component using the callback cb
 	if (nvcomps.size() == 1 and virtuals.empty()) {
 		dbgprt("No Virtuals; ordinary solver: ====================== ");
-		// Split in positive and negative clauses
-		std::vector<Handle> affirm, negate;
-		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
 		PatternMatchEngine pme;
-		pme.match(cb, vars, affirm, negate);
+		pme.match(cb, vars, *nvcomps.begin());
 		return;
 	}
 
@@ -346,14 +343,10 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 			if (is_unquoted_in_any_tree(comp, v)) cvars.insert(v);
 		}
 
-		// Split in positive and negative clauses
-		std::vector<Handle> affirm, negate;
-		split_clauses_pos_neg(comp, affirm, negate);
-
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(cb);
 		PatternMatchEngine pme;
-		pme.match(&gcb, cvars, affirm, negate);
+		pme.match(&gcb, cvars, comp);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_pred_gnds.push_back(gcb._pred_groundings);
