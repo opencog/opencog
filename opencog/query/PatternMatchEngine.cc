@@ -1045,7 +1045,6 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
 	// Cleanup
 	clear_current_state();
 	graph_stacks_clear();
-	clear_redex();
 
 	// Match the required clauses.
 	curr_root = do_clause;
