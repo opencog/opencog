@@ -43,27 +43,34 @@ class PatternMatchEngine
 	private:
 		// -------------------------------------------
 		// The current set of clauses (redex context) being grounded.
-		void setup_clauses(const std::set<Handle> &vars,
+		void setup_redex(const std::set<Handle> &vars,
 		                   const std::vector<Handle> &component);
-		void clear_clauses(void);
-		void push_clauses(void);
-		void pop_clauses(void);
+		void clear_redex(void);
 
 		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
 
 		// List of clauses that need to be grounded.
-		std::vector<Handle> _cnf_clauses;
-		std::vector<Handle> _mandatory;
+		HandleSeq        _cnf_clauses;
+		HandleSeq        _mandatory;
 		std::set<Handle> _optionals;
 		std::set<Handle> _evaluatable;
-		ConnectMap _connectivity_map;   // initialized by make_root_map()
+		ConnectMap       _connectivity_map;   // initialized by make_root_map()
 
 		void make_connectivity_map(const Handle&, const Handle&);
 
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
 		// above, that are being searched.
+		std::stack<std::set<Handle>> _stack_bound_vars;
+		std::stack<HandleSeq>        _stack_cnf_clauses;
+		std::stack<HandleSeq>        _stack_mandatory;
+		std::stack<std::set<Handle>> _stack_optionals;
+		std::stack<std::set<Handle>> _stack_evaluatable;
+		std::stack<ConnectMap>       _stack_connectivity_map;
+
+		void push_redex(void);
+		void pop_redex(void);
 
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
@@ -87,7 +94,6 @@ class PatternMatchEngine
 		std::stack<Handle> soln_handle_stack;
 		std::stack<Handle> root_handle_stack;
 		std::stack<bool> in_quote_stack;
-		unsigned int stack_depth;
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
@@ -117,8 +123,9 @@ class PatternMatchEngine
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 
-		void all_stacks_push(void);
-		void all_stacks_pop(void);
+		void graph_stacks_push(void);
+		void graph_stacks_pop(void);
+		unsigned int _graph_stack_depth;
 
 		// -------------------------------------------
 

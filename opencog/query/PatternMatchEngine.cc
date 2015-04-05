@@ -619,12 +619,14 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	return false;
 }
 
-// Push almost all stacks.  The only stacks that are not pushed
-// are those for _conf_clauses and _optionals.
-void PatternMatchEngine::all_stacks_push(void)
+/**
+ * Push all stacks related to graph traversal. Do NOT push any
+ * of the redex stacks.
+ */
+void PatternMatchEngine::graph_stacks_push(void)
 {
-	stack_depth++;
-	dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
+	_graph_stack_depth++;
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", _graph_stack_depth);
 
 	root_handle_stack.push(curr_root);
 	pred_handle_stack.push(curr_pred_handle);
@@ -649,7 +651,11 @@ void PatternMatchEngine::all_stacks_push(void)
 	_pmc->push();
 }
 
-void PatternMatchEngine::all_stacks_pop(void)
+/**
+ * Pop all graph-traversal-related stacks. These do NOT
+ * affect any of the redex stacks.
+ */
+void PatternMatchEngine::graph_stacks_pop(void)
 {
 	_pmc->pop();
 	curr_root = root_handle_stack.top();
@@ -686,9 +692,9 @@ void PatternMatchEngine::all_stacks_pop(void)
 	mute_stack = permutation_stack.top();
 	permutation_stack.pop();
 
-	stack_depth --;
+	_graph_stack_depth --;
 
-	dbgprt("pop to depth %d\n", stack_depth);
+	dbgprt("pop to depth %d\n", _graph_stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
 	prtmsg("pop to clause", curr_root);
 }
@@ -769,7 +775,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
 
-	all_stacks_push();
+	graph_stacks_push();
 	get_next_untried_clause();
 
 	// If there are no further predicates to solve,
@@ -852,7 +858,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If we failed to find anything at this level, we need to
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
-	all_stacks_pop();
+	graph_stacks_pop();
 
 	return found;
 }
@@ -1079,7 +1085,7 @@ void PatternMatchEngine::clear_state(void)
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
 
-	stack_depth = 0;
+	_graph_stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
@@ -1101,7 +1107,7 @@ void PatternMatchEngine::clear_state(void)
 /**
  * Clear only the internal clause declarations
  */
-void PatternMatchEngine::clear_clauses(void)
+void PatternMatchEngine::clear_redex(void)
 {
 	// Clear all pattern-related state.
 	_bound_vars.clear();
@@ -1124,7 +1130,7 @@ void PatternMatchEngine::clear_clauses(void)
  * connection topology; they can form any graph whatsoever (as long as
  * itws connected).
  */
-void PatternMatchEngine::setup_clauses(
+void PatternMatchEngine::setup_redex(
                                const std::set<Handle> &vars,
                                const std::vector<Handle> &component)
 {
@@ -1229,7 +1235,7 @@ void PatternMatchEngine::setup_clauses(
 void PatternMatchEngine::clear(void)
 {
 	// Clear all pattern-related state.
-	clear_clauses();
+	clear_redex();
 
 	// Clear internal recursive state.
 	clear_state();
@@ -1245,7 +1251,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 {
 	// Clear all state, and set up clauses
 	clear();
-	setup_clauses(vars, component);
+	setup_redex(vars, component);
 
 	if (_cnf_clauses.empty()) return;
 

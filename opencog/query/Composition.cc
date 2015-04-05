@@ -49,12 +49,35 @@ using namespace opencog;
 
 /* ================================================================= */
 
-void PatternMatchEngine::push_clauses(void)
+void PatternMatchEngine::push_redex(void)
 {
+	_stack_bound_vars.push(_bound_vars);
+	_stack_cnf_clauses.push(_cnf_clauses);
+	_stack_mandatory.push(_mandatory);
+	_stack_optionals.push(_optionals);
+	_stack_evaluatable.push(_evaluatable);
+	_stack_connectivity_map.push(_connectivity_map);
 }
 
-void PatternMatchEngine::pop_clauses(void)
+void PatternMatchEngine::pop_redex(void)
 {
+	_bound_vars = _stack_bound_vars.top();
+	_stack_bound_vars.pop();
+
+	_cnf_clauses = _stack_cnf_clauses.top();
+	_stack_cnf_clauses.pop();
+
+	_mandatory = _stack_mandatory.top();
+	_stack_mandatory.pop();
+
+	_optionals = _stack_optionals.top();
+	_stack_optionals.pop();
+
+	_evaluatable = _stack_evaluatable.top();
+	_stack_evaluatable.pop();
+
+	_connectivity_map = _stack_connectivity_map.top();
+	_stack_connectivity_map.pop();
 }
 
 bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
@@ -85,7 +108,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// new pme state, with the existing pme state. So we don't.  Instead,
 	// we push all pme state, clear the decks, (almost as if strting from
 	// scratch) and then pop all pme state when we are done.
-	all_stacks_push();
+	graph_stacks_push();
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
@@ -137,14 +160,14 @@ local_pattern->toString().c_str(), lg->toString().c_str());
 	// No match; restore original grounding and quit
 	if (not have_match)
 	{
-		all_stacks_pop();
+		graph_stacks_pop();
 		return false;
 	}
 
 	// If there is a match, then maybe we grounded some variables.
 	// If so, we need to unmasquerade them.
 	local_grounding = var_grounding;
-	all_stacks_pop();
+	graph_stacks_pop();
 	for (size_t i=0; i< sz; i++)
 	{
 		auto iter = local_grounding.find(local_args[i]);
