@@ -69,21 +69,34 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
-	// First, we masquerade: replace the redex vars by the vars
-	// that they wrap.
-// XXX TODO respect  the type definitions, too!!!!
-	var_solutn_stack.push(var_grounding);
+	// To explore the defined pattern, we've got to get
+	// into its local frame. iDo this by masquerading
+	// any grounded variables we may have so far.
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
+
+// XXX TODO respect  the type definitions, too!!!!
+
+	SolnMap local_grounding;
 	size_t sz = redex_args.size();
 	for (size_t i=0; i< sz; i++)
 	{
+		// Relabel (masquerade) the grounded vars.
 		auto iter = var_grounding.find(redex_args[i]);
 		if (iter == var_grounding.end()) continue;
-		var_grounding.insert({local_args[i], iter->second});
-		var_grounding.erase(redex_args[i]);
+		local_grounding.insert({local_args[i], iter->second});
 	}
+	var_solutn_stack.push(var_grounding);
+	var_grounding = local_grounding;
+
+printf("duuuude ready to compare pat=%s to gnd=%s\n",
+lp->toString().c_str(), lg->toString().c_str());
+
+	// Now, proceed as normal.
+	std::set<Handle> saved_vars = _bound_vars;
+	_bound_vars = cpl->get_local_argset();
 	bool have_match = tree_compare(Handle(lp), Handle(lg));
+	_bound_vars = saved_vars;
 
 	// No match; restore original grounding and quit
 	if (not have_match)
@@ -94,18 +107,14 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	// If there is a match, then maybe we grounded some variables.
 	// If so, we need to unmasquerade them.
-	SolnMap tmp;
+	local_grounding = var_grounding;
+	POPGND(var_grounding, var_solutn_stack);
 	for (size_t i=0; i< sz; i++)
 	{
-		auto iter = var_grounding.find(local_args[i]);
-		if (iter != var_grounding.end())
-			tmp.insert({redex_args[i], iter->second});
+		auto iter = local_grounding.find(local_args[i]);
+		if (iter != local_grounding.end())
+			var_grounding.insert({redex_args[i], iter->second});
 	}
-	POPGND(var_grounding, var_solutn_stack);
-
-	// Now, copy them into the grounding
-	for (const std::pair<Handle, Handle> pare : tmp)
-		var_grounding.insert(pare);
 
 	return true;
 }

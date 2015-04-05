@@ -109,6 +109,7 @@ public:
 
 	// Return the arguments of the lambda
 	const HandleSeq& get_local_args(void) const;
+	const std::set<Handle>& get_local_argset(void) const;
 
 	// Return the lambda
 	LambdaLinkPtr get_definition(void) const;

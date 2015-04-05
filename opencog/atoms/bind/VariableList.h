@@ -87,6 +87,7 @@ public:
 
 	// Return he list of variables we are holding.
 	const HandleSeq& get_variables(void) const { return _varseq; }
+	const std::set<Handle>& get_varset(void) const { return _varset; }
 
 	// Return the type restrivtions ffor the variables.
 	const VariableTypeMap& get_typemap(void) const { return _typemap; }

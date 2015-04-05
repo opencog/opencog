@@ -42,8 +42,10 @@ class PatternMatchEngine
 
 	private:
 		// -------------------------------------------
-		// predicate to be solved.
+		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
+
+		// List of clauses that need to be grounded.
 		std::vector<Handle> _cnf_clauses;
 		std::set<Handle> _optionals;
 
