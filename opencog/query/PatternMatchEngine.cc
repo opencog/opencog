@@ -1091,19 +1091,24 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	clear();
 
 	// Split in positive and negative clauses
-	HandleSeq clauses, negations;
-	split_clauses_pos_neg(component, clauses, negations);
+	HandleSeq positives, negations;
+	for (const Handle& h : component)
+	{
+		Type t = h->getType();
+		if (NOT_LINK == t or ABSENT_LINK == t) {
+			Handle inv(LinkCast(h)->getOutgoingAtom(0));
+			negations.push_back(inv);
+			_optionals.insert(inv);
+			_cnf_clauses.push_back(inv);
+		}
+		else
+		{
+			positives.push_back(h);
+			_cnf_clauses.push_back(h);
+		}
+	}
 
 	_bound_vars = vars;
-	_cnf_clauses = clauses;
-
-	// Copy the negates into the clause list
-	// Copy the negates into a set.
-	for (Handle h : negations)
-	{
-		_cnf_clauses.push_back(h);
-		_optionals.insert(h);
-	}
 
 	if (_cnf_clauses.empty()) return;
 
@@ -1166,7 +1171,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Perform the actual search!
-	cb->perform_search(this, vars, clauses, negations);
+	cb->perform_search(this, vars, positives, negations);
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG

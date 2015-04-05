@@ -171,21 +171,6 @@ void get_connected_components(const std::set<Handle> &vars,
 	compset.insert(components.begin(), components.end());
 }
 
-void split_clauses_pos_neg(const std::vector<Handle>& clauses,
-                           std::vector<Handle>& affirm,
-                           std::vector<Handle>& negate)
-{
-	for (Handle h : clauses) {
-		Type t = h->getType();
-		if (NOT_LINK == t or ABSENT_LINK == t) {
-			negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-		}
-		else {
-			affirm.push_back(h);
-		}
-	}
-}
-
 } // namespace opencog
 
 /* ===================== END OF FILE ===================== */
