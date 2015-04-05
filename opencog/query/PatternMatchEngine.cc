@@ -1038,6 +1038,7 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
 	// Cleanup
 	clear_current_state();
 	graph_stacks_clear();
+	clear_redex();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -1237,21 +1238,6 @@ void PatternMatchEngine::setup_redex(
 /* ======================================================== */
 
 /**
- * Clear all internal and pattern state.
- * This allows a given instance of this class to be used again, with
- * a different pattern.
- */
-void PatternMatchEngine::clear(void)
-{
-	// Clear all pattern-related state.
-	clear_redex();
-
-	// Clear internal recursive state.
-	clear_current_state();
-	graph_stacks_clear();
-}
-
-/**
  * Main entry point for the pattern matcher engine. This is the
  * method that sets the gears in motion.
  */
@@ -1260,7 +1246,10 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
                                const std::vector<Handle> &component)
 {
 	// Clear all state, and set up clauses
-	clear();
+	clear_current_state();
+	graph_stacks_clear();
+
+	clear_redex();
 	setup_redex(vars, component);
 
 	if (_cnf_clauses.empty()) return;
