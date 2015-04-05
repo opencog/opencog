@@ -1104,6 +1104,7 @@ void PatternMatchEngine::clear(void)
 	// Clear all pattern-related state.
 	_bound_vars.clear();
 	_cnf_clauses.clear();
+	_mandatory.clear();
 	_optionals.clear();
 	_root_map.clear();
 
