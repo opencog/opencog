@@ -88,6 +88,9 @@ public:
 
 	SatisfactionLink(Link &l);
 
+	// XXX temp hack till thigs get sorted out; remove this method later.
+	const HandleSeq& get_clauses(void) { return _clauses; }
+
 	void satisfy(PatternMatchCallback *);
 };
 

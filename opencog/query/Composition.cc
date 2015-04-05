@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/bind/BetaRedex.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 
 #include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
@@ -76,6 +77,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	const HandleSeq& redex_args(cpl->get_args());
 
 // XXX TODO respect  the type definitions, too!!!!
+// XXX TODO handle pred-groundings as well
 
 	SolnMap local_grounding;
 	size_t sz = redex_args.size();
@@ -89,7 +91,22 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	var_solutn_stack.push(var_grounding);
 	var_grounding = local_grounding;
 
-	Handle local_pattern(cpl->get_definition());
+	// Now, get the set of clauses to be grounded. We expect
+	// the redex body to be a SatisfactionLink; we have already
+	// remapped its variable declarations; now get its body.
+	Handle hsat(cpl->get_definition());
+	SatisfactionLinkPtr sat_link(SatisfactionLinkCast(hsat));
+	if (NULL == sat_link)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting SatisfactionLink, got %s",
+				hsat->toString().c_str());
+
+	const HandleSeq& local_clauses(sat_link->get_clauses());
+	if (1 != local_clauses.size())
+		throw InvalidParamException(TRACE_INFO,
+			"More than one clause - not implemented");
+
+	Handle local_pattern(local_clauses[0]);
 printf("duuuude ready to compare pat=%s to gnd=%s\n",
 local_pattern->toString().c_str(), lg->toString().c_str());
 
