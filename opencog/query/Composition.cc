@@ -38,6 +38,18 @@ using namespace opencog;
 #endif
 
 /* ================================================================= */
+/*
+TODO:
+-- for non-connected satisfaction links, the ctor should take each
+   connected comp, and compute the mandatories, the optionals, the
+   evaluatables and the connectivity map for each comp, and store
+   thse in a meta-pseudo satisfactonLink.  Should invent a new link
+   type for this...
+
+-- where the heck is type enforcement done, again??? Need type
+   enforcement during the redex...
+*/
+/* ================================================================= */
 
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
@@ -99,7 +111,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// that the match engine is carrying, to correspond with the variable
 	// names that are native to the definition. This way, insde the body
 	// of the definition, everything looks "normal", and should thus
-	// proceed as formal.  Of course, on exit, we have to unmasquerade. 
+	// proceed as formal.  Of course, on exit, we have to unmasquerade.
 	//
 	// By "everything looks normal", we really mean "treat this as if it
 	// was a brand-new pattern matching problem".  To do this, it is very
@@ -109,8 +121,25 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// we push all pme state, clear the decks, (almost as if strting from
 	// scratch) and then pop all pme state when we are done.
 	graph_stacks_push();
+	push_redex();
+	clear_redex();
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
+
+	// Get the variales and clauses that make up the redex.
+	// We expect the redex body to be a SatisfactionLink.
+	// XXX TODO perhaps we should create a special sat-redex-only
+	// link type?
+	Handle hsat(cpl->get_definition());
+	SatisfactionLinkPtr sat_link(SatisfactionLinkCast(hsat));
+	if (NULL == sat_link)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting SatisfactionLink, got %s",
+				hsat->toString().c_str());
+
+	const std::set<Handle>& local_vars(sat_link->get_varset());
+	const HandleSeq& local_clauses(sat_link->get_clauses());
+	setup_redex(local_vars, local_clauses);
 
 	// To explore the defined pattern, we've got to get
 	// into its local frame. Do this by masquerading
@@ -118,7 +147,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
-// XXX TODO respect  the type definitions, too!!!!
 // XXX TODO handle clause_grounding as well
 
 	SolnMap local_grounding;
@@ -132,21 +160,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 	var_grounding = local_grounding;
 
-	// Now, get the set of clauses to be grounded. We expect
-	// the redex body to be a SatisfactionLink; we have already
-	// remapped its variable declarations; now get its body.
-	Handle hsat(cpl->get_definition());
-	SatisfactionLinkPtr sat_link(SatisfactionLinkCast(hsat));
-	if (NULL == sat_link)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting SatisfactionLink, got %s",
-				hsat->toString().c_str());
-
-	const HandleSeq& local_clauses(sat_link->get_clauses());
-	if (1 != local_clauses.size())
-		throw InvalidParamException(TRACE_INFO,
-			"More than one clause - not implemented");
-
+/*****
 	Handle local_pattern(local_clauses[0]);
 printf("duuuude ready to compare pat=%s to gnd=%s\n",
 local_pattern->toString().c_str(), lg->toString().c_str());
@@ -156,10 +170,13 @@ local_pattern->toString().c_str(), lg->toString().c_str());
 	_bound_vars = cpl->get_local_argset();
 	bool have_match = tree_compare(local_pattern, Handle(lg));
 	_bound_vars = saved_vars;
+****/
+bool have_match = false;
 
 	// No match; restore original grounding and quit
 	if (not have_match)
 	{
+		pop_redex();
 		graph_stacks_pop();
 		return false;
 	}
@@ -175,6 +192,7 @@ local_pattern->toString().c_str(), lg->toString().c_str());
 			var_grounding.insert({redex_args[i], iter->second});
 	}
 
+	pop_redex();
 	return true;
 }
 
