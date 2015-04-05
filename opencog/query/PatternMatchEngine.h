@@ -72,41 +72,67 @@ class PatternMatchEngine
 		void push_redex(void);
 		void pop_redex(void);
 
+		// --------------------------------------------
+		// Current traversal state
+
+		// Map of current groundings of variables to thier grounds
+		// Also contains grounds of subclauses (not sure why, this seems
+		// to be needed)
+		std::map<Handle, Handle> var_grounding;
+		// Map of clauses to their current groundings
+		std::map<Handle, Handle> clause_grounding;
+
+		// Set of clauses for which a grounding is currently being attempted.
+		typedef std::set<Handle> IssuedSet;
+		IssuedSet issued;     // stacked on issued_stack
+
+		int depth;      // Recursion depth for tree_compare.
+		bool in_quote;  // Everything is literal in a quote.
+
+		Handle curr_root;         // stacked onto root_handle_stack
+		Handle curr_soln_handle;  // stacked onto soln_handle_stack
+		Handle curr_pred_handle;  // stacked onto pred_handle_stack
+
+		void clear_current_state(void);  // clear the stuff above
+
+		// -------------------------------------------
+		// Stack used to store current traversal state during
+		// backtracking, to find additional groundings
+		std::stack<Handle> root_handle_stack;
+		std::stack<Handle> pred_handle_stack;
+		std::stack<Handle> soln_handle_stack;
+
+		// Stacks containing partial groundings.
+		typedef std::map<Handle, Handle> SolnMap;
+		std::stack<SolnMap> var_solutn_stack;
+		std::stack<SolnMap> pred_solutn_stack;
+
+		std::stack<IssuedSet> issued_stack;
+		std::stack<bool> in_quote_stack;
+
+		// push, pop and clear these states.
+		void graph_stacks_push(void);
+		void graph_stacks_pop(void);
+		void graph_stacks_clear(void);
+		unsigned int _graph_stack_depth;
+
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
 		bool tree_compare(const Handle&, const Handle&);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
-		int depth;      // Recursion depth for tree_compare.
-		bool in_quote;  // Everything is literal in a quote.
 
 		bool pred_up(const Handle&);
 		bool soln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
-		Handle curr_root;         // stacked onto root_handle_stack
-		Handle curr_soln_handle;  // stacked onto soln_handle_stack
-		Handle curr_pred_handle;  // stacked onto pred_handle_stack
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);
 
-		// Stack used during recursive exploration.
-		std::stack<Handle> pred_handle_stack;
-		std::stack<Handle> soln_handle_stack;
-		std::stack<Handle> root_handle_stack;
-		std::stack<bool> in_quote_stack;
-
-		// Stacks containing partial groundings.
-		typedef std::map<Handle, Handle> SolnMap;
-		std::stack<SolnMap> pred_solutn_stack;
-		std::stack<SolnMap> var_solutn_stack;
-
-		// Set of clauses for which a grounding is currently being attempted.
-		typedef std::set<Handle> IssuedSet;
-		IssuedSet issued;     // stacked on issued_stack
-		std::stack<IssuedSet> issued_stack;
-
-		// Stacks used to explore all possible permuations of
-		// unordered links. 
+		// --------------------------------------------------
+		// Unordered-link stuff. This needs a major overhaul.
+		// Stacks are used to explore all possible permuations of
+		// unordered links, but this is incorectly/incompletely
+		// designed.
 		bool have_more;
 		size_t more_depth;
 
@@ -123,22 +149,7 @@ class PatternMatchEngine
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 
-		void graph_stacks_push(void);
-		void graph_stacks_pop(void);
-		unsigned int _graph_stack_depth;
-
 		// -------------------------------------------
-
-		// Result of solving the predicate
-		// Map variables (and sub-clauses as well) to their groundings
-		// partial solutions are pushed onto var_solutn_stack
-		std::map<Handle, Handle> var_grounding;
-		// Map clauses to their groundings
-		// partial results are pushed onto pred_solutn_stack
-		std::map<Handle, Handle> clause_grounding;
-
-		void clear_state(void);
-
 		// Callback to whom the results are reported.
 		PatternMatchCallback *_pmc;
 

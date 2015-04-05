@@ -631,8 +631,10 @@ void PatternMatchEngine::graph_stacks_push(void)
 	root_handle_stack.push(curr_root);
 	pred_handle_stack.push(curr_pred_handle);
 	soln_handle_stack.push(curr_soln_handle);
-	pred_solutn_stack.push(clause_grounding);
+
 	var_solutn_stack.push(var_grounding);
+	pred_solutn_stack.push(clause_grounding);
+
 	issued_stack.push(issued);
 	in_quote_stack.push(in_quote);
 
@@ -1034,7 +1036,8 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
                                       const Handle& ah)
 {
 	// Cleanup
-	clear_state();
+	clear_current_state();
+	graph_stacks_clear();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -1069,10 +1072,10 @@ void PatternMatchEngine::make_connectivity_map(const Handle& root, const Handle&
 }
 
 /**
- * Clear all internal state.
- * This resets the class for continuing a search, from the top.
+ * Clear current traversal state. This gets us into a state where we
+ * can start traversing a set of clauses.
  */
-void PatternMatchEngine::clear_state(void)
+void PatternMatchEngine::clear_current_state(void)
 {
 	// Clear all state.
 	var_grounding.clear();
@@ -1084,7 +1087,13 @@ void PatternMatchEngine::clear_state(void)
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
+}
 
+/**
+ * Unconditionally clear all graph traversal stacks
+ */
+void PatternMatchEngine::graph_stacks_clear(void)
+{
 	_graph_stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
@@ -1238,7 +1247,8 @@ void PatternMatchEngine::clear(void)
 	clear_redex();
 
 	// Clear internal recursive state.
-	clear_state();
+	clear_current_state();
+	graph_stacks_clear();
 }
 
 /**
