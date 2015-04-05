@@ -67,17 +67,26 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// names that are native to the definition. This way, insde the body
 	// of the definition, everything looks "normal", and should thus
 	// proceed as formal.  Of course, on exit, we have to unmasquerade. 
+	//
+	// By "everything looks normal", we really mean "treat this as if it
+	// was a brand-new pattern matching problem".  To do this, it is very
+	// empting to just create a new PME, and let it run. The problem with
+	// that is that we have no particularly good way of integrating the
+	// new pme state, with the existing pme state. So we don't.  Instead,
+	// we push all pme state, clear the decks, (almost as if strting from
+	// scratch) and then pop all pme state when we are done.
+	all_stacks_push();
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
 	// To explore the defined pattern, we've got to get
-	// into its local frame. iDo this by masquerading
+	// into its local frame. Do this by masquerading
 	// any grounded variables we may have so far.
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
 // XXX TODO respect  the type definitions, too!!!!
-// XXX TODO handle pred-groundings as well
+// XXX TODO handle clause_grounding as well
 
 	SolnMap local_grounding;
 	size_t sz = redex_args.size();
@@ -88,7 +97,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 		if (iter == var_grounding.end()) continue;
 		local_grounding.insert({local_args[i], iter->second});
 	}
-	var_solutn_stack.push(var_grounding);
 	var_grounding = local_grounding;
 
 	// Now, get the set of clauses to be grounded. We expect
@@ -119,14 +127,14 @@ local_pattern->toString().c_str(), lg->toString().c_str());
 	// No match; restore original grounding and quit
 	if (not have_match)
 	{
-		POPGND(var_grounding, var_solutn_stack);
+		all_stacks_pop();
 		return false;
 	}
 
 	// If there is a match, then maybe we grounded some variables.
 	// If so, we need to unmasquerade them.
 	local_grounding = var_grounding;
-	POPGND(var_grounding, var_solutn_stack);
+	all_stacks_pop();
 	for (size_t i=0; i< sz; i++)
 	{
 		auto iter = local_grounding.find(local_args[i]);
