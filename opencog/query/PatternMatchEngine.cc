@@ -183,7 +183,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		if (not pmc->variable_match (hp,hg)) return false;
+		if (not _pmc->variable_match (hp,hg)) return false;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
@@ -312,7 +312,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		}
 
 		// Let the callback perform basic checking.
-		bool match = pmc->link_match(lp, lg);
+		bool match = _pmc->link_match(lp, lg);
 		if (not match) return false;
 
 		dbgprt("depth=%d\n", depth);
@@ -357,7 +357,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			match = pmc->post_link_match(lp, lg);
+			match = _pmc->post_link_match(lp, lg);
 			if (not match) return false;
 
 			// If we've found a grounding, record it.
@@ -421,7 +421,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 				// post-match callback likes this grounding.
 				if (match)
 				{
-					match = pmc->post_link_match(lp, lg);
+					match = _pmc->post_link_match(lp, lg);
 				}
 
 				// If we've found a grounding, record it.
@@ -483,7 +483,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 	if (np and ng)
 	{
 		// Call the callback to make the final determination.
-		bool match = pmc->node_match(hp, hg);
+		bool match = _pmc->node_match(hp, hg);
 		if (match)
 		{
 			dbgprt("Found matching nodes\n");
@@ -579,12 +579,12 @@ void PatternMatchEngine::all_stacks_push(void)
 	more_stack[0] = false;
 	permutation_stack.push(mute_stack);
 
-	pmc->push();
+	_pmc->push();
 }
 
 void PatternMatchEngine::all_stacks_pop(void)
 {
-	pmc->pop();
+	_pmc->pop();
 	curr_root = root_handle_stack.top();
 	root_handle_stack.pop();
 
@@ -688,11 +688,11 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	if (_optionals.count(curr_root))
 	{
 		clause_accepted = true;
-		match = pmc->optional_clause_match(curr_pred_handle, hsoln);
+		match = _pmc->optional_clause_match(curr_pred_handle, hsoln);
 	}
 	else
 	{
-		match = pmc->clause_match(curr_pred_handle, hsoln);
+		match = _pmc->clause_match(curr_pred_handle, hsoln);
 	}
 	dbgprt("clause match callback match=%d\n", match);
 	if (not match) return false;
@@ -714,7 +714,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		dbgprt ("==================== FINITO!\n");
 		print_solution(var_grounding, clause_grounding);
 #endif
-		found = pmc->grounding(var_grounding, clause_grounding);
+		found = _pmc->grounding(var_grounding, clause_grounding);
 	}
 	else
 	{
@@ -754,7 +754,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			match = pmc->optional_clause_match(curr_pred_handle, undef);
+			match = _pmc->optional_clause_match(curr_pred_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
@@ -768,7 +768,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 #ifdef DEBUG
 				print_solution(var_grounding, clause_grounding);
 #endif
-				found = pmc->grounding(var_grounding, clause_grounding);
+				found = _pmc->grounding(var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -796,7 +796,7 @@ bool PatternMatchEngine::pred_up(const Handle& h)
 	Handle curr_pred_save(curr_pred_handle);
 	curr_pred_handle = h;
 
-	IncomingSet iset = pmc->get_incoming_set(curr_soln_handle);
+	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
@@ -1046,52 +1046,51 @@ void PatternMatchEngine::clear(void)
  * Find groundings for a sequence of clauses in conjunctive normal form.
  * That is, perform a variable unification across multiple clauses.
  *
- * The list of clauses, and the list of negations, are both OpenCog
- * hypergraphs.  Both can be (should be) envisioned as model-theoretic
- * predicates: i.e. statements with are "true" only if they exist in
- * the atomspace (which is the "universe" of all statements).  That is,
- * the clauses define a subgraph which may or may not exist in the
- * atomspace.
+ * The list of mandatory and optional clauses consist of atoms (links)
+ * containing variables.  Any given clause is "solved" or "grounded"
+ * if there exists a substitution for the variables such that the
+ * resulting clause exists in the atomspace.  Thus, a grounding can be
+ * thought of as an "interpretation" of the clause; the pattern matcher
+ * searches for interpretations.  It can be thought of as a "unifier"
+ * in that ALL of the mandatory clauses must be grounded, and they must
+ * grounded in a self-consistent way (i.e. the clauses must be grounded
+ * in conjunction with one-another.)
  *
  * The list of "bound vars" are to be solved for ("grounded", or
- * "evaluated") during pattern matching. That is, if the subgraph
+ * "interpreted") during pattern matching. That is, if the subgraph
  * defined by the clauses is located, then the vars are given the
  * corresponding values associated to that match. Because these
  * variables can be shared across multiple clauses, this can be
  * understood to be a unification problem; the pattern matcher is thus
  * a unifier.
  *
- * The negations are a set of clauses whose truth values are to be
- * inverted.  That is, while the clauses define a subgraph that
- * *must* be found, the negations define a subgraph that should
- * not be found, or, if found, should have a truth value of 'false'.
- * The precise meaning of 'false' in the sentence above is determined
- * by the callback, which can use arbitrary criteria for this.
- * In particular, the search engine itself will happily proclaim
- * a match whether or not it finds any of the negated clauses. So,
- * in this sense, the negated clauses can be understood to be
- * "optional" matches: they will be matched, if possible, but are not
- * required to be matched. It is up to the callback to explictly
- * reject these clauses, if it so wishes to, thus implementing the
- * concept of negation.
+ * The optionals are a set of clauses which are also searched for,
+ * but whose presence is not mandatory. The optional clauses can be
+ * used to implement negation or pattern-rejection (among other things).
+ * Thier use for negation/rejection is determined by the "optional
+ * clause" callback.  Thus, if an optional clause is found, the callback
+ * can then signal that the pattern as a whole should be rejected.
+ * Alternately, the callback could base its considerations on the
+ * truth-value of the optionall clause: if the optional clause has
+ * a TV of FALSE, then it is accepted; otherwise it is rejected.
+ * Other strategies for handling optional clauses in the callback
+ * are also possible. Thus, optional clauses themselves can be thought
+ * as implementing a bridge between "intuitionistic logic" and
+ * "classical logic", depending on ow they are handled in the callback.
  *
- * The PatternMatchCallback is consulted to determine whether a
- * veritable match has been found, or not. The callback is given
- * individual nodes and links to compare for a match.
- *
- * The callback may alter the sequence of the clauses, in order to
- * otpimze the search. It may also remove some clauses or variables,
- * if it determines that these are irrelevant to the search.
+ * At every step of the process, the PatternMatchCallback is consulted
+ * to determine whether a candidate match should be accepted or not.
+ * In general, the callbacks have almost total control over the search;
+ * the pattern match engine only provides the general framework for
+ * navigating and backtracking and maintaining the needed state for
+ * such traversal.  It is up to the callbacks to perform the actual
+ * grounding or interpreation, and to record the search results.
  */
-void PatternMatchEngine::match(PatternMatchCallback *cb,
+void PatternMatchEngine::setup_matching(
                                const std::set<Handle> &vars,
                                const std::vector<Handle> &component)
 {
-	// Clear all state.
-	clear();
-
 	// Split in positive and negative clauses
-	HandleSeq positives;
 	for (const Handle& h : component)
 	{
 		Type t = h->getType();
@@ -1102,7 +1101,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		}
 		else
 		{
-			positives.push_back(h);
+			_mandatory.push_back(h);
 			_cnf_clauses.push_back(h);
 		}
 	}
@@ -1124,15 +1123,14 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		curr_root = h;
 		note_root(h);
 	}
-	pmc = cb;
 
 #ifdef DEBUG
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
 	int cl = 0;
-	for (Handle h : _cnf_clauses)
+	for (Handle h : _mandatory)
 	{
-		printf("Clause %d: ", cl);
+		printf("Mandatory %d: ", cl);
 		prt(h);
 		cl++;
 	}
@@ -1167,13 +1165,26 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		printf("There are no bound vars in this pattern\n");
 	}
 	printf("\n");
+	fflush(stdout);
 #endif
+}
+
+void PatternMatchEngine::match(PatternMatchCallback *cb,
+                               const std::set<Handle> &vars,
+                               const std::vector<Handle> &component)
+{
+	// Clear all state, and set up clauses
+	clear();
+	setup_matching(vars, component);
+
+	if (_cnf_clauses.empty()) return;
 
 	// Perform the actual search!
-	cb->initiate_search(this, vars, positives);
+	_pmc = cb;
+	cb->initiate_search(this, vars, _mandatory);
 
-	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG
+	dbgprt ("==================== Done Matching ==================\n");
 	fflush(stdout);
 #endif
 }

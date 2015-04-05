@@ -42,11 +42,14 @@ class PatternMatchEngine
 
 	private:
 		// -------------------------------------------
+		void setup_matching(const std::set<Handle> &vars,
+		                    const std::vector<Handle> &component);
 		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
 
 		// List of clauses that need to be grounded.
 		std::vector<Handle> _cnf_clauses;
+		std::vector<Handle> _mandatory;
 		std::set<Handle> _optionals;
 
 		std::set<Handle> _evaluatable;
@@ -124,7 +127,7 @@ class PatternMatchEngine
 		void clear_state(void);
 
 		// Callback to whom the results are reported.
-		PatternMatchCallback *pmc;
+		PatternMatchCallback *_pmc;
 
 	public:
 		PatternMatchEngine(void) {}
