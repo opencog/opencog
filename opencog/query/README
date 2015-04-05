@@ -351,9 +351,9 @@ Currently Implemented Algorithm
    The iterator is the next step below (step 5).
 
    [This step is implemented in PatternMatchEngine::match(), which
-   calls PatternMatchEngine::do_candidate() for each candidate root.
-   The fetching of the list is provided by a user-defined algorithm.
-   The default callback DefaultPatternMatchCB::peform_search()
+   calls PatternMatchEngine::explore_neighborhood() for each candidate
+   root. The fetching of the list is provided by a user-defined
+   algorithm.  The default callback DefaultPatternMatchCB::initiate_search()
    implements this by querying the atomspace for all atoms of a given
    type corresponding to some clause, and starting the search there.
    This default behaviour can be over-ridden with a user-dupplied

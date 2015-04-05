@@ -277,7 +277,7 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
 			       h->toShortString().c_str());
-			bool rc = pme->do_candidate(_root, _starter_pred, h);
+			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 			if (rc) break;
 		}
 
@@ -333,7 +333,7 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool rc = pme->do_candidate(_root, _starter_pred, h);
+		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 		if (rc) break;
 	}
 }

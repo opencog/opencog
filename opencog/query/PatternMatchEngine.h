@@ -156,8 +156,9 @@ class PatternMatchEngine
 	public:
 		PatternMatchEngine(void) {}
 
-		// Examine each candidate for a match, in turn.
-		bool do_candidate(const Handle&, const Handle&, const Handle&);
+		// Examine the locally connected neighborhood for possible
+		// matches.
+		bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
 		// Do the actual pattern search.
 		void match(PatternMatchCallback *,

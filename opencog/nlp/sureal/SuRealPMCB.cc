@@ -340,7 +340,7 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
             Handle h(l);
             logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
 
-            if (pPME->do_candidate(bestClause, bestSubClause, h))
+            if (pPME->explore_neighborhood(bestClause, bestSubClause, h))
                 break;
         }
 
@@ -376,7 +376,7 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
     {
         logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
 
-        if (pPME->do_candidate(bestClause, bestClause, c))
+        if (pPME->explore_neighborhood(bestClause, bestClause, c))
             break;
     }
 }

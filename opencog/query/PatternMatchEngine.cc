@@ -1014,7 +1014,14 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 /* ======================================================== */
 
 /**
- * do_candidate - examine candidates, looking for matches.
+ * explore_neighborhood - explore the local (connected) neighborhood
+ * of the starter clause, looking for a match.  The idea here is that
+ * it is much easier to traverse a connected graph looking for the
+ * appropriate subgraph (pattern) than it is to try to explore the
+ * whole atomspace, at random.  The user callback `initiate_search()`
+ * should call this method, suggesting a clause to start with, and
+ * where in the clause the search should begin.
+ *
  * Inputs:
  * do_clause: must be one of the clauses previously specified in the
  *            clause list of the match() method.
@@ -1025,13 +1032,13 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  *            "starter" link, it must be a node, and it must not be
  *            a variable node.
  *
- * Return true if a match is found
+ * Returns true if one (or more) matches are found
  *
  * This routine is meant to be invoked on every candidate atom taken
  * from the atom space. That atom is assumed to anchor some part of
- * a graph that hopefully will match the predicate.
+ * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::do_candidate(const Handle& do_clause,
+bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                       const Handle& starter,
                                       const Handle& ah)
 {
