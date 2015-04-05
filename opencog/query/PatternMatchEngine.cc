@@ -71,6 +71,73 @@ static inline void prtmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
+/**
+ * Pattern Match Engine Overview
+ * -----------------------------
+ *
+ * The pattern match engine finds groundings (interpretations) for a
+ * set of mandatory and optional clauses. It can be thought of in seveal
+ * ways: it performs a variable unification across multiple clauses;
+ * it discovers groundings for variables; it solves the subgraph
+ * isomorphism problem; it queries a graphical relational database
+ * for data that satisfies the query statement; it solves a typed
+ * satisfiability problem; it finds an "answer set".  Which of these
+ * things it does depends on your point of view; it does all of these
+ * things, although, in each case, the langauge is slightly different.
+ *
+ * It works by being given a list ov variables ("bound variables") and
+ * a set of mandatory and optional clauses containing those variables.
+ * Each "clause" is nothing more than an ordinary OpenCog Atom:
+ * specifically, a typed link.  It should be thought of as a tree, the
+ * tree being formed by the outgoing set of the Atom.  We could call
+ * these things "Atoms" or "Links", but it is more convenient to call
+ * them "clauses", in part to avoid confusion, and in part because they
+ * resemble terms (from "term algebra") or the "sentences" (of
+ * first-order logic). They, in fact, are neither, but there is a
+ * general resemblance that is useful to keep in mind.
+ *
+ * Any given clause is "solved" or "grounded", if there exists a
+ * substitution for the variables such that the resulting clause exists
+ * in the atomspace.  Thus, a grounding can be thought of as an
+ * "interpretation" of the clause; the pattern matcher searches for
+ * interpretations.  It can be thought of as a "unifier", in that ALL
+ * of the mandatory clauses must be grounded, and they must grounded in
+ * a self-consistent way (i.e. the clauses must be grounded in
+ * conjunction with one-another.)
+ *
+ * The list of "bound vars" are to be solved for ("grounded", or
+ * "interpreted") during pattern matching. That is, if the subgraph
+ * defined by the clauses is located, then the vars are given the
+ * corresponding values associated to that match. Because these
+ * variables can be shared across multiple clauses, this can be
+ * understood to be a unification problem; the pattern matcher is thus
+ * a unifier.
+ *
+ * The optionals are a set of clauses which are also searched for,
+ * but whose presence is not mandatory. The optional clauses can be
+ * used to implement negation or pattern-rejection (among other things).
+ * Thier use for negation/rejection is determined by the "optional
+ * clause" callback.  Thus, if an optional clause is found, the callback
+ * can then signal that the pattern as a whole should be rejected.
+ * Alternately, the callback could base its considerations on the
+ * truth-value of the optionall clause: if the optional clause has
+ * a TV of FALSE, then it is accepted; otherwise it is rejected.
+ * Other strategies for handling optional clauses in the callback
+ * are also possible. Thus, optional clauses themselves can be thought
+ * as implementing a bridge between "intuitionistic logic" and
+ * "classical logic", depending on ow they are handled in the callback.
+ *
+ * At every step of the process, the PatternMatchCallback is consulted
+ * to determine whether a candidate match should be accepted or not.
+ * In general, the callbacks have almost total control over the search;
+ * the pattern match engine only provides the general framework for
+ * navigating and backtracking and maintaining the needed state for
+ * such traversal.  It is up to the callbacks to perform the actual
+ * grounding or interpreation, and to record the search results.
+ */
+
+/* ======================================================== */
+
 // At this time, we don't want groundings where variables ground
 // themselves.   However, there is a semi-plausible use-case for
 // this, see https://github.com/opencog/opencog/issues/1092
@@ -976,15 +1043,18 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
 
 /**
  * Create an associative array that gives a list of all of the
- * clauses that a given node participates in.
+ * clauses that a given atom participates in.
  */
-bool PatternMatchEngine::note_root(const Handle& h)
+void PatternMatchEngine::note_root(const Handle& h)
 {
 	_root_map[h].push_back(curr_root);
 
 	LinkPtr l(LinkCast(h));
-	if (l) l->foreach_outgoing(&PatternMatchEngine::note_root, this);
-	return false;
+	if (l)
+	{
+		for (const Handle& ho: l->getOutgoingSet())
+			note_root(ho);
+	}
 }
 
 /**
@@ -1041,52 +1111,19 @@ void PatternMatchEngine::clear(void)
 	clear_state();
 }
 
-
 /**
- * Find groundings for a sequence of clauses in conjunctive normal form.
- * That is, perform a variable unification across multiple clauses.
+ * Given the initial list of variables and clauses, extract the optional
+ * clauses and the dynamically-evaluatable clauses. Also make note of
+ * the connectivity diagram of the clauses.
  *
- * The list of mandatory and optional clauses consist of atoms (links)
- * containing variables.  Any given clause is "solved" or "grounded"
- * if there exists a substitution for the variables such that the
- * resulting clause exists in the atomspace.  Thus, a grounding can be
- * thought of as an "interpretation" of the clause; the pattern matcher
- * searches for interpretations.  It can be thought of as a "unifier"
- * in that ALL of the mandatory clauses must be grounded, and they must
- * grounded in a self-consistent way (i.e. the clauses must be grounded
- * in conjunction with one-another.)
- *
- * The list of "bound vars" are to be solved for ("grounded", or
- * "interpreted") during pattern matching. That is, if the subgraph
- * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match. Because these
- * variables can be shared across multiple clauses, this can be
- * understood to be a unification problem; the pattern matcher is thus
- * a unifier.
- *
- * The optionals are a set of clauses which are also searched for,
- * but whose presence is not mandatory. The optional clauses can be
- * used to implement negation or pattern-rejection (among other things).
- * Thier use for negation/rejection is determined by the "optional
- * clause" callback.  Thus, if an optional clause is found, the callback
- * can then signal that the pattern as a whole should be rejected.
- * Alternately, the callback could base its considerations on the
- * truth-value of the optionall clause: if the optional clause has
- * a TV of FALSE, then it is accepted; otherwise it is rejected.
- * Other strategies for handling optional clauses in the callback
- * are also possible. Thus, optional clauses themselves can be thought
- * as implementing a bridge between "intuitionistic logic" and
- * "classical logic", depending on ow they are handled in the callback.
- *
- * At every step of the process, the PatternMatchCallback is consulted
- * to determine whether a candidate match should be accepted or not.
- * In general, the callbacks have almost total control over the search;
- * the pattern match engine only provides the general framework for
- * navigating and backtracking and maintaining the needed state for
- * such traversal.  It is up to the callbacks to perform the actual
- * grounding or interpreation, and to record the search results.
+ * It is assumed that the set of clauses form a single, connected
+ * component; i.e. that the clauses are pair-wise connected by common,
+ * shared variables, and that this pair-wise connection extends over
+ * the entire set of clauses. There is no other restriction on the
+ * connection topology; they can form any graph whatsoever (as long as
+ * itws connected).
  */
-void PatternMatchEngine::setup_matching(
+void PatternMatchEngine::setup_clauses(
                                const std::set<Handle> &vars,
                                const std::vector<Handle> &component)
 {
@@ -1169,17 +1206,22 @@ void PatternMatchEngine::setup_matching(
 #endif
 }
 
+/**
+ * Main entry point for the pattern matcher engine. This is the
+ * method that sets the gears in motion.
+ */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
                                const std::set<Handle> &vars,
                                const std::vector<Handle> &component)
 {
 	// Clear all state, and set up clauses
 	clear();
-	setup_matching(vars, component);
+	setup_clauses(vars, component);
 
 	if (_cnf_clauses.empty()) return;
 
-	// Perform the actual search!
+	// Get the search started. The initiator callback determines
+	// the portion of the atomspace to be searched.
 	_pmc = cb;
 	cb->initiate_search(this, vars, _mandatory);
 

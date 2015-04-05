@@ -42,8 +42,8 @@ class PatternMatchEngine
 
 	private:
 		// -------------------------------------------
-		void setup_matching(const std::set<Handle> &vars,
-		                    const std::vector<Handle> &component);
+		void setup_clauses(const std::set<Handle> &vars,
+		                   const std::vector<Handle> &component);
 		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
 
@@ -58,7 +58,7 @@ class PatternMatchEngine
 		// Traversal utilities
 		RootMap _root_map;
 		Handle curr_root;     // stacked on root_handle_stack
-		bool note_root(const Handle&);
+		void note_root(const Handle&);
 		
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
