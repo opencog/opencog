@@ -33,7 +33,7 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
 }
 
 /**
- * Implement the perform_search calllback.
+ * Implement the initiate_search calllback.
  *
  * For a fuzzy match, it starts with a full atomspace search to find candidates.
  *
@@ -42,10 +42,9 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
  * @param clauses    The clauses for the query
  * @param negations  The negative clauses
  */
-void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
-                                         const std::set<Handle>& vars,
-                                         const std::vector<Handle>& clauses,
-                                         const std::vector<Handle>& negations)
+void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
+                                          const std::set<Handle>& vars,
+                                          const std::vector<Handle>& clauses)
 {
     full_search(pme, clauses);
 }

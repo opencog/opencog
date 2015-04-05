@@ -208,7 +208,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  *    of node matches, esp. for this initial node, then many possible
  *    solutions will be missed.  This seems like a reasonable limitation:
  *    if you really want a very lenient node_match(), then use variables.
- *    Or you can implement your own perform_search() callback.
+ *    Or you can implement your own initiate_search() callback.
  *
  * 3) If the clauses consist entirely of variables, then the search
  *    will start by looking for all links that are of the same type as
@@ -217,7 +217,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  *    set of types.  This is a reasonable limitation: anything looser
  *    would very seriously degrade performance; if you really need a
  *    very lenient link_match(), then use variables. Or you can
- *    implement your own perform_search() callback.
+ *    implement your own initiate_search() callback.
  *
  * The above describes the limits to the "typical" search that this
  * algo can do well. In particular, if the constraint of 2) can be met,
@@ -238,10 +238,9 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * probably *not* be modified, since it is quite efficient for the
  * "normal" case.
  */
-void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                                           const std::set<Handle> &vars,
-                                           const std::vector<Handle> &clauses,
-                                           const std::vector<Handle> &negations)
+void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
+                                            const std::set<Handle> &vars,
+                                            const std::vector<Handle> &clauses)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by

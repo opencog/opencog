@@ -1091,13 +1091,12 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	clear();
 
 	// Split in positive and negative clauses
-	HandleSeq positives, negations;
+	HandleSeq positives;
 	for (const Handle& h : component)
 	{
 		Type t = h->getType();
 		if (NOT_LINK == t or ABSENT_LINK == t) {
 			Handle inv(LinkCast(h)->getOutgoingAtom(0));
-			negations.push_back(inv);
 			_optionals.insert(inv);
 			_cnf_clauses.push_back(inv);
 		}
@@ -1171,7 +1170,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Perform the actual search!
-	cb->perform_search(this, vars, positives, negations);
+	cb->initiate_search(this, vars, positives);
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG

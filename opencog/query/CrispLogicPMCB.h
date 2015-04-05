@@ -129,18 +129,16 @@ class CrispLogicPMCB :
 			return tv->getMean() >= 0.5;
 		}
 
-		virtual void perform_search(PatternMatchEngine* pme,
-		                            const std::set<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations)
+		virtual void initiate_search(PatternMatchEngine* pme,
+		                             const std::set<Handle> &vars,
+		                             const std::vector<Handle> &clauses)
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
 			FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
 			fgpn.find_atoms(clauses);
-			fgpn.find_atoms(negations);
 			_dyns = fgpn.least_holders;
-			DefaultPatternMatchCB::perform_search(pme, vars, clauses, negations);
+			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
 		}
 
 	private:

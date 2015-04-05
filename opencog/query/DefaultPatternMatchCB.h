@@ -137,10 +137,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
 		 */
-		virtual void perform_search(PatternMatchEngine *,
-		                            const std::set<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations);
+		virtual void initiate_search(PatternMatchEngine *,
+		                             const std::set<Handle> &vars,
+		                             const std::vector<Handle> &clauses);
 
 		/**
 		 * Indicate a set of restrictions on the types of the ground atoms.
