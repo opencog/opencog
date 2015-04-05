@@ -89,13 +89,14 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	var_solutn_stack.push(var_grounding);
 	var_grounding = local_grounding;
 
+	Handle local_pattern(cpl->get_definition());
 printf("duuuude ready to compare pat=%s to gnd=%s\n",
-lp->toString().c_str(), lg->toString().c_str());
+local_pattern->toString().c_str(), lg->toString().c_str());
 
 	// Now, proceed as normal.
 	std::set<Handle> saved_vars = _bound_vars;
 	_bound_vars = cpl->get_local_argset();
-	bool have_match = tree_compare(Handle(lp), Handle(lg));
+	bool have_match = tree_compare(local_pattern, Handle(lg));
 	_bound_vars = saved_vars;
 
 	// No match; restore original grounding and quit
