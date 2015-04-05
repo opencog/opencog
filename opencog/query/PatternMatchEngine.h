@@ -54,7 +54,7 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// Traversal utilities
 		RootMap _root_map;
-		Handle curr_root;
+		Handle curr_root;     // stacked on root_handle_stack
 		bool note_root(const Handle&);
 		
 		// -------------------------------------------
@@ -68,8 +68,8 @@ class PatternMatchEngine
 		bool soln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
-		Handle curr_soln_handle;
-		Handle curr_pred_handle;
+		Handle curr_soln_handle;  // stacked onto soln_handle_stack
+		Handle curr_pred_handle;  // stacked onto pred_handle_stack
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);
 
@@ -87,7 +87,7 @@ class PatternMatchEngine
 
 		// Set of clauses for which a grounding is currently being attempted.
 		typedef std::set<Handle> IssuedSet;
-		IssuedSet issued;
+		IssuedSet issued;     // stacked on issued_stack
 		std::stack<IssuedSet> issued_stack;
 
 		// Stacks used to explore all possible permuations of
@@ -108,12 +108,17 @@ class PatternMatchEngine
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 
+		void all_stacks_push(void);
+		void all_stacks_pop(void);
+
 		// -------------------------------------------
 
 		// Result of solving the predicate
 		// Map variables (and sub-clauses as well) to their groundings
+		// partial solutions are pushed onto var_solutn_stack
 		std::map<Handle, Handle> var_grounding;
 		// Map clauses to their groundings
+		// partial results are pushed onto pred_solutn_stack
 		std::map<Handle, Handle> clause_grounding;
 
 		void clear_state(void);

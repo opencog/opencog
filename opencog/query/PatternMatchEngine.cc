@@ -551,6 +551,80 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	return false;
 }
 
+// Push almost all stacks.  The only stacks that are not pushed
+// are those for _conf_clauses and _optionals.
+void PatternMatchEngine::all_stacks_push(void)
+{
+	stack_depth++;
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
+
+	root_handle_stack.push(curr_root);
+	pred_handle_stack.push(curr_pred_handle);
+	soln_handle_stack.push(curr_soln_handle);
+	pred_solutn_stack.push(clause_grounding);
+	var_solutn_stack.push(var_grounding);
+	issued_stack.push(issued);
+	in_quote_stack.push(in_quote);
+
+	// Reset the unordered-set stacks with each new clause.
+	// XXX this cannot possible be right: we may need to pop,
+	// and try a different ordering.
+	have_stack.push(have_more);
+	have_more = false;
+	depth_stack.push(more_depth);
+	more_depth = 0;
+	unordered_stack.push(more_stack);
+	more_stack.resize(1);
+	more_stack[0] = false;
+	permutation_stack.push(mute_stack);
+
+	pmc->push();
+}
+
+void PatternMatchEngine::all_stacks_pop(void)
+{
+	pmc->pop();
+	curr_root = root_handle_stack.top();
+	root_handle_stack.pop();
+
+	curr_pred_handle = pred_handle_stack.top();
+	pred_handle_stack.pop();
+
+	curr_soln_handle = soln_handle_stack.top();
+	soln_handle_stack.pop();
+
+	// The grounding stacks are handled differently.
+	POPGND(clause_grounding, pred_solutn_stack);
+	POPGND(var_grounding, var_solutn_stack);
+
+	issued = issued_stack.top();
+	issued_stack.pop();
+
+	in_quote = in_quote_stack.top();
+	in_quote_stack.pop();
+
+	// Handle different unordered links that live in different
+	// clauses. The mute_stack deals with different unordered
+	// links that live in the *same* clause.
+	have_more = have_stack.top();
+	have_stack.pop();
+
+	more_depth = depth_stack.top();
+	depth_stack.pop();
+
+	more_stack = unordered_stack.top();
+	unordered_stack.pop();
+
+	mute_stack = permutation_stack.top();
+	permutation_stack.pop();
+
+	stack_depth --;
+
+	dbgprt("pop to depth %d\n", stack_depth);
+	prtmsg("pop to joiner", curr_pred_handle);
+	prtmsg("pop to clause", curr_root);
+}
+
 /// Return true if a grounding was found.  It also has the side effect
 /// of updating clause_grounding map when the current clause is being
 /// grounded.
@@ -624,31 +698,10 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 	curr_soln_handle = hsoln;
 	clause_grounding[curr_root] = curr_soln_handle;
-	stack_depth++;
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
-	dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
 
-	root_handle_stack.push(curr_root);
-	pred_handle_stack.push(curr_pred_handle);
-	soln_handle_stack.push(curr_soln_handle);
-	pred_solutn_stack.push(clause_grounding);
-	var_solutn_stack.push(var_grounding);
-	issued_stack.push(issued);
-	in_quote_stack.push(in_quote);
-
-	// Reset the unorded-set stacks with each new clause.
-	have_stack.push(have_more);
-	have_more = false;
-	depth_stack.push(more_depth);
-	more_depth = 0;
-	unordered_stack.push(more_stack);
-	more_stack.resize(1);
-	more_stack[0] = false;
-	permutation_stack.push(mute_stack);
-
-	pmc->push();
-
+	all_stacks_push();
 	get_next_untried_clause();
 
 	// If there are no further predicates to solve,
@@ -731,46 +784,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If we failed to find anything at this level, we need to
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
-	pmc->pop();
-	curr_root = root_handle_stack.top();
-	root_handle_stack.pop();
-
-	curr_pred_handle = pred_handle_stack.top();
-	pred_handle_stack.pop();
-
-	curr_soln_handle = soln_handle_stack.top();
-	soln_handle_stack.pop();
-
-	// The grounding stacks are handled differently.
-	POPGND(clause_grounding, pred_solutn_stack);
-	POPGND(var_grounding, var_solutn_stack);
-
-	issued = issued_stack.top();
-	issued_stack.pop();
-
-	in_quote = in_quote_stack.top();
-	in_quote_stack.pop();
-
-	// Handle different unordered links that live in different
-	// clauses. The mute_stack deals with different unordered
-	// links that live in the *same* clause.
-	have_more = have_stack.top();
-	have_stack.pop();
-
-	more_depth = depth_stack.top();
-	depth_stack.pop();
-
-	more_stack = unordered_stack.top();
-	unordered_stack.pop();
-
-	mute_stack = permutation_stack.top();
-	permutation_stack.pop();
-
-	stack_depth --;
-
-	dbgprt("pop to depth %d\n", stack_depth);
-	prtmsg("pop to joiner", curr_pred_handle);
-	prtmsg("pop to clause", curr_root);
+	all_stacks_pop();
 
 	return found;
 }
