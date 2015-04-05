@@ -42,7 +42,7 @@ class PatternMatchEngine
 
 	private:
 		// -------------------------------------------
-		// The current set of clauses (search context) being grounded.
+		// The current set of clauses (redex context) being grounded.
 		void setup_clauses(const std::set<Handle> &vars,
 		                   const std::vector<Handle> &component);
 		void clear_clauses(void);
@@ -60,6 +60,10 @@ class PatternMatchEngine
 		ConnectMap _connectivity_map;   // initialized by make_root_map()
 
 		void make_connectivity_map(const Handle&, const Handle&);
+
+		// -------------------------------------------
+		// Recursive redex support. These are stacks of the clauses
+		// above, that are being searched.
 
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.

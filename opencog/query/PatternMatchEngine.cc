@@ -1161,6 +1161,19 @@ void PatternMatchEngine::setup_clauses(
 		make_connectivity_map(h, h);
 	}
 
+	// Save some minor amount of space by erasing those atoms that
+	// participate in only one clause. These atoms cannot be used
+	// to determine connectivity between clauses, and so are un-needed.
+	auto it = _connectivity_map.begin();
+	auto end = _connectivity_map.end();
+	while (it != end)
+	{
+		if (it->second.size() == 1)
+			it = _connectivity_map.erase(it);
+		else
+			it++;
+	}
+
 #ifdef DEBUG
 	// Print out the predicate ...
 	printf("\nPredicate consists of the following clauses:\n");
