@@ -47,6 +47,16 @@ using namespace opencog;
 	stack.pop();                      \
 }
 
+/* ================================================================= */
+
+void PatternMatchEngine::push_clauses(void)
+{
+}
+
+void PatternMatchEngine::pop_clauses(void)
+{
+}
+
 bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
                                        const LinkPtr& lg)
 {

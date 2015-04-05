@@ -929,7 +929,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool unsolved = false;
 	bool solved = false;
 
-	for (const RootPair& vk : _root_map)
+	for (const ConnectPair& vk : _connectivity_map)
 	{
 		const RootList& rl = vk.second;
 		pursue = vk.first;
@@ -1042,18 +1042,23 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
 }
 
 /**
- * Create an associative array that gives a list of all of the
- * clauses that a given atom participates in.
+ * Create a map that holds all of the clauses that a given atom
+ * participates in.  In other words, it indicates all the places
+ * where an atom is shared by multiple trees, and thus establishes
+ * how the trees are connected.
+ *
+ * This is used for only one purpose: to find the next unsolved
+ * clause. This could probably be made smaller...!?
  */
-void PatternMatchEngine::note_root(const Handle& h)
+void PatternMatchEngine::make_connectivity_map(const Handle& root, const Handle& h)
 {
-	_root_map[h].push_back(curr_root);
+	_connectivity_map[h].push_back(root);
 
 	LinkPtr l(LinkCast(h));
 	if (l)
 	{
 		for (const Handle& ho: l->getOutgoingSet())
-			note_root(ho);
+			make_connectivity_map(root, ho);
 	}
 }
 
@@ -1093,23 +1098,18 @@ void PatternMatchEngine::clear_state(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
-
 /**
- * Clear all internal and pattern state.
- * This allows a given instance of this class to be used again, with
- * a different pattern.
+ * Clear only the internal clause declarations
  */
-void PatternMatchEngine::clear(void)
+void PatternMatchEngine::clear_clauses(void)
 {
 	// Clear all pattern-related state.
 	_bound_vars.clear();
 	_cnf_clauses.clear();
 	_mandatory.clear();
 	_optionals.clear();
-	_root_map.clear();
-
-	// Clear internal recursive state.
-	clear_state();
+	_evaluatable.clear();
+	_connectivity_map.clear();
 }
 
 /**
@@ -1156,10 +1156,9 @@ void PatternMatchEngine::setup_clauses(
 
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	for (Handle h : _cnf_clauses)
+	for (const Handle& h : _cnf_clauses)
 	{
-		curr_root = h;
-		note_root(h);
+		make_connectivity_map(h, h);
 	}
 
 #ifdef DEBUG
@@ -1205,6 +1204,22 @@ void PatternMatchEngine::setup_clauses(
 	printf("\n");
 	fflush(stdout);
 #endif
+}
+
+/* ======================================================== */
+
+/**
+ * Clear all internal and pattern state.
+ * This allows a given instance of this class to be used again, with
+ * a different pattern.
+ */
+void PatternMatchEngine::clear(void)
+{
+	// Clear all pattern-related state.
+	clear_clauses();
+
+	// Clear internal recursive state.
+	clear_state();
 }
 
 /**

@@ -37,13 +37,18 @@ class PatternMatchEngine
 {
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
-	typedef std::map<Handle, RootList> RootMap;
-	typedef std::pair<Handle, RootList> RootPair;
+	typedef std::map<Handle, RootList> ConnectMap;
+	typedef std::pair<Handle, RootList> ConnectPair;
 
 	private:
 		// -------------------------------------------
+		// The current set of clauses (search context) being grounded.
 		void setup_clauses(const std::set<Handle> &vars,
 		                   const std::vector<Handle> &component);
+		void clear_clauses(void);
+		void push_clauses(void);
+		void pop_clauses(void);
+
 		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
 
@@ -51,15 +56,11 @@ class PatternMatchEngine
 		std::vector<Handle> _cnf_clauses;
 		std::vector<Handle> _mandatory;
 		std::set<Handle> _optionals;
-
 		std::set<Handle> _evaluatable;
+		ConnectMap _connectivity_map;   // initialized by make_root_map()
 
-		// -------------------------------------------
-		// Traversal utilities
-		RootMap _root_map;
-		Handle curr_root;     // stacked on root_handle_stack
-		void note_root(const Handle&);
-		
+		void make_connectivity_map(const Handle&, const Handle&);
+
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
 		bool tree_compare(const Handle&, const Handle&);
@@ -71,6 +72,7 @@ class PatternMatchEngine
 		bool soln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
+		Handle curr_root;         // stacked onto root_handle_stack
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_pred_handle;  // stacked onto pred_handle_stack
 		void get_next_untried_clause(void);
