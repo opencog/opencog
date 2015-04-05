@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 #include <opencog/spacetime/TemporalEntry.h>
 
 namespace opencog

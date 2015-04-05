@@ -22,7 +22,7 @@
  */
 
 
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 
 #include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>

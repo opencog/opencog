@@ -76,7 +76,6 @@ INSTALL (FILES
     ForeachTwo.h
     FuzzyTruthValue.h
     Handle.h
-    HandleMap.h
     IndefiniteTruthValue.h
     Link.h
     Node.h
