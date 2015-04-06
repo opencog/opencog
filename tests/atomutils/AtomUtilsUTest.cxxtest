@@ -38,6 +38,8 @@ public:
 
 	void test_get_distant_neighbors();
 	void test_get_outgoing_nodes();
+	void test_get_predicates();
+	void test_get_predicates_for();
 };
 
 // Test get_distant_neighbors()
@@ -92,3 +94,82 @@ void AtomUtilsUTest::test_get_outgoing_nodes()
 	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {PREDICATE_NODE}),
 	                 UnorderedHandleSet({P}));
 }
+
+// Test get_outgoing_nodes()
+void AtomUtilsUTest::test_get_predicates()
+{
+	AtomSpace as;
+	Handle
+		programmer = as.addNode(CONCEPT_NODE, "programmer"),
+		bacon = as.addNode(CONCEPT_NODE, "bacon"),
+		programmer_bacon = as.addLink(LIST_LINK, programmer, bacon),
+		eats = as.addNode(PREDICATE_NODE, "eats"),
+		programmerEatsBacon = as.addLink(EVALUATION_LINK, eats,
+										programmer_bacon),
+		lover = as.addNode(DEFINED_RELATIONSHIP_NODE, "lover"),
+		programmerBaconLover = as.addLink(EVALUATION_LINK, lover,
+										 programmer_bacon),
+		anotherNode = as.addNode(CONCEPT_NODE, "pigs"),
+		anotherLink = as.addLink(LIST_LINK, anotherNode, bacon);
+		
+	// Test get_predicates(default).
+	HandleSeq baconReferences {programmerEatsBacon, programmerBaconLover};
+	TS_ASSERT_EQUALS(get_predicates(bacon), baconReferences);
+
+	// Test get_predicates with specific type.
+	HandleSeq baconLovers {programmerBaconLover};
+	TS_ASSERT_EQUALS(get_predicates(bacon, DEFINED_RELATIONSHIP_NODE), 
+					 baconLovers);
+
+	// Test get_predicates with specific type and no subclasses.
+	HandleSeq eatersOfBacon {programmerEatsBacon};
+	TS_ASSERT_EQUALS(get_predicates(bacon, PREDICATE_NODE, NO_SUBCLASSES),
+	                 eatersOfBacon);
+}
+
+// Test get_outgoing_nodes()
+void AtomUtilsUTest::test_get_predicates_for()
+{
+	AtomSpace as;
+	Handle
+		// Dog is a mammal, canine, animal.
+		dog = as.addNode(CONCEPT_NODE, "dog"),
+		mammal = as.addNode(CONCEPT_NODE, "mammal"),
+		dog_mammal = as.addLink(LIST_LINK, dog, mammal),
+		canine = as.addNode(CONCEPT_NODE, "canine"),
+		dog_canine = as.addLink(LIST_LINK, dog, canine),
+		animal = as.addNode(CONCEPT_NODE, "animal"),
+		dog_animal = as.addLink(LIST_LINK, dog, animal),
+		isA = as.addNode(PREDICATE_NODE, "IsA"),
+		dogIsAMammal = as.addLink(EVALUATION_LINK, isA, dog_mammal),
+		dogIsACanine = as.addLink(EVALUATION_LINK, isA, dog_canine),
+		dogIsAAnimal = as.addLink(EVALUATION_LINK, isA, dog_animal),
+
+		// Dog eats bacon.
+		bacon = as.addNode(CONCEPT_NODE, "bacon"),
+		dog_bacon = as.addLink(LIST_LINK, dog, bacon),
+		eats = as.addNode(PREDICATE_NODE, "eats"),
+		dogEatsBacon = as.addLink(EVALUATION_LINK, eats, dog_bacon),
+
+		// Programmer eats bacon.
+		programmer = as.addNode(CONCEPT_NODE, "programmer"),
+		programmer_bacon = as.addLink(LIST_LINK, programmer, bacon),
+		programmerEatsBacon = as.addLink(EVALUATION_LINK, eats, programmer_bacon);
+		
+	// Test for dog IsA.
+	HandleSeq dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
+	TS_ASSERT_EQUALS(get_predicates_for(dog, isA), dogIsA);
+
+	// Test for dog eats.
+	HandleSeq dogEats {dogEatsBacon};
+	TS_ASSERT_EQUALS(get_predicates_for(dog, eats), dogEats);
+
+	// Test for programmer eats.
+	HandleSeq programmerEats {programmerEatsBacon};
+	TS_ASSERT_EQUALS(get_predicates_for(programmer, eats), programmerEats);
+
+	// Test for eats bacon.
+	HandleSeq eatsBacon {dogEatsBacon, programmerEatsBacon};
+	TS_ASSERT_EQUALS(get_predicates_for(bacon, eats), eatsBacon);
+}
+

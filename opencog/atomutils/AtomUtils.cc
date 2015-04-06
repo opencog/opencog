@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include "AtomUtils.h"
@@ -171,4 +173,88 @@ UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist)
     return results;
 }
 
+
+HandleSeq get_predicates(const Handle& target, 
+                         Type predicateType,
+                         bool subClasses)
+{
+    if (target == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "get_predicates: Target handle %d doesn't refer to an Atom", target.value());
+    }
+    ClassServer& classServer = classserver();
+    HandleSeq answer;
+
+    // First find any ListLinks that point to the target
+    for (const LinkPtr& link : target->getIncomingSet())
+    {
+        // Skip any links that aren't subclasses of ListLink.
+        Type linkType = link->getType();
+        if (!classServer.isA(linkType, LIST_LINK))
+           continue;
+ 
+        // Look for EvaluationLink's that contain this ListLink.
+        for (const LinkPtr& evaluationLink : link->getIncomingSet())
+        {
+            // Skip any links that aren't subclasses of EvaluationLink.
+            linkType = evaluationLink->getType();
+            if (!classServer.isA(linkType, EVALUATION_LINK))
+                continue;
+
+            // Check the first outgoing atom for this EvaluationLink against
+            // the desired predicate type.
+            Handle candidatePredicate = evaluationLink->getOutgoingAtom(0);
+            Type candidateType = candidatePredicate->getType();
+            if ((candidateType == predicateType)
+                or (subClasses &&
+                    classServer.isA(candidateType, predicateType)))
+            {
+                answer.push_back(evaluationLink->getHandle());
+            }
+        }
+    }
+
+    return answer;
 }
+
+HandleSeq get_predicates_for(const Handle& target, 
+                             const Handle& predicate)
+{
+    if (target == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "get_predicates_for: Target handle %d doesn't refer to an Atom", target.value());
+    }
+    if (predicate == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "get_predicates_for: Predicate handle %d doesn't refer to an Atom", predicate.value());
+    }
+    ClassServer& classServer = classserver();
+    HandleSeq answer;
+
+    // First find any ListLinks that point to the target
+    for (const LinkPtr& link : target->getIncomingSet())
+    {
+        // Skip any links that aren't subclasses of ListLink.
+        Type linkType = link->getType();
+        if (!classServer.isA(linkType, LIST_LINK))
+           continue;
+ 
+        // Look for EvaluationLink's that contain this ListLink.
+        for (const LinkPtr& evaluationLink : link->getIncomingSet())
+        {
+            // Skip any links that aren't subclasses of EvaluationLink.
+            linkType = evaluationLink->getType();
+            if (!classServer.isA(linkType, EVALUATION_LINK))
+                continue;
+
+            // Check if the first outgoing atom for this EvaluationLink is
+            // the desired predicate.
+            if (predicate == evaluationLink->getOutgoingAtom(0))
+                answer.push_back(evaluationLink->getHandle());
+        }
+    }
+
+    return answer;
+}
+
+} // namespace OpenCog
