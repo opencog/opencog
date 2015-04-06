@@ -118,7 +118,7 @@ void SatisfactionLink::unbundle_clauses(const Handle& clauses)
  * _components.
  */
 void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
-                                        std::vector<Handle>& clauses)
+                                        HandleSeq& clauses)
 
 {
 	// Make sure that the user did not pass in bogus clauses.
@@ -141,7 +141,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 		if (not is_unquoted_in_any_tree(clauses, v))
 			throw InvalidParamException(TRACE_INFO,
 				"The variable %s does not appear (unquoted) in any clause!",
-				v->toString().c_str());
+				v->toShortString().c_str());
 	}
 
 	// Are there any virtual links in the clauses? If so, then we need
@@ -188,7 +188,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	}
 
 	// Split the non virtual clauses into connected components
-	get_connected_components(vars, _fixed, _components);
+	get_connected_components(vars, _fixed, _components, _component_vars);
 
 #ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
 	// For now, the virtual links must be at the top. Not sure
@@ -212,7 +212,7 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
  * Check that all clauses are connected
  */
 void SatisfactionLink::check_connectivity(
-	const std::set<std::vector<Handle>>& components)
+	const std::vector<HandleSeq>& components)
 {
 	if (1 == components.size()) return;
 
@@ -222,7 +222,7 @@ void SatisfactionLink::check_connectivity(
 	std::stringstream ss;
 	ss << "Pattern is not connected! Found "
 	   << components.size() << " components:\n";
-	int cnt = 0;
+	int cnt = 1;
 	for (const auto& comp : components)
 	{
 		ss << "Connected component " << cnt

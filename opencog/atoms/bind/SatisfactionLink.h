@@ -55,21 +55,24 @@ class SatisfactionLink : public LambdaLink
 protected:
 	/// The actual clauses. Set by validate_clauses()
 	Handle _hclauses;
-	std::vector<Handle> _clauses;
+	HandleSeq _clauses;
 
 	/// The graph components. Set by validate_clauses()
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.
-	std::vector<Handle> _fixed;
-	std::vector<Handle> _virtual;
-	std::set<std::vector<Handle>> _components;
+	/// The list of component_vars are the variables that appear
+	/// in the corresponding component.
+	HandleSeq _fixed;
+	HandleSeq _virtual;
+	std::vector<HandleSeq> _components;
+	std::vector<std::set<Handle>> _component_vars;
 
 	// Validate the clauses inside the body
 	void unbundle_clauses(const Handle&);
 	void validate_clauses(std::set<Handle>& vars,
-	                      std::vector<Handle>& clauses);
+	                      HandleSeq& clauses);
 
-	void check_connectivity(const std::set<std::vector<Handle>>&);
+	void check_connectivity(const std::vector<HandleSeq>&);
 
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),

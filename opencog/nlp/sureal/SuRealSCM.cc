@@ -149,21 +149,24 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     }
 
     // separate the disconnected clauses (this will happen often with SuReal)
-    std::set<HandleSeq> connectedClauses;
-    get_connected_components(sVars, qClauses, connectedClauses);
+    std::vector<HandleSeq> connectedClauses;
+    std::vector<std::set<Handle>> connectedVars;
+    get_connected_components(sVars, qClauses, connectedClauses, connectedVars);
 
     logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
 
     std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
 
     // call the pattern matcher on each set of disconnected commponents
-    for (auto& c : connectedClauses)
+    for (size_t i=0; i<connectedClauses.size(); i++)
     {
         logger().debug("[SuReal] starting pattern matcher");
+        const HandleSeq& qClause(connectedClauses[i]);
+        const std::set<Handle>& qVars(connectedVars[i]);
 
-        // copy the clause for passing const stuff to non-const argument list
-        HandleSeq qClause(c);
-
+        // XXX TODO don't you want to use qVars, above, instead of
+        // sVars?  qVars holds only those variables that appear in
+        // the given component ...
         SuRealPMCB pmcb(pAS, sVars);
         PatternMatchEngine pme;
         pme.match(&pmcb, sVars, qClause);

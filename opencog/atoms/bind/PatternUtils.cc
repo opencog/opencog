@@ -77,35 +77,37 @@ bool remove_constants(const std::set<Handle> &vars,
 /* ======================================================== */
 /**
  * Given an input set of clauses, partition this set into its
- * connected components, returning that set. The connected
- * components are added to the set "components".
+ * connected components, returning a list of the connected components,
+ * and a matching list of the variables that appear in each component.
  *
  * Two clauses are "connected" if they both contain a common
- * variable. A connected component is the set of clauses that are
- * all connected.
+ * variable. A connected component is the set of all clauses that are
+ * connected to one-another, in some way.
  *
  * This method serves two different purposes.  First, if the
  * pattern does not contain any "virtual" links, then the pattern
  * matcher works correctly only if there is one single, connected
  * component (this is by design, since we don't want to deal with
- * the combinatorics).  If the pattern does contain "virtual" links,
- * then the largest connected component should be grounded first,
- * before the grounding of the virtual links is attempted.
+ * the combinatoric explosion of grounding multuple distinct components).
+ * If the pattern does contain "virtual" links, then the connected
+ * components should be grounded first, and the results then combined
+ * by exploring the combinatoric possibilites presented by the virtual
+ * link(s).
  *
  * A side effect of the algorithm is that it sorts the clauses into
  * connected order. That is, given the vector of connected clauses,
  * each element in the vector is connected to some clause that came
- * before (in the vector).  This is handy, because users do not always
- * specify clauses in such an order, and traversal and matching is just
- * a bit faster when pursued in order.
+ * before it (in the vector).  This is handy, because it guarantees
+ * that the next clause must be connected to the previous ones. This
+ * speeds up the discovery of the next ungrounded clause: it is
+ * trivially just the very next clause in the connected set.  Of
+ * course, users will typically never specify clauses in such order.
  */
-void get_connected_components(const std::set<Handle> &vars,
-                              const std::vector<Handle> &clauses,
-                              std::set<std::vector<Handle>> &compset)
+void get_connected_components(const std::set<Handle>& vars,
+                              const HandleSeq& clauses,
+                              std::vector<HandleSeq>& components,
+                              std::vector<std::set<Handle>>& component_vars)
 {
-	std::vector<std::vector<Handle>> components;
-	std::vector<std::set<Handle>> component_vars; // cache of vars in component
-
 	std::vector<Handle> todo(clauses);
 
 	while (0 < todo.size())
@@ -115,7 +117,7 @@ void get_connected_components(const std::set<Handle> &vars,
 		std::vector<Handle> no_con_yet;
 		bool did_at_least_one = false;
 
-		for (Handle cl: todo)
+		for (const Handle& cl: todo)
 		{
 			bool extended = false;
 
@@ -123,7 +125,7 @@ void get_connected_components(const std::set<Handle> &vars,
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				std::set<Handle>& cur_vars = component_vars[i];
+				std::set<Handle>& cur_vars(component_vars[i]);
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_unquoted_in_tree(cl, cur_vars))
@@ -134,7 +136,7 @@ void get_connected_components(const std::set<Handle> &vars,
 					// Add to the varset cache for that component.
 					FindAtoms fv(vars);
 					fv.find_atoms(cl);
-					for (Handle v : fv.varset) cur_vars.insert(v);
+					for (const Handle& v : fv.varset) cur_vars.insert(v);
 
 					extended = true;
 					did_at_least_one = true;
@@ -154,7 +156,7 @@ void get_connected_components(const std::set<Handle> &vars,
 
 		// Grab the first clause that failed to attach to something,
 		// and use it to start a new component.
-		Handle ncl = no_con_yet.back();
+		Handle ncl(no_con_yet.back());
 		no_con_yet.pop_back();
 		todo = no_con_yet;
 
@@ -166,9 +168,6 @@ void get_connected_components(const std::set<Handle> &vars,
 		fv.find_atoms(ncl);
 		component_vars.push_back(fv.varset);
 	}
-
-	// We are done. Copy the components over.
-	compset.insert(components.begin(), components.end());
 }
 
 } // namespace opencog

@@ -44,8 +44,9 @@ class PatternMatch
 		// See PatternMatch.cc for comments
 		static void do_match(PatternMatchCallback *,
 		              const std::set<Handle>& vars,
-		              const std::vector<Handle>& virtuals,
-		              const std::set<std::vector<Handle>>& components);
+		              const HandleSeq& virtuals,
+		              const std::vector<HandleSeq>& components,
+		              const std::vector<std::set<Handle>>& comp_vars);
 
 		static bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,

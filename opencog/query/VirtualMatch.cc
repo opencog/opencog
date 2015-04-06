@@ -303,12 +303,16 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  */
 void PatternMatch::do_match(PatternMatchCallback *cb,
                             const std::set<Handle>& vars,
-                            const std::vector<Handle>& virtuals,
-                            const std::set<std::vector<Handle>>& nvcomps)
+                            const HandleSeq& virtuals,
+                            const std::vector<HandleSeq>& nvcomps,
+                            const std::vector<std::set<Handle>>& compvars)
 {
+	size_t num_comps = nvcomps.size();
+
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
-	if (nvcomps.size() == 1 and virtuals.empty()) {
+	if (num_comps == 1 and virtuals.empty())
+	{
 		dbgprt("No Virtuals; ordinary solver: ====================== ");
 		PatternMatchEngine pme;
 		pme.match(cb, vars, *nvcomps.begin());
@@ -329,18 +333,11 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
-	// Note: range loop by copy because PatternMatchEngine::match
-	// allows non-const clauses, and as they come from std::set they
-	// are const. I don't see why PatternMatchEngine::match wouldn't
-	// take in const clauses. To be studied...
-	for (const std::vector<Handle>& comp : nvcomps)
+
+	for (size_t i=0; i<num_comps; i++)
 	{
-		// Find the variables in each component.
-		std::set<Handle> cvars;
-		for (const Handle& v : vars)
-		{
-			if (is_unquoted_in_any_tree(comp, v)) cvars.insert(v);
-		}
+		const HandleSeq& comp(nvcomps[i]);
+		const std::set<Handle>& cvars(compvars[i]);
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(cb);

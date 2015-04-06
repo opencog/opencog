@@ -56,12 +56,14 @@ using namespace opencog;
 void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
    if (check_conn and 0 == _virtual.size()) check_connectivity(_components);
-   PatternMatch::do_match(pmc, _varset, _virtual, _components);
+   PatternMatch::do_match(pmc, _varset, _virtual,
+	                       _components, _component_vars);
 }
 
 void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 {
-   PatternMatch::do_match(pmc, _varset, _virtual, _components);
+   PatternMatch::do_match(pmc, _varset, _virtual,
+	                       _components, _component_vars);
 }
 
 void BetaRedex::satisfy(PatternMatchCallback* pmc,
