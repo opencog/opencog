@@ -937,30 +937,35 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool unsolved = false;
 	bool solved = false;
 
+	// We are looking for a joining atom, one that is shared in common
+	// with the a fully grounded clause, and an as-yet ungrounded clause.
+	// The joint is called "pursue", and the unsolved clause that it
+	// joins will become our next untried clause.  Note that the join
+	// is not necessarily a variable; it could be a constant atom.
+	// (wouldn't things be faster if they were variables only, that
+	// joined? the problem is that var_grounding stores both grounded
+	// variables and "grounded" constants.
+#define OLD_LOOP
+#ifdef OLD_LOOP
 	for (const ConnectPair& vk : _connectivity_map)
 	{
-		const RootList& rl = vk.second;
+		const RootList& rl(vk.second);
 		pursue = vk.first;
+		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
+#else // OLD_LOOP
+	// Newloop might be slightly faster than old loop.
+	// ... but maybe not...
+	for (auto gndpair : var_grounding)
+	{
+		pursue = gndpair.first;
+		try { _connectivity_map.at(pursue); }
+		catch(...) { continue; }
+		const RootList& rl(_connectivity_map.at(pursue));
+#endif
 
 		unsolved = false;
 		solved = false;
-
-		// Pursue will become the joining atom, that is shared in common
-		// with the a fully grounded clause, and an as-yet ungrounded
-		// clause. We need it (pursue) to be grounded as well, as otherwise
-		// the join will fail.  This can happen when a clause is "fully"
-		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded.  Yes, that
-		// sounds totally contradictory: it corresponds to a pathological
-		// situation, where a clause is grounded with another clause that
-		// has a bound variable in it.  Which is weird; I'm not sure it
-		// can even occur with the current code... and it will probably
-		// be rejected at some point.  But, for now, this is a semi-
-		// plausible situation.  So we skip this joiner, and look for
-		// another.
-		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-
-		for (Handle root : rl)
+		for (const Handle& root : rl)
 		{
 			if (Handle::UNDEFINED != clause_grounding[root])
 			{
