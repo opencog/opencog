@@ -60,17 +60,7 @@ int main(int argc, char** argv)
              break;
            case 'A':
              benchmarker.buildTestData = true;
-             benchmarker.setMethod("noop");
-             benchmarker.setMethod("addNode");
-             benchmarker.setMethod("addLink");
-             benchmarker.setMethod("getType");
-             benchmarker.setMethod("getTV");
-             benchmarker.setMethod("setTV");
-             benchmarker.setMethod("getNodeHandles");
-             benchmarker.setMethod("getOutgoingSet");
-             benchmarker.setMethod("getIncomingSet");
-             benchmarker.setMethod("removeAtom");
-             benchmarker.setMethod("getHandleSet");
+             benchmarker.setTestAllMethods();
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
