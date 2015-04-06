@@ -77,10 +77,9 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	return filtered_set;
 }
 
-void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
-                                        const std::set<Handle> &vars,
-                                        const std::vector<Handle> &clauses,
-                                        const std::vector<Handle> &negations)
+void AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
+                                         const std::set<Handle> &vars,
+                                         const std::vector<Handle> &clauses)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -116,7 +115,7 @@ void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
 			       h->toShortString().c_str());
-			bool rc = pme->do_candidate(_root, _starter_pred, h);
+			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 			if (rc) break;
 		}
 
@@ -162,13 +161,15 @@ void AttentionalFocusCB::perform_search(PatternMatchEngine *pme,
 		handle_set.erase(it, handle_set.end());
 	}
 
-	size_t handle_set_size = handle_set.size(), i = 0;
+#ifdef DEBUG
+	size_t i = 0;
+#endif
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", i++, handle_set_size,
+		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool rc = pme->do_candidate(_root, _starter_pred, h);
+		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 		if (rc) break;
 	}
 }

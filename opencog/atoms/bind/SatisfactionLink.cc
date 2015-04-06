@@ -24,8 +24,9 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 
+#include "PatternUtils.h"
 #include "SatisfactionLink.h"
 
 using namespace opencog;
@@ -111,7 +112,7 @@ void SatisfactionLink::unbundle_clauses(const Handle& clauses)
  * connected if they contain a common variable.
  *
  * As a side effect, this looks for 'virtual links' and separates
- * them out into a distinct list, _virtuals and _nonvirts.
+ * them out into a distinct list, _virtual; the rest go in _fixed.
  *
  * It also partition the clauses into a set of connected components,
  * _components.
@@ -128,16 +129,16 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	bool bogus = remove_constants(vars, clauses);
 	if (bogus)
 	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
+		logger().warn("%s: Constant clauses removed from pattern",
 		              __FUNCTION__);
 	}
 
 	// Make sure that each declared variable appears in some clause.
 	// We can't ground variables that aren't attached to something.
 	// Quoted variables are constants, and so don't count.
-	for (Handle v : vars)
+	for (const Handle& v : vars)
 	{
-		if (not is_variable_in_any_tree(clauses, v))
+		if (not is_unquoted_in_any_tree(clauses, v))
 			throw InvalidParamException(TRACE_INFO,
 				"The variable %s does not appear (unquoted) in any clause!",
 				v->toString().c_str());
@@ -152,24 +153,42 @@ void SatisfactionLink::validate_clauses(std::set<Handle>& vars,
 	// The GreaterThanLink is a link type that implicitly contains
 	// a GroundedPredicate for numeric greater-than relations. So
 	// we search for that too.
-	//
-	// XXX FIXME, the check below is not quite correct; for example,
-	// it would tag the following as virtual, although it is not:
-	// (BlahLink (VariableNode "$var") (EvaluationLink (GPN "scm:duh")
-	// (ListLink (ConceptNode "Stuff"))))  -- the var is there but not
-	// in the GPN.
-	for (Handle clause: clauses)
+	for (const Handle& clause: clauses)
 	{
-		if ((contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GREATER_THAN_LINK))
-		    and any_variable_in_tree(clause, vars))
-			_virtuals.push_back(clause);
+		bool have_virt = false;
+		FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
+		fgpn.find_atoms(clause);
+		for (const Handle& sh : fgpn.least_holders)
+			if (any_unquoted_in_tree(sh, vars))
+			{
+				have_virt = true;
+				break;
+			}
+
+		if (not have_virt)
+		{
+			// Subclasses of VirtualLink, e.g. GreaterThanLink, which
+			// are essentially a kind of EvaluationLink holding a GPN
+			FindAtoms fgtl(VIRTUAL_LINK, true);
+			fgtl.find_atoms(clause);
+			// Unlike the above, its varset, not least_holders...
+			// because its a link...
+			for (const Handle& sh : fgtl.varset)
+				if (any_unquoted_in_tree(sh, vars))
+				{
+					have_virt = true;
+					break;
+				}
+		}
+
+		if (have_virt)
+			_virtual.push_back(clause);
 		else
-			_nonvirts.push_back(clause);
+			_fixed.push_back(clause);
 	}
 
 	// Split the non virtual clauses into connected components
-	get_connected_components(vars, _nonvirts, _components);
+	get_connected_components(vars, _fixed, _components);
 
 #ifdef I_DONT_THINK_THIS_CHECK_IS_NEEDED
 	// For now, the virtual links must be at the top. Not sure

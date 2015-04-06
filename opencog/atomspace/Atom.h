@@ -131,7 +131,9 @@ protected:
         // The incoming set is not tracked by the garbage collector;
         // this is required, in order to avoid cyclic references.
         // That is, we use weak pointers here, not strong ones.
-        // std::set<ptr> uses 48 bytes (per atom).
+        // std::set<ptr> uses 48 bytes (per atom).  See the README file
+        // in this directory for a slightly longer explanation for why
+        // weak pointers are needed, and why bdgc cannot be used.
         WincomingSet _iset;
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...

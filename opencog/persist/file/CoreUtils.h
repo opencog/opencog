@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 
 namespace opencog
 {

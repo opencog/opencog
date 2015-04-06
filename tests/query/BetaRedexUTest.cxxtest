@@ -1,5 +1,5 @@
 /*
- * tests/query/ComposeUTest.cxxtest
+ * tests/query/BetaRedexUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -25,21 +25,21 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/atoms/bind/ComposeLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-class ComposeUTest: public CxxTest::TestSuite
+class BetaRedexUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace *as;
 	SchemeEval* eval;
 
 public:
-	ComposeUTest(void)
+	BetaRedexUTest(void)
 	{
 		try
 		{
@@ -68,12 +68,12 @@ public:
 
 		cogserver().loadModules();
 
-		config().set("SCM_PRELOAD", "tests/query/compose.scm");
+		config().set("SCM_PRELOAD", "tests/query/beta-redex.scm");
 		load_scm_files_from_config(*as);
 
 	}
 
-	~ComposeUTest()
+	~BetaRedexUTest()
 	{
 		delete as;
 		// Erase the log file if no assertions failed.
@@ -89,11 +89,11 @@ public:
 	void test_quote_compose(void);
 };
 
-void ComposeUTest::tearDown(void)
+void BetaRedexUTest::tearDown(void)
 {
 }
 
-void ComposeUTest::setUp(void)
+void BetaRedexUTest::setUp(void)
 {
 }
 
@@ -101,7 +101,7 @@ void ComposeUTest::setUp(void)
  * Test double-definition of a DefineLink.  Double definitions
  * should not be posible.
  */
-void ComposeUTest::test_double_define(void)
+void BetaRedexUTest::test_double_define(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -132,9 +132,9 @@ void ComposeUTest::test_double_define(void)
 }
 
 /*
- * Basic ComposeLink unit test.
+ * Basic BetaRedex unit test.
  */
-void ComposeUTest::test_simple_compose(void)
+void BetaRedexUTest::test_simple_compose(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -145,10 +145,10 @@ void ComposeUTest::test_simple_compose(void)
 
 	Handle hcomp = eval->eval_h("composer");
 	printf("Get a composer: %s\n", hcomp->toString().c_str());
-	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
-	TSM_ASSERT("Exepected to get a ComposeLink", compr != NULL);
+	BetaRedexPtr compr = BetaRedexCast(hcomp);
+	TSM_ASSERT("Exepected to get a BetaRedex", compr != NULL);
 
-	Handle hresult = compr->compose();
+	Handle hresult = compr->beta_reduce();
 	// We must place it in the atomspace, the composer doesn't do that.
 	hresult = as->getAtom(hresult);
 	printf("Got the result: %s\n", hresult->toString().c_str());
@@ -158,9 +158,9 @@ void ComposeUTest::test_simple_compose(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 /*
- * ComposeLink with QuoteLink in it
+ * BetaRedex with QuoteLink in it
  */
-void ComposeUTest::test_quote_compose(void)
+void BetaRedexUTest::test_quote_compose(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -171,10 +171,10 @@ void ComposeUTest::test_quote_compose(void)
 
 	Handle hcomp = eval->eval_h("compose-quote");
 	printf("Get a composer: %s\n", hcomp->toString().c_str());
-	ComposeLinkPtr compr = ComposeLinkCast(hcomp);
-	TSM_ASSERT("Exepected to get a ComposeLink", compr != NULL);
+	BetaRedexPtr compr = BetaRedexCast(hcomp);
+	TSM_ASSERT("Exepected to get a BetaRedex", compr != NULL);
 
-	Handle hresult = compr->compose();
+	Handle hresult = compr->beta_reduce();
 	// We must place it in the atomspace, the composer doesn't do that.
 	hresult = as->getAtom(hresult);
 	printf("Got the result: %s\n", hresult->toString().c_str());

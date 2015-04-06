@@ -28,7 +28,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
 
@@ -129,18 +129,16 @@ class CrispLogicPMCB :
 			return tv->getMean() >= 0.5;
 		}
 
-		virtual void perform_search(PatternMatchEngine* pme,
-		                            const std::set<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations)
+		virtual void initiate_search(PatternMatchEngine* pme,
+		                             const std::set<Handle> &vars,
+		                             const std::vector<Handle> &clauses)
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
-			FindVariables fv(GROUNDED_PREDICATE_NODE, false);
-			fv.find_vars(clauses);
-			fv.find_vars(negations);
-			_dyns = fv.holders;
-			DefaultPatternMatchCB::perform_search(pme, vars, clauses, negations);
+			FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
+			fgpn.find_atoms(clauses);
+			_dyns = fgpn.least_holders;
+			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
 		}
 
 	private:

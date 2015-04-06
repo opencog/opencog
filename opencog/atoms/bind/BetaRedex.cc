@@ -1,7 +1,7 @@
 /*
- * ComposeLink.cc
+ * BetaRedex.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -26,11 +26,11 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/bind/DefineLink.h>
 
-#include "ComposeLink.h"
+#include "BetaRedex.h"
 
 using namespace opencog;
 
-void ComposeLink::init(const HandleSeq& oset)
+void BetaRedex::init(const HandleSeq& oset)
 {
 	// Must have name and body
 	if (2 != oset.size())
@@ -40,40 +40,69 @@ void ComposeLink::init(const HandleSeq& oset)
 	Type ot = oset[1]->getType();
 	if (not classserver().isA(ot, ORDERED_LINK))
       throw InvalidParamException(TRACE_INFO,
-         "Expecting and ordered list of arguments!");
+         "Expecting an ordered list of arguments!");
 }
 
-ComposeLink::ComposeLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(COMPOSE_LINK, oset, tv, av)
+BetaRedex::BetaRedex(const HandleSeq& oset,
+                     TruthValuePtr tv, AttentionValuePtr av)
+	: Link(BETA_REDEX, oset, tv, av)
 {
 	init(oset);
 }
 
-ComposeLink::ComposeLink(const Handle& name, const Handle& defn,
+BetaRedex::BetaRedex(const Handle& name, const Handle& args,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(COMPOSE_LINK, HandleSeq({name, defn}), tv, av)
+	: Link(BETA_REDEX, HandleSeq({name, args}), tv, av)
 {
 	init(getOutgoingSet());
 }
 
-ComposeLink::ComposeLink(Link &l)
+BetaRedex::BetaRedex(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, COMPOSE_LINK))
+	if (not classserver().isA(tscope, BETA_REDEX))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ComposeLink, got %s", tname.c_str());
+			"Expecting a BetaRedex, got %s", tname.c_str());
 	}
 
 	init(l.getOutgoingSet());
 }
 
-/// Compose this link with the defined link, and return the result.
-Handle ComposeLink::compose(void)
+/// Return the name of the redex
+const std::string& BetaRedex::get_name(void)
+{
+	static const std::string linkname("redex name is a link!!!");
+	NodePtr n(NodeCast(_outgoing[0]));
+	if (n) return n->getName();  // it should be a node pretty much always!
+	return linkname;
+}
+
+/// Simply return the arguments to be composed.
+const HandleSeq& BetaRedex::get_args(void) const
+{
+	LinkPtr args(LinkCast(_outgoing[1]));
+	return args->getOutgoingSet();
+}
+
+/// Return the matching arguments from the lambda
+const HandleSeq& BetaRedex::get_local_args(void) const
+{
+	return get_definition()->get_variables();
+}
+
+/// Same as above, b ut an unordered set
+const std::set<Handle>& BetaRedex::get_local_argset(void) const
+{
+	return get_definition()->get_varset();
+}
+
+/// Get the definition (the body) of the function (without renaming the
+/// variables).
+LambdaLinkPtr BetaRedex::get_definition(void) const
 {
 	// Is the defined link actually defined?
 	// We cannot do this check when the ctor runs, since it might
@@ -82,15 +111,18 @@ Handle ComposeLink::compose(void)
    _outgoing[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
    if (1 != ename.size())
       throw InvalidParamException(TRACE_INFO,
-         "Cannot compose with an undefined function!");
+         "Cannot find defined function!");
 
 	// Get the the defined function
 	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
-	LambdaLinkPtr lam(ldefun->get_definition());
+	return ldefun->get_definition();
+}
 
-	// Get the arguments
-	LinkPtr args(LinkCast(_outgoing[1]));
-	return lam->substitute(args->getOutgoingSet());
+/// Compose this link with the defined link, and return the result.
+Handle BetaRedex::beta_reduce(void) const
+{
+	// Substitute the arguments
+	return get_definition()->substitute(get_args());
 }
 
 /* ===================== END OF FILE ===================== */

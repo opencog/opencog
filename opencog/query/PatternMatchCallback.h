@@ -238,10 +238,9 @@ class PatternMatchCallback
 		 * the variables, clauses, or negated clauses to remove those that
 		 * will not alter the final semantics of the search.
 		 */
-		virtual void perform_search(PatternMatchEngine *,
-		                            const std::set<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations) = 0;
+		virtual void initiate_search(PatternMatchEngine *,
+		                             const std::set<Handle> &vars,
+		                             const std::vector<Handle> &clauses) = 0;
 };
 
 } // namespace opencog

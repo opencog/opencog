@@ -25,7 +25,7 @@
 
 #include "CoreUtils.h"
 
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 #include <opencog/atomspace/TLB.h>
 
 using namespace opencog;

@@ -1,7 +1,6 @@
 
 ADD_LIBRARY (atomutils SHARED
 	AtomUtils
-	PatternUtils
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
@@ -22,10 +21,11 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
     AtomUtils.h
+    FindUtils.h
     FollowLink.h
     ForeachChaseLink.h
     Foreach.h
     ForeachTwo.h
-    PatternUtils.h
+    HandleMap.h
     DESTINATION "include/${PROJECT_NAME}/atomutils"
 )

@@ -68,33 +68,6 @@ VariableList::VariableList(Type t, const HandleSeq& oset,
 	validate_vardecl(oset);
 }
 
-// Crazy rule-violating ctor: auto-build a variable list from
-// just a single variable, or a list of them.
-VariableList::VariableList(const Handle& h,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(VARIABLE_LIST, HandleSeq(), tv, av)
-{
-	// Type must be reasonable
-	Type tscope = h->getType();
-	if (VARIABLE_NODE == tscope or TYPED_VARIABLE_LINK == tscope)
-	{
-		_outgoing.push_back(h);
-		validate_vardecl(_outgoing);
-		return;
-	}
-	else if (classserver().isA(tscope, VARIABLE_LIST))
-	{
-		_type = tscope;
-		_outgoing = LinkCast(h)->getOutgoingSet();
-		if (VARIABLE_LIST == tscope)
-			validate_vardecl(_outgoing);
-		return;
-	}
-	const std::string& tname = classserver().getTypeName(tscope);
-	throw InvalidParamException(TRACE_INFO,
-		"Expecting a VariableList, got %s", tname.c_str());
-}
-
 VariableList::VariableList(Link &l)
 	: Link(l)
 {
@@ -216,7 +189,6 @@ void VariableList::get_vartype(const Handle& htypelink)
  *
  * As a side-effect, the variables and type restrictions are unpacked.
  */
-
 void VariableList::validate_vardecl(const Handle& hdecls)
 {
 	// Expecting the declaration list to be either a single
@@ -226,6 +198,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
 		_varset.insert(hdecls);
+		_varseq.push_back(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
@@ -243,6 +216,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 		throw InvalidParamException(TRACE_INFO,
 			"Expected a VariableList holding variable declarations");
 	}
+	build_index();
 }
 
 /* ================================================================= */
@@ -256,7 +230,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
  * be a TypeChoice, and so the handle must be one of the types in the
  * TypeChoice.
  */
-bool VariableList::is_type(const Handle& h)
+bool VariableList::is_type(const Handle& h) const
 {
 	// The arity must be one for there to be a match.
 	if (1 != _varset.size()) return false;
@@ -284,7 +258,7 @@ bool VariableList::is_type(const Handle& h)
  * on the wiki; We would need the general pattern matcher to do type
  * checking, in that situation.
  */
-bool VariableList::is_type(const HandleSeq& hseq)
+bool VariableList::is_type(const HandleSeq& hseq) const
 {
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
@@ -362,7 +336,8 @@ void VariableList::build_index(void)
  * Again, only a substitution is performed, there is not evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
+Handle VariableList::substitute(const Handle& fun,
+                                const HandleSeq& args) const
 {
 	if (args.size() != _varseq.size())
 		throw InvalidParamException(TRACE_INFO,
@@ -377,7 +352,7 @@ Handle VariableList::substitute(const Handle& fun, const HandleSeq& args)
 }
 
 Handle VariableList::substitute_nocheck(const Handle& fun,
-                                        const HandleSeq& args)
+                                        const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, Arity>::const_iterator idx;

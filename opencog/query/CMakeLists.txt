@@ -1,6 +1,8 @@
 
 # Build the query shlib
 ADD_LIBRARY(query SHARED
+	AttentionalFocusCB.cc
+	Composition.cc
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	Instantiator.cc
@@ -9,7 +11,6 @@ ADD_LIBRARY(query SHARED
 	PatternSCM.cc
 	Satisfier.cc
 	VirtualMatch.cc
-	AttentionalFocusCB.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
 	FuzzyMatch/GraphEditDist.cc
@@ -21,6 +22,7 @@ ADD_DEPENDENCIES(query
 
 TARGET_LINK_LIBRARIES(query
 	atomutils
+	lambda
 	atomspace
 	execution
 )

@@ -22,7 +22,8 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/query/PatternMatchEngine.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -105,7 +106,6 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
 
     std::set<Handle> sVars;
-    HandleSeq qNegs;
 
     // Extract the graph under the SetLink; this is done so that the content
     // of the SetLink could be matched to another SetLink with differnet arity.
@@ -166,7 +166,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         SuRealPMCB pmcb(pAS, sVars);
         PatternMatchEngine pme;
-        pme.match(&pmcb, sVars, qClause, qNegs);
+        pme.match(&pmcb, sVars, qClause);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())

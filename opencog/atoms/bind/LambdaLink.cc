@@ -39,16 +39,6 @@ void LambdaLink::init(const HandleSeq& oset)
 
 	validate_vardecl(oset[0]);
 	_body = oset[1];     // Body
-
-	const Handle& vars = oset[0];
-	_vardecl = VariableListCast(vars);  // VariableNode declarations
-	if (NULL == _vardecl)
-	{
-		// Note: this uses the "crazy constructor"!!
-		// It builds VarLists from single VariableNode's
-		_vardecl = createVariableList(vars);
-	}
-	// _vardecl cannot be null here, after the above...
 }
 
 LambdaLink::LambdaLink(const HandleSeq& oset,
@@ -85,31 +75,6 @@ LambdaLink::LambdaLink(Link &l)
 	}
 
 	init(l.getOutgoingSet());
-}
-
-/* ================================================================= */
-/**
- * Unpack a LambdaLink into vardecls and body
- * Very similar to the constructors.
- */
-void LambdaLink::unbundle_body(const Handle& hlambda)
-{
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hlambda));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink");
-
-	// Type must be as expected
-	Type tscope = hlambda->getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
-	}
-
-	init(lbl->getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */

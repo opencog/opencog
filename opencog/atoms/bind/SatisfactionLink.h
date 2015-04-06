@@ -58,8 +58,10 @@ protected:
 	std::vector<Handle> _clauses;
 
 	/// The graph components. Set by validate_clauses()
-	std::vector<Handle> _virtuals;
-	std::vector<Handle> _nonvirts;
+	/// "virtual" clauses are those that contain virtual links.
+	/// "fixed" clauses are those that do not.
+	std::vector<Handle> _fixed;
+	std::vector<Handle> _virtual;
 	std::set<std::vector<Handle>> _components;
 
 	// Validate the clauses inside the body
@@ -85,6 +87,9 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	SatisfactionLink(Link &l);
+
+	// XXX temp hack till thigs get sorted out; remove this method later.
+	const HandleSeq& get_clauses(void) { return _clauses; }
 
 	void satisfy(PatternMatchCallback *);
 };

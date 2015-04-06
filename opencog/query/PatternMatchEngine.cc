@@ -23,7 +23,8 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomutils/ForeachZip.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -33,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+ #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -67,6 +68,73 @@ static inline void prtmsg(const char * msg, const Handle& h)
 	printf ("%s %s\n", msg, str.c_str());
 #endif
 }
+
+/* ======================================================== */
+
+/**
+ * Pattern Match Engine Overview
+ * -----------------------------
+ *
+ * The pattern match engine finds groundings (interpretations) for a
+ * set of mandatory and optional clauses. It can be thought of in seveal
+ * ways: it performs a variable unification across multiple clauses;
+ * it discovers groundings for variables; it solves the subgraph
+ * isomorphism problem; it queries a graphical relational database
+ * for data that satisfies the query statement; it solves a typed
+ * satisfiability problem; it finds an "answer set".  Which of these
+ * things it does depends on your point of view; it does all of these
+ * things, although, in each case, the langauge is slightly different.
+ *
+ * It works by being given a list ov variables ("bound variables") and
+ * a set of mandatory and optional clauses containing those variables.
+ * Each "clause" is nothing more than an ordinary OpenCog Atom:
+ * specifically, a typed link.  It should be thought of as a tree, the
+ * tree being formed by the outgoing set of the Atom.  We could call
+ * these things "Atoms" or "Links", but it is more convenient to call
+ * them "clauses", in part to avoid confusion, and in part because they
+ * resemble terms (from "term algebra") or the "sentences" (of
+ * first-order logic). They, in fact, are neither, but there is a
+ * general resemblance that is useful to keep in mind.
+ *
+ * Any given clause is "solved" or "grounded", if there exists a
+ * substitution for the variables such that the resulting clause exists
+ * in the atomspace.  Thus, a grounding can be thought of as an
+ * "interpretation" of the clause; the pattern matcher searches for
+ * interpretations.  It can be thought of as a "unifier", in that ALL
+ * of the mandatory clauses must be grounded, and they must grounded in
+ * a self-consistent way (i.e. the clauses must be grounded in
+ * conjunction with one-another.)
+ *
+ * The list of "bound vars" are to be solved for ("grounded", or
+ * "interpreted") during pattern matching. That is, if the subgraph
+ * defined by the clauses is located, then the vars are given the
+ * corresponding values associated to that match. Because these
+ * variables can be shared across multiple clauses, this can be
+ * understood to be a unification problem; the pattern matcher is thus
+ * a unifier.
+ *
+ * The optionals are a set of clauses which are also searched for,
+ * but whose presence is not mandatory. The optional clauses can be
+ * used to implement negation or pattern-rejection (among other things).
+ * Thier use for negation/rejection is determined by the "optional
+ * clause" callback.  Thus, if an optional clause is found, the callback
+ * can then signal that the pattern as a whole should be rejected.
+ * Alternately, the callback could base its considerations on the
+ * truth-value of the optionall clause: if the optional clause has
+ * a TV of FALSE, then it is accepted; otherwise it is rejected.
+ * Other strategies for handling optional clauses in the callback
+ * are also possible. Thus, optional clauses themselves can be thought
+ * as implementing a bridge between "intuitionistic logic" and
+ * "classical logic", depending on ow they are handled in the callback.
+ *
+ * At every step of the process, the PatternMatchCallback is consulted
+ * to determine whether a candidate match should be accepted or not.
+ * In general, the callbacks have almost total control over the search;
+ * the pattern match engine only provides the general framework for
+ * navigating and backtracking and maintaining the needed state for
+ * such traversal.  It is up to the callbacks to perform the actual
+ * grounding or interpreation, and to record the search results.
+ */
 
 /* ======================================================== */
 
@@ -182,13 +250,13 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		if (not pmc->variable_match (hp,hg)) return false;
+		if (not _pmc->variable_match (hp,hg)) return false;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", hp);
 		prtmsg("$$ ground term: ", hg);
-		var_grounding[hp] = hg;
+		if (hp != hg) var_grounding[hp] = hg;
 		return true;
 	}
 
@@ -202,7 +270,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		if (hg == curr_pred_handle)
 		{
 			// Mismatch, if hg contains bound vars in it.
-			if (any_variable_in_tree(hg, _bound_vars)) return false;
+			if (any_unquoted_in_tree(hg, _bound_vars)) return false;
 		}
 		else
 		{
@@ -213,7 +281,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			     (VARIABLE_NODE != tp or
 			       _bound_vars.end() == _bound_vars.find(hp))))
 			{
-				var_grounding[hp] = hg;
+				if (hp != hg) var_grounding[hp] = hg;
 			}
 
 		}
@@ -285,12 +353,12 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// XXX FIXME For now, we punt on this... a proper fix would be
 		// ... hard, as we would have to line up the location of the
 		// quoted and the unquoted parts.
-		if (any_variable_in_tree(hg, _bound_vars))
+		if (any_unquoted_in_tree(hg, _bound_vars))
 		{
 			for (Handle vh: _bound_vars)
 			{
 				// OK, which tree is it in? And is it quoted in the pattern?
-				if (is_variable_in_tree(hg, vh))
+				if (is_unquoted_in_tree(hg, vh))
 				{
 					prtmsg("found bound variable in grounding tree:", vh);
 					prtmsg("matching  pattern  is:", hp);
@@ -303,9 +371,15 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			}
 		}
 #endif
+		// If the pattern is defined elsewhere, not here, then we have
+		// to go to where it is defined, and pattern match things there.
+		if (BETA_REDEX == tp)
+		{
+			return redex_compare(lp, lg);
+		}
 
 		// Let the callback perform basic checking.
-		bool match = pmc->link_match(lp, lg);
+		bool match = _pmc->link_match(lp, lg);
 		if (not match) return false;
 
 		dbgprt("depth=%d\n", depth);
@@ -350,11 +424,11 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			match = pmc->post_link_match(lp, lg);
+			match = _pmc->post_link_match(lp, lg);
 			if (not match) return false;
 
 			// If we've found a grounding, record it.
-			var_grounding[hp] = hg;
+			if (hp != hg) var_grounding[hp] = hg;
 
 			return true;
 		}
@@ -414,7 +488,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 				// post-match callback likes this grounding.
 				if (match)
 				{
-					match = pmc->post_link_match(lp, lg);
+					match = _pmc->post_link_match(lp, lg);
 				}
 
 				// If we've found a grounding, record it.
@@ -423,7 +497,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 					// Since we leave the loop, we better go back
 					// to where we found things.
 					var_solutn_stack.pop();
-					var_grounding[hp] = hg;
+					if (hp != hg) var_grounding[hp] = hg;
 					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
 					      more_depth);
 
@@ -476,13 +550,13 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 	if (np and ng)
 	{
 		// Call the callback to make the final determination.
-		bool match = pmc->node_match(hp, hg);
+		bool match = _pmc->node_match(hp, hg);
 		if (match)
 		{
 			dbgprt("Found matching nodes\n");
 			prtmsg("# pattern: ", hp);
 			prtmsg("# match:   ", hg);
-			var_grounding[hp] = hg;
+			if (hp != hg) var_grounding[hp] = hg;
 		}
 		return match;
 	}
@@ -545,6 +619,88 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	return false;
 }
 
+/**
+ * Push all stacks related to graph traversal. Do NOT push any
+ * of the redex stacks.
+ */
+void PatternMatchEngine::graph_stacks_push(void)
+{
+	_graph_stack_depth++;
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", _graph_stack_depth);
+
+	root_handle_stack.push(curr_root);
+	pred_handle_stack.push(curr_pred_handle);
+	soln_handle_stack.push(curr_soln_handle);
+
+	var_solutn_stack.push(var_grounding);
+	pred_solutn_stack.push(clause_grounding);
+
+	issued_stack.push(issued);
+	in_quote_stack.push(in_quote);
+
+	// Reset the unordered-set stacks with each new clause.
+	// XXX this cannot possible be right: we may need to pop,
+	// and try a different ordering.
+	have_stack.push(have_more);
+	have_more = false;
+	depth_stack.push(more_depth);
+	more_depth = 0;
+	unordered_stack.push(more_stack);
+	more_stack.resize(1);
+	more_stack[0] = false;
+	permutation_stack.push(mute_stack);
+
+	_pmc->push();
+}
+
+/**
+ * Pop all graph-traversal-related stacks. These do NOT
+ * affect any of the redex stacks.
+ */
+void PatternMatchEngine::graph_stacks_pop(void)
+{
+	_pmc->pop();
+	curr_root = root_handle_stack.top();
+	root_handle_stack.pop();
+
+	curr_pred_handle = pred_handle_stack.top();
+	pred_handle_stack.pop();
+
+	curr_soln_handle = soln_handle_stack.top();
+	soln_handle_stack.pop();
+
+	// The grounding stacks are handled differently.
+	POPGND(clause_grounding, pred_solutn_stack);
+	POPGND(var_grounding, var_solutn_stack);
+
+	issued = issued_stack.top();
+	issued_stack.pop();
+
+	in_quote = in_quote_stack.top();
+	in_quote_stack.pop();
+
+	// Handle different unordered links that live in different
+	// clauses. The mute_stack deals with different unordered
+	// links that live in the *same* clause.
+	have_more = have_stack.top();
+	have_stack.pop();
+
+	more_depth = depth_stack.top();
+	depth_stack.pop();
+
+	more_stack = unordered_stack.top();
+	unordered_stack.pop();
+
+	mute_stack = permutation_stack.top();
+	permutation_stack.pop();
+
+	_graph_stack_depth --;
+
+	dbgprt("pop to depth %d\n", _graph_stack_depth);
+	prtmsg("pop to joiner", curr_pred_handle);
+	prtmsg("pop to clause", curr_root);
+}
+
 /// Return true if a grounding was found.  It also has the side effect
 /// of updating clause_grounding map when the current clause is being
 /// grounded.
@@ -571,7 +727,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 			// Is this link even a part of the predicate we
 			// are considering?   If not, try the next atom.
-			bool valid = is_node_in_tree(curr_root, hi);
+			bool valid = is_atom_in_tree(curr_root, hi);
 			if (not valid) continue;
 
 			// Ugh. If the next step up the predicate is an OrLink,
@@ -607,42 +763,21 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	if (_optionals.count(curr_root))
 	{
 		clause_accepted = true;
-		match = pmc->optional_clause_match(curr_pred_handle, hsoln);
+		match = _pmc->optional_clause_match(curr_pred_handle, hsoln);
 	}
 	else
 	{
-		match = pmc->clause_match(curr_pred_handle, hsoln);
+		match = _pmc->clause_match(curr_pred_handle, hsoln);
 	}
 	dbgprt("clause match callback match=%d\n", match);
 	if (not match) return false;
 
 	curr_soln_handle = hsoln;
 	clause_grounding[curr_root] = curr_soln_handle;
-	stack_depth++;
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
-	dbgprt("--- That's it, now push to stack depth=%d\n\n", stack_depth);
 
-	root_handle_stack.push(curr_root);
-	pred_handle_stack.push(curr_pred_handle);
-	soln_handle_stack.push(curr_soln_handle);
-	pred_solutn_stack.push(clause_grounding);
-	var_solutn_stack.push(var_grounding);
-	issued_stack.push(issued);
-	in_quote_stack.push(in_quote);
-
-	// Reset the unorded-set stacks with each new clause.
-	have_stack.push(have_more);
-	have_more = false;
-	depth_stack.push(more_depth);
-	more_depth = 0;
-	unordered_stack.push(more_stack);
-	more_stack.resize(1);
-	more_stack[0] = false;
-	permutation_stack.push(mute_stack);
-
-	pmc->push();
-
+	graph_stacks_push();
 	get_next_untried_clause();
 
 	// If there are no further predicates to solve,
@@ -654,7 +789,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		dbgprt ("==================== FINITO!\n");
 		print_solution(var_grounding, clause_grounding);
 #endif
-		found = pmc->grounding(var_grounding, clause_grounding);
+		found = _pmc->grounding(var_grounding, clause_grounding);
 	}
 	else
 	{
@@ -694,7 +829,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			match = pmc->optional_clause_match(curr_pred_handle, undef);
+			match = _pmc->optional_clause_match(curr_pred_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
@@ -708,7 +843,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 #ifdef DEBUG
 				print_solution(var_grounding, clause_grounding);
 #endif
-				found = pmc->grounding(var_grounding, clause_grounding);
+				found = _pmc->grounding(var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -725,46 +860,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If we failed to find anything at this level, we need to
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
-	pmc->pop();
-	curr_root = root_handle_stack.top();
-	root_handle_stack.pop();
-
-	curr_pred_handle = pred_handle_stack.top();
-	pred_handle_stack.pop();
-
-	curr_soln_handle = soln_handle_stack.top();
-	soln_handle_stack.pop();
-
-	// The grounding stacks are handled differently.
-	POPGND(clause_grounding, pred_solutn_stack);
-	POPGND(var_grounding, var_solutn_stack);
-
-	issued = issued_stack.top();
-	issued_stack.pop();
-
-	in_quote = in_quote_stack.top();
-	in_quote_stack.pop();
-
-	// Handle different unordered links that live in different
-	// clauses. The mute_stack deals with different unordered
-	// links that live in the *same* clause.
-	have_more = have_stack.top();
-	have_stack.pop();
-
-	more_depth = depth_stack.top();
-	depth_stack.pop();
-
-	more_stack = unordered_stack.top();
-	unordered_stack.pop();
-
-	mute_stack = permutation_stack.top();
-	permutation_stack.pop();
-
-	stack_depth --;
-
-	dbgprt("pop to depth %d\n", stack_depth);
-	prtmsg("pop to joiner", curr_pred_handle);
-	prtmsg("pop to clause", curr_root);
+	graph_stacks_pop();
 
 	return found;
 }
@@ -775,7 +871,7 @@ bool PatternMatchEngine::pred_up(const Handle& h)
 	Handle curr_pred_save(curr_pred_handle);
 	curr_pred_handle = h;
 
-	IncomingSet iset = pmc->get_incoming_set(curr_soln_handle);
+	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
@@ -841,28 +937,35 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	bool unsolved = false;
 	bool solved = false;
 
-	for (const RootPair& vk : _root_map)
+	// We are looking for a joining atom, one that is shared in common
+	// with the a fully grounded clause, and an as-yet ungrounded clause.
+	// The joint is called "pursue", and the unsolved clause that it
+	// joins will become our next untried clause.  Note that the join
+	// is not necessarily a variable; it could be a constant atom.
+	// (wouldn't things be faster if they were variables only, that
+	// joined? the problem is that var_grounding stores both grounded
+	// variables and "grounded" constants.
+#define OLD_LOOP
+#ifdef OLD_LOOP
+	for (const ConnectPair& vk : _connectivity_map)
 	{
-		const RootList& rl = vk.second;
+		const RootList& rl(vk.second);
 		pursue = vk.first;
+		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
+#else // OLD_LOOP
+	// Newloop might be slightly faster than old loop.
+	// ... but maybe not...
+	for (auto gndpair : var_grounding)
+	{
+		pursue = gndpair.first;
+		try { _connectivity_map.at(pursue); }
+		catch(...) { continue; }
+		const RootList& rl(_connectivity_map.at(pursue));
+#endif
 
 		unsolved = false;
 		solved = false;
-
-		// Pursue will become the joining atom, that is shared in common
-		// with the a full grounded clause, and an as-yet ungrounded
-		// clause. We need it to be grounded as well, as otherwise the
-		// join will fail.  This can happen when a clause is "fully"
-		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded.  This is
-		// a rather pathological situation (i.e. grounding a clause with
-		// another clause that has bound variables in it), and it will
-		// probably be rejected at some point.  But, for now, this is a
-		// semi-plausible situation.  So we skip this joiner, and look
-		// for another.
-		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
-
-		for (Handle root : rl)
+		for (const Handle& root : rl)
 		{
 			if (Handle::UNDEFINED != clause_grounding[root])
 			{
@@ -918,7 +1021,14 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 /* ======================================================== */
 
 /**
- * do_candidate - examine candidates, looking for matches.
+ * explore_neighborhood - explore the local (connected) neighborhood
+ * of the starter clause, looking for a match.  The idea here is that
+ * it is much easier to traverse a connected graph looking for the
+ * appropriate subgraph (pattern) than it is to try to explore the
+ * whole atomspace, at random.  The user callback `initiate_search()`
+ * should call this method, suggesting a clause to start with, and
+ * where in the clause the search should begin.
+ *
  * Inputs:
  * do_clause: must be one of the clauses previously specified in the
  *            clause list of the match() method.
@@ -929,18 +1039,30 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
  *            "starter" link, it must be a node, and it must not be
  *            a variable node.
  *
- * Return true if a match is found
+ * Returns true if one (or more) matches are found
  *
  * This routine is meant to be invoked on every candidate atom taken
  * from the atom space. That atom is assumed to anchor some part of
- * a graph that hopefully will match the predicate.
+ * a graph that hopefully will match the pattern.
  */
-bool PatternMatchEngine::do_candidate(const Handle& do_clause,
+bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
+                                      const Handle& starter,
+                                      const Handle& ah)
+{
+	graph_stacks_clear();
+	return explore_redex(do_clause, starter, ah);
+}
+
+/**
+ * Same as above, obviously; we just pick up the graph context
+ * where we last left it.
+ */
+bool PatternMatchEngine::explore_redex(const Handle& do_clause,
                                       const Handle& starter,
                                       const Handle& ah)
 {
 	// Cleanup
-	clear_state();
+	clear_current_state();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -954,23 +1076,31 @@ bool PatternMatchEngine::do_candidate(const Handle& do_clause,
 }
 
 /**
- * Create an associative array that gives a list of all of the
- * clauses that a given node participates in.
+ * Create a map that holds all of the clauses that a given atom
+ * participates in.  In other words, it indicates all the places
+ * where an atom is shared by multiple trees, and thus establishes
+ * how the trees are connected.
+ *
+ * This is used for only one purpose: to find the next unsolved
+ * clause. This could probably be made smaller...!?
  */
-bool PatternMatchEngine::note_root(const Handle& h)
+void PatternMatchEngine::make_connectivity_map(const Handle& root, const Handle& h)
 {
-	_root_map[h].push_back(curr_root);
+	_connectivity_map[h].push_back(root);
 
 	LinkPtr l(LinkCast(h));
-	if (l) l->foreach_outgoing(&PatternMatchEngine::note_root, this);
-	return false;
+	if (l)
+	{
+		for (const Handle& ho: l->getOutgoingSet())
+			make_connectivity_map(root, ho);
+	}
 }
 
 /**
- * Clear all internal state.
- * This resets the class for continuing a search, from the top.
+ * Clear current traversal state. This gets us into a state where we
+ * can start traversing a set of clauses.
  */
-void PatternMatchEngine::clear_state(void)
+void PatternMatchEngine::clear_current_state(void)
 {
 	// Clear all state.
 	var_grounding.clear();
@@ -982,8 +1112,14 @@ void PatternMatchEngine::clear_state(void)
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
+}
 
-	stack_depth = 0;
+/**
+ * Unconditionally clear all graph traversal stacks
+ */
+void PatternMatchEngine::graph_stacks_clear(void)
+{
+	_graph_stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
@@ -1002,123 +1138,108 @@ void PatternMatchEngine::clear_state(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
-
 /**
- * Clear all internal and pattern state.
- * This allows a given instance of this class to be used again, with
- * a different pattern.
+ * Clear only the internal clause declarations
  */
-void PatternMatchEngine::clear(void)
+void PatternMatchEngine::clear_redex(const std::string& name)
 {
+	_redex_name = name;
 	// Clear all pattern-related state.
 	_bound_vars.clear();
 	_cnf_clauses.clear();
+	_mandatory.clear();
 	_optionals.clear();
-	_root_map.clear();
-
-	// Clear internal recursive state.
-	clear_state();
+	_evaluatable.clear();
+	_connectivity_map.clear();
 }
 
-
 /**
- * Find groundings for a sequence of clauses in conjunctive normal form.
- * That is, perform a variable unification across multiple clauses.
+ * Given the initial list of variables and clauses, extract the optional
+ * clauses and the dynamically-evaluatable clauses. Also make note of
+ * the connectivity diagram of the clauses.
  *
- * The list of clauses, and the list of negations, are both OpenCog
- * hypergraphs.  Both can be (should be) envisioned as model-theoretic
- * predicates: i.e. statements with are "true" only if they exist in
- * the atomspace (which is the "universe" of all statements).  That is,
- * the clauses define a subgraph which may or may not exist in the
- * atomspace.
- *
- * The list of "bound vars" are to be solved for ("grounded", or
- * "evaluated") during pattern matching. That is, if the subgraph
- * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match. Because these
- * variables can be shared across multiple clauses, this can be
- * understood to be a unification problem; the pattern matcher is thus
- * a unifier.
- *
- * The negations are a set of clauses whose truth values are to be
- * inverted.  That is, while the clauses define a subgraph that
- * *must* be found, the negations define a subgraph that should
- * not be found, or, if found, should have a truth value of 'false'.
- * The precise meaning of 'false' in the sentence above is determined
- * by the callback, which can use arbitrary criteria for this.
- * In particular, the search engine itself will happily proclaim
- * a match whether or not it finds any of the negated clauses. So,
- * in this sense, the negated clauses can be understood to be
- * "optional" matches: they will be matched, if possible, but are not
- * required to be matched. It is up to the callback to explictly
- * reject these clauses, if it so wishes to, thus implementing the
- * concept of negation.
- *
- * The PatternMatchCallback is consulted to determine whether a
- * veritable match has been found, or not. The callback is given
- * individual nodes and links to compare for a match.
- *
- * The callback may alter the sequence of the clauses, in order to
- * otpimze the search. It may also remove some clauses or variables,
- * if it determines that these are irrelevant to the search.
+ * It is assumed that the set of clauses form a single, connected
+ * component; i.e. that the clauses are pair-wise connected by common,
+ * shared variables, and that this pair-wise connection extends over
+ * the entire set of clauses. There is no other restriction on the
+ * connection topology; they can form any graph whatsoever (as long as
+ * itws connected).
  */
-void PatternMatchEngine::match(PatternMatchCallback *cb,
+void PatternMatchEngine::setup_redex(
                                const std::set<Handle> &vars,
-                               const std::vector<Handle> &clauses,
-                               const std::vector<Handle> &negations)
+                               const std::vector<Handle> &component)
 {
-	// Clear all state.
-	clear();
+	// Split in positive and negative clauses
+	for (const Handle& h : component)
+	{
+		Type t = h->getType();
+		if (NOT_LINK == t or ABSENT_LINK == t) {
+			Handle inv(LinkCast(h)->getOutgoingAtom(0));
+			_optionals.insert(inv);
+			_cnf_clauses.push_back(inv);
+		}
+		else
+		{
+			_mandatory.push_back(h);
+			_cnf_clauses.push_back(h);
+		}
+	}
 
 	_bound_vars = vars;
-	_cnf_clauses = clauses;
-
-	// Copy the negates into the clause list
-	// Copy the negates into a set.
-	for (Handle h : negations)
-	{
-		_cnf_clauses.push_back(h);
-		_optionals.insert(h);
-	}
 
 	if (_cnf_clauses.empty()) return;
 
 	// Preparation prior to search.
-	// Find everything that contains GPN's or GSN's.
-	FindVariables fv(GROUNDED_PREDICATE_NODE);
-	fv.find_vars(_cnf_clauses);
-	FindVariables fg(GREATER_THAN_LINK);
-	fg.holders = fv.holders;
-	fg.find_vars(_cnf_clauses);
-	_evaluatable = fg.holders;
+	// Find everything that contains GPN's or the like.
+	FindAtoms fgpn(GROUNDED_PREDICATE_NODE, VIRTUAL_LINK, true);
+	fgpn.find_atoms(_cnf_clauses);
+	_evaluatable = fgpn.holders;
 
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	for (Handle h : _cnf_clauses)
+	for (const Handle& h : _cnf_clauses)
 	{
-		curr_root = h;
-		note_root(h);
+		make_connectivity_map(h, h);
 	}
-	pmc = cb;
+
+	// Save some minor amount of space by erasing those atoms that
+	// participate in only one clause. These atoms cannot be used
+	// to determine connectivity between clauses, and so are un-needed.
+	auto it = _connectivity_map.begin();
+	auto end = _connectivity_map.end();
+	while (it != end)
+	{
+		if (it->second.size() == 1)
+			it = _connectivity_map.erase(it);
+		else
+			it++;
+	}
 
 #ifdef DEBUG
 	// Print out the predicate ...
-	printf("\nPredicate consists of the following clauses:\n");
+	printf("\nRedex '%s' has following clauses:\n", _redex_name.c_str());
 	int cl = 0;
-	for (Handle h : _cnf_clauses)
+	for (Handle h : _mandatory)
 	{
-		printf("Clause %d: ", cl);
+		printf("Mandatory %d: ", cl);
 		prt(h);
 		cl++;
 	}
 
-	printf("\nPredicate includes the following optional clauses:\n");
-	cl = 0;
-	for (Handle h : _optionals)
+	if (0 < _optionals.size())
 	{
-		printf("Optional clause %d: ", cl);
-		prt(h);
-		cl++;
+		printf("Predicate includes the following optional clauses:\n");
+		cl = 0;
+		for (Handle h : _optionals)
+		{
+			printf("Optional clause %d: ", cl);
+			prt(h);
+			cl++;
+		}
+	}
+	else
+	{
+		printf("No optional clauses\n");
 	}
 
 	// Print out the bound variables in the predicate.
@@ -1135,13 +1256,36 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		printf("There are no bound vars in this pattern\n");
 	}
 	printf("\n");
+	fflush(stdout);
 #endif
+}
 
-	// Perform the actual search!
-	cb->perform_search(this, vars, clauses, negations);
+/* ======================================================== */
 
-	dbgprt ("==================== Done Matching ==================\n");
+/**
+ * Main entry point for the pattern matcher engine. This is the
+ * method that sets the gears in motion.
+ */
+void PatternMatchEngine::match(PatternMatchCallback *cb,
+                               const std::set<Handle> &vars,
+                               const std::vector<Handle> &component)
+{
+	// Clear all state, and set up clauses
+	clear_current_state();
+	graph_stacks_clear();
+
+	clear_redex();
+	setup_redex(vars, component);
+
+	if (_cnf_clauses.empty()) return;
+
+	// Get the search started. The initiator callback determines
+	// the portion of the atomspace to be searched.
+	_pmc = cb;
+	cb->initiate_search(this, vars, _mandatory);
+
 #ifdef DEBUG
+	dbgprt ("==================== Done Matching ==================\n");
 	fflush(stdout);
 #endif
 }

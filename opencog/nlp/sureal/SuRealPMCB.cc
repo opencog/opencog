@@ -302,9 +302,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 }
 
 /**
- * Implement the perform_search method.
+ * Implement the initiate_search method.
  *
- * Similar to DefaultPatternMatcherCB::perform_search, in which we start search
+ * Similar to DefaultPatternMatcherCB::initiate_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -316,10 +316,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-void SuRealPMCB::perform_search(PatternMatchEngine* pPME,
+void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
                                 const std::set<Handle>& vars,
-                                const HandleSeq& clauses,
-                                const HandleSeq& negations)
+                                const HandleSeq& clauses)
 {
     size_t bestClauseIndex;
     Handle bestClause, bestSubClause, bestSubNode;
@@ -341,7 +340,7 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME,
             Handle h(l);
             logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
 
-            if (pPME->do_candidate(bestClause, bestSubClause, h))
+            if (pPME->explore_neighborhood(bestClause, bestSubClause, h))
                 break;
         }
 
@@ -377,7 +376,7 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME,
     {
         logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
 
-        if (pPME->do_candidate(bestClause, bestClause, c))
+        if (pPME->explore_neighborhood(bestClause, bestClause, c))
             break;
     }
 }

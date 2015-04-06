@@ -22,8 +22,8 @@
  */
 
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
-#include <opencog/atomutils/PatternUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
@@ -36,9 +36,9 @@ using namespace opencog;
  *
  * Given a BindLink containing variable declarations and an
  * ImplicationLink, this method will "evaluate" the implication,
- * matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
+ * matching the predicate, and creating a grounded implicand,
+ * assuming the predicate can be satisfied. Thus, for example,
+ * given the structure
  *
  *    BindLink
  *       ListLink
@@ -55,13 +55,19 @@ using namespace opencog;
  */
 void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
-   if (check_conn and 0 == _virtuals.size()) check_connectivity(_components);
-   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+   if (check_conn and 0 == _virtual.size()) check_connectivity(_components);
+   PatternMatch::do_match(pmc, _varset, _virtual, _components);
 }
 
 void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 {
-   PatternMatch::do_match(pmc, _varset, _virtuals, _components);
+   PatternMatch::do_match(pmc, _varset, _virtual, _components);
+}
+
+void BetaRedex::satisfy(PatternMatchCallback* pmc,
+                          const HandleSeq& args)
+{
+printf ("duuuuuuuuuuuuude called the compose satter\n");
 }
 
 /* ===================== END OF FILE ===================== */

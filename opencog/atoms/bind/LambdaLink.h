@@ -38,7 +38,7 @@ namespace opencog
  */
 
 /// The LambdaLink consitsts of two parts: A variable declaration,
-/// wgich must conform to current variable declaration standards: i.e.
+/// which must conform to current variable declaration standards: i.e.
 /// it must be either a single VariableNode, a single TypedVariableLink,
 /// or a VariableLink.  This is then followed by a body, of any
 /// arbitrary form.  This class does little other than to check for
@@ -51,14 +51,8 @@ namespace opencog
 class LambdaLink : public VariableList
 {
 protected:
-	/// Handle of the topmost variable declaration.
-	VariableListPtr _vardecl;
-
 	/// Handle of the body of the expression.
 	Handle _body;
-
-	// Extract variable decls and the body.
-	void unbundle_body(const Handle&);
 
 	LambdaLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -76,9 +70,12 @@ public:
 
 	LambdaLink(Link &l);
 
-	Handle substitute (const HandleSeq& seq)
+	// Take the list of values `vals`, and substitute them in for the
+	// variables in the body of this lambda. The values must satisfy all
+	// type restrictions, else an exception will be thrown.
+	Handle substitute (const HandleSeq& vals) const
 	{
-		return _vardecl->substitute(_body, seq);
+		return VariableList::substitute(_body, vals);
 	}
 };
 

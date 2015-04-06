@@ -48,10 +48,9 @@ public:
 	IncomingSet get_incoming_set(const Handle&);
 
 	// Starts from atoms in the attentional focus, with the right types
-	void perform_search(PatternMatchEngine *pme,
-	                    const std::set<Handle> &vars,
-	                    const std::vector<Handle> &clauses,
-	                    const std::vector<Handle> &negations);
+	void initiate_search(PatternMatchEngine *pme,
+	                     const std::set<Handle> &vars,
+	                     const std::vector<Handle> &clauses);
 };
 
 } //namespace opencog

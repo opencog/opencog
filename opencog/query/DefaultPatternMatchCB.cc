@@ -22,7 +22,8 @@
  */
 
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "DefaultPatternMatchCB.h"
 #include "PatternMatchEngine.h"
@@ -30,7 +31,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+ #define DEBUG
 #ifdef DEBUG
 #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -91,26 +92,32 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
+	// Iterate over all the handles in the outgoing set.
+	// Find the deepest one that contains a constant, and start
+	// the search there.  If there are two at the same depth,
+	// then start with the skinnier one.
 	size_t deepest = depth;
 	start = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	// Iterate over all the handles in the outgoing set.
-	// Find the deepest one that contains a constant, and start
-	// the search there.  If there are two at the same depth,
-	// then start with the skinnier one.
+	// If there is a ComposeLink, then search it's definition instead.
+	// but do this only at depth zero, so as to get us started; otherwise
+	// we risk infinite descent if the compose is recursive.
 	LinkPtr ll(LinkCast(h));
-	const std::vector<Handle> &vh = ll->getOutgoingSet();
-	for (size_t i = 0; i < vh.size(); i++) {
-
+	if (0 == depth and BETA_REDEX == ll->getType())
+	{
+		BetaRedexPtr cpl(BetaRedexCast(ll));
+		ll = LinkCast(cpl->beta_reduce());
+	}
+	for (Handle hunt : ll->getOutgoingSet())
+	{
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		Handle hunt(vh[i]);
-		if (QUOTE_LINK == vh[i]->getType())
+		if (QUOTE_LINK == hunt->getType())
 			hunt = LinkCast(hunt)->getOutgoingAtom(0);
 
 		Handle s(find_starter(hunt, brdepth, sbr, brwid));
@@ -201,7 +208,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  *    of node matches, esp. for this initial node, then many possible
  *    solutions will be missed.  This seems like a reasonable limitation:
  *    if you really want a very lenient node_match(), then use variables.
- *    Or you can implement your own perform_search() callback.
+ *    Or you can implement your own initiate_search() callback.
  *
  * 3) If the clauses consist entirely of variables, then the search
  *    will start by looking for all links that are of the same type as
@@ -210,7 +217,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  *    set of types.  This is a reasonable limitation: anything looser
  *    would very seriously degrade performance; if you really need a
  *    very lenient link_match(), then use variables. Or you can
- *    implement your own perform_search() callback.
+ *    implement your own initiate_search() callback.
  *
  * The above describes the limits to the "typical" search that this
  * algo can do well. In particular, if the constraint of 2) can be met,
@@ -231,10 +238,9 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * probably *not* be modified, since it is quite efficient for the
  * "normal" case.
  */
-void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
-                                           const std::set<Handle> &vars,
-                                           const std::vector<Handle> &clauses,
-                                           const std::vector<Handle> &negations)
+void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
+                                            const std::set<Handle> &vars,
+                                            const std::vector<Handle> &clauses)
 {
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -269,9 +275,9 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 		for (size_t i = 0; i < sz; i++) {
 			Handle h(iset[i]);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
+			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
 			       h->toShortString().c_str());
-			bool rc = pme->do_candidate(_root, _starter_pred, h);
+			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 			if (rc) break;
 		}
 
@@ -319,13 +325,15 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 	else
 		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
 
-	size_t handle_set_size = handle_set.size(), i = 0;
+#ifdef DEBUG
+	size_t i = 0;
+#endif
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", i++, handle_set_size,
+		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool rc = pme->do_candidate(_root, _starter_pred, h);
+		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 		if (rc) break;
 	}
 }

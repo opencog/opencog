@@ -23,7 +23,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>

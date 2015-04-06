@@ -1,5 +1,5 @@
 /*
- * tests/query/ComposeBindUTest.cxxtest
+ * tests/query/RedexBindUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/atoms/bind/ComposeLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -68,7 +68,7 @@ public:
 
 		cogserver().loadModules();
 
-		config().set("SCM_PRELOAD", "tests/query/compose-bind.scm");
+		config().set("SCM_PRELOAD", "tests/query/redex-bind.scm");
 		load_scm_files_from_config(*as);
 
 	}

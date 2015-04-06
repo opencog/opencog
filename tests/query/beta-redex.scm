@@ -1,5 +1,5 @@
 ;
-; data for ComposeUTest
+; data for BetaRedexUTest
 ;
 ; First, we test double-definition. Here is a very bogus define.
 (define (defun-a)
@@ -7,7 +7,7 @@
 		(ConceptNode "some-name")
 		(SatisfactionLink
 			(VariableNode "$some-var")
-			(AndLink
+			(AssociativeLink
 				(ConceptNode "random-atom")
 				(VariableNode "$some-var")
 			)
@@ -21,7 +21,7 @@
 		(ConceptNode "some-name")
 		(SatisfactionLink
 			(VariableNode "$other-var")
-			(ListLink
+			(InheritanceLink
 				(VariableNode "$other-var")
 				(ConceptNode "other-atom")
 			)
@@ -29,9 +29,9 @@
 	)
 )
 
-; A compose link that should compose with defun-a
+; A redex link that should compose with defun-a
 (define composer
-	(ComposeLink
+	(BetaRedex
 		(ConceptNode "some-name")
 		(ListLink
 			(ConceptNode "bogosity")
@@ -39,9 +39,9 @@
 	)
 )
 
-; The expected result of composing defun-a with composer
+; The expected result of beta-reducing defun-a with composer
 (define bogo-a
-	(AndLink
+	(AssociativeLink
 		(ConceptNode "random-atom")
 		(ConceptNode "bogosity")
 	)
@@ -53,7 +53,7 @@
 		(ConceptNode "quoter")
 		(SatisfactionLink
 			(VariableNode "$other-var")
-			(OrLink
+			(AttractionLink
 				(VariableNode "$other-var")
 				(ConceptNode "other-atom")
 				(QuoteLink
@@ -64,9 +64,9 @@
 	)
 )
 
-; A compose link that should compose with defun-quote
+; A redex link that should compose with defun-quote
 (define compose-quote
-	(ComposeLink
+	(BetaRedex
 		(ConceptNode "quoter")
 		(ListLink
 			(ConceptNode "yeah, right")
@@ -76,7 +76,7 @@
 
 ; The expected result of composing defun-a with composer
 (define yeah-quote
-	(OrLink
+	(AttractionLink
 		(ConceptNode "yeah, right")
 		(ConceptNode "other-atom")
 		(QuoteLink

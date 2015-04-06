@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/FindUtils.h>
 #include "PatternUtils.h"
 
 using namespace opencog;
@@ -57,7 +58,7 @@ bool remove_constants(const std::set<Handle> &vars,
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_variable_in_tree(clause, vars)
+		if (any_unquoted_in_tree(clause, vars)
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
 		{
@@ -125,14 +126,14 @@ void get_connected_components(const std::set<Handle> &vars,
 				std::set<Handle>& cur_vars = component_vars[i];
 				// If clause cl is connected to this component, then add it
 				// to this component.
-				if (any_variable_in_tree(cl, cur_vars))
+				if (any_unquoted_in_tree(cl, cur_vars))
 				{
 					// Extend the component
 					components[i].push_back(cl);
 
 					// Add to the varset cache for that component.
-					FindVariables fv(vars);
-					fv.find_vars(cl);
+					FindAtoms fv(vars);
+					fv.find_atoms(cl);
 					for (Handle v : fv.varset) cur_vars.insert(v);
 
 					extended = true;
@@ -161,28 +162,13 @@ void get_connected_components(const std::set<Handle> &vars,
 		// Start a new component
 		components.push_back({ncl});
 
-		FindVariables fv(vars);
-		fv.find_vars(ncl);
+		FindAtoms fv(vars);
+		fv.find_atoms(ncl);
 		component_vars.push_back(fv.varset);
 	}
 
 	// We are done. Copy the components over.
 	compset.insert(components.begin(), components.end());
-}
-
-void split_clauses_pos_neg(const std::vector<Handle>& clauses,
-                           std::vector<Handle>& affirm,
-                           std::vector<Handle>& negate)
-{
-	for (Handle h : clauses) {
-		Type t = h->getType();
-		if (NOT_LINK == t or ABSENT_LINK == t) {
-			negate.push_back(LinkCast(h)->getOutgoingAtom(0));
-		}
-		else {
-			affirm.push_back(h);
-		}
-	}
 }
 
 } // namespace opencog

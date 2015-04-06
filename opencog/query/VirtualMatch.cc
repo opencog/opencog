@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomutils/PatternUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/util/Logger.h>
 
 #include "Instantiator.h"
@@ -83,12 +83,11 @@ class PMCGroundings : public PatternMatchCallback
 		void set_type_restrictions(const VariableTypeMap& tm) {
 			_cb->set_type_restrictions(tm);
 		}
-		void perform_search(PatternMatchEngine* pme,
-	                       const std::set<Handle> &vars,
-	                       const std::vector<Handle> &clauses,
-	                       const std::vector<Handle> &negations)
+		void initiate_search(PatternMatchEngine* pme,
+	                        const std::set<Handle> &vars,
+	                        const std::vector<Handle> &clauses)
 		{
-			_cb->perform_search(pme, vars, clauses, negations);
+			_cb->initiate_search(pme, vars, clauses);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -310,11 +309,9 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	// If there's only 1 component and there is no virtual clause then
 	// we can directly match the component using the callback cb
 	if (nvcomps.size() == 1 and virtuals.empty()) {
-		// Split in positive and negative clauses
-		std::vector<Handle> affirm, negate;
-		split_clauses_pos_neg(*nvcomps.begin(), affirm, negate);
+		dbgprt("No Virtuals; ordinary solver: ====================== ");
 		PatternMatchEngine pme;
-		pme.match(cb, vars, affirm, negate);
+		pme.match(cb, vars, *nvcomps.begin());
 		return;
 	}
 
@@ -340,19 +337,15 @@ void PatternMatch::do_match(PatternMatchCallback *cb,
 	{
 		// Find the variables in each component.
 		std::set<Handle> cvars;
-		for (Handle v : vars)
+		for (const Handle& v : vars)
 		{
-			if (is_variable_in_any_tree(comp, v)) cvars.insert(v);
+			if (is_unquoted_in_any_tree(comp, v)) cvars.insert(v);
 		}
-
-		// Split in positive and negative clauses
-		std::vector<Handle> affirm, negate;
-		split_clauses_pos_neg(comp, affirm, negate);
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(cb);
 		PatternMatchEngine pme;
-		pme.match(&gcb, cvars, affirm, negate);
+		pme.match(&gcb, cvars, comp);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_pred_gnds.push_back(gcb._pred_groundings);

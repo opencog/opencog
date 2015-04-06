@@ -165,11 +165,9 @@ void StackUTest::test_stack(void)
 	preds.push_back(p1);
 	preds.push_back(p2);
 
-	std::vector<Handle> negs;
-
 	TestPMCB pmcb(as);
 	pmcb.anch = anch;
-	pme.match(&pmcb, vars, preds, negs);
+	pme.match(&pmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("bad link-test call count", 7, pmcb.lcnt);
 	TSM_ASSERT_EQUALS("bad solution call count", 0, pmcb.scnt);
