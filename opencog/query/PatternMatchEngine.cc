@@ -946,16 +946,18 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 		solved = false;
 
 		// Pursue will become the joining atom, that is shared in common
-		// with the a full grounded clause, and an as-yet ungrounded
-		// clause. We need it to be grounded as well, as otherwise the
-		// join will fail.  This can happen when a clause is "fully"
+		// with the a fully grounded clause, and an as-yet ungrounded
+		// clause. We need it (pursue) to be grounded as well, as otherwise
+		// the join will fail.  This can happen when a clause is "fully"
 		// grounded, but the grounding contains a subtree that has a
-		// variable in it that has not yet been grounded.  This is
-		// a rather pathological situation (i.e. grounding a clause with
-		// another clause that has bound variables in it), and it will
-		// probably be rejected at some point.  But, for now, this is a
-		// semi-plausible situation.  So we skip this joiner, and look
-		// for another.
+		// variable in it that has not yet been grounded.  Yes, that
+		// sounds totally contradictory: it corresponds to a pathological
+		// situation, where a clause is grounded with another clause that
+		// has a bound variable in it.  Which is weird; I'm not sure it
+		// can even occur with the current code... and it will probably
+		// be rejected at some point.  But, for now, this is a semi-
+		// plausible situation.  So we skip this joiner, and look for
+		// another.
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 
 		for (Handle root : rl)

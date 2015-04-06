@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
@@ -149,10 +148,11 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// To explore this redex, we've got to translate the current
 	// traversal state into the "local frame". Do this by tranlsating
 	// (masquerading) any grounded variables we may have so far.
-	graph_stacks_push();
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
+	graph_stacks_push();
+	clear_current_state();
 // XXX TODO handle clause_grounding as well
 
 	SolnMap local_grounding;
@@ -166,26 +166,24 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 	var_grounding = local_grounding;
 
-	// Just pick a clause, any clause ...
-	const Handle& starter = _cnf_clauses[0];
+	// Follow the connectivity graph...
+	get_next_untried_clause();
+	if (Handle::UNDEFINED == curr_root)
+		throw InvalidParamException(TRACE_INFO,
+			"Badly structured redex!");
 
-	// XXX this is wrong need to find connecnting lause
-	FindAtoms fa(NODE, true);
-	fa.find_atoms(starter);
-	Handle ho = *fa.least_holders.begin();
-	Handle ah = *fa.varset.begin();
-printf("duuuud start explre with atom=%s of term%s of clause %s\n",
-ah->toString().c_str(),
-ho->toString().c_str(),
-starter->toString().c_str());
-	bool have_match = explore_redex(starter, ho, ah);
-printf("duuude have mach=%d\n", have_match);
+	clause_accepted = false;
+	curr_soln_handle = var_grounding[curr_pred_handle];
+
+   bool found = soln_up(curr_soln_handle);
+
+printf("duuude have mach=%d\n", found);
 
 	// No match; restore original grounding and quit
-	if (not have_match)
+	if (not found)
 	{
-		pop_redex();
 		graph_stacks_pop();
+		pop_redex();
 		return false;
 	}
 
@@ -199,6 +197,7 @@ printf("duuude have mach=%d\n", have_match);
 		if (iter != local_grounding.end())
 			var_grounding.insert({redex_args[i], iter->second});
 	}
+// XXX unmasq the preds as well
 
 	pop_redex();
 	return true;
