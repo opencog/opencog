@@ -165,7 +165,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	graph_stacks_push();
 	clear_current_state();
-// XXX TODO handle clause_grounding as well
+// XXX TODO handle clause_grounding as well ?? why
 
 	SolnMap local_grounding;
 	size_t sz = redex_args.size();
@@ -178,6 +178,15 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 	var_grounding = local_grounding;
 
+	if (1 != _cnf_clauses.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Redex can currently handle only one clause!");
+
+	// Since there is just a single clause, just compare it as a tree
+	Handle hp(_cnf_clauses[0]);
+	bool found = tree_compare(hp, Handle(lg));
+
+#if 0
 	Handle join;
 	Handle root;
 	// Follow the connectivity graph, to find a joint to
@@ -202,6 +211,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	curr_soln_handle = var_grounding[curr_pred_handle];
 
    bool found = soln_up(curr_soln_handle);
+#endif
 
 	dbgprt("redex finishing; found match=%d\n", found);
 
@@ -223,7 +233,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 		if (iter != local_grounding.end())
 			var_grounding.insert({redex_args[i], iter->second});
 	}
-// XXX unmasq the preds as well
 
 	pop_redex();
 	return true;
