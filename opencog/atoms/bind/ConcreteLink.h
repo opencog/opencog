@@ -60,12 +60,18 @@ class ConcreteLink : public LambdaLink
 
 protected:
 	/// The actual clauses. Set by validate_clauses()
-	Handle _hclauses;
-	HandleSeq        _cnf_clauses;
+	HandleSeq        _clauses;
+	HandleSeq        _cnf_clauses;  // absent/notlinks removed!
 	HandleSeq        _mandatory;
 	std::set<Handle> _optionals;
 	std::set<Handle> _evaluatable;
 	ConnectMap       _connectivity_map; // setup by make_connectivity_map()
+
+	void ConcreteLink::unbundle_clauses(void);
+	void ConcreteLink::validate_clauses(std::set<Handle>& vars,
+	                                    HandleSeq& clauses)
+
+
 
 	void make_connectivity_map(const Handle&, const Handle&);
 
