@@ -44,7 +44,7 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// The current set of clauses (redex context) being grounded.
 		void setup_redex(const std::set<Handle> &vars,
-		                   const std::vector<Handle> &component);
+		                 const std::vector<Handle> &component);
 		void clear_redex(const std::string& name = "topmost level");
 		bool explore_redex(const Handle&, const Handle&, const Handle&);
 

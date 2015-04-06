@@ -44,6 +44,13 @@ namespace opencog
 /// being that it has a very specific semantics: the pattern is to be
 /// grounded!
 ///
+/// The body of the ConcreteLink is assumed to collection of clauses
+/// to be satsified. Thus, the body is typically an AndLink, OrLink
+/// or a SequentialAnd, depending on how they are to be satsified.
+/// This is very much like a ConcreteLink, except that it may contain
+/// clauses that are virtual (e.g. GreaterThanLink, or EvaluationLinks
+/// with GroundedPredicateNodes).
+///
 /// It is similar to a BindLink, except that a BindLink also causes an
 /// implication to be performed: after a grounding is found, the
 /// BindLink then causes the implication to run with the resultant
