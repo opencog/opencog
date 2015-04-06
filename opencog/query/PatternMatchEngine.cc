@@ -256,7 +256,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", hp);
 		prtmsg("$$ ground term: ", hg);
-		var_grounding[hp] = hg;
+		if (hp != hg) var_grounding[hp] = hg;
 		return true;
 	}
 
@@ -281,7 +281,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			     (VARIABLE_NODE != tp or
 			       _bound_vars.end() == _bound_vars.find(hp))))
 			{
-				var_grounding[hp] = hg;
+				if (hp != hg) var_grounding[hp] = hg;
 			}
 
 		}
@@ -428,7 +428,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			if (not match) return false;
 
 			// If we've found a grounding, record it.
-			var_grounding[hp] = hg;
+			if (hp != hg) var_grounding[hp] = hg;
 
 			return true;
 		}
@@ -497,7 +497,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 					// Since we leave the loop, we better go back
 					// to where we found things.
 					var_solutn_stack.pop();
-					var_grounding[hp] = hg;
+					if (hp != hg) var_grounding[hp] = hg;
 					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
 					      more_depth);
 
@@ -556,7 +556,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			dbgprt("Found matching nodes\n");
 			prtmsg("# pattern: ", hp);
 			prtmsg("# match:   ", hg);
-			var_grounding[hp] = hg;
+			if (hp != hg) var_grounding[hp] = hg;
 		}
 		return match;
 	}
