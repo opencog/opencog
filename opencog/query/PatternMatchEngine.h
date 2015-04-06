@@ -45,7 +45,10 @@ class PatternMatchEngine
 		// The current set of clauses (redex context) being grounded.
 		void setup_redex(const std::set<Handle> &vars,
 		                   const std::vector<Handle> &component);
-		void clear_redex(void);
+		void clear_redex(const std::string& name = "topmost level");
+		bool explore_redex(const Handle&, const Handle&, const Handle&);
+
+		std::string _redex_name;  // for debugging only!
 
 		// variables that need to be grounded.
 		std::set<Handle> _bound_vars;
@@ -62,6 +65,7 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
 		// above, that are being searched.
+		std::stack<std::string>      _stack_redex_name;  // for debugging only
 		std::stack<std::set<Handle>> _stack_bound_vars;
 		std::stack<HandleSeq>        _stack_cnf_clauses;
 		std::stack<HandleSeq>        _stack_mandatory;

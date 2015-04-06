@@ -72,6 +72,15 @@ BetaRedex::BetaRedex(Link &l)
 	init(l.getOutgoingSet());
 }
 
+/// Return the name of the redex
+const std::string& BetaRedex::get_name(void)
+{
+	static const std::string linkname("redex name is a link!!!");
+	NodePtr n(NodeCast(_outgoing[0]));
+	if (n) return n->getName();  // it should be a node pretty much always!
+	return linkname;
+}
+
 /// Simply return the arguments to be composed.
 const HandleSeq& BetaRedex::get_args(void) const
 {

@@ -104,6 +104,9 @@ public:
 
 	BetaRedex(Link &l);
 
+	// Return the name of the redex (the name of the defined function)
+	const std::string& get_name(void);
+
 	// Return the arguments of this redex.
 	const HandleSeq& get_args(void) const;
 

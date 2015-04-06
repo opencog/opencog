@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
@@ -63,6 +64,7 @@ TODO:
 
 void PatternMatchEngine::push_redex(void)
 {
+	_stack_redex_name.push(_redex_name);
 	_stack_bound_vars.push(_bound_vars);
 	_stack_cnf_clauses.push(_cnf_clauses);
 	_stack_mandatory.push(_mandatory);
@@ -73,6 +75,9 @@ void PatternMatchEngine::push_redex(void)
 
 void PatternMatchEngine::pop_redex(void)
 {
+	_redex_name = _stack_redex_name.top();
+	_stack_redex_name.pop();
+
 	_bound_vars = _stack_bound_vars.top();
 	_stack_bound_vars.pop();
 
@@ -120,9 +125,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// new pme state, with the existing pme state. So we don't.  Instead,
 	// we push all pme state, clear the decks, (almost as if strting from
 	// scratch) and then pop all pme state when we are done.
-	graph_stacks_push();
-	push_redex();
-	clear_redex();
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
@@ -139,11 +141,15 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	const std::set<Handle>& local_vars(sat_link->get_varset());
 	const HandleSeq& local_clauses(sat_link->get_clauses());
+
+	push_redex();
+	clear_redex(cpl->get_name());
 	setup_redex(local_vars, local_clauses);
 
-	// To explore the defined pattern, we've got to get
-	// into its local frame. Do this by masquerading
-	// any grounded variables we may have so far.
+	// To explore this redex, we've got to translate the current
+	// traversal state into the "local frame". Do this by tranlsating
+	// (masquerading) any grounded variables we may have so far.
+	graph_stacks_push();
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
@@ -160,18 +166,20 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 	var_grounding = local_grounding;
 
-/*****
-	Handle local_pattern(local_clauses[0]);
-printf("duuuude ready to compare pat=%s to gnd=%s\n",
-local_pattern->toString().c_str(), lg->toString().c_str());
+	// Just pick a clause, any clause ...
+	const Handle& starter = _cnf_clauses[0];
 
-	// Now, proceed as normal.
-	std::set<Handle> saved_vars = _bound_vars;
-	_bound_vars = cpl->get_local_argset();
-	bool have_match = tree_compare(local_pattern, Handle(lg));
-	_bound_vars = saved_vars;
-****/
-bool have_match = false;
+	// XXX this is wrong need to find connecnting lause
+	FindAtoms fa(NODE, true);
+	fa.find_atoms(starter);
+	Handle ho = *fa.least_holders.begin();
+	Handle ah = *fa.varset.begin();
+printf("duuuud start explre with atom=%s of term%s of clause %s\n",
+ah->toString().c_str(),
+ho->toString().c_str(),
+starter->toString().c_str());
+	bool have_match = explore_redex(starter, ho, ah);
+printf("duuude have mach=%d\n", have_match);
 
 	// No match; restore original grounding and quit
 	if (not have_match)

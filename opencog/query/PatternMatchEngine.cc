@@ -34,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+ #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -1042,9 +1042,20 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                       const Handle& starter,
                                       const Handle& ah)
 {
+	graph_stacks_clear();
+	return explore_redex(do_clause, starter, ah);
+}
+
+/**
+ * Same as above, obviously; we just pick up the graph context
+ * where we last left it.
+ */
+bool PatternMatchEngine::explore_redex(const Handle& do_clause,
+                                      const Handle& starter,
+                                      const Handle& ah)
+{
 	// Cleanup
 	clear_current_state();
-	graph_stacks_clear();
 
 	// Match the required clauses.
 	curr_root = do_clause;
@@ -1123,8 +1134,9 @@ void PatternMatchEngine::graph_stacks_clear(void)
 /**
  * Clear only the internal clause declarations
  */
-void PatternMatchEngine::clear_redex(void)
+void PatternMatchEngine::clear_redex(const std::string& name)
 {
+	_redex_name = name;
 	// Clear all pattern-related state.
 	_bound_vars.clear();
 	_cnf_clauses.clear();
@@ -1198,7 +1210,7 @@ void PatternMatchEngine::setup_redex(
 
 #ifdef DEBUG
 	// Print out the predicate ...
-	printf("\nPredicate consists of the following clauses:\n");
+	printf("\nRedex '%s' has following clauses:\n", _redex_name.c_str());
 	int cl = 0;
 	for (Handle h : _mandatory)
 	{
