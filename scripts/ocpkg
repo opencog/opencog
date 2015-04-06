@@ -87,9 +87,9 @@ QUIET="" 				#for apt-get
 
 LIVE_DESKTOP_SOURCE="OpenCog Source Code"
 
-REPOSITORIES="		
-		ppa:opencog-dev/ppa \
-		"
+REPOSITORIES="	"	
+		#ppa:opencog-dev/ppa \
+		
 		#opencog-dev: cxxtest
 		#gandelman: python-flask-restful
 #               ppa:chris-lea/zeromq \
@@ -532,7 +532,7 @@ OPENCOG_SOURCE_DIR=$LIVE_SOURCE_BRANCH
 mkdir -p $OPENCOG_SOURCE_DIR || true
 if [ ! "$(ls -A $OPENCOG_SOURCE_DIR/.git)" ]; then
   MESSAGE="Fetching OpenCog source at $OPENCOG_SOURCE_DIR..." ; message
-  git clone https://github.com/opencog/opencog $OPENCOG_SOURCE_DIR
+  git clone https://github.com/hmishra2250/opencog $OPENCOG_SOURCE_DIR
 else
   if [ $UPDATE_OPENCOG ] ; then
     MESSAGE="Updating OpenCog source at $OPENCOG_SOURCE_DIR..." ; message
