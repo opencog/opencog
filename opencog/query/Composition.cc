@@ -30,12 +30,24 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
 	#define dbgprt(f, varargs...)
 #endif
+
+static inline void prtmsg(const char * msg, const Handle& h)
+{
+#ifdef DEBUG
+	if (h == Handle::UNDEFINED) {
+		printf("%s (invalid handle)\n", msg);
+		return;
+	}
+	std::string str = h->toShortString();
+	printf("%s %s\n", msg, str.c_str());
+#endif
+}
 
 /* ================================================================= */
 /*
@@ -166,18 +178,32 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 	var_grounding = local_grounding;
 
-	// Follow the connectivity graph...
-	get_next_untried_clause();
-	if (Handle::UNDEFINED == curr_root)
+	Handle join;
+	Handle root;
+	// Follow the connectivity graph, to find a joint to
+	// somethig we know about...
+	for (const ConnectPair& vk : _connectivity_map)
+	{
+		join = vk.first;
+		if (var_grounding[join])
+		{
+			root = vk.second[0];
+			break;
+		}
+	}
+	if (Handle::UNDEFINED == root)
 		throw InvalidParamException(TRACE_INFO,
 			"Badly structured redex!");
 
+	prtmsg("redex starting with clause: ", root);
+	curr_root = root;
+	curr_pred_handle = join;
 	clause_accepted = false;
 	curr_soln_handle = var_grounding[curr_pred_handle];
 
    bool found = soln_up(curr_soln_handle);
 
-printf("duuude have mach=%d\n", found);
+	dbgprt("redex finishing; found match=%d\n", found);
 
 	// No match; restore original grounding and quit
 	if (not found)
