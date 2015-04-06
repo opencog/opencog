@@ -35,6 +35,16 @@ void ConcreteLink::init(void)
 	// The LambdaLink constructor sets up _body and _varset
 	unbundle_clauses();
 	validate_clauses(_varset, _clauses);
+	extract_optionals(_varset, _clauses);
+	HandleSeq concs, virts;
+	unbundle_virtual(_varset, _cnf_clauses,
+	                 concs, _evaluatable, virts);
+	if (0 < virts.size())
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"ConcreteLink must not have virtuals");
+	}
+	make_connectivity_map(_cnf_clauses);
 }
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
@@ -132,6 +142,32 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 }
 
 /* ================================================================= */
+/**
+ * Given the initial list of variables and clauses, separate these into
+ * the mandatory and optional clauses.
+ */
+void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
+                                     const std::vector<Handle> &component)
+{
+	// Split in positive and negative clauses
+	for (const Handle& h : component)
+	{
+		Type t = h->getType();
+		if (NOT_LINK == t or ABSENT_LINK == t)
+		{
+			Handle inv(LinkCast(h)->getOutgoingAtom(0));
+			_optionals.insert(inv);
+			_cnf_clauses.push_back(inv);
+		}
+		else
+		{
+			_mandatory.push_back(h);
+			_cnf_clauses.push_back(h);
+		}
+	}
+}
+
+/* ================================================================= */
 
 /// Are there any virtual links, or any evaluatable links in the
 /// clause?  Set the two booleans as appropriate.
@@ -185,51 +221,48 @@ void ConcreteLink::holds_virtual(const std::set<Handle>& vars,
 }
 
 /* ================================================================= */
+
 /**
- * Given the initial list of variables and clauses, extract the optional
- * clauses and the dynamically-evaluatable clauses. Also make note of
- * the connectivity diagram of the clauses.
- *
- * It is assumed that the set of clauses form a single, connected
- * component; i.e. that the clauses are pair-wise connected by common,
- * shared variables, and that this pair-wise connection extends over
- * the entire set of clauses. There is no other restriction on the
- * connection topology; they can form any graph whatsoever (as long as
- * it is connected).
+ * Sort out the list of clauses into three classes:
+ * virtual, non-virtual, and evaluatable.
  */
-void ConcreteLink::setup_pattern(const std::set<Handle> &vars,
-                                 const std::vector<Handle> &component)
+void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
+                                    const HandleSeq& clauses,
+                                    HandleSeq& concrete,
+                                    HandleSeq& evaluatable,
+                                    HandleSeq& virt)
 {
-	// Split in positive and negative clauses
-	for (const Handle& h : component)
+	for (const Handle& h : clauses)
 	{
-		Type t = h->getType();
-		if (NOT_LINK == t or ABSENT_LINK == t)
+		bool is_evaluatable;
+		bool is_virtual;
+		holds_virtual(vars, h, is_evaluatable, is_virtual);
+		if (is_virtual)
 		{
-			Handle inv(LinkCast(h)->getOutgoingAtom(0));
-			_optionals.insert(inv);
-			_cnf_clauses.push_back(inv);
+			virt.push_back(h);
+		}
+		else if (is_evaluatale)
+		{
+			evaluatable.push_back(h);
+			concrete.push_back(h);
 		}
 		else
 		{
-			_mandatory.push_back(h);
-			_cnf_clauses.push_back(h);
+			concrete.push_back(h);
 		}
 	}
+}
 
-	if (_cnf_clauses.empty()) return;
-
-	// Preparation prior to search.
-	// Find everything that contains GPN's or the like.
-	FindAtoms fgpn(GROUNDED_PREDICATE_NODE, VIRTUAL_LINK, true);
-	fgpn.find_atoms(_cnf_clauses);
-	_evaluatable = fgpn.holders;
-
-	// Create a table of the nodes that appear in the clauses, and
-	// a list of the clauses that each node participates in.
+/* ================================================================= */
+/**
+ * Create a table of the nodes that appear in the clauses, and
+ * a list of the clauses that each node participates in.
+ */
+void ConcreteLink::make_connectivity_map(const HandleSeq& &component)
+{
 	for (const Handle& h : _cnf_clauses)
 	{
-		make_connectivity_map(h, h);
+		make_map_recursive(h, h);
 	}
 
 	// Save some minor amount of space by erasing those atoms that
@@ -244,10 +277,14 @@ void ConcreteLink::setup_pattern(const std::set<Handle> &vars,
 		else
 			it++;
 	}
+}
 
-#ifdef DEBUG
+/* ================================================================= */
+
+void ConcreteLink::debug_print(const string* tag)
+{
 	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n", _redex_name.c_str());
+	printf("\nRedex '%s' has following clauses:\n", tag);
 	int cl = 0;
 	for (Handle h : _mandatory)
 	{
@@ -268,26 +305,20 @@ void ConcreteLink::setup_pattern(const std::set<Handle> &vars,
 		}
 	}
 	else
-	{
 		printf("No optional clauses\n");
-	}
 
 	// Print out the bound variables in the predicate.
 	for (Handle h : _bound_vars)
 	{
 		if (NodeCast(h))
-		{
 			printf(" Bound var: "); prt(h);
-		}
 	}
 
 	if (_bound_vars.empty())
-	{
 		printf("There are no bound vars in this pattern\n");
-	}
+
 	printf("\n");
 	fflush(stdout);
-#endif
 }
 
 /* ===================== END OF FILE ===================== */

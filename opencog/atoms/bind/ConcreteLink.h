@@ -48,7 +48,18 @@ namespace opencog
 /// "artificial", in that it simplfies how pattern matching is done.
 /// Thus, this class is not really intended for "general use", but
 /// is for internal use only.
-///  
+///
+/// Given the initial list of variables and clauses, the constructors
+/// extract the optional clauses and the dynamically-evaluatable clauses.
+/// This also computes the connectivity diagram of the clauses.
+///
+/// It is assumed that the set of clauses form a single, connected
+/// component; i.e. that the clauses are pair-wise connected by common,
+/// shared variables, and that this pair-wise connection extends over
+/// the entire set of clauses. There is no other restriction on the
+/// connection topology; they can form any graph whatsoever (as long as
+/// it is connected).
+///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.
 class ConcreteLink : public LambdaLink
@@ -67,18 +78,28 @@ protected:
 	std::set<Handle> _evaluatable;
 	ConnectMap       _connectivity_map; // setup by make_connectivity_map()
 
-	void ConcreteLink::unbundle_clauses(void);
-	void ConcreteLink::validate_clauses(std::set<Handle>& vars,
-	                                    HandleSeq& clauses)
+	void unbundle_clauses(void);
+	void validate_clauses(std::set<Handle>& vars,
+	                      HandleSeq& clauses);
 
+	void extract_optionals(const std::set<Handle> &vars,
+	                       const std::vector<Handle> &component);
 
+	void unbundle_virtual(const std::set<Handle>& vars,
+	                      const HandleSeq& clauses,
+	                      HandleSeq& concrete,
+	                      HandleSeq& evaluatable,
+	                      HandleSeq& virt);
 
-	void make_connectivity_map(const Handle&, const Handle&);
+	void make_connectivity_map(const HandleSeq&);
+	void make_map_recursive(const Handle&, const Handle&);
 
-	void ConcreteLink::holds_virtual(const std::set<Handle>& vars,
-	                                 const Handle& clause,
-	                                 bool& is_evaluatable,
-	                                 bool& is_virtual);
+	void holds_virtual(const std::set<Handle>& vars,
+	                   const Handle& clause,
+	                   bool& is_evaluatable,
+	                   bool& is_virtual);
+
+	void debug_print(const string* tag);
 
 	ConcreteLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
