@@ -38,7 +38,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 	#define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -332,7 +332,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  */
 void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
-   if (check_conn and 0 < _components.size())
+   if (check_conn and 0 == _virtual.size() and 0 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"BindLink consists of multiple disconnected components!");
 			// ConcreteLink::check_connectivity(_comps);
