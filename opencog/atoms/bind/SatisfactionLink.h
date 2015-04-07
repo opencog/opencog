@@ -25,17 +25,13 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ConcreteLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental SatisfactionLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 
 /// The SatisfactionLink is used to specify a list of variables, and a
@@ -57,13 +53,9 @@ namespace opencog
 /// grounding.  The SatisfactionLink does not specify what should happen
 /// with the grounding, although the (cog-satisfy) scheme call returns
 /// a truth value.
-class SatisfactionLink : public LambdaLink
+class SatisfactionLink : public ConcreteLink
 {
 protected:
-	/// The actual clauses. Set by validate_clauses()
-	Handle _hclauses;
-	HandleSeq _clauses;
-
 	/// The graph components. Set by validate_clauses()
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.
@@ -73,13 +65,6 @@ protected:
 	HandleSeq _virtual;
 	std::vector<HandleSeq> _components;
 	std::vector<std::set<Handle>> _component_vars;
-
-	// Validate the clauses inside the body
-	void unbundle_clauses(const Handle&);
-	void validate_clauses(std::set<Handle>& vars,
-	                      HandleSeq& clauses);
-
-	void check_connectivity(const std::vector<HandleSeq>&);
 
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),

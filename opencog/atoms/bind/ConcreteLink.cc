@@ -37,6 +37,8 @@ void ConcreteLink::init(void)
 	unbundle_clauses();
 	validate_clauses(_varset, _clauses);
 	extract_optionals(_varset, _clauses);
+
+	// check to make sure there are no virtual clauses.
 	HandleSeq concs, virts;
 	unbundle_virtual(_varset, _cnf_clauses,
 	                 concs, _evaluatable, virts);
@@ -45,6 +47,19 @@ void ConcreteLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"ConcreteLink must not have virtuals");
 	}
+
+	// Check to make sure the graph is connected. As a side-effect,
+	// the (only) component is sorted into connection-order.
+   std::vector<HandleSeq> comps;
+   std::vector<std::set<Handle>> comp_vars;
+	get_connected_components(_varset, _cnf_clauses, comps, comp_vars);
+
+	// throw error if more than one component
+	check_connectivity(comps);
+
+	// This puts them into connection-order.
+	_cnf_clauses = comps[0];
+
 	make_connectivity_map(_cnf_clauses);
 }
 
@@ -66,6 +81,8 @@ ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: LambdaLink(t, hseq, tv, av)
 {
+	// Derived link-types have other init sequences
+	if (CONCRETE_LINK != t) return;
 	init();
 }
 
@@ -80,6 +97,10 @@ ConcreteLink::ConcreteLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a ConcreteLink, got %s", tname.c_str());
 	}
+
+	// Derived link-types have other init sequences
+	if (CONCRETE_LINK != tscope) return;
+
 	init();
 }
 
@@ -294,6 +315,32 @@ void ConcreteLink::make_map_recursive(const Handle& root, const Handle& h)
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
 	}
+}
+
+/* ================================================================= */
+/**
+ * Check that all clauses are connected
+ */
+void ConcreteLink::check_connectivity(
+	const std::vector<HandleSeq>& components)
+{
+	if (1 == components.size()) return;
+
+	// Users are going to be stumped by this one, so print
+	// out a verbose, user-freindly debug message to help
+	// them out.
+	std::stringstream ss;
+	ss << "Pattern is not connected! Found "
+	   << components.size() << " components:\n";
+	int cnt = 1;
+	for (const auto& comp : components)
+	{
+		ss << "Connected component " << cnt
+		   << " consists of ----------------: \n";
+		for (Handle h : comp) ss << h->toString();
+		cnt++;
+	}
+	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 }
 
 /* ================================================================= */

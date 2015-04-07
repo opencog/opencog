@@ -91,13 +91,15 @@ protected:
 	                      std::set<Handle>& evaluatable,
 	                      HandleSeq& virt);
 
-	void make_connectivity_map(const HandleSeq&);
-	void make_map_recursive(const Handle&, const Handle&);
-
 	void holds_virtual(const std::set<Handle>& vars,
 	                   const Handle& clause,
 	                   bool& is_evaluatable,
 	                   bool& is_virtual);
+
+	void check_connectivity(const std::vector<HandleSeq>&);
+
+	void make_connectivity_map(const HandleSeq&);
+	void make_map_recursive(const Handle&, const Handle&);
 
 	ConcreteLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
