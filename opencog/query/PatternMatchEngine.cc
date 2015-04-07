@@ -795,10 +795,14 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	}
 	else
 	{
-		prtmsg("next clause is", curr_root);
-		dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
-		prtmsg("joining handle is", curr_pred_handle);
-		prtmsg("join grounding is", var_grounding[curr_pred_handle]);
+		prtmsg("Next clause is", curr_root);
+		dbgprt("This clause is %s\n",
+			_optionals.count(curr_root)? "optional" : "required");
+		dbgprt("This clause is %s\n",
+			_evaluatable.count(curr_root)?
+			"dynamically evaluatable" : "non-dynamic");
+		prtmsg("Joining variable  is", curr_pred_handle);
+		prtmsg("Joining grounding is", var_grounding[curr_pred_handle]);
 
 		// Else, start solving the next unsolved clause. Note: this is
 		// a recursive call, and not a loop. Recursion is halted when

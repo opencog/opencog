@@ -46,6 +46,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
 			_type_restrictions(NULL),
+			_dynamic(NULL),
 			_as(as)
 		{}
 

@@ -101,7 +101,7 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	}
 
 	// Ignore all dynaically-evaluatab le links up front.
-	if (_dynamic->find(h) != _dynamic->end())
+	if (_dynamic and _dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
