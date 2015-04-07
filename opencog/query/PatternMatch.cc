@@ -23,10 +23,12 @@
 
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
+#include <opencog/atoms/bind/ConcreteLink.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
+#include "PatternMatchEngine.h"
 
 using namespace opencog;
 
@@ -60,6 +62,13 @@ void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 	                       _components, _component_vars);
 }
 
+// All clauses of the Concrete link are connected, so this is easy.
+void ConcreteLink::satisfy(PatternMatchCallback* pmcb)
+{
+   PatternMatchEngine pme;
+	pme.match(pmcb, _varset, ... 
+}
+
 void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 {
    PatternMatch::do_match(pmc, _varset, _virtual,
@@ -69,6 +78,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
 void BetaRedex::satisfy(PatternMatchCallback* pmc,
                           const HandleSeq& args)
 {
+// this is junk, I think..... think about it a bit, then remove me....
 printf ("duuuuuuuuuuuuude called the compose satter\n");
 }
 

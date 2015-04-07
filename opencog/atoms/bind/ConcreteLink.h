@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_CONCRETE_LINK_H
 #define _OPENCOG_CONCRETE_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -122,6 +120,8 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ConcreteLink(Link &l);
+
+	void satisfy(PatternMatchCallback*);
 
 	void debug_print(const char* tag);
 };
