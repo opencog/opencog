@@ -32,6 +32,12 @@
 
 using namespace opencog;
 
+#ifdef DEBUG
+   #define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+   #define dbgprt(f, varargs...)
+#endif
+
 /* ================================================================= */
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
@@ -57,9 +63,12 @@ using namespace opencog;
  */
 void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
-   if (check_conn and 0 == _virtual.size()) check_connectivity(_components);
-   PatternMatch::do_match(pmc, _varset, _virtual,
-	                       _components, _component_vars);
+   if (check_conn and 0 < _components.size())
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink consists of multiple disconnected components!");
+			// ConcreteLink::check_connectivity(_comps);
+
+	SatisfactionLink::satisfy(pmc);
 }
 
 // All clauses of the Concrete link are connected, so this is easy.
@@ -74,8 +83,8 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pme->_connectivity_map = _connectivity_map;
 	pme->_pmc = pmcb;
 
-	pmcb->set_type_restrictions(&_typemap);
-	pmcb->initiate_search(pme, vars, _mandatory);
+	pmcb->set_type_restrictions(_typemap);
+	pmcb->initiate_search(pme, _varset, _mandatory);
 }
 
 void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
@@ -84,11 +93,11 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 	satisfy(pmcb, &pme);
 }
 
-void SatisfactionLink::satisfy(PatternMatchCallback* pmc) const
+void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 {
 	if (1 == _num_comps)
 	{
-		ConcreteLink::satisfy(pmc);
+		ConcreteLink::satisfy(pmcb);
 		return;
 	}
 
@@ -110,9 +119,10 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc) const
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		// Pass through the callbacks, collect up answers.
-		PMCGroundings gcb(cb);
+		PMCGroundings gcb(pmcb);
 		PatternMatchEngine pme;
-		_components[i].satisfy(&gcb, &pme);
+		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
+		clp->satisfy(&gcb, &pme);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_pred_gnds.push_back(gcb._pred_groundings);
@@ -125,7 +135,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmc) const
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> negations; // currently ignored
-	PatternMatch::recursive_virtual(cb, virtuals, negations,
+	PatternMatch::recursive_virtual(pmcb, virtuals, negations,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

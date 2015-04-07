@@ -65,8 +65,9 @@ void SatisfactionLink::setup_sat_body(void)
 	_components.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		_components.emplace_back(comp_vars[i], _typemap,
-		                         comps[i], _optionals);
+		Handle h(createConcreteLink(comp_vars[i], _typemap,
+		                            comps[i], _optionals));
+		_components.push_back(h);
 	}
 }
 

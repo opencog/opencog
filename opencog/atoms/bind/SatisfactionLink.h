@@ -61,7 +61,7 @@ protected:
 	HandleSeq _fixed;
 	HandleSeq _virtual;
 	size_t _num_comps;
-	std::vector<ConcreteLink> _components;
+	HandleSeq _components;
 
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
