@@ -249,86 +249,56 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 
 /* ================================================================= */
 
-/// Are there any virtual links, or any evaluatable links in the
-/// clause?  Set the two booleans as appropriate.
+/// Sort out the list of clauses into three classes:
+/// virtual, evaluatable and concrete.
 ///
-/// A clause is "evalutable" if it contains a GroundedPredicate,
+/// A term is "evalutable" if it contains a GroundedPredicate,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
-/// Such clauses need evaluation at grounding time, to determine
+/// Such terms need evaluation at grounding time, to determine
 /// thier truth values.
 ///
-/// A clause is "virtual" if it is evaluatable, and also takes an
-/// argument that is a variable. Such virtual clauses not only require
-/// evaluation, but an evaluation must be performed for each different
-/// variable grounding.  Virtual clauses get a very different (and more
-/// complex) treatment from the pattern matcher.
+/// A clause is "virtual" if it has an evaluatable term inside of it,
+/// and that term takes an argument that is a variable. Such virtual
+/// clauses not only require evaluation, but an evaluation must be
+/// performed for each different variable grounding.  Virtual clauses
+/// get a very different (and more complex) treatment from the pattern
+/// matcher.
 ///
-void ConcreteLink::holds_virtual(const std::set<Handle>& vars,
-                                 const Handle& clause,
-                                 bool& is_evaluatable,
-                                 bool& is_virtual)
-{
-	is_evaluatable = false;
-	is_virtual = false;
-
-	FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
-	fgpn.find_atoms(clause);
-	for (const Handle& sh : fgpn.least_holders)
-	{
-		is_evaluatable = true;
-		if (any_unquoted_in_tree(sh, vars))
-		{
-			is_virtual = true;
-			return;
-		}
-	}
-
-	// Subclasses of VirtualLink, e.g. GreaterThanLink, which
-	// are essentially a kind of EvaluationLink holding a GPN
-	FindAtoms fgtl(VIRTUAL_LINK, true);
-	fgtl.find_atoms(clause);
-	// Unlike the above, its varset, not least_holders...
-	// because its a link...
-	for (const Handle& sh : fgtl.varset)
-	{
-		is_evaluatable = true;
-		if (any_unquoted_in_tree(sh, vars))
-		{
-			is_virtual = true;
-			return;
-		}
-	}
-}
-
-/* ================================================================= */
-/**
- * Sort out the list of clauses into three classes:
- * virtual, non-virtual, and evaluatable.
- */
 void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
                                     const HandleSeq& clauses,
-                                    HandleSeq& concrete,
-                                    std::set<Handle>& evaluatable,
-                                    HandleSeq& virt)
+                                    HandleSeq& fixed_clauses,
+                                    std::set<Handle>& evaluatable_terms,
+                                    HandleSeq& virtual_clauses)
 {
-	for (const Handle& h : clauses)
+	for (const Handle& clause: clauses)
 	{
-		bool is_evaluatable;
-		bool is_virtual;
-		holds_virtual(vars, h, is_evaluatable, is_virtual);
+		bool is_virtual = false;
+		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
+		fgpn.find_atoms(clause);
+		for (const Handle& sh : fgpn.least_holders)
+		{
+			evaluatable_terms.insert(sh);
+			if (any_unquoted_in_tree(sh, vars))
+				is_virtual = true;
+		}
+
+		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
+		// are essentially a kind of EvaluationLink holding a GPN
+		FindAtoms fgtl(VIRTUAL_LINK, true);
+		fgtl.find_atoms(clause);
+		// Unlike the above, its varset, not least_holders...
+		// because its a link...
+		for (const Handle& sh : fgtl.varset)
+		{
+			evaluatable_terms.insert(sh);
+			if (any_unquoted_in_tree(sh, vars))
+				is_virtual = true;
+		}
+
 		if (is_virtual)
-		{
-			virt.push_back(h);
-		}
-		else if (is_evaluatable)
-		{
-			evaluatable.insert(h);
-			concrete.push_back(h);
-		}
+			virtual_clauses.push_back(clause);
 		else
-		{
-			concrete.push_back(h);
-		}
+			fixed_clauses.push_back(clause);
 	}
 }
 

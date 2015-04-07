@@ -87,14 +87,9 @@ protected:
 
 	void unbundle_virtual(const std::set<Handle>& vars,
 	                      const HandleSeq& clauses,
-	                      HandleSeq& concrete,
-	                      std::set<Handle>& evaluatable,
-	                      HandleSeq& virt);
-
-	void holds_virtual(const std::set<Handle>& vars,
-	                   const Handle& clause,
-	                   bool& is_evaluatable,
-	                   bool& is_virtual);
+	                      HandleSeq& concrete_clauses,
+	                      std::set<Handle>& evaluatable_terms,
+	                      HandleSeq& virtual_clauses);
 
 	void check_connectivity(const std::vector<HandleSeq>&);
 
@@ -126,7 +121,7 @@ public:
 	void satisfy(PatternMatchCallback*) const;
 	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
-	void debug_print(const char* tag) const;
+	void debug_print(const char* tag = "primary entry") const;
 };
 
 typedef std::shared_ptr<ConcreteLink> ConcreteLinkPtr;
