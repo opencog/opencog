@@ -292,6 +292,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		for (const Handle& sh : fgtl.varset)
 		{
 			_evaluatable_terms.insert(sh);
+			_evaluatable_holders.insert(sh);
 			if (any_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
