@@ -56,12 +56,12 @@ private:
 		 * which will simply perform a substitution, without performing
 		 * any execution.
 		 */
-		Handle walk_tree(Handle tree);
+		Handle walk_tree(const Handle& tree);
 
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}
 
-		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars);
+		Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
 };
 
 } // namespace opencog
