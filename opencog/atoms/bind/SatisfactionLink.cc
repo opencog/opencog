@@ -64,7 +64,8 @@ void SatisfactionLink::setup_sat_body(void)
 	// component.  Use emplace_back to avoid a copy.
 	_components.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
-		_components.emplace_back(comp_vars[i], comps[i], _optionals);
+		_components.emplace_back(comp_vars[i], _typemap,
+		                         comps[i], _optionals);
 }
 
 SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,

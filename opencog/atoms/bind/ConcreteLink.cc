@@ -33,7 +33,7 @@ using namespace opencog;
 
 void ConcreteLink::init(void)
 {
-	// The LambdaLink constructor sets up _body and _varset
+	LambdaLink::init(_outgoing);
 	unbundle_clauses(_body);
 	validate_clauses(_varset, _clauses);
 	extract_optionals(_varset, _clauses);
@@ -66,10 +66,51 @@ void ConcreteLink::init(void)
 // Special ctor for use by SatisfactionLink; we are given
 // the pre-computed components.
 ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
-                           const HandleSeq& component,
-                           const HandleSeq& opts)
+                           const VariableTypeMap& typemap,
+                           const HandleSeq& compo,
+                           const std::set<Handle>& opts)
 	: LambdaLink(CONCRETE_LINK, HandleSeq())
 {
+	// First, lets deal with the vars. We have discarded the original
+	// order of the variables, and I think that's OK, because we will
+	// not be using the substitute method, I don't think. If we need it,
+	// then the API will need to be changed...
+	// So all we need is the varset, and the subset of the typemap.
+	_varset = vars;
+	for (const Handle& v : vars)
+	{
+		auto it = typemap.find(v);
+		if (it != typemap.end())
+			_typemap[v] = *it;
+	}
+
+	// Next, the body... there no _body for lambda. The compo is the
+	// _cnf_clauses; we have to reconstruct the optionals.  We cannot
+	// use extract_optionals becuase opts have een stripped already.
+
+	_cnf_clauses = compo;
+	for (const Handle& h : compo)
+	{
+		bool h_is_opt = false;
+		for (const Handle& opt : opts)
+		{
+			if (is_atom_in_tree(opt, h))
+			{
+				_optionals.insert(opt);
+				_clauses.push_back(opt);
+				h_is_opt = true;
+				break;
+			}
+		}
+		if (not h_is_opt)
+			_mandatory.push_back(h);
+	}
+
+	// The rest is easy: the evaluatables and the connection map
+	HandleSeq concs, virts;
+	unbundle_virtual(_varset, _cnf_clauses,
+	                 concs, _evaluatable, virts);
+	make_connectivity_map(_cnf_clauses);
 }
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,

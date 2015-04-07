@@ -106,8 +106,9 @@ protected:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ConcreteLink(const std::set<Handle>& vars,
+	             const VariableTypeMap& typemap,
 	             const HandleSeq& component,
-	             const HandleSeq& optionals);
+	             const std::set<Handle>& optionals);
 
 	void init(void);
 
