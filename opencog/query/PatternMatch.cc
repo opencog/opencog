@@ -348,12 +348,19 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pme->_cnf_clauses = _cnf_clauses;
 	pme->_mandatory = _mandatory;
 	pme->_optionals = _optionals;
-	pme->_evaluatable = _evaluatable;
+	pme->_evaluatable = _evaluatable_holders;
 	pme->_connectivity_map = _connectivity_map;
 	pme->_pmc = pmcb;
+#ifdef DEBUG
+	debug_print();
+#endif
 
 	pmcb->set_type_restrictions(_typemap);
 	pmcb->initiate_search(pme, _varset, _mandatory);
+
+#ifdef DEBUG
+	printf("==================== Done with Search ==================\n");
+#endif
 }
 
 void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
@@ -361,6 +368,8 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
    PatternMatchEngine pme;
 	satisfy(pmcb, &pme);
 }
+
+/* ================================================================= */
 
 void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 {
@@ -400,7 +409,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	// And now, try grounding each of the virtual clauses.
 	dbgprt("BEGIN component recursion: ====================== "
 	       "num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), virtuals.size());
+	       comp_var_gnds.size(), _virtual.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> optionals; // currently ignored
@@ -408,6 +417,8 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }
+
+/* ================================================================= */
 
 void BetaRedex::satisfy(PatternMatchCallback* pmc,
                           const HandleSeq& args)
