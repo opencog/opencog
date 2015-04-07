@@ -139,21 +139,24 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
             std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
             std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds)
 {
-	// If we are done with the recursive step, then submit the grounding
-	// to the virtual links, and see what happens.
+	// If we are done with the recursive step, then we have one of the
+	// many combinatoric possibilities in the var_gnds and pred_gnds
+	// maps. Submit this grounding map to the virtual links, and see
+	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
 #ifdef DEBUG
-		dbgprt("Explore combinatoric grounding clauses "
+		dbgprt("Explore one possible combinatoric grounding "
 		       "(var_gnds.size() = %zu, pred_gnds.size() = %zu):\n",
 			   var_gnds.size(), pred_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
 #endif
 
 		// We put all of the temporary atoms into a temporary atomspace.
-		// Everything in here will go poof and disappear when this class
-		// is destructed. And that's OK, that's exactly what we want for
-		// these temporaries.  The atomspace is blown away when we finish.
+		// Everything in here will go poof and disappear when this
+		// atomsspace is destructed. And that's OK, that's exactly what
+		// we want for these temporaries.  The atomspace is blown away
+		// when we finish.
 		//
 		// XXX FIXME ... I suspect the atomspace initialzation is pretty
 		// heavyweight.  Will need to explore a more lightweight approach
@@ -161,7 +164,11 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		AtomSpace aspace;
 		Instantiator instor(&aspace);
 
-		for (Handle virt : virtuals)
+		// Note, FYI, that if there are no virtual clauses at all,
+		// then this loop falls straight-through, and the grounding
+		// is reported as a match to the callback.  That is, the
+		// virtuals only serve to reject possibilities.
+		for (const Handle& virt : virtuals)
 		{
 			// At this time, we expect all virtual links to be in
 			// one of two forms: either EvaluationLink's or
@@ -217,8 +224,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	// We do this recursively, by poping N_m off the back, and calling
 	// ourselves.
 	//
-	// vg and vp will be the collection of groundings for one of the
-	// components (well, for component m, in the above notation.)
+	// vg and vp will be the collection of all of the different possible
+	// groundings for one of the components (well, its for component m,
+	// in the above notation.) So the loop below tries every possibility.
 	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
 	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
@@ -241,7 +249,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
 		                                comp_var_gnds, comp_pred_gnds);
 
-		// Halt recursion immeditately if match is accepted.
+		// Halt recursion immediattely if match is accepted.
 		if (accept) return true;
 	}
 	return false;
