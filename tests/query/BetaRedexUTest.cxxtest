@@ -139,19 +139,19 @@ void BetaRedexUTest::test_simple_compose(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle hdef = eval->eval_h("(defun-a)");
-	printf("Get a defintion: %s\n", hdef->toString().c_str());
+	printf("Get a defintion: %s\n", hdef->toShortString().c_str());
 	DefineLinkPtr defun = DefineLinkCast(hdef);
 	TSM_ASSERT("Exepected to get a definion", defun != NULL);
 
 	Handle hcomp = eval->eval_h("composer");
-	printf("Get a composer: %s\n", hcomp->toString().c_str());
+	printf("Get a composer: %s\n", hcomp->toShortString().c_str());
 	BetaRedexPtr compr = BetaRedexCast(hcomp);
 	TSM_ASSERT("Exepected to get a BetaRedex", compr != NULL);
 
 	Handle hresult = compr->beta_reduce();
 	// We must place it in the atomspace, the composer doesn't do that.
 	hresult = as->getAtom(hresult);
-	printf("Got the result: %s\n", hresult->toString().c_str());
+	printf("Got the result: %s\n", hresult->toShortString().c_str());
 
 	Handle hexpected = eval->eval_h("bogo-a");
 	TSM_ASSERT("Exepected to get desired result", hresult == hexpected);
@@ -165,19 +165,19 @@ void BetaRedexUTest::test_quote_compose(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle hdef = eval->eval_h("(defun-quote)");
-	printf("Get a defintion: %s\n", hdef->toString().c_str());
+	printf("Get a defintion: %s\n", hdef->toShortString().c_str());
 	DefineLinkPtr defun = DefineLinkCast(hdef);
 	TSM_ASSERT("Exepected to get a definion", defun != NULL);
 
 	Handle hcomp = eval->eval_h("compose-quote");
-	printf("Get a composer: %s\n", hcomp->toString().c_str());
+	printf("Get a composer: %s\n", hcomp->toShortString().c_str());
 	BetaRedexPtr compr = BetaRedexCast(hcomp);
 	TSM_ASSERT("Exepected to get a BetaRedex", compr != NULL);
 
 	Handle hresult = compr->beta_reduce();
 	// We must place it in the atomspace, the composer doesn't do that.
 	hresult = as->getAtom(hresult);
-	printf("Got the result: %s\n", hresult->toString().c_str());
+	printf("Got the result: %s\n", hresult->toShortString().c_str());
 
 	Handle hexpected = eval->eval_h("yeah-quote");
 	TSM_ASSERT("Exepected to get desired result", hresult == hexpected);
