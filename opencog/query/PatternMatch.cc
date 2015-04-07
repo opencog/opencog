@@ -403,8 +403,8 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	       comp_var_gnds.size(), virtuals.size());
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
-	std::vector<Handle> negations; // currently ignored
-	PatternMatch::recursive_virtual(pmcb, virtuals, negations,
+	std::vector<Handle> optionals; // currently ignored
+	PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

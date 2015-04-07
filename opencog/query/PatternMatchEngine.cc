@@ -1138,7 +1138,7 @@ void PatternMatchEngine::graph_stacks_clear(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
-void PatternMatchEngine::PatternMatchEngine(void)
+PatternMatchEngine::PatternMatchEngine(void)
 {
 	// current state
 	in_quote = false;

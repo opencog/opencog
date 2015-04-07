@@ -106,7 +106,6 @@ protected:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
-	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
 public:
 	ConcreteLink(const HandleSeq&,
@@ -125,6 +124,7 @@ public:
 	             const std::set<Handle>& optionals);
 
 	void satisfy(PatternMatchCallback*) const;
+	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
 	void debug_print(const char* tag) const;
 };
