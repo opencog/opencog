@@ -275,7 +275,7 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
 		for (size_t i = 0; i < sz; i++) {
 			Handle h(iset[i]);
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
+			dbgprt("Loop candidate (%lu/%lu): %s\n", (unsigned long)i+1, (unsigned long)sz,
 			       h->toShortString().c_str());
 			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 			if (rc) break;
@@ -331,7 +331,7 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		dbgprt("Loop candidate (%lu/%lu): %s\n", (unsigned long)++i, (unsigned long)handle_set.size(),
 		       h->toShortString().c_str());
 		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
 		if (rc) break;
