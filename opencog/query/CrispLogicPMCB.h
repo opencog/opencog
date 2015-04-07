@@ -28,7 +28,6 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
 
@@ -153,10 +152,12 @@ class CrispLogicPMCB :
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
-			FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
-			fgpn.find_atoms(clauses);
-			_dyns = fgpn.least_holders;
 			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
+		}
+
+		virtual void set_evaluatable_terms(const std::set<Handle>& terms)
+		{
+			_dyns = terms;
 		}
 
 	private:
@@ -166,7 +167,7 @@ class CrispLogicPMCB :
 		// XXX FIXME the boolean _in_seq_and should really be a stack,
 		// which is pushed/popped on each entry and exit.  The stack is
 		// needed for recursive nesting of these things.  Right now,
-		// Im being lazy, but that's a bug ....
+		// I'm being lazy, so that's a bug ....
 };
 
 } // namespace opencog

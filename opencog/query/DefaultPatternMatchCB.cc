@@ -78,7 +78,7 @@ using namespace opencog;
 // handle.
 //
 Handle
-DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
+DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
                                     Handle& start, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
@@ -150,7 +150,8 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 	starter_pred = Handle::UNDEFINED;
 
 	size_t nc = clauses.size();
-	for (size_t i=0; i < nc; i++) {
+	for (size_t i=0; i < nc; i++)
+	{
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;

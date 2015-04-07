@@ -154,7 +154,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		Handle _root;
 		Handle _starter_pred;
 		const VariableTypeMap* _type_restrictions;
-		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
+		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const std::vector<Handle>&, Handle&, size_t&);
 
 		/**

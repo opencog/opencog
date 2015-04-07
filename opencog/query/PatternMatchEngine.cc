@@ -34,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -290,6 +290,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// then we must fall through, and let the tree comp mechanism
 		// find and evaluate them.
 		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
+		else
+		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
 
 	// OR_LINK's are multiple-choice links. As long as we can

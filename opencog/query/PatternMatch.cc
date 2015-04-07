@@ -87,6 +87,12 @@ class PMCGroundings : public PatternMatchCallback
 		void set_type_restrictions(const VariableTypeMap& tm) {
 			_cb->set_type_restrictions(tm);
 		}
+		void set_evaluatable_terms(const std::set<Handle>& term) {
+			_cb->set_evaluatabble_terms(terms);
+		}
+		void set_evaluatable_holders(const std::set<Handle>& term) {
+			_cb->set_evaluatabble_holders(terms);
+		}
 		void initiate_search(PatternMatchEngine* pme,
 	                        const std::set<Handle> &vars,
 	                        const std::vector<Handle> &clauses)
@@ -356,6 +362,8 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 #endif
 
 	pmcb->set_type_restrictions(_typemap);
+	pmcb->set_evaluatable_terms(_evaluatable_terms);
+	pmcb->set_evaluatable_holders(_evaluatable_holders);
 	pmcb->initiate_search(pme, _varset, _mandatory);
 
 #ifdef DEBUG
