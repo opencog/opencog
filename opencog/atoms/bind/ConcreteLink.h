@@ -88,7 +88,7 @@ protected:
 	void unbundle_virtual(const std::set<Handle>& vars,
 	                      const HandleSeq& clauses,
 	                      HandleSeq& concrete,
-	                      HandleSeq& evaluatable,
+	                      std::set<Handle>& evaluatable,
 	                      HandleSeq& virt);
 
 	void make_connectivity_map(const HandleSeq&);
@@ -98,8 +98,6 @@ protected:
 	                   const Handle& clause,
 	                   bool& is_evaluatable,
 	                   bool& is_virtual);
-
-	void debug_print(const string* tag);
 
 	ConcreteLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -117,6 +115,8 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ConcreteLink(Link &l);
+
+	void debug_print(const char* tag);
 };
 
 typedef std::shared_ptr<ConcreteLink> ConcreteLinkPtr;

@@ -70,6 +70,12 @@ public:
 
 	LambdaLink(Link &l);
 
+	// utility debug print
+	void prt(const Handle& h)
+	{
+		printf("%s\n", h->toShortString().c_str());
+	}
+
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.

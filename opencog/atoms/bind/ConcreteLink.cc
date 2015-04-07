@@ -27,6 +27,7 @@
 #include <opencog/atomutils/FindUtils.h>
 
 #include "ConcreteLink.h"
+#include "PatternUtils.h"
 
 using namespace opencog;
 
@@ -95,7 +96,7 @@ ConcreteLink::ConcreteLink(Link &l)
 void ConcreteLink::unbundle_clauses(void)
 {
 	Type t = _body->getType();
-	if (AND_LINK == t or SEQUANTIAL_AND_LINK == t)
+	if (AND_LINK == t or SEQUENTIAL_AND_LINK == t)
 	{
 		_clauses = LinkCast(_body)->getOutgoingSet();
 	}
@@ -221,7 +222,6 @@ void ConcreteLink::holds_virtual(const std::set<Handle>& vars,
 }
 
 /* ================================================================= */
-
 /**
  * Sort out the list of clauses into three classes:
  * virtual, non-virtual, and evaluatable.
@@ -229,7 +229,7 @@ void ConcreteLink::holds_virtual(const std::set<Handle>& vars,
 void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
                                     const HandleSeq& clauses,
                                     HandleSeq& concrete,
-                                    HandleSeq& evaluatable,
+                                    std::set<Handle>& evaluatable,
                                     HandleSeq& virt)
 {
 	for (const Handle& h : clauses)
@@ -241,9 +241,9 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			virt.push_back(h);
 		}
-		else if (is_evaluatale)
+		else if (is_evaluatable)
 		{
-			evaluatable.push_back(h);
+			evaluatable.insert(h);
 			concrete.push_back(h);
 		}
 		else
@@ -255,10 +255,15 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 
 /* ================================================================= */
 /**
- * Create a table of the nodes that appear in the clauses, and
- * a list of the clauses that each node participates in.
+ * Create a map that holds all of the clauses that a given atom
+ * participates in.  In other words, it indicates all the places
+ * where an atom is shared by multiple trees, and thus establishes
+ * how the trees are connected.
+ *
+ * This is used for only one purpose: to find the next unsolved
+ * clause. Perhaps this could be simplied somehow ...
  */
-void ConcreteLink::make_connectivity_map(const HandleSeq& &component)
+void ConcreteLink::make_connectivity_map(const HandleSeq& component)
 {
 	for (const Handle& h : _cnf_clauses)
 	{
@@ -279,14 +284,26 @@ void ConcreteLink::make_connectivity_map(const HandleSeq& &component)
 	}
 }
 
+void ConcreteLink::make_map_recursive(const Handle& root, const Handle& h)
+{
+	_connectivity_map[h].push_back(root);
+
+	LinkPtr l(LinkCast(h));
+	if (l)
+	{
+		for (const Handle& ho: l->getOutgoingSet())
+			make_map_recursive(root, ho);
+	}
+}
+
 /* ================================================================= */
 
-void ConcreteLink::debug_print(const string* tag)
+void ConcreteLink::debug_print(const char* tag)
 {
 	// Print out the predicate ...
 	printf("\nRedex '%s' has following clauses:\n", tag);
 	int cl = 0;
-	for (Handle h : _mandatory)
+	for (const Handle& h : _mandatory)
 	{
 		printf("Mandatory %d: ", cl);
 		prt(h);
@@ -297,7 +314,7 @@ void ConcreteLink::debug_print(const string* tag)
 	{
 		printf("Predicate includes the following optional clauses:\n");
 		cl = 0;
-		for (Handle h : _optionals)
+		for (const Handle& h : _optionals)
 		{
 			printf("Optional clause %d: ", cl);
 			prt(h);
@@ -308,13 +325,13 @@ void ConcreteLink::debug_print(const string* tag)
 		printf("No optional clauses\n");
 
 	// Print out the bound variables in the predicate.
-	for (Handle h : _bound_vars)
+	for (const Handle& h : _varset)
 	{
 		if (NodeCast(h))
 			printf(" Bound var: "); prt(h);
 	}
 
-	if (_bound_vars.empty())
+	if (_varset.empty())
 		printf("There are no bound vars in this pattern\n");
 
 	printf("\n");

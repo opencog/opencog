@@ -85,7 +85,7 @@ BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Scoping and Logical quantifiers
 CONCRETE_LINK <- LAMBDA_LINK       // a set of clauses with no virtuals
-SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings
+SATISFACTION_LINK <- CONCRETE_LINK   // Finds all groundings
 BIND_LINK <- SATISFACTION_LINK     // Finds all groundings and executes
 
 FORALL_LINK <- LAMBDA_LINK "ForAllLink"
