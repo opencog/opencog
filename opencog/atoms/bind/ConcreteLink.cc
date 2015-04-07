@@ -23,8 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomspace/Node.h>
 
 #include "ConcreteLink.h"
 #include "PatternUtils.h"
@@ -81,7 +83,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	{
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_typemap[v] = *it;
+			_typemap.insert(*it);
 	}
 
 	// Next, the body... there no _body for lambda. The compo is the

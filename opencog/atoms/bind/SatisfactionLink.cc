@@ -35,7 +35,7 @@ void SatisfactionLink::init(void)
 {
 	LambdaLink::init(_outgoing);
 	unbundle_clauses(_body);
-	setup_sat_body(_varset, _clauses);
+	setup_sat_body();
 }
 
 /// The second half of the common initialization sequence
@@ -64,8 +64,10 @@ void SatisfactionLink::setup_sat_body(void)
 	// component.  Use emplace_back to avoid a copy.
 	_components.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
+	{
 		_components.emplace_back(comp_vars[i], _typemap,
 		                         comps[i], _optionals);
+	}
 }
 
 SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,

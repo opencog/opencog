@@ -27,8 +27,8 @@
 
 namespace opencog
 {
-class PatterniMatchEngine;
-class PatterniMatchCallback;
+class PatternMatchEngine;
+class PatternMatchCallback;
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -105,11 +105,6 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ConcreteLink(const std::set<Handle>& vars,
-	             const VariableTypeMap& typemap,
-	             const HandleSeq& component,
-	             const std::set<Handle>& optionals);
-
 	void init(void);
 	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
@@ -123,6 +118,11 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ConcreteLink(Link &l);
+
+	ConcreteLink(const std::set<Handle>& vars,
+	             const VariableTypeMap& typemap,
+	             const HandleSeq& component,
+	             const std::set<Handle>& optionals);
 
 	void satisfy(PatternMatchCallback*) const;
 

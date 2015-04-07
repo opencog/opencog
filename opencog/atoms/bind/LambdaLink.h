@@ -67,7 +67,7 @@ public:
 	LambdaLink(Link &l);
 
 	// utility debug print
-	void prt(const Handle& h)
+	void prt(const Handle& h) const
 	{
 		printf("%s\n", h->toShortString().c_str());
 	}
