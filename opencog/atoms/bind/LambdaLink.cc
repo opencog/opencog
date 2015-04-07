@@ -59,6 +59,8 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: VariableList(t, oset, tv, av)
 {
+	// Derived classes have a different initialization sequence
+	if (LAMBDA_LINK != t) return;
 	init(oset);
 }
 

@@ -63,16 +63,15 @@ protected:
 	/// in the corresponding component.
 	HandleSeq _fixed;
 	HandleSeq _virtual;
-	std::vector<HandleSeq> _components;
-	std::vector<std::set<Handle>> _component_vars;
+	size_t _num_comps;
+	std::vector<ConcreteLink> _components;
 
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
-	void setup_sat_body(std::set<Handle>& vars,
-	                    HandleSeq& clauses);
+	void setup_sat_body(void);
 
 public:
 	SatisfactionLink(const HandleSeq&,

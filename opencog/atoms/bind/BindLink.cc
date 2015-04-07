@@ -31,12 +31,12 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
-	// The LambdaLink constructor sets up _body and _varset
+	LambdaLink::init(_outgoing);
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 
-	// remainder of the init is just like in the SatisfactionLink
-	setup_sat_body(_varset, _clauses);
+	// Remainder of the init is just like in the SatisfactionLink
+	setup_sat_body();
 }
 
 BindLink::BindLink(const HandleSeq& hseq,

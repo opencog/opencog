@@ -105,6 +105,10 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	ConcreteLink(const std::set<Handle>& vars,
+	             const HandleSeq& component,
+	             const HandleSeq& optionals);
+
 	void init(void);
 
 public:

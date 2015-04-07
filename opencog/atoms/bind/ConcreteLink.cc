@@ -63,6 +63,15 @@ void ConcreteLink::init(void)
 	make_connectivity_map(_cnf_clauses);
 }
 
+// Special ctor for use by SatisfactionLink; we are given
+// the pre-computed components.
+ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
+                           const HandleSeq& component,
+                           const HandleSeq& opts)
+	: LambdaLink(CONCRETE_LINK, HandleSeq())
+{
+}
+
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: LambdaLink(CONCRETE_LINK, hseq, tv, av)

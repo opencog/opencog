@@ -33,22 +33,38 @@ using namespace opencog;
 
 void SatisfactionLink::init(void)
 {
-	// The LambdaLink constructor sets up _body and _varset
+	LambdaLink::init(_outgoing);
 	unbundle_clauses(_body);
 	setup_sat_body(_varset, _clauses);
 }
 
 /// The second half of the common initialization sequence
-void SatisfactionLink::setup_sat_body(std::set<Handle>& vars,
-                                      HandleSeq& clauses)
+void SatisfactionLink::setup_sat_body(void)
 {
-	validate_clauses(vars, clauses);
-	std::set<Handle> evls;
-	unbundle_virtual(vars, clauses,
-                    _fixed, evls, _virtual);
+	validate_clauses(_varset, _clauses);
+	extract_optionals(_varset, _clauses);
+	unbundle_virtual(_varset, _cnf_clauses,
+                    _fixed, _evaluatable, _virtual);
 
 	// Split the non virtual clauses into connected components
-	get_connected_components(vars, _fixed, _components, _component_vars);
+	std::vector<HandleSeq> comps;
+	std::vector<std::set<Handle>> comp_vars;
+	get_connected_components(_varset, _fixed, comps, comp_vars);
+
+	// If there is only one component, this is essentially just a
+	// single Concrete link; perform the rest of that initialization.
+	_num_comps = comps.size();
+	if (1 == _num_comps)
+	{
+		make_connectivity_map(_cnf_clauses);
+		return;
+	}
+
+	// If we are here, then set up a ConcreteLink for each connected
+	// component.  Use emplace_back to avoid a copy.
+	_components.reserve(_num_comps);
+	for (size_t i=0; i<_num_comps; i++)
+		_components.emplace_back(comp_vars[i], comps[i], _optionals);
 }
 
 SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
