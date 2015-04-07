@@ -72,10 +72,11 @@ class ConcreteLink : public LambdaLink
 protected:
 	/// The actual clauses. Set by validate_clauses()
 	HandleSeq        _clauses;
-	HandleSeq        _cnf_clauses;  // absent/notlinks removed!
+	HandleSeq        _cnf_clauses;  // AbsentLink, NotLink removed!
 	HandleSeq        _mandatory;
 	std::set<Handle> _optionals;
-	std::set<Handle> _evaluatable;
+	std::set<Handle> _evaluatable_terms;  // smallest term that is evaluatable
+	std::set<Handle> _evaluatable_holders; // holds something evaluatable.
 	ConnectMap       _connectivity_map; // setup by make_connectivity_map()
 
 	void unbundle_clauses(const Handle& body);
@@ -88,7 +89,6 @@ protected:
 	void unbundle_virtual(const std::set<Handle>& vars,
 	                      const HandleSeq& clauses,
 	                      HandleSeq& concrete_clauses,
-	                      std::set<Handle>& evaluatable_terms,
 	                      HandleSeq& virtual_clauses);
 
 	void check_connectivity(const std::vector<HandleSeq>&);

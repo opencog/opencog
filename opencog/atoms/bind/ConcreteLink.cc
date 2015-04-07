@@ -43,7 +43,7 @@ void ConcreteLink::init(void)
 	// check to make sure there are no virtual clauses.
 	HandleSeq concs, virts;
 	unbundle_virtual(_varset, _cnf_clauses,
-	                 concs, _evaluatable, virts);
+	                 concs, virts);
 	if (0 < virts.size())
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -111,7 +111,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	// The rest is easy: the evaluatables and the connection map
 	HandleSeq concs, virts;
 	unbundle_virtual(_varset, _cnf_clauses,
-	                 concs, _evaluatable, virts);
+	                 concs, virts);
 	make_connectivity_map(_cnf_clauses);
 }
 
@@ -267,7 +267,6 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
                                     const HandleSeq& clauses,
                                     HandleSeq& fixed_clauses,
-                                    std::set<Handle>& evaluatable_terms,
                                     HandleSeq& virtual_clauses)
 {
 	for (const Handle& clause: clauses)
@@ -277,10 +276,12 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		fgpn.find_atoms(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
-			evaluatable_terms.insert(sh);
+			_evaluatable_terms.insert(sh);
 			if (any_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
+		for (const Handle& sh : fgpn.holders)
+			_evaluatable_holders.insert(sh);
 
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
 		// are essentially a kind of EvaluationLink holding a GPN
@@ -290,10 +291,12 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)
 		{
-			evaluatable_terms.insert(sh);
+			_evaluatable_terms.insert(sh);
 			if (any_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
+		for (const Handle& sh : fgtl.holders)
+			_evaluatable_holders.insert(sh);
 
 		if (is_virtual)
 			virtual_clauses.push_back(clause);
