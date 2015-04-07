@@ -34,7 +34,7 @@ using namespace opencog;
 void ConcreteLink::init(void)
 {
 	// The LambdaLink constructor sets up _body and _varset
-	unbundle_clauses();
+	unbundle_clauses(_body);
 	validate_clauses(_varset, _clauses);
 	extract_optionals(_varset, _clauses);
 
@@ -114,17 +114,17 @@ ConcreteLink::ConcreteLink(Link &l)
 /// clauses; a SequentialAnd is also a list, and must be specifically
 /// satisfied in sequential order.  Currently, an OrLink is treated
 /// as a single clause, and is handled separately.
-void ConcreteLink::unbundle_clauses(void)
+void ConcreteLink::unbundle_clauses(const Handle& hbody)
 {
-	Type t = _body->getType();
+	Type t = hbody->getType();
 	if (AND_LINK == t or SEQUENTIAL_AND_LINK == t)
 	{
-		_clauses = LinkCast(_body)->getOutgoingSet();
+		_clauses = LinkCast(hbody)->getOutgoingSet();
 	}
 	else
 	{
 		// There's just one single clause!
-		_clauses.push_back(_body);
+		_clauses.push_back(hbody);
 	}
 }
 
@@ -154,6 +154,9 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 	// Make sure that each declared variable appears in some clause.
 	// We can't ground variables that aren't attached to something.
 	// Quoted variables are constants, and so don't count.
+	//
+	// XXX instead of throwing, should we just remove them, and print a
+	// warning? Right now, doens't matter which way...
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))

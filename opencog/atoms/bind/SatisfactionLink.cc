@@ -34,14 +34,21 @@ using namespace opencog;
 void SatisfactionLink::init(void)
 {
 	// The LambdaLink constructor sets up _body and _varset
-	unbundle_clauses();
-	validate_clauses(_varset, _clauses);
+	unbundle_clauses(_body);
+	setup_sat_body(_varset, _clauses);
+}
+
+/// The second half of the common initialization sequence
+void SatisfactionLink::setup_sat_body(std::set<Handle>& vars,
+                                      HandleSeq& clauses)
+{
+	validate_clauses(vars, clauses);
 	std::set<Handle> evls;
-	unbundle_virtual(_varset, _clauses,
+	unbundle_virtual(vars, clauses,
                     _fixed, evls, _virtual);
 
 	// Split the non virtual clauses into connected components
-	get_connected_components(_varset, _fixed, _components, _component_vars);
+	get_connected_components(vars, _fixed, _components, _component_vars);
 }
 
 SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,

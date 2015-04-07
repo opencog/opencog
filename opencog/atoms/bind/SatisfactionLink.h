@@ -71,6 +71,8 @@ protected:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
+	void setup_sat_body(std::set<Handle>& vars,
+	                    HandleSeq& clauses);
 
 public:
 	SatisfactionLink(const HandleSeq&,

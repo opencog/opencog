@@ -78,7 +78,7 @@ protected:
 	std::set<Handle> _evaluatable;
 	ConnectMap       _connectivity_map; // setup by make_connectivity_map()
 
-	void unbundle_clauses(void);
+	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses);
 

@@ -29,24 +29,28 @@
 
 using namespace opencog;
 
-BindLink::BindLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: SatisfactionLink(BIND_LINK, hseq, tv, av)
+void BindLink::init(void)
 {
 	// The LambdaLink constructor sets up _body and _varset
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+
+	// remainder of the init is just like in the SatisfactionLink
+	setup_sat_body(_varset, _clauses);
+}
+
+BindLink::BindLink(const HandleSeq& hseq,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: SatisfactionLink(BIND_LINK, hseq, tv, av)
+{
+	init();
 }
 
 BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: SatisfactionLink(t, hseq, tv, av)
 {
-	// The LambdaLink constructor sets up _body and _varset
-	validate_body(_body);
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 BindLink::BindLink(Link &l)
@@ -60,10 +64,7 @@ BindLink::BindLink(Link &l)
 			"Expecting a BindLink, got %s", tname.c_str());
 	}
 
-	// The LambdaLink contructor sets up _body and _varset
-	validate_body(_body);
-	unbundle_clauses(_hclauses);
-	validate_clauses(_varset, _clauses);
+	init();
 }
 
 /* ================================================================= */

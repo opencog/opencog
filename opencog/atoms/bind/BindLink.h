@@ -39,8 +39,10 @@ namespace opencog
 class BindLink : public SatisfactionLink
 {
 protected:
+	void init(void);
 
 	/// The actual clauses. Set by validate_body()
+	Handle _hclauses;
 	Handle _implicand;
 
 	// Validate the structure of the body
