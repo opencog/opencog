@@ -59,6 +59,7 @@ protected:
 	/// The list of component_vars are the variables that appear
 	/// in the corresponding component.
 	HandleSeq _fixed;
+	size_t _num_virts;
 	HandleSeq _virtual;
 	size_t _num_comps;
 	HandleSeq _components;

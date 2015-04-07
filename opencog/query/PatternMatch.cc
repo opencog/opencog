@@ -381,7 +381,11 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 
 void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 {
-	if (1 == _num_comps)
+	// We allow a combinatoric explosion of multiple components,
+	// but zero virtuals, because PLN has a use case for this.
+	// I think its a pathological situation, but they really do
+	// want to explore the combinatoric explosion.
+	if (0 == _num_virts and 1 == _num_comps)
 	{
 		ConcreteLink::satisfy(pmcb);
 		return;

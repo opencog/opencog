@@ -51,10 +51,17 @@ void SatisfactionLink::setup_sat_body(void)
 	std::vector<std::set<Handle>> comp_vars;
 	get_connected_components(_varset, _fixed, comps, comp_vars);
 
-	// If there is only one component, this is essentially just a
-	// single Concrete link; perform the rest of that initialization.
+	// If there are no virtuals, and there is only one connected
+	// component, then this is just a single Concrete link; perform
+	// the rest of initialization for just that.  There is a pathological
+	// case where there are no virtuals, but there are multiple
+	// disconnected components.  I think that this is a user-error,
+	// but in fact PLN does have a rule which wants to explore that
+	// combinatoric explosion, on purpose. So we have to allow the
+	// multiple disconnected components for that case.
 	_num_comps = comps.size();
-	if (1 == _num_comps)
+	_num_virts = _virtual.size();
+	if (0 == _num_virts and 1 == _num_comps)
 	{
 		make_connectivity_map(_cnf_clauses);
 		return;
