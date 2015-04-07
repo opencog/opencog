@@ -24,10 +24,12 @@
 #define _OPENCOG_CONCRETE_LINK_H
 
 #include <opencog/atoms/bind/LambdaLink.h>
-#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
+class PatterniMatchEngine;
+class PatterniMatchCallback;
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -109,6 +111,7 @@ protected:
 	             const std::set<Handle>& optionals);
 
 	void init(void);
+	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
 public:
 	ConcreteLink(const HandleSeq&,
@@ -121,9 +124,9 @@ public:
 
 	ConcreteLink(Link &l);
 
-	void satisfy(PatternMatchCallback*);
+	void satisfy(PatternMatchCallback*) const;
 
-	void debug_print(const char* tag);
+	void debug_print(const char* tag) const;
 };
 
 typedef std::shared_ptr<ConcreteLink> ConcreteLinkPtr;

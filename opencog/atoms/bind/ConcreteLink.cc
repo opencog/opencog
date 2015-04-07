@@ -401,7 +401,7 @@ void ConcreteLink::check_connectivity(
 
 /* ================================================================= */
 
-void ConcreteLink::debug_print(const char* tag)
+void ConcreteLink::debug_print(const char* tag) const
 {
 	// Print out the predicate ...
 	printf("\nRedex '%s' has following clauses:\n", tag);

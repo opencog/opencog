@@ -1138,6 +1138,23 @@ void PatternMatchEngine::graph_stacks_clear(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
+void PatternMatchEngine::PatternMatchEngine(void)
+{
+	// current state
+	in_quote = false;
+	curr_root = Handle::UNDEFINED;
+	curr_soln_handle = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
+	depth = 0;
+
+	// graph state
+	_graph_stack_depth = 0;
+
+	// unordered link state
+	have_more = false;
+	more_depth = 0;
+}
+
 /**
  * Clear only the internal clause declarations
  */

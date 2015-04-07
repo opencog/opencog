@@ -63,16 +63,71 @@ void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 }
 
 // All clauses of the Concrete link are connected, so this is easy.
-void ConcreteLink::satisfy(PatternMatchCallback* pmcb)
+void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
+                           PatternMatchEngine *pme) const
 {
-   PatternMatchEngine pme;
-	pme.match(pmcb, _varset, ... 
+	pme->_bound_vars = _varset;
+	pme->_cnf_clauses = _cnf_clauses;
+	pme->_mandatory = _mandatory;
+	pme->_optionals = _optionals;
+	pme->_evaluatable = _evaluatable;
+	pme->_connectivity_map = _connectivity_map;
+	pme->_pmc = pmcb;
+
+	pmcb->set_type_restrictions(&_typemap);
+	pmcb->initiate_search(pme, vars, _mandatory);
 }
 
-void SatisfactionLink::satisfy(PatternMatchCallback* pmc)
+void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
-   PatternMatch::do_match(pmc, _varset, _virtual,
-	                       _components, _component_vars);
+   PatternMatchEngine pme;
+	satisfy(pmcb, &pme);
+}
+
+void SatisfactionLink::satisfy(PatternMatchCallback* pmc) const
+{
+	if (1 == _num_comps)
+	{
+		ConcreteLink::satisfy(pmc);
+		return;
+	}
+
+	// If we are here, then we've got a knot in the center of it all.
+	// Removing the virtual clauses from the hypergraph typically causes
+	// the hypergraph to fall apart into multiple components, (i.e. none
+	// are connected to one another). The virtual clauses tie all of
+	// these back together into a single connected graph.
+	//
+	// There are several solution strategies possible at this point.
+	// The one that we will pursue, for now, is to first ground all of
+	// the distinct components individually, and then run each possible
+	// grounding combination through the virtual link, for the final
+	// accept/reject determination.
+
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+
+	for (size_t i=0; i<_num_comps; i++)
+	{
+		// Pass through the callbacks, collect up answers.
+		PMCGroundings gcb(cb);
+		PatternMatchEngine pme;
+		_components[i].satisfy(&gcb, &pme);
+
+		comp_var_gnds.push_back(gcb._var_groundings);
+		comp_pred_gnds.push_back(gcb._pred_groundings);
+	}
+
+	// And now, try grounding each of the virtual clauses.
+	dbgprt("BEGIN component recursion: ====================== "
+	       "num comp=%zd num virts=%zd\n",
+	       comp_var_gnds.size(), virtuals.size());
+	std::map<Handle, Handle> empty_vg;
+	std::map<Handle, Handle> empty_pg;
+	std::vector<Handle> negations; // currently ignored
+	PatternMatch::recursive_virtual(cb, virtuals, negations,
+	                  empty_vg, empty_pg,
+	                  comp_var_gnds, comp_pred_gnds);
 }
 
 void BetaRedex::satisfy(PatternMatchCallback* pmc,

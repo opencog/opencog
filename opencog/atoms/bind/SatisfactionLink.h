@@ -24,7 +24,6 @@
 #define _OPENCOG_SATISFACTION_LINK_H
 
 #include <opencog/atoms/bind/ConcreteLink.h>
-#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
@@ -85,7 +84,7 @@ public:
 	// XXX temp hack till thigs get sorted out; remove this method later.
 	const HandleSeq& get_clauses(void) { return _clauses; }
 
-	void satisfy(PatternMatchCallback *);
+	void satisfy(PatternMatchCallback *) const;
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

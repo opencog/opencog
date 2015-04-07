@@ -33,8 +33,12 @@
 
 namespace opencog {
 
+class ConcreteLink;
+
 class PatternMatchEngine
 {
+	friend class ConcreteLink;
+
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
@@ -158,7 +162,7 @@ class PatternMatchEngine
 		PatternMatchCallback *_pmc;
 
 	public:
-		PatternMatchEngine(void) {}
+		PatternMatchEngine(void);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.
