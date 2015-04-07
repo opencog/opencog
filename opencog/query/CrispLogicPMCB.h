@@ -130,7 +130,7 @@ class CrispLogicPMCB :
 			}
 
 			Handle hp(pat_link);
-			if (_dyns.find(hp) == _dyns.end()) return true;
+			if (_dynamic->find(hp) == _dynamic->end()) return true;
 
 			// We will find ourselves here whenever the link contains
 			// a GroundedPredicateNode. In this case, execute the
@@ -155,14 +155,7 @@ class CrispLogicPMCB :
 			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
 		}
 
-		virtual void set_evaluatable_terms(const std::set<Handle>& terms)
-		{
-			_dyns = terms;
-		}
-
 	private:
-		// Info about GPN's
-		std::set<Handle> _dyns;
 		bool _in_seq_and;
 		// XXX FIXME the boolean _in_seq_and should really be a stack,
 		// which is pushed/popped on each entry and exit.  The stack is

@@ -255,7 +255,7 @@ class PatternMatchCallback
 		 * match decisions based on TruthValues, then these terms will
 		 * typically need to be evaluated during the search.
 		 */
-		virtual void set_evaluatable_terms(const set::set<Handle>&) {}
+		virtual void set_evaluatable_terms(const std::set<Handle>&) {}
 
 		/**
 		 * Called very early, before pattern-matching has begun. This
@@ -263,7 +263,7 @@ class PatternMatchCallback
 		 * that contain ("hold") evaluatable terms in them. See above
 		 * for the definition of an "evaluatable term".
 		 */
-		virtual void set_evaluatable_holders(const set::set<Handle>&) {}
+		virtual void set_evaluatable_holders(const std::set<Handle>&) {}
 
 		/**
 		 * Called to initiate the search. This callback is responsible

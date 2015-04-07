@@ -87,11 +87,11 @@ class PMCGroundings : public PatternMatchCallback
 		void set_type_restrictions(const VariableTypeMap& tm) {
 			_cb->set_type_restrictions(tm);
 		}
-		void set_evaluatable_terms(const std::set<Handle>& term) {
-			_cb->set_evaluatabble_terms(terms);
+		void set_evaluatable_terms(const std::set<Handle>& terms) {
+			_cb->set_evaluatable_terms(terms);
 		}
-		void set_evaluatable_holders(const std::set<Handle>& term) {
-			_cb->set_evaluatabble_holders(terms);
+		void set_evaluatable_holders(const std::set<Handle>& terms) {
+			_cb->set_evaluatable_holders(terms);
 		}
 		void initiate_search(PatternMatchEngine* pme,
 	                        const std::set<Handle> &vars,
