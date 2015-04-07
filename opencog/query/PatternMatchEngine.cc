@@ -471,7 +471,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			do {
 				// The recursion step: traverse down the tree.
 				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
-				       more_depth);
+				       (unsigned long)more_depth);
 				var_solutn_stack.push(var_grounding);
 				depth ++;
 
@@ -482,7 +482,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 				more_depth --;
 				depth --;
 				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
-				       more_depth, match);
+				       (unsigned long)more_depth, match);
 
 				// If we've found a grounding, lets see if the
 				// post-match callback likes this grounding.
@@ -499,7 +499,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 					var_solutn_stack.pop();
 					if (hp != hg) var_grounding[hp] = hg;
 					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
-					      more_depth);
+					      (unsigned long)more_depth);
 
 					// If a lower part of a tree has more to do, it will have
 					// set the have_more flag.  If it is done, then the
