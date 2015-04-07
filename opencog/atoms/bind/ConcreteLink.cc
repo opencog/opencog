@@ -109,15 +109,18 @@ ConcreteLink::ConcreteLink(Link &l)
 ///
 /// Unpack the clauses.
 ///
-/// The predicate is either an AndLink, a SequentialAndLink,
-/// or a single clause. If its an AndLink, then its a list of
-/// clauses; a SequentialAnd is also a list, and must be specifically
-/// satisfied in sequential order.  Currently, an OrLink is treated
-/// as a single clause, and is handled separately.
+/// The predicate is either an AndLink of clauses to be satisfied, or a
+/// single clause. Other link types, such as OrLink and SequentialAnd,
+/// are treated here as single clauses; unpacking them here would lead
+/// to confusion in the pattern matcher. This is patly because, after
+/// unpacking, clauses can be grounded in  an arbitrary order; thus,
+/// SequentialAnd's must not be unpacked. In the case of OrLinks, there
+/// is no flag to say that "these are disjoined", so again, that has to
+/// happen later.
 void ConcreteLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
-	if (AND_LINK == t or SEQUENTIAL_AND_LINK == t)
+	if (AND_LINK == t)
 	{
 		_clauses = LinkCast(hbody)->getOutgoingSet();
 	}
