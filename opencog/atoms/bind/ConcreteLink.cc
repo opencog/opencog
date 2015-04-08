@@ -194,16 +194,24 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
                                     HandleSeq& clauses)
 
 {
-	// Make sure that the user did not pass in bogus clauses.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = remove_constants(vars, clauses);
-	if (bogus)
+	// The Fuzzy matcher does some strange things: it declares no
+	// vars at all, only clauses, and then uses the pattern matcher
+	// to automatically explore nearby atoms. As a result, all of
+	// its clauses are "constant", and we allow this special case.
+	// Need to review the rationality of this design...
+	if (0 < vars.size())
 	{
-		logger().warn("%s: Constant clauses removed from pattern",
-		              __FUNCTION__);
+		// Make sure that the user did not pass in bogus clauses.
+		// Make sure that every clause contains at least one variable.
+		// The presence of constant clauses will mess up the current
+		// pattern matcher.  Constant clauses are "trivial" to match,
+		// and so its pointless to even send them through the system.
+		bool bogus = remove_constants(vars, clauses);
+		if (bogus)
+		{
+			logger().warn("%s: Constant clauses removed from pattern",
+			              __FUNCTION__);
+		}
 	}
 
 	// Make sure that each declared variable appears in some clause.
