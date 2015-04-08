@@ -2,10 +2,10 @@
 ; processing-utils.scm
 ;
 ; Utilities for applying different processing steps to input sentences.
-; These include getting a list of recently parsed sentences, and a 
-; utility to send raw input text to the RelEx parse server, with the 
+; These include getting a list of recently parsed sentences, and a
+; utility to send raw input text to the RelEx parse server, with the
 ; resulting parse inserted into the cogserver atomspace.
-; 
+;
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ; Copyright (c) 2015 OpenCog Foundation
 ;
@@ -21,7 +21,7 @@
    )
 )
 
-; Return the list of SentenceNodes that are attached to the 
+; Return the list of SentenceNodes that are attached to the
 ; freshly-parsed anchor.  This list will be non-empty if relex-parse
 ; has been recently run. This list can be emptied with the call
 ; release-new-parsed-sent below.
@@ -30,7 +30,7 @@
 	(cog-chase-link 'ListLink 'SentenceNode (AnchorNode "# New Parsed Sentence"))
 )
 
-; release-new-parsed-sents deletes the links that anchor sentences to 
+; release-new-parsed-sents deletes the links that anchor sentences to
 ; to new-parsed-sent anchor.
 ;
 (define (release-new-parsed-sents)
@@ -40,8 +40,8 @@
 ; -----------------------------------------------------------------------
 ; relex-parse -- send text to RelEx parser, load the resulting opencog atoms
 ;
-; This routine takes plain-text input (in english), and sends it off 
-; to a running instance of the RelEx parser, which should be listening 
+; This routine takes plain-text input (in english), and sends it off
+; to a running instance of the RelEx parser, which should be listening
 ; on port 4444. The parser will return a set of atoms, and these are
 ; then loaded into this opencog instance. After import, these are attached
 ; to the "*new-parsed-sent-anchor*" via a ListLink; the set of newly added
@@ -98,7 +98,7 @@
 
 ; -----------------------------------------------------------------------
 ; attach-parses-to-anchor -- given sentences, attach the parses to anchor.
-; 
+;
 ; Given a list of sentences i.e. a list of SentenceNodes, go through them,
 ; locate the ParseNodes, and attach the parse nodes to the anchor.
 ;
@@ -166,7 +166,7 @@
 
 	; ---------------------------------------------------------------------
 	; Evaluate the string and returns a list with SetLink of the initial r2l rule application.
-	; (ReferenceLink 
+	; (ReferenceLink
 	;   (InterpretationNode "sentence@1d220-c7ace2f_parse_2_interpretation_$X")
 	;   (SetLink
 	;       different links that are a result of r2l rule-functions being applied
@@ -185,7 +185,7 @@
 		; sub-list being a relex-opencog-output string and the second element being
 		; a string of the relex-to-logic function calls that is to be applied on the
 		; relex-opencog-output in the atomspace. The last sub-list is just the AnchorNode.
-		(define z-list (map (lambda (x) (split-string pattern2 x)) 
+		(define z-list (map (lambda (x) (split-string pattern2 x))
 		                                (split-string pattern1 a-string)))
 
 		; helper function that prune away atoms that no longer exists from subsequent
@@ -202,7 +202,7 @@
 		)
 
 		; Given any one of the sub-lists from the z-lists it will evaluate the strings
-		; elements from left to right resulting in the creation of the Atoms of the 
+		; elements from left to right resulting in the creation of the Atoms of the
 		; relex-to-logic pipeline.
 		(define (eval-list a-list)
 			(if (= 1 (length a-list))
@@ -224,15 +224,15 @@
 ;								parse-node
 ;							)
 ;						)
-						(ReferenceLink 
+						(ReferenceLink
 							(InterpretationNode (string-append parse-name "_interpretation_$X"))
 							; The function in the SetLink returns a list of outputs that
 							; are the results of the evaluation of the relex-to-logic functions,
 							; on the relex-opencog-outputs.
 							(SetLink
 								(filter-map pruner
-									(delete-duplicates 
-										(apply append 
+									(delete-duplicates
+										(apply append
 											(map-in-order eval-string
 												(filter (lambda (x) (not (string=? "" x)))
 													(split-string "\n" (list-ref a-list 1))
@@ -256,7 +256,7 @@
 	)
 
 	; ---------------------------------------------------------------------
-	; A helper function 
+	; A helper function
 	(define (set-interpret port)
 		(let ((string-read (get-string-all port)))
 			(if (eof-object? string-read)
@@ -287,7 +287,7 @@
 
 ; -----------------------------------------------------------------------
 ; nlp-parse -- Wrap the whole NLP pipeline in one function.
-; 
+;
 ; Call the necessary functions for the full NLP pipeline.
 ;
 (define (nlp-parse plain-text)
@@ -296,7 +296,7 @@
 
 	; call the RelEx server
 	(r2l-parse plain-text)
-	
+
 	(let ((sent-nodes (get-new-parsed-sentences)))
 		; increment the R2L's node count value
 		(parallel-map-parses
@@ -338,9 +338,38 @@
 			sent-nodes
 		)
 		(release-new-parsed-sents)
-	
+
 		; return the list of SentenceNode
 		sent-nodes
 	)
 )
 
+; -----------------------------------------------------------------------
+; Returns the parses of strings found on each line in a file at 'filepath'.
+;
+; 'filepath': a string that points to the file containing the strings
+;             to be parsed.
+;
+(define (nlp-parse-from-file filepath)
+    (let*
+        ((cmd-string (string-join (list "cat " filepath) ""))
+        (port (open-input-pipe cmd-string))
+        (line (get-line port))
+        )
+        (while (not (eof-object? line))
+            (if (or (= (string-length line) 0)
+                    (char=? #\; (string-ref (string-trim line) 0))
+                )
+                (set! line (get-line port))
+                (if (string=? "END." line)  ; continuing the tradition of RelEx
+                    (break)
+                    (begin
+                        (nlp-parse line)
+                        (set! line (get-line port))
+                    )
+                )
+            )
+        )
+        (close-pipe port)
+    )
+)
