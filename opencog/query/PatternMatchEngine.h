@@ -44,6 +44,10 @@ class PatternMatchEngine
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
+	// Used for managing OrLink state
+	typedef std::pair<const Handle&, const Handle&> Choice;
+	typedef std::map<Choice, size_t> ChoiceState;
+
 	private:
 		// -------------------------------------------
 		// The current set of clauses (redex context) being grounded.
@@ -151,9 +155,11 @@ class PatternMatchEngine
 		bool get_next_untried_helper(bool);
 
 		// --------------------------------------------------
-		// or-link scaffoldig
-		void push_stuff(void);
-		void pop_stuff(void);
+		// OrLink (choice) state management
+		ChoiceState _choice_state;
+		size_t choice_resume(const Handle&, const Handle&);
+		void choice_set(const Handle&, const Handle&, size_t);
+		void choice_clear(const Handle&, const Handle&);
 
 		// --------------------------------------------------
 		// Unordered-link stuff. This needs a major overhaul.

@@ -298,55 +298,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
 
-	// OR_LINK's are multiple-choice links. As long as we can
-	// can match one of the sub-expressions of the OrLink, then
-	// the OrLink as a whole can be considered to be grounded.
-	//
-	// After finding a grounding for a subexpression, we need to save
-	// state, so that, later one, we can resume, and try a different
-	// subexpression.  The state that needs to be pushed is this:
-	// * The current var and pred groundings,
-	// * The current OR-clause (so that we can resume exploring the next
-	//   one)
-	// This means that the loop over the outgoing set of an OR-link
-	// cannot be an actual loop, but must be a recursive call.
-	if (classserver().isA(tp, OR_LINK))
-	{
-		OC_ASSERT(caller == CALL_SOLN, "Not yet implemented!");
-
-		LinkPtr lp(LinkCast(hp));
-		bool match = false;
-		const std::vector<Handle> &osp = lp->getOutgoingSet();
-		for (Handle hop : osp)
-		{
-			prtmsg("tree_comp or_link choice: ", hop);
-			var_solutn_stack.push(var_grounding);
-
-			match = tree_recurse(hop, hg, CALL_CHOICE);
-			// If no match, then try the next one.
-			if (not match)
-			{
-				// Get rid of any grounding that might have been proposed
-				// during the tree-match.
-				POPGND(var_grounding, var_solutn_stack);
-				continue;
-			}
-
-			// Keep the grounding that was found. Even up the stack.
-			var_solutn_stack.pop();
-
-			// If we've found a grounding, record it.
-			// Note we record the grounding for both the OrLink,
-			// and for the specific clause that was picked.
-			var_grounding[hop] = hg;
-			var_grounding[hp] = hg;
-			break;
-		}
-		if (not match) return false;
-
-		return true;
-	}
-
 	// If both are links, compare them as such.
 	// Unless pattern link is a QuoteLink, in which case, the quoted
 	// contents is compared. (well, that was done up above...)
@@ -399,6 +350,46 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		prtmsg("> tree_compare", hp);
 		prtmsg(">           to", hg);
 
+		// OR_LINK's are multiple-choice links. As long as we can
+		// can match one of the sub-expressions of the OrLink, then
+		// the OrLink as a whole can be considered to be grounded.
+		//
+		if (classserver().isA(tp, OR_LINK))
+		{
+			OC_ASSERT(caller == CALL_SOLN, "Not yet implemented!");
+
+			const std::vector<Handle> &osp = lp->getOutgoingSet();
+
+			// _choice_state lets use resume wher we last left off.
+			size_t iend = osp.size();
+			size_t istart;
+			try { istart = _choice_state.at(Choice(hp, hg)); }
+			catch(...) { istart = 0;}
+			for (size_t i=istart; i<iend; i++)
+			{
+				const Handle& hop = osp[i];
+
+				prtmsg("tree_comp or_link choice: ", hop);
+
+				match = tree_recurse(hop, hg, CALL_CHOICE);
+				if (match)
+				{
+					// If we've found a grounding, lets see if the
+					// post-match callback likes this grounding.
+					match = _pmc->post_link_match(lp, lg);
+					if (not match) continue;
+
+					// If we've found a grounding, record it.
+					if (hp != hg) var_grounding[hp] = hg;
+					_choice_state[Choice(hp, hg)] = i+1;
+					return true;
+				}
+			}
+			// If we are here, we've explored all the possibilities already
+			_choice_state.erase(Choice(hp, hg));
+			return false;
+		}
+
 		// If the two links are both ordered, its enough to compare
 		// them "side-by-side"; the foreach_atom_pair iterator does
 		// this. If they are un-ordered, then we have to compare every
@@ -406,8 +397,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// explosion.
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
-			LinkPtr lp(LinkCast(hp));
-			LinkPtr lg(LinkCast(hg));
 			const HandleSeq &osp = lp->getOutgoingSet();
 			const HandleSeq &osg = lg->getOutgoingSet();
 
