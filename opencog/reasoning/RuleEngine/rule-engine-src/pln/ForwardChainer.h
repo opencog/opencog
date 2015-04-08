@@ -31,7 +31,8 @@
 
 class ForwardChainerUTest;
 
-namespace opencog {
+namespace opencog
+{
 
 class ForwardChainerCallBack;
 class ForwardChainer {
@@ -46,17 +47,9 @@ private:
      * initialize config methods
      */
     void init();
-    //TODO this is duplicate method
-    /**
-     * choose a random source to start forward chaining with. This is
-     * useful when there is no source specified ahead to the forward
-     * chaining process.
-     *
-     * @param as - the atomspace instance from which source is selected
-     */
-    Handle choose_random_source(AtomSpace *);
     void add_to_source_list(Handle h);
-    void init_source(Handle source);
+
+    void do_pm();
     void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes,
                ForwardChainerCallBack& fcb);
 protected:
