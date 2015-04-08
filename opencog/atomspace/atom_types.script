@@ -80,12 +80,13 @@ QUOTE_LINK <- ORDERED_LINK
 
 // Pattern and function declaration
 LAMBDA_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK
-BETA_REDEX <- ORDERED_LINK
+DEFINE_LINK <- ORDERED_LINK     // Gives lambda a name
+BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Scoping and Logical quantifiers
-SATISFACTION_LINK <- LAMBDA_LINK   // Finds all groundings
-BIND_LINK <- SATISFACTION_LINK           // Finds all groundings and executes
+CONCRETE_LINK <- LAMBDA_LINK       // a set of clauses with no virtuals
+SATISFACTION_LINK <- CONCRETE_LINK   // Finds all groundings
+BIND_LINK <- SATISFACTION_LINK     // Finds all groundings and executes
 
 FORALL_LINK <- LAMBDA_LINK "ForAllLink"
 EXISTS_LINK <- LAMBDA_LINK

@@ -1,7 +1,8 @@
 
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultImplicator.h>
-#include <opencog/atoms/bind/BindLink.h>
 
 using namespace opencog;
 
@@ -46,4 +47,16 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
 	// Turn it into a true list, and return it.
 	Handle gl = as->addLink(LIST_LINK, impl.result_list);
 	return gl;
+}
+
+/**
+ * Pattern Matcher. Just run the matcher against the indicated
+ * variables and clauses, using eh indicated callback.
+ */
+static inline void match(PatternMatchCallback* pmcb,
+                         const std::set<Handle> &vars,
+                         const std::vector<Handle> &clauses)
+{
+	SatisfactionLinkPtr slp(createSatisfactionLink(vars, clauses));
+	slp->satisfy(pmcb);
 }

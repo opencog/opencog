@@ -46,6 +46,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
 			_type_restrictions(NULL),
+			_dynamic(NULL),
 			_as(as)
 		{}
 
@@ -150,12 +151,24 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		{
 			_type_restrictions = &tm;
 		}
+
+		/**
+		 * Indicate the dynamically-evaluatable terms. Searchs cannot
+		 * be started with these, as groundings probably won't exist
+		 * in the  atomspace.
+		 */
+		virtual void set_evaluatable_terms(const std::set<Handle>& terms)
+		{
+			_dynamic = &terms;
+		}
 	protected:
 		Handle _root;
 		Handle _starter_pred;
 		const VariableTypeMap* _type_restrictions;
-		virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
-		virtual Handle find_thinnest(const std::vector<Handle>&, Handle&, size_t&);
+		const std::set<Handle>* _dynamic;
+
+		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
+		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
 
 		/**
 		 * Perform a full atomspace search.

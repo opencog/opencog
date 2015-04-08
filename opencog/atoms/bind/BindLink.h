@@ -23,24 +23,20 @@
 #ifndef _OPENCOG_BIND_LINK_H
 #define _OPENCOG_BIND_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental BindLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 class BindLink : public SatisfactionLink
 {
 protected:
+	void init(void);
 
 	/// The actual clauses. Set by validate_body()
+	Handle _hclauses;
 	Handle _implicand;
 
 	// Validate the structure of the body

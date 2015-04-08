@@ -23,19 +23,12 @@
 #ifndef _OPENCOG_SATISFACTION_LINK_H
 #define _OPENCOG_SATISFACTION_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
-#include <opencog/query/PatternMatchCallback.h>
+#include <opencog/atoms/bind/ConcreteLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental SatisfactionLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 
 /// The SatisfactionLink is used to specify a list of variables, and a
@@ -44,38 +37,39 @@ namespace opencog
 /// being that it has a very specific semantics: the pattern is to be
 /// grounded!
 ///
+/// The body of the ConcreteLink is assumed to collection of clauses
+/// to be satsified. Thus, the body is typically an AndLink, OrLink
+/// or a SequentialAnd, depending on how they are to be satsified.
+/// This is very much like a ConcreteLink, except that it may contain
+/// clauses that are virtual (e.g. GreaterThanLink, or EvaluationLinks
+/// with GroundedPredicateNodes).
+///
 /// It is similar to a BindLink, except that a BindLink also causes an
 /// implication to be performed: after a grounding is found, the
 /// BindLink then causes the implication to run with the resultant
 /// grounding.  The SatisfactionLink does not specify what should happen
 /// with the grounding, although the (cog-satisfy) scheme call returns
 /// a truth value.
-class SatisfactionLink : public LambdaLink
+class SatisfactionLink : public ConcreteLink
 {
 protected:
-	/// The actual clauses. Set by validate_clauses()
-	Handle _hclauses;
-	std::vector<Handle> _clauses;
-
 	/// The graph components. Set by validate_clauses()
 	/// "virtual" clauses are those that contain virtual links.
 	/// "fixed" clauses are those that do not.
-	std::vector<Handle> _fixed;
-	std::vector<Handle> _virtual;
-	std::set<std::vector<Handle>> _components;
-
-	// Validate the clauses inside the body
-	void unbundle_clauses(const Handle&);
-	void validate_clauses(std::set<Handle>& vars,
-	                      std::vector<Handle>& clauses);
-
-	void check_connectivity(const std::set<std::vector<Handle>>&);
+	/// The list of component_vars are the variables that appear
+	/// in the corresponding component.
+	HandleSeq _fixed;
+	size_t _num_virts;
+	HandleSeq _virtual;
+	size_t _num_comps;
+	HandleSeq _components;
 
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
+	void setup_sat_body(void);
 
 public:
 	SatisfactionLink(const HandleSeq&,
@@ -88,10 +82,13 @@ public:
 
 	SatisfactionLink(Link &l);
 
+	SatisfactionLink(const std::set<Handle> &vars,
+	                 const HandleSeq& clauses);
+
 	// XXX temp hack till thigs get sorted out; remove this method later.
 	const HandleSeq& get_clauses(void) { return _clauses; }
 
-	void satisfy(PatternMatchCallback *);
+	void satisfy(PatternMatchCallback *) const;
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

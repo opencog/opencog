@@ -35,7 +35,6 @@ using namespace opencog;
 class PatternUTest: public CxxTest::TestSuite
 {
 	private:
-		PatternMatchEngine pme;
 		AtomSpace *as;
 
 		// These handles are documented below.
@@ -242,7 +241,7 @@ void PatternUTest::test_simple_link(void)
 	preds.push_back(he);
 
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds);
+	match(&pmcb, vars, preds);
 
 	// Should find only one solution.
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -296,7 +295,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hl2);
 
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds);
+	match(&pmcb, vars, preds);
 
 	// Should find two solutions:
 	// var_x = soln_b
@@ -355,7 +354,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(heval);
 
 	PMCB pmcb(as);
-	pme.match(&pmcb, vars, preds);
+	match(&pmcb, vars, preds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -380,7 +379,7 @@ void PatternUTest::test_eval(void)
 	spreds.push_back(hshort_eval);
 
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, svars, spreds);
+	match(&pmcb, svars, spreds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -395,7 +394,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hshort_eval);
 	vars.insert(hprns);
 	pmcb.found = 0; // reset the counter !!
-	pme.match(&pmcb, vars, preds);
+	match(&pmcb, vars, preds);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

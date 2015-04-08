@@ -27,20 +27,20 @@
 
 using namespace opencog;
 
-Handle Instantiator::walk_tree(Handle expr)
+Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
 	if (not lexpr)
 	{
 		if (VARIABLE_NODE != t)
-			return expr;
+			return Handle(expr);
 
 		// If we are here, we found a variable. Look it up. Return a
 		// grounding if it has one, otherwise return the variable
 		// itself
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		return _vmap->end() != it ? it->second : expr;
+		return _vmap->end() != it ? it->second : Handle(expr);
 	}
 
 	// If we are here, then we have a link. Walk it.
@@ -88,7 +88,7 @@ Handle Instantiator::walk_tree(Handle expr)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(Handle& expr,
+Handle Instantiator::instantiate(const Handle& expr,
                                  const std::map<Handle, Handle> &vars)
 {
 	// throw, not assert, because this is a user error ...

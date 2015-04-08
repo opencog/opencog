@@ -25,6 +25,7 @@
 #include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -34,7 +35,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
- #define DEBUG
+// #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -274,6 +275,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		}
 		else
 		{
+#if THIS_CANT_BE_RIGHT
 			// Bound but quoted variables cannot be solutions to themselves.
 			// huh? whaaaat?
 			if (not in_quote or
@@ -283,6 +285,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			{
 				if (hp != hg) var_grounding[hp] = hg;
 			}
+#endif // THIS_CANT_BE_RIGHT
 
 		}
 #endif
@@ -290,6 +293,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// then we must fall through, and let the tree comp mechanism
 		// find and evaluate them.
 		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
+		else
+		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
 
 	// OR_LINK's are multiple-choice links. As long as we can
@@ -793,10 +798,14 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	}
 	else
 	{
-		prtmsg("next clause is", curr_root);
-		dbgprt("This clause is %s\n", _optionals.count(curr_root)? "optional" : "required");
-		prtmsg("joining handle is", curr_pred_handle);
-		prtmsg("join grounding is", var_grounding[curr_pred_handle]);
+		prtmsg("Next clause is", curr_root);
+		dbgprt("This clause is %s\n",
+			_optionals.count(curr_root)? "optional" : "required");
+		dbgprt("This clause is %s\n",
+			_evaluatable.count(curr_root)?
+			"dynamically evaluatable" : "non-dynamic");
+		prtmsg("Joining variable  is", curr_pred_handle);
+		prtmsg("Joining grounding is", var_grounding[curr_pred_handle]);
 
 		// Else, start solving the next unsolved clause. Note: this is
 		// a recursive call, and not a loop. Recursion is halted when
@@ -1076,27 +1085,6 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 }
 
 /**
- * Create a map that holds all of the clauses that a given atom
- * participates in.  In other words, it indicates all the places
- * where an atom is shared by multiple trees, and thus establishes
- * how the trees are connected.
- *
- * This is used for only one purpose: to find the next unsolved
- * clause. This could probably be made smaller...!?
- */
-void PatternMatchEngine::make_connectivity_map(const Handle& root, const Handle& h)
-{
-	_connectivity_map[h].push_back(root);
-
-	LinkPtr l(LinkCast(h));
-	if (l)
-	{
-		for (const Handle& ho: l->getOutgoingSet())
-			make_connectivity_map(root, ho);
-	}
-}
-
-/**
  * Clear current traversal state. This gets us into a state where we
  * can start traversing a set of clauses.
  */
@@ -1138,6 +1126,23 @@ void PatternMatchEngine::graph_stacks_clear(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
+PatternMatchEngine::PatternMatchEngine(void)
+{
+	// current state
+	in_quote = false;
+	curr_root = Handle::UNDEFINED;
+	curr_soln_handle = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
+	depth = 0;
+
+	// graph state
+	_graph_stack_depth = 0;
+
+	// unordered link state
+	have_more = false;
+	more_depth = 0;
+}
+
 /**
  * Clear only the internal clause declarations
  */
@@ -1151,143 +1156,6 @@ void PatternMatchEngine::clear_redex(const std::string& name)
 	_optionals.clear();
 	_evaluatable.clear();
 	_connectivity_map.clear();
-}
-
-/**
- * Given the initial list of variables and clauses, extract the optional
- * clauses and the dynamically-evaluatable clauses. Also make note of
- * the connectivity diagram of the clauses.
- *
- * It is assumed that the set of clauses form a single, connected
- * component; i.e. that the clauses are pair-wise connected by common,
- * shared variables, and that this pair-wise connection extends over
- * the entire set of clauses. There is no other restriction on the
- * connection topology; they can form any graph whatsoever (as long as
- * itws connected).
- */
-void PatternMatchEngine::setup_redex(
-                               const std::set<Handle> &vars,
-                               const std::vector<Handle> &component)
-{
-	// Split in positive and negative clauses
-	for (const Handle& h : component)
-	{
-		Type t = h->getType();
-		if (NOT_LINK == t or ABSENT_LINK == t) {
-			Handle inv(LinkCast(h)->getOutgoingAtom(0));
-			_optionals.insert(inv);
-			_cnf_clauses.push_back(inv);
-		}
-		else
-		{
-			_mandatory.push_back(h);
-			_cnf_clauses.push_back(h);
-		}
-	}
-
-	_bound_vars = vars;
-
-	if (_cnf_clauses.empty()) return;
-
-	// Preparation prior to search.
-	// Find everything that contains GPN's or the like.
-	FindAtoms fgpn(GROUNDED_PREDICATE_NODE, VIRTUAL_LINK, true);
-	fgpn.find_atoms(_cnf_clauses);
-	_evaluatable = fgpn.holders;
-
-	// Create a table of the nodes that appear in the clauses, and
-	// a list of the clauses that each node participates in.
-	for (const Handle& h : _cnf_clauses)
-	{
-		make_connectivity_map(h, h);
-	}
-
-	// Save some minor amount of space by erasing those atoms that
-	// participate in only one clause. These atoms cannot be used
-	// to determine connectivity between clauses, and so are un-needed.
-	auto it = _connectivity_map.begin();
-	auto end = _connectivity_map.end();
-	while (it != end)
-	{
-		if (it->second.size() == 1)
-			it = _connectivity_map.erase(it);
-		else
-			it++;
-	}
-
-#ifdef DEBUG
-	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n", _redex_name.c_str());
-	int cl = 0;
-	for (Handle h : _mandatory)
-	{
-		printf("Mandatory %d: ", cl);
-		prt(h);
-		cl++;
-	}
-
-	if (0 < _optionals.size())
-	{
-		printf("Predicate includes the following optional clauses:\n");
-		cl = 0;
-		for (Handle h : _optionals)
-		{
-			printf("Optional clause %d: ", cl);
-			prt(h);
-			cl++;
-		}
-	}
-	else
-	{
-		printf("No optional clauses\n");
-	}
-
-	// Print out the bound variables in the predicate.
-	for (Handle h : _bound_vars)
-	{
-		if (NodeCast(h))
-		{
-			printf(" Bound var: "); prt(h);
-		}
-	}
-
-	if (_bound_vars.empty())
-	{
-		printf("There are no bound vars in this pattern\n");
-	}
-	printf("\n");
-	fflush(stdout);
-#endif
-}
-
-/* ======================================================== */
-
-/**
- * Main entry point for the pattern matcher engine. This is the
- * method that sets the gears in motion.
- */
-void PatternMatchEngine::match(PatternMatchCallback *cb,
-                               const std::set<Handle> &vars,
-                               const std::vector<Handle> &component)
-{
-	// Clear all state, and set up clauses
-	clear_current_state();
-	graph_stacks_clear();
-
-	clear_redex();
-	setup_redex(vars, component);
-
-	if (_cnf_clauses.empty()) return;
-
-	// Get the search started. The initiator callback determines
-	// the portion of the atomspace to be searched.
-	_pmc = cb;
-	cb->initiate_search(this, vars, _mandatory);
-
-#ifdef DEBUG
-	dbgprt ("==================== Done Matching ==================\n");
-	fflush(stdout);
-#endif
 }
 
 /* ======================================================== */

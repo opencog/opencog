@@ -51,7 +51,8 @@ class PatternMatchCallback
 		 * Return true if the nodes match, else return
 		 * false. (i.e. return false if mis-match).
 		 */
-		virtual bool node_match(const Handle& node1, const Handle& node2) = 0;
+		virtual bool node_match(const Handle& patt_node,
+		                        const Handle& grnd_node) = 0;
 
 		/**
 		 * Called when a variable in the template pattern
@@ -62,7 +63,8 @@ class PatternMatchCallback
 		 * Return true if the grouding is acceptable, else
 		 * return false. (i.e. return false if mis-match).
 		 */
-		virtual bool variable_match(const Handle& node1, const Handle& node2) = 0;
+		virtual bool variable_match(const Handle& patt_node,
+		                            const Handle& grnd_node) = 0;
 
 		/**
 		 * Called right before link in the template pattern
@@ -89,7 +91,8 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(const LinkPtr& link1, const LinkPtr& link2) = 0;
+		virtual bool link_match(const LinkPtr& patt_link,
+		                        const LinkPtr& grnd_link) = 0;
 
 		/**
 		 * Called after a candidate grounding has been found
@@ -103,8 +106,12 @@ class PatternMatchCallback
 		 * found to match.  It offers a chance to record
 		 * the candidate grounding, or to reject it for some
 		 * reason.
+		 *
+		 * The first link is from the pattern, the second is
+		 * from the proposed grounding.
 		 */
-		virtual bool post_link_match(const LinkPtr& link1, const LinkPtr& link2)
+		virtual bool post_link_match(const LinkPtr& patt_link,
+		                             const LinkPtr& grnd_link)
 		{
 			return true; // Accept the match, by default.
 		}
@@ -138,7 +145,8 @@ class PatternMatchCallback
 		 * main AtomSpace (it is held in a temporary AtomSpace that is
 		 * deleted upon return from this callback).
 		 */
-		virtual bool virtual_link_match(const Handle& virt, const Handle& args) = 0;
+		virtual bool virtual_link_match(const Handle& virt,
+		                                const Handle& args) = 0;
 
 		/**
 		 * Called when a complete grounding to all clauses is found.
@@ -160,9 +168,13 @@ class PatternMatchCallback
 		 * Return false to discard the use of this clause as a possible
 		 * grounding, return true to use this grounding.
 		 */
-		virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h)
+		virtual bool clause_match(const Handle& pattrn_link_h,
+		                          const Handle& grnd_link_h)
 		{
-			//	if (pattrn_link_h == grnd_link_h) return true;
+			// By default, reject a clause that is grounded by itself.
+			// XXX someone commented this out... why??? Do you really
+			// want self-grounding???
+			//	if (pattrn_link_h == grnd_link_h) return false;
 			return true;
 		}
 
@@ -181,11 +193,12 @@ class PatternMatchCallback
 		 * any optional clauses are examined.
 		 *
 		 * The default semantics here is to reject a match if the optional
-		 * clasues are detected.  This is in keeping with the semantics of
+		 * clauses are detected.  This is in keeping with the semantics of
 		 * AbsentLink: a match is possible only if the indicated clauses
 		 * are absent!
 		 */
-		virtual bool optional_clause_match(const Handle& pattrn, const Handle& grnd)
+		virtual bool optional_clause_match(const Handle& pattrn,
+		                                   const Handle& grnd)
 		{
 			if (Handle::UNDEFINED == grnd) return true;
 			return false;
@@ -223,12 +236,34 @@ class PatternMatchCallback
 		/**
 		 * Called very early, before pattern-matching has begun. This
 		 * conveys how the variable declarations in a BindLink were
-		 * decoded.  The argument is nothing more than the variable
-		 * declarations, as given in the atomspace, but re-expressed
-		 * in a slightly more convenient C++ form, is all.  This
-		 * callback may alter the typemap before returning.
+		 * decoded.  The argument contains nothing more than a map
+		 * holding the type restrictions, if any, on each variable that
+		 * was declared in the VariableList bound to the pattern. The
+		 * map allows a fast lookup by variable name, to find any of
+		 * it's type restrictions.
 		 */
 		virtual void set_type_restrictions(const VariableTypeMap& tm) {}
+
+		/**
+		 * Called very early, before pattern-matching has begun. This
+		 * conveys a list of all of the evaluatable terms in the pattern.
+		 * By "evaluatable", it is meant any term that does not have a
+		 * fixed TruthValue, but rather has a truth value computed
+		 * dynamically, at runtime. Currently, such terms are any
+		 * EvaluationLink that contains a GroundedPredicateNode or any
+		 * link that inherits from a VirtualLink.  If the callbacks make
+		 * match decisions based on TruthValues, then these terms will
+		 * typically need to be evaluated during the search.
+		 */
+		virtual void set_evaluatable_terms(const std::set<Handle>&) {}
+
+		/**
+		 * Called very early, before pattern-matching has begun. This
+		 * conveys a list of all of the links in the search pattern
+		 * that contain ("hold") evaluatable terms in them. See above
+		 * for the definition of an "evaluatable term".
+		 */
+		virtual void set_evaluatable_holders(const std::set<Handle>&) {}
 
 		/**
 		 * Called to initiate the search. This callback is responsible

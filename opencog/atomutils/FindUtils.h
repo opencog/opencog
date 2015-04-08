@@ -113,7 +113,7 @@ class FindAtoms
 
 		inline void find_atoms(const std::vector<Handle>& hlist)
 		{
-			for (const Handle& h : hlist) find_atoms(h);
+			for (const Handle& h : hlist) find_rec(h);
 		}
 	private:
 		typedef enum
@@ -145,9 +145,12 @@ class FindAtoms
 					if (NOPE != where) held = true;
 					if (IMM == where) imm = true;
 				}
-				if (held) holders.insert(h);
 				if (imm) least_holders.insert(h);
-				return YEP;
+				if (held)
+				{
+					holders.insert(h);
+					return YEP;
+				}
 			}
 			return NOPE;
 		}

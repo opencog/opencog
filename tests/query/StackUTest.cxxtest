@@ -22,15 +22,15 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
 
 using namespace opencog;
 
 class StackUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatchEngine pme;
 		AtomSpace *as;
 		Handle svar, wvar;
 		Handle p1, p2;
@@ -167,7 +167,7 @@ void StackUTest::test_stack(void)
 
 	TestPMCB pmcb(as);
 	pmcb.anch = anch;
-	pme.match(&pmcb, vars, preds);
+	match(&pmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("bad link-test call count", 7, pmcb.lcnt);
 	TSM_ASSERT_EQUALS("bad solution call count", 0, pmcb.scnt);

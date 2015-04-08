@@ -29,12 +29,13 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "imply.h"
+
 using namespace opencog;
 
 class FuzzyPatternUTest : public CxxTest::TestSuite
 {
 	private:
-		PatternMatchEngine pme;
 		AtomSpace* as;
 
 		Handle hwn1;
@@ -173,7 +174,7 @@ void FuzzyPatternUTest::test_basic_link(void)
 	HandleSeq preds;
 	preds.push_back(query);
 
-	pme.match(&fpmcb, vars, preds);
+	match(&fpmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 
@@ -194,7 +195,7 @@ void FuzzyPatternUTest::test_basic_node(void)
 	HandleSeq preds;
 	preds.push_back(query);
 
-	pme.match(&fpmcb, vars, preds);
+	match(&fpmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 

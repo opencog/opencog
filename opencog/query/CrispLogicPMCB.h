@@ -28,19 +28,35 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
 
 /**
- * Callback mixin class, used to examine and work with SimpleTruthValues
+ * Callback mix-in class, used to examine and work with SimpleTruthValues
  * so as to implement crisp, non-probabilistic Boolean logic
  * combinations of truth values.  That is, this code attempts to
- * combine the truth values in the predicate part of the pattern
+ * combine the truth values in the clause part of the pattern
  * match, using crisp-logic rules, in order to evaluate the possible
  * groundings of implications.
  *
- * This callback is meant to be chained into place: etc.
+ * Right now, this is sort of quirky in how it behaves... and perhaps
+ * should be changed. For now, it works for the foreseeable
+ * applications. Sooo:
+ *
+ * We don't examine the truth value of every node and link, to determine
+ * a match. Perhaps we should....  We do examine the truth values of the
+ * clauses, to judge whether a clause as a wole, is a matfch or not.
+ * Also, we examine the truth value of links, but only if they are in
+ * a SequentialAnd, AND ALSO if they are evaluatable.   Evaluatable
+ * links can be used as stop-go markers in a pattern, so that's good.
+ * However, the nature of the pattern search algo means that some of
+ * these might be visited twice.  Thus, the SequentialAnd is used to
+ * guarantee that each is visited only once (or not at all), thus giving
+ * the impression of a deterministic sequence of execution. Without
+ * the SequentialAnd, some link in the middle might be searched first,
+ * as that is where the neighborhood search just happened to start.
+ * Only later is the SequentialAnd discovered, and, after it has, it
+ * will explored in order.
  */
 class CrispLogicPMCB :
 	public virtual DefaultPatternMatchCB
@@ -101,7 +117,8 @@ class CrispLogicPMCB :
 			return pattype == soltype;
 		}
 
-		virtual bool post_link_match(const LinkPtr& pat_link, const LinkPtr& gnd_link)
+		virtual bool post_link_match(const LinkPtr& pat_link,
+		                             const LinkPtr& gnd_link)
 		{
 			if (not _in_seq_and) return true;
 
@@ -113,7 +130,7 @@ class CrispLogicPMCB :
 			}
 
 			Handle hp(pat_link);
-			if (_dyns.find(hp) == _dyns.end()) return true;
+			if (_dynamic->find(hp) == _dynamic->end()) return true;
 
 			// We will find ourselves here whenever the link contains
 			// a GroundedPredicateNode. In this case, execute the
@@ -135,20 +152,15 @@ class CrispLogicPMCB :
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
-			FindAtoms fgpn(GROUNDED_PREDICATE_NODE);
-			fgpn.find_atoms(clauses);
-			_dyns = fgpn.least_holders;
 			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
 		}
 
 	private:
-		// Info about GPN's
-		std::set<Handle> _dyns;
 		bool _in_seq_and;
 		// XXX FIXME the boolean _in_seq_and should really be a stack,
 		// which is pushed/popped on each entry and exit.  The stack is
 		// needed for recursive nesting of these things.  Right now,
-		// Im being lazy, but that's a bug ....
+		// I'm being lazy, so that's a bug ....
 };
 
 } // namespace opencog

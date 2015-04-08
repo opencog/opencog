@@ -41,12 +41,6 @@ class PatternMatch
 	friend class SatisfactionLink;
 
 	protected:
-		// See PatternMatch.cc for comments
-		static void do_match(PatternMatchCallback *,
-		              const std::set<Handle>& vars,
-		              const std::vector<Handle>& virtuals,
-		              const std::set<std::vector<Handle>>& components);
-
 		static bool recursive_virtual(PatternMatchCallback *cb,
 		            const std::vector<Handle>& virtuals,
 		            const std::vector<Handle>& negations,

@@ -37,7 +37,7 @@ void LambdaLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting variabe decls and body, got size %d", oset.size());
 
-	validate_vardecl(oset[0]);
+	VariableList::validate_vardecl(oset[0]);
 	_body = oset[1];     // Body
 }
 
@@ -59,6 +59,8 @@ LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: VariableList(t, oset, tv, av)
 {
+	// Derived classes have a different initialization sequence
+	if (LAMBDA_LINK != t) return;
 	init(oset);
 }
 
@@ -74,6 +76,8 @@ LambdaLink::LambdaLink(Link &l)
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 
+	// Dervided types have a different initialization sequence
+	if (LAMBDA_LINK != tscope) return;
 	init(l.getOutgoingSet());
 }
 

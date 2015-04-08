@@ -32,10 +32,6 @@ namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental VariableList class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
@@ -59,7 +55,8 @@ protected:
 	/// as the _varseq; it is used for fast lookup; (i.e. is some
 	/// some variable a part of this set?) whereas the _varseq list
 	/// preserves the original order of the variables.  Yes, the fast
-	/// lookup really is needed!
+	/// lookup really is needed!  The _index is used to implement the
+	/// variable substitution method.
 	HandleSeq _varseq;
 	std::set<Handle> _varset;
 	VariableTypeMap _typemap;

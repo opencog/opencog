@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/PatternMatchEngine.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
 
@@ -43,13 +43,13 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
 #ifdef HAVE_GUILE
     FuzzyPatternMatchCB fpmcb(as);
 
-    std::set<Handle> vars;
-
     HandleSeq preds;
     preds.push_back(hg);
 
-    PatternMatchEngine pme;
-    pme.match(&fpmcb, vars, preds);
+    std::set<Handle> no_vars;
+
+    SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, preds));
+    slp->satisfy(&fpmcb);
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.

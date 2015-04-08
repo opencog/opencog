@@ -32,7 +32,7 @@ using namespace opencog;
 
 void VariableList::validate_vardecl(const HandleSeq& oset)
 {
-	for (Handle h: oset)
+	for (const Handle& h: oset)
 	{
 		Type t = h->getType();
 		if (VARIABLE_NODE == t)
@@ -283,6 +283,9 @@ bool VariableList::is_type(const HandleSeq& hseq) const
 /* ================================================================= */
 /**
  * Build the reverse index from variable name, to its ordinal.
+ * The index is needed for variable substitution, i.e. for the
+ * substitute method below.  The specific sequence order of the
+ * variables is essential for making substitution work.
  */
 void VariableList::build_index(void)
 {
@@ -328,10 +331,17 @@ void VariableList::build_index(void)
  *   EvaluationLink
  *      PredicateNode "something"
  *      ListLink
- *          NumberNode 2.0000
+ *          NumberNode 2.0000    ; note reversed order here, also
  *          ConceptNode "one"
  *
- * That is, the values 1 and 2 were substituted for %a and $b.
+ * That is, the values "one" and 2.0 were substituted for $a and $b.
+ *
+ * The func can be, for example, a single variable name(!) In this
+ * case, the corresponding arg is returned. So, for example, if the
+ * func was simple $b, then 2.0 would be returned.
+ *
+ * Type checking is performed before subsitution; if the args fail to
+ * satisfy the type constraints, an exception is thrown.
  *
  * Again, only a substitution is performed, there is not evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!

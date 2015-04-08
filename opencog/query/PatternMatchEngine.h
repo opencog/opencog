@@ -33,8 +33,12 @@
 
 namespace opencog {
 
+class ConcreteLink;
+
 class PatternMatchEngine
 {
+	friend class ConcreteLink;
+
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
@@ -43,8 +47,6 @@ class PatternMatchEngine
 	private:
 		// -------------------------------------------
 		// The current set of clauses (redex context) being grounded.
-		void setup_redex(const std::set<Handle> &vars,
-		                   const std::vector<Handle> &component);
 		void clear_redex(const std::string& name = "topmost level");
 		bool explore_redex(const Handle&, const Handle&, const Handle&);
 
@@ -58,9 +60,7 @@ class PatternMatchEngine
 		HandleSeq        _mandatory;
 		std::set<Handle> _optionals;
 		std::set<Handle> _evaluatable;
-		ConnectMap       _connectivity_map;   // initialized by make_root_map()
-
-		void make_connectivity_map(const Handle&, const Handle&);
+		ConnectMap       _connectivity_map;
 
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
@@ -158,16 +158,11 @@ class PatternMatchEngine
 		PatternMatchCallback *_pmc;
 
 	public:
-		PatternMatchEngine(void) {}
+		PatternMatchEngine(void);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.
 		bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
-
-		// Do the actual pattern search.
-		void match(PatternMatchCallback *,
-		           const std::set<Handle> &vars,
-		           const std::vector<Handle> &component);
 
 		// Handy-dandy utilities
 		static void print_solution(const std::map<Handle, Handle> &vars,

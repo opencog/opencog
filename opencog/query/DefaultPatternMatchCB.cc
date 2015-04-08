@@ -31,7 +31,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
- #define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -53,7 +53,7 @@ using namespace opencog;
 //            VariableNode $var
 //            ConceptNode  "item"
 //
-// Typically, the incoming set to "blah" will be huge, so starting the
+// Typically, the incoming set for "blah" will be huge, so starting the
 // search there would be a poor choice. Typically, the incoming set to
 // "item" will be much smaller, and so makes a better choice.  The code
 // below tries to pass over "blah" and pick "item" instead.  It does so
@@ -61,8 +61,16 @@ using namespace opencog;
 // picking the one with the smaller ("thinner") incoming set. Note that
 // this is a form of "greedy" search.
 //
-// Note that the algo performs a full-depth search to find this. That's
-// OK, because typeical clauses are never very deep.
+// Atoms that are inside of dynamically-evaluatable terms are not
+// considered. That's because groundings for such terms might not exist
+// in the atomspace, so a search that starts there is doomed to fail.
+//
+// Note that the algo explores the clause to its greatest depth. That's
+// OK, because typical clauses are never very deep.
+//
+// A variant of this algo could incorporate the Attentional focus
+// into the "thinnest" calculation, so that only high-AF atoms are
+// considered.
 //
 // Note that the size of the incoming set really is a better measure,
 // and not the depth.  So, for example, if "item" has a huge incoming
@@ -78,7 +86,7 @@ using namespace opencog;
 // handle.
 //
 Handle
-DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
+DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
                                     Handle& start, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
@@ -91,6 +99,10 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 		}
 		return Handle::UNDEFINED;
 	}
+
+	// Ignore all dynaically-evaluatab le links up front.
+	if (_dynamic and _dynamic->find(h) != _dynamic->end())
+		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
@@ -150,7 +162,8 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 	starter_pred = Handle::UNDEFINED;
 
 	size_t nc = clauses.size();
-	for (size_t i=0; i < nc; i++) {
+	for (size_t i=0; i < nc; i++)
+	{
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;

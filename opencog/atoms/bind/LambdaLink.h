@@ -31,10 +31,6 @@ namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
- *
- * Experimental LambdaLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
  */
 
 /// The LambdaLink consitsts of two parts: A variable declaration,
@@ -69,6 +65,12 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Link &l);
+
+	// utility debug print
+	void prt(const Handle& h) const
+	{
+		printf("%s\n", h->toShortString().c_str());
+	}
 
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
