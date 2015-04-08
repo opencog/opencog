@@ -274,6 +274,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		}
 		else
 		{
+#if THIS_CANT_BE_RIGHT
 			// Bound but quoted variables cannot be solutions to themselves.
 			// huh? whaaaat?
 			if (not in_quote or
@@ -283,6 +284,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			{
 				if (hp != hg) var_grounding[hp] = hg;
 			}
+#endif // THIS_CANT_BE_RIGHT
 
 		}
 #endif
