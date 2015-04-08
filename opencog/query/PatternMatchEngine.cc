@@ -362,9 +362,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 			// _choice_state lets use resume wher we last left off.
 			size_t iend = osp.size();
-			size_t istart;
-			try { istart = _choice_state.at(Choice(hp, hg)); }
-			catch(...) { istart = 0;}
+			size_t istart = next_choice(hp, hg);
 			for (size_t i=istart; i<iend; i++)
 			{
 				const Handle& hop = osp[i];
@@ -598,6 +596,14 @@ bool PatternMatchEngine::tree_recurse(const Handle& hp,
 	return tree_compare(hp, hg, caller);
 }
 
+size_t PatternMatchEngine::next_choice(const Handle& hp,
+                                       const Handle& hg)
+{
+	size_t istart;
+	try { istart = _choice_state.at(Choice(hp, hg)); }
+	catch(...) { istart = 0;}
+	return istart;
+}
 /* ======================================================== */
 
 /// Return true if a grounding was found.
@@ -614,33 +620,36 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	have_more = false;
 
 	do {
-		var_solutn_stack.push(var_grounding);
+		bool found = false;
 
-		bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
-		// If no match, then try the next one.
-		if (not match)
-		{
+		do {
+			var_solutn_stack.push(var_grounding);
+
+			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
+			// If no match, then try the next one.
+			if (not match)
+			{
+				// Get rid of any grounding that might have been proposed
+				// during the tree-match.
+				POPGND(var_grounding, var_solutn_stack);
+				have_more = have_stack.top();
+				have_stack.pop();
+				return false;
+			}
+
+			if (do_soln_up(hsoln)) found = true;
+
 			// Get rid of any grounding that might have been proposed
-			// during the tree-match.
+			// during the tree-compare or do_soln_up.
 			POPGND(var_grounding, var_solutn_stack);
-			have_more = have_stack.top();
-			have_stack.pop();
-			return false;
-		}
+		} while (0 < next_choice(curr_pred_handle, hsoln));
 
-		bool found = do_soln_up(hsoln);
 		if (found)
 		{
-			// Keep the grounding that was found. Even up the stack.
-			var_solutn_stack.pop();
 			have_more = have_stack.top();
 			have_stack.pop();
 			return true;
 		}
-
-		// Get rid of any grounding that might have been proposed
-		// during the tree-compare or xsoln_up.
-		POPGND(var_grounding, var_solutn_stack);
 
 		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
 		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
@@ -1137,6 +1146,8 @@ void PatternMatchEngine::clear_current_state(void)
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
+
+	_choice_state.clear();
 }
 
 /**

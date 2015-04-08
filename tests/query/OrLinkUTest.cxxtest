@@ -103,7 +103,5 @@ void OrLinkUTest::test_basic_or(void)
 
     Handle items = eval->eval_h("(cog-bind (basic))");
 
-// XXX FIXME disabled for now, since we are not yet code-complete
-// on the implementation.
-    // TS_ASSERT_EQUALS(2, as->getArity(items));
+    TS_ASSERT_EQUALS(2, as->getArity(items));
 }

@@ -107,6 +107,10 @@ class PatternMatchEngine
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_pred_handle;  // stacked onto pred_handle_stack
 
+		// OrLink (choice) state management
+		ChoiceState _choice_state;
+		size_t next_choice(const Handle&, const Handle&);
+
 		void clear_current_state(void);  // clear the stuff above
 
 		// -------------------------------------------
@@ -153,13 +157,6 @@ class PatternMatchEngine
 		bool clause_accepted;
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);
-
-		// --------------------------------------------------
-		// OrLink (choice) state management
-		ChoiceState _choice_state;
-		size_t choice_resume(const Handle&, const Handle&);
-		void choice_set(const Handle&, const Handle&, size_t);
-		void choice_clear(const Handle&, const Handle&);
 
 		// --------------------------------------------------
 		// Unordered-link stuff. This needs a major overhaul.
