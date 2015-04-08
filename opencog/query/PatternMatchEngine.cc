@@ -25,7 +25,7 @@
 #include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/ConcreteLink.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -1168,12 +1168,8 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
                                const std::set<Handle> &vars,
                                const std::vector<Handle> &component)
 {
-	VariableTypeMap no_type_restrictions;
-	std::set<Handle> no_optionals;
-
-	ConcreteLinkPtr cl(createConcreteLink(vars, no_type_restrictions,
-	               component, no_optionals));
-	cl->satisfy(cb);
+	SatisfactionLinkPtr slp(createSatisfactionLink(vars, component));
+	slp->satisfy(cb);
 }
 
 

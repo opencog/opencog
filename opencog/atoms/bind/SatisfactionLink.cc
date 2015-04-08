@@ -118,4 +118,18 @@ SatisfactionLink::SatisfactionLink(Link &l)
 	init();
 }
 
+/// Constructor that takes a pre-determined set of variables, and
+/// a list of clauses to solve.  This is currently kind-of crippled,
+/// since no variable type restricions are possible, and no optionals,
+/// either.  By contrast, the ConcreteLink constructor does allw these
+/// things, but it does not allow virtual links. Alas.
+SatisfactionLink::SatisfactionLink(const std::set<Handle>& vars,
+                                   const HandleSeq& clauses)
+	: ConcreteLink(SATISFACTION_LINK, HandleSeq())
+{
+	_varset = vars;
+	_clauses = clauses;
+	setup_sat_body();
+}
+
 /* ===================== END OF FILE ===================== */

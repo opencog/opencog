@@ -210,14 +210,20 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 	// We can't ground variables that aren't attached to something.
 	// Quoted variables are constants, and so don't count.
 	//
-	// XXX instead of throwing, should we just remove them, and print a
-	// warning? Right now, doens't matter which way...
+	// XXX Well, we could throw, here, but sureal doesn't filter
+	// its variables before it runs...
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
-			throw InvalidParamException(TRACE_INFO,
-				"The variable %s does not appear (unquoted) in any clause!",
-				v->toShortString().c_str());
+		{
+			logger().warn(
+				"%s: The variable %s does not appear (unquoted) in any clause!",
+			           __FUNCTION__, v->toShortString().c_str());
+			vars.erase(v);
+			// throw InvalidParamException(TRACE_INFO,
+			//    "The variable %s does not appear (unquoted) in any clause!",
+			//    v->toShortString().c_str());
+		}
 	}
 }
 
