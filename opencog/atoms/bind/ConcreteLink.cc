@@ -216,7 +216,7 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 
 	// Make sure that each declared variable appears in some clause.
 	// We won't (can't) ground variables that don't show up in a
-	// clause; they just gum up the works.
+	// clause.  They are presumably there due to programmer error.
 	// Quoted variables are constants, and so don't count.
 	//
 	// XXX Well, we could throw, here, but sureal gives us spurious
@@ -226,13 +226,15 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
+/*
 			logger().warn(
 				"%s: The variable %s does not appear (unquoted) in any clause!",
 			           __FUNCTION__, v->toShortString().c_str());
+*/
 			vars.erase(v);
-			// throw InvalidParamException(TRACE_INFO,
-			//    "The variable %s does not appear (unquoted) in any clause!",
-			//    v->toShortString().c_str());
+			throw InvalidParamException(TRACE_INFO,
+			   "The variable %s does not appear (unquoted) in any clause!",
+			   v->toShortString().c_str());
 		}
 	}
 

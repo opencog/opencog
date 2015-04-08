@@ -164,11 +164,6 @@ class PatternMatchEngine
 		// matches.
 		bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
-		// Do the actual pattern search.
-		void match(PatternMatchCallback *,
-		           const std::set<Handle> &vars,
-		           const std::vector<Handle> &component);
-
 		// Handy-dandy utilities
 		static void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);

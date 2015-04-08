@@ -1160,21 +1160,6 @@ void PatternMatchEngine::clear_redex(const std::string& name)
 
 /* ======================================================== */
 
-/**
- * Main entry point for the pattern matcher engine. This is the
- * method that sets the gears in motion.
- */
-void PatternMatchEngine::match(PatternMatchCallback *cb,
-                               const std::set<Handle> &vars,
-                               const std::vector<Handle> &component)
-{
-	SatisfactionLinkPtr slp(createSatisfactionLink(vars, component));
-	slp->satisfy(cb);
-}
-
-
-/* ======================================================== */
-
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)

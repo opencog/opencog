@@ -24,8 +24,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/query/PatternMatchEngine.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealSCM.h"
@@ -164,12 +164,11 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         const HandleSeq& qClause(connectedClauses[i]);
         const std::set<Handle>& qVars(connectedVars[i]);
 
-        // XXX TODO don't you want to use qVars, above, instead of
-        // sVars?  qVars holds only those variables that appear in
-        // the given component ...
-        SuRealPMCB pmcb(pAS, sVars);
-        PatternMatchEngine pme;
-        pme.match(&pmcb, sVars, qClause);
+        // I replaced sVars by qVars in the below. sVars had extra
+        // variables that don't appear anywhere in the clauses -- linas.
+        SuRealPMCB pmcb(pAS, qVars);
+        SatisfactionLinkPtr slp(createSatisfactionLink(qVars, qClause));
+        slp->satisfy(&pmcb);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())
