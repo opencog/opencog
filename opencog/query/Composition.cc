@@ -155,7 +155,10 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	push_redex();
 	clear_redex(cpl->get_name());
-//	setup_redex(local_vars, local_clauses);
+	_bound_vars = local_vars;
+	_cnf_clauses = local_clauses;
+	_mandatory = local_clauses;
+	// TODO: handle optionals, and virtuals too.
 
 	// To explore this redex, we've got to translate the current
 	// traversal state into the "local frame". Do this by tranlsating

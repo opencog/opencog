@@ -140,6 +140,7 @@ class PatternMatchEngine
 		} Caller;   // temporary scaffolding !???
 
 		bool tree_compare(const Handle&, const Handle&, Caller);
+		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
 		bool pred_up(const Handle&);

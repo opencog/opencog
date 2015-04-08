@@ -323,7 +323,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			prtmsg("tree_comp or_link choice: ", hop);
 			var_solutn_stack.push(var_grounding);
 
-			match = tree_compare(hop, hg, CALL_CHOICE);
+			match = tree_recurse(hop, hg, CALL_CHOICE);
 			// If no match, then try the next one.
 			if (not match)
 			{
@@ -435,7 +435,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			match = true;
 			for (size_t i=0; i<oset_sz; i++)
 			{
-				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+				if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
 				{
 					match = false;
 					break;
@@ -510,7 +510,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 				match = true;
 				for (size_t i=0; i<oset_sz; i++)
 				{
-					if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
+					if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
 					{
 						match = false;
 						break;
@@ -604,6 +604,13 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	return false;
 }
 
+bool PatternMatchEngine::tree_recurse(const Handle& hp,
+                                      const Handle& hg,
+                                      Caller caller)
+{
+	return tree_compare(hp, hg, caller);
+}
+
 /* ======================================================== */
 
 /// Return true if a grounding was found.
@@ -622,7 +629,7 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	do {
 		var_solutn_stack.push(var_grounding);
 
-		bool match = tree_compare(curr_pred_handle, hsoln, CALL_SOLN);
+		bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
 		// If no match, then try the next one.
 		if (not match)
 		{
