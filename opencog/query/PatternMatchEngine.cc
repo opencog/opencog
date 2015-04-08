@@ -625,13 +625,25 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 }
 
 /**
- * Push all stacks related to graph traversal. Do NOT push any
- * of the redex stacks.
+ * Push all stacks related to the grounding of a clause. This push is
+ * meant to be done only when a grounding for a clause has been found,
+ * and the next clause is about the be attempted. It saves all of the
+ * traversal data associated with the current clause, so that, later
+ * on, traversal can be resumed where it was left off.
+ *
+ * This does NOT push and of the redex stacks because (with the current
+ * redex design), all redex substitutions should have terminatated by
+ * now, and returned to the main clause. i.e. the redex stack is assumed
+ * to be empty, at this point.  (Its possible this design may change in
+ * in the future if multi-clause redexes are allowed, whatever the heck
+ * that may be!?)
  */
-void PatternMatchEngine::graph_stacks_push(void)
+void PatternMatchEngine::clause_stacks_push(void)
 {
-	_graph_stack_depth++;
-	dbgprt("--- That's it, now push to stack depth=%d\n\n", _graph_stack_depth);
+	_clause_stack_depth++;
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", _clause_stack_depth);
+
+	OC_ASSERT(not in_quote, "Can't posssibly happen!");
 
 	root_handle_stack.push(curr_root);
 	pred_handle_stack.push(curr_pred_handle);
@@ -641,7 +653,6 @@ void PatternMatchEngine::graph_stacks_push(void)
 	pred_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
-	in_quote_stack.push(in_quote);
 
 	// Reset the unordered-set stacks with each new clause.
 	// XXX this cannot possible be right: we may need to pop,
@@ -659,10 +670,12 @@ void PatternMatchEngine::graph_stacks_push(void)
 }
 
 /**
- * Pop all graph-traversal-related stacks. These do NOT
- * affect any of the redex stacks.
+ * Pop all clause-traversal-related stacks. This restores state
+ * so that the traversal of a single clause can resume where it left
+ * off. These do NOT affect any of the redex stacks (which are assumed
+ * to be empty at this point.)
  */
-void PatternMatchEngine::graph_stacks_pop(void)
+void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc->pop();
 	curr_root = root_handle_stack.top();
@@ -681,9 +694,6 @@ void PatternMatchEngine::graph_stacks_pop(void)
 	issued = issued_stack.top();
 	issued_stack.pop();
 
-	in_quote = in_quote_stack.top();
-	in_quote_stack.pop();
-
 	// Handle different unordered links that live in different
 	// clauses. The mute_stack deals with different unordered
 	// links that live in the *same* clause.
@@ -699,9 +709,9 @@ void PatternMatchEngine::graph_stacks_pop(void)
 	mute_stack = permutation_stack.top();
 	permutation_stack.pop();
 
-	_graph_stack_depth --;
+	_clause_stack_depth --;
 
-	dbgprt("pop to depth %d\n", _graph_stack_depth);
+	dbgprt("pop to depth %d\n", _clause_stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
 	prtmsg("pop to clause", curr_root);
 }
@@ -782,7 +792,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
 
-	graph_stacks_push();
+	clause_stacks_push();
 	get_next_untried_clause();
 
 	// If there are no further predicates to solve,
@@ -869,7 +879,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If we failed to find anything at this level, we need to
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
-	graph_stacks_pop();
+	clause_stacks_pop();
 
 	return found;
 }
@@ -1058,7 +1068,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                       const Handle& starter,
                                       const Handle& ah)
 {
-	graph_stacks_clear();
+	clause_stacks_clear();
 	return explore_redex(do_clause, starter, ah);
 }
 
@@ -1105,16 +1115,15 @@ void PatternMatchEngine::clear_current_state(void)
 /**
  * Unconditionally clear all graph traversal stacks
  */
-void PatternMatchEngine::graph_stacks_clear(void)
+void PatternMatchEngine::clause_stacks_clear(void)
 {
-	_graph_stack_depth = 0;
+	_clause_stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
 	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
-	while (!in_quote_stack.empty()) in_quote_stack.pop();
 
 	have_more = false;
 	more_depth = 0;
@@ -1136,7 +1145,7 @@ PatternMatchEngine::PatternMatchEngine(void)
 	depth = 0;
 
 	// graph state
-	_graph_stack_depth = 0;
+	_clause_stack_depth = 0;
 
 	// unordered link state
 	have_more = false;
