@@ -394,7 +394,7 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
  * @return        same as DefaultPatternMatchCB::find_starter but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(Handle h, size_t& depth, Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth, Handle& start, size_t& width)
 {
     Handle rh = DefaultPatternMatchCB::find_starter(h, depth, start, width);
 
