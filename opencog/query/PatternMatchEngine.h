@@ -130,7 +130,23 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
-		bool tree_compare(const Handle&, const Handle&);
+		typedef enum {
+			CALL_QUOTE,
+			CALL_ORDER,
+			CALL_UNORDER,
+			CALL_CHOICE,
+			CALL_COMP,
+			CALL_SOLN
+		} Caller;   // temporary scaffolding !???
+
+		bool tree_compare(const Handle&, const Handle&, Caller);
+
+		// temp scaffolding
+		bool tree_compare_ord(const Handle& hp, const Handle& hg) {
+			return tree_compare(hp, hg, CALL_ORDER); }
+		bool tree_compare_unord(const Handle& hp, const Handle& hg) {
+			return tree_compare(hp, hg, CALL_UNORDER); }
+
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
 		bool pred_up(const Handle&);
@@ -139,6 +155,11 @@ class PatternMatchEngine
 		bool clause_accepted;
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);
+
+		// --------------------------------------------------
+		// or-link scaffoldig
+		void push_stuff(void);
+		void pop_stuff(void);
 
 		// --------------------------------------------------
 		// Unordered-link stuff. This needs a major overhaul.

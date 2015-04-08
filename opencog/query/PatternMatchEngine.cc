@@ -191,7 +191,9 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * var_grounding when encountering variables (and sub-clauses) in the
  * pattern.
  */
-bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
+bool PatternMatchEngine::tree_compare(const Handle& hp,
+                                      const Handle& hg,
+                                      Caller caller)
 {
 	// If the pattern link is a quote, then we compare the quoted
 	// contents. This is done recursively, of course.  The QuoteLink
@@ -205,7 +207,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		if (1 != lp->getArity())
 			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
 		more_depth ++;
-		bool ma = tree_compare(lp->getOutgoingAtom(0), hg);
+		bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
 		more_depth --;
 		in_quote = false;
 		return ma;
@@ -300,6 +302,15 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 	// OR_LINK's are multiple-choice links. As long as we can
 	// can match one of the sub-expressions of the OrLink, then
 	// the OrLink as a whole can be considered to be grounded.
+	//
+	// After finding a grounding for a subexpression, we need to save
+	// state, so that, later one, we can resume, and try a different
+	// subexpression.  The state that needs to be pushed is this:
+	// * The current var and pred groundings,
+	// * The current OR-clause (so that we can resume exploring the next
+	//   one)
+	// This means that the loop over the outgoing set of an OR-link
+	// cannot be an actual loop, but must be a recursive call.
 	if (classserver().isA(tp, OR_LINK))
 	{
 		// XXX TODO: the below finds the first possible match,
@@ -313,7 +324,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			prtmsg("tree_comp or_link choice: ", hop);
 			var_solutn_stack.push(var_grounding);
 
-			match = tree_compare(hop, hg);
+			match = tree_compare(hop, hg, CALL_CHOICE);
 			// If no match, then try the next one.
 			if (not match)
 			{
@@ -408,7 +419,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			// onto the stack before recursing, and then pop them off on
 			// return.  Failure to do so could leave some bogus groundings,
 			// sitting around, i.e. groundings that were found during
-			// recursion but then discarded due to a later mistmatch.
+			// recursion but then discarded due to a later mis-match.
 			//
 			// In practice, I was unable to come up with any test case
 			// where this mattered; any bogus groundings eventually get
@@ -420,7 +431,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			more_depth ++;
 
 			match = foreach_atom_pair(osp, osg,
-			                   &PatternMatchEngine::tree_compare, this);
+			                   &PatternMatchEngine::tree_compare_ord, this);
 			more_depth --;
 			depth --;
 			dbgprt("tree_comp down link match=%d\n", match);
@@ -483,7 +494,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 				have_more = false;
 				more_depth ++;
 				match = foreach_atom_pair(mutation, osg,
-				                   &PatternMatchEngine::tree_compare, this);
+				                   &PatternMatchEngine::tree_compare_unord, this);
 				more_depth --;
 				depth --;
 				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
@@ -589,7 +600,7 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	do {
 		var_solutn_stack.push(var_grounding);
 
-		bool match = tree_compare(curr_pred_handle, hsoln);
+		bool match = tree_compare(curr_pred_handle, hsoln, CALL_SOLN);
 		// If no match, then try the next one.
 		if (not match)
 		{

@@ -191,7 +191,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	curr_soln_handle = var_grounding[curr_pred_handle];
 
 	Handle hp(_cnf_clauses[0]);
-	bool found = tree_compare(hp, Handle(lg));
+	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
 
 #if 0
 	Handle join;
