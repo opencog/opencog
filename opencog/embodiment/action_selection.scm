@@ -486,11 +486,21 @@
          (let do_plan ( (current_goal goal)
                       )
 
+           (display "current_goal = ")
+           (display current_goal)
+           (newline)
+           (display "(not (null? current_goal) ) = ")
+           (display (not (null? current_goal) ))
+           (newline)
+           (display "(equal? (member current_goal planned_goal_list) #f) = ")
+           (display (equal? (member current_goal planned_goal_list) #f))
+           (newline)
+
              ; If current goal is not empty and it has not been planned yet,
              ; make a plan for it
              (if (and (not (null? current_goal) )
                       (equal? (member current_goal planned_goal_list) #f)
-                 )    
+                 )
 
                 ; Get all the rules related to current goal 
                 (let ( (available_rule_list
@@ -498,7 +508,7 @@
                        )
                      ) 
 
-;                    (display "do_plan for ") (newline) (display current_goal) (newline)
+                   (display "do_plan for ") (newline) (display current_goal) (newline)
 
                     ; Append current goal to end of the planned goal list,
                     ; then it will not be planned twice. 
@@ -535,7 +545,7 @@
                                (search_result (list) )
                              )
 
-;                              (display "Available rules ") (newline) (display available_rule_list) (newline)
+                             (display "Available rules ") (newline) (display available_rule_list) (newline)
                             
                              ; Sort available rules based on their truth values, 
                              ; (i.e. mean values of ImplicationLink truth value)
@@ -698,6 +708,10 @@
            (most_critical_truth_value 1)
          )
         
+      (display "demand_goal_list = ")
+      (display demand_goal_list)
+      (newline)
+
          (map 
              (lambda (demand_goal)
                  (let ( (demand_goal_truth_value
@@ -716,6 +730,10 @@
 
              demand_goal_list
          )
+
+         (display "most_critical_demand_goal = ")
+         (display most_critical_demand_goal)
+         (newline)
        
          ; Return the demand goal with lowest truth value
          most_critical_demand_goal
@@ -743,6 +761,10 @@
          ; Select the most critical demand goal
          ; TODO: if selected_demand_goal is null?
          (set! selected_demand_goal (get_most_critical_demand_goal) )
+
+         (display "selected_demand_goal = ")
+         (display selected_demand_goal)
+         (newline)
 
          ; Planning
          (set! plan_result (make_psi_plan selected_demand_goal) )
