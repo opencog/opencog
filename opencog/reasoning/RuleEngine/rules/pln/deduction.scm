@@ -48,6 +48,10 @@
 
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
+;
+; AC.s = ((AB.s * BC.s) + ((1 - AB.s) * (C.s - (B.s * BC.s)))) / (1 - B.s)
+;
+; AC.c = min(AB.TV.c, BC.TV.c)
 ; -----------------------------------------------------------------------------
 
 (define (pln-formula-simple-deduction-side-effect-free AB BC AC)
