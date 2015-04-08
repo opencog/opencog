@@ -312,6 +312,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// cannot be an actual loop, but must be a recursive call.
 	if (classserver().isA(tp, OR_LINK))
 	{
+		OC_ASSERT(caller == CALL_SOLN, "Not yet implemented!");
+
 		// XXX TODO: the below finds the first possible match,
 		// and then calls it quits. In fact, we need to find all
 		// of them.
