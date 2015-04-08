@@ -183,6 +183,13 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 			"Redex can currently handle only one clause!");
 
 	// Since there is just a single clause, just compare it as a tree
+	// But first, we do have to set up curr root, etc, otherwise even
+	// the tre compare goes wonky...
+	curr_root = _cnf_clauses[0];
+	curr_pred_handle = curr_root;
+	clause_accepted = false;
+	curr_soln_handle = var_grounding[curr_pred_handle];
+
 	Handle hp(_cnf_clauses[0]);
 	bool found = tree_compare(hp, Handle(lg));
 
