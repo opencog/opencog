@@ -758,54 +758,60 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	depth = 1;
 
 	// If we are here, then everything below us matches.  If we are
-	// not yet at the top of a clause, i.e. we are in the middle of
-	// a clause, then we need to move up.
-	if (curr_pred_handle != curr_root)
+	// at the top of the clause, move on to the next clause. Else,
+	// we are working on a term somewhere in the middle of a clause
+	// and need to walk upwards.
+	if (curr_pred_handle == curr_root)
+		return clause_accept(hsoln);
+
+	soln_handle_stack.push(curr_soln_handle);
+	curr_soln_handle = hsoln;
+
+	// Move up the predicate, and hunt for a match, again.
+	dbgprt("Term has ground, move up.\n");
+	// Do not use the callback get_incoming_set on the pattern!
+	IncomingSet iset = curr_pred_handle->getIncomingSet();
+	size_t sz = iset.size();
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
 	{
-		soln_handle_stack.push(curr_soln_handle);
-		curr_soln_handle = hsoln;
+		Handle hi(iset[i]);
 
-		// Move up the predicate, and hunt for a match, again.
-		dbgprt("Term has ground, move up.\n");
-		// Do not use the callback get_incoming_set on the pattern!
-		IncomingSet iset = curr_pred_handle->getIncomingSet();
-		size_t sz = iset.size();
-		bool found = false;
-		for (size_t i = 0; i < sz; i++) {
-			Handle hi(iset[i]);
-
-			// Is this link even a part of the predicate we
-			// are considering?   If not, try the next atom.
-			bool valid = is_atom_in_tree(curr_root, hi);
-			if (not valid) continue;
+		// Is this link even a part of the predicate we
+		// are considering?   If not, try the next atom.
+		bool valid = is_atom_in_tree(curr_root, hi);
+		if (not valid) continue;
 
 /*********
-			// Ugh. If the next step up the predicate is an OrLink,
-			// we consider it to be solved already.  So re-enter, and
-			// try again.
-			if (OR_LINK == hi->getType())
-			{
-				curr_pred_handle = hi;
-				found = do_soln_up(hsoln);
-				break;
-			}
+		// Ugh. If the next step up the predicate is an OrLink,
+		// we consider it to be solved already.  So re-enter, and
+		// try again.
+		if (OR_LINK == hi->getType())
+		{
+			curr_pred_handle = hi;
+			found = do_soln_up(hsoln);
+			break;
+		}
 **********/
 
-			found = pred_up(hi);
-			if (found) break;
-		}
-		dbgprt("After moving up the clause, found = %d\n", found);
-
-		curr_soln_handle = soln_handle_stack.top();
-		soln_handle_stack.pop();
-
-		return found;
+		found = pred_up(hi);
+		if (found) break;
 	}
+	dbgprt("After moving up the clause, found = %d\n", found);
 
-	// If we are here, we've navigated to the top of the clause, and
-	// it is fully grounded, and we're essentially done. Let the
-	// callbacks have the final say on this.
-	//
+	curr_soln_handle = soln_handle_stack.top();
+	soln_handle_stack.pop();
+
+	return found;
+}
+
+/// This is called when we've navigated to the top of a clause,
+/// and so it is fully grounded, and we're essentially done.
+/// However, let the callbacks have the final say on whether to
+/// proceed onwards, or to backtrack.
+///
+bool PatternMatchEngine::clause_accept(const Handle& hsoln)
+{
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
