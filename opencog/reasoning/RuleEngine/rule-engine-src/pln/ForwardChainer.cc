@@ -215,26 +215,6 @@ void ForwardChainer::do_pm()
 
 }
 
-Handle ForwardChainer::choose_random_source(AtomSpace * as)
-{
-    //!choose a random atoms to start forward chaining with
-    HandleSeq hs;
-    if (cpolicy_loader_->get_attention_alloc())
-        as->getHandleSetInAttentionalFocus(back_inserter(hs));
-    else
-        as->getHandlesByType(back_inserter(hs), ATOM, true);
-    Handle rand_source;
-    for (;;) {
-        Handle h = hs[rand() % hs.size()];
-        Type t = as->getType(h);
-        if (t != VARIABLE_NODE and t != BIND_LINK and t != IMPLICATION_LINK) {
-            rand_source = h;
-            break;
-        }
-    }
-    return rand_source;
-}
-
 HandleSeq ForwardChainer::get_chaining_result()
 {
     return fcmem_.get_result();
