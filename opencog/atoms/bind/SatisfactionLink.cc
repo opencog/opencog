@@ -115,7 +115,6 @@ SatisfactionLink::SatisfactionLink(Link &l)
 
 	// BindLink has a different clause sequence
 	if (SATISFACTION_LINK != tscope) return;
-
 	init();
 }
 

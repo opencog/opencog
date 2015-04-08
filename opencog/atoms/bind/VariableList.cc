@@ -32,7 +32,7 @@ using namespace opencog;
 
 void VariableList::validate_vardecl(const HandleSeq& oset)
 {
-	for (Handle h: oset)
+	for (const Handle& h: oset)
 	{
 		Type t = h->getType();
 		if (VARIABLE_NODE == t)
