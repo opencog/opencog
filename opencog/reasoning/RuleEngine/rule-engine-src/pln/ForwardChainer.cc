@@ -76,15 +76,22 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
     PLNCommons pc(as_);
 
-    // Variable fulfillment query.
-    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {VARIABLE_NODE});
-    if (not var_nodes.empty())
-        return do_pm(hsource, var_nodes, fcb);
+    if (hsource == Handle::UNDEFINED) {
+        do_pm();
+        return;
+    } else {
+        // Variable fulfillment query.
+        UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {
+                VARIABLE_NODE });
+        if (not var_nodes.empty())
+            return do_pm(hsource, var_nodes, fcb);
+        else
+            fcmem_.set_source(hsource);
+    }
 
     // Forward chaining on a particular type of atom.
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
-    init_source(hsource);
     while (iteration < max_iter /*OR other termination criteria*/) {
         log_->info("Iteration %d", iteration);
 
@@ -180,15 +187,32 @@ void ForwardChainer::do_pm(const Handle& hsource,
     }
 
 }
-
-void ForwardChainer::init_source(Handle hsource)
+/**
+ * Invokes pattern matcher using each rule declared in the configuration file.
+ */
+void ForwardChainer::do_pm()
 {
-    if (hsource == Handle::UNDEFINED) {
-        log_->info("Choosing a random source");
-        fcmem_.set_source(choose_random_source(as_)); //start FC on a random source
-    } else {
-        fcmem_.set_source(hsource);
+    //! Do pattern matching using the rules declared in the declaration file
+    log_->info(
+            "Forward chaining on the entire atomspace with rules declared in %s",
+            _conf_path.c_str());
+    vector<Rule*> rules = fcmem_.get_rules();
+    for (Rule* rule : rules) {
+        log_->info("Applying rule %s on ", rule->get_name().c_str());
+        BindLinkPtr bl(BindLinkCast(rule->get_handle()));
+        DefaultImplicator impl(as_);
+        impl.implicand = bl->get_implicand();
+        impl.set_type_restrictions(bl->get_typemap());
+        bl->imply(&impl);
+        fcmem_.set_cur_rule(rule);
+
+        log_->info("OUTPUTS");
+        for (auto h : impl.result_list)
+            log_->info("%s", h->toString().c_str());
+
+        fcmem_.add_rules_product(0, impl.result_list);
     }
+
 }
 
 Handle ForwardChainer::choose_random_source(AtomSpace * as)
