@@ -144,7 +144,7 @@ class PatternMatchEngine
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
 		bool pred_up(const Handle&);
-		bool soln_up(const Handle&);
+		bool xsoln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accepted;
 		void get_next_untried_clause(void);

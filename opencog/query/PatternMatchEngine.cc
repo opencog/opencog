@@ -314,9 +314,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	{
 		OC_ASSERT(caller == CALL_SOLN, "Not yet implemented!");
 
-		// XXX TODO: the below finds the first possible match,
-		// and then calls it quits. In fact, we need to find all
-		// of them.
 		LinkPtr lp(LinkCast(hp));
 		bool match = false;
 		const std::vector<Handle> &osp = lp->getOutgoingSet();
@@ -332,19 +329,18 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
 				POPGND(var_grounding, var_solutn_stack);
+				continue;
 			}
-			else
-			{
-				// Keep the grounding that was found. Even up the stack.
-				var_solutn_stack.pop();
 
-				// If we've found a grounding, record it.
-				// Note we record the grounding for both the OrLink,
-				// and for the specific clause that was picked.
-				var_grounding[hop] = hg;
-				var_grounding[hp] = hg;
-				break;
-			}
+			// Keep the grounding that was found. Even up the stack.
+			var_solutn_stack.pop();
+
+			// If we've found a grounding, record it.
+			// Note we record the grounding for both the OrLink,
+			// and for the specific clause that was picked.
+			var_grounding[hop] = hg;
+			var_grounding[hp] = hg;
+			break;
 		}
 		if (not match) return false;
 
@@ -616,7 +612,7 @@ bool PatternMatchEngine::tree_recurse(const Handle& hp,
 /* ======================================================== */
 
 /// Return true if a grounding was found.
-bool PatternMatchEngine::soln_up(const Handle& hsoln)
+bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
@@ -654,7 +650,7 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 		}
 
 		// Get rid of any grounding that might have been proposed
-		// during the tree-compare or soln_up.
+		// during the tree-compare or xsoln_up.
 		POPGND(var_grounding, var_solutn_stack);
 
 		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
@@ -872,7 +868,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		curr_soln_handle = var_grounding[curr_pred_handle];
 		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = soln_up(curr_soln_handle);
+		found = xsoln_up(curr_soln_handle);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -913,7 +909,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				curr_soln_handle = var_grounding[curr_pred_handle];
-				found = soln_up(curr_soln_handle);
+				found = xsoln_up(curr_soln_handle);
 			}
 		}
 	}
@@ -936,7 +932,7 @@ bool PatternMatchEngine::pred_up(const Handle& h)
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		found = soln_up(Handle(iset[i]));
+		found = xsoln_up(Handle(iset[i]));
 		if (found) break;
 	}
 
@@ -1129,7 +1125,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	curr_root = do_clause;
 	curr_pred_handle = starter;
 	issued.insert(curr_root);
-	bool found = soln_up(ah);
+	bool found = xsoln_up(ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
