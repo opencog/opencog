@@ -137,7 +137,10 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
 /**
  * Does pattern matching for a variable containing query.
- * @param source handle containing VariableNode
+ * @param source a variable containing handle passed as an input to the pattern matcher
+ * @param var_nodes the VariableNodes in @param hsource
+ * @param fcb a forward chainer callback implementation used here only for choosing rules
+ * that contain @param hsource in their implicant
  */
 void ForwardChainer::do_pm(const Handle& hsource,
                            const UnorderedHandleSet& var_nodes,
@@ -152,7 +155,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     Handle hvar_list = as_->addLink(VARIABLE_LIST, vars);
     Handle hclause = as_->addLink(AND_LINK, hsource);
 
-    // Run the pattner matcher, find all patterns that satisfy the
+    // Run the pattern matcher, find all patterns that satisfy the
     // the clause, with the given variables in it.
     SatisfactionLinkPtr sl(createSatisfactionLink(hvar_list, hclause));
     sl->satisfy(&impl);
