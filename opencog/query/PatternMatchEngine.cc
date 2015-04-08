@@ -354,7 +354,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// can match one of the sub-expressions of the OrLink, then
 		// the OrLink as a whole can be considered to be grounded.
 		//
-		if (classserver().isA(tp, OR_LINK))
+		if (OR_LINK == tp)
 		{
 			const std::vector<Handle> &osp = lp->getOutgoingSet();
 
@@ -769,33 +769,45 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 	// Move up the predicate, and hunt for a match, again.
 	dbgprt("Term has ground, move up.\n");
+	bool found = false;
+
 	// Do not use the callback get_incoming_set on the pattern!
 	IncomingSet iset = curr_pred_handle->getIncomingSet();
 	size_t sz = iset.size();
-	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
 		Handle hi(iset[i]);
 
 		// Is this link even a part of the predicate we
 		// are considering?   If not, try the next atom.
+		// Note Bene: there can be only one such atom!
+		// XXX FIXME, there is a more efficient way...
 		bool valid = is_atom_in_tree(curr_root, hi);
 		if (not valid) continue;
 
-/*********
-		// Ugh. If the next step up the predicate is an OrLink,
-		// we consider it to be solved already.  So re-enter, and
-		// try again.
+		// OrLinks may have multiple choices in them. We have to
+		// loop until all the choices have been explored.
 		if (OR_LINK == hi->getType())
 		{
-			curr_pred_handle = hi;
-			found = do_soln_up(hsoln);
-			break;
+			dbgprt("Exploring OrLink\n");
+			if (hi == curr_root)
+			{
+				curr_pred_handle = hi;
+				if (clause_accept(hsoln)) found = true;
+			}
+			else
+			{
+				found = false;
+				do {
+					if (pred_up(hi)) found = true;
+				} while (0 < next_choice(hi, hsoln));
+			}
 		}
-**********/
+		else
+			found = pred_up(hi);
 
-		found = pred_up(hi);
-		if (found) break;
+		// unconditional break...
+		break;
 	}
 	dbgprt("After moving up the clause, found = %d\n", found);
 
