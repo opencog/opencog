@@ -35,10 +35,10 @@ InferenceSCM* InferenceSCM::_inst = NULL;
 
 InferenceSCM::InferenceSCM()
 {
-	if (NULL == _inst) {
-		_inst = this;
-		init();
-	}
+    if (NULL == _inst) {
+        _inst = this;
+        init();
+    }
 }
 
 InferenceSCM::~InferenceSCM()
@@ -48,22 +48,22 @@ InferenceSCM::~InferenceSCM()
 
 void InferenceSCM::init(void)
 {
-	_inst = new InferenceSCM();
+    _inst = new InferenceSCM();
 #ifdef HAVE_GUILE
-	//all commands for invoking the rule engine from scm shell should be declared here
-	define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
-			_inst); //eg. from scm shell (cog-fc (InheritanceLink (ConceptNode "cat")(ConceptNode "animal"))
-	define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
-			_inst); //backward chaining
+    //all commands for invoking the rule engine from scm shell should be declared here
+    define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
+                            _inst); //eg. from scm shell (cog-fc (InheritanceLink (ConceptNode "cat")(ConceptNode "animal"))
+    define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
+                            _inst); //backward chaining
 #endif
 }
 
 Handle InferenceSCM::do_forward_chaining(Handle h)
 {
 #ifdef HAVE_GUILE
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-	DefaultForwardChainerCB dfc(as);
-	ForwardChainer fc(as);
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
+    DefaultForwardChainerCB dfc(as);
+    ForwardChainer fc(as);
     /**
      * Parse (cog-fc ListLink()) as forward chaining with Handle::UNDEFINED which  does
      * pattern matching on the atomspace using the rules declared in the config.A similar
@@ -82,35 +82,35 @@ Handle InferenceSCM::do_forward_chaining(Handle h)
          */
         fc.do_chain(dfc, h);
 
-	HandleSeq result = fc.get_chaining_result();
-	return as->addLink(LIST_LINK, result);
+    HandleSeq result = fc.get_chaining_result();
+    return as->addLink(LIST_LINK, result);
 #else
-	return Handle::UNDEFINED;
+    return Handle::UNDEFINED;
 #endif
 }
 
 Handle InferenceSCM::do_backward_chaining(Handle h)
 {
 #ifdef HAVE_GUILE
-	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-	BackwardChainer bc(as);
+    BackwardChainer bc(as);
 
-	bc.do_chain(h);
-	map<Handle, HandleSeq> soln = bc.get_chaining_result();
+    bc.do_chain(h);
+    map<Handle, HandleSeq> soln = bc.get_chaining_result();
 
-	HandleSeq soln_list_link;
-	for (auto it = soln.begin(); it != soln.end(); ++it) {
-		HandleSeq hs;
-		hs.push_back(it->first);
-		hs.insert(hs.end(), it->second.begin(), it->second.end());
+    HandleSeq soln_list_link;
+    for (auto it = soln.begin(); it != soln.end(); ++it) {
+        HandleSeq hs;
+        hs.push_back(it->first);
+        hs.insert(hs.end(), it->second.begin(), it->second.end());
 
-		if (hs[1] != Handle::UNDEFINED)
-			soln_list_link.push_back(as->addLink(LIST_LINK, hs));
-	}
+        if (hs[1] != Handle::UNDEFINED)
+            soln_list_link.push_back(as->addLink(LIST_LINK, hs));
+    }
 
-	return as->addLink(LIST_LINK, soln_list_link);
+    return as->addLink(LIST_LINK, soln_list_link);
 #else
-	return Handle::UNDEFINED;
+    return Handle::UNDEFINED;
 #endif
 }
