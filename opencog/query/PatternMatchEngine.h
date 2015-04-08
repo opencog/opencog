@@ -154,6 +154,8 @@ class PatternMatchEngine
 		bool pred_up(const Handle&);
 		bool xsoln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
+		bool do_next_clause(void);
+
 		bool clause_accepted;
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);

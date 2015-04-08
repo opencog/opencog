@@ -34,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -356,8 +356,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		//
 		if (classserver().isA(tp, OR_LINK))
 		{
-			OC_ASSERT(caller == CALL_SOLN, "Not yet implemented!");
-
 			const std::vector<Handle> &osp = lp->getOutgoingSet();
 
 			// _choice_state lets use resume wher we last left off.
@@ -781,6 +779,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			bool valid = is_atom_in_tree(curr_root, hi);
 			if (not valid) continue;
 
+/*********
 			// Ugh. If the next step up the predicate is an OrLink,
 			// we consider it to be solved already.  So re-enter, and
 			// try again.
@@ -790,6 +789,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				found = do_soln_up(hsoln);
 				break;
 			}
+**********/
 
 			found = pred_up(hi);
 			if (found) break;
@@ -803,10 +803,9 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	}
 
 	// If we are here, we've navigated to the top of the clause, and
-	// it is matched, then it is fully grounded, and we're done with it.
-	// Start work on the next unsovled predicate. But first, see what
-	// the callbacks have to say.
-
+	// it is fully grounded, and we're essentially done. Let the
+	// callbacks have the final say on this.
+	//
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
@@ -828,6 +827,14 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
 
+	// Now go and do more clauses.
+	return do_next_clause();
+}
+
+// This is called when all previous clauses have been grounded; so
+// we search for the next one, and try to round that.
+bool PatternMatchEngine::do_next_clause(void)
+{
 	clause_stacks_push();
 	get_next_untried_clause();
 
@@ -884,7 +891,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			match = _pmc->optional_clause_match(curr_pred_handle, undef);
+			bool match = _pmc->optional_clause_match(curr_pred_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
