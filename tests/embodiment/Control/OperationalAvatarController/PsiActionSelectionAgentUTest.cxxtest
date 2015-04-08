@@ -180,12 +180,14 @@ public:
 
         scheme_expression = "( do_planning )";
 
-        std::cout << "AtomSpace after planning" << std::endl;
-        atomSpace.print();
-
         // Run the Procedure that do planning
         scheme_return_value = evaluator.eval(scheme_expression);
+        std::cout << "scheme_return_value =" << std::endl
+                  << scheme_return_value << std::endl;
         TS_ASSERT( !evaluator.eval_error() ); 
+
+        std::cout << "AtomSpace after planning" << std::endl;
+        atomSpace.print();
 
         // give it an agent first.
         //oac.
