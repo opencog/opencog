@@ -140,13 +140,6 @@ class PatternMatchEngine
 		} Caller;   // temporary scaffolding !???
 
 		bool tree_compare(const Handle&, const Handle&, Caller);
-
-		// temp scaffolding
-		bool tree_compare_ord(const Handle& hp, const Handle& hg) {
-			return tree_compare(hp, hg, CALL_ORDER); }
-		bool tree_compare_unord(const Handle& hp, const Handle& hg) {
-			return tree_compare(hp, hg, CALL_UNORDER); }
-
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
 		bool pred_up(const Handle&);

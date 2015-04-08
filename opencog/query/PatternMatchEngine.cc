@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
@@ -414,6 +413,9 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			const HandleSeq &osp = lp->getOutgoingSet();
 			const HandleSeq &osg = lg->getOutgoingSet();
 
+			size_t oset_sz = osp.size();
+			if (oset_sz != osg.size()) return false;
+
 			// The recursion step: traverse down the tree.
 			// In principle, we could/should push the current groundings
 			// onto the stack before recursing, and then pop them off on
@@ -430,8 +432,16 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			depth ++;
 			more_depth ++;
 
-			match = foreach_atom_pair(osp, osg,
-			                   &PatternMatchEngine::tree_compare_ord, this);
+			match = true;
+			for (size_t i=0; i<oset_sz; i++)
+			{
+				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+				{
+					match = false;
+					break;
+				}
+			}
+
 			more_depth --;
 			depth --;
 			dbgprt("tree_comp down link match=%d\n", match);
@@ -485,6 +495,9 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			}
 
 			do {
+				size_t oset_sz = mutation.size();
+				if (oset_sz != osg.size()) return false;
+
 				// The recursion step: traverse down the tree.
 				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
 				       more_depth);
@@ -493,8 +506,17 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 				have_more = false;
 				more_depth ++;
-				match = foreach_atom_pair(mutation, osg,
-				                   &PatternMatchEngine::tree_compare_unord, this);
+
+				match = true;
+				for (size_t i=0; i<oset_sz; i++)
+				{
+					if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
+					{
+						match = false;
+						break;
+					}
+				}
+
 				more_depth --;
 				depth --;
 				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
