@@ -215,11 +215,13 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 	}
 
 	// Make sure that each declared variable appears in some clause.
-	// We can't ground variables that aren't attached to something.
+	// We won't (can't) ground variables that don't show up in a
+	// clause; they just gum up the works.
 	// Quoted variables are constants, and so don't count.
 	//
-	// XXX Well, we could throw, here, but sureal doesn't filter
-	// its variables before it runs...
+	// XXX Well, we could throw, here, but sureal gives us spurious
+	// variables, so instead of throwing, we just discard them and
+	// print a warning.
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
@@ -233,6 +235,13 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
 			//    v->toShortString().c_str());
 		}
 	}
+
+	// The above 1-2 combination of removing constant clauses, and
+	// removing variables, can result in an empty body. That surely
+	// warrants a throw, and BuggyQuoteUTest is expecting one.
+	if (0 == vars.size() and 0 == clauses.size())
+			throw InvalidParamException(TRACE_INFO,
+			   "No variable appears (unquoted) anywhere in any clause!");
 }
 
 /* ================================================================= */
