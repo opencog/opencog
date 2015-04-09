@@ -60,14 +60,14 @@ else:
 
 executed = False
 execute_atom(   atomspace,
-                ExecutionOutputLink( 
-                        GroundedSchemaNode("py: add_link"),
-                        ListLink(
-                            ConceptNode("one"),
-                            ConceptNode("two") 
-                            )
-                        )
-                  )
+    ExecutionOutputLink( 
+        GroundedSchemaNode("py: add_link"),
+        ListLink(
+            ConceptNode("one"),
+            ConceptNode("two") 
+        )
+    )
+)
 print "execute: execute_atom"
 if (executed):
     print "add_link - executed successfully"
