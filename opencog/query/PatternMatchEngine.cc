@@ -774,48 +774,50 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	FindAtoms fa(curr_pred_handle);
 	fa.search_set(curr_root);
 
-	for (const Handle& hi : fa.least_holders)
+	// It is almost always the case, but not necessarily, that
+	// least_holders contains one atom. If a term is repeated
+	// in a single clause, it could show up at several locations.
+	// As far as I can tell, it is sufficient to examine only the
+	// first appearance; the others will be found anyway...
+	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
+	const Handle& hi = *fa.least_holders.begin();
+
+	// OrLinks may have multiple choices in them. We have to
+	// loop until all the choices have been explored.
+	if (OR_LINK == hi->getType())
 	{
-		// OrLinks may have multiple choices in them. We have to
-		// loop until all the choices have been explored.
-		if (OR_LINK == hi->getType())
+		dbgprt("Exploring OrLink\n");
+		if (hi == curr_root)
 		{
-			dbgprt("Exploring OrLink\n");
-			if (hi == curr_root)
-			{
 printf("duude is root!!\n");
-				const Handle& this_one = curr_pred_handle;
-				curr_pred_handle = hi;
-				if (clause_accept(hsoln)) found = true;
+			const Handle& this_one = curr_pred_handle;
+			curr_pred_handle = hi;
+			if (clause_accept(hsoln)) found = true;
 
 #ifdef BORKEN
-				LinkPtr lp(LinkCast(hp));
-				const std::vector<Handle> &osp = lp->getOutgoingSet();
-				for (const Handle& ch : osp)
-				{
-					if (ch == this_one) continue;
-					cur_pred_handle = ch;
-					// xsoln_up(xxxx some const);
-				}
-#endif
-			}
-			else
+			LinkPtr lp(LinkCast(hp));
+			const std::vector<Handle> &osp = lp->getOutgoingSet();
+			for (const Handle& ch : osp)
 			{
-				found = false;
-				do {
-printf("duuuuude next ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
-					if (pred_up(hi)) found = true;
-printf("duuuuude after up ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
-				} while (0 < next_choice(hi, hsoln));
+				if (ch == this_one) continue;
+				cur_pred_handle = ch;
+				// xsoln_up(xxxx some const);
 			}
+#endif
 		}
 		else
-			found = pred_up(hi);
-
-		// unconditional break...
-		// XXX this is wrong, could appear multiple times!
-		break;
+		{
+			found = false;
+			do {
+printf("duuuuude next ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
+				if (pred_up(hi)) found = true;
+printf("duuuuude after up ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
+			} while (0 < next_choice(hi, hsoln));
+		}
 	}
+	else
+		found = pred_up(hi);
+
 	dbgprt("After moving up the clause, found = %d\n", found);
 
 	curr_soln_handle = soln_handle_stack.top();

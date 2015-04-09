@@ -34,6 +34,7 @@ ADD_CXXTEST(FuzzyPatternUTest)
 # These are not in alphabetical order; they are in order of
 # simpler to more complex.
 IF (HAVE_GUILE)
+	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)
