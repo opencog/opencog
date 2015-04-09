@@ -845,7 +845,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		choice_push();
 
 		if (pred_up(holds_or)) found = true;
-		prtmsg("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
+		dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
 		choice_pop();
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
