@@ -411,7 +411,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			// replaced by valid ones.  Thus, we save some unknown amount
 			// of cpu time by simply skipping the push & pop here.
 			//
-			// var_solutn_stack.push(var_grounding);
 			depth ++;
 			more_depth ++;
 
@@ -485,6 +484,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
 				       more_depth);
 				var_solutn_stack.push(var_grounding);
+				// XXX why are we not pushing the claus soln stack??
 				depth ++;
 
 				have_more = false;
@@ -621,7 +621,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		bool found = false;
 
 		do {
-			var_solutn_stack.push(var_grounding);
+			choice_push();
 
 			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
 			// If no match, then try the next one.
@@ -629,7 +629,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			{
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
-				POPGND(var_grounding, var_solutn_stack);
+				choice_pop();
 				have_more = have_stack.top();
 				have_stack.pop();
 				return false;
@@ -639,7 +639,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 
 			// Get rid of any grounding that might have been proposed
 			// during the tree-compare or do_soln_up.
-			POPGND(var_grounding, var_solutn_stack);
+			choice_pop();
 		} while (0 < next_choice(curr_pred_handle, hsoln));
 
 		if (found)
@@ -750,6 +750,18 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	prtmsg("pop to clause", curr_root);
 }
 
+void PatternMatchEngine::choice_push(void)
+{
+	var_solutn_stack.push(var_grounding);
+	pred_solutn_stack.push(clause_grounding);
+}
+
+void PatternMatchEngine::choice_pop(void)
+{
+	POPGND(var_grounding, var_solutn_stack);
+	POPGND(clause_grounding, pred_solutn_stack);
+}
+
 /// Return true if a grounding was found.  It also has the side effect
 /// of updating clause_grounding map when the current clause is being
 /// grounded.
@@ -764,65 +776,82 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	if (curr_pred_handle == curr_root)
 		return clause_accept(hsoln);
 
-	soln_handle_stack.push(curr_soln_handle);
-	curr_soln_handle = hsoln;
-
 	// Move up the predicate, and hunt for a match, again.
 	dbgprt("Term has ground, move up.\n");
-	bool found = false;
 
 	FindAtoms fa(curr_pred_handle);
 	fa.search_set(curr_root);
 
 	// It is almost always the case, but not necessarily, that
-	// least_holders contains one atom. If a term is repeated
-	// in a single clause, it could show up at several locations.
+	// least_holders contains one atom. (i.e. the one atom that
+	// is the parent of curr_pred_handle that is within curr_root.
+	// If curr_pred_handle appears twice (or N times) in a curr_root,
+	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
 	// first appearance; the others will be found anyway...
 	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
 	const Handle& hi = *fa.least_holders.begin();
 
+	// Do the simple case first, OrLinks are harder.
+	if (OR_LINK != hi->getType())
+	{
+		soln_handle_stack.push(curr_soln_handle);
+		curr_soln_handle = hsoln;
+
+		bool found = pred_up(hi);
+
+		curr_soln_handle = soln_handle_stack.top();
+		soln_handle_stack.pop();
+
+		dbgprt("After moving up the clause, found = %d\n", found);
+		return found;
+	}
+
 	// OrLinks may have multiple choices in them. We have to
 	// loop until all the choices have been explored.
-	if (OR_LINK == hi->getType())
+	dbgprt("Exploring OrLink\n");
+	if (hi == curr_root)
 	{
-		dbgprt("Exploring OrLink\n");
-		if (hi == curr_root)
-		{
 printf("duude is root!!\n");
-			const Handle& this_one = curr_pred_handle;
-			curr_pred_handle = hi;
-			if (clause_accept(hsoln)) found = true;
+		bool found = false;
+		// const Handle& this_one = curr_pred_handle;
+		curr_pred_handle = hi;
+		if (clause_accept(hsoln)) found = true;
 
 #ifdef BORKEN
-			LinkPtr lp(LinkCast(hp));
-			const std::vector<Handle> &osp = lp->getOutgoingSet();
-			for (const Handle& ch : osp)
-			{
-				if (ch == this_one) continue;
-				cur_pred_handle = ch;
-				// xsoln_up(xxxx some const);
-			}
-#endif
-		}
-		else
+		LinkPtr lp(LinkCast(hp));
+		const std::vector<Handle> &osp = lp->getOutgoingSet();
+		for (const Handle& ch : osp)
 		{
-			found = false;
-			do {
-printf("duuuuude next ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
-				if (pred_up(hi)) found = true;
-printf("duuuuude after up ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
-			} while (0 < next_choice(hi, hsoln));
+			if (ch == this_one) continue;
+			cur_pred_handle = ch;
+			// xsoln_up(xxxx some const);
 		}
+#endif
+		return found;
 	}
-	else
-		found = pred_up(hi);
 
-	dbgprt("After moving up the clause, found = %d\n", found);
+	// If we are here, the OrLink is not at the root.
+	// we have to go up again...
+	FindAtoms hop_over(hi);
+	hop_over.search_set(curr_root);
+	OC_ASSERT(0 < hop_over.least_holders.size(), "Ympossible situation");
+	const Handle& holds_or = *hop_over.least_holders.begin();
 
-	curr_soln_handle = soln_handle_stack.top();
-	soln_handle_stack.pop();
+	bool found = false;
+	do {
+		soln_handle_stack.push(curr_soln_handle);
+		curr_soln_handle = hsoln;
+		choice_push();
 
+printf("duuuuude next ch= %lu sz=%lu\n", next_choice(hi, hsoln), _choice_state.size());
+		if (pred_up(holds_or)) found = true;
+printf("duuuuude after up ch= %lu sz=%lu\n", next_choice(hi, hsoln), _choice_state.size());
+		choice_pop();
+		curr_soln_handle = soln_handle_stack.top();
+		soln_handle_stack.pop();
+
+	} while (0 < next_choice(hi, hsoln));
 	return found;
 }
 

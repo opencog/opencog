@@ -110,6 +110,8 @@ class PatternMatchEngine
 		// OrLink (choice) state management
 		ChoiceState _choice_state;
 		size_t next_choice(const Handle&, const Handle&);
+		void choice_push(void);
+		void choice_pop(void);
 
 		void clear_current_state(void);  // clear the stuff above
 
