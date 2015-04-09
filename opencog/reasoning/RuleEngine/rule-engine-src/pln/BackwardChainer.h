@@ -68,29 +68,31 @@ public:
 	~BackwardChainer();
 
 	void do_chain(Handle init_target);
-	map<Handle, UnorderedHandleSet>& get_chaining_result();
+	VarMultimap& get_chaining_result();
 
 	AtomSpace* _as;
 	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
 
 private:
-	map<Handle, UnorderedHandleSet> do_bc(Handle& htarget);
-	map<Handle, UnorderedHandleSet> bc_rule(Rule& rule, const map<Handle, Handle>& mapping);
+
+	VarMultimap bc(HandleSeq goals, vector<map<Handle, Handle>>);
+
+	VarMultimap do_bc(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
-	HandleSeq filter_grounded_experssions(Handle htarget);
+	HandleSeq filter_knowledge_base(Handle htarget);
 
-	bool unify(const Handle& htarget, const Handle& match, map<Handle, Handle>& output);
+	bool unify(const Handle& htarget, const Handle& match, VarMap& output);
 
 	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplicant);
 
-	map<Handle, UnorderedHandleSet> join_premise_vgrounding_maps(const Handle& connector,
-			const map<Handle, map<Handle, UnorderedHandleSet> >& premise_var_grounding_map);
+	VarMultimap join_premise_vgrounding_maps(const Handle& connector,
+			const map<Handle, VarMultimap >& premise_var_grounding_map);
 
 	Rule select_rule(const std::vector<Rule>& rules);
 
 	UnorderedHandleSet chase_var_values(Handle& hvar, const vector<map<Handle, UnorderedHandleSet>>& inference_list, UnorderedHandleSet& results);
-	map<Handle, UnorderedHandleSet> ground_target_vars(Handle& hgoal, vector<map<Handle, UnorderedHandleSet>>& var_grounding_map);
+	VarMultimap ground_target_vars(Handle& hgoal, vector<map<Handle, UnorderedHandleSet>>& var_grounding_map);
 
 	void remove_generated_rules();
 
@@ -104,7 +106,13 @@ private:
 	map<Handle, UnorderedHandleSet> _chaining_result;
 
 	// XXX TODO do we need to store the rule used too?
-	vector<map<Handle, UnorderedHandleSet>> _inference_list;
+	vector<VarMultimap> _inference_list;
+
+	// a map of a premise, to a map of its variables mapping
+	map<Handle, VarMultimap> _inference_history;
+
+	// XXX might want a list to allow target selection
+	std::stack<Handle> _targets_stack;
 
 	std::vector<Rule> _rules_set;
 
@@ -112,9 +120,13 @@ private:
     HandleSeq _bc_generated_rules;
 
 	// XXX any additional link should be reflected in @method join_premise_vgrounding_maps
-	vector<Type> _logical_link_types = { AND_LINK, OR_LINK };
+	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK };
 
 };
+
+
+typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+typedef std::map<Handle, Handle> VarMap;
 
 } // namespace opencog
 
