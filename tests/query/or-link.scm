@@ -1,78 +1,46 @@
 ;
 ; Unit testing for OrLinks in the pattern matcher.
 ;
-;;; Populate the atomspace with three small trees.
-(EvaluationLink
-	(PredicateNode "this way")
-	(ListLink
-		(ConceptNode "this one")
-		(ConceptNode "thing two")
-	)
+;;; Populate the atomspace with four small trees.
+(MemberLink
+	(ConceptNode "Tom")
+	(ConceptNode "ways and means")
 )
 
-(EvaluationLink
-	(PredicateNode "that way")
-	(ListLink
-		(ConceptNode "thing one")
-		(ConceptNode "that too")
-	)
+(MemberLink
+	(ConceptNode "Joe")
+	(ConceptNode "ways and means")
 )
 
-(EvaluationLink
-	(PredicateNode "third way")
-	(ListLink
-		(ConceptNode "thing one")
-		(ConceptNode "thing two")
-	)
+(MemberLink
+	(ConceptNode "Tom")
+	(ConceptNode "Senator")
 )
 
-;;; A very basic pattern using OrLink.  Should find two of the three
-;;; trees given above.
-(define (basic)
-	(BindLink
-		(VariableNode "$x")
-		(ImplicationLink
-			(OrLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "that way")
-					(ListLink
-						(ConceptNode "thing one")
-						(VariableNode "$x")
-					)
-				)
-			)
-			(VariableNode "$x")
-		)
-	)
+(MemberLink
+	(ConceptNode "Joe")
+	(ConceptNode "Representative")
 )
 
-;;; Same as above, but the tope-level OrLink is wrapped.
-(define (wrapped)
+
+;;; Two clauses; they both connected with a common variable.
+(define (embed)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
 			(AndLink
+				(MemberLink
+					(VariableNode "$x")
+					(ConceptNode "ways and means")
+				)
 				(OrLink
-					(EvaluationLink
-						(PredicateNode "this way")
-						(ListLink
-							(VariableNode "$x")
-							(ConceptNode "thing two")
-						)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Senator")
 					)
-					(EvaluationLink
-						(PredicateNode "that way")
-						(ListLink
-							(ConceptNode "thing one")
-							(VariableNode "$x")
-						)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Representative")
 					)
 				)
 			)

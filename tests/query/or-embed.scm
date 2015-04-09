@@ -1,60 +1,51 @@
 ;
 ; Unit testing for OrLinks in the pattern matcher.
 ;
-;;; Populate the atomspace with three small trees.
+;;; Populate the atomspace with four small trees.
 (MemberLink
+	(ConceptNode "Tom")
 	(ConceptNode "ways and means")
-	(EvaluationLink
-		(PredicateNode "this way")
-		(ListLink
-			(ConceptNode "this one")
-			(ConceptNode "thing two")
-		)
-	)
 )
 
 (MemberLink
+	(ConceptNode "Joe")
 	(ConceptNode "ways and means")
-	(EvaluationLink
-		(PredicateNode "that way")
-		(ListLink
-			(ConceptNode "thing one")
-			(ConceptNode "that too")
-		)
+)
+
+;;; the list link serves o purpose other than to "embed"
+(ListLink
+	(MemberLink
+		(ConceptNode "Tom")
+		(ConceptNode "Senator")
 	)
 )
 
-(MemberLink
-	(ConceptNode "ways and means")
-	(EvaluationLink
-		(PredicateNode "third way")
-		(ListLink
-			(ConceptNode "thing one")
-			(ConceptNode "thing two")
-		)
+(ListLink
+	(MemberLink
+		(ConceptNode "Joe")
+		(ConceptNode "Representative")
 	)
 )
 
-;;; One clause, with an OrLink nested in it.
+;;; Two clauses; they both connected with a common variable.
 (define (embed)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
-			(MemberLink
-				(ConceptNode "ways and means")
-				(OrLink
-					(EvaluationLink
-						(PredicateNode "this way")
-						(ListLink
+			(AndLink
+				(MemberLink
+					(VariableNode "$x")
+					(ConceptNode "ways and means")
+				)
+				(ListLink
+					(OrLink
+						(MemberLink
 							(VariableNode "$x")
-							(ConceptNode "thing two")
+							(ConceptNode "Senator")
 						)
-					)
-					(EvaluationLink
-						(PredicateNode "that way")
-						(ListLink
-							(ConceptNode "thing one")
+						(MemberLink
 							(VariableNode "$x")
+							(ConceptNode "Representative")
 						)
 					)
 				)
