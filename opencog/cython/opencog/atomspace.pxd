@@ -99,6 +99,14 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
 # HandleSeq
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
+cdef class TruthValue:
+    cdef tv_ptr *cobj
+    cdef _mean(self)
+    cdef _confidence(self)
+    cdef _count(self)
+    cdef cTruthValue* _ptr(self)
+    cdef tv_ptr* _tvptr(self)
+
 cdef class Handle:
     cdef cHandle *h
 
