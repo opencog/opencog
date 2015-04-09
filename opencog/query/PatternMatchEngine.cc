@@ -630,7 +630,11 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		do {
 			choice_push();
 
+printf ("duuuude is this thr driod????????\n");
+choice_stack.push(_choice_state);
 			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
+POPSTK(choice_stack, _choice_state);
+printf ("duuuude end of this driod????????\n");
 			// If no match, then try the next one.
 			if (not match)
 			{
@@ -790,10 +794,11 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	bool found = false;
 	for (const Handle& hi : fa.least_holders)
 	{
-		dbgprt("Exploring one possible embedding\n");
 		// Do the simple case first, OrLinks are harder.
 		if (OR_LINK != hi->getType())
 		{
+			dbgprt("Exploring one possible embedding out of %zu\n",
+			       fa.least_holders.size());
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
@@ -806,14 +811,16 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		else
 		if (hi == curr_root)
 		{
-			dbgprt("Exploring one possible OrLink at root\n");
+			dbgprt("Exploring one possible OrLink at root out of %zu\n",
+			       fa.least_holders.size());
 			curr_pred_handle = hi;
 			if (clause_accept(hsoln)) found = true;
 		}
 		else
 		{
 			// If we are here, we have an embedded OrLink
-			dbgprt("Exploring one possible OrLink in clause\n");
+			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
+			       fa.least_holders.size());
 			// If we are here, the OrLink is not at the root.
 			// we have to go up again...
 			FindAtoms hop_over(hi);
@@ -830,13 +837,16 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				       "UUID=%lu, choice=%lu\n",
 				       hi.value(), next_choice(hi, hsoln));
 				if (pred_up(holds_or)) found = true;
-				dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
+				dbgprt("Upwards choice loop next choice=%lu\n",
+				        next_choice(hi, hsoln));
 				choice_pop();
 				POPSTK(soln_handle_stack, curr_soln_handle);
 
 			} while (0 < next_choice(hi, hsoln));
 		}
 	}
+	dbgprt("Done exploring %zu choices, found %d\n",
+	       fa.least_holders.size(), found);
 	return found;
 }
 
