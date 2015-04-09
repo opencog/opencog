@@ -75,8 +75,10 @@ public:
 
     void xtest_basic_or(void);
     void xtest_embed_or(void);
-    void test_nest_or(void);
-    void xtest_nest_bad_or(void);
+    void xtest_nest_or(void);
+    void xtest_top_nest_or(void);
+    void test_nest_bad_or(void);
+    void xtest_top_nest_bad_or(void);
 };
 
 void OrLinkUTest::tearDown(void)
@@ -127,7 +129,7 @@ void OrLinkUTest::xtest_embed_or(void)
 /*
  * OrLink nested embeded unit test.
  */
-void OrLinkUTest::test_nest_or(void)
+void OrLinkUTest::xtest_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -141,9 +143,25 @@ void OrLinkUTest::test_nest_or(void)
 }
 
 /*
+ * OrLink top-level nested unit test.
+ */
+void OrLinkUTest::xtest_top_nest_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest))");
+
+    printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(5, as->getArity(items));
+}
+
+/*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::xtest_nest_bad_or(void)
+void OrLinkUTest::test_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -153,5 +171,21 @@ void OrLinkUTest::xtest_nest_bad_or(void)
     Handle items = eval->eval_h("(cog-bind (nest-bad))");
 
     printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(4, as->getArity(items));
+}
+
+/*
+ * OrLink bad nested embeded unit test.
+ */
+void OrLinkUTest::xtest_top_nest_bad_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
+
+    printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
     TS_ASSERT_EQUALS(4, as->getArity(items));
 }
