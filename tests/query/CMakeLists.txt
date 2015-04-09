@@ -88,6 +88,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-embed.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/or-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
