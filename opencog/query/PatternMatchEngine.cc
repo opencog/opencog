@@ -689,7 +689,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	issued_stack.push(issued);
 
 	// Reset the unordered-set stacks with each new clause.
-	// XXX this cannot possible be right: we may need to pop,
+	// XXX this cannot possibly be right: we may need to pop,
 	// and try a different ordering.
 	have_stack.push(have_more);
 	have_more = false;
@@ -788,69 +788,78 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If curr_pred_handle appears twice (or N times) in a curr_root,
 	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
-	// first appearance; the others will be found anyway...
+	// first appearance in almost all cases, unless the holders
+	// lie below an OrLink.  For OrLinks, we really have to examine
+	// all the different holders, they correspond to the different
+	// choices.
 	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
-	const Handle& hi = *fa.least_holders.begin();
-
-	// Do the simple case first, OrLinks are harder.
-	if (OR_LINK != hi->getType())
-	{
-		soln_handle_stack.push(curr_soln_handle);
-		curr_soln_handle = hsoln;
-
-		bool found = pred_up(hi);
-
-		curr_soln_handle = soln_handle_stack.top();
-		soln_handle_stack.pop();
-
-		dbgprt("After moving up the clause, found = %d\n", found);
-		return found;
-	}
-
-	// OrLinks may have multiple choices in them. We have to
-	// loop until all the choices have been explored.
-	if (hi == curr_root)
-	{
-		dbgprt("Exploring OrLink at the root\n");
-		bool found = false;
-		// const Handle& this_one = curr_pred_handle;
-		curr_pred_handle = hi;
-		if (clause_accept(hsoln)) found = true;
-
-#ifdef BORKEN
-		LinkPtr lp(LinkCast(hp));
-		const std::vector<Handle> &osp = lp->getOutgoingSet();
-		for (const Handle& ch : osp)
-		{
-			if (ch == this_one) continue;
-			cur_pred_handle = ch;
-			// xsoln_up(xxxx some const);
-		}
-#endif
-		return found;
-	}
-
-	dbgprt("Exploring clause-embedded OrLink\n");
-	// If we are here, the OrLink is not at the root.
-	// we have to go up again...
-	FindAtoms hop_over(hi);
-	hop_over.search_set(curr_root);
-	OC_ASSERT(0 < hop_over.least_holders.size(), "Ympossible situation");
-	const Handle& holds_or = *hop_over.least_holders.begin();
+printf("duuuude holders size=%lu\n", fa.least_holders.size());
+for(Handle h : fa.least_holders){
+prtmsg("duuude its ", h); }
 
 	bool found = false;
-	do {
-		soln_handle_stack.push(curr_soln_handle);
-		curr_soln_handle = hsoln;
-		choice_push();
+	for (const Handle& hi : fa.least_holders)
+	{
+		dbgprt("Exploring one possible embedding\n");
+		// Do the simple case first, OrLinks are harder.
+		if (OR_LINK != hi->getType())
+		{
+			soln_handle_stack.push(curr_soln_handle);
+			curr_soln_handle = hsoln;
 
-		if (pred_up(holds_or)) found = true;
-		dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
-		choice_pop();
-		curr_soln_handle = soln_handle_stack.top();
-		soln_handle_stack.pop();
+			if (pred_up(hi)) found = true;
 
-	} while (0 < next_choice(hi, hsoln));
+			curr_soln_handle = soln_handle_stack.top();
+			soln_handle_stack.pop();
+
+			dbgprt("After moving up the clause, found = %d\n", found);
+		}
+		else
+		if (hi == curr_root)
+		{
+			// OrLinks may have multiple choices in them. We have to
+			// loop until all the choices have been explored.
+			dbgprt("Exploring OrLink at the root\n");
+			// const Handle& this_one = curr_pred_handle;
+			curr_pred_handle = hi;
+			if (clause_accept(hsoln)) found = true;
+
+#ifdef BORKEN
+			LinkPtr lp(LinkCast(hp));
+			const std::vector<Handle> &osp = lp->getOutgoingSet();
+			for (const Handle& ch : osp)
+			{
+				if (ch == this_one) continue;
+				cur_pred_handle = ch;
+				// xsoln_up(xxxx some const);
+			}
+#endif
+		}
+		else
+		{
+			// If we are here, we have an embedded OrLink
+			dbgprt("Exploring one choice of clause-embedded OrLink\n");
+			// If we are here, the OrLink is not at the root.
+			// we have to go up again...
+			FindAtoms hop_over(hi);
+			hop_over.search_set(curr_root);
+			OC_ASSERT(0 < hop_over.least_holders.size(), "Ympossible situation");
+			const Handle& holds_or = *hop_over.least_holders.begin();
+
+			do {
+				soln_handle_stack.push(curr_soln_handle);
+				curr_soln_handle = hsoln;
+				choice_push();
+
+				if (pred_up(holds_or)) found = true;
+				dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
+				choice_pop();
+				curr_soln_handle = soln_handle_stack.top();
+				soln_handle_stack.pop();
+
+			} while (0 < next_choice(hi, hsoln));
+		}
+	}
 	return found;
 }
 
