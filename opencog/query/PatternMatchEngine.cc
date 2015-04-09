@@ -146,11 +146,19 @@ static inline void prtmsg(const char * msg, const Handle& h)
 
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
-#define POPGND(soln,stack) {         \
-   OC_ASSERT(not stack.empty(), "Unbalanced grounding stack"); \
-   soln = stack.top();               \
-   stack.pop();                      \
-}
+#ifdef DEBUG
+   #define POPSTK(stack,soln) {         \
+      OC_ASSERT(not stack.empty(),      \
+           "Unbalanced stack " #stack); \
+      soln = stack.top();               \
+      stack.pop();                      \
+   }
+#else
+   #define POPSTK(stack,soln) {         \
+      soln = stack.top();               \
+      stack.pop();                      \
+   }
+#endif
 
 /* ======================================================== */
 
@@ -365,7 +373,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			{
 				const Handle& hop = osp[i];
 
-				prtmsg("tree_comp or_link choice: ", hop);
+				dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
 
 				match = tree_recurse(hop, hg, CALL_CHOICE);
 				if (match)
@@ -472,8 +480,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			{
 				dbgprt("tree_comp resume unordered link at depth %zd\n",
 				       more_depth);
-				mutation = mute_stack.top();
-				mute_stack.pop();
+				POPSTK(mute_stack, mutation);
 			}
 
 			do {
@@ -552,7 +559,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 					return true;
 				}
-				POPGND(var_grounding, var_solutn_stack);
+				POPSTK(var_solutn_stack, var_grounding);
 			} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 			dbgprt("tree_comp down unordered exhausted all permuations\n");
@@ -630,8 +637,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
 				choice_pop();
-				have_more = have_stack.top();
-				have_stack.pop();
+				POPSTK(have_stack, have_more);
 				return false;
 			}
 
@@ -644,8 +650,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 
 		if (found)
 		{
-			have_more = have_stack.top();
-			have_stack.pop();
+			POPSTK(have_stack, have_more);
 			return true;
 		}
 
@@ -653,8 +658,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
 	} while (have_more);
 
-	have_more = have_stack.top();
-	have_stack.pop();
+	POPSTK(have_stack, have_more);
 	return false;
 }
 
@@ -713,39 +717,24 @@ void PatternMatchEngine::clause_stacks_push(void)
 void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc->pop();
-	curr_root = root_handle_stack.top();
-	root_handle_stack.pop();
-
-	curr_pred_handle = pred_handle_stack.top();
-	pred_handle_stack.pop();
-
-	curr_soln_handle = soln_handle_stack.top();
-	soln_handle_stack.pop();
+	POPSTK(root_handle_stack, curr_root);
+	POPSTK(pred_handle_stack, curr_pred_handle);
+	POPSTK(soln_handle_stack, curr_soln_handle);
 
 	// The grounding stacks are handled differently.
-	POPGND(clause_grounding, pred_solutn_stack);
-	POPGND(var_grounding, var_solutn_stack);
+	POPSTK(pred_solutn_stack, clause_grounding);
+	POPSTK(var_solutn_stack, var_grounding);
+	POPSTK(issued_stack, issued);
 
-	issued = issued_stack.top();
-	issued_stack.pop();
-
-	_choice_state = choice_stack.top();
-	choice_stack.pop();
+	POPSTK(choice_stack, _choice_state);
 
 	// Handle different unordered links that live in different
 	// clauses. The mute_stack deals with different unordered
 	// links that live in the *same* clause.
-	have_more = have_stack.top();
-	have_stack.pop();
-
-	more_depth = depth_stack.top();
-	depth_stack.pop();
-
-	more_stack = unordered_stack.top();
-	unordered_stack.pop();
-
-	mute_stack = permutation_stack.top();
-	permutation_stack.pop();
+	POPSTK(have_stack, have_more);
+	POPSTK(depth_stack, more_depth);
+	POPSTK(unordered_stack, more_stack);
+	POPSTK(permutation_stack, mute_stack);
 
 	_clause_stack_depth --;
 
@@ -762,8 +751,8 @@ void PatternMatchEngine::choice_push(void)
 
 void PatternMatchEngine::choice_pop(void)
 {
-	POPGND(var_grounding, var_solutn_stack);
-	POPGND(clause_grounding, pred_solutn_stack);
+	POPSTK(var_solutn_stack, var_grounding);
+	POPSTK(pred_solutn_stack, clause_grounding);
 }
 
 /// Return true if a grounding was found.  It also has the side effect
@@ -810,8 +799,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 			if (pred_up(hi)) found = true;
 
-			curr_soln_handle = soln_handle_stack.top();
-			soln_handle_stack.pop();
+			POPSTK(soln_handle_stack, curr_soln_handle);
 
 			dbgprt("After moving up the clause, found = %d\n", found);
 		}
@@ -825,7 +813,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		else
 		{
 			// If we are here, we have an embedded OrLink
-			dbgprt("Exploring one choice of clause-embedded OrLink\n");
+			dbgprt("Exploring one possible OrLink in clause\n");
 			// If we are here, the OrLink is not at the root.
 			// we have to go up again...
 			FindAtoms hop_over(hi);
@@ -838,12 +826,13 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				curr_soln_handle = hsoln;
 				choice_push();
 
-				dbgprt("Exploring one choice of clause-embedded OrLink\n");
+				dbgprt("Exploring one choice of OrLink, "
+				       "UUID=%lu, choice=%lu\n",
+				       hi.value(), next_choice(hi, hsoln));
 				if (pred_up(holds_or)) found = true;
 				dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
 				choice_pop();
-				curr_soln_handle = soln_handle_stack.top();
-				soln_handle_stack.pop();
+				POPSTK(soln_handle_stack, curr_soln_handle);
 
 			} while (0 < next_choice(hi, hsoln));
 		}
