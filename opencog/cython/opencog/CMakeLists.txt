@@ -145,6 +145,7 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(bindlink_cython
 		query
+		execution
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
