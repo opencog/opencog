@@ -298,7 +298,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 	{
 		bool is_virtual = false;
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
-		fgpn.find_atoms(clause);
+		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
 			_evaluatable_terms.insert(sh);
@@ -311,7 +311,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
 		// are essentially a kind of EvaluationLink holding a GPN
 		FindAtoms fgtl(VIRTUAL_LINK, true);
-		fgtl.find_atoms(clause);
+		fgtl.search_set(clause);
 		// Unlike the above, its varset, not least_holders...
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)

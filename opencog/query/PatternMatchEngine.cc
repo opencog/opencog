@@ -771,20 +771,11 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	dbgprt("Term has ground, move up.\n");
 	bool found = false;
 
-	// Do not use the callback get_incoming_set on the pattern!
-	IncomingSet iset = curr_pred_handle->getIncomingSet();
-	size_t sz = iset.size();
-	for (size_t i = 0; i < sz; i++)
+	FindAtoms fa(curr_pred_handle);
+	fa.search_set(curr_root);
+
+	for (const Handle& hi : fa.least_holders)
 	{
-		Handle hi(iset[i]);
-
-		// Is this link even a part of the predicate we
-		// are considering?   If not, try the next atom.
-		// Note Bene: there can be only one such atom!
-		// XXX FIXME, there is a more efficient way...
-		bool valid = is_atom_in_tree(curr_root, hi);
-		if (not valid) continue;
-
 		// OrLinks may have multiple choices in them. We have to
 		// loop until all the choices have been explored.
 		if (OR_LINK == hi->getType())
@@ -792,14 +783,29 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			dbgprt("Exploring OrLink\n");
 			if (hi == curr_root)
 			{
+printf("duude is root!!\n");
+				const Handle& this_one = curr_pred_handle;
 				curr_pred_handle = hi;
 				if (clause_accept(hsoln)) found = true;
+
+#ifdef BORKEN
+				LinkPtr lp(LinkCast(hp));
+				const std::vector<Handle> &osp = lp->getOutgoingSet();
+				for (const Handle& ch : osp)
+				{
+					if (ch == this_one) continue;
+					cur_pred_handle = ch;
+					// xsoln_up(xxxx some const);
+				}
+#endif
 			}
 			else
 			{
 				found = false;
 				do {
+printf("duuuuude next ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
 					if (pred_up(hi)) found = true;
+printf("duuuuude after up ch= %d sz=%d\n", next_choice(hi, hsoln), _choice_state.size());
 				} while (0 < next_choice(hi, hsoln));
 			}
 		}
@@ -807,6 +813,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			found = pred_up(hi);
 
 		// unconditional break...
+		// XXX this is wrong, could appear multiple times!
 		break;
 	}
 	dbgprt("After moving up the clause, found = %d\n", found);

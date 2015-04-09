@@ -45,13 +45,20 @@ namespace opencog {
 /// you exactly where it occurs.  We start with the more complicated one
 /// first.  Otherwise, skip down to get at the simpler ones.
 
+//================================================================
+/// The FindAtoms class is used to locate atoms of a given type or
+/// target that occur inside some clause.  The target is specified in
+/// the constructor, the clause to be searched is given with the
+/// 'search_set()' method. Aftr the search has been done, the targets
+/// are available in the various public members.
+///
 /// Find a "target atom", or find all atoms of a given "target type",
 /// and all of the links that hold that target, that occur in a clause
 /// (an expression tree formed by the outgoing set.) This is typically
 /// used to find all variables in an expression, but it can be used for
 /// any purpose.
 ///
-/// After find_atoms() is called, the set of target atoms that were found
+/// After search_set() is called, the set of target atoms that were found
 /// can be retreived from the public member `varset`.  The set of links
 /// that had one of these targets occuring somewhere, anywhere, within
 /// them is in the public member `holders`. This includes the holders of
@@ -89,6 +96,7 @@ class FindAtoms
 				classserver().getChildrenRecursive(t, inserter(_target_types));
 			}
 		}
+
 		inline FindAtoms(Type ta, Type tb, bool subclass = false)
 			: _target_types({ta, tb})
 		{
@@ -98,20 +106,26 @@ class FindAtoms
 				classserver().getChildrenRecursive(tb, inserter(_target_types));
 			}
 		}
+
+		inline FindAtoms(const Handle& atom)
+			: _target_types(),
+			 _target_atoms() { _target_atoms.insert(atom); }
+
 		inline FindAtoms(const std::set<Handle>& selection)
 			: _target_types(),
 			 _target_atoms(selection) {}
 
 		/**
-		 * Create a set of all of the target atoms/types that lie in the
-		 * outgoing set of the handle (recursively).
+		 * Given a handle to be searched, create a set of all of the
+		 * target atoms/types that lie in the outgoing set of the handle
+		 * (recursively).
 		 */
-		inline void find_atoms(const Handle& h)
+		inline void search_set(const Handle& h)
 		{
 			find_rec(h);
 		}
 
-		inline void find_atoms(const std::vector<Handle>& hlist)
+		inline void search_set(const std::vector<Handle>& hlist)
 		{
 			for (const Handle& h : hlist) find_rec(h);
 		}
