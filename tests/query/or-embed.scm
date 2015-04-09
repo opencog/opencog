@@ -12,6 +12,11 @@
 	(ConceptNode "ways and means")
 )
 
+(MemberLink
+	(ConceptNode "Hank")
+	(ConceptNode "ways and means")
+)
+
 ;;; the list link serves o purpose other than to "embed"
 (ListLink
 	(MemberLink
@@ -24,6 +29,14 @@
 	(MemberLink
 		(ConceptNode "Joe")
 		(ConceptNode "Representative")
+	)
+)
+
+;; We should NOT find Hank!
+(ListLink
+	(MemberLink
+		(ConceptNode "Hank")
+		(ConceptNode "CEO")
 	)
 )
 

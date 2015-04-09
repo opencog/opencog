@@ -1,5 +1,5 @@
 ;
-; Unit testing for OrLinks in the pattern matcher.
+; Basic unit testing for OrLinks in the pattern matcher.
 ;
 ;;; Populate the atomspace with four small trees.
 (MemberLink
@@ -13,6 +13,11 @@
 )
 
 (MemberLink
+	(ConceptNode "Hank")
+	(ConceptNode "ways and means")
+)
+
+(MemberLink
 	(ConceptNode "Tom")
 	(ConceptNode "Senator")
 )
@@ -22,9 +27,14 @@
 	(ConceptNode "Representative")
 )
 
+;; We should NOT find Hank among the solutions
+(MemberLink
+	(ConceptNode "Hank")
+	(ConceptNode "CEO")
+)
 
 ;;; Two clauses; they both connected with a common variable.
-(define (embed)
+(define (basic)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink

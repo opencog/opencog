@@ -793,9 +793,6 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// all the different holders, they correspond to the different
 	// choices.
 	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
-printf("duuuude holders size=%lu\n", fa.least_holders.size());
-for(Handle h : fa.least_holders){
-prtmsg("duuude its ", h); }
 
 	bool found = false;
 	for (const Handle& hi : fa.least_holders)
@@ -817,23 +814,9 @@ prtmsg("duuude its ", h); }
 		else
 		if (hi == curr_root)
 		{
-			// OrLinks may have multiple choices in them. We have to
-			// loop until all the choices have been explored.
-			dbgprt("Exploring OrLink at the root\n");
-			// const Handle& this_one = curr_pred_handle;
+			dbgprt("Exploring one possible OrLink at root\n");
 			curr_pred_handle = hi;
 			if (clause_accept(hsoln)) found = true;
-
-#ifdef BORKEN
-			LinkPtr lp(LinkCast(hp));
-			const std::vector<Handle> &osp = lp->getOutgoingSet();
-			for (const Handle& ch : osp)
-			{
-				if (ch == this_one) continue;
-				cur_pred_handle = ch;
-				// xsoln_up(xxxx some const);
-			}
-#endif
 		}
 		else
 		{
@@ -843,7 +826,7 @@ prtmsg("duuude its ", h); }
 			// we have to go up again...
 			FindAtoms hop_over(hi);
 			hop_over.search_set(curr_root);
-			OC_ASSERT(0 < hop_over.least_holders.size(), "Ympossible situation");
+			OC_ASSERT(1 == hop_over.least_holders.size(), "Hell on Earth");
 			const Handle& holds_or = *hop_over.least_holders.begin();
 
 			do {
@@ -851,6 +834,7 @@ prtmsg("duuude its ", h); }
 				curr_soln_handle = hsoln;
 				choice_push();
 
+				dbgprt("Exploring one choice of clause-embedded OrLink\n");
 				if (pred_up(holds_or)) found = true;
 				dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
 				choice_pop();
