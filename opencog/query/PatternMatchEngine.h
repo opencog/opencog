@@ -44,9 +44,15 @@ class PatternMatchEngine
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
+	// Used for managing OrLink state
+	typedef std::pair<const Handle&, const Handle&> Choice;
+	typedef std::map<Choice, size_t> ChoiceState;
+
 	private:
 		// -------------------------------------------
 		// The current set of clauses (redex context) being grounded.
+		// A single redex consists of a collection of clauses, all of
+		// which must be grounded.
 		void clear_redex(const std::string& name = "topmost level");
 		bool explore_redex(const Handle&, const Handle&, const Handle&);
 
@@ -77,7 +83,11 @@ class PatternMatchEngine
 		void pop_redex(void);
 
 		// --------------------------------------------
-		// Current traversal state
+		// Current clause traversal state. These hold the state needed
+		// to traverse a single clause, and find groundings for it.
+		// Note, though, that these are cumulative: so e.g. the
+		// var_grounding map accumulates variable groundings for this
+		// clause, and all previous clauses so far.
 
 		// Map of current groundings of variables to thier grounds
 		// Also contains grounds of subclauses (not sure why, this seems
@@ -90,18 +100,27 @@ class PatternMatchEngine
 		typedef std::set<Handle> IssuedSet;
 		IssuedSet issued;     // stacked on issued_stack
 
-		int depth;      // Recursion depth for tree_compare.
-		bool in_quote;  // Everything is literal in a quote.
+		unsigned int depth; // Recursion depth for tree_compare.
+		bool in_quote;      // Everything is literal in a quote.
 
 		Handle curr_root;         // stacked onto root_handle_stack
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_pred_handle;  // stacked onto pred_handle_stack
 
+		// OrLink (choice) state management
+		ChoiceState _choice_state;
+		size_t next_choice(const Handle&, const Handle&);
+		void choice_push(void);
+		void choice_pop(void);
+
 		void clear_current_state(void);  // clear the stuff above
 
 		// -------------------------------------------
-		// Stack used to store current traversal state during
-		// backtracking, to find additional groundings
+		// Stack used to store current traversal state for a single
+		// clause. These are pushed when a clause is fully grounded,
+		// and a new clause is about to be started. These are popped
+		// in order to get back to the original clause, and resume
+		// traversal of that clause, where it was last left off.
 		std::stack<Handle> root_handle_stack;
 		std::stack<Handle> pred_handle_stack;
 		std::stack<Handle> soln_handle_stack;
@@ -112,22 +131,34 @@ class PatternMatchEngine
 		std::stack<SolnMap> pred_solutn_stack;
 
 		std::stack<IssuedSet> issued_stack;
-		std::stack<bool> in_quote_stack;
 
 		// push, pop and clear these states.
-		void graph_stacks_push(void);
-		void graph_stacks_pop(void);
-		void graph_stacks_clear(void);
-		unsigned int _graph_stack_depth;
+		void clause_stacks_push(void);
+		void clause_stacks_pop(void);
+		void clause_stacks_clear(void);
+		unsigned int _clause_stack_depth;
 
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
-		bool tree_compare(const Handle&, const Handle&);
+		typedef enum {
+			CALL_QUOTE,
+			CALL_ORDER,
+			CALL_UNORDER,
+			CALL_CHOICE,
+			CALL_COMP,
+			CALL_SOLN
+		} Caller;   // temporary scaffolding !???
+
+		bool tree_compare(const Handle&, const Handle&, Caller);
+		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
 		bool pred_up(const Handle&);
-		bool soln_up(const Handle&);
+		bool xsoln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
+		bool clause_accept(const Handle&);
+		bool do_next_clause(void);
+
 		bool clause_accepted;
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool);

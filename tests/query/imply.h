@@ -20,7 +20,7 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
 
 	// Extract the variables; they were not specified.
 	FindAtoms fv(VARIABLE_NODE);
-	fv.find_atoms(hclauses);
+	fv.search_set(hclauses);
 
 	HandleSeq vars;
 	for (Handle h : fv.varset)

@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomutils/ForeachZip.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
@@ -35,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -191,7 +190,9 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * var_grounding when encountering variables (and sub-clauses) in the
  * pattern.
  */
-bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
+bool PatternMatchEngine::tree_compare(const Handle& hp,
+                                      const Handle& hg,
+                                      Caller caller)
 {
 	// If the pattern link is a quote, then we compare the quoted
 	// contents. This is done recursively, of course.  The QuoteLink
@@ -205,7 +206,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		if (1 != lp->getArity())
 			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
 		more_depth ++;
-		bool ma = tree_compare(lp->getOutgoingAtom(0), hg);
+		bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
 		more_depth --;
 		in_quote = false;
 		return ma;
@@ -297,48 +298,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
 
-	// OR_LINK's are multiple-choice links. As long as we can
-	// can match one of the sub-expressions of the OrLink, then
-	// the OrLink as a whole can be considered to be grounded.
-	if (classserver().isA(tp, OR_LINK))
-	{
-		// XXX TODO: the below finds the first possible match,
-		// and then calls it quits. In fact, we need to find all
-		// of them.
-		LinkPtr lp(LinkCast(hp));
-		bool match = false;
-		const std::vector<Handle> &osp = lp->getOutgoingSet();
-		for (Handle hop : osp)
-		{
-			prtmsg("tree_comp or_link choice: ", hop);
-			var_solutn_stack.push(var_grounding);
-
-			match = tree_compare(hop, hg);
-			// If no match, then try the next one.
-			if (not match)
-			{
-				// Get rid of any grounding that might have been proposed
-				// during the tree-match.
-				POPGND(var_grounding, var_solutn_stack);
-			}
-			else
-			{
-				// Keep the grounding that was found. Even up the stack.
-				var_solutn_stack.pop();
-
-				// If we've found a grounding, record it.
-				// Note we record the grounding for both the OrLink,
-				// and for the specific clause that was picked.
-				var_grounding[hop] = hg;
-				var_grounding[hp] = hg;
-				break;
-			}
-		}
-		if (not match) return false;
-
-		return true;
-	}
-
 	// If both are links, compare them as such.
 	// Unless pattern link is a QuoteLink, in which case, the quoted
 	// contents is compared. (well, that was done up above...)
@@ -391,6 +350,42 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		prtmsg("> tree_compare", hp);
 		prtmsg(">           to", hg);
 
+		// OR_LINK's are multiple-choice links. As long as we can
+		// can match one of the sub-expressions of the OrLink, then
+		// the OrLink as a whole can be considered to be grounded.
+		//
+		if (OR_LINK == tp)
+		{
+			const std::vector<Handle> &osp = lp->getOutgoingSet();
+
+			// _choice_state lets use resume wher we last left off.
+			size_t iend = osp.size();
+			size_t istart = next_choice(hp, hg);
+			for (size_t i=istart; i<iend; i++)
+			{
+				const Handle& hop = osp[i];
+
+				prtmsg("tree_comp or_link choice: ", hop);
+
+				match = tree_recurse(hop, hg, CALL_CHOICE);
+				if (match)
+				{
+					// If we've found a grounding, lets see if the
+					// post-match callback likes this grounding.
+					match = _pmc->post_link_match(lp, lg);
+					if (not match) continue;
+
+					// If we've found a grounding, record it.
+					if (hp != hg) var_grounding[hp] = hg;
+					_choice_state[Choice(hp, hg)] = i+1;
+					return true;
+				}
+			}
+			// If we are here, we've explored all the possibilities already
+			_choice_state.erase(Choice(hp, hg));
+			return false;
+		}
+
 		// If the two links are both ordered, its enough to compare
 		// them "side-by-side"; the foreach_atom_pair iterator does
 		// this. If they are un-ordered, then we have to compare every
@@ -398,29 +393,37 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 		// explosion.
 		if (classserver().isA(tp, ORDERED_LINK))
 		{
-			LinkPtr lp(LinkCast(hp));
-			LinkPtr lg(LinkCast(hg));
 			const HandleSeq &osp = lp->getOutgoingSet();
 			const HandleSeq &osg = lg->getOutgoingSet();
+
+			size_t oset_sz = osp.size();
+			if (oset_sz != osg.size()) return false;
 
 			// The recursion step: traverse down the tree.
 			// In principle, we could/should push the current groundings
 			// onto the stack before recursing, and then pop them off on
 			// return.  Failure to do so could leave some bogus groundings,
 			// sitting around, i.e. groundings that were found during
-			// recursion but then discarded due to a later mistmatch.
+			// recursion but then discarded due to a later mis-match.
 			//
 			// In practice, I was unable to come up with any test case
 			// where this mattered; any bogus groundings eventually get
 			// replaced by valid ones.  Thus, we save some unknown amount
 			// of cpu time by simply skipping the push & pop here.
 			//
-			// var_solutn_stack.push(var_grounding);
 			depth ++;
 			more_depth ++;
 
-			match = foreach_atom_pair(osp, osg,
-			                   &PatternMatchEngine::tree_compare, this);
+			match = true;
+			for (size_t i=0; i<oset_sz; i++)
+			{
+				if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
+				{
+					match = false;
+					break;
+				}
+			}
+
 			more_depth --;
 			depth --;
 			dbgprt("tree_comp down link match=%d\n", match);
@@ -474,16 +477,29 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 			}
 
 			do {
+				size_t oset_sz = mutation.size();
+				if (oset_sz != osg.size()) return false;
+
 				// The recursion step: traverse down the tree.
 				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
 				       more_depth);
 				var_solutn_stack.push(var_grounding);
+				// XXX why are we not pushing the claus soln stack??
 				depth ++;
 
 				have_more = false;
 				more_depth ++;
-				match = foreach_atom_pair(mutation, osg,
-				                   &PatternMatchEngine::tree_compare, this);
+
+				match = true;
+				for (size_t i=0; i<oset_sz; i++)
+				{
+					if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
+					{
+						match = false;
+						break;
+					}
+				}
+
 				more_depth --;
 				depth --;
 				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
@@ -571,10 +587,25 @@ bool PatternMatchEngine::tree_compare(const Handle& hp, const Handle& hg)
 	return false;
 }
 
+bool PatternMatchEngine::tree_recurse(const Handle& hp,
+                                      const Handle& hg,
+                                      Caller caller)
+{
+	return tree_compare(hp, hg, caller);
+}
+
+size_t PatternMatchEngine::next_choice(const Handle& hp,
+                                       const Handle& hg)
+{
+	size_t istart;
+	try { istart = _choice_state.at(Choice(hp, hg)); }
+	catch(...) { istart = 0;}
+	return istart;
+}
 /* ======================================================== */
 
 /// Return true if a grounding was found.
-bool PatternMatchEngine::soln_up(const Handle& hsoln)
+bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
@@ -587,33 +618,36 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 	have_more = false;
 
 	do {
-		var_solutn_stack.push(var_grounding);
+		bool found = false;
 
-		bool match = tree_compare(curr_pred_handle, hsoln);
-		// If no match, then try the next one.
-		if (not match)
-		{
+		do {
+			choice_push();
+
+			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
+			// If no match, then try the next one.
+			if (not match)
+			{
+				// Get rid of any grounding that might have been proposed
+				// during the tree-match.
+				choice_pop();
+				have_more = have_stack.top();
+				have_stack.pop();
+				return false;
+			}
+
+			if (do_soln_up(hsoln)) found = true;
+
 			// Get rid of any grounding that might have been proposed
-			// during the tree-match.
-			POPGND(var_grounding, var_solutn_stack);
-			have_more = have_stack.top();
-			have_stack.pop();
-			return false;
-		}
+			// during the tree-compare or do_soln_up.
+			choice_pop();
+		} while (0 < next_choice(curr_pred_handle, hsoln));
 
-		bool found = do_soln_up(hsoln);
 		if (found)
 		{
-			// Keep the grounding that was found. Even up the stack.
-			var_solutn_stack.pop();
 			have_more = have_stack.top();
 			have_stack.pop();
 			return true;
 		}
-
-		// Get rid of any grounding that might have been proposed
-		// during the tree-compare or soln_up.
-		POPGND(var_grounding, var_solutn_stack);
 
 		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
 		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
@@ -625,13 +659,25 @@ bool PatternMatchEngine::soln_up(const Handle& hsoln)
 }
 
 /**
- * Push all stacks related to graph traversal. Do NOT push any
- * of the redex stacks.
+ * Push all stacks related to the grounding of a clause. This push is
+ * meant to be done only when a grounding for a clause has been found,
+ * and the next clause is about the be attempted. It saves all of the
+ * traversal data associated with the current clause, so that, later
+ * on, traversal can be resumed where it was left off.
+ *
+ * This does NOT push and of the redex stacks because (with the current
+ * redex design), all redex substitutions should have terminatated by
+ * now, and returned to the main clause. i.e. the redex stack is assumed
+ * to be empty, at this point.  (Its possible this design may change in
+ * in the future if multi-clause redexes are allowed, whatever the heck
+ * that may be!?)
  */
-void PatternMatchEngine::graph_stacks_push(void)
+void PatternMatchEngine::clause_stacks_push(void)
 {
-	_graph_stack_depth++;
-	dbgprt("--- That's it, now push to stack depth=%d\n\n", _graph_stack_depth);
+	_clause_stack_depth++;
+	dbgprt("--- That's it, now push to stack depth=%d\n\n", _clause_stack_depth);
+
+	OC_ASSERT(not in_quote, "Can't posssibly happen!");
 
 	root_handle_stack.push(curr_root);
 	pred_handle_stack.push(curr_pred_handle);
@@ -641,10 +687,9 @@ void PatternMatchEngine::graph_stacks_push(void)
 	pred_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
-	in_quote_stack.push(in_quote);
 
 	// Reset the unordered-set stacks with each new clause.
-	// XXX this cannot possible be right: we may need to pop,
+	// XXX this cannot possibly be right: we may need to pop,
 	// and try a different ordering.
 	have_stack.push(have_more);
 	have_more = false;
@@ -659,10 +704,12 @@ void PatternMatchEngine::graph_stacks_push(void)
 }
 
 /**
- * Pop all graph-traversal-related stacks. These do NOT
- * affect any of the redex stacks.
+ * Pop all clause-traversal-related stacks. This restores state
+ * so that the traversal of a single clause can resume where it left
+ * off. These do NOT affect any of the redex stacks (which are assumed
+ * to be empty at this point.)
  */
-void PatternMatchEngine::graph_stacks_pop(void)
+void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc->pop();
 	curr_root = root_handle_stack.top();
@@ -681,9 +728,6 @@ void PatternMatchEngine::graph_stacks_pop(void)
 	issued = issued_stack.top();
 	issued_stack.pop();
 
-	in_quote = in_quote_stack.top();
-	in_quote_stack.pop();
-
 	// Handle different unordered links that live in different
 	// clauses. The mute_stack deals with different unordered
 	// links that live in the *same* clause.
@@ -699,11 +743,23 @@ void PatternMatchEngine::graph_stacks_pop(void)
 	mute_stack = permutation_stack.top();
 	permutation_stack.pop();
 
-	_graph_stack_depth --;
+	_clause_stack_depth --;
 
-	dbgprt("pop to depth %d\n", _graph_stack_depth);
+	dbgprt("pop to depth %d\n", _clause_stack_depth);
 	prtmsg("pop to joiner", curr_pred_handle);
 	prtmsg("pop to clause", curr_root);
+}
+
+void PatternMatchEngine::choice_push(void)
+{
+	var_solutn_stack.push(var_grounding);
+	pred_solutn_stack.push(clause_grounding);
+}
+
+void PatternMatchEngine::choice_pop(void)
+{
+	POPGND(var_grounding, var_solutn_stack);
+	POPGND(clause_grounding, pred_solutn_stack);
 }
 
 /// Return true if a grounding was found.  It also has the side effect
@@ -714,53 +770,90 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	depth = 1;
 
 	// If we are here, then everything below us matches.  If we are
-	// not yet at the top of a clause, i.e. we are in the middle of
-	// a clause, then we need to move up.
-	if (curr_pred_handle != curr_root)
+	// at the top of the clause, move on to the next clause. Else,
+	// we are working on a term somewhere in the middle of a clause
+	// and need to walk upwards.
+	if (curr_pred_handle == curr_root)
+		return clause_accept(hsoln);
+
+	// Move up the predicate, and hunt for a match, again.
+	dbgprt("Term has ground, move up.\n");
+
+	FindAtoms fa(curr_pred_handle);
+	fa.search_set(curr_root);
+
+	// It is almost always the case, but not necessarily, that
+	// least_holders contains one atom. (i.e. the one atom that
+	// is the parent of curr_pred_handle that is within curr_root.
+	// If curr_pred_handle appears twice (or N times) in a curr_root,
+	// then it will show up twice (or N times) in least_holders.
+	// As far as I can tell, it is sufficient to examine only the
+	// first appearance in almost all cases, unless the holders
+	// lie below an OrLink.  For OrLinks, we really have to examine
+	// all the different holders, they correspond to the different
+	// choices.
+	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
+
+	bool found = false;
+	for (const Handle& hi : fa.least_holders)
 	{
-		soln_handle_stack.push(curr_soln_handle);
-		curr_soln_handle = hsoln;
+		dbgprt("Exploring one possible embedding\n");
+		// Do the simple case first, OrLinks are harder.
+		if (OR_LINK != hi->getType())
+		{
+			soln_handle_stack.push(curr_soln_handle);
+			curr_soln_handle = hsoln;
 
-		// Move up the predicate, and hunt for a match, again.
-		dbgprt("Term has ground, move up.\n");
-		// Do not use the callback get_incoming_set on the pattern!
-		IncomingSet iset = curr_pred_handle->getIncomingSet();
-		size_t sz = iset.size();
-		bool found = false;
-		for (size_t i = 0; i < sz; i++) {
-			Handle hi(iset[i]);
+			if (pred_up(hi)) found = true;
 
-			// Is this link even a part of the predicate we
-			// are considering?   If not, try the next atom.
-			bool valid = is_atom_in_tree(curr_root, hi);
-			if (not valid) continue;
+			curr_soln_handle = soln_handle_stack.top();
+			soln_handle_stack.pop();
 
-			// Ugh. If the next step up the predicate is an OrLink,
-			// we consider it to be solved already.  So re-enter, and
-			// try again.
-			if (OR_LINK == hi->getType())
-			{
-				curr_pred_handle = hi;
-				found = do_soln_up(hsoln);
-				break;
-			}
-
-			found = pred_up(hi);
-			if (found) break;
+			dbgprt("After moving up the clause, found = %d\n", found);
 		}
-		dbgprt("After moving up the clause, found = %d\n", found);
+		else
+		if (hi == curr_root)
+		{
+			dbgprt("Exploring one possible OrLink at root\n");
+			curr_pred_handle = hi;
+			if (clause_accept(hsoln)) found = true;
+		}
+		else
+		{
+			// If we are here, we have an embedded OrLink
+			dbgprt("Exploring one choice of clause-embedded OrLink\n");
+			// If we are here, the OrLink is not at the root.
+			// we have to go up again...
+			FindAtoms hop_over(hi);
+			hop_over.search_set(curr_root);
+			OC_ASSERT(1 == hop_over.least_holders.size(), "Hell on Earth");
+			const Handle& holds_or = *hop_over.least_holders.begin();
 
-		curr_soln_handle = soln_handle_stack.top();
-		soln_handle_stack.pop();
+			do {
+				soln_handle_stack.push(curr_soln_handle);
+				curr_soln_handle = hsoln;
+				choice_push();
 
-		return found;
+				dbgprt("Exploring one choice of clause-embedded OrLink\n");
+				if (pred_up(holds_or)) found = true;
+				dbgprt("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
+				choice_pop();
+				curr_soln_handle = soln_handle_stack.top();
+				soln_handle_stack.pop();
+
+			} while (0 < next_choice(hi, hsoln));
+		}
 	}
+	return found;
+}
 
-	// If we are here, we've navigated to the top of the clause, and
-	// it is matched, then it is fully grounded, and we're done with it.
-	// Start work on the next unsovled predicate. But first, see what
-	// the callbacks have to say.
-
+/// This is called when we've navigated to the top of a clause,
+/// and so it is fully grounded, and we're essentially done.
+/// However, let the callbacks have the final say on whether to
+/// proceed onwards, or to backtrack.
+///
+bool PatternMatchEngine::clause_accept(const Handle& hsoln)
+{
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
@@ -782,7 +875,15 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", curr_soln_handle);
 
-	graph_stacks_push();
+	// Now go and do more clauses.
+	return do_next_clause();
+}
+
+// This is called when all previous clauses have been grounded; so
+// we search for the next one, and try to round that.
+bool PatternMatchEngine::do_next_clause(void)
+{
+	clause_stacks_push();
 	get_next_untried_clause();
 
 	// If there are no further predicates to solve,
@@ -820,7 +921,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		curr_soln_handle = var_grounding[curr_pred_handle];
 		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = soln_up(curr_soln_handle);
+		found = xsoln_up(curr_soln_handle);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -838,7 +939,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			match = _pmc->optional_clause_match(curr_pred_handle, undef);
+			bool match = _pmc->optional_clause_match(curr_pred_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
@@ -861,7 +962,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				curr_soln_handle = var_grounding[curr_pred_handle];
-				found = soln_up(curr_soln_handle);
+				found = xsoln_up(curr_soln_handle);
 			}
 		}
 	}
@@ -869,7 +970,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// If we failed to find anything at this level, we need to
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
-	graph_stacks_pop();
+	clause_stacks_pop();
 
 	return found;
 }
@@ -884,7 +985,7 @@ bool PatternMatchEngine::pred_up(const Handle& h)
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		found = soln_up(Handle(iset[i]));
+		found = xsoln_up(Handle(iset[i]));
 		if (found) break;
 	}
 
@@ -1058,7 +1159,7 @@ bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
                                       const Handle& starter,
                                       const Handle& ah)
 {
-	graph_stacks_clear();
+	clause_stacks_clear();
 	return explore_redex(do_clause, starter, ah);
 }
 
@@ -1077,7 +1178,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	curr_root = do_clause;
 	curr_pred_handle = starter;
 	issued.insert(curr_root);
-	bool found = soln_up(ah);
+	bool found = xsoln_up(ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
@@ -1100,21 +1201,22 @@ void PatternMatchEngine::clear_current_state(void)
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
+
+	_choice_state.clear();
 }
 
 /**
  * Unconditionally clear all graph traversal stacks
  */
-void PatternMatchEngine::graph_stacks_clear(void)
+void PatternMatchEngine::clause_stacks_clear(void)
 {
-	_graph_stack_depth = 0;
+	_clause_stack_depth = 0;
 	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
 	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
-	while (!in_quote_stack.empty()) in_quote_stack.pop();
 
 	have_more = false;
 	more_depth = 0;
@@ -1136,7 +1238,7 @@ PatternMatchEngine::PatternMatchEngine(void)
 	depth = 0;
 
 	// graph state
-	_graph_stack_depth = 0;
+	_clause_stack_depth = 0;
 
 	// unordered link state
 	have_more = false;

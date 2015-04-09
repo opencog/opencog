@@ -43,10 +43,10 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
+	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(BetaRedexUTest)
-# Test disabled for now; its under construction
-#	ADD_CXXTEST(RedexBindUTest)
+	ADD_CXXTEST(RedexBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
@@ -89,6 +89,12 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-disconnected.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-disconnected.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-embed.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed-disco.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-embed-disco.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/or-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm

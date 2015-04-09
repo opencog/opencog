@@ -79,6 +79,16 @@ the search space, leading to very long run-times.  This is not usually
 the case for most ordinary problems, but can occur for large problems
 containing hundreds of unordered links and/or virtual nodes.
 
+Under "normal" circumstances, the algorithm reports each result
+exactly once.  However, in certain graphs having a common subexpression,
+arranged in a particular way, identical solutions may be repeated more
+than once. (With the current algorithm, this occurs when the common
+subexpression occurs within different singleton links, and the different
+singleton links are all contained within the same link. A solution
+will be reported once for each such singleton. This situation would
+surely never occur during any sort of "typical" usage. See the
+ArcanaUTest::test_repeats() unit test for an example.)
+
 The algorithm performs a fair amount of pre-traversal setup and error
 checking, such as finding the common variables that connect different
 clauses together, and initializing and setting up maps to make traversal

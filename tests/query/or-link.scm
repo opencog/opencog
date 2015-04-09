@@ -1,50 +1,56 @@
 ;
-; Unit testing for OrLinks in the pattern matcher.
+; Basic unit testing for OrLinks in the pattern matcher.
 ;
-;;; Populate the atomspace with three small trees.
-(EvaluationLink
-	(PredicateNode "this way")
-	(ListLink
-		(ConceptNode "this one")
-		(ConceptNode "thing two")
-	)
+;;; Populate the atomspace with four small trees.
+(MemberLink
+	(ConceptNode "Tom")
+	(ConceptNode "ways and means")
 )
 
-(EvaluationLink
-	(PredicateNode "that way")
-	(ListLink
-		(ConceptNode "thing one")
-		(ConceptNode "that too")
-	)
+(MemberLink
+	(ConceptNode "Joe")
+	(ConceptNode "ways and means")
 )
 
-(EvaluationLink
-	(PredicateNode "third way")
-	(ListLink
-		(ConceptNode "thing one")
-		(ConceptNode "thing two")
-	)
+(MemberLink
+	(ConceptNode "Hank")
+	(ConceptNode "ways and means")
 )
 
-;;; A very basic pattern using OrLink.  Should find two of the three
-;;; trees given above.
+(MemberLink
+	(ConceptNode "Tom")
+	(ConceptNode "Senator")
+)
+
+(MemberLink
+	(ConceptNode "Joe")
+	(ConceptNode "Representative")
+)
+
+;; We should NOT find Hank among the solutions
+(MemberLink
+	(ConceptNode "Hank")
+	(ConceptNode "CEO")
+)
+
+;;; Two clauses; they both connected with a common variable.
 (define (basic)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
-			(OrLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+			(AndLink
+				(MemberLink
+					(VariableNode "$x")
+					(ConceptNode "ways and means")
 				)
-				(EvaluationLink
-					(PredicateNode "that way")
-					(ListLink
-						(ConceptNode "thing one")
+				(OrLink
+					(MemberLink
 						(VariableNode "$x")
+						(ConceptNode "Senator")
+					)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Representative")
 					)
 				)
 			)

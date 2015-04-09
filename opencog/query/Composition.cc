@@ -155,7 +155,10 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 
 	push_redex();
 	clear_redex(cpl->get_name());
-//	setup_redex(local_vars, local_clauses);
+	_bound_vars = local_vars;
+	_cnf_clauses = local_clauses;
+	_mandatory = local_clauses;
+	// TODO: handle optionals, and virtuals too.
 
 	// To explore this redex, we've got to translate the current
 	// traversal state into the "local frame". Do this by tranlsating
@@ -163,7 +166,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	const HandleSeq& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
-	graph_stacks_push();
+	clause_stacks_push();
 	clear_current_state();
 // XXX TODO handle clause_grounding as well ?? why
 
@@ -191,7 +194,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	curr_soln_handle = var_grounding[curr_pred_handle];
 
 	Handle hp(_cnf_clauses[0]);
-	bool found = tree_compare(hp, Handle(lg));
+	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
 
 #if 0
 	Handle join;
@@ -225,7 +228,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// No match; restore original grounding and quit
 	if (not found)
 	{
-		graph_stacks_pop();
+		clause_stacks_pop();
 		pop_redex();
 		return false;
 	}
@@ -233,7 +236,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// If there is a match, then maybe we grounded some variables.
 	// If so, we need to unmasquerade them.
 	local_grounding = var_grounding;
-	graph_stacks_pop();
+	clause_stacks_pop();
 	for (size_t i=0; i< sz; i++)
 	{
 		auto iter = local_grounding.find(local_args[i]);

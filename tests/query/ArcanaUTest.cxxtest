@@ -1,5 +1,5 @@
 /*
- * tests/query/OrLinkUTest.cxxtest
+ * tests/query/ArcanaUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -31,14 +31,14 @@
 
 using namespace opencog;
 
-class OrLinkUTest: public CxxTest::TestSuite
+class ArcanaUTest: public CxxTest::TestSuite
 {
 private:
         AtomSpace *as;
         SchemeEval* eval;
 
 public:
-    OrLinkUTest(void)
+    ArcanaUTest(void)
     {
         try
         {
@@ -62,7 +62,7 @@ public:
         cogserver().loadModules();
     }
 
-    ~OrLinkUTest()
+    ~ArcanaUTest()
     {
         delete eval;
         // Erase the log file if no assertions failed.
@@ -73,16 +73,15 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void test_basic_or(void);
-    void test_embed_or(void);
+    void test_repeats(void);
 };
 
-void OrLinkUTest::tearDown(void)
+void ArcanaUTest::tearDown(void)
 {
     as->clear();
 }
 
-void OrLinkUTest::setUp(void)
+void ArcanaUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
@@ -93,31 +92,48 @@ void OrLinkUTest::setUp(void)
 }
 
 /*
- * OrLink most basic unit test.
+ * Miscellaneous Arcana
+ * This one tests a repeated unit in a clause.
  */
-void OrLinkUTest::test_basic_or(void)
+void ArcanaUTest::test_repeats(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-link.scm");
+    config().set("SCM_PRELOAD", "tests/query/arcana-repeat.scm");
     load_scm_files_from_config(*as);
 
-    Handle items = eval->eval_h("(cog-bind (basic))");
+    Handle same = eval->eval_h("(cog-bind (repeat-same))");
+    printf("same, num solutions=%d\n", as->getArity(same));
+    TS_ASSERT_EQUALS(1, as->getArity(same));
 
-    TS_ASSERT_EQUALS(2, as->getArity(items));
-}
+    Handle diff = eval->eval_h("(cog-bind (repeat-different))");
 
-/*
- * OrLink embeded unit test.
- */
-void OrLinkUTest::test_embed_or(void)
-{
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    // Either one or two solutions are acceptable, as long as the
+    // two are identical. One solution is prefered, but seems
+    // not possible with the current algo.
+    LinkPtr lll(LinkCast(diff));
+    const HandleSeq& oset = lll->getOutgoingSet();
+    size_t nsol = oset.size();
+    bool pass = false;
+    if (1 == nsol) pass = true;
+    if (2 == nsol and oset[0] == oset[1]) pass = true;
+    printf("diff, num solutions=%lu\n", nsol);
+    if (1 <= nsol)
+        printf("Solution 1:\n%s\n", oset[0]->toShortString().c_str());
+    if (2 == nsol)
+        printf("Solution 2:\n%s\n", oset[0]->toShortString().c_str());
+    TS_ASSERT_EQUALS(true, pass);
 
-    config().set("SCM_PRELOAD", "tests/query/or-embed.scm");
-    load_scm_files_from_config(*as);
+    Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
+    printf("d3d, num solutions=%d\n", as->getArity(d3d));
+    TS_ASSERT(1 <= as->getArity(d3d));
+    TS_ASSERT(as->getArity(d3d) <= 3);
 
-    Handle items = eval->eval_h("(cog-bind (embed))");
+    Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
+    printf("thrice, num solutions=%d\n", as->getArity(thrice));
+    TS_ASSERT_EQUALS(1, as->getArity(thrice));
 
-    TS_ASSERT_EQUALS(2, as->getArity(items));
+    Handle once = eval->eval_h("(cog-bind (repeat-once))");
+    printf("once, num solutions=%d\n", as->getArity(once));
+    TS_ASSERT_EQUALS(1, as->getArity(once));
 }

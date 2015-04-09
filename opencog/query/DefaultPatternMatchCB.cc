@@ -31,7 +31,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define dbgprt(f, varargs...) printf(f, ##varargs)
 #else
@@ -100,7 +100,12 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all dynaically-evaluatab le links up front.
+	// Ignore all OrLink's. Picking a starter inside one of these
+	// will almost surely be disconnected from the rest of the graph.
+	if (OR_LINK == t)
+		return Handle::UNDEFINED;
+
+	// Ignore all dynamically-evaluatable links up front.
 	if (_dynamic and _dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
 
