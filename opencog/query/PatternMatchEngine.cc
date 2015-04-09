@@ -809,10 +809,9 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 
 	// OrLinks may have multiple choices in them. We have to
 	// loop until all the choices have been explored.
-	dbgprt("Exploring OrLink\n");
 	if (hi == curr_root)
 	{
-printf("duude is root!!\n");
+		dbgprt("Exploring OrLink at the root\n");
 		bool found = false;
 		// const Handle& this_one = curr_pred_handle;
 		curr_pred_handle = hi;
@@ -831,6 +830,7 @@ printf("duude is root!!\n");
 		return found;
 	}
 
+	dbgprt("Exploring clause-embedded OrLink\n");
 	// If we are here, the OrLink is not at the root.
 	// we have to go up again...
 	FindAtoms hop_over(hi);
@@ -844,9 +844,8 @@ printf("duude is root!!\n");
 		curr_soln_handle = hsoln;
 		choice_push();
 
-printf("duuuuude next ch= %lu sz=%lu\n", next_choice(hi, hsoln), _choice_state.size());
 		if (pred_up(holds_or)) found = true;
-printf("duuuuude after up ch= %lu sz=%lu\n", next_choice(hi, hsoln), _choice_state.size());
+		prtmsg("Upwards choice loop next choice=%lu\n", next_choice(hi, hsoln));
 		choice_pop();
 		curr_soln_handle = soln_handle_stack.top();
 		soln_handle_stack.pop();
