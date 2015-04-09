@@ -687,6 +687,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	pred_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
+	choice_stack.push(_choice_state);
 
 	// Reset the unordered-set stacks with each new clause.
 	// XXX this cannot possibly be right: we may need to pop,
@@ -727,6 +728,9 @@ void PatternMatchEngine::clause_stacks_pop(void)
 
 	issued = issued_stack.top();
 	issued_stack.pop();
+
+	_choice_state = choice_stack.top();
+	choice_stack.pop();
 
 	// Handle different unordered links that live in different
 	// clauses. The mute_stack deals with different unordered
@@ -1217,6 +1221,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
+	while (!choice_stack.empty()) choice_stack.pop();
 
 	have_more = false;
 	more_depth = 0;

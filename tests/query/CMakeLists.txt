@@ -97,6 +97,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed-disco.scm
     ${PROJECT_BINARY_DIR}/tests/query/or-embed-disco.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/or-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-nest.scm
+    ${PROJECT_BINARY_DIR}/tests/query/or-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm

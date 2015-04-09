@@ -131,6 +131,7 @@ class PatternMatchEngine
 		std::stack<SolnMap> pred_solutn_stack;
 
 		std::stack<IssuedSet> issued_stack;
+		std::stack<ChoiceState> choice_stack;
 
 		// push, pop and clear these states.
 		void clause_stacks_push(void);
