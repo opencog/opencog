@@ -453,38 +453,60 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	return true;
 }
 
-/// The default search tries to optimize by making some reasonable
-/// assumptions about what is being looked for. But not every problem
-/// fits those assumptions, so this method provides an exhaustive
-/// search. Note that exhaustive searches can be exhaustingly long,
-/// so watch out!
-void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
-                                        const std::vector<Handle> &clauses)
+void DefaultPatternMatchCB::find_rarest(const Handle &clause,
+                                        Handle& rarest,
+                                        size_t& count)
 {
-	_root = clauses[0];
-	_starter_pred = _root;
+	LinkPtr lll(LinkCast(clause));
+	if (NULL == lll) return;
 
-	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+	Type t = lll->getType();
+	size_t num = (size_t) _as->getNumAtomsOfType(t);
+	if (num < count)
+	{
+		count = num;
+		rarest = clause;
+	}
 
-	// Get type of the first item in the predicate list.
-	Type ptype = _root->getType();
+	const HandleSeq& oset = lll->getOutgoingSet();
+	for (const Handle& h : oset)
+		find_rarest(h, rarest, count);
+}
 
-	// Plunge into the deep end - start looking at all viable
-	// candidates in the AtomSpace.
+/**
+ * Initiate a search by looping over all Links of the same type as one
+ * of the links in the set of clauses.  This attempts to pick the link
+ * type which has the smallest number of atoms of that type in the
+ * AtomSpace.
+ */
+bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
+                                            const std::set<Handle> &vars,
+                                            const HandleSeq &clauses,
+                                            bool& done)
+{
+	_root = Handle::UNDEFINED;
+	_starter_pred = Handle::UNDEFINED;
+	size_t count = SIZE_T_MAX;
 
-	// XXX TODO -- as a performance optimization, we should try all
-	// the different clauses, and find the one with the smallest number
-	// of atoms of that type, or otherwise try to find a small ("thin")
-	// incoming set to search over.
-	//
-	// If ptype is a VariableNode, then basically, the pattern says
-	// "Search all of the atomspace." Literally. So this will blow up
-	// if the atomspace is large.
-	std::list<Handle> handle_set;
-	if (VARIABLE_NODE != ptype)
-		_as->getHandlesByType(back_inserter(handle_set), ptype);
-	else
-		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
+	for (const Handle& cl: clauses)
+	{
+		size_t prev = count;
+		find_rarest(cl, _starter_pred, count);
+		if (count < prev)
+		{
+			prev = count;
+			_root = cl;
+		}
+	}
+
+	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
+	dbgprt("Start term is: %s\n", _starter_pred->toShortString().c_str());
+
+	// Get type of the rarest link
+	Type ptype = _starter_pred->getType();
+
+	HandleSeq handle_set;
+	_as->getHandlesByType(handle_set, ptype);
 
 #ifdef DEBUG
 	size_t i = 0;
