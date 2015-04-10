@@ -5,17 +5,10 @@ from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
                                 crisp_logic_bindlink, pln_bindlink,\
                                 execute_atom, evaluate_atom
-import opencog.scheme_wrapper as scheme
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.type_constructors import *
 
 __author__ = 'Curtis Faith'
-
-
-scheme_preload = [  
-                    "opencog/atomspace/core_types.scm",
-                    "opencog/scm/utilities.scm" 
-                 ]
 
 
 class BindlinkTest(TestCase):
@@ -24,19 +17,6 @@ class BindlinkTest(TestCase):
 
     def setUp(self):
         self.atomspace = AtomSpace()
-        scheme.__init__(self.atomspace)
-        for scheme_file in scheme_preload:
-            load_scm(self.atomspace, scheme_file)
-        
-        # Define several animals and something of a different type as well
-        scheme_animals = \
-            '''
-            (InheritanceLink (ConceptNode "Frog") (ConceptNode "animal"))
-            (InheritanceLink (ConceptNode "Zebra") (ConceptNode "animal"))
-            (InheritanceLink (ConceptNode "Deer") (ConceptNode "animal"))
-            (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
-            '''
-        scheme_eval_h(self.atomspace, scheme_animals)
 
         # Get the config file name in a manner not dependent on the
         # starting working directory.
@@ -45,31 +25,35 @@ class BindlinkTest(TestCase):
 
         # Initialize Python
         initialize_opencog(self.atomspace, config_file_name)
+        
+        # Define several animals and something of a different type as well
+        InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))
+        InheritanceLink( ConceptNode("Zebra"),      ConceptNode("animal"))
+        InheritanceLink( ConceptNode("Deer"),       ConceptNode("animal"))
+        InheritanceLink( ConceptNode("Spaceship"),  ConceptNode("machine"))
 
         # Define a graph search query
-        bind_link_query = \
-            '''
-            (BindLink
-                ;; The variable to be grounded
-                (VariableNode "$var")
-                (ImplicationLink
-                    ;; The pattern to be grounded
-                    (InheritanceLink
-                        (VariableNode "$var")
-                        (ConceptNode "animal")
-                    )
-                    ;; The grounding to be returned.
-                    (VariableNode "$var")
-                )
-            )
-            '''
-        self.bindlink_handle = scheme_eval_h(self.atomspace, bind_link_query)
-        
+        self.bindlink_handle =  \
+                BindLink(
+                    # The variable node to be grounded.
+                    VariableNode("$var"),
 
+                    # The pattern to be grounded.
+                    ImplicationLink(
+                        InheritanceLink(
+                            VariableNode("$var"),
+                            ConceptNode("animal")
+                        ),
+
+                        # The grounding to be returned.
+                        VariableNode("$var")
+                    )
+                # bindlink needs a handle
+                ).h
+    
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
-
 
     def test_stub_bindlink(self):
 
@@ -166,24 +150,6 @@ class BindlinkTest(TestCase):
         pass
 
     def test_execute_atom(self):
-
-        def GroundedSchemaNode(node_name):
-            return self.atomspace.add_node(types.GroundedSchemaNode, node_name)
-
-        def ConceptNode(node_name):
-            return self.atomspace.add_node(types.ConceptNode, node_name)
-
-        def ExecutionOutputLink(schemaNode, listLink):
-            return self.atomspace.add_link(types.ExecutionOutputLink,
-                    [schemaNode, listLink])
-
-        def ListLink(*args):
-            return self.atomspace.add_link(types.ListLink, args)
-
-        list_link = ListLink(
-                ConceptNode("one"),
-                ConceptNode("two")
-            )
         result = execute_atom(self.atomspace, 
                 ExecutionOutputLink( 
                     GroundedSchemaNode("py: test_functions.add_link"),
@@ -193,24 +159,14 @@ class BindlinkTest(TestCase):
                     )
                 )
             )
+        list_link = ListLink(
+                ConceptNode("one"),
+                ConceptNode("two")
+            )
         self.assertEquals(result, list_link)
         pass
 
     def test_evaluate_atom(self):
-        def GroundedPredicateNode(node_name):
-            return self.atomspace.add_node(types.GroundedPredicateNode,
-                                            node_name)
-
-        def ConceptNode(node_name):
-            return self.atomspace.add_node(types.ConceptNode, node_name)
-
-        def EvaluationLink(schemaNode, listLink):
-            return self.atomspace.add_link(types.EvaluationLink,
-                    [schemaNode, listLink])
-
-        def ListLink(*args):
-            return self.atomspace.add_link(types.ListLink, args)
-
         result = evaluate_atom(self.atomspace,
                 EvaluationLink( 
                     GroundedPredicateNode("py: test_functions.bogus_tv"),
