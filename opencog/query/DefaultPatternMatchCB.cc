@@ -155,6 +155,7 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	return hdeepest;
 }
 
+/* ======================================================== */
 /**
  * Iterate over all the clauses, to find the "thinnest" one.
  */
@@ -191,6 +192,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
     return best_start;
 }
 
+/* ======================================================== */
 /**
  * Given a set of clauses, find a neighborhood to search, and perform
  * the search. A `neighborhood` is defined as all of the atoms that
@@ -210,8 +212,8 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * entire search was completed (and no groun ding was found).
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
-                                            const std::set<Handle> &vars,
-                                            const std::vector<Handle> &clauses,
+                                            const std::set<Handle>& vars,
+                                            const std::vector<Handle>& clauses,
                                             bool& done)
 {
 	done = false;
@@ -266,6 +268,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	return false;
 }
 
+/* ======================================================== */
 /**
  * Search for solutions/groundings over all of the AtomSpace, using
  * the standard, canonical assumptions about the structure of the search
@@ -355,13 +358,14 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * "standard, canonical" case.
  */
 void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
-                                            const std::set<Handle> &vars,
-                                            const HandleSeq &clauses)
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses)
 {
 	bool done = false;
 	disjunct_search(pme, vars, clauses, done);
 }
 
+/* ======================================================== */
 /**
  * This callback implements the handling of the special case where the
  * pattern consists of a single clause, at the top of which there is an
@@ -419,8 +423,8 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
  * is what we do here, with the OrLink loop.
  */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
-                                            const std::set<Handle> &vars,
-                                            const HandleSeq &clauses,
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses,
                                             bool& done)
 {
 	done = false;
@@ -444,16 +448,30 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	if (found) return true;
 	if (done) return false;
 
-	// If we are here, then we could not find a clause at which to start,
-	// as, apparently, the clauses consist entirely of variables!! So,
-	// basically, we must search the entire!! atomspace, in this case.
-	// Yes, this hurts.
-	full_search(pme, clauses);
-	done = true;
-	return true;
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses consist entirely of
+	// variables! Which can happen (there is a unit test for this,
+	// the LoopUTest), and so instead, we search based on the link
+	// types that occur in the atomspace.
+	found = link_type_search(pme, vars, clauses, done);
+	if (found) return true;
+	if (done) return false;
+
+	// The bizarro case: if we found nothing, then there are no links!
+	// Ergo, every clause must be a lone variable, all by itself. This
+	// is a bit pathological, but we handle it anyway, with the
+	// variable_search() method.  Note, however, that variable_search()
+	// does not look at the clauses, it looks at the varset instead.
+	found = variable_search(pme, vars, clauses, done);
+	return found;
 }
 
-void DefaultPatternMatchCB::find_rarest(const Handle &clause,
+/* ======================================================== */
+/**
+ * Find the rarest link type contained in the clause, or one
+ * of its subclauses.
+ */
+void DefaultPatternMatchCB::find_rarest(const Handle& clause,
                                         Handle& rarest,
                                         size_t& count)
 {
@@ -473,6 +491,7 @@ void DefaultPatternMatchCB::find_rarest(const Handle &clause,
 		find_rarest(h, rarest, count);
 }
 
+/* ======================================================== */
 /**
  * Initiate a search by looping over all Links of the same type as one
  * of the links in the set of clauses.  This attempts to pick the link
@@ -480,13 +499,14 @@ void DefaultPatternMatchCB::find_rarest(const Handle &clause,
  * AtomSpace.
  */
 bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
-                                            const std::set<Handle> &vars,
-                                            const HandleSeq &clauses,
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses,
                                             bool& done)
 {
+	done = false;
 	_root = Handle::UNDEFINED;
 	_starter_pred = Handle::UNDEFINED;
-	size_t count = SIZE_T_MAX;
+	size_t count = SIZE_MAX;
 
 	for (const Handle& cl: clauses)
 	{
@@ -498,6 +518,12 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 			_root = cl;
 		}
 	}
+
+	// The bizarro case: if we found nothing, then there are no links!
+	// Ergo, every clause must be a lone variable, all by itself. This
+	// is a bit pathological, but we handle it anyway, with the
+	// variable_search() method, below.
+	if (Handle::UNDEFINED == _root) return false;
 
 	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
 	dbgprt("Start term is: %s\n", _starter_pred->toShortString().c_str());
@@ -513,12 +539,83 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 #endif
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-		if (rc) break;
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		if (found) return true;
 	}
+	done = true;
+	return false;
+}
+
+/* ======================================================== */
+/**
+ * Initiate a search by looping over all atoms of the allowed
+ * variable types (as set with the set_type_testrictions() method).
+ * This assumes that the varset contains the variables to be searched
+ * over, and that the type restrictins are set up approrpriately.
+ */
+bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& varset,
+                                            const HandleSeq& clauses,
+                                            bool& done)
+{
+	done = false;
+
+	// Find the rarest variable type;
+	size_t count = SIZE_MAX;
+	Type ptype = ATOM;
+
+	_root = Handle::UNDEFINED;
+	_starter_pred = Handle::UNDEFINED;
+	for (const Handle& var: varset)
+	{
+		auto tit = _type_restrictions->find(var);
+		for (; tit != _type_restrictions->end(); tit++)
+		{
+			size_t num = (size_t) _as->getNumAtomsOfType(*tit);
+			if (0 < num and num < count)
+			{
+				for (const Handle& cl : clauses)
+				{
+					FindAtoms fa(var);
+					fa.search_set(cl);
+					if (0 < fa.least_holders.size())
+					{
+						_root = cl;
+						_starter_pred = *fa.least_holders.begin();
+						count = num;
+						ptype = *tit;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// There were no type restrictions!
+	if (Handle::UNDEFINED == _root)
+	{
+		_root = _starter_pred = clauses[0];
+	}
+
+	_as->getHandlesByType(handle_set, ptype);
+
+#ifdef DEBUG
+	size_t i = 0;
+#endif
+	for (const Handle& h : handle_set)
+	{
+		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
+		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		       h->toShortString().c_str());
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		if (found) return true;
+	}
+
+	done = true;
+	return false;
 }
 
 /* ======================================================== */

@@ -187,6 +187,10 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses,
 		                             bool& done);
+		virtual bool variable_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
 
 		AtomSpace *_as;
 };
