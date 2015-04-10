@@ -31,13 +31,14 @@
                     (VariableNode "$B")
                     (VariableNode "$C")
                 )
-                ; To avoid (Inheritance A B)  (Inheritance B A)
+                ; To avoid matching (Inheritance A B) and (Inheritance B A)
+                ; TODO Figure out why the AbsentLink/NotLink are not working
                 #!(AbsentLink
                     (EvaluationLink
                         (GroundedPredicateNode "scm: cog-equal?")
                         (ListLink
                             (VariableNode "$A")
-                            (VariableNode "$B")
+                            (VariableNode "$C")
                         )
                     )
                 )!#
@@ -65,6 +66,8 @@
 
 ; -----------------------------------------------------------------------------
 ; Check whether two nodes are equal.
+;
+; If they are equal then it will return TRUE_TV else it returns FALSE_TV.
 ; -----------------------------------------------------------------------------
 (define (cog-equal? atom-1 atom-2)
     (if (equal? atom-1 atom-2)
