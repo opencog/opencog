@@ -469,16 +469,19 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 /* ======================================================== */
 /**
  * Find the rarest link type contained in the clause, or one
- * of its subclauses.
+ * of its subclauses. Of course, QuoteLinks, and anything under
+ * a Quotelink, must be ignored.
  */
 void DefaultPatternMatchCB::find_rarest(const Handle& clause,
                                         Handle& rarest,
                                         size_t& count)
 {
+	Type t = clause->getType();
+	if (QUOTE_LINK == t) return;
+
 	LinkPtr lll(LinkCast(clause));
 	if (NULL == lll) return;
 
-	Type t = lll->getType();
 	size_t num = (size_t) _as->getNumAtomsOfType(t);
 	if (num < count)
 	{
