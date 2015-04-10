@@ -151,7 +151,11 @@ class PatternMatchCallback
 		/**
 		 * Called when a complete grounding to all clauses is found.
 		 * Should return false to search for more solutions; or return
-		 * true to terminate search.
+		 * true to terminate search.  (Just as in all the other callbacks,
+		 * a return value of `true` means that the proposed grounding is
+		 * acceptable. The engine is designed to halt once an acceptable
+		 * solution has been found; thus, in order to force it to search
+		 * for more, a return value of false is needed.)
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &pred_soln) = 0;
