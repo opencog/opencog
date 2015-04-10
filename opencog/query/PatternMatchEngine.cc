@@ -630,8 +630,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		do {
 			choice_push();
 
-printf ("duuuude is this thr driod????????\n");
-choice_stack.push(_choice_state);
+			choice_stack.push(_choice_state);
+printf ("duuuude start of this driod!!!!????\n");
 			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
 POPSTK(choice_stack, _choice_state);
 printf ("duuuude end of this driod????????\n");
@@ -818,15 +818,23 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		}
 		else
 		{
-			// If we are here, we have an embedded OrLink
+			// If we are here, we have an embedded OrLink, i.e. an OrLink
+			// that is not at the clause root. It's contained in some other
+			// link, and we have to get that link and perform comparisons
+			// on it. i.e. we have to "hop over" (hop up) past the OrLink,
+			// before resuming the search.  Next issue: after hoping up,
+			// we might be in another OrLink, again (due to poor pattern
+			// design). So keep hoping till we're not hitting an OrLink
+			// any more.
 			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
 			       fa.least_holders.size());
-			// If we are here, the OrLink is not at the root.
-			// we have to go up again...
-			FindAtoms hop_over(hi);
-			hop_over.search_set(curr_root);
-			OC_ASSERT(1 == hop_over.least_holders.size(), "Hell on Earth");
-			const Handle& holds_or = *hop_over.least_holders.begin();
+			Handle holds_or = hi;
+			do {
+				FindAtoms hop_over(holds_or);
+				hop_over.search_set(curr_root);
+				OC_ASSERT(1 == hop_over.least_holders.size(), "Hell on Earth");
+				holds_or = *hop_over.least_holders.begin();
+			} while (OR_LINK == holds_or->getType());
 
 			do {
 				soln_handle_stack.push(curr_soln_handle);

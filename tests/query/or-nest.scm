@@ -80,7 +80,7 @@
 (ListLink
 	(MemberLink
 		(ConceptNode "Phillip")
-		(ConceptNode "Secreatary")
+		(ConceptNode "Secretary")
 	)
 )
 
