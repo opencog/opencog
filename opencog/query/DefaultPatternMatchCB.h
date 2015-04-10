@@ -175,8 +175,13 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
 		virtual bool neighbor_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
+		                             const HandleSeq& clauses,
+		                             bool& done);
 
+		virtual bool disjunct_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
 		/**
 		 * Perform a full atomspace search.
 		 */

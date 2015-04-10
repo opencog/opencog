@@ -195,19 +195,27 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * Given a set of clauses, find a neighborhood to search, and perform
  * the search. A `neighborhood` is defined as all of the atoms that
  * can be reached from a given (non-variable) atom, by following either
- * it's incoming or its outgoinng set.
+ * it's incoming or its outgoing set.
  *
  * A neighborhood search is guaranteed to find all possible groundings
  * for the set of clauses. The reason for this is that, given a
  * non-variable atom in the pattern, any possible grounding of that
  * pattern must contain that atom, out of necessity. Thus, any possible
  * grounding must be contained in that neighborhood.  It is sufficient
- * to walk that graph until a sutiable grounding is encountered.
+ * to walk that graph until a suitable grounding is encountered.
+ *
+ * The return value is true if a grounding was found, else it returns
+ * false. That is, this return value works just like all the other
+ * satisfiability callbacks.  The flag 'done' is set to true if the
+ * entire search was completed.
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
-                                            const std::vector<Handle> &clauses)
+                                            const std::vector<Handle> &clauses,
+                                            bool& done)
 {
+	done = false;
+
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
 	// iterating over the incoming set of the node, and so, if it is
@@ -251,7 +259,10 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 		if (found) return true;
 	}
 
-	// If we are here, we are not yet done
+	// If we are here, we have searched the entire neighborhood, and so
+	// we set the 'done' flag. The return value of false indicates that
+	// no satisfiable groundings were found.
+	done = true;
 	return false;
 }
 
@@ -326,30 +337,46 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
                                             const HandleSeq &clauses)
 {
+	bool done = false;
+	disjunct_search(pme, vars, clauses, done);
+}
+
+bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
+                                            const std::set<Handle> &vars,
+                                            const HandleSeq &clauses,
+                                            bool& done)
+{
+	done = false;
 	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
 	{
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
 		for (const Handle& h : oset)
 		{
+			bool dont_care = false;
 			HandleSeq hs;
 			hs.push_back(h);
-			initiate_search(pme, vars, hs);
+			bool found = disjunct_search(pme, vars, hs, dont_care);
+			if (found) return true;
 		}
+		done = true;
+		return false;
 	}
 
-	bool found = neighbor_search(pme, vars, clauses);
-	// if (found) return true;
-	if (found) return;
+	bool found = neighbor_search(pme, vars, clauses, done);
+	if (found) return true;
+	if (done) return false;
 
 	// If we are here, then we could not find a clause at which to start,
 	// as, apparently, the clauses consist entirely of variables!! So,
 	// basically, we must search the entire!! atomspace, in this case.
 	// Yes, this hurts.
 	full_search(pme, clauses);
+	done = true;
+	return true;
 }
 
-/// The defualt search tries to optimize by making some reasonable
+/// The default search tries to optimize by making some reasonable
 /// assumptions about what is being looked for. But not every problem
 /// fits those assumptions, so this method provides an exhaustive
 /// search. Note that exhaustive searches can be exhaustingly long,
@@ -397,7 +424,8 @@ void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt, const Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
+                                               const Handle& gargs)
 {
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
