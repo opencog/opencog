@@ -703,42 +703,8 @@
 
 ; Return the demand goal (EvaluationLink) with lowest truth value
 (define (get_most_critical_demand_goal)
-    (let ( (demand_goal_list (get_demand_goal_list) )
-           (most_critical_demand_goal (list) )
-           (most_critical_truth_value 1)
-         )
-        
-      (display "demand_goal_list = ")
-      (display demand_goal_list)
-      (newline)
-
-         (map 
-             (lambda (demand_goal)
-                 (let ( (demand_goal_truth_value
-                             (get_truth_value_mean (cog-tv demand_goal) )
-                        )
-                      )
-
-                      (if (< demand_goal_truth_value most_critical_truth_value)
-                          (begin
-                              (set! most_critical_truth_value demand_goal_truth_value) 
-                              (set! most_critical_demand_goal demand_goal)
-                          )    
-                      )
-                 ) 
-             )
-
-             demand_goal_list
-         )
-
-         (display "most_critical_demand_goal = ")
-         (display most_critical_demand_goal)
-         (newline)
-       
-         ; Return the demand goal with lowest truth value
-         most_critical_demand_goal
-    )
-)
+ (atom_with_lowest_tv_mean (get_demand_goal_list))
+ )
 
 ;execute updating the "plan_selected_demand_goal"
 (define (update_selected_demand_goal)
@@ -767,6 +733,7 @@
          (newline)
 
          ; Planning
+         (set! selected_demand_goal (list) ) ; TODO remove this (for debugging)
          (set! plan_result (make_psi_plan selected_demand_goal) )
 
          (if (null? plan_result)
