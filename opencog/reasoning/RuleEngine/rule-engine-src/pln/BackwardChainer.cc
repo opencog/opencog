@@ -290,14 +290,11 @@ HandleSeq BackwardChainer::filter_knowledge_base(Handle htarget)
 /**
  * Unify two atoms, finding a mapping that makes them equal.
  *
- * Unification is done by mapping VariableNodes from one atom to atoms in the
- * other.
+ * Use the Pattern Matcher to do the heavy lifting of unification from one
+ * specific atom to another.
  *
- * XXX TODO unify UNORDERED_LINK
- * XXX TODO check unifying same variable twice
- * XXX TODO check VariableNode inside QuoteLink
  * XXX TODO check Typed VariableNode
- * XXX TODO unify in both direction
+ * XXX TODO unify in both direction (might not want to do that)
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
@@ -310,44 +307,38 @@ bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
                             VarMap& result)
 {
-	LinkPtr lptr_target(LinkCast(htarget));
-	LinkPtr lptr_match(LinkCast(hmatch));
+	AtomSpace temp_space;
 
-	// if unifying a link
-	if (lptr_target && lptr_match)
+	Handle temp_htarget = temp_space.addAtom(htarget);
+	temp_space.addAtom(hmatch);
+
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(temp_htarget);
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, temp_htarget));
+	BCPatternMatch bcpm(temp_space);
+
+	sl->satisfy(&bcpm);
+
+	// if no grounding
+	if (bcpm.get_var_list().size() == 0)
+		return false;
+
+	// only use the first grounding for now
+	// XXX TODO branch on the various groundings
+	VarMap& temp_vmap = bcpm.get_var_list()[0];
+
+	// change the mapping from temp_atomspace to current atomspace
+	for (auto& p : temp_vmap)
 	{
-		HandleSeq target_outg = lptr_target->getOutgoingSet();
+		Handle& var = p.first;
+		Handle& grn = p.second;
 
-		// if the two links type are not equal
-		if (lptr_target->getType() != lptr_match->getType())
-		{
-			result = std::map<Handle, Handle>();
-			return false;
-		}
-
-		HandleSeq match_outg = lptr_match->getOutgoingSet();
-
-		// if the two links are not of equal size, cannot unify
-		if (target_outg.size() != match_outg.size())
-		{
-			result = std::map<Handle, Handle>();
-			return false;
-		}
-
-		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++)
-		{
-			if (target_outg[i]->getType() == VARIABLE_NODE)
-				result[target_outg[i]] = match_outg[i];
-			else if (not unify(target_outg[i], match_outg[i], result))
-				return false;
-		}
-	}
-	else if (htarget->getType() == VARIABLE_NODE)
-	{
-		result[htarget] = hmatch;
+		// getAtom should get the equivlent atom in this atomspace
+		result[_as->getAtom(var)] = _as->getAtom(grn);
 	}
 
-	return not result.empty();
+	return true;
 }
 
 /**
