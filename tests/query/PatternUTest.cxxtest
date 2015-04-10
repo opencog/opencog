@@ -125,7 +125,7 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 
 	Handle ha = npat->getHandle();
 	Handle hb = nsoln->getHandle();
-	logger().debug("Compare (%lu) %s ==== (%lu) %s", 
+	logger().debug("Compare (%zu) %s ==== (%zu) %s",
 		ha.value(), npat->getName().c_str(),
 		hb.value(), nsoln->getName().c_str());
 
@@ -164,7 +164,7 @@ bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
  *       ConceptNode "some const concept node 1"
  *       ConceptNode "desired solution concept node c"
  *
- *    AssociativeLink 
+ *    AssociativeLink
  *       ConceptNode "some const concept node"
  *       ConceptNode "incorrect solution concept node"
  *
@@ -248,7 +248,7 @@ void PatternUTest::test_simple_link(void)
 	TSM_ASSERT("incorrect solution", hsoln_a == pmcb.vars[hvar]);
 	TSM_ASSERT("incorrect predicate", hpred_1a == pmcb.preds[he]);
 
-	// Remove garbage, just in case ... 
+	// Remove garbage, just in case ...
 	as->removeAtom(he);
 	as->removeAtom(hvar);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -364,7 +364,7 @@ void PatternUTest::test_eval(void)
 
 	// ----------------------------------------
 	logger().debug("BEGIN second subtest: %s", __FUNCTION__);
-	// Do it again, but with a truncated list 
+	// Do it again, but with a truncated list
 	Handle hls = as->addLink(LIST_LINK, h1, h2);
 
 	Handle hprns = as->addNode(VARIABLE_NODE, "2-tuple relationship variable");
@@ -410,8 +410,8 @@ void PatternUTest::test_eval(void)
  *
  *    ImplicationLink
  *       AndLink
- *           EvaluationLink  ;; heval, as given above ... 
- *           EvaluationLink  ;; hshorteval, as given above ... 
+ *           EvaluationLink  ;; heval, as given above ...
+ *           EvaluationLink  ;; hshorteval, as given above ...
  *       ParseLink
  *           VariableNode "concept variable"
  *

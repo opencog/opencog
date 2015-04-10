@@ -110,8 +110,7 @@ class PatternMatchEngine
 		// OrLink (choice) state management
 		ChoiceState _choice_state;
 		size_t next_choice(const Handle&, const Handle&);
-		void choice_push(void);
-		void choice_pop(void);
+		bool _need_choice_push;
 
 		void clear_current_state(void);  // clear the stuff above
 
@@ -131,8 +130,11 @@ class PatternMatchEngine
 		std::stack<SolnMap> pred_solutn_stack;
 
 		std::stack<IssuedSet> issued_stack;
+		std::stack<ChoiceState> choice_stack;
 
 		// push, pop and clear these states.
+		void solution_push(void);
+		void solution_pop(void);
 		void clause_stacks_push(void);
 		void clause_stacks_pop(void);
 		void clause_stacks_clear(void);

@@ -1,5 +1,5 @@
 /*
- * tests/query/OrLinkUTest.cxxtest
+ * tests/query/OrLinkUTest.cxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -75,6 +75,10 @@ public:
 
     void test_basic_or(void);
     void test_embed_or(void);
+    void test_nest_or(void);
+    void test_top_nest_or(void);
+    void test_nest_bad_or(void);
+    void test_top_nest_bad_or(void);
 };
 
 void OrLinkUTest::tearDown(void)
@@ -120,4 +124,68 @@ void OrLinkUTest::test_embed_or(void)
     Handle items = eval->eval_h("(cog-bind (embed))");
 
     TS_ASSERT_EQUALS(2, as->getArity(items));
+}
+
+/*
+ * OrLink nested embeded unit test.
+ */
+void OrLinkUTest::test_nest_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (nest))");
+
+    printf ("Nest found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(5, as->getArity(items));
+}
+
+/*
+ * OrLink top-level nested unit test.
+ */
+void OrLinkUTest::test_top_nest_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest))");
+
+    printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(5, as->getArity(items));
+}
+
+/*
+ * OrLink bad nested embeded unit test.
+ */
+void OrLinkUTest::test_nest_bad_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (nest-bad))");
+
+    printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(4, as->getArity(items));
+}
+
+/*
+ * OrLink bad nested embeded unit test.
+ */
+void OrLinkUTest::test_top_nest_bad_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
+
+    printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(4, as->getArity(items));
 }
