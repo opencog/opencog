@@ -25,7 +25,6 @@
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 
-#include "PLNCommons.h"
 
 #define DEBUG 1
 
@@ -102,7 +101,6 @@ private:
 	void print_var_value(const map<Handle,HandleSeq>&);
 #endif
 
-	PLNCommons* _commons;
 	map<Handle, UnorderedHandleSet> _chaining_result;
 
 	// XXX TODO do we need to store the rule used too?

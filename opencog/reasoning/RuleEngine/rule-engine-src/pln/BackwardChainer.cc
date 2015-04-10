@@ -33,13 +33,11 @@ using namespace opencog;
 BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
     : _as(as)
 {
-	_commons = new PLNCommons(_as);
 	_rules_set = rs;
 }
 
 BackwardChainer::~BackwardChainer()
 {
-	delete _commons;
 }
 
 /**
