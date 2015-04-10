@@ -34,7 +34,7 @@
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG
+// #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -628,19 +628,19 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		bool found = false;
 
 		do {
-			choice_push();
+			solution_push();
 
-			choice_stack.push(_choice_state);
-printf ("duuuude start of this driod!!!!????\n");
+			if (_need_choice_push) choice_stack.push(_choice_state);
 			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
-POPSTK(choice_stack, _choice_state);
-printf ("duuuude end of this driod????????\n");
+			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
+			_need_choice_push = false;
+
 			// If no match, then try the next one.
 			if (not match)
 			{
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
-				choice_pop();
+				solution_pop();
 				POPSTK(have_stack, have_more);
 				return false;
 			}
@@ -649,7 +649,7 @@ printf ("duuuude end of this driod????????\n");
 
 			// Get rid of any grounding that might have been proposed
 			// during the tree-compare or do_soln_up.
-			choice_pop();
+			solution_pop();
 		} while (0 < next_choice(curr_pred_handle, hsoln));
 
 		if (found)
@@ -747,13 +747,13 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	prtmsg("pop to clause", curr_root);
 }
 
-void PatternMatchEngine::choice_push(void)
+void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
 	pred_solutn_stack.push(clause_grounding);
 }
 
-void PatternMatchEngine::choice_pop(void)
+void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(pred_solutn_stack, clause_grounding);
@@ -830,17 +830,18 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			do {
 				soln_handle_stack.push(curr_soln_handle);
 				curr_soln_handle = hsoln;
-				choice_push();
+				solution_push();
 
 				dbgprt("Exploring one choice of OrLink, "
 				       "UUID=%lu, choice=%lu\n",
 				       hi.value(), next_choice(hi, hsoln));
 
+				_need_choice_push = true;
 				curr_pred_handle = hi;
 				if (do_soln_up(hsoln)) found = true;
 				dbgprt("Upwards choice loop next choice=%lu\n",
 				        next_choice(hi, hsoln));
-				choice_pop();
+				solution_pop();
 				POPSTK(soln_handle_stack, curr_soln_handle);
 
 			} while (0 < next_choice(hi, hsoln));
@@ -1241,6 +1242,7 @@ PatternMatchEngine::PatternMatchEngine(void)
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 	depth = 0;
+	_need_choice_push = false;
 
 	// graph state
 	_clause_stack_depth = 0;
