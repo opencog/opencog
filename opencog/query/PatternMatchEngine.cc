@@ -822,19 +822,10 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			// that is not at the clause root. It's contained in some other
 			// link, and we have to get that link and perform comparisons
 			// on it. i.e. we have to "hop over" (hop up) past the OrLink,
-			// before resuming the search.  Next issue: after hoping up,
-			// we might be in another OrLink, again (due to poor pattern
-			// design). So keep hoping till we're not hitting an OrLink
-			// any more.
+			// before resuming the search.  The easiest way to hop is to
+			// do it recursively... i.e. call ourselves again.
 			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
 			       fa.least_holders.size());
-			Handle holds_or = hi;
-			do {
-				FindAtoms hop_over(holds_or);
-				hop_over.search_set(curr_root);
-				OC_ASSERT(1 == hop_over.least_holders.size(), "Hell on Earth");
-				holds_or = *hop_over.least_holders.begin();
-			} while (OR_LINK == holds_or->getType());
 
 			do {
 				soln_handle_stack.push(curr_soln_handle);
@@ -844,7 +835,9 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				dbgprt("Exploring one choice of OrLink, "
 				       "UUID=%lu, choice=%lu\n",
 				       hi.value(), next_choice(hi, hsoln));
-				if (pred_up(holds_or)) found = true;
+
+				curr_pred_handle = hi;
+				if (do_soln_up(hsoln)) found = true;
 				dbgprt("Upwards choice loop next choice=%lu\n",
 				        next_choice(hi, hsoln));
 				choice_pop();

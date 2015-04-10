@@ -1,5 +1,5 @@
 /*
- * tests/query/OrLinkUTest.cxxtest
+ * tests/query/OrLinkUTest.cxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -73,12 +73,12 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void xtest_basic_or(void);
-    void xtest_embed_or(void);
-    void xtest_nest_or(void);
-    void xtest_top_nest_or(void);
+    void test_basic_or(void);
+    void test_embed_or(void);
+    void test_nest_or(void);
+    void test_top_nest_or(void);
     void test_nest_bad_or(void);
-    void xtest_top_nest_bad_or(void);
+    void test_top_nest_bad_or(void);
 };
 
 void OrLinkUTest::tearDown(void)
@@ -99,7 +99,7 @@ void OrLinkUTest::setUp(void)
 /*
  * OrLink most basic unit test.
  */
-void OrLinkUTest::xtest_basic_or(void)
+void OrLinkUTest::test_basic_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -114,7 +114,7 @@ void OrLinkUTest::xtest_basic_or(void)
 /*
  * OrLink embeded unit test.
  */
-void OrLinkUTest::xtest_embed_or(void)
+void OrLinkUTest::test_embed_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -129,7 +129,7 @@ void OrLinkUTest::xtest_embed_or(void)
 /*
  * OrLink nested embeded unit test.
  */
-void OrLinkUTest::xtest_nest_or(void)
+void OrLinkUTest::test_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -145,7 +145,7 @@ void OrLinkUTest::xtest_nest_or(void)
 /*
  * OrLink top-level nested unit test.
  */
-void OrLinkUTest::xtest_top_nest_or(void)
+void OrLinkUTest::test_top_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -177,7 +177,7 @@ void OrLinkUTest::test_nest_bad_or(void)
 /*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::xtest_top_nest_bad_or(void)
+void OrLinkUTest::test_top_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
