@@ -276,8 +276,13 @@ class PatternMatchCallback
 		 * possibly limiting the breadth of the search.  It may also cull
 		 * the variables, clauses, or negated clauses to remove those that
 		 * will not alter the final semantics of the search.
+		 *
+		 * The return value is used to indicate if the search pattern was
+		 * satisfied (grounded) or not.  This is just like the return
+		 * values on all the other callbacks; it summarizes (passes
+		 * through) the return values of all the others.
 		 */
-		virtual void initiate_search(PatternMatchEngine *,
+		virtual bool initiate_search(PatternMatchEngine *,
 		                             const std::set<Handle> &vars,
 		                             const std::vector<Handle> &clauses) = 0;
 };

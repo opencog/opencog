@@ -142,7 +142,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
 		 */
-		virtual void initiate_search(PatternMatchEngine *,
+		virtual bool initiate_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses);
 

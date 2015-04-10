@@ -358,12 +358,12 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
+bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
                                             const HandleSeq& clauses)
 {
 	_search_fail = false;
-	disjunct_search(pme, vars, clauses);
+	return disjunct_search(pme, vars, clauses);
 }
 
 /* ======================================================== */

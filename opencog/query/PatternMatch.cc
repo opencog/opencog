@@ -93,11 +93,11 @@ class PMCGroundings : public PatternMatchCallback
 		void set_evaluatable_holders(const std::set<Handle>& terms) {
 			_cb->set_evaluatable_holders(terms);
 		}
-		void initiate_search(PatternMatchEngine* pme,
+		bool initiate_search(PatternMatchEngine* pme,
 	                        const std::set<Handle> &vars,
 	                        const std::vector<Handle> &clauses)
 		{
-			_cb->initiate_search(pme, vars, clauses);
+			return _cb->initiate_search(pme, vars, clauses);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -344,18 +344,18 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  */
-void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
+bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
    if (check_conn and 0 == _virtual.size() and 0 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"BindLink consists of multiple disconnected components!");
 			// ConcreteLink::check_connectivity(_comps);
 
-	SatisfactionLink::satisfy(pmc);
+	return SatisfactionLink::satisfy(pmc);
 }
 
 // All clauses of the Concrete link are connected, so this is easy.
-void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
+bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
 	pme->_bound_vars = _varset;
@@ -372,22 +372,23 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pmcb->set_type_restrictions(_typemap);
 	pmcb->set_evaluatable_terms(_evaluatable_terms);
 	pmcb->set_evaluatable_holders(_evaluatable_holders);
-	pmcb->initiate_search(pme, _varset, _mandatory);
+	bool found = pmcb->initiate_search(pme, _varset, _mandatory);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");
 #endif
+	return found;
 }
 
-void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
+bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
    PatternMatchEngine pme;
-	satisfy(pmcb, &pme);
+	return satisfy(pmcb, &pme);
 }
 
 /* ================================================================= */
 
-void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
+bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 {
 	// We allow a combinatoric explosion of multiple components,
 	// but zero virtuals, because PLN has a use case for this.
@@ -395,8 +396,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	// want to explore the combinatoric explosion.
 	if (0 == _num_virts and 1 == _num_comps)
 	{
-		ConcreteLink::satisfy(pmcb);
-		return;
+		return ConcreteLink::satisfy(pmcb);
 	}
 
 	// If we are here, then we've got a knot in the center of it all.
@@ -433,7 +433,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> optionals; // currently ignored
-	PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
+	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_pred_gnds);
 }

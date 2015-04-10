@@ -77,23 +77,12 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	return filtered_set;
 }
 
-void AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
+// XXX FIXME, this is a bad-cut-n-paste job of the DefaultCB,
+// with some unclear modifications..
+bool AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
                                          const std::set<Handle> &vars,
                                          const std::vector<Handle> &clauses)
 {
-	// In principle, we could start our search at some node, any node,
-	// that is not a variable. In practice, the search begins by
-	// iterating over the incoming set of the node, and so, if it is
-	// large, a huge amount of effort might be wasted exploring
-	// dead-ends.  Thus, it pays off to start the search on the
-	// node with the smallest ("narrowest" or "thinnest") incoming set
-	// possible.  Thus, we look at all the clauses, to find the
-	// "thinnest" one.
-	//
-	// Note also: the user is allowed to specify patterns that have
-	// no constants in them at all.  In this case, the search is
-	// performed by looping over all links of the given types.
-
 	size_t bestclause;
 	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
 
@@ -115,12 +104,12 @@ void AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
 			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
 			       h->toShortString().c_str());
-			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-			if (rc) break;
+			bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+			if (found) return true;
 		}
 
 		// If we are here, we are done.
-		return;
+		return false;
 	}
 
 	// If we are here, then we could not find a clause at which to start,
@@ -146,6 +135,7 @@ void AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
 	// candidates in the AtomSpace.
 	std::list<Handle> handle_set;
 	_as->getHandleSetInAttentionalFocus(back_inserter(handle_set));
+// xxxxxxxxxxxxxx here xxxxxxxxxxx
 
 	// WARNING: if there's nothing in the attentional focus then get
 	// the whole atomspace
@@ -170,6 +160,7 @@ void AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
 		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-		if (rc) break;
+		if (rc) return true;
 	}
+	return false;
 }

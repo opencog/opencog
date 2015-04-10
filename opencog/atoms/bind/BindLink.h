@@ -53,7 +53,7 @@ public:
 
 	BindLink(Link &l);
 
-	void imply(PatternMatchCallback*, bool check_connectivity=true);
+	bool imply(PatternMatchCallback*, bool check_connectivity=true);
 	Handle& get_implicand(void) { return _implicand; }
 };
 

@@ -42,7 +42,7 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
  * @param clauses    The clauses for the query
  * @param negations  The negative clauses
  */
-void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
+bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
                                           const std::set<Handle>& vars,
                                           const std::vector<Handle>& clauses)
 {
@@ -69,8 +69,9 @@ void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
     for (const Handle& h : handle_set)
     {
         bool found = pme->explore_neighborhood(_root, _starter_pred, h);
-        if (found) return;
+        if (found) return found;
     }
+    return false;
 }
 
 /**

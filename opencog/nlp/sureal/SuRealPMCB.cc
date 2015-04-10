@@ -316,7 +316,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
+bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
                                 const std::set<Handle>& vars,
                                 const HandleSeq& clauses)
 {
@@ -326,6 +326,7 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
     // find the thinnest clause with constants
     bestSubNode = find_thinnest(clauses, bestSubClause, bestClauseIndex);
 
+/// XXX xxxxxxxx refactor this 
     if (bestSubNode != Handle::UNDEFINED && !vars.empty())
     {
         bestClause = clauses[bestClauseIndex];
@@ -341,10 +342,10 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
             logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
 
             if (pPME->explore_neighborhood(bestClause, bestSubClause, h))
-                break;
+                return true;
         }
 
-        return;
+        return false;
     }
 
     // reaching here means no contants, so do some search space reduction here
@@ -377,8 +378,9 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
         logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c))
-            break;
+            return true;
     }
+    return false;
 }
 
 /**

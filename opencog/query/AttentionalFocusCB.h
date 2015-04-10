@@ -48,7 +48,7 @@ public:
 	IncomingSet get_incoming_set(const Handle&);
 
 	// Starts from atoms in the attentional focus, with the right types
-	void initiate_search(PatternMatchEngine *pme,
+	bool initiate_search(PatternMatchEngine *pme,
 	                     const std::set<Handle> &vars,
 	                     const std::vector<Handle> &clauses);
 };
