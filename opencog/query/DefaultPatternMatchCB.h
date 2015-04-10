@@ -174,23 +174,23 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
 		virtual void find_rarest(const Handle&, Handle&, size_t&);
+
+		bool _search_fail;
 		virtual bool neighbor_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& halt);
+		                             const HandleSeq& clauses);
 
 		virtual bool disjunct_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& halt);
+		                             const HandleSeq& clauses);
+
 		virtual bool link_type_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& halt);
+		                             const HandleSeq& clauses);
+
 		virtual bool variable_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& halt);
+		                             const HandleSeq& clauses);
 
 		AtomSpace *_as;
 };

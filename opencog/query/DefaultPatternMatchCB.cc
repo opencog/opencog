@@ -208,15 +208,15 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  *
  * The return value is true if a grounding was found, else it returns
  * false. That is, this return value works just like all the other
- * satisfiability callbacks.  The flag 'halt' is set to true if the
- * entire search was completed (and no grounding was found).
+ * satisfiability callbacks.  The flag '_search_fail' is set to true
+ * if the search was not performed, due to a failure to find a sutiable
+ * starting point.
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
-                                            const std::vector<Handle>& clauses,
-                                            bool& halt)
+                                            const HandleSeq& clauses)
 {
-	halt = false;
+	_search_fail = false;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -238,7 +238,10 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	// happen.  In this case, we need some other, alternative search
 	// strategy.
 	if (Handle::UNDEFINED == best_start)
+	{
+		_search_fail = true;
 		return false;
+	}
 
 	_root = clauses[bestclause];
 	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
@@ -261,10 +264,8 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 		if (found) return true;
 	}
 
-	// If we are here, we have searched the entire neighborhood, and so
-	// we set the 'halt' flag. The return value of false indicates that
+	// If we are here, we have searched the entire neighborhood, and
 	// no satisfiable groundings were found.
-	halt = true;
 	return false;
 }
 
@@ -361,8 +362,8 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
                                             const HandleSeq& clauses)
 {
-	bool halt = false;
-	disjunct_search(pme, vars, clauses, halt);
+	_search_fail = false;
+	disjunct_search(pme, vars, clauses);
 }
 
 /* ======================================================== */
@@ -424,45 +425,44 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
  */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
-                                            const HandleSeq& clauses,
-                                            bool& halt)
+                                            const HandleSeq& clauses)
 {
-	halt = false;
 	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
 	{
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
 		for (const Handle& h : oset)
 		{
-			bool dont_care = false;
 			HandleSeq hs;
 			hs.push_back(h);
-			bool found = disjunct_search(pme, vars, hs, dont_care);
+			bool found = disjunct_search(pme, vars, hs);
 			if (found) return true;
 		}
-		halt = true;
-		return false;
+		if (not _search_fail) return false;
 	}
 
-	bool found = neighbor_search(pme, vars, clauses, halt);
+	_search_fail = false;
+	bool found = neighbor_search(pme, vars, clauses);
 	if (found) return true;
-	if (halt) return false;
+	if (not _search_fail) return false;
 
 	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	found = link_type_search(pme, vars, clauses, halt);
+	_search_fail = false;
+	found = link_type_search(pme, vars, clauses);
 	if (found) return true;
-	if (halt) return false;
+	if (not _search_fail) return false;
 
 	// The bizarro case: if we found nothing, then there are no links!
 	// Ergo, every clause must be a lone variable, all by itself. This
 	// is a bit pathological, but we handle it anyway, with the
 	// variable_search() method.  Note, however, that variable_search()
 	// does not look at the clauses, it looks at the varset instead.
-	found = variable_search(pme, vars, clauses, halt);
+	_search_fail = false;
+	found = variable_search(pme, vars, clauses);
 	return found;
 }
 
@@ -503,10 +503,9 @@ void DefaultPatternMatchCB::find_rarest(const Handle& clause,
  */
 bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
-                                            const HandleSeq& clauses,
-                                            bool& halt)
+                                            const HandleSeq& clauses)
 {
-	halt = false;
+	_search_fail = false;
 	_root = Handle::UNDEFINED;
 	_starter_pred = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
@@ -526,7 +525,11 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 	// Ergo, every clause must be a lone variable, all by itself. This
 	// is a bit pathological, but we handle it anyway, with the
 	// variable_search() method, below.
-	if (Handle::UNDEFINED == _root) return false;
+	if (Handle::UNDEFINED == _root)
+	{
+		_search_fail = true;
+		return false;
+	}
 
 	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
 	dbgprt("Start term is: %s\n", _starter_pred->toShortString().c_str());
@@ -548,7 +551,6 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
 		if (found) return true;
 	}
-	halt = true;
 	return false;
 }
 
@@ -567,10 +569,9 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
  */
 bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& varset,
-                                            const HandleSeq& clauses,
-                                            bool& halt)
+                                            const HandleSeq& clauses)
 {
-	halt = false;
+	_search_fail = false;
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
@@ -625,7 +626,6 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 		if (found) return true;
 	}
 
-	halt = true;
 	return false;
 }
 
