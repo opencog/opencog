@@ -207,7 +207,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * The return value is true if a grounding was found, else it returns
  * false. That is, this return value works just like all the other
  * satisfiability callbacks.  The flag 'done' is set to true if the
- * entire search was completed.
+ * entire search was completed (and no groun ding was found).
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
@@ -268,70 +268,83 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 
 /**
  * Search for solutions/groundings over all of the AtomSpace, using
- * some "reasonable" assumptions for what might be searched for. Or,
- * to put it bluntly, this search method *might* miss some possible
- * solutions, for certain "unusual" search types. The trade-off is
- * that this search algo should really be quite fast for "normal"
- * search types.
+ * the standard, canonical assumptions about the structure of the search
+ * pattern.  Here, the "standard, canonical" assumptions are that the
+ * pattern consists of clauses that contain VariableNodes in them, with
+ * the VariableNodes interpreted in the "standard, canonical" way:
+ * namely, that these are the atoms that are to be grounded, as normally
+ * described elsewhere in the documentation.  In such a case, a full and
+ * complete search for any/all possible groundings is performed; if
+ * there are groundings, they are guaranteed to be found; if there are
+ * none, then it is guaranteed that this will also be correctly
+ * reported. For certain, highly unusual (but still canonical) search
+ * patterns, the same grounding may be reported more than once; grep for
+ * notes pertaining to the OrLink, and the ArcanaUTest for details.
+ * Otherwise, all possible groundings are guaranteed to be returned
+ * exactly once.
  *
- * This search algo makes the following (important) assumptions:
+ * We emphasize "standard, canonical" here, for a reason: the pattern
+ * engine is capable of doing many strange, weird things, depending on
+ * how the callbacks are designed to work.  For those other
+ * applications, it is possible or likely that this method will fail to
+ * traverse the "interesting" parts of the atomspace: non-standard
+ * callbacks may also need a non-standard search strategy.
  *
- * 1) If none of the clauses have any variables in them, (that is, if
- *    all of the clauses are "constant" clauses) then the search will
- *    begin by looping over all links in the atomspace that have the
- *    same link type as the first clause.  This will fail to examine
- *    all possible solutions if the link_match() callback is leniant,
- *    and accepts a broader range of types than just this one. This
- *    seems like a reasonable limitation: trying to search all-possible
- *    link-types would be a huge performance impact, especially if the
- *    link_match() callback was not interested in this broadened search.
+ * Now, some notes on the strategy employed here, and how non-canonical
+ * callbacks might affect it:
  *
- *    At any rate, this limitation doesn't even apply, because the
- *    current PatternMatch::do_match() method completely removes
- *    constant clauses anyway.  (It needs to do this in order to
- *    simplify handling of connected graphs, so that virtual atoms are
- *    properly handled.  This is based on the assumption that support
- *    for virtual atoms is more important than support for unusual
- *    link_match() callbacks.
- *
- * 2) Search will begin at the first non-variable node in the "thinnest"
+ * 1) Search will begin at the first non-variable node in the "thinnest"
  *    clause.  The thinnest clause is chosen, so as to improve performance;
  *    but this has no effect on the thoroughness of the search.  The search
  *    will proceed by exploring the entire incoming-set for this node.
- *    The search will NOT examine other non-variable node types.
- *    If the node_match() callback is willing to accept a broader range
- *    of node matches, esp. for this initial node, then many possible
- *    solutions will be missed.  This seems like a reasonable limitation:
- *    if you really want a very lenient node_match(), then use variables.
- *    Or you can implement your own initiate_search() callback.
  *
- * 3) If the clauses consist entirely of variables, then the search
- *    will start by looking for all links that are of the same type as
- *    the type of the first clause.  This can fail to find all possible
- *    matches, if the link_match() callback is willing to accept a larger
- *    set of types.  This is a reasonable limitation: anything looser
- *    would very seriously degrade performance; if you really need a
- *    very lenient link_match(), then use variables. Or you can
- *    implement your own initiate_search() callback.
+ *    This is ideal, when the node_match() callback accepts a match only
+ *    when the pattern and suggested nodes are identical (i.e. are
+ *    exactly the same atom).  If the node_match() callback is willing to
+ *    accept a broader range of node matches, then other possible
+ *    solutions might be missed. Just how to fix this depends sharpely
+ *    on what node_match() is willing to accept as a match.
  *
- * The above describes the limits to the "typical" search that this
- * algo can do well. In particular, if the constraint of 2) can be met,
- * then the search can be quite rapid, since incoming sets are often
- * quite small; and assumption 2) limits the search to "nearby",
- * connected atoms.
+ *    Anyway, this seems like a very reasonable limitation: if you
+ *    really want a lenient node_match(), then use variables instead.
+ *    Don't overload node-match with something weird, and you should be
+ *    OK.  Otherwise, you'll have to implement your own initiate_search()
+ *    callback.
  *
- * Note that the default implementation of node_match() and link_match()
- * in this class does satisfy both 2) and 3), so this algo will work
- * correctly if these two methods are not overloaded with more callbacks
- * that are lenient about matching types.
+ * 2) If the clauses consist entirely of variables, i.e. if there is not
+ *    even one single non-variable node in the pattern, then a search is
+ *    driven by looking for all links that are of the same type as one
+ *    of the links in one of the clauses.
+ *
+ *    If the link_match() callback is willing to accept a broader range
+ *    of types, then this search method may fail to find some possible
+ *    patterns. There are several possible remedies in this situation.
+ *    One is to modify the link_type_search() callback to try each
+ *    possible link type that is considered bo be equivalent by
+ *    link_match(). Another alternative is to just leave the
+ *    link_match() callback alone, and use variables for links, instead.
+ *    This is probably the best strategy, because then the fairly
+ *    standard reasoning can be used when thinking about the problem.
+ *    Of course, you can always write your own initiate_search() callback.
+ *
+ * If the constraint 1) can be met, (which is always the case for
+ * "standard, canonical" searches, then the pattern match should be
+ * quite rapid.  Incoming sets tend to be small; in addition, the
+ * implemnentation here picks the smallest, "tinnest" incoming set to
+ * explore.
+ *
+ * The default implementation of node_match() and link_match() in this
+ * class does satisfy both 1) and 2), so this algo will work correctly,
+ * if these two methods are not overloaded with more callbacks that are
+ * lenient about matching.
  *
  * If you overload node_match(), and do so in a way that breaks
- * assumption 2), then you will scratch your head, thinking
+ * assumption 1), then you will scratch your head, thinking
  * "why did my search fail to find this obvious solution?" The answer
  * will be for you to create a new search algo, in a new class, that
  * overloads this one, and does what you want it to.  This class should
  * probably *not* be modified, since it is quite efficient for the
- * "normal" case.
+ * "standard, canonical" case.
  */
 void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
@@ -453,7 +466,7 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
 	//           Arg2Atom
 	//
 	// If it does, we should declare a match.  If not, only then run the
-	// do_evaluate callback.  Alternately, perhaps the 
+	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, gargs));
