@@ -46,8 +46,31 @@ void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
                                           const std::set<Handle>& vars,
                                           const std::vector<Handle>& clauses)
 {
-    bool done = false;
-    link_type_search(pme, vars, clauses, done);
+    _root = clauses[0];
+    _starter_pred = _root;
+    // XXX FIXME  I'm pretty sure that this search is not going to be
+    // complete, probably missing lots of similar patterns, simply
+    // because it starts out with just the type of the very first
+    // clause, and thus missing things that are fuzzily close to it.
+    //
+    // I know that this is the case, because when I substitute the
+    // below with link_type_search(), which normally would be
+    // equivalent but faster, the FuzzyUTest failed. Tis means that
+    // if the "equivalent" search is missing answers, then the search
+    // below is missing them too.
+    //
+    // So, instead of using the type of clause[0], you probably want
+    // look at several types ???  There is a high risk that the
+    // resulting search will be very inefficeint: this inefficiency
+    // is exactly what link_type_search() was trying to avoid...
+    Type ptype = _root->getType();
+    HandleSeq handle_set;
+    _as->getHandlesByType(handle_set, ptype);
+    for (const Handle& h : handle_set)
+    {
+        bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+        if (found) return;
+    }
 }
 
 /**
