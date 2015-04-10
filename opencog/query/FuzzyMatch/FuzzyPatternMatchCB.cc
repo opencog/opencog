@@ -46,7 +46,8 @@ void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
                                           const std::set<Handle>& vars,
                                           const std::vector<Handle>& clauses)
 {
-    full_search(pme, clauses);
+    bool done = false;
+    link_type_search(pme, vars, clauses, done);
 }
 
 /**

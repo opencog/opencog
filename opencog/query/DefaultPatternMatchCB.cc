@@ -555,6 +555,12 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
  * variable types (as set with the set_type_testrictions() method).
  * This assumes that the varset contains the variables to be searched
  * over, and that the type restrictins are set up approrpriately.
+ *
+ * If the varset is empty, or if there are no variables, then the
+ * entire atomspace will be searched.  Depending on the pattern,
+ * many, many duplicates might be reported. If you are not using
+ * variables, then you probably don't want to use this metod, either;
+ * you should create somethnig more clever.
  */
 bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& varset,
@@ -572,9 +578,10 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	for (const Handle& var: varset)
 	{
 		auto tit = _type_restrictions->find(var);
-		for (; tit != _type_restrictions->end(); tit++)
+		const std::set<Type> typeset = tit->second;
+		for (Type t : typeset)
 		{
-			size_t num = (size_t) _as->getNumAtomsOfType(*tit);
+			size_t num = (size_t) _as->getNumAtomsOfType(t);
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
@@ -586,7 +593,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 						_root = cl;
 						_starter_pred = *fa.least_holders.begin();
 						count = num;
-						ptype = *tit;
+						ptype = t;
 						break;
 					}
 				}
@@ -600,6 +607,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 		_root = _starter_pred = clauses[0];
 	}
 
+	HandleSeq handle_set;
 	_as->getHandlesByType(handle_set, ptype);
 
 #ifdef DEBUG
