@@ -16,6 +16,7 @@ IF (HAVE_SERVER)
 		PythonModule
 		server
 		cogutil
+		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -33,6 +34,7 @@ IF (HAVE_SERVER)
 		py-shell
 		server
 		cogutil
+		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -53,6 +55,7 @@ TARGET_LINK_LIBRARIES(PythonEvalUTest
 	server
 	PythonEval
 	cogutil
+	atomspace_cython
 )
 SET_TESTS_PROPERTIES(PythonEvalUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -68,6 +71,7 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	PythonEval
 	cogutil
 	utilities_cython
+	atomspace_cython
 )
 SET_TESTS_PROPERTIES(PythonUtilitiesUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")

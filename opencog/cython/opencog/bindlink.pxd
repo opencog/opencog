@@ -1,4 +1,4 @@
-from opencog.atomspace cimport cHandle, cTruthValue, cAtomSpace
+from opencog.atomspace cimport cHandle, tv_ptr, cAtomSpace
 
 cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
     # C++: 
@@ -20,4 +20,11 @@ cdef extern from "opencog/query/BindLink.h" namespace "opencog":
     cdef cHandle c_crisp_logic_bindlink "crisp_logic_bindlink" (cAtomSpace*,
                                                                 cHandle)
     cdef cHandle c_pln_bindlink "pln_bindlink" (cAtomSpace*, cHandle)
-    cdef cTruthValue c_satisfaction_link "satisfaction_link" (cAtomSpace*, cHandle)
+    cdef tv_ptr c_satisfaction_link "satisfaction_link" (cAtomSpace*, cHandle)
+
+
+cdef extern from "opencog/atoms/execution/EvaluationLink.h" namespace "opencog":
+    tv_ptr c_evaluate_atom "opencog::EvaluationLink::do_evaluate"(cAtomSpace*, cHandle)
+
+cdef extern from "opencog/atoms/execution/ExecutionOutputLink.h" namespace "opencog":
+    cHandle c_execute_atom "opencog::ExecutionOutputLink::do_execute"(cAtomSpace*, cHandle)

@@ -1,10 +1,13 @@
 from unittest import TestCase
+import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                crisp_logic_bindlink, pln_bindlink
+                                crisp_logic_bindlink, pln_bindlink,\
+                                execute_atom, evaluate_atom
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
+from opencog.utilities import initialize_opencog, finalize_opencog
 
 __author__ = 'Curtis Faith'
 
@@ -35,6 +38,14 @@ class BindlinkTest(TestCase):
             '''
         scheme_eval_h(self.atomspace, scheme_animals)
 
+        # Get the config file name in a manner not dependent on the
+        # starting working directory.
+        full_path = os.path.realpath(__file__)
+        config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf" 
+
+        # Initialize Python
+        initialize_opencog(self.atomspace, config_file_name)
+
         # Define a graph search query
         bind_link_query = \
             '''
@@ -56,6 +67,7 @@ class BindlinkTest(TestCase):
         
 
     def tearDown(self):
+        finalize_opencog()
         del self.atomspace
 
 
@@ -152,3 +164,60 @@ class BindlinkTest(TestCase):
     def test_satisfy(self):
         # XXX TODO implement a test here...
         pass
+
+    def test_execute_atom(self):
+
+        def GroundedSchemaNode(node_name):
+            return self.atomspace.add_node(types.GroundedSchemaNode, node_name)
+
+        def ConceptNode(node_name):
+            return self.atomspace.add_node(types.ConceptNode, node_name)
+
+        def ExecutionOutputLink(schemaNode, listLink):
+            return self.atomspace.add_link(types.ExecutionOutputLink,
+                    [schemaNode, listLink])
+
+        def ListLink(*args):
+            return self.atomspace.add_link(types.ListLink, args)
+
+        list_link = ListLink(
+                ConceptNode("one"),
+                ConceptNode("two")
+            )
+        result = execute_atom(self.atomspace, 
+                ExecutionOutputLink( 
+                    GroundedSchemaNode("py: test_functions.add_link"),
+                    ListLink(
+                        ConceptNode("one"),
+                        ConceptNode("two") 
+                    )
+                )
+            )
+        self.assertEquals(result, list_link)
+        pass
+
+    def test_evaluate_atom(self):
+        def GroundedPredicateNode(node_name):
+            return self.atomspace.add_node(types.GroundedPredicateNode,
+                                            node_name)
+
+        def ConceptNode(node_name):
+            return self.atomspace.add_node(types.ConceptNode, node_name)
+
+        def EvaluationLink(schemaNode, listLink):
+            return self.atomspace.add_link(types.EvaluationLink,
+                    [schemaNode, listLink])
+
+        def ListLink(*args):
+            return self.atomspace.add_link(types.ListLink, args)
+
+        result = evaluate_atom(self.atomspace,
+                EvaluationLink( 
+                    GroundedPredicateNode("py: test_functions.bogus_tv"),
+                    ListLink(
+                        ConceptNode("one"),
+                        ConceptNode("two") 
+                    )
+                )
+            )
+        self.assertEquals(result, TruthValue(0.6, 0.234))
