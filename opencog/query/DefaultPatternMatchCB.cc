@@ -318,7 +318,15 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  *
  *    If the link_match() callback is willing to accept a broader range
  *    of types, then this search method may fail to find some possible
- *    patterns. There are several possible remedies in this situation.
+ *    patterns.
+ *
+ *    Lets start by noting that this situation is very rare: most
+ *    patterns will not consist entirely if Links and VariableNodes.
+ *    Almost surely, most reasonable people will have at least one
+ *    non-variable node in the pattern. So the disucssion below almost
+ *    surely does not apply.
+ *
+ *    But if yhou really want this, there are several possible remedies.
  *    One is to modify the link_type_search() callback to try each
  *    possible link type that is considered bo be equivalent by
  *    link_match(). Another alternative is to just leave the
@@ -354,6 +362,62 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
 	disjunct_search(pme, vars, clauses, done);
 }
 
+/**
+ * This callback implements the handling of the special case where the
+ * pattern consists of a single clause, at the top of which there is an
+ * OrLink. In this situation, one effectively has multiple, unrelated
+ * grounding problems at hand, and they need to be treated as such.
+ *
+ * The core issue here is that, from the point of view of satisfiability,
+ * each subgraph that occurs inside an OrLink might be grounded by a
+ * graph that is disconnected from the other subgraphs. There is no
+ * a-priori way of knowing whether the groundings might be connected,
+ * and thus, the worst-case must be assumed: each subgraph that occurs
+ * inside an OrLink must be considered to be a unique, independent
+ * graph, which must be assumed to be disconnected from each of the
+ * other subgraphs (even though they "accidentally" share a common
+ * variable name).
+ *
+ * This is best understood through an example. Consider the clause
+ *
+ *   OrLink
+ *       ListLink
+ *           ConceptNode Hunt
+ *           VariableNode $X
+ *       ListLink
+ *           VariableNode $X
+ *           ConceptNode Zebra
+ *
+ * Suppose that the Universe over which this is being grounded consists
+ * of only two clauses:
+ *
+ *   ListLink
+ *       ConceptNode Hunt
+ *       ConceptNode RedOctober
+ *
+ *   ListLink
+ *       ConceptNode IceStation
+ *       ConceptNode Zebra
+ *
+ * Suppose that the search for a grounding is begun at `Hunt`. Then, the
+ * `RedOctober` is found, so $X is grounded by `RedOctober`.  From here,
+ * it is impossible to walk the graph in a connected manner to find the
+ * alternative grounding: `IceStation`.  To find `IceStation`, a second
+ * search needs to be launched, starting at `Zebra`.
+ *
+ * Since the pattern matcher is only able to walk over connected
+ * graphs, it must be assumed a-priori that each subgraph in an OrLink
+ * is disconnected from the others. The only way that these two sub
+ * graphs might prove to be connected is if the variable $X is used in
+ * some other clause, thus establishing connectivity from that clause to
+ * the subgraphs of the OrLink.
+ *
+ * The practical side-effect, here, with regards to satsifcation, is
+ * this: if both groundings are to be found in the above example, then
+ * two efforts must be made: One effort, with the initial grounding
+ * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
+ * is what we do here, with the OrLink loop.
+ */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
                                             const HandleSeq &clauses,

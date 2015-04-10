@@ -48,11 +48,6 @@ void get_connected_components(const std::set<Handle>& vars,
                               std::vector<HandleSeq>& compset,
                               std::vector<std::set<Handle>>& compvars);
 
-void get_disjoined_components(const std::set<Handle>& vars,
-                              const HandleSeq& clauses,
-                              std::vector<HandleSeq>& compset,
-                              std::vector<std::set<Handle>>& compvars);
-
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_UTILS_H
