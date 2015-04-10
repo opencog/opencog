@@ -31,6 +31,15 @@
 
 using namespace opencog;
 
+/**
+ * This callback taakes the reported grounding, runs it through the
+ * instantiator, to create the implicand, and then records the result in
+ * the public member `result_list`.  It then returns false, to search
+ * for more groundings.  (The engine will halt its search for a
+ * grounding once an acceptable one has been found; so, to continue
+ * hunting for more, we return `false` here. We want to find all
+ * possible groundings.)
+ */
 bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln)
 {
@@ -108,7 +117,8 @@ static Handle do_imply(AtomSpace* as,
 	bl->imply(&impl, do_conn_check);
 
 	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, and return that.
 	Handle gl = as->addLink(SET_LINK, impl.result_list);
 	return gl;
 }

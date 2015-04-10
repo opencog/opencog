@@ -155,7 +155,10 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	return hdeepest;
 }
 
-// Look at all the clauses, to find the "thinnest" one.
+/* ======================================================== */
+/**
+ * Iterate over all the clauses, to find the "thinnest" one.
+ */
 Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
                                             Handle& starter_pred,
                                             size_t& bestclause)
@@ -189,77 +192,32 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
     return best_start;
 }
 
+/* ======================================================== */
 /**
- * Search for solutions/groundings over all of the AtomSpace, using
- * some "reasonable" assumptions for what might be searched for. Or,
- * to put it bluntly, this search method *might* miss some possible
- * solutions, for certain "unusual" search types. The trade-off is
- * that this search algo should really be quite fast for "normal"
- * search types.
+ * Given a set of clauses, find a neighborhood to search, and perform
+ * the search. A `neighborhood` is defined as all of the atoms that
+ * can be reached from a given (non-variable) atom, by following either
+ * it's incoming or its outgoing set.
  *
- * This search algo makes the following (important) assumptions:
+ * A neighborhood search is guaranteed to find all possible groundings
+ * for the set of clauses. The reason for this is that, given a
+ * non-variable atom in the pattern, any possible grounding of that
+ * pattern must contain that atom, out of necessity. Thus, any possible
+ * grounding must be contained in that neighborhood.  It is sufficient
+ * to walk that graph until a suitable grounding is encountered.
  *
- * 1) If none of the clauses have any variables in them, (that is, if
- *    all of the clauses are "constant" clauses) then the search will
- *    begin by looping over all links in the atomspace that have the
- *    same link type as the first clause.  This will fail to examine
- *    all possible solutions if the link_match() callback is leniant,
- *    and accepts a broader range of types than just this one. This
- *    seems like a reasonable limitation: trying to search all-possible
- *    link-types would be a huge performance impact, especially if the
- *    link_match() callback was not interested in this broadened search.
- *
- *    At any rate, this limitation doesn't even apply, because the
- *    current PatternMatch::do_match() method completely removes
- *    constant clauses anyway.  (It needs to do this in order to
- *    simplify handling of connected graphs, so that virtual atoms are
- *    properly handled.  This is based on the assumption that support
- *    for virtual atoms is more important than support for unusual
- *    link_match() callbacks.
- *
- * 2) Search will begin at the first non-variable node in the "thinnest"
- *    clause.  The thinnest clause is chosen, so as to improve performance;
- *    but this has no effect on the thoroughness of the search.  The search
- *    will proceed by exploring the entire incoming-set for this node.
- *    The search will NOT examine other non-variable node types.
- *    If the node_match() callback is willing to accept a broader range
- *    of node matches, esp. for this initial node, then many possible
- *    solutions will be missed.  This seems like a reasonable limitation:
- *    if you really want a very lenient node_match(), then use variables.
- *    Or you can implement your own initiate_search() callback.
- *
- * 3) If the clauses consist entirely of variables, then the search
- *    will start by looking for all links that are of the same type as
- *    the type of the first clause.  This can fail to find all possible
- *    matches, if the link_match() callback is willing to accept a larger
- *    set of types.  This is a reasonable limitation: anything looser
- *    would very seriously degrade performance; if you really need a
- *    very lenient link_match(), then use variables. Or you can
- *    implement your own initiate_search() callback.
- *
- * The above describes the limits to the "typical" search that this
- * algo can do well. In particular, if the constraint of 2) can be met,
- * then the search can be quite rapid, since incoming sets are often
- * quite small; and assumption 2) limits the search to "nearby",
- * connected atoms.
- *
- * Note that the default implementation of node_match() and link_match()
- * in this class does satisfy both 2) and 3), so this algo will work
- * correctly if these two methods are not overloaded with more callbacks
- * that are lenient about matching types.
- *
- * If you overload node_match(), and do so in a way that breaks
- * assumption 2), then you will scratch your head, thinking
- * "why did my search fail to find this obvious solution?" The answer
- * will be for you to create a new search algo, in a new class, that
- * overloads this one, and does what you want it to.  This class should
- * probably *not* be modified, since it is quite efficient for the
- * "normal" case.
+ * The return value is true if a grounding was found, else it returns
+ * false. That is, this return value works just like all the other
+ * satisfiability callbacks.  The flag 'done' is set to true if the
+ * entire search was completed (and no groun ding was found).
  */
-void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
-                                            const std::set<Handle> &vars,
-                                            const std::vector<Handle> &clauses)
+bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& vars,
+                                            const std::vector<Handle>& clauses,
+                                            bool& done)
 {
+	done = false;
+
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
 	// iterating over the incoming set of the node, and so, if it is
@@ -272,93 +230,409 @@ void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
 	// Note also: the user is allowed to specify patterns that have
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
-
 	size_t bestclause;
 	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
 
-	if ((Handle::UNDEFINED != best_start)
-	    // and (Handle::UNDEFINED != _starter_pred)
-	    // and (not vars.empty()))
-	    )
-	{
-		_root = clauses[bestclause];
-		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+	// Cannot find a starting point! This can happen if all of the
+	// clauses contain nothing but variables!! Unusual, but it can
+	// happen.  In this case, we need some other, alternative search
+	// strategy.
+	if (Handle::UNDEFINED == best_start)
+		return false;
 
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by attentional
-		// focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start);
-		size_t sz = iset.size();
-		for (size_t i = 0; i < sz; i++) {
-			Handle h(iset[i]);
-			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
-			       h->toShortString().c_str());
-			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-			if (rc) break;
-		}
-
-		// If we are here, we are done.
-		return;
-	}
-
-	// If we are here, then we could not find a clause at which to start,
-	// as, apparently, the clauses consist entirely of variables!! So,
-	// basically, we must search the entire!! atomspace, in this case.
-	// Yes, this hurts.
-	full_search(pme, clauses);
-}
-
-/// The defualt search tries to optimize by making some reasonable
-/// assumptions about what is being looked for. But not every problem
-/// fits those assumptions, so this method provides an exhaustive
-/// search. Note that exhaustive searches can be exhaustingly long,
-/// so watch out!
-void DefaultPatternMatchCB::full_search(PatternMatchEngine *pme,
-                                        const std::vector<Handle> &clauses)
-{
-	_root = clauses[0];
-	_starter_pred = _root;
-
+	_root = clauses[bestclause];
+	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 
-	// Get type of the first item in the predicate list.
-	Type ptype = _root->getType();
+	// This should be calling the over-loaded virtual method
+	// get_incoming_set(), so that, e.g. it gets sorted by attentional
+	// focus in the AttentionalFocusCB class...
+	IncomingSet iset = get_incoming_set(best_start);
+	size_t sz = iset.size();
+	for (size_t i = 0; i < sz; i++)
+	{
+		Handle h(iset[i]);
+		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+		dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
+		       h->toShortString().c_str());
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
 
-	// Plunge into the deep end - start looking at all viable
-	// candidates in the AtomSpace.
+		// Terminate search if satisfied.
+		if (found) return true;
+	}
 
-	// XXX TODO -- as a performance optimization, we should try all
-	// the different clauses, and find the one with the smallest number
-	// of atoms of that type, or otherwise try to find a small ("thin")
-	// incoming set to search over.
-	//
-	// If ptype is a VariableNode, then basically, the pattern says
-	// "Search all of the atomspace." Literally. So this will blow up
-	// if the atomspace is large.
-	std::list<Handle> handle_set;
-	if (VARIABLE_NODE != ptype)
-		_as->getHandlesByType(back_inserter(handle_set), ptype);
-	else
-		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
+	// If we are here, we have searched the entire neighborhood, and so
+	// we set the 'done' flag. The return value of false indicates that
+	// no satisfiable groundings were found.
+	done = true;
+	return false;
+}
+
+/* ======================================================== */
+/**
+ * Search for solutions/groundings over all of the AtomSpace, using
+ * the standard, canonical assumptions about the structure of the search
+ * pattern.  Here, the "standard, canonical" assumptions are that the
+ * pattern consists of clauses that contain VariableNodes in them, with
+ * the VariableNodes interpreted in the "standard, canonical" way:
+ * namely, that these are the atoms that are to be grounded, as normally
+ * described elsewhere in the documentation.  In such a case, a full and
+ * complete search for any/all possible groundings is performed; if
+ * there are groundings, they are guaranteed to be found; if there are
+ * none, then it is guaranteed that this will also be correctly
+ * reported. For certain, highly unusual (but still canonical) search
+ * patterns, the same grounding may be reported more than once; grep for
+ * notes pertaining to the OrLink, and the ArcanaUTest for details.
+ * Otherwise, all possible groundings are guaranteed to be returned
+ * exactly once.
+ *
+ * We emphasize "standard, canonical" here, for a reason: the pattern
+ * engine is capable of doing many strange, weird things, depending on
+ * how the callbacks are designed to work.  For those other
+ * applications, it is possible or likely that this method will fail to
+ * traverse the "interesting" parts of the atomspace: non-standard
+ * callbacks may also need a non-standard search strategy.
+ *
+ * Now, some notes on the strategy employed here, and how non-canonical
+ * callbacks might affect it:
+ *
+ * 1) Search will begin at the first non-variable node in the "thinnest"
+ *    clause.  The thinnest clause is chosen, so as to improve performance;
+ *    but this has no effect on the thoroughness of the search.  The search
+ *    will proceed by exploring the entire incoming-set for this node.
+ *
+ *    This is ideal, when the node_match() callback accepts a match only
+ *    when the pattern and suggested nodes are identical (i.e. are
+ *    exactly the same atom).  If the node_match() callback is willing to
+ *    accept a broader range of node matches, then other possible
+ *    solutions might be missed. Just how to fix this depends sharpely
+ *    on what node_match() is willing to accept as a match.
+ *
+ *    Anyway, this seems like a very reasonable limitation: if you
+ *    really want a lenient node_match(), then use variables instead.
+ *    Don't overload node-match with something weird, and you should be
+ *    OK.  Otherwise, you'll have to implement your own initiate_search()
+ *    callback.
+ *
+ * 2) If the clauses consist entirely of variables, i.e. if there is not
+ *    even one single non-variable node in the pattern, then a search is
+ *    driven by looking for all links that are of the same type as one
+ *    of the links in one of the clauses.
+ *
+ *    If the link_match() callback is willing to accept a broader range
+ *    of types, then this search method may fail to find some possible
+ *    patterns.
+ *
+ *    Lets start by noting that this situation is very rare: most
+ *    patterns will not consist entirely if Links and VariableNodes.
+ *    Almost surely, most reasonable people will have at least one
+ *    non-variable node in the pattern. So the disucssion below almost
+ *    surely does not apply.
+ *
+ *    But if yhou really want this, there are several possible remedies.
+ *    One is to modify the link_type_search() callback to try each
+ *    possible link type that is considered bo be equivalent by
+ *    link_match(). Another alternative is to just leave the
+ *    link_match() callback alone, and use variables for links, instead.
+ *    This is probably the best strategy, because then the fairly
+ *    standard reasoning can be used when thinking about the problem.
+ *    Of course, you can always write your own initiate_search() callback.
+ *
+ * If the constraint 1) can be met, (which is always the case for
+ * "standard, canonical" searches, then the pattern match should be
+ * quite rapid.  Incoming sets tend to be small; in addition, the
+ * implemnentation here picks the smallest, "tinnest" incoming set to
+ * explore.
+ *
+ * The default implementation of node_match() and link_match() in this
+ * class does satisfy both 1) and 2), so this algo will work correctly,
+ * if these two methods are not overloaded with more callbacks that are
+ * lenient about matching.
+ *
+ * If you overload node_match(), and do so in a way that breaks
+ * assumption 1), then you will scratch your head, thinking
+ * "why did my search fail to find this obvious solution?" The answer
+ * will be for you to create a new search algo, in a new class, that
+ * overloads this one, and does what you want it to.  This class should
+ * probably *not* be modified, since it is quite efficient for the
+ * "standard, canonical" case.
+ */
+void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses)
+{
+	bool done = false;
+	disjunct_search(pme, vars, clauses, done);
+}
+
+/* ======================================================== */
+/**
+ * This callback implements the handling of the special case where the
+ * pattern consists of a single clause, at the top of which there is an
+ * OrLink. In this situation, one effectively has multiple, unrelated
+ * grounding problems at hand, and they need to be treated as such.
+ *
+ * The core issue here is that, from the point of view of satisfiability,
+ * each subgraph that occurs inside an OrLink might be grounded by a
+ * graph that is disconnected from the other subgraphs. There is no
+ * a-priori way of knowing whether the groundings might be connected,
+ * and thus, the worst-case must be assumed: each subgraph that occurs
+ * inside an OrLink must be considered to be a unique, independent
+ * graph, which must be assumed to be disconnected from each of the
+ * other subgraphs (even though they "accidentally" share a common
+ * variable name).
+ *
+ * This is best understood through an example. Consider the clause
+ *
+ *   OrLink
+ *       ListLink
+ *           ConceptNode Hunt
+ *           VariableNode $X
+ *       ListLink
+ *           VariableNode $X
+ *           ConceptNode Zebra
+ *
+ * Suppose that the Universe over which this is being grounded consists
+ * of only two clauses:
+ *
+ *   ListLink
+ *       ConceptNode Hunt
+ *       ConceptNode RedOctober
+ *
+ *   ListLink
+ *       ConceptNode IceStation
+ *       ConceptNode Zebra
+ *
+ * Suppose that the search for a grounding is begun at `Hunt`. Then, the
+ * `RedOctober` is found, so $X is grounded by `RedOctober`.  From here,
+ * it is impossible to walk the graph in a connected manner to find the
+ * alternative grounding: `IceStation`.  To find `IceStation`, a second
+ * search needs to be launched, starting at `Zebra`.
+ *
+ * Since the pattern matcher is only able to walk over connected
+ * graphs, it must be assumed a-priori that each subgraph in an OrLink
+ * is disconnected from the others. The only way that these two sub
+ * graphs might prove to be connected is if the variable $X is used in
+ * some other clause, thus establishing connectivity from that clause to
+ * the subgraphs of the OrLink.
+ *
+ * The practical side-effect, here, with regards to satsifcation, is
+ * this: if both groundings are to be found in the above example, then
+ * two efforts must be made: One effort, with the initial grounding
+ * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
+ * is what we do here, with the OrLink loop.
+ */
+bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses,
+                                            bool& done)
+{
+	done = false;
+	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
+	{
+		LinkPtr orl(LinkCast(clauses[0]));
+		const HandleSeq& oset = orl->getOutgoingSet();
+		for (const Handle& h : oset)
+		{
+			bool dont_care = false;
+			HandleSeq hs;
+			hs.push_back(h);
+			bool found = disjunct_search(pme, vars, hs, dont_care);
+			if (found) return true;
+		}
+		done = true;
+		return false;
+	}
+
+	bool found = neighbor_search(pme, vars, clauses, done);
+	if (found) return true;
+	if (done) return false;
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses consist entirely of
+	// variables! Which can happen (there is a unit test for this,
+	// the LoopUTest), and so instead, we search based on the link
+	// types that occur in the atomspace.
+	found = link_type_search(pme, vars, clauses, done);
+	if (found) return true;
+	if (done) return false;
+
+	// The bizarro case: if we found nothing, then there are no links!
+	// Ergo, every clause must be a lone variable, all by itself. This
+	// is a bit pathological, but we handle it anyway, with the
+	// variable_search() method.  Note, however, that variable_search()
+	// does not look at the clauses, it looks at the varset instead.
+	found = variable_search(pme, vars, clauses, done);
+	return found;
+}
+
+/* ======================================================== */
+/**
+ * Find the rarest link type contained in the clause, or one
+ * of its subclauses. Of course, QuoteLinks, and anything under
+ * a Quotelink, must be ignored.
+ */
+void DefaultPatternMatchCB::find_rarest(const Handle& clause,
+                                        Handle& rarest,
+                                        size_t& count)
+{
+	Type t = clause->getType();
+	if (QUOTE_LINK == t) return;
+
+	LinkPtr lll(LinkCast(clause));
+	if (NULL == lll) return;
+
+	size_t num = (size_t) _as->getNumAtomsOfType(t);
+	if (num < count)
+	{
+		count = num;
+		rarest = clause;
+	}
+
+	const HandleSeq& oset = lll->getOutgoingSet();
+	for (const Handle& h : oset)
+		find_rarest(h, rarest, count);
+}
+
+/* ======================================================== */
+/**
+ * Initiate a search by looping over all Links of the same type as one
+ * of the links in the set of clauses.  This attempts to pick the link
+ * type which has the smallest number of atoms of that type in the
+ * AtomSpace.
+ */
+bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& vars,
+                                            const HandleSeq& clauses,
+                                            bool& done)
+{
+	done = false;
+	_root = Handle::UNDEFINED;
+	_starter_pred = Handle::UNDEFINED;
+	size_t count = SIZE_MAX;
+
+	for (const Handle& cl: clauses)
+	{
+		size_t prev = count;
+		find_rarest(cl, _starter_pred, count);
+		if (count < prev)
+		{
+			prev = count;
+			_root = cl;
+		}
+	}
+
+	// The bizarro case: if we found nothing, then there are no links!
+	// Ergo, every clause must be a lone variable, all by itself. This
+	// is a bit pathological, but we handle it anyway, with the
+	// variable_search() method, below.
+	if (Handle::UNDEFINED == _root) return false;
+
+	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
+	dbgprt("Start term is: %s\n", _starter_pred->toShortString().c_str());
+
+	// Get type of the rarest link
+	Type ptype = _starter_pred->getType();
+
+	HandleSeq handle_set;
+	_as->getHandlesByType(handle_set, ptype);
 
 #ifdef DEBUG
 	size_t i = 0;
 #endif
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-		if (rc) break;
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		if (found) return true;
 	}
+	done = true;
+	return false;
+}
+
+/* ======================================================== */
+/**
+ * Initiate a search by looping over all atoms of the allowed
+ * variable types (as set with the set_type_testrictions() method).
+ * This assumes that the varset contains the variables to be searched
+ * over, and that the type restrictins are set up approrpriately.
+ *
+ * If the varset is empty, or if there are no variables, then the
+ * entire atomspace will be searched.  Depending on the pattern,
+ * many, many duplicates might be reported. If you are not using
+ * variables, then you probably don't want to use this metod, either;
+ * you should create somethnig more clever.
+ */
+bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
+                                            const std::set<Handle>& varset,
+                                            const HandleSeq& clauses,
+                                            bool& done)
+{
+	done = false;
+
+	// Find the rarest variable type;
+	size_t count = SIZE_MAX;
+	Type ptype = ATOM;
+
+	_root = Handle::UNDEFINED;
+	_starter_pred = Handle::UNDEFINED;
+	for (const Handle& var: varset)
+	{
+		auto tit = _type_restrictions->find(var);
+		const std::set<Type> typeset = tit->second;
+		for (Type t : typeset)
+		{
+			size_t num = (size_t) _as->getNumAtomsOfType(t);
+			if (0 < num and num < count)
+			{
+				for (const Handle& cl : clauses)
+				{
+					FindAtoms fa(var);
+					fa.search_set(cl);
+					if (0 < fa.least_holders.size())
+					{
+						_root = cl;
+						_starter_pred = *fa.least_holders.begin();
+						count = num;
+						ptype = t;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// There were no type restrictions!
+	if (Handle::UNDEFINED == _root)
+	{
+		_root = _starter_pred = clauses[0];
+	}
+
+	HandleSeq handle_set;
+	_as->getHandlesByType(handle_set, ptype);
+
+#ifdef DEBUG
+	size_t i = 0;
+#endif
+	for (const Handle& h : handle_set)
+	{
+		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
+		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		       h->toShortString().c_str());
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		if (found) return true;
+	}
+
+	done = true;
+	return false;
 }
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt, const Handle& gargs)
+bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
+                                               const Handle& gargs)
 {
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
@@ -386,7 +660,7 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt, const Handle&
 	//           Arg2Atom
 	//
 	// If it does, we should declare a match.  If not, only then run the
-	// do_evaluate callback.  Alternately, perhaps the 
+	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, gargs));

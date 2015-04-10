@@ -79,6 +79,9 @@ bool remove_constants(const std::set<Handle> &vars,
  * Given an input set of clauses, partition this set into its
  * connected components, returning a list of the connected components,
  * and a matching list of the variables that appear in each component.
+ * The input set of clauses are assumed to be in conjunctive normal
+ * form; i.e. they do NOT contain any OrLinks. If they do, then you
+ * must used the `get_disjoined_components()` function, below.
  *
  * Two clauses are "connected" if they both contain a common
  * variable. A connected component is the set of all clauses that are

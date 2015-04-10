@@ -143,8 +143,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * in order to drive a reasonably-fast search.
 		 */
 		virtual void initiate_search(PatternMatchEngine *,
-		                             const std::set<Handle> &vars,
-		                             const std::vector<Handle> &clauses);
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses);
 
 		/**
 		 * Indicate a set of restrictions on the types of the ground atoms.
@@ -173,12 +173,24 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
+		virtual void find_rarest(const Handle&, Handle&, size_t&);
+		virtual bool neighbor_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
 
-		/**
-		 * Perform a full atomspace search.
-		 */
-		virtual void full_search(PatternMatchEngine *,
-		                         const std::vector<Handle> &clauses);
+		virtual bool disjunct_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
+		virtual bool link_type_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
+		virtual bool variable_search(PatternMatchEngine *,
+		                             const std::set<Handle>& vars,
+		                             const HandleSeq& clauses,
+		                             bool& done);
 
 		AtomSpace *_as;
 };

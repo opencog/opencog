@@ -1,5 +1,5 @@
 ;
-; Unit testing for OrLinks in the pattern matcher.
+; Unit testing for disconnected patterns within OrLinks.
 ;
 ;;; Populate the atomspace with three small trees.
 (EvaluationLink
@@ -26,9 +26,9 @@
 	)
 )
 
-;;; A very basic pattern using OrLink.  Should find two of the three
-;;; trees given above.
-(define (basic)
+;;; A pattern with two disconnected groundings.  Two search pases must
+;;; be made.  Should find two of the three trees given above.
+(define (top-disco)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
@@ -54,7 +54,7 @@
 )
 
 ;;; Same as above, but the tope-level OrLink is wrapped.
-(define (wrapped)
+(define (wrapped-disco)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
