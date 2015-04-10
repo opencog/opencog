@@ -177,20 +177,20 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool neighbor_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             bool& halt);
 
 		virtual bool disjunct_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             bool& halt);
 		virtual bool link_type_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             bool& halt);
 		virtual bool variable_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             bool& halt);
 
 		AtomSpace *_as;
 };
