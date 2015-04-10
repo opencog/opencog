@@ -104,6 +104,28 @@ IF (HAVE_ATOMSPACE)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_ATOMSPACE)
+	############################## type constructors #####################
+	CYTHON_ADD_MODULE_PYX(type_constructors
+		"atomspace.pxd" opencog_atom_types )
+
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
+
+	ADD_LIBRARY(type_constructors SHARED
+		type_constructors.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(type_constructors
+		atomspace
+		${PYTHON_LIBRARIES}
+	)
+	
+	SET_TARGET_PROPERTIES(type_constructors PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME type_constructors)
+
+ENDIF (HAVE_ATOMSPACE)
+
+IF (HAVE_ATOMSPACE)
 	############################## utilities #####################
 	CYTHON_ADD_MODULE_PYX(utilities
 		"atomspace.pxd" opencog_atom_types )
@@ -118,6 +140,7 @@ IF (HAVE_ATOMSPACE)
 	TARGET_LINK_LIBRARIES(utilities_cython
 		PythonEval
 		atomspace
+		type_constructors
 		cogutil
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
