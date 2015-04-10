@@ -155,7 +155,9 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	return hdeepest;
 }
 
-// Look at all the clauses, to find the "thinnest" one.
+/**
+ * Iterate over all the clauses, to find the "thinnest" one.
+ */
 Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
                                             Handle& starter_pred,
                                             size_t& bestclause)
@@ -187,6 +189,70 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 	}
 
     return best_start;
+}
+
+/**
+ * Given a set of clauses, find a neighborhood to search, and perform
+ * the search. A `neighborhood` is defined as all of the atoms that
+ * can be reached from a given (non-variable) atom, by following either
+ * it's incoming or its outgoinng set.
+ *
+ * A neighborhood search is guaranteed to find all possible groundings
+ * for the set of clauses. The reason for this is that, given a
+ * non-variable atom in the pattern, any possible grounding of that
+ * pattern must contain that atom, out of necessity. Thus, any possible
+ * grounding must be contained in that neighborhood.  It is sufficient
+ * to walk that graph until a sutiable grounding is encountered.
+ */
+bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
+                                            const std::set<Handle> &vars,
+                                            const std::vector<Handle> &clauses)
+{
+	// In principle, we could start our search at some node, any node,
+	// that is not a variable. In practice, the search begins by
+	// iterating over the incoming set of the node, and so, if it is
+	// large, a huge amount of effort might be wasted exploring
+	// dead-ends.  Thus, it pays off to start the search on the
+	// node with the smallest ("narrowest" or "thinnest") incoming set
+	// possible.  Thus, we look at all the clauses, to find the
+	// "thinnest" one.
+	//
+	// Note also: the user is allowed to specify patterns that have
+	// no constants in them at all.  In this case, the search is
+	// performed by looping over all links of the given types.
+	size_t bestclause;
+	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
+
+	// Cannot find a starting point! This can happen if all of the
+	// clauses contain nothing but variables!! Unusual, but it can
+	// happen.  In this case, we need some other, alternative search
+	// strategy.
+	if (Handle::UNDEFINED == best_start)
+		return false;
+
+	_root = clauses[bestclause];
+	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
+	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+
+	// This should be calling the over-loaded virtual method
+	// get_incoming_set(), so that, e.g. it gets sorted by attentional
+	// focus in the AttentionalFocusCB class...
+	IncomingSet iset = get_incoming_set(best_start);
+	size_t sz = iset.size();
+	for (size_t i = 0; i < sz; i++)
+	{
+		Handle h(iset[i]);
+		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+		dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
+		       h->toShortString().c_str());
+		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+
+		// Terminate search if satisfied.
+		if (found) return true;
+	}
+
+	// If we are here, we are not yet done
+	return false;
 }
 
 /**
@@ -258,50 +324,23 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  */
 void DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const std::set<Handle> &vars,
-                                            const std::vector<Handle> &clauses)
+                                            const HandleSeq &clauses)
 {
-	// In principle, we could start our search at some node, any node,
-	// that is not a variable. In practice, the search begins by
-	// iterating over the incoming set of the node, and so, if it is
-	// large, a huge amount of effort might be wasted exploring
-	// dead-ends.  Thus, it pays off to start the search on the
-	// node with the smallest ("narrowest" or "thinnest") incoming set
-	// possible.  Thus, we look at all the clauses, to find the
-	// "thinnest" one.
-	//
-	// Note also: the user is allowed to specify patterns that have
-	// no constants in them at all.  In this case, the search is
-	// performed by looping over all links of the given types.
-
-	size_t bestclause;
-	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
-
-	if ((Handle::UNDEFINED != best_start)
-	    // and (Handle::UNDEFINED != _starter_pred)
-	    // and (not vars.empty()))
-	    )
+	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
 	{
-		_root = clauses[bestclause];
-		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by attentional
-		// focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start);
-		size_t sz = iset.size();
-		for (size_t i = 0; i < sz; i++) {
-			Handle h(iset[i]);
-			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
-			       h->toShortString().c_str());
-			bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-			if (rc) break;
+		LinkPtr orl(LinkCast(clauses[0]));
+		const HandleSeq& oset = orl->getOutgoingSet();
+		for (const Handle& h : oset)
+		{
+			HandleSeq hs;
+			hs.push_back(h);
+			initiate_search(pme, vars, hs);
 		}
-
-		// If we are here, we are done.
-		return;
 	}
+
+	bool found = neighbor_search(pme, vars, clauses);
+	// if (found) return true;
+	if (found) return;
 
 	// If we are here, then we could not find a clause at which to start,
 	// as, apparently, the clauses consist entirely of variables!! So,
