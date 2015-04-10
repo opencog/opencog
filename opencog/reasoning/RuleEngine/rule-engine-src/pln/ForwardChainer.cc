@@ -120,11 +120,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         if (not r) {
             auto new_source = fcb.choose_next_source(fcmem_);
             if (new_source == Handle::UNDEFINED) {
-                log_->info(
-                        "No chosen rule and no more target to choose.Aborting forward chaining.");
+                log_->info("No chosen rule and no more source to choose. "
+                           "Aborting forward chaining.");
                 return;
             } else {
-                log_->info("No matching rule,attempting with another target.");
+                log_->info("No matching rule, attempting with another source.");
                 fcmem_.set_source(new_source);
                 continue;
             }
