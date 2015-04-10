@@ -41,7 +41,7 @@
 
 ;;; One clause, with an OrLink nested in it. Note that the two
 ;;; parts are entirely disconnected from each-other.
-(define (embed)
+(define (embed-disco)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink

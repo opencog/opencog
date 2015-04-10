@@ -1,5 +1,5 @@
 /*
- * tests/query/OrLinkUTest.cxtest
+ * tests/query/OrLinkUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -73,12 +73,14 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void test_basic_or(void);
-    void test_embed_or(void);
-    void test_nest_or(void);
-    void test_top_nest_or(void);
-    void test_nest_bad_or(void);
-    void test_top_nest_bad_or(void);
+    void ytest_basic_or(void);
+    void ytest_embed_or(void);
+    void ytest_nest_or(void);
+    void ytest_top_nest_or(void);
+    void ytest_nest_bad_or(void);
+    void ytest_top_nest_bad_or(void);
+    void test_top_disco(void);
+    void ytest_embed_disco(void);
 };
 
 void OrLinkUTest::tearDown(void)
@@ -99,7 +101,7 @@ void OrLinkUTest::setUp(void)
 /*
  * OrLink most basic unit test.
  */
-void OrLinkUTest::test_basic_or(void)
+void OrLinkUTest::ytest_basic_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -114,7 +116,7 @@ void OrLinkUTest::test_basic_or(void)
 /*
  * OrLink embeded unit test.
  */
-void OrLinkUTest::test_embed_or(void)
+void OrLinkUTest::ytest_embed_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -129,7 +131,7 @@ void OrLinkUTest::test_embed_or(void)
 /*
  * OrLink nested embeded unit test.
  */
-void OrLinkUTest::test_nest_or(void)
+void OrLinkUTest::ytest_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -145,7 +147,7 @@ void OrLinkUTest::test_nest_or(void)
 /*
  * OrLink top-level nested unit test.
  */
-void OrLinkUTest::test_top_nest_or(void)
+void OrLinkUTest::ytest_top_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -161,7 +163,7 @@ void OrLinkUTest::test_top_nest_or(void)
 /*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::test_nest_bad_or(void)
+void OrLinkUTest::ytest_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -177,7 +179,7 @@ void OrLinkUTest::test_nest_bad_or(void)
 /*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::test_top_nest_bad_or(void)
+void OrLinkUTest::ytest_top_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -188,4 +190,42 @@ void OrLinkUTest::test_top_nest_bad_or(void)
 
     printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
     TS_ASSERT_EQUALS(4, as->getArity(items));
+}
+
+/*
+ * OrLink disconnected unit test.
+ */
+void OrLinkUTest::test_top_disco(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-disconnected.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-disco))");
+
+    printf ("Top-disco found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(items));
+
+    Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
+
+    printf ("Top-wrapped-disco found:\n%s\n", wrap->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(wrap));
+}
+
+/*
+ * OrLink disconnected-embeded unit test.
+ * (Well, its not really disconnected, it just sort-of looks that way.)
+ */
+void OrLinkUTest::ytest_embed_disco(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/or-embed-disco.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (embed-disco))");
+
+    printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(items));
 }
