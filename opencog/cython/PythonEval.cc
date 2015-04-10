@@ -521,6 +521,14 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Get the module and stripped function name.
     pyModule = this->module_for_function(moduleFunction, functionName);
 
+    // If we can't find that module then throw an exception.
+    if (!pyModule) {
+        PyGILState_Release(gstate);
+        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        throw (RuntimeException(TRACE_INFO, "Python module for '%s' not found!",
+                moduleFunction.c_str()));
+    }
+        
     // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
     pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
