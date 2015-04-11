@@ -274,13 +274,31 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 
 /* ================================================================= */
 
-/// Sort out the list of clauses into three classes:
-/// virtual, evaluatable and concrete.
+/* utility -- every atom in the key term will get the value. */
+static void add_to_map(std::map<Handle, Handle>& map,
+                       const Handle& key, const Handle& value)
+{
+	map[key] = value;
+	LinkPtr lll(LinkCast(key));
+	if (NULL == lll) return;
+	const HandleSeq& oset = lll->getOutgoingSet();
+	for (const Handle& ho : oset) add_to_map(map, ho, value);
+}
+
+/// Sort out the list of clauses into four classes:
+/// virtual, evaluatable, executable and concrete.
 ///
 /// A term is "evalutable" if it contains a GroundedPredicate,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
 /// thier truth values.
+///
+/// A term is "executable" if it is an ExecutionOutputLink
+/// or if it inherits from one (such as PlusLink, TimesLink).
+/// Such terms need execution at grounding time, to determine
+/// thier actual form.  Note that executable terms may frequently
+/// occur underneath evaluatable terms, e.g. if something is greater
+/// than the sum of two other things.
 ///
 /// A clause is "virtual" if it has an evaluatable term inside of it,
 /// and that term takes an argument that is a variable. Such virtual
@@ -302,6 +320,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		for (const Handle& sh : fgpn.least_holders)
 		{
 			_evaluatable_terms.insert(sh);
+			add_to_map(_in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
@@ -321,6 +340,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			_evaluatable_terms.insert(sh);
 			_evaluatable_holders.insert(sh);
+			add_to_map(_in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
@@ -329,6 +349,26 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		}
 		for (const Handle& sh : fgtl.holders)
 			_evaluatable_holders.insert(sh);
+
+		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
+		// TimesLink are executable. They get treated by the
+		// same virtual-graph algo as the virtual links.
+		FindAtoms feol(EXECUTION_OUTPUT_LINK, true);
+		feol.search_set(clause);
+
+		for (const Handle& sh : feol.varset)
+		{
+			_executable_terms.insert(sh);
+			_executable_holders.insert(sh);
+			add_to_map(_in_executable, sh, sh);
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
+				is_virtual = true;
+		}
+		for (const Handle& sh : feol.holders)
+			_executable_holders.insert(sh);
 
 		if (is_virtual)
 			virtual_clauses.push_back(clause);

@@ -122,13 +122,15 @@ def AnchorNode(node_name):
     return atomspace.add_node(types.AnchorNode, node_name)
 def QuantityLink(*args):
     return atomspace.add_link(types.QuantityLink, args)
-def PlusLink(*args):
-    return atomspace.add_link(types.PlusLink, args)
-def TimesLink(*args):
-    return atomspace.add_link(types.TimesLink, args)
 def VirtualLink(*args):
     return atomspace.add_link(types.VirtualLink, args)
 def GreaterThanLink(*args):
     return atomspace.add_link(types.GreaterThanLink, args)
 def EqualLink(*args):
     return atomspace.add_link(types.EqualLink, args)
+def FunctionLink(*args):
+    return atomspace.add_link(types.FunctionLink, args)
+def PlusLink(*args):
+    return atomspace.add_link(types.PlusLink, args)
+def TimesLink(*args):
+    return atomspace.add_link(types.TimesLink, args)

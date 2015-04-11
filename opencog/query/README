@@ -8,16 +8,62 @@
 
 This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to support several functions,
-including query processing, graph-rewriting, and forward/backward
-chaining.  The first part of the file describes the generic algorithm;
-the second part describes some of its applications to query processing,
-and graph-rewriting.
+including query processing, graph-rewriting, graph satisfiaibility and
+"satsifiability modulo theories".  Forward and backward chaining are
+implemented separately, in the PLN directory.
 
-This code does not currently expose a "hypergraph query language" (HQL),
-but doing so should not be hard to add. See the design notes below.
+The first part of the file describes the generic algorithm; the second
+part describes some of its applications to query processing, graph
+rewriting, unification, satisfiability and satsifiability module theories.
 
 A simple example of one possible use of this code is shown in the file
 "/examples/pattern-matcher/simple.scm".
+
+A Quick Sketch
+--------------
+The basic idea is that one can specify a pattern or template, in the
+form of a graph, somoe of whose nodes are variables.  The pattern
+matcher can then find all other graphs that match the given template,
+substituing for the variables. Thus, one has:
+
+ * A Hypergraph Query Language (HQL), that, much like SQL, allows you
+   to define a query statement, and ask for all graphs that match. This
+   makes the atomspace a kind of graphical database.
+
+ * Given the variable values returned by the query, one can create new
+   graphs, thus, one has a graph re-writing facility.
+
+ * The pattern is specified as a collection of trees; it is the union
+   of these trees that defines the graph.  The vertexes in the tree are
+   typed (they are OpenCog "Atoms"), and so each tree can be understood
+   as a term. in the sense of a "term algebra".
+
+ * The same variable can appear in different parts of the template. All
+   solutions must therefore have the same value for that variable, thus,
+   the pattern matcher performs "unification".  Variables can be
+   substituted either by vertexes, or by graphs; so the form of
+   unification is not mereley on values, but on terms/expressions.
+
+ * When a value is found for a variable, that value is called a
+   "grounding". When the entire pattern can be grounded, it can be
+   thought of as being "satsfied", in the sense of "satsifiability".
+   Thus, the pattern matcher is a (graphical) satisfiability solver.
+
+ * Certain subgraphs are "evaluatable", other subgraphs are
+   "executable". Evaluatable graphs are those that can be evaluated, in
+   the sense of functional programming; the result of evaluation is a
+   truth value. Executable graphs are likewise, except that the result
+   is another graph.
+
+ * During the pattern search, both the evaluatable and the executable
+   subgraphs are evaluated, and the matching/unification is done on the
+   results. This implies that the pattern amtcher is a "satsifiability
+   modulo theories" solver: when it determines that two subgraphs are
+   equal, it is applying the "equational theory" given by functions
+   (graphs) that are evaluatable. A simple arithmetic theory is
+   built-in, and thus, for example, the pattern matcher can prove that
+   the equation 5 = 2 + 3 holds (is satsified, modulo the theory of
+   addition), while 7 + x = 3 + x is false (not satsifiable).
 
 
 Subgraph Isomorphism Discovery
