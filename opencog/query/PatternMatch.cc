@@ -363,6 +363,8 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pme->_mandatory = _mandatory;
 	pme->_optionals = _optionals;
 	pme->_evaluatable = _evaluatable_holders;
+	pme->_in_evaluatable = _in_evaluatable;
+	pme->_in_executable = _in_executable;
 	pme->_connectivity_map = _connectivity_map;
 	pme->_pmc = pmcb;
 #ifdef DEBUG

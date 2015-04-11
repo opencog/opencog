@@ -300,7 +300,10 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 #endif
 		// If the pattern contains atoms that are evaluatable i.e. GPN's
 		// then we must fall through, and let the tree comp mechanism
-		// find and evaluate them.
+		// find and evaluate them. That's for two reasons: (1) because
+		// evaluation may have side-effects (e.g. send a message) and
+		// (2) evaluation may depend on external state. These are
+		// typically used to implement behavior trees, e.g SequenceUTest
 		if (not is_evaluatable(hp)) return true;
 		else
 		{ dbgprt("Its evaluatable, continuing.\n"); }
@@ -645,10 +648,10 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				return false;
 			}
 
-			if (do_soln_up(hsoln)) found = true;
+			if (do_term_up(hsoln)) found = true;
 
 			// Get rid of any grounding that might have been proposed
-			// during the tree-compare or do_soln_up.
+			// during the tree-compare or do_term_up.
 			solution_pop();
 		} while (0 < next_choice(curr_term_handle, hsoln));
 
@@ -759,10 +762,45 @@ void PatternMatchEngine::solution_pop(void)
 	POPSTK(term_solutn_stack, clause_grounding);
 }
 
-/// Return true if a grounding was found.  It also has the side effect
-/// of updating clause_grounding map when the current clause is being
-/// grounded.
-bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
+/// do_term_up() -- move upwards from the current term.
+///
+/// Given the current term, in curr_term_handle, find its parent in the
+/// clause, and then call start_sol_up() to see if the term's parent
+/// has corresponding match in the solution graph.
+///
+/// Note that, in the "normal" case, a given term has only one, unique
+/// parent in the given root_clause, and so its easy to find; one just
+/// looks at the path from the root clause down to the term, and the
+/// parent is the link immediately above it.
+///
+/// There are five exceptions to this "unique parent" case:
+///  * The term is already the root clause; it has no parent. In this
+///    case, we send it off to the machinery that explores the next
+///    clause.
+///  * Exactly the same term may appear twice, 3 times, etc. in the
+///    clause, all at different locations.  This is very rare, but
+///    can happen. In essence, it has multiple parents; each needs
+///    to be checked. We loop over these.
+///  * The term is a part of a larger, evaluatable term. In this case,
+///    we don't want to go to the immediate parent, we want to go to
+///    the larger evaluatable term, and offer that up as the thing to
+///    match (i.e. to evaluate, to invoke callbacks, etc.)
+///  * The parent is an OrLink (ChoiceLink). In this case, the OrLink
+///    itself cannot be directly matched, as is; only its children can
+///    be. So in this case, we fetch the OrLink's parent, instead.
+///  * Some crazy combination of the above.
+///
+/// If it weren't for these complications, this method would be small
+/// and simple: it would send the parent to start_sol_up(), and start_sol_up()
+/// would respond as to whether it is staisfiable (solvable) or not.
+///
+/// Takes as an argument the atom that is curently matched up to
+/// curr_term_handle. Thus, curr_term_handle's parent will need to be
+/// matched to hsoln's parent.
+///
+/// Returns true if a grounding for the term's parent was found.
+///
+bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 {
 	depth = 1;
 
@@ -773,8 +811,28 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	if (curr_term_handle == curr_root)
 		return clause_accept(hsoln);
 
-	// Move up the term, and hunt for a match, again.
-	dbgprt("Term has ground, move up.\n");
+	// Move upwards in the term, and hunt for a match, again.
+	// There are two ways to move upwards: for a normal term, we just
+	// find its parent in the clause. For an evaluatable term, we find
+	// the parent evaluatable in the clause, which may be many steps
+	// higher.
+	dbgprt("Term has ground, move upwards.\n");
+
+	auto evit = _in_evaluatable.find(curr_term_handle);
+	if (evit != _in_evaluatable.end())
+	{
+		dbgprt("Term is evaluatable\n");
+		soln_handle_stack.push(curr_soln_handle);
+		curr_soln_handle = hsoln;
+
+prtmsg("duuude enter do_term_up, is in eval=\n", evit->second);
+		bool found = start_sol_up(evit->second);
+
+		POPSTK(soln_handle_stack, curr_soln_handle);
+
+		dbgprt("After evaluating the term, found = %d\n", found);
+		return found;
+	}
 
 	FindAtoms fa(curr_term_handle);
 	fa.search_set(curr_root);
@@ -802,7 +860,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
-			if (term_up(hi)) found = true;
+			if (start_sol_up(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
 
@@ -827,24 +885,19 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
 			       fa.least_holders.size());
 
-			do {
-				soln_handle_stack.push(curr_soln_handle);
-				curr_soln_handle = hsoln;
-				solution_push();
+			OC_ASSERT(0 == next_choice(hi, hsoln),
+			          "Something is wrong with the OrLink code");
 
-				dbgprt("Exploring one choice of OrLink, "
-				       "UUID=%lu, choice=%lu\n",
-				       hi.value(), next_choice(hi, hsoln));
+			soln_handle_stack.push(curr_soln_handle);
+			curr_soln_handle = hsoln;
+			solution_push();
 
-				_need_choice_push = true;
-				curr_term_handle = hi;
-				if (do_soln_up(hsoln)) found = true;
-				dbgprt("Upwards choice loop next choice=%lu\n",
-				        next_choice(hi, hsoln));
-				solution_pop();
-				POPSTK(soln_handle_stack, curr_soln_handle);
+			_need_choice_push = true;
+			curr_term_handle = hi;
+			if (do_term_up(hsoln)) found = true;
 
-			} while (0 < next_choice(hi, hsoln));
+			solution_pop();
+			POPSTK(soln_handle_stack, curr_soln_handle);
 		}
 	}
 	dbgprt("Done exploring %zu choices, found %d\n",
@@ -980,7 +1033,19 @@ bool PatternMatchEngine::do_next_clause(void)
 	return found;
 }
 
-bool PatternMatchEngine::term_up(const Handle& h)
+/// start_sol_up -- look for a grounding for the gieven term.
+///
+/// The argument passed to this function is a term that needs to be
+/// grounded. One of this term's children has already been grounded:
+/// the term's child is in curr_term_handle, and the corresponding
+/// grounding is in curr_soln_handle.  Thus, if the argument is going
+/// to be grounded, it will be grounded by some atom in the incoming set
+/// of cur_soln_handle. Viz, we are walking upwards in these trees,
+/// in lockstep.
+///
+/// Returns true if a grounding for the term was found.
+///
+bool PatternMatchEngine::start_sol_up(const Handle& h)
 {
 	// Move up the solution outgoing set, looking for a match.
 	Handle curr_term_save(curr_term_handle);

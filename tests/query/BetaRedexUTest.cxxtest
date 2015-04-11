@@ -30,6 +30,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#undef DEBUG
+
 using namespace opencog;
 
 class BetaRedexUTest: public CxxTest::TestSuite
