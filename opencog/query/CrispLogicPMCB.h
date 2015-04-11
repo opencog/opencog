@@ -146,13 +146,13 @@ class CrispLogicPMCB :
 			return tv->getMean() >= 0.5;
 		}
 
-		virtual void initiate_search(PatternMatchEngine* pme,
+		virtual bool initiate_search(PatternMatchEngine* pme,
 		                             const std::set<Handle> &vars,
 		                             const std::vector<Handle> &clauses)
 		{
 			// Extract the GPN's. We will need these during the search.
 			_in_seq_and = false;
-			DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
+			return DefaultPatternMatchCB::initiate_search(pme, vars, clauses);
 		}
 
 	private:

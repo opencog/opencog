@@ -142,7 +142,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
 		 */
-		virtual void initiate_search(PatternMatchEngine *,
+		virtual bool initiate_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
 		                             const HandleSeq& clauses);
 
@@ -167,30 +167,30 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 	protected:
 		Handle _root;
-		Handle _starter_pred;
+		Handle _starter_term;
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
 		virtual void find_rarest(const Handle&, Handle&, size_t&);
+
+		bool _search_fail;
 		virtual bool neighbor_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             const HandleSeq& clauses);
 
 		virtual bool disjunct_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             const HandleSeq& clauses);
+
 		virtual bool link_type_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             const HandleSeq& clauses);
+
 		virtual bool variable_search(PatternMatchEngine *,
 		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses,
-		                             bool& done);
+		                             const HandleSeq& clauses);
 
 		AtomSpace *_as;
 };

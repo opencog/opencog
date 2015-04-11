@@ -31,9 +31,9 @@
 using namespace opencog;
 
 bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &pred_soln)
+                           const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(pred_soln, var_soln);
+	// PatternMatchEngine::print_solution(term_soln, var_soln);
 	_result = TruthValue::TRUE_TV();
 
 	// Look for more groundings.

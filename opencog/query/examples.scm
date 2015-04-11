@@ -47,7 +47,7 @@
 )
 
 
-;; Example of an implication with just one predicate
+;; Example of an implication with just one clause
 (define v
 	(BindLink
 	(VariableNode "$predicateNode")

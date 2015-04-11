@@ -42,12 +42,12 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
  * @param clauses    The clauses for the query
  * @param negations  The negative clauses
  */
-void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
+bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
                                           const std::set<Handle>& vars,
                                           const std::vector<Handle>& clauses)
 {
     _root = clauses[0];
-    _starter_pred = _root;
+    _starter_term = _root;
     // XXX FIXME  I'm pretty sure that this search is not going to be
     // complete, probably missing lots of similar patterns, simply
     // because it starts out with just the type of the very first
@@ -68,9 +68,10 @@ void FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
     _as->getHandlesByType(handle_set, ptype);
     for (const Handle& h : handle_set)
     {
-        bool found = pme->explore_neighborhood(_root, _starter_pred, h);
-        if (found) return;
+        bool found = pme->explore_neighborhood(_root, _starter_term, h);
+        if (found) return found;
     }
+    return false;
 }
 
 /**
@@ -128,11 +129,11 @@ bool FuzzyPatternMatchCB::node_match(const Handle& pNode, const Handle& gNode)
  * Always return false to search for more solutions.
  *
  * @param var_soln   The variable & links mapping
- * @param pred_soln  The clause mapping
+ * @param term_soln  The clause mapping
  * @return           Always return false to search for more solutions
  */
 bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
-                                    const std::map<Handle, Handle>& pred_soln)
+                                    const std::map<Handle, Handle>& term_soln)
 {
     return false;
 }

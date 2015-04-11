@@ -53,7 +53,7 @@ that can be used to modify the search:
    appropriate, as well.
 
 An additional very important feature is support for 'virtual'
-hypergraphs: those that are not pre-existing in the fixed universe 
+hypergraphs: those that are not pre-existing in the fixed universe
 (i.e. in the atomspace), but are only defined algorithmically, by a
 predicate function that returns a yes/no answer about their existence.
 An example would be a greater-than hypergraph that 'virtually' exists
@@ -260,8 +260,8 @@ variables are grounded.
 
 The goal of query processing is to scan the collection of all knowledge,
 (the "universe hypergraph"), looking for a subgraph that matches the
-predicate. The nodes that fit where the unknowns would go are then the
-answer to the query.
+template. The nodes that fit where the unknowns would go are then the
+answer (grounding) to the query.
 
 The problem of finding certain subgraphs within graphs is known as the
 "subgraph isomorphism problem" or the "subgraph matching problem", and
@@ -296,7 +296,8 @@ Currently Implemented Algorithm
 
    [OpenCog-specific remarks are in square brackets.  In OpenCog, the
    outgoing incidence graph edges are given by the "outgoing set" of
-   the atom.]
+   the atom. Given an OpenCog Link, its outgoing set forms a tree.
+   A collection of such trees is a hypergraph.]
 
 1) Input consists a sequence of the roots of incidence trees, that is,
    of a list of subgraphs of the incidence graph that are trees.  Thus,
@@ -304,10 +305,13 @@ Currently Implemented Algorithm
    as hypergraph node cannot, by definition, have a non-trivial
    incidence tree under it.  Each tree is, by definition, directed.
    These trees are also refered to as "clauses", below [and in the code].
-   This is because, in some cases, the tree can play the role of a
-   logical clause. In some cases, the tree is also refered to as a
-   a "predicate", although sometimes the whole collection of clauses
-   is also called the predicate. Sorry for the confusion.
+   This is because such trees in OpenCog often play the role of logical
+   clauses (i.e. clauses and sentences, as defined in first-order
+   logic).  Subtrees of a clause are usually refered to as "terms"
+   (as in "term algebra"). That is, the word "clause" is used when
+   talking about a rooted tree; the word "term" is used when talking
+   about it's subtrees. This helps avoid some of the confusion about
+   the various different "trees" in the code.
 
    Thus, for example: the clause _subj(row, Steve) has _subj at the
    root of the tree, with "row" and "Steve" as leaves.
@@ -332,7 +336,7 @@ Currently Implemented Algorithm
    Thus, for example _obj(row,_$qVar) has _$qVar as the variable
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
-   The designated variables need not be leaf vertices; that is, 
+   The designated variables need not be leaf vertices; that is,
    variables may match links. There must be at least one variable,
    as otherwise the graph is constant, and there is nothing to be
    done.  The variables are called "bound" simply because they have
@@ -374,7 +378,7 @@ Currently Implemented Algorithm
    candidate grounding.
 
    First, the tree matching algo checks to see if the given
-   node in the predicate is a variable; if so, then the match
+   node in the term is a variable; if so, then the match
    is considered to be successful. The node-match callback is
    invoked to decide whether this grounding is to be accepted;
    if it is, then the corresponding node in the universe is
@@ -413,25 +417,25 @@ Currently Implemented Algorithm
    possible matches.  Push and pop callbacks are provided, in case the
    callback also needs to maintain stack state.
 
-   If the upwards recursion reaches the root of the predicate, the
-   predicate is now considered to be solved. Go to step 6), to find
-   other unsolved predicates.
+   If the upwards recursion reaches the root of the clause, the
+   clause is now considered to be solved. Go to step 6), to find
+   other unsolved clauses.
 
    [This is implemented by two routines: PatternMatchEngine::soln_up()
-   and PatternMatchEngine::pred_up(). These two routines alternate
+   and PatternMatchEngine::term_up(). These two routines alternate
    calls to each other, by traversing the *incoming* set of the
    current node in the clause, and the candidate solution node.
    The incoming set takes one "upwards" in the tree.]
 
    [The stack of current state is maintained in PatternMatchEngine::
-   pred_handle_stack, etc. These are pushed as an upwards(incoming)
+   term_handle_stack, etc. These are pushed as an upwards(incoming)
    edge is explored, and popped when the edge is rejected.]
 
    [Partial solutions are recorded in PatternMatchEngine::var_grounding
    and PatternMatchEngine::clause_grounding.  These partial solutions
    must also be kept on stack, as a failed match at a later stage means
    that backtracking must be done. Since the partial solutions are used
-   to find unsolved predicates, care must be taken that the partial
+   to find unsolved clauses, care must be taken that the partial
    solution is correct after backtracking: i.e. they must be popped
    as failed matches are encountered.]
 
@@ -653,7 +657,7 @@ A "hypergraph query language" is a language that allows queries to be
 expressed as strings. Given *any* way of writing down a hypergraph as
 a string, a hypergraph query language can be trivially formed by adding
 variables to the expression, in exactly the same way that one adds
-variables to logic predicates, lambda calculus, etc.  In order to feel
+variables to predicate logic to get first-order logic.  In order to feel
 comfortable to programmers, the query language should maintain the
 outward form of SQL, SPARQL, RQL, etc.
 

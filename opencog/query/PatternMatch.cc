@@ -93,33 +93,33 @@ class PMCGroundings : public PatternMatchCallback
 		void set_evaluatable_holders(const std::set<Handle>& terms) {
 			_cb->set_evaluatable_holders(terms);
 		}
-		void initiate_search(PatternMatchEngine* pme,
+		bool initiate_search(PatternMatchEngine* pme,
 	                        const std::set<Handle> &vars,
 	                        const std::vector<Handle> &clauses)
 		{
-			_cb->initiate_search(pme, vars, clauses);
+			return _cb->initiate_search(pme, vars, clauses);
 		}
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
 		bool grounding(const std::map<Handle, Handle> &var_soln,
-		               const std::map<Handle, Handle> &pred_soln)
+		               const std::map<Handle, Handle> &term_soln)
 		{
-			_pred_groundings.push_back(pred_soln);
+			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
-		std::vector<std::map<Handle, Handle>> _pred_groundings;
+		std::vector<std::map<Handle, Handle>> _term_groundings;
 		std::vector<std::map<Handle, Handle>> _var_groundings;
 };
 
 /**
  * Recursive evaluator/grounder/unifier of virtual link types.
  * The virtual links are in 'virtuals', a partial set of groundings
- * are in 'var_gnds' and 'pred_gnds', and a collection of possible
+ * are in 'var_gnds' and 'term_gnds', and a collection of possible
  * groundings for disconnected graph components are in 'comp_var_gnds'
- * and 'comp_pred_gnds'.
+ * and 'comp_term_gnds'.
  *
  * Notes below explain the recursive step: how the various disconnected
  * components are brought together into a candidate grounding. That
@@ -127,29 +127,29 @@ class PMCGroundings : public PatternMatchCallback
  * accept the grounding, then the callback is called to make the final
  * determination.
  *
- * The recursion step terminates when comp_var_gnds, comp_pred_gnds
+ * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
             const std::vector<Handle>& virtuals,
             const std::vector<Handle>& negations, // currently ignored
             const std::map<Handle, Handle>& var_gnds,
-            const std::map<Handle, Handle>& pred_gnds,
+            const std::map<Handle, Handle>& term_gnds,
             // copies, NOT references!
             std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds)
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
-	// many combinatoric possibilities in the var_gnds and pred_gnds
+	// many combinatoric possibilities in the var_gnds and term_gnds
 	// maps. Submit this grounding map to the virtual links, and see
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
 #ifdef DEBUG
 		dbgprt("Explore one possible combinatoric grounding "
-		       "(var_gnds.size() = %zu, pred_gnds.size() = %zu):\n",
-			   var_gnds.size(), pred_gnds.size());
-		PatternMatchEngine::print_solution(var_gnds, pred_gnds);
+		       "(var_gnds.size() = %zu, term_gnds.size() = %zu):\n",
+			   var_gnds.size(), term_gnds.size());
+		PatternMatchEngine::print_solution(var_gnds, term_gnds);
 #endif
 
 		// We put all of the temporary atoms into a temporary atomspace.
@@ -205,7 +205,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 			// FYI ... if the virtual_link_match() accepts the match, we
 			// still don't instantiate the grounded form in the atomspace,
-			// nor do we add the grounded form to pred_gnds.  The former
+			// nor do we add the grounded form to term_gnds.  The former
 			// can be done by the callback, if desired.  We can't do the
 			// latter without access to the former ... all of which might
 			// need to be unwound, if the final match is rejected. So...
@@ -214,7 +214,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
-		return cb->grounding(var_gnds, pred_gnds);
+		return cb->grounding(var_gnds, term_gnds);
 	}
 	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
 
@@ -229,8 +229,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 	// in the above notation.) So the loop below tries every possibility.
 	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
-	std::vector<std::map<Handle, Handle>> pg = comp_pred_gnds.back();
-	comp_pred_gnds.pop_back();
+	std::vector<std::map<Handle, Handle>> pg = comp_term_gnds.back();
+	comp_term_gnds.pop_back();
 
 	size_t ngnds = vg.size();
 	for (size_t i=0; i<ngnds; i++)
@@ -239,7 +239,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		// and recurse, with one less component. We need to make a copy,
 		// of course.
 		std::map<Handle, Handle> rvg(var_gnds);
-		std::map<Handle, Handle> rpg(pred_gnds);
+		std::map<Handle, Handle> rpg(term_gnds);
 
 		const std::map<Handle, Handle>& cand_vg(vg[i]);
 		const std::map<Handle, Handle>& cand_pg(pg[i]);
@@ -247,7 +247,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
 		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
-		                                comp_var_gnds, comp_pred_gnds);
+		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediattely if match is accepted.
 		if (accept) return true;
@@ -278,7 +278,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  *        VariableNode "variable 1"
  *        VariableNode "another variable"
  *
- * The predicate hypergraph is assumed to be a list of "clauses", where
+ * The pattern hypergraph is assumed to be a list of "clauses", where
  * each "clause" should be thought of as the tree defined by the outgoing
  * sets in it.  The below assumes that the list of clauses is specified
  * by means of an AndLink, so, for example:
@@ -344,18 +344,18 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  */
-void BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
+bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 {
    if (check_conn and 0 == _virtual.size() and 0 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"BindLink consists of multiple disconnected components!");
 			// ConcreteLink::check_connectivity(_comps);
 
-	SatisfactionLink::satisfy(pmc);
+	return SatisfactionLink::satisfy(pmc);
 }
 
 // All clauses of the Concrete link are connected, so this is easy.
-void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
+bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
 	pme->_bound_vars = _varset;
@@ -372,22 +372,23 @@ void ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pmcb->set_type_restrictions(_typemap);
 	pmcb->set_evaluatable_terms(_evaluatable_terms);
 	pmcb->set_evaluatable_holders(_evaluatable_holders);
-	pmcb->initiate_search(pme, _varset, _mandatory);
+	bool found = pmcb->initiate_search(pme, _varset, _mandatory);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");
 #endif
+	return found;
 }
 
-void ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
+bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
    PatternMatchEngine pme;
-	satisfy(pmcb, &pme);
+	return satisfy(pmcb, &pme);
 }
 
 /* ================================================================= */
 
-void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
+bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 {
 	// We allow a combinatoric explosion of multiple components,
 	// but zero virtuals, because PLN has a use case for this.
@@ -395,8 +396,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	// want to explore the combinatoric explosion.
 	if (0 == _num_virts and 1 == _num_comps)
 	{
-		ConcreteLink::satisfy(pmcb);
-		return;
+		return ConcreteLink::satisfy(pmcb);
 	}
 
 	// If we are here, then we've got a knot in the center of it all.
@@ -411,7 +411,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-	std::vector<std::vector<std::map<Handle, Handle>>> comp_pred_gnds;
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
@@ -423,7 +423,7 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 		clp->satisfy(&gcb, &pme);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
-		comp_pred_gnds.push_back(gcb._pred_groundings);
+		comp_term_gnds.push_back(gcb._term_groundings);
 	}
 
 	// And now, try grounding each of the virtual clauses.
@@ -433,9 +433,9 @@ void SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> optionals; // currently ignored
-	PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
+	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                  empty_vg, empty_pg,
-	                  comp_var_gnds, comp_pred_gnds);
+	                  comp_var_gnds, comp_term_gnds);
 }
 
 /* ================================================================= */

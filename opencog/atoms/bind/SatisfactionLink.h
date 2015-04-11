@@ -88,7 +88,7 @@ public:
 	// XXX temp hack till thigs get sorted out; remove this method later.
 	const HandleSeq& get_clauses(void) { return _clauses; }
 
-	void satisfy(PatternMatchCallback *) const;
+	bool satisfy(PatternMatchCallback *) const;
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

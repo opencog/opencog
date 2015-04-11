@@ -158,7 +158,7 @@ class PatternMatchCallback
 		 * for more, a return value of false is needed.)
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln) = 0;
+		                       const std::map<Handle, Handle> &term_soln) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -223,7 +223,7 @@ class PatternMatchCallback
 		}
 
 		/**
-		 * Called after a top-level predicate (tree) has been fully
+		 * Called after a top-level clause (tree) has been fully
 		 * grounded. This gives the callee the opportunity to save
 		 * state onto a stack, if needed.
 		 */
@@ -231,7 +231,7 @@ class PatternMatchCallback
 
 		/**
 		 * Called prior to starting a back-track, retreating from the
-		 * most recently grounded top-level predicate (tree). This
+		 * most recently grounded top-level clause (tree). This
 		 * gives the callee the opportunity to maintain state with a
 		 * stack, if needed.
 		 */
@@ -276,8 +276,13 @@ class PatternMatchCallback
 		 * possibly limiting the breadth of the search.  It may also cull
 		 * the variables, clauses, or negated clauses to remove those that
 		 * will not alter the final semantics of the search.
+		 *
+		 * The return value is used to indicate if the search pattern was
+		 * satisfied (grounded) or not.  This is just like the return
+		 * values on all the other callbacks; it summarizes (passes
+		 * through) the return values of all the others.
 		 */
-		virtual void initiate_search(PatternMatchEngine *,
+		virtual bool initiate_search(PatternMatchEngine *,
 		                             const std::set<Handle> &vars,
 		                             const std::vector<Handle> &clauses) = 0;
 };

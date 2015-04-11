@@ -118,8 +118,8 @@ public:
 	             const HandleSeq& component,
 	             const std::set<Handle>& optionals);
 
-	void satisfy(PatternMatchCallback*) const;
-	void satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
+	bool satisfy(PatternMatchCallback*) const;
+	bool satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
 	void debug_print(const char* tag = "primary entry") const;
 };

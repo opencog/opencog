@@ -43,12 +43,12 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
 #ifdef HAVE_GUILE
     FuzzyPatternMatchCB fpmcb(as);
 
-    HandleSeq preds;
-    preds.push_back(hg);
+    HandleSeq terms;
+    terms.push_back(hg);
 
     std::set<Handle> no_vars;
 
-    SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, preds));
+    SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, terms));
     slp->satisfy(&fpmcb);
 
     // The result_list contains a list of the grounded expressions.

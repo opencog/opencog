@@ -50,7 +50,7 @@ public:
     virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h);
     virtual bool grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln);
-    virtual void initiate_search(PatternMatchEngine* pPME,
+    virtual bool initiate_search(PatternMatchEngine* pPME,
                                 const std::set<Handle>& vars,
                                 const HandleSeq& clauses);
 

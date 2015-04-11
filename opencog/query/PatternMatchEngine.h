@@ -105,7 +105,7 @@ class PatternMatchEngine
 
 		Handle curr_root;         // stacked onto root_handle_stack
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
-		Handle curr_pred_handle;  // stacked onto pred_handle_stack
+		Handle curr_term_handle;  // stacked onto term_handle_stack
 
 		// OrLink (choice) state management
 		ChoiceState _choice_state;
@@ -121,13 +121,13 @@ class PatternMatchEngine
 		// in order to get back to the original clause, and resume
 		// traversal of that clause, where it was last left off.
 		std::stack<Handle> root_handle_stack;
-		std::stack<Handle> pred_handle_stack;
+		std::stack<Handle> term_handle_stack;
 		std::stack<Handle> soln_handle_stack;
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
 		std::stack<SolnMap> var_solutn_stack;
-		std::stack<SolnMap> pred_solutn_stack;
+		std::stack<SolnMap> term_solutn_stack;
 
 		std::stack<IssuedSet> issued_stack;
 		std::stack<ChoiceState> choice_stack;
@@ -155,7 +155,7 @@ class PatternMatchEngine
 		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
-		bool pred_up(const Handle&);
+		bool term_up(const Handle&);
 		bool xsoln_up(const Handle&);
 		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
 		bool clause_accept(const Handle&);
@@ -201,7 +201,7 @@ class PatternMatchEngine
 		static void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
-		static void print_predicate(const std::set<Handle> &vars,
+		static void print_term(const std::set<Handle> &vars,
 		                            const std::vector<Handle> &clauses);
 };
 

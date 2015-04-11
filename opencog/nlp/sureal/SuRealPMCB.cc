@@ -316,39 +316,19 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
+bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
                                 const std::set<Handle>& vars,
                                 const HandleSeq& clauses)
 {
-    size_t bestClauseIndex;
-    Handle bestClause, bestSubClause, bestSubNode;
-
-    // find the thinnest clause with constants
-    bestSubNode = find_thinnest(clauses, bestSubClause, bestClauseIndex);
-
-    if (bestSubNode != Handle::UNDEFINED && !vars.empty())
+    _search_fail = false;
+    if (not vars.empty())
     {
-        bestClause = clauses[bestClauseIndex];
-
-        logger().debug("[SuReal] Search start node: %s", bestSubNode->toShortString().c_str());
-        logger().debug("[SuReal] Start pred is: %s", bestSubClause->toShortString().c_str());
-
-        IncomingSet iset = get_incoming_set(bestSubNode);
-
-        for (auto& l : iset)
-        {
-            Handle h(l);
-            logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
-
-            if (pPME->explore_neighborhood(bestClause, bestSubClause, h))
-                break;
-        }
-
-        return;
+        bool found = neighbor_search(pPME, vars, clauses);
+        if (not _search_fail) return found;
     }
 
-    // reaching here means no contants, so do some search space reduction here
-    bestClause = clauses[0];
+    // Reaching here means no contants, so do some search space reduction here
+    Handle bestClause = clauses[0];
 
     logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
 
@@ -377,8 +357,9 @@ void SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
         logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c))
-            break;
+            return true;
     }
+    return false;
 }
 
 /**

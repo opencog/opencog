@@ -41,9 +41,9 @@ using namespace opencog;
  * possible groundings.)
  */
 bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &pred_soln)
+                           const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
+	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h)
 	{
@@ -66,9 +66,9 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
  * to tweak (affirm) the truth value of existing clauses!
  */
 bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                const std::map<Handle, Handle> &pred_soln)
+                                const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
+	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
 
 	if (h != Handle::UNDEFINED)
@@ -87,7 +87,7 @@ bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
  * it terminates after the first solution is found.
  */
 bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                 const std::map<Handle, Handle> &pred_soln)
+                                 const std::map<Handle, Handle> &term_soln)
 {
 	Handle h = inst.instantiate(implicand, var_soln);
 
