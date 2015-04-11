@@ -456,11 +456,12 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	if (found) return true;
 	if (not _search_fail) return false;
 
-	// The bizarro case: if we found nothing, then there are no links!
-	// Ergo, every clause must be a lone variable, all by itself. This
-	// is a bit pathological, but we handle it anyway, with the
-	// variable_search() method.  Note, however, that variable_search()
-	// does not look at the clauses, it looks at the varset instead.
+	// The PLN Reasoning case: if we found nothing, then there are no
+	// links!  Ergo, every clause must be a lone variable, all by
+	// itself. This is how some PLN rules start: the specify a single
+	// variable, all by itself, and set some type restrictions on it,
+	// and that's all. We deal with this in the variable_search()
+	// method.
 	_search_fail = false;
 	found = variable_search(pme, vars, clauses);
 	return found;
@@ -521,10 +522,12 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 		}
 	}
 
-	// The bizarro case: if we found nothing, then there are no links!
-	// Ergo, every clause must be a lone variable, all by itself. This
-	// is a bit pathological, but we handle it anyway, with the
-	// variable_search() method, below.
+	// The PLN Reasoning case: if we found nothing, then there are no
+	// links!  Ergo, every clause must be a lone variable, all by
+	// itself. This is how some PLN rules start: the specify a single
+	// variable, all by itself, and set some type restrictions on it,
+	// and that's all. We deal with this in the variable_search()
+	// method.
 	if (Handle::UNDEFINED == _root)
 	{
 		_search_fail = true;
