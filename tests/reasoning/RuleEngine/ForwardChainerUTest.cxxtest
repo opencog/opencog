@@ -27,7 +27,9 @@ public:
 	{
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
-		as_->clear();
+
+		// Disable the AF mechanism during testing!
+		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
 		             "opencog/atomspace/core_types.scm, "
 		             "opencog/scm/utilities.scm, "

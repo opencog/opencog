@@ -70,17 +70,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 		// Returning the empty set abandons the search in this direction.
 		// Search will then backtrack and try a different direction.
 		// ... and that is exactly what should be happening.
-		// But it might also mean that there is an AF bug somewhere ...
-		// Returning the empty set is right thing, but testing is needed.
-		//
-		// XXX TODO Currently, ForwardChainerUTest fails, when we
-		// return the empty set ... this is surely because the
-		// ForwardChainerUTest has not given sufficient stimulous to
-		// to the right atoms, for this to actually work right.
-		// So that test needs to be fixed FIXME ... or AF itself is
-		// broken.
-		// return filtered_set;
-		filtered_set = incoming_set;
+		return filtered_set;
 	}
 
 	// The exploration of the set of patterns proceeds by going through
