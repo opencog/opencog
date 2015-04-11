@@ -32,6 +32,13 @@ using namespace opencog;
    #define dbgprt(f, varargs...)
 #endif
 
+AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
+	DefaultPatternMatchCB(as)
+{
+	// Temporarily disable the AF mechanism during PLN development
+	_as->setAttentionalFocusBoundary(AttentionValue::MINSTI);
+}
+
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
 	return node1 == node2 and

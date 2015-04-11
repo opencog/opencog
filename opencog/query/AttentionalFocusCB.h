@@ -35,8 +35,7 @@ private:
 		return lptr1->getSTI() > lptr2->getSTI();
 	}
 public:
-	AttentionalFocusCB(AtomSpace * as) :
-		DefaultPatternMatchCB(as) {}
+	AttentionalFocusCB(AtomSpace*);
 
 	// Only match nodes if they are in the attentional focus
 	bool node_match(const Handle&, const Handle&);
