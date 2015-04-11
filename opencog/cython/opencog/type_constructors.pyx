@@ -130,3 +130,5 @@ def VirtualLink(*args):
     return atomspace.add_link(types.VirtualLink, args)
 def GreaterThanLink(*args):
     return atomspace.add_link(types.GreaterThanLink, args)
+def EqualLink(*args):
+    return atomspace.add_link(types.EqualLink, args)

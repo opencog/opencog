@@ -159,5 +159,10 @@ TIMES_LINK <- UNORDERED_LINK
 // with a GroundedPredicateNode "c++:greater_than".  Its defined this
 // way to gain some performance. The base type must be VirtualLink, to
 // make it easier to find these things.
+//
+// VirtualLinks only need to be used for those GPN's that take 2 or
+// more arguments. If they take only one, then there is no reason
+// for them to be virtual (as far as the pattern matcher is concerned)
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
+EQUAL_LINK <- VIRTUAL_LINK

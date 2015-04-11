@@ -56,8 +56,11 @@ EvaluationLink::EvaluationLink(Handle schema, Handle args,
 }
 
 // Perform a GreaterThan check
-TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
+static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 {
+	if (2 != ll->getArity())
+		throw RuntimeException(TRACE_INFO,
+		     "GreaterThankLink expects two arguments");
 	Handle h1(ll->getOutgoingAtom(0));
 	Handle h2(ll->getOutgoingAtom(1));
 	if (NUMBER_NODE != h1->getType())
@@ -74,6 +77,18 @@ TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 		     "Expecting c++:greater arguments to be NumberNode's!");
 
 	if (n1->getValue() > n2->getValue())
+		return TruthValue::TRUE_TV();
+	else
+		return TruthValue::FALSE_TV();
+}
+
+static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
+{
+	const HandleSeq& oset = ll->getOutgoingSet();
+	if (2 != oset.size())
+		throw RuntimeException(TRACE_INFO,
+		     "EqualLink expects two arguments");
+	if (oset[0] == oset[1])
 		return TruthValue::TRUE_TV();
 	else
 		return TruthValue::FALSE_TV();
@@ -101,6 +116,10 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
 	{
 		LinkPtr l(LinkCast(execlnk));
 		return do_evaluate(as, l->getOutgoingSet());
+	}
+	else if (EQUAL_LINK == t)
+	{
+		return equal(as, LinkCast(execlnk));
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
