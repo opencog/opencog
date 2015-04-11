@@ -42,7 +42,7 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
@@ -295,9 +295,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
-    } else if (LAMBDA_LINK == atom_type) {
-        if (NULL == LambdaLinkCast(atom))
-            atom = createLambdaLink(*LinkCast(atom));
+    } else if (SCOPE_LINK == atom_type) {
+        if (NULL == ScopeLinkCast(atom))
+            atom = createScopeLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             atom = createSatisfactionLink(*LinkCast(atom));
@@ -336,8 +336,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createBetaRedex(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
-            } else if (LAMBDA_LINK == atom_type) {
-                atom = createLambdaLink(*lll);
+            } else if (SCOPE_LINK == atom_type) {
+                atom = createScopeLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
             } else if (VARIABLE_LIST == atom_type) {

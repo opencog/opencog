@@ -79,17 +79,27 @@ VARIABLE_LIST <- LIST_LINK
 QUOTE_LINK <- ORDERED_LINK
 
 // Pattern and function declaration
-LAMBDA_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK     // Gives lambda a name
+// A ScopeLink is (more or less???) the same thing as a LambdaLink
+// (We have not yet settled on the appropriate definition of a
+// LambdaLink) The ScopeLink is used to identify an open term, i.e. a
+// link containing VariableNodes within it, and then listing those
+// variables, and forcing type restrictions on them. Thus, in a certain
+// sense, the ScopeLink explicitly binds at least some, and maybe all
+// of the variables that occur in it's body.  It differs from the
+// FreeLink in that the FreeLink neccesarily list ALL the (free)
+// variables within it; the ScopeLink need not bind all of them.
+// The FreeLink also has no type restrictions on the variables.
+SCOPE_LINK <- VARIABLE_LIST
+DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
 BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Scoping and Logical quantifiers
-CONCRETE_LINK <- LAMBDA_LINK       // a set of clauses with no virtuals
+CONCRETE_LINK <- SCOPE_LINK       // a set of clauses with no virtuals
 SATISFACTION_LINK <- CONCRETE_LINK   // Finds all groundings
 BIND_LINK <- SATISFACTION_LINK     // Finds all groundings and executes
 
-FORALL_LINK <- LAMBDA_LINK "ForAllLink"
-EXISTS_LINK <- LAMBDA_LINK
+FORALL_LINK <- SCOPE_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
@@ -107,9 +117,6 @@ SCHOLEM_LINK <- ORDERED_LINK
 IMPLICATION_LINK <- AVERAGE_LINK
 EQUIVALENCE_LINK <- AVERAGE_LINK
 
-// To be used with PredicateNode
-EVALUATION_LINK <- ORDERED_LINK
-
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
@@ -117,6 +124,32 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 ATTRACTION_LINK <- ORDERED_LINK
+
+// A FreeLink is any kind of link that might be evaluatable or
+// executable in some way, and can have free variables in it. The
+// FreeLink exists for one purpose: to make visible to the pattern
+// matcher all of the free variables that lie within the link. That is,
+// the FreeLink is at the top of a tree, and somewere in that tree,
+// there might be VariableNodes.  The C++ class for this link records
+// the names of those variables, in order of traversal.  The goal here
+// is to simply know these variables, so that, at the time of evaluation
+// or execution, they are easily located.
+//
+// The variables are necessarily free: they to NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to ScopeLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+FREE_LINK <- ORDERED_LINK
+
+// To be used with PredicateNode
+EVALUATION_LINK <- FREE_LINK
+
+EXECUTION_OUTPUT_LINK <- FREE_LINK
+
+EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
@@ -132,9 +165,6 @@ DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
-
-EXECUTION_LINK <- ORDERED_LINK
-EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing

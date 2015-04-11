@@ -28,7 +28,9 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
+
+#define DEBUG 1
 
 namespace opencog {
 class PatternMatchEngine;
@@ -147,6 +149,17 @@ class PatternMatchCallback
 		 */
 		virtual bool virtual_link_match(const Handle& virt,
 		                                const Handle& args) = 0;
+
+		/**
+		 * Like the above, except that the args to the virtual link
+		 * have not been grounded.  Instead, it gets a list of the
+		 * variables in the term, and the candidate values, and it is
+		 * up to the callback to figure out what to do about it
+		 * (e.g to put them in an atomspace, or not.)
+		 */
+		virtual bool evaluate_link(const Handle& virt,
+		                           const HandleSeq& vars,
+		                           const HandleSeq& gnds) = 0;
 
 		/**
 		 * Called when a complete grounding to all clauses is found.

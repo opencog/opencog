@@ -35,7 +35,7 @@ using namespace opencog;
 
 void ConcreteLink::init(void)
 {
-	LambdaLink::init(_outgoing);
+	ScopeLink::init(_outgoing);
 	unbundle_clauses(_body);
 	validate_clauses(_varset, _clauses);
 	extract_optionals(_varset, _clauses);
@@ -71,7 +71,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
                            const VariableTypeMap& typemap,
                            const HandleSeq& compo,
                            const std::set<Handle>& opts)
-	: LambdaLink(CONCRETE_LINK, HandleSeq())
+	: ScopeLink(CONCRETE_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -117,21 +117,21 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(CONCRETE_LINK, hseq, tv, av)
+	: ScopeLink(CONCRETE_LINK, hseq, tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
+	: ScopeLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(t, hseq, tv, av)
+	: ScopeLink(t, hseq, tv, av)
 {
 	// Derived link-types have other init sequences
 	if (CONCRETE_LINK != t) return;
@@ -139,7 +139,7 @@ ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
 }
 
 ConcreteLink::ConcreteLink(Link &l)
-	: LambdaLink(l)
+	: ScopeLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

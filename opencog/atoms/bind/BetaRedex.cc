@@ -102,7 +102,7 @@ const std::set<Handle>& BetaRedex::get_local_argset(void) const
 
 /// Get the definition (the body) of the function (without renaming the
 /// variables).
-LambdaLinkPtr BetaRedex::get_definition(void) const
+ScopeLinkPtr BetaRedex::get_definition(void) const
 {
 	// Is the defined link actually defined?
 	// We cannot do this check when the ctor runs, since it might

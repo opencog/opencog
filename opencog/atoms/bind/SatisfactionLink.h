@@ -33,7 +33,7 @@ namespace opencog
 
 /// The SatisfactionLink is used to specify a list of variables, and a
 /// pattern (containing those variables) that is to be grounded
-/// (satisfied).  Thus, it resembles a LambdaLink, with the difference
+/// (satisfied).  Thus, it resembles a ScopeLink, with the difference
 /// being that it has a very specific semantics: the pattern is to be
 /// grounded!
 ///

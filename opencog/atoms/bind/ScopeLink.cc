@@ -1,5 +1,5 @@
 /*
- * LambdaLink.cc
+ * ScopeLink.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -26,11 +26,11 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
-#include "LambdaLink.h"
+#include "ScopeLink.h"
 
 using namespace opencog;
 
-void LambdaLink::init(const HandleSeq& oset)
+void ScopeLink::init(const HandleSeq& oset)
 {
 	// Must have variable decls and body
 	if (2 != oset.size())
@@ -41,43 +41,43 @@ void LambdaLink::init(const HandleSeq& oset)
 	_body = oset[1];     // Body
 }
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
+ScopeLink::ScopeLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: VariableList(LAMBDA_LINK, oset, tv, av)
+	: VariableList(SCOPE_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
+ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: VariableList(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+	: VariableList(SCOPE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init(getOutgoingSet());
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
+ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: VariableList(t, oset, tv, av)
 {
 	// Derived classes have a different initialization sequence
-	if (LAMBDA_LINK != t) return;
+	if (SCOPE_LINK != t) return;
 	init(oset);
 }
 
-LambdaLink::LambdaLink(Link &l)
+ScopeLink::ScopeLink(Link &l)
 	: VariableList(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
+	if (not classserver().isA(tscope, SCOPE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
+			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
 	// Dervided types have a different initialization sequence
-	if (LAMBDA_LINK != tscope) return;
+	if (SCOPE_LINK != tscope) return;
 	init(l.getOutgoingSet());
 }
 

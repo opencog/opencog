@@ -73,6 +73,11 @@ class PMCGroundings : public PatternMatchCallback
 		bool virtual_link_match(const Handle& link1, const Handle& args) {
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
+		bool evaluate_link(const Handle& link_h,
+		                   const HandleSeq& vars,
+		                   const HandleSeq& gnds) {
+			return _cb->evaluate_link(link_h, vars, gnds);
+		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
 			return _cb->clause_match(pattrn_link_h, grnd_link_h);
 		}
@@ -358,6 +363,9 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
+	// XXX FIXME someday -- instead of copying these, they should
+	// just be pointers. Or references. Or maybe pme should point
+	// ConcreteLink, and ConcreteLink would befriend the pme ...
 	pme->_bound_vars = _varset;
 	pme->_cnf_clauses = _cnf_clauses;
 	pme->_mandatory = _mandatory;

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_CONCRETE_LINK_H
 #define _OPENCOG_CONCRETE_LINK_H
 
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ScopeLink.h>
 
 namespace opencog
 {
@@ -36,7 +36,7 @@ class PatternMatchCallback;
 
 /// The ConcreteLink is used to specify a list of variables, and a
 /// pattern (containing those variables) that is to be grounded
-/// (satisfied).  Thus, it resembles a LambdaLink, with the difference
+/// (satisfied).  Thus, it resembles a ScopeLink, with the difference
 /// being that it has a very specific semantics: the pattern is to be
 /// grounded!
 ///
@@ -62,7 +62,7 @@ class PatternMatchCallback;
 ///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.
-class ConcreteLink : public LambdaLink
+class ConcreteLink : public ScopeLink
 {
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
@@ -95,6 +95,10 @@ protected:
 	// (that is evaluatable or executable...)
 	std::map<Handle,Handle> _in_evaluatable; // under something evaluatable.
 	std::map<Handle,Handle> _in_executable;  // under something executable.
+
+	// Any given evaluatable or executable term will have variables
+	// sprinkled throughout it. What variables... xxx finish me
+	std::map<Handle,HandleSeq> _eutable_args; // variables e*able term
 
 	// Any given atom may appear in one or more clauses. Given an atom,
 	// the connectivy map tells you what clauses it appears in. It

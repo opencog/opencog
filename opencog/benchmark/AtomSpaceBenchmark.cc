@@ -498,11 +498,12 @@ Type AtomSpaceBenchmark::randomType(Type t)
     // BIND_LINK and other validated types since the validation will fail.
     do {
         candidateType = ATOM + rng->randint(numberOfTypes-1);
-    } while (!classserver().isA(candidateType, t) ||
-        candidateType == TYPE_NODE ||
-        candidateType == BIND_LINK || 
-        candidateType == SATISFACTION_LINK ||
-        candidateType == LAMBDA_LINK );
+    } while (!classserver().isA(candidateType, t) or
+        candidateType == TYPE_NODE or
+        candidateType == BIND_LINK or 
+        candidateType == CONCRETE_LINK or 
+        candidateType == SATISFACTION_LINK or
+        candidateType == SCOPE_LINK );
 
     return candidateType;
 }

@@ -697,4 +697,13 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
 	return relation_holds;
 }
 
+/* ======================================================== */
+
+bool DefaultPatternMatchCB::evaulate_link(const Handle& virt,
+                                          const HandleSeq& vars,
+                                          const HandleSeq& gnds)
+{
+	return true;
+}
+
 /* ===================== END OF FILE ===================== */
