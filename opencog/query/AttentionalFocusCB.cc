@@ -83,34 +83,11 @@ bool AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
                                          const std::set<Handle> &vars,
                                          const std::vector<Handle> &clauses)
 {
-	size_t bestclause;
-	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
+	_search_fail = false;
 
-	if ((Handle::UNDEFINED != best_start) and
-	    // (Handle::UNDEFINED != _starter_pred) and
-	    (!vars.empty()))
-	{
-		_root = clauses[bestclause];
-		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-
-		// This should be calling the over-loaded virtual method
-		// get_incoming_set(), so that, e.g. it gets sorted by attentional
-		// focus in the AttentionalFocusCB class...
-		IncomingSet iset = get_incoming_set(best_start);
-		size_t sz = iset.size();
-		for (size_t i = 0; i < sz; i++) {
-			Handle h(iset[i]);
-			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu): %s\n", i, sz,
-			       h->toShortString().c_str());
-			bool found = pme->explore_neighborhood(_root, _starter_pred, h);
-			if (found) return true;
-		}
-
-		// If we are here, we are done.
-		return false;
-	}
+	bool found = neighbor_search(pme, vars, clauses);
+	if (found) return true;
+	if (not _search_fail) return false;
 
 	// If we are here, then we could not find a clause at which to start,
 	// as, apparently, the clauses consist entirely of variables!! So,
@@ -133,7 +110,7 @@ bool AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
 
 	// Plunge into the deep end - start looking at all viable
 	// candidates in the AtomSpace.
-	std::list<Handle> handle_set;
+	HandleSeq handle_set;
 	_as->getHandleSetInAttentionalFocus(back_inserter(handle_set));
 // xxxxxxxxxxxxxx here xxxxxxxxxxx
 

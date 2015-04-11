@@ -44,7 +44,7 @@ public:
 	// Only match links if they are in the attentional focus
 	bool link_match(const LinkPtr&, const LinkPtr&);
 
-	// Only get incomming sets that are in the attentional focus
+	// Only get incoming sets that are in the attentional focus
 	IncomingSet get_incoming_set(const Handle&);
 
 	// Starts from atoms in the attentional focus, with the right types
