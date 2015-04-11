@@ -301,7 +301,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// If the pattern contains atoms that are evaluatable i.e. GPN's
 		// then we must fall through, and let the tree comp mechanism
 		// find and evaluate them.
-		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
+		if (not is_evaluatable(hp)) return true;
 		else
 		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
@@ -618,7 +618,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	// clause has GroundedPredicateNodes in it. In that case, we
 	// have to make sure that they get evaluated.
 	if ((hsoln == curr_root)
-	    and _evaluatable.find(curr_root) == _evaluatable.end())
+	    and not is_evaluatable(curr_root))
 		return false;
 
 	have_stack.push(have_more);
@@ -863,7 +863,7 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (_optionals.count(curr_root))
+	if (is_optional(curr_root))
 	{
 		clause_accepted = true;
 		match = _pmc->optional_clause_match(curr_term_handle, hsoln);
@@ -906,9 +906,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	{
 		prtmsg("Next clause is", curr_root);
 		dbgprt("This clause is %s\n",
-			_optionals.count(curr_root)? "optional" : "required");
+			is_optional(curr_root)? "optional" : "required");
 		dbgprt("This clause is %s\n",
-			_evaluatable.count(curr_root)?
+			is_evaluatable(curr_root)?
 			"dynamically evaluatable" : "non-dynamic");
 		prtmsg("Joining variable  is", curr_term_handle);
 		prtmsg("Joining grounding is", var_grounding[curr_term_handle]);
@@ -941,7 +941,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// clauses that don't have matches.
 		while ((false == found) and
 		       (false == clause_accepted) and
-		       (_optionals.count(curr_root)))
+		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
 			bool match = _pmc->optional_clause_match(curr_term_handle, undef);
@@ -1088,7 +1088,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 			}
 			else if ((issued.end() == issued.find(root)) and
 			         (search_optionals or
-			          (_optionals.end() == _optionals.find(root))))
+			          (not is_optional(root))))
 			{
 				unsolved_clause = root;
 				unsolved = true;

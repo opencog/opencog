@@ -68,6 +68,12 @@ class PatternMatchEngine
 		std::set<Handle> _evaluatable;
 		ConnectMap       _connectivity_map;
 
+		bool is_optional(const Handle& h) {
+			return (_optionals.count(h) != 0); }
+
+		bool is_evaluatable(const Handle& h) {
+			return (_evaluatable.count(h) != 0); }
+
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
 		// above, that are being searched.
