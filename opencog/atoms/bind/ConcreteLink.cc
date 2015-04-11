@@ -302,7 +302,10 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		for (const Handle& sh : fgpn.least_holders)
 		{
 			_evaluatable_terms.insert(sh);
-			if (any_unquoted_in_tree(sh, vars))
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgpn.holders)
@@ -318,7 +321,10 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			_evaluatable_terms.insert(sh);
 			_evaluatable_holders.insert(sh);
-			if (any_unquoted_in_tree(sh, vars))
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
