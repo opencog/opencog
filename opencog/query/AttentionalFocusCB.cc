@@ -60,13 +60,13 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	// If nothing is in AF
 	if (filtered_set.empty())
 	{
-		// XXX What shall we do here? Return the default or return empty ?
-		// Returning empty completely halts the search up to this point
-		// ... and maybe that is a good thing, right? But it might also
-		// mean that there is an AF bug somewhere ... I think that
-		// returning the empty set is really probably the right thing ...
+		// Returning the empty set abandons the search in this direction;
+		// search will then backtrack and try a different direction.
+		// ... and that is exactly what should be happening.
+		// But it might also mean that there is an AF bug somewhere ...
+		// Returning the empty set is right thing, but testing is needed.
 		// XXX TODO test with PLN and FIXME ...
-		filtered_set = incoming_set;
+		return filtered_set;
 	}
 
 	// The exploration of the set of patterns proceeds by going through
@@ -75,69 +75,4 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	std::sort(filtered_set.begin(), filtered_set.end(), compare_sti);
 
 	return filtered_set;
-}
-
-// XXX FIXME, this is a bad-cut-n-paste job of the DefaultCB,
-// with some unclear modifications..
-bool AttentionalFocusCB::initiate_search(PatternMatchEngine *pme,
-                                         const std::set<Handle> &vars,
-                                         const std::vector<Handle> &clauses)
-{
-	_search_fail = false;
-
-	bool found = neighbor_search(pme, vars, clauses);
-	if (found) return true;
-	if (not _search_fail) return false;
-
-	// If we are here, then we could not find a clause at which to start,
-	// as, apparently, the clauses consist entirely of variables!! So,
-	// basically, we must search the entire!! atomspace, in this case.
-	// Yes, this hurts.
-	_root = clauses[0];
-	_starter_pred = _root;
-
-	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-
-	// Get the set of types of the potential candidates
-	std::set<Type> ptypes;
-	if (_root->getType() == VARIABLE_NODE)
-		ptypes = _type_restrictions->at(_root);
-
-	// XXX TODO -- as a performance optimization, we should try all
-	// the different clauses, and find the one with the smallest number
-	// of atoms of that type, or otherwise try to find a small ("thin")
-	// incoming set to search over.
-
-	// Plunge into the deep end - start looking at all viable
-	// candidates in the AtomSpace.
-	HandleSeq handle_set;
-	_as->getHandleSetInAttentionalFocus(back_inserter(handle_set));
-// xxxxxxxxxxxxxx here xxxxxxxxxxx
-
-	// WARNING: if there's nothing in the attentional focus then get
-	// the whole atomspace
-	if (handle_set.empty())
-		_as->getHandlesByType(back_inserter(handle_set), ATOM, true);
-
-	// Filter by variable types
-	if (not ptypes.empty()) {
-		auto it = remove_if(handle_set.begin(), handle_set.end(),
-		                    [&ptypes](const Handle& h) {
-			                    return ptypes.find(h->getType()) == ptypes.end();
-		                    });
-		handle_set.erase(it, handle_set.end());
-	}
-
-#ifdef DEBUG
-	size_t i = 0;
-#endif
-	for (const Handle& h : handle_set)
-	{
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
-		       h->toShortString().c_str());
-		bool rc = pme->explore_neighborhood(_root, _starter_pred, h);
-		if (rc) return true;
-	}
-	return false;
 }
