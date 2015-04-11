@@ -23,6 +23,6 @@ To demo this, follow the instruction(Assume you've do the instruction in the htt
 3. Execute catkin_make, start roscore and start minecraft server.
 4. Start cog_perception.py and spock_listener.py
 5. Start your minecraft game and login to your server
-6. Now you can try to put the target(sand block) in the place the bot can see it. If the bot fins it, it should start to shake its hand. 
+6. Now you can try to put the target(sand block) in the place the bot can see it, it should start to shake its hand. 
 
 
