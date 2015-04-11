@@ -167,7 +167,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 	protected:
 		Handle _root;
-		Handle _starter_pred;
+		Handle _starter_term;
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
 

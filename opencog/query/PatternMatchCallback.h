@@ -158,7 +158,7 @@ class PatternMatchCallback
 		 * for more, a return value of false is needed.)
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln) = 0;
+		                       const std::map<Handle, Handle> &term_soln) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -223,7 +223,7 @@ class PatternMatchCallback
 		}
 
 		/**
-		 * Called after a top-level predicate (tree) has been fully
+		 * Called after a top-level clause (tree) has been fully
 		 * grounded. This gives the callee the opportunity to save
 		 * state onto a stack, if needed.
 		 */
@@ -231,7 +231,7 @@ class PatternMatchCallback
 
 		/**
 		 * Called prior to starting a back-track, retreating from the
-		 * most recently grounded top-level predicate (tree). This
+		 * most recently grounded top-level clause (tree). This
 		 * gives the callee the opportunity to maintain state with a
 		 * stack, if needed.
 		 */

@@ -170,11 +170,11 @@ static inline void prtmsg(const char * msg, const Handle& h)
  * tree.  The incidence tree is the so-called "Levi graph" of the
  * hypergraph.  The first arg should be a handle to a clause in the
  * pattern, while the second arg is a handle to a candidate grounding.
- * The pattern (predicate) clause is compared to the candidate grounding,
+ * The pattern (template) clause is compared to the candidate grounding,
  * returning true if there is a mis-match.
  *
  * The comparison is recursive, so this method calls itself on each
- * subtree of the predicate clause, performing comparisons until a
+ * subtree (term) of the template clause, performing comparisons until a
  * match is found (or not found).
  *
  * Return false if there's a mis-match. The goal here is to walk over
@@ -277,7 +277,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		prtmsg("Compare atom to itself:\n", hp);
 
 #ifdef NO_SELF_GROUNDING
-		if (hg == curr_pred_handle)
+		if (hg == curr_term_handle)
 		{
 			// Mismatch, if hg contains bound vars in it.
 			if (any_unquoted_in_tree(hg, _bound_vars)) return false;
@@ -452,7 +452,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		{
 			// If we are here, we are dealing with an unordered link.
 			// Enumerate all the permutations of the outgoing set of
-			// the predicate.  We have to try all possible permuations
+			// the term.  We have to try all possible permuations
 			// here, as different variable assignments could lead to
 			// very differrent problem solutions.  We have to push/pop
 			// the stack as we try each permutation, so that each
@@ -631,7 +631,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			solution_push();
 
 			if (_need_choice_push) choice_stack.push(_choice_state);
-			bool match = tree_recurse(curr_pred_handle, hsoln, CALL_SOLN);
+			bool match = tree_recurse(curr_term_handle, hsoln, CALL_SOLN);
 			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 			_need_choice_push = false;
 
@@ -650,7 +650,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			// Get rid of any grounding that might have been proposed
 			// during the tree-compare or do_soln_up.
 			solution_pop();
-		} while (0 < next_choice(curr_pred_handle, hsoln));
+		} while (0 < next_choice(curr_term_handle, hsoln));
 
 		if (found)
 		{
@@ -688,11 +688,11 @@ void PatternMatchEngine::clause_stacks_push(void)
 	OC_ASSERT(not in_quote, "Can't posssibly happen!");
 
 	root_handle_stack.push(curr_root);
-	pred_handle_stack.push(curr_pred_handle);
+	term_handle_stack.push(curr_term_handle);
 	soln_handle_stack.push(curr_soln_handle);
 
 	var_solutn_stack.push(var_grounding);
-	pred_solutn_stack.push(clause_grounding);
+	term_solutn_stack.push(clause_grounding);
 
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
@@ -722,11 +722,11 @@ void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc->pop();
 	POPSTK(root_handle_stack, curr_root);
-	POPSTK(pred_handle_stack, curr_pred_handle);
+	POPSTK(term_handle_stack, curr_term_handle);
 	POPSTK(soln_handle_stack, curr_soln_handle);
 
 	// The grounding stacks are handled differently.
-	POPSTK(pred_solutn_stack, clause_grounding);
+	POPSTK(term_solutn_stack, clause_grounding);
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(issued_stack, issued);
 
@@ -743,20 +743,20 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_clause_stack_depth --;
 
 	dbgprt("pop to depth %d\n", _clause_stack_depth);
-	prtmsg("pop to joiner", curr_pred_handle);
+	prtmsg("pop to joiner", curr_term_handle);
 	prtmsg("pop to clause", curr_root);
 }
 
 void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
-	pred_solutn_stack.push(clause_grounding);
+	term_solutn_stack.push(clause_grounding);
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
-	POPSTK(pred_solutn_stack, clause_grounding);
+	POPSTK(term_solutn_stack, clause_grounding);
 }
 
 /// Return true if a grounding was found.  It also has the side effect
@@ -770,19 +770,19 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	if (curr_pred_handle == curr_root)
+	if (curr_term_handle == curr_root)
 		return clause_accept(hsoln);
 
-	// Move up the predicate, and hunt for a match, again.
+	// Move up the term, and hunt for a match, again.
 	dbgprt("Term has ground, move up.\n");
 
-	FindAtoms fa(curr_pred_handle);
+	FindAtoms fa(curr_term_handle);
 	fa.search_set(curr_root);
 
 	// It is almost always the case, but not necessarily, that
 	// least_holders contains one atom. (i.e. the one atom that
-	// is the parent of curr_pred_handle that is within curr_root.
-	// If curr_pred_handle appears twice (or N times) in a curr_root,
+	// is the parent of curr_term_handle that is within curr_root.
+	// If curr_term_handle appears twice (or N times) in a curr_root,
 	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
 	// first appearance in almost all cases, unless the holders
@@ -802,7 +802,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
-			if (pred_up(hi)) found = true;
+			if (term_up(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
 
@@ -813,7 +813,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 		{
 			dbgprt("Exploring one possible OrLink at root out of %zu\n",
 			       fa.least_holders.size());
-			curr_pred_handle = hi;
+			curr_term_handle = hi;
 			if (clause_accept(hsoln)) found = true;
 		}
 		else
@@ -837,7 +837,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 				       hi.value(), next_choice(hi, hsoln));
 
 				_need_choice_push = true;
-				curr_pred_handle = hi;
+				curr_term_handle = hi;
 				if (do_soln_up(hsoln)) found = true;
 				dbgprt("Upwards choice loop next choice=%lu\n",
 				        next_choice(hi, hsoln));
@@ -866,11 +866,11 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	if (_optionals.count(curr_root))
 	{
 		clause_accepted = true;
-		match = _pmc->optional_clause_match(curr_pred_handle, hsoln);
+		match = _pmc->optional_clause_match(curr_term_handle, hsoln);
 	}
 	else
 	{
-		match = _pmc->clause_match(curr_pred_handle, hsoln);
+		match = _pmc->clause_match(curr_term_handle, hsoln);
 	}
 	dbgprt("clause match callback match=%d\n", match);
 	if (not match) return false;
@@ -891,7 +891,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_push();
 	get_next_untried_clause();
 
-	// If there are no further predicates to solve,
+	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
 	bool found = false;
 	if (Handle::UNDEFINED == curr_root)
@@ -910,8 +910,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		dbgprt("This clause is %s\n",
 			_evaluatable.count(curr_root)?
 			"dynamically evaluatable" : "non-dynamic");
-		prtmsg("Joining variable  is", curr_pred_handle);
-		prtmsg("Joining grounding is", var_grounding[curr_pred_handle]);
+		prtmsg("Joining variable  is", curr_term_handle);
+		prtmsg("Joining grounding is", var_grounding[curr_term_handle]);
 
 		// Else, start solving the next unsolved clause. Note: this is
 		// a recursive call, and not a loop. Recursion is halted when
@@ -923,7 +923,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// else the join is a 'real' atom.
 
 		clause_accepted = false;
-		curr_soln_handle = var_grounding[curr_pred_handle];
+		curr_soln_handle = var_grounding[curr_term_handle];
 		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
 		found = xsoln_up(curr_soln_handle);
@@ -944,7 +944,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (_optionals.count(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc->optional_clause_match(curr_pred_handle, undef);
+			bool match = _pmc->optional_clause_match(curr_term_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
@@ -966,7 +966,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// or not. If it does, we'll recurse. If it does not,
 				// we'll loop around back to here again.
 				clause_accepted = false;
-				curr_soln_handle = var_grounding[curr_pred_handle];
+				curr_soln_handle = var_grounding[curr_term_handle];
 				found = xsoln_up(curr_soln_handle);
 			}
 		}
@@ -980,11 +980,11 @@ bool PatternMatchEngine::do_next_clause(void)
 	return found;
 }
 
-bool PatternMatchEngine::pred_up(const Handle& h)
+bool PatternMatchEngine::term_up(const Handle& h)
 {
 	// Move up the solution outgoing set, looking for a match.
-	Handle curr_pred_save(curr_pred_handle);
-	curr_pred_handle = h;
+	Handle curr_term_save(curr_term_handle);
+	curr_term_handle = h;
 
 	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
@@ -994,7 +994,7 @@ bool PatternMatchEngine::pred_up(const Handle& h)
 		if (found) break;
 	}
 
-	curr_pred_handle = curr_pred_save;
+	curr_term_handle = curr_term_save;
 	dbgprt("Found upward soln = %d\n", found);
 	return found;
 }
@@ -1023,7 +1023,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	{
 		// There are no more ungrounded clauses to consider. We are done.
 		curr_root = Handle::UNDEFINED;
-		curr_pred_handle = Handle::UNDEFINED;
+		curr_term_handle = Handle::UNDEFINED;
 		return;
 	}
 
@@ -1032,7 +1032,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 	// If we are here, there are no more unsolved clauses to consider.
 	curr_root = Handle::UNDEFINED;
-	curr_pred_handle = Handle::UNDEFINED;
+	curr_term_handle = Handle::UNDEFINED;
 }
 
 /// Same as above, but with a boolean flag:  if not set, then only the
@@ -1117,11 +1117,11 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	if (solved and unsolved)
 	{
 		// Pursue is a pointer to a (variable) node that's shared between
-		// several clauses. One of the predicates has been grounded,
+		// several clauses. One of the clauses has been grounded,
 		// another has not.  We want to now traverse upwards from this node,
 		// to find the top of the ungrounded clause.
 		curr_root = unsolved_clause;
-		curr_pred_handle = pursue;
+		curr_term_handle = pursue;
 
 		if (Handle::UNDEFINED != unsolved_clause)
 		{
@@ -1181,7 +1181,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 
 	// Match the required clauses.
 	curr_root = do_clause;
-	curr_pred_handle = starter;
+	curr_term_handle = starter;
 	issued.insert(curr_root);
 	bool found = xsoln_up(ah);
 
@@ -1204,7 +1204,7 @@ void PatternMatchEngine::clear_current_state(void)
 
 	curr_root = Handle::UNDEFINED;
 	curr_soln_handle = Handle::UNDEFINED;
-	curr_pred_handle = Handle::UNDEFINED;
+	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
 	_choice_state.clear();
@@ -1216,10 +1216,10 @@ void PatternMatchEngine::clear_current_state(void)
 void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
-	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
+	while (!term_handle_stack.empty()) term_handle_stack.pop();
 	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
-	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
+	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
@@ -1240,7 +1240,7 @@ PatternMatchEngine::PatternMatchEngine(void)
 	in_quote = false;
 	curr_root = Handle::UNDEFINED;
 	curr_soln_handle = Handle::UNDEFINED;
-	curr_pred_handle = Handle::UNDEFINED;
+	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 	_need_choice_push = false;
 
@@ -1319,7 +1319,7 @@ void PatternMatchEngine::print_solution(
 /**
  * For debug printing only
  */
-void PatternMatchEngine::print_predicate(
+void PatternMatchEngine::print_term(
                   const std::set<Handle> &vars,
                   const std::vector<Handle> &clauses)
 {

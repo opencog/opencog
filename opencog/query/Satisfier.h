@@ -60,7 +60,7 @@ class Satisfier :
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
+		                       const std::map<Handle, Handle> &term_soln);
 };
 
 }; // namespace opencog

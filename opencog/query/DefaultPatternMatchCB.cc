@@ -160,14 +160,14 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
  * Iterate over all the clauses, to find the "thinnest" one.
  */
 Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
-                                            Handle& starter_pred,
+                                            Handle& starter_term,
                                             size_t& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
 	bestclause = 0;
 	Handle best_start(Handle::UNDEFINED);
-	starter_pred = Handle::UNDEFINED;
+	starter_term = Handle::UNDEFINED;
 
 	size_t nc = clauses.size();
 	for (size_t i=0; i < nc; i++)
@@ -175,8 +175,8 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
-		Handle pred(Handle::UNDEFINED);
-		Handle start(find_starter(h, depth, pred, width));
+		Handle term(Handle::UNDEFINED);
+		Handle start(find_starter(h, depth, term, width));
 		if (start != Handle::UNDEFINED
 		    and (width < thinnest
 		         or (width == thinnest and depth > deepest)))
@@ -185,7 +185,7 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 			deepest = depth;
 			bestclause = i;
 			best_start = start;
-			starter_pred = pred;
+			starter_term = term;
 		}
 	}
 
@@ -231,7 +231,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	size_t bestclause;
-	Handle best_start = find_thinnest(clauses, _starter_pred, bestclause);
+	Handle best_start = find_thinnest(clauses, _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if all of the
 	// clauses contain nothing but variables!! Unusual, but it can
@@ -245,7 +245,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 
 	_root = clauses[bestclause];
 	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-	dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
+	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
 
 	// This should be calling the over-loaded virtual method
 	// get_incoming_set(), so that, e.g. it gets sorted by attentional
@@ -258,7 +258,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
 		       h->toShortString().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		// Terminate search if satisfied.
 		if (found) return true;
@@ -507,13 +507,13 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 {
 	_search_fail = false;
 	_root = Handle::UNDEFINED;
-	_starter_pred = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
 
 	for (const Handle& cl: clauses)
 	{
 		size_t prev = count;
-		find_rarest(cl, _starter_pred, count);
+		find_rarest(cl, _starter_term, count);
 		if (count < prev)
 		{
 			prev = count;
@@ -532,10 +532,10 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 	}
 
 	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_pred->toShortString().c_str());
+	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
 
 	// Get type of the rarest link
-	Type ptype = _starter_pred->getType();
+	Type ptype = _starter_term->getType();
 
 	HandleSeq handle_set;
 	_as->getHandlesByType(handle_set, ptype);
@@ -548,7 +548,7 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
 	return false;
@@ -578,7 +578,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	Type ptype = ATOM;
 
 	_root = Handle::UNDEFINED;
-	_starter_pred = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: varset)
 	{
 		auto tit = _type_restrictions->find(var);
@@ -595,7 +595,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 					if (0 < fa.least_holders.size())
 					{
 						_root = cl;
-						_starter_pred = *fa.least_holders.begin();
+						_starter_term = *fa.least_holders.begin();
 						count = num;
 						ptype = t;
 						break;
@@ -608,7 +608,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	// There were no type restrictions!
 	if (Handle::UNDEFINED == _root)
 	{
-		_root = _starter_pred = clauses[0];
+		_root = _starter_term = clauses[0];
 	}
 
 	HandleSeq handle_set;
@@ -622,7 +622,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
 		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_pred, h);
+		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
 
