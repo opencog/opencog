@@ -35,8 +35,7 @@ private:
 		return lptr1->getSTI() > lptr2->getSTI();
 	}
 public:
-	AttentionalFocusCB(AtomSpace * as) :
-		DefaultPatternMatchCB(as) {}
+	AttentionalFocusCB(AtomSpace*);
 
 	// Only match nodes if they are in the attentional focus
 	bool node_match(const Handle&, const Handle&);
@@ -46,11 +45,6 @@ public:
 
 	// Only get incoming sets that are in the attentional focus
 	IncomingSet get_incoming_set(const Handle&);
-
-	// Starts from atoms in the attentional focus, with the right types
-	bool initiate_search(PatternMatchEngine *pme,
-	                     const std::set<Handle> &vars,
-	                     const std::vector<Handle> &clauses);
 };
 
 } //namespace opencog
