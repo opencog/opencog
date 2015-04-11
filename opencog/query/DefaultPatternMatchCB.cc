@@ -441,6 +441,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 		if (not _search_fail) return false;
 	}
 
+	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
 	bool found = neighbor_search(pme, vars, clauses);
 	if (found) return true;
@@ -451,6 +452,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
+	dbgprt("Cannot use node-neighbor search, use link-type search\n");
 	_search_fail = false;
 	found = link_type_search(pme, vars, clauses);
 	if (found) return true;
@@ -462,6 +464,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
+	dbgprt("Cannot use link-type search, use variable-type search\n");
 	_search_fail = false;
 	found = variable_search(pme, vars, clauses);
 	return found;
@@ -580,27 +583,43 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
+	dbgprt("varset size = %lu\n", varset.size());
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: varset)
 	{
+		dbgprt("Examine variable %s\n", var->toShortString().c_str());
 		auto tit = _type_restrictions->find(var);
-		const std::set<Type> typeset = tit->second;
+		if (_type_restrictions->end() == tit) continue;
+		const std::set<Type>& typeset = tit->second;
+		dbgprt("Type-restictions set size = %lu\n", typeset.size());
 		for (Type t : typeset)
 		{
 			size_t num = (size_t) _as->getNumAtomsOfType(t);
+			dbgprt("Type = %s has %lu atoms in the atomspace\n",
+			       classserver().getTypeName(t).c_str(), num);
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
 				{
 					FindAtoms fa(var);
 					fa.search_set(cl);
+					if (cl == var)
+					{
+						_root = cl;
+						_starter_term = cl;
+						count = num;
+						ptype = t;
+						dbgprt("New minimum count of %lu\n", count);
+						break;
+					}
 					if (0 < fa.least_holders.size())
 					{
 						_root = cl;
 						_starter_term = *fa.least_holders.begin();
 						count = num;
 						ptype = t;
+						dbgprt("New minimum count of %lu (nonroot)\n", count);
 						break;
 					}
 				}
@@ -611,11 +630,14 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	// There were no type restrictions!
 	if (Handle::UNDEFINED == _root)
 	{
+		dbgprt("There were no type restrictions! That must be wrong!\n");
 		_root = _starter_term = clauses[0];
 	}
 
 	HandleSeq handle_set;
 	_as->getHandlesByType(handle_set, ptype);
+
+	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
 
 #ifdef DEBUG
 	size_t i = 0;
