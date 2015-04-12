@@ -35,24 +35,24 @@ namespace opencog
 class ExecutionOutputLink : public FreeLink
 {
 public:
-    ExecutionOutputLink(const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	ExecutionOutputLink(const HandleSeq& oset,
+	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    ExecutionOutputLink(const Handle& schema, const Handle& args,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	ExecutionOutputLink(const Handle& schema, const Handle& args,
+	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    ExecutionOutputLink(Link& l);
+	ExecutionOutputLink(Link& l);
 
-    Handle execute(AtomSpace* as) {
-        return do_execute(as, Handle(shared_from_this()));
-    }
+	Handle execute(AtomSpace* as) {
+	    return do_execute(as, Handle(shared_from_this()));
+	}
 
-    static Handle do_execute(AtomSpace*, const Handle&);
-    static Handle do_execute(AtomSpace*, Type, const HandleSeq& schema_and_args);
-    static Handle do_execute(AtomSpace*, const Handle& schema,
-                                         const Handle& args);
+	static Handle do_execute(AtomSpace*, const Handle&);
+	static Handle do_execute(AtomSpace*, Type, const HandleSeq& schema_and_args);
+	static Handle do_execute(AtomSpace*, const Handle& schema,
+	                                     const Handle& args);
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

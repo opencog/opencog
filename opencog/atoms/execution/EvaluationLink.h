@@ -35,23 +35,23 @@ namespace opencog
 class EvaluationLink : public FreeLink
 {
 public:
-    EvaluationLink(const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	EvaluationLink(const HandleSeq& oset,
+	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    EvaluationLink(Handle schema, Handle args,
-         TruthValuePtr tv = TruthValue::NULL_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	EvaluationLink(Handle schema, Handle args,
+	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    EvaluationLink(Link& l);
+	EvaluationLink(Link& l);
 
-    TruthValuePtr evaluate(AtomSpace* as) {
-        return do_evaluate(as, Handle(shared_from_this()));
-    }
+	TruthValuePtr evaluate(AtomSpace* as) {
+	    return do_evaluate(as, Handle(shared_from_this()));
+	}
 
-    static TruthValuePtr do_evaluate(AtomSpace*, Handle);
-    static TruthValuePtr do_evaluate(AtomSpace*, const HandleSeq& schema_and_args);
-    static TruthValuePtr do_evaluate(AtomSpace*, Handle schema, Handle args);
+	static TruthValuePtr do_evaluate(AtomSpace*, Handle);
+	static TruthValuePtr do_evaluate(AtomSpace*, const HandleSeq& schema_and_args);
+	static TruthValuePtr do_evaluate(AtomSpace*, Handle schema, Handle args);
 };
 
 typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;
