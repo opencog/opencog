@@ -822,13 +822,18 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	if (evit != _in_evaluatable.end())
 	{
 		dbgprt("Term is evaluatable\n");
-		soln_handle_stack.push(curr_soln_handle);
-		curr_soln_handle = hsoln;
+
+		// All of the veriables occurring in the term should have
+		// grounded by now. If not, then its virtual term, and we
+		// shouldn't even be here (we can't just backtrack, and
+		// try again later).  So validate the grounding, but leave
+		// the evaluation for the callback.
 
 prtmsg("duuude enter do_term_up, is in eval=\n", evit->second);
-		bool found = start_sol_up(evit->second);
-
-		POPSTK(soln_handle_stack, curr_soln_handle);
+		bool found = _pmc->evaluate_link(evit->second, var_grounding);
+		if (curr_root == evit->second)
+		{
+		}
 
 		dbgprt("After evaluating the term, found = %d\n", found);
 		return found;
@@ -1047,10 +1052,10 @@ bool PatternMatchEngine::do_next_clause(void)
 ///
 bool PatternMatchEngine::start_sol_up(const Handle& h)
 {
-	// Move up the solution outgoing set, looking for a match.
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
 
+	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
 	bool found = false;

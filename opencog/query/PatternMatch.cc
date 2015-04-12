@@ -74,9 +74,8 @@ class PMCGroundings : public PatternMatchCallback
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
 		bool evaluate_link(const Handle& link_h,
-		                   const HandleSeq& vars,
-		                   const HandleSeq& gnds) {
-			return _cb->evaluate_link(link_h, vars, gnds);
+		                   const std::map<Handle, Handle> &gnds) {
+			return _cb->evaluate_link(link_h, gnds);
 		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
 			return _cb->clause_match(pattrn_link_h, grnd_link_h);
@@ -197,8 +196,11 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// to the callback.
 
 			// At last! Actually perform the test!
+/*
 			Handle gargs(instor.instantiate(virt, var_gnds));
 			bool match = cb->virtual_link_match(virt, gargs);
+*/
+			bool match = cb->evaluate_link(virt, var_gnds);
 
 			// After checking, remove the temporary atoms.
 			// The most fool-proof way to do this is to blow

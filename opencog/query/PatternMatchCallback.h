@@ -151,15 +151,14 @@ class PatternMatchCallback
 		                                const Handle& args) = 0;
 
 		/**
-		 * Like the above, except that the args to the virtual link
-		 * have not been grounded.  Instead, it gets a list of the
-		 * variables in the term, and the candidate values, and it is
-		 * up to the callback to figure out what to do about it
-		 * (e.g to put them in an atomspace, or not.)
+		 * Like the above, except that the free variables occuring
+		 * in the virtual link have not been grounded.  Instead, it
+		 * gets a map of variables to candidate grounds, and must
+		 * then return either 'true' to accept the grounding, or
+		 * 'false' to reject it.
 		 */
 		virtual bool evaluate_link(const Handle& virt,
-		                           const HandleSeq& vars,
-		                           const HandleSeq& gnds) = 0;
+		                           const std::map<Handle,Handle>& gnds) = 0; 
 
 		/**
 		 * Called when a complete grounding to all clauses is found.

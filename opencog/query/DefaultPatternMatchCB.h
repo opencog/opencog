@@ -137,8 +137,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 */
 		virtual bool virtual_link_match(const Handle& pat, const Handle& args);
 		virtual bool evaluate_link(const Handle& pat,
-		                           const HandleSeq& vars,
-		                           const HandleSeq& gnds);
+		                           const std::map<Handle,Handle>& gnds);
 
 		/**
 		 * Called to perform the actual search. This makes some default
