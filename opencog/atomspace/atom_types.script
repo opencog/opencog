@@ -109,7 +109,7 @@ SATISFYING_SET_LINK <- UNORDERED_LINK
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
-// The inherit from ForAll becuase if these contain variables, then
+// These inherit from ForAll becuase if these contain variables, then
 // those variables are implicitly scoped to this link (i.e. are not
 // free, but are bound to this link.) Truth-value wise, these behave
 // like AVERAGE_LINK, averaging over the for-all universe that they
