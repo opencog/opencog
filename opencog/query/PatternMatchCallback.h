@@ -197,18 +197,9 @@ class PatternMatchCallback
 		 *
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
-		 *
-		 * The default semantics here is to reject a match if the optional
-		 * clauses are detected.  This is in keeping with the semantics of
-		 * AbsentLink: a match is possible only if the indicated clauses
-		 * are absent!
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd)
-		{
-			if (Handle::UNDEFINED == grnd) return true;
-			return false;
-		}
+		                                   const Handle& grnd) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

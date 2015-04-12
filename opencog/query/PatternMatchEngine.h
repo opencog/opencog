@@ -27,6 +27,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <unordered_map>
 #include <vector>
 
 #include <opencog/query/PatternMatchCallback.h>
@@ -68,8 +69,9 @@ class PatternMatchEngine
 		std::set<Handle> _optionals;
 		std::set<Handle> _evaluatable;
 
-		std::map<Handle,Handle> _in_evaluatable;
-		std::map<Handle,Handle> _in_executable;
+		// Map from variables to e*uatble terms they appear in.
+		std::unordered_multimap<Handle,Handle> _in_evaluatable;
+		std::unordered_multimap<Handle,Handle> _in_executable;
 
 		ConnectMap       _connectivity_map;
 

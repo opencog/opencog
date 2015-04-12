@@ -134,6 +134,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 
 		/**
+		 * Typically called for AbsentLink
+		 */
+		virtual bool optional_clause_match(const Handle& pattrn,
+		                                   const Handle& grnd);
+
+		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */

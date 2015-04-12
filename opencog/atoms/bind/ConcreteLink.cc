@@ -274,11 +274,11 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 
 /* ================================================================= */
 
-/* utility -- every atom in the key term will get the value. */
-static void add_to_map(std::map<Handle, Handle>& map,
+/* utility -- every variable in the key term will get the value. */
+static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
                        const Handle& key, const Handle& value)
 {
-	map[key] = value;
+	if (key->getType() == VARIABLE_NODE) map.insert({key, value});
 	LinkPtr lll(LinkCast(key));
 	if (NULL == lll) return;
 	const HandleSeq& oset = lll->getOutgoingSet();

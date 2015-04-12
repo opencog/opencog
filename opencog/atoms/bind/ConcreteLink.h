@@ -23,6 +23,8 @@
 #ifndef _OPENCOG_CONCRETE_LINK_H
 #define _OPENCOG_CONCRETE_LINK_H
 
+#include <unordered_map>
+
 #include <opencog/atoms/bind/ScopeLink.h>
 
 namespace opencog
@@ -65,6 +67,7 @@ class PatternMatchCallback;
 class ConcreteLink : public ScopeLink
 {
 	// Private, locally scoped typedefs, not used outside of this class.
+	// XX TODO Replace by unordered multimap...
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
@@ -91,14 +94,11 @@ protected:
 	std::set<Handle> _executable_terms;    // smallest term that is executable
 	std::set<Handle> _executable_holders;  // holds something executable.
 
-	// Maps; the value is the largest term containing the key
-	// (that is evaluatable or executable...)
-	std::map<Handle,Handle> _in_evaluatable; // under something evaluatable.
-	std::map<Handle,Handle> _in_executable;  // under something executable.
-
-	// Any given evaluatable or executable term will have variables
-	// sprinkled throughout it. What variables... xxx finish me
-	std::map<Handle,HandleSeq> _eutable_args; // variables e*able term
+	// Maps; the value is the largest (evaluatable or executable)
+	// term containing the variable. Its a multimap, because
+	// a variable may appear in several different evaluatables.
+	std::unordered_multimap<Handle,Handle> _in_evaluatable;
+	std::unordered_multimap<Handle,Handle> _in_executable;
 
 	// Any given atom may appear in one or more clauses. Given an atom,
 	// the connectivy map tells you what clauses it appears in. It

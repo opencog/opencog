@@ -41,6 +41,22 @@ using namespace opencog;
 
 /* ======================================================== */
 
+/**
+ * The default semantics here is to reject a match if the option
+ * clauses are detected.  This is in keeping with the semantics
+ * AbsentLink: a match is possible only if the indicated clauses
+ * are absent!
+ */
+
+bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
+                                                  const Handle& grnd)
+{
+	if (Handle::UNDEFINED == grnd) return true;
+	return false;
+}
+
+/* ======================================================== */
+
 // Find a good place to start the search.
 //
 // The handle h points to a clause.  In principle, it is enough to

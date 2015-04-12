@@ -819,29 +819,37 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
 	       curr_term_handle.value(), curr_root.value());
 
-	auto evit = _in_evaluatable.find(curr_term_handle);
-	if (evit != _in_evaluatable.end() and
-	   is_unquoted_in_tree(curr_root, evit->second))
+	auto evra = _in_evaluatable.equal_range(curr_term_handle);
+	if (evra.first != evra.second)
 	{
-		prtmsg("Term inside evaluatable, move up to it's top:\n",
-		        evit->second);
-
-		// All of the veriables occurring in the term should have
-		// grounded by now. If not, then its virtual term, and we
-		// shouldn't even be here (we can't just backtrack, and
-		// try again later).  So validate the grounding, but leave
-		// the evaluation for the callback.
-
-		bool found = _pmc->evaluate_link(evit->second, var_grounding);
-		dbgprt("After evaluating the term, found = %d\n", found);
-		if (found and curr_root == evit->second)
+		// Similar to the cases below, the variable my appear in
+		// more than one term that is under the root clause (right??)
+		// so we have to loop.
+		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
-			dbgprt("Evaluated term was clause top\n");
-			curr_term_handle = evit->second;
-			return clause_accept(hsoln);
-		}
+			if (not is_unquoted_in_tree(curr_root, evit->second))
+				continue;
 
-		return found;
+			prtmsg("Term inside evaluatable, move up to it's top:\n",
+			        evit->second);
+
+			// All of the variables occurring in the term should have
+			// grounded by now. If not, then its virtual term, and we
+			// shouldn't even be here (we can't just backtrack, and
+			// try again later).  So validate the grounding, but leave
+			// the evaluation for the callback.
+
+			bool found = _pmc->evaluate_link(evit->second, var_grounding);
+			dbgprt("After evaluating the term, found = %d\n", found);
+			if (found and curr_root == evit->second)
+			{
+				dbgprt("Evaluated term was clause top\n");
+				curr_term_handle = evit->second;
+				return clause_accept(hsoln);
+			}
+
+			return found;
+		}
 	}
 
 	FindAtoms fa(curr_term_handle);
