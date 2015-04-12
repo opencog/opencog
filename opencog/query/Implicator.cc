@@ -32,7 +32,7 @@
 using namespace opencog;
 
 /**
- * This callback taakes the reported grounding, runs it through the
+ * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result in
  * the public member `result_list`.  It then returns false, to search
  * for more groundings.  (The engine will halt its search for a

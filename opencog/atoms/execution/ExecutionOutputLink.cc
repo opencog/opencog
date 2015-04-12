@@ -1,5 +1,5 @@
 /*
- * opencog/execution/ExecutionOutputLink.cc
+ * opencog/atoms/execution/ExecutionOutputLink.cc
  *
  * Copyright (C) 2009, 2013, 2015 Linas Vepstas
  * All Rights Reserved
@@ -35,7 +35,7 @@ using namespace opencog;
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-	: Link(EXECUTION_OUTPUT_LINK, oset, tv, av)
+	: FreeLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
 	if ((2 != oset.size()) or
 	   (LIST_LINK != oset[1]->getType()))
@@ -45,15 +45,27 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 	}
 }
 
-ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
+ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
+                                         const Handle& args,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-	: Link(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
+	: FreeLink(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
 	if (LIST_LINK != args->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args!");
+	}
+}
+
+ExecutionOutputLink::ExecutionOutputLink(Link& l)
+	: FreeLink(l)
+{
+	Type tscope = l.getType();
+	if (EXECUTION_OUTPUT_LINK != tscope)
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Expection an ExecutionOutputLink!");
 	}
 }
 
@@ -76,7 +88,7 @@ ExecutionOutputLink::ExecutionOutputLink(Handle schema, Handle args,
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle h)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 {
 	LinkPtr lll(LinkCast(h));
 	if (NULL == lll) return h;
@@ -106,8 +118,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle h)
 }
 
 // handle->double conversion
-static inline double get_double(AtomSpace *as, Handle h)
+static inline double get_double(AtomSpace *as, const Handle& ha)
 {
+	Handle h(ha);
+
 	// Recurse, if needed: handle may be another numeric operator.
 	if (NUMBER_NODE != h->getType())
 		h = ExecutionOutputLink::do_execute(as, h);
@@ -176,14 +190,15 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 /// Expects "args" to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the args as argument
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
+Handle ExecutionOutputLink::do_execute(AtomSpace* as,
+                         const Handle& gsn, const Handle& cargs)
 {
 	if (GROUNDED_SCHEMA_NODE != gsn->getType())
 	{
 		throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
 	}
 
-	if (LIST_LINK != args->getType())
+	if (LIST_LINK != cargs->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
 		     "Expecting arguments to ExecutionOutputLink!");
@@ -192,7 +207,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Handle gsn, Handle args)
 	// Search for additional execution links, and execute them too.
 	// We will know that happend if the returned handle differs from
 	// the input handle.
-	LinkPtr largs(LinkCast(args));
+	LinkPtr largs(LinkCast(cargs));
+	Handle args(cargs);
 	if (largs)
 	{
 		std::vector<Handle> new_oset;

@@ -1,7 +1,7 @@
 /*
- * opencog/execution/EvaluationLink.h
+ * opencog/atoms/execution/EvaluationLink.h
  *
- * Copyright (C) 2013,2014 Linas Vepstas
+ * Copyright (C) 2013,2014,2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #define _OPENCOG_EVALUTATION_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/execution/FreeLink.h>
 
 namespace opencog
 {
@@ -32,7 +32,7 @@ namespace opencog
  *  @{
  */
 
-class EvaluationLink : public Link
+class EvaluationLink : public FreeLink
 {
 public:
     EvaluationLink(const HandleSeq& oset,
@@ -43,6 +43,8 @@ public:
          TruthValuePtr tv = TruthValue::NULL_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+    EvaluationLink(Link& l);
+
     TruthValuePtr evaluate(AtomSpace* as) {
         return do_evaluate(as, Handle(shared_from_this()));
     }
@@ -51,6 +53,15 @@ public:
     static TruthValuePtr do_evaluate(AtomSpace*, const HandleSeq& schema_and_args);
     static TruthValuePtr do_evaluate(AtomSpace*, Handle schema, Handle args);
 };
+
+typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;
+static inline EvaluationLinkPtr EvaluationLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<EvaluationLink>(a); }
+static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<EvaluationLink>(a); }
+
+// XXX temporary hack ...
+#define createEvaluationLink std::make_shared<EvaluationLink>
 
 /** @}*/
 }

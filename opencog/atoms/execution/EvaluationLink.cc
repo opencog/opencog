@@ -1,7 +1,7 @@
 /*
- * opencog/execution/EvaluationLink.cc
+ * opencog/atoms/execution/EvaluationLink.cc
  *
- * Copyright (C) 2009, 2013, 2014 Linas Vepstas
+ * Copyright (C) 2009, 2013, 2014, 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ using namespace opencog;
 EvaluationLink::EvaluationLink(const HandleSeq& oset,
                                TruthValuePtr tv,
                                AttentionValuePtr av)
-    : Link(EVALUATION_LINK, oset, tv, av)
+    : FreeLink(EVALUATION_LINK, oset, tv, av)
 {
 	if ((2 != oset.size()) or
 	   (LIST_LINK != oset[1]->getType()))
@@ -47,11 +47,21 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset,
 EvaluationLink::EvaluationLink(Handle schema, Handle args,
                                TruthValuePtr tv,
                                AttentionValuePtr av)
-    : Link(EVALUATION_LINK, schema, args, tv, av)
+    : FreeLink(EVALUATION_LINK, schema, args, tv, av)
 {
 	if (LIST_LINK != args->getType()) {
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have args in a ListLink!");
+	}
+}
+
+EvaluationLink::EvaluationLink(Link& l)
+    : FreeLink(l)
+{
+	Type tscope = l.getType();
+	if (EVALUATION_LINK != tscope) {
+		throw RuntimeException(TRACE_INFO,
+		    "Expecting an EvaluationLink");
 	}
 }
 

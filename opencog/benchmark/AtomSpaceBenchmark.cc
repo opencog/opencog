@@ -499,11 +499,10 @@ Type AtomSpaceBenchmark::randomType(Type t)
     do {
         candidateType = ATOM + rng->randint(numberOfTypes-1);
     } while (!classserver().isA(candidateType, t) or
-        candidateType == TYPE_NODE or
-        candidateType == BIND_LINK or 
-        candidateType == CONCRETE_LINK or 
-        candidateType == SATISFACTION_LINK or
-        candidateType == SCOPE_LINK );
+        !classserver().isA(candidateType, FREE_LINK) or
+        !classserver().isA(candidateType, SCOPE_LINK) or
+        candidateType == NUMBER_NODE or
+        candidateType == TYPE_NODE);
 
     return candidateType;
 }

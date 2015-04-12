@@ -699,7 +699,7 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::evaulate_link(const Handle& virt,
+bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
                                           const HandleSeq& vars,
                                           const HandleSeq& gnds)
 {

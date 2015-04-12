@@ -82,7 +82,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& h,
+    Link(Type t, const Handle& h,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -92,7 +92,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& ha, Handle &hb,
+    Link(Type t, const Handle& ha, const Handle &hb,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -103,7 +103,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& ha, Handle &hb, Handle &hc,
+    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -114,7 +114,8 @@ public:
         oset.push_back(hc);
         init(oset);
     }
-    Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
+    Link(Type t, const Handle& ha, const Handle &hb,
+	      const Handle &hc, const Handle &hd,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
