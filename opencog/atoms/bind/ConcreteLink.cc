@@ -455,11 +455,12 @@ void ConcreteLink::debug_print(const char* tag) const
 	int cl = 0;
 	for (const Handle& h : _mandatory)
 	{
-		printf("Mandatory %d:\n", cl);
+		printf("Mandatory %d:", cl);
 		if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
-			printf(" (evaluatable) ");
+			printf(" (evaluatable)");
 		if (_executable_holders.find(h) != _executable_holders.end())
-			printf(" (executable) ");
+			printf(" (executable)");
+		printf("\n");
 		prt(h);
 		cl++;
 	}

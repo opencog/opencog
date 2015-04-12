@@ -816,12 +816,14 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-	dbgprt("Term has ground, move upwards.\n");
+	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
+	       curr_term_handle.value(), curr_root.value());
 
 	auto evit = _in_evaluatable.find(curr_term_handle);
-	if (evit != _in_evaluatable.end())
+	if (evit != _in_evaluatable.end() and
+	   is_unquoted_in_tree(curr_root, evit->second))
 	{
-		prtmsg("Term is evaluatable, move up to evaluatble top:\n",
+		prtmsg("Term inside evaluatable, move up to it's top:\n",
 		        evit->second);
 
 		// All of the veriables occurring in the term should have

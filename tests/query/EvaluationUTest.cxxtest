@@ -96,6 +96,11 @@ void EvaluationUTest::test_eval(void)
     config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
     load_scm_files_from_config(*as);
 
+/*
     Handle five = eval->eval_h("(cog-bind (five-arcs))");
     TS_ASSERT_EQUALS(5, as->getArity(five));
+*/
+
+    Handle one = eval->eval_h("(cog-bind (one-arc))");
+    TS_ASSERT_EQUALS(1, as->getArity(one));
 }
