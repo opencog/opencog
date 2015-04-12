@@ -821,7 +821,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	auto evit = _in_evaluatable.find(curr_term_handle);
 	if (evit != _in_evaluatable.end())
 	{
-		dbgprt("Term is evaluatable\n");
+		prtmsg("Term is evaluatable, move up to evaluatble top:\n",
+		        evit->second);
 
 		// All of the veriables occurring in the term should have
 		// grounded by now. If not, then its virtual term, and we
@@ -829,13 +830,15 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 		// try again later).  So validate the grounding, but leave
 		// the evaluation for the callback.
 
-prtmsg("duuude enter do_term_up, is in eval=\n", evit->second);
 		bool found = _pmc->evaluate_link(evit->second, var_grounding);
-		if (curr_root == evit->second)
+		dbgprt("After evaluating the term, found = %d\n", found);
+		if (found and curr_root == evit->second)
 		{
+			dbgprt("Evaluated term was clause top\n");
+			curr_term_handle = evit->second;
+			return clause_accept(hsoln);
 		}
 
-		dbgprt("After evaluating the term, found = %d\n", found);
 		return found;
 	}
 
