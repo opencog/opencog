@@ -2,7 +2,6 @@
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 INCLUDE_DIRECTORIES (
-	${PROJECT_SOURCE_DIR}/src/server
 	${ODBC_INCLUDE_DIRS}
 )
 
@@ -42,7 +41,6 @@ ADD_EXECUTABLE(sniff
 
 TARGET_LINK_LIBRARIES(sniff
 	persist-sql
-	server
 	atomspace
 	${ODBC_LIBRARIES}
 )
