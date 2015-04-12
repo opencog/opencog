@@ -33,57 +33,57 @@ using namespace opencog;
 class EvaluationUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
-    EvaluationUTest(void)
-    {
-        try
-        {
-             config().load("opencog-test.conf");
-        }
-        catch (RuntimeException &e)
-        {
-            std::cerr << e.getMessage() << std::endl;
-        }
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+	EvaluationUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-    }
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+	}
 
-    ~EvaluationUTest()
-    {
-        delete eval;
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().getFilename().c_str());
-    }
+	~EvaluationUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
 
-    void setUp(void);
-    void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-    void test_eval(void);
+	void test_eval(void);
 };
 
 void EvaluationUTest::tearDown(void)
 {
-    as->clear();
+	as->clear();
 }
 
 void EvaluationUTest::setUp(void)
 {
-    as->clear();
-    config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
-        "opencog/scm/utilities.scm, "
-        "opencog/scm/opencog/query.scm");
+	as->clear();
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/utilities.scm, "
+		"opencog/scm/opencog/query.scm");
 
-    load_scm_files_from_config(*as);
+	load_scm_files_from_config(*as);
 }
 
 /*
@@ -91,16 +91,35 @@ void EvaluationUTest::setUp(void)
  */
 void EvaluationUTest::test_eval(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
-    load_scm_files_from_config(*as);
+	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
+	load_scm_files_from_config(*as);
 
 /*
-    Handle five = eval->eval_h("(cog-bind (five-arcs))");
-    TS_ASSERT_EQUALS(5, as->getArity(five));
+	Handle five = eval->eval_h("(cog-bind (five-arcs))");
+	printf ("five: found:\n%s\n", five->toShortString().c_str());
+	TS_ASSERT_EQUALS(5, as->getArity(five));
+
+	Handle one = eval->eval_h("(cog-bind (one-arc-one))");
+	printf ("one: found:\n%s\n", one->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(one));
+
+	Handle onet = eval->eval_h("(cog-bind (one-arc-three))");
+	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(onet));
+
+	Handle zero = eval->eval_h("(cog-bind (zero-arcs))");
+	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
+	TS_ASSERT_EQUALS(0, as->getArity(zero));
+
+	Handle four = eval->eval_h("(cog-bind (four-arcs))");
+	printf ("four: found:\n%s\n", four->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, as->getArity(four));
 */
 
-    Handle one = eval->eval_h("(cog-bind (one-arc))");
-    TS_ASSERT_EQUALS(1, as->getArity(one));
+	Handle two = eval->eval_h("(cog-bind (two-arcs))");
+	printf ("two: found:\n%s\n", two->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(two));
+
 }

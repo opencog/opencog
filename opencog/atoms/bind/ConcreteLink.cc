@@ -471,7 +471,12 @@ void ConcreteLink::debug_print(const char* tag) const
 		cl = 0;
 		for (const Handle& h : _optionals)
 		{
-			printf("Optional clause %d: ", cl);
+			printf("Optional clause %d:", cl);
+			if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
+				printf(" (evaluatable)");
+			if (_executable_holders.find(h) != _executable_holders.end())
+				printf(" (executable)");
+			printf("\n");
 			prt(h);
 			cl++;
 		}
@@ -483,7 +488,7 @@ void ConcreteLink::debug_print(const char* tag) const
 	for (const Handle& h : _varset)
 	{
 		if (NodeCast(h))
-			printf(" Bound var: "); prt(h);
+			printf("Bound var: "); prt(h);
 	}
 
 	if (_varset.empty())

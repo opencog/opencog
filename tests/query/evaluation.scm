@@ -40,26 +40,90 @@
 	)
 )
 
-;;; Explore the connectivity of the graph
-(define (five-arcs)
+(define (wrapper core)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
-			(AndLink one->x x->one
-			)
+			(AndLink core)
 			(VariableNode "$x")
 		)
 	)
 )
 
-(define (one-arc)
-	(BindLink
-		(VariableNode "$x")
-		(ImplicationLink
-			(AndLink one->x x->one
-				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
-			)
-			(VariableNode "$x")
+;;; Explore the connectivity of the graph
+
+;; All five nodes are bi-connected.
+(define (five-arcs)
+	(wrapper (list one->x x->one))
+)
+
+;; Reject all but one arc
+(define (one-arc-one)
+	(wrapper
+		(list one->x x->one
+			(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
 		)
 	)
 )
+
+(define (one-arc-three)
+	(wrapper
+		(list one->x x->one
+			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+		)
+	)
+)
+
+;;; conflict thus not satisfiable $x cannot be 3 and 4 at the same time
+(define (zero-arcs)
+	(wrapper
+		(list one->x x->one
+			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+			(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+		)
+	)
+)
+
+;; reject node three only; of the five, four remain
+(define (four-arcs)
+	(wrapper
+		(list one->x x->one
+			(AbsentLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+			)
+		)
+	)
+)
+
+;; reject three nodes; of the five, two remain
+(define (xtwo-arcs)
+	(wrapper
+		(list one->x x->one
+			(AbsentLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
+			)
+		)
+	)
+)
+
+
+;; reject three nodes; of the five, two remain
+(define (two-arcs)
+	(wrapper
+		(list one->x x->one
+			(AbsentLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+			)
+			(AbsentLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+			)
+			(AbsentLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
+			)
+		)
+	)
+)
+
+
