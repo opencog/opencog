@@ -657,9 +657,18 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
-                                               const Handle& gargs)
+bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
+                                 const std::map<Handle, Handle>& gnds)
 {
+	// Evaluation of the link requires working with an atomspace
+	// of some sort, so that the atoms can be communicated to scheme or
+	// python for the actual evaluation. We don't want to put the
+	// proposed grounding into the "real" atomspace, because the
+	// grounding might be insane.  So we put it here. This is probably
+	// not very efficient, but will do for now...
+
+	Handle gvirt(_instor.instantiate(virt, gnds));
+
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
 	// EvaluationLinks should have the structure
@@ -689,32 +698,7 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, gargs));
-
-	// XXX FIXME: we are making a crsip-logic go/no-go decision
-	// based on the TV strength. Perhaps something more subtle might be
-	// wanted, here.
-	bool relation_holds = tvp->getMean() > 0.5;
-	return relation_holds;
-}
-
-/* ======================================================== */
-
-bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
-                                 const std::map<Handle, Handle>& gnds)
-{
-	// Evaluation of the link requires working with an atomspace
-	// of some sort, so that the atoms can be communicated to scheme or
-	// python for the actual evaluation. We don't want to put the
-	// proposed grounding into the "real" atomspace, because the
-	// grounding might be insane.  So we put it here. This is probably
-	// not very efficient, but will do for now...
-	AtomSpace temp_aspace;
-	Instantiator instor(&temp_aspace);
-
-	Handle gvirt(instor.instantiate(virt, gnds));
-
-	TruthValuePtr tvp(EvaluationLink::do_evaluate(&temp_aspace, gvirt));
+	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be

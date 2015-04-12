@@ -26,6 +26,7 @@
 #define _OPENCOG_CRISP_LOGIC_PATTERN_MATCH_H
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
@@ -138,7 +139,7 @@ class CrispLogicPMCB :
 			// one how the evaluation turned out.  Its "crisp logic"
 			// because we use a greater-than-half for the TV.
 			//
-			// This is similar to virtual_link_match(), except that,
+			// This is similar to evaluate_link(), except that,
 			// in the current design, this one will get called instead
 			// of that one, when, the pattern has no variables in it.
 			// Perhaps this is wrong .. XXX FIXME
