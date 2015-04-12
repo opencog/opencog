@@ -1,3 +1,6 @@
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ;
 ; Definition for a specific puzzle
 ; Hand-typed-in version of

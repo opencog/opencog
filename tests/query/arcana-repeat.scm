@@ -2,6 +2,8 @@
 ; Unit testing for a strange repeated-clause
 ;
 ;;; Populate the atomspace with two things
+(use-modules (opencog))
+(use-modules (opencog query))
 
 ; Two parts, both identical
 (ImplicationLink

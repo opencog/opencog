@@ -2,6 +2,9 @@
 ; Sudoku puzzle rules, encoded in such a way that the pattern matcher
 ; can try to do a brute-force exploration.
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
+
 
 ; Definition of a number.  Cells in the sudoku puzzle can only contain
 ; numbers.

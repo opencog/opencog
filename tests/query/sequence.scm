@@ -5,6 +5,8 @@
 ; A sequence of these is evaluated, verifying that sequential evaluation
 ; works.
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
 
 (define green-light  (ConceptNode "green light"))
 (define red-light  (ConceptNode "red light"))

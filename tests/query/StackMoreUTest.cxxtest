@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -73,6 +72,12 @@ class StackMoreUTest :  public CxxTest::TestSuite
 		void xtest_uu(void);
 };
 
+extern "C" {
+	void nlp_types_init(void);
+	void attention_types_init(void);
+	void embodiment_types_init(void);
+};
+
 /*
  * This function sets up an implication link, and some data.
  */
@@ -80,17 +85,15 @@ class StackMoreUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void StackMoreUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 
 	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/dynamics/attention/libattention-types.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+	nlp_types_init();
+	attention_types_init();
+	embodiment_types_init();
 
 	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
+		"opencog/atomspace/core_types.scm, "
       "opencog/nlp/types/nlp_types.scm, "
       "opencog/spacetime/spacetime_types.scm, "
       "opencog/dynamics/attention/attention_types.scm, "
@@ -100,7 +103,6 @@ void StackMoreUTest::setUp(void)
 		"tests/query/stackmore-u-o.scm, "
 		"tests/query/stackmore-u-u.scm");
 
-	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 
 	// Create an implication link that will be tested.

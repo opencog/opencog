@@ -18,29 +18,29 @@
 	)
 )
 
-(EvaluationLink
-	(PredicateNode "ergs")
-	(ListLink
-		(ConceptNode "Peter")
-		(NumberNode  8)
-	)
-)
-
-(EvaluationLink
-	(PredicateNode "ergs")
-	(ListLink
-		(ConceptNode "Linas")
-		(NumberNode  4)
-	)
-)
-
-(EvaluationLink
-	(PredicateNode "ergs")
-	(ListLink
-		(ConceptNode "Joe Novice")
-		(NumberNode  1)
-	)
-)
+;;;(EvaluationLink
+;;;	(PredicateNode "ergs")
+;;;	(ListLink
+;;;		(ConceptNode "Peter")
+;;;		(NumberNode  8)
+;;;	)
+;;;)
+;;;
+;;;(EvaluationLink
+;;;	(PredicateNode "ergs")
+;;;	(ListLink
+;;;		(ConceptNode "Linas")
+;;;		(NumberNode  4)
+;;;	)
+;;;)
+;;;
+;;;(EvaluationLink
+;;;	(PredicateNode "ergs")
+;;;	(ListLink
+;;;		(ConceptNode "Joe Novice")
+;;;		(NumberNode  1)
+;;;	)
+;;;)
 
 ; Function that takes the square root of a numeric values
 (define (eff x)

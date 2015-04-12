@@ -24,11 +24,16 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
+
+extern "C" {
+	void nlp_types_init(void);
+	void attention_types_init(void);
+	void embodiment_types_init(void);
+};
 
 class BuggyNot :  public CxxTest::TestSuite
 {
@@ -54,22 +59,15 @@ class BuggyNot :  public CxxTest::TestSuite
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
 
-			server(CogServer::createInstance);
-			as = &cogserver().getAtomSpace();
-
-			// Load the required data
-			config().set("MODULES",
-				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/dynamics/attention/libattention-types.so, "
-				"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
-
-			cogserver().loadModules();
-
-
+			as = new AtomSpace();
+			nlp_types_init();
+			attention_types_init();
+			embodiment_types_init();
 		}
 
 		~BuggyNot()
 		{
+			delete as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());

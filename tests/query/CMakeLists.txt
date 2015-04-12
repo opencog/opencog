@@ -14,8 +14,9 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
 	atomspace
 	nlp-types
+	attention-types
+	embodiment-types
 	query
-	server
 )
 
 # We want to run the tests in the order below;

@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/util/Config.h>
@@ -55,8 +54,7 @@ public:
 		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-		server(CogServer::createInstance);
-		as = &cogserver().getAtomSpace();
+		as = new AtomSpace();
 		eval = new SchemeEval(as);
 
 		config().set("SCM_PRELOAD",
@@ -65,14 +63,8 @@ public:
 
 		load_scm_files_from_config(*as);
 
-		config().set("MODULES",
-			"opencog/query/libQueryModule.so");
-
-		cogserver().loadModules();
-
 		config().set("SCM_PRELOAD", "tests/query/beta-redex.scm");
 		load_scm_files_from_config(*as);
-
 	}
 
 	~BetaRedexUTest()

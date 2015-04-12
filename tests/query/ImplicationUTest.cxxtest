@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -73,6 +72,8 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
+extern "C" { void nlp_types_init(void); };
+
 /*
  * This function sets up an implication link, and some data.
  *
@@ -97,19 +98,12 @@ class ImplicationUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void ImplicationUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
 	// Load the atom types
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so");
+	nlp_types_init();
 
-	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm");
-
-	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 
 	// Create initialzation
@@ -131,6 +125,8 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-node (append (list 'PredicateNode) x)))\n"
 	"(define (VariableNode . x)\n"
 	"   (apply cog-new-node (append (list 'VariableNode) x)))\n"
+	"(define (VariableList . x)\n"
+	"   (apply cog-new-link (append (list 'VariableList) x)))\n"
 	"(define (TypeNode . x)\n"
 	"   (apply cog-new-node (append (list 'TypeNode) x)))\n"
 	"(define (TypedVariableLink . x)\n"

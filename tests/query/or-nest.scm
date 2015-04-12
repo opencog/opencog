@@ -1,6 +1,10 @@
 ;
 ; Unit testing for nested OrLinks in the pattern matcher.
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
+
+
 ;;; Populate the atomspace with four small trees.
 (MemberLink
 	(ConceptNode "Tom")
