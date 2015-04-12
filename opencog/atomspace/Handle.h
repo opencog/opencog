@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <iostream>
 #include <climits>
+#include <functional>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -285,14 +286,34 @@ inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
 }
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+// The below used to work, but broke in gcc-4.7.2. The reason it
+// broke is that it fails to typedef result_type and argument_type,
+// which ... somehow used to work automagically?? It doesn't any more.
 // I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.  Use handle_hash, above, instead.
+// stackoverflow.  You have two choices: use handle_hash, above, or
+// cross your fingers, and hope the definition in the #else clause,
+// below, works.
 
 template<>
-inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+inline std::size_t
+std::hash<opencog::Handle>::operator()(opencog::Handle h) const
 {
     return static_cast<std::size_t>(h.value());
 }
+
+#else
+
+// This works for e, per note immediately above.
+template<>
+struct hash<opencog::Handle>
+{
+    typedef std::size_t result_type;
+    typedef opencog::Handle argument_type;
+    std::size_t
+    operator()(opencog::Handle h) const noexcept
+    { return static_cast<std::size_t>(h.value()); }
+};
+
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
 } //namespace std
