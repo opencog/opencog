@@ -273,7 +273,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	{
 		Handle h(iset[i]);
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
@@ -569,7 +569,7 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
@@ -662,7 +662,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;

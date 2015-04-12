@@ -260,7 +260,16 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 		Type t = h->getType();
 		if (NOT_LINK == t or ABSENT_LINK == t)
 		{
-			Handle inv(LinkCast(h)->getOutgoingAtom(0));
+			LinkPtr lopt(LinkCast(h));
+
+			// We insist on an arity of 1, because anything else is
+			// ambiguous: consider not(A B) is that (not(A) and not(B))
+			// or is it (not(A) or not(B))?
+			if (1 != lopt->getArity())
+				throw InvalidParamException(TRACE_INFO,
+					"NotLink and AbsentLink can have an arity of one only!");
+
+			const Handle& inv(lopt->getOutgoingAtom(0));
 			_optionals.insert(inv);
 			_cnf_clauses.push_back(inv);
 		}

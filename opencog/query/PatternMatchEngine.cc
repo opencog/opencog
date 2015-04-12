@@ -938,12 +938,13 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	{
 		clause_accepted = true;
 		match = _pmc->optional_clause_match(curr_term_handle, hsoln);
+		dbgprt("optional clause match callback match=%d\n", match);
 	}
 	else
 	{
 		match = _pmc->clause_match(curr_term_handle, hsoln);
+		dbgprt("clause match callback match=%d\n", match);
 	}
-	dbgprt("clause match callback match=%d\n", match);
 	if (not match) return false;
 
 	curr_soln_handle = hsoln;

@@ -96,20 +96,6 @@
 )
 
 ;; reject three nodes; of the five, two remain
-(define (xtwo-arcs)
-	(wrapper
-		(list one->x x->one
-			(AbsentLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
-				(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
-				(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
-			)
-		)
-	)
-)
-
-
-;; reject three nodes; of the five, two remain
 (define (two-arcs)
 	(wrapper
 		(list one->x x->one
@@ -125,5 +111,3 @@
 		)
 	)
 )
-
-

@@ -96,7 +96,6 @@ void EvaluationUTest::test_eval(void)
 	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
 	load_scm_files_from_config(*as);
 
-/*
 	Handle five = eval->eval_h("(cog-bind (five-arcs))");
 	printf ("five: found:\n%s\n", five->toShortString().c_str());
 	TS_ASSERT_EQUALS(5, as->getArity(five));
@@ -116,10 +115,8 @@ void EvaluationUTest::test_eval(void)
 	Handle four = eval->eval_h("(cog-bind (four-arcs))");
 	printf ("four: found:\n%s\n", four->toShortString().c_str());
 	TS_ASSERT_EQUALS(4, as->getArity(four));
-*/
 
 	Handle two = eval->eval_h("(cog-bind (two-arcs))");
 	printf ("two: found:\n%s\n", two->toShortString().c_str());
 	TS_ASSERT_EQUALS(2, as->getArity(two));
-
 }
