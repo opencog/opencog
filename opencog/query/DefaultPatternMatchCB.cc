@@ -117,9 +117,9 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all OrLink's. Picking a starter inside one of these
+	// Ignore all ChoiceLink's. Picking a starter inside one of these
 	// will almost surely be disconnected from the rest of the graph.
-	if (OR_LINK == t)
+	if (CHOICE_LINK == t)
 		return Handle::UNDEFINED;
 
 	// Ignore all dynamically-evaluatable links up front.
@@ -300,7 +300,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * none, then it is guaranteed that this will also be correctly
  * reported. For certain, highly unusual (but still canonical) search
  * patterns, the same grounding may be reported more than once; grep for
- * notes pertaining to the OrLink, and the ArcanaUTest for details.
+ * notes pertaining to the ChoiceLink, and the ArcanaUTest for details.
  * Otherwise, all possible groundings are guaranteed to be returned
  * exactly once.
  *
@@ -387,22 +387,22 @@ bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
 /**
  * This callback implements the handling of the special case where the
  * pattern consists of a single clause, at the top of which there is an
- * OrLink. In this situation, one effectively has multiple, unrelated
+ * ChoiceLink. In this situation, one effectively has multiple, unrelated
  * grounding problems at hand, and they need to be treated as such.
  *
  * The core issue here is that, from the point of view of satisfiability,
- * each subgraph that occurs inside an OrLink might be grounded by a
+ * each subgraph that occurs inside an ChoiceLink might be grounded by a
  * graph that is disconnected from the other subgraphs. There is no
  * a-priori way of knowing whether the groundings might be connected,
  * and thus, the worst-case must be assumed: each subgraph that occurs
- * inside an OrLink must be considered to be a unique, independent
+ * inside an ChoiceLink must be considered to be a unique, independent
  * graph, which must be assumed to be disconnected from each of the
  * other subgraphs (even though they "accidentally" share a common
  * variable name).
  *
  * This is best understood through an example. Consider the clause
  *
- *   OrLink
+ *   ChoiceLink
  *       ListLink
  *           ConceptNode Hunt
  *           VariableNode $X
@@ -428,23 +428,23 @@ bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
  * search needs to be launched, starting at `Zebra`.
  *
  * Since the pattern matcher is only able to walk over connected
- * graphs, it must be assumed a-priori that each subgraph in an OrLink
+ * graphs, it must be assumed a-priori that each subgraph in an ChoiceLink
  * is disconnected from the others. The only way that these two sub
  * graphs might prove to be connected is if the variable $X is used in
  * some other clause, thus establishing connectivity from that clause to
- * the subgraphs of the OrLink.
+ * the subgraphs of the ChoiceLink.
  *
  * The practical side-effect, here, with regards to satsifcation, is
  * this: if both groundings are to be found in the above example, then
  * two efforts must be made: One effort, with the initial grounding
  * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
- * is what we do here, with the OrLink loop.
+ * is what we do here, with the ChoiceLink loop.
  */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
                                             const std::set<Handle>& vars,
                                             const HandleSeq& clauses)
 {
-	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
+	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
 	{
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
