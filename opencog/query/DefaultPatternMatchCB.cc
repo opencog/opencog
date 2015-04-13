@@ -41,6 +41,20 @@ using namespace opencog;
 
 /* ======================================================== */
 
+DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
+	_temp_aspace(NULL),
+	_instor(&_temp_aspace),
+	_type_restrictions(NULL),
+	_dynamic(NULL),
+	_as(as)
+{
+	_connectives.insert(AND_LINK);
+	_connectives.insert(OR_LINK);
+	_connectives.insert(NOT_LINK);
+}
+
+/* ======================================================== */
+
 /**
  * The default semantics here is to reject a match if the option
  * clauses are detected.  This is in keeping with the semantics
@@ -673,8 +687,8 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::evaluate_term(const Handle& virt,
-                                 const std::map<Handle, Handle>& gnds)
+bool DefaultPatternMatchCB::eval_term(const Handle& virt,
+                                      const std::map<Handle, Handle>& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
@@ -721,6 +735,61 @@ bool DefaultPatternMatchCB::evaluate_term(const Handle& virt,
 	// wanted, here.
 	bool relation_holds = tvp->getMean() > 0.5;
 	return relation_holds;
+}
+
+/* ======================================================== */
+
+/**
+ * This implements the evaluation of a classical boolean-logic
+ * "sentence": a well-formed formula with no free variables,
+ * having a crisp true/false truth value.  Here, "top" holds
+ * the sentence (with variables), 'gnds' holds the bindings of
+ * variables to values.
+ */
+bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
+                              const std::map<Handle, Handle>& gnds)
+{
+	LinkPtr ltop(LinkCast(top));
+	if (NULL == ltop)
+		throw InvalidParamException(TRACE_INFO,
+	            "Not expecting a Node, here %s\n",
+	            top->toShortString().c_str());
+
+	const HandleSeq& oset = ltop->getOutgoingSet();
+	if (0 == oset.size())
+		throw InvalidParamException(TRACE_INFO,
+		   "Expecting logical connective to have at least one child!");
+
+	Type term_type = top->getType();
+	if (OR_LINK == term_type)
+	{
+		for (const Handle& h : oset)
+			if (eval_sentence(h, gnds)) return true;
+
+		return false;
+	}
+	else if (AND_LINK == term_type)
+	{
+		for (const Handle& h : oset)
+			if (not eval_sentence(h, gnds)) return false;
+
+		return true;
+	}
+	else if (NOT_LINK == term_type)
+	{
+		if (1 != oset.size())
+			throw InvalidParamException(TRACE_INFO,
+			            "NotLink can have only one child!");
+
+		return not eval_sentence(oset[0], gnds);
+	}
+	else if (classserver().isA(term_type, VIRTUAL_LINK))
+	{
+		return eval_term(top, gnds);
+	}
+	throw InvalidParamException(TRACE_INFO,
+	            "Unknown logical connective %s\n",
+	            top->toShortString().c_str());
 }
 
 /* ===================== END OF FILE ===================== */

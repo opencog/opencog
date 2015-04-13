@@ -44,13 +44,7 @@ namespace opencog {
 class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
 	public:
-		DefaultPatternMatchCB(AtomSpace* as) :
-			_temp_aspace(NULL),
-			_instor(&_temp_aspace),
-			_type_restrictions(NULL),
-			_dynamic(NULL),
-			_as(as)
-		{}
+		DefaultPatternMatchCB(AtomSpace*);
 
 		/**
 		 * Called when a node in the template pattern needs to
@@ -143,8 +137,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool evaluate_term(const Handle& pat,
-		                           const std::map<Handle,Handle>& gnds);
+		virtual bool evaluate_sentence(const Handle& pat,
+		                           const std::map<Handle,Handle>& gnds)
+		{ return eval_sentence(pat, gnds); }
 
 		/**
 		 * Called to perform the actual search. This makes some default
@@ -174,13 +169,24 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		{
 			_dynamic = &terms;
 		}
+
+		virtual const std::set<Type>& get_connectives(void)
+		{
+			return _connectives;
+		}
 	protected:
 
 		// Used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
 
-		// All the state below is for findig a good place to start
+		std::set<Type> _connectives;
+		bool eval_term(const Handle& pat,
+		             const std::map<Handle,Handle>& gnds);
+		bool eval_sentence(const Handle& pat,
+		             const std::map<Handle,Handle>& gnds);
+
+		// All the state below is for finding a good place to start
 		// searches.
 		Handle _root;
 		Handle _starter_term;

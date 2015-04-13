@@ -157,13 +157,20 @@ class PatternMatchCallback
 		 * currently considered, and the 'value' is the proposed
 		 * grounding.
 		 *
+		 * In ordinary logic, a well-formed formula with no free variables
+		 * is called a "sentence". Thus, in the sense of logic, the 'eval'
+		 * argument, together with 'gnds' combine to bind values to all
+		 * the variables in 'term', thus leaving a sentence with no free
+		 * variables. In logic, sentences are always true or false, ergo
+		 * the the return value.
+		 *
 		 * The return value follows the same convention as all the other
 		 * callbacks: 'true' accepts the grounding, and the search for the
 		 * rest of the pattern continues, while 'false' rejects the
 		 * grounding, and forces a backtrack.
 		 */
-		virtual bool evaluate_term(const Handle& eval,
-		                           const std::map<Handle,Handle>& gnds) = 0; 
+		virtual bool evaluate_sentence(const Handle& eval,
+		                      const std::map<Handle,Handle>& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -268,7 +275,7 @@ class PatternMatchCallback
 		 * typically need to be evaluated during the search.
 		 *
 		 * they belong to the pattern!!!
-		 * 
+		 *
 		 * XXX This is exactly the wrong way. WTF FIXME...
 		 *
 		 * A virtual link is one that does not (might not) exist as a
@@ -291,8 +298,8 @@ class PatternMatchCallback
 		 */
 		virtual void set_evaluatable_terms(const std::set<Handle>&) {}
 
-		virtual std::set<Type> get_connectives(void)
-		{ return std::set<Type>(); }
+		virtual const std::set<Type>& get_connectives(void)
+		{ static const std::set<Type> _empty; return _empty; }
 
 		/**
 		 * Called very early, before pattern-matching has begun. This

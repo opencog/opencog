@@ -71,6 +71,7 @@ class PatternMatchEngine
 		HandleSeq        _mandatory;
 		std::set<Handle> _optionals;
 		std::set<Handle> _evaluatable;
+		std::set<Type>   _connectives;
 
 		// Map from variables to e*uatble terms they appear in.
 		std::unordered_multimap<Handle,Handle> _in_evaluatable;
@@ -170,7 +171,6 @@ class PatternMatchEngine
 		bool tree_compare(const Handle&, const Handle&, Caller);
 		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
-		bool eval_logic_term(const Handle&);
 
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);

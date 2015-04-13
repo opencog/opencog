@@ -69,8 +69,8 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
 		}
-		bool evaluate_term(const Handle& link_h,
-		                   const std::map<Handle, Handle> &gnds) {
+		bool evaluate_sentence(const Handle& link_h,
+		                       const std::map<Handle, Handle> &gnds) {
 			throw InvalidParamException(TRACE_INFO,
 			              "Not expecting a virtual link here!");
 		}
@@ -180,7 +180,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// in the Arg atoms. So, we ground the args, and pass that
 			// to the callback.
 
-			bool match = cb->evaluate_term(virt, var_gnds);
+			bool match = cb->evaluate_sentence(virt, var_gnds);
 
 			if (not match) return false;
 		}
@@ -343,6 +343,8 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pme->_in_executable = _in_executable;
 	pme->_connectivity_map = _connectivity_map;
 	pme->_pmc = pmcb;
+
+	pme->_connectives = pmcb->get_connectives();
 #ifdef DEBUG
 	debug_print();
 #endif

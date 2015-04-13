@@ -616,59 +616,6 @@ size_t PatternMatchEngine::next_choice(const Handle& hp,
 
 /* ======================================================== */
 
-/**
- * This implements a boolean-logic combination of evaluatable terms.
- * XXX TODO -- this should be replaced by a callback that can perform
- * the needed calculations, using either Bayesiian formulas, or PLN
- * formulas.
- */
-bool PatternMatchEngine::eval_logic_term(const Handle& top)
-{
-	LinkPtr ltop(LinkCast(top));
-	if (NULL == ltop)
-		throw InvalidParamException(TRACE_INFO,
-	            "Not expecting a Node, here %s\n",
-	            top->toShortString().c_str());
-
-	const HandleSeq& oset = ltop->getOutgoingSet();
-	if (0 == oset.size())
-		throw InvalidParamException(TRACE_INFO,
-		   "Expecting logical connective to have at least one child!");
-
-	Type term_type = top->getType();
-	if (OR_LINK == term_type)
-	{
-		for (const Handle& h : oset)
-			if (eval_logic_term(h)) return true;
-
-		return false;
-	}
-	else if (AND_LINK == term_type)
-	{
-		for (const Handle& h : oset)
-			if (not eval_logic_term(h)) return false;
-
-		return true;
-	}
-	else if (NOT_LINK == term_type)
-	{
-		if (1 != oset.size())
-			throw InvalidParamException(TRACE_INFO,
-			            "NotLink can have only one child!");
-
-		return not eval_logic_term(oset[0]);
-	}
-	else if (_classserver.isA(term_type, VIRTUAL_LINK))
-	{
-		return _pmc->evaluate_term(top, var_grounding);
-	}
-	throw InvalidParamException(TRACE_INFO,
-	            "Unknown logical connective %s\n",
-	            top->toShortString().c_str());
-}
-
-/* ======================================================== */
-
 /// start_sol_up -- look for a grounding for the gieven term.
 ///
 /// The argument passed to this function is a term that needs to be
@@ -863,24 +810,16 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			// try again later).  So validate the grounding, but leave
 			// the evaluation for the callback.
 // XXX TODO count the number of ungrounded vars !!! (make sure its zero)
+// XXX TODO make sure that all links from the curr_root to the term are
+// connectives (i.e. are in the _connectives set).  Else throw an error.
+// why bother with this extra overhead, though?? Do we really need to do
+// this?
 
-			if (curr_root == evit->second)
-			{
-				bool found = _pmc->evaluate_term(evit->second, var_grounding);
-				dbgprt("After evaluating clause top, found = %d\n", found);
-				if (found)
-				{
-					curr_term_handle = evit->second;
-					return clause_accept(hsoln);
-				}
-				return false;
-			}
-
-			dbgprt("Evaluated term was mid-clause\n");
-			bool found = eval_logic_term(curr_root);
+			bool found = _pmc->evaluate_sentence(curr_root, var_grounding);
+			dbgprt("After evaluating clause, found = %d\n", found);
 			if (found)
 			{
-				curr_term_handle = curr_root;
+				curr_term_handle = evit->second;
 				return clause_accept(hsoln);
 			}
 			return false;
