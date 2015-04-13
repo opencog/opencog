@@ -43,7 +43,7 @@ class PatternMatchEngine
 
 	// -------------------------------------------
 	// Callback to whom the results are reported.
-	PatternMatchCallback *_pmc;
+	PatternMatchCallback &_pmc;
 	ClassServer& _classserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.

@@ -51,23 +51,23 @@ using namespace opencog;
 class PMCGroundings : public PatternMatchCallback
 {
 	private:
-		PatternMatchCallback* _cb;
+		PatternMatchCallback& _cb;
 
 	public:
-		PMCGroundings(PatternMatchCallback* cb) : _cb(cb) {}
+		PMCGroundings(PatternMatchCallback& cb) : _cb(cb) {}
 
 		// Pass all the calls straight through, except one.
 		bool node_match(const Handle& node1, const Handle& node2) {
-			return _cb->node_match(node1, node2);
+			return _cb.node_match(node1, node2);
 		}
 		bool variable_match(const Handle& node1, const Handle& node2) {
-			return _cb->variable_match(node1, node2);
+			return _cb.variable_match(node1, node2);
 		}
 		bool link_match(const LinkPtr& link1, const LinkPtr& link2) {
-			return _cb->link_match(link1, link2);
+			return _cb.link_match(link1, link2);
 		}
 		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
-			return _cb->post_link_match(link1, link2);
+			return _cb.post_link_match(link1, link2);
 		}
 		bool evaluate_sentence(const Handle& link_h,
 		                       const std::map<Handle, Handle> &gnds) {
@@ -75,30 +75,30 @@ class PMCGroundings : public PatternMatchCallback
 			              "Not expecting a virtual link here!");
 		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
-			return _cb->clause_match(pattrn_link_h, grnd_link_h);
+			return _cb.clause_match(pattrn_link_h, grnd_link_h);
 		}
 		bool optional_clause_match(const Handle& pattrn, const Handle& grnd) {
-			return _cb->optional_clause_match(pattrn, grnd);
+			return _cb.optional_clause_match(pattrn, grnd);
 		}
 		IncomingSet get_incoming_set(const Handle& h) {
-			return _cb->get_incoming_set(h);
+			return _cb.get_incoming_set(h);
 		}
-		void push(void) { _cb->push(); }
-		void pop(void) { _cb->pop(); }
+		void push(void) { _cb.push(); }
+		void pop(void) { _cb.pop(); }
 		void set_type_restrictions(const VariableTypeMap& tm) {
-			_cb->set_type_restrictions(tm);
+			_cb.set_type_restrictions(tm);
 		}
 		void set_evaluatable_terms(const std::set<Handle>& terms) {
-			_cb->set_evaluatable_terms(terms);
+			_cb.set_evaluatable_terms(terms);
 		}
 		void set_evaluatable_holders(const std::set<Handle>& terms) {
-			_cb->set_evaluatable_holders(terms);
+			_cb.set_evaluatable_holders(terms);
 		}
 		bool initiate_search(PatternMatchEngine* pme,
 	                        const std::set<Handle> &vars,
 	                        const std::vector<Handle> &clauses)
 		{
-			return _cb->initiate_search(pme, vars, clauses);
+			return _cb.initiate_search(pme, vars, clauses);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -342,7 +342,6 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	pme->_in_evaluatable = _in_evaluatable;
 	pme->_in_executable = _in_executable;
 	pme->_connectivity_map = _connectivity_map;
-	pme->_pmc = pmcb;
 
 	pme->_connectives = pmcb->get_connectives();
 #ifdef DEBUG
@@ -397,7 +396,7 @@ bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		// Pass through the callbacks, collect up answers.
-		PMCGroundings gcb(pmcb);
+		PMCGroundings gcb(*pmcb);
 		PatternMatchEngine pme(gcb);
 		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
 		clp->satisfy(&gcb, &pme);

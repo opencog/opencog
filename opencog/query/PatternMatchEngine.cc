@@ -261,7 +261,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		if (not _pmc->variable_match (hp,hg)) return false;
+		if (not _pmc.variable_match (hp,hg)) return false;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
@@ -355,7 +355,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		}
 
 		// Let the callback perform basic checking.
-		bool match = _pmc->link_match(lp, lg);
+		bool match = _pmc.link_match(lp, lg);
 		if (not match) return false;
 
 		dbgprt("depth=%d\n", depth);
@@ -384,7 +384,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 				{
 					// If we've found a grounding, lets see if the
 					// post-match callback likes this grounding.
-					match = _pmc->post_link_match(lp, lg);
+					match = _pmc.post_link_match(lp, lg);
 					if (not match) continue;
 
 					// If we've found a grounding, record it.
@@ -444,7 +444,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			match = _pmc->post_link_match(lp, lg);
+			match = _pmc.post_link_match(lp, lg);
 			if (not match) return false;
 
 			// If we've found a grounding, record it.
@@ -520,7 +520,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 				// post-match callback likes this grounding.
 				if (match)
 				{
-					match = _pmc->post_link_match(lp, lg);
+					match = _pmc.post_link_match(lp, lg);
 				}
 
 				// If we've found a grounding, record it.
@@ -582,7 +582,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	if (np and ng)
 	{
 		// Call the callback to make the final determination.
-		bool match = _pmc->node_match(hp, hg);
+		bool match = _pmc.node_match(hp, hg);
 		if (match)
 		{
 			dbgprt("Found matching nodes\n");
@@ -634,7 +634,7 @@ bool PatternMatchEngine::start_sol_up(const Handle& h)
 	curr_term_handle = h;
 
 	// Move up the solution graph, looking for a match.
-	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
+	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
@@ -815,7 +815,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 // why bother with this extra overhead, though?? Do we really need to do
 // this?
 
-			bool found = _pmc->evaluate_sentence(curr_root, var_grounding);
+			bool found = _pmc.evaluate_sentence(curr_root, var_grounding);
 			dbgprt("After evaluating clause, found = %d\n", found);
 			if (found)
 			{
@@ -912,12 +912,12 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	if (is_optional(curr_root))
 	{
 		clause_accepted = true;
-		match = _pmc->optional_clause_match(curr_term_handle, hsoln);
+		match = _pmc.optional_clause_match(curr_term_handle, hsoln);
 		dbgprt("optional clause match callback match=%d\n", match);
 	}
 	else
 	{
-		match = _pmc->clause_match(curr_term_handle, hsoln);
+		match = _pmc.clause_match(curr_term_handle, hsoln);
 		dbgprt("clause match callback match=%d\n", match);
 	}
 	if (not match) return false;
@@ -947,7 +947,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		dbgprt ("==================== FINITO!\n");
 		print_solution(var_grounding, clause_grounding);
 #endif
-		found = _pmc->grounding(var_grounding, clause_grounding);
+		found = _pmc.grounding(var_grounding, clause_grounding);
 	}
 	else
 	{
@@ -991,7 +991,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc->optional_clause_match(curr_term_handle, undef);
+			bool match = _pmc.optional_clause_match(curr_term_handle, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
@@ -1005,7 +1005,7 @@ bool PatternMatchEngine::do_next_clause(void)
 #ifdef DEBUG
 				print_solution(var_grounding, clause_grounding);
 #endif
-				found = _pmc->grounding(var_grounding, clause_grounding);
+				found = _pmc.grounding(var_grounding, clause_grounding);
 			}
 			else
 			{
@@ -1205,7 +1205,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	more_stack[0] = false;
 	permutation_stack.push(mute_stack);
 
-	_pmc->push();
+	_pmc.push();
 }
 
 /**
@@ -1216,7 +1216,7 @@ void PatternMatchEngine::clause_stacks_push(void)
  */
 void PatternMatchEngine::clause_stacks_pop(void)
 {
-	_pmc->pop();
+	_pmc.pop();
 	POPSTK(root_handle_stack, curr_root);
 	POPSTK(term_handle_stack, curr_term_handle);
 	POPSTK(soln_handle_stack, curr_soln_handle);
@@ -1357,7 +1357,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
-	: _pmc (&pmcb),
+	: _pmc(pmcb),
 	_classserver(classserver())
 {
 	// current state
