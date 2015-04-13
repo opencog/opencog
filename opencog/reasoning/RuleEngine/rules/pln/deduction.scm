@@ -101,14 +101,26 @@
                 (
                     (and
                         (<=
-                            (max (/ (- (+ sA sB) 1) sA) 0)
+                            (if (= sA 0)
+                                0
+                                (max (/ (- (+ sA sB) 1) sA) 0)
+                            )
                             sAB
-                            (min 1 (/ sB sA))
+                            (if (= sA 0)
+                                1
+                                (min 1 (/ sB sA))
+                            )
                         )
                         (<=
-                            (max (/ (- (+ sB sC) 1) sB) 0)
+                            (if (= sB 0)
+                                0
+                                (max (/ (- (+ sB sC) 1) sB) 0)
+                            )
                             sBC
-                            (min 1 (/ sC sB))
+                            (if (= sB 0)
+                                1
+                                (min 1 (/ sC sB))
+                            )
                         )
                     )
                     (+
