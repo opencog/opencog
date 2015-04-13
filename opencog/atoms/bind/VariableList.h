@@ -72,11 +72,7 @@ public:
 	VariableList(Link&);
 
 	// Return the list of variables we are holding.
-	const HandleSeq& get_variables(void) const { return _varlist.varseq; }
-	const std::set<Handle>& get_varset(void) const { return _varlist.varset; }
-
-	// Return the type restrivtions ffor the variables.
-	const VariableTypeMap& get_typemap(void) const { return _varlist.typemap; }
+	const Variables& get_variables(void) const { return _varlist; }
 
 	// Return true if we are holding a single variable, and the handle is
 	// satisfies any type restrictions. Else return false.

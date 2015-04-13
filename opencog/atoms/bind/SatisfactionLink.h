@@ -86,7 +86,7 @@ public:
 	                 const HandleSeq& clauses);
 
 	// XXX temp hack till thigs get sorted out; remove this method later.
-	const HandleSeq& get_clauses(void) { return _pat.clauses; }
+	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback *) const;
 };

@@ -334,16 +334,9 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	// XXX FIXME someday -- instead of copying these, they should
 	// just be pointers. Or references. Or maybe pme should point
 	// ConcreteLink, and ConcreteLink would befriend the pme ...
-	pme->_bound_vars = _varlist.varset;
-	pme->_cnf_clauses = _pat.cnf_clauses;
-	pme->_mandatory = _pat.mandatory;
-	pme->_optionals = _pat.optionals;
-	pme->_evaluatable = _pat.evaluatable_holders;
-	pme->_in_evaluatable = _pat.in_evaluatable;
-	pme->_in_executable = _pat.in_executable;
-	pme->_connectivity_map = _pat.connectivity_map;
+	pme->_varlist = &_varlist;
+	pme->_pat = &_pat;
 
-	pme->_connectives = pmcb->get_connectives();
 #ifdef DEBUG
 	debug_print();
 #endif

@@ -80,14 +80,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         BindLinkPtr bl(BindLinkCast(bind_link));
         DefaultImplicator imp(&rule_atomspace);
         imp.implicand = bl->get_implicand();
-        imp.set_type_restrictions(bl->get_typemap());
+        imp.set_type_restrictions(bl->get_variables().typemap);
         bl->imply(&imp);
 
         // Get matched bindLinks.
         HandleSeq matches = imp.result_list;
         if (matches.empty()) {
             logger().debug(
-                    "No matching BindLink was found.Returning empty vector");
+                "No matching BindLink was found. Returning empty vector");
             return vector<Rule*> { };
         }
 
@@ -230,7 +230,7 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 
     BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
     fcpm_->implicand = bl->get_implicand();
-    fcpm_->set_type_restrictions(bl->get_typemap());
+    fcpm_->set_type_restrictions(bl->get_variables().typemap);
     bl->imply(fcpm_);
 
     HandleSeq product = fcpm_->get_products();

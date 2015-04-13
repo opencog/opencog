@@ -223,12 +223,12 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not in_quote and _bound_vars.end() != _bound_vars.find(hp))
+	if (not in_quote and _varlist->varset.end() != _varlist->varset.find(hp))
 	{
 #ifdef NO_SELF_GROUNDING
 		// But... if handle hg happens to also be a bound var,
 		// then its a mismatch.
-		if (_bound_vars.end() != _bound_vars.find(hg)) return false;
+		if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
 #endif
 
 		// If we already have a grounding for this variable, the new
@@ -252,7 +252,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// grounded by a free variable (because free variables are
 		// effectively constant literals, during the pattern match.
 		if (VARIABLE_NODE == hg->getType() and
-		    _bound_vars.end() != _bound_vars.find(hg))
+		    _varlist->varset.end() != _varlist->varset.find(hg))
 		{
 			return false;
 		}
@@ -281,7 +281,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		if (hg == curr_term_handle)
 		{
 			// Mismatch, if hg contains bound vars in it.
-			if (any_unquoted_in_tree(hg, _bound_vars)) return false;
+			if (any_unquoted_in_tree(hg, _varlist->varset)) return false;
 		}
 		else
 		{
@@ -291,7 +291,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 			if (not in_quote or
 			    (in_quote and
 			     (VARIABLE_NODE != tp or
-			       _bound_vars.end() == _bound_vars.find(hp))))
+			       _varlist->varset.end() == _varlist->varset.find(hp))))
 			{
 				if (hp != hg) var_grounding[hp] = hg;
 			}
@@ -329,9 +329,9 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// XXX FIXME For now, we punt on this... a proper fix would be
 		// ... hard, as we would have to line up the location of the
 		// quoted and the unquoted parts.
-		if (any_unquoted_in_tree(hg, _bound_vars))
+		if (any_unquoted_in_tree(hg, _varlist->varset))
 		{
-			for (Handle vh: _bound_vars)
+			for (Handle vh: _varlist->varset)
 			{
 				// OK, which tree is it in? And is it quoted in the pattern?
 				if (is_unquoted_in_tree(hg, vh))
@@ -759,7 +759,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
 	       curr_term_handle.value(), curr_root.value());
 
-	if (0 < _in_evaluatable.count(curr_term_handle))
+	if (0 < _pat->in_evaluatable.count(curr_term_handle))
 	{
 		// If we are here, there are four possibilities:
 		// 1) curr_term_handle is not in any evaluatable that lies
@@ -795,7 +795,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 		// a variable, at least it is, if we are working in the canonical
 		// interpretation.
 
-		auto evra = _in_evaluatable.equal_range(curr_term_handle);
+		auto evra = _pat->in_evaluatable.equal_range(curr_term_handle);
 		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
 			if (not is_unquoted_in_tree(curr_root, evit->second))
@@ -1047,7 +1047,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (get_next_untried_helper(false)) return;
 
 	// If there are no optional clauses, we are done.
-	if (_optionals.empty())
+	if (_pat->optionals.empty())
 	{
 		// There are no more ungrounded clauses to consider. We are done.
 		curr_root = Handle::UNDEFINED;
@@ -1090,9 +1090,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	// variables and "grounded" constants.
 #define OLD_LOOP
 #ifdef OLD_LOOP
-	for (const ConnectPair& vk : _connectivity_map)
+	for (const Pattern::ConnectPair& vk : _pat->connectivity_map)
 	{
-		const RootList& rl(vk.second);
+		const Pattern::RootList& rl(vk.second);
 		pursue = vk.first;
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 #else // OLD_LOOP
@@ -1101,9 +1101,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	for (auto gndpair : var_grounding)
 	{
 		pursue = gndpair.first;
-		try { _connectivity_map.at(pursue); }
+		try { _pat->connectivity_map.at(pursue); }
 		catch(...) { continue; }
-		const RootList& rl(_connectivity_map.at(pursue));
+		const RootList& rl(_pat->connectivity_map.at(pursue));
 #endif
 
 		unsolved = false;
@@ -1360,6 +1360,10 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_classserver(classserver())
 {
+	// Our data!
+	//_varlist = _pmc->get_variables();
+	//_pat = _pmc->get_pattern();
+
 	// current state
 	in_quote = false;
 	curr_root = Handle::UNDEFINED;
@@ -1374,21 +1378,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	// unordered link state
 	have_more = false;
 	more_depth = 0;
-}
-
-/**
- * Clear only the internal clause declarations
- */
-void PatternMatchEngine::clear_redex(const std::string& name)
-{
-	_redex_name = name;
-	// Clear all pattern-related state.
-	_bound_vars.clear();
-	_cnf_clauses.clear();
-	_mandatory.clear();
-	_optionals.clear();
-	_evaluatable.clear();
-	_connectivity_map.clear();
 }
 
 /* ======================================================== */
