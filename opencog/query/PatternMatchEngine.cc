@@ -212,7 +212,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		in_quote = true;
 		LinkPtr lp(LinkCast(hp));
 		if (1 != lp->getArity())
-			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+			throw InvalidParamException(TRACE_INFO,
+			            "QuoteLink has unexpected arity!");
 		more_depth ++;
 		bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
 		more_depth --;
@@ -819,12 +820,43 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
 	       curr_term_handle.value(), curr_root.value());
 
-	auto evra = _in_evaluatable.equal_range(curr_term_handle);
-	if (evra.first != evra.second)
+	if (0 < _in_evaluatable.count(curr_term_handle))
 	{
-		// Similar to the cases below, the variable my appear in
-		// more than one term that is under the root clause (right??)
-		// so we have to loop.
+		// If we are here, there are four possibilities:
+		// 1) curr_term_handle is not in any evaluatable that lies
+		//    between it and the clause root.  In this case, we need to
+		//    fall through to the bottom.
+		// 2) The evaluatable is the clause root. We evaluate it, and
+		//    consider the clause satisfied if the evaluation returns
+		//    true. In that case, we continue to te next clause, else we
+		//    backtrack.
+		// 3) The evaluatable is in the middle of a clause, in which case,
+		//    it's parent must be a logical connective: an AndLink, an
+		//    OrLink or a NotLink. In this case, we have to loop over
+		//    all of the evaluatables within this clause, and connect
+		//    them as appropriate. The structure may be non-trivial, so
+		//    that presents a challange.  However, it must be logical
+		//    connectives all the way up to the root of the clause, so the
+		//    easiest thing to do is simply to start at the top, and
+		//    recurse downwards.  Ergo, this is much like case 2): the
+		//    evaluation either suceeds or fails; we proceed or backtrack.
+		// 4) The evaluatable is in the middle of something else. We don't
+		//    know what that means, so we throw an error. Actually, this
+		//    is too harsh. It may be in the middle of some function that
+		//    expects a boolean value as an argument. But I don't know of
+		//    any, just right now.
+		//
+		// Anyway, all of this talk abbout booleans is emphasizing the
+		// point that, someday, we need to replace this crisp logic with
+		// probabalistic logic of some sort. XXX TODO. The fuzzy matcher
+		// tries to do this, but I'm not sure its correct. We eventually
+		// need to do this here, not there.
+		//
+		// By the way, if we are here, then curr_term_handle is surely
+		// a variable, at least it is, if we are working in the canonical
+		// interpretation.
+
+		auto evra = _in_evaluatable.equal_range(curr_term_handle);
 		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
 			if (not is_unquoted_in_tree(curr_root, evit->second))
@@ -841,14 +873,23 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 
 			bool found = _pmc->evaluate_link(evit->second, var_grounding);
 			dbgprt("After evaluating the term, found = %d\n", found);
-			if (found and curr_root == evit->second)
+			if (found)
 			{
-				dbgprt("Evaluated term was clause top\n");
 				curr_term_handle = evit->second;
-				return clause_accept(hsoln);
+				if (curr_root == evit->second)
+				{
+					dbgprt("Evaluated term was clause top\n");
+					return clause_accept(hsoln);
+				}
+				else
+				{
+					throw InvalidParamException(TRACE_INFO,
+					            "Not implemented yet!");
+					dbgprt("Evaluated term was mid-clause\n");
+					return false;
+				}
 			}
-
-			return found;
+			return false;
 		}
 	}
 
