@@ -7,13 +7,9 @@
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
-#include <opencog/guile/load-file.h>
 
 using namespace opencog;
 
@@ -21,7 +17,7 @@ class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
 	ForwardChainer * fc_;
 	AtomSpace * as_;
-	const std::string find_node_test1;
+
 public:
 	ForwardChainerUTest()
 	{
@@ -34,10 +30,7 @@ public:
 		             "opencog/atomspace/core_types.scm, "
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
-		config().set("MODULES", "opencog/query/libQueryModule.so");
-		cogserver().loadModules();
 		cogserver().loadSCMModules();
-		load_scm_files_from_config(*as_);
 		fc_ = new ForwardChainer(as_);
 	}
 	~ForwardChainerUTest() {
