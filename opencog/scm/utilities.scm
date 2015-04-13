@@ -41,6 +41,7 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- approx-eq? -- Test equality of 2 floats up to an epsilon
+; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -651,7 +652,7 @@
   atom 'anchor'.
 
   Thus, for example, suppose the atom-space contains a link of the
-  form 
+  form
         (ReferenceLink
             (ConceptNode \"asdf\")
             (WordNode \"pqrs\")
@@ -918,11 +919,24 @@
           (minus-epsilon -0.000001)
           (plus-epsilon 0.000001)
           )
-        (and (< minus-epsilon diff) (> plus-epsilon diff))        
+        (and (< minus-epsilon diff) (> plus-epsilon diff))
     )
 )
 
 ; ---------------------------------------------------------------------
+(define (cog-equal? atom-1 atom-2)
+"
+  Checks whether two nodes are equal. If they are equal then it will return
+  TRUE_TV else it returns FALSE_TV.
+"
+    (if (equal? atom-1 atom-2)
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+; ---------------------------------------------------------------------
+
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
@@ -971,6 +985,7 @@
 'cartesian-prod
 'cartesian-prod-list-only
 'approx-eq?
+'cog-equal?
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
