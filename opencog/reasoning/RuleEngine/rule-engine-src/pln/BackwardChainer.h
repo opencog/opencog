@@ -28,8 +28,10 @@
 
 #define DEBUG 1
 
-namespace opencog {
+class BackwardChainerUTest;
 
+namespace opencog {
+    
 /**
  * Backward chaining falls in to two cases
  *  1.Truth value query - Given a target atom whose truth value is not known and a pool of atoms,find a way
@@ -58,6 +60,8 @@ namespace opencog {
 
 class BackwardChainer
 {
+    friend class ::BackwardChainerUTest;
+
 public:
 	BackwardChainer(AtomSpace* as);
 	~BackwardChainer();
