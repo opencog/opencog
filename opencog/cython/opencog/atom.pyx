@@ -70,6 +70,9 @@ cdef class Atom(object):
         def __get__(self):
             return self.type
 
+    def truth_value(self, mean, count):
+        self.tv.set_value(mean, count)
+
     def handle_uuid(self):
         return self.handle.value()
 

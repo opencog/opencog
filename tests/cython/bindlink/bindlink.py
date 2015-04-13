@@ -36,7 +36,7 @@ initialize_opencog(atomspace, config_file_name)
 InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))
 InheritanceLink( ConceptNode("Zebra"),      ConceptNode("animal"))
 InheritanceLink( ConceptNode("Deer"),       ConceptNode("animal"))
-InheritanceLink( ConceptNode("Spaceship"),  ConceptNode("machine"))
+InheritanceLink( ConceptNode("Spaceship"),  ConceptNode("machine")).truth_value(0.5,0.5)
 
 # Define a graph search query
 bindlink_handle =  \
