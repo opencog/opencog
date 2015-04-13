@@ -403,7 +403,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		// this. If they are un-ordered, then we have to compare every
 		// possible permutation.  This can be a bit of a combinatoric
 		// explosion.
-		if (classserver().isA(tp, ORDERED_LINK))
+		if (_classserver.isA(tp, ORDERED_LINK))
 		{
 			const HandleSeq &osp = lp->getOutgoingSet();
 			const HandleSeq &osg = lg->getOutgoingSet();
@@ -616,14 +616,51 @@ size_t PatternMatchEngine::next_choice(const Handle& hp,
 
 /* ======================================================== */
 
+/**
+ * This implements a boolean-logic combination of evaluatable terms.
+ * XXX TODO -- this should be replaced by a callback that can perform
+ * the needed calculations, using either Bayesiian formulas, or PLN
+ * formulas.
+ */
 bool PatternMatchEngine::eval_logic_term(const Handle& top)
 {
+	LinkPtr ltop(LinkCast(top));
+	if (NULL == ltop)
+		throw InvalidParamException(TRACE_INFO,
+	            "Not expecting a Node, here %s\n",
+	            top->toShortString().c_str());
+
+	const HandleSeq& oset = ltop->getOutgoingSet();
+	if (0 == oset.size())
+		throw InvalidParamException(TRACE_INFO,
+		   "Expecting logical connective to have at least one child!");
+
 	Type term_type = top->getType();
-	if (OR_LINK == term_type or
-	    AND_LINK == term_type or
-	    NOT_LINK == term_type)
+	if (OR_LINK == term_type)
 	{
+		for (const Handle& h : oset)
+			if (eval_logic_term(h)) return true;
+
 		return false;
+	}
+	else if (AND_LINK == term_type)
+	{
+		for (const Handle& h : oset)
+			if (not eval_logic_term(h)) return false;
+
+		return true;
+	}
+	else if (NOT_LINK == term_type)
+	{
+		if (1 != oset.size())
+			throw InvalidParamException(TRACE_INFO,
+			            "NotLink can have only one child!");
+
+		return not eval_logic_term(oset[0]);
+	}
+	else if (_classserver.isA(term_type, VIRTUAL_LINK))
+	{
+		return _pmc->evaluate_link(top, var_grounding);
 	}
 	throw InvalidParamException(TRACE_INFO,
 	            "Unknown logical connective %s\n",
@@ -840,8 +877,13 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			}
 
 			dbgprt("Evaluated term was mid-clause\n");
-			curr_root =	curr_term_handle;
-			return eval_logic_term(curr_root);
+			bool found = eval_logic_term(curr_root);
+			if (found)
+			{
+				curr_term_handle = curr_root;
+				return clause_accept(hsoln);
+			}
+			return false;
 		}
 	}
 
@@ -1376,6 +1418,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 }
 
 PatternMatchEngine::PatternMatchEngine(void)
+	: _classserver(classserver())
 {
 	// current state
 	in_quote = false;

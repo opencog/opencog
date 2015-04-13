@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
@@ -40,12 +41,14 @@ class PatternMatchEngine
 {
 	friend class ConcreteLink;
 
+	ClassServer& _classserver;
+
 	// Private, locally scoped typedefs, not used outside of this class.
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
-	// Used for managing OrLink state
+	// Used for managing ChoiceLink state
 	typedef std::pair<const Handle&, const Handle&> Choice;
 	typedef std::map<Choice, size_t> ChoiceState;
 

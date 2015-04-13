@@ -845,19 +845,8 @@ TODO
    Anyway, the next clause to be selected is chosen by
    get_next_untried_clause(); there is a XXX note in there about this.
 
- * Enhancement: Add support for OrLink's in the pattern: viz: having
-   partly matched some fraction of the pattern, allow the OrLink to
-   specify several different sub-parts that are acceptable matches.
-   Any one of the subparts could be matched; all possible matches
-   should be reported. In particular, this is needed for the
-   random-choice or-link, used to trigger actions.
-
-   Status: work started. See OrLinkUTest. Problems: Search start points
-   that are inside an OrLink will fail to cover all possibilities. Thus
-   the perform-search loop needs modification.  Also, a "resume where we
-   left off" mechanism is needed (perhaps the have_more mechanism can be
-   used for this?) . Finally, a callback is needed, to
-   allow random-choice to pick one.
+ * Invent a callback so that ChoiceLink can become a random-choice
+	or a Bayesian-probability-choice, etc.
 
  * Enhancement: Add support for IfLink, which would have the semantics
    'if (some-condition-during-search) then match-this else match-that'
