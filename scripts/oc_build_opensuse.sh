@@ -1,11 +1,11 @@
 # SECTION 1 Declare vars and collect environment info.
-# trap errors 
+# trap errors
 set -e
 
 PATH_PREFIX=/usr/local
 CURRENT_DIR=$(pwd)
 
-HOST_SOURCE_BRANCH=$CURRENT_DIR/opencog/src  
+HOST_SOURCE_BRANCH=$CURRENT_DIR/opencog/src
 HOST_BUILD_DIR=$CURRENT_DIR/opencog/build
 
 # SECTION 2 Assemble install info.
@@ -18,7 +18,7 @@ PROCESSORS=$(grep "^processor" /proc/cpuinfo | wc -l)
 MAKE_JOBS=$(($PROCESSORS+0))
 
 VERBOSE="-v"				#for mount, umount, rm, etc.
-QUIET="" 				
+QUIET=""
 
 PACKAGES_FETCH=" git "
 
@@ -77,7 +77,7 @@ PACKAGES_BUILD="
 		#libxmlrpc-c3-dev \
 		#python-flask-restful \
 
-PACKAGES_RUNTIME="	
+PACKAGES_RUNTIME="
 		unixODBC-devel \
 		psqlODBC \
 		postgresql \
@@ -110,7 +110,7 @@ fi
 }
 
 # execute error_trap on signal ERR
-trap error_trap ERR 
+trap error_trap ERR
 # execute exit_trap on signal EXIT
 trap exit_trap  EXIT
 # execute quit_trap on signal INT HUP QUIT TERM
@@ -119,26 +119,26 @@ trap quit_trap  INT HUP QUIT TERM
 # SECTION 4: Function Definitions
 add_repositories() {
 MESSAGE="Adding software repositories..." ; message
-for REPO in $REPOSITORIES ; do 
+for REPO in $REPOSITORIES ; do
 #Install a 'remote' package (not from a repository stated in pacman's configuration files)
   zypper addrepo $REPO
 done
-# Update package database 
+# Update package database
   zypper refresh
 }
 
 
 install_dependencies() {
 MESSAGE="Installing OpenCog build dependencies...." ; message
-if !  zypper --no-refresh install $QUIET $PACKAGES_BUILD $PACKAGES_RUNTIME 
-$PACKAGES_FETCH; 
+if !  zypper --no-refresh install $QUIET $PACKAGES_BUILD $PACKAGES_RUNTIME
+$PACKAGES_FETCH;
 then
   MESSAGE="Error installing some of dependencies... :( :("  ; message
   exit 1
 fi
 }
 
-update_opencog_source() { 
+update_opencog_source() {
 OPENCOG_SOURCE_DIR=$LIVE_SOURCE_BRANCH
 mkdir -p $OPENCOG_SOURCE_DIR || true
 if [ ! "$(ls -A $OPENCOG_SOURCE_DIR/.git)" ]; then
@@ -148,7 +148,7 @@ else
   if [ $UPDATE_OPENCOG ] ; then
     MESSAGE="Updating OpenCog source at $OPENCOG_SOURCE_DIR..." ; message
     cd $OPENCOG_SOURCE_DIR
- #   git pull 
+ #   git pull
     cd -
   fi
 fi
@@ -166,7 +166,7 @@ cmake $HOST_SOURCE_BRANCH
 MESSAGE="make -j$MAKE_JOBS" ; message
 make -j$MAKE_JOBS
 
-if [ $TEST_OPENCOG ] ; then 
+if [ $TEST_OPENCOG ] ; then
   make test
 fi
 
@@ -175,9 +175,9 @@ fi
 
 # For Intel's Threading Block Library (TBB)
 
-# source install 
+# source install
 #zypper si tbb
-#tar -xvzf "/usr/src/packages/SOURCES/tbb*.tar.gz" 
+#tar -xvzf "/usr/src/packages/SOURCES/tbb*.tar.gz"
 #make target=linux $MAKE_JOBS
 pattern_install
 add_repositories
