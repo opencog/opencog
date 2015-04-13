@@ -49,9 +49,9 @@ protected:
     /// Total number of observations used to estimate the mean 
     count_t count;
 
-    void init(strength_t mean, count_t count);
-
 public:
+    void initialize(strength_t new_mean, count_t new_count)
+            { mean = new_mean; count = new_count; }
 
     SimpleTruthValue(strength_t mean, count_t count);
     SimpleTruthValue(const TruthValue&);
