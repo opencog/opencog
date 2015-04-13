@@ -121,10 +121,10 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 			// grounding, then its a perfect match. 
 			if (lpat == lsoln) return true;
 
-			// Accept all OrLink's by default! We will get another shot
-			// at it when the contents of the OrLink are examined.
+			// Accept all ChoiceLink's by default! We will get another shot
+			// at it when the contents of the ChoiceLink are examined.
 			Type pattype = lpat->getType();
-			if (OR_LINK == pattype) return true;
+			if (CHOICE_LINK == pattype) return true;
 
 			if (lpat->getArity() != lsoln->getArity()) return false;
 			Type soltype = lsoln->getType();
