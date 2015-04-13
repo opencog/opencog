@@ -38,12 +38,12 @@ void ConcreteLink::init(void)
 	_pat.redex_name = "anonymous ConcreteLink";
 	ScopeLink::init(_outgoing);
 	unbundle_clauses(_body);
-	validate_clauses(_pat.varset, _pat.clauses);
-	extract_optionals(_pat.varset, _pat.clauses);
+	validate_clauses(_varlist.varset, _pat.clauses);
+	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// check to make sure there are no virtual clauses.
 	HandleSeq concs, virts;
-	unbundle_virtual(_pat.varset, _pat.cnf_clauses,
+	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 concs, virts);
 	if (0 < virts.size())
 	{
@@ -55,7 +55,7 @@ void ConcreteLink::init(void)
 	// the (only) component is sorted into connection-order.
    std::vector<HandleSeq> comps;
    std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_pat.varset, _pat.cnf_clauses, comps, comp_vars);
+	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
 
 	// throw error if more than one component
 	check_connectivity(comps);
@@ -79,12 +79,12 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	// not be using the substitute method, I don't think. If we need it,
 	// then the API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
-	_pat.varset = vars;
+	_varlist.varset = vars;
 	for (const Handle& v : vars)
 	{
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_typemap.insert(*it);
+			_varlist.typemap.insert(*it);
 	}
 
 	// Next, the body... there no _body for lambda. The compo is the
@@ -111,7 +111,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 	// The rest is easy: the evaluatables and the connection map
 	HandleSeq concs, virts;
-	unbundle_virtual(_varset, _pat.cnf_clauses,
+	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 concs, virts);
 	make_connectivity_map(_pat.cnf_clauses);
 }
@@ -182,7 +182,6 @@ void ConcreteLink::unbundle_clauses(const Handle& hbody)
 		// There's just one single clause!
 		_pat.clauses.push_back(hbody);
 	}
-	_pat.varset = _varset;
 }
 
 /* ================================================================= */
@@ -496,13 +495,13 @@ void ConcreteLink::debug_print(const char* tag) const
 		printf("No optional clauses\n");
 
 	// Print out the bound variables in the predicate.
-	for (const Handle& h : _varset)
+	for (const Handle& h : _varlist.varset)
 	{
 		if (NodeCast(h))
 			printf("Bound var: "); prt(h);
 	}
 
-	if (_varset.empty())
+	if (_varlist.varset.empty())
 		printf("There are no bound vars in this pattern\n");
 
 	printf("\n");

@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/query/Pattern.h>
 
 namespace opencog
 {
@@ -34,11 +35,9 @@ namespace opencog
  *  @{
  */
 
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
-
 /// The VariableList class records it's outgoing set in various ways
-/// that make it easier and faster to work with.  It implements a
-/// substitute method that will replace all variables in a tree by
+/// that make it easier and faster to work with in C++.  It implements
+/// a substitute method that will replace all variables in a tree by
 /// the corresponding atoms that it is given. See the .cc file for
 /// more info.
 ///
@@ -50,17 +49,7 @@ class VariableList : public Link
 {
 protected:
 	/// Unbundled variables and types for them.
-	/// _typemap is the (possibly empty) list of restrictions on
-	/// the variable types. The _varset contains exactly the same atoms
-	/// as the _varseq; it is used for fast lookup; (i.e. is some
-	/// some variable a part of this set?) whereas the _varseq list
-	/// preserves the original order of the variables.  Yes, the fast
-	/// lookup really is needed!  The _index is used to implement the
-	/// variable substitution method.
-	HandleSeq _varseq;
-	std::set<Handle> _varset;
-	VariableTypeMap _typemap;
-	std::map<Handle, Arity> _index;
+	Variables _varlist;
 
 	// See VariableList.cc for comments
 	void get_vartype(const Handle&);
@@ -82,12 +71,12 @@ public:
 
 	VariableList(Link&);
 
-	// Return he list of variables we are holding.
-	const HandleSeq& get_variables(void) const { return _varseq; }
-	const std::set<Handle>& get_varset(void) const { return _varset; }
+	// Return the list of variables we are holding.
+	const HandleSeq& get_variables(void) const { return _varlist.varseq; }
+	const std::set<Handle>& get_varset(void) const { return _varlist.varset; }
 
 	// Return the type restrivtions ffor the variables.
-	const VariableTypeMap& get_typemap(void) const { return _typemap; }
+	const VariableTypeMap& get_typemap(void) const { return _varlist.typemap; }
 
 	// Return true if we are holding a single variable, and the handle is
 	// satisfies any type restrictions. Else return false.

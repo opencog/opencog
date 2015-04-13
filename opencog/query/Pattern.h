@@ -31,9 +31,42 @@
 #include <vector>
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>  // for typedef Type
 
 namespace opencog {
 
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
+
+/// The Variables struct defines a list of variables in a way that
+/// makes it easier and faster to work with in C++.  It implements 
+/// the data that is shared between the VariableList link atom
+/// and the pattern matcher.
+///
+struct Variables
+{
+	/// Unbundled variables and types for them.
+	/// _typemap is the (possibly empty) list of restrictions on
+	/// the variable types. The _varset contains exactly the same atoms
+	/// as the _varseq; it is used for fast lookup; (i.e. is some
+	/// some variable a part of this set?) whereas the _varseq list
+	/// preserves the original order of the variables.  Yes, the fast
+	/// lookup really is needed!  The _index is used to implement the
+	/// variable substitution method.
+	HandleSeq varseq;
+	std::set<Handle> varset;
+	VariableTypeMap typemap;
+	std::map<Handle, unsigned int> index;
+};
+
+/// The Pattern struct defines a search pattern in a way that makes it
+/// easier and faster to work with in C++.  It implements the data that
+/// is shared between the various pattern-specification atoms and the
+/// pattern matcher.
+///
 struct Pattern
 {
 	// Private, locally scoped typedefs, not used outside of this class.
@@ -45,9 +78,6 @@ struct Pattern
 	// -------------------------------------------
 	// The current set of clauses (beta redex context) being grounded.
 	std::string redex_name;  // for debugging only!
-
-	// variables that need to be grounded.
-	std::set<Handle> varset;
 
 	/// The actual clauses. Set by validate_clauses()
 	HandleSeq        clauses;
@@ -84,6 +114,7 @@ struct Pattern
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // OPENCOG_PATTERN_H

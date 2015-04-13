@@ -42,15 +42,15 @@ void SatisfactionLink::init(void)
 void SatisfactionLink::setup_sat_body(void)
 {
 	_pat.redex_name = "anonymous SatisfactionLink";
-	validate_clauses(_pat.varset, _pat.clauses);
-	extract_optionals(_pat.varset, _pat.clauses);
-	unbundle_virtual(_pat.varset, _pat.cnf_clauses,
+	validate_clauses(_varlist.varset, _pat.clauses);
+	extract_optionals(_varlist.varset, _pat.clauses);
+	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
                     _fixed, _virtual);
 
 	// Split the non virtual clauses into connected components
 	std::vector<HandleSeq> comps;
 	std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_pat.varset, _fixed, comps, comp_vars);
+	get_connected_components(_varlist.varset, _fixed, comps, comp_vars);
 
 	// If there are no virtuals, and there is only one connected
 	// component, then this is just a single Concrete link; perform
@@ -73,7 +73,7 @@ void SatisfactionLink::setup_sat_body(void)
 	_components.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		Handle h(createConcreteLink(comp_vars[i], _typemap,
+		Handle h(createConcreteLink(comp_vars[i], _varlist.typemap,
 		                            comps[i], _pat.optionals));
 		_components.push_back(h);
 	}
@@ -128,7 +128,7 @@ SatisfactionLink::SatisfactionLink(const std::set<Handle>& vars,
                                    const HandleSeq& clauses)
 	: ConcreteLink(SATISFACTION_LINK, HandleSeq())
 {
-	_pat.varset = vars;
+	_varlist.varset = vars;
 	_pat.clauses = clauses;
 	setup_sat_body();
 }
