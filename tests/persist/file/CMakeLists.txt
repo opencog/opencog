@@ -4,6 +4,7 @@ OPENCOG_ADD_ATOM_TYPES(
 	atom_types.definitions
 	atom_types.inheritance
 	persist_test_types.scm
+    persist_test_types.pyx
 )
 ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 

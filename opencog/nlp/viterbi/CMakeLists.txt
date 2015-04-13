@@ -3,7 +3,8 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h
 	atom_types.definitions
 	atom_types.inheritance
-	viterbi_types.scm) 
+	viterbi_types.scm
+	viterbi_types.pyx)
 
 ADD_CUSTOM_TARGET(viterbi_atom_types DEPENDS atom_types.h)
 
