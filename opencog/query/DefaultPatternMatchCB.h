@@ -179,6 +179,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		// Used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
+		ClassServer& _classserver;
 
 		std::set<Type> _connectives;
 		bool eval_term(const Handle& pat,

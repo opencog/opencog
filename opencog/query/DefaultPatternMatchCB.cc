@@ -44,6 +44,7 @@ using namespace opencog;
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_temp_aspace(NULL),
 	_instor(&_temp_aspace),
+	_classserver(classserver()),
 	_type_restrictions(NULL),
 	_dynamic(NULL),
 	_as(as)
@@ -123,7 +124,7 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
-	if (classserver().isNode(t)) {
+	if (_classserver.isNode(t)) {
 		if (t != VARIABLE_NODE) {
 			width = h->getIncomingSetSize();
 			return h;
@@ -628,7 +629,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 		{
 			size_t num = (size_t) _as->getNumAtomsOfType(t);
 			dbgprt("Type = %s has %lu atoms in the atomspace\n",
-			       classserver().getTypeName(t).c_str(), num);
+			       _classserver.getTypeName(t).c_str(), num);
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
@@ -783,7 +784,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 		return not eval_sentence(oset[0], gnds);
 	}
-	else if (classserver().isA(term_type, VIRTUAL_LINK))
+	else if (EVALUATION_LINK == term_type or
+	         _classserver.isA(term_type, VIRTUAL_LINK))
 	{
 		return eval_term(top, gnds);
 	}
