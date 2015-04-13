@@ -4,20 +4,9 @@ from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.bindlink import execute_atom
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import load_scm, scheme_eval
+from opencog.type_constructors import *
 
 atomspace = AtomSpace()
-
-def GroundedSchemaNode(node_name):
-    return atomspace.add_node(types.GroundedSchemaNode, node_name)
-
-def ConceptNode(node_name):
-    return atomspace.add_node(types.ConceptNode, node_name)
-
-def ExecutionOutputLink(schemaNode, listLink):
-    return atomspace.add_link(types.ExecutionOutputLink, [schemaNode, listLink])
-
-def ListLink(*args):
-    return atomspace.add_link(types.ListLink, args)
 
 # Initialize Scheme
 scheme_preload = [  
