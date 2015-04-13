@@ -27,7 +27,8 @@
 #include "BCPatternMatch.h"
 
 #define DEBUG 1
-using namespace opencog;
+
+namespace opencog {
 
 /**
  * Backward chaining falls in to two cases
@@ -117,4 +118,7 @@ private:
 	vector<Type> _logical_link_types = { AND_LINK, OR_LINK };
 
 };
+
+} // namespace opencog
+
 #endif /* BACKWARDCHAINER_H_ */

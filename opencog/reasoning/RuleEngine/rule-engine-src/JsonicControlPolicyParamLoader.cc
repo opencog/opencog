@@ -34,6 +34,8 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/Config.h>
 
+using namespace opencog;
+
 /**
  * Constructor for JsonicControlPolicyParamLoader
  *

@@ -30,8 +30,10 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
+namespace opencog {
+
 using namespace std;
-using namespace opencog;
+
 /**
  * Reusable functions in the PLN module
  */
@@ -132,4 +134,6 @@ public:
 	float tv_fitness(Handle h);
 };
 
+} // ~namespace opencog
+	
 #endif /* PLNCOMMONS_H_ */

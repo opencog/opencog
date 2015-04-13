@@ -29,7 +29,8 @@
 
 #include "Rule.h"
 
-using namespace opencog;
+namespace opencog {
+
 using namespace json_spirit;
 
 /**
@@ -84,5 +85,7 @@ private:
                                    vector<string> search_paths = { });
     vector<vector<Rule*>> get_mutex_sets(void);
 };
+
+} // ~namespace opencog
 
 #endif /* JSONICCONTROLPOLICYLOADER_H_ */

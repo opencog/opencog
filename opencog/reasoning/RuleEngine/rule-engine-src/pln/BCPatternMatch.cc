@@ -22,6 +22,8 @@
  */
 #include "BCPatternMatch.h"
 
+using namespace opencog;
+
 BCPatternMatch::BCPatternMatch(AtomSpace * as) :
 		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
 				as), as_(as)

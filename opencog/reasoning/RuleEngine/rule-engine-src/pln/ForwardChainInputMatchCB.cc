@@ -25,16 +25,13 @@
 
 #include <opencog/guile/SchemeSmob.h>
 
-ForwardChainInputMatchCB::ForwardChainInputMatchCB(AtomSpace * as
-) :
-		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
-				as), _as(as) {
+using namespace opencog;
 
-}
+ForwardChainInputMatchCB::ForwardChainInputMatchCB(AtomSpace * as)
+	: Implicator(as), DefaultPatternMatchCB(as),
+	  AttentionalFocusCB(as), PLNImplicator(as), _as(as) {}
 
-ForwardChainInputMatchCB::~ForwardChainInputMatchCB() {
-
-}
+ForwardChainInputMatchCB::~ForwardChainInputMatchCB() {}
 
 bool ForwardChainInputMatchCB::grounding(
 		const std::map<Handle, Handle> &var_soln,
@@ -44,6 +41,7 @@ bool ForwardChainInputMatchCB::grounding(
 		_input_match.push_back(h);
 	return false;
 }
+
 void ForwardChainInputMatchCB::set_instantiators_atom_space(AtomSpace *as) {
 	inst = Instantiator(as);
 }
