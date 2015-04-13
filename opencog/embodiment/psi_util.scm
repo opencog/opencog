@@ -980,5 +980,19 @@
 
 ; Given a list of atoms l return the atom with the lowest TV strengh
 (define (atom_with_lowest_tv_mean l)
- (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
- )
+  (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return the atom with the lowest TV strengh
+(define (atom_with_highest_tv_mean l)
+  (max-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return them sorted by TVs (ascending order)
+(define (sort_by_tv l)
+  (sort l (lambda (a1 a2) (>=  (get_truth_value_mean (cog-tv a1))
+                               (get_truth_value_mean (cog-tv a2))
+                               )
+                  )
+        )
+  )
