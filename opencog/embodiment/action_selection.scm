@@ -476,210 +476,246 @@
 ;       limitation later. Probably just add a new function like get_psi_rules.   
 ;
 (define (make_psi_plan goal)
-    (let ( (planned_goal_list (list) )
-           (reachable_rule_list (list) )
-           (unreachable_rule_list (list) )
-           (context_action_list (list) )
-           (solved_rule_list (list) )
+  (let ( (planned_goal_list (list) )
+         (reachable_rule_list (list) )
+         (unreachable_rule_list (list) )
+         (context_action_list (list) )
+         (solved_rule_list (list) )
          )
 
-         (let do_plan ( (current_goal goal)
-                      )
+    (let do_plan ( (current_goal goal) )
 
-           (display "current_goal = ")
-           (display current_goal)
-           (newline)
-           (display "(not (null? current_goal) ) = ")
-           (display (not (null? current_goal) ))
-           (newline)
-           (display "(equal? (member current_goal planned_goal_list) #f) = ")
-           (display (equal? (member current_goal planned_goal_list) #f))
-           (newline)
+      (display "current_goal = ")
+      (display current_goal)
+      (newline)
+      (display "(not (null? current_goal) ) = ")
+      (display (not (null? current_goal) ))
+      (newline)
+      (display "(equal? (member current_goal planned_goal_list) #f) = ")
+      (display (equal? (member current_goal planned_goal_list) #f))
+      (newline)
+      (display "(not (member current_goal planned_goal_list)) = ")
+      (display (not (member current_goal planned_goal_list)))
+      (newline)
 
-             ; If current goal is not empty and it has not been planned yet,
-             ; make a plan for it
-             (if (and (not (null? current_goal) )
-                      (equal? (member current_goal planned_goal_list) #f)
-                 )
+      ; If current goal is not empty and it has not been planned yet,
+      ; make a plan for it
+      (if (and (not (null? current_goal) )
+               (not (member current_goal planned_goal_list)))
 
-                ; Get all the rules related to current goal 
-                (let ( (available_rule_list
-                           (query_atom_space (find_psi_rule current_goal) ) 
+          ; Get all the rules related to current goal
+          (let ( (available_rule_list
+                  (query_atom_space (find_psi_rule current_goal) ) 
+                  ) )
+
+            (display "available_rule_list = ")
+            (display available_rule_list)
+            (newline)
+
+            (display "do_plan for ") (newline) (display current_goal) (newline)
+
+            ; Append current goal to end of the planned goal list,
+            ; then it will not be planned twice. 
+            (set! planned_goal_list 
+                  (append planned_goal_list (list current_goal) )
+                  )
+
+            (display "planned_goal_list = ")
+            (display planned_goal_list)
+            (newline)
+
+            (if (null? available_rule_list)
+                ; If there's no rule directly attached to current goal, 
+                ; we should dive into its outgoings
+                (let ( (atom_type (cog-type current_goal) )
+                       (atom_outgoings (cog-outgoing-set current_goal) )
                        )
-                     ) 
 
-                   (display "do_plan for ") (newline) (display current_goal) (newline)
-
-                    ; Append current goal to end of the planned goal list,
-                    ; then it will not be planned twice. 
-                    (set! planned_goal_list 
-                          (append planned_goal_list (list current_goal) )
-                    )
-
-                    (if (null? available_rule_list)
-                        ; If there's no rule directly attach to current goal, 
-                        ; we should dive into its outgoings             
-                        (let ( (atom_type (cog-type current_goal) )
-                               (atom_outgoings (cog-outgoing-set current_goal) )
-                             )
-
-;                              (display "No direct rules for ") (newline) (display current_goal) (newline)
+                  (display "No direct rules for ")
+                  (newline)
+                  (display current_goal)
+                  (newline)
                             
-                             (if (not (null? atom_outgoings) )
-                                 (cond 
-                                     ( (equal? atom_type 'AndLink)
-                                       (map do_plan atom_outgoings)
-                                     ) 
+                  (if (not (null? atom_outgoings) )
+                      (cond 
+                       ( (equal? atom_type 'AndLink)
+                         (map do_plan atom_outgoings)
+                         ) 
   
-                                     ( (equal? atom_type 'OrLink)
-                                       (do_plan
-                                           (random_select atom_outgoings) 
-                                       )
-                                     )    
-                                 ); cond
-                             ); if
-                        ); let
+                       ( (equal? atom_type 'OrLink)
+                         (do_plan
+                          (random_select atom_outgoings) 
+                          )
+                         )    
+                       ); cond
+                      ); if
+                  ); let
                      
-                        ; If there are rules attaching to the current goal
-                        (let ( (selected_rule (list) )
-                               (search_result (list) )
-                             )
+                ; If there are rules attached to the current goal
+                (let ( (selected_rule (list) )
+                       (search_result (list) )
+                       )
 
-                             (display "Available rules ") (newline) (display available_rule_list) (newline)
-                            
-                             ; Sort available rules based on their truth values, 
-                             ; (i.e. mean values of ImplicationLink truth value)
-                             ; then 'search_rule_with_true_context' below will tend 
-                             ; to pick up rules with higher truth value
-                             (set! available_rule_list
-                                 (sort available_rule_list
-                                       (lambda (psi_rule_1 psi_rule_2)
-                                           (<  (get_truth_value_mean (cog-tv psi_rule_1) )
-                                               (get_truth_value_mean (cog-tv psi_rule_2) )
-                                           )   
-                                       )
-                                 )
-                             ) 
+                  (display "available_rule_list = ")
+                  (display available_rule_list)
+                  (newline)
 
-                             ; Search a rule with True context, rules with higher truth value (mean value), 
-                             ; have priority to be tested ealier
-                             (let search_rule_with_true_context ( (rule_list available_rule_list)
-                                                                )
+                  ; Sort available rules based on their truth values,
+                  ; (i.e. mean values of ImplicationLink truth value)
+                  ; then 'search_rule_with_true_context' below will
+                  ; tend to pick up rules with higher truth value
+                  (set! available_rule_list
+                        (reverse (sort_by_tv available_rule_list)))
 
-                                  (if ( not (null? rule_list) )
-                                      (let ( (current_rule (roulette_wheel_select rule_list) )
-                                           )
 
-                                           (if (equal? (member current_rule unreachable_rule_list)
-                                                       #f
-                                               )
+                  (display "available_rule_list = ")
+                  (display available_rule_list)
+                  (newline)
+
+                  ; Search a rule with True context, rules
+                  ; with higher truth value (mean value),
+                  ; have priority to be tested ealier
+                  (let search_rule_with_true_context 
+                      ( (rule_list available_rule_list)
+                        )
+
+                    (if ( not (null? rule_list) )
+                        (let ( (current_rule (roulette_wheel_select rule_list) )
+                               )
+
+                          (if (not (member current_rule unreachable_rule_list))
                                              
-                                               ; if current rule is not in the unreachable rule list
-                                               (begin 
-                                                   ; Search
-                                                   (set! search_result 
-                                                         (is_psi_context_true current_rule)
-                                                   ) 
-                           
-                                                   (if (null? search_result)
-                                                       ; Not found
-                                                       (begin
-                                                           (set! unreachable_rule_list 
-                                                                 (append unreachable_rule_list (list current_rule) ) 
-                                                           )
-;                                                            (display "search_result ") (newline) (display search_result) (newline)
-;                                                            (display "False context rule ") (newline) (display current_rule) (newline)
-                                                           (search_rule_with_true_context (delete current_rule rule_list) ) 
-                                                       )   
-
-                                                       ; Found
-                                                       (begin
-                                                           (set! reachable_rule_list
-                                                                 (append reachable_rule_list (list current_rule) )
-                                                           )
-;                                                            (display "search_result ") (newline) (display search_result) (newline)
-;                                                            (display "True context rule ") (newline) (display current_rule) (newline)
-                                                           (set! selected_rule current_rule)
-                                                       )   
-                                                   ); if 
-                                               ); begin
-
-                                               ; if current rule is already in the unreachable rule list, skip it
-                                               (search_rule_with_true_context (delete current_rule rule_list) )
-
-                                           ); if 
-
-                                      ); let
-                                  ); if
-                             ); let
-  
-                             (if (null? selected_rule)
-                                 ; If there's no rule with True context, randomly select a rule using roulette wheel selection, 
-                                 ; that is, for each rule, the possibility to be selected is proportional to its truth value
-                                 ; (mean value).
-                                 ; And the truth value of these rules could be 'learned' very easily through the interaction with 
-                                 ; the environment. For example, we can increase the truth value of a psi rule (ImplicationLink) 
-                                 ; slightly, while corresponding actions are executed successfully, and decrease it, when actions 
-                                 ; fail. This work should be done in 'PsiActionSelectionAgent::run'. 
-                                 (begin
-;                                      (display "Failed to find any rule with true context ") (newline)
-
-                                     (set! selected_rule 
-                                           (roulette_wheel_select available_rule_list)        
-                                     )
- 
-                                     (let* ( (precondition (get_psi_precondition selected_rule) )
-                                             (split_result (split_context_action precondition) )
-                                             (context (list-ref split_result 0) )
-                                           ) 
-                                           (do_plan context)
-                                     )
-                                 )
-   
-                                 ; If found a rule with True context
-                                 (let ( (selected_context_action (random_select search_result) )
+                              ; if current rule is not in the
+                              ; unreachable rule list
+                              (begin 
+                                ; Search
+                                (set! search_result 
+                                      (is_psi_context_true current_rule)
                                       ) 
+                           
+                                (if (null? search_result)
+                                    ; Not found
+                                    (begin
+                                      (set! unreachable_rule_list 
+                                            (append unreachable_rule_list (list current_rule) ) 
+                                            )
 
-;                                       (display "Found a rule with true context ") (display search_result) (newline)
+                                      (display "search_result = ")
+                                      (display search_result)
+                                      (newline)
 
-                                      (if (equal? (member selected_context_action context_action_list)
-                                                  #f
-                                          )
+                                      (display "current_rule (false context) = ")
+                                      (display current_rule)
+                                      (newline)
 
-                                          (begin
-                                              (set! context_action_list 
-                                                    (append context_action_list
-                                                            (list selected_context_action)
-                                                    )
-                                              )
+                                      (search_rule_with_true_context
+                                       (delete current_rule rule_list) ) 
+                                      )   
 
-                                              (set! solved_rule_list
-                                                    (append solved_rule_list
-                                                            (list selected_rule)
-                                                    ) 
-                                              )
-                                          ); begin
-                                      )
-                                 ); let
+                                    ; Found
+                                    (begin
+                                      (set! reachable_rule_list
+                                            (append reachable_rule_list (list current_rule) )
+                                            )
+                                      (display "search_result = ")
+                                      (display search_result)
+                                      (newline)
+
+                                      (display "current_rule (true context")
+                                      (display current_rule)
+                                      (newline)
+
+                                      (set! selected_rule current_rule)
+                                      )   
+                                    ); if 
+                                ); begin
+
+                              ; If current rule is already in the
+                              ; unreachable rule list, skip it
+                              (search_rule_with_true_context
+                               (delete current_rule rule_list) )
+
+                              ); if 
+                          
+                          ); let
+                        ); if
+                    ); let
+
+                  ;; (if (null? selected_rule)
+                  ;;     ; If there's no rule with True context, randomly
+                  ;;     ; select a rule using roulette wheel selection,
+                  ;;     ; that is, for each rule, the possibility to be
+                  ;;     ; selected is proportional to its truth value
+                  ;;     ; (mean value).  And the truth value of these
+                  ;;     ; rules could be 'learned' very easily through
+                  ;;     ; the interaction with the environment. For
+                  ;;     ; example, we can increase the truth value of a
+                  ;;     ; psi rule (ImplicationLink) slightly, while
+                  ;;     ; corresponding actions are executed
+                  ;;     ; successfully, and decrease it, when actions
+                  ;;     ; fail. This work should be done in
+                  ;;     ; 'PsiActionSelectionAgent::run'.
+                  ;;     (begin
+                  ;;       (display "Failed to find any rule with true context ")
+                  ;;       (newline)
+
+                  ;;       (set! selected_rule 
+                  ;;             (roulette_wheel_select available_rule_list)        
+                  ;;             )
+ 
+                  ;;       (let* ( (precondition (get_psi_precondition selected_rule) )
+                  ;;               (split_result (split_context_action precondition) )
+                  ;;               (context (list-ref split_result 0) )
+                  ;;               ) 
+                  ;;         (do_plan context)
+                  ;;         )
+                  ;;       )
    
-                             ); if (null? selected_rule)
-                        ); let
-                    ); if (null? available_rule_list)
+                  ;;     ; If found a rule with True context
+                  ;;     (let ( (selected_context_action
+                  ;;             (random_select search_result) )
+                  ;;            ) 
 
-                ); let
-             ); if
+                  ;;       (display "Found a rule with true context ")
+                  ;;       (display search_result) (newline)
 
-         ); let do_plan
+                  ;;       (if (not (member selected_context_action
+                  ;;                        context_action_list))
 
-         ; Return the result of planning
-         (if (and (null? solved_rule_list)
-                  (null? context_action_list)
+                  ;;           (begin
+                  ;;             (set! context_action_list 
+                  ;;                   (append context_action_list
+                  ;;                           (list selected_context_action)
+                  ;;                           )
+                  ;;                   )
+
+                  ;;             (set! solved_rule_list
+                  ;;                   (append solved_rule_list
+                  ;;                           (list selected_rule)
+                  ;;                           ) 
+                  ;;                   )
+                  ;;             ); begin
+                  ;;           )
+                  ;;       ); let
+                      
+                  ;;     ); if (null? selected_rule)
+                  ); let
+                ); if (null? available_rule_list)
+            
+            ); let
+          ); if
+      
+      ); let do_plan
+
+    ; Return the result of planning
+    (if (and (null? solved_rule_list)
+             (null? context_action_list)
              )
              
-             (list)
+        (list)
 
-             (list solved_rule_list context_action_list)
-         )
+        (list solved_rule_list context_action_list)
+        )
 
     ); let
 ); define
@@ -733,8 +769,13 @@
          (newline)
 
          ; Planning
-         (set! selected_demand_goal (list) ) ; TODO remove this (for debugging)
          (set! plan_result (make_psi_plan selected_demand_goal) )
+
+         (display "plan_result = ")
+         (display plan_result)
+         (newline)
+
+         (set! plan_result (list))             ;TODO remove this (for debugging)
 
          (if (null? plan_result)
              ; If the planner fails to find any plan for the selected demand goal 
