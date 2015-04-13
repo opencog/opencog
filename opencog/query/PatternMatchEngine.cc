@@ -362,11 +362,11 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		prtmsg("> tree_compare", hp);
 		prtmsg(">           to", hg);
 
-		// OR_LINK's are multiple-choice links. As long as we can
-		// can match one of the sub-expressions of the OrLink, then
-		// the OrLink as a whole can be considered to be grounded.
+		// CHOICE_LINK's are multiple-choice links. As long as we can
+		// can match one of the sub-expressions of the ChoiceLink, then
+		// the ChoiceLink as a whole can be considered to be grounded.
 		//
-		if (OR_LINK == tp)
+		if (CHOICE_LINK == tp)
 		{
 			const std::vector<Handle> &osp = lp->getOutgoingSet();
 
@@ -741,9 +741,9 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 ///    we don't want to go to the immediate parent, we want to go to
 ///    the larger evaluatable term, and offer that up as the thing to
 ///    match (i.e. to evaluate, to invoke callbacks, etc.)
-///  * The parent is an OrLink (ChoiceLink). In this case, the OrLink
+///  * The parent is an ChoiceLink. In this case, the ChoiceLink
 ///    itself cannot be directly matched, as is; only its children can
-///    be. So in this case, we fetch the OrLink's parent, instead.
+///    be. So in this case, we fetch the ChoiceLink's parent, instead.
 ///  * Some crazy combination of the above.
 ///
 /// If it weren't for these complications, this method would be small
@@ -855,16 +855,16 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
 	// first appearance in almost all cases, unless the holders
-	// lie below an OrLink.  For OrLinks, we really have to examine
-	// all the different holders, they correspond to the different
-	// choices.
+	// lie below an ChoiceLink.  For ChoiceLinks, we really have to
+	// examine all the different holders, they correspond to the
+	// different choices.
 	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
 
 	bool found = false;
 	for (const Handle& hi : fa.least_holders)
 	{
-		// Do the simple case first, OrLinks are harder.
-		if (OR_LINK != hi->getType())
+		// Do the simple case first, ChoiceLinks are harder.
+		if (CHOICE_LINK != hi->getType())
 		{
 			dbgprt("Exploring one possible embedding out of %zu\n",
 			       fa.least_holders.size());
@@ -880,24 +880,25 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 		else
 		if (hi == curr_root)
 		{
-			dbgprt("Exploring one possible OrLink at root out of %zu\n",
+			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
 			curr_term_handle = hi;
 			if (clause_accept(hsoln)) found = true;
 		}
 		else
 		{
-			// If we are here, we have an embedded OrLink, i.e. an OrLink
-			// that is not at the clause root. It's contained in some other
-			// link, and we have to get that link and perform comparisons
-			// on it. i.e. we have to "hop over" (hop up) past the OrLink,
-			// before resuming the search.  The easiest way to hop is to
-			// do it recursively... i.e. call ourselves again.
-			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
+			// If we are here, we have an embedded ChoiceLink, i.e. a
+			// ChoiceLink that is not at the clause root. It's contained
+			// in some other link, and we have to get that link and
+			// perform comparisons on it. i.e. we have to "hop over"
+			// (hop up) past the ChoiceLink, before resuming the search.
+			// The easiest way to hop is to do it recursively... i.e.
+			// call ourselves again.
+			dbgprt("Exploring one possible ChoiceLink in clause out of %zu\n",
 			       fa.least_holders.size());
 
 			OC_ASSERT(0 == next_choice(hi, hsoln),
-			          "Something is wrong with the OrLink code");
+			          "Something is wrong with the ChoiceLink code");
 
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;

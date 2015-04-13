@@ -46,6 +46,8 @@ def SequentialAndLink(*args):
     return atomspace.add_link(types.SequentialAndLink, args)
 def AbsentLink(*args):
     return atomspace.add_link(types.AbsentLink, args)
+def ChoiceLink(*args):
+    return atomspace.add_link(types.ChoiceLink, args)
 def ContextLink(*args):
     return atomspace.add_link(types.ContextLink, args)
 def TypeNode(node_name):

@@ -1,5 +1,5 @@
 /*
- * tests/query/OrLinkUTest.cxxtest
+ * tests/query/ChoiceLinkUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -30,14 +30,14 @@
 
 using namespace opencog;
 
-class OrLinkUTest: public CxxTest::TestSuite
+class ChoiceLinkUTest: public CxxTest::TestSuite
 {
 private:
         AtomSpace *as;
         SchemeEval* eval;
 
 public:
-    OrLinkUTest(void)
+    ChoiceLinkUTest(void)
     {
         try
         {
@@ -55,7 +55,7 @@ public:
         eval = new SchemeEval(as);
     }
 
-    ~OrLinkUTest()
+    ~ChoiceLinkUTest()
     {
         delete eval;
         delete as;
@@ -77,12 +77,12 @@ public:
     void test_embed_disco(void);
 };
 
-void OrLinkUTest::tearDown(void)
+void ChoiceLinkUTest::tearDown(void)
 {
     as->clear();
 }
 
-void OrLinkUTest::setUp(void)
+void ChoiceLinkUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
@@ -94,13 +94,13 @@ void OrLinkUTest::setUp(void)
 }
 
 /*
- * OrLink most basic unit test.
+ * ChoiceLink most basic unit test.
  */
-void OrLinkUTest::test_basic_or(void)
+void ChoiceLinkUTest::test_basic_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-link.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-link.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (basic))");
@@ -109,13 +109,13 @@ void OrLinkUTest::test_basic_or(void)
 }
 
 /*
- * OrLink embeded unit test.
+ * ChoiceLink embeded unit test.
  */
-void OrLinkUTest::test_embed_or(void)
+void ChoiceLinkUTest::test_embed_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-embed.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-embed.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (embed))");
@@ -124,13 +124,13 @@ void OrLinkUTest::test_embed_or(void)
 }
 
 /*
- * OrLink nested embeded unit test.
+ * ChoiceLink nested embeded unit test.
  */
-void OrLinkUTest::test_nest_or(void)
+void ChoiceLinkUTest::test_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-nest.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (nest))");
@@ -140,13 +140,13 @@ void OrLinkUTest::test_nest_or(void)
 }
 
 /*
- * OrLink top-level nested unit test.
+ * ChoiceLink top-level nested unit test.
  */
-void OrLinkUTest::test_top_nest_or(void)
+void ChoiceLinkUTest::test_top_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (top-nest))");
@@ -156,13 +156,13 @@ void OrLinkUTest::test_top_nest_or(void)
 }
 
 /*
- * OrLink bad nested embeded unit test.
+ * ChoiceLink bad nested embeded unit test.
  */
-void OrLinkUTest::test_nest_bad_or(void)
+void ChoiceLinkUTest::test_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-nest.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (nest-bad))");
@@ -172,13 +172,13 @@ void OrLinkUTest::test_nest_bad_or(void)
 }
 
 /*
- * OrLink bad nested embeded unit test.
+ * ChoiceLink bad nested embeded unit test.
  */
-void OrLinkUTest::test_top_nest_bad_or(void)
+void ChoiceLinkUTest::test_top_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-top-nest.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
@@ -188,13 +188,13 @@ void OrLinkUTest::test_top_nest_bad_or(void)
 }
 
 /*
- * OrLink disconnected unit test.
+ * ChoiceLink disconnected unit test.
  */
-void OrLinkUTest::test_top_disco(void)
+void ChoiceLinkUTest::test_top_disco(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-disconnected.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-disconnected.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (top-disco))");
@@ -209,14 +209,14 @@ void OrLinkUTest::test_top_disco(void)
 }
 
 /*
- * OrLink disconnected-embeded unit test.
+ * ChoiceLink disconnected-embeded unit test.
  * (Well, its not really disconnected, it just sort-of looks that way.)
  */
-void OrLinkUTest::test_embed_disco(void)
+void ChoiceLinkUTest::test_embed_disco(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/or-embed-disco.scm");
+    config().set("SCM_PRELOAD", "tests/query/choice-embed-disco.scm");
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-bind (embed-disco))");

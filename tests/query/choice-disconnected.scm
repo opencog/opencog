@@ -1,5 +1,5 @@
 ;
-; Unit testing for disconnected patterns within OrLinks.
+; Unit testing for disconnected patterns within ChoiceLinks.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -35,7 +35,7 @@
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
-			(OrLink
+			(ChoiceLink
 				(EvaluationLink
 					(PredicateNode "this way")
 					(ListLink
@@ -56,13 +56,13 @@
 	)
 )
 
-;;; Same as above, but the tope-level OrLink is wrapped.
+;;; Same as above, but the tope-level ChoiceLink is wrapped.
 (define (wrapped-disco)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
 			(AndLink
-				(OrLink
+				(ChoiceLink
 					(EvaluationLink
 						(PredicateNode "this way")
 						(ListLink
