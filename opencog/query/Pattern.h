@@ -30,45 +30,60 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/query/PatternMatchCallback.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 
 struct Pattern
 {
 	// Private, locally scoped typedefs, not used outside of this class.
+	// XX TODO Replace by unordered multimap...
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
-	// Used for managing ChoiceLink state
-	typedef std::pair<const Handle&, const Handle&> Choice;
-	typedef std::map<Choice, size_t> ChoiceState;
-
 	// -------------------------------------------
-	// The current set of clauses (redex context) being grounded.
-
-	std::string _redex_name;  // for debugging only!
+	// The current set of clauses (beta redex context) being grounded.
+	std::string redex_name;  // for debugging only!
 
 	// variables that need to be grounded.
-	std::set<Handle> _bound_vars;
+	std::set<Handle> varset;
 
-	// List of clauses that need to be grounded.
-	// See ConcreteLink.h for additional documentation.
-	HandleSeq        _cnf_clauses;
-	HandleSeq        _mandatory;
-	std::set<Handle> _optionals;
-	std::set<Handle> _evaluatable;
-	std::set<Type>   _connectives;
+	/// The actual clauses. Set by validate_clauses()
+	HandleSeq        clauses;
 
-	// Map from variables to e*uatble terms they appear in.
-	std::unordered_multimap<Handle,Handle> _in_evaluatable;
-	std::unordered_multimap<Handle,Handle> _in_executable;
+	// The cnf_clauses are the clauses, but with the AbsentLink, NotLink
+	// removed. This simplifies graph discovery, so that when they are
+	// found, they can be rejected (e.g. are not absent)
+	HandleSeq        cnf_clauses;  // AbsentLink, NotLink removed!
 
-	ConnectMap       _connectivity_map;
+	// The mandatory clauses must be grounded.
+	HandleSeq        mandatory;
+
+	// The optional clauses don't have to be. This is where the
+	// negated/absent clauses are held, so e.g. if these get grounded,
+	// they might be rejected.
+	std::set<Handle> optionals;    // Optional clauses
+
+	std::set<Handle> evaluatable_terms;   // smallest term that is evaluatable
+	std::set<Handle> evaluatable_holders; // holds something evaluatable.
+	std::set<Handle> executable_terms;    // smallest term that is executable
+	std::set<Handle> executable_holders;  // holds something executable.
+
+	// Maps; the value is the largest (evaluatable or executable)
+	// term containing the variable. Its a multimap, because
+	// a variable may appear in several different evaluatables.
+	std::unordered_multimap<Handle,Handle> in_evaluatable;
+	std::unordered_multimap<Handle,Handle> in_executable;
+
+	// Any given atom may appear in one or more clauses. Given an atom,
+	// the connectivy map tells you what clauses it appears in. It
+	// captures how the clauses are connected to one-another, so that,
+	// after one clause is solved, we know what parts of the unsolved
+	// clauses already have a solution.
+	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG_PATTERN_H
+#endif // OPENCOG_PATTERN_H

@@ -334,14 +334,14 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	// XXX FIXME someday -- instead of copying these, they should
 	// just be pointers. Or references. Or maybe pme should point
 	// ConcreteLink, and ConcreteLink would befriend the pme ...
-	pme->_bound_vars = _varset;
-	pme->_cnf_clauses = _cnf_clauses;
-	pme->_mandatory = _mandatory;
-	pme->_optionals = _optionals;
-	pme->_evaluatable = _evaluatable_holders;
-	pme->_in_evaluatable = _in_evaluatable;
-	pme->_in_executable = _in_executable;
-	pme->_connectivity_map = _connectivity_map;
+	pme->_bound_vars = _pat.varset;
+	pme->_cnf_clauses = _pat.cnf_clauses;
+	pme->_mandatory = _pat.mandatory;
+	pme->_optionals = _pat.optionals;
+	pme->_evaluatable = _pat.evaluatable_holders;
+	pme->_in_evaluatable = _pat.in_evaluatable;
+	pme->_in_executable = _pat.in_executable;
+	pme->_connectivity_map = _pat.connectivity_map;
 
 	pme->_connectives = pmcb->get_connectives();
 #ifdef DEBUG
@@ -349,9 +349,9 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 #endif
 
 	pmcb->set_type_restrictions(_typemap);
-	pmcb->set_evaluatable_terms(_evaluatable_terms);
-	pmcb->set_evaluatable_holders(_evaluatable_holders);
-	bool found = pmcb->initiate_search(pme, _varset, _mandatory);
+	pmcb->set_evaluatable_terms(_pat.evaluatable_terms);
+	pmcb->set_evaluatable_holders(_pat.evaluatable_holders);
+	bool found = pmcb->initiate_search(pme, _pat.varset, _pat.mandatory);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");
