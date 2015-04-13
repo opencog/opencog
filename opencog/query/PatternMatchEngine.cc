@@ -660,7 +660,7 @@ bool PatternMatchEngine::eval_logic_term(const Handle& top)
 	}
 	else if (_classserver.isA(term_type, VIRTUAL_LINK))
 	{
-		return _pmc->evaluate_link(top, var_grounding);
+		return _pmc->evaluate_term(top, var_grounding);
 	}
 	throw InvalidParamException(TRACE_INFO,
 	            "Unknown logical connective %s\n",
@@ -866,7 +866,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 
 			if (curr_root == evit->second)
 			{
-				bool found = _pmc->evaluate_link(evit->second, var_grounding);
+				bool found = _pmc->evaluate_term(evit->second, var_grounding);
 				dbgprt("After evaluating clause top, found = %d\n", found);
 				if (found)
 				{

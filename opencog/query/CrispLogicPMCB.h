@@ -138,11 +138,7 @@ class CrispLogicPMCB :
 			// node, and declare a match, or no match, depending
 			// one how the evaluation turned out.  Its "crisp logic"
 			// because we use a greater-than-half for the TV.
-			//
-			// This is similar to evaluate_link(), except that,
-			// in the current design, this one will get called instead
-			// of that one, when, the pattern has no variables in it.
-			// Perhaps this is wrong .. XXX FIXME
+			// This is the same behavior as used in evaluate_term().
 			TruthValuePtr tv(EvaluationLink::do_evaluate(_as, gnd_link->getHandle()));
 			return tv->getMean() >= 0.5;
 		}

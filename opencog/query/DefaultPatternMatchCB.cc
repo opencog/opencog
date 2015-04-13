@@ -673,7 +673,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
+bool DefaultPatternMatchCB::evaluate_term(const Handle& virt,
                                  const std::map<Handle, Handle>& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
