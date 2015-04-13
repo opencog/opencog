@@ -41,6 +41,9 @@ class PatternMatchEngine
 {
 	friend class ConcreteLink;
 
+	// -------------------------------------------
+	// Callback to whom the results are reported.
+	PatternMatchCallback *_pmc;
 	ClassServer& _classserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
@@ -204,12 +207,8 @@ class PatternMatchEngine
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 
-		// -------------------------------------------
-		// Callback to whom the results are reported.
-		PatternMatchCallback *_pmc;
-
 	public:
-		PatternMatchEngine(void);
+		PatternMatchEngine(PatternMatchCallback&);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.

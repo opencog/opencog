@@ -1356,8 +1356,9 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
-PatternMatchEngine::PatternMatchEngine(void)
-	: _classserver(classserver())
+PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
+	: _pmc (&pmcb),
+	_classserver(classserver())
 {
 	// current state
 	in_quote = false;

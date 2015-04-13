@@ -362,7 +362,7 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
-   PatternMatchEngine pme;
+   PatternMatchEngine pme(*pmcb);
 	return satisfy(pmcb, &pme);
 }
 
@@ -398,7 +398,7 @@ bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	{
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		PatternMatchEngine pme;
+		PatternMatchEngine pme(gcb);
 		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
 		clp->satisfy(&gcb, &pme);
 
