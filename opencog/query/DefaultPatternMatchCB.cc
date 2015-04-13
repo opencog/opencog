@@ -1,7 +1,7 @@
 /*
  * DefaultPatternMatchCB.cc
  *
- * Copyright (C) 2008,2009,2014 Linas Vepstas
+ * Copyright (C) 2008,2009,2014,2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -26,6 +26,7 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 
 #include "DefaultPatternMatchCB.h"
+#include "Instantiator.h"
 #include "PatternMatchEngine.h"
 
 using namespace opencog;
@@ -37,6 +38,22 @@ using namespace opencog;
 #else
 #define dbgprt(f, varargs...)
 #endif
+
+/* ======================================================== */
+
+/**
+ * The default semantics here is to reject a match if the option
+ * clauses are detected.  This is in keeping with the semantics
+ * AbsentLink: a match is possible only if the indicated clauses
+ * are absent!
+ */
+
+bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
+                                                  const Handle& grnd)
+{
+	if (Handle::UNDEFINED == grnd) return true;
+	return false;
+}
 
 /* ======================================================== */
 
@@ -256,7 +273,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	{
 		Handle h(iset[i]);
 		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", i+1, sz,
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
@@ -552,7 +569,7 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
@@ -645,7 +662,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	for (const Handle& h : handle_set)
 	{
 		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
-		dbgprt("Loop candidate (%lu/%lu): %s\n", ++i, handle_set.size(),
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
@@ -656,9 +673,18 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
-                                               const Handle& gargs)
+bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
+                                 const std::map<Handle, Handle>& gnds)
 {
+	// Evaluation of the link requires working with an atomspace
+	// of some sort, so that the atoms can be communicated to scheme or
+	// python for the actual evaluation. We don't want to put the
+	// proposed grounding into the "real" atomspace, because the
+	// grounding might be insane.  So we put it here. This is probably
+	// not very efficient, but will do for now...
+
+	Handle gvirt(_instor.instantiate(virt, gnds));
+
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
 	// EvaluationLinks should have the structure
@@ -688,7 +714,7 @@ bool DefaultPatternMatchCB::virtual_link_match(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, gargs));
+	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be

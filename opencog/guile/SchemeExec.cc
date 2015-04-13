@@ -98,11 +98,11 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 
 	Type t = h->getType();
 	if ((EVALUATION_LINK != t)
-	    and (GREATER_THAN_LINK != t)
-	    and (NOT_LINK != t))
+	    and (NOT_LINK != t)
+	    and (not classserver().isA(t, VIRTUAL_LINK)))
 	{
 		scm_wrong_type_arg_msg("cog-evaluate!", 1, satom,
-			"EvaluationLink or GreaterThanLink or NotLink");
+			"EvaluationLink or NotLink or VirtualLink");
 	}
 
 	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");

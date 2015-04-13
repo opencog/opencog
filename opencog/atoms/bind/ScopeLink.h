@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/LambdaLink.h
+ * opencog/atoms/ScopeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LAMBDA_LINK_H
-#define _OPENCOG_LAMBDA_LINK_H
+#ifndef _OPENCOG_SCOPE_LINK_H
+#define _OPENCOG_SCOPE_LINK_H
 
 #include <map>
 
@@ -33,38 +33,38 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink consitsts of two parts: A variable declaration,
+/// The ScopeLink consitsts of two parts: A variable declaration,
 /// which must conform to current variable declaration standards: i.e.
 /// it must be either a single VariableNode, a single TypedVariableLink,
 /// or a VariableLink.  This is then followed by a body, of any
 /// arbitrary form.  This class does little other than to check for
 /// the above-described format; it will throw an error if an ill-formed
-/// LambdaLink is inserted into the atomspace.  In addition to the
+/// ScopeLink is inserted into the atomspace.  In addition to the
 /// above, it also unpacks the variable declarations, using the
 /// VariableList class as a helper class to do that unpacking.
 /// As usual, the unpacked variables act as a memo or cache, speeding
 /// up later calculations.
-class LambdaLink : public VariableList
+class ScopeLink : public VariableList
 {
 protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-	LambdaLink(Type, const HandleSeq&,
+	ScopeLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(const HandleSeq&);
 public:
-	LambdaLink(const HandleSeq&,
+	ScopeLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(const Handle& varcdecls, const Handle& body,
+	ScopeLink(const Handle& varcdecls, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(Link &l);
+	ScopeLink(Link &l);
 
 	// utility debug print
 	void prt(const Handle& h) const
@@ -81,16 +81,16 @@ public:
 	}
 };
 
-typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;
-static inline LambdaLinkPtr LambdaLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<LambdaLink>(a); }
-static inline LambdaLinkPtr LambdaLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<LambdaLink>(a); }
+typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
+static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<ScopeLink>(a); }
+static inline ScopeLinkPtr ScopeLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
 
 // XXX temporary hack ...
-#define createLambdaLink std::make_shared<LambdaLink>
+#define createScopeLink std::make_shared<ScopeLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_LAMBDA_LINK_H
+#endif // _OPENCOG_SCOPE_LINK_H

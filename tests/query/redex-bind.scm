@@ -2,6 +2,9 @@
 ; data for RedexBindUTest
 ;
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ;; The data that we expect to be able to match
 (EvaluationLink
 	(PredicateNode "some-pred")

@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -52,19 +51,14 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        server(CogServer::createInstance);
-        as = &cogserver().getAtomSpace();
+        as = new AtomSpace();
         eval = new SchemeEval(as);
-
-        config().set("MODULES",
-            "opencog/query/libQueryModule.so");
-
-        cogserver().loadModules();
     }
 
     ~ArcanaUTest()
     {
         delete eval;
+        delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
                 std::remove(logger().getFilename().c_str());
@@ -86,7 +80,9 @@ void ArcanaUTest::setUp(void)
     as->clear();
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
-        "opencog/scm/utilities.scm");
+        "opencog/nlp/types/nlp_types.scm, "
+        "opencog/scm/utilities.scm,"
+        "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }

@@ -28,7 +28,9 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
+
+#define DEBUG 1
 
 namespace opencog {
 class PatternMatchEngine;
@@ -126,7 +128,7 @@ class PatternMatchCallback
 		 * this decision. This should return false to reject the match.
 		 * That is, a return value of "false" denotes that the virtual
 		 * atom does not exist; while "true" implies that it does exist.
-		 * This is the same convention as link_match() and post_link_match().
+		 * This is the same convention as most all of the other callbacks.
 		 *
 		 * Unlike the other callbacks, this takes arguments in s slightly
 		 * different form.  Here, 'virt' is the virtual link specification,
@@ -140,13 +142,13 @@ class PatternMatchCallback
 		 *             VariableNode $arg2  ;; could be some other node, too.
 		 *             EtcAtom ...
 		 *
-		 * The 'args' handle is a candidate grounding for the ListLink.
-		 * Note that the candidate grounding is NOT instantiated in the
-		 * main AtomSpace (it is held in a temporary AtomSpace that is
-		 * deleted upon return from this callback).
+		 * The proposed grounding is given in the 'gnds' map, in which
+		 * the keys are variable names, and the values are the proposed
+		 * groundings for the free variables occuring in the evaluatable
+		 * term.
 		 */
-		virtual bool virtual_link_match(const Handle& virt,
-		                                const Handle& args) = 0;
+		virtual bool evaluate_link(const Handle& virt,
+		                           const std::map<Handle,Handle>& gnds) = 0; 
 
 		/**
 		 * Called when a complete grounding to all clauses is found.
@@ -195,18 +197,9 @@ class PatternMatchCallback
 		 *
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
-		 *
-		 * The default semantics here is to reject a match if the optional
-		 * clauses are detected.  This is in keeping with the semantics of
-		 * AbsentLink: a match is possible only if the indicated clauses
-		 * are absent!
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd)
-		{
-			if (Handle::UNDEFINED == grnd) return true;
-			return false;
-		}
+		                                   const Handle& grnd) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

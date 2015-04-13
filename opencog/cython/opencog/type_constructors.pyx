@@ -60,8 +60,8 @@ def VariableList(*args):
     return atomspace.add_link(types.VariableList, args)
 def QuoteLink(*args):
     return atomspace.add_link(types.QuoteLink, args)
-def LambdaLink(*args):
-    return atomspace.add_link(types.LambdaLink, args)
+def ScopeLink(*args):
+    return atomspace.add_link(types.ScopeLink, args)
 def DefineLink(*args):
     return atomspace.add_link(types.DefineLink, args)
 def BetaRedex(*args):
@@ -86,8 +86,6 @@ def ImplicationLink(*args):
     return atomspace.add_link(types.ImplicationLink, args)
 def EquivalenceLink(*args):
     return atomspace.add_link(types.EquivalenceLink, args)
-def EvaluationLink(*args):
-    return atomspace.add_link(types.EvaluationLink, args)
 def AssociativeLink(*args):
     return atomspace.add_link(types.AssociativeLink, args)
 def InheritanceLink(*args):
@@ -96,6 +94,14 @@ def SimilarityLink(*args):
     return atomspace.add_link(types.SimilarityLink, args)
 def AttractionLink(*args):
     return atomspace.add_link(types.AttractionLink, args)
+def FreeLink(*args):
+    return atomspace.add_link(types.FreeLink, args)
+def EvaluationLink(*args):
+    return atomspace.add_link(types.EvaluationLink, args)
+def ExecutionOutputLink(*args):
+    return atomspace.add_link(types.ExecutionOutputLink, args)
+def ExecutionLink(*args):
+    return atomspace.add_link(types.ExecutionLink, args)
 def ProcedureNode(node_name):
     return atomspace.add_node(types.ProcedureNode, node_name)
 def GroundedProcedureNode(node_name):
@@ -114,19 +120,19 @@ def SchemaExecutionLink(*args):
     return atomspace.add_link(types.SchemaExecutionLink, args)
 def SchemaEvaluationLink(*args):
     return atomspace.add_link(types.SchemaEvaluationLink, args)
-def ExecutionLink(*args):
-    return atomspace.add_link(types.ExecutionLink, args)
-def ExecutionOutputLink(*args):
-    return atomspace.add_link(types.ExecutionOutputLink, args)
 def AnchorNode(node_name):
     return atomspace.add_node(types.AnchorNode, node_name)
 def QuantityLink(*args):
     return atomspace.add_link(types.QuantityLink, args)
-def PlusLink(*args):
-    return atomspace.add_link(types.PlusLink, args)
-def TimesLink(*args):
-    return atomspace.add_link(types.TimesLink, args)
 def VirtualLink(*args):
     return atomspace.add_link(types.VirtualLink, args)
 def GreaterThanLink(*args):
     return atomspace.add_link(types.GreaterThanLink, args)
+def EqualLink(*args):
+    return atomspace.add_link(types.EqualLink, args)
+def FunctionLink(*args):
+    return atomspace.add_link(types.FunctionLink, args)
+def PlusLink(*args):
+    return atomspace.add_link(types.PlusLink, args)
+def TimesLink(*args):
+    return atomspace.add_link(types.TimesLink, args)

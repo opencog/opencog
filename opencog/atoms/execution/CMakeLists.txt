@@ -9,6 +9,7 @@ ENDIF (HAVE_CYTHON)
 ADD_LIBRARY (execution SHARED
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
+	FreeLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -19,12 +20,13 @@ TARGET_LINK_LIBRARIES(execution
 )
 
 IF (HAVE_CYTHON)
-   TARGET_LINK_LIBRARIES(execution PythonEval)
-   TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
+	TARGET_LINK_LIBRARIES(execution PythonEval)
+	TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
 INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
+	FreeLink.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

@@ -42,8 +42,10 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -295,12 +297,20 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
-    } else if (LAMBDA_LINK == atom_type) {
-        if (NULL == LambdaLinkCast(atom))
-            atom = createLambdaLink(*LinkCast(atom));
+/*
+    } else if (EVALUATION_LINK == atom_type) {
+        if (NULL == EvaluationLinkCast(atom))
+            atom = createEvaluationLink(*LinkCast(atom));
+    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+        if (NULL == ExecutionOutputLinkCast(atom))
+            atom = createExecutionOutputLink(*LinkCast(atom));
+*/
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             atom = createSatisfactionLink(*LinkCast(atom));
+    } else if (SCOPE_LINK == atom_type) {
+        if (NULL == ScopeLinkCast(atom))
+            atom = createScopeLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             atom = createVariableList(*LinkCast(atom));
@@ -336,10 +346,16 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createBetaRedex(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
-            } else if (LAMBDA_LINK == atom_type) {
-                atom = createLambdaLink(*lll);
+/*
+            } else if (EVALUATION_LINK == atom_type) {
+                atom = createEvaluationLink(*lll);
+            } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+                atom = createExecutionOutputLink(*lll);
+*/
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
+            } else if (SCOPE_LINK == atom_type) {
+                atom = createScopeLink(*lll);
             } else if (VARIABLE_LIST == atom_type) {
                 atom = createVariableList(*lll);
             } else {

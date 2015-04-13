@@ -24,6 +24,7 @@
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
+#undef DEBUG
 
 using namespace opencog;
 

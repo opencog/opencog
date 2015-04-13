@@ -212,7 +212,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		in_quote = true;
 		LinkPtr lp(LinkCast(hp));
 		if (1 != lp->getArity())
-			throw InvalidParamException(TRACE_INFO, "QuoteLink has unexpected arity!");
+			throw InvalidParamException(TRACE_INFO,
+			            "QuoteLink has unexpected arity!");
 		more_depth ++;
 		bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
 		more_depth --;
@@ -300,8 +301,11 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 #endif
 		// If the pattern contains atoms that are evaluatable i.e. GPN's
 		// then we must fall through, and let the tree comp mechanism
-		// find and evaluate them.
-		if (_evaluatable.find(hp) == _evaluatable.end()) return true;
+		// find and evaluate them. That's for two reasons: (1) because
+		// evaluation may have side-effects (e.g. send a message) and
+		// (2) evaluation may depend on external state. These are
+		// typically used to implement behavior trees, e.g SequenceUTest
+		if (not is_evaluatable(hp)) return true;
 		else
 		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
@@ -618,7 +622,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	// clause has GroundedPredicateNodes in it. In that case, we
 	// have to make sure that they get evaluated.
 	if ((hsoln == curr_root)
-	    and _evaluatable.find(curr_root) == _evaluatable.end())
+	    and not is_evaluatable(curr_root))
 		return false;
 
 	have_stack.push(have_more);
@@ -645,10 +649,10 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				return false;
 			}
 
-			if (do_soln_up(hsoln)) found = true;
+			if (do_term_up(hsoln)) found = true;
 
 			// Get rid of any grounding that might have been proposed
-			// during the tree-compare or do_soln_up.
+			// during the tree-compare or do_term_up.
 			solution_pop();
 		} while (0 < next_choice(curr_term_handle, hsoln));
 
@@ -759,10 +763,45 @@ void PatternMatchEngine::solution_pop(void)
 	POPSTK(term_solutn_stack, clause_grounding);
 }
 
-/// Return true if a grounding was found.  It also has the side effect
-/// of updating clause_grounding map when the current clause is being
-/// grounded.
-bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
+/// do_term_up() -- move upwards from the current term.
+///
+/// Given the current term, in curr_term_handle, find its parent in the
+/// clause, and then call start_sol_up() to see if the term's parent
+/// has corresponding match in the solution graph.
+///
+/// Note that, in the "normal" case, a given term has only one, unique
+/// parent in the given root_clause, and so its easy to find; one just
+/// looks at the path from the root clause down to the term, and the
+/// parent is the link immediately above it.
+///
+/// There are five exceptions to this "unique parent" case:
+///  * The term is already the root clause; it has no parent. In this
+///    case, we send it off to the machinery that explores the next
+///    clause.
+///  * Exactly the same term may appear twice, 3 times, etc. in the
+///    clause, all at different locations.  This is very rare, but
+///    can happen. In essence, it has multiple parents; each needs
+///    to be checked. We loop over these.
+///  * The term is a part of a larger, evaluatable term. In this case,
+///    we don't want to go to the immediate parent, we want to go to
+///    the larger evaluatable term, and offer that up as the thing to
+///    match (i.e. to evaluate, to invoke callbacks, etc.)
+///  * The parent is an OrLink (ChoiceLink). In this case, the OrLink
+///    itself cannot be directly matched, as is; only its children can
+///    be. So in this case, we fetch the OrLink's parent, instead.
+///  * Some crazy combination of the above.
+///
+/// If it weren't for these complications, this method would be small
+/// and simple: it would send the parent to start_sol_up(), and start_sol_up()
+/// would respond as to whether it is staisfiable (solvable) or not.
+///
+/// Takes as an argument the atom that is curently matched up to
+/// curr_term_handle. Thus, curr_term_handle's parent will need to be
+/// matched to hsoln's parent.
+///
+/// Returns true if a grounding for the term's parent was found.
+///
+bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 {
 	depth = 1;
 
@@ -773,8 +812,86 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 	if (curr_term_handle == curr_root)
 		return clause_accept(hsoln);
 
-	// Move up the term, and hunt for a match, again.
-	dbgprt("Term has ground, move up.\n");
+	// Move upwards in the term, and hunt for a match, again.
+	// There are two ways to move upwards: for a normal term, we just
+	// find its parent in the clause. For an evaluatable term, we find
+	// the parent evaluatable in the clause, which may be many steps
+	// higher.
+	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
+	       curr_term_handle.value(), curr_root.value());
+
+	if (0 < _in_evaluatable.count(curr_term_handle))
+	{
+		// If we are here, there are four possibilities:
+		// 1) curr_term_handle is not in any evaluatable that lies
+		//    between it and the clause root.  In this case, we need to
+		//    fall through to the bottom.
+		// 2) The evaluatable is the clause root. We evaluate it, and
+		//    consider the clause satisfied if the evaluation returns
+		//    true. In that case, we continue to te next clause, else we
+		//    backtrack.
+		// 3) The evaluatable is in the middle of a clause, in which case,
+		//    it's parent must be a logical connective: an AndLink, an
+		//    OrLink or a NotLink. In this case, we have to loop over
+		//    all of the evaluatables within this clause, and connect
+		//    them as appropriate. The structure may be non-trivial, so
+		//    that presents a challange.  However, it must be logical
+		//    connectives all the way up to the root of the clause, so the
+		//    easiest thing to do is simply to start at the top, and
+		//    recurse downwards.  Ergo, this is much like case 2): the
+		//    evaluation either suceeds or fails; we proceed or backtrack.
+		// 4) The evaluatable is in the middle of something else. We don't
+		//    know what that means, so we throw an error. Actually, this
+		//    is too harsh. It may be in the middle of some function that
+		//    expects a boolean value as an argument. But I don't know of
+		//    any, just right now.
+		//
+		// Anyway, all of this talk abbout booleans is emphasizing the
+		// point that, someday, we need to replace this crisp logic with
+		// probabalistic logic of some sort. XXX TODO. The fuzzy matcher
+		// tries to do this, but I'm not sure its correct. We eventually
+		// need to do this here, not there.
+		//
+		// By the way, if we are here, then curr_term_handle is surely
+		// a variable, at least it is, if we are working in the canonical
+		// interpretation.
+
+		auto evra = _in_evaluatable.equal_range(curr_term_handle);
+		for (auto evit = evra.first; evit != evra.second; evit++)
+		{
+			if (not is_unquoted_in_tree(curr_root, evit->second))
+				continue;
+
+			prtmsg("Term inside evaluatable, move up to it's top:\n",
+			        evit->second);
+
+			// All of the variables occurring in the term should have
+			// grounded by now. If not, then its virtual term, and we
+			// shouldn't even be here (we can't just backtrack, and
+			// try again later).  So validate the grounding, but leave
+			// the evaluation for the callback.
+
+			bool found = _pmc->evaluate_link(evit->second, var_grounding);
+			dbgprt("After evaluating the term, found = %d\n", found);
+			if (found)
+			{
+				curr_term_handle = evit->second;
+				if (curr_root == evit->second)
+				{
+					dbgprt("Evaluated term was clause top\n");
+					return clause_accept(hsoln);
+				}
+				else
+				{
+					throw InvalidParamException(TRACE_INFO,
+					            "Not implemented yet!");
+					dbgprt("Evaluated term was mid-clause\n");
+					return false;
+				}
+			}
+			return false;
+		}
+	}
 
 	FindAtoms fa(curr_term_handle);
 	fa.search_set(curr_root);
@@ -802,7 +919,7 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
-			if (term_up(hi)) found = true;
+			if (start_sol_up(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
 
@@ -827,24 +944,19 @@ bool PatternMatchEngine::do_soln_up(const Handle& hsoln)
 			dbgprt("Exploring one possible OrLink in clause out of %zu\n",
 			       fa.least_holders.size());
 
-			do {
-				soln_handle_stack.push(curr_soln_handle);
-				curr_soln_handle = hsoln;
-				solution_push();
+			OC_ASSERT(0 == next_choice(hi, hsoln),
+			          "Something is wrong with the OrLink code");
 
-				dbgprt("Exploring one choice of OrLink, "
-				       "UUID=%lu, choice=%lu\n",
-				       hi.value(), next_choice(hi, hsoln));
+			soln_handle_stack.push(curr_soln_handle);
+			curr_soln_handle = hsoln;
+			solution_push();
 
-				_need_choice_push = true;
-				curr_term_handle = hi;
-				if (do_soln_up(hsoln)) found = true;
-				dbgprt("Upwards choice loop next choice=%lu\n",
-				        next_choice(hi, hsoln));
-				solution_pop();
-				POPSTK(soln_handle_stack, curr_soln_handle);
+			_need_choice_push = true;
+			curr_term_handle = hi;
+			if (do_term_up(hsoln)) found = true;
 
-			} while (0 < next_choice(hi, hsoln));
+			solution_pop();
+			POPSTK(soln_handle_stack, curr_soln_handle);
 		}
 	}
 	dbgprt("Done exploring %zu choices, found %d\n",
@@ -863,16 +975,17 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (_optionals.count(curr_root))
+	if (is_optional(curr_root))
 	{
 		clause_accepted = true;
 		match = _pmc->optional_clause_match(curr_term_handle, hsoln);
+		dbgprt("optional clause match callback match=%d\n", match);
 	}
 	else
 	{
 		match = _pmc->clause_match(curr_term_handle, hsoln);
+		dbgprt("clause match callback match=%d\n", match);
 	}
-	dbgprt("clause match callback match=%d\n", match);
 	if (not match) return false;
 
 	curr_soln_handle = hsoln;
@@ -906,9 +1019,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	{
 		prtmsg("Next clause is", curr_root);
 		dbgprt("This clause is %s\n",
-			_optionals.count(curr_root)? "optional" : "required");
+			is_optional(curr_root)? "optional" : "required");
 		dbgprt("This clause is %s\n",
-			_evaluatable.count(curr_root)?
+			is_evaluatable(curr_root)?
 			"dynamically evaluatable" : "non-dynamic");
 		prtmsg("Joining variable  is", curr_term_handle);
 		prtmsg("Joining grounding is", var_grounding[curr_term_handle]);
@@ -941,7 +1054,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// clauses that don't have matches.
 		while ((false == found) and
 		       (false == clause_accepted) and
-		       (_optionals.count(curr_root)))
+		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
 			bool match = _pmc->optional_clause_match(curr_term_handle, undef);
@@ -980,12 +1093,24 @@ bool PatternMatchEngine::do_next_clause(void)
 	return found;
 }
 
-bool PatternMatchEngine::term_up(const Handle& h)
+/// start_sol_up -- look for a grounding for the gieven term.
+///
+/// The argument passed to this function is a term that needs to be
+/// grounded. One of this term's children has already been grounded:
+/// the term's child is in curr_term_handle, and the corresponding
+/// grounding is in curr_soln_handle.  Thus, if the argument is going
+/// to be grounded, it will be grounded by some atom in the incoming set
+/// of cur_soln_handle. Viz, we are walking upwards in these trees,
+/// in lockstep.
+///
+/// Returns true if a grounding for the term was found.
+///
+bool PatternMatchEngine::start_sol_up(const Handle& h)
 {
-	// Move up the solution outgoing set, looking for a match.
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
 
+	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc->get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
 	bool found = false;
@@ -1088,7 +1213,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 			}
 			else if ((issued.end() == issued.find(root)) and
 			         (search_optionals or
-			          (_optionals.end() == _optionals.find(root))))
+			          (not is_optional(root))))
 			{
 				unsolved_clause = root;
 				unsolved = true;

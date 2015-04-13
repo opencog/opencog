@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ScopeLink.h>
 
 namespace opencog
 {
@@ -65,7 +65,7 @@ class DefineLink : public Link
 {
 protected:
 	// The definition is the named object that this link is defining.
-	LambdaLinkPtr _definition;
+	ScopeLinkPtr _definition;
 	void init(const HandleSeq&);
 public:
 	DefineLink(const HandleSeq&,
@@ -77,7 +77,7 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DefineLink(Link &l);
-	LambdaLinkPtr get_definition(void) { return _definition; }
+	ScopeLinkPtr get_definition(void) { return _definition; }
 };
 
 typedef std::shared_ptr<DefineLink> DefineLinkPtr;

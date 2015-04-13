@@ -272,6 +272,24 @@ static inline bool any_unquoted_in_tree(const Handle& tree,
 }
 
 /**
+ * Return how many of the indicated atoms occur somewhere in
+ * the tree (that is, in the tree spanned by the outgoing set.)
+ * But ONLY if they are not quoted!  This is intended to be used to
+ * search for variables; but when a variable is quoted, it is no
+ * longer a variable.
+ */
+static inline unsigned int num_unquoted_in_tree(const Handle& tree,
+                                        const std::set<Handle>& atoms)
+{
+	unsigned int count = 0;
+	for (const Handle& n: atoms)
+	{
+		if (is_unquoted_in_tree(tree, n)) count++;
+	}
+	return count;
+}
+
+/**
  * Return true if the indicated atom occurs somewhere in any of the trees.
  */
 static inline bool is_atom_in_any_tree(const std::vector<Handle>& trees,

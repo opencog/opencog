@@ -5,6 +5,9 @@
 ; role in each.  Graphically, its really two disconnected graphs
 ; (where a connection is defined in terms of shared variables)
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ;;; Populate the atomspace with three small trees.
 (MemberLink
 	(ConceptNode "ways and means")

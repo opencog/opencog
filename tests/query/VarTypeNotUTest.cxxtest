@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -69,6 +68,12 @@ class VarTypeNot :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
+extern "C" {
+	void nlp_types_init(void);
+	void attention_types_init(void);
+	void embodiment_types_init(void);
+};
+
 /*
  * This function sets up an implication link, and some data.
  */
@@ -76,14 +81,12 @@ class VarTypeNot :  public CxxTest::TestSuite
 #define al as->addLink
 void VarTypeNot::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 
 	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/dynamics/attention/libattention-types.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+	nlp_types_init();
+	attention_types_init();
+	embodiment_types_init();
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
@@ -93,7 +96,6 @@ void VarTypeNot::setUp(void)
 		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/var-type-not.scm");
 
-	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 }
 

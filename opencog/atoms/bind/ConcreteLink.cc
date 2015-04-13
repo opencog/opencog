@@ -35,7 +35,7 @@ using namespace opencog;
 
 void ConcreteLink::init(void)
 {
-	LambdaLink::init(_outgoing);
+	ScopeLink::init(_outgoing);
 	unbundle_clauses(_body);
 	validate_clauses(_varset, _clauses);
 	extract_optionals(_varset, _clauses);
@@ -71,7 +71,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
                            const VariableTypeMap& typemap,
                            const HandleSeq& compo,
                            const std::set<Handle>& opts)
-	: LambdaLink(CONCRETE_LINK, HandleSeq())
+	: ScopeLink(CONCRETE_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -117,21 +117,21 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(CONCRETE_LINK, hseq, tv, av)
+	: ScopeLink(CONCRETE_LINK, hseq, tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
+	: ScopeLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(t, hseq, tv, av)
+	: ScopeLink(t, hseq, tv, av)
 {
 	// Derived link-types have other init sequences
 	if (CONCRETE_LINK != t) return;
@@ -139,7 +139,7 @@ ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
 }
 
 ConcreteLink::ConcreteLink(Link &l)
-	: LambdaLink(l)
+	: ScopeLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -260,7 +260,16 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 		Type t = h->getType();
 		if (NOT_LINK == t or ABSENT_LINK == t)
 		{
-			Handle inv(LinkCast(h)->getOutgoingAtom(0));
+			LinkPtr lopt(LinkCast(h));
+
+			// We insist on an arity of 1, because anything else is
+			// ambiguous: consider not(A B) is that (not(A) and not(B))
+			// or is it (not(A) or not(B))?
+			if (1 != lopt->getArity())
+				throw InvalidParamException(TRACE_INFO,
+					"NotLink and AbsentLink can have an arity of one only!");
+
+			const Handle& inv(lopt->getOutgoingAtom(0));
 			_optionals.insert(inv);
 			_cnf_clauses.push_back(inv);
 		}
@@ -274,13 +283,31 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 
 /* ================================================================= */
 
-/// Sort out the list of clauses into three classes:
-/// virtual, evaluatable and concrete.
+/* utility -- every variable in the key term will get the value. */
+static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
+                       const Handle& key, const Handle& value)
+{
+	if (key->getType() == VARIABLE_NODE) map.insert({key, value});
+	LinkPtr lll(LinkCast(key));
+	if (NULL == lll) return;
+	const HandleSeq& oset = lll->getOutgoingSet();
+	for (const Handle& ho : oset) add_to_map(map, ho, value);
+}
+
+/// Sort out the list of clauses into four classes:
+/// virtual, evaluatable, executable and concrete.
 ///
 /// A term is "evalutable" if it contains a GroundedPredicate,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
 /// thier truth values.
+///
+/// A term is "executable" if it is an ExecutionOutputLink
+/// or if it inherits from one (such as PlusLink, TimesLink).
+/// Such terms need execution at grounding time, to determine
+/// thier actual form.  Note that executable terms may frequently
+/// occur underneath evaluatable terms, e.g. if something is greater
+/// than the sum of two other things.
 ///
 /// A clause is "virtual" if it has an evaluatable term inside of it,
 /// and that term takes an argument that is a variable. Such virtual
@@ -302,7 +329,11 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		for (const Handle& sh : fgpn.least_holders)
 		{
 			_evaluatable_terms.insert(sh);
-			if (any_unquoted_in_tree(sh, vars))
+			add_to_map(_in_evaluatable, sh, sh);
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgpn.holders)
@@ -318,11 +349,35 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			_evaluatable_terms.insert(sh);
 			_evaluatable_holders.insert(sh);
-			if (any_unquoted_in_tree(sh, vars))
+			add_to_map(_in_evaluatable, sh, sh);
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_evaluatable_holders.insert(sh);
+
+		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
+		// TimesLink are executable. They get treated by the
+		// same virtual-graph algo as the virtual links.
+		FindAtoms feol(EXECUTION_OUTPUT_LINK, true);
+		feol.search_set(clause);
+
+		for (const Handle& sh : feol.varset)
+		{
+			_executable_terms.insert(sh);
+			_executable_holders.insert(sh);
+			add_to_map(_in_executable, sh, sh);
+			// But they're virtual only if they have two or more
+			// unquoted, bound variables in them. Otherwise, they
+			// can be evaluated on the spot.
+			if (2 <= num_unquoted_in_tree(sh, vars))
+				is_virtual = true;
+		}
+		for (const Handle& sh : feol.holders)
+			_executable_holders.insert(sh);
 
 		if (is_virtual)
 			virtual_clauses.push_back(clause);
@@ -409,9 +464,12 @@ void ConcreteLink::debug_print(const char* tag) const
 	int cl = 0;
 	for (const Handle& h : _mandatory)
 	{
-		printf("Mandatory %d:\n", cl);
+		printf("Mandatory %d:", cl);
 		if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
-			printf(" (evaluatable) ");
+			printf(" (evaluatable)");
+		if (_executable_holders.find(h) != _executable_holders.end())
+			printf(" (executable)");
+		printf("\n");
 		prt(h);
 		cl++;
 	}
@@ -422,7 +480,12 @@ void ConcreteLink::debug_print(const char* tag) const
 		cl = 0;
 		for (const Handle& h : _optionals)
 		{
-			printf("Optional clause %d: ", cl);
+			printf("Optional clause %d:", cl);
+			if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
+				printf(" (evaluatable)");
+			if (_executable_holders.find(h) != _executable_holders.end())
+				printf(" (executable)");
+			printf("\n");
 			prt(h);
 			cl++;
 		}
@@ -434,7 +497,7 @@ void ConcreteLink::debug_print(const char* tag) const
 	for (const Handle& h : _varset)
 	{
 		if (NodeCast(h))
-			printf(" Bound var: "); prt(h);
+			printf("Bound var: "); prt(h);
 	}
 
 	if (_varset.empty())

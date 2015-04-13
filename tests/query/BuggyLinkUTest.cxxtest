@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -52,14 +51,8 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        server(CogServer::createInstance);
-        as = &cogserver().getAtomSpace();
+        as = new AtomSpace();
         eval = new SchemeEval(as);
-
-        config().set("MODULES",
-            "opencog/query/libQueryModule.so");
-
-        cogserver().loadModules();
     }
 
     ~BuggyLinkUTest()

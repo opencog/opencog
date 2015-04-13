@@ -1,5 +1,5 @@
 /*
- * tests/query/RedexBindUTest.cxxtest
+ * tests/query/EvaluationUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,21 +24,20 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/bind/BetaRedex.h>
-#include <opencog/atoms/bind/DefineLink.h>
+#include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-class ComposeUTest: public CxxTest::TestSuite
+class EvaluationUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace *as;
 	SchemeEval* eval;
 
 public:
-	ComposeUTest(void)
+	EvaluationUTest(void)
 	{
 		try
 		{
@@ -54,20 +53,11 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-
-		config().set("SCM_PRELOAD",
-			"opencog/atomspace/core_types.scm, "
-			"opencog/scm/utilities.scm, "
-			"opencog/scm/opencog/query.scm");
-
-		load_scm_files_from_config(*as);
-
-		config().set("SCM_PRELOAD", "tests/query/redex-bind.scm");
-		load_scm_files_from_config(*as);
 	}
 
-	~ComposeUTest()
+	~EvaluationUTest()
 	{
+		delete eval;
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -77,31 +67,56 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_simple_match(void);
+	void test_eval(void);
 };
 
-void ComposeUTest::tearDown(void)
+void EvaluationUTest::tearDown(void)
 {
+	as->clear();
 }
 
-void ComposeUTest::setUp(void)
+void EvaluationUTest::setUp(void)
 {
+	as->clear();
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/utilities.scm, "
+		"opencog/scm/opencog/query.scm");
+
+	load_scm_files_from_config(*as);
 }
 
 /*
- * Basic ComposeLink unit test.
+ * Evaluation most basic unit test.
  */
-void ComposeUTest::test_simple_match(void)
+void EvaluationUTest::test_eval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle hans = eval->eval_h("expected-answer");
-	Handle hgnd = eval->eval_h("(cog-bind (simple-call))");
+	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
+	load_scm_files_from_config(*as);
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	Handle five = eval->eval_h("(cog-bind (five-arcs))");
+	printf ("five: found:\n%s\n", five->toShortString().c_str());
+	TS_ASSERT_EQUALS(5, as->getArity(five));
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	Handle one = eval->eval_h("(cog-bind (one-arc-one))");
+	printf ("one: found:\n%s\n", one->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(one));
 
-	logger().debug("END TEST: %s", __FUNCTION__);
+	Handle onet = eval->eval_h("(cog-bind (one-arc-three))");
+	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(onet));
+
+	Handle zero = eval->eval_h("(cog-bind (zero-arcs))");
+	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
+	TS_ASSERT_EQUALS(0, as->getArity(zero));
+
+	Handle four = eval->eval_h("(cog-bind (four-arcs))");
+	printf ("four: found:\n%s\n", four->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, as->getArity(four));
+
+	Handle two = eval->eval_h("(cog-bind (two-arcs))");
+	printf ("two: found:\n%s\n", two->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(two));
 }

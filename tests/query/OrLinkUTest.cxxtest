@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/query/BindLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -52,19 +51,14 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        server(CogServer::createInstance);
-        as = &cogserver().getAtomSpace();
+        as = new AtomSpace();
         eval = new SchemeEval(as);
-
-        config().set("MODULES",
-            "opencog/query/libQueryModule.so");
-
-        cogserver().loadModules();
     }
 
     ~OrLinkUTest()
     {
         delete eval;
+        delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
                 std::remove(logger().getFilename().c_str());
@@ -73,14 +67,14 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void ytest_basic_or(void);
-    void ytest_embed_or(void);
-    void ytest_nest_or(void);
-    void ytest_top_nest_or(void);
-    void ytest_nest_bad_or(void);
-    void ytest_top_nest_bad_or(void);
+    void test_basic_or(void);
+    void test_embed_or(void);
+    void test_nest_or(void);
+    void test_top_nest_or(void);
+    void test_nest_bad_or(void);
+    void test_top_nest_bad_or(void);
     void test_top_disco(void);
-    void ytest_embed_disco(void);
+    void test_embed_disco(void);
 };
 
 void OrLinkUTest::tearDown(void)
@@ -93,7 +87,8 @@ void OrLinkUTest::setUp(void)
     as->clear();
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
-        "opencog/scm/utilities.scm");
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }
@@ -101,7 +96,7 @@ void OrLinkUTest::setUp(void)
 /*
  * OrLink most basic unit test.
  */
-void OrLinkUTest::ytest_basic_or(void)
+void OrLinkUTest::test_basic_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -116,7 +111,7 @@ void OrLinkUTest::ytest_basic_or(void)
 /*
  * OrLink embeded unit test.
  */
-void OrLinkUTest::ytest_embed_or(void)
+void OrLinkUTest::test_embed_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -131,7 +126,7 @@ void OrLinkUTest::ytest_embed_or(void)
 /*
  * OrLink nested embeded unit test.
  */
-void OrLinkUTest::ytest_nest_or(void)
+void OrLinkUTest::test_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -147,7 +142,7 @@ void OrLinkUTest::ytest_nest_or(void)
 /*
  * OrLink top-level nested unit test.
  */
-void OrLinkUTest::ytest_top_nest_or(void)
+void OrLinkUTest::test_top_nest_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -163,7 +158,7 @@ void OrLinkUTest::ytest_top_nest_or(void)
 /*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::ytest_nest_bad_or(void)
+void OrLinkUTest::test_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -179,7 +174,7 @@ void OrLinkUTest::ytest_nest_bad_or(void)
 /*
  * OrLink bad nested embeded unit test.
  */
-void OrLinkUTest::ytest_top_nest_bad_or(void)
+void OrLinkUTest::test_top_nest_bad_or(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -217,7 +212,7 @@ void OrLinkUTest::test_top_disco(void)
  * OrLink disconnected-embeded unit test.
  * (Well, its not really disconnected, it just sort-of looks that way.)
  */
-void OrLinkUTest::ytest_embed_disco(void)
+void OrLinkUTest::test_embed_disco(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

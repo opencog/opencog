@@ -79,17 +79,27 @@ VARIABLE_LIST <- LIST_LINK
 QUOTE_LINK <- ORDERED_LINK
 
 // Pattern and function declaration
-LAMBDA_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK     // Gives lambda a name
+// A ScopeLink is (more or less???) the same thing as a LambdaLink
+// (We have not yet settled on the appropriate definition of a
+// LambdaLink) The ScopeLink is used to identify an open term, i.e. a
+// link containing VariableNodes within it, and then listing those
+// variables, and forcing type restrictions on them. Thus, in a certain
+// sense, the ScopeLink explicitly binds at least some, and maybe all
+// of the variables that occur in it's body.  It differs from the
+// FreeLink in that the FreeLink neccesarily list ALL the (free)
+// variables within it; the ScopeLink need not bind all of them.
+// The FreeLink also has no type restrictions on the variables.
+SCOPE_LINK <- VARIABLE_LIST
+DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
 BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Scoping and Logical quantifiers
-CONCRETE_LINK <- LAMBDA_LINK       // a set of clauses with no virtuals
+CONCRETE_LINK <- SCOPE_LINK       // a set of clauses with no virtuals
 SATISFACTION_LINK <- CONCRETE_LINK   // Finds all groundings
 BIND_LINK <- SATISFACTION_LINK     // Finds all groundings and executes
 
-FORALL_LINK <- LAMBDA_LINK "ForAllLink"
-EXISTS_LINK <- LAMBDA_LINK
+FORALL_LINK <- SCOPE_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
@@ -99,16 +109,13 @@ SATISFYING_SET_LINK <- UNORDERED_LINK
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
-// The inherit from ForAll becuase if these contain variables, then
+// These inherit from ForAll becuase if these contain variables, then
 // those variables are implicitly scoped to this link (i.e. are not
 // free, but are bound to this link.) Truth-value wise, these behave
 // like AVERAGE_LINK, averaging over the for-all universe that they
 // apply to.
 IMPLICATION_LINK <- AVERAGE_LINK
 EQUIVALENCE_LINK <- AVERAGE_LINK
-
-// To be used with PredicateNode
-EVALUATION_LINK <- ORDERED_LINK
 
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
@@ -117,6 +124,32 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 ATTRACTION_LINK <- ORDERED_LINK
+
+// A FreeLink is any kind of link that might be evaluatable or
+// executable in some way, and can have free variables in it. The
+// FreeLink exists for one purpose: to make visible to the pattern
+// matcher all of the free variables that lie within the link. That is,
+// the FreeLink is at the top of a tree, and somewere in that tree,
+// there might be VariableNodes.  The C++ class for this link records
+// the names of those variables, in order of traversal.  The goal here
+// is to simply know these variables, so that, at the time of evaluation
+// or execution, they are easily located.
+//
+// The variables are necessarily free: they to NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to ScopeLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+FREE_LINK <- ORDERED_LINK
+
+// To be used with PredicateNode
+EVALUATION_LINK <- FREE_LINK
+
+EXECUTION_OUTPUT_LINK <- FREE_LINK
+
+EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
@@ -133,9 +166,6 @@ DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
-EXECUTION_LINK <- ORDERED_LINK
-EXECUTION_OUTPUT_LINK <- ORDERED_LINK
-
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
@@ -149,15 +179,30 @@ ANCHOR_NODE <- NODE
 // Link for mathematics. (???) Huh? What is this? What does it do?
 QUANTITY_LINK <- ORDERED_LINK
 
-// Basic arithmetic operators
-PLUS_LINK <- UNORDERED_LINK
-TIMES_LINK <- UNORDERED_LINK
-
 // A VirtualLink is equivalent to an EvaluationLink, with a
 // GroundedPredicateNode in it, except that the GPN is "built in".
 // So, for example, GreaterThanLink is equivalent to an EvaluationLink
-// with a GroundedPredicateNode "c++:greater_than".  Its defined this
-// way to gain some performance. The base type must be VirtualLink, to
-// make it easier to find these things.
+// with a GroundedPredicateNode "c++:greater_than". The built-in
+// evaluation links have better performance, since they don't need
+// to make a call to external scheme or python code to get evaluated.
+//
+// The VirtuaLink designation is needed by the pattern matcher,
+// in order to be able to find and treat these terms correctly.
+// 
+// VirtualLinks only need to be used for those GPN's that take 2 or
+// more arguments. If they take only one, then there is no reason
+// for them to be delcared as virtual (at least, as far as the pattern
+// matcher is concerned, with, right now, is the unly user of this
+// link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
+EQUAL_LINK <- VIRTUAL_LINK
+
+// Same idea as the VirtualLink, but for ExecutionOutputLinks.
+// Again, the only reason that this link types exists is so that the
+// pattern matcher can find them and treat them as needed.
+FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
+
+// Basic arithmetic operators
+PLUS_LINK <- FUNCTION_LINK
+TIMES_LINK <- FUNCTION_LINK

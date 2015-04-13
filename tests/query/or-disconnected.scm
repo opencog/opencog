@@ -1,6 +1,9 @@
 ;
 ; Unit testing for disconnected patterns within OrLinks.
 ;
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ;;; Populate the atomspace with three small trees.
 (EvaluationLink
 	(PredicateNode "this way")

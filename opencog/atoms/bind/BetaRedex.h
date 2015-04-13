@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/LambdaLink.h>
+#include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
@@ -69,7 +69,7 @@ namespace opencog
 ///
 ///      DefineLink
 ///          SomeNamingAtom
-///          LambdaLink   ;;; Or SatisfactionLink or BindLink....
+///          ScopeLink   ;;; Or SatisfactionLink or BindLink....
 ///              Vardecls
 ///              BodyAtom
 ///
@@ -78,16 +78,16 @@ namespace opencog
 /// body.  The DefineLink does not have to be created before the
 /// BetaRedex is created; however, it must exist by the time the
 /// composition is used.  The DefineLink has to name either a
-/// LambdaLink, or one of the link types inheriting from it (e.g. a
+/// ScopeLink, or one of the link types inheriting from it (e.g. a
 /// BindLink or SatisfactionLink).
 ///
 /// The "SomeOrderedLink" holds the set of arguments associated with the
 /// name.  These arguments may be "values", or they may be VariableNodes,
 /// or a mixture of the two.  A "value" is anything that is not a
 /// VariableNode.  If the arguments are values, then they MUST obey
-/// the type restrictions specified in the LambdaLink.  If they are
+/// the type restrictions specified in the ScopeLink.  If they are
 /// VariableNodes, then they inherit the type restrictions from the
-/// LambdaLink.
+/// ScopeLink.
 ///
 class BetaRedex : public Link
 {
@@ -115,7 +115,7 @@ public:
 	const std::set<Handle>& get_local_argset(void) const;
 
 	// Return the lambda
-	LambdaLinkPtr get_definition(void) const;
+	ScopeLinkPtr get_definition(void) const;
 
 	// Return the substitution of the redex args in the lambda.
 	Handle beta_reduce(void) const;

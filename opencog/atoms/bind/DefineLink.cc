@@ -43,15 +43,15 @@ void DefineLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"This is already defined; remoce before redfining!");
 
-	_definition = LambdaLinkCast(oset[1]);
+	_definition = ScopeLinkCast(oset[1]);
 	if (NULL == _definition)
-		_definition = createLambdaLink(*LinkCast(oset[1]));
+		_definition = createScopeLink(*LinkCast(oset[1]));
 	if (NULL == _definition)
 	{
 		Type t = oset[1]->getType();
 		const std::string& tname = classserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
+			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 }
 

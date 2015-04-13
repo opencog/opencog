@@ -30,7 +30,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/Logger.h>
 
-#include "Instantiator.h"
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
@@ -70,7 +69,8 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
 			return _cb->post_link_match(link1, link2);
 		}
-		bool virtual_link_match(const Handle& link1, const Handle& args) {
+		bool evaluate_link(const Handle& link_h,
+		                   const std::map<Handle, Handle> &gnds) {
 			throw InvalidParamException(TRACE_INFO, "Not expecting a virtual link here!");
 		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
@@ -152,18 +152,6 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		PatternMatchEngine::print_solution(var_gnds, term_gnds);
 #endif
 
-		// We put all of the temporary atoms into a temporary atomspace.
-		// Everything in here will go poof and disappear when this
-		// atomsspace is destructed. And that's OK, that's exactly what
-		// we want for these temporaries.  The atomspace is blown away
-		// when we finish.
-		//
-		// XXX FIXME ... I suspect the atomspace initialzation is pretty
-		// heavyweight.  Will need to explore a more lightweight approach
-		// someday ...
-		AtomSpace aspace;
-		Instantiator instor(&aspace);
-
 		// Note, FYI, that if there are no virtual clauses at all,
 		// then this loop falls straight-through, and the grounding
 		// is reported as a match to the callback.  That is, the
@@ -191,25 +179,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// in the Arg atoms. So, we ground the args, and pass that
 			// to the callback.
 
-			// At last! Actually perform the test!
-			Handle gargs(instor.instantiate(virt, var_gnds));
-			bool match = cb->virtual_link_match(virt, gargs);
-
-			// After checking, remove the temporary atoms.
-			// The most fool-proof way to do this is to blow
-			// away the entire atomspace.
-			// if (0 == gargs->getIncomingSetSize())
-				// _atom_space->purgeAtom(gargs, false);
+			bool match = cb->evaluate_link(virt, var_gnds);
 
 			if (not match) return false;
-
-			// FYI ... if the virtual_link_match() accepts the match, we
-			// still don't instantiate the grounded form in the atomspace,
-			// nor do we add the grounded form to term_gnds.  The former
-			// can be done by the callback, if desired.  We can't do the
-			// latter without access to the former ... all of which might
-			// need to be unwound, if the final match is rejected. So...
-			// Hmmm. Unclear if this should change...
 		}
 
 		// Yay! We found one! We now have a fully and completely grounded
@@ -358,11 +330,16 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
+	// XXX FIXME someday -- instead of copying these, they should
+	// just be pointers. Or references. Or maybe pme should point
+	// ConcreteLink, and ConcreteLink would befriend the pme ...
 	pme->_bound_vars = _varset;
 	pme->_cnf_clauses = _cnf_clauses;
 	pme->_mandatory = _mandatory;
 	pme->_optionals = _optionals;
 	pme->_evaluatable = _evaluatable_holders;
+	pme->_in_evaluatable = _in_evaluatable;
+	pme->_in_executable = _in_executable;
 	pme->_connectivity_map = _connectivity_map;
 	pme->_pmc = pmcb;
 #ifdef DEBUG

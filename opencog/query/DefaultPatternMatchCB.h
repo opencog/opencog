@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/query/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -45,6 +45,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
 	public:
 		DefaultPatternMatchCB(AtomSpace* as) :
+			_temp_aspace(NULL),
+			_instor(&_temp_aspace),
 			_type_restrictions(NULL),
 			_dynamic(NULL),
 			_as(as)
@@ -132,10 +134,17 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 
 		/**
+		 * Typically called for AbsentLink
+		 */
+		virtual bool optional_clause_match(const Handle& pattrn,
+		                                   const Handle& grnd);
+
+		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool virtual_link_match(const Handle& pat, const Handle& args);
+		virtual bool evaluate_link(const Handle& pat,
+		                           const std::map<Handle,Handle>& gnds);
 
 		/**
 		 * Called to perform the actual search. This makes some default
@@ -166,6 +175,13 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 			_dynamic = &terms;
 		}
 	protected:
+
+		// Used for test-groundings of virtual links.
+		AtomSpace _temp_aspace;
+		Instantiator _instor;
+
+		// All the state below is for findig a good place to start
+		// searches.
 		Handle _root;
 		Handle _starter_term;
 		const VariableTypeMap* _type_restrictions;

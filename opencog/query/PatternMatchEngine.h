@@ -27,6 +27,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <unordered_map>
 #include <vector>
 
 #include <opencog/query/PatternMatchCallback.h>
@@ -62,11 +63,23 @@ class PatternMatchEngine
 		std::set<Handle> _bound_vars;
 
 		// List of clauses that need to be grounded.
+		// See ConcreteLink.h for additional documentation.
 		HandleSeq        _cnf_clauses;
 		HandleSeq        _mandatory;
 		std::set<Handle> _optionals;
 		std::set<Handle> _evaluatable;
+
+		// Map from variables to e*uatble terms they appear in.
+		std::unordered_multimap<Handle,Handle> _in_evaluatable;
+		std::unordered_multimap<Handle,Handle> _in_executable;
+
 		ConnectMap       _connectivity_map;
+
+		bool is_optional(const Handle& h) {
+			return (_optionals.count(h) != 0); }
+
+		bool is_evaluatable(const Handle& h) {
+			return (_evaluatable.count(h) != 0); }
 
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
@@ -155,9 +168,10 @@ class PatternMatchEngine
 		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 
-		bool term_up(const Handle&);
+		// See PatternMatchEngine.cc for descriptions
+		bool start_sol_up(const Handle&);
 		bool xsoln_up(const Handle&);
-		bool do_soln_up(const Handle&); // See PatternMatchEngine.cc for comment
+		bool do_term_up(const Handle&);
 		bool clause_accept(const Handle&);
 		bool do_next_clause(void);
 
