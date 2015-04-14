@@ -92,87 +92,89 @@ VarMultimap& BackwardChainer::get_chaining_result()
  */
 VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 {
-	// check if this goal is already grounded
-	if (_inference_history.count(hgoal) == 1)
-		return _inference_history[hgoal];
+//	// check if this goal is already grounded
+//	if (_inference_history.count(hgoal) == 1)
+//		return _inference_history[hgoal];
+
+	HandleSeq free_vars = get_free_vars_in_tree(hgoal);
 
 	// check whether this goal has free variables and worth exploring
-	if (get_free_vars_in_tree(hgoal).empty())
+	if (free_vars.empty())
 		return VarMultimap();
 
-	// if logical link, check if all its sub-premises are grounded already
-	if (_logical_link_types.count(hgoal->getType()) == 1)
+//	VarMultimap results;
+
+//	// check if all free vars has a solution in the inference history already
+//	// XXX no good, does not handle And/Or/Not
+//	for (Handle& h : free_vars)
+//	{
+//		for (auto& p : _inference_history)
+//		{
+//			VarMultimap& vgm = p.second;
+
+//			if (vgm.count(h) == 0)
+//				continue;
+
+//			results[h].insert(vgm[h].begin(), vgm[h].end());
+//		}
+//	}
+
+//	if (results.size() == free_vars.size())
+//		return results;
+
+	std::vector<VarMap> kb_vmap;
+
+	// else, either try to ground, or backward chain
+	HandleSeq kb_match = match_knowledge_base(hgoal, kb_vmap);
+
+	if (kb_match.empty())
 	{
-		HandleSeq sub_premises = LinkCat(hgoal)->getOutgoingSet();
-
-		// if not all sub-premises are grounded, add them all into targets_stack
-		if (std::any_of(sub_premises.begin(), sub_premises.end(),
-		                [](const Handle& h) { return _inference_history.count(h) == 0; }))
+		// if logical link, break it up, add each to the targets stack, and return
+		if (_logical_link_types.count(hgoal->getType()) == 1)
 		{
-			// also add itself so that when all sub_premises are grounded, this
-			// will be revisited (for handling And/Or/Not of sub_premises)
-			_targets_stack.push(hgoal);
+			HandleSeq sub_premises = LinkCat(hgoal)->getOutgoingSet();
 
-			for (Handle h : sub_premises)
+			for (Handle& h : sub_premises)
 				_targets_stack.push(h);
 
 			return VarMultimap();
 		}
 
-		// else get all the sub_premises grounding first
-		map<Handle, VarMultimap> sub_premises_vgrounding_maps;
-		for (Handle h : sub_premises)
-			sub_premises_vgrounding_maps[h] = _inference_history[h];
-
-		// then join them
-		return join_premise_vgrounding_maps(hgoal, sub_premises_vgrounding_maps);
-	}
-
-	// else, either try to ground, or backward chain
-	HandleSeq kb_match = filter_knowledge_base(hgoal);
-
-	// if matched something in knowledge base, for each
-	// unify from hgoal to it
-	// check if "it" has any variable not yet mapped (bounded)
-	// if so, add it to targets stack
-	// XXX never check upward?
-
-	if (kb_match.empty())
-	{
-		logger().debug("[BackwardChainer] Knowledge base empty");
-
 		// find all rules whose implicand can be unified to hgoal
 		std::vector<Rule> acceptable_rules = filter_rules(hgoal);
 
-		logger().debug("[BackwardChainer] Found %d acceptable rules", acceptable_rules.size());
-
 		// if no rules to backward chain on, no way to solve this goal
 		if (acceptable_rules.empty())
-			return map<Handle, UnorderedHandleSet>();
+			return VarMultimap();
 
 		// XXX TODO use all rules found here; this will require branching
 		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_as);
 
-		//for later removal
-//		_bc_generated_rules.push_back(stadardized_rule);
+		// XXXXXX TODO a rule needs to be applied?  So that the output is actually grounded?
+		// this would be the only way to avoid going back to history to resolve variables
+		// and to avoid confusion with And/Or/Not?
+
+		// XXXXXX how to make a specialized version of the rule where the input/output if fixed?
+		// ie. after grounding all the inputs in the atomspace, make it possible to reapply the
+		// rule?
 
 		Handle himplicant = standardized_rule.get_implicant();
 		HandleSeq outputs = standardized_rule.get_implicand();
 		VarMap implicand_mapping;
-		VarMultimap results;
 
 		// a rule can have multiple output, and only one will unify to our goal
 		// so try to find the one output that works
 		for (Handle h : outputs)
 		{
-			implicand_mapping.clear();
+			VarMap temp_mapping;
 
-			if (not unify(h, hgoal, implicand_mapping))
+			if (not unify(h, hgoal, temp_mapping))
 				continue;
 
-			// construct the hgoal to all mappings here to be returned
-			for (auto it = implicand_mapping.begin(); it != implicand_mapping.end(); ++it)
-				results[it->first].emplace(it->second);
+			// wrap all the mapped result inside QuoteLink, so that variables
+			// will be handled correctly for the next BC step
+			for (auto& p : temp_mapping)
+				implicand_mapping[p.first] = _as->addAtom(createLink(QUOTE_LINK, p.second));
 
 			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
 			break;
@@ -183,8 +185,76 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		Instantiator inst(_as);
 		himplicant = inst.instantiate(himplicant, implicand_mapping);
 
-		// add the implicant to the targets stack
-		_targets_stack.push(himplicant);
+		// find all matching premises
+		// XXX TODO include typed variable node checking
+		std::vector<VarMap> vmap_list;
+		HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+		std::stack<Handle> to_be_added_to_targets;
+		VarMultimap results;
+
+		// for each set of possible premises, check if they already satisfy the goal
+		for (Handle& h : possible_premises)
+		{
+			vmap_list.clear();
+
+			bool need_bc = false;
+			HandleSeq grounded_premises = match_knowledge_base(h, vmap_list);
+
+			// check each grounding to see if any has no variable
+			for (int i = 0; i < grounded_premises.size(); ++i)
+			{
+				Handle& g = grounded_premises[i];
+				VarMap& m = vmap_list[i];
+
+				FindAtoms fv(VARIABLE_NODE);
+				fv.search_set(g);
+
+				// if some grounding cannot solve the goal, will need to BC
+				if (not fv.varset.empty())
+				{
+					need_bc = true;
+					continue;
+				}
+
+				// this is a grounding that can solve the goal, so apply it
+				inst.instantiate(hgoal, m);
+
+				// add the grounding to the return results
+				for (Handle& h : free_vars)
+					results[h].emplace(m[h]);
+			}
+
+			if (not need_bc)
+				continue;
+
+			// XXX TODO premise selection would be done here to
+			// determine wheter to BC on a premise
+
+			// break out any logical link and add to targets
+			if (_logical_link_types.count(h->getType()) == 0)
+			{
+				to_be_added_to_targets.push(h);
+				continue;
+			}
+
+			HandleSeq sub_premises = LinkCat(h)->getOutgoingSet();
+
+			for (Handle& h : sub_premises)
+				to_be_added_to_targets.push(h);
+		}
+
+		if (not to_be_added_to_targets.empty())
+		{
+			// add itself back to target, since this is not completely solved
+			_targets_stack.push(hgoal);
+
+			while (not to_be_added_to_targets.empty())
+			{
+				_targets_stack.push(to_be_added_to_targets.top());
+				to_be_added_to_targets.pop();
+			}
+		}
 
 		return results;
 	}
@@ -192,12 +262,10 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	{
 		VarMultimap results;
 
-		for (Handle soln : kb_match)
+		for (int i = 0; i < kb_match.size(); ++i)
 		{
-			VarMap vgm;
-
-			// should be possible to unify since kb_match is found by PM on hgoal
-			unify(hgoal, soln, vgm);
+			Handle& soln = kb_match[i];
+			VarMap& vgm = kb_vmap[i];
 
 			// check if there is any free variables in soln
 			HandleSeq free_vars = get_free_vars_in_tree(soln);
@@ -260,11 +328,11 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
  * @param htarget  the atom to pattern match against
  * @return         a vector of matched atoms
  */
-HandleSeq BackwardChainer::filter_knowledge_base(Handle htarget)
+HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& vmap)
 {
 	// get all VariableNodes (unquoted)
 	FindAtoms fv(VARIABLE_NODE);
-	fv.find_atoms(htarget);
+	fv.search_set(htarget);
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, htarget));
 	BCPatternMatch bcpm(_as);
@@ -278,13 +346,22 @@ HandleSeq BackwardChainer::filter_knowledge_base(Handle htarget)
 
 	for (int i = 0; i < var_solns.size(); i++)
 	{
-		// check if the corresponding clause is inside a rule (if so, don't want it)
+		// don't want clause that is part of a rule
 		if (std::any_of(_rules_set.begin(), _rules_set.end(),
 		                [&](const Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
 			continue;
 
+		// don't want clause already in inference history
+		if (_inference_history.count(pred_solns[i][htarget]) == 1)
+			continue;
+
+		// XXX don't want clause that are already in _targets_stack?
+
 		results.push_back(pred_solns[i][htarget]);
+		vmap.push_back(var_solns[i]);
 	}
+
+	return results;
 }
 
 /**
@@ -294,7 +371,7 @@ HandleSeq BackwardChainer::filter_knowledge_base(Handle htarget)
  * specific atom to another.
  *
  * XXX TODO check Typed VariableNode
- * XXX TODO unify in both direction (might not want to do that)
+ * XXX TODO unify in both direction
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
@@ -536,7 +613,7 @@ VarMultimap BackwardChainer::ground_target_vars(Handle& hgoal)
 
 	// find all VariableNode inside hgoal, but not those inside QuoteLink
 	FindAtoms fv(VARIABLE_NODE);
-	fv.find_atoms(hgoal);
+	fv.search_set(hgoal);
 
 	// check all inference history
 	for (map<Handle, UnorderedHandleSet> vgm : inference_list)

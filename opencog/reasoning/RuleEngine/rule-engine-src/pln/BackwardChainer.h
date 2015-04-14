@@ -79,7 +79,7 @@ private:
 	VarMultimap do_bc(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
-	HandleSeq filter_knowledge_base(Handle htarget);
+	HandleSeq match_knowledge_base(Handle htarget, std::vector<VarMap>& vmap);
 
 	bool unify(const Handle& htarget, const Handle& match, VarMap& output);
 
