@@ -14,9 +14,9 @@ def set_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 
-include "../../../build/opencog/atomspace/core_types.pyx"
-include "../../../build/opencog/embodiment/AtomSpaceExtensions/embodiment_types.pyx"
-include "../../../build/opencog/nlp/types/nlp_types.pyx"
-include "../../../build/opencog/reasoning/pln/pln_types.pyx"
-include "../../../build/opencog/spacetime/spacetime_types.pyx"
-include "../../../build/opencog/dynamics/attention/attention_types.pyx"
+include "opencog/atomspace/core_types.pyx"
+include "opencog/embodiment/AtomSpaceExtensions/embodiment_types.pyx"
+include "opencog/nlp/types/nlp_types.pyx"
+include "opencog/reasoning/pln/pln_types.pyx"
+include "opencog/spacetime/spacetime_types.pyx"
+include "opencog/dynamics/attention/attention_types.pyx"
