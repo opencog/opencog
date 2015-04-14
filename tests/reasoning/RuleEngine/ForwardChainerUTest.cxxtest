@@ -16,6 +16,7 @@ using namespace opencog;
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
 	ForwardChainer * fc_;
+	SchemeEval* eval_;
 	AtomSpace * as_;
 
 public:
@@ -23,6 +24,7 @@ public:
 	{
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
+		eval_ = new SchemeEval(as_);
 
 		// Disable the AF mechanism during testing!
 		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
@@ -35,6 +37,7 @@ public:
 	}
 	~ForwardChainerUTest() {
 		delete as_;
+		delete eval_;
 	}
 	void test_do_chain();
 };
@@ -46,12 +49,16 @@ void ForwardChainerUTest::test_do_chain()
 	// InheritanceLink A B
 	// InheritanceLink B C
 	// |-
-	// InheritanceLink A C
-	Handle A = as_->addNode(CONCEPT_NODE, "A"),
-		B = as_->addNode(CONCEPT_NODE, "B"),
-		C = as_->addNode(CONCEPT_NODE, "C"),
-		AB = as_->addLink(INHERITANCE_LINK, A, B),
-		BC = as_->addLink(INHERITANCE_LINK, B, C);
+	// InheritanceLink A C	
+	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
+		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
+		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
+		AB = eval_->eval_h("(InheritanceLink (stv 0.9 0.9)"
+		                   "    (ConceptNode \"A\")"
+		                   "    (ConceptNode \"B\"))"),
+		BC = eval_->eval_h("(InheritanceLink (stv 0.8 0.9)"
+		                   "    (ConceptNode \"B\")"
+		                   "    (ConceptNode \"C\"))");
 
 	// Run forward chainer (and remove problematic rules)
 	DefaultForwardChainerCB dfc(as_);
