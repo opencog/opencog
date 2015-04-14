@@ -3,16 +3,19 @@
 # This script is used for installing the dependencies required for
 # building opencog on debian.The script has been tested using docker
 # image debian:testing.
-# To install extra python-dependencies use pip and the requirements
-# file @ https://github.com/opencog/opencog/blob/master/opencog/python/requirements.txt
 
 # trap errors
 set -e
 
+# Environment Variables
+SELF_NAME=$(basename $0)
+
 # Some tools
-PACKAGES_FETCH="
+PACKAGES_TOOLS="
 		git \
-			"
+		python-pip \
+		"
+
 # Packages for building opencog
 PACKAGES_BUILD="
 		build-essential \
@@ -26,17 +29,7 @@ PACKAGES_BUILD="
 		cython \
 		python-dev \
 		python-zmq \
-		python-matplotlib \
-		python-nose \
-		python-numpy \
-		python-scipy \
-		python-mock \
 		python-simplejson \
-		python-pyparsing \
-		python-dateutil \
-		python-six \
-		python-tornado \
-		python-wsgiref \
 		libboost-date-time-dev \
 		libboost-filesystem-dev \
 		libboost-math-dev \
@@ -73,6 +66,9 @@ PACKAGES_RUNTIME="
 		postgresql-client \
 		"
 
+# Path to requirements file
+PACKAGES_PYTHON="../opencog/python/requirements.txt"
+
 # Template for messages printed.
 message() {
 echo -e "\e[1;34m[$SELF_NAME] $MESSAGE\e[0m"
@@ -85,7 +81,8 @@ MESSAGE="Updating Package db...." ; message
 apt-get update
 
 MESSAGE="Installing OpenCog build dependencies...." ; message
-if !  apt-get --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
+if ! (apt-get -y install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_TOOLS && \
+		pip install -U -r $PACKAGES_PYTHON); then
   MESSAGE="Error installing some of the dependencies... :( :("  ; message
   exit 1
 fi
