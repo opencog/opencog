@@ -60,11 +60,11 @@ void BackwardChainer::do_chain(Handle init_target)
 		_targets_stack.pop();
 
 		VarMultimap subt = do_bc(top);
+		VarMultimap& old_subt = _inference_history[top];
 
 		// add the substitution to inference history
-		// XXX TODO add the subt to the existing one, instead of replacing
-		_inference_history[top] = subt;
-
+		for (auto& p : subt)
+			old_subt[p.first].insert(p.second.begin(), p.second.end());
 
 		// XXX TODO ground/chase var here to see if the initial target is solved?
 	}
