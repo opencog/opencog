@@ -51,7 +51,7 @@ void BackwardChainer::do_chain(Handle init_target)
 {
 	_chaining_result.clear();
 
-	_targets_stack.clear();
+	_targets_stack = std::stack<Handle>();
 	_targets_stack.push(init_target);
 
 	while (not _targets_stack.empty())
@@ -62,6 +62,7 @@ void BackwardChainer::do_chain(Handle init_target)
 		VarMultimap subt = do_bc(top);
 
 		// add the substitution to inference history
+		// XXX TODO add the subt to the existing one, instead of replacing
 		_inference_history[top] = subt;
 
 
@@ -71,10 +72,10 @@ void BackwardChainer::do_chain(Handle init_target)
 	// results will contain a mapping of the variables in init_target
 	// but it could point to other varialbes, so need to chase its
 	// final grounding
-	_chaining_result = ground_target_vars(init_target, _inference_list);
+	//_chaining_result = ground_target_vars(init_target);
 
 	//clean variables
-	remove_generated_rules();
+	//remove_generated_rules();
 }
 
 VarMultimap& BackwardChainer::get_chaining_result()
@@ -132,7 +133,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		// if logical link, break it up, add each to the targets stack, and return
 		if (_logical_link_types.count(hgoal->getType()) == 1)
 		{
-			HandleSeq sub_premises = LinkCat(hgoal)->getOutgoingSet();
+			HandleSeq sub_premises = LinkCast(hgoal)->getOutgoingSet();
 
 			for (Handle& h : sub_premises)
 				_targets_stack.push(h);
@@ -202,7 +203,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			HandleSeq grounded_premises = match_knowledge_base(h, vmap_list);
 
 			// check each grounding to see if any has no variable
-			for (int i = 0; i < grounded_premises.size(); ++i)
+			for (size_t i = 0; i < grounded_premises.size(); ++i)
 			{
 				Handle& g = grounded_premises[i];
 				VarMap& m = vmap_list[i];
@@ -238,7 +239,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				continue;
 			}
 
-			HandleSeq sub_premises = LinkCat(h)->getOutgoingSet();
+			HandleSeq sub_premises = LinkCast(h)->getOutgoingSet();
 
 			for (Handle& h : sub_premises)
 				to_be_added_to_targets.push(h);
@@ -263,7 +264,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		VarMultimap results;
 		bool goal_readded = false;
 
-		for (int i = 0; i < kb_match.size(); ++i)
+		for (size_t i = 0; i < kb_match.size(); ++i)
 		{
 			Handle& soln = kb_match[i];
 			VarMap& vgm = kb_vmap[i];
@@ -292,7 +293,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				results[it->first].emplace(it->second);
 		}
 
-		return reuslts;
+		return results;
 	}
 }
 
@@ -345,21 +346,24 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(htarget);
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, htarget));
+	HandleSeq s;
+	s.push_back(htarget);
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, s));
 	BCPatternMatch bcpm(_as);
 
 	sl->satisfy(&bcpm);
 
-	vector<map<Handle, Handle>>& var_solns = bcpm.get_var_list();
-	vector<map<Handle, Handle>>& pred_solns = bcpm.get_pred_list();
+	vector<map<Handle, Handle>> var_solns = bcpm.get_var_list();
+	vector<map<Handle, Handle>> pred_solns = bcpm.get_pred_list();
 
 	HandleSeq results;
 
-	for (int i = 0; i < var_solns.size(); i++)
+	for (size_t i = 0; i < var_solns.size(); i++)
 	{
 		// don't want clause that is part of a rule
 		if (std::any_of(_rules_set.begin(), _rules_set.end(),
-		                [&](const Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
+		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
 			continue;
 
 		// don't want clause already in inference history
@@ -403,8 +407,11 @@ bool BackwardChainer::unify(const Handle& htarget,
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(temp_htarget);
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, temp_htarget));
-	BCPatternMatch bcpm(temp_space);
+	HandleSeq s;
+	s.push_back(temp_htarget);
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, s));
+	BCPatternMatch bcpm(&temp_space);
 
 	sl->satisfy(&bcpm);
 
@@ -419,8 +426,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 	// change the mapping from temp_atomspace to current atomspace
 	for (auto& p : temp_vmap)
 	{
-		Handle& var = p.first;
-		Handle& grn = p.second;
+		Handle var = p.first;
+		Handle grn = p.second;
 
 		// getAtom should get the equivlent atom in this atomspace
 		result[_as->getAtom(var)] = _as->getAtom(grn);
@@ -614,45 +621,47 @@ UnorderedHandleSet BackwardChainer::chase_var_values(
  */
 VarMultimap BackwardChainer::ground_target_vars(Handle& hgoal)
 {
-	// check if inference history has a grounding for hgoal yet
-	if (_inference_history.count(hgoal) == 0)
-		return VarMultimap;
+	return VarMultimap();
 
-	VarMultimap& grounding = _inference_history[hgoal];
+//	// check if inference history has a grounding for hgoal yet
+//	if (_inference_history.count(hgoal) == 0)
+//		return VarMultimap;
 
-	map<Handle, UnorderedHandleSet> vg_map;
+//	VarMultimap& grounding = _inference_history[hgoal];
 
-	// find all VariableNode inside hgoal, but not those inside QuoteLink
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hgoal);
+//	map<Handle, UnorderedHandleSet> vg_map;
 
-	// check all inference history
-	for (map<Handle, UnorderedHandleSet> vgm : inference_list)
-	{
-		// check the mapping generated at each point
-		for (auto it = vgm.begin(); it != vgm.end(); ++it)
-		{
-			Handle hvar = it->first;
+//	// find all VariableNode inside hgoal, but not those inside QuoteLink
+//	FindAtoms fv(VARIABLE_NODE);
+//	fv.search_set(hgoal);
 
-			// if hvar is in hgoal
-			if (fv.varset.count(hvar) == 1)
-			{
-				UnorderedHandleSet groundings = it->second;
+//	// check all inference history
+//	for (map<Handle, UnorderedHandleSet> vgm : inference_list)
+//	{
+//		// check the mapping generated at each point
+//		for (auto it = vgm.begin(); it != vgm.end(); ++it)
+//		{
+//			Handle hvar = it->first;
 
-				for (Handle h : groundings)
-				{
-					UnorderedHandleSet results;
+//			// if hvar is in hgoal
+//			if (fv.varset.count(hvar) == 1)
+//			{
+//				UnorderedHandleSet groundings = it->second;
 
-					if (h->getType() == VARIABLE_NODE)
-						chase_var_values(h, inference_list, results);
+//				for (Handle h : groundings)
+//				{
+//					UnorderedHandleSet results;
 
-					vg_map[hvar].insert(results.begin(), results.end());
-				}
-			}
-		}
-	}
+//					if (h->getType() == VARIABLE_NODE)
+//						chase_var_values(h, inference_list, results);
 
-	return vg_map;
+//					vg_map[hvar].insert(results.begin(), results.end());
+//				}
+//			}
+//		}
+//	}
+
+//	return vg_map;
 }
 
 /**

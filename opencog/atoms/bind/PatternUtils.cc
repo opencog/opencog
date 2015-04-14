@@ -184,12 +184,12 @@ void get_connected_components(const std::set<Handle>& vars,
 HandleSeq get_free_vars_in_tree(const Handle& tree)
 {
 	FindAtoms fv(VARIABLE_NODE);
-	fv.find_atoms(tree);
+	fv.search_set(tree);
 
 	HandleSeq lambdas;
 	HandleSeq free_vars;
 
-	for (Handle& h : fv.holders)
+	for (const Handle& h : fv.holders)
 	{
 		// check if any of the holder is a LambdaLink, and store it
 		if (classserver().isA(h->getType(), LAMBDA_LINK))
@@ -197,7 +197,7 @@ HandleSeq get_free_vars_in_tree(const Handle& tree)
 	}
 
 	// seperate out the free variables
-	for (Handle& v : fv.varset)
+	for (const Handle& v : fv.varset)
 	{
 		// assume any variable inside a lambda is bound
 		if (is_atom_in_any_tree(lambdas, v))

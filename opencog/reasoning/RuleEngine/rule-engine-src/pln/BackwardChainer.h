@@ -32,6 +32,10 @@ class BackwardChainerUTest;
 
 namespace opencog {
     
+typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+typedef std::map<Handle, Handle> VarMap;
+
+
 /**
  * Backward chaining falls in to two cases
  *  1.Truth value query - Given a target atom whose truth value is not known and a pool of atoms,find a way
@@ -91,7 +95,7 @@ private:
 	Rule select_rule(const std::vector<Rule>& rules);
 
 	UnorderedHandleSet chase_var_values(Handle& hvar, const vector<map<Handle, UnorderedHandleSet>>& inference_list, UnorderedHandleSet& results);
-	VarMultimap ground_target_vars(Handle& hgoal, vector<map<Handle, UnorderedHandleSet>>& var_grounding_map);
+	VarMultimap ground_target_vars(Handle& hgoal);
 
 	void remove_generated_rules();
 
@@ -122,9 +126,6 @@ private:
 
 };
 
-
-typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
-typedef std::map<Handle, Handle> VarMap;
 
 } // namespace opencog
 
