@@ -94,10 +94,18 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    BackwardChainer bc(as, std::vector<Rule>());
+    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/RuleEngine/default_cpolicy.json"));
+    cpolicy_loader.load_config();
+
+    std::vector<Rule> rules;
+
+    for (Rule* pr : cpolicy_loader.get_rules())
+        rules.push_back(*pr);
+
+    BackwardChainer bc(as, rules);
 
     bc.do_chain(h);
-    map<Handle, HandleSeq> soln = bc.get_chaining_result();
+    map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
 
     HandleSeq soln_list_link;
     for (auto it = soln.begin(); it != soln.end(); ++it) {
