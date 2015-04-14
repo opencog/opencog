@@ -80,11 +80,15 @@ echo -e "\e[1;34m[$SELF_NAME] $MESSAGE\e[0m"
 
 
 install_dependencies() {
+MESSAGE="Updating Package db...." ; message
+apt-get update
+
 MESSAGE="Installing OpenCog build dependencies...." ; message
 if !  apt-get --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
+  MESSAGE="Error installing some of the dependencies... :( :("  ; message
   exit 1
 fi
 }
 
-# Main Program (MAIN main)
+# Main Program
 install_dependencies
