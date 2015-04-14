@@ -25,17 +25,23 @@
 
 #include <opencog/query/DefaultImplicator.h>
 
-namespace opencog {
+namespace opencog
+{
 
 /**
  * Given a rule(i.e a bindLink handle), find all the premises that satisfy the rule.
  * by pattern matching.
  */
-class BCPatternMatch: public virtual PLNImplicator {
+class BCPatternMatch: public virtual PLNImplicator
+{
 private:
-	AtomSpace * as_;
+	AtomSpace* as_;
+
+	std::vector<std::map<Handle, Handle>> var_solns_;
+	std::vector<std::map<Handle, Handle>> pred_solns_;
+
 public:
-	BCPatternMatch(AtomSpace *);
+	BCPatternMatch(AtomSpace*);
 	virtual ~BCPatternMatch();
 
 	//the follwing callbacks are used for guiding the PM to look only the target list
@@ -48,15 +54,13 @@ public:
 	 */
 	bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
+
     /**
      * return list of matching results found by the pattern matcher
      * @return
      */
-	HandleSeq get_result_list();
-	/**
-	 * Clear result list
-	 */
-	void clear_result_list();
+	std::vector<std::map<Handle, Handle>> get_var_list();
+	std::vector<std::map<Handle, Handle>> get_pred_list();
 };
 
 } // ~namespace opencog

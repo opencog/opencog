@@ -20,13 +20,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "BCPatternMatch.h"
 
 using namespace opencog;
 
-BCPatternMatch::BCPatternMatch(AtomSpace * as) :
-		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
-				as), as_(as)
+BCPatternMatch::BCPatternMatch(AtomSpace * as)
+        : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
 {
 }
 
@@ -36,30 +36,37 @@ BCPatternMatch::~BCPatternMatch()
 
 bool BCPatternMatch::node_match(Handle& node1, Handle& node2)
 {
-	return AttentionalFocusCB::node_match(node1, node2);
+	logger().debug("[BackwardChainer] In node_match looking at %s and %s", node1->toShortString().c_str(), node2->toShortString().c_str());
+	return DefaultPatternMatchCB::node_match(node1, node2);
+
+	//return AttentionalFocusCB::node_match(node1, node2);
 }
 
 bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
-	return AttentionalFocusCB::link_match(lpat, lsoln);
+	logger().debug("[BackwardChainer] In link_match looking at %s and %s", lpat->toShortString().c_str(), lsoln->toShortString().c_str());
+	return DefaultPatternMatchCB::link_match(lpat, lsoln);
+
+	//return AttentionalFocusCB::link_match(lpat, lsoln);
 }
 
 bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
-		const std::map<Handle, Handle> &pred_soln)
+                               const std::map<Handle, Handle> &pred_soln)
 {
-	Handle h = inst.instantiate(implicand, var_soln); //xxx would this create non existing atoms.
-	if (Handle::UNDEFINED != h) {
-		result_list.push_back(h);
-	}
+	// XXX TODO if a variable match to itself, reject?
+
+	// store the variable solution
+	var_solns_.push_back(var_soln);
+	pred_solns_.push_back(pred_soln);
+
 	return false;
 }
 
-HandleSeq BCPatternMatch::get_result_list()
+std::vector<std::map<Handle, Handle>> BCPatternMatch::get_var_list()
 {
-	return result_list;
+	return var_solns_;
 }
-
-void BCPatternMatch::clear_result_list()
+std::vector<std::map<Handle, Handle>> BCPatternMatch::get_pred_list()
 {
-	result_list.clear();
+	return pred_solns_;
 }
