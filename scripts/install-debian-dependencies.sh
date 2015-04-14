@@ -9,12 +9,11 @@
 # trap errors
 set -e
 
-CURRENT_DIR=$(pwd)
-
+# Some tools
 PACKAGES_FETCH="
 		git \
 			"
-
+# Packages for building opencog
 PACKAGES_BUILD="
 		build-essential \
 		cmake \
@@ -67,18 +66,20 @@ PACKAGES_BUILD="
 		gfortran \
 		"
 
+# Packages required for integrating opencog with other services
 PACKAGES_RUNTIME="
 		unixodbc \
 		odbc-postgresql \
 		postgresql-client \
 		"
 
-# Message printed on start of a function.
+# Template for messages printed.
 message() {
 echo -e "\e[1;34m[$SELF_NAME] $MESSAGE\e[0m"
 }
 
-
+# Function for installing all required dependenceis for building OpenCog,
+# as well as dependencies required for running opencog with other services.
 install_dependencies() {
 MESSAGE="Updating Package db...." ; message
 apt-get update
