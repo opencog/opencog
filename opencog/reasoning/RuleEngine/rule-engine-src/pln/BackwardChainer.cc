@@ -261,6 +261,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	else
 	{
 		VarMultimap results;
+		bool goal_readded = false;
 
 		for (int i = 0; i < kb_match.size(); ++i)
 		{
@@ -274,7 +275,17 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// XXX should the free_vars be checked against inference history to
 			// see if a solution exist first?
 			if (not free_vars.empty())
+			{
+				// add the goal back in target list since one of the solution
+				// has variables inside
+				if (not goal_readded)
+				{
+					_targets_stack.push(hgoal);
+					goal_readded = true;
+				}
+
 				_targets_stack.push(soln);
+			}
 
 			// construct the hgoal to all mappings here to be returned
 			for (auto it = vgm.begin(); it != vgm.end(); ++it)
