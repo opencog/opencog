@@ -25,6 +25,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/bind/BindLink.h>
 
+using namespace opencog;
+
 BackwardChainer::BackwardChainer(AtomSpace * as)
     : _as(as)
 {

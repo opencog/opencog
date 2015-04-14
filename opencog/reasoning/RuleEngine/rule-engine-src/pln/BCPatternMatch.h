@@ -25,7 +25,7 @@
 
 #include <opencog/query/DefaultImplicator.h>
 
-using namespace opencog;
+namespace opencog {
 
 /**
  * Given a rule(i.e a bindLink handle), find all the premises that satisfy the rule.
@@ -58,5 +58,7 @@ public:
 	 */
 	void clear_result_list();
 };
+
+} // ~namespace opencog
 
 #endif /* BCPATTERNMATCH_H_ */

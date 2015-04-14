@@ -26,7 +26,7 @@
 
 #include <opencog/query/DefaultImplicator.h>
 
-using namespace opencog;
+namespace opencog {
 
 class ForwardChainInputMatchCB: public virtual PLNImplicator {
 private:
@@ -59,5 +59,7 @@ public:
 	 */
 	HandleSeq get_input_matches(void);
 };
+
+} // ~namespace opencog
 
 #endif /* FORWARDCHAININPUTMATCHCB_H_ */

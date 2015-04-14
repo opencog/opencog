@@ -27,8 +27,11 @@
 #include "BCPatternMatch.h"
 
 #define DEBUG 1
-using namespace opencog;
 
+class BackwardChainerUTest;
+
+namespace opencog {
+    
 /**
  * Backward chaining falls in to two cases
  *  1.Truth value query - Given a target atom whose truth value is not known and a pool of atoms,find a way
@@ -57,6 +60,8 @@ using namespace opencog;
 
 class BackwardChainer
 {
+    friend class ::BackwardChainerUTest;
+
 public:
 	BackwardChainer(AtomSpace* as);
 	~BackwardChainer();
@@ -117,4 +122,7 @@ private:
 	vector<Type> _logical_link_types = { AND_LINK, OR_LINK };
 
 };
+
+} // namespace opencog
+
 #endif /* BACKWARDCHAINER_H_ */
