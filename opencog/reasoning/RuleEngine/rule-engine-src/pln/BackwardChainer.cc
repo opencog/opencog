@@ -54,25 +54,34 @@ void BackwardChainer::do_chain(Handle init_target)
 	_targets_stack = std::stack<Handle>();
 	_targets_stack.push(init_target);
 
+	int i = 0;
+
 	while (not _targets_stack.empty())
 	{
 		Handle top = _targets_stack.top();
 		_targets_stack.pop();
 
+		logger().debug("[BackwardChainer] Before do_bc");
+
 		VarMultimap subt = do_bc(top);
 		VarMultimap& old_subt = _inference_history[top];
+
+		logger().debug("[BackwardChainer] After do_bc");
 
 		// add the substitution to inference history
 		for (auto& p : subt)
 			old_subt[p.first].insert(p.second.begin(), p.second.end());
 
 		// XXX TODO ground/chase var here to see if the initial target is solved?
+
+
+		i++;
+		// debug quit
+		if (i == 5)
+			break;
 	}
 
-	// results will contain a mapping of the variables in init_target
-	// but it could point to other varialbes, so need to chase its
-	// final grounding
-	//_chaining_result = ground_target_vars(init_target);
+	_chaining_result = _inference_history[init_target];
 
 	//clean variables
 	//remove_generated_rules();
@@ -101,7 +110,10 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 	// check whether this goal has free variables and worth exploring
 	if (free_vars.empty())
+	{
+		logger().debug("[BackwardChainer] Boring goal with no free var, skipping " + hgoal->toShortString());
 		return VarMultimap();
+	}
 
 //	VarMultimap results;
 
@@ -150,14 +162,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 		// XXX TODO use all rules found here; this will require branching
 		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_as);
-
-		// XXXXXX TODO a rule needs to be applied?  So that the output is actually grounded?
-		// this would be the only way to avoid going back to history to resolve variables
-		// and to avoid confusion with And/Or/Not?
-
-		// XXXXXX how to make a specialized version of the rule where the input/output if fixed?
-		// ie. after grounding all the inputs in the atomspace, make it possible to reapply the
-		// rule?
 
 		Handle himplicant = standardized_rule.get_implicant();
 		HandleSeq outputs = standardized_rule.get_implicand();
@@ -261,6 +265,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	}
 	else
 	{
+		logger().debug("[BackwardChainer] Matched something in knowledge base, storying the grounding");
+
 		VarMultimap results;
 		bool goal_readded = false;
 
@@ -268,6 +274,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		{
 			Handle& soln = kb_match[i];
 			VarMap& vgm = kb_vmap[i];
+
+			logger().debug("[BackwardChainer] Looking at grounding " + soln->toShortString());
 
 			// check if there is any free variables in soln
 			HandleSeq free_vars = get_free_vars_in_tree(soln);
@@ -346,18 +354,24 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(htarget);
 
-	HandleSeq s;
-	s.push_back(htarget);
+	HandleSeq terms;
+	terms.push_back(htarget);
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, s));
+	logger().debug("[BackwardChainer] Matching knowledge base with %s and %d variables", htarget->toShortString().c_str(), fv.varset.size());
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
 	BCPatternMatch bcpm(_as);
 
 	sl->satisfy(&bcpm);
+
+	logger().debug("[BackwardChainer] After running pattern matcher");
 
 	vector<map<Handle, Handle>> var_solns = bcpm.get_var_list();
 	vector<map<Handle, Handle>> pred_solns = bcpm.get_pred_list();
 
 	HandleSeq results;
+
+	logger().debug("[BackwardChainer] Pattern matcher found %d matches", var_solns.size());
 
 	for (size_t i = 0; i < var_solns.size(); i++)
 	{
@@ -371,6 +385,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 			continue;
 
 		// XXX don't want clause that are already in _targets_stack?
+		// no need? since things on targets stack are in inference history
 
 		results.push_back(pred_solns[i][htarget]);
 		vmap.push_back(var_solns[i]);
@@ -399,18 +414,20 @@ bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
                             VarMap& result)
 {
+	logger().debug("[BackwardChainer] starting unify");
+
 	AtomSpace temp_space;
 
 	Handle temp_htarget = temp_space.addAtom(htarget);
-	temp_space.addAtom(hmatch);
+	Handle temp_hmatch = temp_space.addAtom(hmatch);
 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(temp_htarget);
 
-	HandleSeq s;
-	s.push_back(temp_htarget);
+	HandleSeq terms;
+	terms.push_back(temp_htarget);
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, s));
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
 	BCPatternMatch bcpm(&temp_space);
 
 	sl->satisfy(&bcpm);
@@ -419,15 +436,35 @@ bool BackwardChainer::unify(const Handle& htarget,
 	if (bcpm.get_var_list().size() == 0)
 		return false;
 
-	// only use the first grounding for now
+	logger().debug("[BackwardChainer] unify found %d mapping", bcpm.get_var_list().size());
+
+	std::vector<std::map<Handle, Handle>> pred_list = bcpm.get_pred_list();
+	std::vector<std::map<Handle, Handle>> var_list = bcpm.get_var_list();
+
+	VarMap good_map;
+
+	// go thru each solution, and get the first one that map the whole temp_htarget
 	// XXX TODO branch on the various groundings
-	VarMap& temp_vmap = bcpm.get_var_list()[0];
+	for (size_t i = 0; i < pred_list.size(); ++i)
+	{
+		for (auto& p : pred_list[i])
+		{
+			if (is_atom_in_tree(p.second, temp_hmatch))
+			{
+				good_map = var_list[i];
+				i = pred_list.size();
+				break;
+			}
+		}
+	}
 
 	// change the mapping from temp_atomspace to current atomspace
-	for (auto& p : temp_vmap)
+	for (auto& p : good_map)
 	{
 		Handle var = p.first;
 		Handle grn = p.second;
+
+		logger().debug("[BackwardChainer] unified " + var->toShortString() + " to " + grn->toShortString());
 
 		// getAtom should get the equivlent atom in this atomspace
 		result[_as->getAtom(var)] = _as->getAtom(grn);

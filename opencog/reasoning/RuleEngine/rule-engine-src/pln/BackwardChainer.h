@@ -105,7 +105,7 @@ private:
 	void print_var_value(const map<Handle,HandleSeq>&);
 #endif
 
-	map<Handle, UnorderedHandleSet> _chaining_result;
+	VarMultimap _chaining_result;
 
 	// XXX TODO do we need to store the rule used too?
 	vector<VarMultimap> _inference_list;
