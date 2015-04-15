@@ -42,10 +42,18 @@
 )
 
 
-;;; One step of a finite state machine
+;;; Take one step of a finite state machine.
 ;;; Note that the algorithm below is "universal": it can run any FSM,
 ;;; it does not care about the specific states or state transition
 ;;; rules.
+;;;
+;;; To define two or more machines that run at the same time, each
+;;; should use a different AnchorNode, so that the states of the
+;;; various machines would not get confused with one-another.
+;;; It would also probably be a good idea to include the machine name
+;;; (i.e. the AnchorNode) as part of the transition rules, so that
+;;; the transition rules for one machine would not get used accidentally
+;;; for another machine.
 (define take-one-step
 	(BindLink
 		;; We will need to find the current and the next state
