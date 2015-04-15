@@ -327,7 +327,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 		// check if any of the implicand's output can be unified to target
 		for (Handle h : output)
 		{
-			std::map<Handle, Handle> mapping;
+			VarMap mapping;
 
 			if (not unify(h, htarget, mapping))
 				continue;
@@ -371,9 +371,10 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
 	               " %s and %d variables",
 	               htarget->toShortString().c_str(), fv.varset.size());
 
-	// Pattern Match on _as to avoid matching stuff in our garbage space
+	// Pattern Match on _garbage_superspace since some atoms in htarget could
+	// be in the _garbage space
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
-	BCPatternMatch bcpm(_as);
+	BCPatternMatch bcpm(_garbage_superspace);
 
 	sl->satisfy(bcpm);
 
@@ -392,6 +393,10 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
 		// don't want matched clause that is part of a rule
 		if (std::any_of(_rules_set.begin(), _rules_set.end(),
 		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
+			continue;
+
+		// don't want matched clause that is not in the parent _as
+		if (_as->getAtom(pred_solns[i][htarget]) == Handle::UNDEFINED)
 			continue;
 
 		// don't want matched clause already in inference history
@@ -481,10 +486,12 @@ bool BackwardChainer::unify(const Handle& htarget,
 		Handle var = p.first;
 		Handle grn = p.second;
 
-		logger().debug("[BackwardChainer] unified " + var->toShortString() + " to " + grn->toShortString());
+		logger().debug("[BackwardChainer] unified temp " + var->toShortString() + " to " + grn->toShortString());
 
-		// getAtom should get the equivlent atom in this atomspace
-		result[_garbage_superspace->getAtom(var)] = _garbage_superspace->getAtom(grn);
+		// XXX FIXME multiple atomspace is fubar here, it should be possible to do
+		// _garbage_superspace->getAtom(var), but it is returning Handle::UNDEFINED!!!
+		// so using addAtom instead
+		result[_garbage_superspace->addAtom(var)] = _garbage_superspace->addAtom(grn);
 	}
 
 	return true;
