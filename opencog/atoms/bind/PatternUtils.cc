@@ -176,7 +176,7 @@ void get_connected_components(const std::set<Handle>& vars,
 /**
  * Search for free VariableNode in a tree.
  *
- * Currently assume any variables within a LambdaLink (and its subtype)
+ * Currently assume any variables within a ScopeLink (and its subtype)
  * are bound, since some subtype does implicit binding.
  *
  * XXX TODO when implicit binding is gone, this method should be changed
@@ -191,8 +191,8 @@ HandleSeq get_free_vars_in_tree(const Handle& tree)
 
 	for (const Handle& h : fv.holders)
 	{
-		// check if any of the holder is a LambdaLink, and store it
-		if (classserver().isA(h->getType(), LAMBDA_LINK))
+		// check if any of the holder is a ScopeLink, and store it
+		if (classserver().isA(h->getType(), SCOPE_LINK))
 			lambdas.push_back(h);
 	}
 
