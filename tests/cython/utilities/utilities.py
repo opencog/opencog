@@ -23,7 +23,7 @@ executed = False
 
 def add_link(atom1, atom2):
     global executed
-    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])
+    link = ListLink(atom1, atom2)
     executed = True
     return link
 
@@ -48,7 +48,7 @@ else:
     print "add_link - did NOT execute"
 
 executed = False
-execute_atom(   atomspace,
+execute_atom( atomspace,
     ExecutionOutputLink( 
         GroundedSchemaNode("py: add_link"),
         ListLink(
