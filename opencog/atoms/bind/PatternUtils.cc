@@ -180,6 +180,7 @@ void get_connected_components(const std::set<Handle>& vars,
  * are bound, since some subtype does implicit binding.
  *
  * XXX TODO when implicit binding is gone, this method should be changed
+ * XXX What if we have (AndLink $A (BindLink $A ...)), is $A free or not?
  */
 HandleSeq get_free_vars_in_tree(const Handle& tree)
 {

@@ -47,6 +47,11 @@ BackwardChainer::~BackwardChainer()
 	delete _garbage_superspace;
 }
 
+/**
+ * Set the initial target for backward chaining.
+ *
+ * @param init_target   Handle of the target
+ */
 void BackwardChainer::set_target(Handle init_target)
 {
 	_init_target = init_target;
@@ -75,6 +80,9 @@ void BackwardChainer::do_full_chain()
 	}
 }
 
+/**
+ * Do a single step of backward chaining.
+ */
 void BackwardChainer::do_step()
 {
 	// XXX TODO targets selection should be done here, by first changing
@@ -95,25 +103,24 @@ void BackwardChainer::do_step()
 		old_subt[p.first].insert(p.second.begin(), p.second.end());
 }
 
+/**
+ * Get the current result on the initial target, if any.
+ *
+ * @return a VarMultimap mapping each variable to all possible solutions
+ */
 VarMultimap& BackwardChainer::get_chaining_result()
 {
 	return _inference_history[_init_target];
 }
 
-
-
 /**
  * The main recursive backward chaining method.
  *
  * @param hgoal  the atom to do backward chaining on
- * @return       ???
+ * @return       the solution found for this goal, if any
  */
 VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 {
-//	// check if this goal is already grounded
-//	if (_inference_history.count(hgoal) == 1)
-//		return _inference_history[hgoal];
-
 	HandleSeq free_vars = get_free_vars_in_tree(hgoal);
 
 	// check whether this goal has free variables and worth exploring
@@ -122,26 +129,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		logger().debug("[BackwardChainer] Boring goal with no free var, skipping " + hgoal->toShortString());
 		return VarMultimap();
 	}
-
-//	VarMultimap results;
-
-//	// check if all free vars has a solution in the inference history already
-//	// XXX no good, does not handle And/Or/Not
-//	for (Handle& h : free_vars)
-//	{
-//		for (auto& p : _inference_history)
-//		{
-//			VarMultimap& vgm = p.second;
-
-//			if (vgm.count(h) == 0)
-//				continue;
-
-//			results[h].insert(vgm[h].begin(), vgm[h].end());
-//		}
-//	}
-
-//	if (results.size() == free_vars.size())
-//		return results;
 
 	std::vector<VarMap> kb_vmap;
 
@@ -289,8 +276,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			HandleSeq free_vars = get_free_vars_in_tree(soln);
 
 			// if there are free variables, add this soln to the target stack
-			// XXX should the free_vars be checked against inference history to
-			// see if a solution exist first?
 			if (not free_vars.empty())
 			{
 				// add the goal back in target list since one of the solution
@@ -354,6 +339,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
  * Find all atoms in the AtomSpace matching the pattern.
  *
  * @param htarget  the atom to pattern match against
+ * @param vmap     an output list of mapping for variables in htarget
  * @return         a vector of matched atoms
  */
 HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& vmap)
@@ -421,16 +407,17 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
  *
  * @param htarget    the target with variable nodes
  * @param hmatch     a fully grounded matching handle with @param htarget
- * @param output     a map object to store results and for recursion
+ * @param result     an output VarMap mapping varibles from target to match
  * @return           true if the two atoms can be unified
  */
 bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
                             VarMap& result)
 {
-	logger().debug("[BackwardChainer] starting unify");
+	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString() + " to " + hmatch->toShortString());
 
 	// lazy way of restricting PM to be between two atoms
+	// XXX FIXME the new PM is complaining VariableNode has no type restriction...
 	AtomSpace temp_space;
 
 	Handle temp_htarget = temp_space.addAtom(htarget);
