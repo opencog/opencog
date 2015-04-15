@@ -39,28 +39,46 @@ typedef std::map<Handle, Handle> VarMap;
 
 /**
  * Backward chaining falls in to two cases
- *  1.Truth value query - Given a target atom whose truth value is not known and a pool of atoms,find a way
- *    to estimate the truth value of the target Atom,via combining the atoms in the pool  using the inference rule/
- *     eg. The target is "Do people breath"(InheritanceLink people breath)...the truth value of the target is estima
- *     ated via doing the inference "People are animals,animals breathe,therefore people breathe."
- *  2.Variable fulfillment query - Given a target Link(Atoms may be Nodes or Links) with one or more VariableAtoms
- *  among its targets,figure what atoms may be put in place of these VariableAtoms,so as to give the target Link a
- *  hight strength * confidence (i.e "hight truth value")
- *  eg. What breathes( InheritanceLink $X breath ) can be fulfilled by pattern matching
- *   whenever there are are multiple values to fill $X we will use fitness value measure to choose the best
- *  other compound example is what breathes and adds
- *  ANDLink
- *  	InheritanceLink $X Breath
- *  	InheritanceLink $X adds
  *
- *  Anatomy of a single inferene
- *  ============================
- *  A single inference step may be viewed as follows
- *  1.Choose inference Rule R and a tuple of Atoms that collectively match the input condition of the rule
- *  2.Apply choosen rule R to the chosen input Atoms
- *  3.Create an ExecutionLink recording the output found
- *  4.In addition to retaining this ExecutionLink in the Atomspace.also save the copy of it in the InferenceRepository(
- *  this is not needed for the very first implementation,but will be very useful once PLN is in regular use.)
+ * 1. Truth value query - Given a target atom whose truth value is not
+ *    known and a pool of atoms, find a way to estimate the truth
+ *    value of the target Atom, via combining the atoms in the pool
+ *    using the inference rule. Eg. The target is "Do people breath"
+ *
+ *    (InheritanceLink people breath)
+ *
+ *    the truth value of the target is estimated via doing the
+ *    inference "People are animals, animals breathe, therefore people
+ *    breathe."
+ *
+ * 2. Variable fulfillment query - Given a target Link (Atoms may be
+ *    Nodes or Links) with one or more VariableAtoms among its
+ *    targets, figure what atoms may be put in place of these
+ *    VariableAtoms, so as to give the grounded targets a high
+ *
+ *    strength * confidence
+ *
+ *    Eg. What breathes (InheritanceLink $X breath) can be fulfilled
+ *    by pattern matching, whenever there are are multiple values to
+ *    fill $X we will use fitness value measure to choose the best
+ *    other compound example is what breathes and adds ANDLink
+ *    InheritanceLink $X Breath InheritanceLink $X adds
+ *
+ * Anatomy of a single inferene
+ * ============================
+ * A single inference step may be viewed as follows
+ *
+ * 1. Choose inference Rule R and a tuple of Atoms that collectively
+ *    match the input condition of the rule
+ *
+ * 2. Apply choosen rule R to the chosen input Atoms
+ *
+ * 3. Create an ExecutionLink recording the output found
+ *
+ * 4. In addition to retaining this ExecutionLink in the Atomspace,
+ *    also save the copy of it in the InferenceRepository (this is not
+ *    needed for the very first implementation, but will be very
+ *    useful once PLN is in regular use.)
  */
 
 class BackwardChainer
