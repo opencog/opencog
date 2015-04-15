@@ -24,6 +24,8 @@
 #include "BackwardChainer.h"
 #include "BCPatternMatch.h"
 
+#include <opencog/util/random.h>
+
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
@@ -495,6 +497,6 @@ Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
 {
 	//xxx return random for the purpose of integration testing before going
 	//for a complex implementation of this function
-	return rules[random() % rules.size()];
+	return rand_element(rules);
 }
 
