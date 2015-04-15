@@ -652,7 +652,10 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	}
 
 	HandleSeq handle_set;
-	_as->getHandlesByType(handle_set, ptype);
+	if (ptype == ATOM)
+		_as->getHandlesByType(handle_set, ptype, true);
+	else
+		_as->getHandlesByType(handle_set, ptype);
 
 	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
 
