@@ -365,7 +365,9 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
 	else
 		terms.push_back(htarget);
 
-	logger().debug("[BackwardChainer] Matching knowledge base with %s and %d variables", htarget->toShortString().c_str(), fv.varset.size());
+	logger().debug("[BackwardChainer] Matching knowledge base with "
+	               " %s and %d variables",
+	               htarget->toShortString().c_str(), fv.varset.size());
 
 	// Pattern Match on _as to avoid matching stuff in our garbage space
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
@@ -380,7 +382,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
 
 	HandleSeq results;
 
-	logger().debug("[BackwardChainer] Pattern matcher found %d matches", var_solns.size());
+	logger().debug("[BackwardChainer] Pattern matcher found %d matches",
+	               var_solns.size());
 
 	for (size_t i = 0; i < var_solns.size(); i++)
 	{
