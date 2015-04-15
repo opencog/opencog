@@ -3204,8 +3204,6 @@ std::string subtree_to_string(iter it)
 
 } // ~namespace opencog
 
-namespace std {
-
 // Instantiate a string-specific converter first, as we need this for
 // the general case, below. Note that it is being instantiated in the
 // std namespace.  We do ths because we want to use the std variants
@@ -3213,8 +3211,8 @@ namespace std {
 // convert a string to a string-tree, and then the string-tree to the
 // final, desired typename-tree. Without this, operator>>() would be
 // infinitely recursive.
-std::istream& operator>>(std::istream&, opencog::tree<std::string>&)
-    throw (opencog::InconsistenceException, std::bad_exception);
+namespace std {
+    std::istream& operator>>(std::istream&, opencog::tree<std::string>&);
 }
 
 namespace opencog {
