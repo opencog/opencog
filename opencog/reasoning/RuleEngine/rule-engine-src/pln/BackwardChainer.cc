@@ -361,10 +361,12 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(htarget);
 
-	// XXX TODO htarget could be a logical link, and wrapping it in HandleSeq is killing PM?
-
+	// unbundle clause if necessary
 	HandleSeq terms;
-	terms.push_back(htarget);
+	if (_logical_link_types.count(htarget->getType()))
+		terms = LinkCast(htarget)->getOutgoingSet();
+	else
+		terms.push_back(htarget);
 
 	logger().debug("[BackwardChainer] Matching knowledge base with %s and %d variables", htarget->toShortString().c_str(), fv.varset.size());
 
@@ -390,7 +392,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 			continue;
 
 		// don't want matched clause that is in the garbage space
-		if (_garbage_subspace->getAtom(pred_soln[i][htarget]) != Handle::UNDEFINED)
+		if (_garbage_subspace->getAtom(pred_solns[i][htarget]) != Handle::UNDEFINED)
 			continue;
 
 		// don't want matched clause already in inference history
@@ -411,10 +413,11 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
  * Unify two atoms, finding a mapping that makes them equal.
  *
  * Use the Pattern Matcher to do the heavy lifting of unification from one
- * specific atom to another.
+ * specific atom to another, let it handles UnorderedLink, VariableNode in
+ * QuoteLink, etc.
  *
  * XXX TODO check Typed VariableNode
- * XXX TODO unify in both direction
+ * XXX TODO unify in both direction?
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
