@@ -22,12 +22,6 @@ def single_bindlink(AtomSpace atomspace, Handle handle):
     cdef Handle result = Handle(c_result.value())
     return result
 
-def crisp_logic_bindlink(AtomSpace atomspace, Handle handle):
-    cdef cHandle c_result = c_crisp_logic_bindlink(atomspace.atomspace,
-                                                   deref(handle.h))
-    cdef Handle result = Handle(c_result.value())
-    return result
-
 def pln_bindlink(AtomSpace atomspace, Handle handle):
     cdef cHandle c_result = c_pln_bindlink(atomspace.atomspace, deref(handle.h))
     cdef Handle result = Handle(c_result.value())

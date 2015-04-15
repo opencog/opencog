@@ -3,8 +3,7 @@ import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                crisp_logic_bindlink, pln_bindlink,\
-                                execute_atom, evaluate_atom
+                                pln_bindlink, execute_atom, evaluate_atom
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 
@@ -105,25 +104,6 @@ class BindlinkTest(TestCase):
         # The SetLink should have one item in it.
         atom = self.atomspace[result]
         self.assertEquals(atom.arity, 1)
-        self.assertEquals(atom.type, types.SetLink)
-
-
-    def test_crisp_logic_bindlink(self):
-
-        # Remember the starting atomspace size.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
-        result = crisp_logic_bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
-
-        # Check the ending atomspace size, it should have added one SetLink.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size + 1)
-
-        # The SetLink should have three items in it.
-        atom = self.atomspace[result]
-        self.assertEquals(atom.arity, 3)
         self.assertEquals(atom.type, types.SetLink)
 
 
