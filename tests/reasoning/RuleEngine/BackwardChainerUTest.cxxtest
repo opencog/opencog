@@ -38,8 +38,8 @@ public:
 	void setUp();
 	void tearDown();
 
-	// void test_filter_rules();
-	// void test_unify();
+	void test_filter_rules();
+	void test_unify();
 	void test_simple_deduction_bc();
 	// void test_do_bc();
 };
@@ -57,43 +57,88 @@ void BackwardChainerUTest::tearDown() {
 	as_->clear();
 }
 
-// void BackwardChainerUTest::test_filter_rules() {
-// 	string bl1 =
-// 			"(BindLink (VariableList  (VariableNode \"$A\") (VariableNode \"$B\")) "
-// 					"(ImplicationLink (AndLink (ImplicationLink (VariableNode \"$A\") "
-// 					"(VariableNode \"$B\"))) (ListLink (ExecutionLink "
-// 					" (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\") "
-// 					"(ListLink (ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\")))))))";
-// 	Handle hb1 = eval_->eval_h(bl1);
-// 	string bl2 =
-// 			"(ImplicationLink (stv .99 .99)  (AndLink (InheritanceLink (VariableNode \"$x\") "
-// 					"(ConceptNode \"American\")) (InheritanceLink (VariableNode \"$y\") (ConceptNode \"weapon\")) "
-// 					"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")  (VariableNode \"$y\")"
-// 					"  (VariableNode \"$z\"))) (InheritanceLink (VariableNode \"$z\")   (ConceptNode \"hostile\")))"
-// 					" (InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\")))";
-// 	Handle hb2 = eval_->eval_h(bl2);
-// 	Handle hb1_il = eval_->eval_h(
-// 			"(ImplicationLink (VariableNode \"$A\")  (VariableNode \"$B\"))");
-// 	Handle hb2_il =
-// 			eval_->eval_h(
-// 					"(InheritanceLink  (VariableNode \"$x\")   (ConceptNode \"criminal\"))");
+void BackwardChainerUTest::test_filter_rules() {
+	string bl1 =
+		"(BindLink"		
+		"    (VariableList"
+		"        (VariableNode \"$A\") (VariableNode \"$B\"))"
+		"    (ImplicationLink"
+		"        (AndLink"
+		"            (ImplicationLink"
+        "                (VariableNode \"$A\")"
+		"                (VariableNode \"$B\")))"
+		"        (ListLink"
+		"            (ExecutionLink"
+		"                (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\")"
+		"                (ListLink"
+		"                    (ImplicationLink"
+		"		                 (VariableNode \"$A\")"
+		"                        (VariableNode \"$B\")))))))";
+	Handle hb1 = eval_->eval_h(bl1);
 
-// 	HandleSeq hsresult = { hb1_il, hb2_il };
-// 	HandleSeq hsrules = bc_->filter_rules(hsresult);
-// 	TS_ASSERT_EQUALS(hsrules.size(), 1);
-// }
+	string bl2 =
+		"(ImplicationLink (stv .99 .99)"
+		"    (AndLink"
+		"        (InheritanceLink"
+		"            (VariableNode \"$x\")"
+		"            (ConceptNode \"American\"))"
+		"        (InheritanceLink"
+		"            (VariableNode \"$y\")"
+		"            (ConceptNode \"weapon\"))"
+		"        (EvaluationLink"
+		"            (PredicateNode \"sell\")"
+		"            (ListLink"
+		"                (VariableNode \"$x\")"
+		"                (VariableNode \"$y\")"
+		"                (VariableNode \"$z\")))"
+		"        (InheritanceLink"
+		"            (VariableNode \"$z\")"
+		"            (ConceptNode \"hostile\")))"
+		"    (InheritanceLink"
+		"        (VariableNode \"$x\")"
+		"        (ConceptNode \"criminal\")))";
+	Handle hb2 = eval_->eval_h(bl2);
 
-// void BackwardChainerUTest::test_unify() {
-// 	string target =
-// 			"(EvaluationLink (PredicateNode \"sell\") (ListLink (VariableNode \"$x\")(VariableNode \"$y\")(VariableNode \"$z\")))";
-// 	Handle htarget = eval_->eval_h(target);
-// 	string match =
-// 			"(EvaluationLink (PredicateNode \"sell\") (ListLink (ConceptNode \"west\")(VariableNode \"$a\")(ConceptNode \"nono\")))";
-// 	Handle hmatch = eval_->eval_h(match);
-// 	map<Handle, HandleSeq> result;
-// 	result = bc_->unify(htarget, hmatch, result);
-// 	TS_ASSERT_EQUALS(result.size(), 3);
-// }
+	Handle hb1_il =
+		eval_->eval_h("(ImplicationLink"
+		              "    (VariableNode \"$A\")"
+		              "    (VariableNode \"$B\"))");
+
+	Handle hb2_il =
+		eval_->eval_h("(InheritanceLink"
+		              "    (VariableNode \"$x\")"
+		              "    (ConceptNode \"criminal\"))");
+
+	// HandleSeq hsresult = { hb1_il, hb2_il };
+	// HandleSeq hsrules = bc_->filter_rules(hsresult);
+	// TODO look at the result itself, not just the size!!!
+	// TS_ASSERT_EQUALS(hsrules.size(), 1);
+}
+
+void BackwardChainerUTest::test_unify() {
+	string target =
+		"(EvaluationLink"
+		"    (PredicateNode \"sell\")"
+		"    (ListLink"
+		"        (VariableNode \"$x\")"
+		"        (VariableNode \"$y\")"
+		"        (VariableNode \"$z\")))";
+	Handle htarget = eval_->eval_h(target);
+
+	string match =
+		"(EvaluationLink"
+		"    (PredicateNode \"sell\")"
+		"    (ListLink"
+		"        (ConceptNode \"west\")"
+		"        (VariableNode \"$a\")"
+		"        (ConceptNode \"nono\")))";
+
+	Handle hmatch = eval_->eval_h(match);
+	VarMap result;
+	bc_->unify(htarget, hmatch, result);
+	// Look at the result itself not just the size!!!
+	TS_ASSERT_EQUALS(result.size(), 3);
+}
 
 void BackwardChainerUTest::test_simple_deduction_bc() {
 	// Test simple deduction
