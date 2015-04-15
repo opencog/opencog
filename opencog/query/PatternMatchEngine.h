@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/query/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/atomspace/ClassServer.h>
 
 namespace opencog {
 
@@ -65,7 +65,7 @@ class PatternMatchEngine
 			return (_pat->optionals.count(h) != 0); }
 
 		bool is_evaluatable(const Handle& h) {
-			return (_pat->evaluatable_terms.count(h) != 0); }
+			return (_pat->evaluatable_holders.count(h) != 0); }
 
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses

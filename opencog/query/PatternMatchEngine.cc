@@ -1364,10 +1364,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	_varlist(&v),
 	_pat(&p)
 {
-	// Our data!
-	//_varlist = _pmc->get_variables();
-	//_pat = _pmc->get_pattern();
-
 	// current state
 	in_quote = false;
 	curr_root = Handle::UNDEFINED;
