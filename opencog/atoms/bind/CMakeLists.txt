@@ -19,4 +19,5 @@ ADD_DEPENDENCIES(lambda opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda
 	atomutils
+	cogutil
 )

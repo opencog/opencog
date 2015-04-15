@@ -96,9 +96,9 @@ void DeleteLinkUTest::test_basic(void)
 	config().set("SCM_PRELOAD", "tests/query/delete-link.scm");
 	load_scm_files_from_config(*as);
 
-	Handle five = eval->eval_h("(cog-bind (take-one-step))");
-	printf ("five: found:\n%s\n", five->toShortString().c_str());
-	TS_ASSERT_EQUALS(5, as->getArity(five));
+	Handle green = eval->eval_h("(cog-bind (take-one-step))");
+	printf ("green: found:\n%s\n", green->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(five));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

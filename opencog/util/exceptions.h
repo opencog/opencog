@@ -213,8 +213,8 @@ public:
 }; // InvalidParamException
 
 /**
- * Exception to be thrown when a consistence check (equals to, different, etc)
- * fails.
+ * Exception to be thrown when a consistency check (equal to, different,
+ * etc.) fails.
  */
 class InconsistenceException : public RuntimeException
 {
@@ -255,8 +255,8 @@ public:
 /**
  * Exception to be called when the searched item was not found
  *
- * This exception will not log an error when thrown, because the error must be
- * handled inside the code
+ * This exception will not log an error when thrown, because the
+ * error must be handled inside the code
  */
 class NotFoundException : public StandardException {
 public:
@@ -271,6 +271,23 @@ public:
     NotFoundException(const char*, const char*, ...) throw();
     
 }; // NotFoundException
+
+/**
+ * Exception thrown when the DeleteLink executes.
+ *
+ * This exception will not log an error when thrown, because the
+ * error must be handled inside the code
+ */
+class DeleteException : public StandardException {
+public:
+
+    /**
+     * Constructor
+     * Nothing to be logged; tis simply breaks us out of inner loops.
+     */
+    DeleteException(void) throw();
+    
+}; // DeleteException
 
 /**
  * Exception to be called when a network error  has occured. When catching
