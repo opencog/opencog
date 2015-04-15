@@ -168,7 +168,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         // variables that don't appear anywhere in the clauses -- linas.
         SuRealPMCB pmcb(pAS, qVars);
         SatisfactionLinkPtr slp(createSatisfactionLink(qVars, qClause));
-        slp->satisfy(&pmcb);
+        slp->satisfy(pmcb);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())

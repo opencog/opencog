@@ -122,7 +122,7 @@ class PMCGroundings : public PatternMatchCallback
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
  */
-bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
+bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const std::vector<Handle>& virtuals,
             const std::vector<Handle>& negations, // currently ignored
             const std::map<Handle, Handle>& var_gnds,
@@ -171,14 +171,14 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 			// in the Arg atoms. So, we ground the args, and pass that
 			// to the callback.
 
-			bool match = cb->evaluate_sentence(virt, var_gnds);
+			bool match = cb.evaluate_sentence(virt, var_gnds);
 
 			if (not match) return false;
 		}
 
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
-		return cb->grounding(var_gnds, term_gnds);
+		return cb.grounding(var_gnds, term_gnds);
 	}
 	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
 
@@ -308,7 +308,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  */
-bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
+bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
 {
    if (check_conn and 0 == _virtual.size() and 0 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
@@ -321,15 +321,15 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 /* ================================================================= */
 
 // All clauses of the Concrete link are connected, so this is easy.
-bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
+bool ConcreteLink::satisfy(PatternMatchCallback& pmcb) const
 {
-   PatternMatchEngine pme(*pmcb, _varlist, _pat);
+   PatternMatchEngine pme(pmcb, _varlist, _pat);
 
 #ifdef DEBUG
 	debug_print();
 #endif
 
-	bool found = pmcb->initiate_search(&pme, _varlist, _pat);
+	bool found = pmcb.initiate_search(&pme, _varlist, _pat);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");
@@ -339,7 +339,7 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 
 /* ================================================================= */
 
-bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
+bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 {
 	// We allow a combinatoric explosion of multiple components,
 	// but zero virtuals, because PLN has a use case for this.
@@ -368,9 +368,9 @@ bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		// Pass through the callbacks, collect up answers.
-		PMCGroundings gcb(*pmcb);
+		PMCGroundings gcb(pmcb);
 		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
-		clp->satisfy(&gcb);
+		clp->satisfy(gcb);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_term_gnds.push_back(gcb._term_groundings);
@@ -386,15 +386,6 @@ bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_term_gnds);
-}
-
-/* ================================================================= */
-
-void BetaRedex::satisfy(PatternMatchCallback* pmc,
-                          const HandleSeq& args)
-{
-// this is junk, I think..... think about it a bit, then remove me....
-printf ("duuuuuuuuuuuuude called the compose satter\n");
 }
 
 /* ===================== END OF FILE ===================== */

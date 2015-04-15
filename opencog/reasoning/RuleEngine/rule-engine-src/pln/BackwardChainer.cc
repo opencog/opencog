@@ -361,7 +361,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
 	BCPatternMatch bcpm(_as);
 
-	sl->satisfy(&bcpm);
+	sl->satisfy(bcpm);
 
 	logger().debug("[BackwardChainer] After running pattern matcher");
 
@@ -432,7 +432,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
 	BCPatternMatch bcpm(&temp_space);
 
-	sl->satisfy(&bcpm);
+	sl->satisfy(bcpm);
 
 	// if no grounding
 	if (bcpm.get_var_list().size() == 0)

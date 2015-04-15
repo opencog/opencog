@@ -80,7 +80,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         BindLinkPtr bl(BindLinkCast(bind_link));
         DefaultImplicator imp(&rule_atomspace);
         imp.implicand = bl->get_implicand();
-        bl->imply(&imp);
+        bl->imply(imp);
 
         // Get matched bindLinks.
         HandleSeq matches = imp.result_list;
@@ -229,7 +229,7 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 
     BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
     fcpm_->implicand = bl->get_implicand();
-    bl->imply(fcpm_);
+    bl->imply(*fcpm_);
 
     HandleSeq product = fcpm_->get_products();
 

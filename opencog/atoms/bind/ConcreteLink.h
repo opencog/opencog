@@ -27,10 +27,10 @@
 
 #include <opencog/query/Pattern.h>
 #include <opencog/atoms/bind/ScopeLink.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
-class PatternMatchCallback;
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -110,7 +110,7 @@ public:
 	             const HandleSeq& component,
 	             const std::set<Handle>& optionals);
 
-	bool satisfy(PatternMatchCallback*) const;
+	bool satisfy(PatternMatchCallback&) const;
 
 	void debug_print(void) const;
 };

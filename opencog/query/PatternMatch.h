@@ -39,7 +39,7 @@ class PatternMatch
 	friend class SatisfactionLink;
 
 	protected:
-		static bool recursive_virtual(PatternMatchCallback *cb,
+		static bool recursive_virtual(PatternMatchCallback& cb,
 		            const std::vector<Handle>& virtuals,
 		            const std::vector<Handle>& negations,
 		            const std::map<Handle, Handle>& var_gnds,

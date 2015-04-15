@@ -168,7 +168,7 @@ void StackUTest::test_stack(void)
 
 	TestPMCB pmcb(as);
 	pmcb.anch = anch;
-	match(&pmcb, vars, preds);
+	match(pmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("bad link-test call count", 7, pmcb.lcnt);
 	TSM_ASSERT_EQUALS("bad solution call count", 0, pmcb.scnt);
