@@ -85,20 +85,11 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
-		void set_type_restrictions(const VariableTypeMap& tm) {
-			_cb.set_type_restrictions(tm);
-		}
-		void set_evaluatable_terms(const std::set<Handle>& terms) {
-			_cb.set_evaluatable_terms(terms);
-		}
-		void set_evaluatable_holders(const std::set<Handle>& terms) {
-			_cb.set_evaluatable_holders(terms);
-		}
 		bool initiate_search(PatternMatchEngine* pme,
-	                        const std::set<Handle> &vars,
-	                        const std::vector<Handle> &clauses)
+	                        const Variables& vars,
+	                        const Pattern& pat)
 		{
-			return _cb.initiate_search(pme, vars, clauses);
+			return _cb.initiate_search(pme, vars, pat);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -341,10 +332,7 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 	debug_print();
 #endif
 
-	pmcb->set_type_restrictions(_varlist.typemap);
-	pmcb->set_evaluatable_terms(_pat.evaluatable_terms);
-	pmcb->set_evaluatable_holders(_pat.evaluatable_holders);
-	bool found = pmcb->initiate_search(pme, _varlist.varset, _pat.mandatory);
+	bool found = pmcb->initiate_search(pme, _varlist, _pat);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");

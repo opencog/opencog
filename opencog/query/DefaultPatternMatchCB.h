@@ -147,28 +147,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * in order to drive a reasonably-fast search.
 		 */
 		virtual bool initiate_search(PatternMatchEngine *,
-		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
-
-		/**
-		 * Indicate a set of restrictions on the types of the ground atoms.
-		 * The typemap contains a map from variables to a set of types
-		 * that the groundings for the variable are allowed to have.
-		 */
-		virtual void set_type_restrictions(const VariableTypeMap &tm)
-		{
-			_type_restrictions = &tm;
-		}
-
-		/**
-		 * Indicate the dynamically-evaluatable terms. Searchs cannot
-		 * be started with these, as groundings probably won't exist
-		 * in the  atomspace.
-		 */
-		virtual void set_evaluatable_terms(const std::set<Handle>& terms)
-		{
-			_dynamic = &terms;
-		}
+		                             const Variables&,
+		                             const Pattern&);
 
 		virtual const std::set<Type>& get_connectives(void)
 		{
@@ -200,20 +180,20 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		bool _search_fail;
 		virtual bool neighbor_search(PatternMatchEngine *,
-		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
+		                             const Variables&,
+		                             const Pattern&);
 
 		virtual bool disjunct_search(PatternMatchEngine *,
-		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
+		                             const Variables&,
+		                             const Pattern&);
 
 		virtual bool link_type_search(PatternMatchEngine *,
-		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
+		                             const Variables&,
+		                             const Pattern&);
 
 		virtual bool variable_search(PatternMatchEngine *,
-		                             const std::set<Handle>& vars,
-		                             const HandleSeq& clauses);
+		                             const Variables&,
+		                             const Pattern&);
 
 		AtomSpace *_as;
 };

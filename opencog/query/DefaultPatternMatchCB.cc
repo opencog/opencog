@@ -245,9 +245,11 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * starting point.
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
+	const HandleSeq& clauses = pat.mandatory;
+
 	_search_fail = false;
 
 	// In principle, we could start our search at some node, any node,
@@ -263,6 +265,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	size_t bestclause;
+	_dynamic = &pat.evaluatable_terms;
 	Handle best_start = find_thinnest(clauses, _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if all of the
@@ -391,11 +394,11 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * "standard, canonical" case.
  */
 bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
 	_search_fail = false;
-	return disjunct_search(pme, vars, clauses);
+	return disjunct_search(pme, vars, pat);
 }
 
 /* ======================================================== */
@@ -456,18 +459,23 @@ bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
  * is what we do here, with the ChoiceLink loop.
  */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
+	const HandleSeq& clauses = pat.mandatory;
+	_type_restrictions = &vars.typemap;
+
 	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
 	{
+		Pattern pcpy = pat;
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
 		for (const Handle& h : oset)
 		{
 			HandleSeq hs;
 			hs.push_back(h);
-			bool found = disjunct_search(pme, vars, hs);
+			pcpy.mandatory = hs;
+			bool found = disjunct_search(pme, vars, pcpy);
 			if (found) return true;
 		}
 		if (not _search_fail) return false;
@@ -475,7 +483,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
-	bool found = neighbor_search(pme, vars, clauses);
+	bool found = neighbor_search(pme, vars, pat);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -486,7 +494,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// types that occur in the atomspace.
 	dbgprt("Cannot use node-neighbor search, use link-type search\n");
 	_search_fail = false;
-	found = link_type_search(pme, vars, clauses);
+	found = link_type_search(pme, vars, pat);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -498,7 +506,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// method.
 	dbgprt("Cannot use link-type search, use variable-type search\n");
 	_search_fail = false;
-	found = variable_search(pme, vars, clauses);
+	found = variable_search(pme, vars, pat);
 	return found;
 }
 
@@ -538,9 +546,12 @@ void DefaultPatternMatchCB::find_rarest(const Handle& clause,
  * AtomSpace.
  */
 bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
+	const HandleSeq& clauses = pat.mandatory;
+	_type_restrictions = &vars.typemap;
+
 	_search_fail = false;
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -606,19 +617,22 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
  * you should create somethnig more clever.
  */
 bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& varset,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
+	const HandleSeq& clauses = pat.mandatory;
+	_type_restrictions = &vars.typemap;
+
 	_search_fail = false;
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
-	dbgprt("varset size = %lu\n", varset.size());
+	dbgprt("varset size = %lu\n", vars.varset.size());
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	for (const Handle& var: varset)
+	for (const Handle& var: vars.varset)
 	{
 		dbgprt("Examine variable %s\n", var->toShortString().c_str());
 		auto tit = _type_restrictions->find(var);

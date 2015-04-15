@@ -112,7 +112,6 @@ static Handle do_imply(AtomSpace* as,
 		bl = createBindLink(*LinkCast(hbindlink));
 
 	impl.implicand = bl->get_implicand();
-	impl.set_type_restrictions(bl->get_variables().typemap);
 
 	bl->imply(&impl, do_conn_check);
 

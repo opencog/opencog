@@ -252,62 +252,8 @@ class PatternMatchCallback
 		 */
 		virtual void pop(void) {}
 
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys how the variable declarations in a BindLink were
-		 * decoded.  The argument contains nothing more than a map
-		 * holding the type restrictions, if any, on each variable that
-		 * was declared in the VariableList bound to the pattern. The
-		 * map allows a fast lookup by variable name, to find any of
-		 * it's type restrictions.
-		 */
-		virtual void set_type_restrictions(const VariableTypeMap& tm) {}
-
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys a list of all of the evaluatable terms in the pattern.
-		 * By "evaluatable", it is meant any term that does not have a
-		 * fixed TruthValue, but rather has a truth value computed
-		 * dynamically, at runtime. Currently, such terms are any
-		 * EvaluationLink that contains a GroundedPredicateNode or any
-		 * link that inherits from a VirtualLink.  If the callbacks make
-		 * match decisions based on TruthValues, then these terms will
-		 * typically need to be evaluated during the search.
-		 *
-		 * they belong to the pattern!!!
-		 *
-		 * XXX This is exactly the wrong way. WTF FIXME...
-		 *
-		 * A virtual link is one that does not (might not) exist as a
-		 * real link in the AtomSpace, but might still exist in a
-		 * 'virtual' sense, in that it is instead considered to exist if
-		 * a GroundedPredicateNode evaluates to true or not.  When such
-		 * a virtual link is encountered, this callback is called to make
-		 * this decision.
-		 *
-		 * At this time, it is assumed that
-		 * these are always of the form
-		 *
-		 *       EvaluationLink
-		 *          GroundedPredicateNode "scm:some-function"
-		 *          ListLink
-		 *             SomeAtom arg1       ;; could be a VariableNode
-		 *             VariableNode $arg2  ;; could be some other node, too.
-		 *             EtcAtom ...
-		 *
-		 */
-		virtual void set_evaluatable_terms(const std::set<Handle>&) {}
-
 		virtual const std::set<Type>& get_connectives(void)
 		{ static const std::set<Type> _empty; return _empty; }
-
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys a list of all of the links in the search pattern
-		 * that contain ("hold") evaluatable terms in them. See above
-		 * for the definition of an "evaluatable term".
-		 */
-		virtual void set_evaluatable_holders(const std::set<Handle>&) {}
 
 		/**
 		 * Called to initiate the search. This callback is responsible
@@ -323,8 +269,8 @@ class PatternMatchCallback
 		 * through) the return values of all the others.
 		 */
 		virtual bool initiate_search(PatternMatchEngine *,
-		                             const std::set<Handle> &vars,
-		                             const std::vector<Handle> &clauses) = 0;
+		                             const Variables&,
+		                             const Pattern&) = 0;
 };
 
 } // namespace opencog
