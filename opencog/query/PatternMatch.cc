@@ -213,7 +213,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback *cb,
 		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
-		// Halt recursion immediattely if match is accepted.
+		// Halt recursion immediately if match is accepted.
 		if (accept) return true;
 	}
 	return false;
@@ -318,13 +318,12 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 	return SatisfactionLink::satisfy(pmc);
 }
 
+/* ================================================================= */
+
 // All clauses of the Concrete link are connected, so this is easy.
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
-	// XXX FIXME someday -- instead of copying these, they should
-	// just be pointers. Or references. Or maybe pme should point
-	// ConcreteLink, and ConcreteLink would befriend the pme ...
 	pme->_varlist = &_varlist;
 	pme->_pat = &_pat;
 
