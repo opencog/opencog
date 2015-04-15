@@ -210,7 +210,7 @@ class HobbsAgent(MindAgent):
         Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
         '''
 
-        return self.bindLinkExe(self.currentProposal,node,'(cog-bind-crisp getConjunction)',self.currentResult,types.WordInstanceNode)
+        return self.bindLinkExe(self.currentProposal,node,'(cog-bind getConjunction)',self.currentResult,types.WordInstanceNode)
 
     def checkConjunctions(self,node):
 
@@ -257,7 +257,7 @@ class HobbsAgent(MindAgent):
             end=filter+1
 
         for index in range(start,end):
-            command='(cog-bind-crisp filter-#'+str(index)+')'
+            command='(cog-bind filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
                 '''
@@ -328,7 +328,7 @@ class HobbsAgent(MindAgent):
         Returns a list of words in the atomspace
         '''
 
-        rv=self.bindLinkExe(None,None,'(cog-bind-crisp getWords)',self.currentResult,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-bind getWords)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def getTargets(self,words):
@@ -341,7 +341,7 @@ class HobbsAgent(MindAgent):
         for word in words:
             matched=False
             for index in range(1,self.numOfPrePatterns+1):
-                command='(cog-bind-crisp pre-process-#'+str(index)+')'
+                command='(cog-bind pre-process-#'+str(index)+')'
                 rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
                 if len(rv)>0:
                     matched=True
@@ -351,7 +351,7 @@ class HobbsAgent(MindAgent):
         return targets
 
     def getPronouns(self):
-        rv=self.bindLinkExe(None,None,'(cog-bind-crisp getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-bind getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def getRoots(self):
@@ -360,7 +360,7 @@ class HobbsAgent(MindAgent):
         Return a list of roots(incoming degree of 0)
         '''
 
-        self.bindLinkExe(None,None,'(cog-bind-crisp connectRootsToParseNodes)',None,None)
+        self.bindLinkExe(None,None,'(cog-bind connectRootsToParseNodes)',None,None)
         rv= self.bindLinkExe(None,None,'(cog-bind getAllParseNodes)',self.currentResult,types.ParseNode)
         return self.sortNodes(rv,self.getSentenceNumber)
 
@@ -369,7 +369,7 @@ class HobbsAgent(MindAgent):
         Returns a ParseNode associated with the "target"
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind-crisp getParseNode)',self.currentResult,types.ParseNode)
+        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind getParseNode)',self.currentResult,types.ParseNode)
         return rv[0]
 
     def  previousRootExist(self,root):
@@ -486,10 +486,10 @@ class HobbsAgent(MindAgent):
         Check if the node is the word "it".
         '''
         matched=False
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind-crisp isIt)',self.currentResult,types.AnchorNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind isIt)',self.currentResult,types.AnchorNode)
         if len(rv)>0:
             for index in range(1,self.numOfPleonasticItPatterns+1):
-                command='(cog-bind-crisp pleonastic-it-#'+str(index)+')'
+                command='(cog-bind pleonastic-it-#'+str(index)+')'
                 rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
                 if len(rv)>0:
                     matched=True

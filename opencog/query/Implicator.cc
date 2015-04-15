@@ -53,36 +53,6 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 }
 
 /**
- * The crisp implicator needs to tweak the truth value of the
- * resulting implicand. In most cases, this is not (strictly) needed,
- * for example, if the implicand has ungrounded variables, then
- * a truth value can be assigned to it, and the implicand will obtain
- * that truth value upon grounding.
- *
- * HOWEVER, if the implicand is fully grounded, then it will be given
- * a truth value of (false, uncertain) to start out with, and, if a
- * solution is found, then the goal here is to change its truth value
- * to (true, certain).  That is the whole point of this function:
- * to tweak (affirm) the truth value of existing clauses!
- */
-bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                const std::map<Handle, Handle> &term_soln)
-{
-	// PatternMatchEngine::print_solution(term_soln,var_soln);
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-
-		// Set truth value to true+confident
-		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
-		h->setTruthValue(stv);
-	}
-	return false;
-}
-
-/**
  * The single implicator behaves like the default implicator, except that
  * it terminates after the first solution is found.
  */
@@ -112,7 +82,6 @@ static Handle do_imply(AtomSpace* as,
 		bl = createBindLink(*LinkCast(hbindlink));
 
 	impl.implicand = bl->get_implicand();
-	impl.set_type_restrictions(bl->get_typemap());
 
 	bl->imply(&impl, do_conn_check);
 
@@ -152,30 +121,6 @@ Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	SingleImplicator impl(as);
-	return do_imply(as, hbindlink, impl);
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Use the crisp-logic callback to evaluate boolean implication
- * statements; i.e. statements that have truth values assigned
- * their clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause
- * is true, its accepted, if its false, its rejected. If the
- * clause begins with a NotLink, true and false are reversed.
- *
- * The NotLink is also interpreted as an "absence of a clause";
- * if the atomspace does NOT contain a NotLink clause, then the
- * match is considered postive, and the clause is accepted (and
- * it has a null or "invalid" grounding).
- *
- * See the do_bindlink function documentation for details.
- */
-Handle crisp_logic_bindlink(AtomSpace* as, const Handle& hbindlink)
-{
-	// Now perform the search.
-	CrispImplicator impl(as);
 	return do_imply(as, hbindlink, impl);
 }
 

@@ -30,22 +30,21 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/query/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
+#include <opencog/atomspace/ClassServer.h>
 
 namespace opencog {
 
-class ConcreteLink;
-
 class PatternMatchEngine
 {
-	friend class ConcreteLink;
+	// -------------------------------------------
+	// Callback to whom the results are reported.
+	PatternMatchCallback &_pmc;
+	ClassServer& _classserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
-	typedef std::vector<Handle> RootList;
-	typedef std::map<Handle, RootList> ConnectMap;
-	typedef std::pair<Handle, RootList> ConnectPair;
-
-	// Used for managing OrLink state
+	// Used for managing ChoiceLink state
 	typedef std::pair<const Handle&, const Handle&> Choice;
 	typedef std::map<Choice, size_t> ChoiceState;
 
@@ -54,43 +53,25 @@ class PatternMatchEngine
 		// The current set of clauses (redex context) being grounded.
 		// A single redex consists of a collection of clauses, all of
 		// which must be grounded.
-		void clear_redex(const std::string& name = "topmost level");
 		bool explore_redex(const Handle&, const Handle&, const Handle&);
 
-		std::string _redex_name;  // for debugging only!
-
-		// variables that need to be grounded.
-		std::set<Handle> _bound_vars;
-
-		// List of clauses that need to be grounded.
-		// See ConcreteLink.h for additional documentation.
-		HandleSeq        _cnf_clauses;
-		HandleSeq        _mandatory;
-		std::set<Handle> _optionals;
-		std::set<Handle> _evaluatable;
-
-		// Map from variables to e*uatble terms they appear in.
-		std::unordered_multimap<Handle,Handle> _in_evaluatable;
-		std::unordered_multimap<Handle,Handle> _in_executable;
-
-		ConnectMap       _connectivity_map;
+		// These have to be pointers, not references; they get pushed
+		// onto a stack when a new redex context is started. This is
+		// how redex recursion will (eventually) be implemented.
+		const Variables* _varlist;
+		const Pattern* _pat;
 
 		bool is_optional(const Handle& h) {
-			return (_optionals.count(h) != 0); }
+			return (_pat->optionals.count(h) != 0); }
 
 		bool is_evaluatable(const Handle& h) {
-			return (_evaluatable.count(h) != 0); }
+			return (_pat->evaluatable_holders.count(h) != 0); }
 
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
 		// above, that are being searched.
-		std::stack<std::string>      _stack_redex_name;  // for debugging only
-		std::stack<std::set<Handle>> _stack_bound_vars;
-		std::stack<HandleSeq>        _stack_cnf_clauses;
-		std::stack<HandleSeq>        _stack_mandatory;
-		std::stack<std::set<Handle>> _stack_optionals;
-		std::stack<std::set<Handle>> _stack_evaluatable;
-		std::stack<ConnectMap>       _stack_connectivity_map;
+		std::stack<const Variables*>  _stack_variables;
+		std::stack<const Pattern*>    _stack_pattern;
 
 		void push_redex(void);
 		void pop_redex(void);
@@ -200,12 +181,10 @@ class PatternMatchEngine
 		std::stack<MoreStack> unordered_stack;
 		std::stack<PermuStack> permutation_stack;
 
-		// -------------------------------------------
-		// Callback to whom the results are reported.
-		PatternMatchCallback *_pmc;
-
 	public:
-		PatternMatchEngine(void);
+		PatternMatchEngine(PatternMatchCallback&,
+		                   const Variables&,
+		                   const Pattern&);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.

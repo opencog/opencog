@@ -1,5 +1,5 @@
 ;
-; Unit testing for nested OrLinks in the pattern matcher.
+; Unit testing for nested ChoiceLinks in the pattern matcher.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -121,7 +121,7 @@
 					(VariableNode "$x")
 					(ConceptNode "ways and means")
 				)
-				(OrLink
+				(ChoiceLink
 					(MemberLink
 						(VariableNode "$x")
 						(ConceptNode "Senator")
@@ -132,7 +132,7 @@
 					)
 					(EvaluationLink
 						(PredicateNode "involved")
-						(OrLink
+						(ChoiceLink
 							(ListLink
 								(VariableNode "$x")
 								(ConceptNode "Business")
@@ -164,7 +164,7 @@
 					(VariableNode "$x")
 					(ConceptNode "ways and means")
 				)
-				(OrLink
+				(ChoiceLink
 					(MemberLink
 						(VariableNode "$x")
 						(ConceptNode "Senator")
@@ -174,7 +174,7 @@
 						(ConceptNode "Representative")
 					)
 					;;  Note this Or within an Or
-					(OrLink
+					(ChoiceLink
 						(MemberLink
 							(VariableNode "$x")
 							(ConceptNode "Page")

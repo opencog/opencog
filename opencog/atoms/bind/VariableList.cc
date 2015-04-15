@@ -37,8 +37,8 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		Type t = h->getType();
 		if (VARIABLE_NODE == t)
 		{
-			_varset.insert(h);    // tree (unordered)
-			_varseq.push_back(h); // vector (ordered)
+			_varlist.varset.insert(h);    // tree (unordered)
+			_varlist.varseq.push_back(h); // vector (ordered)
 		}
 		else if (TYPED_VARIABLE_LINK == t)
 		{
@@ -129,9 +129,9 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		Type vt = TypeNodeCast(vartype)->getValue();
 		std::set<Type> ts = {vt};
-		_typemap.insert(ATPair(varname, ts));
-		_varset.insert(varname);
-		_varseq.push_back(varname);
+		_varlist.typemap.insert(ATPair(varname, ts));
+		_varlist.varset.insert(varname);
+		_varlist.varseq.push_back(varname);
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -154,9 +154,9 @@ void VariableList::get_vartype(const Handle& htypelink)
 			ts.insert(vt);
 		}
 
-		_typemap.insert(ATPair(varname,ts));
-		_varset.insert(varname);
-		_varseq.push_back(varname);
+		_varlist.typemap.insert(ATPair(varname,ts));
+		_varlist.varset.insert(varname);
+		_varlist.varseq.push_back(varname);
 	}
 	else
 	{
@@ -197,8 +197,8 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	if ((VARIABLE_NODE == tdecls) or
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
-		_varset.insert(hdecls);
-		_varseq.push_back(hdecls);
+		_varlist.varset.insert(hdecls);
+		_varlist.varseq.push_back(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
@@ -233,13 +233,14 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 bool VariableList::is_type(const Handle& h) const
 {
 	// The arity must be one for there to be a match.
-	if (1 != _varset.size()) return false;
+	if (1 != _varlist.varset.size()) return false;
 
 	// No type restrictions.
-	if (0 == _typemap.size()) return true;
+	if (0 == _varlist.typemap.size()) return true;
 
 	// Check the type restrictions.
-	VariableTypeMap::const_iterator it =_typemap.find(_varseq[0]);
+	VariableTypeMap::const_iterator it =
+		_varlist.typemap.find(_varlist.varseq[0]);
 	const std::set<Type> &tchoice = it->second;
 
 	Type htype = h->getType();
@@ -262,15 +263,16 @@ bool VariableList::is_type(const HandleSeq& hseq) const
 {
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
-	if (_varset.size() != len) return false;
+	if (_varlist.varset.size() != len) return false;
 	// No type restrictions.
-	if (0 == _typemap.size()) return true;
+	if (0 == _varlist.typemap.size()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
-		VariableTypeMap::const_iterator it =_typemap.find(_varseq[i]);
-		if (it == _typemap.end()) continue;  // no restriction
+		VariableTypeMap::const_iterator it =
+			_varlist.typemap.find(_varlist.varseq[i]);
+		if (it == _varlist.typemap.end()) continue;  // no restriction
 
 		const std::set<Type> &tchoice = it->second;
 		Type htype = hseq[i]->getType();
@@ -289,11 +291,11 @@ bool VariableList::is_type(const HandleSeq& hseq) const
  */
 void VariableList::build_index(void)
 {
-	if (0 < _index.size()) return;
-	size_t sz = _varseq.size();
+	if (0 < _varlist.index.size()) return;
+	size_t sz = _varlist.varseq.size();
 	for (size_t i=0; i<sz; i++)
 	{
-		_index.insert(std::pair<Handle,Arity>(_varseq[i], i));
+		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
 	}
 }
 
@@ -349,10 +351,10 @@ void VariableList::build_index(void)
 Handle VariableList::substitute(const Handle& fun,
                                 const HandleSeq& args) const
 {
-	if (args.size() != _varseq.size())
+	if (args.size() != _varlist.varseq.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Incorrect numer of arguments specified, expecting %lu got %lu",
-			_varseq.size(), args.size());
+			_varlist.varseq.size(), args.size());
 
 	if (not is_type(args))
 		throw InvalidParamException(TRACE_INFO,
@@ -365,9 +367,9 @@ Handle VariableList::substitute_nocheck(const Handle& fun,
                                         const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
-	std::map<Handle, Arity>::const_iterator idx;
-	idx = _index.find(fun);
-	if (idx != _index.end())
+	std::map<Handle, unsigned int>::const_iterator idx;
+	idx = _varlist.index.find(fun);
+	if (idx != _varlist.index.end())
 		return args.at(idx->second);
 
 	// If its a node, and its not a variable, then it is a constant,

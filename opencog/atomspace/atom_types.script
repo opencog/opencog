@@ -37,6 +37,8 @@ SUBSET_LINK <- ORDERED_LINK
 
 // Boolean set operations, logical constants
 // The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
+// These are used by the pattern match to perform boolean combinations
+// of predicates.
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
@@ -49,6 +51,19 @@ SEQUENTIAL_AND_LINK <- ORDERED_LINK
 // to find clauses that may or may not be present: clauses that are
 // optionally present.
 ABSENT_LINK <- UNORDERED_LINK
+
+// The 'intuitionist logic' version of OR_LINK is 'multiple choice'
+// (the 'axiom of choice', by terrible abuse of terminology).  The
+// ChoiceLink states that a choice must be made.  Here, it is explicitly
+// an exclusive choice: you can only choose one of the alternatives.
+// The alternatives are just that: alternatives. They are not true/false
+// valued; they're simply options on a menu. Pick one.  It is an ordered
+// link, in the sense that the first choice might be preferable.
+//
+// Currently, the only reason this exists is for the pattern matcher;
+// you use it to say "match this graph or this graph or this graph".
+//
+CHOICE_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links

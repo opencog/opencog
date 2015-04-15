@@ -93,10 +93,6 @@ void PatternSCM::init_in_module(void*)
 	// first match.
 	_binders.push_back(new PatternWrap(single_bindlink, "cog-bind-single"));
 
-	// Run implication, assuming that the argument is a handle to
-	// an BindLink containing variables and an ImplicationLink
-	_binders.push_back(new PatternWrap(crisp_logic_bindlink, "cog-bind-crisp"));
-
 	// Mystery function
 	_binders.push_back(new PatternWrap(pln_bindlink, "cog-bind-pln"));
 

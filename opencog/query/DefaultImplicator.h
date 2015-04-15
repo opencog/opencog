@@ -25,7 +25,6 @@
 #define _OPENCOG_DEFAULT_IMPLICATOR_H
 
 #include "AttentionalFocusCB.h"
-#include "CrispLogicPMCB.h"
 #include "DefaultPatternMatchCB.h"
 #include "Implicator.h"
 #include "PatternMatchCallback.h"
@@ -40,18 +39,6 @@ class DefaultImplicator:
 	public:
 		DefaultImplicator(AtomSpace* asp) :
 			Implicator(asp), DefaultPatternMatchCB(asp) {}
-};
-
-class CrispImplicator:
-	public virtual Implicator,
-	public virtual CrispLogicPMCB
-{
-	public:
-		CrispImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp), CrispLogicPMCB(asp)
-		{}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln);
 };
 
 class SingleImplicator:

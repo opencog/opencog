@@ -111,3 +111,62 @@
 		)
 	)
 )
+
+;;;; -----------------------------------------------------------------
+;;; Boolean logic connectives!
+
+;; reject node one only; of the five, four remain
+(define (four-not)
+	(wrapper
+		(list one->x x->one
+			(NotLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+			)
+		)
+	)
+)
+
+;; accept either of two.
+(define (two-or)
+	(wrapper
+		(list one->x x->one
+			(OrLink
+				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
+			)
+		)
+	)
+)
+
+;; accept neither of two. (accept three)
+(define (three-nor)
+	(wrapper
+		(list one->x x->one
+			(NotLink
+				(OrLink
+					(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+					(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
+				)
+			)
+		)
+	)
+)
+
+;; accept any of the first two;
+(define (two-fancy)
+	(wrapper
+		(list one->x x->one
+			(AndLink
+				(NotLink
+					(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+				)
+				(NotLink
+					(OrLink
+						(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+						(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
+					)
+				)
+			)
+		)
+	)
+)

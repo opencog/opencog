@@ -29,7 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/TruthValue.h>
 
-#include <opencog/query/CrispLogicPMCB.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
 
@@ -45,12 +45,11 @@ namespace opencog {
  */
 
 class Satisfier :
-	public virtual CrispLogicPMCB
+	public virtual DefaultPatternMatchCB
 {
 	public:
 		Satisfier(AtomSpace* as) :
 			DefaultPatternMatchCB(as),
-			CrispLogicPMCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 		TruthValuePtr _result;
 

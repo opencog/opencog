@@ -32,12 +32,10 @@
 
 namespace opencog {
 
-class BindLink;
 class SatisfactionLink;
 
 class PatternMatch
 {
-	friend class BindLink;
 	friend class SatisfactionLink;
 
 	protected:

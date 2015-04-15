@@ -43,9 +43,11 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
  * @param negations  The negative clauses
  */
 bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
-                                          const std::set<Handle>& vars,
-                                          const std::vector<Handle>& clauses)
+                                          const Variables& vars,
+                                          const Pattern& pat)
 {
+    const HandleSeq& clauses = pat.mandatory;
+
     _root = clauses[0];
     _starter_term = _root;
     // XXX FIXME  I'm pretty sure that this search is not going to be

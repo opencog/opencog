@@ -55,7 +55,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(QuoteUTest)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
-	ADD_CXXTEST(OrLinkUTest)
+	ADD_CXXTEST(ChoiceLinkUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
@@ -85,6 +85,18 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-disconnected.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-disconnected.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-embed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-embed.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-embed-disco.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-embed-disco.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm
@@ -93,18 +105,6 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater_than.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-disconnected.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-disconnected.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-embed.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-embed-disco.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-embed-disco.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-link.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-link.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-nest.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-nest.scm)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/or-top-nest.scm
-    ${PROJECT_BINARY_DIR}/tests/query/or-top-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
