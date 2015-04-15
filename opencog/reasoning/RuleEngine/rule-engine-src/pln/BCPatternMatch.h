@@ -32,7 +32,7 @@ namespace opencog
  * Given a rule(i.e a bindLink handle), find all the premises that satisfy the rule.
  * by pattern matching.
  */
-class BCPatternMatch: public virtual PLNImplicator
+class BCPatternMatch  : public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
 private:
 	AtomSpace* as_;

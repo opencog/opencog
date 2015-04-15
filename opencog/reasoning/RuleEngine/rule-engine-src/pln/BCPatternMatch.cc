@@ -26,7 +26,8 @@
 using namespace opencog;
 
 BCPatternMatch::BCPatternMatch(AtomSpace * as)
-        : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
+    : DefaultPatternMatchCB(as), as_(as)
+ //       : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
 {
 }
 
@@ -53,10 +54,26 @@ bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
+	for (auto& p : pred_soln)
+		logger().debug("PM pred: " + p.first->toShortString() + " map to " + p.second->toShortString());
+
+	std::map<Handle, Handle> true_var_soln;
+
+	// get rid of non-var mapping
+	for (auto& p : var_soln)
+	{
+		if (p.first->getType() == VARIABLE_NODE)
+		{
+			true_var_soln[p.first] = p.second;
+			logger().debug("PM var: " + p.first->toShortString() + " map to " + p.second->toShortString());
+		}
+	}
+
+
 	// XXX TODO if a variable match to itself, reject?
 
 	// store the variable solution
-	var_solns_.push_back(var_soln);
+	var_solns_.push_back(true_var_soln);
 	pred_solns_.push_back(pred_soln);
 
 	return false;
