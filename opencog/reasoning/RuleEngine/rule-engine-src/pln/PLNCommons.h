@@ -73,7 +73,9 @@ public:
 	void clean_up_implication_link(Handle& himplication_link)
 			throw (opencog::InvalidParamException);
 	/**
-	 * Remove a variable node. All the incoming sets are also removed in a recursive manner.
+	 * Remove a variable node. All the incoming sets are also removed
+	 * in a recursive manner.
+	 *
 	 * @param h a var node to be deleted
 	 */
 	void remove_vnode_containing_links(Handle& h);
