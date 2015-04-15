@@ -30,7 +30,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
 
-#define DEBUG 1
+// #define DEBUG 1
 
 namespace opencog {
 class PatternMatchEngine;
