@@ -34,10 +34,17 @@ BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
     : _as(as)
 {
 	_rules_set = rs;
+
+	// create a garbage subspace with _as as parent, so codes acting on
+	// _as will see also see _garbage, but codes looking at _garbage
+	// will not see stuff in _as
+	_garbage_subspace = new AtomSpace(_as);
 }
 
 BackwardChainer::~BackwardChainer()
 {
+	// this will presumably remove all temp atoms from _as
+	delete _garbage_subspace;
 }
 
 /**
@@ -58,6 +65,9 @@ void BackwardChainer::do_chain(Handle init_target)
 
 	while (not _targets_stack.empty())
 	{
+		// XXX TODO targets selection should be done here, by first changing
+		// the stack to other data types
+
 		Handle top = _targets_stack.top();
 		_targets_stack.pop();
 
@@ -71,9 +81,6 @@ void BackwardChainer::do_chain(Handle init_target)
 		// add the substitution to inference history
 		for (auto& p : subt)
 			old_subt[p.first].insert(p.second.begin(), p.second.end());
-
-		// XXX TODO ground/chase var here to see if the initial target is solved?
-
 
 		i++;
 		// debug quit
@@ -161,7 +168,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			return VarMultimap();
 
 		// XXX TODO use all rules found here; this will require branching
-		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_as);
+		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_subspace);
 
 		Handle himplicant = standardized_rule.get_implicant();
 		HandleSeq outputs = standardized_rule.get_implicand();
@@ -179,7 +186,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// wrap all the mapped result inside QuoteLink, so that variables
 			// will be handled correctly for the next BC step
 			for (auto& p : temp_mapping)
-				implicand_mapping[p.first] = _as->addAtom(createLink(QUOTE_LINK, p.second));
+				implicand_mapping[p.first] = _garbage_subspace->addAtom(createLink(QUOTE_LINK, p.second));
 
 			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
 			break;
@@ -187,7 +194,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 		// reverse ground the implicant with the grounding we found from
 		// unifying the implicand
-		Instantiator inst(_as);
+		Instantiator inst(_garbage_subspace);
 		himplicant = inst.instantiate(himplicant, implicand_mapping);
 
 		// find all matching premises
@@ -354,6 +361,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(htarget);
 
+	// XXX TODO htarget could be a logical link, and wrapping it in HandleSeq is killing PM?
+
 	HandleSeq terms;
 	terms.push_back(htarget);
 
@@ -375,12 +384,16 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 
 	for (size_t i = 0; i < var_solns.size(); i++)
 	{
-		// don't want clause that is part of a rule
+		// don't want matched clause that is part of a rule
 		if (std::any_of(_rules_set.begin(), _rules_set.end(),
 		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
 			continue;
 
-		// don't want clause already in inference history
+		// don't want matched clause that is in the garbage space
+		if (_garbage_subspace->getAtom(pred_soln[i][htarget]) != Handle::UNDEFINED)
+			continue;
+
+		// don't want matched clause already in inference history
 		if (_inference_history.count(pred_solns[i][htarget]) == 1)
 			continue;
 
@@ -416,6 +429,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 {
 	logger().debug("[BackwardChainer] starting unify");
 
+	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
 	Handle temp_htarget = temp_space.addAtom(htarget);
@@ -443,7 +457,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 
 	VarMap good_map;
 
-	// go thru each solution, and get the first one that map the whole temp_htarget
+	// go thru each solution, and get the first one that map the whole temp_hmatch
 	// XXX TODO branch on the various groundings
 	for (size_t i = 0; i < pred_list.size(); ++i)
 	{

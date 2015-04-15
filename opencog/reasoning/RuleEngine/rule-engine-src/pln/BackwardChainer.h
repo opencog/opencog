@@ -74,6 +74,7 @@ public:
 	VarMultimap& get_chaining_result();
 
 	AtomSpace* _as;
+	AtomSpace* _garbage_subspace;
 	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
 
 private:
