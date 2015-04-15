@@ -275,12 +275,6 @@ was mentioned before: disconnected graphs are always just a trivial
 product of their connected components; thus, it is pointless to
 explicitly support disconnected graphs.
 
-At this time, the boolean-or of clauses is not supported. So far,
-there has been no user demand for this feature.  A somewhat-related
-feature, for optional clauses, is supported; however, this is
-typically used to express patterns that should be rejected if they are
-found.
-
 
 Algorithm overview
 ------------------
@@ -633,12 +627,13 @@ functionality. The BigPatternUTest test case is a small, simple, clear
 example of using the simple forward chainer.
 
 
-Ranking; Approximate matching; Crisp and Fuzzy Logic
-----------------------------------------------------
+Satisfiability Modulo Theories
+------------------------------
 The final decision on matching to a given query pattern is delegated
 to a callback. This allows for considerable flexibility in controlling
 matching for hypergraphs that represent crisp logic statements, or those
-that use probalistic logic, or for ranking matches by quality.
+that use probalistic logic, for ranking matches by quality, or many
+other theories of logic.
 
 Callbacks are provided to accept or reject individual node and link
 groundings, and to accept of reject the grounding of individual clauses.
@@ -647,32 +642,35 @@ pattern rejection. This can be done by specifying the pattern to be
 rejected as "optional": thus, if it is not found, a solution is reported;
 but if it is found, then the callback can reject the solution.
 The callback is free to examine truth values, STI/LTI, etc. in
-accepting or rejecting any given grounding.  Push and pop callbacks
-are provided to help maintain state on a stack, to deal with partial
-matches, if needed.
+accepting or rejecting any given grounding.  The pattern matcher
+performs backtracking; if the matchers maintain state, then they can
+use the push and pop callbacks to piggy-back on the built-in
+back-tracker.
 
 The "optional" mechanism can also be used to implement approximate
 matching, by specifying the parts of the graph that would be "nice
 to match", but not strictly required.
 
-Alternately, the ranking/acceptance/rejection of the solution subgraph
-can be performed in a post-processing stage.  This may be an easier
-approach for many cases.
+Evaluatable terms (terms and clauses that need to be evaluated at
+run-time to determine thier truth values) are evaluated in the
+evaluate_sentence() callback.  See PatternMatchCallback.h for detils:
+in breif, though, this is where the basic conception of "truth" is
+implemented. Crisp-logic theories would implement true/false truth
+values, with and-or-not as the logical connectives. Probabilistic
+theories would implement Bayesian or measure-theoretic "truth values"
+ranging between 0.0 and 1.0; the logical connectives and-or-not would
+correspond to set-intersection, set-union, set-compliment. Other
+theories can implement arbitrary formulas here.
 
-At this time, two generic callbacks are provided:
+At this time, only one generic callback are provided:
 
 *) The DefaultPatternMatchCB. This callback implements node and link
    match methods that accept only strict node/link matches, unless a
    node is of type VariableNode, in which case the match is also
-   accepted. No effort is made to consult truth values or other atom
-   properties to determine a match.
-
-*) The CrispLogicPMCB. This callback implements a crisp boolean logic
-   matching scheme. If a clause is matched, then the grounding must
-   have a truth value of greater than 0.5 to be considered a match.
-   By contrast, optional clauses must have a truth value of less than
-   0.5 to be acceptable; optional clauses are interpreted as negations:
-   they can be absent, or, if present, they must be false.
+   accepted. All evaluatable terms (those containing a
+   GroundedPredicateNode) are evaluated, and the resulting truth
+   value is treated as "true" if the TV is greater than 0.5; else
+   it is treated as false.
 
 
 Forward Chainer
