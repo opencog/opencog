@@ -33,7 +33,7 @@
 #include <string.h>
 #include "macros.h"
 
-namespace opencog 
+namespace opencog
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -65,11 +65,11 @@ public:
     /**
      * Construtor and destructor.
      */
-    StandardException() throw();
-    StandardException(const StandardException&) throw();
-    StandardException& operator=(const StandardException&) throw();
-    virtual ~StandardException() throw();
-    virtual const char* what() const throw() {
+    StandardException();
+    StandardException(const StandardException&);
+    StandardException& operator=(const StandardException&);
+    virtual ~StandardException();
+    virtual const char* what() const _GLIBCXX_USE_NOEXCEPT {
         return getMessage();
     }
 
@@ -104,12 +104,12 @@ public:
      *
      * @param Exception message in printf standard format.
      */
-    RuntimeException(const char*, const char*, ...) throw(); 
+    RuntimeException(const char*, const char*, ...);
 
     /**
      * Default constructor used for inheritance
      */
-    RuntimeException() throw();
+    RuntimeException();
 
 }; // RuntimeException
 
@@ -128,7 +128,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    XMLException(const char*, const char*, ...) throw(); 
+    XMLException(const char*, const char*, ...);
 
 }; // XMLException
 
@@ -147,7 +147,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    IOException(const char*, const char*, ...) throw();
+    IOException(const char*, const char*, ...);
 
 }; // IOException
 
@@ -166,7 +166,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    ComboException(const char*, const char*, ...) throw();
+    ComboException(const char*, const char*, ...);
 
 }; // ComboException
 
@@ -185,7 +185,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    IndexErrorException(const char*, const char*, ...) throw();
+    IndexErrorException(const char*, const char*, ...);
 
 }; // IndexErrorException
 
@@ -208,7 +208,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    InvalidParamException(const char*, const char*, ...) throw();
+    InvalidParamException(const char*, const char*, ...);
 
 }; // InvalidParamException
 
@@ -228,7 +228,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    InconsistenceException(const char*, const char*, ...) throw();
+    InconsistenceException(const char*, const char*, ...);
 
 }; // InconsistenceException
 
@@ -248,7 +248,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    FatalErrorException(const char*, const char*, ...) throw();
+    FatalErrorException(const char*, const char*, ...);
 
 }; // FatalErrorException
 
@@ -268,8 +268,8 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    NotFoundException(const char*, const char*, ...) throw();
-    
+    NotFoundException(const char*, const char*, ...);
+
 }; // NotFoundException
 
 /**
@@ -285,8 +285,8 @@ public:
      * Constructor
      * Nothing to be logged; tis simply breaks us out of inner loops.
      */
-    DeleteException(void) throw();
-    
+    DeleteException(void);
+
 }; // DeleteException
 
 /**
@@ -305,7 +305,7 @@ public:
      * macro.
      * @param Exception message in printf standard format.
      */
-    NetworkException(const char*, const char*, ...) throw();
+    NetworkException(const char*, const char*, ...);
 
 }; // NetworkException
 
@@ -318,8 +318,8 @@ class AssertionException : public StandardException
 
 public:
 
-    AssertionException(const char*, ...) throw();
-    AssertionException(const char* fmt, va_list ap) throw();
+    AssertionException(const char*, ...);
+    AssertionException(const char* fmt, va_list ap);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const StandardException& ex)
