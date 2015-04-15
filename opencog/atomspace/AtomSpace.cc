@@ -53,7 +53,7 @@ using namespace opencog;
 // ====================================================================
 
 AtomSpace::AtomSpace(AtomSpace* parent) :
-    atomTable(parent? &parent->atomTable : NULL),
+    atomTable(parent? &parent->atomTable : NULL, this),
     bank(atomTable),
     backing_store(NULL)
 {
