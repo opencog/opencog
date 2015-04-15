@@ -1356,9 +1356,13 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
-PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
+PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
+                                       const Variables& v,
+                                       const Pattern& p)
 	: _pmc(pmcb),
-	_classserver(classserver())
+	_classserver(classserver()),
+	_varlist(&v),
+	_pat(&p)
 {
 	// Our data!
 	//_varlist = _pmc->get_variables();

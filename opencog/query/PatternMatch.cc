@@ -324,9 +324,6 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
                            PatternMatchEngine *pme) const
 {
-	pme->_varlist = &_varlist;
-	pme->_pat = &_pat;
-
 #ifdef DEBUG
 	debug_print();
 #endif
@@ -341,8 +338,18 @@ bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
 
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
-   PatternMatchEngine pme(*pmcb);
-	return satisfy(pmcb, &pme);
+   PatternMatchEngine pme(*pmcb, _varlist, _pat);
+
+#ifdef DEBUG
+	debug_print();
+#endif
+
+	bool found = pmcb->initiate_search(&pme, _varlist, _pat);
+
+#ifdef DEBUG
+	printf("==================== Done with Search ==================\n");
+#endif
+	return found;
 }
 
 /* ================================================================= */
@@ -377,9 +384,8 @@ bool SatisfactionLink::satisfy(PatternMatchCallback* pmcb) const
 	{
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(*pmcb);
-		PatternMatchEngine pme(gcb);
 		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
-		clp->satisfy(&gcb, &pme);
+		clp->satisfy(&gcb);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
 		comp_term_gnds.push_back(gcb._term_groundings);

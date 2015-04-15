@@ -36,10 +36,8 @@
 
 namespace opencog {
 
-class ConcreteLink;  // XXX hack remove me
 class PatternMatchEngine
 {
-friend class ConcreteLink;  // XXX hack remove me
 	// -------------------------------------------
 	// Callback to whom the results are reported.
 	PatternMatchCallback &_pmc;
@@ -57,6 +55,9 @@ friend class ConcreteLink;  // XXX hack remove me
 		// which must be grounded.
 		bool explore_redex(const Handle&, const Handle&, const Handle&);
 
+		// These have to be pointers, not references; they get pushed
+		// onto a stack when a new redex context is started. This is
+		// how redex recursion will (eventually) be implemented.
 		const Variables* _varlist;
 		const Pattern* _pat;
 
@@ -181,7 +182,9 @@ friend class ConcreteLink;  // XXX hack remove me
 		std::stack<PermuStack> permutation_stack;
 
 	public:
-		PatternMatchEngine(PatternMatchCallback&);
+		PatternMatchEngine(PatternMatchCallback&,
+		                   const Variables&,
+		                   const Pattern&);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.
