@@ -157,6 +157,13 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // FreeLinks may be open or closed; they are closed terms if they
 // have no free variables in them.
+//
+// XXX TODO -- Review and possibly remove. FreeLinks were introduced for
+// the pattern matcher, to simplify the handling of expressions with
+// free variables in them (by pulling out those variables beforehand, at
+// link-creation time, rather than at runtime). However, due to
+// shared-libary conflicts, the FreeLink cannot currently be used in
+// this way.  Thus, its half-finished and currently semi-useless.
 FREE_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -221,3 +228,13 @@ FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
 // Basic arithmetic operators
 PLUS_LINK <- FUNCTION_LINK
 TIMES_LINK <- FUNCTION_LINK
+
+// This is an interesting one. Its a link that can never be grounded!
+// It can only hold VariableNodes. Attempting to insert this link into
+// the atomspace with any other atom in its outgoing set will cause that
+// atom to be deleted. The only variant that is allowed into the
+// atomspace is one that is holding one or more VariableNodes.  These
+// can then be used in expressions that, when evaluated (e.g. by the
+// pattner matcher) cause the grounded atom to be deleted!  Weird, but
+// nifty, I think.
+DELETE_LINK <- FUNCTION_LINK
