@@ -23,6 +23,8 @@
 
 #include "ForwardChainPatternMatchCB.h"
 
+using namespace opencog;
+
 ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
         Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as),
                 PLNImplicator(as), _as(as)

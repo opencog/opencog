@@ -4,7 +4,8 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
                       atom_types.h
                       atom_types.definitions
                       atom_types.inheritance
-                      core_types.scm)
+                      core_types.scm
+                      core_types.pyx)
 ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 
 # The atom_types.h file is written to the build directory
@@ -42,7 +43,7 @@ ADD_LIBRARY (atomspace SHARED
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atomspace opencog_atom_types)
+ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
 
 TARGET_LINK_LIBRARIES(atomspace
 	lambda

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <queue>
+
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
@@ -104,20 +106,56 @@ Handle Rule::get_implicant()
 /**
  * Get the implicand (output) of the rule defined in a BindLink.
  *
- * XXX TODO Might want to do extra processing find the real output over an
- *     ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
+ * This function does extra processing to find the real output over an
+ * ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
  *
  * @return the Handle of the implicand
  */
-Handle Rule::get_implicand()
+HandleSeq Rule::get_implicand()
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
+		return HandleSeq();
 
 	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+	Handle implicand = LinkCast(outgoing[1])->getOutgoingSet()[1];
 
-	return LinkCast(outgoing[1])->getOutgoingSet()[1];
+	std::queue<Handle> pre_output;
+	HandleSeq final_output;
+
+	// skip the top level ListLink
+	if (implicand->getType() == LIST_LINK)
+	{
+		for (Handle h : LinkCast(implicand)->getOutgoingSet())
+			pre_output.push(h);
+	}
+	else
+	{
+		pre_output.push(implicand);
+	}
+
+	// check all output of ExecutionOutputLink
+	while (not pre_output.empty())
+	{
+		Handle hfront = pre_output.front();
+		pre_output.pop();
+
+		if (hfront->getType() == EXECUTION_OUTPUT_LINK)
+		{
+			// get the ListLink containing the arguments of the ExecutionOutputLink
+			Handle harg = LinkCast(hfront)->getOutgoingSet()[1];
+
+			for (Handle h : LinkCast(harg)->getOutgoingSet())
+				pre_output.push(h);
+
+			continue;
+		}
+
+		// if not an ExecutionOutputLink, it is a final output
+		final_output.push_back(hfront);
+	}
+
+	return final_output;
 }
 
 void Rule::set_cost(int p)
@@ -128,19 +166,17 @@ void Rule::set_cost(int p)
 /**
  * Create a new rule where all variables are renamed.
  *
- * @return a new Rule object with its own new BindLink
+ * @param as  pointer to the atomspace where the new BindLink will be added
+ * @return    a new Rule object with its own new BindLink
  */
-Rule Rule::standardize_apart()
+Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
 	// clone the Rule
 	Rule st_ver = *this;
 	std::map<Handle, Handle> dict;
 
-	Handle st_bindlink = standardize_helper(rule_handle_, dict);
-
-	// hard setting rule_handle_ to avoid validating, since Handle cannot
-	// be compared until added to an AtomSpace
-	st_ver.rule_handle_ = st_bindlink;
+	Handle st_bindlink = standardize_helper(as, rule_handle_, dict);
+	st_ver.set_handle(st_bindlink);
 
 	return st_ver;
 }
@@ -148,11 +184,12 @@ Rule Rule::standardize_apart()
 /**
  * Basic helper function to standardize apart the BindLink.
  *
+ * @param as     pointer to an atomspace where new atoms are added
  * @param h      an input atom to standardize apart
  * @param dict   a mapping of old VariableNode and new VariableNode
  * @return       the new atom
  */
-Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
+Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, Handle>& dict)
 {
 	if (LinkCast(h))
 	{
@@ -160,9 +197,9 @@ Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
 		HandleSeq new_outgoing;
 
 		for (auto ho : old_outgoing)
-			new_outgoing.push_back(standardize_helper(ho, dict));
+			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		return Handle(createLink(h->getType(), new_outgoing, h->getTruthValue()));
+		return as->addAtom(createLink(h->getType(), new_outgoing, h->getTruthValue()));
 	}
 
 	// normal node does not need to be changed
@@ -175,7 +212,7 @@ Handle Rule::standardize_helper(const Handle h, std::map<Handle, Handle>& dict)
 
 	std::string new_name = NodeCast(h)->getName() + "-standardize_apart-" + to_string(boost::uuids::random_generator()());
 
-	Handle hcpy = Handle(createNode(h->getType(), new_name, h->getTruthValue()));
+	Handle hcpy = as->addAtom(createNode(h->getType(), new_name, h->getTruthValue()));
 	dict[h] = hcpy;
 
 	return hcpy;

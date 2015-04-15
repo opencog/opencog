@@ -26,6 +26,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 
+using namespace opencog;
+
 PLNCommons::PLNCommons(AtomSpace * as) :
         as_(as)
 {

@@ -2,28 +2,39 @@
 # Definitions for automatically building the atom_types files, given
 # a master file "atom_types.script" that defines all of the type
 # relationships.
+# Macro example call:
+# OPENCOG_ADD_ATOM_TYPES(
+#        SCRIPT_FILE
+#        HEADER_FILE
+#        DEFINITIONS_FILE
+#        INHERITANCE_FILE
+#        SCM_FILE
+#        PYTHON_FILE)
 #
 IF (NOT SCRIPT_FILE)
-	SET (SCRIPT_FILE "atom_types.script")
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing SCRIPT_FILE")
 ENDIF (NOT SCRIPT_FILE)
 
 IF (NOT HEADER_FILE)
-	SET (HEADER_FILE "atom_types.h")
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing HEADER_FILE")
 ENDIF (NOT HEADER_FILE)
 
 IF (NOT DEFINITIONS_FILE)
-	SET (DEFINITIONS_FILE "atom_types.definitions")
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing DEFINITIONS_FILE")
 ENDIF (NOT DEFINITIONS_FILE)
 
 IF (NOT INHERITANCE_FILE)
-	SET (INHERITANCE_FILE "atom_types.inheritance")
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing INHERITANCE_FILE")
 ENDIF (NOT INHERITANCE_FILE)
 
 IF (NOT SCM_FILE)
-	SET (SCM_FILE "../scm/type_constructors.scm")
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing SCM_FILE")
 ENDIF (NOT SCM_FILE)
 
-SET (PYTHON_FILE "../cython/opencog/type_constructors.pyx")
+IF (NOT PYTHON_FILE)
+    MESSAGE(FATAL_ERROR "OPENCOG_ADD_ATOM_TYPES missing PYTHON_FILE")
+ENDIF (NOT PYTHON_FILE)
+
 
 # Check if this is for opencog/atomspace directory. If so, do not reference opencog::classserver() 
 # to avoid infinit recursivity in ClassServer constructor.
@@ -70,13 +81,6 @@ FILE(APPEND "${PYTHON_FILE}" "# definitions in types.script by the macro OPENCOG
 FILE(APPEND "${PYTHON_FILE}" "#\n")
 FILE(APPEND "${PYTHON_FILE}" "# This file contains basic python wrappers for atom creation.\n")
 FILE(APPEND "${PYTHON_FILE}" "#\n")
-FILE(APPEND "${PYTHON_FILE}" "\n")
-FILE(APPEND "${PYTHON_FILE}" "from opencog.atomspace import AtomSpace, types\n")
-FILE(APPEND "${PYTHON_FILE}" "\n")
-FILE(APPEND "${PYTHON_FILE}" "atomspace = None\n")
-FILE(APPEND "${PYTHON_FILE}" "def set_atomspace(new_atomspace):\n")
-FILE(APPEND "${PYTHON_FILE}" "    global atomspace\n")
-FILE(APPEND "${PYTHON_FILE}" "    atomspace = new_atomspace\n")
 FILE(APPEND "${PYTHON_FILE}" "\n")
 
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)

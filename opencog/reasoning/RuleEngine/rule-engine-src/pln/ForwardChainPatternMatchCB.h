@@ -28,7 +28,7 @@
 
 #include <opencog/query/DefaultImplicator.h>
 
-using namespace opencog;
+namespace opencog {
 
 class ForwardChainPatternMatchCB: public virtual PLNImplicator {
 private:
@@ -50,5 +50,7 @@ public:
 	               const std::map<Handle, Handle> &pred_soln);
 
 };
+
+} // ~namespace opencog
 
 #endif /* FORWARDCHAINPATTERNMATCHCB_H_ */
