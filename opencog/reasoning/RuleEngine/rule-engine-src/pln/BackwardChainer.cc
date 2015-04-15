@@ -47,56 +47,57 @@ BackwardChainer::~BackwardChainer()
 	delete _garbage_subspace;
 }
 
-/**
- * The public entry point for backward chaining.
- *
- * XXX TODO allow backward chaining 1 step (for mixing forward/backward chaining)
- *
- * @param init_target  the initial atom to start the chaining
- */
-void BackwardChainer::do_chain(Handle init_target)
+void BackwardChainer::set_target(Handle init_target)
 {
-	_chaining_result.clear();
+	_init_target = init_target;
+}
+
+/**
+ * The public entry point for full backward chaining.
+ */
+void BackwardChainer::do_full_chain()
+{
+	_inference_history.clear();
 
 	_targets_stack = std::stack<Handle>();
-	_targets_stack.push(init_target);
+	_targets_stack.push(_init_target);
 
 	int i = 0;
 
 	while (not _targets_stack.empty())
 	{
-		// XXX TODO targets selection should be done here, by first changing
-		// the stack to other data types
-
-		Handle top = _targets_stack.top();
-		_targets_stack.pop();
-
-		logger().debug("[BackwardChainer] Before do_bc");
-
-		VarMultimap subt = do_bc(top);
-		VarMultimap& old_subt = _inference_history[top];
-
-		logger().debug("[BackwardChainer] After do_bc");
-
-		// add the substitution to inference history
-		for (auto& p : subt)
-			old_subt[p.first].insert(p.second.begin(), p.second.end());
+		do_step();
 
 		i++;
 		// debug quit
 		if (i == 5)
 			break;
 	}
+}
 
-	_chaining_result = _inference_history[init_target];
+void BackwardChainer::do_step()
+{
+	// XXX TODO targets selection should be done here, by first changing
+	// the stack to other data types
 
-	//clean variables
-	//remove_generated_rules();
+	Handle top = _targets_stack.top();
+	_targets_stack.pop();
+
+	logger().debug("[BackwardChainer] Before do_step_bc");
+
+	VarMultimap subt = do_bc(top);
+	VarMultimap& old_subt = _inference_history[top];
+
+	logger().debug("[BackwardChainer] After do_step_bc");
+
+	// add the substitution to inference history
+	for (auto& p : subt)
+		old_subt[p.first].insert(p.second.begin(), p.second.end());
 }
 
 VarMultimap& BackwardChainer::get_chaining_result()
 {
-	return _chaining_result;
+	return _inference_history[_init_target];
 }
 
 

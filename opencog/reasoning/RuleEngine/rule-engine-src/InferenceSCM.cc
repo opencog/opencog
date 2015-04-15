@@ -103,8 +103,13 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
         rules.push_back(*pr);
 
     BackwardChainer bc(as, rules);
+	bc.set_target(h);
 
-    bc.do_chain(h);
+	logger().debug("[BackwardChainer] Before do_chain");
+
+    bc.do_full_chain();
+
+	logger().debug("[BackwardChainer] After do_chain");
     map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
 
     HandleSeq soln_list_link;

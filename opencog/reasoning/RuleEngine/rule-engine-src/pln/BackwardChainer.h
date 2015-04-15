@@ -71,7 +71,11 @@ public:
 	BackwardChainer(AtomSpace* as, std::vector<Rule>);
 	~BackwardChainer();
 
-	void do_chain(Handle init_target);
+	void set_target(Handle init_target);
+
+	void do_full_chain();
+	void do_step();
+
 	VarMultimap& get_chaining_result();
 
 	AtomSpace* _as;
@@ -90,7 +94,7 @@ private:
 
 
 	AtomSpace* _garbage_subspace;
-
+	Handle _init_target;
 	VarMultimap _chaining_result;
 
 	// a map of a premise, to a map of its variables mapping
