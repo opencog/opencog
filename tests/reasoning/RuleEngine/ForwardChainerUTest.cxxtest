@@ -49,7 +49,7 @@ void ForwardChainerUTest::test_do_chain()
 	// InheritanceLink A B
 	// InheritanceLink B C
 	// |-
-	// InheritanceLink A C	
+	// InheritanceLink A C
 	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
 		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
 		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
