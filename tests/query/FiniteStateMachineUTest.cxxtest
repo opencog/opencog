@@ -1,5 +1,5 @@
 /*
- * tests/query/DeleteLinkUTest.cxxtest
+ * tests/query/FiniteStateMachineUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -30,14 +30,14 @@
 
 using namespace opencog;
 
-class DeleteLinkUTest: public CxxTest::TestSuite
+class FiniteStateMachineUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace *as;
 	SchemeEval* eval;
 
 public:
-	DeleteLinkUTest(void)
+	FiniteStateMachineUTest(void)
 	{
 		try
 		{
@@ -55,7 +55,7 @@ public:
 		eval = new SchemeEval(as);
 	}
 
-	~DeleteLinkUTest()
+	~FiniteStateMachineUTest()
 	{
 		delete eval;
 		delete as;
@@ -71,12 +71,12 @@ public:
 	void test_basic(void);
 };
 
-void DeleteLinkUTest::tearDown(void)
+void FiniteStateMachineUTest::tearDown(void)
 {
 	as->clear();
 }
 
-void DeleteLinkUTest::setUp(void)
+void FiniteStateMachineUTest::setUp(void)
 {
 	as->clear();
 	config().set("SCM_PRELOAD",
@@ -87,7 +87,7 @@ void DeleteLinkUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-Handle DeleteLinkUTest::get_state(Handle set_link)
+Handle FiniteStateMachineUTest::get_state(Handle set_link)
 {
 	Handle and_link = LinkCast(set_link)->getOutgoingAtom(0);
 	Handle list_link = LinkCast(and_link)->getOutgoingAtom(0);
@@ -95,13 +95,13 @@ Handle DeleteLinkUTest::get_state(Handle set_link)
 }
 
 /*
- * DeleteLink most basic unit test.
+ * FiniteStateMachine most basic unit test.
  */
-void DeleteLinkUTest::test_basic(void)
+void FiniteStateMachineUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/delete-link.scm");
+	config().set("SCM_PRELOAD", "tests/query/finite-state-machine.scm");
 	load_scm_files_from_config(*as);
 
 	// We expect the incoming set to have an arity of 3: once for the
