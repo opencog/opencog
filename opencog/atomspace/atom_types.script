@@ -229,12 +229,16 @@ FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
 PLUS_LINK <- FUNCTION_LINK
 TIMES_LINK <- FUNCTION_LINK
 
-// This is an interesting one. Its a link that can never be grounded!
-// It can only hold VariableNodes. Attempting to insert this link into
-// the atomspace with any other atom in its outgoing set will cause that
-// atom to be deleted. The only variant that is allowed into the
-// atomspace is one that is holding one or more VariableNodes.  These
-// can then be used in expressions that, when evaluated (e.g. by the
-// pattner matcher) cause the grounded atom to be deleted!  Weird, but
-// nifty, I think.
+// This is an interesting one. Its a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, if we were using the termiology of ordinary
+// logic).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
 DELETE_LINK <- FUNCTION_LINK

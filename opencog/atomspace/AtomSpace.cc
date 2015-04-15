@@ -115,9 +115,21 @@ Handle AtomSpace::addAtom(AtomPtr atom, bool async)
         }
     }
 
-    // If we are here, neither the AtomTable nor backing store know about
-    // this atom. Just add it.
-    return atomTable.add(atom, async);
+    // If we are here, neither the AtomTable nor backing store know
+    // about this atom. Just add it.  If it is a DeleteLink, then the
+    // addition will fail. Deal with it.
+    Handle rh;
+    try {
+        rh = atomTable.add(atom, async);
+    }
+    catch (const DeleteException& ex) {
+        // Atom deletion has not been implemented in the backing store
+        // This is a major to-do item.
+        if (backing_store)
+// Under construction ....
+	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+    }
+    return rh;
 }
 
 Handle AtomSpace::addNode(Type t, const string& name,
