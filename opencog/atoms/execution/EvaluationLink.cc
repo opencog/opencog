@@ -84,7 +84,9 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 
 	if (NULL == n1 or NULL == n2)
 		throw RuntimeException(TRACE_INFO,
-		     "Expecting c++:greater arguments to be NumberNode's!");
+		    "Expecting c++:greater arguments to be NumberNode's!  Got:\n%s\n",
+		    (h1==NULL)? "(invalid handle)" : h1->toShortString().c_str(),
+		    (h2==NULL)? "(invalid handle)" : h2->toShortString().c_str());
 
 	if (n1->getValue() > n2->getValue())
 		return TruthValue::TRUE_TV();
