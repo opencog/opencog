@@ -20,633 +20,473 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "BackwardChainer.h"
 
-#include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atoms/bind/BindLink.h>
+#include "BackwardChainer.h"
+#include "BCPatternMatch.h"
+
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace * as)
+BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
     : _as(as)
 {
-	_commons = new PLNCommons(_as);
-	_bcpm = new BCPatternMatch(_as);
+	_rules_set = rs;
+
+	// create a garbage superspace with _as as parent, so codes acting on
+	// _garbage will see stuff in _as, but codes acting on _as will not
+	// see stuff in _garbage
+	_garbage_superspace = new AtomSpace(_as);
 }
 
 BackwardChainer::~BackwardChainer()
 {
-	delete _commons;
-	delete _bcpm;
+	// this will presumably remove all temp atoms
+	delete _garbage_superspace;
 }
 
 /**
- * The public entry point for backward chaining.
+ * Set the initial target for backward chaining.
  *
- * @param init_target  the initial atom to start the chaining
+ * @param init_target   Handle of the target
  */
-void BackwardChainer::do_chain(Handle init_target)
+void BackwardChainer::set_target(Handle init_target)
 {
-	_chaining_result.clear();
-	_chaining_result = do_bc(init_target);
-
-	//clean variables
-	remove_generated_rules();
+	_init_target = init_target;
 }
 
-map<Handle, HandleSeq>& BackwardChainer::get_chaining_result()
+/**
+ * The public entry point for full backward chaining.
+ */
+void BackwardChainer::do_full_chain()
 {
-	return _chaining_result;
+	_inference_history.clear();
+
+	_targets_stack = std::stack<Handle>();
+	_targets_stack.push(_init_target);
+
+	int i = 0;
+
+	while (not _targets_stack.empty())
+	{
+		do_step();
+
+		i++;
+		// debug quit
+		if (i == 5)
+			break;
+	}
 }
 
-void BackwardChainer::choose_rule()
+/**
+ * Do a single step of backward chaining.
+ */
+void BackwardChainer::do_step()
 {
+	// XXX TODO targets selection should be done here, by first changing
+	// the stack to other data types
 
+	Handle top = _targets_stack.top();
+	_targets_stack.pop();
+
+	logger().debug("[BackwardChainer] Before do_step_bc");
+
+	VarMultimap subt = do_bc(top);
+	VarMultimap& old_subt = _inference_history[top];
+
+	logger().debug("[BackwardChainer] After do_step_bc");
+
+	// add the substitution to inference history
+	for (auto& p : subt)
+		old_subt[p.first].insert(p.second.begin(), p.second.end());
+}
+
+/**
+ * Get the current result on the initial target, if any.
+ *
+ * @return a VarMultimap mapping each variable to all possible solutions
+ */
+VarMultimap& BackwardChainer::get_chaining_result()
+{
+	return _inference_history[_init_target];
 }
 
 /**
  * The main recursive backward chaining method.
  *
  * @param hgoal  the atom to do backward chaining on
- * @return       ???
+ * @return       the solution found for this goal, if any
  */
-map<Handle, HandleSeq> BackwardChainer::do_bc(Handle& hgoal)
+VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 {
-	// TODO filter grounded representations so the next condition would never be fooled
-	HandleSeq kb_match = filter_grounded_experssions(query_knowledge_base(hgoal));
+	HandleSeq free_vars = get_free_vars_in_tree(hgoal);
+
+	// check whether this goal has free variables and worth exploring
+	if (free_vars.empty())
+	{
+		logger().debug("[BackwardChainer] Boring goal with no free var, skipping " + hgoal->toShortString());
+		return VarMultimap();
+	}
+
+	std::vector<VarMap> kb_vmap;
+
+	// else, either try to ground, or backward chain
+	HandleSeq kb_match = match_knowledge_base(hgoal, kb_vmap);
 
 	if (kb_match.empty())
 	{
-		HandleSeq rules = filter_rules(query_rule_base(hgoal));
-
-		if (rules.empty())
+		// if logical link, break it up, add each to the targets stack, and return
+		if (_logical_link_types.count(hgoal->getType()) == 1)
 		{
-			// nothing found
-			return unify_to_empty_set(hgoal);
+			HandleSeq sub_premises = LinkCast(hgoal)->getOutgoingSet();
+
+			for (Handle& h : sub_premises)
+				_targets_stack.push(h);
+
+			return VarMultimap();
 		}
-		else
+
+		// find all rules whose implicand can be unified to hgoal
+		std::vector<Rule> acceptable_rules = filter_rules(hgoal);
+
+		// if no rules to backward chain on, no way to solve this goal
+		if (acceptable_rules.empty())
+			return VarMultimap();
+
+		// XXX TODO use all rules found here; this will require branching
+		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
+
+		Handle himplicant = standardized_rule.get_implicant();
+		HandleSeq outputs = standardized_rule.get_implicand();
+		VarMap implicand_mapping;
+
+		// a rule can have multiple output, and only one will unify to our goal
+		// so try to find the one output that works
+		for (Handle h : outputs)
 		{
-			// TODO use all rules for found here.
-			Handle rule = select_rule(rules);
+			VarMap temp_mapping;
 
-			Handle stadardized_rule = _commons->replace_nodes_with_varnode(rule);
+			if (not unify(h, hgoal, temp_mapping))
+				continue;
 
-			//for later removal
-			_bc_generated_rules.push_back(stadardized_rule);
+			// wrap all the mapped result inside QuoteLink, so that variables
+			// will be handled correctly for the next BC step
+			for (auto& p : temp_mapping)
+				implicand_mapping[p.first] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
 
-			map<Handle, HandleSeq> out;
-			Handle implicand = _as->getOutgoing(stadardized_rule)[1];
-			_inference_list.push_back(unify(hgoal, implicand, out));
-
-			map<Handle, HandleSeq> solution = apply_rule(implicand, stadardized_rule);
-			_inference_list.push_back(solution);
-
-			return ground_target_vars(hgoal, _inference_list);
+			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
+			break;
 		}
+
+		// reverse ground the implicant with the grounding we found from
+		// unifying the implicand
+		Instantiator inst(_garbage_superspace);
+		himplicant = inst.instantiate(himplicant, implicand_mapping);
+
+		// find all matching premises
+		// XXX TODO include typed variable node checking
+		std::vector<VarMap> vmap_list;
+		HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+		std::stack<Handle> to_be_added_to_targets;
+		VarMultimap results;
+
+		// for each set of possible premises, check if they already satisfy the goal
+		for (Handle& h : possible_premises)
+		{
+			vmap_list.clear();
+
+			bool need_bc = false;
+			HandleSeq grounded_premises = match_knowledge_base(h, vmap_list);
+
+			// check each grounding to see if any has no variable
+			for (size_t i = 0; i < grounded_premises.size(); ++i)
+			{
+				Handle& g = grounded_premises[i];
+				VarMap& m = vmap_list[i];
+
+				FindAtoms fv(VARIABLE_NODE);
+				fv.search_set(g);
+
+				// if some grounding cannot solve the goal, will need to BC
+				if (not fv.varset.empty())
+				{
+					need_bc = true;
+					continue;
+				}
+
+				// this is a grounding that can solve the goal, so apply it
+				inst.instantiate(hgoal, m);
+
+				// add the grounding to the return results
+				for (Handle& h : free_vars)
+					results[h].emplace(m[h]);
+			}
+
+			if (not need_bc)
+				continue;
+
+			// XXX TODO premise selection would be done here to
+			// determine wheter to BC on a premise
+
+			// break out any logical link and add to targets
+			if (_logical_link_types.count(h->getType()) == 0)
+			{
+				to_be_added_to_targets.push(h);
+				continue;
+			}
+
+			HandleSeq sub_premises = LinkCast(h)->getOutgoingSet();
+
+			for (Handle& h : sub_premises)
+				to_be_added_to_targets.push(h);
+		}
+
+		if (not to_be_added_to_targets.empty())
+		{
+			// add itself back to target, since this is not completely solved
+			_targets_stack.push(hgoal);
+
+			while (not to_be_added_to_targets.empty())
+			{
+				_targets_stack.push(to_be_added_to_targets.top());
+				to_be_added_to_targets.pop();
+			}
+		}
+
+		return results;
 	}
 	else
 	{
-		vector<map<Handle, HandleSeq>> kb_results;
-		HandleSeq solns = get_grounded(kb_match); //find existing ones
+		logger().debug("[BackwardChainer] Matched something in knowledge base, storying the grounding");
 
-		map<Handle, HandleSeq> out;
-		for (Handle soln : solns)
+		VarMultimap results;
+		bool goal_readded = false;
+
+		for (size_t i = 0; i < kb_match.size(); ++i)
 		{
-			kb_results.push_back(unify(hgoal, soln, out));
-		}
+			Handle& soln = kb_match[i];
+			VarMap& vgm = kb_vmap[i];
 
-		return ground_target_vars(hgoal, kb_results);
-	}
+			logger().debug("[BackwardChainer] Looking at grounding " + soln->toShortString());
 
-	return unify_to_empty_set(hgoal);
-}
+			// check if there is any free variables in soln
+			HandleSeq free_vars = get_free_vars_in_tree(soln);
 
-/**
- * Apply a rule to an atom.
- *
- * @param htarget   the atom in which the rule will be applied
- * @param rule      the rule to apply
- * @return          ???
- */
-map<Handle, HandleSeq> BackwardChainer::apply_rule(Handle& htarget, Handle& rule)
-{
-	vector<map<Handle, HandleSeq>> results;
-	Handle root_logical_link = get_root_logical_link(rule);
-
-	if (root_logical_link == Handle::UNDEFINED)
-	{
-		//eg. ImplicationLink (Inheritance $x "human") (InheritanceLink "$x" "bipedal")) has no logical links
-		Handle implicant = _as->getOutgoing(rule)[0];
-		return do_bc(implicant);
-	}
-
-	//build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map
-	map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(rule);
-	map<Handle, map<Handle, HandleSeq>> premise_var_ground_map;
-
-	HandleSeq visited_logical_link;
-	HandleSeq evaluated_premises;
-	visited_logical_link.push_back(root_logical_link); //start from the root
-
-	//go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
-	//e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
-	while (not visited_logical_link.empty())
-	{
-		Handle logical_link = visited_logical_link.back();
-		visited_logical_link.pop_back();
-
-		HandleSeq premises = logical_link_premise_map[logical_link];
-		Handle llink = get_unvisited_logical_link(premises, evaluated_premises);
-
-		if (llink != Handle::UNDEFINED)
-		{
-			visited_logical_link.push_back(llink);
-			continue;
-		}
-
-		for (Handle premise : premises)
-		{
-			auto i = find(evaluated_premises.begin(), evaluated_premises.end(),
-					premise);
-			if (i == evaluated_premises.end())
+			// if there are free variables, add this soln to the target stack
+			if (not free_vars.empty())
 			{
-				auto var_grounding = do_bc(premise);
-				premise_var_ground_map[premise] = var_grounding;
-				evaluated_premises.push_back(premise);
-			}
-		}
-
-		auto v = join_premise_vgrounding_maps(logical_link,
-				premise_var_ground_map);
-
-		results.push_back(v);		//add to results
-
-		evaluated_premises.push_back(logical_link);
-	}
-
-	return ground_target_vars(htarget, results);
-}
-
-/**
- * Finds rule with their implicand matching the input.
- *
- * XXX what if a VariableNode is inside QuoteLink
- *
- * @param htarget    the input atom which will match the rules
- * @return           a list of rules
- */
-HandleSeq BackwardChainer::query_rule_base(Handle htarget)
-{
-	Handle hbind_link = _commons->create_bindLink(htarget);
-
-	logger().debug("QUERY-RB:\n" + hbind_link->toString());
-
-	BindLinkPtr bl(BindLinkCast(hbind_link));
-	bl->imply(_bcpm);
-
-	_commons->clean_up_bind_link(hbind_link);
-
-	auto result = _bcpm->get_result_list();
-	_bcpm->clear_result_list(); //makes sure on each query only new results are returned
-
-	return result;
-}
-
-/**
- * Finds atoms in the atomspace that match the VariableNodes in the input
- *
- * @param htarget
- * @return
- */
-HandleSeq BackwardChainer::query_knowledge_base(Handle htarget)
-{
-	Handle hbind_link = _commons->create_bindLink(htarget);
-
-	logger().debug("QUERY-KB:\n" + hbind_link->toString());
-
-	BindLinkPtr bl(BindLinkCast(hbind_link));
-	bl->imply(_bcpm);
-
-	_commons->clean_up_bind_link(hbind_link);
-
-	auto result = _bcpm->get_result_list();
-	_bcpm->clear_result_list(); //for making sure on each query new results are returned
-	return result;
-}
-
-/**
- * Find and return all handles containing variable and are within an implicationLink.
- *
- * @param handles
- * @return
- */
-HandleSeq BackwardChainer::filter_rules(HandleSeq handles)
-{
-	HandleSeq rules;
-
-	for (Handle h : handles)
-	{
-		HandleSeq links = _as->getIncoming(h);
-		for (Handle l : links)
-		{
-			Type t = _as->getType(l);
-			if (t == LIST_LINK)
-			{
-				HandleSeq incoming = _as->getIncoming(l);
-				if (not incoming.empty())
+				// add the goal back in target list since one of the solution
+				// has variables inside
+				if (not goal_readded)
 				{
-					if (_as->getType(incoming[0]) == EXECUTION_LINK)
-					{
-						HandleSeq hs = _as->getIncoming(incoming[0]);
-						if (not hs.empty())
-						{
-							if (_as->getType(hs[0]) == IMPLICATION_LINK)
-								rules.push_back(hs[0]);
-						}
-					}
+					_targets_stack.push(hgoal);
+					goal_readded = true;
 				}
+
+				_targets_stack.push(soln);
 			}
-			if (t == IMPLICATION_LINK)
-				if (_as->getOutgoing(l)[1] == h)
-					rules.push_back(l);
+
+			// construct the hgoal to all mappings here to be returned
+			for (auto it = vgm.begin(); it != vgm.end(); ++it)
+				results[it->first].emplace(it->second);
 		}
+
+		return results;
+	}
+}
+
+/**
+ * Find all rules in which the input could be an output.
+ *
+ * @param htarget   an input atom to match
+ * @return          a vector of rules
+ */
+std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
+{
+	std::vector<Rule> rules;
+
+	for (Rule& r : _rules_set)
+	{
+		HandleSeq output = r.get_implicand();
+		bool unifiable = false;
+
+		// check if any of the implicand's output can be unified to target
+		for (Handle h : output)
+		{
+			std::map<Handle, Handle> mapping;
+
+			if (not unify(h, htarget, mapping))
+				continue;
+
+			unifiable = true;
+			break;
+		}
+
+		// move on to next rule if htarget cannot map to the output
+		if (not unifiable)
+			continue;
+
+		rules.push_back(r);
 	}
 
 	return rules;
 }
 
 /**
- * Helper method for removing links with VariableNode.
+ * Find all atoms in the AtomSpace matching the pattern.
  *
- * @param hpremise  a vector of atoms
- * @return          a cleaned vector with no link containing VariableNode
+ * @param htarget  the atom to pattern match against
+ * @param vmap     an output list of mapping for variables in htarget
+ * @return         a vector of matched atoms
  */
-HandleSeq BackwardChainer::filter_grounded_experssions(HandleSeq handles)
+HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& vmap)
 {
-	HandleSeq grounded;
+	// get all VariableNodes (unquoted)
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(htarget);
 
-	for (Handle h : handles)
+	// unbundle clause if necessary
+	HandleSeq terms;
+	if (_logical_link_types.count(htarget->getType()))
+		terms = LinkCast(htarget)->getOutgoingSet();
+	else
+		terms.push_back(htarget);
+
+	logger().debug("[BackwardChainer] Matching knowledge base with %s and %d variables", htarget->toShortString().c_str(), fv.varset.size());
+
+	// Pattern Match on _as to avoid matching stuff in our garbage space
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
+	BCPatternMatch bcpm(_as);
+
+	sl->satisfy(&bcpm);
+
+	logger().debug("[BackwardChainer] After running pattern matcher");
+
+	vector<map<Handle, Handle>> var_solns = bcpm.get_var_list();
+	vector<map<Handle, Handle>> pred_solns = bcpm.get_pred_list();
+
+	HandleSeq results;
+
+	logger().debug("[BackwardChainer] Pattern matcher found %d matches", var_solns.size());
+
+	for (size_t i = 0; i < var_solns.size(); i++)
 	{
-		UnorderedHandleSet uhs = getAllUniqueNodes(h);
+		// don't want matched clause that is part of a rule
+		if (std::any_of(_rules_set.begin(), _rules_set.end(),
+		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
+			continue;
 
-		if (std::none_of(uhs.begin(), uhs.end(), [](const Handle& n) { return NodeCast(n)->getType() == VARIABLE_NODE; }))
-			grounded.push_back(h);
+		// don't want matched clause already in inference history
+		if (_inference_history.count(pred_solns[i][htarget]) == 1)
+			continue;
+
+		// XXX don't want clause that are already in _targets_stack?
+		// no need? since things on targets stack are in inference history
+
+		results.push_back(pred_solns[i][htarget]);
+		vmap.push_back(var_solns[i]);
 	}
 
-	return grounded;
-}
-
-/**
- * maps variable to their groundings given a target handle with variables and a fully grounded matching handle
- * and adds the result to @param output
- * @param htarget the target with variable nodes
- * @param match a fully grounded matching handle with @param htarget
- * @param output a map object to store results
- * @return @param output a map of variable to their groundings
- */
-map<Handle, HandleSeq> BackwardChainer::unify(Handle& htarget, Handle& match,
-                                              map<Handle, HandleSeq>& result) {
-	if (LinkCast(htarget)) {
-		HandleSeq target_outg = _as->getOutgoing(htarget);
-		HandleSeq match_outg = _as->getOutgoing(match);
-		assert(target_outg.size()==match_outg.size()); //TODO throw exception instead
-		for (vector<Handle>::size_type i = 0; i < target_outg.size(); i++) {
-			if (_as->getType(target_outg[i]) == VARIABLE_NODE)
-				result[target_outg[i]].push_back(match_outg[i]);
-			else
-				unify(target_outg[i], match_outg[i], result);
-		}
-	} else if (_as->getType(htarget) == VARIABLE_NODE)
-		result[htarget].push_back(match);
-
-	return result;
-}
-
-/**
- * maps @param htarget's variables wiht empty HandleSewq
- */
-map<Handle, HandleSeq> BackwardChainer::unify_to_empty_set(Handle& htarget)
-{
-	logger().debug("[BC] Unify to empty set.");
-
-	UnorderedHandleSet vars = get_outgoing_nodes(htarget, {VARIABLE_NODE});
-
-	map<Handle, HandleSeq> result;
-	for (Handle h : vars)
-		result[h] = HandleSeq { Handle::UNDEFINED };
-	return result;
-}
-
-/**
- *Given a target find a matching rule
- *@param target handle of the target
- */
-Handle BackwardChainer::select_rule(HandleSeq& hseq_rule) {
-	//apply selection criteria to select one amongst the matching rules
-
-	//xxx return random for the purpose of integration testing before going
-	//for a complex implementation of this function
-	return hseq_rule[random() % hseq_rule.size()];
-}
-
-
-/**
- * @param connector
- * @param premise_var_grounding_map
- * @return a map of variable to groundings
- */
-map<Handle, HandleSeq> BackwardChainer::join_premise_vgrounding_maps(
-		const Handle& logical_link,
-		const map<Handle, map<Handle, HandleSeq> >& premise_var_grounding_map)
-{
-	map<Handle, HandleSeq> result;
-	for (auto pvg_it = premise_var_grounding_map.begin();
-			pvg_it != premise_var_grounding_map.end(); ++pvg_it) {
-		map<Handle, HandleSeq> var_groundings = pvg_it->second;
-		if (pvg_it == premise_var_grounding_map.begin())
-			result = var_groundings;
-		else {
-			for (auto vg_it = var_groundings.begin();
-					vg_it != var_groundings.end(); vg_it++) {
-				if (result.count(vg_it->first) == 1) {
-					HandleSeq vg1 = vg_it->second;
-					HandleSeq vg2 = result[vg_it->first];
-					HandleSeq common_values;
-					sort(vg1.begin(), vg1.end());
-					sort(vg2.begin(), vg2.end());
-					if (_as->getType(logical_link) == AND_LINK) {
-						set_intersection(vg1.begin(), vg1.end(), vg2.begin(),
-								vg2.end(), back_inserter(common_values));
-
-					}
-
-					if (_as->getType(logical_link) == OR_LINK)
-						set_union(vg1.begin(), vg1.end(), vg2.begin(),
-								vg2.end(), back_inserter(common_values));
-
-					result[vg_it->first] = common_values;
-
-				} else
-					result[vg_it->first] = vg_it->second;
-			}
-		}
-	}
-	return result;
-}
-
-/**
- * Looks if first list input exists in,VARIABLE_NODE the second ,gets that aren't contained in the second list
- * and returns the first amongst the non contained ones
- * @param connectors
- * @param visited
- * @return
- */
-Handle BackwardChainer::get_unvisited_logical_link(HandleSeq& llinks,
-		HandleSeq& visited) {
-	HandleSeq result;
-	for (Handle h : llinks) {
-		Type t = _as->getType(h);
-		auto it = find(_logical_link_types.begin(), _logical_link_types.end(),
-				t);
-		if (it != _logical_link_types.end()) {
-			auto i = find(visited.begin(), visited.end(), h);
-			if (i == visited.end())
-				result.push_back(h);
-		}
-	}
-	if (not result.empty())
-		return result[0];
-
-	return Handle::UNDEFINED;
-}
-
-/**
- * find and return all Handles with no variables
- * @param handles
- * @return vectors of handles with no variables in them
- */
-HandleSeq BackwardChainer::get_grounded(HandleSeq result) {
-	HandleSeq grounded;
-	for (Handle h : result) {
-		UnorderedHandleSet var_containing =
-			get_outgoing_nodes(h, {VARIABLE_NODE});
-		if (var_containing.empty())
-			grounded.push_back(h);
-	}
-	return grounded;
-}
-
-/**
- * gets the roolt logical link in an implications link
- * eg. (ImplicationLink (AndLink .....) (...)) AndLink will be the root logical link
- * @param hrule
- * @return a handle if there is a root logical link or Handle::UNDEFINED if there is no
- */
-Handle BackwardChainer::get_root_logical_link(Handle himplication_link)
-		throw (opencog::InvalidParamException) {
-	if (_as->getType(himplication_link) != IMPLICATION_LINK)
-		throw InvalidParamException(TRACE_INFO,
-				"input should be implication link");
-	HandleSeq outg = _as->getOutgoing(himplication_link);
-	Handle implicant = outg[0];
-	if (find(_logical_link_types.begin(), _logical_link_types.end(),
-			_as->getType(implicant)) != _logical_link_types.end()) {
-		return implicant;
-	} else
-		return Handle::UNDEFINED;
-}
-
-/**
- *returns a map of connector link to set of premises connected xxx what if there is no connector?
- *eg. if implicatoinLink is
- *ImplicationLink(
- *  Andlink@1(
- *   Inheritance@1(
- *               (ConceptNode $x)
- *               (ConceptNode "Animal")
- *                )
- *            )
- *   AndLink@2(
- *           EvaluationLink@1(
- *                  (PredicateNode "eats")
- *                   ListLink(
- *                  (ConceptNode $x)
- *                  (ConceptNode "leaves")
- *                           )
- *                          )
- *           EvaluationLink@2(
- *                  (PredicateNode "eats")
- *                   ListLink(
- *                  (ConceptNode "$x")
- *                  (ConceptNode "flesh")
- *                           )
- *                          )
- *             )
- *    Inheritance@2(
- *               (ConceptNode $x)
- *               (ConceptNode "Omnivore")
- *                 )
- *               )
- *  will be returned as[Andlink@1->{Inheritance@1,AndLink@2},Andlink@2->{EvaluationLink@1,EvaluationLink@2}]
- *  where @n represents unique instance of links/connectors.its actually a BackInferenceTree(BIT) as a map
- *  without the use of tree DS.
- *  Note that implicand(consequent) has been rejected.the only interest here is the implicant(antecedent)
- *@ himplication_link a handle to an implication link
- *@ return a connector premise map found in the implicant of the implication link
- */
-map<Handle, HandleSeq> BackwardChainer::get_logical_link_premises_map(
-		Handle& himplication_link) throw (opencog::InvalidParamException) {
-	if (_as->getType(himplication_link) != IMPLICATION_LINK)
-		throw InvalidParamException(TRACE_INFO,
-				"input should be implication link");
-	Handle root_llink = _as->getOutgoing(himplication_link)[0];
-	map<Handle, HandleSeq> logical_link_premise_map;
-	HandleSeq logical_links;
-
-	Type t = _as->getType(root_llink);
-	auto it = find(_logical_link_types.begin(), _logical_link_types.end(), t);
-	if (it != _logical_link_types.end()) {
-		logical_links.push_back(root_llink);
-		do {
-			Handle llink = logical_links[logical_links.size() - 1];
-			logical_links.pop_back();
-			HandleSeq premises = _as->getOutgoing(llink);
-			for (Handle h : premises) {
-				logical_link_premise_map[llink].push_back(h);
-				//check if h is a logical link type and push it for building next iter map
-				t = _as->getType(h);
-				it = find(_logical_link_types.begin(),
-						_logical_link_types.end(), t);
-				if (it != _logical_link_types.end())
-					logical_links.push_back(h);
-
-			}
-		} while (not logical_links.empty());
-		return logical_link_premise_map;
-	} else
-		return map<Handle, HandleSeq> { { Handle::UNDEFINED, HandleSeq {
-				root_llink } } };
-}
-
-/**
- * looks for possible grounding of variable node in the entire inference list which was built through the backward chaining process
- * @param hvar a variable node whose possible values to be searched in the inference list
- * @param inference_list of variable to possible list of matches(to variableNode or ConceptNode) built in the prev inference steps
- * @param results a set of grounded nodes found for @param hvar
- */
-HandleSeq BackwardChainer::chase_var_values(Handle& hvar,
-		vector<map<Handle, HandleSeq>>& inference_list, HandleSeq& results) {
-	for (auto it = inference_list.begin(); it != inference_list.end(); ++it) {
-		map<Handle, HandleSeq> var_value = *it;
-		if (var_value.count(hvar) != 0) {
-			HandleSeq values = var_value[hvar];
-			for (Handle h : values) {
-				if (_as->getType(h) == VARIABLE_NODE) {
-					HandleSeq new_values;
-					HandleSeq hseq = chase_var_values(h, inference_list,
-							new_values);
-					results.insert(results.end(), hseq.begin(), hseq.end());
-				} else {
-					results.push_back(h);
-				}
-			}
-		}
-	}
 	return results;
 }
 
 /**
- * matches the variables in the target to their groundings in the variable grounding map list
- * @param hgoal the target Handle consisting of variable nodes
- * @param var_grounding_map a variable to groundings map list
- * @return  a map of variable to all found groundings
+ * Unify two atoms, finding a mapping that makes them equal.
+ *
+ * Use the Pattern Matcher to do the heavy lifting of unification from one
+ * specific atom to another, let it handles UnorderedLink, VariableNode in
+ * QuoteLink, etc.
+ *
+ * XXX TODO check Typed VariableNode
+ * XXX TODO unify in both direction?
+ * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
+ * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
+ *
+ * @param htarget    the target with variable nodes
+ * @param hmatch     a fully grounded matching handle with @param htarget
+ * @param result     an output VarMap mapping varibles from target to match
+ * @return           true if the two atoms can be unified
  */
-map<Handle, HandleSeq> BackwardChainer::ground_target_vars(Handle& hgoal,
-		vector<map<Handle, HandleSeq>>& inference_list) {
-	map<Handle, HandleSeq> vg_map;
-	UnorderedHandleSet hgoal_vars = get_outgoing_nodes(hgoal, {VARIABLE_NODE});
+bool BackwardChainer::unify(const Handle& htarget,
+                            const Handle& hmatch,
+                            VarMap& result)
+{
+	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString() + " to " + hmatch->toShortString());
 
-	for (map<Handle, HandleSeq> vgm : inference_list) {
-		for (auto it = vgm.begin(); it != vgm.end(); ++it) {
+	// lazy way of restricting PM to be between two atoms
+	// XXX FIXME the new PM is complaining VariableNode has no type restriction...
+	AtomSpace temp_space;
 
-			Handle hvar = it->first;
-			auto i = find(hgoal_vars.begin(), hgoal_vars.end(), hvar);
+	Handle temp_htarget = temp_space.addAtom(htarget);
+	Handle temp_hmatch = temp_space.addAtom(hmatch);
 
-			if (i != hgoal_vars.end()) {
-				HandleSeq values;
-				HandleSeq groundings = it->second;
-				for (Handle h : groundings) {
-					if (_as->getType(h) == VARIABLE_NODE) {
-						HandleSeq val;
-						val = chase_var_values(h, inference_list, val);
-						values.insert(values.end(), val.begin(), val.end());
-					} else {
-						values.push_back(h);
-					}
-					//erase duplicates i.e union
-					sort(values.begin(), values.end());
-					values.erase(unique(values.begin(), values.end()),
-							values.end());
-				}
-				if (vg_map.count(hvar) == 0)
-					vg_map[hvar] = values;
-				else {
-					HandleSeq existing = vg_map[hvar];
-					sort(existing.begin(), existing.end());
-					sort(values.begin(), values.end());
-					HandleSeq hs_combined;
-					set_union(existing.begin(), existing.end(), values.begin(),
-							values.end(), back_inserter(hs_combined));
-					vg_map[hvar] = hs_combined;
-				}
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(temp_htarget);
+
+	HandleSeq terms;
+	terms.push_back(temp_htarget);
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
+	BCPatternMatch bcpm(&temp_space);
+
+	sl->satisfy(&bcpm);
+
+	// if no grounding
+	if (bcpm.get_var_list().size() == 0)
+		return false;
+
+	logger().debug("[BackwardChainer] unify found %d mapping", bcpm.get_var_list().size());
+
+	std::vector<std::map<Handle, Handle>> pred_list = bcpm.get_pred_list();
+	std::vector<std::map<Handle, Handle>> var_list = bcpm.get_var_list();
+
+	VarMap good_map;
+
+	// go thru each solution, and get the first one that map the whole temp_hmatch
+	// XXX TODO branch on the various groundings
+	for (size_t i = 0; i < pred_list.size(); ++i)
+	{
+		for (auto& p : pred_list[i])
+		{
+			if (is_atom_in_tree(p.second, temp_hmatch))
+			{
+				good_map = var_list[i];
+				i = pred_list.size();
+				break;
 			}
 		}
 	}
-	return vg_map;
+
+	// change the mapping from temp_atomspace to current atomspace
+	for (auto& p : good_map)
+	{
+		Handle var = p.first;
+		Handle grn = p.second;
+
+		logger().debug("[BackwardChainer] unified " + var->toShortString() + " to " + grn->toShortString());
+
+		// getAtom should get the equivlent atom in this atomspace
+		result[_garbage_superspace->getAtom(var)] = _garbage_superspace->getAtom(grn);
+	}
+
+	return true;
 }
 
 /**
- * calls atomspace to remove each variables and links present the bc_gnerated_rules
+ * Given a target, select a candidate rule.
+ *
+ * XXX TODO apply selection criteria to select one amongst the matching rules
+ *
+ * @param rules   a vector of rules to select from
+ * @return        one of the rule
  */
-void BackwardChainer::remove_generated_rules() {
-	for (vector<Handle>::size_type i = 0; i < _bc_generated_rules.size(); i++) {
-		Handle h = _bc_generated_rules.back();
-		_commons->clean_up_implication_link(h);
-		_bc_generated_rules.pop_back();
-	}
+Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
+{
+	//xxx return random for the purpose of integration testing before going
+	//for a complex implementation of this function
+	return rules[random() % rules.size()];
 }
-
-#ifdef DEBUG
-void BackwardChainer::print_inference_list() {
-	for (auto it = _inference_list.begin(); it != _inference_list.end(); ++it) {
-		map<Handle, HandleSeq> var_ground = *it;
-		for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
-			cout << "[VAR:" << j->first->toString() << endl;
-			HandleSeq hs = j->second;
-			for (Handle h : hs)
-			cout << "\tVAL:" << h->toString() << endl;
-		}
-		cout << "]" << endl;
-	}
-}
-void BackwardChainer::print_premise_var_ground_mapping(
-		const map<Handle, map<Handle, HandleSeq>>& premise_var_ground_map) {
-	for (auto it = premise_var_ground_map.begin();
-			it != premise_var_ground_map.end(); ++it) {
-		cout << "PREMISE:" << endl << it->first->toString() << endl;
-		map<Handle, HandleSeq> var_ground = it->second;
-		print_var_value(var_ground);
-	}
-}
-void BackwardChainer::print_var_value(
-		const map<Handle, HandleSeq>& var_ground) {
-	for (auto j = var_ground.begin(); j != var_ground.end(); ++j) {
-		cout << "[VAR:" << j->first->toString() << endl;
-		HandleSeq hs = j->second;
-		for (Handle h : hs)
-		cout << "\tVAL:" << h->toString() << endl;
-	}
-	cout << "]" << endl;
-}
-#endif
 
