@@ -56,6 +56,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
+	ADD_CXXTEST(DeleteLinkUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
@@ -97,6 +98,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/delete-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/delete-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm

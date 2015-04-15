@@ -67,7 +67,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void xtest_eval(void);
+	void test_eval(void);
 	void test_logic(void);
 };
 
@@ -90,7 +90,7 @@ void EvaluationUTest::setUp(void)
 /*
  * Evaluation most basic unit test.
  */
-void EvaluationUTest::xtest_eval(void)
+void EvaluationUTest::test_eval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
