@@ -35,16 +35,16 @@ BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
 {
 	_rules_set = rs;
 
-	// create a garbage subspace with _as as parent, so codes acting on
-	// _as will see also see _garbage, but codes looking at _garbage
-	// will not see stuff in _as
-	_garbage_subspace = new AtomSpace(_as);
+	// create a garbage superspace with _as as parent, so codes acting on
+	// _garbage will see stuff in _as, but codes acting on _as will not
+	// see stuff in _garbage
+	_garbage_superspace = new AtomSpace(_as);
 }
 
 BackwardChainer::~BackwardChainer()
 {
-	// this will presumably remove all temp atoms from _as
-	delete _garbage_subspace;
+	// this will presumably remove all temp atoms
+	delete _garbage_superspace;
 }
 
 void BackwardChainer::set_target(Handle init_target)
@@ -169,7 +169,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			return VarMultimap();
 
 		// XXX TODO use all rules found here; this will require branching
-		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_subspace);
+		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
 
 		Handle himplicant = standardized_rule.get_implicant();
 		HandleSeq outputs = standardized_rule.get_implicand();
@@ -187,7 +187,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// wrap all the mapped result inside QuoteLink, so that variables
 			// will be handled correctly for the next BC step
 			for (auto& p : temp_mapping)
-				implicand_mapping[p.first] = _garbage_subspace->addAtom(createLink(QUOTE_LINK, p.second));
+				implicand_mapping[p.first] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
 
 			logger().debug("[BackwardChainer] Found one implicand's output unifiable " + h->toShortString());
 			break;
@@ -195,7 +195,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 		// reverse ground the implicant with the grounding we found from
 		// unifying the implicand
-		Instantiator inst(_garbage_subspace);
+		Instantiator inst(_garbage_superspace);
 		himplicant = inst.instantiate(himplicant, implicand_mapping);
 
 		// find all matching premises
@@ -371,6 +371,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 
 	logger().debug("[BackwardChainer] Matching knowledge base with %s and %d variables", htarget->toShortString().c_str(), fv.varset.size());
 
+	// Pattern Match on _as to avoid matching stuff in our garbage space
 	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
 	BCPatternMatch bcpm(_as);
 
@@ -390,10 +391,6 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget, vector<VarMap>& 
 		// don't want matched clause that is part of a rule
 		if (std::any_of(_rules_set.begin(), _rules_set.end(),
 		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
-			continue;
-
-		// don't want matched clause that is in the garbage space
-		if (_garbage_subspace->getAtom(pred_solns[i][htarget]) != Handle::UNDEFINED)
 			continue;
 
 		// don't want matched clause already in inference history
@@ -485,7 +482,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		logger().debug("[BackwardChainer] unified " + var->toShortString() + " to " + grn->toShortString());
 
 		// getAtom should get the equivlent atom in this atomspace
-		result[_as->getAtom(var)] = _as->getAtom(grn);
+		result[_garbage_superspace->getAtom(var)] = _garbage_superspace->getAtom(grn);
 	}
 
 	return true;

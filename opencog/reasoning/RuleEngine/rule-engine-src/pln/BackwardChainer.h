@@ -82,7 +82,6 @@ public:
 
 private:
 
-	VarMultimap bc(HandleSeq goals, vector<map<Handle, Handle>>);
 	VarMultimap do_bc(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
@@ -93,7 +92,7 @@ private:
 	Rule select_rule(const std::vector<Rule>& rules);
 
 
-	AtomSpace* _garbage_subspace;
+	AtomSpace* _garbage_superspace;
 	Handle _init_target;
 	VarMultimap _chaining_result;
 
