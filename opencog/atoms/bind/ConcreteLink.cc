@@ -89,7 +89,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 	// Next, the body... there no _body for lambda. The compo is the
 	// _cnf_clauses; we have to reconstruct the optionals.  We cannot
-	// use extract_optionals becuase opts have een stripped already.
+	// use extract_optionals because opts have been stripped already.
 
 	_pat.cnf_clauses = compo;
 	for (const Handle& h : compo)
@@ -114,6 +114,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 concs, virts);
 	make_connectivity_map(_pat.cnf_clauses);
+	_pat.redex_name = "Unpacked component of a virtual link";
 }
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
@@ -458,10 +459,11 @@ void ConcreteLink::check_connectivity(
 
 /* ================================================================= */
 
-void ConcreteLink::debug_print(const char* tag) const
+void ConcreteLink::debug_print(void) const
 {
 	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n", tag);
+	printf("\nRedex '%s' has following clauses:\n",
+	       _pat.redex_name.c_str());
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)
 	{

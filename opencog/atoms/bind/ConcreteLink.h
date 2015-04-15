@@ -114,7 +114,7 @@ public:
 	bool satisfy(PatternMatchCallback*) const;
 	bool satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
-	void debug_print(const char* tag = "primary entry") const;
+	void debug_print(void) const;
 };
 
 typedef std::shared_ptr<ConcreteLink> ConcreteLinkPtr;
