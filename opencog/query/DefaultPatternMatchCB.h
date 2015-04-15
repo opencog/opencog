@@ -49,6 +49,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
 		virtual bool link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool post_link_match(const LinkPtr&, const LinkPtr&);
 
 		/**
 		 * Typically called for AbsentLink
@@ -79,11 +80,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		}
 	protected:
 
-		// Used for test-groundings of virtual links.
+		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
 		ClassServer& _classserver;
 
+		// Crisp-logic evaluation of evaluatable terms
 		std::set<Type> _connectives;
 		bool eval_term(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
@@ -92,10 +94,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		// All the state below is for finding a good place to start
 		// searches.
+		void init(const Variables&, const Pattern&);
 		Handle _root;
 		Handle _starter_term;
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
+		bool _have_evaluatables;
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
@@ -117,7 +121,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool variable_search(PatternMatchEngine *,
 		                             const Variables&,
 		                             const Pattern&);
-
 		AtomSpace *_as;
 };
 

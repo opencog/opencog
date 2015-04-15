@@ -64,7 +64,7 @@ class CrispLogicPMCB :
 {
 	public:
 		CrispLogicPMCB(AtomSpace* as)
-			: DefaultPatternMatchCB(as), _in_seq_and(false) {}
+			: DefaultPatternMatchCB(as) {}
 
 		/**
  		 * This callback is called whenever a match has been identified
@@ -101,63 +101,6 @@ class CrispLogicPMCB :
 			// printf (">>>> optional tv=%f\n", tv.getMean());
 			return tv->getMean() < 0.5;
 		}
-
-		virtual bool link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
-		{
-			Type pattype = lpat->getType();
-			if (SEQUENTIAL_AND_LINK == pattype) _in_seq_and = true;
-
-			// If the pattern is exactly the same link as the proposed
-			// grounding, then its a perfect match.
-			if (lpat == lsoln) return true;
-
-			if (lpat->getArity() != lsoln->getArity()) return false;
-			Type soltype = lsoln->getType();
-
-			// If types differ, no match
-			return pattype == soltype;
-		}
-
-		virtual bool post_link_match(const LinkPtr& pat_link,
-		                             const LinkPtr& gnd_link)
-		{
-			if (not _in_seq_and) return true;
-
-			Type pattype = pat_link->getType();
-			if (SEQUENTIAL_AND_LINK == pattype)
-			{
-				_in_seq_and = false;
-				return true;
-			}
-
-			Handle hp(pat_link);
-			if (_dynamic->find(hp) == _dynamic->end()) return true;
-
-			// We will find ourselves here whenever the link contains
-			// a GroundedPredicateNode. In this case, execute the
-			// node, and declare a match, or no match, depending
-			// one how the evaluation turned out.  Its "crisp logic"
-			// because we use a greater-than-half for the TV.
-			// This is the same behavior as used in evaluate_term().
-			TruthValuePtr tv(EvaluationLink::do_evaluate(_as, gnd_link->getHandle()));
-			return tv->getMean() >= 0.5;
-		}
-
-		virtual bool initiate_search(PatternMatchEngine* pme,
-		                             const Variables& vars,
-		                             const Pattern& pat)
-		{
-			// Extract the GPN's. We will need these during the search.
-			_in_seq_and = false;
-			return DefaultPatternMatchCB::initiate_search(pme, vars, pat);
-		}
-
-	private:
-		bool _in_seq_and;
-		// XXX FIXME the boolean _in_seq_and should really be a stack,
-		// which is pushed/popped on each entry and exit.  The stack is
-		// needed for recursive nesting of these things.  Right now,
-		// I'm being lazy, so that's a bug ....
 };
 
 } // namespace opencog

@@ -140,6 +140,23 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	return pattype == soltype;
 }
 
+bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
+                                            const LinkPtr& lgnd)
+{
+	if (not _have_evaluatables) return true;
+	Handle hp(lpat);
+	if (_dynamic->find(hp) == _dynamic->end()) return true;
+
+	// We will find ourselves here whenever the link contain
+	// a GroundedPredicateNode. In this case, execute the
+	// node, and declare a match, or no match, depending
+	// one how the evaluation turned out.  Its "crisp logic"
+	// because we use a greater-than-half for the TV.
+	// This is the same behavior as used in evaluate_term().
+	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->getHandle()));
+	return tv->getMean() >= 0.5;
+}
+
 /**
  * The default semantics here is to reject a match if the option
  * clauses are detected.  This is in keeping with the semantics
@@ -221,7 +238,7 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (_dynamic and _dynamic->find(h) != _dynamic->end())
+	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -331,9 +348,8 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
                                             const Variables& vars,
                                             const Pattern& pat)
 {
+	init(vars, pat);  // call again; derived class may call us directly
 	const HandleSeq& clauses = pat.mandatory;
-
-	_search_fail = false;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -348,7 +364,6 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	size_t bestclause;
-	_dynamic = &pat.evaluatable_terms;
 	Handle best_start = find_thinnest(clauses, _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if all of the
@@ -480,8 +495,17 @@ bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
                                             const Variables& vars,
                                             const Pattern& pat)
 {
-	_search_fail = false;
+	init(vars, pat);  // call again; derived class may call us directly
 	return disjunct_search(pme, vars, pat);
+}
+
+void DefaultPatternMatchCB::init(const Variables& vars,
+                                 const Pattern& pat)
+{
+	_search_fail = false;
+	_type_restrictions = &vars.typemap;
+	_dynamic = &pat.evaluatable_terms;
+	_have_evaluatables = (0 < _dynamic->size());
 }
 
 /* ======================================================== */
@@ -545,8 +569,8 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
                                             const Variables& vars,
                                             const Pattern& pat)
 {
+	init(vars, pat);  // call again; derived class may call us directly
 	const HandleSeq& clauses = pat.mandatory;
-	_type_restrictions = &vars.typemap;
 
 	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
 	{
@@ -632,8 +656,8 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
                                             const Variables& vars,
                                             const Pattern& pat)
 {
+	init(vars, pat);  // call again; derived class may call us directly
 	const HandleSeq& clauses = pat.mandatory;
-	_type_restrictions = &vars.typemap;
 
 	_search_fail = false;
 	_root = Handle::UNDEFINED;
@@ -703,10 +727,8 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
                                             const Variables& vars,
                                             const Pattern& pat)
 {
+	init(vars, pat);  // call again; derived class may call us directly
 	const HandleSeq& clauses = pat.mandatory;
-	_type_restrictions = &vars.typemap;
-
-	_search_fail = false;
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
