@@ -5,6 +5,7 @@
  *      Author: misgana
  */
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
+#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -24,7 +25,6 @@ public:
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
 		eval_ = new SchemeEval(as_);
-		bc_ = new BackwardChainer(as_, {});
 
 		cogserver().loadModules();
 		cogserver().loadSCMModules();
@@ -32,7 +32,6 @@ public:
 
 	}
 	~BackwardChainerUTest() {
-		delete bc_;
 		delete eval_;
 	}
 	void setUp();
@@ -40,7 +39,10 @@ public:
 
 	void test_filter_rules();
 	void test_unify();
+	void test_match_knowledge_base();
 	void test_simple_deduction_bc();
+
+	// TODO this should probably be replaced by test_do_full_chain
 	// void test_do_bc();
 };
 
@@ -51,15 +53,29 @@ void BackwardChainerUTest::setUp() {
 	             "opencog/python/pln/examples/backward_chaining/criminal.scm, "
 	             "tests/reasoning/RuleEngine/bc-test/bc-example.scm");
 	load_scm_files_from_config(*as_);
+
+	// Setup the Backward Chainer
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "reasoning/RuleEngine/default_cpolicy.json"));
+	cpolicy_loader.load_config();
+	std::vector<Rule> rules;
+	for (Rule* pr : cpolicy_loader.get_rules()) {
+		// Ignore some rules for now
+		if (pr->get_name() != "pln-rule-create-and-as-1st-arg-of-inheritance"
+		    and
+		    pr->get_name() != "pln-rule-create-and-as-2nd-arg-of-inheritance")
+			rules.push_back(*pr);
+	}
+	bc_ = new BackwardChainer(as_, rules);
 }
 
 void BackwardChainerUTest::tearDown() {
 	as_->clear();
+	delete bc_;
 }
 
 void BackwardChainerUTest::test_filter_rules() {
 	string bl1 =
-		"(BindLink"		
+		"(BindLink"
 		"    (VariableList"
 		"        (VariableNode \"$A\") (VariableNode \"$B\"))"
 		"    (ImplicationLink"
@@ -140,6 +156,17 @@ void BackwardChainerUTest::test_unify() {
 	TS_ASSERT_EQUALS(result.size(), 3);
 }
 
+void BackwardChainerUTest::test_match_knowledge_base() {
+	/**
+	   TODO: take what makes
+
+	   HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+	   line 198 of the backward chainer return only undefined handles
+	   and debug here why.
+	*/
+}
+
 void BackwardChainerUTest::test_simple_deduction_bc() {
 	// Test simple deduction
 	//
@@ -161,7 +188,12 @@ void BackwardChainerUTest::test_simple_deduction_bc() {
 		                   "    (ConceptNode \"A\")"
 		                   "    (ConceptNode \"C\"))");
 
-	map<Handle, HandleSeq> result; // = bc_->do_bc(AC);
+	std::cout << "AtomSpace before do_bd = " << *as_ << std::endl;
+
+	VarMultimap result = bc_->do_bc(AC);
+
+	std::cout << "AtomSpace after do_bd = " << *as_ << std::endl;
+
 	std::cout << "result:" << std::endl;
 	for (const auto& element : result) {
 		std::cout << "Key = " << element.first->toString() << std::endl;
