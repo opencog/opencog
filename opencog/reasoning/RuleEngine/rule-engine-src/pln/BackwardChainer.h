@@ -30,7 +30,8 @@
 
 class BackwardChainerUTest;
 
-namespace opencog {
+namespace opencog
+{
     
 typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
 typedef std::map<Handle, Handle> VarMap;
@@ -74,55 +75,32 @@ public:
 	VarMultimap& get_chaining_result();
 
 	AtomSpace* _as;
-	AtomSpace* _garbage_subspace;
-	std::map<int, HandleSeq> _step_inference_map; //for holding inference history
 
 private:
 
 	VarMultimap bc(HandleSeq goals, vector<map<Handle, Handle>>);
-
 	VarMultimap do_bc(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
+
 	HandleSeq match_knowledge_base(Handle htarget, std::vector<VarMap>& vmap);
-
 	bool unify(const Handle& htarget, const Handle& match, VarMap& output);
-
-	map<Handle, HandleSeq> get_logical_link_premises_map(Handle& himplicant);
-
-	VarMultimap join_premise_vgrounding_maps(const Handle& connector,
-			const map<Handle, VarMultimap >& premise_var_grounding_map);
 
 	Rule select_rule(const std::vector<Rule>& rules);
 
-	UnorderedHandleSet chase_var_values(Handle& hvar, const vector<map<Handle, UnorderedHandleSet>>& inference_list, UnorderedHandleSet& results);
-	VarMultimap ground_target_vars(Handle& hgoal);
 
-	void remove_generated_rules();
-
-#if DEBUG
-	void print_inference_list();
-	void print_premise_var_ground_mapping(const map<Handle,map<Handle,HandleSeq>>&);
-	void print_var_value(const map<Handle,HandleSeq>&);
-#endif
+	AtomSpace* _garbage_subspace;
 
 	VarMultimap _chaining_result;
-
-	// XXX TODO do we need to store the rule used too?
-	vector<VarMultimap> _inference_list;
 
 	// a map of a premise, to a map of its variables mapping
 	map<Handle, VarMultimap> _inference_history;
 
-	// XXX might want a list to allow target selection
+	// XXX TODO will want a list to allow target selection in the future
 	std::stack<Handle> _targets_stack;
-
 	std::vector<Rule> _rules_set;
 
-	// need to be removed at the end of the backward chaining process
-    HandleSeq _bc_generated_rules;
-
-	// XXX any additional link should be reflected in @method join_premise_vgrounding_maps
+	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK };
 
 };
