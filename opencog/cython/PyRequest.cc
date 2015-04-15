@@ -20,9 +20,9 @@ PyRequest::PyRequest(CogServer& cs,
     _moduleName = moduleName;
     _className = className;
 
-    // NOTE: You need to call the import functions in each separate
-    // shared library that accesses Cython defined api. If you don't
-    // then you get a crash when you call an api function.
+    // NOTE: You need to call the import functions once and only once
+    // in each separate shared library that accesses Cython defined api.
+    // If you don't then you get a crash when you call an api function.
     if (!module_initialized)
     {
         import_opencog__agent_finder();
