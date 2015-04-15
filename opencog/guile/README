@@ -699,11 +699,6 @@ interface.
       Available when the [[pattern matcher]] module is loaded:
       cog-bind handle       -- run pattern matcher on handle.
                                handle must be a BindLink.
-      cog-bind-crisp handle -- run pattern matcher on handle.
-                               handle must be a BindLink.
-                               Use crisp logic during implication.  This
-                               allows [[NotLink]] clauses to be used to
-                               exclude certain patterns.
 
       Available when the PersistModule is loaded, and connected to a
       database:

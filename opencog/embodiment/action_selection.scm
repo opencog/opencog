@@ -270,7 +270,7 @@
 ; Calculate the truth value of the given atom
 ; It simply use the truth value the atom and its outgoings already holds.
 ; It will NOT try to ground the variables. So if there are variables in the atom 
-; or its outgoings recursively, using cog-bind-crisp instead to ground the variables
+; or its outgoings recursively, using cog-bind instead to ground the variables
 (define (cal_truth_value atom)
     (let* ( (atom_type (cog-type atom) )
             (atom_outgoings (cog-outgoing-set atom) )
