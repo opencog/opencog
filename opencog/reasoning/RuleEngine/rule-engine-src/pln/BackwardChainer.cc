@@ -225,6 +225,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				}
 
 				// This is a grounding that can solve the goal, so apply it
+				// and add it to _as since this is not garbage
+				Instantiator inst(_as);
 				inst.instantiate(hgoal, m);
 
 				// Add the grounding to the return results
