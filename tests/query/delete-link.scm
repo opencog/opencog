@@ -46,7 +46,7 @@
 ;;; Note that the algorithm below is "universal": it can run any FSM,
 ;;; it does not care about the specific states or state transition
 ;;; rules.
-(define (take-one-step)
+(define take-one-step
 	(BindLink
 		;; We will need to find the current and the next state
 		(VariableList

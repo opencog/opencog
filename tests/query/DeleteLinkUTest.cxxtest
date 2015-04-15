@@ -67,6 +67,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
+	Handle get_state(Handle);
 	void test_basic(void);
 };
 
@@ -86,6 +87,13 @@ void DeleteLinkUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
+Handle DeleteLinkUTest::get_state(Handle set_link)
+{
+	Handle and_link = LinkCast(set_link)->getOutgoingAtom(0);
+	Handle list_link = LinkCast(and_link)->getOutgoingAtom(0);
+	return LinkCast(list_link)->getOutgoingAtom(1);
+}
+
 /*
  * DeleteLink most basic unit test.
  */
@@ -96,9 +104,47 @@ void DeleteLinkUTest::test_basic(void)
 	config().set("SCM_PRELOAD", "tests/query/delete-link.scm");
 	load_scm_files_from_config(*as);
 
-	Handle green = eval->eval_h("(cog-bind (take-one-step))");
-	printf ("green: found:\n%s\n", green->toShortString().c_str());
-	TS_ASSERT_EQUALS(1, as->getArity(five));
+	// We expect the incoming set to have an arity of 3: once for the
+	// real, actual state, and once for each of the two VariableNodes.
+	Handle istate = eval->eval_h("(AnchorNode \"Current State\")");
+	TS_ASSERT_EQUALS(3, istate->getIncomingSetSize());
+
+	// Set up the three possible state handles.
+	// (Excluding the initial state).
+	HandleSeq states;
+	Handle green = eval->eval_h("(ConceptNode \"green\")");
+	states.push_back(green);
+	Handle yellow = eval->eval_h("(ConceptNode \"yellow\")");
+	states.push_back(yellow);
+	Handle red = eval->eval_h("(ConceptNode \"red\")");
+	states.push_back(red);
+
+	// Take one step of the finite state machine.
+	Handle first = eval->eval_h("(cog-bind take-one-step)");
+	printf ("first state found:\n%s\n", first->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(first));
+
+	// After the first step, we expect a green light.
+	TS_ASSERT_EQUALS(green, get_state(first));
+
+	// We expect the incoming set to have an arity of 3: once for the
+	// real, actual state, and once for each of the two VariableNodes.
+	Handle state = eval->eval_h("(AnchorNode \"Current State\")");
+	TS_ASSERT_EQUALS(3, state->getIncomingSetSize());
+
+	for (LinkPtr lll : state->getIncomingSet())
+	{
+		printf("Incoming set:\n%s\n", lll->toShortString().c_str());
+	}
+
+/****
+	for (int i=1; i<21; i++)
+	{
+		Handle next = eval->eval_h("(cog-bind take-one-step)");
+		TS_ASSERT_EQUALS(1, as->getArity(next));
+		TS_ASSERT_EQUALS(states[i%3], get_state(next));
+	}
+****/
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
