@@ -120,8 +120,9 @@ void DeleteLinkUTest::test_basic(void)
 	states.push_back(red);
 
 	// Take one step of the finite state machine.
+	printf("Going to take one step\n");
 	Handle first = eval->eval_h("(cog-bind take-one-step)");
-	printf ("first state found:\n%s\n", first->toShortString().c_str());
+	printf("First state found:\n%s\n", first->toShortString().c_str());
 	TS_ASSERT_EQUALS(1, as->getArity(first));
 
 	// After the first step, we expect a green light.
@@ -132,19 +133,13 @@ void DeleteLinkUTest::test_basic(void)
 	Handle state = eval->eval_h("(AnchorNode \"Current State\")");
 	TS_ASSERT_EQUALS(3, state->getIncomingSetSize());
 
-	for (LinkPtr lll : state->getIncomingSet())
-	{
-		printf("Incoming set:\n%s\n", lll->toShortString().c_str());
-	}
-
-/****
 	for (int i=1; i<21; i++)
 	{
+		printf("Going to take one step; %d\n", i);
 		Handle next = eval->eval_h("(cog-bind take-one-step)");
 		TS_ASSERT_EQUALS(1, as->getArity(next));
 		TS_ASSERT_EQUALS(states[i%3], get_state(next));
 	}
-****/
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

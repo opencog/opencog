@@ -51,10 +51,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	for (Handle h : lexpr->getOutgoingSet())
 	{
 		Handle hg = walk_tree(h);
-		// It would be undefined if it's deleted...
-		// Just skip over it.
-		if (hg != Handle::UNDEFINED)
-			oset_results.push_back(h);
+		// It would be a NULL handle if it's deleted... Just skip
+		// over it. We test the pointer here, not the uuid, since
+		// the uuid's are all Handle::UNDEFINED until we put them
+		// into the atomspace.
+		if (NULL != hg)
+			oset_results.push_back(hg);
 	}
 
 	// Fire execution links, if found.
@@ -116,9 +118,10 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
+	// A null pointer means that we hit
 	Handle gnd = walk_tree(expr);
-	if (gnd != Handle::UNDEFINED)
-		return _as->addAtom(walk_tree(expr));
+	if (NULL != gnd)
+		return _as->addAtom(gnd);
 	return gnd;
 }
 
