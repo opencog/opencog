@@ -321,21 +321,6 @@ bool BindLink::imply(PatternMatchCallback* pmc, bool check_conn)
 /* ================================================================= */
 
 // All clauses of the Concrete link are connected, so this is easy.
-bool ConcreteLink::satisfy(PatternMatchCallback* pmcb,
-                           PatternMatchEngine *pme) const
-{
-#ifdef DEBUG
-	debug_print();
-#endif
-
-	bool found = pmcb->initiate_search(pme, _varlist, _pat);
-
-#ifdef DEBUG
-	printf("==================== Done with Search ==================\n");
-#endif
-	return found;
-}
-
 bool ConcreteLink::satisfy(PatternMatchCallback* pmcb) const
 {
    PatternMatchEngine pme(*pmcb, _varlist, _pat);

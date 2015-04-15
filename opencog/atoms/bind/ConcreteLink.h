@@ -30,7 +30,6 @@
 
 namespace opencog
 {
-class PatternMatchEngine;
 class PatternMatchCallback;
 
 /** \addtogroup grp_atomspace
@@ -112,7 +111,6 @@ public:
 	             const std::set<Handle>& optionals);
 
 	bool satisfy(PatternMatchCallback*) const;
-	bool satisfy(PatternMatchCallback*, PatternMatchEngine*) const;
 
 	void debug_print(void) const;
 };
