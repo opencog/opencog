@@ -118,10 +118,28 @@
 ;;; BindLink is created, each invocation of it will advance the
 ;;; Markov chain one step.
 ;;;
-;;; XXX UNFINISHED --- this requies some new C++ cod before it can work
-;;; right. Ask Linsas for the status.
-;;;
 (define (create-chain-stepper chain-name chain-next chain-state)
+	(define curr-state
+		(ListLink
+			chain-state
+			(VariableNode "$curr-state")
+		)
+	)
+	(define state-trans
+		(ContextLink
+			(VariableNode "$curr-state")
+			(ListLink
+				chain-name
+				(VariableNode "$next-state")
+			)
+		)
+	)
+	(define next-state
+		(ListLink
+			chain-next
+			(VariableNode "$next-state")
+		)
+	)
 	(BindLink
 		;; We will need to find the current and the next state
 		(VariableList
@@ -131,23 +149,18 @@
 		(ImplicationLink
 			(AndLink
 				;; If we are in the current state ...
-				(ListLink
-					chain-state
-					(VariableNode "$curr-state")
-				)
+				curr-state
 				;; ... and there is a transition to another state...
-				(ContextLink
-					(VariableNode "$curr-state")
-					(ListLink
-						chain-name
-						(VariableNode "$next-state")
-					)
-				)
+				state-trans
 			)
 			;; ... then adjust the probability...
-			(ListLink
-				chain-next
-				(VariableNode "$next-state")
+			(EvaluationLink
+				(GroundedPredicateNode "scm: accum-probability")
+				(ListLink
+					next-state
+					state-trans
+					curr-state
+				)
 			)
 		)
 	)
