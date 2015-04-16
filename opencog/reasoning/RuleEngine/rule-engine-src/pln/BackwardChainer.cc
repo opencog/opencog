@@ -136,7 +136,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	std::vector<VarMap> kb_vmap;
 
 	// Else, either try to ground, or backward chain
-	HandleSeq kb_match = match_knowledge_base(hgoal, kb_vmap);
+	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED, kb_vmap);
 
 	if (kb_match.empty())
 	{
@@ -163,6 +163,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
 
 		Handle himplicant = standardized_rule.get_implicant();
+		Handle hvardecl = standardized_rule.get_vardecl();
 		HandleSeq outputs = standardized_rule.get_implicand();
 		VarMap implicand_mapping;
 
@@ -172,31 +173,35 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		{
 			VarMap temp_mapping;
 
-			if (not unify(h, hgoal, temp_mapping))
+			if (not unify(h, hgoal, hvardecl, temp_mapping))
 				continue;
 
 			// Wrap all the mapped result inside QuoteLink, so that variables
 			// will be handled correctly for the next BC step
 			for (auto& p : temp_mapping)
-				implicand_mapping[p.first] =
-					_garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
+			{
+				implicand_mapping[p.first] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
+				logger().debug("[BackwardChainer] Added " + implicand_mapping[p.first]->toShortString() + " to garbage space");
+			}
 
 			logger().debug("[BackwardChainer] Found one implicand's output "
 			               "unifiable " + h->toShortString());
 			break;
 		}
 
+		for (auto& p : implicand_mapping)
+			logger().debug("[BackwardChainer] mapping is " + p.first->toShortString() + " to " + p.second->toShortString());
+
 		// Reverse ground the implicant with the grounding we found from
 		// unifying the implicand
 		Instantiator inst(_garbage_superspace);
 		himplicant = inst.instantiate(himplicant, implicand_mapping);
 
-		// Find all matching premises
-		// XXX TODO include typed variable node checking
-		std::vector<VarMap> vmap_list;
+		logger().debug("[BackwardChainer] Reverse grounded as " + himplicant->toShortString());
 
-		HandleSeq possible_premises = match_knowledge_base(himplicant,
-		                                                   vmap_list);
+		// Find all matching premises
+		std::vector<VarMap> vmap_list;
+		HandleSeq possible_premises = match_knowledge_base(himplicant, hvardecl, vmap_list);
 
 		std::stack<Handle> to_be_added_to_targets;
 		VarMultimap results;
@@ -208,7 +213,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			vmap_list.clear();
 
 			bool need_bc = false;
-			HandleSeq grounded_premises = match_knowledge_base(h, vmap_list);
+			HandleSeq grounded_premises = match_knowledge_base(h, Handle::UNDEFINED, vmap_list);
 
 			// Check each grounding to see if any has no variable
 			for (size_t i = 0; i < grounded_premises.size(); ++i)
@@ -323,6 +328,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 
 	for (Rule& r : _rules_set)
 	{
+		Handle vardecl = r.get_vardecl();
 		HandleSeq output = r.get_implicand();
 		bool unifiable = false;
 
@@ -331,7 +337,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 		{
 			VarMap mapping;
 
-			if (not unify(h, htarget, mapping))
+			if (not unify(h, htarget, vardecl, mapping))
 				continue;
 
 			unifiable = true;
@@ -351,32 +357,38 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 /**
  * Find all atoms in the AtomSpace matching the pattern.
  *
- * @param htarget  the atom to pattern match against
- * @param vmap     an output list of mapping for variables in htarget
- * @return         a vector of matched atoms
+ * @param htarget          the atom to pattern match against
+ * @param htarget_vardecl  the typed VariableList of the variables in htarget
+ * @param vmap             an output list of mapping for variables in htarget
+ * @return                 a vector of matched atoms
  */
-HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
+HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
+                                                const Handle& htarget_vardecl,
                                                 vector<VarMap>& vmap)
 {
-	// Get all VariableNodes (unquoted)
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(htarget);
+	if (htarget_vardecl == Handle::UNDEFINED)
+	{
+		// Get all VariableNodes (unquoted)
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(htarget);
 
-	// Unbundle clause if necessary
-	HandleSeq terms;
-	if (_logical_link_types.count(htarget->getType()))
-		terms = LinkCast(htarget)->getOutgoingSet();
-	else
-		terms.push_back(htarget);
+		HandleSeq vars;
+		for (auto& h : fv.varset)
+			vars.push_back(h);
+
+		htarget_vardecl = _garbage_superspace->addLink(VARIABLE_LIST, vars);
+	}
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
-	               " %s and %d variables",
-	               htarget->toShortString().c_str(), fv.varset.size());
+	               " %s and variables %s",
+	               htarget->toShortString().c_str(), htarget_vardecl->toShortString());
 
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
+	SatisfactionLinkPtr sl(createSatisfactionLink(htarget_vardecl, htarget));
 	BCPatternMatch bcpm(_garbage_superspace);
+
+	logger().debug("[BackwardChainer] Before satisfy");
 
 	sl->satisfy(bcpm);
 
@@ -422,36 +434,45 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle htarget,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
- * XXX TODO check Typed VariableNode
  * XXX TODO unify in both direction?
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
- * @param htarget    the target with variable nodes
- * @param hmatch     a fully grounded matching handle with @param htarget
- * @param result     an output VarMap mapping varibles from target to match
- * @return           true if the two atoms can be unified
+ * @param htarget          the target with variable nodes
+ * @param hmatch           a fully grounded matching handle with @param htarget
+ * @param htarget_vardecl  the typed VariableList of the variables in htarget
+ * @param result           an output VarMap mapping varibles from target to match
+ * @return                 true if the two atoms can be unified
  */
 bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
+                            const Handle& htarget_vardecl,
                             VarMap& result)
 {
 	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString() + " to " + hmatch->toShortString());
 
 	// lazy way of restricting PM to be between two atoms
-	// XXX FIXME the new PM is complaining VariableNode has no type restriction...
 	AtomSpace temp_space;
 
 	Handle temp_htarget = temp_space.addAtom(htarget);
 	Handle temp_hmatch = temp_space.addAtom(hmatch);
+	Handle temp_vardecl;
 
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(temp_htarget);
+	if (htarget_vardecl == Handle::UNDEFINED)
+	{
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(temp_htarget);
 
-	HandleSeq terms;
-	terms.push_back(temp_htarget);
+		HandleSeq vars;
+		for (Handle& h : fv.varset)
+			vars.push_back(h);
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(fv.varset, terms));
+		temp_vardecl = temp_space.addAtom(createLink(VARIABLE_LIST, vars));
+	}
+	else
+		temp_vardecl = temp_space.addAtom(htarget_vardecl;)
+
+	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
 	BCPatternMatch bcpm(&temp_space);
 
 	sl->satisfy(bcpm);

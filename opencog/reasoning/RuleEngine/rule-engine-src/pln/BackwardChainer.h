@@ -121,15 +121,14 @@ private:
 
 	std::vector<Rule> filter_rules(Handle htarget);
 
-	HandleSeq match_knowledge_base(Handle htarget, std::vector<VarMap>& vmap);
-	bool unify(const Handle& htarget, const Handle& match, VarMap& output);
+	HandleSeq match_knowledge_base(const Handle& htarget, const Handle& htarget_vardecl, std::vector<VarMap>& vmap);
+	bool unify(const Handle& htarget, const Handle& hmatch, const Handle& htarget_vardecl, VarMap& result);
 
 	Rule select_rule(const std::vector<Rule>& rules);
 
 
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
-	VarMultimap _chaining_result;
 
 	// a map of a premise, to a map of its variables mapping
 	map<Handle, VarMultimap> _inference_history;
