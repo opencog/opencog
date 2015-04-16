@@ -194,7 +194,9 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		// Find all matching premises
 		// XXX TODO include typed variable node checking
 		std::vector<VarMap> vmap_list;
-		HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+		HandleSeq possible_premises = match_knowledge_base(himplicant,
+		                                                   vmap_list);
 
 		std::stack<Handle> to_be_added_to_targets;
 		VarMultimap results;
@@ -458,7 +460,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 	if (bcpm.get_var_list().size() == 0)
 		return false;
 
-	logger().debug("[BackwardChainer] unify found %d mapping", bcpm.get_var_list().size());
+	logger().debug("[BackwardChainer] unify found %d mapping",
+	               bcpm.get_var_list().size());
 
 	std::vector<std::map<Handle, Handle>> pred_list = bcpm.get_pred_list();
 	std::vector<std::map<Handle, Handle>> var_list = bcpm.get_var_list();
@@ -469,7 +472,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 	// XXX TODO branch on the various groundings
 	for (size_t i = 0; i < pred_list.size(); ++i)
 	{
-		for (auto& p : pred_list[i])
+		for (const auto& p : pred_list[i])
 		{
 			if (is_atom_in_tree(p.second, temp_hmatch))
 			{
@@ -486,7 +489,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 		Handle var = p.first;
 		Handle grn = p.second;
 
-		logger().debug("[BackwardChainer] unified temp " + var->toShortString() + " to " + grn->toShortString());
+		logger().debug("[BackwardChainer] unified temp "
+		               + var->toShortString() + " to " + grn->toShortString());
 
 		// XXX FIXME multiple atomspace is fubar here, it should be possible to do
 		// _garbage_superspace->getAtom(var), but it is returning Handle::UNDEFINED!!!

@@ -9,7 +9,7 @@ LINK_LIBRARIES(
 IF (HAVE_GUILE)
 	ADD_CXXTEST(RuleUTest)
 	ADD_CXXTEST(ForwardChainerUTest)
-	# ADD_CXXTEST(BackwardChainerUTest)
+	ADD_CXXTEST(BackwardChainerUTest)
 	ADD_CXXTEST(PLNCommonsUTest)
 	ADD_CXXTEST(JsonicControlPolicyParamLoaderUTest)
 	ADD_CXXTEST(DefaultForwardChainerCBUTest)
