@@ -25,9 +25,6 @@
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 
-
-#define DEBUG 1
-
 class BackwardChainerUTest;
 
 namespace opencog
@@ -35,7 +32,6 @@ namespace opencog
     
 typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
 typedef std::map<Handle, Handle> VarMap;
-
 
 /**
  * Backward chaining falls in to two cases

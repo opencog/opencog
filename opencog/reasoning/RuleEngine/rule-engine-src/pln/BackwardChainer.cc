@@ -194,7 +194,9 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		// Find all matching premises
 		// XXX TODO include typed variable node checking
 		std::vector<VarMap> vmap_list;
-		HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+		HandleSeq possible_premises = match_knowledge_base(himplicant,
+		                                                   vmap_list);
 
 		std::stack<Handle> to_be_added_to_targets;
 		VarMultimap results;
