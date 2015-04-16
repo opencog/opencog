@@ -46,25 +46,7 @@ void SchemeEval::init(void)
 	// Lock to prevent racey setting of the output port.
 	std::lock_guard<std::mutex> lck(init_mtx);
 
-	// Output ports for side-effects.
-	_saved_outport = scm_current_output_port();
-	_saved_outport = scm_gc_protect_object(_saved_outport);
-
-	SCM pair = scm_pipe();
-	_pipe = scm_car(pair);
-	_pipe = scm_gc_protect_object(_pipe);
-	_pipeno = scm_to_int(scm_fileno(_pipe));
-	_outport = scm_cdr(pair);
-	_outport = scm_gc_protect_object(_outport);
-	scm_setvbuf(_outport, scm_from_int (_IONBF), SCM_UNDEFINED);
-
-	// We want non-blocking reads.
-	int flags = fcntl(_pipeno, F_GETFL, 0);
-	if (flags < 0) flags = 0;
-	fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
-
-	scm_set_current_output_port(_outport);
-
+	_in_server = false;
 	_in_shell = false;
 	_in_eval = false;
 
@@ -83,6 +65,65 @@ void SchemeEval::init(void)
 	_rc = scm_gc_protect_object(_rc);
 
 	_gc_ctr = 0;
+}
+
+/// When the user is using the guile shell from within the cogserver,
+/// We need to capture the output port. It is used by the cogserver
+/// shell to provide an async I/O mechanism, so that long-running scheme
+/// expressions will have the output captured and displayed as they run,
+/// instead of getting it all saved up and only displayed at the very end.
+/// But if we are not running in the cogserver, non of this is needed.
+///
+void SchemeEval::capture_port(void)
+{
+	// If we've already captured, don't do it again.
+	if (_in_server) return;
+
+	// Lock to prevent racey setting of the output port.
+	std::lock_guard<std::mutex> lck(init_mtx);
+
+	// Try again, under the lock this time.
+	if (_in_server) return;
+	_in_server = true;
+
+	// When running in the cogserver, this pipe will become the output
+	// port.  Scheme code will be writing into one end of it, while, in a
+	// different thread, we will be sucking it dry, and displaying the
+	// contents to the user.
+	SCM pair = scm_pipe();
+	_pipe = scm_car(pair);
+	_pipe = scm_gc_protect_object(_pipe);
+	_pipeno = scm_to_int(scm_fileno(_pipe));
+	_outport = scm_cdr(pair);
+	_outport = scm_gc_protect_object(_outport);
+	scm_setvbuf(_outport, scm_from_int (_IONBF), SCM_UNDEFINED);
+
+	// We want non-blocking reads.
+	int flags = fcntl(_pipeno, F_GETFL, 0);
+	if (flags < 0) flags = 0;
+	fcntl(_pipeno, F_SETFL, flags | O_NONBLOCK);
+}
+
+/// Use the async I/O mechanism, if we are in the cogserver.
+///
+/// Note, by the way, that Guile implements the current port as a fluid
+/// on each thread. So this save an restore gives us exactly the right
+/// per-thread semantics.
+void SchemeEval::redirect_output(void)
+{
+	// Output ports for side-effects.
+	_saved_outport = scm_current_output_port();
+	_saved_outport = scm_gc_protect_object(_saved_outport);
+
+	scm_set_current_output_port(_outport);
+}
+
+void SchemeEval::restore_output(void)
+{
+	// Restore the previous outport (if its still alive)
+	if (scm_is_false(scm_port_closed_p(_saved_outport)))
+		scm_set_current_output_port(_saved_outport);
+	scm_gc_unprotect_object(_saved_outport);
 }
 
 /// Discard all chars in the outport.
@@ -104,16 +145,16 @@ void SchemeEval::finish(void)
 	scm_gc_unprotect_object(_rc);
 
 	std::lock_guard<std::mutex> lck(init_mtx);
-	// Restore the previous outport (if its still alive)
-	if (scm_is_false(scm_port_closed_p(_saved_outport)))
-		scm_set_current_output_port(_saved_outport);
-	scm_gc_unprotect_object(_saved_outport);
 
-	scm_close_port(_outport);
-	scm_gc_unprotect_object(_outport);
+	// If we had once set up the async I/O, the release it.
+	if (_in_server)
+	{
+		scm_close_port(_outport);
+		scm_gc_unprotect_object(_outport);
 
-	scm_close_port(_pipe);
-	scm_gc_unprotect_object(_pipe);
+		scm_close_port(_pipe);
+		scm_gc_unprotect_object(_pipe);
+	}
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
@@ -273,20 +314,6 @@ void SchemeEval::per_thread_init(void)
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_set_current_module(guile_user_module);
 #endif /* WORK_AROUND_GUILE_185_BUG */
-
-	// Guile implements the current port as a fluid on each thread.
-	// So, for every new thread, we need to set this.
-	//
-	// XXX this is not really right.  This is OK if one instance
-	// SchemeEval is touching multiple threads, but this breaks if
-	// two instances are touching one thread: the second instance
-	// won't have its output port set up in this thread!!. Then it
-	// gets worse: if the first instance is destroyed (in a different
-	// thread), we are left with this thread now pointing at a port
-	// that does not exist.  So this is all very fubarred. It will
-	// work as long as the threading is fairly simple. XXX FIXME
-	std::lock_guard<std::mutex> lck(init_mtx);
-	scm_set_current_output_port(_outport);
 }
 
 SchemeEval::~SchemeEval()
@@ -708,6 +735,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	// Set global atomspace variable in the execution environment.
 	SchemeSmob::ss_set_env_as(atomspace);
 
+	// If we are running from the cogserver shell, capture all output
+	if (_in_shell)
+	{
+		capture_port();
+		redirect_output();
+	}
+
 	_caught_error = false;
 	error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
@@ -717,6 +751,11 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
 	_eval_done = true;
+
+	// Restore the outport
+	if (_in_shell)
+		restore_output();
+
 	if (_caught_error)
 	{
 		char * str = scm_to_utf8_string(error_string);
@@ -726,18 +765,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		// set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
+		// ?? Why are we discarding the ouotput??
 		drain_output();
-
-#if 0 // NO_DONT_DO_THIS_ANY_LONGER
-		// Unlike errors seen on the interpreter, log these to the logger.
-		// That's because these errors will be predominantly script
-		// errors that are otherwise invisible to the user/developer.
-		Logger::Level save = logger().getBackTraceLevel();
-		logger().setBackTraceLevel(Logger::NONE);
-		logger().error("%s: guile error was: %s\nFailing expression was %s",
-		               __FUNCTION__, str, prt(sexpr).c_str());
-		logger().setBackTraceLevel(save);
-#endif
 
 		// Stick the guile stack trace into a string. Anyone who called
 		// us is responsible for checking for an error, and handling
@@ -752,7 +781,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
 
 	// Get the contents of the output port, and log it
-	if (logger().isInfoEnabled())
+	if (_in_server and logger().isInfoEnabled())
 	{
 		std::string str(poll_port());
 		if (0 < str.size())
@@ -763,12 +792,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		}
 	}
 
-	// If we are not in a shell context, truncate the output, because
-	// it will never ever be displayed. (i.e. don't overflow the
-	// output buffers.) If we are in_shell, then we are here probably
-	// because user typed something that caused some
-	// ExecutionOutputLink to call some scheme snippet.  Display that.
-	if (not _in_shell)
+	// If we are in the cogservdr, but are anot in a shell context,
+	// then truncate the output, because it will never ever be displayed.
+	// (i.e. don't overflow the output buffers.) If we are in_shell,
+	// then we are here probably because user typed something that
+	// caused some ExecutionOutputLink to call some scheme snippet.
+	// We do want to display that.
+	if (_in_server and not _in_shell)
 		drain_output();
 
 	return rc;
