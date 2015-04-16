@@ -38,7 +38,7 @@ public:
 	void tearDown();
 
 	void test_unify();
-	// void test_filter_rules();
+	void test_filter_rules();
 	// void test_match_knowledge_base();
 	// void test_simple_deduction_bc();
 
@@ -113,63 +113,49 @@ void BackwardChainerUTest::test_unify() {
 	TS_ASSERT_EQUALS(result[z], nono);
 }
 
-// void BackwardChainerUTest::test_filter_rules() {
-// 	string bl1 =
-// 		"(BindLink"
-// 		"    (VariableList"
-// 		"        (VariableNode \"$A\") (VariableNode \"$B\"))"
-// 		"    (ImplicationLink"
-// 		"        (AndLink"
-// 		"            (ImplicationLink"
-//         "                (VariableNode \"$A\")"
-// 		"                (VariableNode \"$B\")))"
-// 		"        (ListLink"
-// 		"            (ExecutionLink"
-// 		"                (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\")"
-// 		"                (ListLink"
-// 		"                    (ImplicationLink"
-// 		"		                 (VariableNode \"$A\")"
-// 		"                        (VariableNode \"$B\")))))))";
-// 	Handle hb1 = eval_->eval_h(bl1);
+void BackwardChainerUTest::test_filter_rules() {
+	string kb_imp_str =
+		"(ImplicationLink (stv .99 .99)"
+		"    (AndLink"
+		"        (InheritanceLink"
+		"            (VariableNode \"$x\")"
+		"            (ConceptNode \"American\"))"
+		"        (InheritanceLink"
+		"            (VariableNode \"$y\")"
+		"            (ConceptNode \"weapon\"))"
+		"        (EvaluationLink"
+		"            (PredicateNode \"sell\")"
+		"            (ListLink"
+		"                (VariableNode \"$x\")"
+		"                (VariableNode \"$y\")"
+		"                (VariableNode \"$z\")))"
+		"        (InheritanceLink"
+		"            (VariableNode \"$z\")"
+		"            (ConceptNode \"hostile\")))"
+		"    (InheritanceLink"
+		"        (VariableNode \"$x\")"
+		"        (ConceptNode \"criminal\")))";
+	Handle kb_imp = eval_->eval_h(kb_imp_str);
 
-// 	string bl2 =
-// 		"(ImplicationLink (stv .99 .99)"
-// 		"    (AndLink"
-// 		"        (InheritanceLink"
-// 		"            (VariableNode \"$x\")"
-// 		"            (ConceptNode \"American\"))"
-// 		"        (InheritanceLink"
-// 		"            (VariableNode \"$y\")"
-// 		"            (ConceptNode \"weapon\"))"
-// 		"        (EvaluationLink"
-// 		"            (PredicateNode \"sell\")"
-// 		"            (ListLink"
-// 		"                (VariableNode \"$x\")"
-// 		"                (VariableNode \"$y\")"
-// 		"                (VariableNode \"$z\")))"
-// 		"        (InheritanceLink"
-// 		"            (VariableNode \"$z\")"
-// 		"            (ConceptNode \"hostile\")))"
-// 		"    (InheritanceLink"
-// 		"        (VariableNode \"$x\")"
-// 		"        (ConceptNode \"criminal\")))";
-// 	Handle hb2 = eval_->eval_h(bl2);
+	Handle target =
+		eval_->eval_h("(InheritanceLink"
+		              "    (VariableNode \"$x\")"
+		              "    (ConceptNode \"criminal\"))");
 
-// 	Handle hb1_il =
-// 		eval_->eval_h("(ImplicationLink"
-// 		              "    (VariableNode \"$A\")"
-// 		              "    (VariableNode \"$B\"))");
+	vector<Rule> rules = bc_->filter_rules(target);
 
-// 	Handle hb2_il =
-// 		eval_->eval_h("(InheritanceLink"
-// 		              "    (VariableNode \"$x\")"
-// 		              "    (ConceptNode \"criminal\"))");
+	for (const Rule& r : rules)
+		std::cout << "rule = " << r.get_name() << std::endl;
 
-// 	// HandleSeq hsresult = { hb1_il, hb2_il };
-// 	// HandleSeq hsrules = bc_->filter_rules(hsresult);
-// 	// TODO look at the result itself, not just the size!!!
-// 	// TS_ASSERT_EQUALS(hsrules.size(), 1);
-// }
+	// At least modus ponens should be in, but others could as well
+	// (especially true as more rules are gonna get added)
+	auto modus_ponens_it =
+		std::find_if(rules.begin(), rules.end(),
+		             [](const Rule& r) {
+			             return r.get_name() == "pln-rule-modus-ponens";
+		             });
+	TS_ASSERT_DIFFERS(modus_ponens_it, rules.end());
+}
 
 // void BackwardChainerUTest::test_match_knowledge_base() {
 // 	/**
