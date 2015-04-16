@@ -79,6 +79,27 @@ typedef std::map<Handle, Handle> VarMap;
  *    also save the copy of it in the InferenceRepository (this is not
  *    needed for the very first implementation, but will be very
  *    useful once PLN is in regular use.)
+ *
+ * Anatomy of current implementation
+ * =================================
+ *
+ * 1. First check if it matches to something in the knowledge base already
+ *
+ * 2. If not, choose a inference Rule R (using some Rule selection criteria)
+ *    whose output can unify to the target
+ *
+ * 3. Reverse ground R's input to restrict the permises search
+ *
+ * 4. Find all permises that matches the restricted R's input by Pattern
+ *    Matching
+ *
+ * 5. For each set of permies, Forward Chain (or Pattern Matcher) on the R
+ *    to see if it can solve the target.
+ *
+ * 6. If not, add the permises to the targets list (in addition to some
+ *    permise selection criteria)
+ *
+ * 7. Do target selection and repeat.
  */
 
 class BackwardChainer
