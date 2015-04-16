@@ -16,6 +16,7 @@ start plain guile, without the -L flags, and then say:
 ```
 (add-to-load-path "/home/yourname/opencog/build")
 (add-to-load-path "/home/yourname/opencog/opencog/scm")
+(add-to-load-path ".")
 ```
 Another possibility: add the above to your `~/.guile` file.  That way,
 they'll be run every time you start.

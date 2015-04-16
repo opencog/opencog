@@ -6,6 +6,21 @@
 ; machine constructor.  This allows mutlple FSM's to be simultaneously
 ; defined and operated asynchronously from each-other.
 ;
+; The run this, you probably need to do this:
+;
+; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+; guile -L build -L opencog/scm
+;
+; (add-to-load-path "/home/yourname/opencog/build")
+; (add-to-load-path "/home/yourname/opencog/opencog/scm")
+; (add-to-load-path ".")
+;
+; and then load this file:
+; (load-from-path "fsm-basic.scm")
+;
+; Then, scroll to the bottom, and some of the commented-out
+; examples.
+
 (use-modules (opencog))
 (use-modules (opencog query))
 
@@ -137,10 +152,10 @@
 (define my-fsm (create-fsm my-trans my-state))
 
 ;;; Take one step.
-(cog-bind my-fsm)
+;(cog-bind my-fsm)
 
 ;;; Take three steps.
 ;;; Try it!
-(cog-bind my-fsm)
-(cog-bind my-fsm)
-(cog-bind my-fsm)
+;(cog-bind my-fsm)
+;(cog-bind my-fsm)
+;(cog-bind my-fsm)

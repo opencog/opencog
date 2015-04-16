@@ -171,7 +171,21 @@
 (define (get-prob atom)
 	(assoc-ref (cog-tv->alist (cog-tv atom)) 'mean))
 
-;;; Return true if the TV on the atom is the default TV
+;;; Return true if the TV on the atom is the default TV.
+;;; For our purposes, we treat it as the default if the confidence is
+;;; below 0.5 (since we later set confidence to 1.0)
+(define (is-default-tv? atom)
+	(not (< 0.5 (assoc-ref (cog-tv->alist (cog-tv atom)) 'confidence))))
+
+;;; Set a probability value on the atom.
+(define (set-prob atom value)
+	(cog-set-tv! atom (cog-new-stv value 1.0)))
+
+;;; Accumulate probability (add it to the existing value)
+(define (accum-prob atom value)
+	(if (is-default-tv? atom)
+		(set-prob atom value)
+		(set-prob atom (+ (get-prob atom) value))))
 
 ;;; Define a function to accumulate the probabilities
 ;;; It takes as input three atoms: PB, PBA and PA. The truth values on
@@ -180,9 +194,7 @@
 ;;; in state A).  The probability of B is then accumulated:
 ;;; P(B) += P(B|A) * P(A)
 (define (accum-probability PB PBA PA)
-	;; get the probability PA
-	(define pa (get-prob PA))
-	(define pba (get-prob PBA))
+	(accum-prob PB (* (get-prob PBA) (get-prob PA)))
 )
 
 ;;; Create a BindLink that will find a state vector, and delete it.

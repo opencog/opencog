@@ -10,6 +10,21 @@
 ; truly general-purpose FSM, in such a way that multiple FSM's can be run
 ; at the same time.
 ;
+; The run this, you probably need to do this:
+;
+; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+; guile -L build -L opencog/scm
+;
+; (add-to-load-path "/home/yourname/opencog/build")
+; (add-to-load-path "/home/yourname/opencog/opencog/scm")
+; (add-to-load-path ".")
+;
+; and then load this file:
+; (load-from-path "fsm-basic.scm")
+;
+; Then, scroll to the bottom, and some of the commented-out
+; examples.
+
 (use-modules (opencog))
 (use-modules (opencog query))
 
@@ -103,11 +118,11 @@
 	)
 )
 
-; Take on step of the FSM
-(cog-bind take-one-step)
-
-;; Take three more steps;
-;; Try it!  See what appens!
-(cog-bind take-one-step)
-(cog-bind take-one-step)
-(cog-bind take-one-step)
+;; Take on step of the FSM
+;(cog-bind take-one-step)
+;
+;;; Take three more steps;
+;;; Try it!  See what appens!
+;(cog-bind take-one-step)
+;(cog-bind take-one-step)
+;(cog-bind take-one-step)

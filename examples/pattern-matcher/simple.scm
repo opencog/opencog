@@ -7,10 +7,20 @@
 ; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
 ; guile -L build -L opencog/scm
 ;
+; (add-to-load-path "/home/yourname/opencog/build")
+; (add-to-load-path "/home/yourname/opencog/opencog/scm")
+; (add-to-load-path ".")
+;
+; and then load this file:
+; (load-from-path "simple.scm")
+;
+; Then, scroll to the bottom, and some of the commented-out
+; examples.
 
 (use-modules (opencog))
 (use-modules (opencog query))
 
+(load-from-path "utilities.scm")
 
 (define human
   (BindLink
@@ -114,24 +124,24 @@
 ; (cog-bind human-implies-animal-stv)
 
 ;Expected output in the same order as the above invokation
-;(ListLink
-;   (ConceptNode "Ben")
-;   (ConceptNode "Linas") 
-;) 
+; (SetLink
+;    (ConceptNode "Ben")
+;    (ConceptNode "Linas") 
+; ) 
 
-;(ListLink 
-;    (InheritanceLink (ConceptNode "Linas") (ConceptNode "animal"))
-;    (InheritanceLink (ConceptNode "Ben") (ConceptNode "animal"))
-;)
+; (SetLink 
+;     (InheritanceLink (ConceptNode "Linas") (ConceptNode "animal"))
+;     (InheritanceLink (ConceptNode "Ben") (ConceptNode "animal"))
+; )
 
-;(ListLink
-;   (InheritanceLink (stv 0.30000001 0.99000001)
-;      (ConceptNode "Linas")
-;      (ConceptNode "animal")
-;   )
-;   (InheritanceLink (stv 0.30000001 0.99000001)
-;      (ConceptNode "Ben")
-;      (ConceptNode "animal")
-;   )
-;)
+; (SetLink
+;    (InheritanceLink (stv 0.30000001 0.99000001)
+;       (ConceptNode "Linas")
+;       (ConceptNode "animal")
+;    )
+;    (InheritanceLink (stv 0.30000001 0.99000001)
+;       (ConceptNode "Ben")
+;       (ConceptNode "animal")
+;    )
+; )
 
