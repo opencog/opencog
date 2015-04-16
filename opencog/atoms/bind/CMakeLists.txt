@@ -7,6 +7,7 @@ ADD_LIBRARY (lambda SHARED
 	BindLink.cc
 	ConcreteLink.cc
 	DefineLink.cc
+	DeleteLink.cc
 	PatternUtils.cc
 	SatisfactionLink.cc
 	ScopeLink.cc
@@ -18,4 +19,5 @@ ADD_DEPENDENCIES(lambda opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda
 	atomutils
+	cogutil
 )

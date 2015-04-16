@@ -1,5 +1,5 @@
 ;
-; Basic unit testing for differen was of nesting evaluatable links.
+; Basic unit testing for different ways of nesting evaluatable links.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))

@@ -33,6 +33,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -53,7 +54,7 @@ using namespace opencog;
 // ====================================================================
 
 AtomSpace::AtomSpace(AtomSpace* parent) :
-    atomTable(parent? &parent->atomTable : NULL),
+    atomTable(parent? &parent->atomTable : NULL, this),
     bank(atomTable),
     backing_store(NULL)
 {
@@ -114,9 +115,21 @@ Handle AtomSpace::addAtom(AtomPtr atom, bool async)
         }
     }
 
-    // If we are here, neither the AtomTable nor backing store know about
-    // this atom. Just add it.
-    return atomTable.add(atom, async);
+    // If we are here, neither the AtomTable nor backing store know
+    // about this atom. Just add it.  If it is a DeleteLink, then the
+    // addition will fail. Deal with it.
+    Handle rh;
+    try {
+        rh = atomTable.add(atom, async);
+    }
+    catch (const DeleteException& ex) {
+        // Atom deletion has not been implemented in the backing store
+        // This is a major to-do item.
+        if (backing_store)
+// Under construction ....
+	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+    }
+    return rh;
 }
 
 Handle AtomSpace::addNode(Type t, const string& name,
@@ -184,9 +197,21 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    // If we are here, neither the AtomTable nor backing store know about
-    // this atom. Just add it.
-    return atomTable.add(createLink(t, outgoing), async);
+    // If we are here, neither the AtomTable nor backing store know
+    // about this atom. Just add it.  If it is a DeleteLink, then the
+    // addition will fail. Deal with it.
+    Handle rh;
+    try {
+        rh = atomTable.add(createLink(t, outgoing), async);
+    }
+    catch (const DeleteException& ex) {
+        // Atom deletion has not been implemented in the backing store
+        // This is a major to-do item.
+        if (backing_store)
+// Under construction ....
+	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+    }
+    return rh;
 }
 
 Handle AtomSpace::getLink(Type t, const HandleSeq& outgoing)
@@ -319,8 +344,10 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
 bool AtomSpace::removeAtom(Handle h, bool recursive)
 {
     if (backing_store) {
+        // Atom deletion has not been implemented in the backing store
+        // This is a major to-do item.
 // Under construction ....
-        throw RuntimeException(TRACE_INFO, "Not emented!!!");
+        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
     }
     return 0 < atomTable.extract(h, recursive).size();
 }

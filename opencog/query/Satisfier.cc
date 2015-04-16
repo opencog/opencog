@@ -48,7 +48,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hsatlink)
 	if (NULL == bl)
 		bl = createSatisfactionLink(*LinkCast(hsatlink));
 
-	bl->satisfy(&sater);
+	bl->satisfy(sater);
 
 	return sater._result;
 }

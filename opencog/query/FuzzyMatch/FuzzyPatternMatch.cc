@@ -49,7 +49,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
     std::set<Handle> no_vars;
 
     SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, terms));
-    slp->satisfy(&fpmcb);
+    slp->satisfy(fpmcb);
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.

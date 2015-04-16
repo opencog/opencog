@@ -104,7 +104,7 @@ std::string Link::toString(std::string indent)
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
-        answer += h->toShortString(more_indent);
+        answer += h->toString(more_indent);
 
     answer += indent + ") ; [" + 
             std::to_string(_uuid).c_str() + "]\n";

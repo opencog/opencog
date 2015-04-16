@@ -83,7 +83,7 @@ static Handle do_imply(AtomSpace* as,
 
 	impl.implicand = bl->get_implicand();
 
-	bl->imply(&impl, do_conn_check);
+	bl->imply(impl, do_conn_check);
 
 	// The result_list contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)

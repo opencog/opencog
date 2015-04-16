@@ -174,7 +174,7 @@ void FuzzyPatternUTest::test_basic_link(void)
 	HandleSeq preds;
 	preds.push_back(query);
 
-	match(&fpmcb, vars, preds);
+	match(fpmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 
@@ -195,7 +195,7 @@ void FuzzyPatternUTest::test_basic_node(void)
 	HandleSeq preds;
 	preds.push_back(query);
 
-	match(&fpmcb, vars, preds);
+	match(fpmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
 

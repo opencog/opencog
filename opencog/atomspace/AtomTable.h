@@ -68,6 +68,8 @@ typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
 
+class AtomSpace;
+
 /**
  * This class provides mechanisms to store atoms and keep indices for
  * efficient lookups. It implements the local storage data structure of
@@ -144,6 +146,8 @@ private:
     bool inEnviron(AtomPtr);
     UUID _uuid;
 
+    // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
+    AtomSpace* _as;
     /**
      * Override and declare copy constructor and equals operator as
      * private.  This is to prevent large object copying by mistake.
@@ -156,9 +160,10 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable(AtomTable* parent=NULL);
+    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
     ~AtomTable();
     UUID get_uuid(void) { return _uuid; }
+    AtomSpace* getAtomSpace(void) { return _as; }
 
     /**
      * Return the number of atoms contained in a table.

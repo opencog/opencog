@@ -157,6 +157,13 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // FreeLinks may be open or closed; they are closed terms if they
 // have no free variables in them.
+//
+// XXX TODO -- Review and possibly remove. FreeLinks were introduced for
+// the pattern matcher, to simplify the handling of expressions with
+// free variables in them (by pulling out those variables beforehand, at
+// link-creation time, rather than at runtime). However, due to
+// shared-libary conflicts, the FreeLink cannot currently be used in
+// this way.  Thus, its half-finished and currently semi-useless.
 FREE_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -221,3 +228,17 @@ FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
 // Basic arithmetic operators
 PLUS_LINK <- FUNCTION_LINK
 TIMES_LINK <- FUNCTION_LINK
+
+// This is an interesting one. Its a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, if we were using the termiology of ordinary
+// logic).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+DELETE_LINK <- FUNCTION_LINK
