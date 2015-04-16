@@ -37,10 +37,10 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_filter_rules();
 	void test_unify();
-	void test_match_knowledge_base();
-	void test_simple_deduction_bc();
+	// void test_filter_rules();
+	// void test_match_knowledge_base();
+	// void test_simple_deduction_bc();
 
 	// TODO this should probably be replaced by test_do_full_chain
 	// void test_do_bc();
@@ -73,65 +73,14 @@ void BackwardChainerUTest::tearDown() {
 	delete bc_;
 }
 
-void BackwardChainerUTest::test_filter_rules() {
-	string bl1 =
-		"(BindLink"
-		"    (VariableList"
-		"        (VariableNode \"$A\") (VariableNode \"$B\"))"
-		"    (ImplicationLink"
-		"        (AndLink"
-		"            (ImplicationLink"
-        "                (VariableNode \"$A\")"
-		"                (VariableNode \"$B\")))"
-		"        (ListLink"
-		"            (ExecutionLink"
-		"                (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\")"
-		"                (ListLink"
-		"                    (ImplicationLink"
-		"		                 (VariableNode \"$A\")"
-		"                        (VariableNode \"$B\")))))))";
-	Handle hb1 = eval_->eval_h(bl1);
-
-	string bl2 =
-		"(ImplicationLink (stv .99 .99)"
-		"    (AndLink"
-		"        (InheritanceLink"
-		"            (VariableNode \"$x\")"
-		"            (ConceptNode \"American\"))"
-		"        (InheritanceLink"
-		"            (VariableNode \"$y\")"
-		"            (ConceptNode \"weapon\"))"
-		"        (EvaluationLink"
-		"            (PredicateNode \"sell\")"
-		"            (ListLink"
-		"                (VariableNode \"$x\")"
-		"                (VariableNode \"$y\")"
-		"                (VariableNode \"$z\")))"
-		"        (InheritanceLink"
-		"            (VariableNode \"$z\")"
-		"            (ConceptNode \"hostile\")))"
-		"    (InheritanceLink"
-		"        (VariableNode \"$x\")"
-		"        (ConceptNode \"criminal\")))";
-	Handle hb2 = eval_->eval_h(bl2);
-
-	Handle hb1_il =
-		eval_->eval_h("(ImplicationLink"
-		              "    (VariableNode \"$A\")"
-		              "    (VariableNode \"$B\"))");
-
-	Handle hb2_il =
-		eval_->eval_h("(InheritanceLink"
-		              "    (VariableNode \"$x\")"
-		              "    (ConceptNode \"criminal\"))");
-
-	// HandleSeq hsresult = { hb1_il, hb2_il };
-	// HandleSeq hsrules = bc_->filter_rules(hsresult);
-	// TODO look at the result itself, not just the size!!!
-	// TS_ASSERT_EQUALS(hsrules.size(), 1);
-}
-
 void BackwardChainerUTest::test_unify() {
+	Handle x = as_->addNode(VARIABLE_NODE, "$x"),
+		y = as_->addNode(VARIABLE_NODE, "$y"),
+		z = as_->addNode(VARIABLE_NODE, "$z"),
+		west = as_->addNode(CONCEPT_NODE, "west"),
+		a = as_->addNode(VARIABLE_NODE, "$a"),
+		nono = as_->addNode(CONCEPT_NODE, "nono");
+
 	string target =
 		"(EvaluationLink"
 		"    (PredicateNode \"sell\")"
@@ -152,61 +101,127 @@ void BackwardChainerUTest::test_unify() {
 	Handle hmatch = eval_->eval_h(match);
 	VarMap result;
 	bc_->unify(htarget, hmatch, result);
-	// Look at the result itself not just the size!!!
-	TS_ASSERT_EQUALS(result.size(), 3);
-}
 
-void BackwardChainerUTest::test_match_knowledge_base() {
-	/**
-	   TODO: take what makes
-
-	   HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
-
-	   line 198 of the backward chainer return only undefined handles
-	   and debug here why.
-	*/
-}
-
-void BackwardChainerUTest::test_simple_deduction_bc() {
-	// Test simple deduction
-	//
-	// InheritanceLink A B
-	// InheritanceLink B C
-	// |-
-	// InheritanceLink A C
-	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
-		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
-		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
-		AB = eval_->eval_h("(InheritanceLink (stv 0.9 0.9)"
-		                   "    (ConceptNode \"A\")"
-		                   "    (ConceptNode \"B\"))"),
-		BC = eval_->eval_h("(InheritanceLink (stv 0.8 0.9)"
-		                   "    (ConceptNode \"B\")"
-		                   "    (ConceptNode \"C\"))"),
-		// The TV is missing cause it's the target
-		AC = eval_->eval_h("(InheritanceLink"
-		                   "    (ConceptNode \"A\")"
-		                   "    (ConceptNode \"C\"))");
-
-	std::cout << "AtomSpace before do_bd = " << *as_ << std::endl;
-
-	VarMultimap result = bc_->do_bc(AC);
-
-	std::cout << "AtomSpace after do_bd = " << *as_ << std::endl;
-
-	std::cout << "result:" << std::endl;
-	for (const auto& element : result) {
-		std::cout << "Key = " << element.first->toString() << std::endl;
-		std::cout << "{" << std::endl;
-		for (const auto& value : element.second)
-			std::cout << "  Value = " << value->toString() << std::endl;
-		std::cout << "}" << std::endl;		
+	for (const auto& kv : result) {
+		std::cout << "Key = " << kv.first->toString()
+		          << "Value = " << kv.second->toString() << std::endl;
 	}
 
-	// TODO: maybe check that the result is AC and that its confidence
-	// is above 0
-	TS_ASSERT(false);
+	TS_ASSERT_EQUALS(result.size(), 3);
+	TS_ASSERT_EQUALS(result[x], west);
+	TS_ASSERT_EQUALS(result[y], a);
+	TS_ASSERT_EQUALS(result[z], nono);
 }
+
+// void BackwardChainerUTest::test_filter_rules() {
+// 	string bl1 =
+// 		"(BindLink"
+// 		"    (VariableList"
+// 		"        (VariableNode \"$A\") (VariableNode \"$B\"))"
+// 		"    (ImplicationLink"
+// 		"        (AndLink"
+// 		"            (ImplicationLink"
+//         "                (VariableNode \"$A\")"
+// 		"                (VariableNode \"$B\")))"
+// 		"        (ListLink"
+// 		"            (ExecutionLink"
+// 		"                (GroundedSchemaNode \"scm: pln-formula-simple-modus-ponens\")"
+// 		"                (ListLink"
+// 		"                    (ImplicationLink"
+// 		"		                 (VariableNode \"$A\")"
+// 		"                        (VariableNode \"$B\")))))))";
+// 	Handle hb1 = eval_->eval_h(bl1);
+
+// 	string bl2 =
+// 		"(ImplicationLink (stv .99 .99)"
+// 		"    (AndLink"
+// 		"        (InheritanceLink"
+// 		"            (VariableNode \"$x\")"
+// 		"            (ConceptNode \"American\"))"
+// 		"        (InheritanceLink"
+// 		"            (VariableNode \"$y\")"
+// 		"            (ConceptNode \"weapon\"))"
+// 		"        (EvaluationLink"
+// 		"            (PredicateNode \"sell\")"
+// 		"            (ListLink"
+// 		"                (VariableNode \"$x\")"
+// 		"                (VariableNode \"$y\")"
+// 		"                (VariableNode \"$z\")))"
+// 		"        (InheritanceLink"
+// 		"            (VariableNode \"$z\")"
+// 		"            (ConceptNode \"hostile\")))"
+// 		"    (InheritanceLink"
+// 		"        (VariableNode \"$x\")"
+// 		"        (ConceptNode \"criminal\")))";
+// 	Handle hb2 = eval_->eval_h(bl2);
+
+// 	Handle hb1_il =
+// 		eval_->eval_h("(ImplicationLink"
+// 		              "    (VariableNode \"$A\")"
+// 		              "    (VariableNode \"$B\"))");
+
+// 	Handle hb2_il =
+// 		eval_->eval_h("(InheritanceLink"
+// 		              "    (VariableNode \"$x\")"
+// 		              "    (ConceptNode \"criminal\"))");
+
+// 	// HandleSeq hsresult = { hb1_il, hb2_il };
+// 	// HandleSeq hsrules = bc_->filter_rules(hsresult);
+// 	// TODO look at the result itself, not just the size!!!
+// 	// TS_ASSERT_EQUALS(hsrules.size(), 1);
+// }
+
+// void BackwardChainerUTest::test_match_knowledge_base() {
+// 	/**
+// 	   TODO: take what makes
+
+// 	   HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
+
+// 	   line 198 of the backward chainer return only undefined handles
+// 	   and debug here why.
+// 	*/
+// }
+
+// void BackwardChainerUTest::test_simple_deduction_bc() {
+// 	// Test simple deduction
+// 	//
+// 	// InheritanceLink A B
+// 	// InheritanceLink B C
+// 	// |-
+// 	// InheritanceLink A C
+// 	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
+// 		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
+// 		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
+// 		AB = eval_->eval_h("(InheritanceLink (stv 0.9 0.9)"
+// 		                   "    (ConceptNode \"A\")"
+// 		                   "    (ConceptNode \"B\"))"),
+// 		BC = eval_->eval_h("(InheritanceLink (stv 0.8 0.9)"
+// 		                   "    (ConceptNode \"B\")"
+// 		                   "    (ConceptNode \"C\"))"),
+// 		// The TV is missing cause it's the target
+// 		AC = eval_->eval_h("(InheritanceLink"
+// 		                   "    (ConceptNode \"A\")"
+// 		                   "    (ConceptNode \"C\"))");
+
+// 	std::cout << "AtomSpace before do_bd = " << *as_ << std::endl;
+
+// 	VarMultimap result = bc_->do_bc(AC);
+
+// 	std::cout << "AtomSpace after do_bd = " << *as_ << std::endl;
+
+// 	std::cout << "result:" << std::endl;
+// 	for (const auto& element : result) {
+// 		std::cout << "Key = " << element.first->toString() << std::endl;
+// 		std::cout << "{" << std::endl;
+// 		for (const auto& value : element.second)
+// 			std::cout << "  Value = " << value->toString() << std::endl;
+// 		std::cout << "}" << std::endl;
+// 	}
+
+// 	// TODO: maybe check that the result is AC and that its confidence
+// 	// is above 0
+// 	TS_ASSERT(false);
+// }
 
 
 // void BackwardChainerUTest::test_do_bc() {
