@@ -155,14 +155,14 @@ t: InhLink $x criminal, InhLink $who criminal
 -> output matched: VarNode $B-4 => InhLink $x criminal
 -> input became: (AndLink (ImpLink (VarNode $A-4) (QuoteLink (InhLink $x criminal))) (VarNode $A-4))
 -> premises selection
--> one of the premises can be grounded by Nono
--> forward chain added (InhLink Nono criminal) to atomspace
+-> one of the premises can be grounded by West
+-> forward chain added (InhLink West criminal) to atomspace
 -> no premises with free var, this target is solved
 
 t: InhLink $who criminal
 -> kb match
 
-$who in the end map to Nono
+$who in the end map to West
 
 ```
 
