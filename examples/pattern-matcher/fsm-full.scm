@@ -16,7 +16,7 @@
 ; (add-to-load-path ".")
 ;
 ; and then load this file:
-; (load-from-path "fsm-basic.scm")
+; (load-from-path "fsm-full.scm")
 ;
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.

@@ -6,8 +6,25 @@
 ; that the transitions are specified probabilistically; mutiple
 ; transitions may occur; each transition has a fixed probability.
 ;
+; The run this, you probably need to do this:
+;
+; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
+; guile -L build -L opencog/scm
+;
+; (add-to-load-path "/home/yourname/opencog/build")
+; (add-to-load-path "/home/yourname/opencog/opencog/scm")
+; (add-to-load-path ".")
+;
+; and then load this file:
+; (load-from-path "markov-chain.scm")
+;
+; Then, scroll to the bottom, and some of the commented-out
+; examples.
+
 (use-modules (opencog))
 (use-modules (opencog query))
+
+(load-from-path "utilities.scm")
 
 (define my-trans (ConceptNode "My Chain's Transition Rule"))
 (define my-state (AnchorNode "My Chain's Current State"))
@@ -277,10 +294,10 @@
 (define my-stepper (create-chain-stepper my-trans my-nexts my-state))
 
 ;;; Take one step.
-(cog-prob my-chain)
+;(cog-bind my-stepper)
 
 ;;; Take three steps.
 ;;; Try it!
-(cog-prob my-chain)
-(cog-prob my-chain)
-(cog-prob my-chain)
+;(cog-bind my-stepper)
+;(cog-bind my-stepper)
+;(cog-bind my-stepper)
