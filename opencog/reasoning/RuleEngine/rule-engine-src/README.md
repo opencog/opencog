@@ -130,8 +130,39 @@ t: EvaLink sell West $a Nono, InhLink $z hostile, InhLink $x criminal, InhLink $
 -> input became: (AndLink (ImplicationLink (VarNode $A-2) (QuoteLink (EvaLink sell West $a Nono))) (VarNode $A-2))
 -> premises selection
 -> one of the premises can be grounded by missile@123
+-> forward chain added (EvaLink sell West missle@123 Nono) to atomspace
+-> no premises with free var, this target is solved
 
-and so on...
+t: InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb match
+
+t: InhLink $b hostile, InhList $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb match fail
+-> match modus ponens rule
+-> output matched: VarNode $B-3 => InhLink $b hostile
+-> input became: (AndLink (ImplicationLink (VarNode $A-3) (QuoteLink (InhLink $b hostile))) (VarNode $A-3))
+-> premises selection
+-> one of the premises can be grounded by Nono
+-> forward chain added (InhLink Nono hostile) to atomspace
+-> no premises with free var, this target is solved
+
+t: InhList $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb match
+
+t: InhLink $x criminal, InhLink $who criminal
+-> kb match fail
+-> matched modus poenes rule
+-> output matched: VarNode $B-4 => InhLink $x criminal
+-> input became: (AndLink (ImpLink (VarNode $A-4) (QuoteLink (InhLink $x criminal))) (VarNode $A-4))
+-> premises selection
+-> one of the premises can be grounded by Nono
+-> forward chain added (InhLink Nono criminal) to atomspace
+-> no premises with free var, this target is solved
+
+t: InhLink $who criminal
+-> kb match
+
+$who in the end map to Nono
 
 ```
 
