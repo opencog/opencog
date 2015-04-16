@@ -106,10 +106,10 @@ t: InhLink $x crimainl, InhLink $who criminal
 -> none of the premises can be grounded to solve for $x
 -> add to targets
 
-t: (ImpLink (AndLink ...) (InhLink $x criminal)), (AndLink ...), InhLink $x crimnal
+t: (ImpLink (AndLink ... american ... weapon ...) (InhLink $x criminal)), (AndLink ... american ... weapon ...), InhLink $x crimnal
 -> no free var
 
-t: (AndLink ...), InhLink $x criminal, InhLink $who criminal
+t: (AndLink ... american ...), InhLink $x criminal, InhLink $who criminal
 -> kb match fail
 -> break apart the AndLink
 
