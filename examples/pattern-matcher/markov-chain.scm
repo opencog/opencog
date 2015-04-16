@@ -1,28 +1,19 @@
 ;
-; Finite State Machine (FSM) Demo.
+; Probabilistic Finite State Machine (Markov Chain) Demo.
 ;
-; Based on fsm-simple.scm, this defines a very simple four-state finite
-; state machine, but illustrates the general (universal) FSM state
-; transitioner.  This allows mutlple FSM's to be simultaneously defined
-; and operated asynchronously from each-other.
+; Based on fsm-full.scm, this defines a very simple four-state Markov
+; chain, using the same states as the demo FSM's. The difference here is
+; that the transitions are specified probabilistically; mutiple
+; transitions may occur; each transition has a fixed probability.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
 
-;; Set of possible states of the state machine
-;; This defintion of the set of states is not strictly needed; it is
-;; not used anywhere in the demo below.
-(SetLink
-	(ConceptNode "initial state")
-	(ConceptNode "green")
-	(ConceptNode "yellow")
-	(ConceptNode "red")
-)
-
 (define my-trans (ConceptNode "My FSM's Transition Rule"))
 (define my-state (AnchorNode "My FSM's Current State"))
 
-;; The inital state of the FSM
+;; The inital state of the FSM.  It starts with 100% probability in this
+;; state.
 (ListLink
 	my-state
 	(ConceptNode "initial state")
@@ -47,9 +38,9 @@
 ;; is the probability of transitioning to state B give that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
 ;; 
-;; For the example below, P(B|A) is always one.
 
-(ContextLink
+; Transition from initial to green with 90% proability.
+(ContextLink (stv 0.9 1)
 	(ConceptNode "initial state")
 	(ListLink
 		my-trans
@@ -57,7 +48,17 @@
 	)
 )
 
-(ContextLink
+; Transition from initial state to yellow with 10% probability.
+(ContextLink (stv 0.1 1)
+	(ConceptNode "initial state")
+	(ListLink
+		my-trans
+		(ConceptNode "yellow")
+	)
+)
+
+; Transition from green to yellow with 90% probability
+(ContextLink (stv 0.9 1)
 	(ConceptNode "green")
 	(ListLink
 		my-trans
@@ -65,7 +66,17 @@
 	)
 )
 
-(ContextLink
+; Transition from green to red with 10% probability
+(ContextLink (stv 0.1 1)
+	(ConceptNode "green")
+	(ListLink
+		my-trans
+		(ConceptNode "red")
+	)
+)
+
+; Transition from yellow to red with 90% probability
+(ContextLink (stv 0.9 1)
 	(ConceptNode "yellow")
 	(ListLink
 		my-trans
@@ -73,7 +84,17 @@
 	)
 )
 
-(ContextLink
+; Transition from yellow to green with 10% probability
+(ContextLink (stv 0.1 1)
+	(ConceptNode "yellow")
+	(ListLink
+		my-trans
+		(ConceptNode "green")
+	)
+)
+
+; Transition from red to green with 90% probability
+(ContextLink (stv 0.9 1)
 	(ConceptNode "red")
 	(ListLink
 		my-trans
@@ -81,12 +102,25 @@
 	)
 )
 
+; Stay in the red state with 10% probability
+(ContextLink (stv 0.1 1)
+	(ConceptNode "red")
+	(ListLink
+		my-trans
+		(ConceptNode "red")
+	)
+)
 
-;;; Create a BindLink that can take an FSM with the name `fsm-name`
-;;; and stores it's state in `fsm-state`.  After the BindLink is
-;;; created, each invocation of it will advance the FSM bu one step.
+
+;;; Create a BindLink that can take an Markov Chain with the name
+;;; `fsm-name` and stores it's state in `fsm-state`.  After the
+;;; BindLink is created, each invocation of it will advance the
+;;; Markov chain one step.
 ;;;
-(define (create-fsm fsm-name fsm-state)
+;;; XXX UNFINISHED --- this requies some new C++ cod before it can work
+;;; right. Ask Linsas for the status.
+;;;
+(define (create-chain chain-name chain-state)
 	(BindLink
 		;; We will need to find the current and the next state
 		(VariableList
@@ -97,44 +131,37 @@
 			(AndLink
 				;; If we are in the current state ...
 				(ListLink
-					fsm-state
+					chain-state
 					(VariableNode "$curr-state")
 				)
 				;; ... and there is a transition to another state...
 				(ContextLink
 					(VariableNode "$curr-state")
 					(ListLink
-						fsm-name
+						chain-name
 						(VariableNode "$next-state")
 					)
 				)
 			)
 			(AndLink
-				;; ... then transistion to the next state ...
+				;; ... then adjust the probability...
 				(ListLink
-					fsm-state
+					chain-state
 					(VariableNode "$next-state")
-				)
-				;; ... and leave the current state.
-				(DeleteLink
-					(ListLink
-						fsm-state
-						(VariableNode "$curr-state")
-					)
 				)
 			)
 		)
 	)
 )
 
-;;; Create "my-fsm"
-(define my-fsm (create-fsm my-trans my-state))
+;;; Create "my-chain"
+(define my-chain (create-chain my-trans my-state))
 
 ;;; Take one step.
-(cog-bind my-fsm)
+(cog-prob my-chain)
 
 ;;; Take three steps.
 ;;; Try it!
-(cog-bind my-fsm)
-(cog-bind my-fsm)
-(cog-bind my-fsm)
+(cog-prob my-chain)
+(cog-prob my-chain)
+(cog-prob my-chain)

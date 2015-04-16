@@ -1,15 +1,17 @@
 ;
 ; Finite State Machine (FSM) Demo.
 ;
-; Based on fsm-simple.scm, this defines a very simple four-state finite
+; Based on fsm-basic.scm, this defines a very simple four-state finite
 ; state machine, but illustrates the general (universal) FSM state
-; transitioner.  This allows mutlple FSM's to be simultaneously defined
-; and operated asynchronously from each-other.
+; machine constructor.  This allows mutlple FSM's to be simultaneously
+; defined and operated asynchronously from each-other.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
 
 ;; Set of possible states of the state machine
+;; This defintion of the set of states is not strictly needed; it is
+;; not used anywhere in the demo below.
 (SetLink
 	(ConceptNode "initial state")
 	(ConceptNode "green")
@@ -17,8 +19,8 @@
 	(ConceptNode "red")
 )
 
-(define my-fsm (ConceptNode "My FSM"))
-(define my-state (AnchoreNode "My FSM's current state"))
+(define my-trans (ConceptNode "My FSM's Transition Rule"))
+(define my-state (AnchorNode "My FSM's Current State"))
 
 ;; The inital state of the FSM
 (ListLink
@@ -50,7 +52,7 @@
 (ContextLink
 	(ConceptNode "initial state")
 	(ListLink
-		my-fsm
+		my-trans
 		(ConceptNode "green")
 	)
 )
@@ -58,7 +60,7 @@
 (ContextLink
 	(ConceptNode "green")
 	(ListLink
-		my-fsm
+		my-trans
 		(ConceptNode "yellow")
 	)
 )
@@ -66,7 +68,7 @@
 (ContextLink
 	(ConceptNode "yellow")
 	(ListLink
-		my-fsm
+		my-trans
 		(ConceptNode "red")
 	)
 )
@@ -74,12 +76,18 @@
 (ContextLink
 	(ConceptNode "red")
 	(ListLink
-		my-fsm
+		my-trans
 		(ConceptNode "green")
 	)
 )
 
 
+;;; A Universal Finite State Machine Constructor.
+;;;
+;;; This will create an FSM; that is, a rule that will transition
+;;; any arbitrary FSM from state to state, given only its name, and
+;;; the name given to the transition rules.
+;;;
 ;;; Create a BindLink that can take an FSM with the name `fsm-name`
 ;;; and stores it's state in `fsm-state`.  After the BindLink is
 ;;; created, each invocation of it will advance the FSM bu one step.
@@ -126,13 +134,13 @@
 )
 
 ;;; Create "my-fsm"
-(define my-fsm (create-fsm my-name my-state))
+(define my-fsm (create-fsm my-trans my-state))
 
 ;;; Take one step.
-(bindlink my-fsm)
+(cog-bind my-fsm)
 
 ;;; Take three steps.
 ;;; Try it!
-(bindlink my-fsm)
-(bindlink my-fsm)
-(bindlink my-fsm)
+(cog-bind my-fsm)
+(cog-bind my-fsm)
+(cog-bind my-fsm)

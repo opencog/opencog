@@ -13,7 +13,9 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-;; Set of possible states of the state machine
+;; Set of possible states of the state machine.
+;; The definition of this set is not strictly needed; it is not used
+;; for anything in the demo code below.
 (SetLink
 	(ConceptNode "initial state")
 	(ConceptNode "green")
@@ -100,3 +102,12 @@
 		)
 	)
 )
+
+; Take on step of the FSM
+(cog-bind take-one-step)
+
+;; Take three more steps;
+;; Try it!  See what appens!
+(cog-bind take-one-step)
+(cog-bind take-one-step)
+(cog-bind take-one-step)
