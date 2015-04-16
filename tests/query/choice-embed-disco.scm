@@ -1,5 +1,5 @@
 ;
-; Unit testing for OrLinks in the pattern matcher.
+; Unit testing for ChoiceLinks in the pattern matcher.
 ; The Or-pattern is "disconnected": although it has a variable
 ; in both disjuncts, that variable plays a completely different
 ; role in each.  Graphically, its really two disconnected graphs
@@ -42,7 +42,7 @@
 	)
 )
 
-;;; One clause, with an OrLink nested in it. Note that the two
+;;; One clause, with an ChoiceLink nested in it. Note that the two
 ;;; parts are entirely disconnected from each-other.
 (define (embed-disco)
 	(BindLink
@@ -50,7 +50,7 @@
 		(ImplicationLink
 			(MemberLink
 				(ConceptNode "ways and means")
-				(OrLink
+				(ChoiceLink
 					(EvaluationLink
 						(PredicateNode "this way")
 						(ListLink

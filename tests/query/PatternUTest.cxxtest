@@ -241,7 +241,7 @@ void PatternUTest::test_simple_link(void)
 	preds.push_back(he);
 
 	PMCB pmcb(as);
-	match(&pmcb, vars, preds);
+	match(pmcb, vars, preds);
 
 	// Should find only one solution.
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -295,7 +295,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hl2);
 
 	PMCB pmcb(as);
-	match(&pmcb, vars, preds);
+	match(pmcb, vars, preds);
 
 	// Should find two solutions:
 	// var_x = soln_b
@@ -307,7 +307,7 @@ void PatternUTest::test_two_links(void)
 	// Test the non-std::vector interface also.
 	pmcb.found = 0;
 	SatisfactionLinkPtr sl(createSatisfactionLink(hv, han));
-	sl->satisfy(&pmcb);
+	sl->satisfy(pmcb);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -354,7 +354,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(heval);
 
 	PMCB pmcb(as);
-	match(&pmcb, vars, preds);
+	match(pmcb, vars, preds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -379,7 +379,7 @@ void PatternUTest::test_eval(void)
 	spreds.push_back(hshort_eval);
 
 	pmcb.found = 0; // reset the counter !!
-	match(&pmcb, svars, spreds);
+	match(pmcb, svars, spreds);
 
 	// Should find one solution
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
@@ -394,7 +394,7 @@ void PatternUTest::test_eval(void)
 	preds.push_back(hshort_eval);
 	vars.insert(hprns);
 	pmcb.found = 0; // reset the counter !!
-	match(&pmcb, vars, preds);
+	match(pmcb, vars, preds);
 	TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 1);
 	TSM_ASSERT("incorrect solution", hitem_2 == pmcb.vars[h2]);
 	TSM_ASSERT("incorrect pr-node", hprnode == pmcb.vars[hprn]);

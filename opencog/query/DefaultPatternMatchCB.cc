@@ -41,13 +41,128 @@ using namespace opencog;
 
 /* ======================================================== */
 
+DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
+	_temp_aspace(NULL),
+	_instor(&_temp_aspace),
+	_classserver(classserver()),
+	_type_restrictions(NULL),
+	_dynamic(NULL),
+	_as(as)
+{
+	_connectives.insert(AND_LINK);
+	_connectives.insert(OR_LINK);
+	_connectives.insert(NOT_LINK);
+}
+
+/* ======================================================== */
+
+/**
+ * Called when a node in the template pattern needs to
+ * be compared to a possibly matching node in the atomspace.
+ * The first argument is a node from the pattern, and the
+ * second is a possible solution (grounding) node from the
+ * atomspace.
+ *
+ * Return true if the nodes match, else return false.
+ * By default, the nodes must be identical.
+ */
+bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
+                                       const Handle& nsoln_h)
+{
+	// If equality, then a match.
+	return npat_h == nsoln_h;
+}
+
+/**
+ * Called when a variable in the template pattern
+ * needs to be compared to a possible grounding
+ * node in the atomspace. The first argument
+ * is a variable from the pattern, and the second
+ * is a possible grounding node from the atomspace.
+ * Return true if the nodes match, else return false.
+ */
+bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
+                                           const Handle& nsoln_h)
+{
+	Type pattype = npat_h->getType();
+
+	// If the ungrounded term is not of type VariableNode, then just
+	// accept the match. This allows any kind of node types to be
+	// explicitly bound as variables.  However, the type VariableNode
+	// gets special handling, below.
+	if (pattype != VARIABLE_NODE) return true;
+
+	// If the ungrounded term is a variable, then see if there
+	// are any restrictions on the variable type.
+	// If no restrictions, we are good to go.
+	if (_type_restrictions->empty()) return true;
+
+	// If we are here, there's a restriction on the grounding type.
+	// Validate the node type, if needed.
+	VariableTypeMap::const_iterator it = _type_restrictions->find(npat_h);
+	if (it == _type_restrictions->end()) return true;
+
+	// Is the ground-atom type in our list of allowed types?
+	Type soltype = nsoln_h->getType();
+	const std::set<Type> &tset = it->second;
+	std::set<Type>::const_iterator allow = tset.find(soltype);
+	return allow != tset.end();
+}
+
+/**
+ * Called when a link in the template pattern
+ * needs to be compared to a possibly matching
+ * link in the atomspace. The first argument
+ * is a link from the pattern, and the second
+ * is a possible solution link from the atomspace.
+ * Return true if the links should be compared,
+ * else return false.
+ *
+ * By default, the search continues if the link
+ * arity and the link types match.
+ */
+bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
+                                       const LinkPtr& lsoln)
+{
+	// If the pattern is exactly the same link as the proposed
+	// grounding, then its a perfect match.
+	if (lpat == lsoln) return true;
+
+	// Accept all ChoiceLink's by default! We will get another shot
+	// at it when the contents of the ChoiceLink are examined.
+	Type pattype = lpat->getType();
+	if (CHOICE_LINK == pattype) return true;
+
+	if (lpat->getArity() != lsoln->getArity()) return false;
+	Type soltype = lsoln->getType();
+
+	// If types differ, no match
+	return pattype == soltype;
+}
+
+bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
+                                            const LinkPtr& lgnd)
+{
+	if (not _have_evaluatables) return true;
+	Handle hp(lpat);
+	if (_dynamic->find(hp) == _dynamic->end()) return true;
+
+	// We will find ourselves here whenever the link contain
+	// a GroundedPredicateNode. In this case, execute the
+	// node, and declare a match, or no match, depending
+	// one how the evaluation turned out.  Its "crisp logic"
+	// because we use a greater-than-half for the TV.
+	// This is the same behavior as used in evaluate_term().
+	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->getHandle()));
+	return tv->getMean() >= 0.5;
+}
+
 /**
  * The default semantics here is to reject a match if the option
  * clauses are detected.  This is in keeping with the semantics
  * AbsentLink: a match is possible only if the indicated clauses
  * are absent!
  */
-
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd)
 {
@@ -109,7 +224,7 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
-	if (classserver().isNode(t)) {
+	if (_classserver.isNode(t)) {
 		if (t != VARIABLE_NODE) {
 			width = h->getIncomingSetSize();
 			return h;
@@ -117,13 +232,13 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all OrLink's. Picking a starter inside one of these
+	// Ignore all ChoiceLink's. Picking a starter inside one of these
 	// will almost surely be disconnected from the rest of the graph.
-	if (OR_LINK == t)
+	if (CHOICE_LINK == t)
 		return Handle::UNDEFINED;
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (_dynamic and _dynamic->find(h) != _dynamic->end())
+	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -230,10 +345,11 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
  * starting point.
  */
 bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
-	_search_fail = false;
+	init(vars, pat);  // call again; derived class may call us directly
+	const HandleSeq& clauses = pat.mandatory;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -300,7 +416,7 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * none, then it is guaranteed that this will also be correctly
  * reported. For certain, highly unusual (but still canonical) search
  * patterns, the same grounding may be reported more than once; grep for
- * notes pertaining to the OrLink, and the ArcanaUTest for details.
+ * notes pertaining to the ChoiceLink, and the ArcanaUTest for details.
  * Otherwise, all possible groundings are guaranteed to be returned
  * exactly once.
  *
@@ -376,33 +492,42 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
  * "standard, canonical" case.
  */
 bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
+{
+	init(vars, pat);  // call again; derived class may call us directly
+	return disjunct_search(pme, vars, pat);
+}
+
+void DefaultPatternMatchCB::init(const Variables& vars,
+                                 const Pattern& pat)
 {
 	_search_fail = false;
-	return disjunct_search(pme, vars, clauses);
+	_type_restrictions = &vars.typemap;
+	_dynamic = &pat.evaluatable_terms;
+	_have_evaluatables = (0 < _dynamic->size());
 }
 
 /* ======================================================== */
 /**
  * This callback implements the handling of the special case where the
  * pattern consists of a single clause, at the top of which there is an
- * OrLink. In this situation, one effectively has multiple, unrelated
+ * ChoiceLink. In this situation, one effectively has multiple, unrelated
  * grounding problems at hand, and they need to be treated as such.
  *
  * The core issue here is that, from the point of view of satisfiability,
- * each subgraph that occurs inside an OrLink might be grounded by a
+ * each subgraph that occurs inside an ChoiceLink might be grounded by a
  * graph that is disconnected from the other subgraphs. There is no
  * a-priori way of knowing whether the groundings might be connected,
  * and thus, the worst-case must be assumed: each subgraph that occurs
- * inside an OrLink must be considered to be a unique, independent
+ * inside an ChoiceLink must be considered to be a unique, independent
  * graph, which must be assumed to be disconnected from each of the
  * other subgraphs (even though they "accidentally" share a common
  * variable name).
  *
  * This is best understood through an example. Consider the clause
  *
- *   OrLink
+ *   ChoiceLink
  *       ListLink
  *           ConceptNode Hunt
  *           VariableNode $X
@@ -428,31 +553,36 @@ bool DefaultPatternMatchCB::initiate_search(PatternMatchEngine *pme,
  * search needs to be launched, starting at `Zebra`.
  *
  * Since the pattern matcher is only able to walk over connected
- * graphs, it must be assumed a-priori that each subgraph in an OrLink
+ * graphs, it must be assumed a-priori that each subgraph in an ChoiceLink
  * is disconnected from the others. The only way that these two sub
  * graphs might prove to be connected is if the variable $X is used in
  * some other clause, thus establishing connectivity from that clause to
- * the subgraphs of the OrLink.
+ * the subgraphs of the ChoiceLink.
  *
  * The practical side-effect, here, with regards to satsifcation, is
  * this: if both groundings are to be found in the above example, then
  * two efforts must be made: One effort, with the initial grounding
  * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
- * is what we do here, with the OrLink loop.
+ * is what we do here, with the ChoiceLink loop.
  */
 bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
-	if (1 == clauses.size() and clauses[0]->getType() == OR_LINK)
+	init(vars, pat);  // call again; derived class may call us directly
+	const HandleSeq& clauses = pat.mandatory;
+
+	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
 	{
+		Pattern pcpy = pat;
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
 		for (const Handle& h : oset)
 		{
 			HandleSeq hs;
 			hs.push_back(h);
-			bool found = disjunct_search(pme, vars, hs);
+			pcpy.mandatory = hs;
+			bool found = disjunct_search(pme, vars, pcpy);
 			if (found) return true;
 		}
 		if (not _search_fail) return false;
@@ -460,7 +590,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
-	bool found = neighbor_search(pme, vars, clauses);
+	bool found = neighbor_search(pme, vars, pat);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -471,7 +601,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// types that occur in the atomspace.
 	dbgprt("Cannot use node-neighbor search, use link-type search\n");
 	_search_fail = false;
-	found = link_type_search(pme, vars, clauses);
+	found = link_type_search(pme, vars, pat);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -483,7 +613,7 @@ bool DefaultPatternMatchCB::disjunct_search(PatternMatchEngine *pme,
 	// method.
 	dbgprt("Cannot use link-type search, use variable-type search\n");
 	_search_fail = false;
-	found = variable_search(pme, vars, clauses);
+	found = variable_search(pme, vars, pat);
 	return found;
 }
 
@@ -523,9 +653,12 @@ void DefaultPatternMatchCB::find_rarest(const Handle& clause,
  * AtomSpace.
  */
 bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& vars,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
+	init(vars, pat);  // call again; derived class may call us directly
+	const HandleSeq& clauses = pat.mandatory;
+
 	_search_fail = false;
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -591,19 +724,20 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
  * you should create somethnig more clever.
  */
 bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
-                                            const std::set<Handle>& varset,
-                                            const HandleSeq& clauses)
+                                            const Variables& vars,
+                                            const Pattern& pat)
 {
-	_search_fail = false;
+	init(vars, pat);  // call again; derived class may call us directly
+	const HandleSeq& clauses = pat.mandatory;
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
-	dbgprt("varset size = %lu\n", varset.size());
+	dbgprt("varset size = %lu\n", vars.varset.size());
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	for (const Handle& var: varset)
+	for (const Handle& var: vars.varset)
 	{
 		dbgprt("Examine variable %s\n", var->toShortString().c_str());
 		auto tit = _type_restrictions->find(var);
@@ -614,7 +748,7 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 		{
 			size_t num = (size_t) _as->getNumAtomsOfType(t);
 			dbgprt("Type = %s has %lu atoms in the atomspace\n",
-			       classserver().getTypeName(t).c_str(), num);
+			       _classserver.getTypeName(t).c_str(), num);
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
@@ -652,7 +786,10 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	}
 
 	HandleSeq handle_set;
-	_as->getHandlesByType(handle_set, ptype);
+	if (ptype == ATOM)
+		_as->getHandlesByType(handle_set, ptype, true);
+	else
+		_as->getHandlesByType(handle_set, ptype);
 
 	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
 
@@ -673,8 +810,8 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 
 /* ======================================================== */
 
-bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
-                                 const std::map<Handle, Handle>& gnds)
+bool DefaultPatternMatchCB::eval_term(const Handle& virt,
+                                      const std::map<Handle, Handle>& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
@@ -721,6 +858,62 @@ bool DefaultPatternMatchCB::evaluate_link(const Handle& virt,
 	// wanted, here.
 	bool relation_holds = tvp->getMean() > 0.5;
 	return relation_holds;
+}
+
+/* ======================================================== */
+
+/**
+ * This implements the evaluation of a classical boolean-logic
+ * "sentence": a well-formed formula with no free variables,
+ * having a crisp true/false truth value.  Here, "top" holds
+ * the sentence (with variables), 'gnds' holds the bindings of
+ * variables to values.
+ */
+bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
+                              const std::map<Handle, Handle>& gnds)
+{
+	LinkPtr ltop(LinkCast(top));
+	if (NULL == ltop)
+		throw InvalidParamException(TRACE_INFO,
+	            "Not expecting a Node, here %s\n",
+	            top->toShortString().c_str());
+
+	const HandleSeq& oset = ltop->getOutgoingSet();
+	if (0 == oset.size())
+		throw InvalidParamException(TRACE_INFO,
+		   "Expecting logical connective to have at least one child!");
+
+	Type term_type = top->getType();
+	if (OR_LINK == term_type)
+	{
+		for (const Handle& h : oset)
+			if (eval_sentence(h, gnds)) return true;
+
+		return false;
+	}
+	else if (AND_LINK == term_type)
+	{
+		for (const Handle& h : oset)
+			if (not eval_sentence(h, gnds)) return false;
+
+		return true;
+	}
+	else if (NOT_LINK == term_type)
+	{
+		if (1 != oset.size())
+			throw InvalidParamException(TRACE_INFO,
+			            "NotLink can have only one child!");
+
+		return not eval_sentence(oset[0], gnds);
+	}
+	else if (EVALUATION_LINK == term_type or
+	         _classserver.isA(term_type, VIRTUAL_LINK))
+	{
+		return eval_term(top, gnds);
+	}
+	throw InvalidParamException(TRACE_INFO,
+	            "Unknown logical connective %s\n",
+	            top->toShortString().c_str());
 }
 
 /* ===================== END OF FILE ===================== */

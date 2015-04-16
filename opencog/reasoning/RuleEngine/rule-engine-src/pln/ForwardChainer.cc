@@ -171,7 +171,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     // Run the pattern matcher, find all patterns that satisfy the
     // the clause, with the given variables in it.
     SatisfactionLinkPtr sl(createSatisfactionLink(hvar_list, hclause));
-    sl->satisfy(&impl);
+    sl->satisfy(impl);
 
     // Update result
     fcmem_.add_rules_product(0, impl.result_list);
@@ -180,14 +180,13 @@ void ForwardChainer::do_pm(const Handle& hsource,
     as_->removeAtom(hvar_list);
     as_->removeAtom(hclause);
 
-    //!Additionally, find applicable rules and apply.
+    // !Additionally, find applicable rules and apply.
     vector<Rule*> rules = fcb.choose_rules(fcmem_);
     for (Rule* rule : rules) {
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(as_);
         impl.implicand = bl->get_implicand();
-        impl.set_type_restrictions(bl->get_typemap());
-        bl->imply(&impl);
+        bl->imply(impl);
         fcmem_.set_cur_rule(rule);
         fcmem_.add_rules_product(0, impl.result_list);
     }
@@ -208,8 +207,7 @@ void ForwardChainer::do_pm()
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(as_);
         impl.implicand = bl->get_implicand();
-        impl.set_type_restrictions(bl->get_typemap());
-        bl->imply(&impl);
+        bl->imply(impl);
         fcmem_.set_cur_rule(rule);
 
         log_->info("OUTPUTS");

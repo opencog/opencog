@@ -94,10 +94,23 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    BackwardChainer bc(as);
+    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/RuleEngine/default_cpolicy.json"));
+    cpolicy_loader.load_config();
 
-    bc.do_chain(h);
-    map<Handle, HandleSeq> soln = bc.get_chaining_result();
+    std::vector<Rule> rules;
+
+    for (Rule* pr : cpolicy_loader.get_rules())
+        rules.push_back(*pr);
+
+    BackwardChainer bc(as, rules);
+	bc.set_target(h);
+
+	logger().debug("[BackwardChainer] Before do_chain");
+
+    bc.do_full_chain();
+
+	logger().debug("[BackwardChainer] After do_chain");
+    map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
 
     HandleSeq soln_list_link;
     for (auto it = soln.begin(); it != soln.end(); ++it) {
@@ -105,8 +118,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
         hs.push_back(it->first);
         hs.insert(hs.end(), it->second.begin(), it->second.end());
 
-        if (hs[1] != Handle::UNDEFINED)
-            soln_list_link.push_back(as->addLink(LIST_LINK, hs));
+        soln_list_link.push_back(as->addLink(LIST_LINK, hs));
     }
 
     return as->addLink(LIST_LINK, soln_list_link);

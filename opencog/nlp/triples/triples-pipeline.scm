@@ -71,7 +71,7 @@
 	; First, create all of the preposition phrases that we'll need.
 	(for-each
 		(lambda (rule)
-			(cog-bind-crisp rule)
+			(cog-bind rule)
 		)
 		prep-rule-list ; this list defined by the /triples/prep-rules.scm file
 	)
@@ -79,7 +79,7 @@
 	; Now, create the actual triples
 	(for-each
 		(lambda (rule)
-			(attach-triples (cog-bind-crisp rule))
+			(attach-triples (cog-bind rule))
 		)
 		triple-rule-list ; this list defined by the /triples/rules.scm file
 	)
@@ -115,7 +115,7 @@
 	; Apply the truth-asserton rules
 	(for-each
 		(lambda (rule)
-			(drule (cog-bind-crisp rule))
+			(drule (cog-bind rule))
 		)
 		truth-assertion-list ; this list defined by the /triples/rules.scm file
 	)

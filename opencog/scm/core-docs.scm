@@ -760,15 +760,9 @@
 (set-procedure-property! cog-bind 'documentation
 "
  cog-bind handle
-     Run pattern matcher on handle.  handle must be a BindLink.
-")
-
-(set-procedure-property! cog-bind-crisp 'documentation
-"
- cog-bind-crisp handle
     Run pattern matcher on handle.  handle must be a BindLink.
-    Use crisp logic during implication.  This allows NotLink clauses
-    to be used to exclude certain patterns.
+    Uses crisp (non-probabilistic) logic during the evaluation
+    of evaluatable terms.
 ")
 
 (set-procedure-property! cog-bind-single 'documentation

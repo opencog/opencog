@@ -30,7 +30,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
 
-#define DEBUG 1
+// #define DEBUG 1
 
 namespace opencog {
 class PatternMatchEngine;
@@ -119,48 +119,58 @@ class PatternMatchCallback
 		}
 
 		/**
-		 * Invoked to perform the matching of a virtual link.
-		 * A virtual link is one that does not (might not) exist as a
-		 * real link in the AtomSpace, but might still exist in a
-		 * 'virtual' sense, in that it is instead considered to exist if
-		 * a GroundedPredicateNode evaluates to true or not.  When such
-		 * a virtual link is encountered, this callback is called to make
-		 * this decision. This should return false to reject the match.
-		 * That is, a return value of "false" denotes that the virtual
-		 * atom does not exist; while "true" implies that it does exist.
-		 * This is the same convention as most all of the other callbacks.
+		 * Invoked to confirm or deny a candidate grounding for term that
+		 * consistes entirely of connectives and evaluatable terms.
+		 *
+		 * An 'evaluatable term' is any pattern term (term occuring in the
+		 * search pattern, either a node or link) that was  previously
+		 * declared as 'evaluatable', by the 'set_evaluatable_terms()'
+		 * callback below.  Thus, for example, the canonical, default
+		 * convention is that evaluatable terms are any terms that
+		 * contain a GPN -- a 'GroundedPredicateNode', and therefore
+		 * requires running code that lies outside of the pattern matcher
+		 * (typically scheme or python code).  In general, though,
+		 * evaluatable terms don't have to be of this sort -- they can
+		 * be any part of the search pattern that was previously
+		 * specified by the  'set_evaluatable_terms()' callback.
+		 *
+		 * Connectives are any link types that were declared by the
+		 * 'get_connectives()' callback, below. Connectives are those
+		 * link types that are are able to combine evaluatable terms.
+		 * For example, the canonical, default connectives are logic
+		 * connectives: AndLink, OrLink, NotLink. They don't have to
+		 * be these, but, that is what they would be if emulating a
+		 * logic that uses the classical boolean logic values of
+		 * true/false.
+		 *
+		 * For another example, they might be SetUnion, SetIntersectionLink,
+		 * and SetComplimentLink if emulating a logic that uses probability
+		 * values for truth values (so, e.g. SetUnionLink would connect
+		 * the probability of A or B, i.e. it would compute P(A or B)
+		 * SetIntersectionLink would compute P(A and B), and so on.
 		 *
 		 * Unlike the other callbacks, this takes arguments in s slightly
-		 * different form.  Here, 'virt' is the virtual link specification,
-		 * as it appears in the pattern.  At this time, it is assumed that
-		 * these are always of the form
+		 * different form.  Here, 'eval' is the evalutatable term, and
+		 * 'gnds' contains the currently-proposed grounding for any
+		 * variables occuring within that term. It is a map: the 'key' is
+		 * either a variable, or another term whose grounding is being
+		 * currently considered, and the 'value' is the proposed
+		 * grounding.
 		 *
-		 *       EvaluationLink
-		 *          GroundedPredicateNode "scm:some-function"
-		 *          ListLink
-		 *             SomeAtom arg1       ;; could be a VariableNode
-		 *             VariableNode $arg2  ;; could be some other node, too.
-		 *             EtcAtom ...
+		 * In ordinary logic, a well-formed formula with no free variables
+		 * is called a "sentence". Thus, in the sense of logic, the 'eval'
+		 * argument, together with 'gnds' combine to bind values to all
+		 * the variables in 'term', thus leaving a sentence with no free
+		 * variables. In logic, sentences are always true or false, ergo
+		 * the the return value.
 		 *
-		 * The proposed grounding is given in the 'gnds' map, in which
-		 * the keys are variable names, and the values are the proposed
-		 * groundings for the free variables occuring in the evaluatable
-		 * term.
+		 * The return value follows the same convention as all the other
+		 * callbacks: 'true' accepts the grounding, and the search for the
+		 * rest of the pattern continues, while 'false' rejects the
+		 * grounding, and forces a backtrack.
 		 */
-		virtual bool evaluate_link(const Handle& virt,
-		                           const std::map<Handle,Handle>& gnds) = 0; 
-
-		/**
-		 * Called when a complete grounding to all clauses is found.
-		 * Should return false to search for more solutions; or return
-		 * true to terminate search.  (Just as in all the other callbacks,
-		 * a return value of `true` means that the proposed grounding is
-		 * acceptable. The engine is designed to halt once an acceptable
-		 * solution has been found; thus, in order to force it to search
-		 * for more, a return value of false is needed.)
-		 */
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln) = 0;
+		virtual bool evaluate_sentence(const Handle& eval,
+		                      const std::map<Handle,Handle>& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -202,6 +212,18 @@ class PatternMatchCallback
 		                                   const Handle& grnd) = 0;
 
 		/**
+		 * Called when a complete grounding for all clauses is found.
+		 * Should return false to search for more solutions; or return
+		 * true to terminate search.  (Just as in all the other callbacks,
+		 * a return value of `true` means that the proposed grounding is
+		 * acceptable. The engine is designed to halt once an acceptable
+		 * solution has been found; thus, in order to force it to search
+		 * for more, a return value of false is needed.)
+		 */
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &term_soln) = 0;
+
+		/**
 		 * Called whenever the incoming set of an atom is to be explored.
 		 * This callback allows the search space to be prioritized, by
 		 * returning (all or some of) the incoming set in some sorted
@@ -230,37 +252,8 @@ class PatternMatchCallback
 		 */
 		virtual void pop(void) {}
 
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys how the variable declarations in a BindLink were
-		 * decoded.  The argument contains nothing more than a map
-		 * holding the type restrictions, if any, on each variable that
-		 * was declared in the VariableList bound to the pattern. The
-		 * map allows a fast lookup by variable name, to find any of
-		 * it's type restrictions.
-		 */
-		virtual void set_type_restrictions(const VariableTypeMap& tm) {}
-
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys a list of all of the evaluatable terms in the pattern.
-		 * By "evaluatable", it is meant any term that does not have a
-		 * fixed TruthValue, but rather has a truth value computed
-		 * dynamically, at runtime. Currently, such terms are any
-		 * EvaluationLink that contains a GroundedPredicateNode or any
-		 * link that inherits from a VirtualLink.  If the callbacks make
-		 * match decisions based on TruthValues, then these terms will
-		 * typically need to be evaluated during the search.
-		 */
-		virtual void set_evaluatable_terms(const std::set<Handle>&) {}
-
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys a list of all of the links in the search pattern
-		 * that contain ("hold") evaluatable terms in them. See above
-		 * for the definition of an "evaluatable term".
-		 */
-		virtual void set_evaluatable_holders(const std::set<Handle>&) {}
+		virtual const std::set<Type>& get_connectives(void)
+		{ static const std::set<Type> _empty; return _empty; }
 
 		/**
 		 * Called to initiate the search. This callback is responsible
@@ -276,8 +269,8 @@ class PatternMatchCallback
 		 * through) the return values of all the others.
 		 */
 		virtual bool initiate_search(PatternMatchEngine *,
-		                             const std::set<Handle> &vars,
-		                             const std::vector<Handle> &clauses) = 0;
+		                             const Variables&,
+		                             const Pattern&) = 0;
 };
 
 } // namespace opencog

@@ -37,6 +37,7 @@ void BindLink::init(void)
 
 	// Remainder of the init is just like in the SatisfactionLink
 	setup_sat_body();
+	_pat.redex_name = "anonymous BindLink";
 }
 
 BindLink::BindLink(const HandleSeq& hseq,

@@ -89,15 +89,9 @@ const HandleSeq& BetaRedex::get_args(void) const
 }
 
 /// Return the matching arguments from the lambda
-const HandleSeq& BetaRedex::get_local_args(void) const
+const Variables& BetaRedex::get_local_args(void) const
 {
 	return get_definition()->get_variables();
-}
-
-/// Same as above, b ut an unordered set
-const std::set<Handle>& BetaRedex::get_local_argset(void) const
-{
-	return get_definition()->get_varset();
 }
 
 /// Get the definition (the body) of the function (without renaming the

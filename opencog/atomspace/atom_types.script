@@ -37,6 +37,8 @@ SUBSET_LINK <- ORDERED_LINK
 
 // Boolean set operations, logical constants
 // The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
+// These are used by the pattern match to perform boolean combinations
+// of predicates.
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
@@ -49,6 +51,19 @@ SEQUENTIAL_AND_LINK <- ORDERED_LINK
 // to find clauses that may or may not be present: clauses that are
 // optionally present.
 ABSENT_LINK <- UNORDERED_LINK
+
+// The 'intuitionist logic' version of OR_LINK is 'multiple choice'
+// (the 'axiom of choice', by terrible abuse of terminology).  The
+// ChoiceLink states that a choice must be made.  Here, it is explicitly
+// an exclusive choice: you can only choose one of the alternatives.
+// The alternatives are just that: alternatives. They are not true/false
+// valued; they're simply options on a menu. Pick one.  It is an ordered
+// link, in the sense that the first choice might be preferable.
+//
+// Currently, the only reason this exists is for the pattern matcher;
+// you use it to say "match this graph or this graph or this graph".
+//
+CHOICE_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
@@ -142,6 +157,13 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // FreeLinks may be open or closed; they are closed terms if they
 // have no free variables in them.
+//
+// XXX TODO -- Review and possibly remove. FreeLinks were introduced for
+// the pattern matcher, to simplify the handling of expressions with
+// free variables in them (by pulling out those variables beforehand, at
+// link-creation time, rather than at runtime). However, due to
+// shared-libary conflicts, the FreeLink cannot currently be used in
+// this way.  Thus, its half-finished and currently semi-useless.
 FREE_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -206,3 +228,17 @@ FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
 // Basic arithmetic operators
 PLUS_LINK <- FUNCTION_LINK
 TIMES_LINK <- FUNCTION_LINK
+
+// This is an interesting one. Its a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, if we were using the termiology of ordinary
+// logic).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+DELETE_LINK <- FUNCTION_LINK

@@ -317,18 +317,18 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param negations  the negative clauses
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
-                                const std::set<Handle>& vars,
-                                const HandleSeq& clauses)
+                                const Variables& vars,
+                                const Pattern& pat)
 {
     _search_fail = false;
-    if (not vars.empty())
+    if (not vars.varset.empty())
     {
-        bool found = neighbor_search(pPME, vars, clauses);
+        bool found = neighbor_search(pPME, vars, pat);
         if (not _search_fail) return found;
     }
 
     // Reaching here means no contants, so do some search space reduction here
-    Handle bestClause = clauses[0];
+    Handle bestClause = pat.mandatory[0];
 
     logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
 

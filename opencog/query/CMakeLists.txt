@@ -48,7 +48,7 @@ ENDIF (WIN32)
 INSTALL (FILES
 	Implicator.h
 	Instantiator.h
-	PatternMatch.h
+	Pattern.h
 	PatternMatchCallback.h
 	Satisfier.h
 	DESTINATION "include/${PROJECT_NAME}/query"

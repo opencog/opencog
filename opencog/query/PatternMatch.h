@@ -32,16 +32,14 @@
 
 namespace opencog {
 
-class BindLink;
 class SatisfactionLink;
 
 class PatternMatch
 {
-	friend class BindLink;
 	friend class SatisfactionLink;
 
 	protected:
-		static bool recursive_virtual(PatternMatchCallback *cb,
+		static bool recursive_virtual(PatternMatchCallback& cb,
 		            const std::vector<Handle>& virtuals,
 		            const std::vector<Handle>& negations,
 		            const std::map<Handle, Handle>& var_gnds,

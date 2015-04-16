@@ -76,7 +76,6 @@ tree<std::string> parse_string_tree(const std::string& str)
 namespace std {
 
 std::istream& operator>>(std::istream& in,opencog::tree<std::string>& t)
-    throw (InconsistenceException, std::bad_exception)
 {
     t.clear();
     std::string str, tmp;

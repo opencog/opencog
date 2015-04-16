@@ -63,10 +63,10 @@ public:
 	const string& get_category() const;
 	Handle get_handle();
 	Handle get_implicant();
-	Handle get_implicand();
+	HandleSeq get_implicand();
 	int get_cost();
 
-	Rule standardize_apart();
+	Rule gen_standardize_apart(AtomSpace* as);
 
 private:
 	Handle rule_handle_;
@@ -77,7 +77,7 @@ private:
 	// priority
 	int cost_;
 
-	Handle standardize_helper(Handle, std::map<Handle, Handle>&);
+	Handle standardize_helper(AtomSpace* as, Handle, std::map<Handle, Handle>&);
 };
 
 } // ~namespace opencog

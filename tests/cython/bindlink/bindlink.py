@@ -3,8 +3,7 @@ import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                crisp_logic_bindlink, pln_bindlink,\
-                                execute_atom, evaluate_atom
+                                pln_bindlink, execute_atom, evaluate_atom
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 

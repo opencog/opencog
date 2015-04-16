@@ -42,6 +42,7 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
+// #include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -58,9 +59,10 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable(AtomTable* parent)
+AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder)
     : _index_queue(this, &AtomTable::put_atom_into_index)
 {
+    _as = holder;
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
     size = 0;
@@ -297,6 +299,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
+    } else if (DELETE_LINK == atom_type) {
+        // if (NULL == DeleteLinkCast(atom))
+        //     atom = createDeleteLink(*LinkCast(atom));
 /*
     } else if (EVALUATION_LINK == atom_type) {
         if (NULL == EvaluationLinkCast(atom))
@@ -346,6 +351,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createBetaRedex(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
+            } else if (DELETE_LINK == atom_type) {
+                // atom = createDeleteLink(*lll);
 /*
             } else if (EVALUATION_LINK == atom_type) {
                 atom = createEvaluationLink(*lll);

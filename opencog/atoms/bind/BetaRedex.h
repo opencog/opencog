@@ -28,7 +28,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atoms/bind/ScopeLink.h>
-#include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
 {
@@ -111,17 +110,13 @@ public:
 	const HandleSeq& get_args(void) const;
 
 	// Return the arguments of the lambda
-	const HandleSeq& get_local_args(void) const;
-	const std::set<Handle>& get_local_argset(void) const;
+	const Variables& get_local_args(void) const;
 
 	// Return the lambda
 	ScopeLinkPtr get_definition(void) const;
 
 	// Return the substitution of the redex args in the lambda.
 	Handle beta_reduce(void) const;
-
-	//junk
-	void satisfy(PatternMatchCallback*, const HandleSeq&);
 };
 
 typedef std::shared_ptr<BetaRedex> BetaRedexPtr;

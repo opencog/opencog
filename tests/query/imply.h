@@ -41,7 +41,7 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
 	DefaultImplicator impl(as);
 	impl.implicand = limp->getOutgoingAtom(1);
 
-	bl->imply(&impl);
+	bl->imply(impl);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -53,7 +53,7 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
  * Pattern Matcher. Just run the matcher against the indicated
  * variables and clauses, using eh indicated callback.
  */
-static inline void match(PatternMatchCallback* pmcb,
+static inline void match(PatternMatchCallback& pmcb,
                          const std::set<Handle> &vars,
                          const std::vector<Handle> &clauses)
 {

@@ -40,15 +40,15 @@ namespace opencog
  */
 
 /// The DefineLink is used to give a name to a pattern, typically to
-/// a LmbdaLink, a SatisfactionLink or a BindLink.  The DefineLink is
+/// a ScopeLink, a SatisfactionLink or a BindLink.  The DefineLink is
 /// unique, in that, if any other atoms exists with this same name, it
 /// will throw an error!  Thus, only ONE DefineLink with a given name
 /// can exist at a time.
 ///
 /// This class is intended to be used for anything that needs to be
-/// accessed by namea: for, if there were two things with the same name,
+/// accessed by name: for, if there were two things with the same name,
 /// it would be ambiguous as to which to access. (It would not make
-///  sense to access both: would the result of access have 'and'
+/// sense to access both: would the result of access have 'and'
 /// semantics? 'or' semantics ??)  Thus, this exists to define an atom
 /// uniquely.
 ///
@@ -60,7 +60,10 @@ namespace opencog
 /// It is intended that the DefineLink be used with the ComposeLink,
 /// which provides the values for the variables bound by the DefineLink.
 /// That is, the ComposeLink acts like function composition. It does not
-/// catually call, invoke or ground the resulting composition.
+/// actually call, invoke or ground the resulting composition.
+///
+/// Currently, the implementation of ComposeLink is half-finished and
+/// mostly broken.
 class DefineLink : public Link
 {
 protected:

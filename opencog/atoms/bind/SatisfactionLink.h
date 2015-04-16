@@ -86,9 +86,9 @@ public:
 	                 const HandleSeq& clauses);
 
 	// XXX temp hack till thigs get sorted out; remove this method later.
-	const HandleSeq& get_clauses(void) { return _clauses; }
+	const Pattern& get_pattern(void) { return _pat; }
 
-	bool satisfy(PatternMatchCallback *) const;
+	bool satisfy(PatternMatchCallback&) const;
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

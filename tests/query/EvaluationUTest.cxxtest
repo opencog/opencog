@@ -68,6 +68,7 @@ public:
 	void tearDown(void);
 
 	void test_eval(void);
+	void test_logic(void);
 };
 
 void EvaluationUTest::tearDown(void)
@@ -119,4 +120,38 @@ void EvaluationUTest::test_eval(void)
 	Handle two = eval->eval_h("(cog-bind (two-arcs))");
 	printf ("two: found:\n%s\n", two->toShortString().c_str());
 	TS_ASSERT_EQUALS(2, as->getArity(two));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Evaluation boolean logic unit test.
+ */
+void EvaluationUTest::test_logic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
+	load_scm_files_from_config(*as);
+
+	Handle four = eval->eval_h("(cog-bind (four-not))");
+	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, as->getArity(four));
+
+	Handle two = eval->eval_h("(cog-bind (two-or))");
+	printf ("two-or: found:\n%s\n", two->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(two));
+
+	Handle three = eval->eval_h("(cog-bind (three-nor))");
+	printf ("three-nor: found:\n%s\n", three->toShortString().c_str());
+	TS_ASSERT_EQUALS(3, as->getArity(three));
+
+	Handle fancy = eval->eval_h("(cog-bind (two-fancy))");
+	printf ("two-fancy: found:\n%s\n", fancy->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(fancy));
+
+	// Both the searches should return the same two (the first two)
+	TS_ASSERT_EQUALS(two, fancy);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

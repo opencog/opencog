@@ -37,9 +37,9 @@ namespace opencog
 
             FuzzyPatternMatchCB(AtomSpace* as);
 
-            virtual bool initiate_search(PatternMatchEngine* pme,
-                                        const std::set<Handle>& vars,
-                                        const std::vector<Handle>& clauses);
+            virtual bool initiate_search(PatternMatchEngine*,
+                                        const Variables&,
+                                        const Pattern&);
             virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink);
             virtual bool node_match(const Handle& pNode, const Handle& gNode);
             virtual bool grounding(const std::map<Handle, Handle>& var_soln,

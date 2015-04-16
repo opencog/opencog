@@ -7,26 +7,24 @@
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
 #include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
-#include <opencog/guile/load-file.h>
 
 using namespace opencog;
 
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
 	ForwardChainer * fc_;
+	SchemeEval* eval_;
 	AtomSpace * as_;
-	const std::string find_node_test1;
+
 public:
 	ForwardChainerUTest()
 	{
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
+		eval_ = new SchemeEval(as_);
 
 		// Disable the AF mechanism during testing!
 		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
@@ -34,14 +32,12 @@ public:
 		             "opencog/atomspace/core_types.scm, "
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
-		config().set("MODULES", "opencog/query/libQueryModule.so");
-		cogserver().loadModules();
 		cogserver().loadSCMModules();
-		load_scm_files_from_config(*as_);
 		fc_ = new ForwardChainer(as_);
 	}
 	~ForwardChainerUTest() {
 		delete as_;
+		delete eval_;
 	}
 	void test_do_chain();
 };
@@ -54,11 +50,15 @@ void ForwardChainerUTest::test_do_chain()
 	// InheritanceLink B C
 	// |-
 	// InheritanceLink A C
-	Handle A = as_->addNode(CONCEPT_NODE, "A"),
-		B = as_->addNode(CONCEPT_NODE, "B"),
-		C = as_->addNode(CONCEPT_NODE, "C"),
-		AB = as_->addLink(INHERITANCE_LINK, A, B),
-		BC = as_->addLink(INHERITANCE_LINK, B, C);
+	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
+		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
+		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
+		AB = eval_->eval_h("(InheritanceLink (stv 0.9 0.9)"
+		                   "    (ConceptNode \"A\")"
+		                   "    (ConceptNode \"B\"))"),
+		BC = eval_->eval_h("(InheritanceLink (stv 0.8 0.9)"
+		                   "    (ConceptNode \"B\")"
+		                   "    (ConceptNode \"C\"))");
 
 	// Run forward chainer (and remove problematic rules)
 	DefaultForwardChainerCB dfc(as_);

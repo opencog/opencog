@@ -1,7 +1,7 @@
 /*
  * DefineLink.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -41,7 +41,7 @@ void DefineLink::init(const HandleSeq& oset)
    oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
 	if (0 < ename.size())
 		throw InvalidParamException(TRACE_INFO,
-			"This is already defined; remoce before redfining!");
+			"This is already defined; remove before redfining!");
 
 	_definition = ScopeLinkCast(oset[1]);
 	if (NULL == _definition)

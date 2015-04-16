@@ -26,6 +26,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 
+using namespace opencog;
+
 PLNCommons::PLNCommons(AtomSpace * as) :
         as_(as)
 {
@@ -51,9 +53,8 @@ Handle PLNCommons::create_quoted(Handle himplicant)
     return hquoted;
 }
 
-Handle PLNCommons::create_bindLink(
-        Handle himplicant, bool vnode_is_typedv)
-                throw (opencog::InvalidParamException)
+Handle PLNCommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
+    throw (opencog::InvalidParamException)
 {
     if (!LinkCast(himplicant)) {
         throw InvalidParamException(TRACE_INFO, "Input must be a link type ");

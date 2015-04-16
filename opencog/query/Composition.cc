@@ -75,37 +75,17 @@ TODO:
 
 void PatternMatchEngine::push_redex(void)
 {
-	_stack_redex_name.push(_redex_name);
-	_stack_bound_vars.push(_bound_vars);
-	_stack_cnf_clauses.push(_cnf_clauses);
-	_stack_mandatory.push(_mandatory);
-	_stack_optionals.push(_optionals);
-	_stack_evaluatable.push(_evaluatable);
-	_stack_connectivity_map.push(_connectivity_map);
+	_stack_variables.push(_varlist);
+	_stack_pattern.push(_pat);
 }
 
 void PatternMatchEngine::pop_redex(void)
 {
-	_redex_name = _stack_redex_name.top();
-	_stack_redex_name.pop();
+	_varlist = _stack_variables.top();
+	_stack_variables.pop();
 
-	_bound_vars = _stack_bound_vars.top();
-	_stack_bound_vars.pop();
-
-	_cnf_clauses = _stack_cnf_clauses.top();
-	_stack_cnf_clauses.pop();
-
-	_mandatory = _stack_mandatory.top();
-	_stack_mandatory.pop();
-
-	_optionals = _stack_optionals.top();
-	_stack_optionals.pop();
-
-	_evaluatable = _stack_evaluatable.top();
-	_stack_evaluatable.pop();
-
-	_connectivity_map = _stack_connectivity_map.top();
-	_stack_connectivity_map.pop();
+	_pat = _stack_pattern.top();
+	_stack_pattern.pop();
 }
 
 bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
@@ -150,20 +130,14 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 			"Expecting SatisfactionLink, got %s",
 				hsat->toString().c_str());
 
-	const std::set<Handle>& local_vars(sat_link->get_varset());
-	const HandleSeq& local_clauses(sat_link->get_clauses());
-
 	push_redex();
-	clear_redex(cpl->get_name());
-	_bound_vars = local_vars;
-	_cnf_clauses = local_clauses;
-	_mandatory = local_clauses;
-	// TODO: handle optionals, and virtuals too.
+	_varlist = &sat_link->get_variables();
+	_pat = &sat_link->get_pattern();
 
 	// To explore this redex, we've got to translate the current
 	// traversal state into the "local frame". Do this by tranlsating
 	// (masquerading) any grounded variables we may have so far.
-	const HandleSeq& local_args(cpl->get_local_args());
+	const Variables& local_args(cpl->get_local_args());
 	const HandleSeq& redex_args(cpl->get_args());
 
 	clause_stacks_push();
@@ -177,23 +151,23 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 		// Relabel (masquerade) the grounded vars.
 		auto iter = var_grounding.find(redex_args[i]);
 		if (iter == var_grounding.end()) continue;
-		local_grounding.insert({local_args[i], iter->second});
+		local_grounding.insert({local_args.varseq[i], iter->second});
 	}
 	var_grounding = local_grounding;
 
-	if (1 != _cnf_clauses.size())
+	if (1 != _pat->cnf_clauses.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Redex can currently handle only one clause!");
 
 	// Since there is just a single clause, just compare it as a tree
 	// But first, we do have to set up curr root, etc, otherwise even
 	// the tre compare goes wonky...
-	curr_root = _cnf_clauses[0];
+	curr_root = _pat->cnf_clauses[0];
 	curr_term_handle = curr_root;
 	clause_accepted = false;
 	curr_soln_handle = var_grounding[curr_term_handle];
 
-	Handle hp(_cnf_clauses[0]);
+	Handle hp(_pat->cnf_clauses[0]);
 	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
 
 #if 0
@@ -239,7 +213,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	clause_stacks_pop();
 	for (size_t i=0; i< sz; i++)
 	{
-		auto iter = local_grounding.find(local_args[i]);
+		auto iter = local_grounding.find(local_args.varseq[i]);
 		if (iter != local_grounding.end())
 			var_grounding.insert({redex_args[i], iter->second});
 	}

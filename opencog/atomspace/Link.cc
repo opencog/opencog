@@ -80,11 +80,9 @@ std::string Link::toShortString(std::string indent)
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    Arity arity = getArity();
-    for (Arity i = 0; i < arity; i++) {
-        AtomPtr a(_outgoing[i]);
-        answer << a->toShortString(more_indent);
-    }
+    for (const Handle& h : _outgoing)
+        answer << h->toShortString(more_indent);
+
     answer << indent << ") ; [" << _uuid << "]\n";
     return answer.str();
 }
@@ -105,10 +103,9 @@ std::string Link::toString(std::string indent)
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    for (int i = 0; i < getArity(); i++) {
-        AtomPtr a(_outgoing[i]);
-        answer += a->toString(more_indent);
-    }
+    for (const Handle& h : _outgoing)
+        answer += h->toString(more_indent);
+
     answer += indent + ") ; [" + 
             std::to_string(_uuid).c_str() + "]\n";
     return answer;

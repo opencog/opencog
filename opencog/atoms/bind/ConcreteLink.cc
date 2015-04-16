@@ -35,14 +35,15 @@ using namespace opencog;
 
 void ConcreteLink::init(void)
 {
+	_pat.redex_name = "anonymous ConcreteLink";
 	ScopeLink::init(_outgoing);
 	unbundle_clauses(_body);
-	validate_clauses(_varset, _clauses);
-	extract_optionals(_varset, _clauses);
+	validate_clauses(_varlist.varset, _pat.clauses);
+	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// check to make sure there are no virtual clauses.
 	HandleSeq concs, virts;
-	unbundle_virtual(_varset, _cnf_clauses,
+	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 concs, virts);
 	if (0 < virts.size())
 	{
@@ -54,15 +55,15 @@ void ConcreteLink::init(void)
 	// the (only) component is sorted into connection-order.
    std::vector<HandleSeq> comps;
    std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varset, _cnf_clauses, comps, comp_vars);
+	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
 
 	// throw error if more than one component
 	check_connectivity(comps);
 
 	// This puts them into connection-order.
-	_cnf_clauses = comps[0];
+	_pat.cnf_clauses = comps[0];
 
-	make_connectivity_map(_cnf_clauses);
+	make_connectivity_map(_pat.cnf_clauses);
 }
 
 // Special ctor for use by SatisfactionLink; we are given
@@ -78,19 +79,19 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	// not be using the substitute method, I don't think. If we need it,
 	// then the API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
-	_varset = vars;
+	_varlist.varset = vars;
 	for (const Handle& v : vars)
 	{
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_typemap.insert(*it);
+			_varlist.typemap.insert(*it);
 	}
 
 	// Next, the body... there no _body for lambda. The compo is the
 	// _cnf_clauses; we have to reconstruct the optionals.  We cannot
-	// use extract_optionals becuase opts have een stripped already.
+	// use extract_optionals because opts have been stripped already.
 
-	_cnf_clauses = compo;
+	_pat.cnf_clauses = compo;
 	for (const Handle& h : compo)
 	{
 		bool h_is_opt = false;
@@ -98,21 +99,22 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 		{
 			if (is_atom_in_tree(opt, h))
 			{
-				_optionals.insert(opt);
-				_clauses.push_back(opt);
+				_pat.optionals.insert(opt);
+				_pat.clauses.push_back(opt);
 				h_is_opt = true;
 				break;
 			}
 		}
 		if (not h_is_opt)
-			_mandatory.push_back(h);
+			_pat.mandatory.push_back(h);
 	}
 
 	// The rest is easy: the evaluatables and the connection map
 	HandleSeq concs, virts;
-	unbundle_virtual(_varset, _cnf_clauses,
+	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 concs, virts);
-	make_connectivity_map(_cnf_clauses);
+	make_connectivity_map(_pat.cnf_clauses);
+	_pat.redex_name = "Unpacked component of a virtual link";
 }
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
@@ -174,12 +176,12 @@ void ConcreteLink::unbundle_clauses(const Handle& hbody)
 	Type t = hbody->getType();
 	if (AND_LINK == t)
 	{
-		_clauses = LinkCast(hbody)->getOutgoingSet();
+		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
 	}
 	else
 	{
 		// There's just one single clause!
-		_clauses.push_back(hbody);
+		_pat.clauses.push_back(hbody);
 	}
 }
 
@@ -270,13 +272,13 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 					"NotLink and AbsentLink can have an arity of one only!");
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
-			_optionals.insert(inv);
-			_cnf_clauses.push_back(inv);
+			_pat.optionals.insert(inv);
+			_pat.cnf_clauses.push_back(inv);
 		}
 		else
 		{
-			_mandatory.push_back(h);
-			_cnf_clauses.push_back(h);
+			_pat.mandatory.push_back(h);
+			_pat.cnf_clauses.push_back(h);
 		}
 	}
 }
@@ -328,8 +330,8 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
-			_evaluatable_terms.insert(sh);
-			add_to_map(_in_evaluatable, sh, sh);
+			_pat.evaluatable_terms.insert(sh);
+			add_to_map(_pat.in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
@@ -337,7 +339,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgpn.holders)
-			_evaluatable_holders.insert(sh);
+			_pat.evaluatable_holders.insert(sh);
 
 		// Subclasses of VirtualLink, e.g. GreaterThanLink, which
 		// are essentially a kind of EvaluationLink holding a GPN
@@ -347,9 +349,9 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 		// because its a link...
 		for (const Handle& sh : fgtl.varset)
 		{
-			_evaluatable_terms.insert(sh);
-			_evaluatable_holders.insert(sh);
-			add_to_map(_in_evaluatable, sh, sh);
+			_pat.evaluatable_terms.insert(sh);
+			_pat.evaluatable_holders.insert(sh);
+			add_to_map(_pat.in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
@@ -357,7 +359,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
-			_evaluatable_holders.insert(sh);
+			_pat.evaluatable_holders.insert(sh);
 
 		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
 		// TimesLink are executable. They get treated by the
@@ -367,9 +369,9 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 
 		for (const Handle& sh : feol.varset)
 		{
-			_executable_terms.insert(sh);
-			_executable_holders.insert(sh);
-			add_to_map(_in_executable, sh, sh);
+			_pat.executable_terms.insert(sh);
+			_pat.executable_holders.insert(sh);
+			add_to_map(_pat.in_executable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
@@ -377,7 +379,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 				is_virtual = true;
 		}
 		for (const Handle& sh : feol.holders)
-			_executable_holders.insert(sh);
+			_pat.executable_holders.insert(sh);
 
 		if (is_virtual)
 			virtual_clauses.push_back(clause);
@@ -398,7 +400,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
  */
 void ConcreteLink::make_connectivity_map(const HandleSeq& component)
 {
-	for (const Handle& h : _cnf_clauses)
+	for (const Handle& h : _pat.cnf_clauses)
 	{
 		make_map_recursive(h, h);
 	}
@@ -406,12 +408,12 @@ void ConcreteLink::make_connectivity_map(const HandleSeq& component)
 	// Save some minor amount of space by erasing those atoms that
 	// participate in only one clause. These atoms cannot be used
 	// to determine connectivity between clauses, and so are un-needed.
-	auto it = _connectivity_map.begin();
-	auto end = _connectivity_map.end();
+	auto it = _pat.connectivity_map.begin();
+	auto end = _pat.connectivity_map.end();
 	while (it != end)
 	{
 		if (it->second.size() == 1)
-			it = _connectivity_map.erase(it);
+			it = _pat.connectivity_map.erase(it);
 		else
 			it++;
 	}
@@ -419,7 +421,7 @@ void ConcreteLink::make_connectivity_map(const HandleSeq& component)
 
 void ConcreteLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_connectivity_map[h].push_back(root);
+	_pat.connectivity_map[h].push_back(root);
 
 	LinkPtr l(LinkCast(h));
 	if (l)
@@ -457,33 +459,34 @@ void ConcreteLink::check_connectivity(
 
 /* ================================================================= */
 
-void ConcreteLink::debug_print(const char* tag) const
+void ConcreteLink::debug_print(void) const
 {
 	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n", tag);
+	printf("\nRedex '%s' has following clauses:\n",
+	       _pat.redex_name.c_str());
 	int cl = 0;
-	for (const Handle& h : _mandatory)
+	for (const Handle& h : _pat.mandatory)
 	{
 		printf("Mandatory %d:", cl);
-		if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
+		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
 			printf(" (evaluatable)");
-		if (_executable_holders.find(h) != _executable_holders.end())
+		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 			printf(" (executable)");
 		printf("\n");
 		prt(h);
 		cl++;
 	}
 
-	if (0 < _optionals.size())
+	if (0 < _pat.optionals.size())
 	{
 		printf("Predicate includes the following optional clauses:\n");
 		cl = 0;
-		for (const Handle& h : _optionals)
+		for (const Handle& h : _pat.optionals)
 		{
 			printf("Optional clause %d:", cl);
-			if (_evaluatable_holders.find(h) != _evaluatable_holders.end())
+			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
 				printf(" (evaluatable)");
-			if (_executable_holders.find(h) != _executable_holders.end())
+			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 				printf(" (executable)");
 			printf("\n");
 			prt(h);
@@ -494,13 +497,13 @@ void ConcreteLink::debug_print(const char* tag) const
 		printf("No optional clauses\n");
 
 	// Print out the bound variables in the predicate.
-	for (const Handle& h : _varset)
+	for (const Handle& h : _varlist.varset)
 	{
 		if (NodeCast(h))
 			printf("Bound var: "); prt(h);
 	}
 
-	if (_varset.empty())
+	if (_varlist.varset.empty())
 		printf("There are no bound vars in this pattern\n");
 
 	printf("\n");
