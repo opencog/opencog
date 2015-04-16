@@ -9,8 +9,9 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(define my-trans (ConceptNode "My FSM's Transition Rule"))
-(define my-state (AnchorNode "My FSM's Current State"))
+(define my-trans (ConceptNode "My Chain's Transition Rule"))
+(define my-state (AnchorNode "My Chain's Current State"))
+(define my-nexts (AnchorNode "My Chain's Next State"))
 
 ;; The inital state of the FSM.  It starts with 100% probability in this
 ;; state.
@@ -120,7 +121,7 @@
 ;;; XXX UNFINISHED --- this requies some new C++ cod before it can work
 ;;; right. Ask Linsas for the status.
 ;;;
-(define (create-chain chain-name chain-state)
+(define (create-chain-stepper chain-name chain-next chain-state)
 	(BindLink
 		;; We will need to find the current and the next state
 		(VariableList
@@ -143,11 +144,85 @@
 					)
 				)
 			)
-			(AndLink
-				;; ... then adjust the probability...
+			;; ... then adjust the probability...
+			(ListLink
+				chain-next
+				(VariableNode "$next-state")
+			)
+		)
+	)
+)
+
+;;; Create a BindLink that will find a state vector, and delete it.
+;;; After the next chain state is computed, it must be made into the
+;;; current chain state.  This is done in a three-step process:
+;;; 1) delete the current state vector
+;;; 2) copy the next state vector to the current vector
+;;; 3) delete the next state-vector.
+;;; The below implements steps 1 and 3
+(define (create-chain-deleter chain-state)
+	(BindLink
+		(VariableNode "$state")
+		(ImplicationLink
+			;; Find the state vector...
+			(ListLink
+				chain-state
+				(VariableNode "$state")
+			)
+			;; Delete the state vector.
+			(DeleteLink
 				(ListLink
 					chain-state
-					(VariableNode "$next-state")
+					(VariableNode "$state")
+				)
+			)
+		)
+	)
+)
+
+;; Copy a state vector from chain-from to chain-to
+(define (create-chain-copier chain-to chain-from)
+	(BindLink
+		(VariableNode "$state")
+		(ImplicationLink
+			;; Find the copy-from state vector...
+			(ListLink
+				chain-from
+				(VariableNode "$state")
+			)
+			;; Copy it to the copy-to state vector.
+			(ListLink
+				chain-to
+				(VariableNode "$state")
+			)
+		)
+	)
+)
+
+;; Move a state vector from chain-from to chain-to
+;; This combines the copy and delete operation into one.
+;; It should be a bit faster.
+(define (create-chain-move chain-to chain-from)
+	(BindLink
+		(VariableNode "$state")
+		(ImplicationLink
+			;; Find the copy-from state vector...
+			(ListLink
+				chain-from
+				(VariableNode "$state")
+			)
+			(AndLink
+				;; Copy it to the copy-to state vector.
+				(ListLink
+					chain-to
+					(VariableNode "$state")
+				)
+				;; Delete the copy-from state vector
+				(DeleteLink
+					(ListLink
+						chain-from
+						(VariableNode "$state")
+					)
 				)
 			)
 		)
@@ -155,7 +230,7 @@
 )
 
 ;;; Create "my-chain"
-(define my-chain (create-chain my-trans my-state))
+(define my-stepper (create-chain-stepper my-trans my-nexts my-state))
 
 ;;; Take one step.
 (cog-prob my-chain)
