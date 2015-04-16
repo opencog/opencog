@@ -30,6 +30,7 @@ public:
 		cogserver().loadSCMModules();
 		config().set("MODULES", "opencog/query/libQueryModule.so");
 
+		logger().setLevel(Logger::DEBUG);
 	}
 	~BackwardChainerUTest() {
 		delete eval_;
@@ -189,11 +190,11 @@ void BackwardChainerUTest::test_filter_rules() {
 // 		                   "    (ConceptNode \"A\")"
 // 		                   "    (ConceptNode \"C\"))");
 
-// 	std::cout << "AtomSpace before do_bd = " << *as_ << std::endl;
+// 	std::cout << "AtomSpace before do_bc = " << *as_ << std::endl;
 
 // 	VarMultimap result = bc_->do_bc(AC);
 
-// 	std::cout << "AtomSpace after do_bd = " << *as_ << std::endl;
+// 	std::cout << "AtomSpace after do_bc = " << *as_ << std::endl;
 
 // 	std::cout << "result:" << std::endl;
 // 	for (const auto& element : result) {
