@@ -95,6 +95,7 @@ class SchemeEval : public GenericEval
 		SCM _saved_outport;
 		bool _in_shell;
 		bool _in_server;
+		int _in_redirect;
 		void capture_port();
 		void redirect_output();
 		void restore_output();

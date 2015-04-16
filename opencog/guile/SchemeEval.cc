@@ -43,10 +43,8 @@ void SchemeEval::init(void)
 	SchemeSmob::init();
 	PrimitiveEnviron::init();
 
-	// Lock to prevent racey setting of the output port.
-	std::lock_guard<std::mutex> lck(init_mtx);
-
 	_in_server = false;
+	_in_redirect = 0;
 	_in_shell = false;
 	_in_eval = false;
 
@@ -80,11 +78,17 @@ void SchemeEval::capture_port(void)
 	if (_in_server) return;
 
 	// Lock to prevent racey setting of the output port.
+	// XXX FIXME This lock is not needed, because in guile 2.2,
+	// at least, every thread has its own output port, and so its
+	// impossible for two different threads to compete to set the
+	// same outport.  Not to sure about guile-2.0, though... so
+	// I'm leaving the lock in, for now. Its harmless.
 	std::lock_guard<std::mutex> lck(init_mtx);
 
 	// Try again, under the lock this time.
 	if (_in_server) return;
 	_in_server = true;
+	_in_redirect = 1;
 
 	// When running in the cogserver, this pipe will become the output
 	// port.  Scheme code will be writing into one end of it, while, in a
@@ -111,6 +115,10 @@ void SchemeEval::capture_port(void)
 /// per-thread semantics.
 void SchemeEval::redirect_output(void)
 {
+	_in_redirect++;
+	if (1 < _in_redirect) return;
+	capture_port();
+
 	// Output ports for side-effects.
 	_saved_outport = scm_current_output_port();
 	_saved_outport = scm_gc_protect_object(_saved_outport);
@@ -120,6 +128,9 @@ void SchemeEval::redirect_output(void)
 
 void SchemeEval::restore_output(void)
 {
+	_in_redirect --;
+	if (0 < _in_redirect) return;
+
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
@@ -572,6 +583,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_input_line += expr;
 
+	redirect_output();
 	_caught_error = false;
 	_pending_input = false;
 	error_msg.clear();
@@ -586,6 +598,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	_rc = scm_gc_protect_object(_rc);
 
 	atomspace = SchemeSmob::ss_get_env_as("do_eval");
+	restore_output();
 
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
@@ -737,10 +750,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 	// If we are running from the cogserver shell, capture all output
 	if (_in_shell)
-	{
-		capture_port();
 		redirect_output();
-	}
 
 	_caught_error = false;
 	error_msg.clear();
