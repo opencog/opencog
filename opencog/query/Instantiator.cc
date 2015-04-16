@@ -1,7 +1,7 @@
 /*
  * Instantiator.cc
  *
- * Copyright (C) 2009, 2014 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *

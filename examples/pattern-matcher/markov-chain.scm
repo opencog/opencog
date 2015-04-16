@@ -8,12 +8,16 @@
 ;
 ; The run this, you probably need to do this:
 ;
-; export LTDL_LIBRARY_PATH=build/opencog/guile:build/opencog/query
-; guile -L build -L opencog/scm
+; OCDIR=home/home/yourname/opencog
+; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
 ;
+; Add the following to your ~/.guile file:
 ; (add-to-load-path "/home/yourname/opencog/build")
 ; (add-to-load-path "/home/yourname/opencog/opencog/scm")
 ; (add-to-load-path ".")
+;
+; Start guile:
+; guile
 ;
 ; and then load this file:
 ; (load-from-path "markov-chain.scm")
@@ -44,7 +48,7 @@
 ;; Each rule is labelled with the "my-fsm", so that rules for
 ;; different FSM's do not clash with one-another.  A ConextLink is used
 ;; because that will allow this example to generalize: Context's are
-;; usually used to  express conditional probabilities, so that 
+;; usually used to  express conditional probabilities, so that
 ;;
 ;;     Context  <TV>
 ;;         A
@@ -55,7 +59,7 @@
 ;; of the machine, and B the the next state of theh machine, so that P(B|A)
 ;; is the probability of transitioning to state B give that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
-;; 
+;;
 
 ; Transition from initial to green with 90% proability.
 (ContextLink (stv 0.9 1)
