@@ -166,6 +166,25 @@
 	)
 )
 
+;;; Get the probability on atom. The probability is assumed to be stroed
+;;; in the "mean" component of a SimpleTruthValue.
+(define (get-prob atom)
+	(assoc-ref (cog-tv->alist (cog-tv atom)) 'mean))
+
+;;; Return true if the TV on the atom is the default TV
+
+;;; Define a function to accumulate the probabilities
+;;; It takes as input three atoms: PB, PBA and PA. The truth values on
+;;; the last two correspond to P(B|A) (the probability of the state
+;;; transition to B, given state A) and P(A) (the probability of being
+;;; in state A).  The probability of B is then accumulated:
+;;; P(B) += P(B|A) * P(A)
+(define (accum-probability PB PBA PA)
+	;; get the probability PA
+	(define pa (get-prob PA))
+	(define pba (get-prob PBA))
+)
+
 ;;; Create a BindLink that will find a state vector, and delete it.
 ;;; After the next chain state is computed, it must be made into the
 ;;; current chain state.  This is done in a three-step process:
