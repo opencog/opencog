@@ -87,64 +87,58 @@ in a ListLink.
 
 In the backward chaining inference we are interested in either truth value fulfillment query or variable fulfillment query.  The current implementation does
 the later where a variable containing link is passed as an argument and the backward chainer tries to find grounding for the variable.  The entry point 
-for the backward chainer is the `do_bc function`. A pseudo code representation would look like
- 
- 		vector<map<Handle,HandleSeq>> inference_list
- 		
- 		function map<var,soln> do_bc(target) 
-    		HandleSeq kb_result = query_knowledge_base(target) //try to find grounding via pattern matching
-    	if kb_result is empty
-    		HandleSeq rules = query_rule_base(target)
-    		if rules is not empty
-    			rule = rules[0]
-    			inference_list.push(unify(target,implicand(rule))) //map variables in the target to matching nodes in the rule( which might be variables)
-    			map<var,soln> solution = backward_chain(implicand,rule)
-				inference_list.push(solution)
-    		else
-    			return empty_soln
-    	
-    	function map<var,soln> backward_chain(target,rule)
-    		root_logical_link = get_root_logical_link(rule) //see if the rule has logical connectors (right now AND and OR)
-    		if root_logical_link = null
-    			implicand = outgoing_set(rule)[0] 
-    			return do_bc(implicand)
-    		//build a tree of the the logical links and premises( premises could by themselves be a logical link) as a map	
-    		map<Handle, HandleSeq> logical_link_premise_map = get_logical_link_premises_map(rule)
-			
-			map<Handle, map<Handle, HandleSeq>> premise_var_ground_map
-			HandleSeq visited_logical_link
-			HandleSeq evaluated_premises
-			visited_logical_link.push_back(root_logical_link); //start from the root
+for the backward chainer is the `do_full_chain` or the `do_step` function.
 
-			//go down deep until a logical link maps only to set of premises in the logical_link_premise_map object
-			//e.g start from (and x y) instead of (and (and x y) x) and start backward chaining  from there. i.e bottom up.
-			while visited_logical_link is not empty
-				logical_link = visited_logical_link.back();
-				visited_logical_link.pop_back();
+Here's how the criminal example located at https://github.com/opencog/opencog/blob/master/opencog/python/pln/examples/backward_chaining/criminal.scm
+is expected to be solved by the Backward Chainer, when only the Modus Ponens rule is present.
 
-				HandleSeq premises = logical_link_premise_map[logical_link];
-				Handle llink = get_unvisited_logical_link(premises, evaluated_premises);
-				if llink != null
-					visited_logical_link.push_back(llink)
-					continue
-				for (Handle premise : premises) 
-					p = find premise in evaluated_premise
-					if p == null 
-						var_grounding = do_bc(premise);
-						premise_var_ground_map[premise] = var_grounding
-						evaluated_premises.push_back(premise)	
-		
-				 = join_premise_vgrounding_maps(logical_link,premise_var_ground_map)
-				results.push_back(v) //add to results
-				evaluated_premises.push_back(logical_link)
-			return ground_target_vars(target, results);  //unify vars in target to grounding in results(basically chase the variable pointing variables till there is a grounding or no more map)    		    		
-    	 
-  The backward chainer can be used by calling the cog-bc scheme binding.  For example
-  
-  		(define whose-frog (InheritanceLink (VariableNode "$whosFrog")(ConceptNode "Frog"))) 
-  		(cog-bc whose-frog)
-  		
-  will return all the solution for the variable $whosFrog in a ListLink of ListLinks. I did this thinking of multivariable grounding with multiple solutions for each variable.
+
+```
+t: InhLink $who criminal
+-> kb matched
+
+t: InhLink $x crimainl, InhLink $who criminal
+-> kb match fail
+-> match modus ponens rule
+-> output matched: VarNode $B-1 => InhLink $x criminal
+-> input became: (AndLink (ImpLink (VarNode $A-1) (QuoteLink (InhLink $x criminal))) (VarNode $A-1))
+-> premises selection
+-> none of the premises can be grounded to solve for $x
+-> add to targets
+
+t: (ImpLink (AndLink ...) (InhLink $x criminal)), (AndLink ...), InhLink $x crimnal
+-> no free var
+
+t: (AndLink ...), InhLink $x criminal, InhLink $who criminal
+-> kb match fail
+-> break apart the AndLink
+
+t: InhLink $x American, InhLink $y weapon, EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb matched
+
+t: InhLink $y weapon, EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb matched
+
+t: EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb match sell West $a Nono
+-> got free var, add to target
+
+t: EvaLink sell West $a Nono, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
+-> kb match fail
+-> match modus ponens rule
+-> output matched: VarNode $B-2 => EvaLink sell West $a Nono
+-> input became: (AndLink (ImplicationLink (VarNode $A-2) (QuoteLink (EvaLink sell West $a Nono))) (VarNode $A-2))
+-> premises selection
+-> one of the premises can be grounded by missile@123
+
+and so on...
+
+```
+
+where `t` is the targets stack (left is the front).  Since there's a check where a target will not be readded to the stack
+if all its knowledge base matches are in the inference history or has no free var, persumably the targets stack will
+be cleared and get back to the original target `(InheritanceLink $who criminal)` and finally solve `$who`
+
 
 ##Control policy##
 
