@@ -21,6 +21,10 @@ cdef class Atom(object):
             return self.atomspace.is_valid(self.handle)
         else: return False
 
+    property atomspace:
+        def __get__(self):
+            return self.atomspace
+
     property h:
         def __get__(self): return self.handle
     
@@ -100,9 +104,8 @@ cdef class Atom(object):
     def __richcmp__(a1_, a2_, int op):
         if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
             return NotImplemented
-        cdef Atom a1,  a2
-        a1 = a1_
-        a2 = a2_
+        cdef Atom a1 = a1_
+        cdef Atom a2 = a2_
         
         is_equal = True
         if a1.atomspace != a2.atomspace:

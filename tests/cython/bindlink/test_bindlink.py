@@ -3,9 +3,12 @@ import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                pln_bindlink, execute_atom, evaluate_atom
+                                pln_bindlink, satisfaction_link,\
+                                execute_atom, evaluate_atom
+
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
+from test_helpers.bind_helpers import green_count, red_count, initialize_counts, increment_green, increment_red
 
 __author__ = 'Curtis Faith'
 
@@ -16,6 +19,7 @@ class BindlinkTest(TestCase):
 
     def setUp(self):
         self.atomspace = AtomSpace()
+        print "setUp - atomspace = ", self.atomspace
 
         # Get the config file name in a manner not dependent on the
         # starting working directory.
@@ -126,8 +130,40 @@ class BindlinkTest(TestCase):
         self.assertEquals(atom.type, types.SetLink)
 
     def test_satisfy(self):
-        # XXX TODO implement a test here...
-        pass
+        satisfaction_handle = SatisfactionLink(
+            VariableList(),  # no variables
+            SequentialAndLink(
+                EvaluationLink(
+                    GroundedPredicateNode("py: test_functions.stop_go"),
+                    ListLink(
+                        ConceptNode("green light")
+                    )
+                ),
+                EvaluationLink(
+                    GroundedPredicateNode("py: test_functions.stop_go"),
+                    ListLink(
+                        ConceptNode("green light")
+                    )
+                ),
+                EvaluationLink(
+                    GroundedPredicateNode("py: test_functions.stop_go"),
+                    ListLink(
+                        ConceptNode("red light")
+                    )
+                ),
+                EvaluationLink(
+                    GroundedPredicateNode("py: test_functions.stop_go"),
+                    ListLink(
+                        ConceptNode("traffic ticket")
+                    )
+                )
+            )
+        ).h
+ 
+        result = satisfaction_link(self.atomspace, satisfaction_handle)
+        self.assertTrue(result is not None and result.mean <= 0.5)
+        self.assertEquals(green_count(), 2)
+        self.assertEquals(red_count(), 1)
 
     def test_execute_atom(self):
         result = execute_atom(self.atomspace, 
@@ -144,7 +180,6 @@ class BindlinkTest(TestCase):
                 ConceptNode("two")
             )
         self.assertEquals(result, list_link)
-        pass
 
     def test_evaluate_atom(self):
         result = evaluate_atom(self.atomspace,
