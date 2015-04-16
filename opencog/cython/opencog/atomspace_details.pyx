@@ -52,6 +52,23 @@ cdef class AtomSpace:
         if self.owns_atomspace:
             del self.atomspace
 
+    def __richcmp__(as_1, as_2, int op):
+        if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
+            return NotImplemented
+        cdef AtomSpace atomspace_1 = <AtomSpace>as_1
+        cdef AtomSpace atomspace_2 = <AtomSpace>as_1
+
+        cdef cAtomSpace* c_atomspace_1 = atomspace_1.atomspace
+        cdef cAtomSpace* c_atomspace_2 = atomspace_2.atomspace
+        
+        is_equal = True
+        if c_atomspace_1 != c_atomspace_2:
+            is_equal = False
+        if op == 2: # ==
+            return is_equal
+        elif op == 3: # !=
+            return not is_equal
+
     def add(self, Type t, name=None, out=None, TruthValue tv=None, prefixed=False):
         """ add method that determines exact method to call from type """
         if is_a(t,types.Node):
