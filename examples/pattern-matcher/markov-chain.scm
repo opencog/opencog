@@ -104,6 +104,15 @@
 	)
 )
 
+; Stay in the initial state with probability zero
+(ContextLink (stv 0.0 1)
+	(ConceptNode "initial state")
+	(ListLink
+		my-trans
+		(ConceptNode "initial state")
+	)
+)
+
 ; Transition from green to yellow with 90% probability
 (ContextLink (stv 0.9 1)
 	(ConceptNode "green")
@@ -201,8 +210,8 @@
 				state-trans
 			)
 			;; ... then adjust the probability...
-			(EvaluationLink
-				(GroundedPredicateNode "scm: accum-probability")
+			(ExecutionOutputLink
+				(GroundedSchemaNode "scm: accum-probability")
 				(ListLink
 					next-state
 					state-trans
@@ -250,6 +259,7 @@
 ;;; P(B) += P(B|A) * P(A)
 (define (accum-probability PB PBA PA)
 	(accum-prob PB (* (get-prob PBA) (get-prob PA)))
+	PB
 )
 
 ;; --------------------------------------------------------------------
@@ -334,9 +344,13 @@
 ;; --------------------------------------------------------------------
 ;; Create a utility to show the state probabilities
 
-(define (show-state)
+(define (show-state state-vect)
 	(define (get-tv atom)
-		(cog-tv (ListLink my-state atom)))
+		(cog-tv (ListLink state-vect atom)))
+
+	(display "State vector for ")
+	(display (cog-name state-vect))
+	(newline)
 
 	(display "Initial state: ")
 	(display (get-tv (ConceptNode "initial state")))
@@ -366,9 +380,10 @@
 	(define my-delter (create-chain-deleter my-state))
 	(define my-mover (create-chain-move my-state my-nexts))
 	(cog-bind my-stepper)
+	(show-state my-nexts)
 	(cog-bind my-delter)
 	(cog-bind my-mover)
-	(show-state)
+	(show-state my-state)
 )
 
 ;;; Show the initial state
