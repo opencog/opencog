@@ -179,8 +179,18 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// will be handled correctly for the next BC step
 			for (auto& p : temp_mapping)
 			{
-				implicand_mapping[p.first]
-				        = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
+				// find all variables
+				FindAtoms fv(VARIABLE_NODE);
+				fv.search_set(p.second);
+
+				// wrap a QuoteLink on each variable
+				VarMap quote_mapping;
+				for (auto& h: fv.varset)
+					quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
+
+				Instantiator inst(_garbage_superspace);
+				implicand_mapping[p.first] = inst.instantiate(p.second, quote_mapping);;
+
 				logger().debug("[BackwardChainer] Added "
 				               + implicand_mapping[p.first]->toShortString()
 				               + " to garbage space");
@@ -532,6 +542,7 @@ bool BackwardChainer::unify(const Handle& htarget,
  * Given a target, select a candidate rule.
  *
  * XXX TODO apply selection criteria to select one amongst the matching rules
+ * XXX better implement target selection first before trying to implement this!
  *
  * @param rules   a vector of rules to select from
  * @return        one of the rule
