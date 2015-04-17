@@ -68,6 +68,7 @@ public:
 
     void test_numeric_greater(void);
     void test_scm_greater(void);
+    void test_builtin_greater(void);
 };
 
 void GreaterThanUTest::tearDown(void)
@@ -123,6 +124,29 @@ void GreaterThanUTest::test_scm_greater(void)
     Handle richer_than_susan = eval->eval_h("(scm-than-susan)");
     Handle richer_than_obama = eval->eval_h("(scm-than-obama)");
     Handle richer_than_gates = eval->eval_h("(scm-than-gates)");
+
+    Handle people_richer_than_george = bindlink(as, richer_than_george);
+    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+
+    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
+    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_obama));
+    TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_george));
+    TS_ASSERT_EQUALS(3, as->getArity(people_richer_than_susan));
+}
+// Same test as above, but using the built-in GreaterThanLink
+void GreaterThanUTest::test_builtin_greater(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
+    load_scm_files_from_config(*as);
+
+    Handle richer_than_george = eval->eval_h("(builtin-than-george)");
+    Handle richer_than_susan = eval->eval_h("(builtin-than-susan)");
+    Handle richer_than_obama = eval->eval_h("(builtin-than-obama)");
+    Handle richer_than_gates = eval->eval_h("(builtin-than-gates)");
 
     Handle people_richer_than_george = bindlink(as, richer_than_george);
     Handle people_richer_than_susan = bindlink(as, richer_than_susan);
