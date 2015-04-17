@@ -622,6 +622,10 @@ void SchemeEval::begin_eval()
 std::string SchemeEval::poll_port()
 {
 	std::string rv;
+
+	// drain_output() calls us, and not always in server mode.
+	if (not _in_server) return rv;
+
 #define BUFSZ 1000
 	char buff[BUFSZ];
 	while (1)
