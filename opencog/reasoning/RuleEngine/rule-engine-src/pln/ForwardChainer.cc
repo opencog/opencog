@@ -71,81 +71,106 @@ Logger* ForwardChainer::getLogger()
     return _log;
 }
 
+/**
+ * Does one step forward chaining
+ * @return false if there is not target to explore
+ */
+bool ForwardChainer::step(ForwardChainerCallBack& fcb)
+{
+    PLNCommons pc(_as); //utility class
+
+    if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
+        _log->info(
+                "[ForwardChainer] No current source, forward chaining aborted");
+        return false;
+    }
+
+    _log->info("[ForwardChainer] Next source %s",
+               _fcmem.cur_source_->toString().c_str());
+
+    // Add more premise to hcurrent_source by pattern matching.
+    _log->info("[ForwardChainer] Choose additional premises:");
+    HandleSeq input = fcb.choose_premises(_fcmem);
+    for (Handle h : input) {
+        if (not _fcmem.isin_premise_list(h))
+            _log->info("%s \n", h->toString().c_str());
+    }
+    _fcmem.update_premise_list(input);
+
+    // Choose the best rule to apply.
+    vector<Rule*> rules = fcb.choose_rules(_fcmem);
+    map<Rule*, float> rule_weight;
+    for (Rule* r : rules) {
+        _log->info("[ForwardChainer] Matching rule %s", r->get_name().c_str());
+        rule_weight[r] = r->get_cost();
+    }
+    auto r = pc.tournament_select(rule_weight);
+
+    //! If no rules matches the pattern of the source, choose
+    //! another source if there is, else end forward chaining.
+    if (not r) {
+        auto new_source = fcb.choose_next_source(_fcmem);
+        if (new_source == Handle::UNDEFINED) {
+            _log->info(
+                    "[ForwardChainer] No chosen rule and no more target to choose.Aborting forward chaining.");
+            return false;
+        } else {
+            _log->info(
+                    "[ForwardChainer] No matching rule,attempting with another target %s.",
+                    new_source->toString().c_str());
+            //set source and try another step
+            _fcmem.set_source(new_source);
+            return step(fcb);
+        }
+    }
+
+    _fcmem.cur_rule_ = r;
+
+    //! Apply rule.
+    _log->info("[ForwardChainer] Applying chosen rule %s",
+               r->get_name().c_str());
+    HandleSeq product = fcb.apply_rule(_fcmem);
+
+    _log->info("[ForwardChainer] Results of rule application");
+    for (auto p : product)
+        _log->info("%s", p->toString().c_str());
+    _log->info("[ForwardChainer] adding inference to history");
+    _fcmem.add_rules_product(iteration, product);
+    _log->info(
+            "[ForwardChainer] updating premise list with the inference made");
+    _fcmem.update_premise_list(product);
+
+    return true;
+}
+
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                               Handle hsource/*=Handle::UNDEFINED*/)
 {
-
-    PLNCommons pc(_as);
-
     if (hsource == Handle::UNDEFINED) {
         do_pm();
         return;
-    } else {
-        // Variable fulfillment query.
-        UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource, {
-                VARIABLE_NODE });
-        if (not var_nodes.empty())
-            return do_pm(hsource, var_nodes, fcb);
-        else
-            _fcmem.set_source(hsource);
     }
+    // Variable fulfillment query.
+    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
+                                                      { VARIABLE_NODE });
+    if (not var_nodes.empty())
+        return do_pm(hsource, var_nodes, fcb);
 
-    // Forward chaining on a particular type of atom.
-    int iteration = 0;
-    auto max_iter = cpolicy_loader_->get_max_iter();
-    while (iteration < max_iter /*OR other termination criteria*/) {
-        _log->info("Iteration %d", iteration);
+    auto max_iter = _cpolicy_loader->get_max_iter();
+    while (_iteration < max_iter /*OR other termination criteria*/) {
 
-        if (_fcmem.cur_source_ == Handle::UNDEFINED) {
-            _log->info("No current source, forward chaining aborted");
+        _log->info("Iteration %d", _iteration);
+        if (_iteration == 0)
+            _fcmem.set_source(hsource);
+
+        if (not step(fcb))
             break;
-        }
-
-        _log->info("Next source %s", _fcmem.cur_source_->toString().c_str());
-
-        // Add more premise to hcurrent_source by pattern matching.
-        HandleSeq input = fcb.choose_premises(_fcmem);
-        _fcmem.update_premise_list(input);
-
-        // Choose the best rule to apply.
-        vector<Rule*> rules = fcb.choose_rules(_fcmem);
-        map<Rule*, float> rule_weight;
-        for (Rule* r : rules) {
-            _log->info("Matching rule %s", r->get_name().c_str());
-            rule_weight[r] = r->get_cost();
-        }
-        auto r = pc.tournament_select(rule_weight);
-
-        //! If no rules matches the pattern of the source, choose
-        //! another source if there is, else end forward chaining.
-        if (not r) {
-            auto new_source = fcb.choose_next_source(_fcmem);
-            if (new_source == Handle::UNDEFINED) {
-                _log->info(
-                        "No chosen rule and no more target to choose.Aborting forward chaining.");
-                return;
-            } else {
-                _log->info("No matching rule,attempting with another target.");
-                _fcmem.set_source(new_source);
-                continue;
-            }
-        }
-
-        _log->info("Chosen rule %s", r->get_name().c_str());
-        _fcmem.cur_rule_ = r;
-
-        //! Apply rule.
-        _log->info("Applying chosen rule %s", r->get_name().c_str());
-        HandleSeq product = fcb.apply_rule(_fcmem);
-        _log->info("Results of rule application");
-        for (auto p : product)
-            _log->info("%s", p->toString().c_str());
-        _fcmem.add_rules_product(iteration, product);
-        _fcmem.update_premise_list(product);
 
         //! Choose next source.
+        _log->info("[ForwardChainer] setting next source");
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
-        iteration++;
+
+        _iteration++;
     }
 }
 
@@ -191,7 +216,6 @@ void ForwardChainer::do_pm(const Handle& hsource,
         _fcmem.set_cur_rule(rule);
         _fcmem.add_rules_product(0, impl.result_list);
     }
-
 }
 /**
  * Invokes pattern matcher using each rule declared in the configuration file.
