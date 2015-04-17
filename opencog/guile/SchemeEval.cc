@@ -779,7 +779,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		// set_error_string(SCM_EOL);
 		set_captured_stack(SCM_BOOL_F);
 
-		// ?? Why are we discarding the ouotput??
+		// ?? Why are we discarding the output??
 		drain_output();
 
 		// Stick the guile stack trace into a string. Anyone who called
@@ -1100,6 +1100,28 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 	return evaluator;
 }
 
+void* SchemeEval::c_wrap_set_atomspace(void * vas)
+{
+	AtomSpace* as = (AtomSpace*) vas;
+	SchemeSmob::ss_set_env_as(as);
+	return vas;
+}
+
+/**
+ * Set the current atomspace for this thead.  From this point on, all
+ * scheme code executing in this thread will use this atomspace (unless
+ * it is changed in the course of execution...)
+ */
+void SchemeEval::set_scheme_as(AtomSpace* as)
+{
+	scm_with_guile(c_wrap_set_atomspace, as);
+}
+
+void SchemeEval::init_scheme(void)
+{
+	// XXX FIXME only a subset is needed.
+	SchemeEval sch;
+}
 
 #endif
 

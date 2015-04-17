@@ -128,12 +128,13 @@ class SchemeEval : public GenericEval
 		// Printing of basic types
 		static std::string prt(SCM);
 
+		static void * c_wrap_set_atomspace(void *);
 		AtomSpace* atomspace;
 		int _gc_ctr;
 		bool _in_eval;
 
 	public:
-		SchemeEval(AtomSpace*);
+		SchemeEval(AtomSpace* = NULL);
 		~SchemeEval();
 
 		// The async-output interface.
@@ -161,10 +162,15 @@ class SchemeEval : public GenericEval
 
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }
+
+// Set per-thread global XXX temp hack...
+static void set_scheme_as(AtomSpace*);
+static void init_scheme(void);
 };
 
 // Return per-thread singleton
-SchemeEval* get_evaluator(AtomSpace* as);
+SchemeEval* get_evaluator(AtomSpace*);
+
 
 /** @}*/
 }
