@@ -15,6 +15,8 @@
 ; In either viewpoint, the numbers, which are probabilities, are
 ; stored in the "strength" portion of a SimpleTruthValue.
 ;
+; XXX Right now, this demo is broken/unfinished! It doesn't work! XXX
+;
 ; The run this, you probably need to do this:
 ;
 ; OCDIR=home/home/yourname/opencog
