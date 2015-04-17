@@ -121,21 +121,12 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         if (not r) {
             auto new_source = fcb.choose_next_source(_fcmem);
             if (new_source == Handle::UNDEFINED) {
-<<<<<<< HEAD
-                log_->info("No chosen rule and no more source to choose. "
-                           "Aborting forward chaining.");
-                return;
-            } else {
-                log_->info("No matching rule, attempting with another source.");
-                fcmem_.set_source(new_source);
-=======
                 _log->info(
                         "No chosen rule and no more target to choose.Aborting forward chaining.");
                 return;
             } else {
                 _log->info("No matching rule,attempting with another target.");
                 _fcmem.set_source(new_source);
->>>>>>> Follow naming standard
                 continue;
             }
         }
@@ -196,7 +187,6 @@ void ForwardChainer::do_pm(const Handle& hsource,
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(_as);
         impl.implicand = bl->get_implicand();
-        impl.set_type_restrictions(bl->get_typemap());
         bl->imply(impl);
         _fcmem.set_cur_rule(rule);
         _fcmem.add_rules_product(0, impl.result_list);
@@ -218,7 +208,6 @@ void ForwardChainer::do_pm()
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(_as);
         impl.implicand = bl->get_implicand();
-        impl.set_type_restrictions(bl->get_typemap());
         bl->imply(impl);
         _fcmem.set_cur_rule(rule);
 
