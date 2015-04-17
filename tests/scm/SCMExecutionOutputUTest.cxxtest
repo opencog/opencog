@@ -137,7 +137,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 {
 	AtomSpace* as = &cogserver().getAtomSpace();
-	SchemeEval* ev = get_evaluator(as);
+	SchemeEval* ev = SchemeEval::get_evaluator(as);
 	int counter = 0;
 
 	// Define a Scheme procedure that will be used in the

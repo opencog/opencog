@@ -218,7 +218,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-		SchemeEval* applier = get_evaluator(as);
+		SchemeEval* applier = SchemeEval::get_evaluator(as);
 		return applier->apply_tv(schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,

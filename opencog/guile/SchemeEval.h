@@ -160,6 +160,9 @@ class SchemeEval : public GenericEval
 		Handle apply(const std::string& func, Handle varargs);
 		TruthValuePtr apply_tv(const std::string& func, Handle varargs);
 
+		// Return per-thread singleton
+		static SchemeEval* get_evaluator(AtomSpace* = NULL);
+
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }
 
@@ -168,8 +171,6 @@ static void set_scheme_as(AtomSpace*);
 static void init_scheme(void);
 };
 
-// Return per-thread singleton
-SchemeEval* get_evaluator(AtomSpace*);
 
 
 /** @}*/

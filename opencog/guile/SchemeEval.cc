@@ -1050,23 +1050,21 @@ void * SchemeEval::c_wrap_apply_tv(void * p)
 // delete() is because calling delete() from TLS conflicts with
 // the guile garbage collector, when the thread is destroyed. See
 // the note below.
-static std::map<AtomSpace*, concurrent_stack<SchemeEval*> > pool;
+static concurrent_stack<SchemeEval*> pool;
 static std::mutex pool_mtx;
 
-static SchemeEval* get_from_pool(AtomSpace* as)
+static SchemeEval* get_from_pool(void)
 {
 	std::lock_guard<std::mutex> lock(pool_mtx);
-	concurrent_stack<SchemeEval*> &stk = pool[as];
 	SchemeEval* ev = NULL;
-	if (stk.try_pop(ev)) return ev;
-	return new SchemeEval(as);
+	if (pool.try_pop(ev)) return ev;
+	return new SchemeEval();
 }
 
-static void return_to_pool(AtomSpace* as, SchemeEval* ev)
+static void return_to_pool(SchemeEval* ev)
 {
 	std::lock_guard<std::mutex> lock(pool_mtx);
-	concurrent_stack<SchemeEval*> &stk = pool[as];
-	stk.push(ev);
+	pool.push(ev);
 }
 
 /// Return singleton evaluator, for this thread.
@@ -1080,16 +1078,18 @@ static void return_to_pool(AtomSpace* as, SchemeEval* ev)
 /// then this very same evaluator would be re-entered, corrupting
 /// its own internal state.  If that happened, the result would be
 /// a hard-to-find & fix bug. So instead, we throw.
-SchemeEval* opencog::get_evaluator(AtomSpace* as)
+SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
-	static thread_local AtomSpace* current_as = NULL;
-	static thread_local SchemeEval* evaluator = NULL;
+	static thread_local std::map<AtomSpace*,SchemeEval*> issued;
 
 	// The eval_dtor runs when this thread is destroyed.
 	class eval_dtor {
 		public:
 		~eval_dtor() {
-			if (evaluator) {
+			for (auto ev : issued)
+			{
+				SchemeEval* evaluator = ev.second;
+
 				// It would have been easier to just call delete evaluator
 				// instead of return_to_pool.  Unfortunately, the delete
 				// won't work, because the STL destructor has already run
@@ -1097,18 +1097,21 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 				// calling delete will lead to a crash in c_wrap_finish().
 				// It would be nice if we got called before guile did, but
 				// there is no way in TLS to control execution order...
-				return_to_pool(current_as, evaluator);
-				evaluator = NULL; current_as = NULL;
+				evaluator->atomspace = NULL;
+				return_to_pool(evaluator);
 			}
 		}
 	};
 	static thread_local eval_dtor killer;
 
-	if (current_as != as) {
-		if (evaluator) return_to_pool(current_as, evaluator);
-		current_as = as;
-		evaluator = get_from_pool(as);
-	}
+	auto ev = issued.find(as);
+	if (ev != issued.end())
+		return ev->second;
+
+	SchemeEval* evaluator = get_from_pool();
+	evaluator->atomspace = as;
+	issued[as] = evaluator;
+	return evaluator;
 
 #if 0
 	if (evaluator->recursing())
@@ -1116,8 +1119,9 @@ SchemeEval* opencog::get_evaluator(AtomSpace* as)
 			"Evaluator thread singleton used recursively!");
 #endif
 
-	return evaluator;
 }
+
+/* ============================================================== */
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {

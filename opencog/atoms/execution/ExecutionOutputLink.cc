@@ -235,7 +235,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-		SchemeEval* applier = get_evaluator(as);
+		SchemeEval* applier = SchemeEval::get_evaluator(as);
 		Handle h(applier->apply(schema.substr(pos), args));
 
 		// Exceptions were already caught, before leaving guile mode,
