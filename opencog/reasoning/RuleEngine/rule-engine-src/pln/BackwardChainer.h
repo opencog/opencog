@@ -121,6 +121,7 @@ private:
 	Rule select_rule(const std::vector<Rule>& rules);
 
 	HandleSeq match_knowledge_base(const Handle& htarget, Handle htarget_vardecl, bool check_history, std::vector<VarMap>& vmap);
+	HandleSeq ground_premises(const Handle& htarget, std::vector<VarMap>& vmap);
 	bool unify(const Handle& htarget, const Handle& hmatch, Handle htarget_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent_varlist, const std::set<Handle>& varset);
