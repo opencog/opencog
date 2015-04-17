@@ -77,7 +77,7 @@ void BackwardChainer::do_full_chain()
 
 		i++;
 		// debug quit
-		if (i == 10)
+		if (i == 20)
 			break;
 	}
 }
@@ -230,10 +230,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			logger().debug("Checking permises " + h->toShortString());
 
 			bool need_bc = false;
-			// XXX TODO!! this is wrong, it should not just match the premises, but
-			// instead apply the Rule to forward chain (otherwise it won't generate
-			// the Rule's output
-			HandleSeq grounded_premises = match_knowledge_base(h, Handle::UNDEFINED, false, vmap_list);
+			HandleSeq grounded_premises = ground_premises(h, vmap_list);
 
 			if (grounded_premises.size() == 0)
 				need_bc = true;
@@ -485,6 +482,35 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 	}
 
 	return results;
+}
+
+HandleSeq BackwardChainer::ground_premises(const Handle& htarget, std::vector<VarMap>& vmap)
+{
+	Handle premises = htarget;
+
+	if (_logical_link_types.count(premises->getType()) == 1)
+	{
+		HandleSeq sub_premises;
+		HandleSeq oset = LinkCast(htarget)->getOutgoingSet();
+
+		for (const Handle& h : oset)
+		{
+			// ignore premises with no free var
+			if (get_free_vars_in_tree(h).empty())
+				continue;
+
+			sub_premises.push_back(h);
+		}
+
+		if (sub_premises.size() == 1)
+			premises = sub_premises[0];
+		else
+			premises = _garbage_superspace->addLink(htarget->getType(), sub_premises);
+	}
+
+	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
+
+	return match_knowledge_base(premises, Handle::UNDEFINED, false, vmap);
 }
 
 /**
