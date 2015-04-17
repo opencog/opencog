@@ -159,7 +159,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		if (acceptable_rules.empty())
 			return VarMultimap();
 
-		// XXX TODO use all rules found here; this will require branching
 		Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
 
 		Handle himplicant = standardized_rule.get_implicant();
@@ -363,7 +362,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
  * @return                 a vector of matched atoms
  */
 HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
-                                                const Handle& htarget_vardecl,
+                                                Handle htarget_vardecl,
                                                 vector<VarMap>& vmap)
 {
 	if (htarget_vardecl == Handle::UNDEFINED)
@@ -381,7 +380,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
 	               " %s and variables %s",
-	               htarget->toShortString().c_str(), htarget_vardecl->toShortString());
+	               htarget->toShortString().c_str(), htarget_vardecl->toShortString().c_str());
 
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
@@ -434,7 +433,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
- * XXX TODO unify in both direction?
+ * XXX TODO unify in both direction? (maybe not)
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
@@ -446,7 +445,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
  */
 bool BackwardChainer::unify(const Handle& htarget,
                             const Handle& hmatch,
-                            const Handle& htarget_vardecl,
+                            Handle htarget_vardecl,
                             VarMap& result)
 {
 	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString() + " to " + hmatch->toShortString());
@@ -464,13 +463,13 @@ bool BackwardChainer::unify(const Handle& htarget,
 		fv.search_set(temp_htarget);
 
 		HandleSeq vars;
-		for (Handle& h : fv.varset)
+		for (const Handle& h : fv.varset)
 			vars.push_back(h);
 
 		temp_vardecl = temp_space.addAtom(createLink(VARIABLE_LIST, vars));
 	}
 	else
-		temp_vardecl = temp_space.addAtom(htarget_vardecl;)
+		temp_vardecl = temp_space.addAtom(htarget_vardecl);
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
 	BCPatternMatch bcpm(&temp_space);
@@ -490,7 +489,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 	VarMap good_map;
 
 	// go thru each solution, and get the first one that map the whole temp_hmatch
-	// XXX TODO branch on the various groundings
+	// XXX TODO branch on the various groundings?
 	for (size_t i = 0; i < pred_list.size(); ++i)
 	{
 		for (const auto& p : pred_list[i])

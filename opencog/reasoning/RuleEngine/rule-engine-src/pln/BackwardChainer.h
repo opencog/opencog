@@ -121,8 +121,8 @@ private:
 
 	std::vector<Rule> filter_rules(Handle htarget);
 
-	HandleSeq match_knowledge_base(const Handle& htarget, const Handle& htarget_vardecl, std::vector<VarMap>& vmap);
-	bool unify(const Handle& htarget, const Handle& hmatch, const Handle& htarget_vardecl, VarMap& result);
+	HandleSeq match_knowledge_base(const Handle& htarget, Handle htarget_vardecl, std::vector<VarMap>& vmap);
+	bool unify(const Handle& htarget, const Handle& hmatch, Handle htarget_vardecl, VarMap& result);
 
 	Rule select_rule(const std::vector<Rule>& rules);
 
