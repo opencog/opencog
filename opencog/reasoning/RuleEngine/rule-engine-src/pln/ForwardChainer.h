@@ -40,9 +40,9 @@ private:
     friend class ::ForwardChainerUTest;
     JsonicControlPolicyParamLoader* cpolicy_loader_;
     string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
-    AtomSpace * as_;
-    FCMemory fcmem_;
-    Logger * log_;
+    AtomSpace * _as;
+    FCMemory _fcmem;
+    Logger * _log;
     /**
      * initialize config methods
      */

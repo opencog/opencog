@@ -34,7 +34,7 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-        as_(as), fcmem_(as_)
+        _as(as), _fcmem(_as)
 {
     if (conf_path != "")
         _conf_path = conf_path;
@@ -48,34 +48,34 @@ ForwardChainer::~ForwardChainer()
 
 void ForwardChainer::init()
 {
-    cpolicy_loader_ = new JsonicControlPolicyParamLoader(as_, _conf_path);
+    cpolicy_loader_ = new JsonicControlPolicyParamLoader(_as, _conf_path);
     cpolicy_loader_->load_config();
-    fcmem_.search_in_af_ = cpolicy_loader_->get_attention_alloc();
-    fcmem_.rules_ = cpolicy_loader_->get_rules();
-    fcmem_.cur_rule_ = nullptr;
+    _fcmem.search_in_af_ = cpolicy_loader_->get_attention_alloc();
+    _fcmem.rules_ = cpolicy_loader_->get_rules();
+    _fcmem.cur_rule_ = nullptr;
 
     // Provide a logger
-    log_ = NULL;
+    _log = NULL;
     setLogger(new opencog::Logger("forward_chainer.log", Logger::FINE, true));
 }
 
 void ForwardChainer::setLogger(Logger* log)
 {
-    if (log_)
-        delete log_;
-    log_ = log;
+    if (_log)
+        delete _log;
+    _log = log;
 }
 
 Logger* ForwardChainer::getLogger()
 {
-    return log_;
+    return _log;
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                               Handle hsource/*=Handle::UNDEFINED*/)
 {
 
-    PLNCommons pc(as_);
+    PLNCommons pc(_as);
 
     if (hsource == Handle::UNDEFINED) {
         do_pm();
@@ -87,31 +87,31 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         if (not var_nodes.empty())
             return do_pm(hsource, var_nodes, fcb);
         else
-            fcmem_.set_source(hsource);
+            _fcmem.set_source(hsource);
     }
 
     // Forward chaining on a particular type of atom.
     int iteration = 0;
     auto max_iter = cpolicy_loader_->get_max_iter();
     while (iteration < max_iter /*OR other termination criteria*/) {
-        log_->info("Iteration %d", iteration);
+        _log->info("Iteration %d", iteration);
 
-        if (fcmem_.cur_source_ == Handle::UNDEFINED) {
-            log_->info("No current source, forward chaining aborted");
+        if (_fcmem.cur_source_ == Handle::UNDEFINED) {
+            _log->info("No current source, forward chaining aborted");
             break;
         }
 
-        log_->info("Next source %s", fcmem_.cur_source_->toString().c_str());
+        _log->info("Next source %s", _fcmem.cur_source_->toString().c_str());
 
         // Add more premise to hcurrent_source by pattern matching.
-        HandleSeq input = fcb.choose_premises(fcmem_);
-        fcmem_.update_premise_list(input);
+        HandleSeq input = fcb.choose_premises(_fcmem);
+        _fcmem.update_premise_list(input);
 
         // Choose the best rule to apply.
-        vector<Rule*> rules = fcb.choose_rules(fcmem_);
+        vector<Rule*> rules = fcb.choose_rules(_fcmem);
         map<Rule*, float> rule_weight;
         for (Rule* r : rules) {
-            log_->info("Matching rule %s", r->get_name().c_str());
+            _log->info("Matching rule %s", r->get_name().c_str());
             rule_weight[r] = r->get_cost();
         }
         auto r = pc.tournament_select(rule_weight);
@@ -119,32 +119,41 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //! If no rules matches the pattern of the source, choose
         //! another source if there is, else end forward chaining.
         if (not r) {
-            auto new_source = fcb.choose_next_source(fcmem_);
+            auto new_source = fcb.choose_next_source(_fcmem);
             if (new_source == Handle::UNDEFINED) {
+<<<<<<< HEAD
                 log_->info("No chosen rule and no more source to choose. "
                            "Aborting forward chaining.");
                 return;
             } else {
                 log_->info("No matching rule, attempting with another source.");
                 fcmem_.set_source(new_source);
+=======
+                _log->info(
+                        "No chosen rule and no more target to choose.Aborting forward chaining.");
+                return;
+            } else {
+                _log->info("No matching rule,attempting with another target.");
+                _fcmem.set_source(new_source);
+>>>>>>> Follow naming standard
                 continue;
             }
         }
 
-        log_->info("Chosen rule %s", r->get_name().c_str());
-        fcmem_.cur_rule_ = r;
+        _log->info("Chosen rule %s", r->get_name().c_str());
+        _fcmem.cur_rule_ = r;
 
         //! Apply rule.
-        log_->info("Applying chosen rule %s", r->get_name().c_str());
-        HandleSeq product = fcb.apply_rule(fcmem_);
-        log_->info("Results of rule application");
+        _log->info("Applying chosen rule %s", r->get_name().c_str());
+        HandleSeq product = fcb.apply_rule(_fcmem);
+        _log->info("Results of rule application");
         for (auto p : product)
-            log_->info("%s", p->toString().c_str());
-        fcmem_.add_rules_product(iteration, product);
-        fcmem_.update_premise_list(product);
+            _log->info("%s", p->toString().c_str());
+        _fcmem.add_rules_product(iteration, product);
+        _fcmem.update_premise_list(product);
 
         //! Choose next source.
-        fcmem_.set_source(fcb.choose_next_source(fcmem_));
+        _fcmem.set_source(fcb.choose_next_source(_fcmem));
         iteration++;
     }
 }
@@ -160,14 +169,14 @@ void ForwardChainer::do_pm(const Handle& hsource,
                            const UnorderedHandleSet& var_nodes,
                            ForwardChainerCallBack& fcb)
 {
-    DefaultImplicator impl(as_);
+    DefaultImplicator impl(_as);
     impl.implicand = hsource;
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
-    fcmem_.set_source(hsource);
-    Handle hvar_list = as_->addLink(VARIABLE_LIST, vars);
-    Handle hclause = as_->addLink(AND_LINK, hsource);
+    _fcmem.set_source(hsource);
+    Handle hvar_list = _as->addLink(VARIABLE_LIST, vars);
+    Handle hclause = _as->addLink(AND_LINK, hsource);
 
     // Run the pattern matcher, find all patterns that satisfy the
     // the clause, with the given variables in it.
@@ -175,21 +184,22 @@ void ForwardChainer::do_pm(const Handle& hsource,
     sl->satisfy(impl);
 
     // Update result
-    fcmem_.add_rules_product(0, impl.result_list);
+    _fcmem.add_rules_product(0, impl.result_list);
 
     // Delete the AND_LINK and LIST_LINK
-    as_->removeAtom(hvar_list);
-    as_->removeAtom(hclause);
+    _as->removeAtom(hvar_list);
+    _as->removeAtom(hclause);
 
-    // !Additionally, find applicable rules and apply.
-    vector<Rule*> rules = fcb.choose_rules(fcmem_);
+    //!Additionally, find applicable rules and apply.
+    vector<Rule*> rules = fcb.choose_rules(_fcmem);
     for (Rule* rule : rules) {
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(as_);
+        DefaultImplicator impl(_as);
         impl.implicand = bl->get_implicand();
+        impl.set_type_restrictions(bl->get_typemap());
         bl->imply(impl);
-        fcmem_.set_cur_rule(rule);
-        fcmem_.add_rules_product(0, impl.result_list);
+        _fcmem.set_cur_rule(rule);
+        _fcmem.add_rules_product(0, impl.result_list);
     }
 
 }
@@ -199,28 +209,29 @@ void ForwardChainer::do_pm(const Handle& hsource,
 void ForwardChainer::do_pm()
 {
     //! Do pattern matching using the rules declared in the declaration file
-    log_->info(
+    _log->info(
             "Forward chaining on the entire atomspace with rules declared in %s",
             _conf_path.c_str());
-    vector<Rule*> rules = fcmem_.get_rules();
+    vector<Rule*> rules = _fcmem.get_rules();
     for (Rule* rule : rules) {
-        log_->info("Applying rule %s on ", rule->get_name().c_str());
+        _log->info("Applying rule %s on ", rule->get_name().c_str());
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(as_);
+        DefaultImplicator impl(_as);
         impl.implicand = bl->get_implicand();
+        impl.set_type_restrictions(bl->get_typemap());
         bl->imply(impl);
-        fcmem_.set_cur_rule(rule);
+        _fcmem.set_cur_rule(rule);
 
-        log_->info("OUTPUTS");
+        _log->info("OUTPUTS");
         for (auto h : impl.result_list)
-            log_->info("%s", h->toString().c_str());
+            _log->info("%s", h->toString().c_str());
 
-        fcmem_.add_rules_product(0, impl.result_list);
+        _fcmem.add_rules_product(0, impl.result_list);
     }
 
 }
 
 HandleSeq ForwardChainer::get_chaining_result()
 {
-    return fcmem_.get_result();
+    return _fcmem.get_result();
 }
