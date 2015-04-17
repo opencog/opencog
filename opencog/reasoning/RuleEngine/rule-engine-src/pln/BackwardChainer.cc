@@ -77,7 +77,7 @@ void BackwardChainer::do_full_chain()
 
 		i++;
 		// debug quit
-		if (i == 5)
+		if (i == 10)
 			break;
 	}
 }
@@ -136,7 +136,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	std::vector<VarMap> kb_vmap;
 
 	// Else, either try to ground, or backward chain
-	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED, kb_vmap);
+	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED, true, kb_vmap);
 
 	if (kb_match.empty())
 	{
@@ -214,7 +214,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 		// Find all matching premises
 		std::vector<VarMap> vmap_list;
-		HandleSeq possible_premises = match_knowledge_base(himplicant, hvardecl, vmap_list);
+		HandleSeq possible_premises = match_knowledge_base(himplicant, hvardecl, false, vmap_list);
 
 		logger().debug("%d possible permises", possible_premises.size());
 
@@ -230,7 +230,13 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			logger().debug("Checking permises " + h->toShortString());
 
 			bool need_bc = false;
-			HandleSeq grounded_premises = match_knowledge_base(h, Handle::UNDEFINED, vmap_list);
+			// XXX TODO!! this is wrong, it should not just match the premises, but
+			// instead apply the Rule to forward chain (otherwise it won't generate
+			// the Rule's output
+			HandleSeq grounded_premises = match_knowledge_base(h, Handle::UNDEFINED, false, vmap_list);
+
+			if (grounded_premises.size() == 0)
+				need_bc = true;
 
 			// Check each grounding to see if any has no variable
 			for (size_t i = 0; i < grounded_premises.size(); ++i)
@@ -278,6 +284,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			for (Handle& h : sub_premises)
 				to_be_added_to_targets.push(h);
 		}
+
+		logger().debug("[BackwardChainer] %d new targets to be added", to_be_added_to_targets.size());
 
 		if (not to_be_added_to_targets.empty())
 		{
@@ -379,10 +387,12 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
  * @param htarget          the atom to pattern match against
  * @param htarget_vardecl  the typed VariableList of the variables in htarget
  * @param vmap             an output list of mapping for variables in htarget
+ *
  * @return                 a vector of matched atoms
  */
 HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
                                                 Handle htarget_vardecl,
+                                                bool check_history,
                                                 vector<VarMap>& vmap)
 {
 	// Get all VariableNodes (unquoted)
@@ -446,7 +456,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 			}
 
 			// don't want matched clause already in inference history
-			if (_inference_history.count(p.second) == 1)
+			if (check_history && _inference_history.count(p.second) == 1)
 			{
 				logger().debug("[BackwardChainer] matched clause in history");
 				break;
