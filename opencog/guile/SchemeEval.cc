@@ -579,7 +579,15 @@ void SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 	// Set global atomspace variable in the execution environment.
-	SchemeSmob::ss_set_env_as(atomspace);
+	AtomSpace* saved_as = NULL;
+	if (atomspace)
+	{
+		saved_as = SchemeSmob::ss_get_env_as("do_eval");
+		if (saved_as != atomspace)
+			SchemeSmob::ss_set_env_as(atomspace);
+		else
+			saved_as = NULL;
+	}
 
 	_input_line += expr;
 
@@ -597,8 +605,10 @@ void SchemeEval::do_eval(const std::string &expr)
 	                      SchemeEval::preunwind_handler_wrapper, this);
 	_rc = scm_gc_protect_object(_rc);
 
-	atomspace = SchemeSmob::ss_get_env_as("do_eval");
 	restore_output();
+
+	if (saved_as)
+		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
@@ -750,7 +760,15 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	per_thread_init();
 
 	// Set global atomspace variable in the execution environment.
-	SchemeSmob::ss_set_env_as(atomspace);
+	AtomSpace* saved_as = NULL;
+	if (atomspace)
+	{
+		saved_as = SchemeSmob::ss_get_env_as("do_scm_eval");
+		if (saved_as != atomspace)
+			SchemeSmob::ss_set_env_as(atomspace);
+		else
+			saved_as = NULL;
+	}
 
 	// If we are running from the cogserver shell, capture all output
 	if (_in_shell)
@@ -769,6 +787,9 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	// Restore the outport
 	if (_in_shell)
 		restore_output();
+
+	if (saved_as)
+		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (_caught_error)
 	{
@@ -791,8 +812,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		free(str);
 		return SCM_EOL;
 	}
-
-	atomspace = SchemeSmob::ss_get_env_as("do_scm_eval");
 
 	// Get the contents of the output port, and log it
 	if (_in_server and logger().isInfoEnabled())
