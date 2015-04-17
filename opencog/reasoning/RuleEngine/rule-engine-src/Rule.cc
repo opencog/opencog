@@ -88,6 +88,16 @@ Handle Rule::get_handle()
 }
 
 /**
+ * Get the typed variable list of the Rule.
+ *
+ * @return the VariableList or the lone VariableNode
+ */
+Handle Rule::get_vardecl()
+{
+	return LinkCast(rule_handle_)->getOutgoingSet()[0];
+}
+
+/**
  * Get the implicant (input) of the rule defined in a BindLink.
  *
  * @return the Handle of the implicant

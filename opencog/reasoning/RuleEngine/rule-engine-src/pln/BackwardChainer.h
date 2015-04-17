@@ -113,23 +113,21 @@ public:
 
 	VarMultimap& get_chaining_result();
 
-	AtomSpace* _as;
-
 private:
 
 	VarMultimap do_bc(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
-
-	HandleSeq match_knowledge_base(Handle htarget, std::vector<VarMap>& vmap);
-	bool unify(const Handle& htarget, const Handle& match, VarMap& output);
-
 	Rule select_rule(const std::vector<Rule>& rules);
 
+	HandleSeq match_knowledge_base(const Handle& htarget, Handle htarget_vardecl, std::vector<VarMap>& vmap);
+	bool unify(const Handle& htarget, const Handle& hmatch, Handle htarget_vardecl, VarMap& result);
 
+	Handle gen_sub_varlist(const Handle& parent_varlist, const std::set<Handle>& varset);
+
+	AtomSpace* _as;
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
-	VarMultimap _chaining_result;
 
 	// a map of a premise, to a map of its variables mapping
 	map<Handle, VarMultimap> _inference_history;

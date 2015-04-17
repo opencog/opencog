@@ -24,6 +24,7 @@
 #ifndef RULE_H_
 #define RULE_H_
 
+#include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <boost/operators.hpp>
@@ -62,6 +63,7 @@ public:
 	string& get_category();
 	const string& get_category() const;
 	Handle get_handle();
+	Handle get_vardecl();
 	Handle get_implicant();
 	HandleSeq get_implicand();
 	int get_cost();
