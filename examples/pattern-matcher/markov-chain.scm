@@ -6,6 +6,15 @@
 ; that the transitions are specified probabilistically; mutiple
 ; transitions may occur; each transition has a fixed probability.
 ;
+; Another way to look at this is an example of matrix multiplication.
+; The state of a Markov chain is a vector, and the state transtions
+; can be understood as a matrix (a Markov matrix, where the columns
+; sum to one).  One iteration of the probabilistic state machine
+; corresponds to one matrix multiplication.
+;
+; In either viewpoint, the numbers, which are probabilities, are
+; stored in the "strength" portion of a SimpleTruthValue.
+;
 ; The run this, you probably need to do this:
 ;
 ; OCDIR=home/home/yourname/opencog
@@ -30,17 +39,33 @@
 
 (load-from-path "utilities.scm")
 
+;; Define three objects: a name for the current state vector,
+;; a name for the next state vector, and a name for the state
+;; transition matrix.
 (define my-trans (ConceptNode "My Chain's Transition Rule"))
 (define my-state (AnchorNode "My Chain's Current State"))
 (define my-nexts (AnchorNode "My Chain's Next State"))
 
-;; The inital state of the FSM.  It starts with 100% probability in this
-;; state.
-(ListLink
+;; The inital state of the Markov chain.  It starts with 100%
+;; probability in this state.
+(ListLink (stv 1 1)
 	my-state
 	(ConceptNode "initial state")
 )
+(ListLink (stv 0 1)
+	my-state
+	(ConceptNode "green")
+)
+(ListLink (stv 0 1)
+	my-state
+	(ConceptNode "yellow")
+)
+(ListLink (stv 0 1)
+	my-state
+	(ConceptNode "red")
+)
 
+;; --------------------------------------------------------------------
 ;; The set of allowed state transistions.  Its a triangular cycle,
 ;; of green goint to yellow going to red going back to green.
 ;; The intial state transitions into green (and is never visted again).
@@ -133,11 +158,12 @@
 	)
 )
 
-
-;;; Create a BindLink that can take an Markov Chain with the name
-;;; `fsm-name` and stores it's state in `fsm-state`.  After the
-;;; BindLink is created, each invocation of it will advance the
-;;; Markov chain one step.
+;; --------------------------------------------------------------------
+;;; Create a BindLink that can take a Markov Chain with the name
+;;; `chain-name` and two state vectors: `chain-state` and `chain-next`
+;;; Each invocation of the BindLink will take the current state vector,
+;;; multiply it by the transition matrix, and store the result in the
+;;; `chain-next` vector.
 ;;;
 (define (create-chain-stepper chain-name chain-next chain-state)
 	(define curr-state
@@ -187,7 +213,15 @@
 	)
 )
 
-;;; Get the probability on atom. The probability is assumed to be stroed
+;; --------------------------------------------------------------------
+;; To move from state to state, we must have some way of accumulating
+;; conditional probabilities.  This is done by the `accum-probability`
+;; function, defined at the end of this section.  It accumulates
+;; probability using the standard Bayesian interpretation.  All
+;; the other functions here are helpers, to extract the probability
+;; from a truth value, and to set it.
+
+;;; Get the probability on atom. The probability is assumed to be stored
 ;;; in the "mean" component of a SimpleTruthValue.
 (define (get-prob atom)
 	(assoc-ref (cog-tv->alist (cog-tv atom)) 'mean))
@@ -218,6 +252,7 @@
 	(accum-prob PB (* (get-prob PBA) (get-prob PA)))
 )
 
+;; --------------------------------------------------------------------
 ;;; Create a BindLink that will find a state vector, and delete it.
 ;;; After the next chain state is computed, it must be made into the
 ;;; current chain state.  This is done in a three-step process:
@@ -245,6 +280,7 @@
 	)
 )
 
+;; --------------------------------------------------------------------
 ;; Copy a state vector from chain-from to chain-to
 (define (create-chain-copier chain-to chain-from)
 	(BindLink
@@ -264,6 +300,7 @@
 	)
 )
 
+;; --------------------------------------------------------------------
 ;; Move a state vector from chain-from to chain-to
 ;; This combines the copy and delete operation into one.
 ;; It should be a bit faster.
@@ -294,14 +331,52 @@
 	)
 )
 
-;;; Create "my-chain"
-(define my-stepper (create-chain-stepper my-trans my-nexts my-state))
+;; --------------------------------------------------------------------
+;; Create a utility to show the state probabilities
+
+(define (show-state)
+	(define (get-tv atom)
+		(cog-tv (ListLink my-state atom)))
+
+	(display "Initial state: ")
+	(display (get-tv (ConceptNode "initial state")))
+	(newline)
+
+	(display "Green state: ")
+	(display (get-tv (ConceptNode "green")))
+	(newline)
+
+	(display "Yellow state: ")
+	(display (get-tv (ConceptNode "yellow")))
+	(newline)
+
+	(display "Red state: ")
+	(display (get-tv (ConceptNode "red")))
+	(newline)
+)
+
+;; --------------------------------------------------------------------
+;;; Create a Markov chain stepper.  There are three parts to it.
+;;; The first part multiplies the current state by the transition
+;;; matrix, putting the result into the next-state vector.  The
+;;; second part deletes the current-state vector. The third part
+;;; moves the next-state vector to the current-state.
+(define (take-a-step)
+	(define my-stepper (create-chain-stepper my-trans my-nexts my-state))
+	(define my-delter (create-chain-deleter my-state))
+	(define my-mover (create-chain-move my-state my-nexts))
+	(cog-bind my-stepper)
+	(cog-bind my-delter)
+	(cog-bind my-mover)
+	(show-state)
+)
+
+;;; Show the initial state
+; (show-state)
 
 ;;; Take one step.
-;(cog-bind my-stepper)
+;(take-a-step)
 
 ;;; Take three steps.
 ;;; Try it!
-;(cog-bind my-stepper)
-;(cog-bind my-stepper)
-;(cog-bind my-stepper)
+;(take-a-step)
