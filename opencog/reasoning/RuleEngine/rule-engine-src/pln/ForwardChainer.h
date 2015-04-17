@@ -43,6 +43,7 @@ private:
     AtomSpace * _as;
     FCMemory _fcmem;
     Logger * _log;
+    int iteration = 0;
     /**
      * initialize config methods
      */
