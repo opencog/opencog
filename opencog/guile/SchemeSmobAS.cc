@@ -131,7 +131,7 @@ SCM SchemeSmob::ss_get_as (void)
 /// at them may be deleted by the gc.  This will cause atoms to
 /// disappear, if the user is not careful ...
 ///
-/// Oh, wait: only atomspaces that were interanlly creted (i.e.
+/// Oh, wait: only atomspaces that were interanlly created (i.e.
 /// created by a scheme call) are eligible for deletion.  We may
 /// also be given atomspaces that magically appeared from the outside
 /// world --- we do NOT track those for deletion.
