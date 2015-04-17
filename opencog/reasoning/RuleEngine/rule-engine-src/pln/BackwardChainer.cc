@@ -179,8 +179,11 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// will be handled correctly for the next BC step
 			for (auto& p : temp_mapping)
 			{
-				implicand_mapping[p.first] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
-				logger().debug("[BackwardChainer] Added " + implicand_mapping[p.first]->toShortString() + " to garbage space");
+				implicand_mapping[p.first]
+				        = _garbage_superspace->addAtom(createLink(QUOTE_LINK, p.second));
+				logger().debug("[BackwardChainer] Added "
+				               + implicand_mapping[p.first]->toShortString()
+				               + " to garbage space");
 			}
 
 			logger().debug("[BackwardChainer] Found one implicand's output "
@@ -189,7 +192,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		}
 
 		for (auto& p : implicand_mapping)
-			logger().debug("[BackwardChainer] mapping is " + p.first->toShortString() + " to " + p.second->toShortString());
+			logger().debug("[BackwardChainer] mapping is " + p.first->toShortString()
+			               + " to " + p.second->toShortString());
 
 		// Reverse ground the implicant with the grounding we found from
 		// unifying the implicand
@@ -365,18 +369,20 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
                                                 Handle htarget_vardecl,
                                                 vector<VarMap>& vmap)
 {
+	// Get all VariableNodes (unquoted)
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(htarget);
+
 	if (htarget_vardecl == Handle::UNDEFINED)
 	{
-		// Get all VariableNodes (unquoted)
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(htarget);
-
 		HandleSeq vars;
 		for (auto& h : fv.varset)
 			vars.push_back(h);
 
-		htarget_vardecl = _garbage_superspace->addLink(VARIABLE_LIST, vars);
+		htarget_vardecl = _garbage_superspace->addAtom(createVariableList(vars));
 	}
+	else
+		htarget_vardecl = _garbage_superspace->addAtom(gen_sub_varlist(htarget_vardecl, fv.varset));
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
 	               " %s and variables %s",
@@ -448,7 +454,8 @@ bool BackwardChainer::unify(const Handle& htarget,
                             Handle htarget_vardecl,
                             VarMap& result)
 {
-	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString() + " to " + hmatch->toShortString());
+	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString()
+	               + " to " + hmatch->toShortString());
 
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
@@ -457,19 +464,19 @@ bool BackwardChainer::unify(const Handle& htarget,
 	Handle temp_hmatch = temp_space.addAtom(hmatch);
 	Handle temp_vardecl;
 
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(htarget);
+
 	if (htarget_vardecl == Handle::UNDEFINED)
 	{
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(temp_htarget);
-
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
 
-		temp_vardecl = temp_space.addAtom(createLink(VARIABLE_LIST, vars));
+		temp_vardecl = temp_space.addAtom(createVariableList(vars));
 	}
 	else
-		temp_vardecl = temp_space.addAtom(htarget_vardecl);
+		temp_vardecl = temp_space.addAtom(gen_sub_varlist(htarget_vardecl, fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
 	BCPatternMatch bcpm(&temp_space);
@@ -534,5 +541,30 @@ Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
 	//xxx return random for the purpose of integration testing before going
 	//for a complex implementation of this function
 	return rand_element(rules);
+}
+
+/**
+ * Given a VariableList, generate a new VariableList of only the specific vars
+ *
+ * @param parent_varlist  the original VariableList
+ * @param varset          a set of VariableNodes to be included
+ * @return                the new sublist
+ */
+Handle BackwardChainer::gen_sub_varlist(const Handle& parent_varlist,
+                                        const std::set<Handle>& varset)
+{
+	HandleSeq oset = LinkCast(parent_varlist)->getOutgoingSet();
+	HandleSeq final_oset;
+
+	// for each var, check if it is in varset
+	for (const Handle& h : oset)
+	{
+		Type t = h->getType();
+		if ((VARIABLE_NODE == t && varset.count(h) == 1)
+			or (TYPED_VARIABLE_LINK == t && varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
+			final_oset.push_back(h);
+	}
+
+	return Handle(createVariableList(final_oset));
 }
 
