@@ -216,6 +216,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		std::vector<VarMap> vmap_list;
 		HandleSeq possible_premises = match_knowledge_base(himplicant, hvardecl, vmap_list);
 
+		logger().debug("%d possible permises", possible_premises.size());
+
 		std::stack<Handle> to_be_added_to_targets;
 		VarMultimap results;
 
@@ -225,6 +227,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		{
 			vmap_list.clear();
 
+			logger().debug("Checking permises " + h->toShortString());
+
 			bool need_bc = false;
 			HandleSeq grounded_premises = match_knowledge_base(h, Handle::UNDEFINED, vmap_list);
 
@@ -233,6 +237,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			{
 				Handle& g = grounded_premises[i];
 				VarMap& m = vmap_list[i];
+
+				logger().debug("Checking possible permises grounding " + g->toShortString());
 
 				FindAtoms fv(VARIABLE_NODE);
 				fv.search_set(g);
@@ -419,23 +425,52 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 	for (size_t i = 0; i < var_solns.size(); i++)
 	{
-		// don't want matched clause that is part of a rule
-		if (std::any_of(_rules_set.begin(), _rules_set.end(),
-		                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), pred_solns[i][htarget]); }))
+		HandleSeq i_pred_soln;
+
+		// check for bad mapping
+		for (auto& p : pred_solns[i])
+		{
+			// don't want matched clause that is part of a rule
+			if (std::any_of(_rules_set.begin(), _rules_set.end(),
+			                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), p.second); }))
+			{
+				logger().debug("[BackwardChainer] matched clause in rule");
+				break;
+			}
+
+			// don't want matched clause that is not in the parent _as
+			if (_as->getAtom(p.second) == Handle::UNDEFINED)
+			{
+				logger().debug("[BackwardChainer] matched clause not in _as");
+				break;
+			}
+
+			// don't want matched clause already in inference history
+			if (_inference_history.count(p.second) == 1)
+			{
+				logger().debug("[BackwardChainer] matched clause in history");
+				break;
+			}
+
+			// XXX don't want clause that are already in _targets_stack?
+			// no need? since things on targets stack are in inference history
+
+			i_pred_soln.push_back(p.second);
+		}
+
+		if (i_pred_soln.size() != pred_solns[i].size())
 			continue;
 
-		// don't want matched clause that is not in the parent _as
-		if (_as->getAtom(pred_solns[i][htarget]) == Handle::UNDEFINED)
-			continue;
+		// if the original htarget is multi-clause, wrap the solution with the
+		// same logical link
+		// XXX TODO preserve htarget's order
+		Handle this_result;
+		if (_logical_link_types.count(htarget->getType()) == 1)
+			this_result = _garbage_superspace->addLink(htarget->getType(), i_pred_soln);
+		else
+			this_result = i_pred_soln[0];
 
-		// don't want matched clause already in inference history
-		if (_inference_history.count(pred_solns[i][htarget]) == 1)
-			continue;
-
-		// XXX don't want clause that are already in _targets_stack?
-		// no need? since things on targets stack are in inference history
-
-		results.push_back(pred_solns[i][htarget]);
+		results.push_back(this_result);
 		vmap.push_back(var_solns[i]);
 	}
 
