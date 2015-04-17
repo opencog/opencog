@@ -46,7 +46,7 @@ SchemeShell::SchemeShell(void)
 
 	do_async_output = true;
 
-	evaluator = new SchemeEval();
+	evaluator = SchemeEval::get_evaluator();
 
 	// Set the inital atomspace for this thread.
 	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
@@ -57,7 +57,6 @@ SchemeShell::SchemeShell(void)
 
 SchemeShell::~SchemeShell()
 {
-	if (evaluator) delete evaluator;
 }
 
 /**

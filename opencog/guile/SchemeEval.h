@@ -137,6 +137,9 @@ class SchemeEval : public GenericEval
 		SchemeEval(AtomSpace* = NULL);
 		~SchemeEval();
 
+		// Return per-thread, per-atomspace singleton
+		static SchemeEval* get_evaluator(AtomSpace* = NULL);
+
 		// The async-output interface.
 		void begin_eval();
 		void eval_expr(const std::string&);
@@ -159,9 +162,6 @@ class SchemeEval : public GenericEval
 		// Apply expression to args, returning Handle or TV
 		Handle apply(const std::string& func, Handle varargs);
 		TruthValuePtr apply_tv(const std::string& func, Handle varargs);
-
-		// Return per-thread singleton
-		static SchemeEval* get_evaluator(AtomSpace* = NULL);
 
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }

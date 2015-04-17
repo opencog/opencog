@@ -1067,7 +1067,9 @@ static void return_to_pool(SchemeEval* ev)
 	pool.push(ev);
 }
 
-/// Return singleton evaluator, for this thread.
+/// Return evaluator, for this thread and atomspace combination.
+/// If called with NULL, it will use the current atomspace for
+/// this thread.
 ///
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.

@@ -61,7 +61,7 @@ const char* dbg =
 const char * Parser::alternatives_anchor = "(AnchorNode \"# Viterbi Alternatives\")";
 
 Parser::Parser(Dictionary dict, AtomSpace *as)
-	: _dict(dict), _scm_eval(new SchemeEval(as)), _dict_reader(new LGDictReader(dict, as))
+	: _dict(dict), _scm_eval(SchemeEval::get_evaluator(as)), _dict_reader(new LGDictReader(dict, as))
 {
 	DBG(cout << "=============== Parser ctor ===============" << endl);
 	initialize_state();
@@ -73,7 +73,6 @@ Parser::Parser(Dictionary dict, AtomSpace *as)
 
 Parser::~Parser()
 {
-	delete _scm_eval;
 	delete _dict_reader;
 }
 
