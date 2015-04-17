@@ -134,6 +134,12 @@ class SchemeEval : public GenericEval
 		bool _in_eval;
 
 	public:
+		// Call before first use.
+		static void init_scheme(void);
+
+		// Set per-thread global
+		static void set_scheme_as(AtomSpace*);
+
 		SchemeEval(AtomSpace* = NULL);
 		~SchemeEval();
 
@@ -165,10 +171,6 @@ class SchemeEval : public GenericEval
 
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }
-
-// Set per-thread global XXX temp hack...
-static void set_scheme_as(AtomSpace*);
-static void init_scheme(void);
 };
 
 
