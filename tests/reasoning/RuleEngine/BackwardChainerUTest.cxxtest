@@ -101,7 +101,7 @@ void BackwardChainerUTest::test_unify() {
 
 	Handle hmatch = eval_->eval_h(match);
 	VarMap result;
-	bc_->unify(htarget, hmatch, result);
+	bc_->unify(htarget, hmatch, Handle::UNDEFINED, result);
 
 	for (const auto& kv : result) {
 		std::cout << "Key = " << kv.first->toString()
