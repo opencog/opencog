@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/ConcreteLink.h>
@@ -28,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"

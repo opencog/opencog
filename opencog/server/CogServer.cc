@@ -140,8 +140,8 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
-    SchemeEval* se = new SchemeEval(atomSpace);
-    delete se;
+    SchemeEval::init_scheme();
+    SchemeEval::set_scheme_as(atomSpace);
 #endif // HAVE_GUILE
 #ifdef HAVE_CYTHON
     // Initialize Python.

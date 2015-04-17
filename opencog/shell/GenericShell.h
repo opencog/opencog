@@ -68,6 +68,7 @@ class GenericShell
 		virtual void set_socket(ConsoleSocket *);
 		virtual const std::string& get_prompt(void);
 
+		virtual void thread_init(void);
 		virtual void do_eval(const std::string &expr);
 
 		// Async output handling.

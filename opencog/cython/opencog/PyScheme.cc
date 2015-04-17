@@ -49,7 +49,7 @@ static void check_err(SchemeEval* evaluator, const std::string &s)
 std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-	SchemeEval* evaluator = get_evaluator(&as);
+	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	std::string scheme_return_value = evaluator->eval(s);
 	check_err(evaluator, s);
 	return scheme_return_value;
@@ -62,7 +62,7 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-	SchemeEval* evaluator = get_evaluator(&as);
+	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	Handle scheme_return_value = evaluator->eval_h(s);
 	check_err(evaluator, s);
 	return scheme_return_value;

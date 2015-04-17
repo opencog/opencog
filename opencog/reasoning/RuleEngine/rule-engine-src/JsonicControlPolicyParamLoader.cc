@@ -48,7 +48,7 @@ JsonicControlPolicyParamLoader::JsonicControlPolicyParamLoader(AtomSpace* as,
 {
     cur_read_rule_ = NULL;
     attention_alloc_ = false;
-    scm_eval_ = get_evaluator(as_);
+    scm_eval_ = SchemeEval::get_evaluator(as_);
 }
 
 /**

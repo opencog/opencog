@@ -1,6 +1,12 @@
 ;
 ; Main OpenCog guile module
 ;
+; When this module is loaded from the guile prompt, it sets up all of
+; the opencog infrastructure, including a default atomspace.
+;
+; To use, say this from the guile prompt:
+; (load-modules (opencog))
+;
 
 (define-module (opencog))
 (load-extension "libsmob" "opencog_guile_init")
@@ -8,6 +14,11 @@
 (use-modules (system base compile))
 
 ; Initialze a default atomspace, just to keep things sane...
+; The below is safe, because this module runs at most only once
+; (if invoked from the guile shell, as (load-modules (opencog)) )
+; or zero times, if invoked from the cogserver shell. The cogserver
+; refuses to run this; the cogserver main atomspace is never clobbered.
+;
 (cog-set-atomspace! (cog-new-atomspace))
 
 ; Load a bunch of atom types too ...

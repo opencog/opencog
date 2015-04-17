@@ -40,14 +40,13 @@ using namespace opencog;
  * @param vars   the set of nodes that should be treated as variables
  */
 SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars)
-    : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(new SchemeEval(pAS))
+    : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(SchemeEval::get_evaluator(pAS))
 {
 
 }
 
 SuRealPMCB::~SuRealPMCB()
 {
-    delete m_eval;
 }
 
 /**

@@ -131,7 +131,7 @@ SCM SchemeSmob::ss_get_as (void)
 /// at them may be deleted by the gc.  This will cause atoms to
 /// disappear, if the user is not careful ...
 ///
-/// Oh, wait: only atomspaces that were interanlly creted (i.e.
+/// Oh, wait: only atomspaces that were interanlly created (i.e.
 /// created by a scheme call) are eligible for deletion.  We may
 /// also be given atomspaces that magically appeared from the outside
 /// world --- we do NOT track those for deletion.
@@ -189,8 +189,8 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
-	if (NULL == as)
-		scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
+	// if (NULL == as)
+	//	scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
 	return as;
 }
 
