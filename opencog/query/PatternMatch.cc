@@ -139,8 +139,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	if (0 == comp_var_gnds.size())
 	{
 #ifdef DEBUG
-		dbgprt("Explore one possible combinatoric grounding "
-		       "(var_gnds.size() = %zu, term_gnds.size() = %zu):\n",
+		dbgprt("\nExplore one possible combinatoric grounding "
+		       "(var_gnds.size = %zu, term_gnds.size = %zu):\n",
 			   var_gnds.size(), term_gnds.size());
 		PatternMatchEngine::print_solution(var_gnds, term_gnds);
 #endif
@@ -363,11 +363,26 @@ bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
+#ifdef DEBUG
+	printf("VIRTUAL PATTERN: ====================== "
+	       "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
+	printf("Virtuals are:\n");
+	size_t iii=0;
+	for (const Handle& v : _virtual)
+	{
+		printf("Virtual clause %zu of %zu:\n%s\n", iii, _num_virts,
+		       v->toShortString().c_str());
+		iii++;
+	}
+#endif
+
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
 	{
+		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
+		       i, _num_comps);
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
 		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));

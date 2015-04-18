@@ -68,7 +68,7 @@
 				;; Avoid reporting things we already know.
 				;; Basically, if we already know that person A and B
 				;; are the same person, then lets not deduce it again.
-				(NotLink
+				(AbsentLink
 					(EvaluationLink
 						(PredicateNode "IsSamePerson")
 						(ListLink
