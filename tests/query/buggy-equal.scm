@@ -80,7 +80,9 @@
                         (VariableNode "$B")
                         (VariableNode "$C")
                     )
-                    (InheritanceLink
+                    ; Don't screw-up in-progress searches
+                    ; by using InheritanceLink here.
+                    (ListLink
                         (VariableNode "$A")
                         (VariableNode "$C")
                     )
@@ -154,7 +156,9 @@
                         (VariableNode "$B")
                         (VariableNode "$C")
                     )
-                    (InheritanceLink
+                    ; Don't screw-up in-progress searches
+                    ; by using InheritanceLink here.
+                    (ListLink
                         (VariableNode "$A")
                         (VariableNode "$C")
                     )
