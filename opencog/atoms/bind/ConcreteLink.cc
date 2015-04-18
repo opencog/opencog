@@ -260,7 +260,7 @@ void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
 	for (const Handle& h : component)
 	{
 		Type t = h->getType();
-		if (NOT_LINK == t or ABSENT_LINK == t)
+		if (ABSENT_LINK == t)
 		{
 			LinkPtr lopt(LinkCast(h));
 
