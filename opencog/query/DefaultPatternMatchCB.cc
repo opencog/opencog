@@ -822,6 +822,12 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 
 	Handle gvirt(_instor.instantiate(virt, gnds));
 
+	dbgprt("Enter eval_term CB with virt=\n%s\n",
+	        virt->toShortString().c_str());
+	dbgprt("grounded by gvirt=\n%s\n",
+	        gvirt->toShortString().c_str());
+
+
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
 	// EvaluationLinks should have the structure
@@ -853,6 +859,8 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 
 	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
 
+	dbgprt("eval_term evaluation yeilded tv=%s\n", tvp->toString().c_str());
+
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
 	// wanted, here.
@@ -872,6 +880,9 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                               const std::map<Handle, Handle>& gnds)
 {
+	dbgprt("Enter eval_sentence CB with top=\n%s\n",
+	        top->toShortString().c_str());
+
 	LinkPtr ltop(LinkCast(top));
 	if (NULL == ltop)
 		throw InvalidParamException(TRACE_INFO,
