@@ -15,8 +15,6 @@
 ; In either viewpoint, the numbers, which are probabilities, are
 ; stored in the "strength" portion of a SimpleTruthValue.
 ;
-; XXX Right now, this demo is broken/unfinished! It doesn't work! XXX
-;
 ; The run this, you probably need to do this:
 ;
 ; OCDIR=home/home/yourname/opencog
@@ -277,16 +275,10 @@
 		(VariableNode "$state")
 		(ImplicationLink
 			;; Find the state vector...
-			(ListLink
-				chain-state
-				(VariableNode "$state")
-			)
+			(ListLink chain-state (VariableNode "$state"))
 			;; Delete the state vector.
 			(DeleteLink
-				(ListLink
-					chain-state
-					(VariableNode "$state")
-				)
+				(ListLink chain-state (VariableNode "$state"))
 			)
 		)
 	)
@@ -294,6 +286,12 @@
 
 ;; --------------------------------------------------------------------
 ;; Copy a state vector from chain-from to chain-to
+;; Since the TV's carry the probabilities, they must be copied.
+
+;; Copy TV from second atom to first
+(define (copy-tv b a)
+	(begin (cog-set-tv! b (cog-tv a)) b))
+
 (define (create-chain-copier chain-to chain-from)
 	(BindLink
 		(VariableNode "$state")
@@ -304,9 +302,14 @@
 				(VariableNode "$state")
 			)
 			;; Copy it to the copy-to state vector.
-			(ListLink
-				chain-to
-				(VariableNode "$state")
+			;; We need to use an execution-output link to copy
+			;; the tv values from one to the other.
+			(ExecutionOutputLink
+				(GroundedSchemaNode "scm:copy-tv")
+				(ListLink
+					(ListLink chain-to (VariableNode "$state"))
+					(ListLink chain-from (VariableNode "$state"))
+				)
 			)
 		)
 	)
@@ -318,7 +321,13 @@
 ;; It should be a bit faster.
 (define (create-chain-move chain-to chain-from)
 	(BindLink
-		(VariableNode "$state")
+		; Constrain the allowed types on the variable;
+		; we only want to copy the actual state, and not
+		; (for example) the subgraphs of this link.
+		(TypedVariableLink
+			(VariableNode "$state")
+			(TypeNode "ConceptNode")
+		)
 		(ImplicationLink
 			;; Find the copy-from state vector...
 			(ListLink
@@ -327,16 +336,18 @@
 			)
 			(AndLink
 				;; Copy it to the copy-to state vector.
-				(ListLink
-					chain-to
-					(VariableNode "$state")
+				;; We need to use an execution-output link to copy
+				;; the tv values from one to the other.
+				(ExecutionOutputLink
+					(GroundedSchemaNode "scm:copy-tv")
+					(ListLink
+						(ListLink chain-to (VariableNode "$state"))
+						(ListLink chain-from (VariableNode "$state"))
+					)
 				)
 				;; Delete the copy-from state vector
 				(DeleteLink
-					(ListLink
-						chain-from
-						(VariableNode "$state")
-					)
+					(ListLink chain-from (VariableNode "$state"))
 				)
 			)
 		)
@@ -382,18 +393,20 @@
 	(define my-delter (create-chain-deleter my-state))
 	(define my-mover (create-chain-move my-state my-nexts))
 	(cog-bind my-stepper)
-	(show-state my-nexts)
+	; (show-state my-nexts)
 	(cog-bind my-delter)
 	(cog-bind my-mover)
 	(show-state my-state)
 )
 
 ;;; Show the initial state
-; (show-state)
+; (show-state my-state)
 
 ;;; Take one step.
 ;(take-a-step)
 
 ;;; Take three steps.
 ;;; Try it!
+;(take-a-step)
+;(take-a-step)
 ;(take-a-step)
