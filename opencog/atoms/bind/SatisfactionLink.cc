@@ -52,17 +52,12 @@ void SatisfactionLink::setup_sat_body(void)
 	std::vector<std::set<Handle>> comp_vars;
 	get_connected_components(_varlist.varset, _fixed, comps, comp_vars);
 
-	// If there are no virtuals, and there is only one connected
-	// component, then this is just a single Concrete link; perform
-	// the rest of initialization for just that.  There is a pathological
-	// case where there are no virtuals, but there are multiple
-	// disconnected components.  I think that this is a user-error,
-	// but in fact PLN does have a rule which wants to explore that
-	// combinatoric explosion, on purpose. So we have to allow the
-	// multiple disconnected components for that case.
+	// If there is only one connected component, then this can be handled
+	// during search by a single Concrete link. The multi-clause grounding
+	// mechanism is not required for that case.
 	_num_comps = comps.size();
 	_num_virts = _virtual.size();
-	if (0 == _num_virts and 1 == _num_comps)
+	if (1 == _num_comps)
 	{
 		make_connectivity_map(_pat.cnf_clauses);
 		return;
@@ -70,6 +65,12 @@ void SatisfactionLink::setup_sat_body(void)
 
 	// If we are here, then set up a ConcreteLink for each connected
 	// component.  Use emplace_back to avoid a copy.
+	//
+	// There is a pathological case where there are no virtuals, but
+	// there are multiple disconnected components.  I think that this is
+	// a user-error, but in fact PLN does have a rule which wants to
+	// explore that combinatoric explosion, on purpose. So we have to
+	// allow the multiple disconnected components for that case.
 	_components.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
