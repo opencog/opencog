@@ -41,15 +41,10 @@ void ConcreteLink::init(void)
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
-	// check to make sure there are no virtual clauses.
+	// Locate the black-box clauses.
 	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts);
-	if (0 < virts.size())
-	{
-		throw InvalidParamException(TRACE_INFO,
-			"ConcreteLink must not have virtuals");
-	}
+	                 concs, virts, _pat.black);
 
 	// Check to make sure the graph is connected. As a side-effect,
 	// the (only) component is sorted into connection-order.
@@ -57,7 +52,7 @@ void ConcreteLink::init(void)
    std::vector<std::set<Handle>> comp_vars;
 	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
 
-	// throw error if more than one component
+	// Throw error if more than one component!
 	check_connectivity(comps);
 
 	// This puts them into connection-order.
@@ -112,7 +107,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	// The rest is easy: the evaluatables and the connection map
 	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts);
+	                 concs, virts, _pat.black);
 	make_connectivity_map(_pat.cnf_clauses);
 	_pat.redex_name = "Unpacked component of a virtual link";
 }
@@ -321,11 +316,13 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
                                     const HandleSeq& clauses,
                                     HandleSeq& fixed_clauses,
-                                    HandleSeq& virtual_clauses)
+                                    HandleSeq& virtual_clauses,
+                                    std::set<Handle>& black_clauses)
 {
 	for (const Handle& clause: clauses)
 	{
 		bool is_virtual = false;
+		bool is_black = false;
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
@@ -336,7 +333,10 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
+			{
 				is_virtual = true;
+				is_black = true;
+			}
 		}
 		for (const Handle& sh : fgpn.holders)
 			_pat.evaluatable_holders.insert(sh);
@@ -354,7 +354,7 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 			add_to_map(_pat.in_evaluatable, sh, sh);
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
+			// can be evaluated on the spot. Virtuals are not black.
 			if (2 <= num_unquoted_in_tree(sh, vars))
 				is_virtual = true;
 		}
@@ -376,7 +376,10 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
+			{
 				is_virtual = true;
+				is_black = true;
+			}
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
@@ -385,6 +388,9 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 			virtual_clauses.push_back(clause);
 		else
 			fixed_clauses.push_back(clause);
+
+		if (is_black)
+			black_clauses.insert(clause);
 	}
 }
 

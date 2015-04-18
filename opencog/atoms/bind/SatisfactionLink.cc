@@ -45,9 +45,9 @@ void SatisfactionLink::setup_sat_body(void)
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-                    _fixed, _virtual);
+                    _fixed, _virtual, _pat.black);
 
-	// Split the non virtual clauses into connected components
+	// Split the non-virtual clauses into connected components
 	std::vector<HandleSeq> comps;
 	std::vector<std::set<Handle>> comp_vars;
 	get_connected_components(_varlist.varset, _fixed, comps, comp_vars);

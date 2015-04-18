@@ -80,7 +80,8 @@ protected:
 	void unbundle_virtual(const std::set<Handle>& vars,
 	                      const HandleSeq& clauses,
 	                      HandleSeq& concrete_clauses,
-	                      HandleSeq& virtual_clauses);
+	                      HandleSeq& virtual_clauses,
+	                      std::set<Handle>& black_clauses);
 
 	void check_connectivity(const std::vector<HandleSeq>&);
 
