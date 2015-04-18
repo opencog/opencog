@@ -72,6 +72,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 		void tearDown(void) { as->clear(); }
 
 		void test_bugeq(void);
+		void test_bugalt(void);
 };
 
 void BuggyEqual::setUp(void)
@@ -99,9 +100,25 @@ void BuggyEqual::test_bugeq(void)
 	config().set("SCM_PRELOAD", "tests/query/buggy-equal.scm");
 	load_scm_files_from_config(*as);
 
-	Handle alt = eval->eval_h("(cog-bind pln-alt)");
+	Handle pln = eval->eval_h("(cog-bind pln-rule-deduction)");
+	printf("Deduction results:\n%s\n", pln->toShortString().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(pln));
 
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+/*
+ * NotLink causing weird trouble.
+ */
+void BuggyEqual::test_bugalt(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/buggy-equal.scm");
+	load_scm_files_from_config(*as);
+
+	Handle alt = eval->eval_h("(cog-bind pln-alt)");
 	printf("Alt results:\n%s\n", alt->toShortString().c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(alt));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
