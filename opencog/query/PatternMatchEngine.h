@@ -162,6 +162,7 @@ class PatternMatchEngine
 		bool clause_accepted;
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool, bool, bool);
+		unsigned int thickness(const Handle&, const std::set<Handle>&);
 
 		// --------------------------------------------------
 		// Unordered-link stuff. This needs a major overhaul.

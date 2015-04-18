@@ -1086,9 +1086,33 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	curr_term_handle = Handle::UNDEFINED;
 }
 
-/// Same as above, but with a boolean flag:  if not set, then only the
-/// list of mandatory clauses is considered, else all clauses (mandatory
-/// and optional) are considered.
+// XXX TODO ... Rather than settling for the first one that we find,
+// we should instead look for the "thinnest" one, the one with the
+// smallest incoming set.  That is because the very next thing that
+// we do will be to iterate over the incoming set of "pursue" ... so
+// it could be a huge pay-off to minimize this.
+//
+// In particular, the "thinnest" one is probably the one with the
+// fewest ungrounded variables in it. Thus, if there is just one
+// variable that needs to be grounded, then this can be done in
+// direct fashion; it resembles the concept of "unit propagation"
+// in the DPLL algorithm.
+//
+// If there are two ungrounded variables in a clause, then the
+// "thickness" is the *product* of the sizes of the two incoming
+// sets. Thus, the fewer ungrounded variables, the better.
+unsigned int PatternMatchEngine::thickness(const Handle& clause,
+                                           const std::set<Handle>& live)
+{
+	// If there are only zero or one ungrounded vars, then any clause
+	// will do. Blow this pop stand.
+	if (live.size() < 2) return 1;
+	return 1;
+}
+
+/// Same as above, but with three boolean flags:  if not set, then only
+/// those clauses satsifying the criterion are considered, else all
+/// clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
 bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
@@ -1104,6 +1128,15 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	Handle unsolved_clause(Handle::UNDEFINED);
 	bool unsolved = false;
 	bool solved = false;
+	unsigned int thinnest = UINT_MAX;
+
+	// Make a list of the as-yet ungrounded variables.
+	std::set<Handle> undead;
+	for (const Handle &v : _varlist->varseq)
+	{
+		try { var_grounding.at(v); }
+		catch(...) { undead.insert(v); }
+	}
 
 	// We are looking for a joining atom, one that is shared in common
 	// with the a fully grounded clause, and an as-yet ungrounded clause.
@@ -1144,28 +1177,18 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 			        and (search_black or not is_black(root))
 			        and (search_optionals or not is_optional(root)))
 			{
-				unsolved_clause = root;
-				unsolved = true;
+				unsigned int th = thickness(root, undead);
+				if (th < thinnest)
+				{
+					thinnest = th;
+					unsolved_clause = root;
+					unsolved = true;
+				}
 			}
-			if (solved and unsolved) break;
+			if (solved and unsolved and thinnest < 2) break;
 		}
 
-		// XXX TODO ... Rather than settling for the first one that we find,
-		// we should instead look for the "thinnest" one, the one with the
-		// smallest incoming set.  That is because the very next thing that
-		// we do will be to iterate over the incoming set of "pursue" ... so
-		// it could be a huge pay-off to minimize this.
-		//
-		// In particular, the "thinnest" one is probably the one with the
-		// fewest ungrounded variables in it. Thus, if there is just one
-		// variable that needs to be grounded, then this can be done in
-		// direct fashion; it resembles the concept of "unit propagation"
-		// in the DPLL algorithm.
-		//
-		// If there are two ungrounded variables in a clause, then the
-		// "thickness" is the *product* of the sizes of the two incoming
-		// sets. Thus, the fewer ungrounded variables, the better.
-		if (solved and unsolved) break;
+		if (solved and unsolved and thinnest < 2) break;
 	}
 
 	if (solved and unsolved)
