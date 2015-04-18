@@ -1039,13 +1039,33 @@ bool PatternMatchEngine::do_next_clause(void)
  *
  * The words "solved" and "grounded" are used as synonyms throught the
  * code.
+ *
+ * Additional complications are introduced by the presence of
+ * evaluatable terms, black-box terms, and optional clauses. An
+ * evaluatable term is any term that needs to be evaluated to determine
+ * if it matches: such terms typically do not exist in the atomspace;
+ * they are "virtual", and "exist" only when the evaluation returns
+ * "true". Thus, these can only be grounded after all other possible
+ * clauses are grounded; thus these are saved for last.  It is always
+ * possible to save these for last, because earlier stages have
+ * guaranteed that all of he non-virtual clauses are connected.
+ * Anyway, evaluatables come in two forms: those that can be evaluated
+ * quickly, and those that require a "black-box" evaluation of some
+ * scheme or python code. Of the two, we save "black-box" for last.
+ *
+ * Then afer grounding all of the mandatory clauses (virtual or not),
+ * we look for optional clauses, if any. Again, these might be virtual,
+ * and they might be black...
+ *
+ * Thus, we use a helper function to broaden the search in each case.
  */
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// Optional clauses are grounded only after all the mandatory
-	// ones are done.
-	if (get_next_untried_helper(false)) return;
+	// no virtuals, no black boxes, no optionals.
+	if (get_next_untried_helper(false, false, false)) return;
+	if (get_next_untried_helper(true, false, false)) return;
+	if (get_next_untried_helper(true, true, false)) return;
 
 	// If there are no optional clauses, we are done.
 	if (_pat->optionals.empty())
@@ -1057,7 +1077,9 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// Try again, this time, considering the optional clauses.
-	if (get_next_untried_helper(true)) return;
+	if (get_next_untried_helper(false, false, true)) return;
+	if (get_next_untried_helper(true, false, true)) return;
+	if (get_next_untried_helper(true, true, true)) return;
 
 	// If we are here, there are no more unsolved clauses to consider.
 	curr_root = Handle::UNDEFINED;
@@ -1069,7 +1091,9 @@ void PatternMatchEngine::get_next_untried_clause(void)
 /// and optional) are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
+bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
+                                                 bool search_black,
+                                                 bool search_optionals)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -1115,9 +1139,10 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 			{
 				solved = true;
 			}
-			else if ((issued.end() == issued.find(root)) and
-			         (search_optionals or
-			          (not is_optional(root))))
+			else if ((issued.end() == issued.find(root))
+			        and (search_virtual or not is_evaluatable(root))
+			        and (search_black or not is_black(root))
+			        and (search_optionals or not is_optional(root)))
 			{
 				unsolved_clause = root;
 				unsolved = true;
