@@ -7,9 +7,10 @@ to run the demos here.
 The first set of demos provide a basic introduction to various
 main features.
 
-* simple.scm: a basic introduction to pattern matching.
-* gsn.scm: calling arbitrary functions upon a match.
-* gpn.scm: calling arbitrary functions to decide a match.
+* simple.scm: A basic introduction to pattern matching.
+* gsn.scm: Calling arbitrary functions upon a match.
+* gpn.scm: Calling arbitrary functions to decide a match.
+* sequence.scm: Using GPN's to execute a sequence of tasks.
 
 Some simpler applications showing some things one can do, and how to do
 them.
