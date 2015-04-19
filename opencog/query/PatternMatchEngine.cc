@@ -266,6 +266,25 @@ bool PatternMatchEngine::self_compare(const Handle& hp)
 }
 
 /* ======================================================== */
+
+/// If both are nodes, compare them as such.
+bool PatternMatchEngine::node_compare(const Handle& hp,
+                                      const Handle& hg)
+{
+	// Call the callback to make the final determination.
+	bool match = _pmc.node_match(hp, hg);
+	if (match)
+	{
+		dbgprt("Found matching nodes\n");
+		prtmsg("# pattern: ", hp);
+		prtmsg("# match:   ", hg);
+		if (hp != hg) var_grounding[hp] = hg;
+	}
+	return match;
+}
+
+/* ======================================================== */
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -335,18 +354,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	NodePtr np(NodeCast(hp));
 	NodePtr ng(NodeCast(hg));
 	if (np and ng)
-	{
-		// Call the callback to make the final determination.
-		bool match = _pmc.node_match(hp, hg);
-		if (match)
-		{
-			dbgprt("Found matching nodes\n");
-			prtmsg("# pattern: ", hp);
-			prtmsg("# match:   ", hg);
-			if (hp != hg) var_grounding[hp] = hg;
-		}
-		return match;
-	}
+		return node_compare(hp, hg);
 
 	// If they're not both are links, then it is clearly a mismatch.
 	LinkPtr lp(LinkCast(hp));
@@ -386,9 +394,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// If the pattern is defined elsewhere, not here, then we have
 	// to go to where it is defined, and pattern match things there.
 	if (BETA_REDEX == tp)
-	{
 		return redex_compare(lp, lg);
-	}
 
 	// Let the callback perform basic checking.
 	bool match = _pmc.link_match(lp, lg);
