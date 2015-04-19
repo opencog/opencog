@@ -1163,7 +1163,6 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 		const RootList& rl(_pat->connectivity_map.at(pursue));
 #endif
 
-		unsolved = false;
 		for (const Handle& root : rl)
 		{
 			if ((issued.end() == issued.find(root))
