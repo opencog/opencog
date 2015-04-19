@@ -159,6 +159,8 @@ class PatternMatchEngine
 		                    const LinkPtr&, const LinkPtr&);
 		bool ordered_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
+		bool unorder_compare(const Handle&, const Handle&,
+		                     const LinkPtr&, const LinkPtr&);
 
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);
