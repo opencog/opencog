@@ -570,10 +570,13 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 			match = _pmc.post_link_match(lp, lg);
 			if (match)
 			{
-				solution_pop();
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
 				_perm_state[Unorder(hp, hg)] = mutation;
+
+				// Even the stack, *without* erasing the discovered
+				// grounding.
+				var_solutn_stack.pop();
 				return true;
 			}
 		}
@@ -595,7 +598,7 @@ bool PatternMatchEngine::next_perm(const Handle& hp,
 	try { perm = _perm_state.at(Unorder(hp, hg)); }
 	catch(...)
 	{
-		dbgprt("tree_comp fresh start unordered link\n");
+		dbgprt("tree_comp fresh start unordered link UUID=%lu\n", hp.value());
 		LinkPtr lp(LinkCast(hp));
 		perm = lp->getOutgoingSet();
 		sort(perm.begin(), perm.end());
@@ -802,21 +805,28 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 
 	do {
 		dbgprt("Enter the permutation loop!\n");
+//		solution_push();
 
 		bool found = false;
 		do {
 			solution_push();
+
+			if (_need_perm_push) perm_stack.push(_perm_state);
 
 			if (_need_choice_push) choice_stack.push(_choice_state);
 			bool match = tree_recurse(curr_term_handle, hsoln, CALL_SOLN);
 			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 			_need_choice_push = false;
 
+			if (_need_perm_push) POPSTK(perm_stack, _perm_state);
+			_need_perm_push = false;
+
 			// If no match, then try the next one.
 			if (not match)
 			{
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
+	//			solution_pop();
 				solution_pop();
 				return false;
 			}
@@ -828,9 +838,14 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			solution_pop();
 		} while (0 < next_choice(curr_term_handle, hsoln));
 
-		if (found) return true;
+		if (found)
+		{
+			return true;
+		}
 
+//		solution_pop();
 	} while (have_perm(curr_term_handle, hsoln));
+
 
 	dbgprt("No more unordered permutations\n");
 
@@ -987,6 +1002,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
+			_need_perm_push = true;
 			if (start_sol_up(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
@@ -1020,6 +1036,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			curr_soln_handle = hsoln;
 			solution_push();
 
+			_need_perm_push = true;
 			_need_choice_push = true;
 			curr_term_handle = hi;
 			if (do_term_up(hsoln)) found = true;
@@ -1574,6 +1591,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 	_need_choice_push = false;
+	_need_perm_push = false;
 
 	// graph state
 	_clause_stack_depth = 0;

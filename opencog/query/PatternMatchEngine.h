@@ -109,8 +109,9 @@ class PatternMatchEngine
 		typedef std::map<Choice, size_t> ChoiceState;
 
 		ChoiceState _choice_state;
-		size_t next_choice(const Handle&, const Handle&);
 		bool _need_choice_push;
+
+		size_t next_choice(const Handle&, const Handle&);
 
 		// -------------------------------------------
 		// New Unordered Link suppoprt
@@ -119,6 +120,7 @@ class PatternMatchEngine
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
+		bool _need_perm_push;
 		bool next_perm(const Handle&, const Handle&, Permutation&);
 		bool have_perm(const Handle&, const Handle&);
 
@@ -139,6 +141,7 @@ class PatternMatchEngine
 
 		std::stack<IssuedSet> issued_stack;
 		std::stack<ChoiceState> choice_stack;
+		std::stack<PermState> perm_stack;
 
 		// push, pop and clear these states.
 		void solution_push(void);
