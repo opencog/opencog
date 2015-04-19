@@ -284,6 +284,46 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 }
 
 /* ======================================================== */
+
+/// CHOICE_LINK's are multiple-choice links. As long as we can
+/// can match one of the sub-expressions of the ChoiceLink, then
+/// the ChoiceLink as a whole can be considered to be grounded.
+///
+bool PatternMatchEngine::choice_compare(const Handle& hp,
+                                        const Handle& hg,
+                                        const LinkPtr& lp,
+                                        const LinkPtr& lg)
+{
+	const std::vector<Handle> &osp = lp->getOutgoingSet();
+
+	// _choice_state lets use resume wher we last left off.
+	size_t iend = osp.size();
+	size_t istart = next_choice(hp, hg);
+	for (size_t i=istart; i<iend; i++)
+	{
+		const Handle& hop = osp[i];
+
+		dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
+
+		match = tree_recurse(hop, hg, CALL_CHOICE);
+		if (match)
+		{
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
+			match = _pmc.post_link_match(lp, lg);
+			if (not match) continue;
+
+			// If we've found a grounding, record it.
+			if (hp != hg) var_grounding[hp] = hg;
+			_choice_state[Choice(hp, hg)] = i+1;
+			return true;
+		}
+	}
+	// If we are here, we've explored all the possibilities already
+	_choice_state.erase(Choice(hp, hg));
+	return false;
+}
+
 /* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
@@ -409,36 +449,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// the ChoiceLink as a whole can be considered to be grounded.
 	//
 	if (CHOICE_LINK == tp)
-	{
-		const std::vector<Handle> &osp = lp->getOutgoingSet();
-
-		// _choice_state lets use resume wher we last left off.
-		size_t iend = osp.size();
-		size_t istart = next_choice(hp, hg);
-		for (size_t i=istart; i<iend; i++)
-		{
-			const Handle& hop = osp[i];
-
-			dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
-
-			match = tree_recurse(hop, hg, CALL_CHOICE);
-			if (match)
-			{
-				// If we've found a grounding, lets see if the
-				// post-match callback likes this grounding.
-				match = _pmc.post_link_match(lp, lg);
-				if (not match) continue;
-
-				// If we've found a grounding, record it.
-				if (hp != hg) var_grounding[hp] = hg;
-				_choice_state[Choice(hp, hg)] = i+1;
-				return true;
-			}
-		}
-		// If we are here, we've explored all the possibilities already
-		_choice_state.erase(Choice(hp, hg));
-		return false;
-	}
+		return choice_compare(hp, hg, lp, lg);
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side"; the foreach_atom_pair iterator does
