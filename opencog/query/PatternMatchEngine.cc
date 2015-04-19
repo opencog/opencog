@@ -302,7 +302,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 {
 	const std::vector<Handle> &osp = lp->getOutgoingSet();
 
-	// _choice_state lets use resume wher we last left off.
+	// _choice_state lets use resume where we last left off.
 	size_t iend = osp.size();
 	size_t istart = next_choice(hp, hg);
 	for (size_t i=istart; i<iend; i++)
@@ -319,7 +319,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 			match = _pmc.post_link_match(lp, lg);
 			if (not match) continue;
 
-			// If we've found a grounding, record it.
+			// If the grounding is accepted, record it.
 			if (hp != hg) var_grounding[hp] = hg;
 			_choice_state[Choice(hp, hg)] = i+1;
 			return true;
@@ -414,7 +414,7 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 /// if so, we have to pick up where we left off, and so there
 /// is yet more stack trickery to save and restore that state.
 ///
-bool PatternMatchEngine::unorder_compare(const Handle& hp,
+bool PatternMatchEngine::old_unorder_compare(const Handle& hp,
                                          const Handle& hg,
                                          const LinkPtr& lp,
                                          const LinkPtr& lg)
@@ -520,6 +520,94 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	more_stack[more_depth] = false;
 	have_more = false;
 	return false;
+}
+
+/* ======================================================== */
+
+bool PatternMatchEngine::unorder_compare(const Handle& hp,
+                                         const Handle& hg,
+                                         const LinkPtr& lp,
+                                         const LinkPtr& lg)
+{
+	const HandleSeq& osg = lg->getOutgoingSet();
+	const HandleSeq& osp = lp->getOutgoingSet();
+	size_t arity = osp.size();
+
+	// They've got to be the same size, at the least!
+	if (osg.size() != arity) return false;
+
+	// _perm_state lets use resume where we last left off.
+	// next_perm returns false only when the next permuation
+	// whould have wrapped us all the way back to the begining.
+	Permutation mutation;
+	if (not next_perm(hp, hg, mutation))
+	{
+		// If we are here, we've explored all the possibilities already
+		_perm_state.erase(Choice(hp, hg));
+		return false;
+	}
+
+	// If we are here, we've got possibilities to explore.
+	do
+	{
+		dbgprt("tree_comp explore unordered permuation\n");
+
+		bool match = true;
+		for (size_t i=0; i<arity; i++)
+		{
+			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
+			{
+				match = false;
+				break;
+			}
+		}
+
+		if (match)
+		{
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
+			match = _pmc.post_link_match(lp, lg);
+			if (not match) continue;
+
+			// If the grounding is accepted, record it.
+			if (hp != hg) var_grounding[hp] = hg;
+			_perm_state[Unorder(hp, hg)] = mutation;
+			return true;
+		}
+	} while (std::next_permutation(mutation.begin(), mutation.end()));
+
+	// If we are here, we've explored all the possibilities already
+	_perm_state.erase(Choice(hp, hg));
+	return false;
+}
+
+/// Return the next unordered-link permutation for this
+/// particular point in the tree comparison (i.e. for the
+/// particular unordered link hp in the pattern.)
+bool PatternMatchEngine::next_perm(const Handle& hp,
+                                   const Handle& hg,
+                                   Permutation& perm)
+{
+	try { perm = _perm_state.at(Unorder(hp, hg)); }
+	catch(...)
+	{
+		dbgprt("tree_comp fresh start unordered link\n");
+		LinkPtr lp(LinkCast(hp));
+		perm = lp->getOutgoingSet();
+		sort(perm.begin(), perm.end());
+		return true;
+	}
+	return std::next_permutation(perm.begin(), perm.end());
+}
+
+/// Return true if there are more permutations to explore.
+/// Else return false.
+bool PatternMatchEngine::have_perm(const Handle& hp,
+                                   const Handle& hg)
+{
+	try { _perm_state.at(Unorder(hp, hg)); }
+	catch(...) { return false; }
+	return true;
 }
 
 /* ======================================================== */
@@ -708,12 +796,10 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	    and not is_evaluatable(curr_root))
 		return false;
 
-	have_stack.push(have_more);
-	have_more = false;
-
 	do {
-		bool found = false;
+		dbgprt("Enter the permuation loop!\n");
 
+		bool found = false;
 		do {
 			solution_push();
 
@@ -728,7 +814,6 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
 				solution_pop();
-				POPSTK(have_stack, have_more);
 				return false;
 			}
 
@@ -739,17 +824,12 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			solution_pop();
 		} while (0 < next_choice(curr_term_handle, hsoln));
 
-		if (found)
-		{
-			POPSTK(have_stack, have_more);
-			return true;
-		}
+		if (found) return true;
 
-		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
-		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
-	} while (have_more);
+	} while (have_perm(curr_term_handle, hsoln));
 
-	POPSTK(have_stack, have_more);
+	dbgprt("No more unordered permutations\n");
+
 	return false;
 }
 

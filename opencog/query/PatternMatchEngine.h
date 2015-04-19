@@ -44,9 +44,6 @@ class PatternMatchEngine
 	ClassServer& _classserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
-	// Used for managing ChoiceLink state
-	typedef std::pair<const Handle&, const Handle&> Choice;
-	typedef std::map<Choice, size_t> ChoiceState;
 
 	private:
 		// -------------------------------------------
@@ -104,12 +101,26 @@ class PatternMatchEngine
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_term_handle;  // stacked onto term_handle_stack
 
+		void clear_current_state(void);  // clear the stuff above
+
+		// -------------------------------------------
 		// OrLink (choice) state management
+		typedef std::pair<const Handle&, const Handle&> Choice;
+		typedef std::map<Choice, size_t> ChoiceState;
+
 		ChoiceState _choice_state;
 		size_t next_choice(const Handle&, const Handle&);
 		bool _need_choice_push;
 
-		void clear_current_state(void);  // clear the stuff above
+		// -------------------------------------------
+		// New Unordered Link suppoprt
+		typedef std::vector<Handle> Permutation;
+		typedef std::pair<const Handle&, const Handle&> Unorder; // Choice
+		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
+
+		PermState _perm_state;
+		bool next_perm(const Handle&, const Handle&, Permutation&);
+		bool have_perm(const Handle&, const Handle&);
 
 		// -------------------------------------------
 		// Stack used to store current traversal state for a single
@@ -159,9 +170,13 @@ class PatternMatchEngine
 		                    const LinkPtr&, const LinkPtr&);
 		bool ordered_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
+		bool old_unorder_compare(const Handle&, const Handle&,
+		                     const LinkPtr&, const LinkPtr&);
 		bool unorder_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
 
+		// -------------------------------------------
+		// Upwards-walking and clause hanlding.
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);
 		bool xsoln_up(const Handle&);
@@ -185,7 +200,6 @@ class PatternMatchEngine
 		// Substacks used for nested unorderered links.
 		typedef std::vector<bool> MoreStack;
 		MoreStack more_stack;
-		typedef std::vector<Handle> Permutation;
 		typedef std::stack<Permutation> PermuStack;
 		PermuStack mute_stack;
 
