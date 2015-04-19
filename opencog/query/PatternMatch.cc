@@ -342,11 +342,10 @@ bool ConcreteLink::satisfy(PatternMatchCallback& pmcb) const
 
 bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 {
-	// We allow a combinatoric explosion of multiple components,
-	// but zero virtuals, because PLN has a use case for this.
-	// I think its a pathological situation, but they really do
-	// want to explore the combinatoric explosion.
-	if (0 == _num_virts and 1 == _num_comps)
+	// If there is just one connected component, we don't have to
+	// do anything special to find a grounding for it.  Proceed
+	// as normal.
+	if (1 == _num_comps)
 	{
 		return ConcreteLink::satisfy(pmcb);
 	}
@@ -385,7 +384,7 @@ bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 		       i, _num_comps);
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		ConcreteLinkPtr clp(ConcreteLinkCast(_components[i]));
+		ConcreteLinkPtr clp(ConcreteLinkCast(_components.at(i)));
 		clp->satisfy(gcb);
 
 		comp_var_gnds.push_back(gcb._var_groundings);

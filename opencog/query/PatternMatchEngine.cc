@@ -163,6 +163,366 @@ static inline void prtmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
+/// If the pattern link is a quote, then we compare the quoted
+/// contents. This is done recursively, of course.  The QuoteLink
+/// must have only one child; anything else beyond that is ignored
+/// (as its not clear what else could possibly be done).
+bool PatternMatchEngine::quote_compare(const Handle& hp,
+                                       const Handle& hg)
+{
+	in_quote = true;
+	LinkPtr lp(LinkCast(hp));
+	if (1 != lp->getArity())
+		throw InvalidParamException(TRACE_INFO,
+		            "QuoteLink has unexpected arity!");
+	more_depth ++;
+	bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
+	more_depth --;
+	in_quote = false;
+	return ma;
+}
+
+/* ======================================================== */
+
+/// Compare a VariableNode in the pattern to the proposed grounding.
+///
+/// Handle hp is from the pattern clause.
+bool PatternMatchEngine::variable_compare(const Handle& hp,
+                                          const Handle& hg)
+{
+#ifdef NO_SELF_GROUNDING
+	// But... if handle hg happens to also be a bound var,
+	// then its a mismatch.
+	if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
+#endif
+
+	// If we already have a grounding for this variable, the new
+	// proposed grounding must match the existing one. Such multiple
+	// groundings can occur when traversing graphs with loops in them.
+	Handle gnd(var_grounding[hp]);
+	if (Handle::UNDEFINED != gnd) {
+		return (gnd == hg);
+	}
+
+	// VariableNode had better be an actual node!
+	// If it's not then we are very very confused ...
+	NodePtr np(NodeCast(hp));
+	OC_ASSERT (NULL != np,
+	           "ERROR: expected variable to be a node, got this: %s\n",
+	           hp->toShortString().c_str());
+
+#ifdef NO_SELF_GROUNDING
+	// Disallow matches that contain a bound variable in the
+	// grounding. However, a bound variable can be legitimately
+	// grounded by a free variable (because free variables are
+	// effectively constant literals, during the pattern match.
+	if (VARIABLE_NODE == hg->getType() and
+	    _varlist->varset.end() != _varlist->varset.find(hg))
+	{
+		return false;
+	}
+#endif
+
+	// Else, we have a candidate grounding for this variable.
+	// The node_match may implement some tighter variable check,
+	// e.g. making sure that grounding is of some certain type.
+	if (not _pmc.variable_match (hp,hg)) return false;
+
+	// Make a record of it.
+	dbgprt("Found grounding of variable:\n");
+	prtmsg("$$ variable:    ", hp);
+	prtmsg("$$ ground term: ", hg);
+	if (hp != hg) var_grounding[hp] = hg;
+	return true;
+}
+
+/* ======================================================== */
+
+/// Compare an atom to itself. Amazingly, this is more complicated
+/// that what it might seem to be ...
+///
+/// If they're the same atom, then clearly they match.
+/// ... but only if hp is a constant i.e. contains no bound variables)
+bool PatternMatchEngine::self_compare(const Handle& hp)
+{
+	prtmsg("Compare atom to itself:\n", hp);
+
+#ifdef NO_SELF_GROUNDING
+	if (hp == curr_term_handle)
+	{
+		// Mismatch, if hg contains bound vars in it.
+		if (any_unquoted_in_tree(hp, _varlist->varset)) return false;
+		return true;
+	}
+#if THIS_CANT_BE_RIGHT
+	// Bound but quoted variables cannot be solutions to themselves.
+	// huh? whaaaat?
+	if (not in_quote or
+	    (in_quote and
+	     (VARIABLE_NODE != tp or
+	       _varlist->varset.end() == _varlist->varset.find(hp))))
+	{
+		if (hp != hg) var_grounding[hp] = hg;
+	}
+#endif // THIS_CANT_BE_RIGHT
+#endif
+	return true;
+}
+
+/* ======================================================== */
+
+/// Compare two nodes, one in the pattern, one proposed grounding.
+bool PatternMatchEngine::node_compare(const Handle& hp,
+                                      const Handle& hg)
+{
+	// Call the callback to make the final determination.
+	bool match = _pmc.node_match(hp, hg);
+	if (match)
+	{
+		dbgprt("Found matching nodes\n");
+		prtmsg("# pattern: ", hp);
+		prtmsg("# match:   ", hg);
+		if (hp != hg) var_grounding[hp] = hg;
+	}
+	return match;
+}
+
+/* ======================================================== */
+
+/// Compae a ChoiceLink in the pattern to the proposed grounding.
+///
+/// CHOICE_LINK's are multiple-choice links. As long as we can
+/// can match one of the sub-expressions of the ChoiceLink, then
+/// the ChoiceLink as a whole can be considered to be grounded.
+///
+bool PatternMatchEngine::choice_compare(const Handle& hp,
+                                        const Handle& hg,
+                                        const LinkPtr& lp,
+                                        const LinkPtr& lg)
+{
+	const std::vector<Handle> &osp = lp->getOutgoingSet();
+
+	// _choice_state lets use resume wher we last left off.
+	size_t iend = osp.size();
+	size_t istart = next_choice(hp, hg);
+	for (size_t i=istart; i<iend; i++)
+	{
+		const Handle& hop = osp[i];
+
+		dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
+
+		bool match = tree_recurse(hop, hg, CALL_CHOICE);
+		if (match)
+		{
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
+			match = _pmc.post_link_match(lp, lg);
+			if (not match) continue;
+
+			// If we've found a grounding, record it.
+			if (hp != hg) var_grounding[hp] = hg;
+			_choice_state[Choice(hp, hg)] = i+1;
+			return true;
+		}
+	}
+	// If we are here, we've explored all the possibilities already
+	_choice_state.erase(Choice(hp, hg));
+	return false;
+}
+
+size_t PatternMatchEngine::next_choice(const Handle& hp,
+                                       const Handle& hg)
+{
+	size_t istart;
+	try { istart = _choice_state.at(Choice(hp, hg)); }
+	catch(...) { istart = 0;}
+	return istart;
+}
+
+/* ======================================================== */
+
+/// If the two links are both ordered, its enough to compare
+/// them "side-by-side".
+bool PatternMatchEngine::ordered_compare(const Handle& hp,
+                                         const Handle& hg,
+                                         const LinkPtr& lp,
+                                         const LinkPtr& lg)
+{
+	const HandleSeq &osp = lp->getOutgoingSet();
+	const HandleSeq &osg = lg->getOutgoingSet();
+
+	size_t oset_sz = osp.size();
+	if (oset_sz != osg.size()) return false;
+
+	// The recursion step: traverse down the tree.
+	// In principle, we could/should push the current groundings
+	// onto the stack before recursing, and then pop them off on
+	// return.  Failure to do so could leave some bogus groundings,
+	// sitting around, i.e. groundings that were found during
+	// recursion but then discarded due to a later mis-match.
+	//
+	// In practice, I was unable to come up with any test case
+	// where this mattered; any bogus groundings eventually get
+	// replaced by valid ones.  Thus, we save some unknown amount
+	// of cpu time by simply skipping the push & pop here.
+	//
+	depth ++;
+	more_depth ++;
+
+	bool match = true;
+	for (size_t i=0; i<oset_sz; i++)
+	{
+		if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
+		{
+			match = false;
+			break;
+		}
+	}
+
+	more_depth --;
+	depth --;
+	dbgprt("tree_comp down link match=%d\n", match);
+
+	if (not match) return false;
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	match = _pmc.post_link_match(lp, lg);
+	if (not match) return false;
+
+	// If we've found a grounding, record it.
+	if (hp != hg) var_grounding[hp] = hg;
+
+	return true;
+}
+
+/* ======================================================== */
+
+/// Unordered link comparison
+///
+/// Enumerate all the permutations of the outgoing set of
+/// the term.  We have to try all possible permuations
+/// here, as different variable assignments could lead to
+/// very differrent problem solutions.  We have to push/pop
+/// the stack as we try each permutation, so that each
+/// permutation has a chance of finding a grounding.
+///
+/// The problem with exhaustive enumeration is that we can't
+/// do it here, by ourselves: this can only be done at the
+/// clause level. So if we do find a grounding, we have to
+/// report it, and return.  We might get called again, and,
+/// if so, we have to pick up where we left off, and so there
+/// is yet more stack trickery to save and restore that state.
+///
+bool PatternMatchEngine::unorder_compare(const Handle& hp,
+                                         const Handle& hg,
+                                         const LinkPtr& lp,
+                                         const LinkPtr& lg)
+{
+	const std::vector<Handle> &osg = lg->getOutgoingSet();
+	std::vector<Handle> mutation;
+
+	if (more_stack.size() <= more_depth) more_stack.push_back(false);
+	if (not more_stack[more_depth])
+	{
+		dbgprt("tree_comp fresh unordered link at depth %zd\n",
+		       more_depth);
+		mutation = lp->getOutgoingSet();
+		sort(mutation.begin(), mutation.end());
+	}
+	else
+	{
+		dbgprt("tree_comp resume unordered link at depth %zd\n",
+		       more_depth);
+		POPSTK(mute_stack, mutation);
+	}
+
+	do {
+		size_t oset_sz = mutation.size();
+		if (oset_sz != osg.size()) return false;
+
+		// The recursion step: traverse down the tree.
+		dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
+		       more_depth);
+		var_solutn_stack.push(var_grounding);
+		// XXX why are we not pushing the claus soln stack??
+		depth ++;
+
+		have_more = false;
+		more_depth ++;
+
+		bool match = true;
+		for (size_t i=0; i<oset_sz; i++)
+		{
+			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
+			{
+				match = false;
+				break;
+			}
+		}
+
+		more_depth --;
+		depth --;
+		dbgprt("tree_comp down unordered link depth=%lu match=%d\n",
+		       more_depth, match);
+
+		// If we've found a grounding, lets see if the
+		// post-match callback likes this grounding.
+		if (match)
+		{
+			match = _pmc.post_link_match(lp, lg);
+		}
+
+		// If we've found a grounding, record it.
+		if (match)
+		{
+			// Since we leave the loop, we better go back
+			// to where we found things.
+			var_solutn_stack.pop();
+			if (hp != hg) var_grounding[hp] = hg;
+			dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
+			      more_depth);
+
+			// If a lower part of a tree has more to do, it will have
+			// set the have_more flag.  If it is done, then the
+			// have_more flag is clear.  If its clear, we, have to
+			// advance, so we don't restart in the same place.
+			// Ugh. Seems like there should be a more elegant way.
+			if (have_more)
+			{
+				mute_stack.push(mutation);
+				more_stack[more_depth] = true;
+				have_more = true;
+			}
+			else
+			{
+				// Lower loop is done. Advance.
+				bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
+				if (more_perms)
+				{
+					mute_stack.push(mutation);
+					more_stack[more_depth] = true;
+					have_more = true;
+				}
+				else
+				{
+					more_stack[more_depth] = false;
+					have_more = false;
+				}
+			}
+
+			return true;
+		}
+		POPSTK(var_solutn_stack, var_grounding);
+	} while (std::next_permutation(mutation.begin(), mutation.end()));
+
+	dbgprt("tree_comp down unordered exhausted all permuations\n");
+	more_stack[more_depth] = false;
+	have_more = false;
+	return false;
+}
+
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -209,394 +569,93 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// (as its not clear what else could possibly be done).
 	Type tp = hp->getType();
 	if (not in_quote and QUOTE_LINK == tp)
-	{
-		in_quote = true;
-		LinkPtr lp(LinkCast(hp));
-		if (1 != lp->getArity())
-			throw InvalidParamException(TRACE_INFO,
-			            "QuoteLink has unexpected arity!");
-		more_depth ++;
-		bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
-		more_depth --;
-		in_quote = false;
-		return ma;
-	}
+		return quote_compare(hp, hg);
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (not in_quote and _varlist->varset.end() != _varlist->varset.find(hp))
-	{
-#ifdef NO_SELF_GROUNDING
-		// But... if handle hg happens to also be a bound var,
-		// then its a mismatch.
-		if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
-#endif
-
-		// If we already have a grounding for this variable, the new
-		// proposed grounding must match the existing one. Such multiple
-		// groundings can occur when traversing graphs with loops in them.
-		Handle gnd(var_grounding[hp]);
-		if (Handle::UNDEFINED != gnd) {
-			return (gnd == hg);
-		}
-
-		// VariableNode had better be an actual node!
-		// If it's not then we are very very confused ...
-		NodePtr np(NodeCast(hp));
-		OC_ASSERT (NULL != np,
-		           "ERROR: expected variable to be a node, got this: %s\n",
-		           hp->toShortString().c_str());
-
-#ifdef NO_SELF_GROUNDING
-		// Disallow matches that contain a bound variable in the
-		// grounding. However, a bound variable can be legitimately
-		// grounded by a free variable (because free variables are
-		// effectively constant literals, during the pattern match.
-		if (VARIABLE_NODE == hg->getType() and
-		    _varlist->varset.end() != _varlist->varset.find(hg))
-		{
-			return false;
-		}
-#endif
-
-		// Else, we have a candidate grounding for this variable.
-		// The node_match may implement some tighter variable check,
-		// e.g. making sure that grounding is of some certain type.
-		if (not _pmc.variable_match (hp,hg)) return false;
-
-		// Make a record of it.
-		dbgprt("Found grounding of variable:\n");
-		prtmsg("$$ variable:    ", hp);
-		prtmsg("$$ ground term: ", hg);
-		if (hp != hg) var_grounding[hp] = hg;
-		return true;
-	}
+		return variable_compare(hp, hg);
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hp is a constant i.e. contains no bound variables)
-	if (hp == hg)
-	{
-		prtmsg("Compare atom to itself:\n", hp);
-
-#ifdef NO_SELF_GROUNDING
-		if (hg == curr_term_handle)
-		{
-			// Mismatch, if hg contains bound vars in it.
-			if (any_unquoted_in_tree(hg, _varlist->varset)) return false;
-		}
-		else
-		{
-#if THIS_CANT_BE_RIGHT
-			// Bound but quoted variables cannot be solutions to themselves.
-			// huh? whaaaat?
-			if (not in_quote or
-			    (in_quote and
-			     (VARIABLE_NODE != tp or
-			       _varlist->varset.end() == _varlist->varset.find(hp))))
-			{
-				if (hp != hg) var_grounding[hp] = hg;
-			}
-#endif // THIS_CANT_BE_RIGHT
-
-		}
-#endif
-		// If the pattern contains atoms that are evaluatable i.e. GPN's
-		// then we must fall through, and let the tree comp mechanism
-		// find and evaluate them. That's for two reasons: (1) because
-		// evaluation may have side-effects (e.g. send a message) and
-		// (2) evaluation may depend on external state. These are
-		// typically used to implement behavior trees, e.g SequenceUTest
-		if (not is_evaluatable(hp)) return true;
-		else
-		{ dbgprt("Its evaluatable, continuing.\n"); }
-	}
-
-	// If both are links, compare them as such.
-	// Unless pattern link is a QuoteLink, in which case, the quoted
-	// contents is compared. (well, that was done up above...)
-	LinkPtr lp(LinkCast(hp));
-	LinkPtr lg(LinkCast(hg));
-	if (lp and lg)
-	{
-#ifdef NO_SELF_GROUNDING
-		// The proposed grounding must NOT contain any bound variables!
-		// .. unless they are quoted in the pattern, in which case they
-		// are allowed... well, not just allowed, but give the right
-		// answer. The below checks for this case. The check is not
-		// entirely correct though; there are some weird corner cases
-		// where a variable may appear quoted in the pattern, but then
-		// be in the wrong spot entirely in the proposed grounding, and
-		// so should not have been allowed.
-		// XXX FIXME For now, we punt on this... a proper fix would be
-		// ... hard, as we would have to line up the location of the
-		// quoted and the unquoted parts.
-		if (any_unquoted_in_tree(hg, _varlist->varset))
-		{
-			for (Handle vh: _varlist->varset)
-			{
-				// OK, which tree is it in? And is it quoted in the pattern?
-				if (is_unquoted_in_tree(hg, vh))
-				{
-					prtmsg("found bound variable in grounding tree:", vh);
-					prtmsg("matching  pattern  is:", hp);
-					prtmsg("proposed grounding is:", hg);
-
-					if (is_quoted_in_tree(hp, vh)) continue;
-					dbgprt("miscompare; var is not in pattern, or its not quoted\n");
-					return false;
-				}
-			}
-		}
-#endif
-		// If the pattern is defined elsewhere, not here, then we have
-		// to go to where it is defined, and pattern match things there.
-		if (BETA_REDEX == tp)
-		{
-			return redex_compare(lp, lg);
-		}
-
-		// Let the callback perform basic checking.
-		bool match = _pmc.link_match(lp, lg);
-		if (not match) return false;
-
-		dbgprt("depth=%d\n", depth);
-		prtmsg("> tree_compare", hp);
-		prtmsg(">           to", hg);
-
-		// CHOICE_LINK's are multiple-choice links. As long as we can
-		// can match one of the sub-expressions of the ChoiceLink, then
-		// the ChoiceLink as a whole can be considered to be grounded.
-		//
-		if (CHOICE_LINK == tp)
-		{
-			const std::vector<Handle> &osp = lp->getOutgoingSet();
-
-			// _choice_state lets use resume wher we last left off.
-			size_t iend = osp.size();
-			size_t istart = next_choice(hp, hg);
-			for (size_t i=istart; i<iend; i++)
-			{
-				const Handle& hop = osp[i];
-
-				dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
-
-				match = tree_recurse(hop, hg, CALL_CHOICE);
-				if (match)
-				{
-					// If we've found a grounding, lets see if the
-					// post-match callback likes this grounding.
-					match = _pmc.post_link_match(lp, lg);
-					if (not match) continue;
-
-					// If we've found a grounding, record it.
-					if (hp != hg) var_grounding[hp] = hg;
-					_choice_state[Choice(hp, hg)] = i+1;
-					return true;
-				}
-			}
-			// If we are here, we've explored all the possibilities already
-			_choice_state.erase(Choice(hp, hg));
-			return false;
-		}
-
-		// If the two links are both ordered, its enough to compare
-		// them "side-by-side"; the foreach_atom_pair iterator does
-		// this. If they are un-ordered, then we have to compare every
-		// possible permutation.  This can be a bit of a combinatoric
-		// explosion.
-		if (_classserver.isA(tp, ORDERED_LINK))
-		{
-			const HandleSeq &osp = lp->getOutgoingSet();
-			const HandleSeq &osg = lg->getOutgoingSet();
-
-			size_t oset_sz = osp.size();
-			if (oset_sz != osg.size()) return false;
-
-			// The recursion step: traverse down the tree.
-			// In principle, we could/should push the current groundings
-			// onto the stack before recursing, and then pop them off on
-			// return.  Failure to do so could leave some bogus groundings,
-			// sitting around, i.e. groundings that were found during
-			// recursion but then discarded due to a later mis-match.
-			//
-			// In practice, I was unable to come up with any test case
-			// where this mattered; any bogus groundings eventually get
-			// replaced by valid ones.  Thus, we save some unknown amount
-			// of cpu time by simply skipping the push & pop here.
-			//
-			depth ++;
-			more_depth ++;
-
-			match = true;
-			for (size_t i=0; i<oset_sz; i++)
-			{
-				if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
-				{
-					match = false;
-					break;
-				}
-			}
-
-			more_depth --;
-			depth --;
-			dbgprt("tree_comp down link match=%d\n", match);
-
-			if (not match) return false;
-
-			// If we've found a grounding, lets see if the
-			// post-match callback likes this grounding.
-			match = _pmc.post_link_match(lp, lg);
-			if (not match) return false;
-
-			// If we've found a grounding, record it.
-			if (hp != hg) var_grounding[hp] = hg;
-
-			return true;
-		}
-		else
-		{
-			// If we are here, we are dealing with an unordered link.
-			// Enumerate all the permutations of the outgoing set of
-			// the term.  We have to try all possible permuations
-			// here, as different variable assignments could lead to
-			// very differrent problem solutions.  We have to push/pop
-			// the stack as we try each permutation, so that each
-			// permutation has a chance of finding a grounding.
-			//
-			// The problem with exhaustive enumeration is that we can't
-			// do it here, by ourselves: this can only be done at the
-			// clause level. So if we do find a grounding, we have to
-			// report it, and return.  We might get called again, and,
-			// if so, we have to pick up where we left off, and so there
-			// is yet more stack trickery to save and restore that state.
-			//
-			const std::vector<Handle> &osg = lg->getOutgoingSet();
-			std::vector<Handle> mutation;
-
-			if (more_stack.size() <= more_depth) more_stack.push_back(false);
-			if (not more_stack[more_depth])
-			{
-				dbgprt("tree_comp fresh unordered link at depth %zd\n",
-				       more_depth);
-				mutation = lp->getOutgoingSet();
-				sort(mutation.begin(), mutation.end());
-			}
-			else
-			{
-				dbgprt("tree_comp resume unordered link at depth %zd\n",
-				       more_depth);
-				POPSTK(mute_stack, mutation);
-			}
-
-			do {
-				size_t oset_sz = mutation.size();
-				if (oset_sz != osg.size()) return false;
-
-				// The recursion step: traverse down the tree.
-				dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
-				       more_depth);
-				var_solutn_stack.push(var_grounding);
-				// XXX why are we not pushing the claus soln stack??
-				depth ++;
-
-				have_more = false;
-				more_depth ++;
-
-				match = true;
-				for (size_t i=0; i<oset_sz; i++)
-				{
-					if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
-					{
-						match = false;
-						break;
-					}
-				}
-
-				more_depth --;
-				depth --;
-				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
-				       more_depth, match);
-
-				// If we've found a grounding, lets see if the
-				// post-match callback likes this grounding.
-				if (match)
-				{
-					match = _pmc.post_link_match(lp, lg);
-				}
-
-				// If we've found a grounding, record it.
-				if (match)
-				{
-					// Since we leave the loop, we better go back
-					// to where we found things.
-					var_solutn_stack.pop();
-					if (hp != hg) var_grounding[hp] = hg;
-					dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
-					      more_depth);
-
-					// If a lower part of a tree has more to do, it will have
-					// set the have_more flag.  If it is done, then the
-					// have_more flag is clear.  If its clear, we, have to
-					// advance, so we don't restart in the same place.
-					// Ugh. Seems like there should be a more elegant way.
-					if (have_more)
-					{
-						mute_stack.push(mutation);
-						more_stack[more_depth] = true;
-						have_more = true;
-					}
-					else
-					{
-						// Lower loop is done. Advance.
-						bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
-						if (more_perms)
-						{
-							mute_stack.push(mutation);
-							more_stack[more_depth] = true;
-							have_more = true;
-						}
-						else
-						{
-							more_stack[more_depth] = false;
-							have_more = false;
-						}
-					}
-
-					return true;
-				}
-				POPSTK(var_solutn_stack, var_grounding);
-			} while (std::next_permutation(mutation.begin(), mutation.end()));
-
-			dbgprt("tree_comp down unordered exhausted all permuations\n");
-			more_stack[more_depth] = false;
-			have_more = false;
-			return false;
-		}
-
-		OC_ASSERT(false, "statement should not be reached");
-		return match;
-	}
+	//
+	// If the pattern contains atoms that are evaluatable i.e. GPN's
+	// then we must fall through, and let the tree comp mechanism
+	// find and evaluate them. That's for two reasons: (1) because
+	// evaluation may have side-effects (e.g. send a message) and
+	// (2) evaluation may depend on external state. These are
+	// typically used to implement behavior trees, e.g SequenceUTest
+	if ((hp == hg) and not is_evaluatable(hp))
+		return self_compare(hp);
 
 	// If both are nodes, compare them as such.
 	NodePtr np(NodeCast(hp));
 	NodePtr ng(NodeCast(hg));
 	if (np and ng)
-	{
-		// Call the callback to make the final determination.
-		bool match = _pmc.node_match(hp, hg);
-		if (match)
-		{
-			dbgprt("Found matching nodes\n");
-			prtmsg("# pattern: ", hp);
-			prtmsg("# match:   ", hg);
-			if (hp != hg) var_grounding[hp] = hg;
-		}
-		return match;
-	}
+		return node_compare(hp, hg);
 
-	// If we got to here, there is a clear mismatch, probably because
-	// one is a node, and the other a link.
-	return false;
+	// If they're not both are links, then it is clearly a mismatch.
+	LinkPtr lp(LinkCast(hp));
+	LinkPtr lg(LinkCast(hg));
+	if (not (lp and lg)) return false;
+
+#ifdef NO_SELF_GROUNDING
+	// The proposed grounding must NOT contain any bound variables!
+	// .. unless they are quoted in the pattern, in which case they
+	// are allowed... well, not just allowed, but give the right
+	// answer. The below checks for this case. The check is not
+	// entirely correct though; there are some weird corner cases
+	// where a variable may appear quoted in the pattern, but then
+	// be in the wrong spot entirely in the proposed grounding, and
+	// so should not have been allowed.
+	// XXX FIXME For now, we punt on this... a proper fix would be
+	// ... hard, as we would have to line up the location of the
+	// quoted and the unquoted parts.
+	if (any_unquoted_in_tree(hg, _varlist->varset))
+	{
+		for (Handle vh: _varlist->varset)
+		{
+			// OK, which tree is it in? And is it quoted in the pattern?
+			if (is_unquoted_in_tree(hg, vh))
+			{
+				prtmsg("found bound variable in grounding tree:", vh);
+				prtmsg("matching  pattern  is:", hp);
+				prtmsg("proposed grounding is:", hg);
+
+				if (is_quoted_in_tree(hp, vh)) continue;
+				dbgprt("miscompare; var is not in pattern, or its not quoted\n");
+				return false;
+			}
+		}
+	}
+#endif
+	// If the pattern is defined elsewhere, not here, then we have
+	// to go to where it is defined, and pattern match things there.
+	if (BETA_REDEX == tp)
+		return redex_compare(lp, lg);
+
+	// Let the callback perform basic checking.
+	bool match = _pmc.link_match(lp, lg);
+	if (not match) return false;
+
+	dbgprt("depth=%d\n", depth);
+	prtmsg("> tree_compare", hp);
+	prtmsg(">           to", hg);
+
+	// CHOICE_LINK's are multiple-choice links. As long as we can
+	// can match one of the sub-expressions of the ChoiceLink, then
+	// the ChoiceLink as a whole can be considered to be grounded.
+	//
+	if (CHOICE_LINK == tp)
+		return choice_compare(hp, hg, lp, lg);
+
+	// If the two links are both ordered, its enough to compare
+	// them "side-by-side".
+	if (_classserver.isA(tp, ORDERED_LINK))
+		return ordered_compare(hp, hg, lp, lg);
+
+	// If we are here, we are dealing with an unordered link.
+	return unorder_compare(hp, hg, lp, lg);
 }
 
 bool PatternMatchEngine::tree_recurse(const Handle& hp,
@@ -604,15 +663,6 @@ bool PatternMatchEngine::tree_recurse(const Handle& hp,
                                       Caller caller)
 {
 	return tree_compare(hp, hg, caller);
-}
-
-size_t PatternMatchEngine::next_choice(const Handle& hp,
-                                       const Handle& hg)
-{
-	size_t istart;
-	try { istart = _choice_state.at(Choice(hp, hg)); }
-	catch(...) { istart = 0;}
-	return istart;
 }
 
 /* ======================================================== */
@@ -1039,13 +1089,41 @@ bool PatternMatchEngine::do_next_clause(void)
  *
  * The words "solved" and "grounded" are used as synonyms throught the
  * code.
+ *
+ * Additional complications are introduced by the presence of
+ * evaluatable terms, black-box terms, and optional clauses. An
+ * evaluatable term is any term that needs to be evaluated to determine
+ * if it matches: such terms typically do not exist in the atomspace;
+ * they are "virtual", and "exist" only when the evaluation returns
+ * "true". Thus, these can only be grounded after all other possible
+ * clauses are grounded; thus these are saved for last.  It is always
+ * possible to save these for last, because earlier stages have
+ * guaranteed that all of he non-virtual clauses are connected.
+ * Anyway, evaluatables come in two forms: those that can be evaluated
+ * quickly, and those that require a "black-box" evaluation of some
+ * scheme or python code. Of the two, we save "black-box" for last.
+ *
+ * Then afer grounding all of the mandatory clauses (virtual or not),
+ * we look for optional clauses, if any. Again, these might be virtual,
+ * and they might be black...
+ *
+ * Thus, we use a helper function to broaden the search in each case.
  */
 void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
-	// Optional clauses are grounded only after all the mandatory
-	// ones are done.
-	if (get_next_untried_helper(false)) return;
+	// no virtuals, no black boxes, no optionals.
+	if (get_next_untried_helper(false, false, false)) return;
+
+	// Don't bother looking for evaluatables if they are not there.
+	if (not _pat->evaluatable_holders.empty())
+	{
+		if (get_next_untried_helper(true, false, false)) return;
+		if (not _pat->black.empty())
+		{
+			if (get_next_untried_helper(true, true, false)) return;
+		}
+	}
 
 	// If there are no optional clauses, we are done.
 	if (_pat->optionals.empty())
@@ -1057,29 +1135,83 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// Try again, this time, considering the optional clauses.
-	if (get_next_untried_helper(true)) return;
+	if (get_next_untried_helper(false, false, true)) return;
+	if (not _pat->evaluatable_holders.empty())
+	{
+		if (get_next_untried_helper(true, false, true)) return;
+		if (not _pat->black.empty())
+		{
+			if (get_next_untried_helper(true, true, true)) return;
+		}
+	}
 
 	// If we are here, there are no more unsolved clauses to consider.
 	curr_root = Handle::UNDEFINED;
 	curr_term_handle = Handle::UNDEFINED;
 }
 
-/// Same as above, but with a boolean flag:  if not set, then only the
-/// list of mandatory clauses is considered, else all clauses (mandatory
-/// and optional) are considered.
+// Count teh number of ungrounded variables in a clause.
+//
+// This is used to search for the "thinnest" ungrounded clause:
+// the one with the fewest ungrounded variables in it. Thus, if
+// there is just one variable that needs to be grounded, then this
+// can be done in a direct fashion; it resembles the concept of
+// "unit propagation" in the DPLL algorithm.
+//
+// XXX TODO ... Rather than counting the number of variables, we
+// should instead look for one with the smallest incoming set.
+// That is because the very next thing that we do will be to
+// iterate over the incoming set of "pursue" ... so it could be
+// a huge pay-off to minimize this.
+//
+// If there are two ungrounded variables in a clause, then the
+// "thickness" is the *product* of the sizes of the two incoming
+// sets. Thus, the fewer ungrounded variables, the better.
+//
+// Danger: this assumes a suitable dataset, as otherwise, the cost
+// of this "optimization" can add un-necessarily to the overhead.
+//
+unsigned int PatternMatchEngine::thickness(const Handle& clause,
+                                           const std::set<Handle>& live)
+{
+	// If there are only zero or one ungrounded vars, then any clause
+	// will do. Blow this pop stand.
+	if (live.size() < 2) return 1;
+
+	unsigned int count = 0;
+	for (const Handle& v : live)
+	{
+		if (is_unquoted_in_tree(clause, v)) count++;
+	}
+	return count;
+}
+
+/// Same as above, but with three boolean flags:  if not set, then only
+/// those clauses satsifying the criterion are considered, else all
+/// clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
+bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
+                                                 bool search_black,
+                                                 bool search_optionals)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
 	// to the optional clauses.  We can find ungrounded clauses by
 	// looking at the grounded vars, looking up the root, to see if
 	// the root is grounded.  If its not, start working on that.
-	Handle pursue(Handle::UNDEFINED);
+	Handle joint(Handle::UNDEFINED);
 	Handle unsolved_clause(Handle::UNDEFINED);
 	bool unsolved = false;
-	bool solved = false;
+	unsigned int thinnest = UINT_MAX;
+
+	// Make a list of the as-yet ungrounded variables.
+	std::set<Handle> undead;
+	for (const Handle &v : _varlist->varseq)
+	{
+		try { var_grounding.at(v); }
+		catch(...) { undead.insert(v); }
+	}
 
 	// We are looking for a joining atom, one that is shared in common
 	// with the a fully grounded clause, and an as-yet ungrounded clause.
@@ -1087,70 +1219,56 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_optionals)
 	// joins will become our next untried clause.  Note that the join
 	// is not necessarily a variable; it could be a constant atom.
 	// (wouldn't things be faster if they were variables only, that
-	// joined? the problem is that var_grounding stores both grounded
+	// joined?) the problem is that var_grounding stores both grounded
 	// variables and "grounded" constants.
 #define OLD_LOOP
 #ifdef OLD_LOOP
 	for (const Pattern::ConnectPair& vk : _pat->connectivity_map)
 	{
 		const Pattern::RootList& rl(vk.second);
-		pursue = vk.first;
+		const Handle& pursue = vk.first;
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 #else // OLD_LOOP
 	// Newloop might be slightly faster than old loop.
 	// ... but maybe not...
 	for (auto gndpair : var_grounding)
 	{
-		pursue = gndpair.first;
+		const Handle& pursue = gndpair.first;
 		try { _pat->connectivity_map.at(pursue); }
 		catch(...) { continue; }
 		const RootList& rl(_pat->connectivity_map.at(pursue));
 #endif
 
-		unsolved = false;
-		solved = false;
 		for (const Handle& root : rl)
 		{
-			if (Handle::UNDEFINED != clause_grounding[root])
+			if ((issued.end() == issued.find(root))
+			        and (search_virtual or not is_evaluatable(root))
+			        and (search_black or not is_black(root))
+			        and (search_optionals or not is_optional(root)))
 			{
-				solved = true;
+				unsigned int th = thickness(root, undead);
+				if (th < thinnest)
+				{
+					thinnest = th;
+					unsolved_clause = root;
+					joint = pursue;
+					unsolved = true;
+				}
 			}
-			else if ((issued.end() == issued.find(root)) and
-			         (search_optionals or
-			          (not is_optional(root))))
-			{
-				unsolved_clause = root;
-				unsolved = true;
-			}
-			if (solved and unsolved) break;
+			if (unsolved and thinnest < 2) break;
 		}
 
-		// XXX TODO ... Rather than settling for the first one that we find,
-		// we should instead look for the "thinnest" one, the one with the
-		// smallest incoming set.  That is because the very next thing that
-		// we do will be to iterate over the incoming set of "pursue" ... so
-		// it could be a huge pay-off to minimize this.
-		//
-		// In particular, the "thinnest" one is probably the one with the
-		// fewest ungrounded variables in it. Thus, if there is just one
-		// variable that needs to be grounded, then this can be done in
-		// direct fashion; it resembles the concept of "unit propagation"
-		// in the DPLL algorithm.
-		//
-		// If there are two ungrounded variables in a clause, then the
-		// "thickness" is the *product* of the sizes of the two incoming
-		// sets. Thus, the fewer ungrounded variables, the better.
-		if (solved and unsolved) break;
+		if (unsolved and thinnest < 2) break;
 	}
 
-	if (solved and unsolved)
+	if (unsolved)
 	{
-		// Pursue is a pointer to a (variable) node that's shared between
-		// several clauses. One of the clauses has been grounded,
-		// another has not.  We want to now traverse upwards from this node,
+		// Joint is a (variable) node that's shared between several
+		// clauses. One of the clauses has been grounded, another
+		// has not.  We want to now traverse upwards from this node,
 		// to find the top of the ungrounded clause.
 		curr_root = unsolved_clause;
-		curr_term_handle = pursue;
+		curr_term_handle = joint;
 
 		if (Handle::UNDEFINED != unsolved_clause)
 		{

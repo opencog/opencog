@@ -102,7 +102,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool _have_evaluatables;
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
-		virtual Handle find_thinnest(const HandleSeq&, Handle&, size_t&);
+		virtual Handle find_thinnest(const HandleSeq&,
+		                             const std::set<Handle>&,
+		                             Handle&, size_t&);
 		virtual void find_rarest(const Handle&, Handle&, size_t&);
 
 		bool _search_fail;

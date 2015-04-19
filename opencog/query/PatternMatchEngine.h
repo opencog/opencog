@@ -67,6 +67,9 @@ class PatternMatchEngine
 		bool is_evaluatable(const Handle& h) {
 			return (_pat->evaluatable_holders.count(h) != 0); }
 
+		bool is_black(const Handle& h) {
+			return (_pat->black.count(h) != 0); }
+
 		// -------------------------------------------
 		// Recursive redex support. These are stacks of the clauses
 		// above, that are being searched.
@@ -147,7 +150,17 @@ class PatternMatchEngine
 
 		bool tree_compare(const Handle&, const Handle&, Caller);
 		bool tree_recurse(const Handle&, const Handle&, Caller);
+		bool quote_compare(const Handle&, const Handle&);
+		bool variable_compare(const Handle&, const Handle&);
+		bool self_compare(const Handle&);
+		bool node_compare(const Handle&, const Handle&);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
+		bool choice_compare(const Handle&, const Handle&,
+		                    const LinkPtr&, const LinkPtr&);
+		bool ordered_compare(const Handle&, const Handle&,
+		                     const LinkPtr&, const LinkPtr&);
+		bool unorder_compare(const Handle&, const Handle&,
+		                     const LinkPtr&, const LinkPtr&);
 
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);
@@ -158,7 +171,8 @@ class PatternMatchEngine
 
 		bool clause_accepted;
 		void get_next_untried_clause(void);
-		bool get_next_untried_helper(bool);
+		bool get_next_untried_helper(bool, bool, bool);
+		unsigned int thickness(const Handle&, const std::set<Handle>&);
 
 		// --------------------------------------------------
 		// Unordered-link stuff. This needs a major overhaul.

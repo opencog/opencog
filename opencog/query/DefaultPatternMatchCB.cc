@@ -290,8 +290,11 @@ DefaultPatternMatchCB::find_starter(const Handle& h, size_t& depth,
 /* ======================================================== */
 /**
  * Iterate over all the clauses, to find the "thinnest" one.
+ * Skip any/all evaluatable clauses, as thes typically do not
+ * exist in the atomspace, anyway.
  */
-Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
+Handle DefaultPatternMatchCB::find_thinnest(const HandleSeq& clauses,
+                                            const std::set<Handle>& evl,
                                             Handle& starter_term,
                                             size_t& bestclause)
 {
@@ -304,6 +307,8 @@ Handle DefaultPatternMatchCB::find_thinnest(const std::vector<Handle>& clauses,
 	size_t nc = clauses.size();
 	for (size_t i=0; i < nc; i++)
 	{
+		// Cannot start with an evaluatable clause!
+		if (0 < evl.count(clauses[i])) continue;
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
@@ -364,10 +369,12 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	size_t bestclause;
-	Handle best_start = find_thinnest(clauses, _starter_term, bestclause);
+	Handle best_start = find_thinnest(clauses, pat.evaluatable_holders,
+	                                  _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if all of the
-	// clauses contain nothing but variables!! Unusual, but it can
+	// clauses contain nothing but variables, or if all of the
+	// clauses are evaluatable(!) Somewhat unusual, but it can
 	// happen.  In this case, we need some other, alternative search
 	// strategy.
 	if (Handle::UNDEFINED == best_start)
@@ -666,6 +673,9 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 
 	for (const Handle& cl: clauses)
 	{
+		// Evaluatables dont' exist in the atomspace, in general.
+		// Cannot start a search wtih them.
+		if (0 < pat.evaluatable_holders.count(cl)) continue;
 		size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
@@ -753,6 +763,9 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 			{
 				for (const Handle& cl : clauses)
 				{
+					// Evaluatables dont' exist in the atomspace, in general.
+					// Cannot start a search wtih them.
+					if (0 < pat.evaluatable_holders.count(cl)) continue;
 					FindAtoms fa(var);
 					fa.search_set(cl);
 					if (cl == var)

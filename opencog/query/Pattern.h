@@ -82,21 +82,32 @@ struct Pattern
 	/// The actual clauses. Set by validate_clauses()
 	HandleSeq        clauses;
 
-	// The cnf_clauses are the clauses, but with the AbsentLink, NotLink
-	// removed. This simplifies graph discovery, so that when they are
-	// found, they can be rejected (e.g. are not absent)
-	HandleSeq        cnf_clauses;  // AbsentLink, NotLink removed!
+	// The cnf_clauses are the clauses, but with the AbsentLink removed.
+	// This simplifies graph discovery, so that when they are found,
+	// they can be rejected (e.g. are not absent).
+	HandleSeq        cnf_clauses;  // AbsentLink removed!
 
 	// The mandatory clauses must be grounded.
 	HandleSeq        mandatory;
 
-	// The optional clauses don't have to be. This is where the
-	// negated/absent clauses are held, so e.g. if these get grounded,
-	// they might be rejected.
+	// The optional clauses don't have to be grounded, but they might be.
+	// This is where the absent clauses are held, so e.g. if these do get
+	// grounded, they might be rejected (depending on the callback).
 	std::set<Handle> optionals;    // Optional clauses
 
+	// Black-box clauses. These are clauses that contain GPN's. These
+	// have to drop into scheme or python to get evaluated, which means
+	// that they will be slow.  So, we leave these for last, so that the
+	// faster clauses can run first, and rule out un-needed evaluations.
+	std::set<Handle> black;       // Black-box clauses
+
+	// Evaluatable terms are those that hold a GroundedPredicateNode
+	// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
 	std::set<Handle> evaluatable_terms;   // smallest term that is evaluatable
 	std::set<Handle> evaluatable_holders; // holds something evaluatable.
+
+	// Execuatable terms are those that hold a GroundedSchemaNode (GSN)
+	// in them.
 	std::set<Handle> executable_terms;    // smallest term that is executable
 	std::set<Handle> executable_holders;  // holds something executable.
 
