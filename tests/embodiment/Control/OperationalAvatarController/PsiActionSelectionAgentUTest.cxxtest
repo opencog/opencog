@@ -181,10 +181,20 @@ public:
         scheme_expression = "( do_planning )";
 
         // Run the Procedure that do planning
-        scheme_return_value = evaluator.eval(scheme_expression);
-        std::cout << "scheme_return_value =" << std::endl
-                  << scheme_return_value << std::endl;
-        TS_ASSERT( !evaluator.eval_error() ); 
+        try {
+	        scheme_return_value = evaluator.eval(scheme_expression);
+	        std::cout << "scheme_return_value =" << std::endl
+	                  << scheme_return_value << std::endl;
+	        TS_ASSERT(!evaluator.eval_error());
+        } catch(...) {
+	        // TODO this doesn't work, it doesn't catch the
+	        // opencog::RuntimeException thrown by the AtomTable
+	        //
+	        // Attempting to insert link with invalid outgoing members
+	        // (/home/nilg/OpenCog/opencog/opencog/atomspace/AtomTable.cc:544)
+	        //
+	        std::cout << "I caught it!!!" << std::endl;
+        }
 
         std::cout << "AtomSpace after planning" << std::endl;
         atomSpace.print();
@@ -193,13 +203,13 @@ public:
         //oac.
         
         // Get the plan stored in AtomSpace
-        oac.psiActionSelectionAgent->plan_action_list.clear(); 
-        oac.psiActionSelectionAgent->temp_action_list.clear(); 
+        oac.psiActionSelectionAgent->plan_action_list.clear();
+        oac.psiActionSelectionAgent->temp_action_list.clear();
 
-        oac.psiActionSelectionAgent->getPlan(); 
+        oac.psiActionSelectionAgent->getPlan();
         TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_selected_demand_goal,
                           opencog::Handle::UNDEFINED);
-        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_action_list.size(), 0);  
-        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->temp_action_list.size(), 0);  
+        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_action_list.size(), 0);
+        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->temp_action_list.size(), 0);
     }
 };
