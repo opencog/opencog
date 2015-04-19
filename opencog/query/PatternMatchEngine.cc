@@ -1127,7 +1127,6 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	Handle pursue(Handle::UNDEFINED);
 	Handle unsolved_clause(Handle::UNDEFINED);
 	bool unsolved = false;
-	bool solved = false;
 	unsigned int thinnest = UINT_MAX;
 
 	// Make a list of the as-yet ungrounded variables.
@@ -1165,14 +1164,9 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 #endif
 
 		unsolved = false;
-		solved = false;
 		for (const Handle& root : rl)
 		{
-			if (Handle::UNDEFINED != clause_grounding[root])
-			{
-				solved = true;
-			}
-			else if ((issued.end() == issued.find(root))
+			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
 			        and (search_optionals or not is_optional(root)))
@@ -1185,13 +1179,13 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 					unsolved = true;
 				}
 			}
-			if (solved and unsolved and thinnest < 2) break;
+			if (unsolved and thinnest < 2) break;
 		}
 
-		if (solved and unsolved and thinnest < 2) break;
+		if (unsolved and thinnest < 2) break;
 	}
 
-	if (solved and unsolved)
+	if (unsolved)
 	{
 		// Pursue is a pointer to a (variable) node that's shared between
 		// several clauses. One of the clauses has been grounded,
