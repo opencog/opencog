@@ -311,12 +311,28 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		{ dbgprt("Its evaluatable, continuing.\n"); }
 	}
 
-	// If both are links, compare them as such.
-	// Unless pattern link is a QuoteLink, in which case, the quoted
-	// contents is compared. (well, that was done up above...)
+	// If both are nodes, compare them as such.
+	NodePtr np(NodeCast(hp));
+	NodePtr ng(NodeCast(hg));
+	if (np and ng)
+	{
+		// Call the callback to make the final determination.
+		bool match = _pmc.node_match(hp, hg);
+		if (match)
+		{
+			dbgprt("Found matching nodes\n");
+			prtmsg("# pattern: ", hp);
+			prtmsg("# match:   ", hg);
+			if (hp != hg) var_grounding[hp] = hg;
+		}
+		return match;
+	}
+
+	// If They're not both are links, then it is clearly a mismatch.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
-	if (lp and lg)
+	if (not (lp and lg)) return false;
+
 	{
 #ifdef NO_SELF_GROUNDING
 		// The proposed grounding must NOT contain any bound variables!
@@ -514,7 +530,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 				more_depth --;
 				depth --;
-				dbgprt("tree_comp down unordered link depth=%lu mismatch=%d\n",
+				dbgprt("tree_comp down unordered link depth=%lu match=%d\n",
 				       more_depth, match);
 
 				// If we've found a grounding, lets see if the
@@ -577,22 +593,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		return match;
 	}
 
-	// If both are nodes, compare them as such.
-	NodePtr np(NodeCast(hp));
-	NodePtr ng(NodeCast(hg));
-	if (np and ng)
-	{
-		// Call the callback to make the final determination.
-		bool match = _pmc.node_match(hp, hg);
-		if (match)
-		{
-			dbgprt("Found matching nodes\n");
-			prtmsg("# pattern: ", hp);
-			prtmsg("# match:   ", hg);
-			if (hp != hg) var_grounding[hp] = hg;
-		}
-		return match;
-	}
 
 	// If we got to here, there is a clear mismatch, probably because
 	// one is a node, and the other a link.
