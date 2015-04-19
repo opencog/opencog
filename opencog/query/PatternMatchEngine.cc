@@ -175,9 +175,7 @@ bool PatternMatchEngine::quote_compare(const Handle& hp,
 	if (1 != lp->getArity())
 		throw InvalidParamException(TRACE_INFO,
 		            "QuoteLink has unexpected arity!");
-	more_depth ++;
 	bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
-	more_depth --;
 	in_quote = false;
 	return ma;
 }
@@ -367,7 +365,6 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	// of cpu time by simply skipping the push & pop here.
 	//
 	depth ++;
-	more_depth ++;
 
 	bool match = true;
 	for (size_t i=0; i<oset_sz; i++)
@@ -379,7 +376,6 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 		}
 	}
 
-	more_depth --;
 	depth --;
 	dbgprt("tree_comp down link match=%d\n", match);
 
@@ -414,115 +410,8 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 /// if so, we have to pick up where we left off, and so there
 /// is yet more stack trickery to save and restore that state.
 ///
-bool PatternMatchEngine::old_unorder_compare(const Handle& hp,
-                                         const Handle& hg,
-                                         const LinkPtr& lp,
-                                         const LinkPtr& lg)
-{
-	const std::vector<Handle> &osg = lg->getOutgoingSet();
-	std::vector<Handle> mutation;
 
-	if (more_stack.size() <= more_depth) more_stack.push_back(false);
-	if (not more_stack[more_depth])
-	{
-		dbgprt("tree_comp fresh unordered link at depth %zd\n",
-		       more_depth);
-		mutation = lp->getOutgoingSet();
-		sort(mutation.begin(), mutation.end());
-	}
-	else
-	{
-		dbgprt("tree_comp resume unordered link at depth %zd\n",
-		       more_depth);
-		POPSTK(mute_stack, mutation);
-	}
-
-	do {
-		size_t oset_sz = mutation.size();
-		if (oset_sz != osg.size()) return false;
-
-		// The recursion step: traverse down the tree.
-		dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
-		       more_depth);
-		var_solutn_stack.push(var_grounding);
-		// XXX why are we not pushing the claus soln stack??
-		depth ++;
-
-		have_more = false;
-		more_depth ++;
-
-		bool match = true;
-		for (size_t i=0; i<oset_sz; i++)
-		{
-			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
-			{
-				match = false;
-				break;
-			}
-		}
-
-		more_depth --;
-		depth --;
-		dbgprt("tree_comp down unordered link depth=%lu match=%d\n",
-		       more_depth, match);
-
-		// If we've found a grounding, lets see if the
-		// post-match callback likes this grounding.
-		if (match)
-		{
-			match = _pmc.post_link_match(lp, lg);
-		}
-
-		// If we've found a grounding, record it.
-		if (match)
-		{
-			// Since we leave the loop, we better go back
-			// to where we found things.
-			var_solutn_stack.pop();
-			if (hp != hg) var_grounding[hp] = hg;
-			dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
-			      more_depth);
-
-			// If a lower part of a tree has more to do, it will have
-			// set the have_more flag.  If it is done, then the
-			// have_more flag is clear.  If its clear, we, have to
-			// advance, so we don't restart in the same place.
-			// Ugh. Seems like there should be a more elegant way.
-			if (have_more)
-			{
-				mute_stack.push(mutation);
-				more_stack[more_depth] = true;
-				have_more = true;
-			}
-			else
-			{
-				// Lower loop is done. Advance.
-				bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
-				if (more_perms)
-				{
-					mute_stack.push(mutation);
-					more_stack[more_depth] = true;
-					have_more = true;
-				}
-				else
-				{
-					more_stack[more_depth] = false;
-					have_more = false;
-				}
-			}
-
-			return true;
-		}
-		POPSTK(var_solutn_stack, var_grounding);
-	} while (std::next_permutation(mutation.begin(), mutation.end()));
-
-	dbgprt("tree_comp down unordered exhausted all permuations\n");
-	more_stack[more_depth] = false;
-	have_more = false;
-	return false;
-}
-
-/* ======================================================== */
+static int duude = 0;
 
 bool PatternMatchEngine::unorder_compare(const Handle& hp,
                                          const Handle& hg,
@@ -537,20 +426,14 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	if (osg.size() != arity) return false;
 
 	// _perm_state lets use resume where we last left off.
-	// next_perm returns false only when the next permuation
-	// whould have wrapped us all the way back to the begining.
-	Permutation mutation;
-	if (not next_perm(hp, hg, mutation))
-	{
-		// If we are here, we've explored all the possibilities already
-		_perm_state.erase(Choice(hp, hg));
-		return false;
-	}
+	Permutation mutation = next_perm(hp, hg);
 
 	// If we are here, we've got possibilities to explore.
+	dbgprt("tree_comp resume unordered search of UUID=%lu\n", hp.value());
 	do
 	{
-		dbgprt("tree_comp explore unordered permuation\n");
+		dbgprt("tree_comp explore unordered perm of UUID=%lu\n", hp.value());
+if (15 == hp.value()) {printf("duuude its perm %d\n", duude); duude++; }
 
 		solution_push();
 		bool match = true;
@@ -570,6 +453,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 			match = _pmc.post_link_match(lp, lg);
 			if (match)
 			{
+				dbgprt("Above permuation good UUID=%lu\n", hp.value());
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
 				_perm_state[Unorder(hp, hg)] = mutation;
@@ -580,21 +464,25 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 				return true;
 			}
 		}
+		dbgprt("Above permuation failed UUID=%lu\n", hp.value());
+
 		solution_pop();
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
-	_perm_state.erase(Choice(hp, hg));
+	dbgprt("Exhausted all permuations of UUID=%lu\n", hp.value());
+	_perm_state.erase(Unorder(hp, hg));
 	return false;
 }
 
-/// Return the next unordered-link permutation for this
+/// Return the saved unordered-link permutation for this
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
-bool PatternMatchEngine::next_perm(const Handle& hp,
-                                   const Handle& hg,
-                                   Permutation& perm)
+PatternMatchEngine::Permutation 
+PatternMatchEngine::next_perm(const Handle& hp,
+                              const Handle& hg)
 {
+	Permutation perm;
 	try { perm = _perm_state.at(Unorder(hp, hg)); }
 	catch(...)
 	{
@@ -602,9 +490,8 @@ bool PatternMatchEngine::next_perm(const Handle& hp,
 		LinkPtr lp(LinkCast(hp));
 		perm = lp->getOutgoingSet();
 		sort(perm.begin(), perm.end());
-		return true;
 	}
-	return std::next_permutation(perm.begin(), perm.end());
+	return perm;
 }
 
 /// Return true if there are more permutations to explore.
@@ -804,7 +691,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		return false;
 
 	do {
-		dbgprt("Enter the permutation loop!\n");
+		dbgprt("Enter the permutation loop for UUID=%lu\n",
+		        curr_term_handle.value());
 //		solution_push();
 
 		bool found = false;
@@ -826,8 +714,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			{
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
-	//			solution_pop();
 				solution_pop();
+//				solution_pop();
 				return false;
 			}
 
@@ -840,6 +728,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 
 		if (found)
 		{
+			// Even the stack, *without* erasing the discovered grounding.
+		//	var_solutn_stack.pop();
 			return true;
 		}
 
@@ -1413,18 +1303,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
 
-	// Reset the unordered-set stacks with each new clause.
-	// XXX this cannot possibly be right: we may need to pop,
-	// and try a different ordering.
-	have_stack.push(have_more);
-	have_more = false;
-	depth_stack.push(more_depth);
-	more_depth = 0;
-	unordered_stack.push(more_stack);
-	more_stack.resize(1);
-	more_stack[0] = false;
-	permutation_stack.push(mute_stack);
-
 	_pmc.push();
 }
 
@@ -1447,14 +1325,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	POPSTK(issued_stack, issued);
 
 	POPSTK(choice_stack, _choice_state);
-
-	// Handle different unordered links that live in different
-	// clauses. The mute_stack deals with different unordered
-	// links that live in the *same* clause.
-	POPSTK(have_stack, have_more);
-	POPSTK(depth_stack, more_depth);
-	POPSTK(unordered_stack, more_stack);
-	POPSTK(permutation_stack, mute_stack);
 
 	_clause_stack_depth --;
 
@@ -1567,13 +1437,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!choice_stack.empty()) choice_stack.pop();
 
 	have_more = false;
-	more_depth = 0;
 	more_stack.clear();
-	while (!mute_stack.empty()) mute_stack.pop();
-	while (!have_stack.empty()) have_stack.pop();
-	while (!depth_stack.empty()) depth_stack.pop();
-	while (!unordered_stack.empty()) unordered_stack.pop();
-	while (!permutation_stack.empty()) permutation_stack.pop();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
@@ -1598,7 +1462,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 
 	// unordered link state
 	have_more = false;
-	more_depth = 0;
 }
 
 /* ======================================================== */

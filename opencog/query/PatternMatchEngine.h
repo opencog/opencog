@@ -120,9 +120,13 @@ class PatternMatchEngine
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
-		bool _need_perm_push;
-		bool next_perm(const Handle&, const Handle&, Permutation&);
+		bool _need_perm_push;  // XXX ???
+		Permutation next_perm(const Handle&, const Handle&);
 		bool have_perm(const Handle&, const Handle&);
+
+		bool have_more;
+		typedef std::vector<bool> MoreStack;
+		MoreStack more_stack;
 
 		// -------------------------------------------
 		// Stack used to store current traversal state for a single
@@ -173,8 +177,6 @@ class PatternMatchEngine
 		                    const LinkPtr&, const LinkPtr&);
 		bool ordered_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
-		bool old_unorder_compare(const Handle&, const Handle&,
-		                     const LinkPtr&, const LinkPtr&);
 		bool unorder_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
 
@@ -191,26 +193,6 @@ class PatternMatchEngine
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool, bool, bool);
 		unsigned int thickness(const Handle&, const std::set<Handle>&);
-
-		// --------------------------------------------------
-		// Unordered-link stuff. This needs a major overhaul.
-		// Stacks are used to explore all possible permuations of
-		// unordered links, but this is incorectly/incompletely
-		// designed.
-		bool have_more;
-		size_t more_depth;
-
-		// Substacks used for nested unorderered links.
-		typedef std::vector<bool> MoreStack;
-		MoreStack more_stack;
-		typedef std::stack<Permutation> PermuStack;
-		PermuStack mute_stack;
-
-		// Stacks used for unordered links in different clauses.
-		std::stack<bool> have_stack;
-		std::stack<size_t> depth_stack;
-		std::stack<MoreStack> unordered_stack;
-		std::stack<PermuStack> permutation_stack;
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,
