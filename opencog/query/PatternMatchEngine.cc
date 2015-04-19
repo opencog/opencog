@@ -1100,28 +1100,40 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	curr_term_handle = Handle::UNDEFINED;
 }
 
-// XXX TODO ... Rather than settling for the first one that we find,
-// we should instead look for the "thinnest" one, the one with the
-// smallest incoming set.  That is because the very next thing that
-// we do will be to iterate over the incoming set of "pursue" ... so
-// it could be a huge pay-off to minimize this.
+// Count teh number of ungrounded variables in a clause.
 //
-// In particular, the "thinnest" one is probably the one with the
-// fewest ungrounded variables in it. Thus, if there is just one
-// variable that needs to be grounded, then this can be done in
-// direct fashion; it resembles the concept of "unit propagation"
-// in the DPLL algorithm.
+// This is used to search for the "thinnest" ungrounded clause:
+// the one with the fewest ungrounded variables in it. Thus, if
+// there is just one variable that needs to be grounded, then this
+// can be done in a direct fashion; it resembles the concept of
+// "unit propagation" in the DPLL algorithm.
+//
+// XXX TODO ... Rather than counting the number of variables, we
+// should instead look for one with the smallest incoming set.
+// That is because the very next thing that we do will be to
+// iterate over the incoming set of "pursue" ... so it could be
+// a huge pay-off to minimize this.
 //
 // If there are two ungrounded variables in a clause, then the
 // "thickness" is the *product* of the sizes of the two incoming
 // sets. Thus, the fewer ungrounded variables, the better.
+//
+// Danger: this assumes a suitable dataset, as otherwise, the cost
+// of this "optimization" can add un-necessarily to the overhead.
+//
 unsigned int PatternMatchEngine::thickness(const Handle& clause,
                                            const std::set<Handle>& live)
 {
 	// If there are only zero or one ungrounded vars, then any clause
 	// will do. Blow this pop stand.
 	if (live.size() < 2) return 1;
-	return 1;
+
+	unsigned int count = 0;
+	for (const Handle& v : live)
+	{
+		if (is_unquoted_in_tree(clause, v)) count++;
+	}
+	return count;
 }
 
 /// Same as above, but with three boolean flags:  if not set, then only
@@ -1138,7 +1150,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	// to the optional clauses.  We can find ungrounded clauses by
 	// looking at the grounded vars, looking up the root, to see if
 	// the root is grounded.  If its not, start working on that.
-	Handle pursue(Handle::UNDEFINED);
+	Handle joint(Handle::UNDEFINED);
 	Handle unsolved_clause(Handle::UNDEFINED);
 	bool unsolved = false;
 	unsigned int thinnest = UINT_MAX;
@@ -1157,21 +1169,21 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	// joins will become our next untried clause.  Note that the join
 	// is not necessarily a variable; it could be a constant atom.
 	// (wouldn't things be faster if they were variables only, that
-	// joined? the problem is that var_grounding stores both grounded
+	// joined?) the problem is that var_grounding stores both grounded
 	// variables and "grounded" constants.
 #define OLD_LOOP
 #ifdef OLD_LOOP
 	for (const Pattern::ConnectPair& vk : _pat->connectivity_map)
 	{
 		const Pattern::RootList& rl(vk.second);
-		pursue = vk.first;
+		const Handle& pursue = vk.first;
 		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
 #else // OLD_LOOP
 	// Newloop might be slightly faster than old loop.
 	// ... but maybe not...
 	for (auto gndpair : var_grounding)
 	{
-		pursue = gndpair.first;
+		const Handle& pursue = gndpair.first;
 		try { _pat->connectivity_map.at(pursue); }
 		catch(...) { continue; }
 		const RootList& rl(_pat->connectivity_map.at(pursue));
@@ -1189,6 +1201,7 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 				{
 					thinnest = th;
 					unsolved_clause = root;
+					joint = pursue;
 					unsolved = true;
 				}
 			}
@@ -1200,12 +1213,12 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 
 	if (unsolved)
 	{
-		// Pursue is a pointer to a (variable) node that's shared between
-		// several clauses. One of the clauses has been grounded,
-		// another has not.  We want to now traverse upwards from this node,
+		// Joint is a (variable) node that's shared between several
+		// clauses. One of the clauses has been grounded, another
+		// has not.  We want to now traverse upwards from this node,
 		// to find the top of the ungrounded clause.
 		curr_root = unsolved_clause;
-		curr_term_handle = pursue;
+		curr_term_handle = joint;
 
 		if (Handle::UNDEFINED != unsolved_clause)
 		{
