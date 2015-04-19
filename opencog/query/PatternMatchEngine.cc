@@ -311,7 +311,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 
 		dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
 
-		match = tree_recurse(hop, hg, CALL_CHOICE);
+		bool match = tree_recurse(hop, hg, CALL_CHOICE);
 		if (match)
 		{
 			// If we've found a grounding, lets see if the
@@ -369,7 +369,7 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	depth ++;
 	more_depth ++;
 
-	match = true;
+	bool match = true;
 	for (size_t i=0; i<oset_sz; i++)
 	{
 		if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
@@ -451,7 +451,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		have_more = false;
 		more_depth ++;
 
-		match = true;
+		bool match = true;
 		for (size_t i=0; i<oset_sz; i++)
 		{
 			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
