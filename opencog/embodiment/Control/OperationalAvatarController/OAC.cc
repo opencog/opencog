@@ -772,7 +772,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
     logger().fine("OAC - Processing next message.");
     bool result;
 
-    // message not for the OAC
+    // Message not for the OAC
     if (msg->getTo() != getID()) {
         logger().warn("OAC::%s - This message is not for OAC. "
                       "Its destination is %s. Message content: %s",
@@ -783,7 +783,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         return false;
     }
 
-    // message that has been parsed by RelEx server
+    // Message that has been parsed by RelEx server
     if(msg->getFrom() == config().get("RELEX_SERVER_ID")) {
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(),
@@ -803,13 +803,13 @@ bool OAC::processNextMessage(messaging::Message *msg)
         return false;
     }
 
-    // message from embodiment proxy - send to PAI
+    // Message from embodiment proxy - send to PAI
     if (msg->getFrom() == config().get("PROXY_ID")) {
         // @note:
         // The message type RAW is used for unity environment to handle dialog.
 		// If you use multiverse, just ignore this.
         if(msg->getType() == messaging::RAW) {
-			// message from OC Avatar, forward it to RelEx server.
+			// Message from OC Avatar, forward it to RelEx server.
             StringMessage rawMessage( getID(),
                                       config().get("RELEX_SERVER_ID"), 
                                       msg->getPlainTextRepresentation()
