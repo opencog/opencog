@@ -552,6 +552,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	{
 		dbgprt("tree_comp explore unordered permuation\n");
 
+		solution_push();
 		bool match = true;
 		for (size_t i=0; i<arity; i++)
 		{
@@ -567,13 +568,16 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
 			match = _pmc.post_link_match(lp, lg);
-			if (not match) continue;
-
-			// If the grounding is accepted, record it.
-			if (hp != hg) var_grounding[hp] = hg;
-			_perm_state[Unorder(hp, hg)] = mutation;
-			return true;
+			if (match)
+			{
+				solution_pop();
+				// If the grounding is accepted, record it.
+				if (hp != hg) var_grounding[hp] = hg;
+				_perm_state[Unorder(hp, hg)] = mutation;
+				return true;
+			}
 		}
+		solution_pop();
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
@@ -797,7 +801,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		return false;
 
 	do {
-		dbgprt("Enter the permuation loop!\n");
+		dbgprt("Enter the permutation loop!\n");
 
 		bool found = false;
 		do {
