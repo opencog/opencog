@@ -535,7 +535,7 @@
                   (newline)
                   (display current_goal)
                   (newline)
-                            
+
                   (if (not (null? atom_outgoings) )
                       (cond 
                        ( (equal? atom_type 'AndLink)
@@ -641,64 +641,77 @@
                         ); if
                     ); let
 
-                  ;; (if (null? selected_rule)
-                  ;;     ; If there's no rule with True context, randomly
-                  ;;     ; select a rule using roulette wheel selection,
-                  ;;     ; that is, for each rule, the possibility to be
-                  ;;     ; selected is proportional to its truth value
-                  ;;     ; (mean value).  And the truth value of these
-                  ;;     ; rules could be 'learned' very easily through
-                  ;;     ; the interaction with the environment. For
-                  ;;     ; example, we can increase the truth value of a
-                  ;;     ; psi rule (ImplicationLink) slightly, while
-                  ;;     ; corresponding actions are executed
-                  ;;     ; successfully, and decrease it, when actions
-                  ;;     ; fail. This work should be done in
-                  ;;     ; 'PsiActionSelectionAgent::run'.
-                  ;;     (begin
-                  ;;       (display "Failed to find any rule with true context ")
-                  ;;       (newline)
+                  (if (null? selected_rule)
+                      ; If there's no rule with True context, randomly
+                      ; select a rule using roulette wheel selection,
+                      ; that is, for each rule, the possibility to be
+                      ; selected is proportional to its truth value
+                      ; (mean value).  And the truth value of these
+                      ; rules could be 'learned' very easily through
+                      ; the interaction with the environment. For
+                      ; example, we can increase the truth value of a
+                      ; psi rule (ImplicationLink) slightly, while
+                      ; corresponding actions are executed
+                      ; successfully, and decrease it, when actions
+                      ; fail. This work should be done in
+                      ; 'PsiActionSelectionAgent::run'.
+                      (begin
+                        (display "Failed to find any rule with true context ")
+                        (newline)
 
-                  ;;       (set! selected_rule 
-                  ;;             (roulette_wheel_select available_rule_list)        
-                  ;;             )
+                        (set! selected_rule
+                              (roulette_wheel_select available_rule_list)
+                              )
  
-                  ;;       (let* ( (precondition (get_psi_precondition selected_rule) )
-                  ;;               (split_result (split_context_action precondition) )
-                  ;;               (context (list-ref split_result 0) )
-                  ;;               ) 
-                  ;;         (do_plan context)
-                  ;;         )
-                  ;;       )
-   
-                  ;;     ; If found a rule with True context
-                  ;;     (let ( (selected_context_action
-                  ;;             (random_select search_result) )
-                  ;;            ) 
+                        (let* ( (precondition (get_psi_precondition selected_rule) )
+                                (split_result (split_context_action precondition) )
+                                (context (list-ref split_result 0) )
+                                )
 
-                  ;;       (display "Found a rule with true context ")
-                  ;;       (display search_result) (newline)
+                          (display "precondition = ")
+                          (display precondition)
+                          (newline)
 
-                  ;;       (if (not (member selected_context_action
-                  ;;                        context_action_list))
+                          (display "split_result = ")
+                          (display split_result)
+                          (newline)
 
-                  ;;           (begin
-                  ;;             (set! context_action_list 
-                  ;;                   (append context_action_list
-                  ;;                           (list selected_context_action)
-                  ;;                           )
-                  ;;                   )
+                          (display "context = ")
+                          (display context)
+                          (newline)
 
-                  ;;             (set! solved_rule_list
-                  ;;                   (append solved_rule_list
-                  ;;                           (list selected_rule)
-                  ;;                           ) 
-                  ;;                   )
-                  ;;             ); begin
-                  ;;           )
-                  ;;       ); let
+                          (do_plan context)
+                          )
+                        )
+
+                      ; If found a rule with True context
+                      (let ( (selected_context_action
+                              (random_select search_result) )
+                             )
+
+                        (display "Found a rule with true context ")
+                        (display search_result) (newline)
+
+                        (if (not (member selected_context_action
+                                         context_action_list))
+
+                            (begin
+                              (set! context_action_list
+                                    (append context_action_list
+                                            (list selected_context_action)
+                                            )
+                                    )
+
+                              (set! solved_rule_list
+                                    (append solved_rule_list
+                                            (list selected_rule)
+                                            )
+                                    )
+                              ); begin
+                            )
+                        ); let
                       
-                  ;;     ); if (null? selected_rule)
+                      ); if (null? selected_rule)
                   ); let
                 ); if (null? available_rule_list)
             
@@ -774,8 +787,6 @@
          (display "plan_result = ")
          (display plan_result)
          (newline)
-
-         (set! plan_result (list))             ;TODO remove this (for debugging)
 
          (if (null? plan_result)
              ; If the planner fails to find any plan for the selected demand goal 
