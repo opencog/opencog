@@ -137,6 +137,8 @@ class PatternMatchEngine
 		std::stack<Handle> root_handle_stack;
 		std::stack<Handle> term_handle_stack;
 		std::stack<Handle> soln_handle_stack;
+		void solution_push(void);
+		void solution_pop(void);
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
@@ -145,11 +147,14 @@ class PatternMatchEngine
 
 		std::stack<IssuedSet> issued_stack;
 		std::stack<ChoiceState> choice_stack;
+
 		std::stack<PermState> perm_stack;
+		std::stack<MoreStack> unordered_stack;
+		std::stack<bool> unmore_stack;
+		void perm_push(void);
+		void perm_pop(void);
 
 		// push, pop and clear these states.
-		void solution_push(void);
-		void solution_pop(void);
 		void clause_stacks_push(void);
 		void clause_stacks_pop(void);
 		void clause_stacks_clear(void);
