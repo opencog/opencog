@@ -325,6 +325,63 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 }
 
 /* ======================================================== */
+
+/// If the two links are both ordered, its enough to compare
+/// them "side-by-side".
+bool PatternMatchEngine::ordered_compare(const Handle& hp,
+                                         const Handle& hg,
+                                         const LinkPtr& lp,
+                                         const LinkPtr& lg)
+{
+	const HandleSeq &osp = lp->getOutgoingSet();
+	const HandleSeq &osg = lg->getOutgoingSet();
+
+	size_t oset_sz = osp.size();
+	if (oset_sz != osg.size()) return false;
+
+	// The recursion step: traverse down the tree.
+	// In principle, we could/should push the current groundings
+	// onto the stack before recursing, and then pop them off on
+	// return.  Failure to do so could leave some bogus groundings,
+	// sitting around, i.e. groundings that were found during
+	// recursion but then discarded due to a later mis-match.
+	//
+	// In practice, I was unable to come up with any test case
+	// where this mattered; any bogus groundings eventually get
+	// replaced by valid ones.  Thus, we save some unknown amount
+	// of cpu time by simply skipping the push & pop here.
+	//
+	depth ++;
+	more_depth ++;
+
+	match = true;
+	for (size_t i=0; i<oset_sz; i++)
+	{
+		if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
+		{
+			match = false;
+			break;
+		}
+	}
+
+	more_depth --;
+	depth --;
+	dbgprt("tree_comp down link match=%d\n", match);
+
+	if (not match) return false;
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	match = _pmc.post_link_match(lp, lg);
+	if (not match) return false;
+
+	// If we've found a grounding, record it.
+	if (hp != hg) var_grounding[hp] = hg;
+
+	return true;
+}
+
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -457,54 +514,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// possible permutation.  This can be a bit of a combinatoric
 	// explosion.
 	if (_classserver.isA(tp, ORDERED_LINK))
-	{
-		const HandleSeq &osp = lp->getOutgoingSet();
-		const HandleSeq &osg = lg->getOutgoingSet();
-
-		size_t oset_sz = osp.size();
-		if (oset_sz != osg.size()) return false;
-
-		// The recursion step: traverse down the tree.
-		// In principle, we could/should push the current groundings
-		// onto the stack before recursing, and then pop them off on
-		// return.  Failure to do so could leave some bogus groundings,
-		// sitting around, i.e. groundings that were found during
-		// recursion but then discarded due to a later mis-match.
-		//
-		// In practice, I was unable to come up with any test case
-		// where this mattered; any bogus groundings eventually get
-		// replaced by valid ones.  Thus, we save some unknown amount
-		// of cpu time by simply skipping the push & pop here.
-		//
-		depth ++;
-		more_depth ++;
-
-		match = true;
-		for (size_t i=0; i<oset_sz; i++)
-		{
-			if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
-			{
-				match = false;
-				break;
-			}
-		}
-
-		more_depth --;
-		depth --;
-		dbgprt("tree_comp down link match=%d\n", match);
-
-		if (not match) return false;
-
-		// If we've found a grounding, lets see if the
-		// post-match callback likes this grounding.
-		match = _pmc.post_link_match(lp, lg);
-		if (not match) return false;
-
-		// If we've found a grounding, record it.
-		if (hp != hg) var_grounding[hp] = hg;
-
-		return true;
-	}
+		return ordered_compare(hp, hg, lp, lg);
 
 	// If we are here, we are dealing with an unordered link.
 	// Enumerate all the permutations of the outgoing set of
