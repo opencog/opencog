@@ -183,6 +183,89 @@ bool PatternMatchEngine::quote_compare(const Handle& hp,
 }
 
 /* ======================================================== */
+
+/// Handle hp is from the pattern clause, and it might be one
+/// of the bound variables. If so, then declare a match.
+bool PatternMatchEngine::variable_compare(const Handle& hp,
+                                          const Handle& hg)
+{
+#ifdef NO_SELF_GROUNDING
+	// But... if handle hg happens to also be a bound var,
+	// then its a mismatch.
+	if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
+#endif
+
+	// If we already have a grounding for this variable, the new
+	// proposed grounding must match the existing one. Such multiple
+	// groundings can occur when traversing graphs with loops in them.
+	Handle gnd(var_grounding[hp]);
+	if (Handle::UNDEFINED != gnd) {
+		return (gnd == hg);
+	}
+
+	// VariableNode had better be an actual node!
+	// If it's not then we are very very confused ...
+	NodePtr np(NodeCast(hp));
+	OC_ASSERT (NULL != np,
+	           "ERROR: expected variable to be a node, got this: %s\n",
+	           hp->toShortString().c_str());
+
+#ifdef NO_SELF_GROUNDING
+	// Disallow matches that contain a bound variable in the
+	// grounding. However, a bound variable can be legitimately
+	// grounded by a free variable (because free variables are
+	// effectively constant literals, during the pattern match.
+	if (VARIABLE_NODE == hg->getType() and
+	    _varlist->varset.end() != _varlist->varset.find(hg))
+	{
+		return false;
+	}
+#endif
+
+	// Else, we have a candidate grounding for this variable.
+	// The node_match may implement some tighter variable check,
+	// e.g. making sure that grounding is of some certain type.
+	if (not _pmc.variable_match (hp,hg)) return false;
+
+	// Make a record of it.
+	dbgprt("Found grounding of variable:\n");
+	prtmsg("$$ variable:    ", hp);
+	prtmsg("$$ ground term: ", hg);
+	if (hp != hg) var_grounding[hp] = hg;
+	return true;
+}
+
+/* ======================================================== */
+
+// If they're the same atom, then clearly they match.
+// ... but only if hp is a constant i.e. contains no bound variables)
+bool PatternMatchEngine::self_compare(const Handle& hp)
+{
+	prtmsg("Compare atom to itself:\n", hp);
+
+#ifdef NO_SELF_GROUNDING
+	if (hp == curr_term_handle)
+	{
+		// Mismatch, if hg contains bound vars in it.
+		if (any_unquoted_in_tree(hp, _varlist->varset)) return false;
+		return true;
+	}
+#if THIS_CANT_BE_RIGHT
+	// Bound but quoted variables cannot be solutions to themselves.
+	// huh? whaaaat?
+	if (not in_quote or
+	    (in_quote and
+	     (VARIABLE_NODE != tp or
+	       _varlist->varset.end() == _varlist->varset.find(hp))))
+	{
+		if (hp != hg) var_grounding[hp] = hg;
+	}
+#endif // THIS_CANT_BE_RIGHT
+#endif
+	return true;
+}
+
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -234,91 +317,19 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (not in_quote and _varlist->varset.end() != _varlist->varset.find(hp))
-	{
-#ifdef NO_SELF_GROUNDING
-		// But... if handle hg happens to also be a bound var,
-		// then its a mismatch.
-		if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
-#endif
-
-		// If we already have a grounding for this variable, the new
-		// proposed grounding must match the existing one. Such multiple
-		// groundings can occur when traversing graphs with loops in them.
-		Handle gnd(var_grounding[hp]);
-		if (Handle::UNDEFINED != gnd) {
-			return (gnd == hg);
-		}
-
-		// VariableNode had better be an actual node!
-		// If it's not then we are very very confused ...
-		NodePtr np(NodeCast(hp));
-		OC_ASSERT (NULL != np,
-		           "ERROR: expected variable to be a node, got this: %s\n",
-		           hp->toShortString().c_str());
-
-#ifdef NO_SELF_GROUNDING
-		// Disallow matches that contain a bound variable in the
-		// grounding. However, a bound variable can be legitimately
-		// grounded by a free variable (because free variables are
-		// effectively constant literals, during the pattern match.
-		if (VARIABLE_NODE == hg->getType() and
-		    _varlist->varset.end() != _varlist->varset.find(hg))
-		{
-			return false;
-		}
-#endif
-
-		// Else, we have a candidate grounding for this variable.
-		// The node_match may implement some tighter variable check,
-		// e.g. making sure that grounding is of some certain type.
-		if (not _pmc.variable_match (hp,hg)) return false;
-
-		// Make a record of it.
-		dbgprt("Found grounding of variable:\n");
-		prtmsg("$$ variable:    ", hp);
-		prtmsg("$$ ground term: ", hg);
-		if (hp != hg) var_grounding[hp] = hg;
-		return true;
-	}
+		return variable_compare(hp, hg);
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hp is a constant i.e. contains no bound variables)
-	if (hp == hg)
-	{
-		prtmsg("Compare atom to itself:\n", hp);
-
-#ifdef NO_SELF_GROUNDING
-		if (hg == curr_term_handle)
-		{
-			// Mismatch, if hg contains bound vars in it.
-			if (any_unquoted_in_tree(hg, _varlist->varset)) return false;
-		}
-		else
-		{
-#if THIS_CANT_BE_RIGHT
-			// Bound but quoted variables cannot be solutions to themselves.
-			// huh? whaaaat?
-			if (not in_quote or
-			    (in_quote and
-			     (VARIABLE_NODE != tp or
-			       _varlist->varset.end() == _varlist->varset.find(hp))))
-			{
-				if (hp != hg) var_grounding[hp] = hg;
-			}
-#endif // THIS_CANT_BE_RIGHT
-
-		}
-#endif
-		// If the pattern contains atoms that are evaluatable i.e. GPN's
-		// then we must fall through, and let the tree comp mechanism
-		// find and evaluate them. That's for two reasons: (1) because
-		// evaluation may have side-effects (e.g. send a message) and
-		// (2) evaluation may depend on external state. These are
-		// typically used to implement behavior trees, e.g SequenceUTest
-		if (not is_evaluatable(hp)) return true;
-		else
-		{ dbgprt("Its evaluatable, continuing.\n"); }
-	}
+	//
+	// If the pattern contains atoms that are evaluatable i.e. GPN's
+	// then we must fall through, and let the tree comp mechanism
+	// find and evaluate them. That's for two reasons: (1) because
+	// evaluation may have side-effects (e.g. send a message) and
+	// (2) evaluation may depend on external state. These are
+	// typically used to implement behavior trees, e.g SequenceUTest
+	if ((hp == hg) and not is_evaluatable(hp))
+		return self_compare(hp);
 
 	// If both are nodes, compare them as such.
 	NodePtr np(NodeCast(hp));

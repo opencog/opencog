@@ -152,6 +152,8 @@ class PatternMatchEngine
 		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 		bool quote_compare(const Handle&, const Handle&);
+		bool variable_compare(const Handle&, const Handle&);
+		bool self_compare(const Handle&);
 
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);
