@@ -428,6 +428,12 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	// _perm_state lets use resume where we last left off.
 	Permutation mutation = next_perm(hp, hg);
 
+	// have_more will be set here only if a peer set it previously.
+	// It will be false if there are no peers.
+	// If there are peers, we have to explore all M! * N! possibilities.
+	bool do_increment = not have_more;
+	have_more = true;
+
 	// If we are here, we've got possibilities to explore.
 	dbgprt("tree_comp resume unordered search of UUID=%lu\n", hp.value());
 	do
@@ -435,6 +441,8 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		dbgprt("tree_comp explore unordered perm of UUID=%lu\n", hp.value());
 if (15 == hp.value()) {printf("duuude its perm %d\n", duude); duude++; }
 
+		more_stack.push(have_more);
+		have_more = false;
 		solution_push();
 		bool match = true;
 		for (size_t i=0; i<arity; i++)
@@ -454,24 +462,39 @@ if (15 == hp.value()) {printf("duuude its perm %d\n", duude); duude++; }
 			if (match)
 			{
 				dbgprt("Above permuation good UUID=%lu\n", hp.value());
+				// Even the stack, *without* erasing the discovered grounding.
+				var_solutn_stack.pop();
+
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
-				_perm_state[Unorder(hp, hg)] = mutation;
 
-				// Even the stack, *without* erasing the discovered
-				// grounding.
-				var_solutn_stack.pop();
+				if (have_more)
+				{
+					_perm_state[Unorder(hp, hg)] = mutation;
+					POPSTK(more_stack, have_more);
+					return true;
+				}
+				if (do_increment)
+				{
+					POPSTK(more_stack, have_more);
+					have_more = std::next_permutation(mutation.begin(), mutation.end());
+					return true;
+				}
+				_perm_state[Unorder(hp, hg)] = mutation;
+				POPSTK(more_stack, have_more);
 				return true;
 			}
 		}
 		dbgprt("Above permuation failed UUID=%lu\n", hp.value());
 
+		POPSTK(more_stack, have_more);
 		solution_pop();
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
 	dbgprt("Exhausted all permuations of UUID=%lu\n", hp.value());
 	_perm_state.erase(Unorder(hp, hg));
+	have_more = false;
 	return false;
 }
 
@@ -1437,7 +1460,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!choice_stack.empty()) choice_stack.pop();
 
 	have_more = false;
-	more_stack.clear();
+	while (!more_stack.empty()) more_stack.pop();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,

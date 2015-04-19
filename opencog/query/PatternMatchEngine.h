@@ -125,7 +125,7 @@ class PatternMatchEngine
 		bool have_perm(const Handle&, const Handle&);
 
 		bool have_more;
-		typedef std::vector<bool> MoreStack;
+		typedef std::stack<bool> MoreStack;
 		MoreStack more_stack;
 
 		// -------------------------------------------
