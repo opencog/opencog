@@ -32,16 +32,12 @@
                     (VariableNode "$C")
                 )
                 ; To avoid matching (Inheritance A B) and (Inheritance B A)
-                ; TODO Figure out why the AbsentLink/NotLink are not working
-                #!(AbsentLink
-                    (EvaluationLink
-                        (GroundedPredicateNode "scm: cog-equal?")
-                        (ListLink
-                            (VariableNode "$A")
-                            (VariableNode "$C")
-                        )
+                (NotLink
+                    (EqualLink
+                        (VariableNode "$A")
+                        (VariableNode "$C")
                     )
-                )!#
+                )
             )
             (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pln-formula-simple-deduction")
