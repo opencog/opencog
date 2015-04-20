@@ -277,17 +277,115 @@ static inline void prtmsg(const char * msg, const Handle& h)
  *    must be made. Thus, the state includes the set of all choices made
  *    so far.
  *
+ *    Both of the above branch-points are dealt with in the xsoln_up()
+ *    method.  It is essentially a wrapper around tree_compare(), and
+ *    deals with setting up the state so that tree_compare() can
+ *    reproduce the desired choiices when it performs it's comparison.
+ *    Thus, the description of the basic algorithm, up above, is
+ *    modified in a fairly straight-forward way: when two trees need to
+ *    be compared for similarity, the tree_compare() method is not
+ *    invoked directly; instead, the xsoln_up() method is invoked: it
+ *    makes sure that the correct state has been established, and it
+ *    explores the different branches that the unordered and the choice
+ *    links represent.
+ *
  * -- Evaluatable and executable links. These links are not a static
  *    part of the pattern, but can only be known at runtime, at the time
  *    the actual match must be made. Evaluatable links are those that
  *    contain a GroundedPredicateNode (GPN), are are one of the equivalent
  *    stand-ins for a GPN, such as an EqualLink or GreaterThanLink.
- *    Whenever one of these is encountered
-
-* black box
- For each parent, it calls xsoln_up()  thin wrap of tree comp.
+ *    Whenever one of these is encountered, it must be evaluated on the
+ *    spot to determine if a match is successful (if the predicate is
+ *    satisfied).
  *
+ *    Evaluatable links can be joined together with connective links.
+ *    Thus, for example, if the evaluatable links yield crisp-logic
+ *    true/false match/no-match values, then these can be combined with
+ *    the connectives AndLink, OrLink and NotLink to form a classical
+ *    boolean algebra. This crisp-logic combination is performed in the
+ *    Default callback.  It is performed in the callback because other
+ *    ways of combining evaluatables is possible: another simple example
+ *    would be Bayesian probability: If each evaluatable yeilds a
+ *    probability 0.0 <= p <= 1.0, then these probabilities can be
+ *    combined with the standard Bayesian probability-union, conditional
+ *    probability and inversion operators. This too could be implemented
+ *    in a callback. However, at the very top, the final decision must
+ *    be a go/no-go decision: proceed with the grounding, or do not.
+ *    It is OK to make this a random choice. The callback or GPN can use
+ *    any policy whatsoever.
+ *
+ *    The technical name for the different ways of joining together
+ *    different evaluatable terms is called a "theory". Thus, the
+ *    pattern matcher is a "satisfiability modulo theories" (SMT)
+ *    solver, with different theories implementable via the
+ *    evaluatable-link callback. (Theories can also be implemented more
+ *    directly but more opaquely using the "black box" GPN's; this is
+ *    easier in the short-run but not advisable in the long-run; so e.g.
+ *    the "Bayesian theory" shold be hard-coded in C++; a demo of the
+ *    Bayesian theory, via GPN's, can be found in the Markov Chain
+ *    example demo).
+ *
+ *    Evaluatable links come in two forms: "black box" links, which
+ *    specify a python or scheme program in a GPN, or "clear-box" links,
+ *    such as EqualLink or GreaterThanLink.  The "clear-box" links are
+ *    more convenient for the external user: they can be reasoned about
+ *    (its "obvious" what they mean). They are also faster: they can be
+ *    implemented inentirely in C++, wherease the black-box links
+ *    require entry into to python or scheme virtual machine, which can
+ *    take in excess of 100 microseconds each time, thus limiting
+ *    performance to about 10K calls/second on current (2015) CPU's.
+ *
+ *    The distinction between clear-box and black-box doesn't much
+ *    matter to the pattern matcher, other than that cloear-box clauses
+ *    are tried first, so that if satisfaction is not possible, then
+ *    perhaps some invocations to the slower black-boxes can be avoided.
+ *
+ *    The primary difficulty that the evaluatable links present is when
+ *    whey are organized such that, when they are removed, the pattern
+ *    graph falls apart into multiple disconnected pieces. This requires
+ *    that each piece must be separately grounded, and each possible
+ *    grounding is then stitched back together by evaluating the
+ *    evaluatable link, with its arguments taken from each grounding.
+ *    Note that there is a combinatoric explosion here, as well: If
+ *    there are n disconnected pieces, and piece k has M_k possible
+ *    groundings, then there is a total of (M_1 * M_2 * ... * M_n)
+ *    possibilities to explore.  This combinatoric explosion is handled
+ *    outside of the class PatternMatchEngine: it is impemented in
+ *    PatternMatch class. (Thus, grounding just one component, here,
+ *    resembles the "unit propagation" of DPLL.)
+ *
+ *    This class (PatternMatchEngine) does handle evaluatable clauses
+ *    as long as the total graph would remain connected if the
+ *    evaluatable clauses were removed.  Thus, grounding proceeds by
+ *    evaluating all "fixed" (non-evaluatable) clauses, so that every
+ *    variable is given a ground BEFORE the evaluatable clauses are
+ *    evaluated. Thus, the evaluatable terms are alwways working with
+ *    concrete, fully-grounded terms (closed terms): there is no
+ *    question of how to evaluate something that has a free variable in
+ *    it.
+ *
+ *    Note that evaluatable terms need not have any variables in them at
+ *    all; they can consist entirely of constant, fixed links. However,
+ *    black-box links can have a side-effect (e.g. they can send a
+ *    message) or can depend on external data (evaluate to true/false
+ *    depending on whether a message has been received).
+ *
+ * -- Executable terms.  These are terms that contain a
+ *    GroundedSchemaNode (GSN).  These must be executed. The atom that
+ *    results from thier execution is then treated as an "ordinary"
+ *    term, and is grounded as per usual (unless it also contains GSN's,
+ *    in which case the process repeats).  The use of GSN's means that
+ *    patterns themselves can be recursive. Support for GSN's means that
+ *    patterns are essentially the equivalent of ProLog programs, or
+ *    "answer-set" programs; the pattern matcher is then a
+ *    satisifiability solver. Since the pattern matcher can handle
+ *    truth values that are more general than true/false, it should more
+ *    accurately be called a satisfiability-modulo-theories (SMT) solver.
+ *
+ *    At this time, support for GSN's is only partly implemented, and
+ *    badly.
  */
+
 /* ======================================================== */
 
 // At this time, we don't want groundings where variables ground
@@ -674,7 +772,7 @@ OC_ASSERT(false,"duuuude unexpected!");
 /// Return the saved unordered-link permutation for this
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
-PatternMatchEngine::Permutation 
+PatternMatchEngine::Permutation
 PatternMatchEngine::next_perm(const Handle& hp,
                               const Handle& hg)
 {
