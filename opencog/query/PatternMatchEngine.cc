@@ -139,6 +139,157 @@ static inline void prtmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
+/**
+ * Algorithm Overview
+ * ------------------
+ * The basic search algorithm is relatively straightforward: its a
+ * back-tracking search. It is made complicated by several features,
+ * some nice to have, others mandatory. The review begins with the basic
+ * algorithm, and then the adjustments made for the complications.
+ *
+ * Basic Algorithm
+ * ---------------
+ * The input is a set of trees describing the pattern; these are to be
+ * matched against the contents of the atomspace. If the pattern has a
+ * constant node (not variable), then search can begin at this node
+ * (since it must, by definition, be shared by the pattern and its
+ * grounding). If the pattern has no constant nodes, search can begin
+ * elsewhere, e.g. at a link; either way, the precise starting point
+ * is specified by a callback.  Once the callback has found a starting
+ * point, it calls explore_neghborhood(), which will walk the connected
+ * trees in the pattern and compare them to the atomspace contents.
+ *
+ * In the below, atoms belonging to the pattern are called "terms"; this
+ * terminology helps to distinguish them from the atoms they are being
+ * matched up with. At every point of the search, the current term (and
+ * all of the terms that came before it) have a coresponding "match",
+ * "ground" or "solution", these last three names being used
+ * interchangably in the comments below.
+ *
+ * From the starting term, the search moves "upwards": the parent of
+ * the starting term is compared to all possible parents of its match.
+ * (It is possible that a given term may appear more than once in the
+ * pattern; this is one of the complications. For now, assume the parent
+ * term is unique.) The comparison of the term to it's potential match
+ * is done with the tree_compare() mathod. This takes the two trees, and
+ * compares them side-by-side, walking "downwards" in the trees. If the
+ * two trees match up, then another step upwards can be taken. This
+ * proceeds until the top of the current tree or "clause" is reached.
+ *
+ * Thus, the upwards-search method is recursive: it calls itself, until
+ * the top is reached. The recursion alternates between an upward step
+ * in the pattern (implemented by do_term_up()) and an upward step of
+ * the ground (implemented by start_sol_up()). The start_sol_up()
+ * method loops over the incoming set (i.e. the parents) of the current
+ * match. Thus, these two alternate between each other, calling each
+ * other, until the top of the clause is reached.
+ *
+ * Once the top of a clause is reached, another clause is selected. The
+ * selected clause must be "connected" to the grounded clause(s) by a
+ * common, shared term: thus, the search continues at this shared term
+ * and its corresponding ground. This becomes the new "starting term",
+ * above.  Search then continues until all terms are grounded, at which
+ * point, one has a solution that satsifies the search pattern; one is
+ * then done. If addtional groundings are desired, one can backtrack
+ * from here, and explore other possible groundings.
+ *
+ * The next clause is selected and explored by the do_next_clause()
+ * method. Again, it is recursive: it ends up calling itself, until all
+ * of the clauses have been grounded.
+ *
+ * To summarize, there are four basic recursive methods:
+ *
+ * -- tree_compare(), which recursively compares a term in the pattern
+ *    to a proposed grounding. It moves "downwards" in the two trees;
+ *    it only calls itself, and terminates on match or mis-match.
+ *
+ * -- start_sol_up() and do_term_up(), which alternately call each
+ *    other, moving up the pattern tree and it's matching tree.
+ *    These invoke tree_compare() to make sure the trees actually match.
+ *    When the top of a pattern clause is reached, these call the
+ *    do_next_clause() method.
+ *
+ * -- do_next_clause(), which effectively calls itself, moving "sideways"
+ *    from one clause to the next. "Effectively", because, actually, it
+ *    invokes do_term_up() to perform the actual clause matching; upon
+ *    reaching the top, it recurses to do_next_clause(). The recursion
+ *    terminates when there are no more clauses to e grounded.
+ *
+ * State, Stack and Backtracking
+ * -----------------------------
+ * At each stage of the exploration, a mis-match may be declared. In
+ * this case, the interlocking nested recursive routines then return
+ * back to the most recent branchpoint. This return is called
+ * "backtracking".  The "branchpoint" is a location where there existed
+ * some alternative in the recursion. The primary branchpoint is the
+ * incoming set of the current match. If the first element of this
+ * incoming set does not provide a ground, then the next element can be
+ * explored. Thus, each call to start_sol_up() encounters a branchpoint
+ * when it examines the incoming set. Support for some of the more
+ * complex features introduce addtional branchpoints at other locations.
+ *
+ * During the foward recursion, assort state is maintained; this
+ * includes the set of all groundings discovered so far, and the set of
+ * all clauses grounded so far. In order to backtrack, a stack of the
+ * current state must be maintained. At each branchpoint, the current
+ * state is pushed onto the stack, before the exploration continues down
+ * one branch.  If that branch yeilds no results, then, upon return to
+ * the branchpoint, the accumualted state must be discarded and replaced
+ * by pristine state, before the next branch can be explored. The
+ * pristine state is the state that is sitting at the top of the stack.
+ * If none of the branches yielded a solution, the stack is popped, and
+ * the calls return (backtrack) to the previous branchpoint.
+ * Backtracking continues until all methods return to the very first
+ * caller, at which point, the algorithm concludes. Zero, one or more
+ * groundings will have been discovered.
+ *
+ * The callback methods push() and pop() are invoked at these
+ * branchpoints, in case the callback also has state management to
+ * perform.
+ *
+ * Tree Compare
+ * ------------
+ * To simplify the implementation of tree_compare(), it has been broken
+ * up into various pieces. There are methods to compare ordered and
+ * unordered links, a method to compare the contents of a ChoiceLink,
+ * a method to compare a variable against its proposed ground, and
+ * a method for handling quoted terms.  This breakup makes it easier to
+ * see how tree_compare(), as a whole, is functioning.
+ *
+ * Complications
+ * -------------
+ * Complications are introduced due to the following features:
+ *
+ * -- Unordered links. To compare an unordered link to it's proposed
+ *    grounding, every possible permuatation of the order must be tried.
+ *    Thus, each permuation is a branchpoint; state must be saved and
+ *    restored if an earlier permuation did not work out. However, it is
+ *    worse than that: during the tree_compare stage, the comparison
+ *    must be performed only for the current permuation. Thus, the state
+ *    includes the set of all permuations taken so far.
+ *
+ * -- ChoiceLinks. These are similar to unordered links, and are
+ *    implemented similarly. Each ChoiceLink presents a (mututally-
+ *    exclusive) choice of terms that may be grounded; only one of
+ *    these is to be grounded.  Again, the choice represents a
+ *    branch-point: if one chice didn't work out, another must be
+ *    tried. Again, during tree_compare, exactly the same choices
+ *    must be made. Thus, the state includes the set of all choices made
+ *    so far.
+ *
+ * -- Evaluatable and executable links. These links are not a static
+ *    part of the pattern, but can only be known at runtime, at the time
+ *    the actual match must be made. Evaluatable links are those that
+ *    contain a GroundedPredicateNode (GPN), are are one of the equivalent
+ *    stand-ins for a GPN, such as an EqualLink or GreaterThanLink.
+ *    Whenever one of these is encountered
+
+* black box
+ For each parent, it calls xsoln_up()  thin wrap of tree comp.
+ *
+ */
+/* ======================================================== */
+
 // At this time, we don't want groundings where variables ground
 // themselves.   However, there is a semi-plausible use-case for
 // this, see https://github.com/opencog/opencog/issues/1092
@@ -807,6 +958,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		}
 
 printf("duuude wtf came all theh way around.. no match..???\n");
+OC_ASSERT(false, "must incrment here");
 //		solution_pop();
 	} while (have_perm(curr_term_handle, hsoln));
 
