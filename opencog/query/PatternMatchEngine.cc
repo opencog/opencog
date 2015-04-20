@@ -749,8 +749,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			return true;
 		}
 
-printf("duuude wtf came all theh way around.. no match..???\n");
-OC_ASSERT(false, "must incrment here");
+// printf("duuude wtf came all theh way around.. no match..???\n");
+// OC_ASSERT(false, "must incrment here");
 //		solution_pop();
 	} while (have_perm(curr_term_handle, hsoln));
 
