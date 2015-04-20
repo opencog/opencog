@@ -33,6 +33,16 @@
 #include "PatternMatchEngine.h"
 
 using namespace opencog;
+/* ======================================================== */
+/**
+ * Pattern Match Engine Overview
+ * -----------------------------
+ * The explanation of how this code *actually* qorks has been
+ * moved to README-Algorithm. That README provies the "big-picture"
+ * explanation of the rather complex interwoven code below. Read it
+ * first, and refert to it when examining the main methods below.
+ */
+/* ======================================================== */
 
 // Uncomment below to enable debug print
 // #define DEBUG
@@ -72,73 +82,6 @@ static inline void prtmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
-/**
- * Pattern Match Engine Overview
- * -----------------------------
- *
- * The pattern match engine finds groundings (interpretations) for a
- * set of mandatory and optional clauses. It can be thought of in seveal
- * ways: it performs a variable unification across multiple clauses;
- * it discovers groundings for variables; it solves the subgraph
- * isomorphism problem; it queries a graphical relational database
- * for data that satisfies the query statement; it solves a typed
- * satisfiability problem; it finds an "answer set".  Which of these
- * things it does depends on your point of view; it does all of these
- * things, although, in each case, the langauge is slightly different.
- *
- * It works by being given a list ov variables ("bound variables") and
- * a set of mandatory and optional clauses containing those variables.
- * Each "clause" is nothing more than an ordinary OpenCog Atom:
- * specifically, a typed link.  It should be thought of as a tree, the
- * tree being formed by the outgoing set of the Atom.  We could call
- * these things "Atoms" or "Links", but it is more convenient to call
- * them "clauses", in part to avoid confusion, and in part because they
- * resemble terms (from "term algebra") or the "sentences" (of
- * first-order logic). They, in fact, are neither, but there is a
- * general resemblance that is useful to keep in mind.
- *
- * Any given clause is "solved" or "grounded", if there exists a
- * substitution for the variables such that the resulting clause exists
- * in the atomspace.  Thus, a grounding can be thought of as an
- * "interpretation" of the clause; the pattern matcher searches for
- * interpretations.  It can be thought of as a "unifier", in that ALL
- * of the mandatory clauses must be grounded, and they must grounded in
- * a self-consistent way (i.e. the clauses must be grounded in
- * conjunction with one-another.)
- *
- * The list of "bound vars" are to be solved for ("grounded", or
- * "interpreted") during pattern matching. That is, if the subgraph
- * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match. Because these
- * variables can be shared across multiple clauses, this can be
- * understood to be a unification problem; the pattern matcher is thus
- * a unifier.
- *
- * The optionals are a set of clauses which are also searched for,
- * but whose presence is not mandatory. The optional clauses can be
- * used to implement negation or pattern-rejection (among other things).
- * Thier use for negation/rejection is determined by the "optional
- * clause" callback.  Thus, if an optional clause is found, the callback
- * can then signal that the pattern as a whole should be rejected.
- * Alternately, the callback could base its considerations on the
- * truth-value of the optionall clause: if the optional clause has
- * a TV of FALSE, then it is accepted; otherwise it is rejected.
- * Other strategies for handling optional clauses in the callback
- * are also possible. Thus, optional clauses themselves can be thought
- * as implementing a bridge between "intuitionistic logic" and
- * "classical logic", depending on ow they are handled in the callback.
- *
- * At every step of the process, the PatternMatchCallback is consulted
- * to determine whether a candidate match should be accepted or not.
- * In general, the callbacks have almost total control over the search;
- * the pattern match engine only provides the general framework for
- * navigating and backtracking and maintaining the needed state for
- * such traversal.  It is up to the callbacks to perform the actual
- * grounding or interpreation, and to record the search results.
- */
-
-/* ======================================================== */
-
 // At this time, we don't want groundings where variables ground
 // themselves.   However, there is a semi-plausible use-case for
 // this, see https://github.com/opencog/opencog/issues/1092
@@ -175,9 +118,7 @@ bool PatternMatchEngine::quote_compare(const Handle& hp,
 	if (1 != lp->getArity())
 		throw InvalidParamException(TRACE_INFO,
 		            "QuoteLink has unexpected arity!");
-	more_depth ++;
 	bool ma = tree_compare(lp->getOutgoingAtom(0), hg, CALL_QUOTE);
-	more_depth --;
 	in_quote = false;
 	return ma;
 }
@@ -302,7 +243,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 {
 	const std::vector<Handle> &osp = lp->getOutgoingSet();
 
-	// _choice_state lets use resume wher we last left off.
+	// _choice_state lets use resume where we last left off.
 	size_t iend = osp.size();
 	size_t istart = next_choice(hp, hg);
 	for (size_t i=istart; i<iend; i++)
@@ -319,7 +260,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 			match = _pmc.post_link_match(lp, lg);
 			if (not match) continue;
 
-			// If we've found a grounding, record it.
+			// If the grounding is accepted, record it.
 			if (hp != hg) var_grounding[hp] = hg;
 			_choice_state[Choice(hp, hg)] = i+1;
 			return true;
@@ -367,7 +308,6 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	// of cpu time by simply skipping the push & pop here.
 	//
 	depth ++;
-	more_depth ++;
 
 	bool match = true;
 	for (size_t i=0; i<oset_sz; i++)
@@ -379,7 +319,6 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 		}
 	}
 
-	more_depth --;
 	depth --;
 	dbgprt("tree_comp down link match=%d\n", match);
 
@@ -397,6 +336,9 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 }
 
 /* ======================================================== */
+#ifdef DEBUG
+static int facto (int n) { return (n==1)? 1 : n * facto(n-1); };
+#endif
 
 /// Unordered link comparison
 ///
@@ -414,45 +356,44 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 /// if so, we have to pick up where we left off, and so there
 /// is yet more stack trickery to save and restore that state.
 ///
+
 bool PatternMatchEngine::unorder_compare(const Handle& hp,
                                          const Handle& hg,
                                          const LinkPtr& lp,
                                          const LinkPtr& lg)
 {
-	const std::vector<Handle> &osg = lg->getOutgoingSet();
-	std::vector<Handle> mutation;
+	const HandleSeq& osg = lg->getOutgoingSet();
+	const HandleSeq& osp = lp->getOutgoingSet();
+	size_t arity = osp.size();
 
-	if (more_stack.size() <= more_depth) more_stack.push_back(false);
-	if (not more_stack[more_depth])
+	// They've got to be the same size, at the least!
+	if (osg.size() != arity) return false;
+
+	// _perm_state lets use resume where we last left off.
+	Permutation mutation = next_perm(hp, hg);
+
+	// have_more will be set here only if a peer set it previously.
+	// It will be false if there are no peers.
+	// If there are peers, we have to explore all M! * N! possibilities.
+	bool do_increment = not have_more;
+	have_more = true;
+
+	// If we are here, we've got possibilities to explore.
+#ifdef DEBUG
+	int num_perms = facto(mutation.size());
+	dbgprt("tree_comp resume unordered search at %d of %d of UUID=%lu\n",
+	       perm_count[Unorder(hp, hg)], num_perms, hp.value());
+#endif
+	do
 	{
-		dbgprt("tree_comp fresh unordered link at depth %zd\n",
-		       more_depth);
-		mutation = lp->getOutgoingSet();
-		sort(mutation.begin(), mutation.end());
-	}
-	else
-	{
-		dbgprt("tree_comp resume unordered link at depth %zd\n",
-		       more_depth);
-		POPSTK(mute_stack, mutation);
-	}
+		dbgprt("tree_comp explore unordered perm %d of %d of UUID=%lu\n",
+		       perm_count[Unorder(hp, hg)], num_perms, hp.value());
 
-	do {
-		size_t oset_sz = mutation.size();
-		if (oset_sz != osg.size()) return false;
-
-		// The recursion step: traverse down the tree.
-		dbgprt("tree_comp start downwards unordered link at depth=%lu\n",
-		       more_depth);
-		var_solutn_stack.push(var_grounding);
-		// XXX why are we not pushing the claus soln stack??
-		depth ++;
-
+		more_stack.push(have_more);
 		have_more = false;
-		more_depth ++;
-
+		solution_push();
 		bool match = true;
-		for (size_t i=0; i<oset_sz; i++)
+		for (size_t i=0; i<arity; i++)
 		{
 			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
 			{
@@ -461,65 +402,117 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 			}
 		}
 
-		more_depth --;
-		depth --;
-		dbgprt("tree_comp down unordered link depth=%lu match=%d\n",
-		       more_depth, match);
-
-		// If we've found a grounding, lets see if the
-		// post-match callback likes this grounding.
 		if (match)
 		{
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
 			match = _pmc.post_link_match(lp, lg);
-		}
-
-		// If we've found a grounding, record it.
-		if (match)
-		{
-			// Since we leave the loop, we better go back
-			// to where we found things.
-			var_solutn_stack.pop();
-			if (hp != hg) var_grounding[hp] = hg;
-			dbgprt("tree_comp unordered link have gnd at depth=%lu\n",
-			      more_depth);
-
-			// If a lower part of a tree has more to do, it will have
-			// set the have_more flag.  If it is done, then the
-			// have_more flag is clear.  If its clear, we, have to
-			// advance, so we don't restart in the same place.
-			// Ugh. Seems like there should be a more elegant way.
-			if (have_more)
+			if (match)
 			{
-				mute_stack.push(mutation);
-				more_stack[more_depth] = true;
-				have_more = true;
-			}
-			else
-			{
-				// Lower loop is done. Advance.
-				bool more_perms = std::next_permutation(mutation.begin(), mutation.end());
-				if (more_perms)
-				{
-					mute_stack.push(mutation);
-					more_stack[more_depth] = true;
-					have_more = true;
-				}
-				else
-				{
-					more_stack[more_depth] = false;
-					have_more = false;
-				}
-			}
+				// Even the stack, *without* erasing the discovered grounding.
+				var_solutn_stack.pop();
 
-			return true;
+				// If the grounding is accepted, record it.
+				if (hp != hg) var_grounding[hp] = hg;
+
+				if (have_more)
+				{
+					dbgprt("Good permutation %d for UUID=%lu have_more=%d\n",
+					       perm_count[Unorder(hp, hg)], hp.value(), have_more);
+					_perm_state[Unorder(hp, hg)] = mutation;
+					POPSTK(more_stack, have_more);
+					return true;
+				}
+
+				if (do_increment or not have_more)
+				{
+#ifdef DEBUG
+					dbgprt("Good permute %d of %d; incrementing %lu more=%d\n",
+					       perm_count[Unorder(hp, hg)], num_perms,
+					       hp.value(), have_more);
+					perm_count[Unorder(hp, hg)] ++;
+#endif
+					POPSTK(more_stack, have_more);
+					have_more = std::next_permutation(mutation.begin(), mutation.end());
+					if (not have_more)
+						_perm_state.erase(Unorder(hp, hg));
+					else
+						_perm_state[Unorder(hp, hg)] = mutation;
+					return true;
+				}
+OC_ASSERT(false,"duuuude unexpected!");
+				_perm_state[Unorder(hp, hg)] = mutation;
+				POPSTK(more_stack, have_more);
+				return true;
+			}
 		}
-		POPSTK(var_solutn_stack, var_grounding);
+		dbgprt("Above permuation %d failed UUID=%lu\n",
+		       perm_count[Unorder(hp, hg)], hp.value());
+
+		POPSTK(more_stack, have_more);
+		solution_pop();
+#ifdef DEBUG
+		perm_count[Unorder(hp, hg)] ++;
+#endif
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
-	dbgprt("tree_comp down unordered exhausted all permuations\n");
-	more_stack[more_depth] = false;
+	// If we are here, we've explored all the possibilities already
+	dbgprt("Exhausted all permuations of UUID=%lu\n", hp.value());
+	_perm_state.erase(Unorder(hp, hg));
 	have_more = false;
 	return false;
+}
+
+/// Return the saved unordered-link permutation for this
+/// particular point in the tree comparison (i.e. for the
+/// particular unordered link hp in the pattern.)
+PatternMatchEngine::Permutation
+PatternMatchEngine::next_perm(const Handle& hp,
+                              const Handle& hg)
+{
+	Permutation perm;
+	try { perm = _perm_state.at(Unorder(hp, hg)); }
+	catch(...)
+	{
+#ifdef DEBUG
+		dbgprt("tree_comp fresh start unordered link UUID=%lu\n", hp.value());
+		perm_count[Unorder(hp, hg)] = 0;
+#endif
+		LinkPtr lp(LinkCast(hp));
+		perm = lp->getOutgoingSet();
+		sort(perm.begin(), perm.end());
+	}
+	return perm;
+}
+
+/// Return true if there are more permutations to explore.
+/// Else return false.
+bool PatternMatchEngine::have_perm(const Handle& hp,
+                                   const Handle& hg)
+{
+	try { _perm_state.at(Unorder(hp, hg)); }
+	catch(...) { return false; }
+	return true;
+}
+
+void PatternMatchEngine::perm_push(void)
+{
+	perm_stack.push(_perm_state);
+	unordered_stack.push(more_stack);
+	unmore_stack.push(have_more);
+#ifdef DEBUG
+	perm_count_stack.push(perm_count);
+#endif
+}
+
+void PatternMatchEngine::perm_pop(void)
+{
+	POPSTK(perm_stack, _perm_state);
+	POPSTK(unordered_stack, more_stack);
+	POPSTK(unmore_stack, have_more);
+#ifdef DEBUG
+	POPSTK(perm_count_stack, perm_count);
+#endif
 }
 
 /* ======================================================== */
@@ -684,6 +677,7 @@ bool PatternMatchEngine::start_sol_up(const Handle& h)
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
 
+	dbgprt("Looking for solution for UUID=%lu\n", h.value());
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
@@ -708,19 +702,24 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	    and not is_evaluatable(curr_root))
 		return false;
 
-	have_stack.push(have_more);
-	have_more = false;
-
 	do {
-		bool found = false;
+		dbgprt("Checking UUID=%lu for soln by %lu\n",
+		       curr_term_handle.value(), hsoln.value());
+//		solution_push();
 
+		bool found = false;
 		do {
 			solution_push();
+
+			// if (_need_perm_push) perm_push();
 
 			if (_need_choice_push) choice_stack.push(_choice_state);
 			bool match = tree_recurse(curr_term_handle, hsoln, CALL_SOLN);
 			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 			_need_choice_push = false;
+
+		//	if (_need_perm_push) perm_pop();
+	//		_need_perm_push = false;
 
 			// If no match, then try the next one.
 			if (not match)
@@ -728,10 +727,14 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				// Get rid of any grounding that might have been proposed
 				// during the tree-match.
 				solution_pop();
-				POPSTK(have_stack, have_more);
+//				solution_pop();
+				dbgprt("UUID=%lu NOT solved by %lu\n",
+				       curr_term_handle.value(), hsoln.value());
 				return false;
 			}
 
+			dbgprt("UUID=%lu solved by %lu move up\n",
+			       curr_term_handle.value(), hsoln.value());
 			if (do_term_up(hsoln)) found = true;
 
 			// Get rid of any grounding that might have been proposed
@@ -741,15 +744,19 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 
 		if (found)
 		{
-			POPSTK(have_stack, have_more);
+			// Even the stack, *without* erasing the discovered grounding.
+		//	var_solutn_stack.pop();
 			return true;
 		}
 
-		if (have_more) { dbgprt("Wait ----- there's more!\n"); }
-		else { dbgprt("No more unordered, more_depth=%zd\n", more_depth); }
-	} while (have_more);
+printf("duuude wtf came all theh way around.. no match..???\n");
+OC_ASSERT(false, "must incrment here");
+//		solution_pop();
+	} while (have_perm(curr_term_handle, hsoln));
 
-	POPSTK(have_stack, have_more);
+
+	dbgprt("No more unordered permutations\n");
+
 	return false;
 }
 
@@ -903,6 +910,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
+			// _need_perm_push = true;
 			if (start_sol_up(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
@@ -936,6 +944,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			curr_soln_handle = hsoln;
 			solution_push();
 
+			// _need_perm_push = true;
 			_need_choice_push = true;
 			curr_term_handle = hi;
 			if (do_term_up(hsoln)) found = true;
@@ -1002,7 +1011,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	}
 	else
 	{
-		prtmsg("Next clause is", curr_root);
+		prtmsg("Next clause is\n", curr_root);
 		dbgprt("This clause is %s\n",
 			is_optional(curr_root)? "optional" : "required");
 		dbgprt("This clause is %s\n",
@@ -1312,17 +1321,7 @@ void PatternMatchEngine::clause_stacks_push(void)
 	issued_stack.push(issued);
 	choice_stack.push(_choice_state);
 
-	// Reset the unordered-set stacks with each new clause.
-	// XXX this cannot possibly be right: we may need to pop,
-	// and try a different ordering.
-	have_stack.push(have_more);
-	have_more = false;
-	depth_stack.push(more_depth);
-	more_depth = 0;
-	unordered_stack.push(more_stack);
-	more_stack.resize(1);
-	more_stack[0] = false;
-	permutation_stack.push(mute_stack);
+	perm_push();
 
 	_pmc.push();
 }
@@ -1347,13 +1346,7 @@ void PatternMatchEngine::clause_stacks_pop(void)
 
 	POPSTK(choice_stack, _choice_state);
 
-	// Handle different unordered links that live in different
-	// clauses. The mute_stack deals with different unordered
-	// links that live in the *same* clause.
-	POPSTK(have_stack, have_more);
-	POPSTK(depth_stack, more_depth);
-	POPSTK(unordered_stack, more_stack);
-	POPSTK(permutation_stack, mute_stack);
+	perm_pop();
 
 	_clause_stack_depth --;
 
@@ -1466,13 +1459,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!choice_stack.empty()) choice_stack.pop();
 
 	have_more = false;
-	more_depth = 0;
-	more_stack.clear();
-	while (!mute_stack.empty()) mute_stack.pop();
-	while (!have_stack.empty()) have_stack.pop();
-	while (!depth_stack.empty()) depth_stack.pop();
-	while (!unordered_stack.empty()) unordered_stack.pop();
-	while (!permutation_stack.empty()) permutation_stack.pop();
+	while (!more_stack.empty()) more_stack.pop();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
@@ -1490,13 +1477,13 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 	_need_choice_push = false;
+//	_need_perm_push = false;
 
 	// graph state
 	_clause_stack_depth = 0;
 
 	// unordered link state
 	have_more = false;
-	more_depth = 0;
 }
 
 /* ======================================================== */

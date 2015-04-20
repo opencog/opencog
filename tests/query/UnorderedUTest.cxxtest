@@ -76,9 +76,9 @@ class UnorderedUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
-		void test_exhaust(void);
 		void test_un1(void);
 		void test_un2(void);
+		void test_exhaust(void);
 };
 
 extern "C" {

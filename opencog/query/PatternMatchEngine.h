@@ -44,9 +44,6 @@ class PatternMatchEngine
 	ClassServer& _classserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
-	// Used for managing ChoiceLink state
-	typedef std::pair<const Handle&, const Handle&> Choice;
-	typedef std::map<Choice, size_t> ChoiceState;
 
 	private:
 		// -------------------------------------------
@@ -104,12 +101,35 @@ class PatternMatchEngine
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_term_handle;  // stacked onto term_handle_stack
 
+		void clear_current_state(void);  // clear the stuff above
+
+		// -------------------------------------------
 		// OrLink (choice) state management
+		typedef std::pair<Handle, Handle> Choice;
+		typedef std::map<Choice, size_t> ChoiceState;
+
 		ChoiceState _choice_state;
-		size_t next_choice(const Handle&, const Handle&);
 		bool _need_choice_push;
 
-		void clear_current_state(void);  // clear the stuff above
+		size_t next_choice(const Handle&, const Handle&);
+
+		// -------------------------------------------
+		// New Unordered Link suppoprt
+		typedef std::vector<Handle> Permutation;
+		typedef std::pair<Handle, Handle> Unorder; // Choice
+		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
+
+		PermState _perm_state;
+		Permutation next_perm(const Handle&, const Handle&);
+		bool have_perm(const Handle&, const Handle&);
+
+		bool have_more;
+		typedef std::stack<bool> MoreStack;
+		MoreStack more_stack;
+#ifdef DEBUG
+		std::map<Unorder, int> perm_count;
+		std::stack<std::map<Unorder, int>> perm_count_stack;
+#endif
 
 		// -------------------------------------------
 		// Stack used to store current traversal state for a single
@@ -120,6 +140,8 @@ class PatternMatchEngine
 		std::stack<Handle> root_handle_stack;
 		std::stack<Handle> term_handle_stack;
 		std::stack<Handle> soln_handle_stack;
+		void solution_push(void);
+		void solution_pop(void);
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
@@ -129,9 +151,13 @@ class PatternMatchEngine
 		std::stack<IssuedSet> issued_stack;
 		std::stack<ChoiceState> choice_stack;
 
+		std::stack<PermState> perm_stack;
+		std::stack<MoreStack> unordered_stack;
+		std::stack<bool> unmore_stack;
+		void perm_push(void);
+		void perm_pop(void);
+
 		// push, pop and clear these states.
-		void solution_push(void);
-		void solution_pop(void);
 		void clause_stacks_push(void);
 		void clause_stacks_pop(void);
 		void clause_stacks_clear(void);
@@ -162,6 +188,8 @@ class PatternMatchEngine
 		bool unorder_compare(const Handle&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
 
+		// -------------------------------------------
+		// Upwards-walking and clause hanlding.
 		// See PatternMatchEngine.cc for descriptions
 		bool start_sol_up(const Handle&);
 		bool xsoln_up(const Handle&);
@@ -173,27 +201,6 @@ class PatternMatchEngine
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool, bool, bool);
 		unsigned int thickness(const Handle&, const std::set<Handle>&);
-
-		// --------------------------------------------------
-		// Unordered-link stuff. This needs a major overhaul.
-		// Stacks are used to explore all possible permuations of
-		// unordered links, but this is incorectly/incompletely
-		// designed.
-		bool have_more;
-		size_t more_depth;
-
-		// Substacks used for nested unorderered links.
-		typedef std::vector<bool> MoreStack;
-		MoreStack more_stack;
-		typedef std::vector<Handle> Permutation;
-		typedef std::stack<Permutation> PermuStack;
-		PermuStack mute_stack;
-
-		// Stacks used for unordered links in different clauses.
-		std::stack<bool> have_stack;
-		std::stack<size_t> depth_stack;
-		std::stack<MoreStack> unordered_stack;
-		std::stack<PermuStack> permutation_stack;
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,
