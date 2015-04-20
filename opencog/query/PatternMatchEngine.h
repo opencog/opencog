@@ -105,7 +105,7 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// OrLink (choice) state management
-		typedef std::pair<const Handle&, const Handle&> Choice;
+		typedef std::pair<Handle, Handle> Choice;
 		typedef std::map<Choice, size_t> ChoiceState;
 
 		ChoiceState _choice_state;
@@ -116,7 +116,7 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// New Unordered Link suppoprt
 		typedef std::vector<Handle> Permutation;
-		typedef std::pair<const Handle&, const Handle&> Unorder; // Choice
+		typedef std::pair<Handle, Handle> Unorder; // Choice
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
