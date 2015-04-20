@@ -393,6 +393,9 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 }
 
 /* ======================================================== */
+#ifdef DEBUG
+static int facto (int n) { return (n==1)? 1 : n * facto(n-1); };
+#endif
 
 /// Unordered link comparison
 ///
@@ -410,9 +413,6 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 /// if so, we have to pick up where we left off, and so there
 /// is yet more stack trickery to save and restore that state.
 ///
-
-static int duud10 = 0;
-static int duud33 = 0;
 
 bool PatternMatchEngine::unorder_compare(const Handle& hp,
                                          const Handle& hg,
@@ -436,12 +436,15 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	have_more = true;
 
 	// If we are here, we've got possibilities to explore.
-	dbgprt("tree_comp resume unordered search of UUID=%lu\n", hp.value());
+#ifdef DEBUG
+	int num_perms = facto(mutation.size());
+	dbgprt("tree_comp resume unordered search at %d of %d of UUID=%lu\n",
+	       perm_count[Unorder(hp, hg)], num_perms, hp.value());
+#endif
 	do
 	{
-		dbgprt("tree_comp explore unordered perm of UUID=%lu\n", hp.value());
-if (10 == hp.value()) {printf("duuude 10 its perm %d\n", duud10); }
-if (33 == hp.value()) {printf("duuude 33 its perm %d\n", duud33); }
+		dbgprt("tree_comp explore unordered perm %d of %d of UUID=%lu\n",
+		       perm_count[Unorder(hp, hg)], num_perms, hp.value());
 
 		more_stack.push(have_more);
 		have_more = false;
@@ -463,7 +466,6 @@ if (33 == hp.value()) {printf("duuude 33 its perm %d\n", duud33); }
 			match = _pmc.post_link_match(lp, lg);
 			if (match)
 			{
-				dbgprt("Above permuation good UUID=%lu\n", hp.value());
 				// Even the stack, *without* erasing the discovered grounding.
 				var_solutn_stack.pop();
 
@@ -472,7 +474,8 @@ if (33 == hp.value()) {printf("duuude 33 its perm %d\n", duud33); }
 
 				if (have_more)
 				{
-printf("duuuude try again from before for hp=%lu\n", hp.value());
+					dbgprt("Good permutation %d for UUID=%lu have_more=%d\n",
+					       perm_count[Unorder(hp, hg)], hp.value(), have_more);
 					_perm_state[Unorder(hp, hg)] = mutation;
 					POPSTK(more_stack, have_more);
 					return true;
@@ -480,17 +483,18 @@ printf("duuuude try again from before for hp=%lu\n", hp.value());
 
 				if (do_increment or not have_more)
 				{
-if(hp.value() == 10) duud10++;
-if(hp.value() == 33) duud33++;
 					POPSTK(more_stack, have_more);
 					have_more = std::next_permutation(mutation.begin(), mutation.end());
-if(hp.value() == 33) printf("duude 33 was incrmeneted to %d and hasmore=%d\n", duud33, have_more);
-if(hp.value() == 10) printf("duude 10 was incrmeneted to %d and hasmore=%d\n", duud10, have_more);
+#ifdef DEBUG
+					perm_count[Unorder(hp, hg)] ++;
+					dbgprt("Good permute %d of %d incremented, UUID=%lu more=%d\n",
+					       perm_count[Unorder(hp, hg)], num_perms,
+					       hp.value(), have_more);
+#endif
 					if (not have_more)
 						_perm_state.erase(Unorder(hp, hg));
 					else
 						_perm_state[Unorder(hp, hg)] = mutation;
-printf("duuuude upon a good ground aperm state has zie =%lu\n", _perm_state.size());
 					return true;
 				}
 OC_ASSERT(false,"duuuude unexpected!");
@@ -499,12 +503,14 @@ OC_ASSERT(false,"duuuude unexpected!");
 				return true;
 			}
 		}
-		dbgprt("Above permuation failed UUID=%lu\n", hp.value());
+		dbgprt("Above permuation %d failed UUID=%lu\n",
+		       perm_count[Unorder(hp, hg)], hp.value());
 
 		POPSTK(more_stack, have_more);
 		solution_pop();
-if(hp.value() == 10) duud10++;
-if(hp.value() == 33) duud33++;
+#ifdef DEBUG
+		perm_count[Unorder(hp, hg)] ++;
+#endif
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
@@ -521,21 +527,14 @@ PatternMatchEngine::Permutation
 PatternMatchEngine::next_perm(const Handle& hp,
                               const Handle& hg)
 {
-printf("duuude call next perm for uuid=%lu, size=%zu\n",hp.value(),
-_perm_state.size());
-printf("duuude perm contesnts\n");
-for (auto x: _perm_state) {
-printf("per state has %lu %lu\n", x.first.first.value(),
-x.first.second.value());
-}
 	Permutation perm;
 	try { perm = _perm_state.at(Unorder(hp, hg)); }
 	catch(...)
 	{
+#ifdef DEBUG
 		dbgprt("tree_comp fresh start unordered link UUID=%lu\n", hp.value());
-printf("duuuude fresh start for hg=%lu\n", hg.value());
-
-if (hp.value()==33) duud33=0;
+		perm_count[Unorder(hp, hg)] = 0;
+#endif
 		LinkPtr lp(LinkCast(hp));
 		perm = lp->getOutgoingSet();
 		sort(perm.begin(), perm.end());
@@ -558,6 +557,9 @@ void PatternMatchEngine::perm_push(void)
 	perm_stack.push(_perm_state);
 	unordered_stack.push(more_stack);
 	unmore_stack.push(have_more);
+#ifdef DEBUG
+	perm_count_stack.push(perm_count);
+#endif
 }
 
 void PatternMatchEngine::perm_pop(void)
@@ -565,6 +567,9 @@ void PatternMatchEngine::perm_pop(void)
 	POPSTK(perm_stack, _perm_state);
 	POPSTK(unordered_stack, more_stack);
 	POPSTK(unmore_stack, have_more);
+#ifdef DEBUG
+	POPSTK(perm_count_stack, perm_count);
+#endif
 }
 
 /* ======================================================== */

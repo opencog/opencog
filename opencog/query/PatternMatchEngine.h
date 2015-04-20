@@ -120,13 +120,16 @@ class PatternMatchEngine
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
-		bool _need_perm_push;  // XXX ???
 		Permutation next_perm(const Handle&, const Handle&);
 		bool have_perm(const Handle&, const Handle&);
 
 		bool have_more;
 		typedef std::stack<bool> MoreStack;
 		MoreStack more_stack;
+#ifdef DEBUG
+		std::map<Unorder, int> perm_count;
+		std::stack<std::map<Unorder, int>> perm_count_stack;
+#endif
 
 		// -------------------------------------------
 		// Stack used to store current traversal state for a single
