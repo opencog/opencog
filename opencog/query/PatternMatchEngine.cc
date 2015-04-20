@@ -483,14 +483,14 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 
 				if (do_increment or not have_more)
 				{
-					POPSTK(more_stack, have_more);
-					have_more = std::next_permutation(mutation.begin(), mutation.end());
 #ifdef DEBUG
-					perm_count[Unorder(hp, hg)] ++;
-					dbgprt("Good permute %d of %d incremented, UUID=%lu more=%d\n",
+					dbgprt("Good permute %d of %d; incrementing %lu more=%d\n",
 					       perm_count[Unorder(hp, hg)], num_perms,
 					       hp.value(), have_more);
+					perm_count[Unorder(hp, hg)] ++;
 #endif
+					POPSTK(more_stack, have_more);
+					have_more = std::next_permutation(mutation.begin(), mutation.end());
 					if (not have_more)
 						_perm_state.erase(Unorder(hp, hg));
 					else
@@ -734,6 +734,7 @@ bool PatternMatchEngine::start_sol_up(const Handle& h)
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
 
+	dbgprt("Looking for solution for UUID=%lu\n", h.value());
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
@@ -759,8 +760,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 		return false;
 
 	do {
-		dbgprt("Enter the permutation loop for UUID=%lu\n",
-		        curr_term_handle.value());
+		dbgprt("Checking UUID=%lu for soln by %lu\n",
+		       curr_term_handle.value(), hsoln.value());
 //		solution_push();
 
 		bool found = false;
@@ -784,9 +785,13 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 				// during the tree-match.
 				solution_pop();
 //				solution_pop();
+				dbgprt("UUID=%lu NOT solved by %lu\n",
+				       curr_term_handle.value(), hsoln.value());
 				return false;
 			}
 
+			dbgprt("UUID=%lu solved by %lu move up\n",
+			       curr_term_handle.value(), hsoln.value());
 			if (do_term_up(hsoln)) found = true;
 
 			// Get rid of any grounding that might have been proposed
@@ -801,6 +806,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			return true;
 		}
 
+printf("duuude wtf came all theh way around.. no match..???\n");
 //		solution_pop();
 	} while (have_perm(curr_term_handle, hsoln));
 
@@ -1061,7 +1067,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	}
 	else
 	{
-		prtmsg("Next clause is", curr_root);
+		prtmsg("Next clause is\n", curr_root);
 		dbgprt("This clause is %s\n",
 			is_optional(curr_root)? "optional" : "required");
 		dbgprt("This clause is %s\n",
