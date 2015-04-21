@@ -246,7 +246,7 @@ a lot of space for improvement. Right now am working on
 
 * Inference termination 
 
-**Refactoring out some codes
+* Refactoring out some codes
 
 
 ***Author*** *Misgana Bayetta*
