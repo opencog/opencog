@@ -517,6 +517,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 				break;
 			}
 		}
+printf("duuuude the match=%d\n", match);
 
 		// Check for cases 1&2 of description above.
 		OC_ASSERT(not (take_step and have_more),
@@ -526,6 +527,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		// to do this before post_link_match() !??
 		if (take_step and not have_more)
 		{
+printf("duude oh nooo jumped away!!\n");
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
 			goto take_next_step;
@@ -819,8 +821,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			solution_push();
 
 			// if (_need_perm_push) perm_push();
-		have_more = false;
-		take_step = true;
+	//	have_more = false;
+		// take_step = true;
 
 			if (_need_choice_push) choice_stack.push(_choice_state);
 			bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
@@ -1464,6 +1466,25 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	prtmsg("pop to clause", curr_root);
 }
 
+/**
+ * Unconditionally clear all graph traversal stacks
+ */
+void PatternMatchEngine::clause_stacks_clear(void)
+{
+	_clause_stack_depth = 0;
+	while (!term_handle_stack.empty()) term_handle_stack.pop();
+	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
+	while (!root_handle_stack.empty()) root_handle_stack.pop();
+	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
+	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
+	while (!issued_stack.empty()) issued_stack.pop();
+	while (!choice_stack.empty()) choice_stack.pop();
+
+	have_more = false;
+	take_step = false;
+	while (!more_stack.empty()) more_stack.pop();
+}
+
 void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
@@ -1551,25 +1572,6 @@ void PatternMatchEngine::clear_current_state(void)
 	depth = 0;
 
 	_choice_state.clear();
-}
-
-/**
- * Unconditionally clear all graph traversal stacks
- */
-void PatternMatchEngine::clause_stacks_clear(void)
-{
-	_clause_stack_depth = 0;
-	while (!term_handle_stack.empty()) term_handle_stack.pop();
-	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
-	while (!root_handle_stack.empty()) root_handle_stack.pop();
-	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
-	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
-	while (!issued_stack.empty()) issued_stack.pop();
-	while (!choice_stack.empty()) choice_stack.pop();
-
-	have_more = false;
-	take_step = false;
-	while (!more_stack.empty()) more_stack.pop();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
