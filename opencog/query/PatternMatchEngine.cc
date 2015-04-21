@@ -480,6 +480,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	// They've got to be the same size, at the least!
 	if (osg.size() != arity) return false;
 
+	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
 	           "Impossible situation! BUG!");
 
@@ -499,8 +500,10 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	// If we are here, we've got possibilities to explore.
 #ifdef DEBUG
 	int num_perms = facto(mutation.size());
-	dbgprt("tree_comp resume unordered search at %d of %d of UUID=%lu\n",
-	       perm_count[Unorder(hp, hg)], num_perms, hp.value());
+	dbgprt("tree_comp resume unordered search at %d of %d of UUID=%lu "
+	       "take_step=%d have_more=%d\n",
+	       perm_count[Unorder(hp, hg)], num_perms, hp.value(),
+	       take_step, have_more);
 #endif
 	do
 	{
@@ -564,6 +567,7 @@ printf("duude oh nooo jumped away!!\n");
 
 take_next_step:
 		take_step = false; // we are taking a step, so clear the flag.
+		have_more = false; // start with a clean slate...
 		solution_pop();
 #ifdef DEBUG
 		perm_count[Unorder(hp, hg)] ++;
@@ -811,7 +815,7 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 	    and not is_evaluatable(curr_root))
 		return false;
 
-	do {
+//	do {
 		dbgprt("Checking UUID=%lu for soln by %lu\n",
 		       curr_term_handle.value(), hsoln.value());
 //		solution_push();
@@ -863,7 +867,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 // printf("duuude wtf came all theh way around.. no match..???\n");
 // OC_ASSERT(false, "must incrment here");
 //		solution_pop();
-	} while (have_perm(curr_term_handle, hsoln));
+//  XXX is this really necessary, this loop below???
+//	} while (have_perm(curr_term_handle, hsoln));
 
 
 	dbgprt("No more unordered permutations\n");
@@ -1109,6 +1114,10 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_push();
 	get_next_untried_clause();
 
+	// Try the next permuatation
+	take_step = true;
+	have_more = false;
+
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
 	bool found = false;
@@ -1194,6 +1203,10 @@ bool PatternMatchEngine::do_next_clause(void)
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
 	clause_stacks_pop();
+
+	// Try the next permuatation
+	take_step = true;
+	have_more = false;
 
 	return found;
 }
@@ -1577,7 +1590,7 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// unordered link state
 	have_more = false;
-	take_step = false;
+	take_step = true;
 	_perm_state.clear();
 }
 
@@ -1603,7 +1616,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 
 	// unordered link state
 	have_more = false;
-	take_step = false;
+	take_step = true;
 }
 
 /* ======================================================== */
