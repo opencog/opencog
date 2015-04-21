@@ -850,63 +850,73 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 	    and not is_evaluatable(curr_root))
 		return false;
 
-//	do {
+	do {
 		dbgprt("Checking UUID=%lu for soln by %lu\n",
 		       curr_term_handle.value(), hsoln.value());
-//		solution_push();
+		solution_push();
+		take_step = true;
+		have_more = false;
 
-		bool found = false;
-		do {
-			solution_push();
-
-			// if (_need_perm_push) perm_push();
-	//	have_more = false;
-		// take_step = true;
-
-			if (_need_choice_push) choice_stack.push(_choice_state);
-			bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
-			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
-			_need_choice_push = false;
+		// if (_need_perm_push) perm_push();
+		bool match = explore_choice_branches(hsoln);
 
 		//	if (_need_perm_push) perm_pop();
-	//		_need_perm_push = false;
+		//	_need_perm_push = false;
 
-			// If no match, then try the next one.
-			if (not match)
-			{
-				// Get rid of any grounding that might have been proposed
-				// during the tree-match.
-				solution_pop();
-//				solution_pop();
-				dbgprt("UUID=%lu NOT solved by %lu\n",
-				       curr_term_handle.value(), hsoln.value());
-				return false;
-			}
-
-			dbgprt("UUID=%lu solved by %lu move up\n",
-			       curr_term_handle.value(), hsoln.value());
-			if (do_term_up(hsoln)) found = true;
-
-			// Get rid of any grounding that might have been proposed
-			// during the tree-compare or do_term_up.
-			solution_pop();
-		} while (0 < next_choice(curr_term_handle, hsoln));
-
-		if (found)
+		if (match)
 		{
 			// Even the stack, *without* erasing the discovered grounding.
-		//	var_solutn_stack.pop();
+			var_solutn_stack.pop();
 			return true;
 		}
 
-// printf("duuude wtf came all theh way around.. no match..???\n");
-// OC_ASSERT(false, "must incrment here");
-//		solution_pop();
-//  XXX is this really necessary, this loop below???
-//	} while (have_perm(curr_term_handle, hsoln));
-
+		solution_pop();
+	} while (have_perm(curr_term_handle, hsoln));
 
 	dbgprt("No more unordered permutations\n");
+
+	return false;
+}
+
+/// See explore_link_branches() for a general explanation. This method
+/// handles the ChoiceLink branch alternatives only.  It assumes
+/// that the caller had handles the unordered-link alternative branches.
+bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
+{
+	bool found = false;
+	do {
+		solution_push();
+
+		if (_need_choice_push) choice_stack.push(_choice_state);
+		bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
+		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
+		_need_choice_push = false;
+
+		// If no match, then try the next one.
+		if (not match)
+		{
+///////// xxxxxxxxxxxxxx  wtf???
+			// Get rid of any grounding that might have been proposed
+			// during the tree-match.
+			solution_pop();
+			dbgprt("UUID=%lu NOT solved by %lu\n",
+			       curr_term_handle.value(), hsoln.value());
+			return false;
+		}
+
+		dbgprt("UUID=%lu solved by %lu move up\n",
+		       curr_term_handle.value(), hsoln.value());
+		if (do_term_up(hsoln)) found = true;
+
+		// Get rid of any grounding that might have been proposed
+		// during the tree-compare or do_term_up.
+		solution_pop();
+	} while (0 < next_choice(curr_term_handle, hsoln));
+
+	if (found)
+		return true;
+
+	dbgprt("No more choice possibilities\n");
 
 	return false;
 }
@@ -1150,10 +1160,6 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_push();
 	get_next_untried_clause();
 
-	// Try the next permuatation
-	take_step = true;
-	have_more = false;
-
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
 	bool found = false;
@@ -1239,10 +1245,6 @@ bool PatternMatchEngine::do_next_clause(void)
 	// backtrack, i.e. pop the stack, and begin a search for
 	// other possible matches and groundings.
 	clause_stacks_pop();
-
-	// Try the next permuatation
-	take_step = true;
-	have_more = false;
 
 	return found;
 }
