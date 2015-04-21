@@ -114,16 +114,17 @@ class PatternMatchEngine
 		size_t next_choice(const Handle&, const Handle&);
 
 		// -------------------------------------------
-		// New Unordered Link suppoprt
+		// Unordered Link suppoprt
 		typedef std::vector<Handle> Permutation;
 		typedef std::pair<Handle, Handle> Unorder; // Choice
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
-		Permutation next_perm(const Handle&, const Handle&);
+		Permutation curr_perm(const Handle&, const Handle&, bool&);
 		bool have_perm(const Handle&, const Handle&);
 
 		bool have_more;
+		bool take_step;
 		typedef std::stack<bool> MoreStack;
 		MoreStack more_stack;
 #ifdef DEBUG
@@ -175,7 +176,6 @@ class PatternMatchEngine
 		} Caller;   // temporary scaffolding !???
 
 		bool tree_compare(const Handle&, const Handle&, Caller);
-		bool tree_recurse(const Handle&, const Handle&, Caller);
 		bool quote_compare(const Handle&, const Handle&);
 		bool variable_compare(const Handle&, const Handle&);
 		bool self_compare(const Handle&);

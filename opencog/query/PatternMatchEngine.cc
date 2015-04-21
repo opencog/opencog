@@ -252,7 +252,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 
 		dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
 
-		bool match = tree_recurse(hop, hg, CALL_CHOICE);
+		bool match = tree_compare(hop, hg, CALL_CHOICE);
 		if (match)
 		{
 			// If we've found a grounding, lets see if the
@@ -312,7 +312,7 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	bool match = true;
 	for (size_t i=0; i<oset_sz; i++)
 	{
-		if (not tree_recurse(osp[i], osg[i], CALL_ORDER))
+		if (not tree_compare(osp[i], osg[i], CALL_ORDER))
 		{
 			match = false;
 			break;
@@ -481,7 +481,8 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	if (osg.size() != arity) return false;
 
 	// _perm_state lets use resume where we last left off.
-	Permutation mutation = next_perm(hp, hg);
+	bool fresh = false;
+	Permutation mutation = curr_perm(hp, hg, fresh);
 
 	// have_more will be set here only if a peer set it previously.
 	// It will be false if there are no peers.
@@ -506,7 +507,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		bool match = true;
 		for (size_t i=0; i<arity; i++)
 		{
-			if (not tree_recurse(mutation[i], osg[i], CALL_UNORDER))
+			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
 			{
 				match = false;
 				break;
@@ -578,8 +579,9 @@ OC_ASSERT(false,"duuuude unexpected!");
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
 PatternMatchEngine::Permutation
-PatternMatchEngine::next_perm(const Handle& hp,
-                              const Handle& hg)
+PatternMatchEngine::curr_perm(const Handle& hp,
+                              const Handle& hg,
+                              bool& fresh)
 {
 	Permutation perm;
 	try { perm = _perm_state.at(Unorder(hp, hg)); }
@@ -592,6 +594,7 @@ PatternMatchEngine::next_perm(const Handle& hp,
 		LinkPtr lp(LinkCast(hp));
 		perm = lp->getOutgoingSet();
 		sort(perm.begin(), perm.end());
+		fresh = true;
 	}
 	return perm;
 }
@@ -762,13 +765,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	return unorder_compare(hp, hg, lp, lg);
 }
 
-bool PatternMatchEngine::tree_recurse(const Handle& hp,
-                                      const Handle& hg,
-                                      Caller caller)
-{
-	return tree_compare(hp, hg, caller);
-}
-
 /* ======================================================== */
 
 /// start_sol_up -- look for a grounding for the gieven term.
@@ -823,9 +819,11 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 			solution_push();
 
 			// if (_need_perm_push) perm_push();
+		have_more = false;
+		take_step = true;
 
 			if (_need_choice_push) choice_stack.push(_choice_state);
-			bool match = tree_recurse(curr_term_handle, hsoln, CALL_SOLN);
+			bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
 			if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 			_need_choice_push = false;
 
@@ -1570,6 +1568,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!choice_stack.empty()) choice_stack.pop();
 
 	have_more = false;
+	take_step = false;
 	while (!more_stack.empty()) more_stack.pop();
 }
 
@@ -1595,6 +1594,7 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 
 	// unordered link state
 	have_more = false;
+	take_step = false;
 }
 
 /* ======================================================== */
