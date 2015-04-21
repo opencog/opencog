@@ -435,7 +435,7 @@ case step  more  match    Comments / Action to tbe Taken
                           If exhaust, we return take_step=F, have_more=F
                             (we return case 8)
 
- 4     T    F      F    If we are not holding any evaluatabel links,
+ 4     T    F      F    If we are not holding any evaluatable links,
                         then this is impossible, as last time we were
                         here, we returned T.  If we are holding
                         evaluatable links, then one of them changed its
@@ -480,15 +480,21 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	// They've got to be the same size, at the least!
 	if (osg.size() != arity) return false;
 
+	OC_ASSERT (not (take_step and have_more),
+	           "Impossible situation! BUG!");
+
 	// _perm_state lets use resume where we last left off.
 	bool fresh = false;
 	Permutation mutation = curr_perm(hp, hg, fresh);
+	if (fresh) take_step = false; // took a step, clear the flag.
 
-	// have_more will be set here only if a peer set it previously.
-	// It will be false if there are no peers.
-	// If there are peers, we have to explore all M! * N! possibilities.
-	bool do_increment = not have_more;
-	have_more = true;
+	// Deal with Case C, Case D, described above.
+	if ((not take_step) and (not fresh) and
+	    (0 == _pat->evaluatable_holders.count(hp)))
+	{
+		have_more = true;
+		return true;
+	}
 
 	// If we are here, we've got possibilities to explore.
 #ifdef DEBUG
@@ -501,8 +507,6 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		dbgprt("tree_comp explore unordered perm %d of %d of UUID=%lu\n",
 		       perm_count[Unorder(hp, hg)], num_perms, hp.value());
 
-		more_stack.push(have_more);
-		have_more = false;
 		solution_push();
 		bool match = true;
 		for (size_t i=0; i<arity; i++)
@@ -513,6 +517,23 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 				break;
 			}
 		}
+
+		// Check for cases 1&2 of description above.
+		OC_ASSERT(not (take_step and have_more),
+		          "This shouldn't happen. Impossible situation! BUG!");
+
+		// Handle cases 3&4 of the description above. Seems wisest
+		// to do this before post_link_match() !??
+		if (take_step and not have_more)
+		{
+			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
+			          "Impossible: should have matched!");
+			goto take_next_step;
+		}
+
+		// If we are here, then take_step is false, because
+		// cases 1,2,3,4 already handled above.
+		OC_ASSERT(match or not have_more, "Impossible: case 6 happened!");
 
 		if (match)
 		{
@@ -527,41 +548,20 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
 
-				if (have_more)
-				{
-					dbgprt("Good permutation %d for UUID=%lu have_more=%d\n",
-					       perm_count[Unorder(hp, hg)], hp.value(), have_more);
-					_perm_state[Unorder(hp, hg)] = mutation;
-					POPSTK(more_stack, have_more);
-					return true;
-				}
-
-				if (do_increment or not have_more)
-				{
-#ifdef DEBUG
-					dbgprt("Good permute %d of %d; incrementing %lu more=%d\n",
-					       perm_count[Unorder(hp, hg)], num_perms,
-					       hp.value(), have_more);
-					perm_count[Unorder(hp, hg)] ++;
-#endif
-					POPSTK(more_stack, have_more);
-					have_more = std::next_permutation(mutation.begin(), mutation.end());
-					if (not have_more)
-						_perm_state.erase(Unorder(hp, hg));
-					else
-						_perm_state[Unorder(hp, hg)] = mutation;
-					return true;
-				}
-OC_ASSERT(false,"duuuude unexpected!");
+				// Handle case 5&7 of description above.
+				have_more = true;
+				dbgprt("Good permutation %d for UUID=%lu have_more=%d\n",
+				       perm_count[Unorder(hp, hg)], hp.value(), have_more);
 				_perm_state[Unorder(hp, hg)] = mutation;
-				POPSTK(more_stack, have_more);
 				return true;
 			}
 		}
+		// If we are here, we are handling case 8.
 		dbgprt("Above permuation %d failed UUID=%lu\n",
 		       perm_count[Unorder(hp, hg)], hp.value());
 
-		POPSTK(more_stack, have_more);
+take_next_step:
+		take_step = false; // we are taking a step, so clear the flag.
 		solution_pop();
 #ifdef DEBUG
 		perm_count[Unorder(hp, hg)] ++;
