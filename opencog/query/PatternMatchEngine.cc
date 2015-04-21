@@ -342,20 +342,131 @@ static int facto (int n) { return (n==1)? 1 : n * facto(n-1); };
 
 /// Unordered link comparison
 ///
-/// Enumerate all the permutations of the outgoing set of
-/// the term.  We have to try all possible permuations
-/// here, as different variable assignments could lead to
-/// very differrent problem solutions.  We have to push/pop
-/// the stack as we try each permutation, so that each
-/// permutation has a chance of finding a grounding.
+/// Compare two unordered links, side by side. In some ways, this is
+/// similar to the ordered link compare: for a given, fixed permuation
+/// of the unordered link, the compare is side by side.  However, if
+/// that compare fails, the next permuation must then be tried, until
+/// a match is found or all permuations are exhausted.  But there's a
+/// problem: if there are multiple, nested unordered links, or if they
+/// are peers (siblings) in the tree, then if one takes a step, the
+/// other must not. Coordinating this is difficult, and requires a long
+/// explanation. So here goes:
 ///
-/// The problem with exhaustive enumeration is that we can't
-/// do it here, by ourselves: this can only be done at the
-/// clause level. So if we do find a grounding, we have to
-/// report it, and return.  We might get called again, and,
-/// if so, we have to pick up where we left off, and so there
-/// is yet more stack trickery to save and restore that state.
-///
+/*****************************************************************
+
+How do unordered links work?
+----------------------------
+This is complicted, so we write it out.  When ascending from below (i.e.
+from do_term_up()), unordered links may be found in two different
+places: The parent term may be unordered, or the parent link may hold
+another link (a sibling to us) that is unordered. Traversal needs to
+handle both cases.  Thus, the upwards-movement methods (do_term_sup(),
+start_sol_up(), etc.) are incapable of discovering unordered links, as
+they cannot "see" the siblings.  Siblings can only be found during
+tree-compare, moving downwards.  Thus, tree_compare must do a lot of
+heavy lifting.
+
+When comparing trees downwards, we have two situations we may be in:
+we may be asked to compare things exactly like last time, or we may be
+asked to try out the next permutation. We need to report back two bits
+of state: whether or not we found a match, and whether or not we have
+more possibilities to explore. Our behavior is thus controlled by this
+third bit, as well as what happened below us.
+
+The correct actions to take are best explored by truth tables: the
+settings of the take_step and have_more flags on entry, and what to
+do after running tree_compare downwards. These are handled by two
+truth tables.
+
+The topmost routine to call tree_compare must *always* set have_more=F
+and take_step=T before calling tree compare.  This will cause
+tree_compare to advance to the next matching permuation, or to run until
+all permuations are exhausted, and no match was found.
+
+
+Flag settings upon entry
+------------------------
+
+     take  have
+case step  more    Comments / Action to be Taken
+---- ----  ----    -----------------------------
+  A    T    T     Impossible, Who set have_more? Who set take_step?
+  B    T    F     Normal entry: we are first unordered link to be hit
+                  during downward travesal. Proceed using the truth
+                  table below.
+  C    F    T     We are not the first unorder. Someone ran before us.
+                  If we are in the very first permuation, (i.e. we are
+                    entering for the first time) we must call downwards.
+                    If this returns a mismatch, we must step until we
+                    find a match, or until we exhaust all permuatations.
+                    See next table for what to return: we return cases
+                    5, 7 or 8.
+                  If we are not the first permutation, we could just
+                    return T, because that is what we did last time.
+                    i.e. we are told to not take a step, so we don't,
+                    and we know a-priori last time were were here, we
+                    must have returned a match.  Thus, we can return
+                    case 5 below.  We cannot return case 7 because we
+                    can't know what std::next_perm returns.
+                  If we hold an evaluatable, we must call down.
+  D    F    F     Perform same as C above.
+
+
+If case B was encountered on entry, we call downwards ourselves, and
+then report back, according to the truth table below.
+
+     returned result flags
+     take  have   got
+case step  more  match    Comments / Action to tbe Taken
+---- ----  ----  ----     ------------------------------
+ 1     T    T      T    Impossible, error: who set have_more w/o
+                          taking step??
+ 2     T    T      F    ditto
+ 3     T    F      T    We have no unordered links below us; we are at
+                        the bottom.  If there had been unordered links,
+                        they would have cleared the take_step flag. The
+                        match we detected is the same match the last
+                        time we were here. So we take a step, call
+                        down again, and keep stepping until there is a
+                        match or until all permuations are exhausted.
+                          If match, we return: take_step=F,
+                            have_more = result of std::next_perm
+                            (we return case 5 or 7)
+                          If exhaust, we return take_step=F, have_more=F
+                            (we return case 8)
+
+ 4     T    F      F    If we are not holding any evaluatabel links,
+                        then this is impossible, as last time we were
+                        here, we returned T.  If we are holding
+                        evaluatable links, then one of them changed its
+                        mind. Oh well. Take a step, proceed as in case 3.
+
+ 5     F    T      T    Someone below us took a step. Do nothing.
+                        Return case 5 flags.
+ 6     F    T      F    Impossible; link that took the step should have
+                        stepped until match or exhastion.
+ 7     F    F      T    Unusual; its the last match for a lower unordered
+                        link. We report the match. We do not take a
+                        step; we do set the have_more flag to indicate
+                        that we ourselves still have more.  i.e We return
+                        case 5 flags.
+ 8     F    F      F    Typical; a lower unord link ran to exhaustion,
+                        and got nada.  So *we* take a step, and call
+                        downwards again. We keep  going till match or till
+                        exhaustion. If there's a match, we expect to see
+                        the case 5 flags, so we halt and return.  If we
+                        exhaust, we return case 8.
+
+The above assumes that the curr_perm() method always returns either
+the current permuation, or it returns a fresh permuation. If it returned
+a fresh permuation, this counts as "taking a step", so we need to know
+this.
+
+Notice that these rules never pushed of popped the have-more stack.
+The have-more stack is only pushed/popped by other branchpoints, before
+they call compare_tree.
+
+******************************************************************/
 
 bool PatternMatchEngine::unorder_compare(const Handle& hp,
                                          const Handle& hg,
