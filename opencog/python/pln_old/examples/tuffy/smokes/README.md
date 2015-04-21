@@ -11,7 +11,7 @@ Author: Cosmo Harrigan, March 2014
 ##### Input data used
 
 ###### Python format
-https://github.com/opencog/opencog/blob/master/opencog/python/pln/examples/tuffy/smokes/data.py
+https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/examples/tuffy/smokes/data.py
 
 ###### Scheme format
 https://github.com/opencog/test-datasets/blob/master/pln/tuffy/smokes/smokes.scm

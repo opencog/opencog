@@ -89,7 +89,7 @@ In the backward chaining inference we are interested in either truth value fulfi
 the later where a variable containing link is passed as an argument and the backward chainer tries to find grounding for the variable.  The entry point 
 for the backward chainer is the `do_full_chain` or the `do_step` function.
 
-Here's how the criminal example located at https://github.com/opencog/opencog/blob/master/opencog/python/pln/examples/backward_chaining/criminal.scm
+Here's how the criminal example located at https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/examples/backward_chaining/criminal.scm
 is expected to be solved by the Backward Chainer, when only the Modus Ponens rule is present.
 
 

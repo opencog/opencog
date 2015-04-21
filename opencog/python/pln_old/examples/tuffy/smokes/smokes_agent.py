@@ -2,7 +2,7 @@
 PLN representation of the "smokes" sample from Tuffy Markov Logic Networks
 
 More details on this sample are available here:
-https://github.com/opencog/opencog/tree/master/opencog/python/pln/examples/tuffy/smokes
+https://github.com/opencog/opencog/tree/master/opencog/python/pln_old/examples/tuffy/smokes
 https://github.com/cosmoharrigan/tuffy/tree/master/samples/smoke
 http://hazy.cs.wisc.edu/hazy/tuffy/doc/tuffy-manual.pdf
 
@@ -17,11 +17,11 @@ Method 2 -- Running the example in a standalone Python environment:
 
 Method 3 -- Running the example within the cogserver:
 - Add the module path to your PYTHON_EXTENSION_DIRS in opencog.conf:
-  ../opencog/python/pln/examples/tuffy/smokes
+  ../opencog/python/pln_old/examples/tuffy/smokes
 - Run the cogserver
 - Load these files into the cogserver:
-  python/pln/examples/tuffy/smokes/smokes.scm,
-  python/pln/examples/tuffy/smokes/extra-data.scm
+  python/pln_old/examples/tuffy/smokes/smokes.scm,
+  python/pln_old/examples/tuffy/smokes/extra-data.scm
 - Run these commands in the cogserver:
   loadpy smokes_agent
   agents-start smokes_agent.InferenceAgent

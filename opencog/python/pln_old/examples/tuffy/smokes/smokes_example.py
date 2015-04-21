@@ -18,10 +18,10 @@ __init__(atomspace)
 
 data = ["opencog/atomspace/core_types.scm",
         "opencog/scm/utilities.scm",
-        "opencog/python/pln/examples/tuffy/smokes/smokes.scm"]
+        "opencog/python/pln_old/examples/tuffy/smokes/smokes.scm"]
 
 if EXTRA_DATA:
-    data.append("opencog/python/pln/examples/tuffy/smokes/extra-data.scm")
+    data.append("opencog/python/pln_old/examples/tuffy/smokes/extra-data.scm")
 
 for item in data:
     load_scm(atomspace, item)

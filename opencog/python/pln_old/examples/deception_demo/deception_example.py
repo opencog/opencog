@@ -15,7 +15,7 @@ __init__(atomspace)
 coreTypes = "opencog/atomspace/core_types.scm"
 embodimentTypes = "opencog/spacetime/spacetime_types.scm"
 utilities = "opencog/scm/utilities.scm"
-path = "opencog/python/pln/examples/deception_demo/"
+path = "opencog/python/pln_old/examples/deception_demo/"
 data = [path + "deception.scm", path + "spatial_information.scm",
         path + "spatial_rules.scm", path + "agent_behavior.scm"]
 #data = [path + "deception.scm"]

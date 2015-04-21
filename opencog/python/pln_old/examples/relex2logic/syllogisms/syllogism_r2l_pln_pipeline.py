@@ -54,7 +54,7 @@ class SyllogismAgent(MindAgent):
 
 num_steps = 10
 file_name = "syllogisms.txt"
-path = "../opencog/python/pln/examples/relex2logic/syllogisms/" \
+path = "../opencog/python/pln_old/examples/relex2logic/syllogisms/" \
        "syllogism_r2l_pln_pipeline"
 name = "SyllogismAgent"
 

@@ -15,7 +15,7 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
-data = "opencog/python/pln/examples/backward_chaining/criminal.scm"
+data = "opencog/python/pln_old/examples/backward_chaining/criminal.scm"
 
 for item in [coreTypes, utilities, data]:
     load_scm(atomspace, item)
