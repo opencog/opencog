@@ -3,7 +3,8 @@ Probabilistic Logic Networks (PLN)
 
 ## Summary
 
-This is a [new PLN design][] that is currently under development. It is still in-progress.
+This is the old python version of PLN, now replaced by the Rule Engine
+version under opencog/reasoning.
 
 A detailed description of the architecture is available in [algorithm.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
 
