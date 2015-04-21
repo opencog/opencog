@@ -1468,6 +1468,10 @@ void PatternMatchEngine::clause_stacks_pop(void)
 
 /**
  * Unconditionally clear all graph traversal stacks
+ * XXX TODO -- if the algo is working correctly, then all
+ * of these should already be empty, when this method is
+ * called. So really, we should check the stack size, and
+ * assert if it is not zero ...
  */
 void PatternMatchEngine::clause_stacks_clear(void)
 {
@@ -1480,9 +1484,7 @@ void PatternMatchEngine::clause_stacks_clear(void)
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
 
-	have_more = false;
-	take_step = false;
-	while (!more_stack.empty()) more_stack.pop();
+	while (!perm_stack.empty()) perm_stack.pop();
 }
 
 void PatternMatchEngine::solution_push(void)
@@ -1572,6 +1574,11 @@ void PatternMatchEngine::clear_current_state(void)
 	depth = 0;
 
 	_choice_state.clear();
+
+	// unordered link state
+	have_more = false;
+	take_step = false;
+	_perm_state.clear();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,

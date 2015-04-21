@@ -125,8 +125,8 @@ class PatternMatchEngine
 
 		bool have_more;
 		bool take_step;
-		typedef std::stack<bool> MoreStack;
-		MoreStack more_stack;
+		typedef std::stack<bool> MoreStack; // XXX
+		MoreStack more_stack; // XXX
 #ifdef DEBUG
 		std::map<Unorder, int> perm_count;
 		std::stack<std::map<Unorder, int>> perm_count_stack;
@@ -153,8 +153,8 @@ class PatternMatchEngine
 		std::stack<ChoiceState> choice_stack;
 
 		std::stack<PermState> perm_stack;
-		std::stack<MoreStack> unordered_stack;
-		std::stack<bool> unmore_stack;
+		std::stack<MoreStack> unordered_stack;  // XXX
+		std::stack<bool> unmore_stack;  // XXX
 		void perm_push(void);
 		void perm_pop(void);
 
