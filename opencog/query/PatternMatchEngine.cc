@@ -790,7 +790,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 /// one branch, we backtrack to here, and try another branch. When
 /// backtracking, all state must be popped and pushed again, to enter
 /// the new branch. We don't pushd & pop ere, we push-n-pop in the
-/// xsoln_up() method.
+/// explore_link_branches() method.
 ///
 /// Returns true if a grounding for the term was found.
 ///
@@ -805,7 +805,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 	size_t sz = iset.size();
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		found = xsoln_up(Handle(iset[i]));
+		found = explore_link_branches(Handle(iset[i]));
 		if (found) break;
 	}
 
@@ -814,8 +814,34 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 	return found;
 }
 
+/// explore_link_branches -- verify the suggested grounding.
+///
+/// There are two ways to understand this method. In the "simple" case,
+/// where there are no unordered links, and no ChoiceLinks, this becomes
+/// a simple wrapper around tree_compare(), and it just returns true of
+/// false to indicate if the suggested grounding `hsoln` actually is a
+/// match for the current term being grounded. Before calling
+/// tree_compare(), it pushes all current state, and then pops it upon
+/// return. In other words, this encapsulates a single up-branch
+/// (incoming-set branch): grounding of that single branch succeeds or
+/// fails. Failure backtracks to the caller of this method; upon return,
+/// the current state has been restored; this routine leaves the current
+/// state as it found it. For the simple case, this method is mis-named:
+/// it should be called "explore_one_branch".
+///
+/// The non-simple case is a pattern that includes ChoiceLinks or
+/// unordered links. These links represent branch-points themselves.
+/// A ChoiceLink of arity N wraps N different possible branches to be
+/// explored. An unordered link of arity N wraps N-factorial different
+/// possible permuations, each of which must be explored. This method
+/// controls the exploration of these different branches. For each
+/// possible branch, it saves state, explores the branch, and pops the
+/// state. If the exploration yielded nothing, then the next bracnh is
+/// explored, until exhaustion of the possibilities.  Upon exhaustion, it
+/// returns to the caller.
+///
 /// Return true if a grounding was found.
-bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
+bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
@@ -1163,7 +1189,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		curr_soln_handle = var_grounding[curr_term_handle];
 		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = xsoln_up(curr_soln_handle);
+		found = explore_link_branches(curr_soln_handle);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1204,7 +1230,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				curr_soln_handle = var_grounding[curr_term_handle];
-				found = xsoln_up(curr_soln_handle);
+				found = explore_link_branches(curr_soln_handle);
 			}
 		}
 	}
@@ -1572,7 +1598,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	curr_root = do_clause;
 	curr_term_handle = starter;
 	issued.insert(curr_root);
-	bool found = xsoln_up(ah);
+	bool found = explore_link_branches(ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
