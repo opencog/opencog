@@ -361,8 +361,8 @@ from do_term_up()), unordered links may be found in two different
 places: The parent term may be unordered, or the parent link may hold
 another link (a sibling to us) that is unordered. Traversal needs to
 handle both cases.  Thus, the upwards-movement methods (do_term_sup(),
-start_sol_up(), etc.) are incapable of discovering unordered links, as
-they cannot "see" the siblings.  Siblings can only be found during
+explore_up_branches(), etc.) are incapable of discovering unordered links,
+as they cannot "see" the siblings.  Siblings can only be found during
 tree-compare, moving downwards.  Thus, tree_compare must do a lot of
 heavy lifting.
 
@@ -773,7 +773,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// start_sol_up -- look for a grounding for the gieven term.
+/// explore_up_branches -- look for groundings for the given term.
 ///
 /// The argument passed to this function is a term that needs to be
 /// grounded. One of this term's children has already been grounded:
@@ -783,9 +783,18 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 /// of cur_soln_handle. Viz, we are walking upwards in these trees,
 /// in lockstep.
 ///
+/// This method wraps the major branch-point of the entire pattern
+/// matching process. Each element of the incoming set is the start of
+/// a different possible branch to be explored; each one might yeild
+/// a grounding. Thus, when backtracking, after a failed grounding in
+/// one branch, we backtrack to here, and try another branch. When
+/// backtracking, all state must be popped and pushed again, to enter
+/// the new branch. We don't pushd & pop ere, we push-n-pop in the
+/// xsoln_up() method.
+///
 /// Returns true if a grounding for the term was found.
 ///
-bool PatternMatchEngine::start_sol_up(const Handle& h)
+bool PatternMatchEngine::explore_up_branches(const Handle& h)
 {
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
@@ -879,8 +888,8 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 /// do_term_up() -- move upwards from the current term.
 ///
 /// Given the current term, in curr_term_handle, find its parent in the
-/// clause, and then call start_sol_up() to see if the term's parent
-/// has corresponding match in the solution graph.
+/// clause, and then call explore_up_branches() to see if the term's
+/// parent has corresponding match in the solution graph.
 ///
 /// Note that, in the "normal" case, a given term has only one, unique
 /// parent in the given root_clause, and so its easy to find; one just
@@ -905,8 +914,9 @@ bool PatternMatchEngine::xsoln_up(const Handle& hsoln)
 ///  * Some crazy combination of the above.
 ///
 /// If it weren't for these complications, this method would be small
-/// and simple: it would send the parent to start_sol_up(), and start_sol_up()
-/// would respond as to whether it is staisfiable (solvable) or not.
+/// and simple: it would send the parent to explore_up_branches(), and
+/// then explore_up_branches() would respond as to whether it is
+/// satisfiable (solvable) or not.
 ///
 /// Takes as an argument the atom that is curently matched up to
 /// curr_term_handle. Thus, curr_term_handle's parent will need to be
@@ -1027,7 +1037,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			curr_soln_handle = hsoln;
 
 			// _need_perm_push = true;
-			if (start_sol_up(hi)) found = true;
+			if (explore_up_branches(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
 

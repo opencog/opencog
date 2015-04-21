@@ -191,7 +191,7 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// Upwards-walking and clause hanlding.
 		// See PatternMatchEngine.cc for descriptions
-		bool start_sol_up(const Handle&);
+		bool explore_up_branches(const Handle&);
 		bool xsoln_up(const Handle&);
 		bool do_term_up(const Handle&);
 		bool clause_accept(const Handle&);
