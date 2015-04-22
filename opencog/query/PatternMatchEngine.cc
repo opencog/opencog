@@ -847,25 +847,22 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 /// explored.  Thus, this returns true only if entire pattern was
 /// grounded.
 ///
-bool PatternMatchEngine::explore_up_branches(const Handle& h)
+bool PatternMatchEngine::explore_up_branches(const Handle& hp,
+                                             const Handle& hg)
 {
-	Handle curr_term_save(curr_term_handle);
-	curr_term_handle = h;
-
 	// Move up the solution graph, looking for a match.
-	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
+	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
 	dbgprt("Looking upward for pat-UUID=%lu have %zu branches\n",
-	        h.value(), sz);
+	        hp.value(), sz);
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
 		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
-		       i, sz, h.value(), Handle(iset[i]).value());
-		found = explore_link_branches(curr_term_handle, Handle(iset[i]));
+		       i, sz, hp.value(), Handle(iset[i]).value());
+		found = explore_link_branches(hp, Handle(iset[i]));
 		if (found) break;
 	}
 
-	curr_term_handle = curr_term_save;
 	dbgprt("Found upward soln = %d\n", found);
 	return found;
 }
@@ -1167,9 +1164,12 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			       fa.least_holders.size());
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
+			Handle curr_term_save(curr_term_handle);
+			curr_term_handle = hi;
 
-			if (explore_up_branches(hi)) found = true;
+			if (explore_up_branches(hi, hsoln)) found = true;
 
+			curr_term_handle = curr_term_save;
 			POPSTK(soln_handle_stack, curr_soln_handle);
 
 			dbgprt("After moving up the clause, found = %d\n", found);
