@@ -1171,7 +1171,6 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		{
 			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
-			curr_term_handle = hi;
 			if (clause_accept(hp, hg)) found = true;
 		}
 		else
@@ -1189,14 +1188,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			OC_ASSERT(not have_choice(hi, hg),
 			          "Something is wrong with the ChoiceLink code");
 
-			soln_handle_stack.push(curr_soln_handle);
-			curr_soln_handle = hg;
-
 			_need_choice_push = true;
-			curr_term_handle = hi;
 			if (do_term_up(hi, hg)) found = true;
-
-			POPSTK(soln_handle_stack, curr_soln_handle);
 		}
 	}
 	dbgprt("Done exploring %zu choices, found %d\n",
