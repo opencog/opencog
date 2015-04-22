@@ -1161,16 +1161,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		{
 			dbgprt("Exploring one possible embedding out of %zu\n",
 			       fa.least_holders.size());
-// XXXX
-			soln_handle_stack.push(hg);
-			curr_soln_handle = hg;
-			Handle curr_term_save(hp);
-			curr_term_handle = hi;
 
 			if (explore_up_branches(hi, hg)) found = true;
-
-			curr_term_handle = curr_term_save;
-			POPSTK(soln_handle_stack, curr_soln_handle);
 
 			dbgprt("After moving up the clause, found = %d\n", found);
 		}
