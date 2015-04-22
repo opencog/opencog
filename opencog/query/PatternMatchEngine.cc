@@ -1007,7 +1007,7 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
 	perm_push();
-	bool found = do_term_up(hg);
+	bool found = do_term_up(hp, hg);
 	perm_pop();
 
 	solution_pop();
@@ -1053,7 +1053,8 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 ///
 /// Returns true if a grounding for the term's parent was found.
 ///
-bool PatternMatchEngine::do_term_up(const Handle& hsoln)
+bool PatternMatchEngine::do_term_up(const Handle& hp,
+                                    const Handle& hg)
 {
 	depth = 1;
 
@@ -1061,8 +1062,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	if (curr_term_handle == curr_root)
-		return clause_accept(curr_term_handle, hsoln);
+	if (hp == curr_root)
+		return clause_accept(hp, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
 	// There are two ways to move upwards: for a normal term, we just
@@ -1070,9 +1071,9 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
 	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
-	       curr_term_handle.value(), curr_root.value());
+	       hp.value(), curr_root.value());
 
-	if (0 < _pat->in_evaluatable.count(curr_term_handle))
+	if (0 < _pat->in_evaluatable.count(hp))
 	{
 		// If we are here, there are four possibilities:
 		// 1) curr_term_handle is not in any evaluatable that lies
@@ -1108,7 +1109,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 		// a variable, at least it is, if we are working in the canonical
 		// interpretation.
 
-		auto evra = _pat->in_evaluatable.equal_range(curr_term_handle);
+		auto evra = _pat->in_evaluatable.equal_range(hp);
 		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
 			if (not is_unquoted_in_tree(curr_root, evit->second))
@@ -1133,13 +1134,13 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			if (found)
 			{
 				curr_term_handle = evit->second;
-				return clause_accept(curr_term_handle, hsoln);
+				return clause_accept(hp, hg);
 			}
 			return false;
 		}
 	}
 
-	FindAtoms fa(curr_term_handle);
+	FindAtoms fa(hp);
 	fa.search_set(curr_root);
 
 	// It is almost always the case, but not necessarily, that
@@ -1162,12 +1163,13 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 		{
 			dbgprt("Exploring one possible embedding out of %zu\n",
 			       fa.least_holders.size());
-			soln_handle_stack.push(curr_soln_handle);
-			curr_soln_handle = hsoln;
-			Handle curr_term_save(curr_term_handle);
+// XXXX
+			soln_handle_stack.push(hg);
+			curr_soln_handle = hg;
+			Handle curr_term_save(hp);
 			curr_term_handle = hi;
 
-			if (explore_up_branches(hi, hsoln)) found = true;
+			if (explore_up_branches(hi, hg)) found = true;
 
 			curr_term_handle = curr_term_save;
 			POPSTK(soln_handle_stack, curr_soln_handle);
@@ -1180,7 +1182,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
 			curr_term_handle = hi;
-			if (clause_accept(curr_term_handle, hsoln)) found = true;
+			if (clause_accept(hp, hg)) found = true;
 		}
 		else
 		{
@@ -1194,15 +1196,15 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			dbgprt("Exploring one possible ChoiceLink in clause out of %zu\n",
 			       fa.least_holders.size());
 
-			OC_ASSERT(not have_choice(hi, hsoln),
+			OC_ASSERT(not have_choice(hi, hg),
 			          "Something is wrong with the ChoiceLink code");
 
 			soln_handle_stack.push(curr_soln_handle);
-			curr_soln_handle = hsoln;
+			curr_soln_handle = hg;
 
 			_need_choice_push = true;
 			curr_term_handle = hi;
-			if (do_term_up(hsoln)) found = true;
+			if (do_term_up(hi, hg)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
 		}
