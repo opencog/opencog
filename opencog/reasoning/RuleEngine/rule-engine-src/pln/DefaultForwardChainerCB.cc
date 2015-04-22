@@ -56,7 +56,7 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
     Handle source = fcmem.get_cur_source();
-    if (source == Handle::UNDEFINED or NodeCast(source))
+    if (source == Handle::UNDEFINED)
         throw InvalidParamException(TRACE_INFO,
                                     "Needs a source atom of type LINK");
     HandleSeq chosen_bindlinks;
