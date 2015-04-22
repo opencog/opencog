@@ -521,7 +521,6 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 				break;
 			}
 		}
-printf("duuuude the match=%d\n", match);
 
 		// Check for cases 1&2 of description above.
 		OC_ASSERT(not (take_step and have_more),
@@ -531,7 +530,6 @@ printf("duuuude the match=%d\n", match);
 		// to do this before post_link_match() !??
 		if (take_step and not have_more)
 		{
-printf("duude oh nooo jumped away!!\n");
 			OC_ASSERT(match or (0 < _pat->evaluatable_holders.count(hp)),
 			          "Impossible: should have matched!");
 			goto take_next_step;
@@ -539,7 +537,8 @@ printf("duude oh nooo jumped away!!\n");
 
 		// If we are here, then take_step is false, because
 		// cases 1,2,3,4 already handled above.
-		OC_ASSERT(match or not have_more, "Impossible: case 6 happened!");
+		OC_ASSERT(match or not have_more or 1==num_perms,
+		          "Impossible: case 6 happened!");
 
 		if (match)
 		{
