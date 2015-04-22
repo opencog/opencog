@@ -23,7 +23,7 @@
 
 (MemberLink
 	(ConceptNode "Dick")
-	(ConceptNode "argriculture")
+	(ConceptNode "agriculture")
 )
 
 ;;; the list link serves no purpose other than to "embed"
