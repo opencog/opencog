@@ -869,20 +869,12 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 
 	do {
 		solution_push();
-
-		// if (_need_perm_push) perm_push();
-		bool match = explore_choice_branches(hsoln);
-
-		//	if (_need_perm_push) perm_pop();
-		//	_need_perm_push = false;
-
-		if (match)
+		if (explore_choice_branches(hsoln))
 		{
 			// Even the stack, *without* erasing the discovered grounding.
 			var_solutn_stack.pop();
 			return true;
 		}
-
 		solution_pop();
 
 		dbgprt("Step to next permuation\n");
