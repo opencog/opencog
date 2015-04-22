@@ -569,6 +569,8 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		}
 
 		// Check for cases 1&2 of description above.
+		// The step-next may have been taken by someone else, in the
+		// tree_compare immediate above.
 		OC_ASSERT(not (take_step and have_more),
 		          "This shouldn't happen. Impossible situation! BUG!");
 
@@ -912,16 +914,9 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 		return explore_choice_branches(hsoln);
 
 	do {
-		solution_push();
-
 		// If the pattern was satisfied, then we are done for good.
 		if (explore_choice_branches(hsoln))
-		{
-			// Even the stack, *without* erasing the discovered grounding.
-			var_solutn_stack.pop();
 			return true;
-		}
-		solution_pop();
 
 		dbgprt("Step to next permuation\n");
 		// If we are here, there was no match.
