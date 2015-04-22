@@ -98,7 +98,6 @@ class PatternMatchEngine
 		bool in_quote;      // Everything is literal in a quote.
 
 		Handle curr_root;         // stacked onto root_handle_stack
-		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_term_handle;  // stacked onto term_handle_stack
 		Type curr_term_type;      // Type of the current term.
 
@@ -146,7 +145,6 @@ class PatternMatchEngine
 		// traversal of that clause, where it was last left off.
 		std::stack<Handle> root_handle_stack;
 		std::stack<Handle> term_handle_stack;
-		std::stack<Handle> soln_handle_stack;
 		void solution_push(void);
 		void solution_pop(void);
 

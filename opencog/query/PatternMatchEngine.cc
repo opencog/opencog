@@ -1221,7 +1221,6 @@ bool PatternMatchEngine::clause_accept(const Handle& hp,
 	}
 	if (not match) return false;
 
-	curr_soln_handle = hg;
 	clause_grounding[curr_root] = hg;
 	prtmsg("---------------------\nclause:", curr_root);
 	prtmsg("ground:", hg);
@@ -1269,10 +1268,10 @@ bool PatternMatchEngine::do_next_clause(void)
 		// else the join is a 'real' atom.
 
 		clause_accepted = false;
-		curr_soln_handle = var_grounding[curr_term_handle];
-		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
+		Handle hgnd = var_grounding[curr_term_handle];
+		OC_ASSERT(hgnd != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(curr_term_handle, curr_soln_handle);
+		found = explore_link_branches(curr_term_handle, hgnd);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1312,8 +1311,8 @@ bool PatternMatchEngine::do_next_clause(void)
 				// or not. If it does, we'll recurse. If it does not,
 				// we'll loop around back to here again.
 				clause_accepted = false;
-				curr_soln_handle = var_grounding[curr_term_handle];
-				found = explore_link_branches(curr_term_handle, curr_soln_handle);
+				Handle hgnd = var_grounding[curr_term_handle];
+				found = explore_link_branches(curr_term_handle, hgnd);
 			}
 		}
 	}
@@ -1552,7 +1551,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 
 	root_handle_stack.push(curr_root);
 	term_handle_stack.push(curr_term_handle);
-	soln_handle_stack.push(curr_soln_handle);
 
 	var_solutn_stack.push(var_grounding);
 	term_solutn_stack.push(clause_grounding);
@@ -1576,7 +1574,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_pmc.pop();
 	POPSTK(root_handle_stack, curr_root);
 	POPSTK(term_handle_stack, curr_term_handle);
-	POPSTK(soln_handle_stack, curr_soln_handle);
 
 	// The grounding stacks are handled differently.
 	POPSTK(term_solutn_stack, clause_grounding);
@@ -1605,7 +1602,6 @@ void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
 	while (!term_handle_stack.empty()) term_handle_stack.pop();
-	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
 	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
@@ -1697,7 +1693,6 @@ void PatternMatchEngine::clear_current_state(void)
 	in_quote = false;
 
 	curr_root = Handle::UNDEFINED;
-	curr_soln_handle = Handle::UNDEFINED;
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
@@ -1723,7 +1718,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	// current state
 	in_quote = false;
 	curr_root = Handle::UNDEFINED;
-	curr_soln_handle = Handle::UNDEFINED;
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
