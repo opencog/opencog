@@ -409,9 +409,23 @@ case step  more    Comments / Action to be Taken
                     must have returned a match.  Thus, we can return
                     case 5 below.  We cannot return case 7 because we
                     can't know what std::next_perm returns.
+                    (See however, footnote below).
                   If we hold an evaluatable, we must call down.
   D    F    F     Perform same as C above.
 
+Footnote: case C: Well, thr reasoning there is almost riht, but not
+quite. If the unordered link contains a variable, and it is also not in
+the direct line of exploration (i.e. its grounding is NOT recorded)
+then its truthiness holds only for a grounding that no longer exists.
+Thus, for case C, it is safer to always check.
+
+However, by the above reasoning: if the grounding wasn't recorded
+(because the link is not in te recursion path) then the permuation
+should not be recorded either. It should start with a permutation from
+nothing.  XXX FIXME ... except we have no test case that illustrates
+this failure mode.  It would require a peer unordered link that takes
+a different order when the parent changes. Perhaps unordered links
+nested inside a ChoiceLink would trigger this?
 
 If case B was encountered on entry, we call downwards ourselves, and
 then report back, according to the truth table below.
@@ -490,14 +504,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 	Permutation mutation = curr_perm(hp, hg, fresh);
 	if (fresh) take_step = false; // took a step, clear the flag.
 
-	// Deal with Case C, Case D, described above.
-	if ((not take_step) and (not fresh) and
-	    (0 == _pat->evaluatable_holders.count(hp)))
-	{
-		have_more = true;
-		return true;
-	}
-
+	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
 #ifdef DEBUG
 	int num_perms = facto(mutation.size());
@@ -540,8 +547,8 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		// Well, actually, this can happen, if we are not careful
 		// to manage the have_more flag on a stack. But it doesn't
 		// seem required, not really ... XXX remove the more_stack
-		OC_ASSERT(match or not have_more or 1==num_perms,
-		          "Impossible: case 6 happened!");
+//		OC_ASSERT(match or not have_more or 1==num_perms,
+//		          "Impossible: case 6 happened!");
 
 		if (match)
 		{
@@ -809,11 +816,11 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
-	dbgprt("Looking for solution for UUID=%lu have %zu branches\n",
+	dbgprt("Looking for solution for pat-UUID=%lu have %zu branches\n",
 	        h.value(), sz);
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		dbgprt("Try branch %zu of %zu for UUID=%lu propose=%lu\n",
+		dbgprt("Try branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
 		       i, sz, h.value(), Handle(iset[i]).value());
 		found = explore_link_branches(Handle(iset[i]));
 		if (found) break;
