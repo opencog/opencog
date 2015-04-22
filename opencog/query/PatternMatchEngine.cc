@@ -878,6 +878,7 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 
 		solution_pop();
 
+		dbgprt("Step to next permuation\n");
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		take_step = true;
@@ -919,7 +920,11 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 
 		dbgprt("UUID=%lu solved by %lu move up\n",
 		       curr_term_handle.value(), hsoln.value());
+
+		// XXX should not do ths every time... only selectively.
+		perm_push();
 		if (do_term_up(hsoln)) found = true;
+		perm_pop();
 
 		// Get rid of any grounding that might have been proposed
 		// during the tree-compare or do_term_up.
