@@ -861,7 +861,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 	for (size_t i = 0; i < sz; i++) {
 		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
 		       i, sz, h.value(), Handle(iset[i]).value());
-		found = explore_link_branches(Handle(iset[i]));
+		found = explore_link_branches(curr_term_handle, Handle(iset[i]));
 		if (found) break;
 	}
 
@@ -902,23 +902,24 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 /// explored.  Thus, this returns true only if entire pattern was
 /// grounded.
 ///
-bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
+bool PatternMatchEngine::explore_link_branches(const Handle& hp,
+                                               const Handle& hg)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
 	// have to make sure that they get evaluated.
-	if ((hsoln == curr_root)
+	if ((hg == curr_root)
 	    and not is_evaluatable(curr_root))
 		return false;
 
 	// If its not an unordered link, then don't try to iterate.
-	curr_term_type = curr_term_handle->getType();
+	curr_term_type = hp->getType();
 	if (not _classserver.isA(curr_term_type, UNORDERED_LINK))
-		return explore_choice_branches(hsoln);
+		return explore_choice_branches(hp, hg);
 
 	do {
 		// If the pattern was satisfied, then we are done for good.
-		if (explore_choice_branches(hsoln))
+		if (explore_choice_branches(hp, hg))
 			return true;
 
 		dbgprt("Step to next permuation\n");
@@ -926,7 +927,7 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 		// On the next go-around, take a step.
 		take_step = true;
 		have_more = false;
-	} while (have_perm(curr_term_handle, hsoln));
+	} while (have_perm(hp, hg));
 
 	dbgprt("No more unordered permutations\n");
 
@@ -936,11 +937,12 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 /// See explore_link_branches() for a general explanation. This method
 /// handles the ChoiceLink branch alternatives only.  It assumes
 /// that the caller had handles the unordered-link alternative branches.
-bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
+bool PatternMatchEngine::explore_choice_branches(const Handle& hp,
+                                                 const Handle& hg)
 {
 	// If its not an choice link, then don't try to iterate.
 	if (CHOICE_LINK != curr_term_type)
-		return explore_single_branch(curr_term_handle, hsoln);
+		return explore_single_branch(hp, hg);
 
 	dbgprt("Begin choice branchpoint iteration loop\n");
 	do {
@@ -949,7 +951,7 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 		// However, currently, no test case trips this up. so .. OK.
 		// whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_single_branch(curr_term_handle, hsoln);
+		bool match = explore_single_branch(hp, hg);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
@@ -961,7 +963,7 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 		choose_next = true;
-	} while (have_choice(curr_term_handle, hsoln));
+	} while (have_choice(hp, hg));
 
 	dbgprt("Exhausted all choice possibilities\n");
 
@@ -1285,7 +1287,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		curr_soln_handle = var_grounding[curr_term_handle];
 		OC_ASSERT(curr_soln_handle != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(curr_soln_handle);
+		found = explore_link_branches(curr_term_handle, curr_soln_handle);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1326,7 +1328,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				curr_soln_handle = var_grounding[curr_term_handle];
-				found = explore_link_branches(curr_soln_handle);
+				found = explore_link_branches(curr_term_handle, curr_soln_handle);
 			}
 		}
 	}
@@ -1690,7 +1692,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	curr_root = do_clause;
 	curr_term_handle = starter;
 	issued.insert(curr_root);
-	bool found = explore_link_branches(ah);
+	bool found = explore_link_branches(curr_term_handle, ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
