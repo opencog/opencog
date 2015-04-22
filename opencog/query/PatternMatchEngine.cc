@@ -537,6 +537,9 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 
 		// If we are here, then take_step is false, because
 		// cases 1,2,3,4 already handled above.
+		// Well, actually, this can happen, if we are not careful
+		// to manage the have_more flag on a stack. But it doesn't
+		// seem required, not really ... XXX remove the more_stack
 		OC_ASSERT(match or not have_more or 1==num_perms,
 		          "Impossible: case 6 happened!");
 
@@ -618,8 +621,9 @@ bool PatternMatchEngine::have_perm(const Handle& hp,
 void PatternMatchEngine::perm_push(void)
 {
 	perm_stack.push(_perm_state);
+// XXX I think we can get rid of more stack, as long as
+// we comment out the assert on "case 6"
 	unordered_stack.push(more_stack);
-	unmore_stack.push(have_more);
 #ifdef DEBUG
 	perm_count_stack.push(perm_count);
 #endif
@@ -629,7 +633,6 @@ void PatternMatchEngine::perm_pop(void)
 {
 	POPSTK(perm_stack, _perm_state);
 	POPSTK(unordered_stack, more_stack);
-	POPSTK(unmore_stack, have_more);
 #ifdef DEBUG
 	POPSTK(perm_count_stack, perm_count);
 #endif
@@ -920,7 +923,7 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 		dbgprt("UUID=%lu solved by %lu move up\n",
 		       curr_term_handle.value(), hsoln.value());
 
-		// XXX should not do ths every time... only selectively.
+		// XXX should not do perm_push every time... only selectively.
 		perm_push();
 		if (do_term_up(hsoln)) found = true;
 		perm_pop();
@@ -1089,7 +1092,6 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
 
-			// _need_perm_push = true;
 			if (explore_up_branches(hi)) found = true;
 
 			POPSTK(soln_handle_stack, curr_soln_handle);
@@ -1661,7 +1663,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 	_need_choice_push = false;
-//	_need_perm_push = false;
 
 	// graph state
 	_clause_stack_depth = 0;

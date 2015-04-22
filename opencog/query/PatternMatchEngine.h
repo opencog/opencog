@@ -154,7 +154,6 @@ class PatternMatchEngine
 
 		std::stack<PermState> perm_stack;
 		std::stack<MoreStack> unordered_stack;  // XXX
-		std::stack<bool> unmore_stack;  // XXX
 		void perm_push(void);
 		void perm_pop(void);
 
