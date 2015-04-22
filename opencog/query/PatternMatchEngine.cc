@@ -1129,13 +1129,11 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 
 			soln_handle_stack.push(curr_soln_handle);
 			curr_soln_handle = hsoln;
-			solution_push();
 
 			_need_choice_push = true;
 			curr_term_handle = hi;
 			if (do_term_up(hsoln)) found = true;
 
-			solution_pop();
 			POPSTK(soln_handle_stack, curr_soln_handle);
 		}
 	}
