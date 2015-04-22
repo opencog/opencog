@@ -862,8 +862,6 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 
 	do {
 		solution_push();
-		take_step = true;
-		have_more = false;
 
 		// if (_need_perm_push) perm_push();
 		bool match = explore_choice_branches(hsoln);
@@ -879,6 +877,11 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 		}
 
 		solution_pop();
+
+		// If we are here, there was no match.
+		// On the next go-around, take a step.
+		take_step = true;
+		have_more = false;
 	} while (have_perm(curr_term_handle, hsoln));
 
 	dbgprt("No more unordered permutations\n");
