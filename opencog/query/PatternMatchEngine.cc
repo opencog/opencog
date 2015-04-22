@@ -804,12 +804,15 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 	Handle curr_term_save(curr_term_handle);
 	curr_term_handle = h;
 
-	dbgprt("Looking for solution for UUID=%lu\n", h.value());
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(curr_soln_handle);
 	size_t sz = iset.size();
+	dbgprt("Looking for solution for UUID=%lu have %zu branches\n",
+	        h.value(), sz);
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
+		dbgprt("Try branch %zu of %zu for UUID=%lu propose=%lu\n",
+		       i, sz, h.value(), Handle(iset[i]).value());
 		found = explore_link_branches(Handle(iset[i]));
 		if (found) break;
 	}
@@ -859,6 +862,11 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 	if ((hsoln == curr_root)
 	    and not is_evaluatable(curr_root))
 		return false;
+
+	// If its not an unordered link, then don't try to iterate.
+	Type tp = curr_term_handle->getType();
+	if (not _classserver.isA(tp, UNORDERED_LINK))
+		return explore_choice_branches(hsoln);
 
 	do {
 		solution_push();
