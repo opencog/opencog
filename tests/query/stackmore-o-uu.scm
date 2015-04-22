@@ -18,6 +18,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -28,6 +34,12 @@
 		(SchemaNode "ActivationModulatorUpdater")
 		(LemmaNode "thing1")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -41,6 +53,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -52,6 +70,12 @@
 		(LemmaNode "thing1")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -65,6 +89,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -76,6 +106,12 @@
 		(LemmaNode "thing1")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -93,6 +129,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -103,6 +145,12 @@
 		(SchemaNode "ActivationModulatorUpdater")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -116,6 +164,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -127,6 +181,12 @@
 		(LemmaNode "thing1")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -140,6 +200,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -152,9 +218,15 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
-(define (many_ou)
+(define (bind_ouu)
 	(BindLink
 		;; variable decls
 		(VariableList
@@ -167,10 +239,16 @@
 				(VariableNode "$var_schema")
 				(VariableNode "$var_number")
 				(SetLink
-					(LemmaNode "thing2")
 					(LemmaNode "thing3")
-					(VariableNode "$var_schema")
 					(LemmaNode "thing1")
+					(VariableNode "$var_schema")
+					(LemmaNode "thing2")
+				)
+				(SetLink
+					(NumberNode "2.0")
+					(VariableNode "$var_number")
+					(NumberNode "3.0")
+					(NumberNode "1.0")
 				)
 			)
 			;; implicand -- result
@@ -192,6 +270,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -203,6 +287,12 @@
 		(LemmaNode "thing1")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
@@ -216,6 +306,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -228,6 +324,12 @@
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
 	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
+	)
 )
 
 ;; this should not match.
@@ -239,6 +341,12 @@
 		(LemmaNode "thing1")
 		(LemmaNode "thing2")
 		(LemmaNode "thing3")
+	)
+	(SetLink
+		(NumberNode "0.24")
+		(NumberNode "1.0")
+		(NumberNode "2.0")
+		(NumberNode "3.0")
 	)
 )
 
