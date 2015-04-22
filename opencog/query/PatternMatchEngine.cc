@@ -230,7 +230,8 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// Compae a ChoiceLink in the pattern to the proposed grounding.
+/// Compare a ChoiceLink in the pattern to the proposed grounding.
+/// hp points at the ChoiceLink.
 ///
 /// CHOICE_LINK's are multiple-choice links. As long as we can
 /// can match one of the sub-expressions of the ChoiceLink, then
@@ -789,10 +790,14 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 /// a grounding. Thus, when backtracking, after a failed grounding in
 /// one branch, we backtrack to here, and try another branch. When
 /// backtracking, all state must be popped and pushed again, to enter
-/// the new branch. We don't pushd & pop ere, we push-n-pop in the
+/// the new branch. We don't pushd & pop here, we push-n-pop in the
 /// explore_link_branches() method.
 ///
-/// Returns true if a grounding for the term was found.
+/// This method is part of a recursive chain that only terminates
+/// when a grounding for *the entire pattern* was found (and the
+/// grounding was accepted) or if all possibilities were exhaustively
+/// explored.  Thus, this returns true only if entire pattern was
+/// grounded.
 ///
 bool PatternMatchEngine::explore_up_branches(const Handle& h)
 {
@@ -840,7 +845,12 @@ bool PatternMatchEngine::explore_up_branches(const Handle& h)
 /// explored, until exhaustion of the possibilities.  Upon exhaustion, it
 /// returns to the caller.
 ///
-/// Return true if a grounding was found.
+/// This method is part of a recursive chain that only terminates
+/// when a grounding for *the entire pattern* was found (and the
+/// grounding was accepted) or if all possibilities were exhaustively
+/// explored.  Thus, this returns true only if entire pattern was
+/// grounded.
+///
 bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 {
 	// Let's not stare at our own navel. ... Unless the current
@@ -851,8 +861,6 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 		return false;
 
 	do {
-		dbgprt("Checking UUID=%lu for soln by %lu\n",
-		       curr_term_handle.value(), hsoln.value());
 		solution_push();
 		take_step = true;
 		have_more = false;
@@ -887,6 +895,9 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 	do {
 		solution_push();
 
+		dbgprt("Checking UUID=%lu for soln by %lu\n",
+		       curr_term_handle.value(), hsoln.value());
+
 		if (_need_choice_push) choice_stack.push(_choice_state);
 		bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
@@ -895,7 +906,6 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 		// If no match, then try the next one.
 		if (not match)
 		{
-///////// xxxxxxxxxxxxxx  wtf???
 			// Get rid of any grounding that might have been proposed
 			// during the tree-match.
 			solution_pop();
@@ -1106,7 +1116,6 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			curr_soln_handle = hsoln;
 			solution_push();
 
-			// _need_perm_push = true;
 			_need_choice_push = true;
 			curr_term_handle = hi;
 			if (do_term_up(hsoln)) found = true;
