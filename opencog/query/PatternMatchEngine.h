@@ -200,7 +200,7 @@ class PatternMatchEngine
 		bool explore_choice_branches(const Handle&, const Handle&);
 		bool explore_single_branch(const Handle&, const Handle&);
 		bool do_term_up(const Handle&);
-		bool clause_accept(const Handle&);
+		bool clause_accept(const Handle&, const Handle&);
 		bool do_next_clause(void);
 
 		bool clause_accepted;

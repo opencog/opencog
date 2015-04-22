@@ -1062,7 +1062,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	if (curr_term_handle == curr_root)
-		return clause_accept(hsoln);
+		return clause_accept(curr_term_handle, hsoln);
 
 	// Move upwards in the term, and hunt for a match, again.
 	// There are two ways to move upwards: for a normal term, we just
@@ -1133,7 +1133,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			if (found)
 			{
 				curr_term_handle = evit->second;
-				return clause_accept(hsoln);
+				return clause_accept(curr_term_handle, hsoln);
 			}
 			return false;
 		}
@@ -1180,7 +1180,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
 			curr_term_handle = hi;
-			if (clause_accept(hsoln)) found = true;
+			if (clause_accept(curr_term_handle, hsoln)) found = true;
 		}
 		else
 		{
@@ -1217,7 +1217,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 /// However, let the callbacks have the final say on whether to
 /// proceed onwards, or to backtrack.
 ///
-bool PatternMatchEngine::clause_accept(const Handle& hsoln)
+bool PatternMatchEngine::clause_accept(const Handle& hp,
+                                       const Handle& hg)
 {
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
@@ -1226,20 +1227,20 @@ bool PatternMatchEngine::clause_accept(const Handle& hsoln)
 	if (is_optional(curr_root))
 	{
 		clause_accepted = true;
-		match = _pmc.optional_clause_match(curr_term_handle, hsoln);
+		match = _pmc.optional_clause_match(hp, hg);
 		dbgprt("optional clause match callback match=%d\n", match);
 	}
 	else
 	{
-		match = _pmc.clause_match(curr_term_handle, hsoln);
+		match = _pmc.clause_match(hp, hg);
 		dbgprt("clause match callback match=%d\n", match);
 	}
 	if (not match) return false;
 
-	curr_soln_handle = hsoln;
-	clause_grounding[curr_root] = curr_soln_handle;
+	curr_soln_handle = hg;
+	clause_grounding[curr_root] = hg;
 	prtmsg("---------------------\nclause:", curr_root);
-	prtmsg("ground:", curr_soln_handle);
+	prtmsg("ground:", hg);
 
 	// Now go and do more clauses.
 	return do_next_clause();
