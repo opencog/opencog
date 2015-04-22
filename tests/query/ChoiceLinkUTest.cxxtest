@@ -75,6 +75,7 @@ public:
     void test_top_nest_bad_or(void);
     void test_top_disco(void);
     void test_embed_disco(void);
+    void test_double_or(void);
 };
 
 void ChoiceLinkUTest::tearDown(void)
@@ -224,3 +225,19 @@ void ChoiceLinkUTest::test_embed_disco(void)
     printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
     TS_ASSERT_EQUALS(2, as->getArity(items));
 }
+
+/*
+ * doubl ChoiceLink unit test.
+ */
+void ChoiceLinkUTest::test_double_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-double.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (double))");
+
+    TS_ASSERT_EQUALS(3, as->getArity(items));
+}
+
