@@ -826,11 +826,10 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 ///
 /// The argument passed to this function is a term that needs to be
 /// grounded. One of this term's children has already been grounded:
-/// the term's child is in curr_term_handle, and the corresponding
-/// grounding is in curr_soln_handle.  Thus, if the argument is going
-/// to be grounded, it will be grounded by some atom in the incoming set
-/// of cur_soln_handle. Viz, we are walking upwards in these trees,
-/// in lockstep.
+/// the term's child is in `hp`, and the corresponding grounding is
+/// in `hg`.  Thus, if the argument is going to be grounded, it will
+/// be grounded by some atom in the incoming set of `hg`. Viz, we are
+/// walking upwards in these trees, in lockstep.
 ///
 /// This method wraps the major branch-point of the entire pattern
 /// matching process. Each element of the incoming set is the start of
@@ -1016,9 +1015,9 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 
 /// do_term_up() -- move upwards from the current term.
 ///
-/// Given the current term, in curr_term_handle, find its parent in the
-/// clause, and then call explore_up_branches() to see if the term's
-/// parent has corresponding match in the solution graph.
+/// Given the current term, in `hp`, find its parent in the clause,
+/// and then call explore_up_branches() to see if the term's parent
+/// has corresponding match in the solution graph.
 ///
 /// Note that, in the "normal" case, a given term has only one, unique
 /// parent in the given root_clause, and so its easy to find; one just
@@ -1047,9 +1046,9 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 /// then explore_up_branches() would respond as to whether it is
 /// satisfiable (solvable) or not.
 ///
-/// Takes as an argument the atom that is curently matched up to
-/// curr_term_handle. Thus, curr_term_handle's parent will need to be
-/// matched to hsoln's parent.
+/// Takes as an argument an atom `hp` in the pattern, and its matching
+/// grounding `hg`.  Thus, hp's parent will need to be matched to hg's
+/// parent.
 ///
 /// Returns true if a grounding for the term's parent was found.
 ///
@@ -1076,9 +1075,9 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
 		// If we are here, there are four possibilities:
-		// 1) curr_term_handle is not in any evaluatable that lies
-		//    between it and the clause root.  In this case, we need to
-		//    fall through to the bottom.
+		// 1) `hp` is not in any evaluatable that lies between it and
+		//    the clause root.  In this case, we need to fall through
+		//    to the bottom.
 		// 2) The evaluatable is the clause root. We evaluate it, and
 		//    consider the clause satisfied if the evaluation returns
 		//    true. In that case, we continue to te next clause, else we
@@ -1105,8 +1104,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		// tries to do this, but I'm not sure its correct. We eventually
 		// need to do this here, not there.
 		//
-		// By the way, if we are here, then curr_term_handle is surely
-		// a variable, at least it is, if we are working in the canonical
+		// By the way, if we are here, then `hp` is surely a variable;
+		// or, at least, it is, if we are working in the canonical
 		// interpretation.
 
 		auto evra = _pat->in_evaluatable.equal_range(hp);
@@ -1143,8 +1142,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 
 	// It is almost always the case, but not necessarily, that
 	// least_holders contains one atom. (i.e. the one atom that
-	// is the parent of curr_term_handle that is within curr_root.
-	// If curr_term_handle appears twice (or N times) in a curr_root,
+	// is the parent of `hp` that is within curr_root.
+	// If `hp` appears twice (or N times) in a curr_root,
 	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
 	// first appearance in almost all cases, unless the holders
