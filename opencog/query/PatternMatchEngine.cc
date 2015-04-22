@@ -1132,10 +1132,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			bool found = _pmc.evaluate_sentence(curr_root, var_grounding);
 			dbgprt("After evaluating clause, found = %d\n", found);
 			if (found)
-			{
-				curr_term_handle = evit->second;
-				return clause_accept(hp, hg);
-			}
+				return clause_accept(evit->second, hg);
+
 			return false;
 		}
 	}
