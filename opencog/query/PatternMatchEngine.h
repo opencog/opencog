@@ -100,18 +100,24 @@ class PatternMatchEngine
 		Handle curr_root;         // stacked onto root_handle_stack
 		Handle curr_soln_handle;  // stacked onto soln_handle_stack
 		Handle curr_term_handle;  // stacked onto term_handle_stack
+		Type curr_term_type;      // Type of the current term.
 
 		void clear_current_state(void);  // clear the stuff above
 
 		// -------------------------------------------
-		// OrLink (choice) state management
+		// ChoiceLink state management
 		typedef std::pair<Handle, Handle> Choice;
 		typedef std::map<Choice, size_t> ChoiceState;
 
 		ChoiceState _choice_state;
 		bool _need_choice_push;
 
-		size_t next_choice(const Handle&, const Handle&);
+		size_t curr_choice(const Handle&, const Handle&, bool&);
+		bool have_choice(const Handle&, const Handle&);
+
+		// Iteration control for choice links. Branchpoint advances
+		// whenever take_step is set to true.
+		bool choose_next;
 
 		// -------------------------------------------
 		// Unordered Link suppoprt
@@ -123,10 +129,10 @@ class PatternMatchEngine
 		Permutation curr_perm(const Handle&, const Handle&, bool&);
 		bool have_perm(const Handle&, const Handle&);
 
-		bool have_more;
+		// Iteration control for unordered links. Branchpoint advances
+		// whenever take_step is set to true.
 		bool take_step;
-		typedef std::stack<bool> MoreStack; // XXX
-		MoreStack more_stack; // XXX
+		bool have_more;
 #ifdef DEBUG
 		std::map<Unorder, int> perm_count;
 		std::stack<std::map<Unorder, int>> perm_count_stack;
@@ -153,7 +159,6 @@ class PatternMatchEngine
 		std::stack<ChoiceState> choice_stack;
 
 		std::stack<PermState> perm_stack;
-		std::stack<MoreStack> unordered_stack;  // XXX
 		void perm_push(void);
 		void perm_pop(void);
 
@@ -193,6 +198,7 @@ class PatternMatchEngine
 		bool explore_up_branches(const Handle&);
 		bool explore_link_branches(const Handle&);
 		bool explore_choice_branches(const Handle&);
+		bool explore_single_branch(const Handle&, const Handle&);
 		bool do_term_up(const Handle&);
 		bool clause_accept(const Handle&);
 		bool do_next_clause(void);

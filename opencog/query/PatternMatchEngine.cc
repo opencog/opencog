@@ -230,59 +230,6 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 
 /* ======================================================== */
 
-/// Compare a ChoiceLink in the pattern to the proposed grounding.
-/// hp points at the ChoiceLink.
-///
-/// CHOICE_LINK's are multiple-choice links. As long as we can
-/// can match one of the sub-expressions of the ChoiceLink, then
-/// the ChoiceLink as a whole can be considered to be grounded.
-///
-bool PatternMatchEngine::choice_compare(const Handle& hp,
-                                        const Handle& hg,
-                                        const LinkPtr& lp,
-                                        const LinkPtr& lg)
-{
-	const std::vector<Handle> &osp = lp->getOutgoingSet();
-
-	// _choice_state lets use resume where we last left off.
-	size_t iend = osp.size();
-	size_t istart = next_choice(hp, hg);
-	for (size_t i=istart; i<iend; i++)
-	{
-		const Handle& hop = osp[i];
-
-		dbgprt("tree_comp or_link choice %zu of %zu\n", i, iend);
-
-		bool match = tree_compare(hop, hg, CALL_CHOICE);
-		if (match)
-		{
-			// If we've found a grounding, lets see if the
-			// post-match callback likes this grounding.
-			match = _pmc.post_link_match(lp, lg);
-			if (not match) continue;
-
-			// If the grounding is accepted, record it.
-			if (hp != hg) var_grounding[hp] = hg;
-			_choice_state[Choice(hp, hg)] = i+1;
-			return true;
-		}
-	}
-	// If we are here, we've explored all the possibilities already
-	_choice_state.erase(Choice(hp, hg));
-	return false;
-}
-
-size_t PatternMatchEngine::next_choice(const Handle& hp,
-                                       const Handle& hg)
-{
-	size_t istart;
-	try { istart = _choice_state.at(Choice(hp, hg)); }
-	catch(...) { istart = 0;}
-	return istart;
-}
-
-/* ======================================================== */
-
 /// If the two links are both ordered, its enough to compare
 /// them "side-by-side".
 bool PatternMatchEngine::ordered_compare(const Handle& hp,
@@ -334,6 +281,98 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	if (hp != hg) var_grounding[hp] = hg;
 
 	return true;
+}
+
+/* ======================================================== */
+
+/// Compare a ChoiceLink in the pattern to the proposed grounding.
+/// hp points at the ChoiceLink.
+///
+/// CHOICE_LINK's are multiple-choice links. As long as we can
+/// can match one of the sub-expressions of the ChoiceLink, then
+/// the ChoiceLink as a whole can be considered to be grounded.
+///
+bool PatternMatchEngine::choice_compare(const Handle& hp,
+                                        const Handle& hg,
+                                        const LinkPtr& lp,
+                                        const LinkPtr& lg)
+{
+	const std::vector<Handle> &osp = lp->getOutgoingSet();
+
+	// _choice_state lets use resume where we last left off.
+	size_t iend = osp.size();
+	bool fresh = false;
+	size_t icurr = curr_choice(hp, hg, fresh);
+	if (fresh) choose_next = false; // took a step, clear the flag
+
+	dbgprt("tree_comp resume choice search at %zu of %zu of UUID=%lu "
+          "choose_next=%d\n",
+	       icurr, iend, hp.value(), choose_next);
+
+	if (choose_next)
+	{
+		icurr++;
+		choose_next = false; // we are taking a step, so clear the flag.
+	}
+
+	while (icurr<iend)
+	{
+		solution_push();
+		const Handle& hop = osp[icurr];
+
+		dbgprt("tree_comp or_link choice %zu of %zu\n", icurr, iend);
+
+		bool match = tree_compare(hop, hg, CALL_CHOICE);
+		if (match)
+		{
+			// If we've found a grounding, lets see if the
+			// post-match callback likes this grounding.
+			match = _pmc.post_link_match(lp, lg);
+			if (match)
+			{
+				// Even the stack, *without* erasing the discovered grounding.
+				var_solutn_stack.pop();
+
+				// If the grounding is accepted, record it.
+				if (hp != hg) var_grounding[hp] = hg;
+
+				_choice_state[Choice(hp, hg)] = icurr;
+				return true;
+			}
+		}
+		solution_pop();
+		choose_next = false; // we are taking a step, so clear the flag.
+		icurr++;
+	}
+
+	// If we are here, we've explored all the possibilities already
+	_choice_state.erase(Choice(hp, hg));
+	return false;
+}
+
+/// Return the current choice state for the given pattern & ground
+/// combination.
+size_t PatternMatchEngine::curr_choice(const Handle& hp,
+                                       const Handle& hg,
+                                       bool& fresh)
+{
+	size_t istart;
+	try { istart = _choice_state.at(Choice(hp, hg)); }
+	catch(...) { istart = 0; fresh = true; }
+	return istart;
+}
+
+bool PatternMatchEngine::have_choice(const Handle& hp,
+                                     const Handle& hg)
+{
+#if USE_AT
+	bool have = true;
+	try { _choice_state.at(Choice(hp, hg)); }
+	catch(...) { have = false;}
+	return have;
+#else
+	return 0 < _choice_state.count(Choice(hp, hg));
+#endif
 }
 
 /* ======================================================== */
@@ -545,8 +584,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 		// If we are here, then take_step is false, because
 		// cases 1,2,3,4 already handled above.
 		// Well, actually, this can happen, if we are not careful
-		// to manage the have_more flag on a stack. But it doesn't
-		// seem required, not really ... XXX remove the more_stack
+		// to manage the have_more flag on a stack.
 //		OC_ASSERT(match or not have_more or 1==num_perms,
 //		          "Impossible: case 6 happened!");
 
@@ -628,9 +666,6 @@ bool PatternMatchEngine::have_perm(const Handle& hp,
 void PatternMatchEngine::perm_push(void)
 {
 	perm_stack.push(_perm_state);
-// XXX I think we can get rid of more stack, as long as
-// we comment out the assert on "case 6"
-	unordered_stack.push(more_stack);
 #ifdef DEBUG
 	perm_count_stack.push(perm_count);
 #endif
@@ -639,7 +674,6 @@ void PatternMatchEngine::perm_push(void)
 void PatternMatchEngine::perm_pop(void)
 {
 	POPSTK(perm_stack, _perm_state);
-	POPSTK(unordered_stack, more_stack);
 #ifdef DEBUG
 	POPSTK(perm_count_stack, perm_count);
 #endif
@@ -873,12 +907,14 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 		return false;
 
 	// If its not an unordered link, then don't try to iterate.
-	Type tp = curr_term_handle->getType();
-	if (not _classserver.isA(tp, UNORDERED_LINK))
+	curr_term_type = curr_term_handle->getType();
+	if (not _classserver.isA(curr_term_type, UNORDERED_LINK))
 		return explore_choice_branches(hsoln);
 
 	do {
 		solution_push();
+
+		// If the pattern was satisfied, then we are done for good.
 		if (explore_choice_branches(hsoln))
 		{
 			// Even the stack, *without* erasing the discovered grounding.
@@ -904,48 +940,77 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hsoln)
 /// that the caller had handles the unordered-link alternative branches.
 bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 {
-	bool found = false;
+	// If its not an choice link, then don't try to iterate.
+	if (CHOICE_LINK != curr_term_type)
+		return explore_single_branch(curr_term_handle, hsoln);
+
+	dbgprt("Begin choice branchpoint iteration loop\n");
 	do {
-		solution_push();
-
-		dbgprt("Checking UUID=%lu for soln by %lu\n",
-		       curr_term_handle.value(), hsoln.value());
-
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = tree_compare(curr_term_handle, hsoln, CALL_SOLN);
+		bool match = explore_single_branch(curr_term_handle, hsoln);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
-		// If no match, then try the next one.
-		if (not match)
-		{
-			// Get rid of any grounding that might have been proposed
-			// during the tree-match.
-			solution_pop();
-			dbgprt("UUID=%lu NOT solved by %lu\n",
-			       curr_term_handle.value(), hsoln.value());
-			return false;
-		}
+		// If the pattern was satisfied, then we are done for good.
+		if (match)
+			return true;
 
-		dbgprt("UUID=%lu solved by %lu move up\n",
-		       curr_term_handle.value(), hsoln.value());
+		dbgprt("Step to next choice\n");
+		// If we are here, there was no match.
+		// On the next go-around, take a step.
+		choose_next = true;
+	} while (have_choice(curr_term_handle, hsoln));
 
-		// XXX should not do perm_push every time... only selectively.
-		perm_push();
-		if (do_term_up(hsoln)) found = true;
-		perm_pop();
-
-		// Get rid of any grounding that might have been proposed
-		// during the tree-compare or do_term_up.
-		solution_pop();
-	} while (0 < next_choice(curr_term_handle, hsoln));
-
-	if (found)
-		return true;
-
-	dbgprt("No more choice possibilities\n");
+	dbgprt("Exhausted all choice possibilities\n");
 
 	return false;
+}
+
+/// Check the proposed grounding hg for pattern term hp.
+///
+/// As the name implies, this will explore only one single potential
+/// (proposed) grounding for the current pattern term. This is meant
+/// to be called after a viable branch has been identified for
+/// exploration.
+///
+/// This is wrapper around tree compare; if tree_compare
+/// returns false, then this returns immediately.
+///
+/// However, this method is part of the upwards-recursion chain,
+/// so if tree_compare approves the proposed grounding, this will
+/// recurse upwards, calling do_term_up to get the next pattern
+/// term. Thus, this method will return true ONLY if ALL OF the terms
+/// and clauses in the pattern are satisfiable (are accepted matches).
+///
+bool PatternMatchEngine::explore_single_branch(const Handle& hp,
+                                               const Handle& hg)
+{
+	solution_push();
+
+	dbgprt("Checking pattern UUID=%lu for soln by %lu\n",
+	       hp.value(), hg.value());
+
+	bool match = tree_compare(hp, hg, CALL_SOLN);
+
+	if (not match)
+	{
+		dbgprt("Pattern UUID=%lu NOT solved by %lu\n",
+		       hp.value(), hg.value());
+		solution_pop();
+		return false;
+	}
+
+	dbgprt("UUID=%lu solved by %lu move up\n",
+          hp.value(), hg.value());
+
+	// XXX should not do perm_push every time... only selectively.
+	// But when? This is very confusing ...
+	perm_push();
+	bool found = do_term_up(hg);
+	perm_pop();
+
+	solution_pop();
+	return found;
 }
 
 /// do_term_up() -- move upwards from the current term.
@@ -1125,7 +1190,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hsoln)
 			dbgprt("Exploring one possible ChoiceLink in clause out of %zu\n",
 			       fa.least_holders.size());
 
-			OC_ASSERT(0 == next_choice(hi, hsoln),
+			OC_ASSERT(not have_choice(hi, hsoln),
 			          "Something is wrong with the ChoiceLink code");
 
 			soln_handle_stack.push(curr_soln_handle);
@@ -1647,7 +1712,10 @@ void PatternMatchEngine::clear_current_state(void)
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
+	// choice link state
 	_choice_state.clear();
+	_need_choice_push = false;
+	choose_next = true;
 
 	// unordered link state
 	have_more = false;
@@ -1669,10 +1737,13 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	curr_soln_handle = Handle::UNDEFINED;
 	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
-	_need_choice_push = false;
 
 	// graph state
 	_clause_stack_depth = 0;
+
+	// choice link state
+	_need_choice_push = false;
+	choose_next = true;
 
 	// unordered link state
 	have_more = false;
