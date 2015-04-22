@@ -309,6 +309,9 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
           "choose_next=%d\n",
 	       icurr, iend, hp.value(), choose_next);
 
+	// XXX This is almost surely wrong... if there are two
+	// nested choice links, then this will hog the steps,
+	// and the deeper choice will fail.
 	if (choose_next)
 	{
 		icurr++;
@@ -941,6 +944,10 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hsoln)
 
 	dbgprt("Begin choice branchpoint iteration loop\n");
 	do {
+		// XXX this "need_choice_push thing is probably wrong; it probably
+		// should resemble the perm_push() used for unordered links.
+		// However, currently, no test case trips this up. so .. OK.
+		// whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
 		bool match = explore_single_branch(curr_term_handle, hsoln);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
