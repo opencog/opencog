@@ -51,6 +51,7 @@ void FCMemoryUTest::test_isin_premise_list(void) {
 	HandleSeq premise_list = {premise};
 	fcmem.update_premise_list(premise_list);
 	Handle h = eval->eval_h("(VariableNode \"$B\")");
+	TS_ASSERT(fcmem.isin_premise_list(premise));
 	TS_ASSERT(fcmem.isin_premise_list(h));
     h= eval->eval_h("(VariableNode \"$D\")");
     TS_ASSERT(not fcmem.isin_premise_list(h));
