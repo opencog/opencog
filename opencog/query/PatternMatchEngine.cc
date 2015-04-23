@@ -183,18 +183,16 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 /// that what it might seem to be ...
 ///
 /// If they're the same atom, then clearly they match.
-/// ... but only if hp is a constant i.e. contains no bound variables)
+/// ... but only if hp is a constant (i.e. contains no bound variables)
+///
+/// This is screwed up. Right now, quoted variables are dealt with
+/// using a different mechanism, and bound beta redex varaiables are
+/// ... just broken, at the moment.
 bool PatternMatchEngine::self_compare(const Handle& hp)
 {
-	prtmsg("Compare atom to itself:\n", hp);
+	// prtmsg("Compare atom to itself:\n", hp);
 
 #ifdef NO_SELF_GROUNDING
-	if (hp == curr_term_handle)
-	{
-		// Mismatch, if hg contains bound vars in it.
-		if (any_unquoted_in_tree(hp, _varlist->varset)) return false;
-		return true;
-	}
 #if THIS_CANT_BE_RIGHT
 	// Bound but quoted variables cannot be solutions to themselves.
 	// huh? whaaaat?
