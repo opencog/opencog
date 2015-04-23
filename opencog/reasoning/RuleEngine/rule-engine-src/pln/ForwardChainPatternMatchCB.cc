@@ -27,7 +27,7 @@ using namespace opencog;
 
 ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
         Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as),
-                PLNImplicator(as), _as(as)
+                _as(as)
 {
     _fcmem = nullptr;
 }
@@ -40,31 +40,41 @@ bool ForwardChainPatternMatchCB::node_match(const Handle& node1,
                                             const Handle& node2)
 {
     //constrain search within premise list
-    return _fcmem->isin_premise_list(node2)
-        and (_fcmem->is_search_in_af() ?
-             AttentionalFocusCB::node_match(node1, node2)
-             : DefaultPatternMatchCB::node_match(node1, node2));
+    bool ret = _fcmem->isin_premise_list(node2)
+            and (_fcmem->is_search_in_af() ?
+                    AttentionalFocusCB::node_match(node1, node2) :
+                    DefaultPatternMatchCB::node_match(node1, node2));
+
+    cout << "Node " << node2->toString() << "RET = " << ret << endl;
+    return ret;
+
 }
 
 bool ForwardChainPatternMatchCB::link_match(const LinkPtr& lpat,
                                             const LinkPtr& lsoln)
 {
     //constrain search within premise list
-    return _fcmem->isin_premise_list(Handle(lsoln))
-        and (_fcmem->is_search_in_af() ?
-             AttentionalFocusCB::link_match(lpat, lsoln)
-             : DefaultPatternMatchCB::link_match(lpat, lsoln));
+    bool ret = _fcmem->isin_premise_list(Handle(lsoln))
+            and (_fcmem->is_search_in_af() ?
+                    AttentionalFocusCB::link_match(lpat, lsoln) :
+                    DefaultPatternMatchCB::link_match(lpat, lsoln));
+
+    cout << "Link " << ((Handle) lsoln)->toString() << "RET = " << ret << endl;
+    return ret;
 }
 
 bool ForwardChainPatternMatchCB::grounding(
         const std::map<Handle, Handle> &var_soln,
         const std::map<Handle, Handle> &pred_soln)
 {
+    cout << "[DEBUG] Grounding " << endl;
+
     Handle h = inst.instantiate(implicand, var_soln);
     if (Handle::UNDEFINED != h) {
+        cout << "[DEBUG] adding grounding " << h->toString() << endl;
         result_list.push_back(h);
     }
-    return false;
+    return true;
 }
 
 void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem)

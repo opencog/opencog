@@ -56,7 +56,7 @@ DefaultForwardChainerCB::~DefaultForwardChainerCB()
 vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
     Handle source = fcmem.get_cur_source();
-    if (source == Handle::UNDEFINED or NodeCast(source))
+    if (source == Handle::UNDEFINED)
         throw InvalidParamException(TRACE_INFO,
                                     "Needs a source atom of type LINK");
     HandleSeq chosen_bindlinks;
@@ -86,7 +86,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         HandleSeq matches = imp.result_list;
         if (matches.empty()) {
             logger().debug(
-                "No matching BindLink was found. Returning empty vector");
+                    "No matching BindLink was found. Returning empty vector");
             return vector<Rule*> { };
         }
 
@@ -221,21 +221,34 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
     return hchosen;
 }
 
-//TODO applier should check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
+//TODO applier shouand premise_list for forward chainingld check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
 HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 {
     Rule * cur_rule = fcmem.get_cur_rule();
-    fcpm_->set_fcmem(&fcmem);
+    //fcpm_->set_fcmem(&fcmem);
+
+    /**
+     * Use temporary atomspace filled with only the source
+     * and premise_list for forward chaining
+     * */
+    AtomSpace temp;
+    for (Handle h : fcmem.get_premise_list())
+        temp.addAtom(h);
+    temp.addAtom(cur_rule->get_handle());
 
     BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
-    fcpm_->implicand = bl->get_implicand();
-    bl->imply(*fcpm_);
-
-    HandleSeq product = fcpm_->get_products();
+    //fcpm_->implicand = bl->get_implicand();
+    DefaultImplicator impl(as_);
+    impl.implicand = bl->get_implicand();
+    //bl->imply(*fcpm_);
+    bl->imply(impl);
+    //HandleSeq product = fcpm_->get_products();
+    HandleSeq product = impl.result_list;
 
     //! Make sure the inferences made are new.
     HandleSeq new_product;
     for (auto h : product) {
+        as_->addAtom(h);
         if (not fcmem.isin_premise_list(h))
             new_product.push_back(h);
     }

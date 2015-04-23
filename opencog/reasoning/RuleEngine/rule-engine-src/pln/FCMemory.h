@@ -39,16 +39,14 @@ struct Inference {
 
 class FCMemory {
 private:
-    friend class ForwardChainer; /*<allow access to private*/
-    friend class ::ForwardChainerUTest; /*<allow access to private*/
-    bool search_in_af_;
-    vector<Rule*> rules_; /*<loaded rules*/
-    HandleSeq source_list_; /*<selected sources on each forward chaining steps*/
-    HandleSeq premise_list_; /*<list of premises*/
-    Rule* cur_rule_;
-    Handle cur_source_;
-    vector<Inference> inf_history_; /*<inference history*/
-    AtomSpace* as_;
+    bool _search_in_af;
+    vector<Rule*> _rules; /*<loaded rules*/
+    HandleSeq _source_list; /*<selected sources on each forward chaining steps*/
+    HandleSeq _premise_list; /*<list of premises*/
+    Rule* _cur_rule;
+    Handle _cur_source;
+    vector<Inference> _inf_history; /*<inference history*/
+    AtomSpace* _as;
 public:
     FCMemory(AtomSpace* as);
     ~FCMemory();
@@ -58,6 +56,7 @@ public:
     HandleSeq get_source_list();
     HandleSeq get_premise_list();
     void update_premise_list(HandleSeq input);
+    void set_search_in_af(bool val);
     bool is_search_in_af();
     Rule* get_cur_rule();
     void add_rules_product(int iteration, HandleSeq product);
