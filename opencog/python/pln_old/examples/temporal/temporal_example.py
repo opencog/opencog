@@ -18,7 +18,7 @@ coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
 timeLinks = "opencog/spacetime/spacetime_types.scm"
 data = "tests/python/test_pln/scm_disabled/temporal/temporalToyExample.scm"
-# data = "opencog/python/pln/examples/temporal/temporal-r2l-input.scm"
+# data = "opencog/python/pln_old/examples/temporal/temporal-r2l-input.scm"
 
 # initialize atomspace
 atomspace = AtomSpace()

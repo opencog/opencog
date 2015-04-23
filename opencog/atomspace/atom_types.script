@@ -101,7 +101,7 @@ QUOTE_LINK <- ORDERED_LINK
 // variables, and forcing type restrictions on them. Thus, in a certain
 // sense, the ScopeLink explicitly binds at least some, and maybe all
 // of the variables that occur in it's body.  It differs from the
-// FreeLink in that the FreeLink neccesarily list ALL the (free)
+// FreeLink in that the FreeLink necessarily list ALL the (free)
 // variables within it; the ScopeLink need not bind all of them.
 // The FreeLink also has no type restrictions on the variables.
 SCOPE_LINK <- VARIABLE_LIST
@@ -124,7 +124,7 @@ SATISFYING_SET_LINK <- UNORDERED_LINK
 SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
-// These inherit from ForAll becuase if these contain variables, then
+// These inherit from ForAll because if these contain variables, then
 // those variables are implicitly scoped to this link (i.e. are not
 // free, but are bound to this link.) Truth-value wise, these behave
 // like AVERAGE_LINK, averaging over the for-all universe that they

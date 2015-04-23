@@ -3,9 +3,10 @@ Probabilistic Logic Networks (PLN)
 
 ## Summary
 
-This is a [new PLN design][] that is currently under development. It is still in-progress.
+This is the old python version of PLN, now replaced by the Rule Engine
+version under opencog/reasoning.
 
-A detailed description of the architecture is available in [algorithm.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
+A detailed description of the architecture is available in [algorithm.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/algorithm.md).
 
 After reading the following high-level tutorial, follow that link to understand the algorithms in detail.
 
@@ -41,9 +42,9 @@ Install the necessary dependencies for REST API
 ```sudo ./install_dependencies.sh```
 For more information: http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
 
-Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path and the ***../opencog/python/web/api*** path and restapi as a preloaded module:
+Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln_old/examples/deduction** path and the ***../opencog/python/web/api*** path and restapi as a preloaded module:
 
-```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction```
+```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln_old/examples/deduction```
 
 ```PYTHON_PRELOAD = restapi```
 
@@ -71,7 +72,7 @@ Enter the ```restapi.Start``` command.
 
 Open the scheme shell by typing ```scm```.
 Load a scheme file by typing ```(load-scm-from-file "filepath")```
-with filepath being, e.g. /home/username/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm
+with filepath being, e.g. /home/username/opencog/opencog/python/pln_old/examples/deduction/atomspace_contents.scm
 Exit the scheme shell by typing ```.``` and hitting enter.
 
 10) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
@@ -91,7 +92,7 @@ For more information: https://github.com/opencog/external-tools/blob/master/Atom
 
 ### PLN Examples in the CogServer
 
-For example code, see the **opencog/python/pln/examples** folder.
+For example code, see the **opencog/python/pln_old/examples** folder.
 
 Currently, the following examples are available:
 -   **deduction** - illustrates how to create a forward chaining agent utilizing **deduction_agent.py**
@@ -114,7 +115,7 @@ The activity of the PLN and Attention Allocation systems can be monitored in rea
 
 Although the primary use case is to use PLN within a MindAgent loaded into the CogServer, coupled with the Attention Allocation system, for development and testing purposes it can be useful to interact directly with the PLN classes in a standalone Python environment.
 
-A complete example is available in: **opencog/python/pln/examples/deduction_example.py**, which utilizes an agent defined in **deduction_agent.py**.
+A complete example is available in: **opencog/python/pln_old/examples/deduction_example.py**, which utilizes an agent defined in **deduction_agent.py**.
 
 ### PLN Agent example:
 Define an initial [atomspace][] object populated with Atoms.
@@ -305,7 +306,7 @@ If set, the \_give\_stimulus method is called, to be applied by the
 [ImportanceUpdatingAgent][].
 
   [new PLN design]: http://wiki.opencog.org/w/New_PLN_Design,_2013
-  [opencog/python/pln directory]: https://github.com/opencog/opencog/tree/master/opencog/python/pln
+  [opencog/python/pln_old directory]: https://github.com/opencog/opencog/tree/master/opencog/python/pln_old
   [atomspace]: http://wiki.opencog.org/w/Python#MindAgents_in_Python
 
   [AtomSpace]: http://wiki.opencog.org/w/Atomspace

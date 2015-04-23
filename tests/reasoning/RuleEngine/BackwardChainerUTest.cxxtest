@@ -51,7 +51,7 @@ void BackwardChainerUTest::setUp() {
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
 	             "opencog/scm/utilities.scm, "
-	             "opencog/python/pln/examples/backward_chaining/criminal.scm, "
+	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
 	             "tests/reasoning/RuleEngine/bc-test/bc-example.scm");
 	load_scm_files_from_config(*as_);
 

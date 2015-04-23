@@ -15,7 +15,7 @@ __init__(atomspace)
 
 coreTypes = "opencog/atomspace/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
-data = "opencog/python/pln/examples/socrates_demo/socrates-r2l.scm"
+data = "opencog/python/pln_old/examples/socrates_demo/socrates-r2l.scm"
 
 number_of_steps = 1000
 

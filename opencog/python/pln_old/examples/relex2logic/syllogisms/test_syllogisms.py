@@ -140,7 +140,7 @@ if __name__ == "__main__":
         "syllogism-canadian.scm"
     ]
 
-    syllogism_path = "opencog/python/pln/examples/relex2logic/syllogisms/"
+    syllogism_path = "opencog/python/pln_old/examples/relex2logic/syllogisms/"
 
     for syllogism in syllogisms:
         # sets up atomspace where inputs, rules, and outputs can be retrieved

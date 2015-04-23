@@ -1,7 +1,8 @@
-### Prototype rule definitions for a generic rule engine implementation
+# Prototype rule definitions for a generic rule engine implementation
 
-Implements rules in the AtomSpace using the pattern matcher for unification
-and GroundedSchemaNodes for execution of formulas written in Scheme
+Implements rules in the AtomSpace using the pattern matcher for
+unification and GroundedSchemaNodes for execution of formulas written
+in Scheme.
 
 ## Rule bases
 
@@ -43,17 +44,29 @@ compile-rules.scm
 in order to compile the rules and formulas for better performance.
 
 ## Next steps
-- See if these can be implemented to directly use the "side-effect free" versions so that the truth value application occurs inside the ImplicationLink rather than inside the Scheme rule. This was discussed [here](https://groups.google.com/d/msg/opencog/KUptHRvBXu0/YR6oySxLKeMJ).
 
-- See if the link type can be made to allow a dynamic list of valid link types. For example, for the Deduction Rule: {InheritanceLink, SubsetLink, ImplicationLink, ExtensionalImplicationLink}
+- See if these can be implemented to directly use the "side-effect
+  free" versions so that the truth value application occurs inside the
+  ImplicationLink rather than inside the Scheme rule. This was
+  discussed [here](https://groups.google.com/d/msg/opencog/KUptHRvBXu0/YR6oySxLKeMJ).
+
+- See if the link type can be made to allow a dynamic list of valid
+  link types. For example, for the Deduction Rule: {InheritanceLink,
+  SubsetLink, ImplicationLink, ExtensionalImplicationLink}
 
 - Support all the TruthValue types
 
-- Utilize a graph rewriting unit test framework, that is currently being discussed, to assert that the replacement graphs match a predefined expected value for specific test instances
+- Utilize a graph rewriting unit test framework, that is currently
+  being discussed, to assert that the replacement graphs match a
+  predefined expected value for specific test instances
 
-- For a rule like Modus Ponens to work, it will be necessary to implement "Recursive Unification using the Pattern Matcher", described [in this thread](http://wiki.opencog.org/w/Idea:_Recursive_Unification_using_the_Pattern_Matcher).
+- For a rule like Modus Ponens to work, it will be necessary to
+  implement "Recursive Unification using the Pattern Matcher",
+  described [in this thread](http://wiki.opencog.org/w/Idea:_Recursive_Unification_using_the_Pattern_Matcher).
 
-- Rules will require mutual exclusions and priorities, but that can likely be implemented outside of the definition of the rule itself for clarity.
+- Rules will require mutual exclusions and priorities, but that can
+  likely be implemented outside of the definition of the rule itself
+  for clarity.
 
 ## PLN Example
 
@@ -117,7 +130,8 @@ in order to compile the rules and formulas for better performance.
 
 ## Relex2Logic Example
 
-The relex-to-logic subdirectory has the initial specification of the R2L-RuleBase for the English language.
+The relex-to-logic subdirectory has the initial specification of the
+R2L-RuleBase for the English language.
 
 To test the rules, use the following steps.
 
@@ -133,6 +147,7 @@ To test the rules, use the following steps.
 
 - Start the relex server using the --relex flag (don't use the --logic flag)
 
-- In the opencog scheme shell run (relex-parse "some sentence"), preferably sentences on which the rules are applicable.
+- In the opencog scheme shell run (relex-parse "some sentence"),
+  preferably sentences on which the rules are applicable.
 
 - Run (cog-bind name-of-the-variable-which-has-BindLink-as-its-value)
