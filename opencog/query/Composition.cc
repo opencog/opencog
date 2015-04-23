@@ -163,7 +163,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// But first, we do have to set up curr root, etc, otherwise even
 	// the tre compare goes wonky...
 	curr_root = _pat->cnf_clauses[0];
-	curr_term_handle = curr_root;
 	clause_accepted = false;
 
 	Handle hp(_pat->cnf_clauses[0]);

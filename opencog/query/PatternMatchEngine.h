@@ -98,7 +98,6 @@ class PatternMatchEngine
 		bool in_quote;      // Everything is literal in a quote.
 
 		Handle curr_root;         // stacked onto root_handle_stack
-		Handle curr_term_handle;  // stacked onto term_handle_stack
 		Type curr_term_type;      // Type of the current term.
 
 		void clear_current_state(void);  // clear the stuff above
@@ -204,6 +203,8 @@ class PatternMatchEngine
 		void get_next_untried_clause(void);
 		bool get_next_untried_helper(bool, bool, bool);
 		unsigned int thickness(const Handle&, const std::set<Handle>&);
+		Handle next_clause;
+		Handle next_joint;
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,

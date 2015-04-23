@@ -1233,9 +1233,8 @@ bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
 	get_next_untried_clause();
-
-Handle joiner = curr_term_handle;
-curr_term_handle = Handle::UNDEFINED;
+	Handle joiner = next_joint;
+	curr_root = next_clause;
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
@@ -1297,8 +1296,9 @@ curr_term_handle = Handle::UNDEFINED;
 			// XXX Maybe should push n pop here? No, maybe not ...
 			clause_grounding[curr_root] = Handle::UNDEFINED;
 			get_next_untried_clause();
-joiner = curr_term_handle;
-curr_term_handle = Handle::UNDEFINED;
+			joiner = next_joint;
+			curr_root = next_clause;
+
 			prtmsg("Next optional clause is", curr_root);
 			if (Handle::UNDEFINED == curr_root)
 			{
@@ -1379,8 +1379,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	if (_pat->optionals.empty())
 	{
 		// There are no more ungrounded clauses to consider. We are done.
-		curr_root = Handle::UNDEFINED;
-		curr_term_handle = Handle::UNDEFINED;
+		next_clause = Handle::UNDEFINED;
+		next_joint = Handle::UNDEFINED;
 		return;
 	}
 
@@ -1396,11 +1396,11 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// If we are here, there are no more unsolved clauses to consider.
-	curr_root = Handle::UNDEFINED;
-	curr_term_handle = Handle::UNDEFINED;
+	next_clause = Handle::UNDEFINED;
+	next_joint = Handle::UNDEFINED;
 }
 
-// Count teh number of ungrounded variables in a clause.
+// Count the number of ungrounded variables in a clause.
 //
 // This is used to search for the "thinnest" ungrounded clause:
 // the one with the fewest ungrounded variables in it. Thus, if
@@ -1517,8 +1517,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 		// clauses. One of the clauses has been grounded, another
 		// has not.  We want to now traverse upwards from this node,
 		// to find the top of the ungrounded clause.
-		curr_root = unsolved_clause;
-		curr_term_handle = joint;
+		next_clause = unsolved_clause;
+		next_joint = joint;
 
 		if (Handle::UNDEFINED != unsolved_clause)
 		{
@@ -1670,7 +1670,6 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 
 	// Match the required clauses.
 	curr_root = do_clause;
-	curr_term_handle = starter;
 	issued.insert(curr_root);
 	bool found = explore_link_branches(starter, ah);
 
@@ -1692,7 +1691,6 @@ void PatternMatchEngine::clear_current_state(void)
 	in_quote = false;
 
 	curr_root = Handle::UNDEFINED;
-	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
 	// choice link state
@@ -1717,7 +1715,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	// current state
 	in_quote = false;
 	curr_root = Handle::UNDEFINED;
-	curr_term_handle = Handle::UNDEFINED;
 	depth = 0;
 
 	// graph state
