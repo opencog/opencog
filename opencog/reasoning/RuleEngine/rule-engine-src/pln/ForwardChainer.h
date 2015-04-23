@@ -26,7 +26,7 @@
 
 #include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 #include <opencog/util/Logger.h>
-
+#include "PLNCommons.h"
 #include "FCMemory.h"
 
 class ForwardChainerUTest;
@@ -38,13 +38,17 @@ class ForwardChainerCallBack;
 class ForwardChainer {
 private:
     friend class ::ForwardChainerUTest;
-    JsonicControlPolicyParamLoader* cpolicy_loader_;
-    string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
+
     AtomSpace * _as;
-    PLNCommons& _pc; //utility class
-    FCMemory _fcmem;
+    PLNCommons _pc; //utility class
+
+    JsonicControlPolicyParamLoader* _cpolicy_loader;
+    string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
+
+    FCMemory _fcmem; //Stores history
     Logger * _log;
-    int iteration = 0;
+    int _iteration = 0;
+
     /**
      * initialize config methods
      */

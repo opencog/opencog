@@ -26,7 +26,7 @@ using namespace opencog;
 
 FCMemory::FCMemory(AtomSpace* as)
 {
-    as_ = as;
+    _as = as;
 }
 
 FCMemory::~FCMemory()
@@ -36,83 +36,83 @@ FCMemory::~FCMemory()
 void FCMemory::update_premise_list(HandleSeq input)
 {
     for (Handle i : input) {
-        if (find(premise_list_.begin(), premise_list_.end(), i) == premise_list_.end())
-            premise_list_.push_back(i);
+        if (find(_premise_list.begin(), _premise_list.end(), i) == _premise_list.end())
+            _premise_list.push_back(i);
     }
 }
 
 vector<Rule*> FCMemory::get_rules()
 {
-    return rules_;
+    return _rules;
 }
 void FCMemory::set_rules(vector<Rule*> rules)
 {
-    rules_ = rules;
+    _rules = rules;
 }
 void FCMemory::set_source(Handle source)
 {
-    cur_source_ = source;
-    source_list_.push_back(cur_source_);
+    _cur_source = source;
+    _source_list.push_back(_cur_source);
 }
 HandleSeq FCMemory::get_source_list()
 {
-    return source_list_;
+    return _source_list;
 }
 HandleSeq FCMemory::get_premise_list()
 {
-    return premise_list_;
+    return _premise_list;
 }
 bool FCMemory::is_search_in_af()
 {
-    return search_in_af_;
+    return _search_in_af;
 }
 Rule* FCMemory::get_cur_rule()
 {
-    return cur_rule_;
+    return _cur_rule;
 }
 void FCMemory::set_cur_rule(Rule* r)
 {
-    cur_rule_ = r;
+    _cur_rule = r;
 }
 void FCMemory::add_rules_product(int iteration, HandleSeq product)
 {
     for (Handle p : product) {
         Inference inf;
         inf.iter_step = iteration;
-        inf.applied_rule = cur_rule_;
+        inf.applied_rule = _cur_rule;
         inf.inf_product.push_back(p);
-        inf_history_.push_back(inf);
+        _inf_history.push_back(inf);
     }
 }
 void FCMemory::add_inference(int iter_step, HandleSeq product,
                              HandleSeq matched_nodes)
 {
     Inference inf;
-    inf.applied_rule = cur_rule_;
+    inf.applied_rule = _cur_rule;
     inf.iter_step = iter_step;
     for (Handle p : product)
         inf.inf_product.push_back(p);
     for (Handle mn : matched_nodes)
         inf.matched_nodes.push_back(mn);
-    inf_history_.push_back(inf);
+    _inf_history.push_back(inf);
 }
 Handle FCMemory::get_cur_source()
 {
-    return cur_source_;
+    return _cur_source;
 }
 bool FCMemory::isin_source_list(Handle h)
 {
-    return (find(source_list_.begin(), source_list_.end(), h) != source_list_.end());
+    return (find(_source_list.begin(), _source_list.end(), h) != _source_list.end());
 }
 bool FCMemory::isin_premise_list(Handle h)
 {
-    for (Handle hi : premise_list_) {
+    for (Handle hi : _premise_list) {
         if (hi.value() == h.value())
             return true;
         //recursive lookup
         else if (LinkCast(hi)) {
             HandleSeqSeq hseqs;
-            hseqs.push_back(as_->getOutgoing(hi));
+            hseqs.push_back(_as->getOutgoing(hi));
             do {
                 HandleSeq iset = hseqs[hseqs.size() - 1];
                 hseqs.pop_back();
@@ -120,7 +120,7 @@ bool FCMemory::isin_premise_list(Handle h)
                     if (i.value() == h.value())
                         return true;
                     else if (LinkCast(i))
-                        hseqs.push_back(as_->getOutgoing(i));
+                        hseqs.push_back(_as->getOutgoing(i));
                 }
             } while (not hseqs.empty());
         }
@@ -131,20 +131,20 @@ bool FCMemory::isin_premise_list(Handle h)
 HandleSeq FCMemory::get_result()
 {
     HandleSeq result;
-    for (Inference i : inf_history_)
+    for (Inference i : _inf_history)
         result.insert(result.end(), i.inf_product.begin(), i.inf_product.end());
     return result;
 }
 
 vector<Inference>& FCMemory::get_inf_history()
 {
-    return inf_history_;
+    return _inf_history;
 }
 
 vector<Rule*> FCMemory::get_applied_rules()
 {
     vector<Rule*> applied_rules;
-    for (Inference i : inf_history_) {
+    for (Inference i : _inf_history) {
         if (find(applied_rules.begin(), applied_rules.end(), i.applied_rule) == applied_rules.end())
             applied_rules.push_back(i.applied_rule);
     }

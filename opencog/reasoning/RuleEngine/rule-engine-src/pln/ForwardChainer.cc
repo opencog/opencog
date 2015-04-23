@@ -29,7 +29,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
-#include "PLNCommons.h"
+
 
 using namespace opencog;
 
@@ -43,16 +43,16 @@ ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
 
 ForwardChainer::~ForwardChainer()
 {
-    delete cpolicy_loader_;
+    delete _cpolicy_loader;
 }
 
 void ForwardChainer::init()
 {
-    cpolicy_loader_ = new JsonicControlPolicyParamLoader(_as, _conf_path);
-    cpolicy_loader_->load_config();
-    _fcmem.search_in_af_ = cpolicy_loader_->get_attention_alloc();
-    _fcmem.rules_ = cpolicy_loader_->get_rules();
-    _fcmem.cur_rule_ = nullptr;
+    _cpolicy_loader = new JsonicControlPolicyParamLoader(_as, _conf_path);
+    _cpolicy_loader->load_config();
+    _fcmem._search_in_af = _cpolicy_loader->get_attention_alloc();
+    _fcmem._rules = _cpolicy_loader->get_rules();
+    _fcmem._cur_rule = nullptr;
 
     // Provide a logger
     _log = NULL;
@@ -85,7 +85,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
     }
 
     _log->info("[ForwardChainer] Next source %s",
-               _fcmem.cur_source_->toString().c_str());
+               _fcmem._cur_source->toString().c_str());
 
     // Add more premise to hcurrent_source by pattern matching.
     _log->info("[ForwardChainer] Choose additional premises:");
@@ -123,7 +123,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         }
     }
 
-    _fcmem.cur_rule_ = r;
+    _fcmem._cur_rule = r;
 
     //! Apply rule.
     _log->info("[ForwardChainer] Applying chosen rule %s",
@@ -134,7 +134,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
     for (auto p : product)
         _log->info("%s", p->toString().c_str());
     _log->info("[ForwardChainer] adding inference to history");
-    _fcmem.add_rules_product(iteration, product);
+    _fcmem.add_rules_product(_iteration, product);
     _log->info(
             "[ForwardChainer] updating premise list with the inference made");
     _fcmem.update_premise_list(product);
@@ -169,11 +169,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         _log->info("[ForwardChainer] setting next source");
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
 
-    auto max_iter = cpolicy_loader_->get_max_iter();
-    while (iteration < max_iter /*OR other termination criteria*/) {
-        _log->info("Iteration %d", iteration);
+    auto max_iter = _cpolicy_loader->get_max_iter();
+    while (_iteration < max_iter /*OR other termination criteria*/) {
+        _log->info("Iteration %d", _iteration);
         step(fcb, hsource);
-        iteration++;
+        _iteration++;
     }
 }
 
