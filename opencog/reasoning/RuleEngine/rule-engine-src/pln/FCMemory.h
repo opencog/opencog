@@ -26,8 +26,6 @@
 #include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-class ForwardChainerUTest;
-
 namespace opencog {
 
 struct Inference {
