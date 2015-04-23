@@ -9,7 +9,7 @@ bother with this configuration, so we disable it to avoid grief.
 To run this test, perform the following steps:
 
 1) If you choose to change the default database name and username, then
-   edit tests/persist/sql/CMakeLists.txt and uncomment 
+   edit tests/persist/sql/CMakeLists.txt and uncomment
    SET(DB_IS_CONFIGURED 1)  It probbly easier to just use the default
    database name and username; see below.
 
@@ -25,7 +25,7 @@ To run this test, perform the following steps:
 
 2c) Create a test database. This can be done at the shell prompt:
 
-    $ createdb test-persist
+    $ createdb opencog_test
 
 2d) If you get an error from the above, about missing createdb permissions,
     Try doing this:
@@ -41,22 +41,22 @@ To run this test, perform the following steps:
     consistent with the ~/.odbc.ini file. Do NOT use your login password!
     Pick something else! Create the user at the shell prompt:
 
-    $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d test-persist
+    $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d opencog_test
 
 2f) Check that the above worked, by manually logging in:
 
-    $  psql test-persist -U opencog_tester -W -h localhost
+    $  psql opencog_test -U opencog_tester -W -h localhost
 
     If you can't login, something up above failed.
 
 2g) Initialize the test database by creating tables. Do this with:
 
-    $ cat opencog/persist/sql/atom.sql | psql test-persist -U opencog_tester -W -h localhost
+    $ cat opencog/persist/sql/atom.sql | psql opencog_test -U opencog_tester -W -h localhost
 
 2h) Verify that the tables were created. Login as before, then enter \d
     at the postgres prompt.  You should see this:
 
-    test-persist=> \d
+    opencog_test=> \d
                   List of relations
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
@@ -71,7 +71,7 @@ To run this test, perform the following steps:
 2i) Verify that opencog_tester has write permissions to the tables. Do
     this by entering the below.
 
-    test-persist=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
+    opencog_test=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
 
     You should see the appropriate respone:
 
@@ -96,7 +96,7 @@ To run this test, perform the following steps:
     Trace       = 0
     TraceFile   =
     CommLog     = No
-    Database    = test-persist
+    Database    = opencog_test
     Servername  = localhost
     Port        = 5432
     Username    = opencog_tester
@@ -122,7 +122,7 @@ To run this test, perform the following steps:
     used is the one in the BUILD directory not the SOURCE directory!
 
 3b) If the above still doesn't work, make sure that postgres is actually
-    listening on port 5432, and not some other port.  If it is using a 
+    listening on port 5432, and not some other port.  If it is using a
     different port, then change ~/.odbc.ini to that.  The postgres config
-    can be found in /etc/postgresql/9.1/main/postgresql.conf, look for 
+    can be found in /etc/postgresql/9.1/main/postgresql.conf, look for
     "port =" near the begining of the file.
