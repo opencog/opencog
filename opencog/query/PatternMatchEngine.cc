@@ -856,7 +856,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 	for (size_t i = 0; i < sz; i++) {
 		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
 		       i, sz, hp.value(), Handle(iset[i]).value());
-		found = explore_link_branches(curr_root, hp, Handle(iset[i]));
+		found = explore_link_branches(hp, Handle(iset[i]), curr_root);
 		if (found) break;
 	}
 
@@ -896,9 +896,9 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 /// explored.  Thus, this returns true only if entire pattern was
 /// grounded.
 ///
-bool PatternMatchEngine::explore_link_branches(const Handle& clause_root,
-                                               const Handle& hp,
-                                               const Handle& hg)
+bool PatternMatchEngine::explore_link_branches(const Handle& hp,
+                                               const Handle& hg,
+                                               const Handle& clause_root)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
@@ -908,13 +908,13 @@ bool PatternMatchEngine::explore_link_branches(const Handle& clause_root,
 		return false;
 
 	// If its not an unordered link, then don't try to iterate.
-	curr_term_type = hp->getType();
-	if (not _classserver.isA(curr_term_type, UNORDERED_LINK))
-		return explore_choice_branches(hp, hg);
+	Type tp = hp->getType();
+	if (not _classserver.isA(tp, UNORDERED_LINK))
+		return explore_choice_branches(hp, hg, clause_root);
 
 	do {
 		// If the pattern was satisfied, then we are done for good.
-		if (explore_choice_branches(hp, hg))
+		if (explore_choice_branches(hp, hg, clause_root))
 			return true;
 
 		dbgprt("Step to next permuation\n");
@@ -933,11 +933,12 @@ bool PatternMatchEngine::explore_link_branches(const Handle& clause_root,
 /// handles the ChoiceLink branch alternatives only.  It assumes
 /// that the caller had handles the unordered-link alternative branches.
 bool PatternMatchEngine::explore_choice_branches(const Handle& hp,
-                                                 const Handle& hg)
+                                                 const Handle& hg,
+                                                 const Handle& clause_root)
 {
 	// If its not an choice link, then don't try to iterate.
-	if (CHOICE_LINK != curr_term_type)
-		return explore_single_branch(hp, hg);
+	if (CHOICE_LINK != hp->getType())
+		return explore_single_branch(hp, hg, clause_root);
 
 	dbgprt("Begin choice branchpoint iteration loop\n");
 	do {
@@ -946,7 +947,7 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hp,
 		// However, currently, no test case trips this up. so .. OK.
 		// whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
-		bool match = explore_single_branch(hp, hg);
+		bool match = explore_single_branch(hp, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
 		_need_choice_push = false;
 
@@ -982,7 +983,8 @@ bool PatternMatchEngine::explore_choice_branches(const Handle& hp,
 /// and clauses in the pattern are satisfiable (are accepted matches).
 ///
 bool PatternMatchEngine::explore_single_branch(const Handle& hp,
-                                               const Handle& hg)
+                                               const Handle& hg,
+                                               const Handle& clause_root)
 {
 	solution_push();
 
@@ -1005,7 +1007,7 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
 	perm_push();
-	bool found = do_term_up(hp, hg);
+	bool found = do_term_up(hp, hg, clause_root);
 	perm_pop();
 
 	solution_pop();
@@ -1052,7 +1054,8 @@ bool PatternMatchEngine::explore_single_branch(const Handle& hp,
 /// Returns true if a grounding for the term's parent was found.
 ///
 bool PatternMatchEngine::do_term_up(const Handle& hp,
-                                    const Handle& hg)
+                                    const Handle& hg,
+                                    const Handle& clause_root)
 {
 	depth = 1;
 
@@ -1060,8 +1063,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	// at the top of the clause, move on to the next clause. Else,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
-	if (hp == curr_root)
-		return clause_accept(hp, hg);
+	if (hp == clause_root)
+		return clause_accept(hp, hg, clause_root);
 
 	// Move upwards in the term, and hunt for a match, again.
 	// There are two ways to move upwards: for a normal term, we just
@@ -1069,7 +1072,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
 	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
-	       hp.value(), curr_root.value());
+	       hp.value(), clause_root.value());
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
@@ -1110,7 +1113,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		auto evra = _pat->in_evaluatable.equal_range(hp);
 		for (auto evit = evra.first; evit != evra.second; evit++)
 		{
-			if (not is_unquoted_in_tree(curr_root, evit->second))
+			if (not is_unquoted_in_tree(clause_root, evit->second))
 				continue;
 
 			prtmsg("Term inside evaluatable, move up to it's top:\n",
@@ -1122,27 +1125,27 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			// try again later).  So validate the grounding, but leave
 			// the evaluation for the callback.
 // XXX TODO count the number of ungrounded vars !!! (make sure its zero)
-// XXX TODO make sure that all links from the curr_root to the term are
+// XXX TODO make sure that all links from the clause_root to the term are
 // connectives (i.e. are in the _connectives set).  Else throw an error.
 // why bother with this extra overhead, though?? Do we really need to do
 // this?
 
-			bool found = _pmc.evaluate_sentence(curr_root, var_grounding);
+			bool found = _pmc.evaluate_sentence(clause_root, var_grounding);
 			dbgprt("After evaluating clause, found = %d\n", found);
 			if (found)
-				return clause_accept(evit->second, hg);
+				return clause_accept(evit->second, hg, clause_root);
 
 			return false;
 		}
 	}
 
 	FindAtoms fa(hp);
-	fa.search_set(curr_root);
+	fa.search_set(clause_root);
 
 	// It is almost always the case, but not necessarily, that
 	// least_holders contains one atom. (i.e. the one atom that
-	// is the parent of `hp` that is within curr_root.
-	// If `hp` appears twice (or N times) in a curr_root,
+	// is the parent of `hp` that is within clause_root.
+	// If `hp` appears twice (or N times) in a clause_root,
 	// then it will show up twice (or N times) in least_holders.
 	// As far as I can tell, it is sufficient to examine only the
 	// first appearance in almost all cases, unless the holders
@@ -1165,11 +1168,11 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			dbgprt("After moving up the clause, found = %d\n", found);
 		}
 		else
-		if (hi == curr_root)
+		if (hi == clause_root)
 		{
 			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
-			if (clause_accept(hp, hg)) found = true;
+			if (clause_accept(hp, hg, clause_root)) found = true;
 		}
 		else
 		{
@@ -1187,7 +1190,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			          "Something is wrong with the ChoiceLink code");
 
 			_need_choice_push = true;
-			if (do_term_up(hi, hg)) found = true;
+			if (do_term_up(hi, hg, clause_root)) found = true;
 		}
 	}
 	dbgprt("Done exploring %zu choices, found %d\n",
@@ -1201,13 +1204,14 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 /// proceed onwards, or to backtrack.
 ///
 bool PatternMatchEngine::clause_accept(const Handle& hp,
-                                       const Handle& hg)
+                                       const Handle& hg,
+                                       const Handle& clause_root)
 {
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
 	// same as a mismatch; try the next one.
 	bool match;
-	if (is_optional(curr_root))
+	if (is_optional(clause_root))
 	{
 		clause_accepted = true;
 		match = _pmc.optional_clause_match(hp, hg);
@@ -1220,8 +1224,8 @@ bool PatternMatchEngine::clause_accept(const Handle& hp,
 	}
 	if (not match) return false;
 
-	clause_grounding[curr_root] = hg;
-	prtmsg("---------------------\nclause:", curr_root);
+	clause_grounding[clause_root] = hg;
+	prtmsg("---------------------\nclause:", clause_root);
 	prtmsg("ground:", hg);
 
 	// Now go and do more clauses.
@@ -1272,7 +1276,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		Handle hgnd = var_grounding[joiner];
 		OC_ASSERT(hgnd != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(curr_root, joiner, hgnd);
+		found = explore_link_branches(joiner, hgnd, curr_root);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1316,7 +1320,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				Handle hgnd = var_grounding[joiner];
-				found = explore_link_branches(curr_root, joiner, hgnd);
+				found = explore_link_branches(joiner, hgnd, curr_root);
 			}
 		}
 	}
@@ -1672,7 +1676,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	// Match the required clauses.
 	curr_root = do_clause;
 	issued.insert(curr_root);
-	bool found = explore_link_branches(curr_root, starter, ah);
+	bool found = explore_link_branches(starter, ah, curr_root);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.

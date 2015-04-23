@@ -98,7 +98,6 @@ class PatternMatchEngine
 		bool in_quote;      // Everything is literal in a quote.
 
 		Handle curr_root;         // stacked onto root_handle_stack
-		Type curr_term_type;      // Type of the current term.
 
 		void clear_current_state(void);  // clear the stuff above
 
@@ -193,10 +192,10 @@ class PatternMatchEngine
 		// See PatternMatchEngine.cc for descriptions
 		bool explore_up_branches(const Handle&, const Handle&);
 		bool explore_link_branches(const Handle&, const Handle&, const Handle&);
-		bool explore_choice_branches(const Handle&, const Handle&);
-		bool explore_single_branch(const Handle&, const Handle&);
-		bool do_term_up(const Handle&, const Handle&);
-		bool clause_accept(const Handle&, const Handle&);
+		bool explore_choice_branches(const Handle&, const Handle&, const Handle&);
+		bool explore_single_branch(const Handle&, const Handle&, const Handle&);
+		bool do_term_up(const Handle&, const Handle&, const Handle&);
+		bool clause_accept(const Handle&, const Handle&, const Handle&);
 		bool do_next_clause(void);
 
 		bool clause_accepted;
