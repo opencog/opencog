@@ -856,7 +856,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 	for (size_t i = 0; i < sz; i++) {
 		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
 		       i, sz, hp.value(), Handle(iset[i]).value());
-		found = explore_link_branches(hp, Handle(iset[i]));
+		found = explore_link_branches(curr_root, hp, Handle(iset[i]));
 		if (found) break;
 	}
 
@@ -896,14 +896,15 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 /// explored.  Thus, this returns true only if entire pattern was
 /// grounded.
 ///
-bool PatternMatchEngine::explore_link_branches(const Handle& hp,
+bool PatternMatchEngine::explore_link_branches(const Handle& clause_root,
+                                               const Handle& hp,
                                                const Handle& hg)
 {
 	// Let's not stare at our own navel. ... Unless the current
 	// clause has GroundedPredicateNodes in it. In that case, we
 	// have to make sure that they get evaluated.
-	if ((hg == curr_root)
-	    and not is_evaluatable(curr_root))
+	if ((hg == clause_root)
+	    and not is_evaluatable(clause_root))
 		return false;
 
 	// If its not an unordered link, then don't try to iterate.
@@ -1271,7 +1272,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		Handle hgnd = var_grounding[joiner];
 		OC_ASSERT(hgnd != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(joiner, hgnd);
+		found = explore_link_branches(curr_root, joiner, hgnd);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1315,7 +1316,7 @@ bool PatternMatchEngine::do_next_clause(void)
 				// we'll loop around back to here again.
 				clause_accepted = false;
 				Handle hgnd = var_grounding[joiner];
-				found = explore_link_branches(joiner, hgnd);
+				found = explore_link_branches(curr_root, joiner, hgnd);
 			}
 		}
 	}
@@ -1671,7 +1672,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	// Match the required clauses.
 	curr_root = do_clause;
 	issued.insert(curr_root);
-	bool found = explore_link_branches(starter, ah);
+	bool found = explore_link_branches(curr_root, starter, ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
