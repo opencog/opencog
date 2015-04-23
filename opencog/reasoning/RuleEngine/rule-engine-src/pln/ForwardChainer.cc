@@ -83,8 +83,6 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         return false;
     }
 
-    _fcmem.set_source(hsource);
-
     _log->info("[ForwardChainer] Next source %s",
                _fcmem.get_cur_source()->toString().c_str());
 
@@ -161,11 +159,10 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         return do_pm(hsource, var_nodes, fcb);
 
     auto max_iter = _cpolicy_loader->get_max_iter();
-    while (_iteration < max_iter /*OR other termination criteria*/) {
+    _fcmem.set_source(hsource); //set initial source
 
+    while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
-        if (_iteration == 0)
-            _fcmem.set_source(hsource);
 
         if (not step(fcb))
             break;
@@ -173,12 +170,6 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //! Choose next source.
         _log->info("[ForwardChainer] setting next source");
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
-
-    auto max_iter = _cpolicy_loader->get_max_iter();
-    while (_iteration < max_iter /*OR other termination criteria*/) {
-        _log->info("Iteration %d", _iteration);
-        step(fcb, hsource);
-        _iteration++;
     }
 
     _log->info("[ForwardChainer] finished do_chain.");
