@@ -1651,27 +1651,27 @@ void PatternMatchEngine::solution_pop(void)
  * a graph that hopefully will match the pattern.
  */
 bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
-                                      const Handle& starter,
-                                      const Handle& ah)
+                                      const Handle& term,
+                                      const Handle& grnd)
 {
 	clause_stacks_clear();
-	return explore_redex(do_clause, starter, ah);
+	return explore_redex(term, grnd, do_clause);
 }
 
 /**
  * Same as above, obviously; we just pick up the graph context
  * where we last left it.
  */
-bool PatternMatchEngine::explore_redex(const Handle& do_clause,
-                                      const Handle& starter,
-                                      const Handle& ah)
+bool PatternMatchEngine::explore_redex(const Handle& term,
+                                       const Handle& grnd,
+                                       const Handle& first_clause)
 {
 	// Cleanup
 	clear_current_state();
 
 	// Match the required clauses.
-	issued.insert(do_clause);
-	bool found = explore_link_branches(starter, ah, do_clause);
+	issued.insert(first_clause);
+	bool found = explore_link_branches(term, grnd, first_clause);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
@@ -1687,7 +1687,6 @@ void PatternMatchEngine::clear_current_state(void)
 	// Clear all state.
 	var_grounding.clear();
 	clause_grounding.clear();
-	issued.clear();
 	in_quote = false;
 
 	depth = 0;
@@ -1701,6 +1700,8 @@ void PatternMatchEngine::clear_current_state(void)
 	have_more = false;
 	take_step = true;
 	_perm_state.clear();
+
+	issued.clear();
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
