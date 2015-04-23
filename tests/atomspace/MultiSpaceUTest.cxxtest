@@ -263,7 +263,7 @@ public:
 		TS_ASSERT(h3 == h3copy);
 	}
 
-	// Like testCopyBack(), except that it explicitly calls theh getAtom
+	// Like testCopyBack(), except that it explicitly calls the getAtom
 	// method.  Because the atoms exist, the get Should work.
 	void testGet()
 	{
@@ -291,13 +291,61 @@ public:
 		TS_ASSERT(h3 == h3copy);
 
 		// Do it again, this time with unordered links.
-		Handle ma = as1.addNode(CONCEPT_NODE, "hacker");
-		Handle mb = as1.addNode(CONCEPT_NODE, "cracker");
-		Handle mc = as1.addNode(CONCEPT_NODE, "jacker");
+		Handle ma = as1.addNode(CONCEPT_NODE, "ziggy");
+		Handle mb = as1.addNode(CONCEPT_NODE, "weird");
+		Handle mc = as1.addNode(CONCEPT_NODE, "gilly");
 
 		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
 		h2 = as2.addAtom(h1);
 		h1copy = as1.getAtom(h2);
+		h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		h3 = as3.addAtom(h1);
+		h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+	}
+
+	// Like testCopyBack() and testGet(), except that it one of the
+	// atomspaces is an expansion
+	void testExpand()
+	{
+		AtomSpace ex1(&as1);
+
+		// Create a node, copy it back and forth.
+		Handle n1 = ex1.addNode(CONCEPT_NODE, "Spiders from Mars");
+		Handle n2 = as2.addAtom(n1);
+		Handle n1copy = ex1.getAtom(n2);
+		Handle n2copy = as2.getAtom(n1copy);
+
+		TS_ASSERT(n1 == n1copy);
+		TS_ASSERT(n2 == n2copy);
+
+		// Create a link, copy it back and forth.
+		Handle h1 = ex1.addLink(LIST_LINK, n1);
+		Handle h2 = as2.addAtom(h1);
+		Handle h1copy = ex1.getAtom(h2);
+		Handle h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		Handle h3 = as3.getAtom(h1);
+		Handle h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+
+		// Do it again, this time with unordered links.
+		Handle ma = ex1.addNode(CONCEPT_NODE, "wham");
+		Handle mb = ex1.addNode(CONCEPT_NODE, "bam");
+		Handle mc = ex1.addNode(CONCEPT_NODE, "thankyou, mam");
+
+		h1 = ex1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.addAtom(h1);
+		h1copy = ex1.getAtom(h2);
 		h2copy = as2.getAtom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
