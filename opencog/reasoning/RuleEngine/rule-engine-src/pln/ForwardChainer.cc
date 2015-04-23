@@ -34,7 +34,7 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-        _as(as), _fcmem(_as)
+        _as(as), _pc(_as), _fcmem(_as)
 {
     if (conf_path != "")
         _conf_path = conf_path;
@@ -77,7 +77,6 @@ Logger* ForwardChainer::getLogger()
  */
 bool ForwardChainer::step(ForwardChainerCallBack& fcb)
 {
-    PLNCommons pc(_as); //utility class
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
         _log->info(
@@ -104,7 +103,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         _log->info("[ForwardChainer] Matching rule %s", r->get_name().c_str());
         rule_weight[r] = r->get_cost();
     }
-    auto r = pc.tournament_select(rule_weight);
+    auto r = _pc.tournament_select(rule_weight);
 
     //! If no rules matches the pattern of the source, choose
     //! another source if there is, else end forward chaining.
