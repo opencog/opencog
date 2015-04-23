@@ -84,6 +84,8 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         return false;
     }
 
+    _fcmem.set_source(hsource);
+
     _log->info("[ForwardChainer] Next source %s",
                _fcmem._cur_source->toString().c_str());
 
@@ -94,17 +96,19 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         if (not _fcmem.isin_premise_list(h))
             _log->info("%s \n", h->toString().c_str());
     }
+
     _fcmem.update_premise_list(input);
 
     // Choose the best rule to apply.
     vector<Rule*> rules = fcb.choose_rules(_fcmem);
     map<Rule*, float> rule_weight;
+
     for (Rule* r : rules) {
         _log->info("[ForwardChainer] Matching rule %s", r->get_name().c_str());
         rule_weight[r] = r->get_cost();
     }
-    auto r = _pc.tournament_select(rule_weight);
 
+    auto r = _pc.tournament_select(rule_weight);
     //! If no rules matches the pattern of the source, choose
     //! another source if there is, else end forward chaining.
     if (not r) {
@@ -133,8 +137,10 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
     _log->info("[ForwardChainer] Results of rule application");
     for (auto p : product)
         _log->info("%s", p->toString().c_str());
+
     _log->info("[ForwardChainer] adding inference to history");
     _fcmem.add_rules_product(_iteration, product);
+
     _log->info(
             "[ForwardChainer] updating premise list with the inference made");
     _fcmem.update_premise_list(product);
@@ -170,11 +176,14 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
 
     auto max_iter = _cpolicy_loader->get_max_iter();
-    while (_iteration < max_iter /*OR other termination criteria*/) {
+    //while (_iteration < max_iter /*OR other termination criteria*/) {
+    do{
         _log->info("Iteration %d", _iteration);
         step(fcb, hsource);
         _iteration++;
-    }
+    }while(false);
+
+    _log->info("[ForwardChainer] finished do_chain.");
 }
 
 /**
