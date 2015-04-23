@@ -1234,6 +1234,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_push();
 	get_next_untried_clause();
 
+Handle joiner = curr_term_handle;
+curr_term_handle = Handle::UNDEFINED;
+
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
 	bool found = false;
@@ -1253,8 +1256,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		dbgprt("This clause is %s\n",
 			is_evaluatable(curr_root)?
 			"dynamically evaluatable" : "non-dynamic");
-		prtmsg("Joining variable  is", curr_term_handle);
-		prtmsg("Joining grounding is", var_grounding[curr_term_handle]);
+		prtmsg("Joining variable  is", joiner);
+		prtmsg("Joining grounding is", var_grounding[joiner]);
 
 		// Else, start solving the next unsolved clause. Note: this is
 		// a recursive call, and not a loop. Recursion is halted when
@@ -1266,10 +1269,10 @@ bool PatternMatchEngine::do_next_clause(void)
 		// else the join is a 'real' atom.
 
 		clause_accepted = false;
-		Handle hgnd = var_grounding[curr_term_handle];
+		Handle hgnd = var_grounding[joiner];
 		OC_ASSERT(hgnd != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(curr_term_handle, hgnd);
+		found = explore_link_branches(joiner, hgnd);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1287,13 +1290,15 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(curr_term_handle, undef);
+			bool match = _pmc.optional_clause_match(joiner, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
 			if (not match) return false;
 
 			// XXX Maybe should push n pop here? No, maybe not ...
 			clause_grounding[curr_root] = Handle::UNDEFINED;
 			get_next_untried_clause();
+joiner = curr_term_handle;
+curr_term_handle = Handle::UNDEFINED;
 			prtmsg("Next optional clause is", curr_root);
 			if (Handle::UNDEFINED == curr_root)
 			{
@@ -1309,8 +1314,8 @@ bool PatternMatchEngine::do_next_clause(void)
 				// or not. If it does, we'll recurse. If it does not,
 				// we'll loop around back to here again.
 				clause_accepted = false;
-				Handle hgnd = var_grounding[curr_term_handle];
-				found = explore_link_branches(curr_term_handle, hgnd);
+				Handle hgnd = var_grounding[joiner];
+				found = explore_link_branches(joiner, hgnd);
 			}
 		}
 	}
@@ -1548,7 +1553,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	OC_ASSERT(not in_quote, "Can't posssibly happen!");
 
 	root_handle_stack.push(curr_root);
-	term_handle_stack.push(curr_term_handle);
 
 	var_solutn_stack.push(var_grounding);
 	term_solutn_stack.push(clause_grounding);
@@ -1571,7 +1575,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc.pop();
 	POPSTK(root_handle_stack, curr_root);
-	POPSTK(term_handle_stack, curr_term_handle);
 
 	// The grounding stacks are handled differently.
 	POPSTK(term_solutn_stack, clause_grounding);
@@ -1585,7 +1588,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_clause_stack_depth --;
 
 	dbgprt("pop to depth %d\n", _clause_stack_depth);
-	prtmsg("pop to joiner", curr_term_handle);
 	prtmsg("pop to clause", curr_root);
 }
 
@@ -1599,7 +1601,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
-	while (!term_handle_stack.empty()) term_handle_stack.pop();
 	while (!root_handle_stack.empty()) root_handle_stack.pop();
 	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
@@ -1671,7 +1672,7 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	curr_root = do_clause;
 	curr_term_handle = starter;
 	issued.insert(curr_root);
-	bool found = explore_link_branches(curr_term_handle, ah);
+	bool found = explore_link_branches(starter, ah);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.

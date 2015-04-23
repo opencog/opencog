@@ -144,7 +144,6 @@ class PatternMatchEngine
 		// in order to get back to the original clause, and resume
 		// traversal of that clause, where it was last left off.
 		std::stack<Handle> root_handle_stack;
-		std::stack<Handle> term_handle_stack;
 		void solution_push(void);
 		void solution_pop(void);
 
