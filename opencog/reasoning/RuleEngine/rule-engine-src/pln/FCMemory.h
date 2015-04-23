@@ -50,7 +50,8 @@ private:
 public:
     FCMemory(AtomSpace* as);
     ~FCMemory();
-    vector<Rule*> get_rules();
+    vector<Rule*>& get_rules();
+    const vector<Rule*>& get_rules() const;
     void set_rules(vector<Rule*> rules);
     void set_source(Handle source);
     HandleSeq get_source_list();

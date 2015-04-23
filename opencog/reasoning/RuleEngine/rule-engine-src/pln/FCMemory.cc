@@ -43,7 +43,11 @@ void FCMemory::update_premise_list(HandleSeq input)
     }
 }
 
-vector<Rule*> FCMemory::get_rules()
+vector<Rule*>& FCMemory::get_rules()
+{
+    return _rules;
+}
+const vector<Rule*>& FCMemory::get_rules() const
 {
     return _rules;
 }
