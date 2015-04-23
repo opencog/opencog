@@ -90,15 +90,6 @@ class PatternMatchEngine
 		// Map of clauses to their current groundings
 		std::map<Handle, Handle> clause_grounding;
 
-		// Set of clauses for which a grounding is currently being attempted.
-		typedef std::set<Handle> IssuedSet;
-		IssuedSet issued;     // stacked on issued_stack
-
-		unsigned int depth; // Recursion depth for tree_compare.
-		bool in_quote;      // Everything is literal in a quote.
-
-		Handle curr_root;         // stacked onto root_handle_stack
-
 		void clear_current_state(void);  // clear the stuff above
 
 		// -------------------------------------------
@@ -135,13 +126,26 @@ class PatternMatchEngine
 		std::stack<std::map<Unorder, int>> perm_count_stack;
 #endif
 
+		// --------------------------------------------
+		// Methods and state that select the next clause to be grounded.
+
+		bool do_next_clause(void);
+		bool clause_accepted;
+		void get_next_untried_clause(void);
+		bool get_next_untried_helper(bool, bool, bool);
+		unsigned int thickness(const Handle&, const std::set<Handle>&);
+		Handle next_clause;
+		Handle next_joint;
+		// Set of clauses for which a grounding is currently being attempted.
+		typedef std::set<Handle> IssuedSet;
+		IssuedSet issued;     // stacked on issued_stack
+
 		// -------------------------------------------
 		// Stack used to store current traversal state for a single
 		// clause. These are pushed when a clause is fully grounded,
 		// and a new clause is about to be started. These are popped
 		// in order to get back to the original clause, and resume
 		// traversal of that clause, where it was last left off.
-		std::stack<Handle> root_handle_stack;
 		void solution_push(void);
 		void solution_pop(void);
 
@@ -165,6 +169,9 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
+		unsigned int depth; // Recursion depth for tree_compare.
+		bool in_quote;      // Everything below a quote is literal.
+
 		typedef enum {
 			CALL_QUOTE,
 			CALL_ORDER,
@@ -188,22 +195,14 @@ class PatternMatchEngine
 		                     const LinkPtr&, const LinkPtr&);
 
 		// -------------------------------------------
-		// Upwards-walking and clause hanlding.
+		// Upwards-walking and grounding of a single clause.
 		// See PatternMatchEngine.cc for descriptions
-		bool explore_up_branches(const Handle&, const Handle&);
+		bool explore_up_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_link_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_choice_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_single_branch(const Handle&, const Handle&, const Handle&);
 		bool do_term_up(const Handle&, const Handle&, const Handle&);
 		bool clause_accept(const Handle&, const Handle&, const Handle&);
-		bool do_next_clause(void);
-
-		bool clause_accepted;
-		void get_next_untried_clause(void);
-		bool get_next_untried_helper(bool, bool, bool);
-		unsigned int thickness(const Handle&, const std::set<Handle>&);
-		Handle next_clause;
-		Handle next_joint;
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,

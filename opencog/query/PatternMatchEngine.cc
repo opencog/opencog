@@ -845,7 +845,8 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 /// grounded.
 ///
 bool PatternMatchEngine::explore_up_branches(const Handle& hp,
-                                             const Handle& hg)
+                                             const Handle& hg,
+                                             const Handle& clause_root)
 {
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
@@ -856,7 +857,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 	for (size_t i = 0; i < sz; i++) {
 		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
 		       i, sz, hp.value(), Handle(iset[i]).value());
-		found = explore_link_branches(hp, Handle(iset[i]), curr_root);
+		found = explore_link_branches(hp, Handle(iset[i]), clause_root);
 		if (found) break;
 	}
 
@@ -1163,7 +1164,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			dbgprt("Exploring one possible embedding out of %zu\n",
 			       fa.least_holders.size());
 
-			if (explore_up_branches(hi, hg)) found = true;
+			if (explore_up_branches(hi, hg, clause_root)) found = true;
 
 			dbgprt("After moving up the clause, found = %d\n", found);
 		}
@@ -1239,7 +1240,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	clause_stacks_push();
 	get_next_untried_clause();
 	Handle joiner = next_joint;
-	curr_root = next_clause;
+	Handle curr_root = next_clause;
 
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
@@ -1557,8 +1558,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 
 	OC_ASSERT(not in_quote, "Can't posssibly happen!");
 
-	root_handle_stack.push(curr_root);
-
 	var_solutn_stack.push(var_grounding);
 	term_solutn_stack.push(clause_grounding);
 
@@ -1579,7 +1578,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 void PatternMatchEngine::clause_stacks_pop(void)
 {
 	_pmc.pop();
-	POPSTK(root_handle_stack, curr_root);
 
 	// The grounding stacks are handled differently.
 	POPSTK(term_solutn_stack, clause_grounding);
@@ -1593,7 +1591,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 	_clause_stack_depth --;
 
 	dbgprt("pop to depth %d\n", _clause_stack_depth);
-	prtmsg("pop to clause", curr_root);
 }
 
 /**
@@ -1606,7 +1603,6 @@ void PatternMatchEngine::clause_stacks_pop(void)
 void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
-	while (!root_handle_stack.empty()) root_handle_stack.pop();
 	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
@@ -1674,9 +1670,8 @@ bool PatternMatchEngine::explore_redex(const Handle& do_clause,
 	clear_current_state();
 
 	// Match the required clauses.
-	curr_root = do_clause;
-	issued.insert(curr_root);
-	bool found = explore_link_branches(starter, ah, curr_root);
+	issued.insert(do_clause);
+	bool found = explore_link_branches(starter, ah, do_clause);
 
 	// If found is false, then there's no solution here.
 	// Bail out, return false to try again with the next candidate.
@@ -1695,7 +1690,6 @@ void PatternMatchEngine::clear_current_state(void)
 	issued.clear();
 	in_quote = false;
 
-	curr_root = Handle::UNDEFINED;
 	depth = 0;
 
 	// choice link state
@@ -1719,7 +1713,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 {
 	// current state
 	in_quote = false;
-	curr_root = Handle::UNDEFINED;
 	depth = 0;
 
 	// graph state
