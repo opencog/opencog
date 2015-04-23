@@ -108,7 +108,7 @@ proceeds until the top of the current tree or "clause" is reached.
 Thus, the upwards-search method is recursive: it calls itself, until
 the top is reached. The recursion alternates between an upward step
 in the pattern (implemented by do_term_up()) and an upward step of
-the ground (implemented by start_sol_up()). The start_sol_up()
+the ground (implemented by explore_up_branches()). The explore_up_branches()
 method loops over the incoming set (i.e. the parents) of the current
 match. Thus, these two alternate between each other, calling each
 other, until the top of the clause is reached.
@@ -132,7 +132,7 @@ To summarize, there are four basic recursive methods:
    to a proposed grounding. It moves "downwards" in the two trees;
    it only calls itself, and terminates on match or mis-match.
 
--- start_sol_up() and do_term_up(), which alternately call each
+-- explore_up_branches() and do_term_up(), which alternately call each
    other, moving up the pattern tree and it's matching tree.
    These invoke tree_compare() to make sure the trees actually match.
    When the top of a pattern clause is reached, these call the
@@ -153,9 +153,10 @@ back to the most recent branchpoint. This return is called
 some alternative in the recursion. The primary branchpoint is the
 incoming set of the current match. If the first element of this
 incoming set does not provide a ground, then the next element can be
-explored. Thus, each call to start_sol_up() encounters a branchpoint
-when it examines the incoming set. Support for some of the more
-complex features introduce addtional branchpoints at other locations.
+explored. Thus, each call to explore_up_branches() encounters a
+branchpoint when it examines the incoming set. Support for some of
+the more complex features introduce addtional branchpoints at other
+locations.
 
 During the foward recursion, assort state is maintained; this
 includes the set of all groundings discovered so far, and the set of
@@ -206,17 +207,17 @@ Complications are introduced due to the following features:
    must be made. Thus, the state includes the set of all choices made
    so far.
 
-   Both of the above branch-points are dealt with in the xsoln_up()
-   method.  It is essentially a wrapper around tree_compare(), and
-   deals with setting up the state so that tree_compare() can
-   reproduce the desired choiices when it performs it's comparison.
-   Thus, the description of the basic algorithm, up above, is
-   modified in a fairly straight-forward way: when two trees need to
-   be compared for similarity, the tree_compare() method is not
-   invoked directly; instead, the xsoln_up() method is invoked: it
-   makes sure that the correct state has been established, and it
-   explores the different branches that the unordered and the choice
-   links represent.
+   Both of the above branch-points are dealt with in the
+   explore_link_branches() method.  It is essentially a wrapper around
+   tree_compare(), and deals with setting up the state so that
+   tree_compare() can reproduce the desired choices when it performs
+   it's comparison.  Thus, the description of the basic algorithm, up
+   above, is modified in a fairly straight-forward way: when two trees
+   need to be compared for similarity, the tree_compare() method is not
+   invoked directly; instead, the explore_link_branches() method is
+   invoked: it makes sure that the correct state has been established,
+   and it explores the different branches that the unordered and the
+   choice links represent.
 
 -- Evaluatable and executable links. These links are not a static
    part of the pattern, but can only be known at runtime, at the time

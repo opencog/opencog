@@ -1,5 +1,6 @@
 ;
 ; Unit testing for ChoiceLinks in the pattern matcher.
+; Much link choice-embed, except it ahs two choice links
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -20,10 +21,22 @@
 	(ConceptNode "ways and means")
 )
 
+(MemberLink
+	(ConceptNode "Dick")
+	(ConceptNode "agriculture")
+)
+
 ;;; the list link serves no purpose other than to "embed"
 (ListLink
 	(MemberLink
 		(ConceptNode "Tom")
+		(ConceptNode "Senator")
+	)
+)
+
+(ListLink
+	(MemberLink
+		(ConceptNode "Dick")
 		(ConceptNode "Senator")
 	)
 )
@@ -44,14 +57,20 @@
 )
 
 ;;; Two clauses; they are both connected with a common variable.
-(define (embed)
+(define (double)
 	(BindLink
 		(VariableNode "$x")
 		(ImplicationLink
 			(AndLink
-				(MemberLink
-					(VariableNode "$x")
-					(ConceptNode "ways and means")
+				(ChoiceLink
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "ways and means")
+					)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "agriculture")
+					)
 				)
 				(ListLink
 					(ChoiceLink

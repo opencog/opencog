@@ -636,6 +636,7 @@ void DefaultPatternMatchCB::find_rarest(const Handle& clause,
 {
 	Type t = clause->getType();
 	if (QUOTE_LINK == t) return;
+	if (CHOICE_LINK == t) return;
 
 	LinkPtr lll(LinkCast(clause));
 	if (NULL == lll) return;
@@ -673,7 +674,7 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 
 	for (const Handle& cl: clauses)
 	{
-		// Evaluatables dont' exist in the atomspace, in general.
+		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search wtih them.
 		if (0 < pat.evaluatable_holders.count(cl)) continue;
 		size_t prev = count;
