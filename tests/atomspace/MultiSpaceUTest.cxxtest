@@ -264,7 +264,7 @@ public:
 	}
 
 	// Like testCopyBack(), except that it explicitly calls the getAtom
-	// method.  Because the atoms exist, the get Should work.
+	// method.  Because the atoms exist, the get should return them.
 	void testGet()
 	{
 		// Create a node, copy it back and forth.
@@ -309,8 +309,9 @@ public:
 		TS_ASSERT(h3 == h3copy);
 	}
 
-	// Like testCopyBack() and testGet(), except that it one of the
-	// atomspaces is an expansion
+	// Like testCopyBack() and testGet(), except that one of the
+	// atomspaces is an expansion.  This exhibits a new bug,
+	// github bug report #1530.
 	void testExpand()
 	{
 		AtomSpace ex1(&as1);
