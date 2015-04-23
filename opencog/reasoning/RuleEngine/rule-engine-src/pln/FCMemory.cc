@@ -22,6 +22,8 @@
  */
 #include "FCMemory.h"
 
+#include <boost/range/algorithm/find.hpp>
+
 using namespace opencog;
 
 FCMemory::FCMemory(AtomSpace* as)
@@ -36,7 +38,7 @@ FCMemory::~FCMemory()
 void FCMemory::update_premise_list(HandleSeq input)
 {
     for (Handle i : input) {
-        if (find(_premise_list.begin(), _premise_list.end(), i) == _premise_list.end())
+        if (boost::find(_premise_list, i) == _premise_list.end())
             _premise_list.push_back(i);
     }
 }
@@ -106,7 +108,7 @@ Handle FCMemory::get_cur_source()
 }
 bool FCMemory::isin_source_list(Handle h)
 {
-    return (find(_source_list.begin(), _source_list.end(), h) != _source_list.end());
+    return (boost::find(_source_list, h) != _source_list.end());
 }
 bool FCMemory::isin_premise_list(Handle h)
 {
@@ -149,7 +151,7 @@ vector<Rule*> FCMemory::get_applied_rules()
 {
     vector<Rule*> applied_rules;
     for (Inference i : _inf_history) {
-        if (find(applied_rules.begin(), applied_rules.end(), i.applied_rule) == applied_rules.end())
+        if (boost::find(applied_rules, i.applied_rule) == applied_rules.end())
             applied_rules.push_back(i.applied_rule);
     }
     return applied_rules;
