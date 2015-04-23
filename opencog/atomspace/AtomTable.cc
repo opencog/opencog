@@ -226,10 +226,12 @@ Handle AtomTable::getHandle(Handle& h) const
     if (h._ptr) {
         if (this == h._ptr->_atomTable)
             return h;
-        else if (_environ)
-            return _environ->getHandle(h);
-        else
-            return getHandle(AtomPtr(h));
+
+        if (_environ) {
+            Handle henv = _environ->getHandle(h);
+            if (henv) return henv;
+        }
+        return getHandle(AtomPtr(h));
     }
 
     // Read-lock for the _atom_set.
@@ -570,7 +572,7 @@ size_t AtomTable::getNumLinks() const
 }
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
-{ 
+{
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     return typeIndex.getNumAtomsOfType(type, subclass);
 }
