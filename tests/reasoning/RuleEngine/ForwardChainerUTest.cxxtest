@@ -11,6 +11,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 
+#include <boost/range/algorithm/find.hpp>
+
 using namespace opencog;
 
 class ForwardChainerUTest: public CxxTest::TestSuite {
@@ -62,13 +64,14 @@ void ForwardChainerUTest::test_do_chain()
 
 	// Run forward chainer (and remove problematic rules)
 	DefaultForwardChainerCB dfc(as_);
-	vector<Rule*> rules = fc_->_fcmem.get_rules();
+	vector<Rule*>& rules = fc_->_fcmem.get_rules();
+	vector<std::string> ignore = {
+		"pln-rule-create-and-as-1st-arg-of-inheritance",
+		"pln-rule-create-and-as-2nd-arg-of-inheritance",
+		"pln-rule-contextualize-inheritance"
+	};
 	for (auto it = rules.begin(); it != rules.end();) {
-		if ((*it)->get_name() == "pln-rule-create-and-as-1st-arg-of-inheritance"
-			or
-		    (*it)->get_name() == "pln-rule-create-and-as-2nd-arg-of-inheritance"
-		    or
-		    (*it)->get_name() == "pln-rule-contextualize-inheritance")
+		if (boost::find(ignore, (*it)->get_name()) != ignore.end())
 			it = rules.erase(it);
 		else
 			++it;
