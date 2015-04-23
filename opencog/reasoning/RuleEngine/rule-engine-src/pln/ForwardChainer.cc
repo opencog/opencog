@@ -30,7 +30,6 @@
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
 
-
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
@@ -50,9 +49,9 @@ void ForwardChainer::init()
 {
     _cpolicy_loader = new JsonicControlPolicyParamLoader(_as, _conf_path);
     _cpolicy_loader->load_config();
-    _fcmem._search_in_af = _cpolicy_loader->get_attention_alloc();
-    _fcmem._rules = _cpolicy_loader->get_rules();
-    _fcmem._cur_rule = nullptr;
+    _fcmem.set_search_in_af(_cpolicy_loader->get_attention_alloc());
+    _fcmem.set_rules(_cpolicy_loader->get_rules());
+    _fcmem.set_cur_rule(nullptr);
 
     // Provide a logger
     _log = NULL;
@@ -87,7 +86,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
     _fcmem.set_source(hsource);
 
     _log->info("[ForwardChainer] Next source %s",
-               _fcmem._cur_source->toString().c_str());
+               _fcmem.get_cur_source()->toString().c_str());
 
     // Add more premise to hcurrent_source by pattern matching.
     _log->info("[ForwardChainer] Choose additional premises:");
@@ -127,7 +126,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         }
     }
 
-    _fcmem._cur_rule = r;
+    _fcmem.set_cur_rule(r);
 
     //! Apply rule.
     _log->info("[ForwardChainer] Applying chosen rule %s",
@@ -176,12 +175,11 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
 
     auto max_iter = _cpolicy_loader->get_max_iter();
-    //while (_iteration < max_iter /*OR other termination criteria*/) {
-    do{
+    while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
         step(fcb, hsource);
         _iteration++;
-    }while(false);
+    }
 
     _log->info("[ForwardChainer] finished do_chain.");
 }

@@ -62,7 +62,7 @@ void ForwardChainerUTest::test_do_chain()
 
 	// Run forward chainer (and remove problematic rules)
 	DefaultForwardChainerCB dfc(as_);
-	vector<Rule*>& rules = fc_->_fcmem._rules;
+	vector<Rule*>& rules = fc_->_fcmem.get_rules();
 	for (auto it = rules.begin(); it != rules.end();) {
 		if ((*it)->get_name() == "pln-rule-create-and-as-1st-arg-of-inheritance"
 			or

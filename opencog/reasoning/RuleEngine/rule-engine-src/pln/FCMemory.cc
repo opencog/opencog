@@ -62,6 +62,10 @@ HandleSeq FCMemory::get_premise_list()
 {
     return _premise_list;
 }
+void FCMemory::set_search_in_af(bool val)
+{
+    _search_in_af = val;
+}
 bool FCMemory::is_search_in_af()
 {
     return _search_in_af;
