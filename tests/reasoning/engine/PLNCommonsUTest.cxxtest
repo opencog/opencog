@@ -5,7 +5,7 @@
  *      Author: misgana
  */
 
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/PLNCommons.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/PLNCommons.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>

@@ -4,8 +4,8 @@
  *  Created on: Oct 20, 2014
  *      Author: misgana
  */
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/BackwardChainer.h>
+#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -52,11 +52,11 @@ void BackwardChainerUTest::setUp() {
 	             "opencog/atomspace/core_types.scm, "
 	             "opencog/scm/utilities.scm, "
 	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
-	             "tests/reasoning/RuleEngine/bc-test/bc-example.scm");
+	             "tests/reasoning/engine/bc-test/bc-example.scm");
 	load_scm_files_from_config(*as_);
 
 	// Setup the Backward Chainer
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "reasoning/RuleEngine/default_cpolicy.json"));
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "reasoning/engine/default_cpolicy.json"));
 	cpolicy_loader.load_config();
 	std::vector<Rule> rules;
 	for (Rule* pr : cpolicy_loader.get_rules()) {

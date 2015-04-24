@@ -5,9 +5,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/FCMemory.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/FCMemory.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/DefaultForwardChainerCB.h>
 
 using namespace opencog;
 
@@ -50,7 +50,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 	/*logger().setPrintToStdoutFlag(true);
 	logger().setLevel(Logger::DEBUG);
 
-	JsonicControlPolicyParamLoader jscp(as, "tests/reasoning/RuleEngine/test_cpolicy.json");
+	JsonicControlPolicyParamLoader jscp(as, "tests/reasoning/engine/test_cpolicy.json");
 	jscp.load_config();
 	FCMemory fcmem(as);
 	fcmem.set_rules(jscp.get_rules());
@@ -72,7 +72,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 void DefaultForwardChainerCBUTest::test_choose_source(void)
 {
 	 config().set("SCM_PRELOAD",
-		"tests/reasoning/RuleEngine/simple-assertions.scm");
+		"tests/reasoning/engine/simple-assertions.scm");
 	 load_scm_files_from_config(*as);
 
 	 Handle source = eval->eval_h("(ConceptNode \"Einstein\")");

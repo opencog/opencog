@@ -23,7 +23,7 @@
 #ifndef BACKWARDCHAINER_H_
 #define BACKWARDCHAINER_H_
 
-#include <opencog/reasoning/RuleEngine/rule-engine-src/Rule.h>
+#include <opencog/reasoning/engine/rule-engine-src/Rule.h>
 
 class BackwardChainerUTest;
 

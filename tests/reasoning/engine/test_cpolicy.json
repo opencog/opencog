@@ -3,7 +3,7 @@
 	[
 		{
 			"name": "pln-rule-deduction",
-			"file_path": "reasoning/RuleEngine/rules/pln/deduction.scm",
+			"file_path": "reasoning/engine/rules/pln/deduction.scm",
 			"priority": 1,
 			"mutex": 
 			[

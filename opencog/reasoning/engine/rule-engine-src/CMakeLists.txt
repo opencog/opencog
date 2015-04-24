@@ -70,6 +70,6 @@ INSTALL (FILES
 	pln/BCPatternMatch.h
 	pln/ForwardChainInputMatchCB.h
 	pln/ForwardChainPatternMatchCB.h
-	DESTINATION "include/${PROJECT_NAME}/reasoning/RuleEngine/rule-engine-src"
+	DESTINATION "include/${PROJECT_NAME}/reasoning/engine/rule-engine-src"
 )
 

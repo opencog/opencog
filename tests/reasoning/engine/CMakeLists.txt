@@ -16,5 +16,5 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(FCMemoryUTest)
 ENDIF (HAVE_GUILE)
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json
-               ${PROJECT_BINARY_DIR}/tests/reasoning/RuleEngine/test_cpolicy.json)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/reasoning/engine/test_cpolicy.json
+               ${PROJECT_BINARY_DIR}/tests/reasoning/engine/test_cpolicy.json)

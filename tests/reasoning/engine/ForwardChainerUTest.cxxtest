@@ -5,8 +5,8 @@
  *      Author: misgana
  */
 
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/DefaultForwardChainerCB.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>

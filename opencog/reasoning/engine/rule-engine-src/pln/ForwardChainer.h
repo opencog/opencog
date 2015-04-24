@@ -24,7 +24,7 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
-#include <opencog/reasoning/RuleEngine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
 #include <opencog/util/Logger.h>
 #include "PLNCommons.h"
 #include "FCMemory.h"
@@ -43,7 +43,7 @@ private:
     PLNCommons _pc; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
-    string _conf_path = "reasoning/RuleEngine/default_cpolicy.json";
+    string _conf_path = "reasoning/engine/default_cpolicy.json";
 
     FCMemory _fcmem; //Stores history
     Logger * _log;

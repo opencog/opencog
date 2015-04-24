@@ -58,7 +58,7 @@ Unified rule engine
   beginning of the inference process (backward and forward
   chaining). Most of PLN formulas have been ported in to a scheme file
   by contributors and can be found
-  [here](https://github.com/opencog/opencog/tree/master/opencog/reasoning/RuleEngine/rules).
+  [here](https://github.com/opencog/opencog/tree/master/opencog/reasoning/engine/rules).
 
   The high level algorithm for the new PLN forward and backward
   chaining is found
@@ -219,7 +219,7 @@ original target `(InheritanceLink $who criminal)` and finally solve
 ##Control policy##
 
 The control policy is implemented as
-[json](https://github.com/opencog/opencog/blob/master/opencog/reasoning/RuleEngine/default_cpolicy.json)
+[json](https://github.com/opencog/opencog/blob/master/opencog/reasoning/engine/default_cpolicy.json)
 file containing what rules and other parameters to load (like the
 maximum number of iterations).  the configuration is being read in the
 `load_fc_conf()` method of the ForwardChainer.cc.  Admittedly this is

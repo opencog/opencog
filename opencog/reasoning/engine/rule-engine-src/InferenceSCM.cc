@@ -24,9 +24,9 @@
 
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/ForwardChainer.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/DefaultForwardChainerCB.h>
-#include <opencog/reasoning/RuleEngine/rule-engine-src/pln/BackwardChainer.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/ForwardChainer.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/rule-engine-src/pln/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -94,7 +94,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/RuleEngine/default_cpolicy.json"));
+    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/engine/default_cpolicy.json"));
     cpolicy_loader.load_config();
 
     std::vector<Rule> rules;
