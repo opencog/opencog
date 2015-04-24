@@ -85,49 +85,8 @@ void FoldLink::init(void)
 /// thing itself.
 Handle FoldLink::reduce(void)
 {
-	// If the expression contains no free variables, and only constants,
-	// then we should be able to reduce it to a NumberNode. Exceptions
-	// are thrown if the expression is not summable.
-	if (0 == _free_vars.size())
-	{
-		double sum = knil;
-		for (const Handle& h: _outgoing)
-		{
-			Type t = h->getType();
-			if (NUMBER_NODE != t and FREE_LINK != t)
-				throw RuntimeException(TRACE_INFO,
-					"Don't know how to reduce %s", h->toShortString().c_str());
-
-			Handle redh(h);
-			if (classserver().isA(t, FREE_LINK))
-			{
-				FreeLinkPtr fff(FreeLinkCast(h));
-				if (NULL == fff)
-					fff = createFreeLink(*LinkCast(h));
-
-				redh = fff->reduce();
-			}
-
-			NumberNodePtr nnn(NumberNodeCast(redh));
-			if (NULL == nnn)
-				nnn = createNumberNode(*NodeCast(redh));
-			sum = kons(sum, nnn->getValue());
-		}
-		Handle result(createNumberNode(sum));
-
-		// Place the result into the same atomspace we are in.
-		if (_atomTable)
-		{
-			AtomSpace* as = _atomTable->getAtomSpace();
-			return as->addAtom(result);
-		}
-
-		return result;
-	}
-
-	// If we are here, then the expression is a mixture of
-	// constants and variables.  Sum the constants, and eliminate
-	// zero.
+	// Assume that the expression is a mixture of constants and variables.
+	// Sum the constants, and eliminate the nils.
 	HandleSeq reduct;
 	bool did_reduce = false;
 	double sum = knil;
@@ -149,6 +108,7 @@ Handle FoldLink::reduce(void)
 				fff = createFreeLink(*LinkCast(h));
 
 			redh = fff->reduce();
+			t = redh->getType();
 		}
 
 		if (h != redh) did_reduce = true;
@@ -167,6 +127,10 @@ Handle FoldLink::reduce(void)
 
 	// If nothing reduced, nothing to do.
 	if (not did_reduce) return getHandle();
+
+	// If it reduced to just one number:
+	if (0 == reduct.size())
+		return Handle(createNumberNode(sum));
 
 	// If it didn't sum to nil, then we have to keep it.
 	if (knil != sum)
