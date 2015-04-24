@@ -59,7 +59,7 @@ public:
 
 	NumberNode(Node &n)
 		: Node(NUMBER_NODE, std::to_string(std::stod(n.getName())),
-		       n.getTruthValue(), n.getAttentionValue()),
+		       n.getTruthValue()->clone(), n.getAttentionValue()->clone()),
 		  value(std::stod(n.getName()))
 	{
 		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode constructor!");

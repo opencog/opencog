@@ -140,10 +140,19 @@ public:
 		// Create three copies of this link in three atomspaces
 		Handle h1 = as1.addLink(LIST_LINK, hnd1, hnd2, hnd3);
 		h1->setTruthValue(tv);
-		Handle h2 = as2.addLink(LIST_LINK, hnd1, hnd2, hnd3);
-		h2->setTruthValue(tv);
-		Handle h3 = as3.addLink(LIST_LINK, hnd1, hnd2, hnd3);
-		h3->setTruthValue(tv);
+		Handle h2 = as2.addAtom(h1);
+		Handle h3 = as3.addAtom(h2);
+
+		// The truth value *pointers* should differ; they should
+		// have been copied on atom insertion.
+		TS_ASSERT(h1->getTruthValue() != h2->getTruthValue());
+		TS_ASSERT(h1->getTruthValue() != h3->getTruthValue());
+		TS_ASSERT(h2->getTruthValue() != h3->getTruthValue());
+
+		// The truth values themselves should be equal, as values.
+		TS_ASSERT(*h1->getTruthValue() == *tv);
+		TS_ASSERT(*h2->getTruthValue() == *tv);
+		TS_ASSERT(*h3->getTruthValue() == *tv);
 
 		// Forget about the link atoms, remember thier UUID's only
 		// UUID's are just long ints ...
@@ -214,8 +223,30 @@ public:
 
 		// The truth value *pointers* should differ; they should
 		// have been copied on atom insertion.
-		// XXX this is currently broken :-(  and should be fixed ... 
-//		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+		TS_ASSERT(h1n1->getTruthValue() != h3n1->getTruthValue());
+		TS_ASSERT(h2n1->getTruthValue() != h3n1->getTruthValue());
+
+		TS_ASSERT(h1n2->getTruthValue() != h2n2->getTruthValue());
+		TS_ASSERT(h1n2->getTruthValue() != h3n2->getTruthValue());
+		TS_ASSERT(h2n2->getTruthValue() != h3n2->getTruthValue());
+
+		TS_ASSERT(h1n3->getTruthValue() != h2n3->getTruthValue());
+		TS_ASSERT(h1n3->getTruthValue() != h3n3->getTruthValue());
+		TS_ASSERT(h2n3->getTruthValue() != h3n3->getTruthValue());
+
+		// The truth values themselves should be equal, as values.
+		TS_ASSERT(*h1n1->getTruthValue() == *tv1);
+		TS_ASSERT(*h2n1->getTruthValue() == *tv1);
+		TS_ASSERT(*h3n1->getTruthValue() == *tv1);
+
+		TS_ASSERT(*h1n2->getTruthValue() == *tv2);
+		TS_ASSERT(*h2n2->getTruthValue() == *tv2);
+		TS_ASSERT(*h3n2->getTruthValue() == *tv2);
+
+		TS_ASSERT(*h1n3->getTruthValue() == *tv3);
+		TS_ASSERT(*h2n3->getTruthValue() == *tv3);
+		TS_ASSERT(*h3n3->getTruthValue() == *tv3);
 	}
 
 	// Test copying back and forth.

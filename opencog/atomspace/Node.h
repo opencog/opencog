@@ -72,7 +72,9 @@ public:
      * because thread-safe locking required in the gets.
      */
     Node(Node &n)
-        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue())
+        : Atom(n.getType(),
+               n.getTruthValue()->clone(),
+               n.getAttentionValue()->clone())
     {
         init(n._name);
     }
