@@ -22,3 +22,17 @@ A more challenging example:
 
 should yeild `(VariableNode "$x")` -- that is, adding zero to something
 has no effect!
+
+Some more interesting examples:
+```
+(cog-reduce! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode -2)))
+```
+
+should yeild `(VariableNode "$x")` -- the +2 and -2 cancel.
+
+```
+(cog-reduce! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode 2)))
+```
+
+should yeild `(PlusLink (VariableNode "$x") (NumberNode 4))` --
+the +2 and +2 sum.

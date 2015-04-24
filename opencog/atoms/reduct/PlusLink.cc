@@ -121,9 +121,12 @@ Handle PlusLink::reduce(void)
 		return result;
 	}
 
-	// If we are here, then there are variables.
+	// If we are here, then the expression is a mixture of
+	// constants and variables.  Sum the constants, and eliminate
+	// zero.
 	HandleSeq reduct;
 	bool did_reduce = false;
+	double sum = 0.0;
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
@@ -150,14 +153,15 @@ Handle PlusLink::reduce(void)
 			NumberNodePtr nnn(NumberNodeCast(redh));
 			if (NULL == nnn)
 				nnn = createNumberNode(*NodeCast(redh));
-			if (0.0 == nnn->getValue())
-			{
-				did_reduce = true;
-				continue;
-			}
+			sum += nnn->getValue();
+			did_reduce = true;
+			continue;
 		}
 		reduct.push_back(redh);
 	}
+
+	if (0.0 != sum)
+		reduct.push_back(Handle(createNumberNode(sum)));
 
 	if (not did_reduce) return getHandle();
 	if (1 == reduct.size()) return reduct[0];
