@@ -99,7 +99,7 @@ Handle FoldLink::reduce(void)
 					"Don't know how to reduce %s", h->toShortString().c_str());
 
 			Handle redh(h);
-			if (FREE_LINK == t)
+			if (classserver().isA(t, FREE_LINK))
 			{
 				FreeLinkPtr fff(FreeLinkCast(h));
 				if (NULL == fff)
@@ -135,13 +135,14 @@ Handle FoldLink::reduce(void)
 	{
 		Type t = h->getType();
 		if (NUMBER_NODE != t and
-		    FREE_LINK != t and
-		    VARIABLE_NODE != t)
+		    VARIABLE_NODE != t and
+		    (not classserver().isA(t, FREE_LINK))
+		)
 			throw RuntimeException(TRACE_INFO,
 				"Don't know how to reduce %s", h->toShortString().c_str());
 
 		Handle redh(h);
-		if (FREE_LINK == t)
+		if (classserver().isA(t, FREE_LINK))
 		{
 			FreeLinkPtr fff(FreeLinkCast(h));
 			if (NULL == fff)
