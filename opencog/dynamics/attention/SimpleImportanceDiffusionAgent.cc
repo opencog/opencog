@@ -47,32 +47,8 @@ namespace opencog
 SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     Agent(cs)
 {
-    /* ======================================================== */
-    // Default configuration settings
-    
-    // ECAN_MAX_SPREAD_PERCENTAGE
-    // Maximum percentage of STI that is spread from an atom
-    
-    // ECAN_SPREAD_HEBBIAN_ONLY
-    // If false, will diffuse along hebbian links only. If true,
-    // will also diffuse to all non-hebbian incident atoms in the
-    // incoming and outgoing sets
-    
-    // HEBBIAN_MAX_ALLOCATION_PERCENTAGE
-    // Maximum percentage that will be available for diffusion to hebbian links
-    
-    static const std::string defaultConfig[] = {
-        "ECAN_MAX_SPREAD_PERCENTAGE", "0.6",
-        "ECAN_SPREAD_HEBBIAN_ONLY", "false",
-        "HEBBIAN_MAX_ALLOCATION_PERCENTAGE", "0.5",
-        "",""
-    };
-    
-    setParameters(defaultConfig);
-    /* ======================================================== */
-    
     spreadDecider = NULL;
-    setSpreadDecider(STEP);
+    setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
                 (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
