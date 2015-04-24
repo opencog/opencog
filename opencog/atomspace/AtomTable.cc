@@ -47,6 +47,7 @@
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -304,6 +305,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DELETE_LINK == atom_type) {
         // if (NULL == DeleteLinkCast(atom))
         //     atom = createDeleteLink(*LinkCast(atom));
+    } else if (PLUS_LINK == atom_type) {
+        if (NULL == PlusLinkCast(atom))
+            atom = createPlusLink(*LinkCast(atom));
 /*
     } else if (EVALUATION_LINK == atom_type) {
         if (NULL == EvaluationLinkCast(atom))
@@ -355,6 +359,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createDefineLink(*lll);
             } else if (DELETE_LINK == atom_type) {
                 // atom = createDeleteLink(*lll);
+            } else if (PLUS_LINK == atom_type) {
+                atom = createPlusLink(*lll);
 /*
             } else if (EVALUATION_LINK == atom_type) {
                 atom = createEvaluationLink(*lll);

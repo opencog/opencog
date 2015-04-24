@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (clearbox SHARED
 	FreeLink.cc
+	PlusLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -15,5 +16,6 @@ TARGET_LINK_LIBRARIES(clearbox
 
 INSTALL (FILES
 	FreeLink.h
+	PlusLink.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/FreeLink.cc
+ * opencog/atoms/reduct/FreeLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
