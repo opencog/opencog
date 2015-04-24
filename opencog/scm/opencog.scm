@@ -31,7 +31,7 @@
 (load-from-path "./opencog/atomspace/core_types.scm")
 (load-from-path "./opencog/nlp/types/nlp_types.scm")
 (load-from-path "./opencog/spacetime/spacetime_types.scm")
-(load-from-path "./opencog/reasoning/pln/pln_types.scm")
+(load-from-path "./opencog/reasoning/pln-types/pln_types.scm")
 (load-from-path "./opencog/dynamics/attention/attention_types.scm")
 (load-from-path "./opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm")
 

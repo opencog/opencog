@@ -1,5 +1,5 @@
 /*
- * opencog/reasoning/pln/PLNTypes.cc
+ * opencog/reasoning/pln-types/PLNTypes.cc
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -23,9 +23,9 @@
  */
 
 #include <opencog/server/Module.h>
-#include "opencog/reasoning/pln/atom_types.definitions"
+#include "opencog/reasoning/pln-types/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/reasoning/pln/atom_types.inheritance"
+#define INHERITANCE_FILE "opencog/reasoning/pln-types/atom_types.inheritance"
 #define INITNAME pln_types_init
 
 #include <opencog/atomspace/atom_types.cc>
