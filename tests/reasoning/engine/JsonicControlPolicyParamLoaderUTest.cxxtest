@@ -19,8 +19,9 @@ public:
 		server(CogServer::createInstance);
 		as_ = &cogserver().getAtomSpace();
 		eval_ = new SchemeEval(as_);
-		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
-				"opencog/scm/utilities.scm, ");
+		config().set("SCM_PRELOAD",
+		             "opencog/atomspace/core_types.scm, "
+		             "opencog/scm/utilities.scm, ");
 		load_scm_files_from_config (*as_);
 	}
 	void setUp();
