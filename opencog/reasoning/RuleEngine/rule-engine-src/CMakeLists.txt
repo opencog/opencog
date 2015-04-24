@@ -67,7 +67,6 @@ ENDIF (WIN32)
 
 INSTALL (FILES
 	pln/ForwardChainer.h
-	pln/Chainer.h
 	pln/BCPatternMatch.h
 	pln/ForwardChainInputMatchCB.h
 	pln/ForwardChainPatternMatchCB.h
