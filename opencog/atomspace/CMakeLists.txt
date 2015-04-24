@@ -72,10 +72,6 @@ INSTALL (FILES
     BackingStore.h
     ClassServer.h
     CountTruthValue.h
-    FollowLink.h
-    ForeachChaseLink.h
-    Foreach.h
-    ForeachTwo.h
     FuzzyTruthValue.h
     Handle.h
     IndefiniteTruthValue.h

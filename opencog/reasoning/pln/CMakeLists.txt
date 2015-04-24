@@ -1,21 +1,21 @@
-OPENCOG_ADD_ATOM_TYPES(atom_types.script
-                      atom_types.h
-                      atom_types.definitions
-                      atom_types.inheritance
-                      pln_types.scm
-                      pln_types.pyx)
-ADD_CUSTOM_TARGET(pln_atom_types DEPENDS atom_types.h)
+# PLNModule
+IF (TBB_FOUND)
+	INCLUDE_DIRECTORIES (
+		${TBB_INCLUDE_DIR}
+	)
 
-# The atom_types.h file is written to the build directory
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+	LINK_DIRECTORIES(
+		${TBB_INCLUDE_DIR}
+		${TBB_LIBRARY_DIRS}
+	)
 
-ADD_LIBRARY (PLNTypes SHARED
-	PLNTypes
-)
+	ADD_LIBRARY(plnmodule SHARED
+		PLNModule
+	)
 
-ADD_DEPENDENCIES(PLNTypes opencog_atom_types)
-ADD_DEPENDENCIES(PLNTypes pln_atom_types)
-
-TARGET_LINK_LIBRARIES (PLNTypes
-	atomspace
-)
+	TARGET_LINK_LIBRARIES(plnmodule
+		server
+		tbb
+		ruleengine
+	)
+ENDIF (TBB_FOUND)

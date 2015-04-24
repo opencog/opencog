@@ -1,2 +1,2 @@
-ADD_SUBDIRECTORY(RuleEngine)
+ADD_SUBDIRECTORY(engine)
 

@@ -1,0 +1,177 @@
+/*
+ * tests/reasoning/engine/RuleUTest.cxxtest
+ *
+ * Copyright (C) 2014 Cosmo Harrigan
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+/*
+ * Note: I would like there to be a generic graph rewriting test framework,
+ *       that loads data specified in atomspace notation from a Scheme file,
+ *       and compares the replacement graph with the expected output for each
+ *       given test case.
+ * 
+ *       In that framework, additionally, the exact TruthValue of each output
+ *       must be verified, and the atomspace must also be examined to ensure
+ *       there are no unexpected side effects or outputs produced.
+ *
+ *       That is still being discussed, so in the meantime, this unit test
+ *       has been defined so that the existing functionality will have tests.
+ *
+ *       Once that generic framework is implemented, this test should be 
+ *       eliminated.
+ */
+
+class RuleUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    RuleUTest()
+    {
+        try
+        {
+             config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        server(CogServer::createInstance);
+        as = &cogserver().getAtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~RuleUTest()
+    {
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp();
+    void tearDown();
+
+    void test_deduction();
+	void test_and();
+	void test_not();
+};
+
+void RuleUTest::tearDown()
+{
+}
+
+void RuleUTest::setUp()
+{
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/av-tv.scm");
+
+    load_scm_files_from_config(*as);
+    
+    config().set("MODULES",
+        "opencog/query/libQueryModule.so");
+    
+    cogserver().loadModules();
+}
+
+/*
+ * Tests the deduction rule (pln-rule-deduction) defined in:
+ * opencog/reasoning/pln/rules/deduction.scm
+ */
+void RuleUTest::test_deduction()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/engine/simple-assertions.scm, "
+                 "reasoning/pln/rules/deduction.scm");
+    load_scm_files_from_config(*as);
+    
+    Handle results;
+    
+    // To start with, it should only know that men are humans
+    results = eval->eval_h("(cog-bind find-humans)");
+    TS_ASSERT_EQUALS(1, as->getArity(results));
+    
+    // Apply the deduction rule
+    eval->eval_h("(cog-bind pln-rule-deduction)");
+       
+    // After applying the deduction rule, it should know that all 3 of the
+    // instances of men are also humans (Socrates, Einstein, and Peirce)
+    results = eval->eval_h("(cog-bind find-humans)");
+    TS_ASSERT_EQUALS(4, as->getArity(results));
+}
+
+/*
+ * Tests the and rule (pln-rule-and) defined in:
+ * opencog/reasoning/pln/rules/and.scm
+ */
+void RuleUTest::test_and()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/engine/simple-predicates.scm, "
+                 "reasoning/pln/rules/and.scm");
+    load_scm_files_from_config(*as);
+
+    // Apply the and rule
+    Handle results = eval->eval_h("(cog-bind-pln pln-rule-and)");
+
+    // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
+    TS_ASSERT_EQUALS(4, as->getArity(results));
+}
+
+/*
+ * Tests the not rule (pln-rule-not) defined in:
+ * opencog/reasoning/pln/rules/not.scm
+ */
+void RuleUTest::test_not()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/engine/simple-predicates.scm, "
+                 "reasoning/pln/rules/not.scm");
+    load_scm_files_from_config(*as);
+
+    // Apply the and rule
+    Handle results = eval->eval_h("(cog-bind-pln pln-rule-not)");
+
+    // It should contain 2 groundings, not(A), not(B)
+    TS_ASSERT_EQUALS(2, as->getArity(results));
+}

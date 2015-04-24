@@ -1,6 +1,6 @@
 ; Examples to test the contextualize and decontextualize rules
 ; using the pattern matcher
-; The rules can be loaded from opencog/learning/RuleEngine/rules/pln
+; The rules can be loaded from opencog/learning/engine/pln/rules
 ; together with this input data.
 
 (EvaluationLink
