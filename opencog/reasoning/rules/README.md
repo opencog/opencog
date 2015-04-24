@@ -73,13 +73,13 @@ in order to compile the rules and formulas for better performance.
 - Load the deduction rule definitions:
 
     ```
-    reasoning/engine/rules/pln/deduction.scm
+    reasoning/rules/pln/deduction.scm
     ```
 
     Example:
 
     ```
-    (load "reasoning/engine/rules/pln/deduction.scm")
+    (load "reasoning/rules/pln/deduction.scm")
     ```
 
 - Load this file containing the data:
@@ -130,7 +130,7 @@ in order to compile the rules and formulas for better performance.
 
 ## Relex2Logic Example
 
-The relex-to-logic subdirectory has the initial specification of the
+The r2l subdirectory has the initial specification of the
 R2L-RuleBase for the English language.
 
 To test the rules, use the following steps.
