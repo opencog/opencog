@@ -473,8 +473,8 @@ you should:
 So here's a super-short recap:
 
  * Create a user 'opencog_tester' with password 'cheese'.
- * Create a new database: e.g.  `$ createdb test-persist`
- * Create the tables: `$ cat atom.sql | psql test-persist`
+ * Create a new database: e.g.  `$ createdb opencog_test`
+ * Create the tables: `$ cat atom.sql | psql `
  * Create an entry in `~/.odbc.ini`, as explained above.  The entry
    should be called `opencot_test`, and use `opencog_tester` as the user.
  * The file `lib/opencog-test.conf` already has the above as the default
@@ -490,6 +490,7 @@ Unit Test Status
 * As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
 * As of 2013-11-26 BasicSaveUTest works and passes, again.
 * As of 2014-06-19 both unit tests work and pass.
+* As of 2015-04-23 both unit tests work and pass.
 
 
 Using the System
@@ -630,13 +631,13 @@ on.
 
 Using SQL Persistence from Scheme
 ---------------------------------
-SQL fetch from store is not automatic!  That is because this layer 
+SQL fetch from store is not automatic!  That is because this layer
 cannot guess the user's intentions. There is no way for this layer
 to guess which atoms might be deleted in a few milliseconds from now,
 or to guess which atoms need to loaded into RAM (do you really want ALL
 of them to be loaded ??)  Some higher level management and policy thread
 will need to make the fetch and store decisions. This layer only
-implements the raw capability: it does not implement the policy. 
+implements the raw capability: it does not implement the policy.
 
 There is one thing that is automatic: when a new atom is added to the
 atomspace, then the database is automatically searched, to see if this
