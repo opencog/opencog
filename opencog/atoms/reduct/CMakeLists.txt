@@ -13,7 +13,7 @@ ADD_LIBRARY (clearbox SHARED
 ADD_DEPENDENCIES(clearbox opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(clearbox
-	atomspace
+	cogutil
 )
 
 INSTALL (FILES
