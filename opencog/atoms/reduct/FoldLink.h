@@ -1,12 +1,12 @@
 /*
- * opencog/atoms/reduct/PlusLink.h
+ * opencog/atoms/reduct/FoldLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Plus Software Foundation and including the exceptions
+ * published by the Fold Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,15 +16,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Plus Software Foundation, Inc.,
+ * Fold Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PLUS_LINK_H
-#define _OPENCOG_PLUS_LINK_H
+#ifndef _OPENCOG_FOLD_LINK_H
+#define _OPENCOG_FOLD_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/reduct/FreeLink.h>
 
 namespace opencog
 {
@@ -33,36 +33,41 @@ namespace opencog
  */
 
 /**
- * The PlusLink implements the mathematical operation of "plus"
+ * The FoldLink implements the arithmetic operations of plus and times.
+ * (Its not currently a general fold; it only works with numbers.)
  */
-class PlusLink : public FoldLink
+class FoldLink : public FreeLink
 {
 protected:
+	double knil;
+	double (*kons) (double, double);
 	void init(void);
-	PlusLink(Type, const HandleSeq& oset,
+	FoldLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PlusLink(Type, const Handle& a, const Handle& b,
+	FoldLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
-	PlusLink(const HandleSeq& oset,
+	FoldLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	PlusLink(Link& l);
+	FoldLink(Link& l);
+
+   virtual Handle reduce(void);
 };
 
-typedef std::shared_ptr<PlusLink> PlusLinkPtr;
-static inline PlusLinkPtr PlusLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<PlusLink>(a); }
-static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<PlusLink>(a); }
+typedef std::shared_ptr<FoldLink> FoldLinkPtr;
+static inline FoldLinkPtr FoldLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<FoldLink>(a); }
+static inline FoldLinkPtr FoldLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<FoldLink>(a); }
 
 // XXX temporary hack ...
-#define createPlusLink std::make_shared<PlusLink>
+#define createFoldLink std::make_shared<FoldLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PLUS_LINK_H
+#endif // _OPENCOG_FOLD_LINK_H

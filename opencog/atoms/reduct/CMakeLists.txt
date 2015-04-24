@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (clearbox SHARED
+	FoldLink.cc
 	FreeLink.cc
 	PlusLink.cc
 )
@@ -15,6 +16,7 @@ TARGET_LINK_LIBRARIES(clearbox
 )
 
 INSTALL (FILES
+	FoldLink.h
 	FreeLink.h
 	PlusLink.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"

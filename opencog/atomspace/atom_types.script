@@ -226,8 +226,9 @@ EQUAL_LINK <- VIRTUAL_LINK
 FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
 
 // Basic arithmetic operators
-PLUS_LINK <- FUNCTION_LINK
-TIMES_LINK <- FUNCTION_LINK
+FOLD_LINK <- FUNCTION_LINK
+PLUS_LINK <- FOLD_LINK
+TIMES_LINK <- FOLD_LINK
 
 // This is an interesting one. Its a link that must never be grounded!
 // It must contain at least one VariableNode somewhere within it; that
