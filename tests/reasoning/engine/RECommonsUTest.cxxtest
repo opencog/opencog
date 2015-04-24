@@ -5,7 +5,7 @@
  *      Author: misgana
  */
 
-#include <opencog/reasoning/engine/rule-engine-src/pln/PLNCommons.h>
+#include <opencog/reasoning/engine/RECommons.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -14,24 +14,24 @@
 #include <opencog/guile/load-file.h>
 //TODO test choose_target
 using namespace opencog;
-class PLNCommonsUTest: public CxxTest::TestSuite {
+class RECommonsUTest: public CxxTest::TestSuite {
 private:
-    PLNCommons * commons_;
+    RECommons * commons_;
     AtomSpace * as_;
     SchemeEval * eval_;
 public:
-    PLNCommonsUTest()
+    RECommonsUTest()
     {
         server(CogServer::createInstance);
         as_ = &cogserver().getAtomSpace();
         eval_ = new SchemeEval(as_);
-        commons_ = new PLNCommons(as_);
+        commons_ = new RECommons(as_);
 
         config().set("MODULES", "opencog/query/libQueryModule.so");
         cogserver().loadModules();
         cogserver().loadSCMModules();
     }
-    ~PLNCommonsUTest()
+    ~RECommonsUTest()
     {
         delete as_;
     }
@@ -52,7 +52,7 @@ public:
     void test_create_bindLink(void);
 
 };
-void PLNCommonsUTest::setUp()
+void RECommonsUTest::setUp()
 {
     config().set(
             "SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
@@ -60,12 +60,12 @@ void PLNCommonsUTest::setUp()
             "opencog/python/pln_old/examples/deduction/atomspace_contents.scm");
     load_scm_files_from_config(*as_);
 }
-void PLNCommonsUTest::tearDown()
+void RECommonsUTest::tearDown()
 {
     as_->clear();
 }
 
-void PLNCommonsUTest::test_create_quoted()
+void RECommonsUTest::test_create_quoted()
 {
     string test =
             "(InheritanceLink (VariableNode \"$x\") (ConceptNode \"criminal\"))";
@@ -77,17 +77,17 @@ void PLNCommonsUTest::test_create_quoted()
     TS_ASSERT_EQUALS(hc.value(), hexpect.value());
 }
 
-void PLNCommonsUTest::test_exists_in(void)
+void RECommonsUTest::test_exists_in(void)
 {
 
 }
 
-void PLNCommonsUTest::test_clean_up_bind_link(void)
+void RECommonsUTest::test_clean_up_bind_link(void)
 {
 
 }
 
-void PLNCommonsUTest::test_remove_vnode_containing_links()
+void RECommonsUTest::test_remove_vnode_containing_links()
 {
     string implink =
             "(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y\")"
@@ -104,22 +104,22 @@ void PLNCommonsUTest::test_remove_vnode_containing_links()
     TS_ASSERT(result.empty());
 }
 
-void PLNCommonsUTest::test_clean_up_implication_link(void)
+void RECommonsUTest::test_clean_up_implication_link(void)
 {
 
 }
 
-void PLNCommonsUTest::test_get_unique_name(void)
+void RECommonsUTest::test_get_unique_name(void)
 {
 
 }
 
-void PLNCommonsUTest::test_change_node_types(void)
+void RECommonsUTest::test_change_node_types(void)
 {
 
 }
 
-void PLNCommonsUTest::test_get_root_links(void)
+void RECommonsUTest::test_get_root_links(void)
 {
     string bindlink =
             "(BindLink"
@@ -161,23 +161,23 @@ void PLNCommonsUTest::test_get_root_links(void)
     SchemeEval sceval(&temp);
     sceval.eval_h(bindlink);
     auto ht_cpy = sceval.eval_h(target);
-    PLNCommons pc(&temp);
+    RECommons rec(&temp);
     HandleSeq rootsx;
-    pc.get_root_links(ht_cpy, rootsx);
+    rec.get_root_links(ht_cpy, rootsx);
     TS_ASSERT_EQUALS(1, rootsx.size());
 }
 
-void PLNCommonsUTest::test_replace_nodes_with_varnode(void)
+void RECommonsUTest::test_replace_nodes_with_varnode(void)
 {
 
 }
 
-void PLNCommonsUTest::test_replace_vars(void)
+void RECommonsUTest::test_replace_vars(void)
 {
 
 }
 
-void PLNCommonsUTest::test_create_with_unique_var(void)
+void RECommonsUTest::test_create_with_unique_var(void)
 {
     /*string implink =
      "(ImplicationLink (stv .99 .99)(AndLink(InheritanceLink(VariableNode \"$x\")(ConceptNode \"American\")) (InheritanceLink(VariableNode \"$y\")"
@@ -188,7 +188,7 @@ void PLNCommonsUTest::test_create_with_unique_var(void)
      TS_ASSERT_DIFFERS(himplicant.value(), h.value());*/
 }
 
-void PLNCommonsUTest::test_create_bindLink()
+void RECommonsUTest::test_create_bindLink()
 {
 //xxx create bind link generates unique variables. so I need good ways of testing it.
     /*Handle himplicant =

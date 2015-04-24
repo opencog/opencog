@@ -5,9 +5,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
-#include <opencog/reasoning/engine/rule-engine-src/pln/FCMemory.h>
-#include <opencog/reasoning/engine/rule-engine-src/pln/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/forwardchainer/FCMemory.h>
+#include <opencog/reasoning/engine/forwardchainer/DefaultForwardChainerCB.h>
 
 using namespace opencog;
 

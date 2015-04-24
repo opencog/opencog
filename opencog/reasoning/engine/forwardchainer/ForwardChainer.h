@@ -24,9 +24,9 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
-#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
 #include <opencog/util/Logger.h>
-#include "PLNCommons.h"
+#include "../RECommons.h"
 #include "FCMemory.h"
 
 class ForwardChainerUTest;
@@ -40,7 +40,7 @@ private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace * _as;
-    PLNCommons _pc; //utility class
+    RECommons _rec; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
     string _conf_path = "reasoning/engine/default_cpolicy.json";

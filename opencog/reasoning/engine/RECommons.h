@@ -1,5 +1,5 @@
 /*
- * PLNCommons.h
+ * RECommons.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *
@@ -37,15 +37,18 @@ using namespace std;
 /**
  * Reusable functions in the PLN module
  */
-class PLNCommons {
+class RECommons {
 public:
 	AtomSpace * as_;
 	const float FITNESS_PARAM = 0.9;
-	PLNCommons(AtomSpace *as);
-	virtual ~PLNCommons();
+	RECommons(AtomSpace *as);
+	virtual ~RECommons();
 	/**
-	 * creates a BindLink instance that could be passed to to PatternMatching module
-	 * @param himplicant - an implicant part of the BindLink must have a variable node.
+	 * creates a BindLink instance that could be passed to to
+	 * PatternMatching module
+	 *
+	 * @param himplicant - an implicant part of the BindLink must have
+	 *                     a variable node.
 	 * @return - a Handle to the BindLink instance created
 	 */
 	Handle create_bindLink(Handle himplicant, bool is_quoted = false)

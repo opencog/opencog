@@ -26,7 +26,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 
 #include "DefaultForwardChainerCB.h"
-#include "PLNCommons.h"
+#include "../RECommons.h"
 
 using namespace opencog;
 
@@ -72,9 +72,9 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         }
 
         // Create bindlink with source as an implicant.
-        PLNCommons pc(&rule_atomspace);
-        Handle copy = pc.replace_nodes_with_varnode(source_cpy, NODE);
-        Handle bind_link = pc.create_bindLink(copy, false);
+        RECommons rec(&rule_atomspace);
+        Handle copy = rec.replace_nodes_with_varnode(source_cpy, NODE);
+        Handle bind_link = rec.create_bindLink(copy, false);
 
         // Pattern match.
         BindLinkPtr bl(BindLinkCast(bind_link));
@@ -134,10 +134,10 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
                                                  bool subclasses)
 {
     auto outgoing = [as](Handle h) {return as->getOutgoing(h);};
-    PLNCommons pc(as);
+    RECommons rec(as);
     HandleSeq chosen_roots;
     HandleSeq candidates_roots;
-    pc.get_root_links(hsource, candidates_roots);
+    rec.get_root_links(hsource, candidates_roots);
 
     for (Handle hr : candidates_roots) {
         bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
@@ -147,7 +147,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
         if (((type == link_type) or subtype) and notexist) {
             //make sure matches are actually part of the premise list rather than the output of the bindLink
             Handle hpremise = outgoing(outgoing(hr)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
-            if (pc.exists_in(hpremise, hsource)) {
+            if (rec.exists_in(hpremise, hsource)) {
                 chosen_roots.push_back(hr);
             }
         }
@@ -159,7 +159,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
-    PLNCommons pc(as_);
+    RECommons rec(as_);
     Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
@@ -169,7 +169,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
     for (auto hn : neighbors) {
         if (hn->getType() != VARIABLE_NODE) {
             HandleSeq roots;
-            pc.get_root_links(hn, roots);
+            rec.get_root_links(hn, roots);
             for (auto r : roots) {
                 if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
                         != BIND_LINK)
@@ -185,13 +185,13 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 {
     HandleSeq tlist = fcmem.get_premise_list();
     map<Handle, float> tournament_elem;
-    PLNCommons pc(as_);
+    RECommons rec(as_);
     Handle hchosen = Handle::UNDEFINED;
 
     for (Handle t : tlist) {
         switch (ts_mode_) {
         case TV_FITNESS_BASED: {
-            float fitness = pc.tv_fitness(t);
+            float fitness = rec.tv_fitness(t);
             tournament_elem[t] = fitness;
         }
             break;
@@ -209,7 +209,7 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
     //!xxx FIXME since same handle might be chosen multiple times the following
     //!code doesn't guarantee all sources have been exhaustively looked.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
-        Handle hselected = pc.tournament_select(tournament_elem);
+        Handle hselected = rec.tournament_select(tournament_elem);
         if (fcmem.isin_source_list(hselected)) {
             continue;
         } else {

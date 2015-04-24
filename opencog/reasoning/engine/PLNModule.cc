@@ -26,8 +26,8 @@
 #include <opencog/util/tbb.h>
 #include <opencog/util/Config.h>
 #include "PLNModule.h"
-#include "DefaultForwardChainerCB.h"
-#include "ForwardChainer.h"
+#include "forwardchainer/DefaultForwardChainerCB.h"
+#include "forwardchainer/ForwardChainer.h"
 
 using namespace opencog;
 

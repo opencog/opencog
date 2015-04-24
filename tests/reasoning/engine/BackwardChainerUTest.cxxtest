@@ -4,8 +4,8 @@
  *  Created on: Oct 20, 2014
  *      Author: misgana
  */
-#include <opencog/reasoning/engine/rule-engine-src/pln/BackwardChainer.h>
-#include <opencog/reasoning/engine/rule-engine-src/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/backwardchainer/BackwardChainer.h>
+#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>

@@ -24,9 +24,9 @@
 
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/reasoning/engine/rule-engine-src/pln/ForwardChainer.h>
-#include <opencog/reasoning/engine/rule-engine-src/pln/DefaultForwardChainerCB.h>
-#include <opencog/reasoning/engine/rule-engine-src/pln/BackwardChainer.h>
+#include <opencog/reasoning/engine/forwardchainer/ForwardChainer.h>
+#include <opencog/reasoning/engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;

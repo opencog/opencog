@@ -23,7 +23,7 @@
 #ifndef FCMEMORY_H_
 #define FCMEMORY_H_
 
-#include <opencog/reasoning/engine/rule-engine-src/Rule.h>
+#include <opencog/reasoning/engine/Rule.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {

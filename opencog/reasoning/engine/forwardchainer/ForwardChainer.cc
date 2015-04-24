@@ -25,7 +25,7 @@
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/DefaultImplicator.h>
-#include <opencog/reasoning/engine/rule-engine-src/Rule.h>
+#include <opencog/reasoning/engine/Rule.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"
@@ -33,7 +33,7 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-        _as(as), _pc(_as), _fcmem(_as)
+        _as(as), _rec(_as), _fcmem(_as)
 {
     if (conf_path != "")
         _conf_path = conf_path;
@@ -105,7 +105,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb)
         rule_weight[r] = r->get_cost();
     }
 
-    auto r = _pc.tournament_select(rule_weight);
+    auto r = _rec.tournament_select(rule_weight);
     //! If no rules matches the pattern of the source, choose
     //! another source if there is, else end forward chaining.
     if (not r) {
