@@ -9,4 +9,7 @@ This directory currently contains the following subdirectories:
    more details, view the README in the subdirectory, and also refer 
    to http://wiki.opencog.org/w/Unified_rule_engine
 
--- pln -- Atom type definitions for PLN
+-- pln-types -- Atom type definitions for PLN (actually only
+   extensional and intensional similarity and inheritance links, those
+   should probably be moved to atomspace/atom_types.script as they are
+   rather fundamental)
