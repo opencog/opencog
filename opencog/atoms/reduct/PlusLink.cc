@@ -72,6 +72,13 @@ void PlusLink::init(void)
 ///
 /// No actual black-box evaluation or execution is performed. Only
 /// clearbox reductions are performed.
+///
+/// Examples: the reduct of (PlusLink (NumberNode 2) (NumberNode 2))
+/// is (NumberNode 4) -- its just a constant.
+///
+/// The reduct of (PlusLink (VariableNode "$x") (NumberNode 0)) is
+/// (VariableNode "$x"), because adding zero to anything yeilds the
+/// thing itself.
 Handle PlusLink::reduce(void)
 {
 	// If the expression contains no free variables, and only constants,
@@ -104,7 +111,7 @@ Handle PlusLink::reduce(void)
 		}
 		Handle result(createNumberNode(sum));
 
-		// Place the result into the same atom table we are in.
+		// Place the result into the same atomspace we are in.
 		if (_atomTable)
 		{
 			AtomSpace* as = _atomTable->getAtomSpace();
@@ -120,13 +127,49 @@ Handle PlusLink::reduce(void)
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
-		if (NUMBER_NODE == t)
+		if (NUMBER_NODE != t and
+		    FREE_LINK != t and
+		    VARIABLE_NODE != t)
+			throw RuntimeException(TRACE_INFO,
+				"Don't know how to reduce %s", h->toShortString().c_str());
+
+		Handle redh(h);
+		if (FREE_LINK == t)
 		{
+			FreeLinkPtr fff(FreeLinkCast(h));
+			if (NULL == fff)
+				fff = createFreeLink(*LinkCast(h));
+
+			redh = fff->reduce();
 		}
 
+		if (h != redh) did_reduce = true;
+
+		if (NUMBER_NODE == t)
+		{
+			NumberNodePtr nnn(NumberNodeCast(redh));
+			if (NULL == nnn)
+				nnn = createNumberNode(*NodeCast(redh));
+			if (0.0 == nnn->getValue())
+			{
+				did_reduce = true;
+				continue;
+			}
+		}
+		reduct.push_back(redh);
 	}
 
-	if (did_reduce)
-	{}
-return Handle();
+	if (not did_reduce) return getHandle();
+	if (1 == reduct.size()) return reduct[0];
+
+	Handle result(createLink(PLUS_LINK, reduct));
+
+	// Place the result into the same atomspace we are in.
+	if (_atomTable)
+	{
+		AtomSpace* as = _atomTable->getAtomSpace();
+		return as->addAtom(result);
+	}
+
+	return result;
 }

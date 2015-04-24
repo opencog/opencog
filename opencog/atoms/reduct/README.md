@@ -14,3 +14,11 @@ Anyway... try this at the guyile prompt:
 ```
 
 you should see `(NumberNode 4)` as the output.
+
+A more challenging example:
+```
+(cog-reduce! (PlusLink (NumberNode 0) (VariableNode "$x")))
+```
+
+should yeild `(VariableNode "$x")` -- that is, adding zero to something
+has no effect!
