@@ -63,8 +63,7 @@ public:
 	{}
 
 	TypeNode(Node &n)
-		: Node(TYPE_NODE, n.getName(),
-		       n.getTruthValue(), n.getAttentionValue()),
+		: Node(n),
 		  value(classserver().getType(n.getName()))
 	{
 		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
