@@ -108,7 +108,7 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 	AtomSpace* atomspace = ss_get_env_as("cog-evaluate!");
 	// do_evaluate() may throw a C++ exception in various cases:
 	// e.g. if it names a non-existant function, or a function
-	// with syntax errors, or if the schene code intetionally
+	// with syntax errors, or if the scheme code intentionally
 	// threw an error.
 	try
 	{
@@ -122,6 +122,43 @@ SCM SchemeSmob::ss_evaluate (SCM satom)
 	catch (...)
 	{
 		SchemeSmob::throw_exception(NULL, "cog-evaluate!");
+	}
+	scm_remember_upto_here_1(satom);
+	return SCM_EOL;
+}
+
+/**
+ * Reduces a FreeLink with free variables in it.
+ */
+SCM SchemeSmob::ss_reduce (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-reduce!");
+
+	Type t = h->getType();
+	if (NUMBER_NODE == t) return satom;
+
+	if (not classserver().isA(t, FREE_LINK))
+	{
+		scm_wrong_type_arg_msg("cog-reduce!", 1, satom,
+			"FreeLink (PlusLink, TimesLink, etc");
+	}
+
+	AtomSpace* atomspace = ss_get_env_as("cog-reduce!");
+	// do_reduce() may throw a C++ exception, usually because the
+	// expression contains non-reducible atoms in it.
+	try
+	{
+		FreeLinkPtr fff(FreeLinkCast(h));
+		Handle h(fff->reduce());
+		return handle_to_scm(h);
+	}
+	catch (const std::exception& ex)
+	{
+		SchemeSmob::throw_exception(ex.what(), "cog-reduce!");
+	}
+	catch (...)
+	{
+		SchemeSmob::throw_exception(NULL, "cog-reduce!");
 	}
 	scm_remember_upto_here_1(satom);
 	return SCM_EOL;

@@ -24,7 +24,7 @@
 #define _OPENCOG_EVALUTATION_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/FreeLink.h>
+#include <opencog/atoms/reduct/FreeLink.h>
 
 namespace opencog
 {

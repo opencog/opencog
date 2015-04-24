@@ -1,12 +1,12 @@
 /*
- * opencog/atoms/execution/FreeLink.h
+ * opencog/atoms/reduct/PlusLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
+ * published by the Plus Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,15 +16,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
+ * Plus Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FREE_LINK_H
-#define _OPENCOG_FREE_LINK_H
+#ifndef _OPENCOG_PLUS_LINK_H
+#define _OPENCOG_PLUS_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 
 namespace opencog
 {
@@ -33,41 +33,36 @@ namespace opencog
  */
 
 /**
- * The FreeLink records all of the free variables that occur within
- * (underneath) it, in traversal order. The names of those variables
- * are placed in _free_vars.
+ * The PlusLink implements the mathematical operation of "plus"
  */
-class FreeLink : public Link
+class PlusLink : public FoldLink
 {
-private:
-	void find_vars(std::set<Handle>&, const HandleSeq&);
 protected:
-	HandleSeq _free_vars;
 	void init(void);
-	FreeLink(Type, const HandleSeq& oset,
+	PlusLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	FreeLink(Type, const Handle& a, const Handle& b,
+	PlusLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
-	FreeLink(const HandleSeq& oset,
+	PlusLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	FreeLink(Link& l);
+	PlusLink(Link& l);
 };
 
-typedef std::shared_ptr<FreeLink> FreeLinkPtr;
-static inline FreeLinkPtr FreeLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<FreeLink>(a); }
-static inline FreeLinkPtr FreeLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<FreeLink>(a); }
+typedef std::shared_ptr<PlusLink> PlusLinkPtr;
+static inline PlusLinkPtr PlusLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<PlusLink>(a); }
+static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<PlusLink>(a); }
 
 // XXX temporary hack ...
-#define createFreeLink std::make_shared<FreeLink>
+#define createPlusLink std::make_shared<PlusLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_FREE_LINK_H
+#endif // _OPENCOG_PLUS_LINK_H

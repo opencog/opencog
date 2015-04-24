@@ -155,6 +155,7 @@ class SchemeSmob
 		// ExecutionOutputLinks
 		static SCM ss_execute(SCM);
 		static SCM ss_evaluate(SCM);
+		static SCM ss_reduce(SCM);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);

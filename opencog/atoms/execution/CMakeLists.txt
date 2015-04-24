@@ -9,13 +9,13 @@ ENDIF (HAVE_CYTHON)
 ADD_LIBRARY (execution SHARED
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
-	FreeLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
+	clearbox
 	atomspace
 )
 
@@ -27,6 +27,5 @@ ENDIF (HAVE_CYTHON)
 INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
-	FreeLink.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
