@@ -65,6 +65,10 @@ FreeLink::FreeLink(Link& l)
 
 /// Create an ordered set of the free variables in this link.
 ///
+/// By "ordered set" it is meant: a list of variables, in traversal
+/// order (from left to right, as they appear in the tree), with each
+/// variable being named only once.  The varset is only used to make
+/// sure that we don't name a variable more than once; that's all.
 void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
@@ -76,7 +80,7 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 			varset.insert(h);
 		}
 		LinkPtr lll(LinkCast(h));
-		if (NULL == lll) return;
+		if (NULL == lll) continue;
 
 		find_vars(varset, lll->getOutgoingSet());
 	}
@@ -86,4 +90,9 @@ void FreeLink::init(void)
 {
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
+}
+
+Handle FreeLink::reduce(void)
+{
+	throw RuntimeException(TRACE_INFO, "Not reducible!");
 }

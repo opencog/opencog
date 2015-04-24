@@ -56,6 +56,9 @@ public:
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	FreeLink(Link& l);
+	virtual ~FreeLink() {}
+
+	virtual Handle reduce(void);
 };
 
 typedef std::shared_ptr<FreeLink> FreeLinkPtr;

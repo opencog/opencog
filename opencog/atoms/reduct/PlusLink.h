@@ -52,9 +52,7 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	PlusLink(Link& l);
 
-   Handle execute(void);
-
-   static Handle do_execute(const Handle&);
+   virtual Handle reduce(void);
 };
 
 typedef std::shared_ptr<PlusLink> PlusLinkPtr;

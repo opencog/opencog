@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/NumberNode.h>
 #include "PlusLink.h"
 
 using namespace opencog;
@@ -65,15 +66,67 @@ PlusLink::PlusLink(Link& l)
 
 void PlusLink::init(void)
 {
-printf("olllaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
 }
 
-Handle PlusLink::execute(void)
+/// reduce() -- reduce the expression by summing constants, etc.
+///
+/// No actual black-box evaluation or execution is performed. Only
+/// clearbox reductions are performed.
+Handle PlusLink::reduce(void)
 {
-return Handle();
-}
+	// If the expression contains no free variables, and only constants,
+	// then we should be able to reduce it to a NumberNode. Exceptions
+	// are thrown if the expression is not summable.
+	if (0 == _free_vars.size())
+	{
+		double sum = 0.0;
+		for (const Handle& h: _outgoing)
+		{
+			Type t = h->getType();
+			if (NUMBER_NODE != t and FREE_LINK != t)
+				throw RuntimeException(TRACE_INFO,
+					"Don't know how to reduce %s", h->toShortString().c_str());
 
-Handle PlusLink::do_execute(const Handle&)
-{
+			Handle redh(h);
+			if (FREE_LINK == t)
+			{
+				FreeLinkPtr fff(FreeLinkCast(h));
+				if (NULL == fff)
+					fff = createFreeLink(*LinkCast(h));
+
+				redh = fff->reduce();
+			}
+
+			NumberNodePtr nnn(NumberNodeCast(redh));
+			if (NULL == nnn)
+				nnn = createNumberNode(*NodeCast(redh));
+			sum += nnn->getValue();
+		}
+		Handle result(createNumberNode(sum));
+
+		// Place the result into the same atom table we are in.
+		if (_atomTable)
+		{
+			AtomSpace* as = _atomTable->getAtomSpace();
+			return as->addAtom(result);
+		}
+
+		return result;
+	}
+
+	// If we are here, then there are variables.
+	HandleSeq reduct;
+	bool did_reduce = false;
+	for (const Handle& h: _outgoing)
+	{
+		Type t = h->getType();
+		if (NUMBER_NODE == t)
+		{
+		}
+
+	}
+
+	if (did_reduce)
+	{}
 return Handle();
 }
