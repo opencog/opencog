@@ -24,8 +24,6 @@ INSTALL (FILES
     FindUtils.h
     FollowLink.h
     ForeachChaseLink.h
-    Foreach.h
-    ForeachTwo.h
     HandleMap.h
     DESTINATION "include/${PROJECT_NAME}/atomutils"
 )
