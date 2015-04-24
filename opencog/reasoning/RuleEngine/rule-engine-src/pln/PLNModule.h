@@ -29,11 +29,12 @@
 namespace opencog
 {
 /**
- * PLN module for backward and forward chaining triggered by atomspace events.
- * Whenever atoms are created or enter to the attentional focus, the rule engine
- * forward/backward chainer will be triggered (Reactive rule engine ).Having this
- * functionality will also help us experiment with the dynamics of ECAN together
- * with PLN reasoning.
+ * PLN module for backward and forward chaining triggered by atomspace
+ * events.  Whenever atoms are created or enter to the attentional
+ * focus, the rule engine forward/backward chainer will be triggered
+ * (Reactive rule engine ). Having this functionality will also help
+ * us experiment with the dynamics of ECAN together with PLN
+ * reasoning.
  */
 class CogServer;
 class AtomSpace;

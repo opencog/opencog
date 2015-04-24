@@ -1,5 +1,5 @@
 /*
- * PLNCommons.cc
+ * PLNCommons.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *
