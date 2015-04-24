@@ -35,30 +35,6 @@ ADD_LIBRARY(RuleEngineModule SHARED
 
 TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
 
-
-# PLNModule
-IF (TBB_FOUND)
-	INCLUDE_DIRECTORIES (
-		${TBB_INCLUDE_DIR}
-	)
-
-	LINK_DIRECTORIES(
-		${TBB_INCLUDE_DIR}
-		${TBB_LIBRARY_DIRS}
-	)
-
-	ADD_LIBRARY(plnmodule SHARED
-		PLNModule
-	)
-
-	TARGET_LINK_LIBRARIES(plnmodule
-		server
-		tbb
-		ruleengine
-	)
-ENDIF (TBB_FOUND)
-
-
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSEIF (CYGWIN)
