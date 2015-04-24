@@ -110,7 +110,7 @@ void RuleUTest::setUp()
 
 /*
  * Tests the deduction rule (pln-rule-deduction) defined in:
- * opencog/reasoning/engine/rules/pln/deduction.scm
+ * opencog/reasoning/rules/pln/deduction.scm
  */
 void RuleUTest::test_deduction()
 {
@@ -118,7 +118,7 @@ void RuleUTest::test_deduction()
     
     config().set("SCM_PRELOAD",
                  "tests/reasoning/engine/simple-assertions.scm, "
-                 "reasoning/engine/rules/pln/deduction.scm");
+                 "reasoning/rules/pln/deduction.scm");
     load_scm_files_from_config(*as);
     
     Handle results;
@@ -138,7 +138,7 @@ void RuleUTest::test_deduction()
 
 /*
  * Tests the and rule (pln-rule-and) defined in:
- * opencog/reasoning/engine/rules/pln/and.scm
+ * opencog/reasoning/rules/pln/and.scm
  */
 void RuleUTest::test_and()
 {
@@ -146,7 +146,7 @@ void RuleUTest::test_and()
     
     config().set("SCM_PRELOAD",
                  "tests/reasoning/engine/simple-predicates.scm, "
-                 "reasoning/engine/rules/pln/and.scm");
+                 "reasoning/rules/pln/and.scm");
     load_scm_files_from_config(*as);
 
     // Apply the and rule
@@ -158,7 +158,7 @@ void RuleUTest::test_and()
 
 /*
  * Tests the not rule (pln-rule-not) defined in:
- * opencog/reasoning/engine/rules/pln/not.scm
+ * opencog/reasoning/rules/pln/not.scm
  */
 void RuleUTest::test_not()
 {
@@ -166,7 +166,7 @@ void RuleUTest::test_not()
     
     config().set("SCM_PRELOAD",
                  "tests/reasoning/engine/simple-predicates.scm, "
-                 "reasoning/engine/rules/pln/not.scm");
+                 "reasoning/rules/pln/not.scm");
     load_scm_files_from_config(*as);
 
     // Apply the and rule
