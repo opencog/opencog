@@ -90,7 +90,6 @@ IF (HAVE_ATOMSPACE)
 		attention-types
 		embodiment-types
 		nlp-types
-		PLNTypes
 		spacetime-types
 		cogutil
 		${PYTHON_LIBRARIES}
