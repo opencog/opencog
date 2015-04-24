@@ -32,8 +32,11 @@ LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK
 
 // SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
-// Therefore the later has been disabled.
+// Therefore the later has been removed.
 SUBSET_LINK <- ORDERED_LINK
+INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
+EXTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
+INTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
 
 // Boolean set operations, logical constants
 // The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
