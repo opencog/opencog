@@ -25,6 +25,9 @@
 #define PLNAGENT_H_
 
 #include <opencog/server/Module.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <boost/signals2.hpp>
 
 namespace opencog
 {

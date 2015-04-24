@@ -20,14 +20,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include "PLNModule.h"
+
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <tbb/task.h>
 #include <opencog/util/tbb.h>
 #include <opencog/util/Config.h>
-#include "PLNModule.h"
-#include "forwardchainer/DefaultForwardChainerCB.h"
-#include "forwardchainer/ForwardChainer.h"
+#include <opencog/reasoning/engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/reasoning/engine/forwardchainer/ForwardChainer.h>
 
 using namespace opencog;
 

@@ -1,26 +1,15 @@
-# Prototype rule definitions for a generic rule engine implementation
+# Prototype rule definitions for rule engine based PLN implementation
 
 Implements rules in the AtomSpace using the pattern matcher for
 unification and GroundedSchemaNodes for execution of formulas written
 in Scheme.
 
-## Rule bases
-
-The following rule bases are currently defined:
-
-- Relex2Logic
-
-- PLN
-
 ## Rules
 
-The following rules are defined for the corresponding rule bases:
+The following rules are defined for PLN:
 
-- Relex2Logic:
-    - be-inheritance
-    - svo
-
-- PLN:
+    - pln-rule-and
+    - pln-rule-not
     - pln-rule-deduction
     - pln-rule-modus-ponens
     - Context rules:
@@ -43,43 +32,18 @@ compile-rules.scm
 
 in order to compile the rules and formulas for better performance.
 
-## Next steps
-
-- See if these can be implemented to directly use the "side-effect
-  free" versions so that the truth value application occurs inside the
-  ImplicationLink rather than inside the Scheme rule. This was
-  discussed [here](https://groups.google.com/d/msg/opencog/KUptHRvBXu0/YR6oySxLKeMJ).
-
-- See if the link type can be made to allow a dynamic list of valid
-  link types. For example, for the Deduction Rule: {InheritanceLink,
-  SubsetLink, ImplicationLink, ExtensionalImplicationLink}
-
-- Support all the TruthValue types
-
-- Utilize a graph rewriting unit test framework, that is currently
-  being discussed, to assert that the replacement graphs match a
-  predefined expected value for specific test instances
-
-- For a rule like Modus Ponens to work, it will be necessary to
-  implement "Recursive Unification using the Pattern Matcher",
-  described [in this thread](http://wiki.opencog.org/w/Idea:_Recursive_Unification_using_the_Pattern_Matcher).
-
-- Rules will require mutual exclusions and priorities, but that can
-  likely be implemented outside of the definition of the rule itself
-  for clarity.
-
 ## PLN Example
 
 - Load the deduction rule definitions:
 
     ```
-    reasoning/rules/pln/deduction.scm
+    reasoning/pln/rules/deduction.scm
     ```
 
     Example:
 
     ```
-    (load "reasoning/rules/pln/deduction.scm")
+    (load "reasoning/pln/rules/deduction.scm")
     ```
 
 - Load this file containing the data:
