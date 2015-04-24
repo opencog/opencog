@@ -6,6 +6,7 @@ ADD_LIBRARY (clearbox SHARED
 	FoldLink.cc
 	FreeLink.cc
 	PlusLink.cc
+	TimesLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -19,5 +20,6 @@ INSTALL (FILES
 	FoldLink.h
 	FreeLink.h
 	PlusLink.h
+	TimesLink.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

@@ -36,3 +36,12 @@ should yeild `(VariableNode "$x")` -- the +2 and -2 cancel.
 
 should yeild `(PlusLink (VariableNode "$x") (NumberNode 4))` --
 the +2 and +2 sum.
+
+Using the same ideas:
+```
+(cog-reduce! (TimesLink (NumberNode 1) (VariableNode "$x")))
+(cog-reduce! (TimesLink (VariableNode "$y") (NumberNode 1) (VariableNode "$x")))
+(cog-reduce! (TimesLink (VariableNode "$y") (NumberNode 0.5)
+                (VariableNode "$x")
+                (PlusLink (NumberNode 1) (NumberNode 1))))
+```
