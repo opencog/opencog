@@ -133,7 +133,9 @@ public:
      * Cannot be const, because the get() functions can't be,
      * because thread-safe locking required in the gets. */
     Link(Link &l)
-        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
+        : Atom(l.getType(),
+               l.getTruthValue()->clone(),
+               l.getAttentionValue()->clone())
     {
         init(l.getOutgoingSet());
     }

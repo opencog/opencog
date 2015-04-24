@@ -214,8 +214,17 @@ public:
 
 		// The truth value *pointers* should differ; they should
 		// have been copied on atom insertion.
-		// XXX this is currently broken :-(  and should be fixed ... 
-//		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+		TS_ASSERT(h1n1->getTruthValue() != h3n1->getTruthValue());
+		TS_ASSERT(h2n1->getTruthValue() != h3n1->getTruthValue());
+
+		TS_ASSERT(h1n2->getTruthValue() != h2n2->getTruthValue());
+		TS_ASSERT(h1n2->getTruthValue() != h3n2->getTruthValue());
+		TS_ASSERT(h2n2->getTruthValue() != h3n2->getTruthValue());
+
+		TS_ASSERT(h1n3->getTruthValue() != h2n3->getTruthValue());
+		TS_ASSERT(h1n3->getTruthValue() != h3n3->getTruthValue());
+		TS_ASSERT(h2n3->getTruthValue() != h3n3->getTruthValue());
 	}
 
 	// Test copying back and forth.
