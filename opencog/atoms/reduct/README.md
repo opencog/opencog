@@ -54,3 +54,5 @@ Using the same ideas:
          (VariableNode "$x")
          (PlusLink (NumberNode 1) (NumberNode 1))))
 ```
+
+Not yet implemented: something that can reduce x+2x to 3x and x+(-x) to 0.
