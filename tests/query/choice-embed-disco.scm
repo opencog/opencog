@@ -46,7 +46,6 @@
 ;;; parts are entirely disconnected from each-other.
 (define (embed-disco)
 	(BindLink
-		(VariableNode "$x")
 		(ImplicationLink
 			(MemberLink
 				(ConceptNode "ways and means")

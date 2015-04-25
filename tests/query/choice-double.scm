@@ -59,7 +59,6 @@
 ;;; Two clauses; they are both connected with a common variable.
 (define (double)
 	(BindLink
-		(VariableNode "$x")
 		(ImplicationLink
 			(AndLink
 				(ChoiceLink
