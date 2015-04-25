@@ -40,10 +40,18 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
+bool SatisfactionSet::grounding(const std::map<Handle, Handle> &var_soln,
+                               const std::map<Handle, Handle> &term_soln)
+{
+	// PatternMatchEngine::print_solution(term_soln, var_soln);
+	_satisfying_set.push_back(term_soln.at(_body));
+
+	// Look for more groundings.
+	return false;
+}
+
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
-	Satisfier sater(as);
-
 	SatisfactionLinkPtr bl(SatisfactionLinkCast(hlink));
 	if (NULL == bl)
 	{
@@ -55,9 +63,30 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 			bl = createSatisfactionLink(hlink);
 	}
 
+	Satisfier sater(as);
 	bl->satisfy(sater);
 
 	return sater._result;
+}
+
+Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
+{
+	SatisfactionLinkPtr bl(SatisfactionLinkCast(hlink));
+	if (NULL == bl)
+	{
+		// If it is a BindLink (for example), we want to use that ctor
+		// instead of the default ctor.
+		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
+			bl = createSatisfactionLink(*LinkCast(hlink));
+		else
+			bl = createSatisfactionLink(hlink);
+	}
+
+	SatisfactionSet sater(as);
+	sater._body = bl->get_body();
+	bl->satisfy(sater);
+
+	return as->addLink(SET_LINK, sater._satisfying_set);
 }
 
 /* ===================== END OF FILE ===================== */

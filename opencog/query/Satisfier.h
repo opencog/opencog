@@ -41,7 +41,7 @@ namespace opencog {
  * grounding of the search pattern.
  *
  * This will set the result TV to TRUE_TV if a grounding is found. More
- * sophisticated TV calculations can be obtained by overloadingthis class.
+ * sophisticated TV calculations can be obtained by overloading this class.
  */
 
 class Satisfier :
@@ -52,6 +52,36 @@ class Satisfier :
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 		TruthValuePtr _result;
+
+		// Return true if a satisfactory grounding has been
+		// found. Note that in case where you want all possible
+		// groundings, this will usually return false, so the
+		// patternMatchEngine can keep looking for ever more
+		// groundings.
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &term_soln);
+};
+
+/**
+ * class SatisfactionSet -- pattern matching callback for finding satsifaction.
+ *
+ * This class is meant to be used with the pattern matcher. When the
+ * pattern matcher calls the callback, it will do so with a particular
+ * grounding of the search pattern.
+ *
+ * This will record every grounding that is found. Thus, after running,
+ * the SatisfyingSet can be examined to see all the groundings that were
+ * found.
+ */
+
+class SatisfactionSet :
+	public virtual DefaultPatternMatchCB
+{
+	public:
+		SatisfactionSet(AtomSpace* as) :
+			DefaultPatternMatchCB(as) {}
+		Handle _body;
+		HandleSeq _satisfying_set;
 
 		// Return true if a satisfactory grounding has been
 		// found. Note that in case where you want all possible

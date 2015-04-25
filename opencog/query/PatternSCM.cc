@@ -99,8 +99,10 @@ void PatternSCM::init_in_module(void*)
    // Fuzzy matching.
 	_binders.push_back(new PatternWrap(find_approximate_match, "cog-fuzzy-match"));
 
-	// A bindlink that does not return a value
+	// A bindlink that return a TV
 	_binders.push_back(new PatternWrap(satisfaction_link, "cog-satisfy"));
+
+	_binders.push_back(new PatternWrap(satisfying_set, "cog-satisfying-set"));
 }
 
 PatternSCM::~PatternSCM()
