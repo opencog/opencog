@@ -87,6 +87,13 @@ SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
 	init();
 }
 
+SatisfactionLink::SatisfactionLink(const Handle& body,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: ConcreteLink(SATISFACTION_LINK, HandleSeq({body}), tv, av)
+{
+	init();
+}
+
 SatisfactionLink::SatisfactionLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: ConcreteLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)

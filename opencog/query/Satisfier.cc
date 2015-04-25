@@ -40,13 +40,20 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
-TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hsatlink)
+TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
 	Satisfier sater(as);
 
-	SatisfactionLinkPtr bl(SatisfactionLinkCast(hsatlink));
+	SatisfactionLinkPtr bl(SatisfactionLinkCast(hlink));
 	if (NULL == bl)
-		bl = createSatisfactionLink(*LinkCast(hsatlink));
+	{
+		// If it is a BindLink (for example), we want to use that ctor
+		// instead of the default ctor.
+		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
+			bl = createSatisfactionLink(*LinkCast(hlink));
+		else
+			bl = createSatisfactionLink(hlink);
+	}
 
 	bl->satisfy(sater);
 
