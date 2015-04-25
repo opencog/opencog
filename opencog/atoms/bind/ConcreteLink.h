@@ -26,7 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/query/Pattern.h>
-#include <opencog/atoms/bind/ScopeLink.h>
+#include <opencog/atoms/bind/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog
@@ -36,11 +36,10 @@ namespace opencog
  *  @{
  */
 
-/// The ConcreteLink is used to specify a list of variables, and a
+/// The ConcreteLink specifies an (optional) list of variables, and a
 /// pattern (containing those variables) that is to be grounded
-/// (satisfied).  Thus, it resembles a ScopeLink, with the difference
-/// being that it has a very specific semantics: the pattern is to be
-/// grounded!
+/// (satisfied).  If no list of variables is specified, then all free
+/// variables are extracted and used for grounding.
 ///
 /// The body of the ConcreteLink is assumed to collection of clauses
 /// to be satsified. Thus, the body is typically an AndLink, OrLink
@@ -64,12 +63,19 @@ namespace opencog
 ///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.
-class ConcreteLink : public ScopeLink
+class ConcreteLink : public Link
 {
 protected:
+	// The link to be grounded.
+	Handle _body;
+
+	// The variables to be grounded
+	Variables _varlist;
+
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
+	void extract_variables(const HandleSeq& oset);
 	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses);
@@ -95,6 +101,12 @@ protected:
 
 	void init(void);
 
+	// utility debug print
+	static void prt(const Handle& h)
+	{
+		printf("%s\n", h->toShortString().c_str());
+	}
+
 public:
 	ConcreteLink(const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -110,6 +122,9 @@ public:
 	             const VariableTypeMap& typemap,
 	             const HandleSeq& component,
 	             const std::set<Handle>& optionals);
+
+	// Return the list of variables we are holding.
+	const Variables& get_variables(void) const { return _varlist; }
 
 	bool satisfy(PatternMatchCallback&) const;
 

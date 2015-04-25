@@ -33,7 +33,7 @@ using namespace opencog;
 
 void SatisfactionLink::init(void)
 {
-	ScopeLink::init(_outgoing);
+	extract_variables(_outgoing);
 	unbundle_clauses(_body);
 	setup_sat_body();
 }

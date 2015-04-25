@@ -31,7 +31,7 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
-	ScopeLink::init(_outgoing);
+	extract_variables(_outgoing);
 	validate_body(_body);
 	unbundle_clauses(_hclauses);
 
