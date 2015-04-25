@@ -27,16 +27,18 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atoms/reduct/FreeLink.h>
 
 #include "ConcreteLink.h"
 #include "PatternUtils.h"
+#include "VariableList.h"
 
 using namespace opencog;
 
 void ConcreteLink::init(void)
 {
 	_pat.redex_name = "anonymous ConcreteLink";
-	ScopeLink::init(_outgoing);
+	extract_variables(_outgoing);
 	unbundle_clauses(_body);
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
@@ -67,7 +69,7 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
                            const VariableTypeMap& typemap,
                            const HandleSeq& compo,
                            const std::set<Handle>& opts)
-	: ScopeLink(CONCRETE_LINK, HandleSeq())
+	: Link(CONCRETE_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -114,21 +116,21 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(CONCRETE_LINK, hseq, tv, av)
+	: Link(CONCRETE_LINK, hseq, tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
+	: Link(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, hseq, tv, av)
+	: Link(t, hseq, tv, av)
 {
 	// Derived link-types have other init sequences
 	if (CONCRETE_LINK != t) return;
@@ -136,7 +138,7 @@ ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
 }
 
 ConcreteLink::ConcreteLink(Link &l)
-	: ScopeLink(l)
+	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -153,6 +155,54 @@ ConcreteLink::ConcreteLink(Link &l)
 	init();
 }
 
+
+/* ================================================================= */
+///
+/// Find and unpack variable declarations, if any; otherwise, just
+/// find all free variables.
+///
+void ConcreteLink::extract_variables(const HandleSeq& oset)
+{
+	size_t sz = oset.size();
+	if (2 < sz)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an outgoing set size of at most two, got %d", sz);
+
+	// If the outgoing set size is one, then there are no variable
+	// declarations; extract all free variables.
+	if (1 == sz)
+	{
+		_body = oset[0];
+
+		// Use the FreeLink class to find all the variables;
+		// Use the VariableList class for build the Variables struct.
+		FreeLink fl(oset[0]);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
+		return;
+	}
+
+	// If we are here, then the first outgoing set member should be
+	// a variable declaration.
+	_body = oset[1];
+
+	// Either the first element is a VariableList, or its a naked
+	// variable, or its a typed variable.  Use the VariableList
+	// class as a tool to extract the variables for us.
+	Type t = oset[0]->getType();
+	if (VARIABLE_LIST == t)
+	{
+		VariableList vl(LinkCast(oset[0])->getOutgoingSet());
+		_varlist = vl.get_variables();
+	}
+	else
+	{
+		HandleSeq v;
+		v.push_back(oset[0]);
+		VariableList vl(v);
+		_varlist = vl.get_variables();
+	}
+}
 
 /* ================================================================= */
 ///
@@ -186,6 +236,9 @@ void ConcreteLink::unbundle_clauses(const Handle& hbody)
  *
  * Every clause should contain at least one variable in it; clauses
  * that are constants and can be trivially discarded.
+ *
+XXX WTF, what about evaluatables? How did those not get removed???
+I don't get it... fixme
  */
 void ConcreteLink::validate_clauses(std::set<Handle>& vars,
                                     HandleSeq& clauses)

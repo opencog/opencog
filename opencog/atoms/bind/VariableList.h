@@ -74,13 +74,14 @@ public:
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
 
-	// Return true if we are holding a single variable, and the handle is
-	// satisfies any type restrictions. Else return false.
+	// Return true if we are holding a single variable, and the handle
+	// given as the argument satisfies the type restrictions (if any).
+	// Else return false.
 	bool is_type(const Handle&) const;
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
-	// restrictions.
+	// restrictions (if any).
 	bool is_type(const HandleSeq&) const;
 
 	// Given the tree `tree` containing variables in it, create and

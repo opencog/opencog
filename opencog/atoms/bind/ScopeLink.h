@@ -55,6 +55,12 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(const HandleSeq&);
+
+	// utility debug print
+	static void prt(const Handle& h)
+	{
+		printf("%s\n", h->toShortString().c_str());
+	}
 public:
 	ScopeLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -65,12 +71,6 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ScopeLink(Link &l);
-
-	// utility debug print
-	void prt(const Handle& h) const
-	{
-		printf("%s\n", h->toShortString().c_str());
-	}
 
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all

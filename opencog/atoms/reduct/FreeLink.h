@@ -55,9 +55,14 @@ public:
 	FreeLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	FreeLink(const Handle& a,
+	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}
 
+	const HandleSeq& get_vars(void) { return _free_vars; }
 	virtual Handle reduce(void);
 };
 

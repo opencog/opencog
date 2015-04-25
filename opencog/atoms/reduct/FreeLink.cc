@@ -34,6 +34,14 @@ FreeLink::FreeLink(const HandleSeq& oset,
 	init();
 }
 
+FreeLink::FreeLink(const Handle& a,
+                   TruthValuePtr tv,
+                   AttentionValuePtr av)
+    : Link(FREE_LINK, a, tv, av)
+{
+	init();
+}
+
 FreeLink::FreeLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)

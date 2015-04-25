@@ -54,8 +54,11 @@ struct Variables
 	/// as the _varseq; it is used for fast lookup; (i.e. is some
 	/// some variable a part of this set?) whereas the _varseq list
 	/// preserves the original order of the variables.  Yes, the fast
-	/// lookup really is needed!  The _index is used to implement the
-	/// variable substitution method.
+	/// lookup really is needed!
+	///
+	/// The _index is a reversed index into _varseq: given a variable,
+	/// it returns the ordinal of that variable in the _varseq. It is
+	/// used to implement the variable substitution method.
 	HandleSeq varseq;
 	std::set<Handle> varset;
 	VariableTypeMap typemap;

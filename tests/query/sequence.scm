@@ -29,7 +29,6 @@
 ; corn fields.
 (define (off-road)
 	(SatisfactionLink
-		(VariableList)  ; no variables
 		(SequentialAndLink
 			(EvaluationLink
 				(GroundedPredicateNode "scm: stop-go")
@@ -46,7 +45,6 @@
 ;; errors when evaluating this.
 (define (traffic-lights)
 	(SatisfactionLink
-		(VariableList)  ; no variables
 		(SequentialAndLink
 			(EvaluationLink
 				(GroundedPredicateNode "scm: stop-go")

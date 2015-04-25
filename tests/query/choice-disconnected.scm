@@ -33,7 +33,6 @@
 ;;; be made.  Should find two of the three trees given above.
 (define (top-disco)
 	(BindLink
-		(VariableNode "$x")
 		(ImplicationLink
 			(ChoiceLink
 				(EvaluationLink
@@ -59,7 +58,6 @@
 ;;; Same as above, but the tope-level ChoiceLink is wrapped.
 (define (wrapped-disco)
 	(BindLink
-		(VariableNode "$x")
 		(ImplicationLink
 			(AndLink
 				(ChoiceLink
