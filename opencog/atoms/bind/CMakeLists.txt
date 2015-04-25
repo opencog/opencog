@@ -7,7 +7,7 @@ ADD_LIBRARY (lambda SHARED
 	BindLink.cc
 	ConcreteLink.cc
 	DefineLink.cc
-	# DeleteLink.cc
+	DeleteLink.cc
 	PatternUtils.cc
 	SatisfactionLink.cc
 	ScopeLink.cc
