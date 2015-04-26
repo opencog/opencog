@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,7 +23,7 @@
  */
 #include "flat_normal_form.h"
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
   /// Does c contain p and !p?
   bool tautology(const clause& c)
@@ -55,13 +55,13 @@ namespace moses { namespace reduct {
   }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3
 
-std::ostream& operator<<(std::ostream& out,const moses::reduct::clause& c) {
+std::ostream& operator<<(std::ostream& out,const moses3::reduct::clause& c) {
     out << "(";
     if (!c.empty()) {
         out << *c.begin();
-        for (moses::reduct::clause::iterator i1=++c.begin();
+        for (moses3::reduct::clause::iterator i1=++c.begin();
              i1!=c.end();++i1)
             out << " " << *i1;
     }
@@ -69,8 +69,8 @@ std::ostream& operator<<(std::ostream& out,const moses::reduct::clause& c) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out,const moses::reduct::nf& d) {
-    for (moses::reduct::nf::const_iterator c=d.begin();c!=d.end();++c)
+std::ostream& operator<<(std::ostream& out,const moses3::reduct::nf& d) {
+    for (moses3::reduct::nf::const_iterator c=d.begin();c!=d.end();++c)
         out << *c;
     return out;
 }

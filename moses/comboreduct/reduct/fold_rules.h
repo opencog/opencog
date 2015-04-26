@@ -7,7 +7,7 @@
 
 #include "reduct.h"
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 //fold unrolling:
 //    foldl(f v list(a b c)) = f(f(f(v a) b) c)
@@ -18,6 +18,6 @@ struct fold_unrolling : public crule<fold_unrolling> {
 };
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

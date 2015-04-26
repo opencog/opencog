@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #include "type_tree_def.h"
 #include <moses/util/oc_assert.h>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 bool is_argument_type(type_node n)
 {
@@ -38,4 +38,4 @@ unsigned int arg_to_idx(type_node n)
     return (unsigned int)((int)n-(int)id::argument_type+1);
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

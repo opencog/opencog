@@ -1,5 +1,5 @@
 /*
- * moses/util/oc_assert.h
+ * moses3/util/oc_assert.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +33,7 @@
  */
 
 /** @name Assertions
- *  Macro OC_ASSERT corresponding to moses::cassert(TRACE_INFO, ...)
+ *  Macro OC_ASSERT corresponding to moses3::cassert(TRACE_INFO, ...)
  *  if IGNORE_OC_ASSERT is not defined, and ignored otherwise.
  *
  *  To disable assertions:
@@ -49,13 +49,13 @@
     /* unless cond is false! (Sometimes, evaluating the args is */ \
     /* CPU intensive, and/or requires taking locks!) */ \
     { bool test = (cond); \
-    if (not test) moses::cassert(TRACE_INFO, test, ##__VA_ARGS__); }
+    if (not test) moses3::cassert(TRACE_INFO, test, ##__VA_ARGS__); }
 #else
 #define OC_ASSERT(...) \
     ((void)0)
 #endif
 
-namespace moses {
+namespace moses3 {
 
 //! cassert complet with message and trace info
 void cassert(const char * trace,  bool condition, const char * msg, ...);
@@ -66,7 +66,7 @@ void cassert(const char* trace, bool condition, const std::string& msg);
 //! cassert without message. Just trace information
 void cassert(const char * trace, bool condition);
 
-} // namespace moses
+} // namespace moses3
 ///@}
 /** @}*/
 

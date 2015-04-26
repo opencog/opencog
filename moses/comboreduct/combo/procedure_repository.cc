@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -41,7 +41,7 @@
 
 #include <cstdio>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 typedef combo_tree::iterator pre_it;
 typedef combo_tree::sibling_iterator sib_it;
@@ -88,10 +88,10 @@ void procedure_repository::instantiate_procedure_calls(combo_tree& tr,
             str_proc_map_const_it proc=_repo.find(str);
             if(proc==_repo.end()) {
                 if(wodo) {
-                    moses::logger().debug("ComboProcedureRepository - Creating definite_object '%s'.", str.c_str());
+                    moses3::logger().debug("ComboProcedureRepository - Creating definite_object '%s'.", str.c_str());
                 }
             } else {
-                moses::logger().debug("ComboProcedureRepository - Replacing procedure name by procedure object '%s'", str.c_str());
+                moses3::logger().debug("ComboProcedureRepository - Replacing procedure name by procedure object '%s'", str.c_str());
                 *it=proc->second;
             }
         }
@@ -537,4 +537,4 @@ std::ostream& operator<<(std::ostream& out, procedure_repository pr) {
 }
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3

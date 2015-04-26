@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,7 @@
 #include "flat_normal_form.h"
 #include "../type_checker/type_tree.h"
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 /// Ensure that all arguments and 'or' nodes have an 'and' node as their parent.
 /// This is important so that other normalizations can catch all cases.
@@ -182,7 +182,7 @@ protected:
         typedef vertex value_type;
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::upwards_iterator up_it;
-        typedef moses::lexicographic_subtree_order<value_type> Comp;
+        typedef moses3::lexicographic_subtree_order<value_type> Comp;
         typedef std::set<sib_it,Comp> subtree_set;
 
         combo_tree& tr;
@@ -281,6 +281,6 @@ struct reduce_remove_subtree_equal_tt
 };
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

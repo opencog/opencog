@@ -38,7 +38,7 @@
 
 using namespace std;
 using namespace boost;
-using namespace moses;
+using namespace moses3;
 using namespace moses;
 using namespace reduct;
 
@@ -46,7 +46,7 @@ using namespace reduct;
 int main(int argc, char** argv)
 {
     // Set flag to print only cassert and other ERROR level logs on stdout.
-    moses::logger().setPrintErrorLevelStdout();
+    moses3::logger().setPrintErrorLevelStdout();
     // Read maximum evaluations and RNG seed from command line.
     int seed;
     bool reduce=true;

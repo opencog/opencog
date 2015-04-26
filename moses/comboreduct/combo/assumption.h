@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 
 #include "vertex.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 //This file contains all function required to treat assumptions in combo_tree
 
@@ -61,6 +61,6 @@ bool equal_assumptions(const combo_tree& tr1, const combo_tree& tr2);
 //it is assumed that the tree is not empty
 void delete_all_assumptions(combo_tree& tr);
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3
 
 #endif

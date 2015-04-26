@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@
 //action property methods which have not been implemented
 #define NO_DEFAULT_ACTION_PROPERTY_METHODS
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
   /**
  * builtin_action_base is an abstract class to be implemented
@@ -123,6 +123,6 @@ typedef builtin_action_set::const_iterator builtin_action_set_const_it;
 std::ostream& operator<<(std::ostream&, combo::builtin_action);
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

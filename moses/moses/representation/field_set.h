@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,7 +39,7 @@
 
 #include "instance.h"
 
-namespace moses {
+namespace moses3 {
 namespace moses {
 
  /**
@@ -75,7 +75,7 @@ namespace moses {
   * of a tree are commonly called 'constants' or 'zero-ary functions',
   * while the internal nodes of the tree would be called 'n-ary functions'
   * (presuming that they have n children).  The labels on nodes are
-  * strings.  Note that atoms (in the general sense, not the moses
+  * strings.  Note that atoms (in the general sense, not the moses3
   * sense) are terms with truth values (predicates);  however no atoms or
   * truth values are used here.  See for example, Baader & Nipkow,
   * 'Term Rewriting and All That', for more information. Or wikipedia.
@@ -132,7 +132,7 @@ struct field_set
      * 0-31/63. The "width" is the width of the raw field, in bits.
      *
      * See also the wiki page
-     * http://www.moses.org/wiki/Field_set_struct_in_MOSES
+     * http://www.opencog.org/wiki/Field_set_struct_in_MOSES
      */
     struct field
     {
@@ -1046,7 +1046,7 @@ public:
             return _fs->disc_and_bit()[spec_idx].multy;
         }
 
-        void randomize(moses::RandGen& rng = randGen())
+        void randomize(moses3::RandGen& rng = randGen())
         {
             _fs->set_raw(*_inst, _idx, rng.randint(multy()));
         }
@@ -1374,6 +1374,6 @@ inline std::ostream& operator<<(std::ostream& out,
 
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

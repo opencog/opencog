@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
 
 #include "../main/feature-selection.h" // needed for feature_set, feature_selection_parameters
 
-namespace moses {
+namespace moses3 {
 
 feature_set_pop smd_select_feature_sets(const CTable& ctable,
                                         const feature_selection_parameters& fs_params);
@@ -193,6 +193,6 @@ feature_set_pop stochastic_max_dependency_selection(const feature_set& features,
     return ranks;
 }
 
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_FEATURE_MAX_MI_ALGO_H

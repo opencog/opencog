@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,9 +26,9 @@
 
 #include "complexity.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
-using namespace moses::combo;
+using namespace moses3::combo;
 
 // For a Boolean formula, the complexity is the neg(# of literals)
 // That is, a Boolean formula can always be reduced to CNF or DNF,
@@ -120,4 +120,4 @@ complexity_t tree_complexity(const combo_tree& tr,
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3

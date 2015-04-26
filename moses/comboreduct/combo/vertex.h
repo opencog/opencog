@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,7 +48,7 @@
 // uncomment that if you want to interpret log(x) as log(abs(x))
 // #define ABS_LOG
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 class procedure_call_base;
 
@@ -790,17 +790,17 @@ inline bool may_have_side_effects(combo_tree::iterator /*it*/)
 }
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 // this is to be able to use std::unordered_map and such
 namespace std
 {
     template<>
-    struct hash<moses::combo::vertex>
+    struct hash<moses3::combo::vertex>
     {
-        size_t operator()(moses::combo::vertex v) const
+        size_t operator()(moses3::combo::vertex v) const
         {
-            return moses::combo::hash_value(v);
+            return moses3::combo::hash_value(v);
         }
     };
 }

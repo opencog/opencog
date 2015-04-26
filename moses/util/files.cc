@@ -1,5 +1,5 @@
 /*
- * moses/util/files.cc
+ * moses3/util/files.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -59,22 +59,22 @@
 static const std::vector<std::string> paths =
 {
     PROJECT_BINARY_DIR,
-    PROJECT_BINARY_DIR "/moses",
+    PROJECT_BINARY_DIR "/moses3",
     PROJECT_SOURCE_DIR,
-    PROJECT_SOURCE_DIR "/moses",
+    PROJECT_SOURCE_DIR "/moses3",
     CMAKE_INSTALL_PREFIX,
-    CMAKE_INSTALL_PREFIX "/moses",
+    CMAKE_INSTALL_PREFIX "/moses3",
     DATADIR,         // this too is an install dir
-    DATADIR "/moses",
+    DATADIR "/moses3",
 #ifndef WIN32
-    "/usr/local/share/moses",  // search local first, then system.
-    "/usr/share/moses",
+    "/usr/local/share/moses3",  // search local first, then system.
+    "/usr/share/moses3",
     "/",
 #endif // !WIN32
 };
-const std::vector<std::string> moses::DEFAULT_MODULE_PATHS = paths;
+const std::vector<std::string> moses3::DEFAULT_MODULE_PATHS = paths;
 
-bool moses::fileExists(const char* filename)
+bool moses3::fileExists(const char* filename)
 {
     std::fstream dumpFile(filename, std::ios::in);
     dumpFile.close();
@@ -86,7 +86,7 @@ bool moses::fileExists(const char* filename)
     return true;
 }
 
-bool moses::exists(const char *fname)
+bool moses3::exists(const char *fname)
 {
     FILE* f = fopen(fname, "rb");
     if (!f)
@@ -95,7 +95,7 @@ bool moses::exists(const char *fname)
     return true;
 }
 
-void moses::expandPath(std::string& path)
+void moses3::expandPath(std::string& path)
 {
 
     size_t user_index = path.find(USER_FLAG, 0);
@@ -107,7 +107,7 @@ void moses::expandPath(std::string& path)
     return;
 }
 
-bool moses::createDirectory(const char* directory)
+bool moses3::createDirectory(const char* directory)
 {
 
 #ifdef WIN32_NOT_CYGWIN
@@ -120,7 +120,7 @@ bool moses::createDirectory(const char* directory)
     return false;
 }
 
-bool moses::appendFileContent(const char* filename, std::string &s) {
+bool moses3::appendFileContent(const char* filename, std::string &s) {
     std::ifstream in(filename);
     if (!in.is_open())
         return false;
@@ -137,7 +137,7 @@ bool moses::appendFileContent(const char* filename, std::string &s) {
     return true;
 }
 
-bool moses::LoadTextFile(const std::string fname, std::string& dest)
+bool moses3::LoadTextFile(const std::string fname, std::string& dest)
 {
     FILE *f = fopen(fname.c_str(), "rt");
     if (f == NULL) {

@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 
 #include <boost/program_options.hpp>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 using std::pair;
 using std::string;
@@ -44,6 +44,6 @@ static const pair<string, string> output_file_opt("output-file", "o");
 static const pair<string, string> target_index_opt("target_index", "t");
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_GEN-TABLE_H

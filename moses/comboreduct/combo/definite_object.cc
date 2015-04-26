@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,7 +25,7 @@
 
 #define ACTION_NAME_POSTFIX "_action"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 bool is_action_definite_object(const definite_object& d) {
     return std::string::npos != d.rfind(ACTION_NAME_POSTFIX);
@@ -39,4 +39,4 @@ definite_object get_action_definite_object(const std::string& action_name) {
     return definite_object(action_name + std::string(ACTION_NAME_POSTFIX));
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

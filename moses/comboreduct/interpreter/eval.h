@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -37,7 +37,7 @@
 #include "../crutil/exception.h"
 #include "../type_checker/type_tree.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 // it has this name because it evaluates a procedure and returns a tree
 combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
@@ -93,6 +93,6 @@ arity_t arity(const tree<T>& tr)
     return a;
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3
 
 #endif

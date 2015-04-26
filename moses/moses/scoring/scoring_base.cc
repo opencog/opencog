@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +33,7 @@
 #include <moses/util/oc_assert.h>
 #include "scoring_base.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 // Note that this function returns a POSITIVE number, since p < 0.5
 score_t discrete_complexity_coef(unsigned alphabet_size, double p)
@@ -235,7 +235,7 @@ void bscore_ctable_base::ignore_cols(const std::set<arity_t>& idxs) const
     // Get permitted idxs.
     auto irng = boost::irange(0, _orig_ctable.get_arity());
     std::set<arity_t> all_idxs(irng.begin(), irng.end());
-    std::set<arity_t> permitted_idxs = moses::set_difference(all_idxs, idxs);
+    std::set<arity_t> permitted_idxs = moses3::set_difference(all_idxs, idxs);
 
     // Filter orig_table with permitted idxs.
     _wrk_ctable = _orig_ctable.filtered_preserve_idxs(permitted_idxs);
@@ -326,4 +326,4 @@ const CTable& bscore_ctable_base::get_ctable() const
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3

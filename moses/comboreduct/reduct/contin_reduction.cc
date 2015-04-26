@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 // Note: the rule names are useful when debugging the reduct engine
 // (uncomment META_RULE_DEBUG in meta_rules.cc)
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 const rule& contin_reduction(int reduct_effort,
                              const vertex_set& ignore_ops)
@@ -135,4 +135,4 @@ const rule& contin_reduction(int reduct_effort,
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3

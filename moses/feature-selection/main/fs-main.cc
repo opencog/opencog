@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
 
 using namespace std;
 using namespace boost::program_options;
-using namespace moses;
+using namespace moses3;
 using boost::lexical_cast;
 using boost::trim;
 using boost::str;
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
              .append("simple for maximum mutual information,\n")
              .append("smd for stochastic mutual dependency,\n")
              .append("inc for incremental max-relevancy, min-redundancy.\n")
-             .append(moses::hc).append(" for moses-hillclimbing,\n")
+             .append(moses3::hc).append(" for moses-hillclimbing,\n")
              .append("random for uniform, random selection.\n")
              .append("The edefault is \"simple\".\n").c_str())
 
@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 
     if (vm.count("version")) {
         cout << "feature-selection "
-             << moses::moses::version_string
+             << moses3::moses3::version_string
              << std::endl;
         return 0;
     }
@@ -405,7 +405,7 @@ int main(int argc, char** argv)
 
     // Log command-line args
     logger().info() << "feature-selection version "
-                    << moses::moses::version_string;
+                    << moses3::moses3::version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";

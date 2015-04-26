@@ -8,7 +8,7 @@
 #include "fold_rules.h"
 #include <mutex>
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 const rule& fold_reduction()
 {
@@ -38,4 +38,4 @@ const rule& fold_reduction()
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3

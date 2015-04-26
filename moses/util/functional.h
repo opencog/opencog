@@ -14,7 +14,7 @@
 
 #include <ext/functional>
 
-namespace moses
+namespace moses3
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -254,6 +254,6 @@ struct toFunc {
 };
 
 /** @}*/
-} //~namespace moses;
+} //~namespace moses3;
 
 #endif

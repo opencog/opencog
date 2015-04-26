@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 #include <sstream>
 #include <moses/comboreduct/combo/vertex.h>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 typedef std::map<std::string, unsigned> tree_branch_vector;
 tree_branch_vector tree_flatten(const combo_tree&);
@@ -50,6 +50,6 @@ std::string toString(const tree_branch_vector& tbv)
 }
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // COMBO_SIMILARITY_H_

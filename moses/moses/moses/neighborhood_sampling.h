@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
 #include "../representation/instance_set.h"
 #include "../moses/types.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 /**
  * This procedure generates the initial deme randomly
@@ -86,7 +86,7 @@ void flip_LR(field_set::disc_iterator itr);
 // 3. Otherwise just flip
 void twiddle_contin_bit(field_set::disc_iterator itr,
                         field_set::disc_iterator next_itr,
-                        moses::RandGen& rng = randGen());
+                        moses3::RandGen& rng = randGen());
 
 /**
  * This routine modifies the instance 'inst' so that the new instance
@@ -111,7 +111,7 @@ void generate_contin_neighbor(const field_set& fs,
                               instance& inst,
                               field_set::contin_iterator it,
                               unsigned dist,
-                              moses::RandGen& rng = randGen());
+                              moses3::RandGen& rng = randGen());
 
 /**
  * Sample (with replacement) 'sample_size' instances from the
@@ -538,6 +538,6 @@ size_t sample_new_instances(size_t number_of_new_instances,
                             unsigned dist);
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_NEIGHBORHOOD_SAMPLING_H

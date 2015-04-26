@@ -1,5 +1,5 @@
 /*
- * moses/util/oc_assert.cc
+ * moses3/util/oc_assert.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include "oc_assert.h"
 #include "exceptions.h"
 
-void moses::cassert(const char * trace, bool condition, const char *fmt, ...)
+void moses3::cassert(const char * trace, bool condition, const char *fmt, ...)
 {
     if (condition) return;
 
@@ -46,11 +46,11 @@ void moses::cassert(const char * trace, bool condition, const char *fmt, ...)
     throw ex;
 }
 
-void moses::cassert(const char* trace, bool condition, const std::string& msg) {
-    moses::cassert(trace, condition, msg.c_str());
+void moses3::cassert(const char* trace, bool condition, const std::string& msg) {
+    moses3::cassert(trace, condition, msg.c_str());
 }
 
-void moses::cassert(const char * trace, bool condition)
+void moses3::cassert(const char * trace, bool condition)
 {
 
     if (condition) return;

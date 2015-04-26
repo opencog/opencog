@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "common_def.h"
 #include "../type_checker/type_tree_def.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
   //that abstract class contains common methods
   //of builtin_action_base and perception_base
@@ -50,6 +50,6 @@ namespace moses { namespace combo {
     virtual const type_tree& get_input_type_tree(arity_t i) const = 0;
   };
 
-}} // ~namespace combo moses
+}} // ~namespace combo moses3
 
 #endif

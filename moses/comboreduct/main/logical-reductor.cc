@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,14 +32,14 @@
 #include "../table/table_io.h"
 
 using namespace std;
-using namespace moses;
+using namespace moses3;
 using namespace reduct;
 
 int main()
 {
     logger().setPrintErrorLevelStdout();
 
-    moses::combo::vertex_set ignore_ops;
+    moses3::combo::vertex_set ignore_ops;
 
     const int effort = 3; // effort allocated for reduction (3 is max)
 

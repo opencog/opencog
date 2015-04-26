@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -37,7 +37,7 @@
 #include "../combo/perception.h"
 #include "../combo/procedure_call.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 // templates helpers to convert C++ type into type_node
 /// @note if I don't inline I get linkage error, go figure...
@@ -428,12 +428,12 @@ type_tree gen_signature(const type_tree& iotype, arity_t arity);
 
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 namespace std {
 
-std::ostream& operator<<(std::ostream&, const moses::combo::type_node&);
-std::istream& operator>>(std::istream&, moses::combo::type_node&);
+std::ostream& operator<<(std::ostream&, const moses3::combo::type_node&);
+std::istream& operator>>(std::istream&, moses3::combo::type_node&);
 
 } // ~namespace std
 

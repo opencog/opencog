@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 #include <moses/learning/moses/representation/instance_scorer.h>
 #include <moses/learning/moses/moses/types.h>
 
-namespace moses {
+namespace moses3 {
 
 using namespace moses;
 using namespace combo;
@@ -77,6 +77,6 @@ struct deme_based_scorer : public iscorer_base
     const field_set& _fields;
 };
 
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_FS_SCORERS_OPTIM_H

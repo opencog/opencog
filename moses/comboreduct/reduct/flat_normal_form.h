@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -37,10 +37,10 @@
 
 #include <moses/comboreduct/combo/vertex.h>
 
-namespace moses { namespace reduct {
-typedef std::set<int, moses::absolute_value_order<int> > clause;
+namespace moses3 { namespace reduct {
+typedef std::set<int, moses3::absolute_value_order<int> > clause;
 typedef std::list<clause> nf;
-using namespace moses::combo;
+using namespace moses3::combo;
 
 //does c contain p and !p?
 bool tautology(const clause& c);
@@ -96,10 +96,10 @@ template<typename T>
 class nf_mapper
 {
 public:
-    typedef moses::tree<T> tree;
+    typedef moses3::tree<T> tree;
     typedef typename tree::sibling_iterator sib_it;
     typedef std::map<sib_it,int,
-                     moses::lexicographic_subtree_order<T> > Item2Int;
+                     moses3::lexicographic_subtree_order<T> > Item2Int;
     typedef std::unordered_map<int,tree> Int2Item;
 
     nf add_cnf(sib_it, sib_it);
@@ -273,9 +273,9 @@ void nf_mapper<T>::create(tree& t, sib_it at, int idx) const
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3
 
-std::ostream& operator<<(std::ostream& out,const moses::reduct::clause& c);
-std::ostream& operator<<(std::ostream& out,const moses::reduct::nf& d);
+std::ostream& operator<<(std::ostream& out,const moses3::reduct::clause& c);
+std::ostream& operator<<(std::ostream& out,const moses3::reduct::nf& d);
 
 #endif

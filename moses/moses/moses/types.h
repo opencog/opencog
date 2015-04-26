@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,7 +43,7 @@
 #include <moses/comboreduct/combo/combo.h>
 #include "complexity.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 using combo::vertex;
 using boost::indirect_iterator;
@@ -423,16 +423,16 @@ std::istream& istream_scored_combo_trees(std::istream& in,
                                          std::vector<scored_combo_tree>& scts);
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::scored_combo_tree& sct)
+                                const moses3::scored_combo_tree& sct)
 {
-    return moses::ostream_scored_combo_tree(out, sct);
+    return moses3::ostream_scored_combo_tree(out, sct);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::composite_score& ts)
+                                const moses3::composite_score& ts)
 {
     return out << "[score="
-               << std::setprecision(moses::io_score_precision)
+               << std::setprecision(moses3::io_score_precision)
                << ts.get_score()
                << ", penalized score=" << ts.get_penalized_score()
                << ", complexity=" << ts.get_complexity()
@@ -442,12 +442,12 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::behavioral_score& s)
+                                const moses3::behavioral_score& s)
 {
-    return moses::ostream_behavioral_score(out, s);
+    return moses3::ostream_behavioral_score(out, s);
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

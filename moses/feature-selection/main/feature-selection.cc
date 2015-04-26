@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,7 +42,7 @@
 #include "../algo/simple.h"
 #include "../algo/stochastic_max_dependency.h"
 
-namespace moses {
+namespace moses3 {
     
 using namespace combo;
 using namespace std;
@@ -137,13 +137,13 @@ feature_set initial_features(const vector<string>& ilabels,
 feature_set_pop select_feature_sets(const CTable& ctable,
                                     const feature_selection_parameters& fs_params)
 {
-    if (fs_params.algorithm == moses::hc) {
+    if (fs_params.algorithm == moses3::hc) {
         // setting moses optimization parameters
         double pop_size_ratio = 20;
         size_t max_dist = 4;
         score_t min_score_improv = 0.0;
         optim_parameters op_params;
-        op_params.opt_algo = moses::hc;
+        op_params.opt_algo = moses3::hc;
         op_params.pop_size_ratio = pop_size_ratio;
         op_params.terminate_if_gte = fs_params.hc_max_score;
         op_params.max_dist = max_dist;
@@ -219,4 +219,4 @@ void feature_selection(const Table& table,
     }
 }
 
-} // ~namespace moses
+} // ~namespace moses3

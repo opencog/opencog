@@ -12,7 +12,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,7 +43,7 @@
 // reduction during optimization
 // #define __FINE_LOG_CND_REDUCED__
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 // Stepsize should be roughly the standard-deviation of the expected
 // distribution of the contin variables.
@@ -438,4 +438,4 @@ void representation::set_exemplar_inst()
 #endif // EXEMPLAR_INST_IS_UNDEAD
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3

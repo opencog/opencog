@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -167,7 +167,7 @@ AntFitnessEstimator::AntFitnessEstimator(int steps, int noise)
     : AntFitnessFunction(steps), _noise(noise) {}
 score_t AntFitnessEstimator::operator()(const combo_tree& tr) const
 {
-    int error = moses::randGen().randint(_noise + 1) - _noise / 2;
+    int error = moses3::randGen().randint(_noise + 1) - _noise / 2;
     return AntFitnessFunction::operator()(tr) + error;
 }
 

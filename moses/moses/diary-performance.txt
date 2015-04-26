@@ -71,7 +71,7 @@ these.
    the selection: that is, a lower-scored, but also lower complexity
    exemplar may be a better starting place than a high-score,
    high-complexity exemplar.  The discovery & solution of this behaviour
-   is documented on the moses blog; the blog page captured in the
+   is documented on the moses3 blog; the blog page captured in the
    file documentation/Select_Exemplar.html in this directory. Misc data
    and graphing tools can be found in diary/complexity-temperature.
    In the diary below, this starts at the section titled:
@@ -860,7 +860,7 @@ Current consolidated dataset:
 20  9999      31836  5371   6867  7777   6666   2074
 
 
-See http://blog.moses.org/2012/02/07/tuning-moses/ for written
+See http://blog.opencog.org/2012/02/07/tuning-moses/ for written
 explanation.
 ==================================================================
 

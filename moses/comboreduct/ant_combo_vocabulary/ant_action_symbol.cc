@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #include "ant_action_symbol.h"
 #include <moses/comboreduct/type_checker/type_tree.h>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 using namespace ant_action_symbol_properties;
 
@@ -90,4 +90,4 @@ const type_tree& ant_action_symbol::get_input_type_tree(arity_t i) const {
   return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

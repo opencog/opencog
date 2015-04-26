@@ -1,6 +1,6 @@
 #include "pole_balancing.h"
 
-using namespace moses;
+using namespace moses3;
 using namespace combo;
 using namespace std;
 

@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 #include "reduct.h"
 #include "../interpreter/eval.h"
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 // Flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
 // Note that level is recursive that is f(a,f(b,f(c,d))) -> f(a,b,c,d)
@@ -73,6 +73,6 @@ struct remove_all_assumptions : public crule<remove_all_assumptions>
 };
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

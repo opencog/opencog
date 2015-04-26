@@ -1,5 +1,5 @@
 /*
- * moses/util/Logger.cc
+ * moses3/util/Logger.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008, 2010 OpenCog Foundation
@@ -9,12 +9,12 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *            Gustavo Gama <gama@vettalabs.com>
  *            Linas Vepstas <linasvepstas@gmail.com>
- *            Joel Pitt <joel@moses.org>
+ *            Joel Pitt <joel@opencog.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -63,7 +63,7 @@
 #define fdatasync fsync
 #endif
 
-using namespace moses;
+using namespace moses3;
 
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
@@ -266,7 +266,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 {
     this->fileName.assign(fname);
     this->currentLevel = level;
-    this->backTraceLevel = getLevelFromString(moses::config()["BACK_TRACE_LOG_LEVEL"]);
+    this->backTraceLevel = getLevelFromString(moses3::config()["BACK_TRACE_LOG_LEVEL"]);
 
     this->timestampEnabled = tsEnabled;
     this->printToStdout = false;
@@ -499,7 +499,7 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 }
 
 // create and return the single instance
-Logger& moses::logger()
+Logger& moses3::logger()
 {
     static Logger instance;
     return instance;

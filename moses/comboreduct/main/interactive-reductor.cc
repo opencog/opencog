@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@
 #include "../type_checker/type_tree.h"
 
 using namespace std;
-using namespace moses;
+using namespace moses3;
 using namespace reduct;
 using namespace boost::assign;
 
@@ -53,7 +53,7 @@ typedef ref_rule_map::iterator ref_rule_map_it;
  */
 const rule* select_rule(string rule_ref_str)
 {
-    static moses::combo::vertex_set ignore_ops;
+    static moses3::combo::vertex_set ignore_ops;
     int reduct_effort = 2;
 
     const static ref_rule_map ref_rules = 

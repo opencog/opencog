@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,7 +34,7 @@
 
 #include "../main/feature-selection.h" // needed for feature_selection_params
 
-namespace moses {
+namespace moses3 {
 
 using namespace moses;
 using namespace combo;
@@ -129,6 +129,6 @@ feature_set_pop moses_select_feature_sets(const CTable& ctable,
     return create_deme_select_feature_sets(ctable, optimize, fs_sc, fs_params);
 }
 
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_FEATURE-SELECTION_DEME_OPTIMIZE_H

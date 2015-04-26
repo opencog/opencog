@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include "../type_checker/type_tree.h"
 #include <moses/util/exceptions.h>
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
@@ -168,4 +168,4 @@ void reduce_cond_const::operator()(combo_tree& tr,
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3

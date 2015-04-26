@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,7 +54,7 @@
 #define TARGET_DISCRETIZED_BINS_NUM 5  // discretize contin type target
                                        // into # bins
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 std::vector<contin_t> discretize_contin_feature(contin_t min, contin_t max);
 
@@ -1508,6 +1508,6 @@ protected:
     mutable vertex_seq bmap;
 };
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3
 
 #endif // _OPENCOG_TABLE_H

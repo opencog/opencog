@@ -83,7 +83,7 @@
 // HP-style construct/destroy have gone from the standard,
 // so here is a copy.
 
-namespace moses {
+namespace moses3 {
 /** \addtogroup grp_cogutil
  *  @{
  */
@@ -2998,12 +2998,12 @@ typename tree<T, tree_node_allocator>::upwards_iterator& tree<T, tree_node_alloc
     return (*this);
 }
 
-} // ~namespace moses
+} // ~namespace moses3
 
 namespace std {
 
 template<typename T>
-void swap(moses::tree<T>& x, moses::tree<T>& y) {
+void swap(moses3::tree<T>& x, moses3::tree<T>& y) {
     std::swap(x.head,y.head);
     std::swap(x.feet,y.feet);
 }
@@ -3011,7 +3011,7 @@ void swap(moses::tree<T>& x, moses::tree<T>& y) {
 } // ~namespace std
 
 
-namespace moses {
+namespace moses3 {
 
 template<typename treeT1,typename src_iterator,
          typename treeT2,typename dst_iterator>
@@ -3202,7 +3202,7 @@ std::string subtree_to_string(iter it)
     return ss.str();
 }
 
-} // ~namespace moses
+} // ~namespace moses3
 
 // Instantiate a string-specific converter first, as we need this for
 // the general case, below. Note that it is being instantiated in the
@@ -3212,34 +3212,34 @@ std::string subtree_to_string(iter it)
 // final, desired typename-tree. Without this, operator>>() would be
 // infinitely recursive.
 namespace std {
-    std::istream& operator>>(std::istream&, moses::tree<std::string>&);
+    std::istream& operator>>(std::istream&, moses3::tree<std::string>&);
 }
 
-namespace moses {
+namespace moses3 {
 // Provide operators that know how to print trees and input them.
-// Note: These operators need to live on the moses namespace, not
+// Note: These operators need to live on the moses3 namespace, not
 // the std namespace. Putting them in std will elicit weird bugs.
 
 template<typename T>
-std::ostream& operator<<(std::ostream& out, const moses::tree<T>& tr)
+std::ostream& operator<<(std::ostream& out, const moses3::tree<T>& tr)
 {
-    typename moses::tree<T>::sibling_iterator it = tr.begin();
+    typename moses3::tree<T>::sibling_iterator it = tr.begin();
     if (it != tr.end()) out << subtree_to_string(it);
     return out;
 }
 
 template<typename T>
-std::istream& operator>>(std::istream& in, moses::tree<T>& tr)
-	throw (moses::InconsistenceException, std::bad_exception)
+std::istream& operator>>(std::istream& in, moses3::tree<T>& tr)
+	throw (moses3::InconsistenceException, std::bad_exception)
 {
-    moses::tree<std::string> tmp;
+    moses3::tree<std::string> tmp;
     in >> tmp;
     try {
-        moses::tree_convert(tmp, tr);
+        moses3::tree_convert(tmp, tr);
     } catch (boost::bad_lexical_cast&) {
         std::stringstream stream (std::stringstream::out);
         stream << "Bad node data in tree '" << tr << "'" << std::endl;
-        throw moses::InconsistenceException(TRACE_INFO,
+        throw moses3::InconsistenceException(TRACE_INFO,
                                               "tree - %s.",
                                               stream.str().c_str());
     }
@@ -3247,6 +3247,6 @@ std::istream& operator>>(std::istream& in, moses::tree<T>& tr)
 }
 
 /** @}*/
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * moses/util/exceptions.cc
+ * moses3/util/exceptions.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
 
 #define MAX_MSG_LENGTH 2048
 
-using namespace moses;
+using namespace moses3;
 
 /*
  * ----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ void StandardException::parseErrorMessage(const char* fmt, va_list ap, bool logE
     char buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    if (logError) moses::logger().error(buf);
+    if (logError) moses3::logger().error(buf);
     setMessage(buf);
 }
 
@@ -292,7 +292,7 @@ AssertionException::AssertionException(const char* fmt, ...)
     va_end(ap);
 
     setMessage(buf);
-    moses::logger().error(buf);
+    moses3::logger().error(buf);
 }
 
 AssertionException::AssertionException(const char* fmt, va_list ap)
@@ -301,6 +301,6 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
     setMessage(buf);
-    moses::logger().error(buf);
+    moses3::logger().error(buf);
 }
 

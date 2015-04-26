@@ -107,7 +107,7 @@ ENDIF (HAVE_MPI)
 
 # Install library
 IF (WIN32)
-	INSTALL(TARGETS moses DESTINATION "lib${LIB_DIR_SUFFIX}/moses")
+	INSTALL(TARGETS moses DESTINATION "lib${LIB_DIR_SUFFIX}/moses3")
 ELSE (WIN32)
 	INSTALL(TARGETS moses
 	        LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}"    # lib*.so files

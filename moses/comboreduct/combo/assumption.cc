@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,13 +27,13 @@
 #include <iostream>
 #include <vector>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 typedef combo_tree::iterator pre_it;
 typedef combo_tree::sibling_iterator sib_it;
 
 void insert_assumption(combo_tree& tr, combo_tree::iterator assum_it) {
-    typedef moses::lexicographic_subtree_order<vertex> Comp;
+    typedef moses3::lexicographic_subtree_order<vertex> Comp;
     pre_it main_tree = tr.begin();
     OC_ASSERT(tr.is_valid(main_tree), "combo_tree ins't valid (insert_assumption).");
     int max_pos = tr.number_of_siblings(main_tree);
@@ -114,4 +114,4 @@ void delete_all_assumptions(combo_tree& tr) {
             assum = tr.erase(assum);
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

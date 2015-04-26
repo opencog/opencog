@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 
 #include "local_moses.h"
 
-namespace moses {
+namespace moses3 {
 namespace moses {
 
 using namespace combo;
@@ -219,5 +219,5 @@ void local_moses(metapopulation& mp,
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 

@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,7 @@
 #include <boost/program_options.hpp>
 #include <moses/comboreduct/combo/vertex.h>
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 class option_base
 {
@@ -75,6 +75,6 @@ unsigned alphabet_size(const combo::type_tree& tt,
 
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_MOSES_PROBLEM_H

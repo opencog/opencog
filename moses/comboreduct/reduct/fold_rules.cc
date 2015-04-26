@@ -4,7 +4,7 @@
 
 #include "fold_rules.h"
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -58,4 +58,4 @@ void fold_unrolling::operator()(combo_tree& tr,combo_tree::iterator it) const {
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3

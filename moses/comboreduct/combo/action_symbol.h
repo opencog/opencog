@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "operator_base.h"
 #include "../type_checker/type_tree_def.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 //action_symbol_base inherit operator_base
 //without additional properties
@@ -41,6 +41,6 @@ typedef const action_symbol_base* action_symbol;
 std::ostream& operator<<(std::ostream&, combo::action_symbol);
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif

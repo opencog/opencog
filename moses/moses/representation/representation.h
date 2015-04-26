@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,7 @@
 
 #include "knob_mapper.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 void set_stepsize(double new_ss);
 void set_expansion(double new_ex);
@@ -206,12 +206,12 @@ protected:
 
 // This helper seems to be needed to unconfuse the compiler.
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::moses::representation& r)
+                                const moses3::moses3::representation& r)
 {
     return r.ostream_prototype(out);
 }
 
 } //~namespace moses
-} //~namespace moses
+} //~namespace moses3
 
 #endif

@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 
 #include <moses/util/functional.h>
 
-namespace moses {
+namespace moses3 {
 /** \addtogroup grp_cogutil
  *  @{
  */
@@ -117,12 +117,12 @@ auto list_comp(const Container& c, const Function& func,
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Really weird for set_comp I'm getting the following error (gcc 4.7.3)                                                  //
 //                                                                                                                        //
-// [ 16%] Building CXX object moses/comboreduct/CMakeFiles/comboreduct.dir/table/table_io.cc.o                          //
-// In file included from /home/nilg/OpenCog/moses/moses/comboreduct/table/table_io.cc:36:0:                           //
-// /home/nilg/OpenCog/moses/moses/util/comprehension.h:128:8: error: expected type-specifier                          //
-// /home/nilg/OpenCog/moses/moses/util/comprehension.h:128:8: error: expected initializer                             //
-// /home/nilg/OpenCog/moses/moses/util/comprehension.h:142:8: error: expected type-specifier                          //
-// /home/nilg/OpenCog/moses/moses/util/comprehension.h:142:8: error: expected initializer                             //
+// [ 16%] Building CXX object moses3/comboreduct/CMakeFiles/comboreduct.dir/table/table_io.cc.o                          //
+// In file included from /home/nilg/OpenCog/moses3/moses3/comboreduct/table/table_io.cc:36:0:                           //
+// /home/nilg/OpenCog/moses3/moses3/util/comprehension.h:128:8: error: expected type-specifier                          //
+// /home/nilg/OpenCog/moses3/moses3/util/comprehension.h:128:8: error: expected initializer                             //
+// /home/nilg/OpenCog/moses3/moses3/util/comprehension.h:142:8: error: expected type-specifier                          //
+// /home/nilg/OpenCog/moses3/moses3/util/comprehension.h:142:8: error: expected initializer                             //
 //                                                                                                                        //
 // I might be is due to having table_io.cc use both boost and std namespace...                                            //
 //                                                                                                                        //

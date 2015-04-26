@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -41,7 +41,7 @@
 #include "distributed_moses.h"
 #include "moses_params.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 using namespace std;
 
@@ -106,7 +106,7 @@ struct metapop_printer
         // A number of external tools read the printed results, and
         // parse them. The floating-point scores must be printed with
         // reasonable accuracy, else these tools fail.
-        ss << std::setprecision(moses::io_score_precision);
+        ss << std::setprecision(moses3::io_score_precision);
         if (output_ensemble) {
             const scored_combo_tree_set& tree_set =
                 metapop.get_ensemble().get_ensemble();
@@ -254,7 +254,7 @@ private:
  */
 template<typename Printer>
 void metapop_moses_results_b(const std::vector<combo_tree>& bases,
-                             const moses::combo::type_tree& tt,
+                             const moses3::combo::type_tree& tt,
                              const reduct::rule& si_ca,
                              const reduct::rule& si_kb,
                              behave_cscore& sc,
@@ -315,7 +315,7 @@ void adjust_termination_criteria(const behave_cscore& sc,
  */
 template<typename Printer>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
-                           const moses::combo::type_tree& type_sig,
+                           const moses3::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            behave_cscore& c_scorer,
@@ -354,6 +354,6 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif // _OPENCOG_MOSES_MAIN_H

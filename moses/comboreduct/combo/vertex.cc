@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include <moses/util/algorithm.h>
 #include "iostream_combo.h"
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 bool operator<(const combo_tree& lt, const combo_tree& rt) {
     return size_tree_order<vertex>()(lt, rt);
@@ -262,4 +262,4 @@ void copy_without_null_vertices(combo_tree::iterator src,
             copy_without_null_vertices(sib, dst_tr, dst_tr.append_child(dst));
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

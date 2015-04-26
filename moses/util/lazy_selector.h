@@ -1,5 +1,5 @@
 /*
- * moses/util/lazy_selector.h
+ * moses3/util/lazy_selector.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 
 #include <unordered_set>
 
-namespace moses
+namespace moses3
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -84,6 +84,6 @@ private:
 };
 
 /** @}*/
-} //~namespace moses
+} //~namespace moses3
 
 #endif

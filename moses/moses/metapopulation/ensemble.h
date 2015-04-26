@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 #include "../scoring/behave_cscore.h"
 #include "../scoring/scoring_base.h"
 
-namespace moses {
+namespace moses3 {
 namespace moses {
 
 /**
@@ -91,7 +91,7 @@ private:
     const combo::combo_tree& get_expert_tree() const;
 };
 
-}}; // namespace moses::moses
+}}; // namespace moses3::moses
 
 #endif // _OPENCOG_ENSEMBLE_H
 

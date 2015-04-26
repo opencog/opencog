@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include <moses/util/exceptions.h>
 #include <map>
 
-namespace moses { namespace reduct {
+namespace moses3 { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
@@ -80,7 +80,7 @@ void reduce_gt_zero_pair_power::operator()(combo_tree& tr,combo_tree::iterator i
 {
     //associate for each subtree its parity
     typedef std::map<pre_it, bool,
-                     moses::lexicographic_subtree_order<vertex> > subtree_parity;
+                     moses3::lexicographic_subtree_order<vertex> > subtree_parity;
     typedef subtree_parity::iterator subtree_parity_it;
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
@@ -293,7 +293,7 @@ void reduce_gt_zero_impulse::operator()(combo_tree& tr,combo_tree::iterator it) 
 // prod impulse(x_i)^p_i -> prod impulse(x_i)
 void reduce_impulse_power::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
-    typedef std::set<pre_it, moses::lexicographic_subtree_order<vertex>
+    typedef std::set<pre_it, moses3::lexicographic_subtree_order<vertex>
                      > subtree_quotient;
         if(*it==id::times) {
             subtree_quotient sq;
@@ -448,7 +448,7 @@ void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
 // op(if(x y1 z1) if(x y2 z2)) -> if(x op(y1 y2) op(z1 z2))
 void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
-    typedef std::set<pre_it, moses::lexicographic_subtree_order<vertex> > subtree_quotient;
+    typedef std::set<pre_it, moses3::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::div) {
         OC_ASSERT(tr.number_of_children(it)==2, 
@@ -516,7 +516,7 @@ void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) con
 // op in {+, *, /}. If op is / the order of argument is respected
 void reduce_contin_if_inner_op::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
-    typedef std::multiset<pre_it, moses::lexicographic_subtree_order<vertex> > subtree_quotient;
+    typedef std::multiset<pre_it, moses3::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
     if(*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
@@ -641,7 +641,7 @@ void reduce_junction_gt_zero_sum_constant::operator()(combo_tree& tr,
     // 0<s+c
     // such that s is a sum of non-constant term and c is a constant
     // the second argument, contin_t, is c
-    typedef std::map<pre_it, contin_t, moses::lexicographic_subtree_order<vertex> > subtree_quotient;
+    typedef std::map<pre_it, contin_t, moses3::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
     if(*it==id::logical_and || *it==id::logical_or) {
         subtree_quotient sq;
@@ -1409,7 +1409,7 @@ void reduce_inequality_from_assumptions::operator()
     // the size of a row is |assumptions|+1
     // the last column of the matrix contains the coef associated with its
     // expression
-    typedef std::map<pre_it, std::vector<contin_t>, moses::lexicographic_subtree_order<vertex> > subtree_row;
+    typedef std::map<pre_it, std::vector<contin_t>, moses3::lexicographic_subtree_order<vertex> > subtree_row;
     typedef subtree_row::iterator subtree_row_it;
     typedef subtree_row::const_iterator subtree_row_const_it;
     //true if the main term is strictly positive false otherwise
@@ -1711,4 +1711,4 @@ void reduce_inequality_from_assumptions::operator()
 }
 
 } // ~namespace reduct
-} // ~namespace moses
+} // ~namespace moses3

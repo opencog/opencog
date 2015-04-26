@@ -1,5 +1,5 @@
 /*
- * moses/util/platform.cc
+ * moses3/util/platform.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include "platform.h"
 #include <stdlib.h>
 
-namespace moses {
+namespace moses3 {
 
 const char* getUserName() { 
     const char* username = getenv("LOGNAME");
@@ -37,7 +37,7 @@ const char* getUserName() {
     return username;
 }
 
-} // ~namespace moses
+} // ~namespace moses3
 
 #ifdef __APPLE__
 
@@ -46,7 +46,7 @@ const char* getUserName() {
 
 #include "platform.h"
 
-namespace moses
+namespace moses3
 {
 
 #ifndef HAVE_STRTOK_R
@@ -72,7 +72,7 @@ char* __strtok_r(char *s1, const char *s2, char **lasts)
 }
 
 #endif /* HAVE_STRTOK_R */
-} // namespace moses
+} // namespace moses3
 #endif
 
 #ifdef WIN32_NOT_UNIX
@@ -85,14 +85,14 @@ char* __strtok_r(char *s1, const char *s2, char **lasts)
 
 #include "platform.h"
 
-using namespace moses;
+using namespace moses3;
 
-int moses::round(float x)
+int moses3::round(float x)
 {
     return ((x -(int)(x)) < 0.5 ) ? (int)x : (int)x + 1;
 }
 
-int moses::gettimeofday(struct timeval* tp, void* tzp)
+int moses3::gettimeofday(struct timeval* tp, void* tzp)
 {
     struct _timeb timebuffer;
     _ftime(&timebuffer);
@@ -102,7 +102,7 @@ int moses::gettimeofday(struct timeval* tp, void* tzp)
     return 0;
 }
 
-void moses::usleep(unsigned useconds)
+void moses3::usleep(unsigned useconds)
 {
     // Sleep is in milliseconds
     // If 0 is passed to Sleep()
@@ -112,7 +112,7 @@ void moses::usleep(unsigned useconds)
     Sleep((int)(useconds / 1000));
 }
 
-unsigned moses::sleep(unsigned seconds)
+unsigned moses3::sleep(unsigned seconds)
 {
     Sleep(seconds * 1000);
     return 0;
@@ -121,7 +121,7 @@ unsigned moses::sleep(unsigned seconds)
 #ifndef HAVE_STRTOK_R
 #define HAVE_STRTOK_R 1
 
-char* moses::__strtok_r(char *s1, const char *s2, char **lasts)
+char* moses3::__strtok_r(char *s1, const char *s2, char **lasts)
 {
     char *ret;
 
@@ -142,24 +142,24 @@ char* moses::__strtok_r(char *s1, const char *s2, char **lasts)
 
 #endif /* HAVE_STRTOK_R */
 
-int moses::__getpid(void)
+int moses3::__getpid(void)
 {
     return _getpid();
 }
 
-double moses::rint(double nr)
+double moses3::rint(double nr)
 {
     double f = floor(nr);
     double c = ceil(nr);
     return (((c -nr) >= (nr - f)) ? f : c);
 }
 
-int moses::__dup2(int fd1, int fd2)
+int moses3::__dup2(int fd1, int fd2)
 {
     return _dup2(fd1, fd2);
 }
 
-unsigned long long moses::atoll(const char *str)
+unsigned long long moses3::atoll(const char *str)
 {
     unsigned long long la = 0;
     sscanf(str, "%uL", &la);
@@ -173,7 +173,7 @@ unsigned long long moses::atoll(const char *str)
 #include "platform.h"
 
 // Return memory usage per sbrk system call.
-size_t moses::getMemUsage()
+size_t moses3::getMemUsage()
 {
     static void *old_sbrk = 0;
     void *p = sbrk(0);
@@ -190,7 +190,7 @@ size_t moses::getMemUsage()
 #include <sys/sysctl.h>
 #include <sys/types.h>
 
-uint64_t moses::getTotalRAM()
+uint64_t moses3::getTotalRAM()
 {
    int mib[2];
    uint64_t physmem;
@@ -204,20 +204,20 @@ uint64_t moses::getTotalRAM()
     
 }
 
-uint64_t moses::getFreeRAM() {
+uint64_t moses3::getFreeRAM() {
     return getTotalRAM() - getMemUsage();
 }
 
 #else // __APPLE__
 #include <sys/sysinfo.h>
 
-uint64_t moses::getTotalRAM()
+uint64_t moses3::getTotalRAM()
 {
     // return getpagesize() * get_phys_pages();
     return getpagesize() * sysconf(_SC_PHYS_PAGES);
 }
 
-uint64_t moses::getFreeRAM()
+uint64_t moses3::getFreeRAM()
 {
     // return getpagesize() * get_avphys_pages();
     return getpagesize() * sysconf(_SC_AVPHYS_PAGES);

@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #include "ant_builtin_action.h"
 #include <moses/comboreduct/type_checker/type_tree.h>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 using namespace ant_builtin_action_properties;
 
@@ -215,4 +215,4 @@ const std::set<builtin_action> ant_builtin_action::preconditions() const {
     return empty_precondition_set;
 }
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

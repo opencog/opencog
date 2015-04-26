@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,7 +34,7 @@
 //perception property methods which have not been implemented
 #define NO_DEFAULT_PERCEPTION_PROPERTY_METHODS
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 /**
  * perception_base is an abstract class to be implemented
@@ -97,7 +97,7 @@ typedef perception_set::const_iterator perception_set_const_it;
 std::ostream& operator<<(std::ostream&, perception);
 
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3
 
 #endif
 

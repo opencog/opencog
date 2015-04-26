@@ -1,5 +1,5 @@
 /*
- * moses/util/octime.cc
+ * moses3/util/octime.cc
  *
  * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved
@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,9 +33,9 @@
 #include <moses/util/exceptions.h>
 #include <moses/util/oc_assert.h>
 
-using namespace moses;
+using namespace moses3;
 
-namespace moses {
+namespace moses3 {
 
 /**
  * Time used as reference to set/get timestamps over the code

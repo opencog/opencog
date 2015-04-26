@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,7 +40,7 @@
 #include "scoring_base.h"
 #include "../moses/types.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 using namespace combo;
 
@@ -141,7 +141,7 @@ protected:
  *
  * The math justifying the program size penalty equations is based on
  * the following thread
- * http://groups.google.com/group/moses-news/browse_thread/thread/b7704419e082c6f1
+ * http://groups.google.com/group/moses3-news/browse_thread/thread/b7704419e082c6f1
  *
  * It turns out this is closely related to the Akaike Information
  * Criterion, see in particular
@@ -638,6 +638,6 @@ protected:
 };
 
 } //~namespace moses
-} //~namespace moses
+} //~namespace moses3
 
 #endif

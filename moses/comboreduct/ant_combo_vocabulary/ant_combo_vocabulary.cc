@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -102,7 +102,7 @@ bool operator!=(ant_indefinite_object_enum e, indefinite_object i) {
 
 }//~namespace ant_combo
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
   
 std::istream& operator>>(std::istream& in, vertex& v) {
     return stream_to_vertex<ant_builtin_action, ant_perception, ant_action_symbol, ant_indefinite_object>(in, v);
@@ -113,4 +113,4 @@ std::istream& operator>>(std::istream& in, combo_tree& tr) {
 }  
   
 } // ~namespace combo
-} // ~namespace moses
+} // ~namespace moses3

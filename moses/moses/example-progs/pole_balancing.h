@@ -3,7 +3,7 @@
 
 #include <moses/comboreduct/combo/simple_nn.h>
 
-using namespace moses;
+using namespace moses3;
 
 class CartPole {
 public:

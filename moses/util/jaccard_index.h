@@ -22,7 +22,7 @@
 
 #include "algorithm.h"
 
-namespace moses {
+namespace moses3 {
 
 /**
  * Calculate the Jaccard index (see

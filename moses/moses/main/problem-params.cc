@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@
 #include "moses_exec_def.h"
 #include "problem-params.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 using namespace std;
 
@@ -881,7 +881,7 @@ problem_params::add_options(boost::program_options::options_description& desc)
          "  inc, for incremental max-relevency, min-redundancy.\n"
          "  smd, for stochastic mutual dependency,\n"
          "  random, for uniform random dependency,\n")
-         .append(moses::hc).append(" for moses-hillclimbing.\n").c_str())
+         .append(moses3::hc).append(" for moses-hillclimbing.\n").c_str())
 
         ("fs-scorer",
          po::value<string>(&fs_params.scorer)->default_value(mi),
@@ -1462,5 +1462,5 @@ void problem_params::parse_options(boost::program_options::variables_map& vm)
 }
 
 } // ~namespace moses
-} // ~namespace moses
+} // ~namespace moses3
 

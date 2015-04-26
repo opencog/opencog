@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include <iostream>
 #include <iterator>
 
-namespace moses { namespace combo {
+namespace moses3 { namespace combo {
 
 using namespace std;
 
@@ -601,4 +601,4 @@ combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
 }
 
 
-}} // ~namespaces combo moses
+}} // ~namespaces combo moses3

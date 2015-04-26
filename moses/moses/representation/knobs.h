@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://moses.org/wiki/Licenses
+ * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@
 #include "../moses/complexity.h"
 #include "field_set.h"
 
-namespace moses { namespace moses {
+namespace moses3 { namespace moses {
 
 using namespace combo;
 
@@ -335,13 +335,13 @@ typedef based_variant <boost::variant<logical_subtree_knob,
 // Without this helper, the compiler gets confused and tries to cast
 // knob_base to something strange.
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses::moses::knob_base& s)
+                                const moses3::moses3::knob_base& s)
 {
 	return out << s.toStr();
 }
 
 } //~namespace moses
-} //~namespace moses
+} //~namespace moses3
 
 #endif
 
