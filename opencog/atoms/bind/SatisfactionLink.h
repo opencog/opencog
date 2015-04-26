@@ -72,11 +72,15 @@ protected:
 	void setup_sat_body(void);
 
 public:
-	SatisfactionLink(const HandleSeq&,
+	SatisfactionLink(const Handle& body,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	SatisfactionLink(const Handle& varcdecls, const Handle& body,
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	SatisfactionLink(const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
