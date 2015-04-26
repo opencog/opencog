@@ -1,0 +1,30 @@
+
+ Some random design notes.
+
+Visual programming langauges:
+http://en.wikipedia.org/wiki/Visual_programming_language
+
+Yes
+---
+
+Maybe
+-----
+* Snap! 
+  -- Pluses: web-based, AGPL
+  -- Minuses: too focused on programming theory
+* Scratch
+* EToys -- based on squeak/smalltalk
+* Python Notebooks?
+
+No
+---
+* Alice (for teaching programming)
+* AgentSheets (proprietaary)
+* Flowgarithm (too low level)
+* Hopscotch (propriuetary)
+* LARP (flowcharts, too low-level)
+* Raptor (flowchart-based, too low-level, non-web)
+* Visual Logic (proprietary, flowchart, non-web)
+* ToonTalk (aimed at children, no web UI)
+* StarLog (programming langauge, not visual)
+* Cameleon (programming language, not visual)
