@@ -60,9 +60,6 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (dynamics)
 	ENDIF (HAVE_ATTENTION)
 
-	# Currently, does not depend on atomspace...
-	ADD_SUBDIRECTORY (comboreduct)
-
 	# learning requires a working comboreduct.
 	ADD_SUBDIRECTORY (learning)
 
