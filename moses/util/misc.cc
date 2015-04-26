@@ -12,7 +12,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,10 +27,10 @@
 
 #include "misc.h"
 
-using namespace opencog;
+using namespace moses;
 
 // MIT HAKMEM Count
-unsigned int opencog::bitcount(unsigned long n)
+unsigned int moses::bitcount(unsigned long n)
 {
     /* works for 32-bit numbers only    */
     /* fix last line for 64-bit numbers */
@@ -42,7 +42,7 @@ unsigned int opencog::bitcount(unsigned long n)
 }
 
 #ifndef WIN32
-std::string opencog::demangle(const std::string& mangled)
+std::string moses::demangle(const std::string& mangled)
 {
     int status = 0;
     char* demangled_name = abi::__cxa_demangle(mangled.c_str(), 0, 0, &status);

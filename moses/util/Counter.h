@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,7 @@
 #include <boost/range/numeric.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-namespace opencog {
+namespace moses {
 /** \addtogroup grp_cogutil
  *  @{
  */
@@ -154,6 +154,6 @@ std::ostream& operator<<(std::ostream& out, const Counter<T, CT>& c)
 }
 
 /** @}*/
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_COUNTER_H

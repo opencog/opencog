@@ -1,15 +1,15 @@
 /*
- * opencog/util/ansi.h
+ * moses/util/ansi.h
  *
  * Copyright (C) 2010 OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Joel Pitt <joel@opencog.org>
+ * Written by Joel Pitt <joel@moses.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,8 +23,8 @@
  */
 #include <string>
 
-#include <opencog/util/Config.h>
-namespace opencog {
+#include <moses/util/Config.h>
+namespace moses {
 /** \addtogroup grp_cogutil
  *  @{
  */

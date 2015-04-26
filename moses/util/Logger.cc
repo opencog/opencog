@@ -1,5 +1,5 @@
 /*
- * opencog/util/Logger.cc
+ * moses/util/Logger.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008, 2010 OpenCog Foundation
@@ -9,12 +9,12 @@
  * Written by Andre Senna <senna@vettalabs.com>
  *            Gustavo Gama <gama@vettalabs.com>
  *            Linas Vepstas <linasvepstas@gmail.com>
- *            Joel Pitt <joel@opencog.org>
+ *            Joel Pitt <joel@moses.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -53,8 +53,8 @@
 #include <valgrind/drd.h>
 #endif
 
-#include <opencog/util/backtrace-symbols.h>
-#include <opencog/util/platform.h>
+#include <moses/util/backtrace-symbols.h>
+#include <moses/util/platform.h>
 
 #include "Logger.h"
 #include "Config.h"
@@ -63,7 +63,7 @@
 #define fdatasync fsync
 #endif
 
-using namespace opencog;
+using namespace moses;
 
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
@@ -266,7 +266,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
 {
     this->fileName.assign(fname);
     this->currentLevel = level;
-    this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]);
+    this->backTraceLevel = getLevelFromString(moses::config()["BACK_TRACE_LOG_LEVEL"]);
 
     this->timestampEnabled = tsEnabled;
     this->printToStdout = false;
@@ -499,7 +499,7 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 }
 
 // create and return the single instance
-Logger& opencog::logger()
+Logger& moses::logger()
 {
     static Logger instance;
     return instance;

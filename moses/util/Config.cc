@@ -1,5 +1,5 @@
 /*
- * opencog/util/Config.cc
+ * moses/util/Config.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -46,17 +46,17 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <opencog/util/platform.h>
-#include <opencog/util/exceptions.h>
+#include <moses/util/platform.h>
+#include <moses/util/exceptions.h>
 
-using namespace opencog;
+using namespace moses;
 using namespace std;
 
 const std::string* Config::DEFAULT()
 {
     static const std::string defaultConfig[] = {
         "SERVER_PORT",                  "17001",
-        "LOG_FILE",                     "opencog_server.log",
+        "LOG_FILE",                     "moses_server.log",
         "LOG_LEVEL",                    "info",
         "BACK_TRACE_LOG_LEVEL",         "error",   // C++ stack trace printing!
         "LOG_TO_STDOUT",                "true",
@@ -68,8 +68,8 @@ const std::string* Config::DEFAULT()
         "LTI_FUNDS_BUFFER",             "10000",
         "MIN_STI",                      "-400",
         "ANSI_ENABLED",                 "false",
-        "PROMPT",                       "opencog> ",
-        "ANSI_PROMPT",                  "opencog> ",
+        "PROMPT",                       "moses> ",
+        "ANSI_PROMPT",                  "moses> ",
         "SCM_PROMPT",                   "guile> ",
         "ANSI_SCM_PROMPT",              "guile> ",
         "MODULES",                      "libbuiltinreqs.so",
@@ -116,10 +116,10 @@ void Config::reset()
     }
 }
 
-static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
+static const char* DEFAULT_CONFIG_FILENAME = "moses.conf";
 static const char* DEFAULT_CONFIG_PATHS[] =
 {
-    // A bunch of relative paths, typical for the current opencog setup.
+    // A bunch of relative paths, typical for the current moses setup.
     "./",
     "../",
     "../../",
@@ -133,7 +133,7 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     CONFDIR,
     "", // If you don't have this, then absolute paths won't work!
 #ifndef WIN32
-    "/etc/opencog",
+    "/etc/moses",
     "/etc",
 #endif // !WIN32
     NULL
@@ -328,7 +328,7 @@ std::string Config::to_string() const
 }
 
 // create and return the single instance
-Config& opencog::config(ConfigFactory* factoryFunction,
+Config& moses::config(ConfigFactory* factoryFunction,
                         bool overwrite)
 {
     static std::unique_ptr<Config> instance((*factoryFunction)());

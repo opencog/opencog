@@ -22,7 +22,7 @@
 
 #include "algorithm.h"
 
-namespace opencog {
+namespace moses {
 
 /**
  * Calculate the Jaccard index (see

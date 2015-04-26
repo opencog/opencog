@@ -1,5 +1,5 @@
 /*
- * opencog/util/digraph.h
+ * moses/util/digraph.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 #include "oc_assert.h"
 #include <boost/iterator/counting_iterator.hpp>
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -119,6 +119,6 @@ Out randomized_topological_sort(digraph g, Out out)
 }
 
 /** @}*/
-} //~namespace opencog
+} //~namespace moses
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * opencog/util/files.cc
+ * moses/util/files.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -59,22 +59,22 @@
 static const std::vector<std::string> paths =
 {
     PROJECT_BINARY_DIR,
-    PROJECT_BINARY_DIR "/opencog",
+    PROJECT_BINARY_DIR "/moses",
     PROJECT_SOURCE_DIR,
-    PROJECT_SOURCE_DIR "/opencog",
+    PROJECT_SOURCE_DIR "/moses",
     CMAKE_INSTALL_PREFIX,
-    CMAKE_INSTALL_PREFIX "/opencog",
+    CMAKE_INSTALL_PREFIX "/moses",
     DATADIR,         // this too is an install dir
-    DATADIR "/opencog",
+    DATADIR "/moses",
 #ifndef WIN32
-    "/usr/local/share/opencog",  // search local first, then system.
-    "/usr/share/opencog",
+    "/usr/local/share/moses",  // search local first, then system.
+    "/usr/share/moses",
     "/",
 #endif // !WIN32
 };
-const std::vector<std::string> opencog::DEFAULT_MODULE_PATHS = paths;
+const std::vector<std::string> moses::DEFAULT_MODULE_PATHS = paths;
 
-bool opencog::fileExists(const char* filename)
+bool moses::fileExists(const char* filename)
 {
     std::fstream dumpFile(filename, std::ios::in);
     dumpFile.close();
@@ -86,7 +86,7 @@ bool opencog::fileExists(const char* filename)
     return true;
 }
 
-bool opencog::exists(const char *fname)
+bool moses::exists(const char *fname)
 {
     FILE* f = fopen(fname, "rb");
     if (!f)
@@ -95,7 +95,7 @@ bool opencog::exists(const char *fname)
     return true;
 }
 
-void opencog::expandPath(std::string& path)
+void moses::expandPath(std::string& path)
 {
 
     size_t user_index = path.find(USER_FLAG, 0);
@@ -107,7 +107,7 @@ void opencog::expandPath(std::string& path)
     return;
 }
 
-bool opencog::createDirectory(const char* directory)
+bool moses::createDirectory(const char* directory)
 {
 
 #ifdef WIN32_NOT_CYGWIN
@@ -120,7 +120,7 @@ bool opencog::createDirectory(const char* directory)
     return false;
 }
 
-bool opencog::appendFileContent(const char* filename, std::string &s) {
+bool moses::appendFileContent(const char* filename, std::string &s) {
     std::ifstream in(filename);
     if (!in.is_open())
         return false;
@@ -137,7 +137,7 @@ bool opencog::appendFileContent(const char* filename, std::string &s) {
     return true;
 }
 
-bool opencog::LoadTextFile(const std::string fname, std::string& dest)
+bool moses::LoadTextFile(const std::string fname, std::string& dest)
 {
     FILE *f = fopen(fname.c_str(), "rt");
     if (f == NULL) {

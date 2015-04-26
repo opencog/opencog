@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include <boost/program_options.hpp>
 #include "iostreamContainer.h"
 
-namespace opencog {
+namespace moses {
 /** \addtogroup grp_cogutil
  *  @{
  */
@@ -49,7 +49,7 @@ bool to_string(const boost::program_options::variable_value& vv,
         str = boost::lexical_cast<std::string>(vv.as<T>());
         return true;
     } else if(vv.value().type() == typeid(std::vector<T>)) {
-        str = opencog::containerToStr(vv.as<std::vector<T> >(), separator.c_str());
+        str = moses::containerToStr(vv.as<std::vector<T> >(), separator.c_str());
         return true;
     }
     return false;
@@ -67,6 +67,6 @@ std::string determine_log_name(const std::string& log_file_prefix,
                                const std::string& log_file_suffix = ".log");
 
 /** @}*/
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_LOG_PROG_NAME_H

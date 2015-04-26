@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
  * This file contains a collection of random generators based on RandGen
  */
 
-namespace opencog {
+namespace moses {
 /** \addtogroup grp_cogutil
  *  @{
  */
@@ -91,6 +91,6 @@ static inline bool biased_randbool(float b, RandGen& rng = randGen())
 }
 
 /** @}*/
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_RANDOM_H

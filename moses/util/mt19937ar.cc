@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -70,14 +70,14 @@
 
 #include "mt19937ar.h"
 
-#include <opencog/util/numeric.h>
+#include <moses/util/numeric.h>
 
 //#define  DEBUG_RAND_CALLS
 #ifdef DEBUG_RAND_CALLS
-#include <opencog/atomspace/Logger.h>
+#include <moses/atomspace/Logger.h>
 #endif
 
-using namespace opencog;
+using namespace moses;
 
 #ifndef USE_STL_RANDOM
 /* Period parameters */  
@@ -309,7 +309,7 @@ double MT19937RandGen::genrand_res53(void)
 
 // Create and return the single instance. The initial seed is zero but
 // can be changed with the public method RandGen::seed(unsigned long)
-RandGen& opencog::randGen()
+RandGen& moses::randGen()
 {
     static MT19937RandGen instance(0);
     return instance;

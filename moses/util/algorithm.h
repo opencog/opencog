@@ -11,7 +11,7 @@
 #include "numeric.h"
 #include "exceptions.h"
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -311,6 +311,6 @@ Seq seq_filtered(const Seq& seq, const Indices& indices) {
 
     
 /** @}*/
-} //~namespace opencog
+} //~namespace moses
 
 #endif

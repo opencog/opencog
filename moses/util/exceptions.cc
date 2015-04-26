@@ -1,5 +1,5 @@
 /*
- * opencog/util/exceptions.cc
+ * moses/util/exceptions.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,12 +31,12 @@
 #include <string.h>
 #include <time.h>
 
-#include <opencog/util/platform.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/platform.h>
+#include <moses/util/Logger.h>
 
 #define MAX_MSG_LENGTH 2048
 
-using namespace opencog;
+using namespace moses;
 
 /*
  * ----------------------------------------------------------------------------
@@ -48,7 +48,7 @@ void StandardException::parseErrorMessage(const char* fmt, va_list ap, bool logE
     char buf[MAX_MSG_LENGTH];
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    if (logError) opencog::logger().error(buf);
+    if (logError) moses::logger().error(buf);
     setMessage(buf);
 }
 
@@ -292,7 +292,7 @@ AssertionException::AssertionException(const char* fmt, ...)
     va_end(ap);
 
     setMessage(buf);
-    opencog::logger().error(buf);
+    moses::logger().error(buf);
 }
 
 AssertionException::AssertionException(const char* fmt, va_list ap)
@@ -301,6 +301,6 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
     setMessage(buf);
-    opencog::logger().error(buf);
+    moses::logger().error(buf);
 }
 

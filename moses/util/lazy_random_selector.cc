@@ -1,5 +1,5 @@
 /*
- * opencog/util/lazy_random_selector.cc
+ * moses/util/lazy_random_selector.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,15 +22,15 @@
 
 #include "lazy_random_selector.h"
 
-namespace opencog
+namespace moses
 {
 
 lazy_random_selector::lazy_random_selector(unsigned int u,
-                                           opencog::RandGen& _rng)
+                                           moses::RandGen& _rng)
     : lazy_selector(u), rng(_rng) {}
 
 lazy_random_selector::lazy_random_selector(unsigned int u, unsigned int l,
-                                           opencog::RandGen& _rng)
+                                           moses::RandGen& _rng)
     : lazy_selector(u, l), rng(_rng) {}
 
 unsigned int lazy_random_selector::select()
@@ -38,4 +38,4 @@ unsigned int lazy_random_selector::select()
     return rng.randint(_u);
 }
 
-} //~namespace opencog
+} //~namespace moses

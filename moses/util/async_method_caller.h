@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,13 +30,13 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/concurrent_queue.h>
-#include <opencog/util/concurrent_stack.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/macros.h>
+#include <moses/util/concurrent_queue.h>
+#include <moses/util/concurrent_stack.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/Logger.h>
+#include <moses/util/macros.h>
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -269,6 +269,6 @@ void async_caller<Writer, Element>::enqueue(Element& elt)
 }
 
 /** @}*/
-} // namespace opencog
+} // namespace moses
 
 #endif // _OC_ASYNC_WRITER_H

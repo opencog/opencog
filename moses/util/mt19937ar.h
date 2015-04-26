@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -83,13 +83,13 @@
 */
 #endif
 
-#include <opencog/util/RandGen.h>
+#include <moses/util/RandGen.h>
 
 #ifdef USE_STL_RANDOM
 #include <random>
 #endif
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -185,6 +185,6 @@ public:
 RandGen& randGen();
 
 /** @}*/
-} // namespace opencog
+} // namespace moses
 
 #endif // _OPENCOG_MT19937AR_H

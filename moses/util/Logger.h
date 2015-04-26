@@ -1,5 +1,5 @@
 /*
- * opencog/util/Logger.h
+ * moses/util/Logger.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,9 +33,9 @@
 #include <string>
 #include <thread>
 
-#include <opencog/util/concurrent_queue.h>
+#include <moses/util/concurrent_queue.h>
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -69,7 +69,7 @@ public:
      * @param timestampEnabled If true, a timestamp will be prefixed to
               every log message
      */
-    Logger(const std::string &fileName = "opencog.log",
+    Logger(const std::string &fileName = "moses.log",
            Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
@@ -301,6 +301,6 @@ private:
 Logger& logger();
 
 /** @}*/
-}  // namespace opencog
+}  // namespace moses
 
 #endif // _OPENCOG_LOGGER_H

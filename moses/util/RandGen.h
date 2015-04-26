@@ -1,5 +1,5 @@
 /*
- * opencog/util/RandGen.h
+ * moses/util/RandGen.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,9 +26,9 @@
 #define _OPENCOG_RAND_GEN_H
 
 #include <set>
-#include <opencog/util/exceptions.h>
+#include <moses/util/exceptions.h>
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -68,6 +68,6 @@ public:
 };
 
 /** @}*/
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_RAND_GEN_H

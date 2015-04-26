@@ -14,7 +14,7 @@
 
 #include <ext/functional>
 
-namespace opencog
+namespace moses
 {
 /** \addtogroup grp_cogutil
  *  @{
@@ -254,6 +254,6 @@ struct toFunc {
 };
 
 /** @}*/
-} //~namespace opencog;
+} //~namespace moses;
 
 #endif

@@ -62,7 +62,7 @@
 #include <stdlib.h>
 #include <execinfo.h>
 #include <libiberty.h> // must appear before bfd.h !! see bug #696
-//  https://github.com/opencog/opencog/issues/696
+//  https://github.com/moses/moses/issues/696
 #include <bfd.h>
 #include <dlfcn.h>
 #include <link.h>
