@@ -1,6 +1,6 @@
 #include "pole_balancing.h"
 
-using namespace opencog;
+using namespace moses;
 using namespace combo;
 using namespace std;
 

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/tree_generation.h
+ * moses/comboreduct/combo/tree_generation.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #ifndef TREE_GENERATION_H
 #define TREE_GENERATION_H
 
-#include <opencog/util/tree.h>
+#include <moses/util/tree.h>
 
 #include "../combo/vertex.h"
 #include "../type_checker/type_tree.h"
 
-namespace opencog { namespace trees {
+namespace moses { namespace trees {
 
-  using namespace opencog::combo;
+  using namespace moses::combo;
 
   template<int MIN_ARITY>
   class Generator {
@@ -94,6 +94,6 @@ namespace opencog { namespace trees {
     }
   }
 
-}} // ~namespaces trees opencog
+}} // ~namespaces trees moses
 
 #endif

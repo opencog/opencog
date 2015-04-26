@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/action.h
+ * moses/comboreduct/combo/action.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 enum UnifierOperation {
     UNIFY_NOT,
@@ -191,6 +191,6 @@ private:
 
 }; // class
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif /*VARIABLE_UNIFIER_H_*/

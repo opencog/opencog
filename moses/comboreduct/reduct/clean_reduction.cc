@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/clean_reduction.cc
+ * moses/comboreduct/reduct/clean_reduction.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "general_rules.h"
 #include "logical_rules.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 const rule& clean_reduction()
 {
@@ -55,4 +55,4 @@ const rule& clean_reduction()
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses

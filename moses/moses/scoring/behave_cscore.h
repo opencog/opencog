@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/behave_cscore.h
+ * moses/learning/moses/scoring/behave_cscore.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,11 +26,11 @@
 #ifndef _MOSES_BEHAVE_CSCORE_H
 #define _MOSES_BEHAVE_CSCORE_H
 
-#include <opencog/util/lru_cache.h>
+#include <moses/util/lru_cache.h>
 
 #include "scoring_base.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 /**
  * Composite score calculated from the behavioral score.
@@ -128,6 +128,6 @@ public:
 
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif // _MOSES_BEHAVE_CSCORE_H

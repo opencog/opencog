@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/complexity.cc
+ * moses/comboreduct/combo/complexity.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,14 +21,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/util/exceptions.h>
-#include <opencog/comboreduct/combo/combo.h>
+#include <moses/util/exceptions.h>
+#include <moses/comboreduct/combo/combo.h>
 
 #include "complexity.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
-using namespace opencog::combo;
+using namespace moses::combo;
 
 // For a Boolean formula, the complexity is the neg(# of literals)
 // That is, a Boolean formula can always be reduced to CNF or DNF,
@@ -120,4 +120,4 @@ complexity_t tree_complexity(const combo_tree& tr,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

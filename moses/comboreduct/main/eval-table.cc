@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,16 +24,16 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/numeric.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/numeric.h>
 
 #include "eval-table.h"
 
 using namespace boost::program_options;
 using boost::lexical_cast;
 using boost::trim;
-using namespace opencog;
+using namespace moses;
 
 /**
  * Program to output the result of a combo program given input data

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/general_rules.cc
+ * moses/comboreduct/reduct/general_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,9 +23,9 @@
  */
 #include "general_rules.h"
 #include "../interpreter/eval.h"
-#include <opencog/comboreduct/combo/assumption.h>
+#include <moses/comboreduct/combo/assumption.h>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 
 /// Flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
@@ -102,7 +102,7 @@ void reorder_commutative::operator()(combo_tree& tr,combo_tree::iterator it) con
 {
     if (is_commutative(*it))
         tr.sort_on_subtrees(it.begin(), it.end(),
-                            opencog::lexicographic_subtree_order<vertex>(),false);
+                            moses::lexicographic_subtree_order<vertex>(),false);
 }
 
 // Get rid of subtrees marked with a null_vertex in their roots
@@ -136,5 +136,5 @@ void remove_all_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) 
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 

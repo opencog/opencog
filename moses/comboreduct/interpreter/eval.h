@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/eval.h
+ * moses/comboreduct/combo/eval.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,17 +27,17 @@
 
 #include <exception>
 
-#include <opencog/util/tree.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/tree.h>
+#include <moses/util/numeric.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/mt19937ar.h>
 
 #include "../combo/vertex.h"
 #include "../combo/variable_unifier.h"
 #include "../crutil/exception.h"
 #include "../type_checker/type_tree.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 // it has this name because it evaluates a procedure and returns a tree
 combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
@@ -93,6 +93,6 @@ arity_t arity(const tree<T>& tr)
     return a;
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif

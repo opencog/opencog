@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/representation.h
+ * moses/learning/moses/representation/representation.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,12 +25,12 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
 #include "knob_mapper.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 void set_stepsize(double new_ss);
 void set_expansion(double new_ex);
@@ -206,12 +206,12 @@ protected:
 
 // This helper seems to be needed to unconfuse the compiler.
 inline std::ostream& operator<<(std::ostream& out,
-                                const opencog::moses::representation& r)
+                                const moses::moses::representation& r)
 {
     return r.ostream_prototype(out);
 }
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

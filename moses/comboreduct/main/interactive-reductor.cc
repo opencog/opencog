@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/main/interactive-reductor.cc
+ * moses/comboreduct/main/interactive-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #include <iostream>
 #include <boost/assign/list_of.hpp>
 
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/mt19937ar.h>
 
 #include "../reduct/reduct.h"
 #include "../reduct/branch_rules.h"
@@ -38,7 +38,7 @@
 #include "../type_checker/type_tree.h"
 
 using namespace std;
-using namespace opencog;
+using namespace moses;
 using namespace reduct;
 using namespace boost::assign;
 
@@ -53,7 +53,7 @@ typedef ref_rule_map::iterator ref_rule_map_it;
  */
 const rule* select_rule(string rule_ref_str)
 {
-    static opencog::combo::vertex_set ignore_ops;
+    static moses::combo::vertex_set ignore_ops;
     int reduct_effort = 2;
 
     const static ref_rule_map ref_rules = 

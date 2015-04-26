@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/perception_rules.h
+ * moses/comboreduct/reduct/perception_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,9 +25,9 @@
 #define _REDUCT_PERCEPTION_RULES_H
 
 #include "reduct.h"
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
   
 //add in the set of assumptions such knowledge
 //f(x, z) <= max{d(x, y), d(y, z)}
@@ -80,6 +80,6 @@ struct reduce_identity_of_indiscernibles : public crule<reduce_identity_of_indis
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

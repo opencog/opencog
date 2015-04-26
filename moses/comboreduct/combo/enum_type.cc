@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/message.cc
+ * moses/comboreduct/combo/message.cc
  *
  * Copyright (C) 2002-2008, 2012 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,9 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "enum_type.h"
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/mt19937ar.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 using namespace std;
 
 // Global table of string-to-int, so that the operator==() can run
@@ -72,5 +72,5 @@ ostream& operator<<(ostream& out, const combo::enum_t& m)
 }
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 

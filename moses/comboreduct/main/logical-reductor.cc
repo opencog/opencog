@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/main/logical-reductor.cc
+ * moses/comboreduct/main/logical-reductor.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,8 +23,8 @@
  */
 #include <iostream>
 
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/Logger.h>
 
 #include "../reduct/reduct.h"
 #include "../interpreter/eval.h"
@@ -32,14 +32,14 @@
 #include "../table/table_io.h"
 
 using namespace std;
-using namespace opencog;
+using namespace moses;
 using namespace reduct;
 
 int main()
 {
     logger().setPrintErrorLevelStdout();
 
-    opencog::combo::vertex_set ignore_ops;
+    moses::combo::vertex_set ignore_ops;
 
     const int effort = 3; // effort allocated for reduction (3 is max)
 

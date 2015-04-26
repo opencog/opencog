@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,14 +27,14 @@
 
 #include <boost/range/algorithm/sort.hpp>
 
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/representation/field_set.h>
-#include <opencog/learning/moses/representation/instance_set.h>
-#include <opencog/comboreduct/table/table.h>
+#include <moses/learning/moses/optimization/optimization.h>
+#include <moses/learning/moses/representation/field_set.h>
+#include <moses/learning/moses/representation/instance_set.h>
+#include <moses/comboreduct/table/table.h>
 
 #include "../main/feature-selection.h" // needed for feature_selection_params
 
-namespace opencog {
+namespace moses {
 
 using namespace moses;
 using namespace combo;
@@ -129,6 +129,6 @@ feature_set_pop moses_select_feature_sets(const CTable& ctable,
     return create_deme_select_feature_sets(ctable, optimize, fs_sc, fs_params);
 }
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE-SELECTION_DEME_OPTIMIZE_H

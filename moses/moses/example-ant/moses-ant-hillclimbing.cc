@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/main/moses-ant-hillclimbing.cc
+ * moses/learning/moses/main/moses-ant-hillclimbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,13 +26,13 @@
 #include <iostream>
 #include <string>
 
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/numeric.h>
+#include <moses/util/oc_omp.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
 #include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
@@ -43,7 +43,7 @@
 #include "ant_scoring.h"
 
 
-using namespace opencog;
+using namespace moses;
 using namespace moses;
 using namespace reduct;
 using namespace boost;
@@ -56,7 +56,7 @@ using namespace std;
 // initial random number seed. At the time of this writing, some
 // seeds result in a solution being found in a few seconds or
 // less, while others take at least minutes, or longer. The
-// bottom of the file opencog/learning/moses/diary-performance.txt
+// bottom of the file moses/learning/moses/diary-performance.txt
 // provides more information.
 
 int main(int argc,char** argv)

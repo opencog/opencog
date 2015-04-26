@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,10 +21,10 @@
  */
 
 #include <vector>
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/table/table.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
 #include "../optimization/hill-climbing.h"
 #include "../metapopulation/metapopulation.h"
@@ -32,7 +32,7 @@
 #include "../scoring/bscores.h"
 #include "moses_main.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace combo;
 using namespace reduct;

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/meta_rules.cc
+ * moses/comboreduct/reduct/meta_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,13 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "meta_rules.h"
-#include <opencog/util/dorepeat.h>
-#include <opencog/comboreduct/combo/assumption.h>
+#include <moses/util/dorepeat.h>
+#include <moses/comboreduct/combo/assumption.h>
 
 // uncomment if you want to have a trace of the rules
 // #define META_RULE_DEBUG
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 #ifdef META_RULE_DEBUG
 
@@ -84,7 +84,7 @@ void downwards::operator()(combo_tree& tr, combo_tree::iterator it) const
     ++end;
 
     static const type_tree unknown_type_tree =
-        type_tree(opencog::combo::id::unknown_type);
+        type_tree(moses::combo::id::unknown_type);
 
     if (input == unknown_type_tree)
         for( ; it != end; ++it) {
@@ -98,7 +98,7 @@ void downwards::operator()(combo_tree& tr, combo_tree::iterator it) const
                // &&
                // @todo: checking that it inherits would be better
                // but has to be sure of it (Nil)
-               opencog::combo::get_output_type_tree(*it) == type_tree(output))
+               moses::combo::get_output_type_tree(*it) == type_tree(output))
                 (*r)(tr, it);
         }
     DEC_TAB
@@ -152,5 +152,5 @@ void assum_iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 

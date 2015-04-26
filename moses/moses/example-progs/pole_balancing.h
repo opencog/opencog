@@ -1,9 +1,9 @@
 #ifndef POLEBALANCINGINC
 #define POLEBALANCINGINC
 
-#include <opencog/comboreduct/combo/simple_nn.h>
+#include <moses/comboreduct/combo/simple_nn.h>
 
-using namespace opencog;
+using namespace moses;
 
 class CartPole {
 public:

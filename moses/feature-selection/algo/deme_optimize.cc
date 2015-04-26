@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,11 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/learning/moses/optimization/optimization.h>
+#include <moses/learning/moses/optimization/optimization.h>
 
 #include "deme_optimize.h"
 
-namespace opencog {
+namespace moses {
     
 using namespace std;
 
@@ -40,4 +40,4 @@ instance initial_instance(const feature_selection_parameters& fs_params,
 }
 
 
-} // ~namespace opencog
+} // ~namespace moses

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/feature_selector.h
+ * moses/learning/moses/moses/feature_selector.h
  *
  * Copyright (C) 2012 OpenCog Foundation
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,11 +25,11 @@
 #ifndef _OPENCOG_FEATURE_SELECTOR_H
 #define _OPENCOG_FEATURE_SELECTOR_H
 
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/learning/feature-selection/main/feature-selection.h>
+#include <moses/comboreduct/table/table.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/learning/feature-selection/main/feature-selection.h>
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 /**
@@ -228,6 +228,6 @@ protected:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_SELECTOR_H

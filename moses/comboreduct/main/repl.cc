@@ -7,8 +7,8 @@
 
 using namespace ant_combo;
 using namespace std;
-using namespace opencog;
-using namespace opencog::combo;
+using namespace moses;
+using namespace moses::combo;
 
 
 

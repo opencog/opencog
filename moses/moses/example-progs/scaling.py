@@ -19,7 +19,7 @@ for nodes in range(2,12):
     tot_time = before - before
 
     for rseed in range (1,1+num_to_do) :
-        cmd = "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r" + str(rseed) + " -j12 -m320000 --mpi=1 -fmspeed.log"
+        cmd = "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts ./moses/learning/moses/main/moses -Hit -Y1 -u2 -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r" + str(rseed) + " -j12 -m320000 --mpi=1 -fmspeed.log"
         print cmd
         # measure wallcock time.
         before = datetime.now()

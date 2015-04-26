@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/example-progs/continmax.cc
+ * moses/learning/moses/example-progs/continmax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,7 +48,7 @@ using boost::lexical_cast;
 // or broken or maybe both; there is a confusion between depth and arity
 // in that code. (i.e. confusion between depth and breadth, between arity
 // and log_2(arity), etc.) See
-// https://bugs.launchpad.net/opencog/+bug/908247
+// https://bugs.launchpad.net/moses/+bug/908247
 //
 // NOTE: This is NOT a demonstration of program learning, which is what
 // MOSES is designed for; rather, this a demonstration of the use of a

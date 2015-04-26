@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/optimization/univariate.cc
+ * moses/learning/moses/optimization/univariate.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -14,7 +14,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,8 +27,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/selection.h>
+#include <moses/util/oc_assert.h>
+#include <moses/util/selection.h>
 
 #include "../eda/termination.h"
 #include "../eda/replacement.h"
@@ -39,7 +39,7 @@
 
 #include "univariate.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 /////////////////////////////
 // Univariate Optimization //
@@ -100,5 +100,5 @@ void univariate_optimization::operator()(deme_t& deme,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

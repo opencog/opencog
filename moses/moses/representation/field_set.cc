@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/field_set.cc
+ * moses/learning/moses/eda/field_set.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,12 +23,12 @@
  */
 #include "field_set.h"
 #include <sstream>
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/iostreamContainer.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/oc_assert.h>
+#include <moses/util/iostreamContainer.h>
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 const disc_t field_set::contin_spec::Stop = 0;
@@ -267,4 +267,4 @@ std::ostream& field_set::ostream_field_set(std::ostream& out) const
 
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

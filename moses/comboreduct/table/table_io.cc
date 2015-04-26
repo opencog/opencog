@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,15 +36,15 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/oc_omp.h>
-#include <opencog/util/comprehension.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/util/oc_omp.h>
+#include <moses/util/comprehension.h>
 
 #include "table.h"
 #include "table_io.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 using namespace std;
 using namespace boost;
@@ -1438,4 +1438,4 @@ ostream& operator<<(ostream& out, const CTable& ct)
     return ostreamCTable(out, ct);
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/contin_rules.h
+ * moses/comboreduct/reduct/contin_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 
 #include "reduct.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 //x+0 -> x
 struct reduce_plus_zero : public crule<reduce_plus_zero> {
@@ -186,6 +186,6 @@ struct reduce_impulse_arg : public crule<reduce_impulse_arg>
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

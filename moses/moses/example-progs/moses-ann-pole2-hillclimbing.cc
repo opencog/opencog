@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/Logger.h>
-#include <opencog/comboreduct/interpreter/eval.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/Logger.h>
+#include <moses/comboreduct/interpreter/eval.h>
 
 
 #include "../deme/deme_expander.h"
@@ -19,7 +19,7 @@ using namespace moses;
 using namespace reduct;
 using namespace boost;
 using namespace std;
-using namespace opencog;
+using namespace moses;
 
 
 int main(int argc, char** argv)

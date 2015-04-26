@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/reduct.h
+ * moses/comboreduct/reduct/reduct.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +24,13 @@
 #ifndef _REDUCT_RULE_H
 #define _REDUCT_RULE_H
 
-#include <opencog/util/RandGen.h>
+#include <moses/util/RandGen.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
-using namespace opencog::combo;
+using namespace moses::combo;
 
 struct rule
 {
@@ -264,6 +264,6 @@ inline void replace_without_changing_it(combo_tree& tr,
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

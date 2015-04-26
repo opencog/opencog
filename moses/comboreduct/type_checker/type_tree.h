@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/type_tree.h
+ * moses/comboreduct/combo/type_tree.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,9 +26,9 @@
 
 #include <exception>
 
-#include <opencog/util/tree.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/exceptions.h>
+#include <moses/util/tree.h>
+#include <moses/util/numeric.h>
+#include <moses/util/exceptions.h>
 
 #include "type_tree_def.h"
 #include "../crutil/exception.h"
@@ -37,7 +37,7 @@
 #include "../combo/perception.h"
 #include "../combo/procedure_call.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 // templates helpers to convert C++ type into type_node
 /// @note if I don't inline I get linkage error, go figure...
@@ -428,12 +428,12 @@ type_tree gen_signature(const type_tree& iotype, arity_t arity);
 
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 namespace std {
 
-std::ostream& operator<<(std::ostream&, const opencog::combo::type_node&);
-std::istream& operator>>(std::istream&, opencog::combo::type_node&);
+std::ostream& operator<<(std::ostream&, const moses::combo::type_node&);
+std::istream& operator>>(std::istream&, moses::combo::type_node&);
 
 } // ~namespace std
 

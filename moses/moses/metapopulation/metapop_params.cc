@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@
 
 #include "metapop_params.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 diversity_parameters::diversity_parameters()
     : pressure(0.0),
@@ -82,4 +82,4 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

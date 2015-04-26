@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/logical_rules.h
+ * moses/comboreduct/reduct/logical_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +24,13 @@
 #ifndef _REDUCT_LOGICAL_RULES_H
 #define _REDUCT_LOGICAL_RULES_H
 
-#include <opencog/util/exceptions.h>
+#include <moses/util/exceptions.h>
 
 #include "reduct.h"
 #include "flat_normal_form.h"
 #include "../type_checker/type_tree.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 /// Ensure that all arguments and 'or' nodes have an 'and' node as their parent.
 /// This is important so that other normalizations can catch all cases.
@@ -182,7 +182,7 @@ protected:
         typedef vertex value_type;
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::upwards_iterator up_it;
-        typedef opencog::lexicographic_subtree_order<value_type> Comp;
+        typedef moses::lexicographic_subtree_order<value_type> Comp;
         typedef std::set<sib_it,Comp> subtree_set;
 
         combo_tree& tr;
@@ -281,6 +281,6 @@ struct reduce_remove_subtree_equal_tt
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

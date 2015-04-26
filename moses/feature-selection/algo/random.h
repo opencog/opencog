@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,11 +25,11 @@
 #ifndef _OPENCOG_FEATURE_SELECTION_RANDOM_ALGO_H
 #define _OPENCOG_FEATURE_SELECTION_RANDOM_ALGO_H
 
-#include <opencog/util/random.h>
+#include <moses/util/random.h>
 
 #include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
 
-namespace opencog {
+namespace moses {
 
 feature_set_pop random_select_feature_sets(const CTable& ctable,
                                            const feature_selection_parameters& fs_params);
@@ -57,6 +57,6 @@ FeatureSet random_selection(const FeatureSet& features,
 }
 
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_SELECTION_RANDOM_ALGO_H

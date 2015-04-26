@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,11 +29,11 @@
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/irange.hpp>
 
-#include <opencog/util/Logger.h>
+#include <moses/util/Logger.h>
 
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/comboreduct/table/table_io.h>
-#include <opencog/learning/moses/optimization/hill-climbing.h> // for hc_params
+#include <moses/comboreduct/table/table.h>
+#include <moses/comboreduct/table/table_io.h>
+#include <moses/learning/moses/optimization/hill-climbing.h> // for hc_params
 
 #include "feature-selection.h"
 #include "../algo/deme_optimize.h"
@@ -42,7 +42,7 @@
 #include "../algo/simple.h"
 #include "../algo/stochastic_max_dependency.h"
 
-namespace opencog {
+namespace moses {
     
 using namespace combo;
 using namespace std;
@@ -219,4 +219,4 @@ void feature_selection(const Table& table,
     }
 }
 
-} // ~namespace opencog
+} // ~namespace moses

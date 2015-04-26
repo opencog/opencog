@@ -71,7 +71,7 @@ these.
    the selection: that is, a lower-scored, but also lower complexity
    exemplar may be a better starting place than a high-score,
    high-complexity exemplar.  The discovery & solution of this behaviour
-   is documented on the opencog blog; the blog page captured in the
+   is documented on the moses blog; the blog page captured in the
    file documentation/Select_Exemplar.html in this directory. Misc data
    and graphing tools can be found in diary/complexity-temperature.
    In the diary below, this starts at the section titled:
@@ -321,7 +321,7 @@ To get the above in later versions, need to use -L1 -T1 flags.
 
 circa revision 6541:
 --------------------
-time opencog/learning/moses/main/moses -Hpa -k3 -m50000
+time moses/learning/moses/main/moses -Hpa -k3 -m50000
 (no -r flag): 0m0.892s
 -r0: 0m0.535s
 -r1: 0m0.796s
@@ -860,7 +860,7 @@ Current consolidated dataset:
 20  9999      31836  5371   6867  7777   6666   2074
 
 
-See http://blog.opencog.org/2012/02/07/tuning-moses/ for written
+See http://blog.moses.org/2012/02/07/tuning-moses/ for written
 explanation.
 ==================================================================
 
@@ -1843,7 +1843,7 @@ a few things right, well, that's mostly harmlesss, yeah?
 
 
 OK, so how the hell does occam work? For boolean:
-http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
+http://groups.google.com/group/moses/browse_thread/thread/a4771ecf63d38df
 OK, a better explanation now in moses/scoring.h
 
  *     score(M) = - [ LL(M) - |D| log(1-p) ] / log(p/(1-p))
@@ -2369,7 +2369,7 @@ moses -i magic04.data -u11  -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=
 took 339 secs, got accuracy of 0.84857
 
 
-time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data
+time ./moses/learning/moses/example-progs/moses-perf -i magic04.data
 -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 | tee magic-m10K.out; 
 
 "magic-10K": magic dataset, above command line.  i.e. the minimum
@@ -2396,7 +2396,7 @@ and 24GB RAM.  Will repeat tests for -j1, -j2, etc. through -j16.
 This required a bugfix; the below is bzr rev 7068 (the fix was bzr
 rev 7065 and 7067)
 
-nohup time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r0  -m40000 | tee magic-j-r0.out
+nohup time ./moses/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r0  -m40000 | tee magic-j-r0.out
 
 "threading": multi-threading test.  Captions: "time", raw time in secs.
        "slow": slowdown, percent.  For N threads, this is just 
@@ -2567,7 +2567,7 @@ with more effort.  Tested with bzr rev 7068.  This is on the Cray, with
 12 threads.
 
  Command line is:
-    nohup time ./opencog/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r1 -j12 | tee magic-j12-m.out
+    nohup time ./moses/learning/moses/example-progs/moses-perf -i magic04.data -u11 -n sin -n log -n exp -x1 -Z1 -Hpre --min-rand-input=0.5 --alpha=1.0 -r1 -j12 | tee magic-j12-m.out
 
 "longrun": As above. Note improvement completely stalls.
 
@@ -2934,7 +2934,7 @@ Lets give this one a whirl:
    Other systems get 55% accuracy. (per ascii description)
 
 
-./opencog/learning/moses/main/moses -Hit -Y1 -u10 -i yeast.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
+./moses/learning/moses/main/moses -Hit -Y1 -u10 -i yeast.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 
 
 Dataset has 1484 rows.  The authors, in the "yeast.names" file state:
   "Results: 55% for Yeast data with an ad hoc structured probability"
@@ -3090,7 +3090,7 @@ After fixing sleep bug (bzr 7287):
 -------------------------------
 Try again: with WDBC dataset:
 
-moses -Hit -Yid -udiag -i /home/linas/src/opencog/build/wdbc.data -W1 -x1 -n
+moses -Hit -Yid -udiag -i /home/linas/src/moses/build/wdbc.data -W1 -x1 -n
 sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12:10.1.1.1
 -j12:10.1.1.2 -j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5 -m320000
 
@@ -3176,7 +3176,7 @@ procs   time  score  plex  bytes      bytes/sec
 
 
 Try again:
-mpirun -n 6 --hostfile ~/mpd.hosts ./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
+mpirun -n 6 --hostfile ~/mpd.hosts ./moses/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1  -j12 -m320000 --mpi=1
 
 real	7m31.761s      score: -17 cpxy=23
 user	60m41.797s
@@ -3201,8 +3201,8 @@ Yuck. Two effects: firt, it really did seem to run longer; second,
 master proces knew it was done, then waited a *long* time for other 
 workers to wrap it up.
 
-time ./opencog/learning/moses/main/moses -Hit -Yid -udiag -i
-/home/linas/src/opencog/build/wdbc.data -W1 -x1 -n sin -n log -n exp -Z1
+time ./moses/learning/moses/main/moses -Hit -Yid -udiag -i
+/home/linas/src/moses/build/wdbc.data -W1 -x1 -n sin -n log -n exp -Z1
 -v12 --hc-max-nn-evals=5000 -r1  -m320000  -j12:10.1.1.1 -j12:10.1.1.2
 -j12:10.1.1.3 -j12:10.1.1.4 -j12:10.1.1.5
 Segmentation fault
@@ -3225,7 +3225,7 @@ sys	0m2.925s
 Tables below are for cluster WDBC dataset.  Measured with bzr rev 7332.
 
 "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
-./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
+./moses/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -m320000
 --mpi=1 -fmspeed.log"
 
@@ -3309,7 +3309,7 @@ From perf standpoint, results should be identical to the above.  Goal
 is to fix score. the -A"-19" does this, and the -m flag uncaps the num evals.
 
 "mpirun -n " + str(nodes) + " --hostfile ~/mpd.hosts
-./opencog/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
+./moses/learning/moses/main/moses -Hit -Yid -udiag -i ./wdbc.data -W1 -x1
 -n sin -n log -n exp -Z1 -v12 --hc-max-nn-evals=5000 -r1 -j12 -A"-19" -m555320000
 --mpi=1 -fmscore.log"
 
@@ -3574,7 +3574,7 @@ as limited logical_probe funkiness.
 
 Dataset: ./reuters-test-10.data which has 4852 rows, 16935 columns
 Typical run:
- ./opencog/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
+ ./moses/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
     -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
    --hc-max-nn-evals=5000 -j12 -m132000 -freuters-test-10-m132K.log
 
@@ -3641,7 +3641,7 @@ as limited logical_probe funkiness.
 
 Dataset: ./reuters-test-10.data which has 4852 rows, 16935 columns
 Typical run:
- ./opencog/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
+ ./moses/learning/moses/main/moses -Hit -i ./reuters-test-10.data 
     -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
    --hc-max-nn-evals=5000 -j12 -m2048000 -freuters-test-10-m2048K.log
 
@@ -3692,7 +3692,7 @@ feats   time (secs)  div by N    N-squared
 
 Bug: feature selection is not writing sparse.
 
-./opencog/learning/feature-selection/main/feature-selection -i ./reuters21578-train-10.dat -ainc -C2400 -o reut-reduced.csv -u1 -j12 -F reut-feat-train-10.log
+./moses/learning/feature-selection/main/feature-selection -i ./reuters21578-train-10.dat -ainc -C2400 -o reut-reduced.csv -u1 -j12 -F reut-feat-train-10.log
 
 The above requires 13.2GB to run ...
 unique features count=27933
@@ -3714,7 +3714,7 @@ Again, this time with
 
 Size: reut-test-10-reduced-1064.csv is 10.3MB
 
- ./opencog/learning/moses/main/moses -Hit -i ./reut-test-10-reduced-1064.csv
+ ./moses/learning/moses/main/moses -Hit -i ./reut-test-10-reduced-1064.csv
     -u1 -W1 -x1 -n sin -n log -n exp -n div -Z1 -v2 -s0
    --hc-max-nn-evals=5000 -j12 -m2048000 -freut-red-1064.log
 
@@ -3881,7 +3881,7 @@ Yikes! 14 hours to build knobs...
 ========================================================================
 Unit tests, specifically mixedUTest for _skip_disc_probe
 
-time ./opencog/learning/moses/main/moses -Hit -upred -nimpulse -nsin
+time ./moses/learning/moses/main/moses -Hit -upred -nimpulse -nsin
 -nexp -nlog -m150000 -rnnn -z1 -Z1 -i ../tests/learning/moses/predicates-1.3.csv
 
 The -m flag limits execution time to about 2 minutes, single threaded.
@@ -3946,7 +3946,7 @@ whole lot.
 
 sparse-BA2012-10.dat
 
-./opencog/learning/moses/example-progs/moses-perf
+./moses/learning/moses/example-progs/moses-perf
 -Hit -W1 --hc-max-nn-evals=5000 -n sin -n log -n exp -n div -Z1
 -uchange_percent -isparse-BA2012-10.dat --enable-fs=1
 

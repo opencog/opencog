@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/precision_bscore.h
+ * moses/learning/moses/scoring/precision_bscore.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,7 @@
 #include "scoring_base.h"
 #include "time_dispersion.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using combo::CTable;
 using combo::count_t;
@@ -230,6 +230,6 @@ private:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

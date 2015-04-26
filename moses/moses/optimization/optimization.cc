@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/optimization/optimization.cc
+ * moses/learning/moses/optimization/optimization.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -14,7 +14,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,7 +32,7 @@
 
 #include "optimization.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 double
 information_theoretic_bits(const field_set& fs)
@@ -186,5 +186,5 @@ void print_stats_header(optim_stats *os, bool diversity)
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

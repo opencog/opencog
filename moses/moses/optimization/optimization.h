@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/optimization/optimization.h
+ * moses/learning/moses/optimization/optimization.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
@@ -14,7 +14,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,12 +29,12 @@
 #ifndef _MOSES_OPTIMIZATION_H
 #define _MOSES_OPTIMIZATION_H
 
-#include <opencog/util/oc_assert.h>
+#include <moses/util/oc_assert.h>
 
 #include "../representation/instance_scorer.h"
 #include "../representation/instance_set.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 /**
  * information_theoretic_bits -- return information content of the field set.
@@ -186,6 +186,6 @@ struct optimizer_base : optim_stats
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

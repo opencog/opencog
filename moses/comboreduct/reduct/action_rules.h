@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/action_rules.h
+ * moses/comboreduct/reduct/action_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "reduct.h"
 #include <boost/logic/tribool.hpp>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 using namespace combo;
 
@@ -267,6 +267,6 @@ struct preconditions_check : public crule<preconditions_check> {
 bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool free_pre_action_before, combo_tree& tr, combo_tree::iterator it);
 
 } // ~namespace reduct
-} // ~namespace opencog 
+} // ~namespace moses 
 
 #endif

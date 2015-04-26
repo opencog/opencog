@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/contin_rules.cc
+ * moses/comboreduct/reduct/contin_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2013 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,11 +23,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <map>
-#include <opencog/util/exceptions.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/util/exceptions.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 #include "contin_rules.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -1021,5 +1021,5 @@ void reduce_impulse_arg::operator()(combo_tree& tr, combo_tree::iterator it) con
 
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 

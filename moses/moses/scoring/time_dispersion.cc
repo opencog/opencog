@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/time_dispersion.cc
+ * moses/learning/moses/scoring/time_dispersion.cc
  *
  * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,10 +24,10 @@
 
 #include "time_dispersion.h"
 
-#include <opencog/comboreduct/table/table_io.h>
-#include <opencog/util/numeric.h>
+#include <moses/comboreduct/table/table_io.h>
+#include <moses/util/numeric.h>
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace combo;
 
@@ -115,4 +115,4 @@ float bscore_ctable_time_dispersion::get_time_dispersion_penalty(const CTableTim
 }
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses

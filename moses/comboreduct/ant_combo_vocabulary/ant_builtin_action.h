@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_combo_vocabulary/ant_builtin_action.h
+ * moses/comboreduct/ant_combo_vocabulary/ant_builtin_action.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,12 +24,12 @@
 #ifndef _ANT_BUILTIN_ACTION_H
 #define _ANT_BUILTIN_ACTION_H
 
-#include <opencog/util/numeric.h>
+#include <moses/util/numeric.h>
 
-#include <opencog/comboreduct/combo/builtin_action.h>
+#include <moses/comboreduct/combo/builtin_action.h>
 #include "ant_operator.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
   
 //later to be replaced by id
 namespace id {
@@ -52,7 +52,7 @@ typedef id::ant_builtin_action_enum ant_builtin_action_enum;
 namespace ant_builtin_action_properties {
 
   //struct for description of name and type
-  typedef opencog::combo::ant_operator<ant_builtin_action_enum, id::ant_builtin_action_count>::basic_description action_basic_description;
+  typedef moses::combo::ant_operator<ant_builtin_action_enum, id::ant_builtin_action_count>::basic_description action_basic_description;
 
   //struct for decription of action properties
   struct action_property_description {
@@ -167,6 +167,6 @@ public:
   const std::set<builtin_action> preconditions() const;
 };
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/instance_set.h
+ * moses/learning/moses/representation/instance_set.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -45,7 +45,7 @@
 #define MAYBE_CONST const
 #endif
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 template<typename ScoreT>
@@ -146,7 +146,7 @@ public:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #undef GCC46_EMPLACE_BACK_WORKAROUND
 #undef MAYBE_CONST

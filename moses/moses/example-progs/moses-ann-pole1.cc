@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <iostream>
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/Logger.h>
-#include <opencog/comboreduct/interpreter/eval.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/Logger.h>
+#include <moses/comboreduct/interpreter/eval.h>
 
 #include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
@@ -35,7 +35,7 @@
 
 using namespace std;
 using namespace boost;
-using namespace opencog;
+using namespace moses;
 using namespace moses;
 using namespace reduct;
 

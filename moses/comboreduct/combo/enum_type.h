@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/enum_type.h
+ * moses/comboreduct/combo/enum_type.h
  *
  * Copyright (C) 2002-2008, 2012 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +31,7 @@
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 // enum_t is essentially a string but is coded as a different type
 // than definite_object (or message), because it semantically denotes
@@ -103,10 +103,10 @@ public:
     }
 };
 
-std::ostream& operator<<(std::ostream&, const opencog::combo::enum_t&);
+std::ostream& operator<<(std::ostream&, const moses::combo::enum_t&);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif
 

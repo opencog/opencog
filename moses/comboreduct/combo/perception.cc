@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/perception.cc
+ * moses/comboreduct/combo/perception.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #include "perception.h"
 #include "descriptions.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 std::ostream& operator<<(std::ostream& out, perception p) {
     OC_ASSERT(p);
@@ -32,4 +32,4 @@ std::ostream& operator<<(std::ostream& out, perception p) {
 }
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses

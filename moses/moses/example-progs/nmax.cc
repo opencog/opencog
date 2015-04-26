@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/example-progs/nmax.cc
+ * moses/learning/moses/example-progs/nmax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@ using boost::lexical_cast;
 // This is a generalization of the "onemax" problem, which is nmax with n=2.
 //
 // XXX setting n=2 currently fails due to a bug, see
-// https://bugs.launchpad.net/opencog/+bug/908230
+// https://bugs.launchpad.net/moses/+bug/908230
 //
 // NOTE: This is NOT a demonstration of program learning, which is what
 // MOSES is designed for; rather, this a demonstration of the use of a

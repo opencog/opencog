@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/precision_bscore.cc
+ * moses/learning/moses/moses/precision_bscore.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,11 +26,11 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
-#include <opencog/comboreduct/table/table_io.h>
+#include <moses/comboreduct/table/table_io.h>
 
 #include "precision_bscore.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace std;
 using namespace combo;
@@ -835,4 +835,4 @@ score_t precision_conj_bscore::min_improv() const
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

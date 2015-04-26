@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/message.h
+ * moses/comboreduct/combo/message.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 #include <string>
 #include <boost/operators.hpp>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 // message is essentially a string but is coded as a different type
 // than definite_object, because it semantically denotes something else.
@@ -69,10 +69,10 @@ typedef std::set<message> message_set;
 typedef message_set::iterator message_set_it;
 typedef message_set::const_iterator message_set_const_it;
 
-std::ostream& operator<<(std::ostream&, const opencog::combo::message&);
+std::ostream& operator<<(std::ostream&, const moses::combo::message&);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif
 

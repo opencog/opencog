@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,10 +23,10 @@
 
 #ifdef HAVE_MPI
 #include <mpi.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/Logger.h>
 #include "mpi_moses.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 
 #define ROOT_NODE 0
@@ -687,6 +687,6 @@ void mpi_moses(metapopulation& mp,
 
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif /* HAVE_MPI */

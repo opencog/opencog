@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_EVAL_CANDIDATE_H
 #define _OPENCOG_EVAL_CANDIDATE_H
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 // structure holding the options
 struct eval_candidate_params
@@ -52,6 +52,6 @@ struct eval_candidate_params
 static const std::string f_one="f_one";
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_EVAL_CANDIDATE_H

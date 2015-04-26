@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,19 +27,19 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/range/algorithm/find.hpp>
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/numeric.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/util/numeric.h>
 
-#include <opencog/comboreduct/combo/combo.h>
-#include <opencog/comboreduct/table/table.h>
+#include <moses/comboreduct/combo/combo.h>
+#include <moses/comboreduct/table/table.h>
 
 #include "../scorers/mutual_info.h"
 
 using namespace std;
 using namespace boost::assign;
-using namespace opencog;
-using namespace opencog::combo;
+using namespace moses;
+using namespace moses::combo;
 
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> scorer_opt("scorer", "H");
@@ -55,7 +55,7 @@ static const pair<string, string> confidence_penalty_intensity_opt("confidence-p
 // Feature selection scorers
 static const string mi="mi";    // Mutual Information (see feature_scorer.h)
 static const string pre="pre";  // Precision (see
-                                // opencog/learning/moses/scoring/scoring.h)
+                                // moses/learning/moses/scoring/scoring.h)
 
 string opt_desc_str(const pair<string, string>& opt)
 {

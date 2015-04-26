@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/field_set.h
+ * moses/learning/moses/representation/field_set.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,17 +29,17 @@
 #include <boost/operators.hpp>  // for random_access_iterator_helper
 #include <boost/variant.hpp>
 
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/RandGen.h>
-#include <opencog/util/Counter.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/Logger.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/numeric.h>
+#include <moses/util/oc_assert.h>
+#include <moses/util/RandGen.h>
+#include <moses/util/Counter.h>
 
 #include "instance.h"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
  /**
@@ -75,7 +75,7 @@ namespace moses {
   * of a tree are commonly called 'constants' or 'zero-ary functions',
   * while the internal nodes of the tree would be called 'n-ary functions'
   * (presuming that they have n children).  The labels on nodes are
-  * strings.  Note that atoms (in the general sense, not the opencog
+  * strings.  Note that atoms (in the general sense, not the moses
   * sense) are terms with truth values (predicates);  however no atoms or
   * truth values are used here.  See for example, Baader & Nipkow,
   * 'Term Rewriting and All That', for more information. Or wikipedia.
@@ -132,7 +132,7 @@ struct field_set
      * 0-31/63. The "width" is the width of the raw field, in bits.
      *
      * See also the wiki page
-     * http://www.opencog.org/wiki/Field_set_struct_in_MOSES
+     * http://www.moses.org/wiki/Field_set_struct_in_MOSES
      */
     struct field
     {
@@ -1046,7 +1046,7 @@ public:
             return _fs->disc_and_bit()[spec_idx].multy;
         }
 
-        void randomize(opencog::RandGen& rng = randGen())
+        void randomize(moses::RandGen& rng = randGen())
         {
             _fs->set_raw(*_inst, _idx, rng.randint(multy()));
         }
@@ -1374,6 +1374,6 @@ inline std::ostream& operator<<(std::ostream& out,
 
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

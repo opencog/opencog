@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,11 +36,11 @@
 #include <boost/operators.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/Counter.h>
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/KLD.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/Counter.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/KLD.h>
 
 #include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
 #include "../interpreter/interpreter.h"
@@ -54,7 +54,7 @@
 #define TARGET_DISCRETIZED_BINS_NUM 5  // discretize contin type target
                                        // into # bins
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 std::vector<contin_t> discretize_contin_feature(contin_t min, contin_t max);
 
@@ -1508,6 +1508,6 @@ protected:
     mutable vertex_seq bmap;
 };
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif // _OPENCOG_TABLE_H

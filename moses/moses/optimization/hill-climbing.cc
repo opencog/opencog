@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/optimization/hill-climbing.cc
+ * moses/learning/moses/optimization/hill-climbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
@@ -14,7 +14,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,13 +31,13 @@
 
 #include <boost/algorithm/minmax_element.hpp>
 
-#include <opencog/util/oc_omp.h>
+#include <moses/util/oc_omp.h>
 
 #include "../moses/neighborhood_sampling.h"
 
 #include "hill-climbing.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 
 ///////////////////
@@ -832,5 +832,5 @@ void hill_climbing::log_stats_legend()
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

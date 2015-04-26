@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/common_def.h
+ * moses/comboreduct/combo/common_def.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 
 #include <set>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 typedef int arity_t;
 typedef std::set<arity_t> arity_set;

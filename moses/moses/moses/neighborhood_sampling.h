@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,14 +29,14 @@
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/lazy_random_selector.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/lazy_random_selector.h>
 
 #include "../eda/initialization.h"
 #include "../representation/instance_set.h"
 #include "../moses/types.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 /**
  * This procedure generates the initial deme randomly
@@ -86,7 +86,7 @@ void flip_LR(field_set::disc_iterator itr);
 // 3. Otherwise just flip
 void twiddle_contin_bit(field_set::disc_iterator itr,
                         field_set::disc_iterator next_itr,
-                        opencog::RandGen& rng = randGen());
+                        moses::RandGen& rng = randGen());
 
 /**
  * This routine modifies the instance 'inst' so that the new instance
@@ -111,7 +111,7 @@ void generate_contin_neighbor(const field_set& fs,
                               instance& inst,
                               field_set::contin_iterator it,
                               unsigned dist,
-                              opencog::RandGen& rng = randGen());
+                              moses::RandGen& rng = randGen());
 
 /**
  * Sample (with replacement) 'sample_size' instances from the
@@ -538,6 +538,6 @@ size_t sample_new_instances(size_t number_of_new_instances,
                             unsigned dist);
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_NEIGHBORHOOD_SAMPLING_H

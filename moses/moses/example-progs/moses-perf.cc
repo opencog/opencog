@@ -19,7 +19,7 @@
 #include "../main/moses_exec.h"
 
 using namespace std;
-using namespace opencog::moses;
+using namespace moses::moses;
 
 void measure(vector<string> arguments)
 {

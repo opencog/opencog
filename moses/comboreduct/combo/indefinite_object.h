@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/indefinite_object.h
+ * moses/comboreduct/combo/indefinite_object.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,12 +24,12 @@
 #ifndef _COMBO_INDEFINITE_OBJECT_H
 #define _COMBO_INDEFINITE_OBJECT_H
 
-#include <opencog/util/exceptions.h>
+#include <moses/util/exceptions.h>
 
 #include "../type_checker/type_tree_def.h"
 #include "operator_base.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
   
 //indefinite_object inherits from operator_base
 //without additional properties
@@ -47,7 +47,7 @@ typedef indefinite_object_set::const_iterator indefinite_object_set_const_it;
 std::ostream& operator<<(std::ostream&, indefinite_object);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif
 

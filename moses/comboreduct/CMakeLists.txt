@@ -82,7 +82,7 @@ TARGET_LINK_LIBRARIES (comboant
 
 #install library
 IF (WIN32)
-	INSTALL(TARGETS comboreduct comboant DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL(TARGETS comboreduct comboant DESTINATION "lib${LIB_DIR_SUFFIX}/moses")
 ELSE (WIN32)
 	INSTALL(TARGETS comboreduct comboant
            LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}"   # lib*.so files

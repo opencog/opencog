@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,17 +31,17 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include <opencog/comboreduct/combo/iostream_combo.h>
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/comboreduct/table/table_io.h>
-#include <opencog/learning/moses/moses/types.h>
-#include <opencog/learning/moses/moses/complexity.h>
+#include <moses/comboreduct/combo/iostream_combo.h>
+#include <moses/util/oc_assert.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/comboreduct/table/table_io.h>
+#include <moses/learning/moses/moses/types.h>
+#include <moses/learning/moses/moses/complexity.h>
 
 #include "eval-candidate-likelihood.h"
 
 using namespace std;
-using namespace opencog;
+using namespace moses;
 using namespace moses;
 using namespace combo;
 using boost::str;

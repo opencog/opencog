@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/local_structure.h
+ * moses/learning/moses/eda/local_structure.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,13 +26,13 @@
 
 #include <vector>
 
-#include <opencog/util/digraph.h>
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/tree.h>
+#include <moses/util/digraph.h>
+#include <moses/util/oc_assert.h>
+#include <moses/util/tree.h>
 
 #include "../representation/field_set.h"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 // Code in this file is used to implement the Bayesian Optimization
@@ -323,6 +323,6 @@ void local_structure_probs_learning::rec_learn(const field_set& fs,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

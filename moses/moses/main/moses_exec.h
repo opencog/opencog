@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 /// used by the main function, it is included in the library for its
 /// convenience
@@ -40,6 +40,6 @@ int moses_exec(const std::vector<std::string>& argv);
 int moses_exec(const std::string& argvs);
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_MOSES_EXEC_H

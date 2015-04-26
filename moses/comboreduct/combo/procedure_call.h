@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/procedure_call.h
+ * moses/comboreduct/combo/procedure_call.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,8 +28,8 @@
 #include <vector>
 #include <cassert>
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/Logger.h>
 
 #include "common_def.h"
 #include "operator_base.h"
@@ -37,7 +37,7 @@
 #include "iostream_combo.h"
 #include "../type_checker/type_tree_def.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 class procedure_call_base : public operator_base
 {
@@ -200,6 +200,6 @@ std::ostream& operator<<(std::ostream&, const procedure_call_base&);
 std::ostream& operator<<(std::ostream&, procedure_call);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

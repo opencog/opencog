@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/meta_rules.h
+ * moses/comboreduct/reduct/meta_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,12 +31,12 @@
 #include <boost/preprocessor/repetition/repeat.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <opencog/util/functional.h>
+#include <moses/util/functional.h>
 
 #include "../type_checker/type_tree.h"
 #include "reduct.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 using std::string;
 
@@ -172,6 +172,6 @@ struct sequential : public crule<sequential> {
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

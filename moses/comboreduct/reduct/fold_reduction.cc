@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/fold_reduction.cc
+ * moses/comboreduct/reduct/fold_reduction.cc
  */
 
 #include "reduct.h"
@@ -8,7 +8,7 @@
 #include "fold_rules.h"
 #include <mutex>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 const rule& fold_reduction()
 {
@@ -38,4 +38,4 @@ const rule& fold_reduction()
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses

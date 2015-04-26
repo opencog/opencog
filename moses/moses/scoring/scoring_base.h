@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/scoring_base.h
+ * moses/learning/moses/scoring/scoring_base.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,10 +27,10 @@
 #define _MOSES_SCORING_BASE_H
 
 #include "../moses/types.h"
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/table/table.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/table/table.h>
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using combo::combo_tree;
 using combo::arity_t;
@@ -346,6 +346,6 @@ static inline void log_candidate_bscore(const combo_tree& tr,
 }
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

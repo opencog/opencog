@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/general_rules.h
+ * moses/comboreduct/reduct/general_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,12 +24,12 @@
 #ifndef _REDUCT_GENERAL_RULES_H
 #define _REDUCT_GENERAL_RULES_H
 
-#include <opencog/util/RandGen.h>
+#include <moses/util/RandGen.h>
 
 #include "reduct.h"
 #include "../interpreter/eval.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 // Flattens all associative functions: f(a,f(b,c)) -> f(a,b,c)
 // Note that level is recursive that is f(a,f(b,f(c,d))) -> f(a,b,c,d)
@@ -73,6 +73,6 @@ struct remove_all_assumptions : public crule<remove_all_assumptions>
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

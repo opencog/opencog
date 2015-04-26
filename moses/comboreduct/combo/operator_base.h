@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/operator_base.h
+ * moses/comboreduct/combo/operator_base.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "common_def.h"
 #include "../type_checker/type_tree_def.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
   //that abstract class contains common methods
   //of builtin_action_base and perception_base
@@ -50,6 +50,6 @@ namespace opencog { namespace combo {
     virtual const type_tree& get_input_type_tree(arity_t i) const = 0;
   };
 
-}} // ~namespace combo opencog
+}} // ~namespace combo moses
 
 #endif

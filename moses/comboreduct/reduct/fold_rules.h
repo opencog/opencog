@@ -1,5 +1,5 @@
 /*
- *opencog/comboreduct/reduct/fold_rules.h
+ *moses/comboreduct/reduct/fold_rules.h
  */
 
 #ifndef _REDUCT_FOLD_RULES_H
@@ -7,7 +7,7 @@
 
 #include "reduct.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 //fold unrolling:
 //    foldl(f v list(a b c)) = f(f(f(v a) b) c)
@@ -18,6 +18,6 @@ struct fold_unrolling : public crule<fold_unrolling> {
 };
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

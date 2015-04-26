@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,12 +27,12 @@
 
 #include <mutex>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/numeric.h>
+#include <moses/util/oc_omp.h>
 
 #include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
 
-namespace opencog {
+namespace moses {
 
 feature_set_pop simple_select_feature_sets(const CTable& ctable,
                                            const feature_selection_parameters& fs_params);
@@ -159,6 +159,6 @@ FeatureSet simple_selection(const FeatureSet& features,
 }
 
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_SELECTION_SIMPLE_ALGO_H

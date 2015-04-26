@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/build_knobs.h
+ * moses/learning/moses/representation/build_knobs.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,14 +29,14 @@
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <opencog/comboreduct/type_checker/type_tree.h>
-#include <opencog/comboreduct/combo/action.h>
-#include <opencog/comboreduct/combo/perception.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/combo/action.h>
+#include <moses/comboreduct/combo/perception.h>
 
 #include "field_set.h"
 #include "representation.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace combo;
 
@@ -200,6 +200,6 @@ protected:
 };
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

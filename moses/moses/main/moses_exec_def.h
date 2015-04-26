@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,7 +25,7 @@
 
 #include <string>
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace std;
 
@@ -89,6 +89,6 @@ static const pair<string, string> hc_crossover_opt("hc-crossover", "Z");
 string opt_desc_str(const pair<string, string>& opt);
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_MOSES_OPTIONS_NAMES_H

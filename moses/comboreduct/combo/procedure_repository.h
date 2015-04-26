@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/procedure_repository.h
+ * moses/comboreduct/combo/procedure_repository.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,8 +24,8 @@
 #ifndef _COMBO_PROCEDURE_REPOSITORY_H
 #define _COMBO_PROCEDURE_REPOSITORY_H
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/Logger.h>
 
 #include "procedure_call.h"
 #include "vertex.h"
@@ -35,7 +35,7 @@
 
 #define LINE_CHAR_MAX 4096
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
   typedef std::set<const procedure_call_base*> procedure_call_set;
   typedef procedure_call_set::const_iterator procedure_call_set_const_it;
@@ -174,7 +174,7 @@ unsigned int load_procedure_repository(std::istream& in,
 
 std::ostream& operator<<(std::ostream& out, procedure_repository pr);
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif
 

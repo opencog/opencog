@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,11 +24,11 @@
 #include "../combo/iostream_combo.h"
 #include "../crutil/exception.h"
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/numeric.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/mt19937ar.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 /////////////////////////
 // Boolean interpreter //
@@ -384,4 +384,4 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
     }
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

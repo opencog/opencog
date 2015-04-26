@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/complexity.h
+ * moses/learning/moses/moses/complexity.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,9 +27,9 @@
 // Various routines dealing with computing the (algorithmic) complexity
 // of particular combo programs.
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
     // Right now, the algorithmic complexity of any combo program
     // is always an (unsigned) int.  I guess it could be made a float,
@@ -45,6 +45,6 @@ namespace opencog { namespace moses {
                         bool (*)(const combo::combo_tree::iterator&) = NULL);
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

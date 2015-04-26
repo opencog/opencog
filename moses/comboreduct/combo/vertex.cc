@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/vertex.cc
+ * moses/comboreduct/combo/vertex.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,10 +24,10 @@
  */
 #include "vertex.h"
 #include "procedure_call.h"
-#include <opencog/util/algorithm.h>
+#include <moses/util/algorithm.h>
 #include "iostream_combo.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 bool operator<(const combo_tree& lt, const combo_tree& rt) {
     return size_tree_order<vertex>()(lt, rt);
@@ -262,4 +262,4 @@ void copy_without_null_vertices(combo_tree::iterator src,
             copy_without_null_vertices(sib, dst_tr, dst_tr.append_child(dst));
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

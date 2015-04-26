@@ -1,10 +1,10 @@
 /*
- *opencog/comboreduct/reduct/fold_rules.cc
+ *moses/comboreduct/reduct/fold_rules.cc
  */
 
 #include "fold_rules.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -58,4 +58,4 @@ void fold_unrolling::operator()(combo_tree& tr,combo_tree::iterator it) const {
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses

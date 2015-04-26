@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,15 +28,15 @@
 #include <boost/range/algorithm/find.hpp>
 #include <boost/format.hpp>
 
-#include <opencog/util/log_prog_name.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/log_prog_name.h>
+#include <moses/util/oc_omp.h>
 
-#include <opencog/comboreduct/table/table_io.h>
-#include <opencog/learning/moses/moses/moses_main.h> // for version string
+#include <moses/comboreduct/table/table_io.h>
+#include <moses/learning/moses/moses/moses_main.h> // for version string
 
 using namespace std;
 using namespace boost::program_options;
-using namespace opencog;
+using namespace moses;
 using boost::lexical_cast;
 using boost::trim;
 using boost::str;
@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 
     if (vm.count("version")) {
         cout << "feature-selection "
-             << opencog::moses::version_string
+             << moses::moses::version_string
              << std::endl;
         return 0;
     }
@@ -405,7 +405,7 @@ int main(int argc, char** argv)
 
     // Log command-line args
     logger().info() << "feature-selection version "
-                    << opencog::moses::version_string;
+                    << moses::moses::version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";

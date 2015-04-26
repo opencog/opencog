@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,12 +26,12 @@
 #include <algorithm>
 #include <iostream>
 
-#include  <opencog/util/oc_assert.h>
-#include  <opencog/comboreduct/reduct/reduct.h>
-#include  <opencog/learning/moses/moses/complexity.h>
+#include  <moses/util/oc_assert.h>
+#include  <moses/comboreduct/reduct/reduct.h>
+#include  <moses/learning/moses/moses/complexity.h>
 #include "ensemble.h"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 using namespace combo;
@@ -434,5 +434,5 @@ score_t ensemble::flat_score() const
 }
 
 
-}}; // namespace opencog::moses
+}}; // namespace moses::moses
 

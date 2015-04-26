@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,11 +24,11 @@
 #ifndef _OPENCOG_FEATURE_SCORERS_MI_H
 #define _OPENCOG_FEATURE_SCORERS_MI_H
 
-#include <opencog/util/numeric.h>
-#include <opencog/comboreduct/table/table.h>
+#include <moses/util/numeric.h>
+#include <moses/comboreduct/table/table.h>
 #include "fs_scorer_base.h"
 
-namespace opencog {
+namespace moses {
 
 using namespace combo;
 
@@ -128,6 +128,6 @@ struct MICScorerCTable : public fs_scorer_base<FeatureSet>
     }
 };
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_SCORERS_MI_H

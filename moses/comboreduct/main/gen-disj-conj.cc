@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/main/gen-disj-conj.cc
+ * moses/comboreduct/main/gen-disj-conj.cc
  *
  * Copyright (C) 2012 OpenCog Foundation
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,16 +27,16 @@
 #include <boost/program_options.hpp>
 #include <boost/range/numeric.hpp>
 
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/random.h>
-#include <opencog/util/lazy_random_selector.h>
-#include <opencog/util/dorepeat.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/util/random.h>
+#include <moses/util/lazy_random_selector.h>
+#include <moses/util/dorepeat.h>
 
 #include "../combo/iostream_combo.h"
 
 using namespace std;
 using namespace boost::program_options;
-using namespace opencog;
+using namespace moses;
 using namespace combo;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/example-progs/pole_scoring.h
+ * moses/learning/moses/example-progs/pole_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,16 +24,16 @@
 #ifndef _POLE_SCORING_H
 #define _POLE_SCORING_H
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/numeric.h>
+#include <moses/util/mt19937ar.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/simple_nn.h>
-#include <opencog/comboreduct/reduct/ann_rules.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/simple_nn.h>
+#include <moses/comboreduct/reduct/ann_rules.h>
 
 #include "pole_balancing.h"
 
-using namespace opencog;
+using namespace moses;
 using namespace combo;
 using namespace std;
 using namespace moses;

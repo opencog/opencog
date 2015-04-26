@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/replacement.h
+ * moses/learning/moses/eda/replacement.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #ifndef _EDA_REPLACE_H
 #define _EDA_REPLACE_H
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/lazy_random_selector.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/lazy_random_selector.h>
+#include <moses/util/oc_omp.h>
 
 #include "../representation/field_set.h"
 #include "../representation/scored_instance.h"
 
-namespace opencog { 
+namespace moses { 
 namespace moses {
 
 // Replace the lowest-scored individuals in the current population,
@@ -106,6 +106,6 @@ protected:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

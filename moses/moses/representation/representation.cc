@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/representation.cc
+ * moses/learning/moses/representation/representation.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
@@ -12,7 +12,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,13 +28,13 @@
 #include <map>
 #include <boost/thread.hpp>
 
-#include <opencog/util/lazy_random_selector.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/lazy_random_selector.h>
+#include <moses/util/oc_omp.h>
 
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/logical_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/meta_rules.h>
+#include <moses/comboreduct/reduct/logical_rules.h>
+#include <moses/comboreduct/reduct/general_rules.h>
 
 #include "representation.h"
 #include "build_knobs.h"
@@ -43,7 +43,7 @@
 // reduction during optimization
 // #define __FINE_LOG_CND_REDUCED__
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 // Stepsize should be roughly the standard-deviation of the expected
 // distribution of the contin variables.
@@ -438,4 +438,4 @@ void representation::set_exemplar_inst()
 #endif // EXEMPLAR_INST_IS_UNDEAD
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

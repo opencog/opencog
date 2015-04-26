@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h
+ * moses/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,13 +28,13 @@
 #include "ant_perception.h"
 #include "ant_action_symbol.h"
 #include "ant_indefinite_object.h"
-#include <opencog/comboreduct/combo/combo.h>
+#include <moses/comboreduct/combo/combo.h>
 
 //this namespace is defined in order to break ambiguities
 //and make coexist several vocabularies
 namespace ant_combo {
 
-using namespace opencog::combo;
+using namespace moses::combo;
 
 //return a pointer to class base instance
 //of a given action or perception enum

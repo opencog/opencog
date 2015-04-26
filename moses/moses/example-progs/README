@@ -29,13 +29,13 @@ to perform much of the "heavy lifting".
    Usage: nmax <rand-seed> <set-size> <population-size> <num-gens> <arity>
 
    NOTE: There's currently a bug, this fails for n=2, see bug 908230.
-   https://bugs.launchpad.net/opencog/+bug/908230
+   https://bugs.launchpad.net/moses/+bug/908230
 
 -- continmax. This is a variation of the onemax/nmax problems above, but
    with continuous variables in place of discrete variables.
 
    NOTE: This sort-of works, but not well, I think due to bugs. See
-   https://bugs.launchpad.net/opencog/+bug/908247
+   https://bugs.launchpad.net/moses/+bug/908247
 
 -- termmax. A variation of the continmax problem, but extended for
    arbitrary n-ary term-algebra trees.  term support in MOSES is 

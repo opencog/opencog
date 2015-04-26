@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/bscores.cc
+ * moses/learning/moses/scoring/bscores.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,14 +40,14 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/KLD.h>
-#include <opencog/util/MannWhitneyU.h>
-#include <opencog/comboreduct/table/table_io.h>
+#include <moses/util/numeric.h>
+#include <moses/util/KLD.h>
+#include <moses/util/MannWhitneyU.h>
+#include <moses/comboreduct/table/table_io.h>
 
 #include "bscores.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace std;
 using boost::adaptors::map_values;
@@ -1072,4 +1072,4 @@ score_t cluster_bscore::min_improv() const
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

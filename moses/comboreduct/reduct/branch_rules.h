@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/branch_rules.h
+ * moses/comboreduct/reduct/branch_rules.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 
 #include "reduct.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 /// Apply boolean reduction to each predicate
 /// (same class structure as reduce_impulse_arg)
@@ -88,6 +88,6 @@ struct reduce_cond_const : public crule<reduce_cond_const>
 
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

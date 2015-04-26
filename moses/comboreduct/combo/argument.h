@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "common_def.h"
 #include <boost/operators.hpp>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 /**
  * class argument
@@ -59,7 +59,7 @@ public:
     }
 
     bool operator<(const argument& rhs) const {
-        static opencog::absolute_value_order<int> comp;
+        static moses::absolute_value_order<int> comp;
         return comp(idx, rhs.idx);
     }
 
@@ -91,6 +91,6 @@ public:
 };
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _COMBO_ARGUMENT_H

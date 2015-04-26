@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@
 
 #include "neighborhood_sampling.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 // See the header for the function comments
 
@@ -37,7 +37,7 @@ void flip_LR(field_set::disc_iterator itr) {
 // See header for comment
 void twiddle_contin_bit(field_set::disc_iterator itr,
                         field_set::disc_iterator next_itr,
-                        opencog::RandGen& rng)
+                        moses::RandGen& rng)
 {
     if (*itr == field_set::contin_spec::Stop) {
         *itr = rng.randbool() ?
@@ -56,7 +56,7 @@ void generate_contin_neighbor(const field_set& fs,
                               instance& inst,
                               field_set::contin_iterator it,
                               unsigned dist,
-                              opencog::RandGen& rng)
+                              moses::RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx()),
         depth = fs.contin()[it.idx()].depth,
@@ -295,4 +295,4 @@ size_t sample_new_instances(size_t number_of_new_instances,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

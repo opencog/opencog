@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,20 +24,20 @@
 #ifndef _OPENCOG_FS_SCORERS_MATRIX_H
 #define _OPENCOG_FS_SCORERS_MATRIX_H
 
-#include <opencog/util/numeric.h>
+#include <moses/util/numeric.h>
 
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/learning/moses/scoring/precision_bscore.h>
+#include <moses/comboreduct/table/table.h>
+#include <moses/learning/moses/scoring/precision_bscore.h>
 #include "fs_scorer_base.h"
 
-namespace opencog {
+namespace moses {
 
 using namespace moses;
 using combo::CTable;
 
 /**
  * Wrapper to use moses scoring precision (see
- * opencog/learning/moses/scoring/scoring.h).  This is one of the
+ * moses/learning/moses/scoring/scoring.h).  This is one of the
  * confusion-matrix based scorers.
  *
  * That wrapper uses the method best_possible_score() given a certain
@@ -88,6 +88,6 @@ protected:
 };
 
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FS_SCORERS_MATRIX_H

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/ant_scoring.h
+ * moses/learning/moses/moses/ant_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,16 +24,16 @@
 #ifndef _ANT_SCORING_H
 #define _ANT_SCORING_H
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/numeric.h>
+#include <moses/util/mt19937ar.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "../scoring/scoring_base.h"
 
 using namespace ant_combo;
-using namespace opencog::moses;
+using namespace moses::moses;
 
 #define MIN_FITNESS -1.0e10
 

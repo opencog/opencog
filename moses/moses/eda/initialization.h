@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/initialization.h
+ * moses/learning/moses/eda/initialization.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "../representation/field_set.h"
 
 //various routines for initializing instances
-namespace opencog { 
+namespace moses { 
 namespace moses {
 
 // Occam randomize a particular contin or term field. Note that it is
@@ -35,29 +35,29 @@ namespace moses {
 // uniformely distributed.
 void occam_randomize_contin(const field_set&, instance&,
                             field_set::contin_iterator,
-                            opencog::RandGen& rng = randGen());
+                            moses::RandGen& rng = randGen());
 void occam_randomize_term(const field_set&, instance&,
                           field_set::const_term_iterator,
-                          opencog::RandGen& rng = randGen());
+                          moses::RandGen& rng = randGen());
 
 //occam randomize all contin or term fields
 void occam_randomize_term(const field_set&, instance&,
-                          opencog::RandGen& rng = randGen());
+                          moses::RandGen& rng = randGen());
 void occam_randomize_contin(const field_set&, instance&,
-                            opencog::RandGen& rng = randGen());
+                            moses::RandGen& rng = randGen());
 
 //uniformly randomize all bit or disc fields
 void uniform_randomize_bit(const field_set&, instance&,
-                           opencog::RandGen& rng = randGen());
+                           moses::RandGen& rng = randGen());
 void uniform_randomize_disc(const field_set&, instance&,
-                            opencog::RandGen& rng = randGen());
+                            moses::RandGen& rng = randGen());
 
 // Occam randomize all contin and term fields, and uniformly randomize
 // all bit and disc fields
 void randomize(const field_set&, instance&,
-               opencog::RandGen& rng = randGen());
+               moses::RandGen& rng = randGen());
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,15 +30,15 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/algorithm/max_element.hpp>
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/functional.h>
+#include <moses/util/lru_cache.h>
+#include <moses/util/numeric.h>
+#include <moses/util/oc_omp.h>
 
 #include "../main/feature-selection.h"  // needed for feature_set, feature_selection_parameters
 
-namespace opencog {
+namespace moses {
 
 feature_set_pop incremental_select_feature_sets(const CTable& ctable,
                                                 const feature_selection_parameters& fs_params);
@@ -105,7 +105,7 @@ FeatureSet incremental_selection(const FeatureSet& features,
         gettimeofday(&start, NULL);
 
         // Define the set of set of features to test for relevancy
-        FeatureSet tf = opencog::set_difference(features, rel);
+        FeatureSet tf = moses::set_difference(features, rel);
         std::set<FeatureSet> fss = powerset(tf, i, true);
 
         logger().debug("Iteration %d feature set size=%d powerset size=%d",
@@ -305,6 +305,6 @@ FeatureSet redundant_features(const FeatureSet& features, const Scorer& scorer,
     return FS();
 }
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_SELECTION_INCREMENTAL_ALGO_H

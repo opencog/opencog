@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,17 +24,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
-#include <opencog/learning/moses/main/problem-params.h>
-#include <opencog/learning/moses/moses/types.h>
-#include <opencog/learning/moses/scoring/behave_cscore.h>
-#include <opencog/learning/moses/scoring/bscores.h>
-#include <opencog/learning/moses/example-progs/scoring_iterators.h>
+#include <moses/util/Logger.h>
+#include <moses/learning/moses/main/problem-params.h>
+#include <moses/learning/moses/moses/types.h>
+#include <moses/learning/moses/scoring/behave_cscore.h>
+#include <moses/learning/moses/scoring/bscores.h>
+#include <moses/learning/moses/example-progs/scoring_iterators.h>
 
 #include "problem.h"
 #include "demo-problems.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 struct demo_params : public option_base
 {
@@ -512,5 +512,5 @@ void register_demo_problems(problem_manager& pmr, option_manager& mgr)
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/logical_rules.cc
+ * moses/comboreduct/reduct/logical_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,14 +26,14 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/mt19937ar.h>
-#include <opencog/comboreduct/combo/assumption.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/mt19937ar.h>
+#include <moses/comboreduct/combo/assumption.h>
 #include "logical_rules.h"
 #include "../table/table.h"
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
 
@@ -445,7 +445,7 @@ void subtree_to_enf::reduce_to_enf::operator()(sib_it it)
     for (up_it p = ++tr.begin_upwards(it);
          p != tr.end_upwards() && is_logical_operator(*p); ++p)
     {
-        if (!opencog::is_sorted(make_counting_iterator(p.begin()),
+        if (!moses::is_sorted(make_counting_iterator(p.begin()),
                                 make_counting_iterator(p.end()), comp))
             tr.sort_on_subtrees(p.begin(), p.end(), comp);
     }
@@ -543,7 +543,7 @@ void subtree_to_enf::reduce_to_enf::or_cut(sib_it current)
         {
             if (*child.begin() == id::logical_or)
             {
-                opencog::insert_set_complement
+                moses::insert_set_complement
                     (tree_inserter(tr,current),
                      make_counting_iterator(current.begin()),
                      make_counting_iterator(current.end()),
@@ -586,7 +586,7 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
 {
 #if DEBUG
     // For performance, skip this check ...
-    OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
+    OC_ASSERT(moses::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
 #endif
 
@@ -609,9 +609,9 @@ subtree_to_enf::reduce_to_enf::reduce(sib_it current,
 
 #if DEBUG
     // We skip this to improve performance.
-    OC_ASSERT(opencog::is_sorted(dominant.begin(), dominant.end(), comp),
+    OC_ASSERT(moses::is_sorted(dominant.begin(), dominant.end(), comp),
               "dominant subtree_set should be sorted (reduce)");
-    OC_ASSERT(opencog::is_sorted(command.begin(), command.end(), comp),
+    OC_ASSERT(moses::is_sorted(command.begin(), command.end(), comp),
               "command subtree_set should be sorted (reduce).");
 #endif
 
@@ -630,7 +630,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                                           const subtree_set& dominant,
                                           const subtree_set& command)
 {
-    opencog::erase_set_intersection(tree_eraser(tr),
+    moses::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
                                     dominant.begin(), dominant.end(), comp);
@@ -640,7 +640,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
     push_back_negated_arguments(command, negated);
     std::sort(negated.begin(), negated.end(), comp);
 
-    opencog::erase_set_intersection(tree_eraser(tr),
+    moses::erase_set_intersection(tree_eraser(tr),
                                     make_counting_iterator(current.begin()),
                                     make_counting_iterator(current.end()),
                                     negated.begin(),negated.end(),comp);
@@ -648,7 +648,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
     if (current.is_childless())
         return Disconnect; //0subsume
 
-    if (!opencog::has_empty_intersection
+    if (!moses::has_empty_intersection
         (make_counting_iterator(current.begin()),
          make_counting_iterator(current.end()),
          command.begin(),command.end(),comp))
@@ -662,11 +662,11 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 
 #if DEBUG
         // stub out, for performance.
-        OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(), comp),
+        OC_ASSERT(moses::is_sorted(dominant.begin(),dominant.end(), comp),
                   "dominant subtree_set should be sorted (reduce_and)");
 #endif
 
-        if (!opencog::is_sorted(make_counting_iterator(current.begin()),
+        if (!moses::is_sorted(make_counting_iterator(current.begin()),
                                 make_counting_iterator(current.end()), comp))
             tr.sort_on_subtrees(current.begin(), current.end(), comp);
 
@@ -692,9 +692,9 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 
 #if DEBUG
             // stubbed out for performance
-            OC_ASSERT(opencog::is_sorted(command.begin(),command.end(),comp),
+            OC_ASSERT(moses::is_sorted(command.begin(),command.end(),comp),
                       "command subtree_set should be sorted (reduce_and)");
-            OC_ASSERT(opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
+            OC_ASSERT(moses::is_sorted(handle_set.begin(),handle_set.end(),comp),
                       "handle_set subtree_set should be sorted (reduce_and)");
 #endif
             subtree_set::iterator tmp_it = handle_set.find(child);
@@ -716,7 +716,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 break;
             case Keep:
 
-                if (!opencog::is_sorted(make_counting_iterator(current.begin()),
+                if (!moses::is_sorted(make_counting_iterator(current.begin()),
                                         make_counting_iterator(current.end()),
                                         comp))
                     tr.sort_on_subtrees(current.begin(), current.end(), comp);
@@ -744,7 +744,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                 }
 
                 for (sib_it sib = child.begin(); sib != child.last_child(); ++sib)
-                    opencog::erase_set_difference(subtree_set_eraser(res),
+                    moses::erase_set_difference(subtree_set_eraser(res),
                                                   res.begin(), res.end(),
                                                   make_counting_iterator(sib.begin()),
                                                   make_counting_iterator(sib.end()),
@@ -752,7 +752,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
 
                 if (!res.empty())
                 {
-                    opencog::insert_set_complement
+                    moses::insert_set_complement
                         (tree_inserter(tr, current),
                          make_counting_iterator(current.begin()),
                          make_counting_iterator(current.end()),
@@ -762,7 +762,7 @@ subtree_to_enf::reduce_to_enf::reduce_and(sib_it current,
                     {
                         // Do NOT erase children of predicates!
                         if (is_predicate(gchild)) continue;
-                        opencog::erase_set_intersection
+                        moses::erase_set_intersection
                             (tree_eraser(tr),
                              make_counting_iterator(gchild.begin()),
                              make_counting_iterator(gchild.end()),
@@ -853,5 +853,5 @@ void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 

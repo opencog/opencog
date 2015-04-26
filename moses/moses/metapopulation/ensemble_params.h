@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_ENSEMBLE_PARAMS_H
 #define _OPENCOG_ENSEMBLE_PARAMS_H
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 struct ensemble_parameters
@@ -47,7 +47,7 @@ struct ensemble_parameters
 	                     // per learning iteration.
 };
 
-}}; // namespace opencog::moses
+}}; // namespace moses::moses
 
 #endif // _OPENCOG_ENSEMBLE_PARAMS_H
 

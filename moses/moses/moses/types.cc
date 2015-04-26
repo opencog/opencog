@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/types.cc
+ * moses/learning/moses/moses/types.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2014 Aidyia Limited
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@
 #include "complexity.h"
 
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace std;
 
@@ -293,4 +293,4 @@ std::istream& istream_scored_combo_trees(std::istream& in,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

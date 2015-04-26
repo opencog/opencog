@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/types.h
+ * moses/learning/moses/moses/types.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -37,13 +37,13 @@
 #include <boost/operators.hpp>
 #include <boost/ptr_container/ptr_set.hpp>
 
-#include <opencog/util/functional.h>
-#include <opencog/util/iostreamContainer.h>
+#include <moses/util/functional.h>
+#include <moses/util/iostreamContainer.h>
 
-#include <opencog/comboreduct/combo/combo.h>
+#include <moses/comboreduct/combo/combo.h>
 #include "complexity.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using combo::vertex;
 using boost::indirect_iterator;
@@ -448,6 +448,6 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

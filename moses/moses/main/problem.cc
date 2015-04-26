@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,12 +30,12 @@
 #include <map>
 #include <set>
 
-#include <opencog/util/Logger.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/util/Logger.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
 #include "problem.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 // =================================================================
 // Register options
@@ -202,5 +202,5 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

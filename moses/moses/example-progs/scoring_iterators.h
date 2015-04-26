@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/example-progs/scoring_iterators.h
+ * moses/learning/moses/example-progs/scoring_iterators.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +24,13 @@
 #ifndef _MOSES_SCORING_ITERATORS_H
 #define _MOSES_SCORING_ITERATORS_H
 
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/numeric.h> // needed for pow2
-#include <opencog/comboreduct/combo/vertex.h> // needed for contin_t
+#include <moses/util/dorepeat.h>
+#include <moses/util/numeric.h> // needed for pow2
+#include <moses/comboreduct/combo/vertex.h> // needed for contin_t
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
-using namespace opencog::combo;
+using namespace moses::combo;
 
 // Base functor for functors taking an iterator range of value type and result T
 template<typename T>
@@ -121,6 +121,6 @@ struct simple_symbolic_regression : public iterator_function<contin_t>
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

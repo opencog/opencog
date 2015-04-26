@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,11 +26,11 @@
 
 #include <boost/range/algorithm/sort.hpp>
 
-#include <opencog/util/oc_omp.h>
+#include <moses/util/oc_omp.h>
 
 #include "metapopulation.h"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 using namespace std;
@@ -305,5 +305,5 @@ void metapopulation::merge_nondominated(const scored_combo_tree_set& bcs, unsign
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,16 +26,16 @@
 
 #include <boost/assign/std/vector.hpp>
 
-#include <opencog/util/algorithm.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/Logger.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/numeric.h>
+#include <moses/util/Logger.h>
 
 #include "../table/table_io.h"
 #include "../table/table.h"
 
 using namespace std;
 using namespace boost::assign;
-using namespace opencog;
+using namespace moses;
 using namespace combo;
 
 string opt_desc_str(const pair<string, string>& opt) {

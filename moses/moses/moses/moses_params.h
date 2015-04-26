@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/moses_params.h
+ * moses/learning/moses/moses/moses_params.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,7 @@
 #include <map>
 #include <boost/program_options/variables_map.hpp>
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 /// A map between hostname and number of jobs allocated.
@@ -97,6 +97,6 @@ struct moses_statistics
 
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

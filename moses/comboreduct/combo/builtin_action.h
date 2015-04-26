@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/builtin_action.h
+ * moses/comboreduct/combo/builtin_action.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +24,7 @@
 #ifndef _COMBO_BUILTIN_ACTION_H
 #define _COMBO_BUILTIN_ACTION_H
 
-#include <opencog/util/exceptions.h>
+#include <moses/util/exceptions.h>
 
 #include "../type_checker/type_tree_def.h"
 #include "common_def.h"
@@ -38,7 +38,7 @@
 //action property methods which have not been implemented
 #define NO_DEFAULT_ACTION_PROPERTY_METHODS
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
   /**
  * builtin_action_base is an abstract class to be implemented
@@ -123,6 +123,6 @@ typedef builtin_action_set::const_iterator builtin_action_set_const_it;
 std::ostream& operator<<(std::ostream&, combo::builtin_action);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

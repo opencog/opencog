@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/build_knobs.cc
+ * moses/learning/moses/representation/build_knobs.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,22 +26,22 @@
 
 #include <boost/range/irange.hpp>
 
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/lazy_random_selector.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/oc_omp.h>
-#include <opencog/util/random.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/util/lazy_random_selector.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/oc_omp.h>
+#include <moses/util/random.h>
 
-#include <opencog/comboreduct/combo/convert_ann_combo.h>
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
+#include <moses/comboreduct/combo/convert_ann_combo.h>
+#include <moses/comboreduct/reduct/meta_rules.h>
+#include <moses/comboreduct/reduct/general_rules.h>
 
 #include "build_knobs.h"
 
 using namespace std;
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
@@ -1348,4 +1348,4 @@ void build_knobs::ann_canonize(pre_it it)
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

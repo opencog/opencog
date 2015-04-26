@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/descriptions.h
+ * moses/comboreduct/combo/descriptions.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #ifndef _COMBO_DESCRIPTIONS_H
 #define _COMBO_DESCRIPTIONS_H
 
-#include <opencog/util/numeric.h>
+#include <moses/util/numeric.h>
 
 #include "action.h"
 #include "../type_checker/type_tree.h"
 
-#include <opencog/util/tree.h>
+#include <moses/util/tree.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 namespace builtin_properties {
 
@@ -119,6 +119,6 @@ private:
 
 }  // namespace action_properties
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif // _COMBO_DESCRIPTIONS_H

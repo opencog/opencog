@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,9 +39,9 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <opencog/util/boost_ext/accumulators/statistics/geometric_mean_mirror.h>
+#include <moses/util/boost_ext/accumulators/statistics/geometric_mean_mirror.h>
 
-#include <opencog/comboreduct/combo/combo.h>
+#include <moses/comboreduct/combo/combo.h>
 #include "../optimization/optimization.h"
 #include "../scoring/behave_cscore.h"
 #include "metapop_params.h"
@@ -55,7 +55,7 @@
 
 class metapopulationUTest;
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 /**
@@ -575,6 +575,6 @@ protected:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_METAPOPULATION_H

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/knobs.h
+ * moses/learning/moses/moses/knobs.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,17 +28,17 @@
 #include <string>
 #include <vector>
 
-#include <opencog/util/based_variant.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/tree.h>
+#include <moses/util/based_variant.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/numeric.h>
+#include <moses/util/tree.h>
 
-#include <opencog/comboreduct/combo/iostream_combo.h>
+#include <moses/comboreduct/combo/iostream_combo.h>
 
 #include "../moses/complexity.h"
 #include "field_set.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace combo;
 
@@ -335,13 +335,13 @@ typedef based_variant <boost::variant<logical_subtree_knob,
 // Without this helper, the compiler gets confused and tries to cast
 // knob_base to something strange.
 inline std::ostream& operator<<(std::ostream& out,
-                                const opencog::moses::knob_base& s)
+                                const moses::moses::knob_base& s)
 {
 	return out << s.toStr();
 }
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif
 

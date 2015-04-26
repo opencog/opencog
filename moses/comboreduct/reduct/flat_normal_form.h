@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/flat_normal_form.h
+ * moses/comboreduct/reduct/flat_normal_form.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,16 +31,16 @@
 #include <unordered_map>
 #include <boost/bind.hpp>
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/tree.h>
+#include <moses/util/Logger.h>
+#include <moses/util/numeric.h>
+#include <moses/util/tree.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
-namespace opencog { namespace reduct {
-typedef std::set<int, opencog::absolute_value_order<int> > clause;
+namespace moses { namespace reduct {
+typedef std::set<int, moses::absolute_value_order<int> > clause;
 typedef std::list<clause> nf;
-using namespace opencog::combo;
+using namespace moses::combo;
 
 //does c contain p and !p?
 bool tautology(const clause& c);
@@ -96,10 +96,10 @@ template<typename T>
 class nf_mapper
 {
 public:
-    typedef opencog::tree<T> tree;
+    typedef moses::tree<T> tree;
     typedef typename tree::sibling_iterator sib_it;
     typedef std::map<sib_it,int,
-                     opencog::lexicographic_subtree_order<T> > Item2Int;
+                     moses::lexicographic_subtree_order<T> > Item2Int;
     typedef std::unordered_map<int,tree> Int2Item;
 
     nf add_cnf(sib_it, sib_it);
@@ -273,9 +273,9 @@ void nf_mapper<T>::create(tree& t, sib_it at, int idx) const
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses
 
-std::ostream& operator<<(std::ostream& out,const opencog::reduct::clause& c);
-std::ostream& operator<<(std::ostream& out,const opencog::reduct::nf& d);
+std::ostream& operator<<(std::ostream& out,const moses::reduct::clause& c);
+std::ostream& operator<<(std::ostream& out,const moses::reduct::nf& d);
 
 #endif

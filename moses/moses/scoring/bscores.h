@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/bscores.h
+ * moses/learning/moses/scoring/bscores.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,12 +35,12 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/weighted_skewness.hpp>
 
-#include <opencog/comboreduct/table/table.h>
+#include <moses/comboreduct/table/table.h>
 
 #include "scoring_base.h"
 #include "../moses/types.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace combo;
 
@@ -141,7 +141,7 @@ protected:
  *
  * The math justifying the program size penalty equations is based on
  * the following thread
- * http://groups.google.com/group/opencog-news/browse_thread/thread/b7704419e082c6f1
+ * http://groups.google.com/group/moses-news/browse_thread/thread/b7704419e082c6f1
  *
  * It turns out this is closely related to the Akaike Information
  * Criterion, see in particular
@@ -289,7 +289,7 @@ private:
  * -------------------------------------------------------------------
  *
  * The details were originally reported in this thread,
- * http://groups.google.com/group/opencog/browse_thread/thread/a4771ecf63d38df
+ * http://groups.google.com/group/moses/browse_thread/thread/a4771ecf63d38df
  * and are restated, cleaned up, below:
  *
  * M is the model (the combo program)
@@ -638,6 +638,6 @@ protected:
 };
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

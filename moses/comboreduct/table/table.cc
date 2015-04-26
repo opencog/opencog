@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,9 +34,9 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 
-#include <opencog/util/dorepeat.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/lazy_random_selector.h>
+#include <moses/util/dorepeat.h>
+#include <moses/util/Logger.h>
+#include <moses/util/lazy_random_selector.h>
 
 #include "../combo/ann.h"
 #include "../combo/simple_nn.h"
@@ -45,7 +45,7 @@
 #include "table.h"
 #include "table_io.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 using namespace std;
 using namespace boost;
@@ -928,4 +928,4 @@ double OTEntropy(const OTable& ot)
     return entropy(py);
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

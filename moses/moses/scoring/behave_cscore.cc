@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/scoring/behave_cscore.cc
+ * moses/learning/moses/scoring/behave_cscore.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -11,7 +11,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,11 +24,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/crutil/exception.h>
+#include <moses/comboreduct/crutil/exception.h>
 
 #include "behave_cscore.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 behave_cscore::behave_cscore(bscore_base& b, size_t initial_cache_size)
     : _bscorer(b),
@@ -132,4 +132,4 @@ score_t behave_cscore::worst_possible_score() const
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

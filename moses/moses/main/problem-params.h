@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,18 +29,18 @@
 
 #include <boost/program_options.hpp>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/learning/moses/main/problem.h>
-#include <opencog/learning/moses/metapopulation/metapop_params.h>
-#include <opencog/learning/moses/moses/moses_main.h>
-#include <opencog/learning/moses/moses/moses_params.h>
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/optimization/hill-climbing.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/table/table.h>
+#include <moses/learning/moses/main/problem.h>
+#include <moses/learning/moses/metapopulation/metapop_params.h>
+#include <moses/learning/moses/moses/moses_main.h>
+#include <moses/learning/moses/moses/moses_params.h>
+#include <moses/learning/moses/optimization/optimization.h>
+#include <moses/learning/moses/optimization/hill-climbing.h>
 
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 // XXX FIXME TODO The structure below should be split into multiple
 // parts, with each sub-part responsible for picking out the argv's
@@ -227,6 +227,6 @@ private:
 };
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_MOSES_PROBLEM_PARAMS_H

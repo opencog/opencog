@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,15 +28,15 @@
 
 #include <functional>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/lru_cache.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/functional.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/numeric.h>
+#include <moses/util/lru_cache.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/functional.h>
+#include <moses/util/oc_omp.h>
 
 #include "../main/feature-selection.h" // needed for feature_set, feature_selection_parameters
 
-namespace opencog {
+namespace moses {
 
 feature_set_pop smd_select_feature_sets(const CTable& ctable,
                                         const feature_selection_parameters& fs_params);
@@ -193,6 +193,6 @@ feature_set_pop stochastic_max_dependency_selection(const feature_set& features,
     return ranks;
 }
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE_MAX_MI_ALGO_H

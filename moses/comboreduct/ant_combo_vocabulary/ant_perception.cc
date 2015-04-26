@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_combo_vocabulary/ant_perception.cc
+ * moses/comboreduct/ant_combo_vocabulary/ant_perception.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,9 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ant_perception.h"
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 using namespace ant_perception_properties;
 
@@ -137,4 +137,4 @@ bool ant_perception::is_identity_of_indiscernibles() const {
     return _identity_of_indiscernibles;
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

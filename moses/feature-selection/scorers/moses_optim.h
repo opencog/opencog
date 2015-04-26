@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #ifndef _OPENCOG_FS_SCORERS_OPTIM_H
 #define _OPENCOG_FS_SCORERS_OPTIM_H
 
-#include <opencog/util/numeric.h>
+#include <moses/util/numeric.h>
 
-#include <opencog/comboreduct/combo/common_def.h>
-#include <opencog/learning/moses/representation/field_set.h>
-#include <opencog/learning/moses/representation/instance_scorer.h>
-#include <opencog/learning/moses/moses/types.h>
+#include <moses/comboreduct/combo/common_def.h>
+#include <moses/learning/moses/representation/field_set.h>
+#include <moses/learning/moses/representation/instance_scorer.h>
+#include <moses/learning/moses/moses/types.h>
 
-namespace opencog {
+namespace moses {
 
 using namespace moses;
 using namespace combo;
@@ -77,6 +77,6 @@ struct deme_based_scorer : public iscorer_base
     const field_set& _fields;
 };
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FS_SCORERS_OPTIM_H

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/main/tree_gen.cc
+ * moses/comboreduct/main/tree_gen.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 
-#include <opencog/util/selection.h>
-#include <opencog/util/mt19937ar.h>
+#include <moses/util/selection.h>
+#include <moses/util/mt19937ar.h>
 
 #include "tree_generation.h"
 
 int main(int argc, char** argv)
 {
-    using namespace opencog;
+    using namespace moses;
     using namespace trees;
     using namespace boost;
     using namespace std;

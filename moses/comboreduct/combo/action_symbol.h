@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/action_symbol.h
+ * moses/comboreduct/combo/action_symbol.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@
 #include "operator_base.h"
 #include "../type_checker/type_tree_def.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 //action_symbol_base inherit operator_base
 //without additional properties
@@ -41,6 +41,6 @@ typedef const action_symbol_base* action_symbol;
 std::ostream& operator<<(std::ostream&, combo::action_symbol);
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

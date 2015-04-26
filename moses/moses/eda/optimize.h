@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/optimize.h
+ * moses/learning/moses/eda/optimize.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,12 +24,12 @@
 #ifndef _EDA_OPTIMIZE_H
 #define _EDA_OPTIMIZE_H
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/oc_omp.h>
+#include <moses/util/Logger.h>
+#include <moses/util/oc_omp.h>
 
 #include "../representation/instance_set.h"
 
-namespace opencog { 
+namespace moses { 
 namespace moses {
     
     // Generic evolutionary competition algorithm, intended for use
@@ -183,6 +183,6 @@ namespace moses {
     }
     
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif

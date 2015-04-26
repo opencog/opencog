@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/reduct/branch_rules.cc
+ * moses/comboreduct/reduct/branch_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,9 +24,9 @@
  */
 #include "branch_rules.h"
 #include "../type_checker/type_tree.h"
-#include <opencog/util/exceptions.h>
+#include <moses/util/exceptions.h>
 
-namespace opencog { namespace reduct {
+namespace moses { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;
@@ -168,4 +168,4 @@ void reduce_cond_const::operator()(combo_tree& tr,
 }
 
 } // ~namespace reduct
-} // ~namespace opencog
+} // ~namespace moses

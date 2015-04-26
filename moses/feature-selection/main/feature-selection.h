@@ -8,7 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,14 +32,14 @@
 #include "../scorers/moses_matrix.h"  // for pre_scorer
 
 
-namespace opencog {
+namespace moses {
 
 // using namespace moses;
 
 // Feature selection scorers
 static const std::string mi="mi";   // Mutual Information (see feature_scorer.h)
 static const std::string pre="pre"; // Precision (see
-                                    // opencog/learning/moses/scoring/scoring.h)
+                                    // moses/learning/moses/scoring/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
@@ -167,7 +167,7 @@ struct fs_scorer : public std::unary_function<FeatureSet, double>
             _ptr_mi_scorer =
                 new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
-            // opencog/learning/moses/scoring/scoring.h)
+            // moses/learning/moses/scoring/scoring.h)
             _ptr_pre_scorer =
                 new pre_scorer<FeatureSet>(ctable, fs_params.mi_confi,
                                            fs_params.pre_penalty,
@@ -223,6 +223,6 @@ feature_set select_features(const Table& table,
 void feature_selection(const Table& table,
                        const feature_selection_parameters& fs_params);
 
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_FEATURE-SELECTION_H

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant_combo_vocabulary/ant_indefinite_object.cc
+ * moses/comboreduct/ant_combo_vocabulary/ant_indefinite_object.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,9 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ant_indefinite_object.h"
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 using namespace ant_indefinite_object_properties;
 
@@ -90,4 +90,4 @@ const type_tree& ant_indefinite_object::get_input_type_tree(arity_t i) const {
   return argument_type_list_input_type(_arg_type_tree, _arity, i);
 }
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses

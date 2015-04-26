@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/vertex.h
+ * moses/comboreduct/combo/vertex.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,10 +28,10 @@
 #include <boost/functional/hash.hpp>
 #include <boost/variant.hpp>
 
-#include <opencog/util/tree.h>
-#include <opencog/util/numeric.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/oc_assert.h>
+#include <moses/util/tree.h>
+#include <moses/util/numeric.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/oc_assert.h>
 
 #include "action.h"
 #include "action_symbol.h"
@@ -48,7 +48,7 @@
 // uncomment that if you want to interpret log(x) as log(abs(x))
 // #define ABS_LOG
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 class procedure_call_base;
 
@@ -790,17 +790,17 @@ inline bool may_have_side_effects(combo_tree::iterator /*it*/)
 }
 
 } // ~namespace combo
-} // ~namespace opencog
+} // ~namespace moses
 
 // this is to be able to use std::unordered_map and such
 namespace std
 {
     template<>
-    struct hash<opencog::combo::vertex>
+    struct hash<moses::combo::vertex>
     {
-        size_t operator()(opencog::combo::vertex v) const
+        size_t operator()(moses::combo::vertex v) const
         {
-            return opencog::combo::hash_value(v);
+            return moses::combo::hash_value(v);
         }
     };
 }

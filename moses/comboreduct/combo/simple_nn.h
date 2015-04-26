@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,12 +32,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <opencog/util/iostreamContainer.h>
-#include <opencog/util/RandGen.h>
+#include <moses/util/iostreamContainer.h>
+#include <moses/util/RandGen.h>
 
 #include "vertex.h"
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 //anns are composed of nodes and connections
 class ann;
@@ -627,6 +627,6 @@ public:
     }
 };
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
 
 #endif // _COMBO_SIMPLE_NN_H

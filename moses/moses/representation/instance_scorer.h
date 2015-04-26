@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/representation/instance_scorer.h
+ * moses/learning/moses/representation/instance_scorer.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC
@@ -10,7 +10,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,7 +30,7 @@
 #include "representation.h"
 #include "../scoring/behave_cscore.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 struct iscorer_base : public std::unary_function<instance, composite_score>
 {
@@ -107,6 +107,6 @@ protected:
 };
 
 } //~namespace moses
-} //~namespace opencog
+} //~namespace moses
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/initialization.cc
+ * moses/learning/moses/eda/initialization.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,14 +24,14 @@
 #include "initialization.h"
 #include "../moses/neighborhood_sampling.h"
 
-namespace opencog { 
+namespace moses { 
 namespace moses {
 
 using namespace std;
 
 void occam_randomize_contin(const field_set& fs, instance& inst,
                             field_set::contin_iterator it,
-                            opencog::RandGen& rng)
+                            moses::RandGen& rng)
 {
     unsigned int n = rng.randint(fs.contin()[it.idx()].depth);
     moses::generate_contin_neighbor(fs, inst, it, n, rng);
@@ -41,7 +41,7 @@ void occam_randomize_contin(const field_set& fs, instance& inst,
 // otherwise there will be a bias towards smaller programs
 void occam_randomize_term(const field_set& fs, instance& inst,
                           field_set::const_term_iterator it,
-                          opencog::RandGen& rng)
+                          moses::RandGen& rng)
 {
     //if there are n levels
     size_t begin = fs.term_to_raw_idx(it.idx());
@@ -62,7 +62,7 @@ void occam_randomize_term(const field_set& fs, instance& inst,
 }
 
 void occam_randomize_term(const field_set& fs, instance& inst,
-                          opencog::RandGen& rng)
+                          moses::RandGen& rng)
 {
     for (field_set::const_term_iterator it = fs.begin_term(inst);
             it != fs.end_term(inst);++it)
@@ -70,7 +70,7 @@ void occam_randomize_term(const field_set& fs, instance& inst,
 }
 
 void occam_randomize_contin(const field_set& fs, instance& inst,
-                            opencog::RandGen& rng)
+                            moses::RandGen& rng)
 {
     for (field_set::contin_iterator it = fs.begin_contin(inst);
          it != fs.end_contin(inst); ++it)
@@ -78,7 +78,7 @@ void occam_randomize_contin(const field_set& fs, instance& inst,
 }
 
 void uniform_randomize_bit(const field_set& fs, instance& inst,
-                           opencog::RandGen& rng)
+                           moses::RandGen& rng)
 {
     //could be faster
     generate(fs.begin_bit(inst), fs.end_bit(inst),
@@ -86,7 +86,7 @@ void uniform_randomize_bit(const field_set& fs, instance& inst,
 }
 
 void uniform_randomize_disc(const field_set& fs, instance& inst,
-                            opencog::RandGen& rng)
+                            moses::RandGen& rng)
 {
     for (field_set::disc_iterator it = fs.begin_disc(inst);
             it != fs.end_disc(inst);++it)
@@ -94,7 +94,7 @@ void uniform_randomize_disc(const field_set& fs, instance& inst,
 }
 
 void randomize(const field_set& fs, instance& inst,
-               opencog::RandGen& rng)
+               moses::RandGen& rng)
 {
 	occam_randomize_term(fs, inst, rng);
 	occam_randomize_contin(fs, inst, rng);
@@ -103,5 +103,5 @@ void randomize(const field_set& fs, instance& inst,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

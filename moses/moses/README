@@ -23,13 +23,13 @@ Documentation can be found in the docs directory, which includes a
 "QuickStart.pdf" that reviews the algorithms and data structures
 used withie MOSES.  There is alo a considerable amount of information
 int the OpenCog wiki: 
-http://wiki.opencog.org/w/Meta-Optimizing_Semantic_Evolutionary_Search
+http://wiki.moses.org/w/Meta-Optimizing_Semantic_Evolutionary_Search
 
 
 INSTALLATION
 ------------
 Compile and install OpenCog, more information at
-http://wiki.opencog.org/w/Building_OpenCog.
+http://wiki.moses.org/w/Building_OpenCog.
 
 
 PROJECT DIRECTORY

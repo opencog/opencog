@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,9 +26,9 @@
 #include <iostream>
 #include <fstream>
 
-#include <opencog/util/Logger.h>
+#include <moses/util/Logger.h>
 
-#include <opencog/comboreduct/combo/combo.h>
+#include <moses/comboreduct/combo/combo.h>
 
 #include "../deme/deme_expander.h"
 #include "../metapopulation/metapopulation.h"
@@ -41,7 +41,7 @@
 #include "distributed_moses.h"
 #include "moses_params.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 using namespace std;
 
@@ -254,7 +254,7 @@ private:
  */
 template<typename Printer>
 void metapop_moses_results_b(const std::vector<combo_tree>& bases,
-                             const opencog::combo::type_tree& tt,
+                             const moses::combo::type_tree& tt,
                              const reduct::rule& si_ca,
                              const reduct::rule& si_kb,
                              behave_cscore& sc,
@@ -315,7 +315,7 @@ void adjust_termination_criteria(const behave_cscore& sc,
  */
 template<typename Printer>
 void metapop_moses_results(const std::vector<combo_tree>& bases,
-                           const opencog::combo::type_tree& type_sig,
+                           const moses::combo::type_tree& type_sig,
                            const reduct::rule& si_ca,
                            const reduct::rule& si_kb,
                            behave_cscore& c_scorer,
@@ -354,6 +354,6 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 
 #endif // _OPENCOG_MOSES_MAIN_H

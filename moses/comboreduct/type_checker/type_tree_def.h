@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/type_tree_def.h
+ * moses/comboreduct/combo/type_tree_def.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,9 +24,9 @@
 #ifndef _COMBO_TYPE_TREE_DEF_H
 #define _COMBO_TYPE_TREE_DEF_H
 
-#include <opencog/util/tree.h>
+#include <moses/util/tree.h>
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 namespace id {
 enum type_node {
@@ -86,7 +86,7 @@ typedef type_node_seq::iterator type_node_seq_it;
 typedef type_node_seq::const_iterator type_node_seq_cit;
 
 //structure that codes the type of a tree
-typedef opencog::tree<type_node> type_tree;
+typedef moses::tree<type_node> type_tree;
 
 typedef type_tree::iterator type_tree_pre_it;
 typedef type_tree::sibling_iterator type_tree_sib_it;
@@ -104,6 +104,6 @@ bool is_argument_type(type_node n);
 //it is assumed that n is a argument type
 unsigned int arg_to_idx(type_node n);
 
-}} // ~namespace combo opencog
+}} // ~namespace combo moses
 
 #endif

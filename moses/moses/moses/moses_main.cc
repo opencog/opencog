@@ -8,7 +8,7 @@
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
  * exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
+#include <moses/util/Logger.h>
 
 #include "../metapopulation/metapopulation.h"
 #include "distributed_moses.h"
@@ -31,7 +31,7 @@
 
 #include "moses_main.h"
 
-namespace opencog { namespace moses {
+namespace moses { namespace moses {
 
 #define strform(x) #x
 #define stringify(x) strform(x)
@@ -101,5 +101,5 @@ void adjust_termination_criteria(const behave_cscore& c_scorer,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses
 

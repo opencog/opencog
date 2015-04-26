@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/local_structure.cc
+ * moses/learning/moses/eda/local_structure.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,15 +24,15 @@
 
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include <opencog/util/numeric.h>
-#include <opencog/util/algorithm.h>
-#include <opencog/util/selection.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/oc_assert.h>
+#include <moses/util/numeric.h>
+#include <moses/util/algorithm.h>
+#include <moses/util/selection.h>
+#include <moses/util/exceptions.h>
+#include <moses/util/oc_assert.h>
 
 #include "local_structure.h"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 // true if the variable at index idx is identical over the range of
@@ -159,4 +159,4 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

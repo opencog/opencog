@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,7 +35,7 @@
  * building a vertex or a combo_tree.
  */
 
-namespace opencog { namespace combo {
+namespace moses { namespace combo {
 
 /**
  * Interpreter for boolean expressions.
@@ -96,6 +96,6 @@ protected:
     const std::vector<vertex>& _mixed_inputs;
 };            
 
-}} // ~namespaces combo opencog
+}} // ~namespaces combo moses
         
 #endif // _OPENCOG_INTERPRETER_H

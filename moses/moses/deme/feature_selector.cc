@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
+ * at http://moses.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,18 +31,18 @@
 #include <boost/range/algorithm/max_element.hpp>
 
 #include "feature_selector.h"
-#include <opencog/comboreduct/table/table.h>
-#include <opencog/comboreduct/table/table_io.h>
-#include <opencog/util/oc_omp.h>
-#include <opencog/util/random.h>
-#include <opencog/util/lazy_random_selector.h>
-#include <opencog/util/jaccard_index.h>
+#include <moses/comboreduct/table/table.h>
+#include <moses/comboreduct/table/table_io.h>
+#include <moses/util/oc_omp.h>
+#include <moses/util/random.h>
+#include <moses/util/lazy_random_selector.h>
+#include <moses/util/jaccard_index.h>
 
 // Name given to the feature corresponding to the output of the
 // exemplar
 #define EXEMPLAR_FEATURE_NAME "__exemplar_feature__"
 
-namespace opencog {
+namespace moses {
 namespace moses {
 
 namespace ba = boost::accumulators;
@@ -473,4 +473,4 @@ feature_set feature_selector::sample_enforced_features() const {
 }
 
 } // ~namespace moses
-} // ~namespace opencog
+} // ~namespace moses

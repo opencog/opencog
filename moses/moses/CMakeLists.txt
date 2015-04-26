@@ -107,7 +107,7 @@ ENDIF (HAVE_MPI)
 
 # Install library
 IF (WIN32)
-	INSTALL(TARGETS moses DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL(TARGETS moses DESTINATION "lib${LIB_DIR_SUFFIX}/moses")
 ELSE (WIN32)
 	INSTALL(TARGETS moses
 	        LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}"    # lib*.so files
