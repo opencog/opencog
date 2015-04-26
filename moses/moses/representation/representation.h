@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/representation/representation.h
+ * moses/moses/representation/representation.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -206,7 +206,7 @@ protected:
 
 // This helper seems to be needed to unconfuse the compiler.
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses3::moses3::representation& r)
+                                const moses3::moses::representation& r)
 {
     return r.ostream_prototype(out);
 }

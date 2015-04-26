@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/optimize.h
+ * moses/moses/eda/optimize.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

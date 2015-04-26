@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/moses_params.h
+ * moses/moses/moses/moses_params.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

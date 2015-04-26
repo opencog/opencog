@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/trap-uni.cc
+ * moses/moses/example-progs/trap-uni.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 using boost::lexical_cast;
 
 // Demonstration program for the "univariate trap" optimization problem.
-// This is a standard learning/optimization demonstraton problem: a 
+// This is a standard optimization demonstraton problem: a 
 // scoring function is given that surrounds the correct solution with
 // nearby solutions which are given a very low score.  This is related
 // to the "nmax" problem, except for having a vee-shaped scoring function.

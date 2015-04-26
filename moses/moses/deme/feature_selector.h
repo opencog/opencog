@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/feature_selector.h
+ * moses/moses/moses/feature_selector.h
  *
  * Copyright (C) 2012 OpenCog Foundation
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <moses/comboreduct/table/table.h>
 #include <moses/comboreduct/combo/vertex.h>
-#include <moses/learning/feature-selection/main/feature-selection.h>
+#include <moses/feature-selection/main/feature-selection.h>
 
 namespace moses3 {
 namespace moses {

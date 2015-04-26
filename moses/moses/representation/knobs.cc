@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/knobs.cc
+ * moses/moses/moses/knobs.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

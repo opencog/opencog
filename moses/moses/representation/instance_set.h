@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/representation/instance_set.h
+ * moses/moses/representation/instance_set.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

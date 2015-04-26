@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/scoring/bscores.cc
+ * moses/moses/scoring/bscores.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC

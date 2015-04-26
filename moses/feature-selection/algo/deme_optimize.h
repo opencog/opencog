@@ -27,9 +27,9 @@
 
 #include <boost/range/algorithm/sort.hpp>
 
-#include <moses/learning/moses/optimization/optimization.h>
-#include <moses/learning/moses/representation/field_set.h>
-#include <moses/learning/moses/representation/instance_set.h>
+#include <moses/moses/optimization/optimization.h>
+#include <moses/moses/representation/field_set.h>
+#include <moses/moses/representation/instance_set.h>
 #include <moses/comboreduct/table/table.h>
 
 #include "../main/feature-selection.h" // needed for feature_selection_params

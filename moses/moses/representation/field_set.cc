@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/field_set.cc
+ * moses/moses/eda/field_set.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/logging.h
+ * moses/moses/eda/logging.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

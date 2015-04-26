@@ -35,8 +35,8 @@
 #include <moses/util/oc_assert.h>
 #include <moses/util/iostreamContainer.h>
 #include <moses/comboreduct/table/table_io.h>
-#include <moses/learning/moses/moses/types.h>
-#include <moses/learning/moses/moses/complexity.h>
+#include <moses/moses/moses/types.h>
+#include <moses/moses/moses/complexity.h>
 
 #include "eval-candidate-likelihood.h"
 

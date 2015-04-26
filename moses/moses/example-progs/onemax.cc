@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/onemax.cc
+ * moses/moses/example-progs/onemax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -26,7 +26,7 @@
 #include "headers.h"
 
 // Demonstration program for the "onemax" optimization problem.  This
-// is a standard learning/optimization demonstraton problem: a scoring
+// is a standard optimization demonstraton problem: a scoring
 // function is given that counts the number of one-bits in a bit-string.
 // This is the "one_max" scoring function.  The optimizer is supposed
 // to be able to find the best solution to this function: namely, a

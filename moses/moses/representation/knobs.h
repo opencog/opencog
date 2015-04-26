@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/knobs.h
+ * moses/moses/moses/knobs.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -335,7 +335,7 @@ typedef based_variant <boost::variant<logical_subtree_knob,
 // Without this helper, the compiler gets confused and tries to cast
 // knob_base to something strange.
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses3::moses3::knob_base& s)
+                                const moses3::moses::knob_base& s)
 {
 	return out << s.toStr();
 }

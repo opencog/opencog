@@ -423,16 +423,16 @@ std::istream& istream_scored_combo_trees(std::istream& in,
                                          std::vector<scored_combo_tree>& scts);
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses3::scored_combo_tree& sct)
+                                const moses::scored_combo_tree& sct)
 {
-    return moses3::ostream_scored_combo_tree(out, sct);
+    return moses::ostream_scored_combo_tree(out, sct);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses3::composite_score& ts)
+                                const moses::composite_score& ts)
 {
     return out << "[score="
-               << std::setprecision(moses3::io_score_precision)
+               << std::setprecision(moses::io_score_precision)
                << ts.get_score()
                << ", penalized score=" << ts.get_penalized_score()
                << ", complexity=" << ts.get_complexity()
@@ -442,12 +442,12 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const moses3::behavioral_score& s)
+                                const moses::behavioral_score& s)
 {
-    return moses3::ostream_behavioral_score(out, s);
+    return moses::ostream_behavioral_score(out, s);
 }
 
 } // ~namespace moses
-} // ~namespace moses3
+} // ~namespace moses
 
 #endif

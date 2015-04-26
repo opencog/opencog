@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/complexity.h
+ * moses/moses/moses/complexity.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/ant_scoring.h
+ * moses/moses/moses/ant_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

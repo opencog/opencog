@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/main/edaopt.h
+ * moses/moses/main/edaopt.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

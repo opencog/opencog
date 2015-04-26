@@ -22,5 +22,5 @@
 #include "moses_exec.h"
 
 int main(int argc, char** argv) {
-    return moses3::moses3::moses_exec(argc, argv);
+    return moses3::moses::moses_exec(argc, argv);
 }

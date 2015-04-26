@@ -27,9 +27,9 @@
 #include <moses/util/numeric.h>
 
 #include <moses/comboreduct/combo/common_def.h>
-#include <moses/learning/moses/representation/field_set.h>
-#include <moses/learning/moses/representation/instance_scorer.h>
-#include <moses/learning/moses/moses/types.h>
+#include <moses/moses/representation/field_set.h>
+#include <moses/moses/representation/instance_scorer.h>
+#include <moses/moses/moses/types.h>
 
 namespace moses3 {
 

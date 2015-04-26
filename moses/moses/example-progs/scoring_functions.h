@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/scoring_functions.h
+ * moses/moses/example-progs/scoring_functions.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/knob_mapper.h
+ * moses/moses/moses/knob_mapper.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2008-2012 OpenCog Foundation

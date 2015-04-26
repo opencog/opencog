@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <moses/learning/moses/optimization/optimization.h>
+#include <moses/moses/optimization/optimization.h>
 
 #include "deme_optimize.h"
 

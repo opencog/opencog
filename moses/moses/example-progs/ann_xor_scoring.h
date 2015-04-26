@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/ann_xor_scoring.h
+ * moses/moses/example-progs/ann_xor_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

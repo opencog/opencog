@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/ontomax.cc
+ * moses/moses/example-progs/ontomax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

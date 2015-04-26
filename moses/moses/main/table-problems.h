@@ -26,7 +26,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <moses/learning/moses/scoring/scoring_base.h>
+#include <moses/moses/scoring/scoring_base.h>
 #include "problem-params.h"
 
 namespace moses3 { namespace moses {

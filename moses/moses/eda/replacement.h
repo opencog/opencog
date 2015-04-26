@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/replacement.h
+ * moses/moses/eda/replacement.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -11,5 +11,5 @@ INSTALL(FILES
 
 	DESTINATION
 
-	"include/${PROJECT_NAME}/learning/moses/scoring"
+	"include/${PROJECT_NAME}/moses/scoring"
 )

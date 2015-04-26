@@ -27,7 +27,7 @@
 #include <moses/util/numeric.h>
 
 #include <moses/comboreduct/table/table.h>
-#include <moses/learning/moses/scoring/precision_bscore.h>
+#include <moses/moses/scoring/precision_bscore.h>
 #include "fs_scorer_base.h"
 
 namespace moses3 {
@@ -37,7 +37,7 @@ using combo::CTable;
 
 /**
  * Wrapper to use moses scoring precision (see
- * moses/learning/moses/scoring/scoring.h).  This is one of the
+ * moses/moses/scoring/scoring.h).  This is one of the
  * confusion-matrix based scorers.
  *
  * That wrapper uses the method best_possible_score() given a certain

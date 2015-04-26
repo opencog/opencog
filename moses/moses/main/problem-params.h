@@ -32,12 +32,12 @@
 #include <moses/comboreduct/combo/vertex.h>
 #include <moses/comboreduct/reduct/reduct.h>
 #include <moses/comboreduct/table/table.h>
-#include <moses/learning/moses/main/problem.h>
-#include <moses/learning/moses/metapopulation/metapop_params.h>
-#include <moses/learning/moses/moses/moses_main.h>
-#include <moses/learning/moses/moses/moses_params.h>
-#include <moses/learning/moses/optimization/optimization.h>
-#include <moses/learning/moses/optimization/hill-climbing.h>
+#include <moses/moses/main/problem.h>
+#include <moses/moses/metapopulation/metapop_params.h>
+#include <moses/moses/moses/moses_main.h>
+#include <moses/moses/moses/moses_params.h>
+#include <moses/moses/optimization/optimization.h>
+#include <moses/moses/optimization/hill-climbing.h>
 
 
 namespace moses3 { namespace moses {

@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/optimization/hill-climbing.cc
+ * moses/moses/optimization/hill-climbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC

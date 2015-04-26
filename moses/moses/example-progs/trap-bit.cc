@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/trap-bit.cc
+ * moses/moses/example-progs/trap-bit.cc
  *
  * Copyright (C) 2011 Linas Vepstas
  *
@@ -31,7 +31,7 @@ using boost::lexical_cast;
 // XXX some of the documentation below may be misleading.
 //
 // Demonstration program for the "bit-trap" optimization problem.
-// This is a standard learning/optimization demonstraton problem: a 
+// This is a standard optimization demonstraton problem: a 
 // scoring function is given that surrounds the correct solution with
 // nearby solutions which are given a very low score.  This is a variant
 // of the "univariate-trap" problem, the difference here being that

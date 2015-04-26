@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/moses/types.cc
+ * moses/moses/moses/types.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2014 Aidyia Limited

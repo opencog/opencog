@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/representation/instance_scorer.h
+ * moses/moses/representation/instance_scorer.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012,2013 Poulin Holdings LLC

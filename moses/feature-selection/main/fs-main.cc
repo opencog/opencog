@@ -32,7 +32,7 @@
 #include <moses/util/oc_omp.h>
 
 #include <moses/comboreduct/table/table_io.h>
-#include <moses/learning/moses/moses/moses_main.h> // for version string
+#include <moses/moses/moses/moses_main.h> // for version string
 
 using namespace std;
 using namespace boost::program_options;
@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 
     if (vm.count("version")) {
         cout << "feature-selection "
-             << moses3::moses3::version_string
+             << moses3::moses::version_string
              << std::endl;
         return 0;
     }
@@ -405,7 +405,7 @@ int main(int argc, char** argv)
 
     // Log command-line args
     logger().info() << "feature-selection version "
-                    << moses3::moses3::version_string;
+                    << moses3::moses::version_string;
     string cmdline = "Command line:";
     for (int i = 0; i < argc; ++i) {
          cmdline += " ";

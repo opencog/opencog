@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/headers.h
+ * moses/moses/example-progs/headers.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -30,12 +30,12 @@
 #include <moses/util/mt19937ar.h>
 #include <moses/util/selection.h>
 
-#include <moses/learning/moses/eda/initialization.h>
-#include <moses/learning/moses/eda/local_structure.h>
-#include <moses/learning/moses/eda/logging.h>
-#include <moses/learning/moses/eda/optimize.h>
-#include <moses/learning/moses/eda/replacement.h>
-#include <moses/learning/moses/eda/termination.h>
+#include <moses/moses/eda/initialization.h>
+#include <moses/moses/eda/local_structure.h>
+#include <moses/moses/eda/logging.h>
+#include <moses/moses/eda/optimize.h>
+#include <moses/moses/eda/replacement.h>
+#include <moses/moses/eda/termination.h>
 
 #include "edaopt.h"
 #include "scoring_functions.h"

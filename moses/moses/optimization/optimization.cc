@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/optimization/optimization.cc
+ * moses/moses/optimization/optimization.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings

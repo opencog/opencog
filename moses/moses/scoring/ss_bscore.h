@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/scoring/ss_bscore.h
+ * moses/moses/scoring/ss_bscore.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved

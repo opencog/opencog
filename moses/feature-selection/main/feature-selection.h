@@ -39,7 +39,7 @@ namespace moses3 {
 // Feature selection scorers
 static const std::string mi="mi";   // Mutual Information (see feature_scorer.h)
 static const std::string pre="pre"; // Precision (see
-                                    // moses/learning/moses/scoring/scoring.h)
+                                    // moses/moses/scoring/scoring.h)
 
 // parameters of feature-selection, see desc.add_options() in
 // feature-selection.cc for their meaning
@@ -167,7 +167,7 @@ struct fs_scorer : public std::unary_function<FeatureSet, double>
             _ptr_mi_scorer =
                 new MICScorerCTable<FeatureSet>(ctable, fs_params.mi_confi);
         } else if (fs_params.scorer == pre) { // precision (see
-            // moses/learning/moses/scoring/scoring.h)
+            // moses/moses/scoring/scoring.h)
             _ptr_pre_scorer =
                 new pre_scorer<FeatureSet>(ctable, fs_params.mi_confi,
                                            fs_params.pre_penalty,

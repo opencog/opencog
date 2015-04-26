@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/representation/representation.cc
+ * moses/moses/representation/representation.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings LLC

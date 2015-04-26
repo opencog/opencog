@@ -25,11 +25,11 @@
  */
 
 #include <moses/util/Logger.h>
-#include <moses/learning/moses/main/problem-params.h>
-#include <moses/learning/moses/moses/types.h>
-#include <moses/learning/moses/scoring/behave_cscore.h>
-#include <moses/learning/moses/scoring/bscores.h>
-#include <moses/learning/moses/example-progs/scoring_iterators.h>
+#include <moses/moses/main/problem-params.h>
+#include <moses/moses/moses/types.h>
+#include <moses/moses/scoring/behave_cscore.h>
+#include <moses/moses/scoring/bscores.h>
+#include <moses/moses/example-progs/scoring_iterators.h>
 
 #include "problem.h"
 #include "demo-problems.h"

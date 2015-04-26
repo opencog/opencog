@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/initialization.cc
+ * moses/moses/eda/initialization.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -34,7 +34,7 @@ void occam_randomize_contin(const field_set& fs, instance& inst,
                             moses3::RandGen& rng)
 {
     unsigned int n = rng.randint(fs.contin()[it.idx()].depth);
-    moses3::generate_contin_neighbor(fs, inst, it, n, rng);
+    moses::generate_contin_neighbor(fs, inst, it, n, rng);
 }
 
 // Tree should be roughly balanced for this to be effective -

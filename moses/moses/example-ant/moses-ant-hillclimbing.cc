@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/main/moses-ant-hillclimbing.cc
+ * moses/moses/main/moses-ant-hillclimbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -56,7 +56,7 @@ using namespace std;
 // initial random number seed. At the time of this writing, some
 // seeds result in a solution being found in a few seconds or
 // less, while others take at least minutes, or longer. The
-// bottom of the file moses/learning/moses/diary-performance.txt
+// bottom of the file moses/moses/diary-performance.txt
 // provides more information.
 
 int main(int argc,char** argv)

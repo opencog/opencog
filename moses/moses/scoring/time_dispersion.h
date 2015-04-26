@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/scoring/time_dispersion.h
+ * moses/moses/scoring/time_dispersion.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved

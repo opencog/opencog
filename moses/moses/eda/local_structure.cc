@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/eda/local_structure.cc
+ * moses/moses/eda/local_structure.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

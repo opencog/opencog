@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/optimization/univariate.cc
+ * moses/moses/optimization/univariate.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * Copyright (C) 2012 Poulin Holdings

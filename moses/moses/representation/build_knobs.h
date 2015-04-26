@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/representation/build_knobs.h
+ * moses/moses/representation/build_knobs.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

@@ -8,4 +8,4 @@ ADD_SUBDIRECTORY (feature-selection)
 # obsolete combo types and routines and etc.  It needs to be ported
 # over to the modern combo interfaces.
 #
-ADD_SUBDIRECTORY (pleasure)
+#ADD_SUBDIRECTORY (pleasure)

@@ -33,7 +33,7 @@
 
 #include <moses/comboreduct/table/table.h>
 #include <moses/comboreduct/table/table_io.h>
-#include <moses/learning/moses/optimization/hill-climbing.h> // for hc_params
+#include <moses/moses/optimization/hill-climbing.h> // for hc_params
 
 #include "feature-selection.h"
 #include "../algo/deme_optimize.h"

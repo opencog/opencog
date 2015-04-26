@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/example-progs/nmax.cc
+ * moses/moses/example-progs/nmax.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -28,7 +28,7 @@
 using boost::lexical_cast;
 
 // Demonstration program for the "nmax" optimization problem.  This
-// is a standard learning/optimization demonstraton problem: a scoring
+// is a standard optimization demonstraton problem: a scoring
 // function is given that totals up the values of a set of discrete
 // variables.  This is the "n_max" scoring function.  The optimizer is
 // supposed to be able to find the best solution to this function:

@@ -1,5 +1,5 @@
 /*
- * moses/learning/moses/scoring/time_dispersion.cc
+ * moses/moses/scoring/time_dispersion.cc
  *
  * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved

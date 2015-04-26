@@ -39,8 +39,8 @@
 
 #include <moses/comboreduct/combo/iostream_combo.h>
 #include <moses/comboreduct/table/table_io.h>
-#include <moses/learning/moses/moses/types.h>
-#include <moses/learning/moses/moses/complexity.h>
+#include <moses/moses/moses/types.h>
+#include <moses/moses/moses/complexity.h>
 
 #include "../scoring/discriminating_bscore.h"
 #include "../scoring/behave_cscore.h"
