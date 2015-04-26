@@ -30,7 +30,7 @@ ADD_LIBRARY (PAI SHARED
 )
 
 TARGET_LINK_LIBRARIES(PAI 
-	LearningServerMessages
+#	LearningServerMessages
 	Language
 	Control
 	AtomSpaceExtensions
@@ -49,5 +49,3 @@ ENDIF (HAVE_PROTOBUF)
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(PAI smob server)
 ENDIF (HAVE_GUILE)
-
-
