@@ -115,6 +115,7 @@ INSTALL(FILES
 	selection.h
 	StringManipulator.h
 	StringTokenizer.h
+	tbb.h
 	tree.h
 	DESTINATION "include/${PROJECT_NAME}/util"
 )
