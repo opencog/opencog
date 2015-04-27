@@ -3230,7 +3230,6 @@ std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr)
 
 template<typename T>
 std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
-	throw (opencog::InconsistenceException, std::bad_exception)
 {
     opencog::tree<std::string> tmp;
     in >> tmp;

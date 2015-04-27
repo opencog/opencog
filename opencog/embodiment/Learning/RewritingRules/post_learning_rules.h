@@ -26,7 +26,7 @@
 
 #include <moses/comboreduct/reduct/reduct.h>
 
-namespace opencog { namespace reduct {
+namespace moses3 { namespace reduct {
 
 //add a drop action in front of a grab action
 struct post_learning_drop_before_grab

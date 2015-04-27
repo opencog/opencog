@@ -69,18 +69,18 @@ typedef moses3::combo::combo_tree::sibling_iterator sib_it;
 
 class EntropyFilter
 {
-    typedef opencog::size_tree_order<vertex> combo_tree_order;
+    typedef moses3::size_tree_order<vertex> combo_tree_order;
 
-    typedef std::set<combo_tree, combo_tree_order> combo_tree_ns_set;
+    typedef std::set<moses3::combo::combo_tree, combo_tree_order> combo_tree_ns_set;
     typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
     typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
 
-    typedef std::map<const combo_tree, unsigned long, combo_tree_order> combo_tree_time_map;
+    typedef std::map<const moses3::combo::combo_tree, unsigned long, combo_tree_order> combo_tree_time_map;
     typedef combo_tree_time_map::iterator combo_tree_time_map_it;
     typedef combo_tree_time_map::const_iterator combo_tree_time_map_const_it;
 
     typedef std::pair<bool, unsigned long> bool_time_pair;
-    typedef std::map<const combo_tree, bool_time_pair, combo_tree_order>
+    typedef std::map<const moses3::combo::combo_tree, bool_time_pair, combo_tree_order>
     combo_tree_bool_time_map;
     typedef combo_tree_bool_time_map::iterator combo_tree_bool_time_map_it;
     typedef combo_tree_bool_time_map::const_iterator combo_tree_bool_time_map_const_it;
@@ -102,7 +102,7 @@ class EntropyFilter
     typedef definite_object_hash_set::const_iterator
     definite_object_hash_set_const_it;
 
-    typedef boost::function < bool (const combo_tree) > EvalFunct;
+    typedef boost::function < bool (const moses3::combo::combo_tree) > EvalFunct;
 
 public:
     //constructor, destructor
@@ -233,7 +233,7 @@ private:
     inline bool getIsMoving(const definite_object& obj);
 
     //eval perception
-    bool evalPerception(Handle smh, const combo_tree tr);
+    bool evalPerception(Handle smh, const moses3::combo::combo_tree tr);
 
     //build (or rebuild) the set of operands
     //by inserting all new definite_objects, indefinite_objects
@@ -247,7 +247,7 @@ private:
 
     //like above but take in input a combo_tree and the number of arguments
     //that remains to insert on the combo_tree
-    void build_and_insert_atomic_perceptions(const combo_tree& tr, arity_t arity_rest);
+    void build_and_insert_atomic_perceptions(const moses3::combo::combo_tree& tr, arity_t arity_rest);
 
 };
 

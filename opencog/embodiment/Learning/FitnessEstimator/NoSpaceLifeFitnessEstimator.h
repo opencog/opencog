@@ -58,7 +58,7 @@ typedef moses3::combo::combo_tree::sibling_iterator sib_it;
 /**
  *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
  */
-struct NoSpaceLifeFitnessEstimator: std::unary_function<combo::combo_tree, fitness_t> {
+struct NoSpaceLifeFitnessEstimator: std::unary_function<moses3::combo::combo_tree, fitness_t> {
 
 public:
 
@@ -85,7 +85,7 @@ public:
                                 const moses3::combo::definite_object_set& dos,
                                 behavior::BehaviorCategory& BDCat,
                                 const std::vector<Temporal>& exemplarTemporals,
-                                const combo::argument_list_list& all,
+                                const moses3::combo::argument_list_list& all,
                                 int indefinite_object_count,
                                 int operator_count,
                                 int predicate_Count,
@@ -114,7 +114,7 @@ private:
     WorldProvider* _wp; //not const because Combo2BD may add atoms
     //into wp's atomspace
 
-    const combo::definite_object_set& _dos;
+    const moses3::combo::definite_object_set& _dos;
 
     const std::string& _petName;
     const std::string& _ownerName;
@@ -123,7 +123,7 @@ private:
 
     const behavior::BehaviorCategory& _BDCat; //list of the examplars retreived
     const std::vector<Temporal>& _exemplarTemporals;
-    const combo::argument_list_list& _all; //argument lists, one for each BD
+    const moses3::combo::argument_list_list& _all; //argument lists, one for each BD
     behavior::BehaviorDescriptionMatcher _BDMatcher;
     SizePenalty _sizePenalty;
 
@@ -131,7 +131,7 @@ private:
     typedef std::vector<fitness_t> fitness_vec;
     typedef fitness_vec::iterator fitness_vec_it;
     typedef fitness_vec::const_iterator fitness_vec_const_it;
-    typedef opencog::lru_cache_arg_result<combo::combo_tree, fitness_vec> BDCache;
+    typedef opencog::lru_cache_arg_result<moses3::combo::combo_tree, fitness_vec> BDCache;
     mutable BDCache _bd_cache;
     mutable unsigned int _cache_success;
     mutable unsigned int _total_fitness_call;
@@ -147,7 +147,7 @@ private:
     /**
      * private methods
      */
-    int getTrialCount(const combo::combo_tree& tr) const;
+    int getTrialCount(const moses3::combo::combo_tree& tr) const;
 
 };
 }
