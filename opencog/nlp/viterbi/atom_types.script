@@ -1,4 +1,0 @@
-// A pair, consisting of a sequence of unconnected connectors,
-// and a sequence of output words.
-LG_STATE_PAIR <- LIST_LINK
-

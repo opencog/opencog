@@ -1,5 +1,0 @@
-IF (HAVE_ZMQ)
-    IF (TBB_FOUND)
-        ADD_SUBDIRECTORY (events)
-    ENDIF (TBB_FOUND)
-ENDIF (HAVE_ZMQ)

@@ -1,8 +1,0 @@
-
-                      semcor
-                      ------
-
-This directory contains miscellaneous utilities related to 
-Rada Mihalcea's SemCor files. The SemCor files are chunks 
-of the WSJ corpus annotated with word senses.  They are 
-handy for scoring the results of wsd.

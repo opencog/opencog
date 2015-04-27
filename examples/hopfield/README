@@ -1,9 +1,0 @@
-See wiki page on Hopfield Network Emulator
-
-example command (from build dir):
-
-./src/examples/hopfield/hopfield -n 4 -s 1000 -c 10 -r 1 -y 5 -d 1.0 -z 0 -o -a
-test --train-file ../src/examples/hopfield/training_patterns_4x4.txt --cue-file
-../src/examples/hopfield/cue_patterns_4x4.txt -e 0.0 -y 5 -E
-
-

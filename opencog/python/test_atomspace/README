@@ -1,8 +1,0 @@
-This folder contains a test implementation of the AtomSpace written in Python.
-
-This is experimental and is not the reference implementation. The reference
-implementation is implemented using Cython, and is located in:
-
-opencog/cython/
-
-in the opencog module.

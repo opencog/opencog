@@ -1,4 +1,0 @@
-
-IF (HAVE_DIMEMBED)
-	ADD_SUBDIRECTORY (dimensionalembedding)
-ENDIF (HAVE_DIMEMBED)
