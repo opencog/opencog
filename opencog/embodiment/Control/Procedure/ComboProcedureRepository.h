@@ -28,9 +28,10 @@
 #include <map>
 #include <boost/noncopyable.hpp>
 
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/procedure_repository.h>
+
 #include <opencog/persist/file/SavableRepository.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/procedure_repository.h>
 #include "ComboProcedure.h"
 
 

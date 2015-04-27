@@ -24,8 +24,8 @@
 #ifndef _WORLDWRAPPERBASE_H
 #define _WORLDWRAPPERBASE_H
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/variable_unifier.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/variable_unifier.h>
 
 namespace opencog { namespace world {
 
