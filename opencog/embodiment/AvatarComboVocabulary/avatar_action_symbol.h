@@ -26,7 +26,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/combo/action_symbol.h>
+#include <moses/comboreduct/combo/action_symbol.h>
 #include "avatar_operator.h"
 
 namespace opencog { namespace combo {
