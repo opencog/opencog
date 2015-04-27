@@ -26,7 +26,7 @@
 
 #include <opencog/util/lru_cache.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
 #include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
@@ -44,13 +44,16 @@
 #define IS_FE_LRU_CACHE
 #define FE_LRU_CACHE_SIZE 1000000
 
+using namespace moses3;
+using namespace moses3::combo;
+
 namespace FitnessEstimator
 {
 
 typedef double fitness_t;
 
-typedef combo::combo_tree::iterator pre_it;
-typedef combo::combo_tree::sibling_iterator sib_it;
+typedef moses3::combo::combo_tree::iterator pre_it;
+typedef moses3::combo::combo_tree::sibling_iterator sib_it;
 
 /**
  *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
@@ -79,7 +82,7 @@ public:
                                 const std::string& ownerName,
                                 const std::string& avatarName,
                                 const std::string& trickName,
-                                const combo::definite_object_set& dos,
+                                const moses3::combo::definite_object_set& dos,
                                 behavior::BehaviorCategory& BDCat,
                                 const std::vector<Temporal>& exemplarTemporals,
                                 const combo::argument_list_list& all,

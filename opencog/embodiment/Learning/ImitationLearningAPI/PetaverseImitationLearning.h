@@ -31,8 +31,10 @@
 #ifndef _PETAVERSE_IMITATION_LEARNING_BASE_H
 #define _PETAVERSE_IMITATION_LEARNING_BASE_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
+
+using namespace moses3;
 
 class PetaverseImitationLearningBase
 {

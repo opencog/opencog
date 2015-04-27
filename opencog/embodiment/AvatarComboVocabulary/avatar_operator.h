@@ -30,6 +30,7 @@
 namespace opencog { namespace combo {
 
 using namespace std;
+using namespace moses3::combo;
 
 //this class implement operator_base in a generic way using
 //an enum

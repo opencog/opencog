@@ -267,7 +267,7 @@ ENDIF(HAVE_SERVER)
 
 IF (HAVE_MOSES)
 	CYTHON_ADD_MODULE_PYX(pymoses
-		"../../learning/moses/main/moses_exec.h"
+		# "<moses/moses/main/moses_exec.h>"
 	)
 
 	# opencog.pymoses Python bindings

@@ -31,7 +31,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/RandGen.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include "NeighborhoodGenerator.h"
 #include <ctime>
 #include <vector>

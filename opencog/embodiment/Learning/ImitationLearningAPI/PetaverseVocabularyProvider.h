@@ -34,7 +34,7 @@
 #ifndef _PETAVERSE_VOCABULARY_PROVIDER_BASE_H
 #define _PETAVERSE_VOCABULARY_PROVIDER_BASE_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 class PetaverseVocabularyProviderBase
@@ -42,8 +42,8 @@ class PetaverseVocabularyProviderBase
 
 public:
 
-    typedef std::set<opencog::combo::vertex> operator_set;
-    typedef std::set<opencog::combo::indefinite_object> indefinite_object_set;
+    typedef std::set<moses3::combo::vertex> operator_set;
+    typedef std::set<moses3::combo::indefinite_object> indefinite_object_set;
 
     //ctor, dtor
 

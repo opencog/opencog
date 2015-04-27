@@ -24,7 +24,7 @@
 #ifndef _SIZEPENALTY_H
 #define _SIZEPENALTY_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 namespace FitnessEstimator
 {
@@ -37,14 +37,14 @@ private:
     double b;
     double c;
 
-    const std::set<opencog::combo::definite_object>& _dos;
+    const std::set<moses3::combo::definite_object>& _dos;
 
     void setc(int indefinite_object_count, int operator_count,
               int condition_count, int action_count);
 
 public:
 
-    SizePenalty(const std::set<opencog::combo::definite_object>& dos,
+    SizePenalty(const std::set<moses3::combo::definite_object>& dos,
                 int indefinite_object_count = 0, int operator_count = 0,
                 int predicate_count = 0, int action_count = 0);
     ~SizePenalty();
@@ -52,7 +52,7 @@ public:
     //Occam's razor factor
     //tends to 0 when the size of the combo tends to infinity
     //tends to 1 when the size of the combo tends to 1
-    double computeSizePenalty(const opencog::combo::combo_tree& tr) const;
+    double computeSizePenalty(const moses3::combo::combo_tree& tr) const;
 
     void update(int definite_object_count, int operator_count,
                 int condition_count, int action_count);

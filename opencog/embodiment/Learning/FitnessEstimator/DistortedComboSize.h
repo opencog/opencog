@@ -24,12 +24,12 @@
 #ifndef DISTORTEDCOMBOSIZE_H
 #define DISTORTEDCOMBOSIZE_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 namespace FitnessEstimator
 {
 
-using namespace opencog::combo;
+using namespace moses3::combo;
 
 typedef combo_tree::iterator pre_it;
 

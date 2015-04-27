@@ -28,7 +28,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
@@ -61,11 +61,11 @@
 namespace Filter
 {
 
-using namespace combo;
+using namespace moses3::combo;
 using namespace behavior;
 
-typedef combo_tree::iterator pre_it;
-typedef combo_tree::sibling_iterator sib_it;
+typedef moses3::combo::combo_tree::iterator pre_it;
+typedef moses3::combo::combo_tree::sibling_iterator sib_it;
 
 class EntropyFilter
 {
