@@ -24,7 +24,7 @@
 #include "avatar_perception.h"
 #include <moses/comboreduct/type_checker/type_tree.h>
 
-using namespace moses3::combo;
+using namespace opencog::combo;
 using namespace avatar_perception_properties;
 
 avatar_perception::avatar_perception()

@@ -42,8 +42,8 @@
 
 namespace opencog { namespace hillclimbing {
 
-using namespace moses3::combo;
-using namespace moses3::reduct;
+using namespace opencog::combo;
+using namespace opencog::reduct;
 
 typedef std::set<vertex> object_set;
 typedef object_set::iterator object_set_it;

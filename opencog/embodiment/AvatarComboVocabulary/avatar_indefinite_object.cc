@@ -24,7 +24,7 @@
 #include "avatar_indefinite_object.h"
 #include <moses/comboreduct/type_checker/type_tree.h>
 
-using namespace moses3::combo;
+using namespace opencog::combo;
 using namespace avatar_indefinite_object_properties;
 
 avatar_indefinite_object::avatar_indefinite_object()

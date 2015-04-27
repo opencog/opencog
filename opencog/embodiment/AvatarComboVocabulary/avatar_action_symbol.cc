@@ -24,7 +24,7 @@
 #include "avatar_action_symbol.h"
 #include <moses/comboreduct/type_checker/type_tree.h>
 
-using namespace moses3::combo;
+using namespace opencog::combo;
 using namespace avatar_action_symbol_properties;
 
 avatar_action_symbol::avatar_action_symbol() { }

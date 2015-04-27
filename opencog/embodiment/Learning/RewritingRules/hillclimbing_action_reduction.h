@@ -26,7 +26,7 @@
 
 #include <moses/comboreduct/reduct/reduct.h>
 
-namespace moses3 { namespace reduct
+namespace opencog { namespace reduct
 {
 const rule& hillclimbing_action_reduction();
 } // ~namespace reduct
