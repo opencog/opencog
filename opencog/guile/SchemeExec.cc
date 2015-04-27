@@ -143,7 +143,6 @@ SCM SchemeSmob::ss_reduce (SCM satom)
 			"FreeLink (PlusLink, TimesLink, etc");
 	}
 
-	AtomSpace* atomspace = ss_get_env_as("cog-reduce!");
 	// do_reduce() may throw a C++ exception, usually because the
 	// expression contains non-reducible atoms in it.
 	try
