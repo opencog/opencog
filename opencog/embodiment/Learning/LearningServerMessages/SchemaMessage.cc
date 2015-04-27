@@ -67,7 +67,7 @@ SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
 }
 
 SchemaMessage::SchemaMessage(const std::string &from, const std::string &to,
-                             const opencog::combo::combo_tree & comboSchema, const std::string &schemaName,
+                             const moses3::combo::combo_tree & comboSchema, const std::string &schemaName,
                              const std::string &candidateSchemaName) :
         Message(from, to, _schemaMsgType)
 {
@@ -128,7 +128,7 @@ void SchemaMessage::loadPlainTextRepresentation(const char *strMessage)
     }
 }
 
-void SchemaMessage::setSchema(const opencog::combo::combo_tree & comboSchema)
+void SchemaMessage::setSchema(const moses3::combo::combo_tree & comboSchema)
 {
     std::stringstream stream;
     stream << comboSchema;
@@ -136,9 +136,9 @@ void SchemaMessage::setSchema(const opencog::combo::combo_tree & comboSchema)
     this->schema = stream.str();
 }
 
-const opencog::combo::combo_tree SchemaMessage::getComboSchema()
+const moses3::combo::combo_tree SchemaMessage::getComboSchema()
 {
-    using namespace opencog::combo;
+    using namespace moses3::combo;
 
     combo_tree comboSchema;
     std::stringstream stream(schema);

@@ -22,9 +22,9 @@
  */
 
 #include "avatar_action_symbol.h"
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
-using namespace opencog::combo;
+using namespace moses3::combo;
 using namespace avatar_action_symbol_properties;
 
 avatar_action_symbol::avatar_action_symbol() { }

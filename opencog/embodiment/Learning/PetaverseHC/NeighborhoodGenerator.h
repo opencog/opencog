@@ -27,9 +27,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
 //apply permutation neighborhood expansion,
 //that is and_seq(A1 A2 A3) is neighbor with
@@ -42,8 +42,8 @@
 
 namespace opencog { namespace hillclimbing {
 
-using namespace combo;
-using namespace reduct;
+using namespace moses3::combo;
+using namespace moses3::reduct;
 
 typedef std::set<vertex> object_set;
 typedef object_set::iterator object_set_it;

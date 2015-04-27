@@ -31,7 +31,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/RandGen.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include "NeighborhoodGenerator.h"
 #include <ctime>
 #include <vector>
@@ -382,7 +382,7 @@ private:
     void populate_neighborhood_from_center() {
         combo_tree center;
         if (_center.empty())
-            center.set_head(id::sequential_and);
+            center.set_head(moses3::combo::id::sequential_and);
         else center = _center;
         pre_it center_head = center.begin();
         _neighborhoodGenerator.populate_neighborhood(_neighborhood,

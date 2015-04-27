@@ -12,36 +12,38 @@ IF (HAVE_GUILE)
 	ENDIF(WIN32)
 ENDIF (HAVE_GUILE)
 ENDIF(0)
-	
+
 ADD_EXECUTABLE(processPVPMessage ProcessPVPMessage.cc)
-TARGET_LINK_LIBRARIES(processPVPMessage 
-	PredicateUpdaters 
+TARGET_LINK_LIBRARIES(processPVPMessage
+	PredicateUpdaters
 	PAI
 	behavior
 	${PROJECT_LIBRARIES}
 )
 
-ADD_CXXTEST(ActionPlanUTest)
-TARGET_LINK_LIBRARIES(ActionPlanUTest PAI Control comboreduct cogutil)
-IF(WIN32)
-    TARGET_LINK_LIBRARIES(ActionPlanTest winmm)
-ENDIF(WIN32)
+IF(HAVE_MOSES)
+	ADD_CXXTEST(ActionPlanUTest)
+	TARGET_LINK_LIBRARIES(ActionPlanUTest PAI Control comboreduct cogutil)
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(ActionPlanTest winmm)
+	ENDIF(WIN32)
 
-ADD_CXXTEST(ActionTypeUTest)
-TARGET_LINK_LIBRARIES(ActionTypeUTest PAI Control comboreduct cogutil)
-IF(WIN32)
-    TARGET_LINK_LIBRARIES(ActionTypeTest winmm)
-ENDIF(WIN32)
+	ADD_CXXTEST(ActionTypeUTest)
+	TARGET_LINK_LIBRARIES(ActionTypeUTest PAI Control comboreduct cogutil)
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(ActionTypeTest winmm)
+	ENDIF(WIN32)
 
-ADD_CXXTEST(ActionParamTypeUTest)
-TARGET_LINK_LIBRARIES(ActionParamTypeUTest PAI Control comboreduct cogutil)
-IF(WIN32)
-    TARGET_LINK_LIBRARIES(ActionParamTypeTest winmm)
-ENDIF(WIN32)
+	ADD_CXXTEST(ActionParamTypeUTest)
+	TARGET_LINK_LIBRARIES(ActionParamTypeUTest PAI Control comboreduct cogutil)
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(ActionParamTypeTest winmm)
+	ENDIF(WIN32)
 
-ADD_CXXTEST(AvatarActionUTest)
-TARGET_LINK_LIBRARIES(AvatarActionUTest PAI Control comboreduct cogutil)
-IF(WIN32)
-    TARGET_LINK_LIBRARIES(AvatarActionUTest winmm)
-ENDIF(WIN32)
+	ADD_CXXTEST(AvatarActionUTest)
+	TARGET_LINK_LIBRARIES(AvatarActionUTest PAI Control comboreduct cogutil)
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(AvatarActionUTest winmm)
+	ENDIF(WIN32)
 
+ENDIF(HAVE_MOSES)

@@ -24,9 +24,9 @@
 #ifndef _HILLCLIMBING_ACTION_REDUCTION_H
 #define _HILLCLIMBING_ACTION_REDUCTION_H
 
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
-namespace opencog { namespace reduct
+namespace moses3 { namespace reduct
 {
 const rule& hillclimbing_action_reduction();
 } // ~namespace reduct

@@ -26,8 +26,10 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/combo/perception.h>
+#include <moses/comboreduct/combo/perception.h>
 #include "avatar_operator.h"
+
+using namespace moses3::combo;
 
 namespace opencog { namespace combo {
 

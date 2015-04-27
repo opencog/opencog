@@ -28,20 +28,20 @@
 #include <vector>
 #include <string>
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
-typedef std::vector<opencog::combo::definite_object> definite_object_vec;
+typedef std::vector<moses3::combo::definite_object> definite_object_vec;
 typedef definite_object_vec::iterator definite_object_vec_it;
 typedef definite_object_vec::const_iterator definite_object_vec_const_it;
 typedef std::set<definite_object_vec> definite_object_vec_set;
 typedef definite_object_vec_set::iterator definite_object_vec_set_it;
 typedef definite_object_vec_set::const_iterator definite_object_vec_set_const_it;
-typedef std::map<opencog::combo::definite_object, definite_object_vec_set> agent_to_actions;
+typedef std::map<moses3::combo::definite_object, definite_object_vec_set> agent_to_actions;
 typedef agent_to_actions::iterator agent_to_actions_it;
 typedef agent_to_actions::const_iterator agent_to_actions_const_it;
 
@@ -73,7 +73,7 @@ public:
      * @param type The atom type
      * @return A vector containing all the entities names
      */
-    const opencog::combo::definite_object_set getEntities(Type type = OBJECT_NODE) const;
+    const moses3::combo::definite_object_set getEntities(Type type = OBJECT_NODE) const;
 
     /**
        * Gets the entities (i.e. definite_object) of a given type (and its decendents) in all LocaSpaceMap2D related to a given trick.
@@ -86,7 +86,7 @@ public:
        * @param type The atom type
        * @return A set containing all the entities names
        */
-    const opencog::combo::definite_object_set getEntities(const WorldProvider& wp,
+    const moses3::combo::definite_object_set getEntities(const WorldProvider& wp,
             const std::string& trick,
             const std::string& selfID,
             const std::string& ownerID,
@@ -109,7 +109,7 @@ public:
        *                       start and stop learning
        * @return A set containing all messages meeting the constraint
        */
-    const opencog::combo::message_set getMessages(const WorldProvider& wp,
+    const moses3::combo::message_set getMessages(const WorldProvider& wp,
                                          const std::string& trick,
                                          const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
@@ -131,7 +131,7 @@ public:
        *                       start and stop learning
        * @return A set containing all messages meeting the constraint
        */
-    const opencog::combo::message_set getMessages(const WorldProvider& wp,
+    const moses3::combo::message_set getMessages(const WorldProvider& wp,
                                          Temporal t,
                                          const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
@@ -153,7 +153,7 @@ public:
     *                       start and stop learning
     * @return A set containing all messages meeting the constraint
     */
-    const opencog::combo::message_set getMessages(AtomSpace& as,
+    const moses3::combo::message_set getMessages(AtomSpace& as,
                                          Temporal t,
                                          const std::string& toID = std::string(),
                                          bool exclude_prefix = false,

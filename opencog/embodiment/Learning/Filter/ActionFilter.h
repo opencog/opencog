@@ -24,7 +24,7 @@
 #ifndef ACTIONFILTER_H_
 #define ACTIONFILTER_H_
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>

@@ -131,7 +131,7 @@ cdef class moses:
         output = output_file.file.read()
 
         candidates = []
-        # Python header declared in opencog/learning/moses/moses/types.h
+        # Python header declared in moses/moses/moses/types.h
         # (ostream_combo_tree_composite_pbscore_python)
         python_header = "#!/usr/bin/env python"
 
@@ -147,7 +147,7 @@ cdef class moses:
 
             for candidate in output_list:
                 program = candidate
-                # @todo Fix opencog/comboreduct/combo/iostream_combo.h
+                # @todo Fix moses/comboreduct/combo/iostream_combo.h
                 # (ostream_combo_it) to remove the unneeded trailing comma
                 # that is inserted by the Python formatter
                 if ',' in program:

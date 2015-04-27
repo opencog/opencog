@@ -22,9 +22,9 @@
  */
 
 #include "avatar_builtin_action.h"
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
-using namespace opencog::combo;
+using namespace moses3::combo;
 using namespace avatar_builtin_action_properties;
 
 avatar_builtin_action::avatar_builtin_action()

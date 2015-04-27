@@ -24,9 +24,9 @@
 #ifndef _POST_LEARNING_REWRITING_H
 #define _POST_LEARNING_REWRITING_H
 
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
-namespace opencog { namespace reduct
+namespace moses3 { namespace reduct
 {
 const rule& post_learning_rewriting();
 }}

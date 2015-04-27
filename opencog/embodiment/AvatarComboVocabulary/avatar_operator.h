@@ -24,12 +24,13 @@
 #ifndef _AVATAR_OPERATOR_H
 #define _AVATAR_OPERATOR_H
 
-#include <opencog/comboreduct/combo/operator_base.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/combo/operator_base.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
 namespace opencog { namespace combo {
 
 using namespace std;
+using namespace moses3::combo;
 
 //this class implement operator_base in a generic way using
 //an enum

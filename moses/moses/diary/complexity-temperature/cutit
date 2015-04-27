@@ -1,2 +1,0 @@
-
-cat moses.log | grep Stats | cut -d" " -f5
