@@ -18,7 +18,7 @@ ADD_LIBRARY (builtinreqs SHARED
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	atomspace
-	cogutil
+	${COGUTIL_LIBRARY}
 )
 
 ADD_LIBRARY (server SHARED
@@ -66,7 +66,7 @@ IF (APPLE)
 	# Apple's linker seems not to understand a colon-separated list of
 	# rpaths.
 	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-                "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cogutil -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
+                "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/${COGUTIL_LIBRARY} -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
 	# doesn't work for some reason...
 	#SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
 	#	${PROJECT_BINARY_DIR}/opencog/guile)

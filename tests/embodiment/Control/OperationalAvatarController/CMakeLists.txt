@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 	MessagingSystem
 	Control
 	comboreduct
-	cogutil
+	${COGUTIL_LIBRARY}
 	pthread
 	${Boost_DATE_TIME_LIBRARY}
 	${PROJECT_LIBRARIES}
@@ -65,7 +65,7 @@ IF (TCL_TCLSH)
 		MessagingSystem
 		Control
 		comboreduct
-		cogutil
+		${COGUTIL_LIBRARY}
 		pthread
 		${Boost_DATE_TIME_LIBRARY}
 		${PROJECT_LIBRARIES}
@@ -101,7 +101,7 @@ ADD_CXXTEST(PsiActionSelectionAgentUTest)
             PythonEval
             PythonModule
             atomspace
-            cogutil
+            ${COGUTIL_LIBRARY}
             ${PYTHON_LIBRARIES})
     ENDIF (HAVE_CYTHON)
 

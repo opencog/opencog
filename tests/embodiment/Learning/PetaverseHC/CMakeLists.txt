@@ -2,5 +2,5 @@ ADD_CXXTEST(NeighborhoodGeneratorUTest)
 TARGET_LINK_LIBRARIES(NeighborhoodGeneratorUTest
 	RewritingRules
 	comboreduct
-	cogutil
+	${COGUTIL_LIBRARY}
 )

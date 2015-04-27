@@ -48,7 +48,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(logger_cython
-		cogutil
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 	)
 
@@ -91,7 +91,7 @@ IF (HAVE_ATOMSPACE)
 		embodiment-types
 		nlp-types
 		spacetime-types
-		cogutil
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -141,7 +141,7 @@ IF (HAVE_ATOMSPACE)
 		PythonEval
 		atomspace
 		type_constructors
-		cogutil
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -278,7 +278,7 @@ IF (HAVE_MOSES)
 	TARGET_LINK_LIBRARIES(moses_cython
 		moses_exec
 		moses
-		cogutil
+		${COGUTIL_LIBRARY}
 		comboreduct
 		feature_selection
 		${PYTHON_LIBRARIES}

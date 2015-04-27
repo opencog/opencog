@@ -16,6 +16,6 @@ LINK_DIRECTORIES (
 ADD_DEPENDENCIES(cogita utils)
 
 TARGET_LINK_LIBRARIES (cogita
-	cogutil
+	${COGUTIL_LIBRARY}
 )
 
