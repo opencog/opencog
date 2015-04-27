@@ -94,6 +94,7 @@ public:
     static void destroySuite(ImportanceUpdatingAgentUTest* suite) { delete suite; }
 
 	ImportanceUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
+        config().load(NULL,false);
         cogserver.registerAgent(ImportanceUpdatingAgent::info().id, &factory);
     }
 

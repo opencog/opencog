@@ -37,6 +37,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 {
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     _cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
+    _cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
 #ifdef HAVE_GSL
     _cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
 #endif

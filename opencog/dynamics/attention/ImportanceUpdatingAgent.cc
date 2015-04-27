@@ -37,20 +37,6 @@ using namespace opencog;
 ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
     Agent(cs)
 {
-    // Starting values for rent and wage
-    static const std::string defaultConfig[] = {
-        "ECAN_STARTING_ATOM_STI_RENT", "10",
-        "ECAN_STARTING_ATOM_LTI_RENT", "0", // TEMPORARILY SET TO 0
-        "ECAN_STARTING_ATOM_STI_WAGE", "2",
-        "ECAN_STARTING_ATOM_LTI_WAGE", "2",
-        "ECAN_RENT_TYPE","2", // RENT_LOG
-        "ECAN_RENT_AMNESTY","5",
-        "ECAN_RENT_EQUATION_PARAMETER_0","0.05",
-        "ECAN_RENT_EQUATION_PARAMETER_1","0.0",
-        "", ""
-    };
-    setParameters(defaultConfig);
-
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
