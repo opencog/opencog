@@ -29,23 +29,23 @@
 namespace FitnessEstimator
 {
 
-using namespace moses3::combo;
+using namespace opencog::combo;
 
-typedef moses3::combo::combo_tree::iterator pre_it;
+typedef opencog::combo::combo_tree::iterator pre_it;
 
 //if DistortedComboSize(tr1)!=size(tr2) then tr1 < tr2
 //otherwise lexicographic_subtree_order
 
-struct DistortedComboSizeOrder : moses3::lexicographic_subtree_order<moses3::combo::vertex> {
+struct DistortedComboSizeOrder : opencog::lexicographic_subtree_order<opencog::combo::vertex> {
     //constructor, destructor
-    DistortedComboSizeOrder(const std::set<moses3::combo::definite_object>& dos)
+    DistortedComboSizeOrder(const std::set<opencog::combo::definite_object>& dos)
             : _dos(dos) {
     }
     ~DistortedComboSizeOrder() {}
     //operator
-    bool operator()(const moses3::combo::combo_tree& tr1, const moses3::combo::combo_tree& tr2) const;
+    bool operator()(const opencog::combo::combo_tree& tr1, const opencog::combo::combo_tree& tr2) const;
 private:
-    const std::set<moses3::combo::definite_object>& _dos;
+    const std::set<opencog::combo::definite_object>& _dos;
 };
 
 struct DistortedComboSize {
@@ -53,10 +53,10 @@ struct DistortedComboSize {
     //for instance random_object has actually size
     //#definite_objects * RANDOM_DISTOR_FACTOR instead of 1
     static int size(const combo_tree& tr,
-                    const std::set<moses3::combo::definite_object>& definite_object_set);
+                    const std::set<opencog::combo::definite_object>& definite_object_set);
 
-    static int vertex_size(const moses3::combo::vertex& v,
-                           const std::set<moses3::combo::definite_object>& definite_object_set);
+    static int vertex_size(const opencog::combo::vertex& v,
+                           const std::set<opencog::combo::definite_object>& definite_object_set);
 
 };
 }

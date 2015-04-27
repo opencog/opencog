@@ -57,7 +57,6 @@ static const definite_object all_agents = "all_agents";
 // and allow several vocabularies to coexist 
 namespace AvatarCombo {
 
-using namespace moses3::combo;
 using namespace opencog::combo;
 
 //return a pointer to class base instance

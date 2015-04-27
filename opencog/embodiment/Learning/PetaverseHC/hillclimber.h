@@ -382,7 +382,7 @@ private:
     void populate_neighborhood_from_center() {
         combo_tree center;
         if (_center.empty())
-            center.set_head(moses3::combo::id::sequential_and);
+            center.set_head(opencog::combo::id::sequential_and);
         else center = _center;
         pre_it center_head = center.begin();
         _neighborhoodGenerator.populate_neighborhood(_neighborhood,

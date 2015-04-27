@@ -40,13 +40,13 @@ using namespace combo;
  */
 
 static const vertex _elementary_operators[] = {
-    moses3::combo::id::sequential_and,
-    moses3::combo::id::action_boolean_if,
+    opencog::combo::id::sequential_and,
+    opencog::combo::id::action_boolean_if,
     // id::action_action_if,
     // id::action_while,
-    moses3::combo::id::boolean_while,
+    opencog::combo::id::boolean_while,
     // id::action_not,
-    moses3::combo::id::logical_not
+    opencog::combo::id::logical_not
 };
 
 static const unsigned int _elementary_operators_size =

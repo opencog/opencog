@@ -44,21 +44,21 @@
 #define IS_FE_LRU_CACHE
 #define FE_LRU_CACHE_SIZE 1000000
 
-using namespace moses3;
-using namespace moses3::combo;
+using namespace opencog;
+using namespace opencog::combo;
 
 namespace FitnessEstimator
 {
 
 typedef double fitness_t;
 
-typedef moses3::combo::combo_tree::iterator pre_it;
-typedef moses3::combo::combo_tree::sibling_iterator sib_it;
+typedef opencog::combo::combo_tree::iterator pre_it;
+typedef opencog::combo::combo_tree::sibling_iterator sib_it;
 
 /**
  *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
  */
-struct NoSpaceLifeFitnessEstimator: std::unary_function<moses3::combo::combo_tree, fitness_t> {
+struct NoSpaceLifeFitnessEstimator: std::unary_function<opencog::combo::combo_tree, fitness_t> {
 
 public:
 
@@ -82,10 +82,10 @@ public:
                                 const std::string& ownerName,
                                 const std::string& avatarName,
                                 const std::string& trickName,
-                                const moses3::combo::definite_object_set& dos,
+                                const opencog::combo::definite_object_set& dos,
                                 behavior::BehaviorCategory& BDCat,
                                 const std::vector<Temporal>& exemplarTemporals,
-                                const moses3::combo::argument_list_list& all,
+                                const opencog::combo::argument_list_list& all,
                                 int indefinite_object_count,
                                 int operator_count,
                                 int predicate_Count,
@@ -114,7 +114,7 @@ private:
     WorldProvider* _wp; //not const because Combo2BD may add atoms
     //into wp's atomspace
 
-    const moses3::combo::definite_object_set& _dos;
+    const opencog::combo::definite_object_set& _dos;
 
     const std::string& _petName;
     const std::string& _ownerName;
@@ -123,7 +123,7 @@ private:
 
     const behavior::BehaviorCategory& _BDCat; //list of the examplars retreived
     const std::vector<Temporal>& _exemplarTemporals;
-    const moses3::combo::argument_list_list& _all; //argument lists, one for each BD
+    const opencog::combo::argument_list_list& _all; //argument lists, one for each BD
     behavior::BehaviorDescriptionMatcher _BDMatcher;
     SizePenalty _sizePenalty;
 
@@ -131,7 +131,7 @@ private:
     typedef std::vector<fitness_t> fitness_vec;
     typedef fitness_vec::iterator fitness_vec_it;
     typedef fitness_vec::const_iterator fitness_vec_const_it;
-    typedef opencog::lru_cache_arg_result<moses3::combo::combo_tree, fitness_vec> BDCache;
+    typedef opencog::lru_cache_arg_result<opencog::combo::combo_tree, fitness_vec> BDCache;
     mutable BDCache _bd_cache;
     mutable unsigned int _cache_success;
     mutable unsigned int _total_fitness_call;
@@ -147,7 +147,7 @@ private:
     /**
      * private methods
      */
-    int getTrialCount(const moses3::combo::combo_tree& tr) const;
+    int getTrialCount(const opencog::combo::combo_tree& tr) const;
 
 };
 }

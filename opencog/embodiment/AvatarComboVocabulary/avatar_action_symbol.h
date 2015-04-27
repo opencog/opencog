@@ -29,8 +29,6 @@
 #include <moses/comboreduct/combo/action_symbol.h>
 #include "avatar_operator.h"
 
-using namespace moses3::combo;
-
 namespace opencog { namespace combo {
 
 namespace id {

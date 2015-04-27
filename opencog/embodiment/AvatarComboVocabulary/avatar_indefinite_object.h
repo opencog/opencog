@@ -29,8 +29,6 @@
 #include <moses/comboreduct/combo/indefinite_object.h>
 #include "avatar_operator.h"
 
-using namespace moses3::combo;
-
 namespace opencog { namespace combo {
 
 namespace id {

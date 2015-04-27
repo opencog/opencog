@@ -37,13 +37,15 @@
 #include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
+// namespace opencog { namespace embodiment {
+
 class PetaverseVocabularyProviderBase
 {
 
 public:
 
-    typedef std::set<moses3::combo::vertex> operator_set;
-    typedef std::set<moses3::combo::indefinite_object> indefinite_object_set;
+    typedef std::set<opencog::combo::vertex> operator_set;
+    typedef std::set<opencog::combo::indefinite_object> indefinite_object_set;
 
     //ctor, dtor
 
@@ -65,4 +67,6 @@ public:
     virtual const indefinite_object_set& get_indefinite_objects() const = 0;
 };
 
+
+		
 #endif
