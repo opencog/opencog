@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (atomspaceutils STATIC
+ADD_LIBRARY (atomspaceutils SHARED
 	AtomSpaceUtils
 )
 

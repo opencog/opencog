@@ -8,7 +8,7 @@ ADD_LIBRARY(lslib
 )
 
 ADD_LIBRARY(TestPatternMinerAgent SHARED
-        TestPatternMinerAgent
+	TestPatternMinerAgent
 )
 
 TARGET_LINK_LIBRARIES (TestPatternMinerAgent
@@ -32,13 +32,19 @@ SET(EXE_LINK_LIBS
 	MessagingSystem
 	LearningServerMessages
 	Control
-	cogutil
-	comboreduct
-	pthread
 	Filter
 	FitnessEstimator
-	# Procedure
+	Procedure
 	RewritingRules
+	moses
+	feature_selection
+	moses
+	cogutil
+	comboant
+	comboreduct
+	pthread
+	${Boost_REGEX_LIBRARY}
+	${Boost_THREAD_LIBRARY}
 )
 
 IF (HAVE_GUILE)

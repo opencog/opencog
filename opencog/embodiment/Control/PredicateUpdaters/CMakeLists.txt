@@ -1,4 +1,4 @@
-ADD_LIBRARY (PredicateUpdaters
+ADD_LIBRARY (PredicateUpdaters SHARED
 	PredicatesUpdater.cc
 	BasicPredicateUpdater.cc
 	IsSmallPredicateUpdater.cc
