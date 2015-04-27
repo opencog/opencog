@@ -21,11 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/reduct.h>
 #include "hillclimbing_action_reduction.h"
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
-#include <opencog/comboreduct/reduct/action_rules.h>
+#include <moses/comboreduct/reduct/meta_rules.h>
+#include <moses/comboreduct/reduct/general_rules.h>
+#include <moses/comboreduct/reduct/action_rules.h>
 
 namespace opencog { namespace reduct {
 const rule& hillclimbing_action_reduction()
