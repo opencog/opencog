@@ -129,16 +129,6 @@ ENDIF (WIN32)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# Look for binutils-dev. Needed for pretty stack printing.
-FIND_PACKAGE(BFD)
-IF (BFD_FOUND)
-	MESSAGE(STATUS "Binutils found.")
-	ADD_DEFINITIONS(-DHAVE_BFD)
-	SET(HAVE_BFD 1)
-ELSE (BFD_FOUND)
-	MESSAGE(STATUS "Binutils-dev missing: No pretty stack-trace printing.")
-ENDIF (BFD_FOUND)
-
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
@@ -187,6 +177,16 @@ IF(Boost_MATH_C99_FOUND)
 ELSE(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
+
+# Cogutils
+FIND_PACKAGE(CogUtil)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+	SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
 
 FIND_PACKAGE(CURL)
 IF (NOT CURL_FOUND)
@@ -264,16 +264,6 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
 
 ENDIF (HYPERTABLE_FOUND)
-
-# Look for libiberty-dev. Needed for pretty stack printing.
-FIND_PACKAGE(Iberty)
-IF (IBERTY_FOUND)
-	MESSAGE(STATUS "Libiberty found.")
-	ADD_DEFINITIONS(-DHAVE_IBERTY)
-	SET(HAVE_IBERTY 1)
-ELSE (IBERTY_FOUND)
-	MESSAGE(STATUS "Libiberty-dev missing: No pretty stack-trace printing.")
-ENDIF (IBERTY_FOUND)
 
 
 # Lapack is needed for BLOPEX
@@ -510,14 +500,13 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 # Decide what to build, based on the packages found.
 
 IF(Boost_FOUND)
-	SET(HAVE_UTIL 1)
 ENDIF(Boost_FOUND)
 
-IF(GSL_FOUND AND HAVE_UTIL)
+IF(GSL_FOUND AND HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
 	SET(HAVE_ATTENTION 1)
 	SET(HAVE_DIMEMBED 1)
-ENDIF(GSL_FOUND AND HAVE_UTIL)
+ENDIF(GSL_FOUND AND HAVE_COGUTIL)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 	SET(HAVE_SPATIAL_TOOLS 1)
@@ -772,10 +761,8 @@ SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
-SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD AND HAVE_IBERTY)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
 SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)

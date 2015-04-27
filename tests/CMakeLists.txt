@@ -13,11 +13,9 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 # Perform tests in component-dependency order, as much as possible.
-# For example, since everything depends on util and config functions,
-# these are tested first. Since most things depend on the atomspace,
-# that is tested next, etc.
+# For example, since most things depends on the atomspace,
+# its is tested first.
 IF (CXXTEST_FOUND)
-	ADD_SUBDIRECTORY (util)
 
 	IF (HAVE_ATOMSPACE)
 		ADD_SUBDIRECTORY (atomspace)
