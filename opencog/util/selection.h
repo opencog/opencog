@@ -23,12 +23,12 @@
 #ifndef _OPENCOG_SELECTION_H
 #define _OPENCOG_SELECTION_H
 
-#include "functional.h"
-#include "numeric.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/numeric.h>
 #include <iterator>
-#include "dorepeat.h"
-#include "RandGen.h"
-#include "mt19937ar.h"
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 
 namespace opencog
 {

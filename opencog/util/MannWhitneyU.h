@@ -26,8 +26,8 @@
 #include <boost/range/numeric.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include "Counter.h"
-#include "ranking.h"
+#include <opencog/util/Counter.h>
+#include <opencog/util/ranking.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

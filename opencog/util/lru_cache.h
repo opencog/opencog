@@ -31,11 +31,11 @@
 #include <boost/thread.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "exceptions.h"
-#include "hashing.h"
-#include "Logger.h"
-#include "oc_assert.h"
-#include "platform.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/hashing.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/util/platform.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

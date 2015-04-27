@@ -24,7 +24,7 @@
 #define _OPENCOG_LOG_PROG_NAME_H
 
 #include <boost/program_options.hpp>
-#include "iostreamContainer.h"
+#include <opencog/util/iostreamContainer.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

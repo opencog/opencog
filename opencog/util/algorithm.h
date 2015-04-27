@@ -8,8 +8,8 @@
 
 #include <ext/algorithm>
 
-#include "numeric.h"
-#include "exceptions.h"
+#include <opencog/util/numeric.h>
+#include <opencog/util/exceptions.h>
 
 namespace opencog
 {

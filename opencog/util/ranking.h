@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_RANKING_H
 #define _OPENCOG_RANKING_H
 
-#include "Counter.h"
+#include <opencog/util/Counter.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

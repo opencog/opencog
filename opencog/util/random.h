@@ -26,9 +26,9 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "RandGen.h"
-#include "mt19937ar.h"
-#include "numeric.h"
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
 
 /**
  * \file random.h

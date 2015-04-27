@@ -23,9 +23,9 @@
 #ifndef _OPENCOG_LAZY_RANDOM_SELECTOR_H
 #define _OPENCOG_LAZY_RANDOM_SELECTOR_H
 
-#include "lazy_selector.h"
-#include "RandGen.h"
-#include "mt19937ar.h"
+#include <opencog/util/lazy_selector.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 
 namespace opencog
 {

@@ -31,7 +31,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "oc_assert.h"
+#include <opencog/util/oc_assert.h>
 
 namespace opencog {
 /** \addtogroup grp_cogutil

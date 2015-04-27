@@ -26,9 +26,9 @@
 #include <queue>
 #include <vector>
 #include <set>
-#include "algorithm.h"
-#include "exceptions.h"
-#include "oc_assert.h"
+#include <opencog/util/algorithm.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <boost/iterator/counting_iterator.hpp>
 
 namespace opencog

@@ -4,23 +4,26 @@
  *
  * Author: Nil Geisweiller
  *
- * Licensed under the Apache License, Version 2.0 (the "Lcense");
- * you may not use this file except in compliance with th License.
- * You may obtain a copy of the License at
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writng, software
- * distributed under the License is distributed on an "ASIS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either epress or implied.
- * See the License for the specific language governing pemissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_JACCARD_INDEX_H
 #define _OPENCOG_JACCARD_INDEX_H
 
-#include "algorithm.h"
+#include <opencog/util/algorithm.h>
 
 namespace opencog {
 

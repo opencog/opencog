@@ -23,8 +23,8 @@
 #ifndef _OPENCOG_LAZY_NORMAL_SELECTOR_H
 #define _OPENCOG_LAZY_NORMAL_SELECTOR_H
 
-#include "lazy_selector.h"
-#include "oc_assert.h"
+#include <opencog/util/lazy_selector.h>
+#include <opencog/util/oc_assert.h>
 
 namespace opencog
 {
