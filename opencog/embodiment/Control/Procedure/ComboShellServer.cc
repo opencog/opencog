@@ -21,11 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/combo/vertex.h>
 #include <iostream>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
+#include <moses/comboreduct/combo/vertex.h>
 #include "ComboShellServer.h"
 #include "ComboInterpreter.h"
 #include "ComboProcedureRepository.h"

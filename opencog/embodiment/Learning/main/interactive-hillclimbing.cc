@@ -20,14 +20,15 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <opencog/embodiment/Learning/PetaverseHC/interactive-hillclimber.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/util/lru_cache.h>
 #include <set>
 #include <string>
 #include <algorithm>
 #include <iostream>
+
+#include <moses/comboreduct/combo/vertex.h>
+
+#include <opencog/embodiment/Learning/PetaverseHC/interactive-hillclimber.h>
+#include <opencog/util/lru_cache.h>
 
 using namespace opencog;
 using namespace hillclimbing;

@@ -24,13 +24,13 @@
 
 #include <boost/range/numeric.hpp>
 
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
-#include <opencog/learning/moses/deme/deme_expander.h>
-#include <opencog/learning/moses/metapopulation/metapopulation.h>
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/learning/moses/optimization/hill-climbing.h>
-#include <opencog/learning/moses/scoring/scoring_base.h>
+#include <moses/moses/deme/deme_expander.h>
+#include <moses/moses/metapopulation/metapopulation.h>
+#include <moses/moses/optimization/optimization.h>
+#include <moses/moses/optimization/hill-climbing.h>
+#include <moses/moses/scoring/scoring_base.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
