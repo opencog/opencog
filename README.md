@@ -28,22 +28,16 @@ container in which OpenCog will be built and run.
 > Currently, opencog requires cxxtest version 3, and is not compatible
   with version 4.
 
-Optional Prerequisites
-----------------------
-The following packages are optional. If they are not installed, some
-optional parts of OpenCog will not be built.  The CMake command, during
-the build, will be more precise as to which parts will not be built.
-
 Building CogUtils
 -----------------
 Peform the following steps at the shell prompt:
-
+```
     cd to project root dir
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release ..
     make
-
+```
 Libraries will be built into subdirectories within build, mirroring the
 structure of the source directory root. The flag -DCMAKE_BUILD_TYPE=Release
 results in binaries that are optimized for for performance; ommitting
@@ -54,5 +48,14 @@ Unit tests
 ----------
 To build and run the unit tests, from the ./build directory enter (after
 building opencog as above):
-
+```
     make test
+```
+
+
+Install
+-------
+After building, you MUST install the utilities!
+```
+    sudo make install
+```
