@@ -1,0 +1,47 @@
+Source: https://github.com/DNCrane/Cover-Tree
+
+This is a C++ implementation of the cover tree datastructure. Implements the
+cover tree algorithms for insert, removal, and k-nearest-neighbor search.
+
+To build simply type make in the terminal from the project directory. Do
+./test to run the tests. Look in test.cc for example code of how to use the
+cover tree.
+
+Relevant links:
+https://secure.wikimedia.org/wikipedia/en/wiki/Cover_tree - Wikipedia's page
+on cover trees.
+http://hunch.net/~jl/projects/cover_tree/cover_tree.html - John Langford's (one
+of the inventors of cover trees) page on cover trees with links to papers.
+
+To use the Cover Tree, you must implement your own Point class. CoverTreePoint
+is provided for testing and as an example. Your Point class must implement the
+following functions:
+
+double YourPoint::distance(const YourPoint& p);
+bool YourPoint::operator==(const YourPoint& p);
+and optionally (for debugging/printing only):
+void YourPoint::print();
+
+The distance function must be a Metric, meaning (from Wikipedia):
+1: d(x, y) = 0   if and only if   x = y
+2: d(x, y) = d(y, x)     (symmetry)
+3: d(x, z) =< d(x, y) + d(y, z)     (subadditivity / triangle inequality).
+
+See https://secure.wikimedia.org/wikipedia/en/wiki/Metric_%28mathematics%29
+for details.
+
+Actually, 1 does not exactly need to hold for this implementation; you can
+provide, for example, names for your points which are unrelated to distance
+but important for equality. You can insert multiple points with distance 0 to
+each other and the tree will keep track of them, but you cannot insert multiple
+points that are equal to each other; attempting to insert a point that
+already exists in the tree will not alter the tree at all.
+
+If you do not want to allow multiple nodes with distance 0, then just make
+your equality operator always return true when distance is 0.
+
+TODO:
+-The papers describe batch insert and batch-nearest-neighbors algorithms which
+may be worth implementing.
+-Try using a third "upper bound" argument for distance functions, beyond which
+the distance does not need to be calculated, to improve efficiency in practice.
