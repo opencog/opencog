@@ -15,11 +15,12 @@ https://github.com/opencog/opencog/blob/master/TUTORIAL.md
 
 Prerequisites
 -------------
-To build and run OpenCog, the packages listed below are required. With a
-few exceptions, most Linux distributions will provide these packages. Users of
-Ubuntu 14.04 "Trusty Tahr" may use the dependency installer at scripts/octool.
-Users of any version of Linux may use the Dockerfile to quickly build a 
-container in which OpenCog will be built and run.
+To build and run OpenCog, the packages listed below are required.
+With a few exceptions, most Linux distributions will provide these
+packages. Users of Ubuntu 14.04 "Trusty Tahr" may use the dependency
+installer at `/scripts/octool`.  Users of any version of Linux may
+use the Dockerfile to quickly build a container in which OpenCog will
+be built and run.
 
 ###### boost
 > C++ utilities package
@@ -28,6 +29,12 @@ container in which OpenCog will be built and run.
 ###### cmake
 > Build management tool; v2.8 or higher recommended.
 > http://www.cmake.org/ | cmake
+
+###### cogutil
+> Common OpenCog C++ utilities
+> http://github/opencog/cogutils
+> It uses exactly the same build proceedure as this pakcage. Be sure
+  to `sudo make install` at the end.
 
 ###### cxxtest
 > Test framework
@@ -69,10 +76,11 @@ the build, will be more precise as to which parts will not be built.
 > Required for experimental Viterbi parser.
 > http://www.abisource.com/projects/link-grammar/
 
-###### MPI
-> Message Passing Interface
-> Required for compute-cluster version of MOSES
-> Use either MPICHV2 or OpenMPI
+###### MOSES
+> MOSES Machine Learning
+> http://github/opencog/moses
+> It uses exactly the same build proceedure as this pakcage. Be sure
+  to `sudo make install` at the end.
 
 ###### OpenGL
 > Open Graphics Library
@@ -89,6 +97,10 @@ the build, will be more precise as to which parts will not be built.
 > Simple DirectMedia Layer extension
 > Used by opencog/spatial/MapTool
 > http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
+
+###### Threading Building Blocks
+> C++ template library for parallel programming
+> https://www.threadingbuildingblocks.org/download | libtbb-dev
 
 ###### unixODBC
 > Generic SQL Database client access libraries
@@ -109,71 +121,65 @@ the build, will be more precise as to which parts will not be built.
 > Asynchronous messaging library
 > http://zeromq.org/intro:get-the-software | libzmq3-dev
 
-###### Threading Building Blocks
-> C++ template library for parallel programming
-> https://www.threadingbuildingblocks.org/download | libtbb-dev
-
 Building OpenCog
 ----------------
 Peform the following steps at the shell prompt:
-
+```
     cd to project root dir
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release ..
     make
-
-Libraries will be built into subdirectories within build, mirroring the
-structure of the source directory root. The flag -DCMAKE_BUILD_TYPE=Release
-results in binaries that are optimized for for performance; ommitting
-this flag will result in faster builds, but slower executables.
+```
+Libraries will be built into subdirectories within build, mirroring
+the structure of the source directory root. The flag
+`-DCMAKE_BUILD_TYPE=Release` results in binaries that are optimized
+for for performance; ommitting this flag will result in faster builds,
+but slower executables.
 
 
 Unit tests
 ----------
-To build and run the unit tests, from the ./build directory enter (after
-building opencog as above):
-
+To build and run the unit tests, from the `./build` directory enter
+(after building opencog as above):
+```
     make test
+```
 
+Using OpenCog
+-------------
+OpenCog can be used in one of three ways, or a mixture of all three:
+By using the GNU Guile scheme interface, by using Python, or by running
+the cogserver.
+
+Guile provides the easiest interface for creating atoms, loading them
+into the AtomSpace, and performing various processing operations on
+them.  For examples, see the `/examples/guile` and the
+`/examples/pattern-matcher` directories.
+
+Python is more familiar than scheme (guile) to most programmers, and
+it offers another way of intrfacing to the atomspace. See the
+`/examples/python` directory for how to use python with OpenCog.
+
+The cogserver provides a network server interface to OpenCog. It is
+requires for running embodiment, some of the reasoning agents, and some
+of the natural-language processing agents.
 
 Running the server
 ------------------
-The cogserver provides a simple server interface to the reasoning
-system.
+The cogserver provides a network server interface to the various
+components and agents.  After building everything, change directory
+to your `opencog/build` folder and execute `opencog/server/cogserver`.
+Then, from another terminal, run `rlwrap telnet localhost 17001`
+The `help` command will list all of the other available commands.
+Notable among these are teh commands to attach to a (Postgres) database,
+and networked scheme and python interfaces (i.e. scheme and python
+shells that are usable over the network, if you are logged in remotely
+to the cogserver).
 
-See CommandRequestProcessor.cc as an example control interface to
-the server.  This command processor understands 3 simple commands:
-load <xml file name>, ls and shutdown. There is an example XML file
-under tests/server/atomSpace.xml
-
-To run a simple test, build everything, change directory to your opencog/build
-folder and execute opencog/server/cogserver. Then, from another terminal,
-run ```telnet localhost 17001``` Try loading the example XML file and ls
-to see all the nodes and links.
-
-
-Config file
------------
 The operation of the server can be altered by means of a config file.
-This config file is in lib/opencog.conf. To make use of it, say
-```cogserver -c <config-filename>``` when starting the server.
-
-
-Scheme shell
-------------
-The cog server also includes a built-in scheme shell. The shell can be
-started by typing ```scm``` after entering the opencog server shell. It can
-be exited by placing a single . on a line by itself.  This shell allows
-opencog atoms and truth values to be created, manipulated and destroyed
-using a very simple but powerful interface.  Examples and documentation
-for the available OpenCog commands can be found in src/guile/README.
-See also the wiki for additional details.
-
-
-Modifying the list of basic types
----------------------------------
-See the example under ./examples/atomtypes
+This config file is in `lib/opencog.conf`. To make use of it, say
+`cogserver -c <config-filename>` when starting the server.
 
 
 CMake notes
