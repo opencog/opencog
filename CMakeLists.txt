@@ -288,7 +288,7 @@ ELSE (LINK_GRAMMAR_FOUND)
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
-# MOSES needed for visualization...
+# MOSES needed for embodiment learning...
 FIND_PACKAGE(MOSES)
 
 IF (MOSES_FOUND)
