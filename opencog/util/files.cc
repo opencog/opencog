@@ -51,19 +51,10 @@
  *
  * The basic search algo is that anything in the user's directory is
  * explored first, before anything in the system directories.
- *
- * XXX FIXME -- for binary installs, the project dirs should not be
- * searched, as they will not exist on the user's machine.  I don't
- * know how to disable this, though...
  */
 static const std::vector<std::string> paths =
 {
-    PROJECT_BINARY_DIR,
-    PROJECT_BINARY_DIR "/opencog",
-    PROJECT_SOURCE_DIR,
-    PROJECT_SOURCE_DIR "/opencog",
     CMAKE_INSTALL_PREFIX,
-    CMAKE_INSTALL_PREFIX "/opencog",
     DATADIR,         // this too is an install dir
     DATADIR "/opencog",
 #ifndef WIN32
@@ -120,7 +111,8 @@ bool opencog::createDirectory(const char* directory)
     return false;
 }
 
-bool opencog::appendFileContent(const char* filename, std::string &s) {
+bool opencog::appendFileContent(const char* filename, std::string &s)
+{
     std::ifstream in(filename);
     if (!in.is_open())
         return false;
@@ -165,7 +157,8 @@ bool opencog::LoadTextFile(const std::string fname, std::string& dest)
     return true;
 }
 
-std::string getExeName() {
+std::string getExeName()
+{
     static char buf[PATH_MAX];
     int rslt = readlink("/proc/self/exe", buf, PATH_MAX);
 
@@ -177,7 +170,8 @@ std::string getExeName() {
         return std::string(buf);
 }
 
-std::string getExeDir() {
+std::string getExeDir()
+{
     std::string exeName = getExeName();
     return exeName.substr(0, exeName.rfind("/")+1);
 }
