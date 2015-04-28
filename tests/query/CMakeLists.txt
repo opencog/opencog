@@ -67,7 +67,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(EinsteinUTest)
     
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
-		cogutil
+		${COGUTIL_LIBRARY}
 	)
 ENDIF (HAVE_GUILE)
 

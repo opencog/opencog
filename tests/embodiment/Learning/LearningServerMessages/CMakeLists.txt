@@ -8,7 +8,7 @@ ADD_CXXTEST(LearnMessageUTest)
 TARGET_LINK_LIBRARIES(LearnMessageUTest 
 	MessagingSystem
 	LearningServerMessages
-	cogutil
+	${COGUTIL_LIBRARY}
 	Filter
 	${PROJECT_LIBRARIES}
 )

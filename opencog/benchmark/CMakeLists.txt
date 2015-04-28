@@ -26,7 +26,7 @@ ENDIF(HAVE_CYTHON)
 TARGET_LINK_LIBRARIES (atomspace_bm
 	server
 	atomspace
-	cogutil
+	${COGUTIL_LIBRARY}
 )
 
 IF (HAVE_SERVER)

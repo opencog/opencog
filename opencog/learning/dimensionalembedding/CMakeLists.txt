@@ -23,5 +23,5 @@ ENDIF (CYGWIN)
 TARGET_LINK_LIBRARIES (dimensionalembedding
 	atomspaceutils
 	atomspace
-	cogutil 
+	${COGUTIL_LIBRARY}
 )

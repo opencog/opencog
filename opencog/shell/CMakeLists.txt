@@ -14,7 +14,7 @@ ADD_LIBRARY (py-shell SHARED
 TARGET_LINK_LIBRARIES(py-shell
 	smob
 	atomspace
-	cogutil
+	${COGUTIL_LIBRARY}
 	PythonEval
 	${Boost_SYSTEM_LIBRARY}
 	${PYTHON_LIBRARIES}
@@ -30,7 +30,7 @@ ADD_LIBRARY (scheme-shell SHARED
 TARGET_LINK_LIBRARIES(scheme-shell
 	smob
 	atomspace
-	cogutil
+	${COGUTIL_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 )
 

@@ -2,7 +2,7 @@
 ADD_EXECUTABLE (post_learning-rewriter post_learning-rewriter)
 TARGET_LINK_LIBRARIES (post_learning-rewriter
 	RewritingRules
-	cogutil
+	${COGUTIL_LIBRARY}
 	${Boost_REGEX_LIBRARY}
 )
 
@@ -13,7 +13,7 @@ IF(HAVE_MOSES)
 		comboant
 		comboreduct
 		mosesutil
-		cogutil
+		${COGUTIL_LIBRARY}
 		${Boost_PROGRAM_OPTIONS_LIBRARY}
 	)
 
@@ -21,6 +21,6 @@ IF(HAVE_MOSES)
 	TARGET_LINK_LIBRARIES (interactive-hillclimbing
 		comboreduct
 		comboant
-		cogutil
+		${COGUTIL_LIBRARY}
 	)
 ENDIF(HAVE_MOSES)

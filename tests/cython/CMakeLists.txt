@@ -15,7 +15,7 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
 		server
-		cogutil
+		${COGUTIL_LIBRARY}
 		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
@@ -33,7 +33,7 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PyEvalUTest
 		py-shell
 		server
-		cogutil
+		${COGUTIL_LIBRARY}
 		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
@@ -54,7 +54,7 @@ TARGET_LINK_LIBRARIES(PythonEvalUTest
 	smob
 	server
 	PythonEval
-	cogutil
+	${COGUTIL_LIBRARY}
 	atomspace_cython
 )
 SET_TESTS_PROPERTIES(PythonEvalUTest
@@ -69,7 +69,7 @@ ADD_CXXTEST(PythonUtilitiesUTest)
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	atomspace
 	PythonEval
-	cogutil
+	${COGUTIL_LIBRARY}
 	utilities_cython
 	atomspace_cython
 )

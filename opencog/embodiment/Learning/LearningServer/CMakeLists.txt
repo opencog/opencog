@@ -39,7 +39,7 @@ SET(EXE_LINK_LIBS
 	moses
 	feature_selection
 	moses
-	cogutil
+	${COGUTIL_LIBRARY}
 	comboant
 	comboreduct
 	pthread

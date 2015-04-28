@@ -7,7 +7,7 @@ ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
 
 # TARGET_LINK_LIBRARIES(atomspaceutils
 # 	atomspace
-# 	cogutil
+# 	${COGUTIL_LIBRARY}
 # )
 
 #IF (CYGWIN)

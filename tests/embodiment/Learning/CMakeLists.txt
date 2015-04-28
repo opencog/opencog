@@ -6,5 +6,5 @@ ADD_SUBDIRECTORY (PetaverseHC)
 
 ADD_CXXTEST(SetopsUTest)
 TARGET_LINK_LIBRARIES(SetopsUTest
-	cogutil
+	${COGUTIL_LIBRARY}
 )
