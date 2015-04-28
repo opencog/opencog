@@ -154,7 +154,8 @@ void JsonicControlPolicyParamLoader::read_obj(const Value &v, int lev)
             rules_.push_back(cur_read_rule_); // XXX take care of pointers
 
         } else if (key == FILE_PATH) {
-            load_scm_file_relative(*as_, value.get_value<string>(), DEFAULT_MODULE_PATHS);
+            load_scm_file_relative(*as_, value.get_value<string>(),
+                                   DEFAULT_MODULE_PATHS);
 
             // resolve the scheme variable to get the BindLink
             Handle rule_handle = scm_eval_->eval_h(cur_read_rule_->get_name());
