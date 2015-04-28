@@ -1,5 +1,5 @@
 add_subdirectory (behavior)
-add_subdirectory (main)
+# add_subdirectory (main)
 add_subdirectory (LearningServer)
 add_subdirectory (LearningServerMessages)
 add_subdirectory (LearningSpace)
