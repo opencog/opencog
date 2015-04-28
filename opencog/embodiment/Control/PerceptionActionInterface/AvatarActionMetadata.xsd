@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.opencog.org/metadata/action"
+            xmlns:action="http://www.opencog.org/metadata/action"
+            xmlns:common="http://www.opencog.org/metadata/common"
+            elementFormDefault="unqualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.opencog.org/metadata/common"
+                schemaLocation="CommonMetadata.xsd"/>
+
+    <xsd:element name="action-macro-metadata" type="action:ActionMacroMetadataType">
+        <xsd:key name="nameKey">
+          <xsd:selector xpath="macros/macro"/>
+          <xsd:field xpath="@name"/>
+        </xsd:key>
+
+        <xsd:key name="actionKey">
+            <xsd:selector xpath="actions/action"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key>
+
+        <xsd:key name="actionGroupKey">
+            <xsd:selector xpath="actions/group"/>
+            <xsd:field xpath="@name"/>
+        </xsd:key>
+
+        <xsd:keyref name="actionRefCheck" refer="action:actionKey">
+          <xsd:selector xpath="macros/macro"/>
+          <xsd:field xpath="@action-ref"/>
+        </xsd:keyref>
+
+        <xsd:keyref name="actionGroupRefCheck" refer="action:actionGroupKey">
+          <xsd:selector xpath="macros/macro/group"/>
+          <xsd:field xpath="@ref"/>
+        </xsd:keyref>
+
+        <xsd:keyref name="actionRefCheck2" refer="action:actionKey">
+          <xsd:selector xpath="macros/macro/group/action"/>
+          <xsd:field xpath="@ref"/>
+        </xsd:keyref>
+
+        <xsd:keyref name="actionRefCheck3" refer="action:actionKey">
+          <xsd:selector xpath="macros/marco/action"/>
+          <xsd:field xpath="@ref"/>
+        </xsd:keyref>
+
+        <xsd:keyref name="actionRefCheck4" refer="action:actionKey">
+          <xsd:selector xpath="actions/group/action"/>
+          <xsd:field xpath="@ref"/>
+        </xsd:keyref>
+
+    </xsd:element>
+
+    <xsd:complexType name="ActionMacroMetadataType">
+        <xsd:sequence>
+            <xsd:element name="appliesTo" type="action:ApplicabilityType"
+                         minOccurs="0" maxOccurs="1"/>            
+            <xsd:element name="actions" type="action:AvatarActionsType"
+                         minOccurs="1" maxOccurs="1"/>
+
+            <xsd:element name="macros" type="action:PetMacrosType"
+                         minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="version" type="xsd:float" use="required"/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:annotation>
+        <xsd:documentation>
+            Applicability rules indicate whether this set of actions applies to
+            a cat/dog/bird since the same command may look a bit different or
+            imply the the use of certain auxillary animations that apply only to
+            a given genus and species.
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="ApplicabilityType">
+        <xsd:sequence>
+            <xsd:element name="genus" type="common:GenusID"
+                         minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="species" type="common:SpeciesID"
+                         minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="locale" type="common:LocaleID"
+                         minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="world" type="common:WorldID"
+                         minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:annotation>
+        <xsd:documentation>
+            An interesting exercise would be to generate expansion code using
+            Janino for these rules.  Can be done as an optimization at a later
+            date . . .
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="AvatarActionsType">
+        <xsd:sequence>
+            <xsd:choice minOccurs="1" maxOccurs="unbounded">
+                <xsd:element name="action" type="action:ActionTemplateType"
+                             minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="group" type="action:ActionGroupTemplateType"
+                             minOccurs="1" maxOccurs="1"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PetMacrosType">
+        <xsd:sequence>
+            <xsd:element name="macro" type="action:MacroTemplateType"
+                         minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="MacroTemplateType">
+        <xsd:sequence>
+            <xsd:element name="param" type="action:ParameterType"
+                         minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:choice minOccurs="1" maxOccurs="unbounded">
+                <xsd:element name="group" type="action:ActionGroupReferenceType"
+                             minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="action" type="action:ActionReferenceType"
+                             minOccurs="1" maxOccurs="1"/>
+            </xsd:choice>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="ActionGroupTemplateType">
+        <xsd:sequence>
+            <xsd:element name="action" type="action:ActionReferenceType"
+                         minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="ActionTemplateType">
+        <xsd:sequence>
+            <xsd:element name="param" type="action:ParameterReferenceType"
+                         minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="optional"/>
+        <xsd:attribute name="type" type="common:AvatarActionEnumType"
+                       use="optional"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="ActionGroupReferenceType">
+        <xsd:complexContent>
+           <xsd:extension base="action:ActionGroupTemplateType">
+               <xsd:sequence/>
+               <xsd:attribute name="ref" type="xsd:string" use="optional"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ActionReferenceType">
+        <xsd:complexContent>
+           <xsd:extension base="action:ActionTemplateType">
+               <xsd:sequence/>
+               <xsd:attribute name="ref" type="xsd:string" use="optional"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ParameterType">
+        <xsd:complexContent>
+            <xsd:extension base="common:BaseParameterType">
+                <xsd:sequence>
+                    <xsd:choice minOccurs="0" maxOccurs="1">
+                        <xsd:element name="vector" type="common:VectorDataType"
+                                     minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="rotation" type="common:RotationDataType"
+                                     minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="entity" type="common:BaseEntityType"
+                                     minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="value" type="xsd:string"
+                                     minOccurs="1" maxOccurs="1"/>
+                    </xsd:choice>
+                </xsd:sequence>
+                <xsd:attribute name="value" type="xsd:string" use="optional"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ParameterReferenceType">
+        <xsd:complexContent>
+            <xsd:extension base="action:ParameterType">
+                <xsd:attribute name="ref-index" type="xsd:int" use="optional"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>

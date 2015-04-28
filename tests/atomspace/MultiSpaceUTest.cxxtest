@@ -1,0 +1,502 @@
+/*
+ * tests/atomspace/MultiSpaceUTest.cxxtest
+ *
+ * Copyright (C) 2014,2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+using namespace opencog;
+
+// Test support for multiple atomspaces.
+// This is pursuant to github bug #523 -- several users want this
+// ability.
+// Tests for removal of atoms in a multi-atomspace usage case is in
+// the RemoveUTest.cxxtest file.
+//
+class MultiSpaceUTest :  public CxxTest::TestSuite
+{
+private:
+
+	AtomSpace as1;
+	AtomSpace as2;
+	AtomSpace as3;
+
+public:
+	MultiSpaceUTest() {}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	// Simple test of naive multiple atomspaces.  Create three
+	// distinct atomspaces, make sure they behave like atomspaces
+	// should.
+	void testSimple()
+	{
+		// Create three TV's
+		TruthValuePtr tv1(SimpleTruthValue::createTV(0.5, 1.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.5, 2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 3.0));
+
+		// Create three atoms in three different atomspaces
+		Handle h1 = as1.addNode(CONCEPT_NODE, "1");
+		h1->setTruthValue(tv1);
+		Handle h2 = as2.addNode(NUMBER_NODE, "2");
+		h2->setTruthValue(tv2);
+		Handle h3 = as3.addNode(VARIABLE_NODE, "3");
+		h3->setTruthValue(tv3);
+
+		// Forget about the atoms, remember thier UUID's only
+		// UUID's are just long ints ...
+		UUID u1 = h1.value();
+		UUID u2 = h2.value();
+		UUID u3 = h3.value();
+
+		// Create new Handles from the UUID's
+		Handle hu1(u1);
+		Handle hu2(u2);
+		Handle hu3(u3);
+
+		// They should match the old handles
+		TS_ASSERT(h1 == hu1);
+		TS_ASSERT(h2 == hu2);
+		TS_ASSERT(h3 == hu3);
+
+		// ... and they should refer to the same atoms.
+		TS_ASSERT(hu1->getType() == h1->getType());
+		TS_ASSERT(hu2->getType() == h2->getType());
+		TS_ASSERT(hu3->getType() == h3->getType());
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hu1->getTruthValue() == h1->getTruthValue());
+		TS_ASSERT(hu2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
+
+		// Fetch three atoms in three different atomspaces
+		Handle hn1 = as1.addNode(CONCEPT_NODE, "1");
+		Handle hn2 = as2.addNode(NUMBER_NODE, "2");
+		Handle hn3 = as3.addNode(VARIABLE_NODE, "3");
+
+		// They should match the old handles
+		TS_ASSERT(h1 == hn1);
+		TS_ASSERT(h2 == hn2);
+		TS_ASSERT(h3 == hn3);
+
+		// ... and they should refer to the same atoms.
+		TS_ASSERT(hn1->getType() == h1->getType());
+		TS_ASSERT(hn2->getType() == h2->getType());
+		TS_ASSERT(hn3->getType() == h3->getType());
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hn1->getTruthValue() == h1->getTruthValue());
+		TS_ASSERT(hn2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hn3->getTruthValue() == h3->getTruthValue());
+	}
+
+	// Test multiple independent atomspaces.  Make sure they do not
+	// collide with one-another in atom insertion, deletion.
+	void testCopy()
+	{
+		// Create three TV's
+		TruthValuePtr tv1(SimpleTruthValue::createTV(0.4, 1.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
+
+		// Create three nodes
+		NodePtr n1(createNode(CONCEPT_NODE, "uni-1"));
+		n1->setTruthValue(tv1);
+		NodePtr n2(createNode(NUMBER_NODE, "2.2222"));
+		n2->setTruthValue(tv2);
+		NodePtr n3(createNode(VARIABLE_NODE, "uni-3"));
+		n3->setTruthValue(tv3);
+
+		Handle hnd1(n1);
+		Handle hnd2(n2);
+		Handle hnd3(n3);
+
+		// Create three links holding these three
+		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
+
+		// Create three copies of this link in three atomspaces
+		Handle h1 = as1.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h1->setTruthValue(tv);
+		Handle h2 = as2.addAtom(h1);
+		Handle h3 = as3.addAtom(h2);
+
+		// The truth value *pointers* should differ; they should
+		// have been copied on atom insertion.
+		TS_ASSERT(h1->getTruthValue() != h2->getTruthValue());
+		TS_ASSERT(h1->getTruthValue() != h3->getTruthValue());
+		TS_ASSERT(h2->getTruthValue() != h3->getTruthValue());
+
+		// The truth values themselves should be equal, as values.
+		TS_ASSERT(*h1->getTruthValue() == *tv);
+		TS_ASSERT(*h2->getTruthValue() == *tv);
+		TS_ASSERT(*h3->getTruthValue() == *tv);
+
+		// Forget about the link atoms, remember thier UUID's only
+		// UUID's are just long ints ...
+		UUID u1 = h1.value();
+		UUID u2 = h2.value();
+		UUID u3 = h3.value();
+
+		// Create new Handles from the link UUID's
+		Handle hu1(u1);
+		Handle hu2(u2);
+		Handle hu3(u3);
+
+		// They should match the old link handles
+		TS_ASSERT(h1 == hu1);
+		TS_ASSERT(h2 == hu2);
+		TS_ASSERT(h3 == hu3);
+
+		// ... and they should refer to the same kind of atoms.
+		TS_ASSERT(hu1->getType() == LIST_LINK);
+		TS_ASSERT(hu2->getType() == LIST_LINK);
+		TS_ASSERT(hu3->getType() == LIST_LINK);
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hu1->getTruthValue() == h1->getTruthValue());
+		TS_ASSERT(hu2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
+
+		// Fetch three atoms in three different atomspaces
+		Handle h1n1 = as1.addNode(CONCEPT_NODE, "uni-1");
+		Handle h1n2 = as1.addNode(NUMBER_NODE, "2.2222");
+		Handle h1n3 = as1.addNode(VARIABLE_NODE, "uni-3");
+
+		Handle h2n1 = as2.addNode(CONCEPT_NODE, "uni-1");
+		Handle h2n2 = as2.addNode(NUMBER_NODE, "2.2222");
+		Handle h2n3 = as2.addNode(VARIABLE_NODE, "uni-3");
+
+		Handle h3n1 = as3.addNode(CONCEPT_NODE, "uni-1");
+		Handle h3n2 = as3.addNode(NUMBER_NODE, "2.2222");
+		Handle h3n3 = as3.addNode(VARIABLE_NODE, "uni-3");
+
+		// They should NOT match one-another
+		// They should have become copies.
+		TS_ASSERT(h1n1 != h2n1);
+		TS_ASSERT(h1n2 != h2n2);
+		TS_ASSERT(h1n3 != h2n3);
+
+		TS_ASSERT(h1n1 != h3n1);
+		TS_ASSERT(h1n2 != h3n2);
+		TS_ASSERT(h1n3 != h3n3);
+
+		TS_ASSERT(h2n1 != h3n1);
+		TS_ASSERT(h2n2 != h3n2);
+		TS_ASSERT(h2n3 != h3n3);
+
+		// The UUID's should differ, too
+		TS_ASSERT(h1n1.value() != h2n1.value());
+		TS_ASSERT(h1n2.value() != h2n2.value());
+		TS_ASSERT(h1n3.value() != h2n3.value());
+
+		TS_ASSERT(h1n1.value() != h3n1.value());
+		TS_ASSERT(h1n2.value() != h3n2.value());
+		TS_ASSERT(h1n3.value() != h3n3.value());
+
+		TS_ASSERT(h2n1.value() != h3n1.value());
+		TS_ASSERT(h2n2.value() != h3n2.value());
+		TS_ASSERT(h2n3.value() != h3n3.value());
+
+		// The truth value *pointers* should differ; they should
+		// have been copied on atom insertion.
+		TS_ASSERT(h1n1->getTruthValue() != h2n1->getTruthValue());
+		TS_ASSERT(h1n1->getTruthValue() != h3n1->getTruthValue());
+		TS_ASSERT(h2n1->getTruthValue() != h3n1->getTruthValue());
+
+		TS_ASSERT(h1n2->getTruthValue() != h2n2->getTruthValue());
+		TS_ASSERT(h1n2->getTruthValue() != h3n2->getTruthValue());
+		TS_ASSERT(h2n2->getTruthValue() != h3n2->getTruthValue());
+
+		TS_ASSERT(h1n3->getTruthValue() != h2n3->getTruthValue());
+		TS_ASSERT(h1n3->getTruthValue() != h3n3->getTruthValue());
+		TS_ASSERT(h2n3->getTruthValue() != h3n3->getTruthValue());
+
+		// The truth values themselves should be equal, as values.
+		TS_ASSERT(*h1n1->getTruthValue() == *tv1);
+		TS_ASSERT(*h2n1->getTruthValue() == *tv1);
+		TS_ASSERT(*h3n1->getTruthValue() == *tv1);
+
+		TS_ASSERT(*h1n2->getTruthValue() == *tv2);
+		TS_ASSERT(*h2n2->getTruthValue() == *tv2);
+		TS_ASSERT(*h3n2->getTruthValue() == *tv2);
+
+		TS_ASSERT(*h1n3->getTruthValue() == *tv3);
+		TS_ASSERT(*h2n3->getTruthValue() == *tv3);
+		TS_ASSERT(*h3n3->getTruthValue() == *tv3);
+	}
+
+	// Test copying back and forth.
+	void testCopyBack()
+	{
+		// Create a node, copy it back and forth.
+		Handle n1 = as1.addNode(CONCEPT_NODE, "backer");
+		Handle n2 = as2.addAtom(n1);
+		Handle n1copy = as1.addAtom(n2);
+		Handle n2copy = as2.addAtom(n1copy);
+
+		TS_ASSERT(n1 == n1copy);
+		TS_ASSERT(n2 == n2copy);
+
+		// Create a link, copy it back and forth.
+		Handle h1 = as1.addLink(LIST_LINK, n1);
+		Handle h2 = as2.addAtom(h1);
+		Handle h1copy = as1.addAtom(h2);
+		Handle h2copy = as2.addAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		Handle h3 = as3.addAtom(h1);
+		Handle h3copy = as3.addAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+
+		// Do it again, this time with unordered links.
+		Handle ma = as1.addNode(CONCEPT_NODE, "hacker");
+		Handle mb = as1.addNode(CONCEPT_NODE, "cracker");
+		Handle mc = as1.addNode(CONCEPT_NODE, "jacker");
+
+		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.addAtom(h1);
+		h1copy = as1.addAtom(h2);
+		h2copy = as2.addAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		h3 = as3.addAtom(h1);
+		h3copy = as3.addAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+	}
+
+	// Like testCopyBack(), except that it explicitly calls the getAtom
+	// method.  Because the atoms exist, the get should return them.
+	void testGet()
+	{
+		// Create a node, copy it back and forth.
+		Handle n1 = as1.addNode(CONCEPT_NODE, "Ziggy Stardust");
+		Handle n2 = as2.addAtom(n1);
+		Handle n1copy = as1.getAtom(n2);
+		Handle n2copy = as2.getAtom(n1copy);
+
+		TS_ASSERT(n1 == n1copy);
+		TS_ASSERT(n2 == n2copy);
+
+		// Create a link, copy it back and forth.
+		Handle h1 = as1.addLink(LIST_LINK, n1);
+		Handle h2 = as2.addAtom(h1);
+		Handle h1copy = as1.getAtom(h2);
+		Handle h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		Handle h3 = as3.getAtom(h1);
+		Handle h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+
+		// Do it again, this time with unordered links.
+		Handle ma = as1.addNode(CONCEPT_NODE, "ziggy");
+		Handle mb = as1.addNode(CONCEPT_NODE, "weird");
+		Handle mc = as1.addNode(CONCEPT_NODE, "gilly");
+
+		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.addAtom(h1);
+		h1copy = as1.getAtom(h2);
+		h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		h3 = as3.addAtom(h1);
+		h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+	}
+
+	// Like testCopyBack() and testGet(), except that one of the
+	// atomspaces is an expansion.  This exhibits a new bug,
+	// github bug report #1530.
+	void testExpand()
+	{
+		AtomSpace ex1(&as1);
+
+		// Create a node, copy it back and forth.
+		Handle n1 = ex1.addNode(CONCEPT_NODE, "Spiders from Mars");
+		Handle n2 = as2.addAtom(n1);
+		Handle n1copy = ex1.getAtom(n2);
+		Handle n2copy = as2.getAtom(n1copy);
+
+		TS_ASSERT(n1 == n1copy);
+		TS_ASSERT(n2 == n2copy);
+
+		// Create a link, copy it back and forth.
+		Handle h1 = ex1.addLink(LIST_LINK, n1);
+		Handle h2 = as2.addAtom(h1);
+		Handle h1copy = ex1.getAtom(h2);
+		Handle h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		Handle h3 = as3.getAtom(h1);
+		Handle h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+
+		// Do it again, this time with unordered links.
+		Handle ma = ex1.addNode(CONCEPT_NODE, "wham");
+		Handle mb = ex1.addNode(CONCEPT_NODE, "bam");
+		Handle mc = ex1.addNode(CONCEPT_NODE, "thankyou, mam");
+
+		h1 = ex1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.addAtom(h1);
+		h1copy = ex1.getAtom(h2);
+		h2copy = as2.getAtom(h1copy);
+
+		TS_ASSERT(h1 == h1copy);
+		TS_ASSERT(h2 == h2copy);
+
+		h3 = as3.addAtom(h1);
+		h3copy = as3.getAtom(h2);
+
+		TS_ASSERT(h3 == h3copy);
+	}
+
+	// Test multiple nested (hierarchical) atomspaces.  They should 
+	// work as expected...  The below is a fairly naive test, it does
+	// not test any kind of complicated semantics.  Its minimal.
+	void testNest()
+	{
+		AtomSpace nas1;
+		AtomSpace nas2(&nas1);
+		AtomSpace nas3(&nas2);
+
+		// Create three TV's
+		TruthValuePtr tv1(SimpleTruthValue::createTV(0.4, 1.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
+
+		// Create three nodes in the base atomspace
+		Handle hnd1 = nas1.addNode(CONCEPT_NODE, "nest-1");
+		hnd1->setTruthValue(tv1);
+		Handle hnd2 = nas1.addNode(NUMBER_NODE, "2.34");
+		hnd2->setTruthValue(tv2);
+		Handle hnd3 = nas1.addNode(VARIABLE_NODE, "nest-3");
+		hnd3->setTruthValue(tv3);
+
+		// Create three links holding these three
+		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
+
+		// Create a link in the middle atomspace
+		Handle h2 = nas2.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h2->setTruthValue(tv);
+
+		// Try to create a link in the grandchild atomspace
+		Handle h3 = nas3.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		h3->setTruthValue(tv);
+
+		// The middle and grand-child links should be one and the same.
+		TS_ASSERT(h2 == h3);
+
+		// Forget about the link atoms, remember thier UUID's only
+		// UUID's are just long ints ...
+		UUID u2 = h2.value();
+		UUID u3 = h3.value();
+
+		// Create new Handles from the link UUID's
+		Handle hu2(u2);
+		Handle hu3(u3);
+
+		// They should match the old link handles
+		TS_ASSERT(h2 == hu2);
+		TS_ASSERT(h3 == hu3);
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hu2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
+
+		// Fetch three atoms in three different atomspaces
+		Handle h1n1 = nas1.addNode(CONCEPT_NODE, "nest-1");
+		Handle h1n2 = nas1.addNode(NUMBER_NODE, "2.34");
+		Handle h1n3 = nas1.addNode(VARIABLE_NODE, "nest-3");
+
+		Handle h2n1 = nas2.addNode(CONCEPT_NODE, "nest-1");
+		Handle h2n2 = nas2.addNode(NUMBER_NODE, "2.34");
+		Handle h2n3 = nas2.addNode(VARIABLE_NODE, "nest-3");
+
+		Handle h3n1 = nas3.addNode(CONCEPT_NODE, "nest-1");
+		Handle h3n2 = nas3.addNode(NUMBER_NODE, "2.34");
+		Handle h3n3 = nas3.addNode(VARIABLE_NODE, "nest-3");
+
+		// They should be identical
+		// They should NOT be copies.
+		TS_ASSERT(hnd1 == h1n1);
+		TS_ASSERT(hnd2 == h1n2);
+		TS_ASSERT(hnd3 == h1n3);
+
+		TS_ASSERT(hnd1 == h2n1);
+		TS_ASSERT(hnd2 == h2n2);
+		TS_ASSERT(hnd3 == h2n3);
+
+		TS_ASSERT(hnd1 == h3n1);
+		TS_ASSERT(hnd2 == h3n2);
+		TS_ASSERT(hnd3 == h3n3);
+
+		// The UUID's should match, of course
+		TS_ASSERT(hnd1.value() == h1n1.value());
+		TS_ASSERT(hnd2.value() == h1n2.value());
+		TS_ASSERT(hnd3.value() == h1n3.value());
+
+		TS_ASSERT(hnd1.value() == h2n1.value());
+		TS_ASSERT(hnd2.value() == h2n2.value());
+		TS_ASSERT(hnd3.value() == h2n3.value());
+
+		TS_ASSERT(hnd1.value() == h3n1.value());
+		TS_ASSERT(hnd2.value() == h3n2.value());
+		TS_ASSERT(hnd3.value() == h3n3.value());
+
+		// The truth value *pointers* should be identical, of course,
+		// since they are the very same atoms.
+		TS_ASSERT(hnd1->getTruthValue() == h1n1->getTruthValue());
+		TS_ASSERT(hnd2->getTruthValue() == h1n2->getTruthValue());
+		TS_ASSERT(hnd3->getTruthValue() == h1n3->getTruthValue());
+
+		TS_ASSERT(hnd1->getTruthValue() == h2n1->getTruthValue());
+		TS_ASSERT(hnd2->getTruthValue() == h2n2->getTruthValue());
+		TS_ASSERT(hnd3->getTruthValue() == h2n3->getTruthValue());
+
+		TS_ASSERT(hnd1->getTruthValue() == h3n1->getTruthValue());
+		TS_ASSERT(hnd2->getTruthValue() == h3n2->getTruthValue());
+		TS_ASSERT(hnd3->getTruthValue() == h3n3->getTruthValue());
+	}
+
+};
+

@@ -1,0 +1,130 @@
+/*
+ * tests/query/DisconnectedUTest.cxxtest
+ *
+ * Copyright (C) 2009,2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class Disconnected :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		Handle bindlinkh;
+
+	public:
+
+		Disconnected(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~Disconnected()
+		{
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_exec(void);
+};
+
+extern "C" { void nlp_types_init(void); };
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->addNode
+#define al as->addLink
+void Disconnected::setUp(void)
+{
+	as = new AtomSpace();
+
+	// Load the required data
+	nlp_types_init();
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"tests/query/disconnected.scm");
+
+	load_scm_files_from_config(*as);
+
+	// Create an implication link that will be tested.
+	SchemeEval* evaluator = new SchemeEval(as);
+	bindlinkh = evaluator->apply("get-bindlink", Handle::UNDEFINED);
+	delete evaluator;
+}
+
+void Disconnected::tearDown(void)
+{
+	delete as;
+}
+
+/*
+ * Test bindlink consisting of two disconnected componentns
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void Disconnected::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
+
+	// We expect to catch an error here.
+	bool caught = false;
+	try
+	{
+		bindlink(as, bindlinkh);
+	}
+	catch (const InvalidParamException& ex)
+	{
+		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		caught = true;
+	}
+	TSM_ASSERT("Failed to catch expected exception", caught);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

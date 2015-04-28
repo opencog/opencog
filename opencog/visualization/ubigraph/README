@@ -1,0 +1,69 @@
+Ubigraph module (by Jared Wigmore <jared.wigmore@gmail.com>)
+
+This module displays the atomspace via Ubigraph.
+
+Ubigraph is available from:
+http://ubietylab.net/ubigraph/
+
+The code for converting the atomspace to a graph was adapted from the
+DottyModule by Trent Waddington <trent.waddington@gmail.com>.
+
+== Dependencies ==
+
+For the module to do anything useful there has to be a running Ubigraph server.
+
+Libraries:
+XMLRPC
+libcurl
+libm
+
+== Running the module ==
+
+First start the ubigraph server. Then load the libubigraph.so module in
+cogserver, and run the "ubigraph" command.  You should run the ubigraph command
+once, and then the display will update when atoms are added or removed.
+
+== A note on screen captures ==
+
+Required software: gtk-recordMyDesktop, mplayer, transcode, ffmpeg
+
+Use gtk-recordMyDesktop. Don't enable compression... just save the ogv file
+somewhere temporary (I found I needed to specify the file to save to before
+doing the recording). Select the ubigraph server window.
+
+Use mplayer to find out the video properties, since recordMyDesktop or the codec
+it uses doesn't set these properly:
+
+$ mplayer -vo null -ao null -frames 0 -identify [filename]
+
+Then find out the width and height and use that in the transcode process:
+
+$ transcode -i [filename] -x mplayer -o output.wmv -y \
+ffmpeg -F wmv1 -g [width]x[height] -f 20
+
+This creates a wmv (Windows mediaplayer video) file.
+
+If you need to trim the borders, you can use the -j transcode option.
+
+== TODO ==
+
+* Better error handling, especially for if the ubigraph command is run (or an
+add/remove atom signal happens) while the ubigraph server is not
+running.
+
+* A separate command to start the initial display and one to choose which things
+to show.
+
+* Being able to choose to display only some of the atoms.
+
+* "Themes" to display TruthValues and AttentionValues visually (e.g. as color or
+size).
+
+* Add callback for Ubigraph which displays atom info when a node or link is
+clicked. This needs OpenCog XML-RPC or JSON-RPC integration first however.
+
+* Allow separate visualisation servers, one for visualisation of PLN BIT trees,
+another for NLP processing and dialogue pipeline. Eventually these should all be
+merged into separate views in a generic AtomSpace/OpenCog visualisation tool.
+
+

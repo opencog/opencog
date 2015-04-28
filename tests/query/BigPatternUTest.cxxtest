@@ -1,0 +1,165 @@
+/*
+ * tests/query/BigPatternUTest.cxxtest
+ *
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include "imply.h"
+#undef DEBUG
+
+using namespace opencog;
+
+class BigPatternUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+
+		Handle imake, hmake_from, hpottery, hclay;
+
+	public:
+
+		BigPatternUTest(void)
+		{
+			logger().setLevel(Logger::DEBUG);
+			logger().setPrintToStdoutFlag(true);
+		}
+
+		~BigPatternUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_prep(void);
+};
+
+/*
+ * This function sets up the following structures:
+ *
+ * ; Sentence: "Pottery is made from clay."
+ * ; var0=make  var1=pottery var2=clay  prep=from
+ * # IF _obj($verb, $var1)
+ *     ^ $prep($verb, $var2)              ; preposition
+ *     THEN ^3_make_from($var2, $var1)
+ * 
+ * This pattern should accept this input: 
+ *       _obj(make, pottery)
+ *       from(make, clay)
+ *
+ * and it should produce as output: make_from(clay, pottery)
+ * The above is a simplified example of a rule that deduces
+ * a prepositional triple.
+ */
+#define an as->addNode
+#define al as->addLink
+void BigPatternUTest::tearDown(void)
+{
+	delete as;
+}
+void BigPatternUTest::setUp(void)
+{
+	as = new AtomSpace();
+
+	// Create an implication link that will be tested.
+	imake = 
+	al(IMPLICATION_LINK,
+		al(AND_LINK,
+			al(EVALUATION_LINK,
+				an(PREDICATE_NODE, "_obj"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$verb"),
+					an(VARIABLE_NODE, "$var1")
+				)
+			),
+			al(EVALUATION_LINK,
+				an(PREDICATE_NODE, "from"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$verb"),
+					an(VARIABLE_NODE, "$var2")
+				)
+			)
+		),
+		al(EVALUATION_LINK,
+			hmake_from = an(PREDICATE_NODE, "make_from"),
+			al(LIST_LINK,
+				an(VARIABLE_NODE, "$var1"),
+				an(VARIABLE_NODE, "$var2")
+			)
+		)
+	);
+
+	// Create data on which the above pattern should match
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "_obj"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "make"),
+			hpottery = an(CONCEPT_NODE, "pottery")
+		)
+	);
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "from"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "make"),
+			hclay = an(CONCEPT_NODE, "clay")
+		)
+	);
+}
+
+/*
+ * preposition reasoning test.
+ *
+ * Expect to get the following result, given the above data:
+ *
+ *    EvaluationLink
+ *       PredicateNode "make_from"
+ *       ListLink
+ *          ConceptNode "pottery"
+ *          ConceptNode "clay"
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void BigPatternUTest::test_prep(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink
+	Handle result = imply(as, imake);
+	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
+
+	// Then, evaluationLink, as above.
+	Handle heval = getlink(result, 0);
+	Handle vmake_from = getlink(heval, 0);
+	Handle hlist = getlink(heval, 1);
+	Handle vpottery = getlink(hlist, 0);
+	Handle vclay = getlink(hlist, 1);
+
+	TSM_ASSERT_EQUALS("incorrect make", hmake_from, vmake_from);
+	TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
+	TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

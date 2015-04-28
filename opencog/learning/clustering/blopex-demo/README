@@ -1,0 +1,23 @@
+
+                   Example blopex program
+                   ----------------------
+
+The code in this directory demonstrates how to use blopex. Its called
+"serial" because it does not implement a parallel (MPI) example.  It
+demos only the real (not complex) solver.
+
+The main interface to the solver is given in pcg_multi.h.  This file
+defines a bunch of matrix and vector routines that the solver will
+call. They are defined here, rather than by the solver, because this
+allows the blopex user to defer any/all calcuations until absolutely
+needed, as well as manage memory access patterns.  That makes the
+interface complicated; its owrth it for the speed.
+
+The demo here calls lobpcg_solve_double with a 40x40 diagonal matrix
+(double precision) with values of 1 thru 40 on the diagonal.  
+
+It solves for 5 eigenvalues, initial eigenvectors are random, tolerance
+1e-6 and max iterations 100. 
+
+The executable is "serial_driver".  Run it from the build directory.
+

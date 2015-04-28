@@ -1,0 +1,123 @@
+/*
+ * tests/atomspace/HandleMapUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Rodrigo Barra
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomutils/HandleMap.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
+
+using namespace opencog;
+using namespace std;
+
+#define N_HANDLES 10
+
+class HandleMapUTest :  public CxxTest::TestSuite
+{
+private:
+    AtomSpace as;
+    Handle handles[N_HANDLES];
+    char *content[N_HANDLES];
+
+    HandleMap<char*>::MapPtr handleMap;
+public:
+    HandleMapUTest() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            ostringstream oss;
+            oss << "hello " << i;
+            handles[i] = as.addNode(CONCEPT_NODE, oss.str());
+            content[i] = new char[1];
+        }
+    }
+
+
+    void setUp() {
+        handleMap = std::make_shared<HandleMap<char*>>();
+    }
+
+    void tearDown() {
+    }
+
+    void testAdd() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(not handleMap->contains(handles[i]));
+            TS_ASSERT_THROWS(handleMap->get(handles[i]), AssertionException&);
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleMap->add(handles[i], content[i]);
+            TS_ASSERT(handleMap->contains(handles[i]));
+            TS_ASSERT(handleMap->get(handles[i]) == content[i]);
+            TS_ASSERT(handleMap->getCount() == i + 1);
+        }
+    }
+
+    void testRemove() {
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleMap->add(handles[i], content[i]);
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(handleMap->contains(handles[i]));
+            TS_ASSERT(handleMap->remove(handles[i]) == content[i]);
+            TS_ASSERT(!handleMap->contains(handles[i]));
+        }
+    }
+
+    void testKeys() {
+        bool iterated[N_HANDLES];
+
+        memset(iterated, 0, sizeof(bool)*N_HANDLES);
+
+        for (int i = 0; i < N_HANDLES; i++) {
+            handleMap->add(handles[i], content[i]);
+        }
+        HandleMapIterator<char*>* it = handleMap->keys();
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(it->hasNext());
+            Handle h = it->next();
+            for (int j = 0; j < N_HANDLES; j++) {
+                if (!Handle::compare(h, handles[j])) {
+                    iterated[i] = true;
+                }
+            }
+        }
+        for (int i = 0; i < N_HANDLES; i++) {
+            TS_ASSERT(iterated[i]);
+        }
+        TS_ASSERT(!it->hasNext());
+        TS_ASSERT_THROWS(it->next(), IndexErrorException&);
+        delete(it);
+    }
+
+    void testSize() {
+#ifdef BAD_TEST
+        MT19937RandGen rng(12345678);
+        int size = rng.randint(N_HANDLES);
+        delete(handleMap);
+        handleMap = new HandleMap<char *>(size);
+        TS_ASSERT(handleMap->getSize() >= size);
+        handleMap->resize(size + 1);
+        TS_ASSERT(handleMap->getSize() >= size + 1);
+#endif
+    }
+};

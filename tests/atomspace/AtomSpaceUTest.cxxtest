@@ -1,0 +1,933 @@
+/*
+ * tests/atomspace/AtomSpaceUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008-2010 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *            Ricardo Bittencourt <ricbit@700km.com.br>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+
+#include <math.h>
+#include <string.h>
+
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
+
+#include "HandleEntry.h"
+#include "makeVirtualAtom.h"
+
+using namespace opencog;
+using namespace std;
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+
+#define NUM_NODES 6
+#define NUM_FORCEUSER_LINKS 4
+#define NUM_HUMAN_LINKS 4
+#define NUM_VHS 4
+#define NUM_VH_NODES 3
+
+// deliberately out of order to test getSortedHandleSet.
+#define AV1_STI 20000
+#define AV2_STI 500
+#define AV3_STI 0
+#define AV1_LTI 0
+#define AV2_LTI 30000
+#define AV3_LTI 700
+
+
+Handle addRealAtom(AtomSpace& as, AtomPtr atom,
+                   TruthValuePtr tvn = TruthValue::NULL_TV())
+{
+    TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
+    // Check if the given Atom reference is of an atom
+    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
+    // result to the correct/valid handle.
+
+    Handle result;
+    NodePtr node(NodeCast(atom));
+    if (node) {
+        result = as.getHandle(node->getType(), node->getName());
+        if (result == Handle::UNDEFINED) {
+            result = as.addNode(node->getType(), node->getName());
+            result->setTruthValue(newTV);
+            return result;
+        }
+    } else {
+        LinkPtr link(LinkCast(atom));
+        result = as.getHandle(link->getType(), link->getOutgoingSet());
+        if (result == Handle::UNDEFINED) {
+            result = as.addLink(link->getType(), link->getOutgoingSet());
+            result->setTruthValue(newTV);
+            return result;
+        }
+    }
+    const TruthValuePtr currentTV = as.getTV(result);
+    if (currentTV->isNullTv()) {
+        as.setTV(result, newTV);
+    } else {
+        TruthValuePtr mergedTV = currentTV->merge(newTV);
+        as.setTV(result, mergedTV);
+    }
+    return result;
+}
+
+
+static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
+{
+    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
+    Type* head_type_ptr = boost::get<Type>(&(*it));
+    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+
+    HandleSeq handles;
+
+    if (head_handle_ptr != NULL) {
+        OC_ASSERT(as.isValidHandle(*head_handle_ptr), "head_handle_ptr is not valid");
+        TruthValuePtr currentTV(as.getTV(*head_handle_ptr));
+        if (currentTV->isNullTv()) {
+            as.setTV(*head_handle_ptr, tvn);
+        } else {
+            TruthValuePtr mergedTV(currentTV->merge(tvn));
+            as.setTV(*head_handle_ptr, mergedTV);
+        }
+
+        return *head_handle_ptr;
+    }
+
+    for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
+        Handle *h_ptr = boost::get<Handle>(&*i);
+
+        if (h_ptr) {
+            handles.push_back(addRealAtom(as, *h_ptr, TruthValue::NULL_TV()));
+        } else {
+            handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
+        }
+    }
+
+    Handle hh = as.addLink(*head_type_ptr, handles);
+    hh->setTruthValue(tvn);
+    return hh;
+}
+
+static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
+{
+    return addAtomIter(as, a, a.begin(), tvn);
+}
+
+
+void HandleEntry2HandleSeq(HandleEntry& src, HandleSeq& dest)
+{
+    dest = src.toHandleVector();
+}
+
+HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+{
+    char buf[256];
+    HandleSeq testAtoms;
+    int baseNameLength;
+
+    memset(buf, 0, 256);
+    baseNameLength = strlen(baseName);
+    strcpy(buf, baseName);
+
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
+    buf[baseNameLength] = '1';
+    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h1->setTruthValue(tv1);
+    atomSpace->setSTI(h1, AV1_STI);
+    atomSpace->setLTI(h1, AV1_LTI);
+    buf[baseNameLength] = '2';
+    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h2->setTruthValue(tv2);
+    atomSpace->setSTI(h2, AV2_STI);
+    atomSpace->setLTI(h2, AV2_LTI);
+    buf[baseNameLength] = '3';
+    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf);
+    h3->setTruthValue(tv3);
+    atomSpace->setSTI(h3, AV3_STI);
+    atomSpace->setLTI(h3, AV3_LTI);
+
+    HandleSeq outgoing1;
+    outgoing1.push_back(h2);
+    outgoing1.push_back(h3);
+    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+    l1->setTruthValue(tv1);
+    HandleSeq outgoing2;
+    outgoing2.push_back(h1);
+    outgoing2.push_back(l1);
+    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+    l2->setTruthValue(tv2);
+
+    testAtoms.push_back(h1);
+    testAtoms.push_back(h2);
+    testAtoms.push_back(h3);
+    testAtoms.push_back(l1);
+    testAtoms.push_back(l2);
+
+    return testAtoms;
+}
+
+/**
+ * Filter handles from a sequence according to the given criterion.
+ *
+ * @param begin iterator for the sequence
+ * @param end iterator for the sequence
+ * @param struct or function embodying the criterion
+ * @return The handles in the sequence that match the criterion.
+ * @deprecated do not use in new code!
+ */
+template<typename InputIterator>
+HandleSeq filter(InputIterator begin, InputIterator end, HandlePredicate& compare)
+{
+    HandleSeq result;
+    std::copy_if(begin, end, back_inserter(result),
+        [&](Handle h)->bool { return compare(h); } );
+    return result;
+}
+
+struct STIAboveThreshold : public HandlePredicate
+{
+    STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
+
+    virtual bool test(const Handle& atom) const
+    {
+        return atom->getAttentionValue()->getSTI() > threshold;
+    }
+    AttentionValue::sti_t threshold;
+};
+
+struct LTIAboveThreshold : public HandlePredicate
+{
+    LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
+
+    virtual bool test(const Handle& atom) const
+    {
+        return atom->getAttentionValue()->getLTI() > threshold;
+    }
+    AttentionValue::lti_t threshold;
+};
+
+template<typename InputIterator>
+HandleSeq filter_InAttentionalFocus(AtomSpace* as, InputIterator begin, InputIterator end)
+{
+    STIAboveThreshold sti_above(as->getAttentionalFocusBoundary());
+    return filter(begin, end, sti_above);
+}
+
+/**
+ * Gets a set of handles that matches with the given type
+ * (subclasses optionally) and a given criterion.
+ *
+ * @param result An output iterator.
+ * @param type The desired type.
+ * @param subclass Whether type subclasses should be considered.
+ * @param compare A criterion for including atoms. It must be something
+ * that returns a bool when called.
+ *
+ * @return The set of atoms of a given type (subclasses optionally).
+ *
+ * @note The matched entries are appended to a container whose
+ * OutputIterator is passed as the first argument.  Example of call to this
+ * method, which would return all entries in AtomSpace beyond 500 LTI:
+ * @code
+ *         std::list<Handle> ret;
+ *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+ * @endcode
+ */
+template <typename OutputIterator> OutputIterator
+getHandleSetFiltered(AtomSpace* as, OutputIterator result,
+             Type type,
+             bool subclass,
+             HandlePredicate& compare)
+{
+    HandleSeq hs;
+    as->getHandlesByType(back_inserter(hs), type, subclass);
+
+    return std::copy_if(hs.begin(), hs.end(), result,
+        [&](Handle h)->bool { return compare(h); } );
+}
+
+// Wrapper for comparing atoms from a HandleSeq
+template <typename Compare>
+struct compareAtom
+{
+    Compare* c;
+    compareAtom(Compare* _c) : c(_c) {}
+
+    bool operator()(Handle h1, Handle h2) {
+        return (*c)(h1, h2);
+    }
+};
+
+
+/**
+ * Gets a set of handles that matches with the given type
+ * (subclasses optionally), sorted according to the given comparison
+ * structure.
+ *
+ * @param result An output iterator.
+ * @param type The desired type.
+ * @param subclass Whether type subclasses should be considered.
+ * @param compare The comparison struct to use in the sort.
+ *
+ * @return The set of atoms of a given type (subclasses optionally).
+ *
+ * @note The matched entries are appended to a container whose
+ * OutputIterator is passed as the first argument.  Example of call to this
+ * method, which would return all entries in AtomSpace, sorted by STI:
+ * @code
+ *         std::list<Handle> ret;
+ *         AttentionValue::STISort stiSort;
+ *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
+ * @endcode
+ */
+template <typename OutputIterator, typename Compare> OutputIterator
+getSortedHandleSet(AtomSpace* as,
+             OutputIterator result,
+             Type type,
+             bool subclass,
+             Compare compare)
+{
+    // get the handle set as a vector and sort it.
+    std::vector<Handle> hs;
+
+    as->getHandlesByType(back_inserter(hs), type, subclass);
+    std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
+    return std::copy(hs.begin(), hs.end(), result);
+}
+
+
+
+class AtomSpaceUTest :  public CxxTest::TestSuite
+{
+private:
+
+    static AtomSpace *atomSpace;
+
+public:
+    AtomSpaceUTest() {
+        logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
+    }
+
+    void setUp() {
+        atomSpace = new AtomSpace();
+    }
+
+    void tearDown() {
+        delete atomSpace;
+    }
+
+    struct mean : public HandlePredicate {
+        virtual bool test(const Handle& h) const {
+            return h->getTruthValue()->getMean() > 0.8;
+        }
+    };
+
+    struct everything : public HandlePredicate {
+        virtual bool test(const Handle& h) const {
+            return true;
+        }
+    };
+
+    void testMiscellaneous() {
+        logger().debug("\ntestMiscellaneous()\n");
+
+        const char* nodeNames[NUM_NODES] = {
+            "Vader",
+            "Luke",
+            "Chewbacca",
+            "R2D2",
+            "Force",
+            "Human"
+        };
+        Handle h[NUM_NODES];
+        for (int i = 0; i < NUM_NODES; i++) {
+            h[i] = atomSpace->addNode(CONCEPT_NODE, nodeNames[i]);
+            h[i]->setTruthValue(SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
+        }
+        //logger().debug("Nodes created\n");
+
+        float ForceUser[NUM_FORCEUSER_LINKS] = {0.99f, 0.99f, 0.0f, 0.5f};
+        Handle FU[NUM_FORCEUSER_LINKS];
+        for (int i = 0; i < NUM_FORCEUSER_LINKS; i++) {
+            HandleSeq temp(2);
+            temp[0] = h[i];
+            temp[1] = h[4];
+            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp);
+            FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
+        }
+        //logger().debug("ForceUser links created\n");
+
+        float Human[4] = {0.99f, 0.99f, 0.5f, 0.0f};
+        HandleSeq out[4];
+        Handle H[4];
+        for (int i = 0; i < 4; i++) {
+            out[i].push_back(h[i]);
+            out[i].push_back(h[5]);
+            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i]);
+            H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
+        }
+        //logger().debug("Human links created\n");
+
+        // Check TVS
+        for (int i = 0; i < NUM_NODES; i++) {
+            TruthValuePtr tv = atomSpace->getTV(h[i]);
+            TS_ASSERT(!tv->isNullTv());
+            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
+            TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
+            logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+            if (i < NUM_FORCEUSER_LINKS) {
+                TruthValuePtr tv = atomSpace->getTV(FU[i]);
+                TS_ASSERT(!tv->isNullTv());
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
+                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->getMean(FU[i]));
+                TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("FU: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+            }
+            if (i < NUM_HUMAN_LINKS) {
+                TruthValuePtr tv = atomSpace->getTV(H[i]);
+                TS_ASSERT(!tv->isNullTv());
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
+                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->getMean(FU[i]));
+                logger().debug("H: tv mean = %f,atomSpace->getMean(H[i]) = %f\n", tv->getMean(), atomSpace->getMean(H[i]));
+                TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+            }
+        }
+        //logger().debug("TVS checked\n");
+
+        TS_ASSERT(atomSpace->getNumNodes() == NUM_NODES);
+        TS_ASSERT(atomSpace->getNumLinks() == 8);
+
+        // Test filters
+        for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
+
+            mean m;
+            HandleSeq high_mean;
+            getHandleSetFiltered(atomSpace, back_inserter(high_mean), ATOM, true, m);
+
+            //std::cout << "high mean size " << high_mean.size() << std::endl;
+            //for (int jj = 0; jj < high_mean.size(); jj++) {
+            //    std::cout << atomSpace->atomAsString(high_mean[jj],false) << std::endl;
+            //}
+
+            HandleSeq nodes;
+            atomSpace->getHandlesByType(back_inserter(nodes), NODE, true);
+
+            HandleSeq links;
+            atomSpace->getHandlesByType(back_inserter(links), LINK, true);
+
+            HandleSeq all;
+            everything e;
+            getHandleSetFiltered(atomSpace, back_inserter(all), ATOM, true, e);
+
+            HandleSeq AF_nodes = filter_InAttentionalFocus(atomSpace, nodes.begin(), nodes.end());
+            HandleSeq AF_links = filter_InAttentionalFocus(atomSpace, links.begin(), links.end());
+
+            TS_ASSERT(AF_nodes.size() == 0);
+            TS_ASSERT(AF_links.size() == 0);
+
+            TS_ASSERT(high_mean.size() == 4);
+            TS_ASSERT(nodes.size() == NUM_NODES);
+            TS_ASSERT(links.size() == 8);
+            TS_ASSERT(all.size() == 14);
+
+            if (vhIdx == 0) {
+                TS_ASSERT(find(high_mean.begin(), high_mean.end(), FU[0]) != high_mean.end());
+                TS_ASSERT(find(high_mean.begin(), high_mean.end(), H[0]) != high_mean.end());
+            }
+            if (vhIdx == 0 || vhIdx == 1) {
+                TS_ASSERT(find(high_mean.begin(), high_mean.end(), FU[1]) != high_mean.end());
+                TS_ASSERT(find(high_mean.begin(), high_mean.end(), H[1]) != high_mean.end());
+            }
+
+            for (int i = 0; i < NUM_FORCEUSER_LINKS; i++) {
+                if (vhIdx == 0 || (i % 4 == vhIdx)) {
+                    TS_ASSERT (find(links.begin(), links.end(), FU[i]) != links.end());
+                    TS_ASSERT (find(all.begin(), all.end(), FU[i]) != all.end());
+                }
+            }
+
+            for (int i = 0; i < NUM_HUMAN_LINKS; i++) {
+                if (vhIdx == 0 || (i % 4 == vhIdx)) {
+                    TS_ASSERT (find(links.begin(), links.end(), H[i]) != links.end());
+                    TS_ASSERT (find(all.begin(), all.end(), H[i]) != all.end());
+                }
+            }
+
+            for (int i = 0; i < NUM_NODES; i++) {
+                if (vhIdx == 0 || (i % 4 == vhIdx)) {
+                    TS_ASSERT (find(all.begin(), all.end(), h[i]) != all.end());
+                    TS_ASSERT (find(nodes.begin(), nodes.end(), h[i]) != nodes.end());
+                }
+            }
+        }
+
+        // Test getHandleSet
+        // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true) const;
+
+        for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
+            for (int i = 0; i < NUM_NODES; i++) {
+                HandleSeq nodes;
+                atomSpace->getHandlesByName(back_inserter(nodes), nodeNames[i], NODE, true);
+                TS_ASSERT_EQUALS(nodes.size(), 1);
+                for (int j = 0; j < NUM_NODES; j++) {
+                    if (i == j) {
+                        TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) != nodes.end());
+                    } else {
+                        TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) == nodes.end());
+                    }
+                }
+            }
+
+            TS_ASSERT(classserver().isA(SCHEMA_EXECUTION_LINK, INHERITANCE_LINK));
+
+            // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
+            HandleSeq links;
+            atomSpace->getHandlesByName(back_inserter(links), "", LINK, true);
+            logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), 8);
+            TS_ASSERT(links.size() == 8);
+            links.clear();
+            atomSpace->getHandlesByName(back_inserter(links), "", LINK, false);
+            //logger().debug("2) links.size() = %d\n", links.size());
+            TS_ASSERT(links.size() == 0);
+            HandleSeq allInhLinks;
+            atomSpace->getHandlesByName(back_inserter(allInhLinks), "", INHERITANCE_LINK, true);
+            //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
+            //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
+            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
+            //}
+            TS_ASSERT(allInhLinks.size() == 8);
+            HandleSeq justInhLinks;
+            atomSpace->getHandlesByName(back_inserter(justInhLinks), "", INHERITANCE_LINK, false);
+            //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
+            TS_ASSERT(justInhLinks.size() == 4);
+            HandleSeq partOfLinks;
+            atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true);
+            //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
+            TS_ASSERT(partOfLinks.size() == 4);
+            partOfLinks.clear();
+            atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false);
+            //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
+            TS_ASSERT(partOfLinks.size() == 4);
+        }
+
+    }
+
+    /**
+     * Method tested:
+     *
+     * Add a new atom represented by a tree of Vertex to the Atom Table
+     * @param the tree of Vertex representation of the atom to be added
+     * @param the TruthValue object to be associated to the added atom
+     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable.
+     *
+     * virtual Handle addAtom(tree<Vertex>& a, TruthValuePtr tvn, bool fresh=false);
+     */
+#define mva makeVirtualAtom
+    void testAddAtomVtreeTruthValueBool() {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
+
+
+        tree<Vertex>* tr = mva(EVALUATION_LINK,
+                               mva(h1, NULL),
+                               mva(LIST_LINK,
+                                   mva(h2, NULL),
+                                   mva(h3, NULL),
+                                   NULL
+                                  ) ,
+                               NULL
+                              );
+
+        HandleSeq links;
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
+        logger().debug("links.size() = %d\n", (int) links.size());
+        TS_ASSERT(links.size() == 0);
+        Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
+        TS_ASSERT(evalLink != Handle::UNDEFINED);
+        links.clear();
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
+        logger().debug("links.size() = %d\n", (int) links.size());
+        TS_ASSERT(links.size() == 2);
+        delete tr;
+
+        Handle hn = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        tr = mva(hn, NULL);
+        Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
+        h1_->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.5f));
+        TS_ASSERT(h1_ != Handle::UNDEFINED);
+        // In this case, the expected behavior is to perform a merge and return the
+        // handle was inserted previously.
+        TS_ASSERT(h1_ == h1);
+        TS_ASSERT(h1_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        delete tr;
+
+        tr = mva(evalLink, NULL);
+        Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
+        TS_ASSERT(evalLink_ != Handle::UNDEFINED);
+        // In this case, the expected behavior is to perform a merge and return the
+        // handle was inserted previously.
+        TS_ASSERT(evalLink_ == evalLink);
+        TS_ASSERT(evalLink_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        delete tr;
+    }
+
+    /**
+     * Method tested:
+     *
+     * Add a new node to the Atom Table
+     * @param t     Type of the node
+     * @param name  Name of the node
+     * @param tvn   TruthValue of the node
+     *
+     * virtual Handle addNode(Type t,const string& name,TruthValuePtr tvn,bool fresh=false)=0;
+     *
+     */
+    void testAddNode() {
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(tv1);
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(tv2);
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(tv3);
+
+        TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
+        TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
+        TruthValuePtr tv3_ = SimpleTruthValue::createTV(0.6f, 0.90f);
+        tv1->merge(tv1_);
+        tv2->merge(tv2_);
+        tv3->merge(tv3_);
+        h1->setTruthValue(tv1);
+        h2->setTruthValue(tv2);
+        h3->setTruthValue(tv3);
+        Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree");
+
+        TS_ASSERT(h1 == h1_);
+        TruthValuePtr h1tv = h1->getTruthValue();
+        TS_ASSERT(h1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2 == h2_);
+        TruthValuePtr h2tv = h2->getTruthValue();
+        TS_ASSERT(h2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3 == h3_);
+        TruthValuePtr h3tv = h3->getTruthValue();
+        TS_ASSERT(h3tv->getMean() - tv3->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3tv->getCount() - tv3->getCount() < FLOAT_ACCEPTABLE_ERROR);
+
+        // test adding a node with no truth value
+        Handle h4 = atomSpace->addNode(CONCEPT_NODE, "wood");
+        TS_ASSERT(h4 != Handle::UNDEFINED);
+
+#if 0
+// Currently disabled.
+//
+// Here's the core idea: there is this "philosophy" that is attempting
+// to support anonymous nodes (i.e. nodes with no name) and the idea that
+// any two nameless nodes are different (NOT the same).  This means that
+// any time anyone creates a nameless node, we create a new, unique node.
+//
+// The old design leaked memory in this scenario, so it was bad. The new
+// design (using std::shared_ptr) no longer leaks, and so this can work.
+//
+// Its still a somwhat questionable design, as the only way to access such
+// anonymous nodes is by knowning their Handle or uuid.  Should we support this?
+
+        // test adding a node with no name or truth value
+        Handle h5 = atomSpace->addNode(NODE);
+        TS_ASSERT(h5 != Handle::UNDEFINED);
+        Handle h6 = atomSpace->addNode(NODE);
+        TS_ASSERT(h6 != Handle::UNDEFINED);
+        TS_ASSERT(h5 != h6);
+
+        // test fetching all unnamed nodes
+        HandleSeq allUnnamed;
+        atomSpace->getHandlesByName(back_inserter(allUnnamed), "", NODE, true);
+        printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
+        TS_ASSERT(allUnnamed.size() == 2);
+        TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
+        TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h6) != allUnnamed.end());
+#endif
+    }
+
+
+    /**
+     * Method tested:
+     *
+     * Add a new link to the Atom Table
+     * @param t         Type of the link
+     * @param outgoing  HandleSeq containing the outgoing set of the link
+     * @param tvn       TruthValue of the link
+     *
+     * virtual Handle addLink(Type t,const HandleSeq& outgoing,TruthValuePtr tvn)=0;
+     */
+    void testAddLink()
+    {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        HandleSeq outgoing1;
+        outgoing1.push_back(h2);
+        outgoing1.push_back(h3);
+        Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+        l1->setTruthValue(tv1);
+        HandleSeq outgoing2;
+        outgoing2.push_back(h1);
+        outgoing2.push_back(l1);
+        Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+        l2->setTruthValue(tv2);
+
+        TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
+        tv1->merge(tv1_);
+        l1->setTruthValue(tv1);
+        Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1);
+        TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
+        tv2->merge(tv2_);
+        l2->setTruthValue(tv2);
+        Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+
+        TS_ASSERT(l1 == l1_);
+        TruthValuePtr l1tv = l1->getTruthValue();
+        TS_ASSERT(l1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2 ==  l2_);
+        TruthValuePtr l2tv = l2->getTruthValue();
+        TS_ASSERT(l2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
+
+    }
+
+    void testGetHandle_bugfix1()
+    {
+        HandleSeq emptyOutgoing;
+        Handle result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
+        TS_ASSERT(result == Handle::UNDEFINED);
+        atomSpace->addLink(LIST_LINK, emptyOutgoing);
+        result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
+        TS_ASSERT(result != Handle::UNDEFINED);
+    }
+
+    /**
+     * Method tested:
+     *
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally), sorted according to the given comparison
+     * structure.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param The comparison struct to use in the sort.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
+     *         std::list<Handle> ret;
+     *         AttentionValue::STISort stiSort;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
+     */
+    void testgetSortedHandleSet()
+    {
+        HandleSeq atoms;
+        logger().debug("BEGIN TEST: getSortedHandleSet");
+        atoms = createSimpleGraph(atomSpace, "stim_sortedHandleSet\0");
+
+        logger().debug("STISort");
+
+        AttentionValue::STISort sSort;
+        HandleSeq sAtoms;
+        getSortedHandleSet(atomSpace, back_inserter(sAtoms), ATOM, true, &sSort);
+        TS_ASSERT(sAtoms.size() > 0);
+        if (sAtoms.size() > 0) {
+            for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
+                TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
+            }
+        }
+
+        logger().debug("LTIAndTVAscendingSort");
+
+        AttentionValue::LTIAndTVAscendingSort latvSort;
+        HandleSeq latvAtoms;
+        getSortedHandleSet(atomSpace, back_inserter(latvAtoms), ATOM, true, &latvSort);
+        TS_ASSERT(latvAtoms.size() > 0);
+        if (latvAtoms.size() > 0) {
+            for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
+                TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
+            }
+        }
+
+        logger().debug("LTIThenTVAscendingSort");
+
+        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        HandleSeq lttvAtoms;
+        getSortedHandleSet(atomSpace, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
+        TS_ASSERT(lttvAtoms.size() > 0);
+        if (lttvAtoms.size() > 0) {
+            for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
+                TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
+            }
+        }
+
+        logger().debug("END TEST: getSortedHandleSet");
+    }
+
+    /**
+     * Method tested:
+     *
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally) and a given criterion.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param A criterion for including atoms. It must be something that returns a bool when called.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     */
+    void testgetHandleSetFiltered()
+    {
+        HandleSeq atoms;
+        logger().debug("BEGIN TEST: getHandleSetFiltered");
+
+        atoms = createSimpleGraph(atomSpace, "hs_filt\0");
+
+        logger().debug("STIAboveThreshold");
+
+        HandleSeq highSTI;
+        STIAboveThreshold sti_above(1000);
+        getHandleSetFiltered(atomSpace, back_inserter(highSTI), NODE, true, sti_above);
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            TS_ASSERT(STIAboveThreshold(1000) (highSTI[i]) );
+        }
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
+
+        logger().debug("LTIAboveThreshold");
+
+        HandleSeq highLTI;
+        LTIAboveThreshold lti_above(800);
+        getHandleSetFiltered(atomSpace, back_inserter(highLTI), NODE, true, lti_above);
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
+        }
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
+        logger().debug("END TEST: getHandleSetFiltered");
+    }
+
+    /**
+     * Method tested:
+     *
+     * Filter handles from a sequence according to the given criterion.
+     *
+     * @param begin iterator for the sequence
+     * @param end iterator for the sequence
+     * @param struct or function embodying the criterion
+     * @return The handles in the sequence that match the criterion.
+     */
+    void testfilter() {
+        HandleSeq atoms;
+        logger().debug("BEGIN TEST: filter");
+
+        //atomSpace->getAtomTable().log(logger(), NODE, true);
+        //atomSpace->getAtomTable().log(logger(), LINK, true);
+
+        atoms = createSimpleGraph(atomSpace, "filt\0");
+
+        //atomSpace->getAtomTable().log(logger(), NODE, true);
+        //atomSpace->getAtomTable().log(logger(), LINK, true);
+
+        logger().debug("STIAboveThreshold");
+
+        STIAboveThreshold sti_above(1000);
+        HandleSeq highSTI = filter(atoms.begin(), atoms.end(), sti_above);
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            //std::cout << atomSpace->atomAsString(highSTI[i],false) << std::endl;
+            //std::cout << atomSpace->getSTI(highSTI[i]) << std::endl;
+            TS_ASSERT(STIAboveThreshold(1000) (highSTI[i]) );
+        }
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
+
+        logger().debug("LTIAboveThreshold");
+
+        LTIAboveThreshold lti_above(800);
+        HandleSeq highLTI = filter(atoms.begin(), atoms.end(), lti_above);
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
+        }
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
+        logger().debug("END TEST: filter");
+    }
+
+    void testGetHandleSetByName()
+    {
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1");
+        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1");
+        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(NODE, "dog1");
+        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
+
+        HandleSeq namedAtoms;
+        atomSpace->getHandlesByType(back_inserter(namedAtoms), NODE, true);
+        TS_ASSERT_EQUALS(namedAtoms.size(), 3);
+    }
+};
+
+AtomSpace *AtomSpaceUTest::atomSpace = NULL;

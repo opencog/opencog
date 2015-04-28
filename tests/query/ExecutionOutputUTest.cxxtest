@@ -1,0 +1,189 @@
+/*
+ * tests/query/ExecutionOutputUTest.cxxtest
+ *
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+#include "imply.h"
+
+using namespace opencog;
+
+class ExecutionOutputUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		Handle implication;
+		Handle hcapital, hprep;
+
+	public:
+
+		ExecutionOutputUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~ExecutionOutputUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_exec(void);
+};
+
+/*
+ * This function sets up the following structures:
+ *  # IF _obj(be, $var1) ^ 
+ *       $prep($var1, $var2) 
+ *      THEN %ExecutionOutputLink("make-it", $var1, $prep)
+ */
+#define an as->addNode
+#define al as->addLink
+void ExecutionOutputUTest::tearDown(void)
+{
+	delete as;
+}
+void ExecutionOutputUTest::setUp(void)
+{
+	as = new AtomSpace();
+
+	// Create an implication link that will be tested.
+	implication = 
+	al(IMPLICATION_LINK,
+		al(AND_LINK,
+			al(EVALUATION_LINK,
+				an(PREDICATE_NODE, "_obj"),
+				al(LIST_LINK,
+					an(CONCEPT_NODE, "be"),
+					an(VARIABLE_NODE, "$var1")
+				)
+			),
+			al(EVALUATION_LINK,
+				an(VARIABLE_NODE, "$prep"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$var1"),
+					an(VARIABLE_NODE, "$var2")
+				)
+			)
+		),
+		al(EXECUTION_OUTPUT_LINK,
+			an(GROUNDED_SCHEMA_NODE, "scm:make-verb-prep"),
+			al(LIST_LINK,
+				an(VARIABLE_NODE, "$var1"),
+				an(VARIABLE_NODE, "$prep")
+			)
+		)
+	);
+
+	// Create data on which the above pattern should match
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "_obj"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "be"),
+			hcapital = an(CONCEPT_NODE, "capital")
+		)
+	)->setTruthValue(TruthValue::TRUE_TV());
+
+	al(EVALUATION_LINK,
+		hprep = an(PREDICATE_NODE, "of"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "capital"),
+			an(CONCEPT_NODE, "Spain")
+		)
+	)->setTruthValue(TruthValue::TRUE_TV());
+
+#ifdef HAVE_GUILE
+	const char * str = 
+	"(define (make-verb-prep verb prep) \n"
+	"	(cog-new-link 'EvaluationLink \n"
+	"		(cog-new-node 'ConceptNode \n"
+	"			(string-append (cog-name verb) \"_\" (cog-name prep)) \n"
+	"		) \n"
+	"		(cog-new-link 'ListLink \n"
+	"			(cog-new-node 'ConceptNode (cog-name verb)) \n"
+	"			(cog-new-node 'PredicateNode (cog-name prep)) \n"
+	"		) \n"
+	"	) \n"
+	")";
+	SchemeEval* ev = new SchemeEval(as);
+	ev->eval(str);
+	delete ev;
+#endif /* HAVE_GUILE */
+}
+
+/*
+ * preposition reasoning test.
+ *
+ * Expect to get the following result, given the above data:
+ *
+ *    EvaluationLink
+ *       DefinedLinguisticRelationshipNode "capital_of"
+ *       ListLink
+ *          WordNode "capital"
+ *          DefinedLinguisticRelationshipNode "of"
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void ExecutionOutputUTest::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink
+	Handle result = imply(as, implication);
+
+	// There should be only one solution: the Berlin one.
+	// The Madrid graph should be rejected because of the 
+	// NOT definite link.
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	// Then, evaluationLink, as above.
+	Handle heval = getlink(result, 0);
+	Handle vcap_of = getlink(heval, 0);
+	Handle hlist = getlink(heval, 1);
+	Handle vcapital = getlink(hlist, 0);
+	Handle vprep = getlink(hlist, 1);
+
+	TSM_ASSERT_EQUALS("incorrect capital", hcapital, vcapital);
+	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

@@ -1,0 +1,176 @@
+
+                     WIRING OVERVIEW
+                     ---------------
+                     September 2008
+          Linas Vepstas <linasvepstas@gmail.com>
+
+The "cgw" subsystem implements a certain programming paradigm for
+workig with opencog hypergraphs. The core idea is that streams of
+atoms are represented by "wires", which are used to connect up 
+"devices", which process and transform the streams in various ways.
+The centrally important such device is the predicate device, which
+is used to match predicates (triples) in the hypergraph.  It can
+be used as a building to build pattern matching structures of 
+arbitrary complexity.
+
+This code is not being used currently; its harder to use than expected;
+a primary problem is that the number of data items on one wire may
+differ from that on another wire, and so devices which must merge
+data from two ports have a problem with figuring out how many data
+elements to swallow.  This could be fixed, I suppose ....
+
+See, however:
+The Art of the Propagator
+Alexey Radul; Gerald Jay Sussman
+local: MIT-CSAIL-TR-2009-002
+http://dspace.mit.edu/handle/1721.1/44215
+
+which perhaps offers a solution to the problem encountered here ... 
+
+
+MOTIVATION
+==========
+Implement a constraint-type wiring system, inspired by SICP sections
+3.3 (constraints) and 3.5 (streams), where SICP is "Structure and
+Interpretation of Computer Programs", Abelson & Sussman. Note that
+the wiring/constraint paradigm is highly amenable to graphical
+manipulation, along the lines of SGI's widely emulated and copied
+graphical wiring system from the early 1990's.
+
+The core problem that this is attempting to solve is that working
+directly with hypergraphs is hard. For example, problems in natural
+language processing require that some certain node in some certain
+location in the hypergraph needs to be compared to some other node
+somewhere else, and if certain conditions apply, then, as a result,
+yet another part of the hypergraph needs to be modified, deleted,
+or constructed; its truth-value needs to be modified, etc.
+
+Code that I've written so far has attacked this problem in an ad-hoc
+manner, crawling the graph, chasing link types in the forward or
+backward direction, looking for nodes of a certain type located in
+a certain place. Worse, this code is fragile: if I decide to change
+how my data (english sentences, grammatical relations, parses) are
+represented in a hypergraph, then I also need to change the code that
+crawls the graph.
+
+There is also another complication: the need for iteration. Whatever
+processing is done, it needs to be done for each word or sentence, etc.
+The ad-hoc proceedure is educational, if you've never used hypergraphs
+before, and relatively fast to implement, but its messy, and certainly
+not scalable. It gets tedious and repetitive -- one codes similar but
+slightly different things with each new algorithm that is needed. Below
+follows an experiment in doing things a different way.
+
+The core paradigm is that of "wires" or "constraints". Wires will
+connect the input or output of one routine to another. Wires carry
+values from one place to another. Consider, for example, the sentence
+"John threw a ball"; it has a relation "_subj(throw, John)" indicating
+that the subject of the verb "throw" is "John". Suppose I wanted to
+iterate over all all relations involving "John" as the subject: that
+is, I want to find all elements ?vrb that solve the predicate
+"_subj(?vrb, John)". This will be done by attaching a wire to ?vrb. The
+result is that the wire will sequentially take on all possible values
+for all matching occrurances of such triples in the hypergraph. This
+wire can be attached to various proceedures that do something with
+those values. Alternately, it might be attached to yet another predicate,
+say "_obj(?vrb, ball)", and would thus hopefully yeild all verbs where
+John did something to a ball.
+
+The design goal is to implement the wires both as constraints (as
+in SICP 3.3) so that they can carry values, and as streams (SICP 3.5)
+so to avoid infinite recursion.
+
+The point of this excercise is not to be abstract, but to explore a
+programming tool. I'm tired of writing ugly, ad-hoc, hard-to-understand
+code for crawling hypergraphs and fetching particular values out of them.
+I'm hoping that this will provide a simpler, cleaner framework.
+The results of this experiment are TBD.
+
+Some deeper conceptual remarks:
+Of course, a wire should be understood to be a particular type of Link,
+lets say "WireLink".
+
+Implementation notes:
+By analogy to electrical engineering, can also think of wires as "buses";
+values are asserted onto the bus by one master, and all other parties
+on the bus must hold it "floating". Currently, the wire only grants 
+access to one bus-master; its might be possible to relax this.
+May need to create a specific grant/revoke protocal for the bus?
+
+Current implementation only allows *two* endpoints on the bus, not many.
+This is because the recever takes the stream from the sender. This seems
+like the most efficient way to proceed at the moment.
+The receiver is also called the "consumer", the transmitter is the "producer"
+Some of the words below refer to a bus, implying multiple endpoints, this
+no longer holds as the appropriate paradigm. -- The wire is purely 
+point-to-point. (Note, however, multiple devices are allowed to connect
+to the wire, if all that they want to do is to snoop for messages. However,
+only one device is allowed to take a stream ... since if two devices
+attempted to take the stream, there would be a race, and one would loose.)
+
+
+Generic Devices
+---------------
+These devices can carry any sort of stream, not just atoms.
+They provide fairly generic services for performing transformations
+on streams, as well as filtering them and comparing them.
+
+make-wire        - Create a wire
+wire-source-list - Place a list of items onto a wire.
+wire-probe       - Display stream pulled from wire.
+wire-null-device - Ignores all messages, does nothing.
+wire-fan-out     - Given a stream on the input, creates two identical
+                     streams of output.
+wire-transceiver - Apply a function to transform an input stream into 
+                     the output stream.
+wire-filter      - Pass input to output only if test returns true.  
+wire-trivial-filter - Pass all traffic between two wires.
+wire-comparator  - Apply a function to a pair of input streams to
+                     produce an output stream.
+wire-fan-in      - Compare elements from two input streams; if they
+                     match, the match is copied to the output.
+wire-bidi        - Given a unidirectional device, create a 
+                     bi-directional device.
+
+
+Atomic Devices
+--------------
+These devices can process only streams of atoms.
+
+cgw-source-atoms      - Present all atoms in the atom space, of a
+                        given type.
+cgw-display-atom-type - Display the type of the atoms pasing through.
+cgw-incoming          - Present the incoming-set of an atom
+cgw-outgoing          - Present the outgoing-set of an atom
+
+cgw-filter-atom-type  - Only let the indicated atom types through.
+cgw-filter-incoming   - Present the links in the incoming set,
+                        matching a given link type.
+cgw-filter-incoming-pos - Present the incoming set, depending
+                        on the link's type and atom's position.
+cgw-filter-outgoing   - Present the atoms in the outgoing set,
+                        matching a given atom type.
+cgw-filter-arity      - Pass through links with a minimum arity.
+cgw-follow-link       - Follow a link to a target atom type.
+cgw-follow-link-pos   - Follow a link to an atom in a given position.
+cgw-outgoing-nth      - Get the n'th atom in the outgoing set.
+
+
+Unwiring
+--------
+Currently some/many of the devices do not properly react to being
+disconnected from a wire. Thus, it is not recommended that a device
+be created, used with data flowing through it in one direction, and
+then re-used with data flowing in a different direction. This is 
+essentially a bug; The devices could be fixed to support such reuse
+and reconnection, and could be fixed without changing the API, however,
+I've just not bothered to focus on this potential problem.
+
+
+Performance
+-----------
+Many of the more important devices will split an input stream into 
+two. This has the result of doubling the the processing time and 
+memory use for everything that came upstream.  This can have
+un-intended performance reprecussions, and result in NP-complexity
+with wiring up circuits with N nodes.

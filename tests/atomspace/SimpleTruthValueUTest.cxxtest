@@ -1,0 +1,142 @@
+/*
+ * tests/atomspace/SimpleTruthValueUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Welter Silva <welter@vettalabs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+#define NUM_TVS 3
+#define TV1_MEAN 0.25f
+#define TV2_MEAN 0.5f
+#define TV3_MEAN 0.75f
+#define TV1_COUNT 0.0f
+#define TV2_COUNT 1.0f
+#define TV3_COUNT 2.0f
+
+// Converting from confidence to count and back again using single-prcision
+// float is a real accuracy killer.  In particular, 1/801 = 0.001248 but
+// converting back gives 800*0.001248/(1.0-0.001248) = 2.000352 and so
+// comparison tests can only be accurate to about 0.000352 or thereabouts.
+#define FLOAT_ACCEPTABLE_ERROR 0.0004
+
+class SimpleTruthValueUTest : public CxxTest::TestSuite
+{
+private:
+
+    SimpleTruthValue* tvs[NUM_TVS];
+    float means[NUM_TVS];
+    float counts[NUM_TVS];
+    float confidences[NUM_TVS];
+
+public:
+    SimpleTruthValueUTest() {
+        //NMCore::Create();
+        means[0] = TV1_MEAN;
+        means[1] = TV2_MEAN;
+        means[2] = TV3_MEAN;
+        counts[0] = TV1_COUNT;
+        counts[1] = TV2_COUNT;
+        counts[2] = TV3_COUNT;
+    }
+
+    void setUp() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            tvs[i] = new SimpleTruthValue(means[i], counts[i]);
+            confidences[i] = SimpleTruthValue::countToConfidence(counts[i]);
+        }
+    }
+
+    void tearDown() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            delete tvs[i];
+        }
+    }
+
+    void testConstructor() {
+
+        SimpleTruthValue* tv;
+        for (int i = 0; i < NUM_TVS; i++) {
+            tv = tvs[i];
+            TS_ASSERT(tv != NULL);
+            TS_ASSERT(tv->getMean() == means[i]);
+            TS_ASSERT(fabs(tv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(tv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+        }
+    }
+
+    void testCopyConstructor() {
+
+        SimpleTruthValue* tv;
+        for (int i = 0; i < NUM_TVS; i++) {
+            tv = new SimpleTruthValue(*(tvs[i]));
+            TS_ASSERT(tv != NULL);
+            TS_ASSERT(fabs(tv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(tv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+        }
+    }
+
+    void testClone() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            TruthValuePtr clonedTv = tvs[i]->clone();
+            TS_ASSERT(fabs(clonedTv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(clonedTv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(clonedTv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+        }
+    }
+
+    void testGetType() {
+        for (int i = 0; i < NUM_TVS; i++) {
+            TS_ASSERT(tvs[i]->getType() == SIMPLE_TRUTH_VALUE);
+        }
+    }
+
+    void testConfidenceToCount() {
+        float testConfidences[] = {0.0f, 0.00001f, 0.1f, 0.5f, 0.9f, 0.9999999f, 1.0f};
+        for (unsigned int i = 0; i < (sizeof(testConfidences) / sizeof(float)) ; i++) {
+            float count  = SimpleTruthValue::confidenceToCount(testConfidences[i]);
+            TS_ASSERT(count >= 0);
+        }
+        for (int i = 0; i < NUM_TVS; i++) {
+            TS_ASSERT(counts[i] - SimpleTruthValue::confidenceToCount(confidences[i]) < FLOAT_ACCEPTABLE_ERROR);
+        }
+    }
+
+    void testCountToConfidence() {
+        float testCounts[] = {0.0f, 0.5f, 1.0f, 5.0f, 10.0f, 1000.0f, 10000000.0f};
+        for (unsigned int i = 0; i < (sizeof(testCounts) / sizeof(float)) ; i++) {
+            float confidence  = SimpleTruthValue::countToConfidence(testCounts[i]);
+            TS_ASSERT(confidence >= 0 && confidence <= 1.0f);
+        }
+        for (int i = 0; i < NUM_TVS; i++) {
+            TS_ASSERT(confidences[i] - SimpleTruthValue::countToConfidence(counts[i]) < FLOAT_ACCEPTABLE_ERROR);
+        }
+    }
+
+};

@@ -1,0 +1,32 @@
+                     HyperTable Support
+                     ------------------
+               Author: Jeremy Schlatter, Summer 2009
+
+This directory uses Hypertable to support persistent and (eventually)
+distributed storage of atoms. Two things are needed in order for it
+to work:
+
+1. HyperTable must be installed (of course). See http://hypertable.org
+
+2. The Hypertable servers must be running. The command to start them is:
+      <hypertable_install_dir>/bin/start-all-servers.sh <local | hadoop | kfs>
+
+
+If things don't work:
+A. Make sure that the hypertable code is passing its own test suite!
+
+B. Verify that CMake correctly found the location of the hypertable
+   install location, and the hypertable config file.  These are needed!
+   The locations are printed out when cmake is run, and should look
+   something like this:
+
+     -- Found hypertable install path: /usr/local/hypertable/0.9.2.4
+     -- Found hypertable config file: /usr/local/hypertable/0.9.2.4/conf/hypertable.cfg
+     -- Hypertable was found.
+
+C. Verify that SIGAR was found by CMake. Its needed for linking.
+
+TODO
+----
+-- search for TODO's in the code and deal witth them.
+-- Fix the getIncomingSet() function, its not implemented correctly.

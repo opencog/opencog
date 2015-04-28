@@ -1,0 +1,7 @@
+
+                   AtomSpace Utilities README
+                   --------------------------
+
+This directory contains miscellaneous utilities involving the AtomSpace.
+Unlike the code in atomutils, all of these functions require an
+AtomSpace to work.

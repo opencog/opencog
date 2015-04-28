@@ -1,0 +1,260 @@
+/*
+ * tests/scm/SCMPrimitiveUTest.cxxtest
+ *
+ * Make sure the scheme primtive extension code works
+ * Copyright (C) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemePrimitive.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+
+class SCMPrimitiveUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		SchemeEval *eval;
+
+	public:
+
+	SCMPrimitiveUTest(void)
+	{
+		try
+		{
+			config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+	}
+
+	~SCMPrimitiveUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_H_H(void);
+	void test_throw(void);
+	void test_parallel(void);
+};
+
+// Some example class
+class MyExampleClass
+{
+	private:
+		int id;  // some value in the instance
+		AtomSpace *as;
+	public:
+
+		MyExampleClass(AtomSpace *_as, int _id) {as = _as; id = _id; }
+
+		// An example method -- accepts a handle, and wraps it
+		// with a ListLink.
+		Handle my_func(Handle h)
+		{
+			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
+
+			logger().debug("Info: my_func instance %d received the node: %s\n",
+			               id, as->getName(h).c_str());
+			Handle hlist = as->addLink(LIST_LINK, h);
+			return hlist;
+		}
+
+		// Throw exception on purpose
+		Handle my_other_func(Handle h)
+		{
+			throw (InvalidParamException(TRACE_INFO,
+			        "Don't panic!! Threw exception %d on purpose.", id));
+			return Handle::UNDEFINED;
+		}
+
+		Handle my_more_func_1(Handle h)
+		{
+			// if handle invalid, it just mean the same atom might have been deleted by another thread
+			if (not as->isValidHandle(h))
+			{
+				logger().debug("Info: my_more_func_1 got invalid handle %s", h->toShortString().c_str());
+				return Handle::UNDEFINED;
+			}
+
+			Handle hlist = as->addLink(LIST_LINK, h);
+			return hlist;
+		}
+
+		void my_more_func_2(Handle h)
+		{
+			if (not as->isValidHandle(h))
+			{
+				logger().debug("Info: my_more_func_2 got invalid handle %s", h->toShortString().c_str());
+				return;
+			}
+
+			as->removeAtom(h, false);
+		}
+};
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void SCMPrimitiveUTest::setUp(void)
+{
+	server(CogServer::createInstance);
+	as = &cogserver().getAtomSpace();
+	eval = new SchemeEval(as);
+}
+
+void SCMPrimitiveUTest::tearDown(void)
+{
+	delete eval;
+	eval = NULL;
+}
+
+// ============================================================
+
+void SCMPrimitiveUTest::test_H_H(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create the example class, and define a scheme function,
+	// named "bingo", that will call one of its methods
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
+
+	// Now, call bingo, with a reasonable argument. Since
+	// MyExampleClass::my_func is expecting a handle, we better pass
+	// bingo a handle.
+	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
+	eval->eval("(define yyy (bingo nnn))");
+
+	bool eval_err = eval->eval_error();
+	TSM_ASSERT ("Evaluation error defining node", !eval_err);
+
+	// Now verify that the returned yyy is a ListLink which wraps the input node.
+	Handle nnn = eval->eval_h("nnn");
+	Handle yyy = eval->eval_h("yyy");
+	TSM_ASSERT ("undefined node handle ", as->isValidHandle(nnn));
+	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
+
+	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
+	TSM_ASSERT ("handle isn't a link ", as->isLink(yyy));
+
+	const std::vector<Handle>& oset = as->getOutgoing(yyy);
+
+	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
+
+	Handle hn = as->addNode(CONCEPT_NODE, "Hello World!");
+	TSM_ASSERT ("wrong atom entirely ", hn == nnn);
+
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void SCMPrimitiveUTest::test_throw(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test the throw of an assertion. This should cause an evaluation
+	// error. (In the shell, stuff would get printed to terminal)
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
+	std::string trc = eval->eval("(whoops nnn)");
+	bool eval_err = eval->eval_error();
+	TSM_ASSERT ("Failed to observe exception", eval_err);
+	printf("Exception trace was: >>%s<<\n", trc.c_str());
+
+	// Now, try to catch the exception within guile.  It should be
+	// caught.  Which means that thee should be NO error from the
+	// evaluator.
+	std::string out = eval->eval(
+		"(catch 'C++-EXCEPTION (lambda () (whoops nnn)) "
+		"   (lambda (key funcname msg) "
+		"      (display \"caught key=\") "
+		"      (display key) "
+		"      (newline) "
+		"      (display \"caught funcname=\") "
+		"      (display funcname) "
+		"      (newline) "
+		"      (display \"caught msg=\") "
+		"      (display msg) "
+		"      (newline) "
+		"   ))");
+	eval_err = eval->eval_error();
+	TSM_ASSERT ("Failed to catch exception", not eval_err);
+
+	printf("Catch evaluates to this: >>%s<<\n", out.c_str());
+
+	int msg = strncmp("caught key=C++-EXCEPTION", out.c_str(),
+	                 strlen("caught key=C++-EXCEPTION"));
+	TSM_ASSERT ("Wrong exception message", 0 == msg);
+
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SCMPrimitiveUTest::test_parallel(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	// Create "mango" for creating, and "tango" for deleting
+	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	define_scheme_primitive("mango", &MyExampleClass::my_more_func_1, mtc);
+	define_scheme_primitive("tango", &MyExampleClass::my_more_func_2, mtc);
+
+	eval->eval("(use-modules (ice-9 threads))");
+	eval->eval_h(R"(
+	             (n-par-for-each
+	                 12
+	                 (lambda (n)
+	                     (tango (mango (cog-new-node 'ConceptNode (number->string n))))
+	                     (cog-delete (mango (cog-new-node 'ConceptNode (number->string (+ n 1)))))
+	                 )
+	                 (iota 30000)
+	             )
+	            )");
+
+	bool eval_err = eval->eval_error();
+	TSM_ASSERT("Evaluation error", !eval_err);
+
+	TSM_ASSERT("Atomspace size incorrect!", as->getSize() == 30001);
+
+	delete mtc;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */

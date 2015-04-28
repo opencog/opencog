@@ -1,0 +1,10 @@
+ADD_SUBDIRECTORY (behavior)
+ADD_SUBDIRECTORY (LearningServerMessages)
+ADD_SUBDIRECTORY (Filter)
+ADD_SUBDIRECTORY (NoSpaceLife)
+ADD_SUBDIRECTORY (PetaverseHC)
+
+ADD_CXXTEST(SetopsUTest)
+TARGET_LINK_LIBRARIES(SetopsUTest
+	cogutil
+)

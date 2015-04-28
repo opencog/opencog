@@ -1,0 +1,17 @@
+requests==2.2
+argparse
+matplotlib
+nose
+numpy
+pyparsing
+python-dateutil
+scipy
+tornado
+wsgiref
+Flask
+flask-restful
+flask-restful-swagger
+flask-cors
+mock
+six
+graphviz

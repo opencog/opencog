@@ -1,0 +1,157 @@
+/*
+ * tests/query/EvaluationUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class EvaluationUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	EvaluationUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+	}
+
+	~EvaluationUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_eval(void);
+	void test_logic(void);
+};
+
+void EvaluationUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void EvaluationUTest::setUp(void)
+{
+	as->clear();
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/utilities.scm, "
+		"opencog/scm/opencog/query.scm");
+
+	load_scm_files_from_config(*as);
+}
+
+/*
+ * Evaluation most basic unit test.
+ */
+void EvaluationUTest::test_eval(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
+	load_scm_files_from_config(*as);
+
+	Handle five = eval->eval_h("(cog-bind (five-arcs))");
+	printf ("five: found:\n%s\n", five->toShortString().c_str());
+	TS_ASSERT_EQUALS(5, as->getArity(five));
+
+	Handle one = eval->eval_h("(cog-bind (one-arc-one))");
+	printf ("one: found:\n%s\n", one->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(one));
+
+	Handle onet = eval->eval_h("(cog-bind (one-arc-three))");
+	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
+	TS_ASSERT_EQUALS(1, as->getArity(onet));
+
+	Handle zero = eval->eval_h("(cog-bind (zero-arcs))");
+	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
+	TS_ASSERT_EQUALS(0, as->getArity(zero));
+
+	Handle four = eval->eval_h("(cog-bind (four-arcs))");
+	printf ("four: found:\n%s\n", four->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, as->getArity(four));
+
+	Handle two = eval->eval_h("(cog-bind (two-arcs))");
+	printf ("two: found:\n%s\n", two->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(two));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Evaluation boolean logic unit test.
+ */
+void EvaluationUTest::test_logic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
+	load_scm_files_from_config(*as);
+
+	Handle four = eval->eval_h("(cog-bind (four-not))");
+	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, as->getArity(four));
+
+	Handle two = eval->eval_h("(cog-bind (two-or))");
+	printf ("two-or: found:\n%s\n", two->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(two));
+
+	Handle three = eval->eval_h("(cog-bind (three-nor))");
+	printf ("three-nor: found:\n%s\n", three->toShortString().c_str());
+	TS_ASSERT_EQUALS(3, as->getArity(three));
+
+	Handle fancy = eval->eval_h("(cog-bind (two-fancy))");
+	printf ("two-fancy: found:\n%s\n", fancy->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, as->getArity(fancy));
+
+	// Both the searches should return the same two (the first two)
+	TS_ASSERT_EQUALS(two, fancy);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

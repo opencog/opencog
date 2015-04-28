@@ -1,0 +1,203 @@
+/*
+ * tests/query/FuzzyPatternUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: Leung Man Hin <https://github.com/leungmanhin>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/query/FuzzyMatch/FuzzyPatternMatchCB.h>
+#include <opencog/query/FuzzyMatch/FuzzyPatternMatch.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+#include "imply.h"
+
+using namespace opencog;
+
+class FuzzyPatternUTest : public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* as;
+
+		Handle hwn1;
+		Handle hwn2;
+		Handle hwin;
+		Handle hpn;
+		Handle hel1;
+		Handle hel2;
+		Handle hel3;
+
+	public:
+		FuzzyPatternUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			as = new AtomSpace();
+		}
+
+		~FuzzyPatternUTest()
+		{
+			delete as;
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_basic_link(void);
+		void test_basic_node(void);
+};
+
+/*
+ * This function sets up the following structures:
+ *
+ *    WordNode "Tea"
+ *    WordNode "Water"
+ *    WordInstanceNode "Tea"
+ *    ParseNode "sentence@123"
+ *
+ *    EvaluationLink
+ *       PredicateNode "read"
+ *       ListLink
+ *          ConceptNode "they"
+ *          ConceptNode "books"
+ *
+ *    EvaluationLink
+ *       PredicateNode "read"
+ *       ListLink
+ *          ConceptNode "they"
+ *          ConceptNode "magazines"
+ *
+ *    EvaluationLink
+ *       PredicateNode "eat"
+ *       ListLink
+ *          ConceptNode "they"
+ *          ConceptNode "burgers"
+ *
+ */
+void FuzzyPatternUTest::tearDown(void)
+{
+
+}
+
+#define an as->addNode
+#define al as->addLink
+void FuzzyPatternUTest::setUp(void)
+{
+	// The solution of test_basic_node
+	hwn1 = an(WORD_NODE, "Tea");
+
+	// Identical to the node in the query,
+	// and is not supposed to be matched
+	hwn2 = an(WORD_NODE, "Water");
+
+	hwin = an(WORD_INSTANCE_NODE, "Tea@456");
+
+	hpn = an(PARSE_NODE, "sentence@123");
+
+	// The solution of test_basic_link
+	hel1 = al(EVALUATION_LINK,
+			an(PREDICATE_NODE, "read"),
+			al(LIST_LINK,
+				an(CONCEPT_NODE, "they"),
+				an(CONCEPT_NODE, "books")
+			)
+		   );
+
+	// Identical to the link in the query,
+	// and is not supposed to be matched
+	hel2 = al(EVALUATION_LINK,
+			an(PREDICATE_NODE, "read"),
+			al(LIST_LINK,
+				an(CONCEPT_NODE, "they"),
+				an(CONCEPT_NODE, "magazines")
+			)
+		   );
+
+	hel3 = al(EVALUATION_LINK,
+			an(PREDICATE_NODE, "eat"),
+			al(LIST_LINK,
+				an(CONCEPT_NODE, "they"),
+				an(CONCEPT_NODE, "burgers")
+			)
+		   );
+}
+
+void FuzzyPatternUTest::test_basic_link(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Construct the query
+	Handle query = al(EVALUATION_LINK,
+					an(PREDICATE_NODE, "read"),
+					al(LIST_LINK,
+						an(CONCEPT_NODE, "they"),
+						an(CONCEPT_NODE, "magazines")
+					)
+				  );
+
+	FuzzyPatternMatchCB fpmcb(as);
+
+	std::set<Handle> vars;
+
+	HandleSeq preds;
+	preds.push_back(query);
+
+	match(fpmcb, vars, preds);
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void FuzzyPatternUTest::test_basic_node(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Construct the query
+	Handle query = an(WORD_NODE, "Water");
+
+	FuzzyPatternMatchCB fpmcb(as);
+
+	std::set<Handle> vars;
+
+	HandleSeq preds;
+	preds.push_back(query);
+
+	match(fpmcb, vars, preds);
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", fpmcb.solns.size(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

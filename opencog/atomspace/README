@@ -1,0 +1,275 @@
+
+                   AtomSpace README
+                   ----------------
+
+The README contains miscellaneous notes about the atomspace. But first:
+
+What is the Atomspace?
+======================
+The AtomSpace is a database that holds "term graphs".  The formal
+definition of a "term graph" can be found on page 66 of the book
+Franz Baader, Tobias Nipkow, "Term Rewriting and All That", Cambridge
+University Press, 1998.  What this means is practice is that every atom
+in the atomspace is unique: you cannot have two of the "same" atom in
+the atomspace.  So, for example, you can create two "identical" atoms
+simply by using the C++ new operator, you cannot place both in the
+atomspace: putting the second one in returns a copy of the first one.
+
+This implies that the AtomTable::addAtom() method is fairly complicated:
+it must be able to detect is that atom being added already exists in the
+atomspace.  The addAtom() method implements the "merge proceedure", page
+68 of Baader&Nipkow; the soundness of the proceedure is given in theorem
+4.4.3.  A lot of the complexity of atoms and te atomspace centers around
+trying to make that merge algo efficient.  It is the primary bottleneck
+of the system.
+
+The AtomSpace is crudely "distributed", i.e. parts of it can reside on
+a networked collection of computers.  It is "crude" because the current
+architecture works, but is not somehow magically, blazingly fast.  The
+AtomTable holds the local, in-RAM cache of atoms on this computer; the
+AtomSpace is a wrapper around the AtomTable, it can go off to other
+machines to fetch (and store) atoms if they are not in the local
+AtomTable.
+
+The distributed AtomSpace uses UUID's (universally unique identifiers)
+to uniquely identify an atom. Due to a historical accident, the UUID's
+are stored both in a Handle and in the Atom it refers to. The seems to
+be a design error: Handles should not store UUID's; Handles should be
+be just a synonym for AtomPtr.  Fixing this will take a lot of work.
+
+Multiple AtomSpaces can be used simultaneously, and AtomSpaces can be
+created in a hierarchical fashion.  Thus, the AtomSpace can be thought
+of as an "environment" (kind-of like the environment in bash, but
+hierarchical, so, more like the environment in Lisp or Scheme.)  The
+hierarchical nature means that Links in the child atomspace can refer
+to Atoms in the parent atomspace (but not vice-versa).
+
+The AtomSpace API is completely thread-safe. This includes the methods
+on class Atom and class TruthValue: these can be accessed by any number
+of threads simultaneously. Several unit tests test for this. More about
+threading below.
+
+Memory management for Atoms is handled by reference-counting, using the
+std::shared_ptr class. This means that you should never use the new()
+and delete() operators directly on Atoms or TruthValues. An Atom will
+automatically be destroyed when it's reference counter drops to zero.
+A prototype using garbage collections (the Boehem GC) was attempted, but
+this did not work well, due to the bad interplay between std:: container
+classes and weak pointers.  Basically, every atom stores both it's
+outgoing set (atoms it points to) and it's incoming set (atoms that
+point at it). This means that there are circular loops everywhere. Now,
+the Boehm GC can discover circular loops just fine, but only if they are
+reasonably short. The problem is that std::set can have pointers to
+pointers to pointers, of depth log(N), and N can get quite large,
+larger than what bdgc can easily detect. In essence, std::set does not
+play nice with bdgc. Bummer. So reference counting is done instead, and
+in order to break the circular loops, the incoming set consists of weak
+pointers. More about garbage collection below.
+
+
+======================================================================
+======================================================================
+======================================================================
+
+                      Adding atom types
+                      -----------------
+
+The ClassServer provides a primitive extension mechanism so that
+modules/agents/libraries may add new atom types to the default type
+hierarchy. In order to ease the task of third-parties wishing to extend
+the ClassServer, we provide a cmake macro that generates a set of
+files with c++ code that can be used by the module/library.
+
+The macro uses a 'type script' file as input which uses the following
+format:
+
+<TYPE> [<- <PARENT_TYPE1>[,<PARENT_TYPE2>,<PARENT_TYPE3>,...]] ["<TYPE_NAME>"]
+
+Where
+
+    TYPE is an identifier that will be used in your code to reference
+    the type's numeric code. Usually, it is defined using capital
+    letters and underscores as its semantics is close to that of C/C++
+    constant.
+
+    PARENT_TYPE1, PARENT_TYPE1, PARENT_TYPE2 are optional identifiers of
+    the parent types of the defined type. When more than one parent type
+    is specified, they must be separated by commas.
+
+    TYPE_NAME is a string that will be used to identify the type. If
+    none is supplied, the cmake macro will generate one based on the
+    type's identifer using camel-casing patterns (for instance,
+    CUSTOM_NODE would be named "CustomNode").
+
+Above is a short snippet of valid script entries. For more examples,
+check the atom_types.script file.
+
+ATOM
+NODE <- ATOM
+LINK <- ATOM
+WORD_NODE <- NODE
+CONCEPT_NODE <- NODE "OddlyNamedNode"
+ASSOCIATIVE_LINK <- LINK "AssocL"
+EVALUATION_LINK <- LINK "EvalLink"
+MULTIPARENT_LINK <- ASSOCIATIVE_LINK_LINK,EVALUATION_LINK "MPLink"
+
+-----
+To process the 'atom types' script file, one must add the macro
+OPENCOG_ADD_ATOM_TYPES to the CMakeLists.txt and the header file to the
+list of source files:
+
+# CMakeList.txt
+OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+
+ADD_LIBRARY(sample SHARED
+    atom_types.h
+    Sample1.cc
+    Sample2.cc
+    ...
+)
+
+The macro OPENCOG_ADD_ATOM_TYPES expects 4 parameters:
+
+    1. the filename of the script file that will be used as input
+    2. the filename of the header file that will be generated with
+       the identifiers of the new atom types.
+    3. the filename of the definitions file that will be generated with
+       the instantiations of the variables that will store the new atom
+       types.
+    4. the filename of the inheritance file that will be generated with
+       the set of method invocations that will build the type hierarchy
+       inside the ClassServer.
+
+To properly *use* the generated files, the following conventions should be
+followed:
+
+  * include the definitions file right after the standard '#include'
+    statement of the file with the code that initializes your module/agent/library.
+
+  * include the inheritance file *inside the body* of the routine
+    initializing the module/agent/library.
+
+  * include the header file by any files that references the identifier
+    of the a new atom type.
+
+For instance:
+
+// MyModule.cc
+#include "MyModule.h"
+#include "AnotherHeader.h"
+#include "atom_types.definitions"
+MyModule::MyModule() {}
+...
+static __attribute__ ((constructor)) void _init(void)
+{
+    #include "atom_types.inheritance"
+}
+
+
+// AnotherFile.cc
+#include "AnotherFile.h"
+#include "atom_types.h"
+#include "YetAnotherFile.h"
+
+void AnotherFile::someMethod() {
+    ...
+    std::string name = opencog::ClassServer::getTypeName(opencog::MYNODE);
+    ...
+}
+
+-----
+For a fully functional example, check the ''examples/atomtypes/' directory.
+
+
+======================================================================
+======================================================================
+======================================================================
+
+                   Garbage Collection Design
+                   -------------------------
+
+As of October/November 2013, Handles use std::shared_pointer to deal
+with memory management, and so using GC is no longer urgent.  The
+shared_pointers seem to work OK, for now.  Based on performance
+measurements, however, shared pointers are 3x slower than GC could be
+(compare the AtomTable results for April and November 2013 in the
+opencog/benchmark/diary.txt file, which show a rough 3x slowdown.)
+
+Without garbage collection (or smart pointers) it becomes unsafe to use
+bare pointers in a multi-threaded environment.  With garbage collection
+(or smart pointers), and a reasonably good design and coding style, the
+use of bare pointers in a multi-threaded environment becomes safe. The
+problem with smart pointers is that they are (1) generally slower, and
+(2) use significantly more RAM (40 bytes per pointer, instead of 8 bytes,
+as well as additional bytes in the object, for the counter itself.)
+
+A prototype using BDW-GC was attempted in 2014, but was found to have
+problems.  The main problem is that the std:: container classes are
+just not freindly for garbage collection.  Consider, for example, the
+std::set container. If it has N objects in it, it will have log_2(N)
+pointers (assuming a binary-tree implementation).  If N = 1 million,
+then tree depth will have a depth of about log_2(1M) = 20. If the
+terminal object (e.g. an Atom) has a back-pointer to another atom
+(e.g. the IncomingSet), this will result in a cycle that is 21 pointers
+in circumfrence.  Now, BDW-GC can detect cycles, but, byt default, it
+only looks for relatively short cycles (I think it goes up to 6 or 8
+or 10 or something like that). Thus, it effectively is unable to detect
+such large cycles, and thus, cannot free the resulting memory!  Perhaps
+it would be possible to make the std::c++14 container classes be more
+GC-freindly, to avoid these issues, but this is way beyond what the
+OpenCog project can do.  In essence, current C++ is more or less
+incompatible with, even hostile to, garbage collection.
+
+Thus, we deal with the seemingly slower and klunkier reference-counting
+design.  It works well-enough.  As long as we stick with C++ for the
+core AtomSpace, I don't see a better way.  It is far from clear that
+any other language has a better solution, anyway.
+
+
+======================================================================
+======================================================================
+======================================================================
+
+                       Threading Design
+                       ----------------
+
+As of November 2013, all atomspace operations should be thread-safe.
+This includes all AtomSpace API calls, and all public methods on Atoms,
+Links, Nodes, truth and attention values.  Thread-safety is mildly
+tested in AtomSpaceAsyncUTest but more robust threading tests would be
+great.  In addition, comprehensive multi-threaded benchmarks are sorely
+needed.
+
+The AtomTable::getHandlesByXXX() methods offer a great opportunity for
+adding parallelism.  Currently, they use std::copy_if(), which can be
+replaced by OMP_ALGO versions, and including oc_omp.h. For examples on
+how this is done in practice, grep the moses code. Its actually quite
+very easy; I haven't done so out of laziness mostly (and the greedy
+desire for a benchmark).
+
+The AtomTable uses a single global lock, and it potentially causes
+significant contention in a highly-threaded environment. It is not
+clear how to fix this.  Converting it to a reader-writer lock is not
+a solution, because reader-writer locks are much larger, while also
+requiring that any cache-lines holding the locks be cleared,
+synchronized.  Thus, reader-writer locks don't avoid any of the
+cache-contention bottlenecks that ordinary plain-simple mutexes have,
+while at the same time being fatter and klunkier.
+
+Some speedup might be possible if each index used it's own private lock,
+maybe. Maybe not.  Some speedup might be possible if index insertion was
+done asynchronously (i.e. in service threads). Maybe. Unclear. That
+entails extra complexity.  A multi-threaded benchmark is needed.
+
+The atoms are all using a per-atom lock, and thus should have no
+contention (although this is a bit RAM-greedy, but what the heck --
+the alternative of one global lock would be a huge bottleneck.)
+
+The ClassServer() uses a mutex when fetching info.  If would be great
+to make this lockless somehow, since, realistically, as, currently,
+absolutely no one ever adds new atom types, once the cogserver has been
+initialized. i.e. we're using a lock to protect a case that never
+happens in real life.
+
+======================================================================
+======================================================================
