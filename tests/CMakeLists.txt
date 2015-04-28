@@ -19,7 +19,7 @@ IF (CXXTEST_FOUND)
 
 	IF (HAVE_ATOMSPACE)
 		ADD_SUBDIRECTORY (atomspace)
-        ADD_SUBDIRECTORY (atomutils)
+		ADD_SUBDIRECTORY (atomutils)
 
 		# Persistence is for saving/restoring atomspace to disk.
 		ADD_SUBDIRECTORY (persist)
@@ -58,7 +58,6 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (dynamics)
 	ENDIF (HAVE_ATTENTION)
 
-	# learning requires a working comboreduct.
 	ADD_SUBDIRECTORY (learning)
 
 	# Embodiment requires that learning, spatial, etc.
