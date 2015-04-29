@@ -21,9 +21,6 @@ IF (CXXTEST_FOUND)
 		# Persistence is for saving/restoring atomspace to disk.
 		ADD_SUBDIRECTORY (persist)
 
-		# Currently, reasoning depends on query, above.
-		ADD_SUBDIRECTORY (reasoning)
-
 		# The cogserver exposes the atomspace to outside users.
 		IF (HAVE_SERVER)
 			ADD_SUBDIRECTORY (server)
