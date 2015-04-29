@@ -1,25 +1,25 @@
 INCLUDE_DIRECTORIES (
-        ${CMAKE_BINARY_DIR}
-        ${TBB_INCLUDE_DIR}
+	${CMAKE_BINARY_DIR}
+	${TBB_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES(
-        ${PROJECT_BINARY_DIR}/opencog/atomspace
-        ${PROJECT_BINARY_DIR}/opencog/server
-        ${TBB_INCLUDE_DIR}
-        ${TBB_LIBRARY_DIRS}
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/server
+	${TBB_INCLUDE_DIR}
+	${TBB_LIBRARY_DIRS}
 )
 
 ADD_LIBRARY (atomspacepublishermodule SHARED
-    AtomSpacePublisherModule
+	AtomSpacePublisherModule
 )
 
 LINK_LIBRARIES(
-        server
+	server
 )
 
 TARGET_LINK_LIBRARIES(atomspacepublishermodule
-    zmq
-    json_spirit
-    tbb
+	zmq
+	json_spirit
+	tbb
 )

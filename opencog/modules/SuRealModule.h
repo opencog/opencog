@@ -24,11 +24,8 @@
 #ifndef _OPENCOG_SUREAL_MODULE_H
 #define _OPENCOG_SUREAL_MODULE_H
 
-
 #include <opencog/server/Module.h>
-
-#include "SuRealSCM.h"
-
+#include <opencog/nlp/sureal/SuRealSCM.h>
 
 namespace opencog
 {

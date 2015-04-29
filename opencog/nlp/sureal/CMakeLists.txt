@@ -18,15 +18,3 @@ TARGET_LINK_LIBRARIES(sureal
     smob
     atomspace
 )
-
-ADD_LIBRARY (SuRealModule SHARED
-    SuRealModule
-)
-
-ADD_DEPENDENCIES (SuRealModule
-    nlp_atom_types
-)
-
-TARGET_LINK_LIBRARIES(SuRealModule
-    sureal
-)
