@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include "PyIncludeWrapper.h"
+#include <opencog/cython/PyIncludeWrapper.h>
 
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>

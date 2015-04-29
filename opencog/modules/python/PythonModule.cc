@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "PyIncludeWrapper.h"
+#include <opencog/cython/PyIncludeWrapper.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -32,8 +32,8 @@
 #include "PyRequest.h"
 #include "PythonModule.h"
 
-#include "opencog/agent_finder_types.h"
-#include "opencog/agent_finder_api.h"
+#include <opencog/cython/opencog/agent_finder_types.h>
+#include <opencog/cython/opencog/agent_finder_api.h>
 
 using std::vector;
 using std::string;

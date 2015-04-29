@@ -14,7 +14,7 @@
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
 
-#include "PyIncludeWrapper.h" // Needed for PyThreadState
+#include <opencog/cython/PyIncludeWrapper.h> // Needed for PyThreadState
 
 namespace opencog
 {
