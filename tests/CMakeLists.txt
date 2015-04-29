@@ -18,9 +18,6 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF (CXXTEST_FOUND)
 
 	IF (HAVE_ATOMSPACE)
-		ADD_SUBDIRECTORY (atomspace)
-		ADD_SUBDIRECTORY (atomutils)
-
 		# Persistence is for saving/restoring atomspace to disk.
 		ADD_SUBDIRECTORY (persist)
 
@@ -28,10 +25,6 @@ IF (CXXTEST_FOUND)
 		IF (HAVE_GUILE)
 			ADD_SUBDIRECTORY (scm)
 		ENDIF (HAVE_GUILE)
-
-		# Many of the query tests require a working guile, so run
-		# these only after guile has been tested.
-		ADD_SUBDIRECTORY (query)
 
 		# Currently, reasoning depends on query, above.
 		ADD_SUBDIRECTORY (reasoning)
