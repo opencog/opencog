@@ -52,7 +52,7 @@
 #include <opencog/util/platform.h>
 
 #ifdef HAVE_SQL_STORAGE
-#include <opencog/persist/sql/PersistModule.h>
+#include <opencog/modules/PersistModule.h>
 #endif /* HAVE_SQL_STORAGE */
 
 #include "CogServer.h"

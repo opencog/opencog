@@ -23,9 +23,9 @@
 #ifndef _OPENCOG_PYREQUEST_H
 #define _OPENCOG_PYREQUEST_H
 
-#include <string>
+#include <opencog/cython/PyIncludeWrapper.h>
 
-#include "PyIncludeWrapper.h"
+#include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Factory.h>

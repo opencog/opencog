@@ -1,9 +1,9 @@
 /*
- * SuRealModule.h
+ * RuleEngineModule.cc
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2014 Misgana Bayetta
  *
- * Author: William Ma <https://github.com/williampma>
+ *  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Sept 2014
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,40 +21,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SUREAL_MODULE_H
-#define _OPENCOG_SUREAL_MODULE_H
+#include <opencog/reasoning/engine/InferenceSCM.h>
+#include "RuleEngineModule.h"
 
+using namespace opencog;
 
-#include <opencog/server/Module.h>
+DECLARE_MODULE(RuleEngineModule);
 
-#include "SuRealSCM.h"
-
-
-namespace opencog
-{
-namespace nlp
-{
-
-/**
- * An OpenCog module for supporting Surface Realization.
- *
- * A module linked to the Surface Realization pattern matching code
- * and scheme bindings.
- */
-class SuRealModule : public Module
-{
-public:
-    SuRealModule(CogServer&);
-    virtual ~SuRealModule();
-
-    const char * id(void);
-    virtual void init(void);
-
-private:
-    SuRealSCM* m_scm;
-};
-
-}
+RuleEngineModule::RuleEngineModule(CogServer &cs) :
+		Module(cs) {
+	iscm_ = NULL;
 }
 
-#endif // _OPENCOG_SUREAL_MODULE_H
+RuleEngineModule::~RuleEngineModule() {
+	delete iscm_;
+}
+
+void RuleEngineModule::init(void) {
+	iscm_ = new InferenceSCM();
+}

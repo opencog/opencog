@@ -71,7 +71,7 @@
 #include "PatternMiningAgent.h"
 
 #ifdef HAVE_CYTHON
-    #include <opencog/cython/PyMindAgent.h>
+    #include <opencog/modules/python/PyMindAgent.h>
 #endif
 
 class PsiModulatorUpdaterAgentUTest; 

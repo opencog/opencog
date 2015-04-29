@@ -2,8 +2,8 @@
 
 #include <opencog/server/CogServer.h>
 
-#include "opencog/agent_finder_types.h"
-#include "opencog/agent_finder_api.h"
+#include <opencog/cython/opencog/agent_finder_types.h>
+#include <opencog/cython/opencog/agent_finder_api.h>
 
 using namespace opencog;
 
