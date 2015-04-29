@@ -11,10 +11,6 @@ ADD_LIBRARY (persist-sql SHARED
 	SQLPersistSCM.cc
 )
 
-ADD_LIBRARY (PersistModule SHARED
-	PersistModule.cc
-)
-
 # XXX FIXME We've added a depedency on the NLP atom types.
 # this should be removed when the NLP_HACK in PersistModule is removed.
 ADD_DEPENDENCIES(persist-sql opencog_atom_types)
@@ -30,11 +26,6 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(persist-sql smob)
 ENDIF (HAVE_GUILE)
 
-TARGET_LINK_LIBRARIES(PersistModule
-	persist
-	persist-sql
-)
-
 ADD_EXECUTABLE(sniff
 	sniff.cc
 )
@@ -46,8 +37,5 @@ TARGET_LINK_LIBRARIES(sniff
 )
 
 INSTALL (TARGETS persist-sql
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-INSTALL (TARGETS PersistModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

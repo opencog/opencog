@@ -5,7 +5,7 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#include "PatternSCM.h"
+#include <opencog/query/PatternSCM.h>
 #include "QueryModule.h"
 
 using namespace opencog;
