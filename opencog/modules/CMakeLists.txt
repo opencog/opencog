@@ -1,4 +1,7 @@
 
+IF (HAVE_SERVER)
+    ADD_SUBDIRECTORY(benchmark)
+ENDIF (HAVE_SERVER)
 
 # ----------------------------------------
 # Build the query (pattern-matching) cogserver module
