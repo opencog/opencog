@@ -28,14 +28,12 @@
 #include <opencog/server/Module.h>
 #include <opencog/atomspace/Handle.h>
 
-#include "LGDictSCM.h"
-
+#include <opencog/nlp/lg-dict/LGDictSCM.h>
 
 namespace opencog
 {
 namespace nlp
 {
-
 
 /**
  * An OpenCog module for reading LG dictionary.
@@ -54,7 +52,6 @@ public:
 private:
     LGDictSCM* m_scm;
 };
-
 
 }
 }

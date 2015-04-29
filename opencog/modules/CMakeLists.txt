@@ -8,6 +8,17 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 # ----------------------------------------
+# Link-grammar cogserver module
+
+IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+	ADD_LIBRARY (LGDictModule SHARED
+		LGDictModule
+	)
+
+	TARGET_LINK_LIBRARIES (LGDictModule lg-dict server)
+ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+
+# ----------------------------------------
 IF (TBB_FOUND)
 	INCLUDE_DIRECTORIES (
 		${TBB_INCLUDE_DIR}
@@ -62,14 +73,18 @@ ADD_LIBRARY(RuleEngineModule SHARED
 TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
 
 # ----------------------------------------
-ADD_LIBRARY (SuRealModule SHARED
-	SuRealModule
-)
+# Surface realization cogserver module
 
-ADD_DEPENDENCIES (SuRealModule
-	nlp_atom_types
-)
+IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+	ADD_LIBRARY (SuRealModule SHARED
+		SuRealModule
+	)
 
-TARGET_LINK_LIBRARIES(SuRealModule
-	sureal
-)
+	ADD_DEPENDENCIES (SuRealModule
+		nlp_atom_types
+	)
+
+	TARGET_LINK_LIBRARIES(SuRealModule
+		sureal
+	)
+ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
