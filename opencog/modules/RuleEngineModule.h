@@ -24,10 +24,8 @@
 #ifndef RULEENGINEMODULE_H_
 #define RULEENGINEMODULE_H_
 
-#include "InferenceSCM.h"
-
 #include <opencog/server/Module.h>
-#include <opencog/reasoning/engine/forwardchainer/ForwardChainer.h>
+#include <opencog/reasoning/engine/InferenceSCM.h>
 
 namespace opencog {
 class RuleEngineModule: public Module {

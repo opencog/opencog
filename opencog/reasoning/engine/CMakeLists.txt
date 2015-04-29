@@ -1,4 +1,6 @@
-#rule engine lib build
+#
+# Rule engine lib build
+#
 ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/BackwardChainer.cc
 	RECommons.cc
@@ -9,7 +11,6 @@ ADD_LIBRARY(ruleengine SHARED
 	forwardchainer/ForwardChainerCallBack.h
 	forwardchainer/DefaultForwardChainerCB.cc
 	forwardchainer/FCMemory.cc	
-	RuleEngineModule.cc
 	InferenceSCM.cc
 	Rule.cc
 	JsonicControlPolicyParamLoader.cc
@@ -28,17 +29,10 @@ TARGET_LINK_LIBRARIES(ruleengine
 	atomspace
 )
 
-# Build the RuelEngine cogserver module
-ADD_LIBRARY(RuleEngineModule SHARED
-	RuleEngineModule.cc
-)
-
-TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
-
 IF (WIN32)
-   INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+   INSTALL (TARGETS reasoning DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSEIF (CYGWIN)
-   INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+   INSTALL (TARGETS reasoning DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES
@@ -48,4 +42,3 @@ INSTALL (FILES
 	backwardchainer/BCPatternMatch.h
 	DESTINATION "include/${PROJECT_NAME}/reasoning/engine"
 )
-

@@ -23,9 +23,9 @@ IF (TBB_FOUND)
 	)
 
 	TARGET_LINK_LIBRARIES(plnmodule
+		ruleengine
 		server
 		tbb
-		ruleengine
 	)
 ENDIF (TBB_FOUND)
 
@@ -51,3 +51,11 @@ TARGET_LINK_LIBRARIES(PersistModule
 INSTALL (TARGETS PersistModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
+# ----------------------------------------
+
+# Build the RuleEngine cogserver module
+ADD_LIBRARY(RuleEngineModule SHARED
+	RuleEngineModule.cc
+)
+
+TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
