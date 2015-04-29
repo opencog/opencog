@@ -17,7 +17,7 @@ ADD_LIBRARY (builtinreqs SHARED
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	${COGUTIL_LIBRARY}
 )
 
@@ -34,7 +34,7 @@ ADD_LIBRARY (server SHARED
 
 TARGET_LINK_LIBRARIES(server
 	nlp-types
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	dl

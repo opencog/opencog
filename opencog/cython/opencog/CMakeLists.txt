@@ -85,8 +85,8 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
-		atomspace
-		atomspaceutils
+		${ATOMSPACE_LIBRARY}
+		${ATOMSPACE_atomspaceutils_LIBRARY}
 		attention-types
 		embodiment-types
 		nlp-types
@@ -115,7 +115,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(type_constructors
-		atomspace
+		${ATOMSPACE_LIBRARY}
 		${PYTHON_LIBRARIES}
 	)
 	
@@ -139,7 +139,7 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(utilities_cython
 		PythonEval
-		atomspace
+		${ATOMSPACE_LIBRARY}
 		type_constructors
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}

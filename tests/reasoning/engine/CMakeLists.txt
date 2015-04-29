@@ -3,7 +3,7 @@ LINK_LIBRARIES(
 	ruleengine
 	query
 	server
-	atomspace
+	${ATOMSPACE_LIBRARY}
 )
 
 IF (HAVE_GUILE)

@@ -16,7 +16,7 @@ IF (HAVE_SERVER)
 		PythonModule
 		server
 		${COGUTIL_LIBRARY}
-		atomspace_cython
+		${ATOMSPACE_LIBRARY}_cython
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -34,7 +34,7 @@ IF (HAVE_SERVER)
 		py-shell
 		server
 		${COGUTIL_LIBRARY}
-		atomspace_cython
+		${ATOMSPACE_LIBRARY}_cython
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -50,12 +50,12 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
 	${PROJECT_BINARY_DIR}/tests/cython/pythoneval.conf)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	smob
 	server
 	PythonEval
 	${COGUTIL_LIBRARY}
-	atomspace_cython
+	${ATOMSPACE_LIBRARY}_cython
 )
 SET_TESTS_PROPERTIES(PythonEvalUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -67,11 +67,11 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 ADD_CXXTEST(PythonUtilitiesUTest)
 
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	PythonEval
 	${COGUTIL_LIBRARY}
 	utilities_cython
-	atomspace_cython
+	${ATOMSPACE_LIBRARY}_cython
 )
 SET_TESTS_PROPERTIES(PythonUtilitiesUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")

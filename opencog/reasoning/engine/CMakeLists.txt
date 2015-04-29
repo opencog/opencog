@@ -21,12 +21,12 @@ ADD_DEPENDENCIES(ruleengine
 )
 
 TARGET_LINK_LIBRARIES(ruleengine
-	lambda
+	${ATOMSPACE_lambda_LIBRARY}
 	query
 	smob
 	execution
-	atomutils
-	atomspace
+	${ATOMSPACE_atomutils_LIBRARY}
+	${ATOMSPACE_LIBRARY}
 )
 
 IF (WIN32)

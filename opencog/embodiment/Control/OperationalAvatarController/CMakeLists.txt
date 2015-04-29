@@ -52,7 +52,7 @@ TARGET_LINK_LIBRARIES (oac
 	SpaceMap
 	json_spirit
 	PatternMiner
-	atomspace
+	${ATOMSPACE_LIBRARY}
 )
 
 IF (HAVE_CYTHON)
@@ -77,7 +77,7 @@ TARGET_LINK_LIBRARIES (OACTester
 	AvatarComboVocabulary
 	AtomSpaceExtensions
 	ImaginaryLife
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
 

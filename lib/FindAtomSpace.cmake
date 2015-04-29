@@ -10,48 +10,43 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-find_library(ATOMSPACE_LIBRARY
-   NAMES atomspace
-   PATH /usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64)
+find_library(ATOMSPACE_LIBRARY atomspace
+   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
 
-find_library(ATOMSPACE_atomutils_LIBRARY
-   NAMES atomutils
-   PATH /usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64)
+find_library(ATOMSPACE_atomutils_LIBRARY atomutils
+   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
 
-find_library(ATOMSPACE_lambda_LIBRARY
-   NAMES lambda
-   PATH /usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64)
+find_library(ATOMSPACE_lambda_LIBRARY lambda
+   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
 
-find_library(ATOMSPACE_clearbox_LIBRARY
-   NAMES clearbox
-   PATH /usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64)
+find_library(ATOMSPACE_clearbox_LIBRARY clearbox
+   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
 
-find_library(ATOMSPACE_atomspaceutils_LIBRARY
-   NAMES atomspaceutils
-   PATH /usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64)
+find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
+   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
 
 INCLUDE (CheckIncludeFiles)
 
-find_path(ATOMSPACE_INCLUDE_DIR opencog/atomspace/AtomSpace.h
+find_path(ATOMSPACE_INCLUDE_DIR opencog/atomspace/atomspace.h
 	PATH /usr/include /usr/local/include
 )
 
 set(CMAKE_REQUIRED_INCLUDES ${ATOMSPACE_INCLUDE_DIR})
-CHECK_INCLUDE_FILES (opencog/atomspace/AtomSpace.h HAVE_ATOMSPACE_H)
+CHECK_INCLUDE_FILES (opencog/atomspace/atomspace.h HAVE_ATOMSPACE_H)
 
 if (ATOMSPACE_LIBRARY AND HAVE_ATOMSPACE_H)
 	set(ATOMSPACE_FOUND TRUE)
 	set(ATOMSPACE_VERSION 0)
-#	FILE(READ "${ATOMSPACE_INCLUDE_DIR}/opencog/util/cogutil.h" _CU_H_CONTENTS)
-#	STRING(REGEX MATCH
-#		"#define ATOMSPACE_VERSION_STRING[  ]+\"([0-9.]+)\""
-#		_MATCH "${_CU_H_CONTENTS}")
-#	SET(ATOMSPACE_VERSION ${CMAKE_MATCH_1})
+	FILE(READ "${ATOMSPACE_INCLUDE_DIR}/opencog/atomspace/atomspace.h" _CU_H_CONTENTS)
+	STRING(REGEX MATCH
+		"#define ATOMSPACE_VERSION_STRING[  ]+\"([0-9.]+)\""
+		_MATCH "${_CU_H_CONTENTS}")
+	SET(ATOMSPACE_VERSION ${CMAKE_MATCH_1})
 endif (ATOMSPACE_LIBRARY AND HAVE_ATOMSPACE_H)
 
 if ( ATOMSPACE_FOUND )
 #	message(STATUS "Found CogUtil version ${ATOMSPACE_VERSION} at ${ATOMSPACE_LIBRARY}")
 	message(STATUS "Found AtomSpaced at ${ATOMSPACE_LIBRARY}")
 else ( ATOMSPACE_FOUND )
-	message( STATUS "AtomSpace not found")
+	message(STATUS "AtomSpace not found")
 endif ( ATOMSPACE_FOUND )

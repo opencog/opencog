@@ -12,7 +12,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	nlp-types
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	server
 )
 
