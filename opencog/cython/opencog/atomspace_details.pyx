@@ -7,6 +7,10 @@ from atomspace cimport *
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
     
+cdef api string get_path_as_string() with gil:
+    import sys
+    cdef bytes c_str = str(sys.path)
+    return string(c_str)
 
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator iter
