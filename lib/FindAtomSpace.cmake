@@ -10,20 +10,32 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+set(ATOMSPACE_LIBPATH
+   /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
+
 find_library(ATOMSPACE_LIBRARY atomspace
-   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
-
-find_library(ATOMSPACE_atomutils_LIBRARY atomutils
-   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
-
-find_library(ATOMSPACE_lambda_LIBRARY lambda
-   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
-
-find_library(ATOMSPACE_clearbox_LIBRARY clearbox
-   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
+   PATH ${ATOMSPACE_LIBPATH})
 
 find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
-   PATH /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_atomutils_LIBRARY atomutils
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_clearbox_LIBRARY clearbox
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_execution_LIBRARY execution
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_lambda_LIBRARY lambda
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_query_LIBRARY query
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_smob_LIBRARY smob
+   PATH ${ATOMSPACE_LIBPATH})
 
 INCLUDE (CheckIncludeFiles)
 

@@ -1,7 +1,7 @@
 
 LINK_LIBRARIES(
 	ruleengine
-	query
+	${ATOMSPACE_query_LIBRARY}
 	server
 	${ATOMSPACE_LIBRARY}
 )

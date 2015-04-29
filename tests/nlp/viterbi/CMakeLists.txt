@@ -13,7 +13,7 @@ LINK_LIBRARIES(
 	lg-dict
 	nlp-types
 	${ATOMSPACE_LIBRARY}
-	query
+	${ATOMSPACE_query_LIBRARY}
 	server
 	${LINK_GRAMMAR_LIBRARY}
 )

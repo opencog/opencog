@@ -22,8 +22,8 @@ ADD_DEPENDENCIES(ruleengine
 
 TARGET_LINK_LIBRARIES(ruleengine
 	${ATOMSPACE_lambda_LIBRARY}
-	query
-	smob
+	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_smob_LIBRARY}
 	execution
 	${ATOMSPACE_atomutils_LIBRARY}
 	${ATOMSPACE_LIBRARY}

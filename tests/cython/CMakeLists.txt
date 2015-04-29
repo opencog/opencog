@@ -51,7 +51,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	${ATOMSPACE_LIBRARY}
-	smob
+	${ATOMSPACE_smob_LIBRARY}
 	server
 	PythonEval
 	${COGUTIL_LIBRARY}

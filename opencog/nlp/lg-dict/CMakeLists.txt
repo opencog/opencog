@@ -17,7 +17,7 @@ ADD_DEPENDENCIES (lg-dict
 
 TARGET_LINK_LIBRARIES (lg-dict
 	nlp-types
-	smob
+	${ATOMSPACE_smob_LIBRARY}
 	${LINK_GRAMMAR_LIBRARY}
 )
 

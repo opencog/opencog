@@ -167,7 +167,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(bindlink_cython
-		query
+		${ATOMSPACE_query_LIBRARY}
 		execution
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -194,8 +194,8 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
-		query
-		smob
+		${ATOMSPACE_query_LIBRARY}
+		${ATOMSPACE_smob_LIBRARY}
 		${PYTHON_LIBRARIES}
 	)
 	

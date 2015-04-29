@@ -35,7 +35,7 @@ TARGET_LINK_LIBRARIES(PAI
 	AtomSpaceExtensions
 	embodiment-types
 	nlp-types
-	query
+	${ATOMSPACE_query_LIBRARY}
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}

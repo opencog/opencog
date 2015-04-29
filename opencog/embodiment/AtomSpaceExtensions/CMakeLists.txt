@@ -34,7 +34,7 @@ IF (HAVE_EMBODIMENT)
 
 	TARGET_LINK_LIBRARIES (AtomSpaceExtensions
 		embodiment-types
-		query
+		${ATOMSPACE_query_LIBRARY}
 		spacetime
 		${ATOMSPACE_LIBRARY}
 	)
