@@ -20,7 +20,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/cython/PythonEval.h>
-#include <opencog/cython/PythonModule.h>
+#include <opencog/modules/python/PythonModule.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
