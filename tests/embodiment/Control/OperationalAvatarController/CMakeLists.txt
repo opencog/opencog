@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(
-    ${PYTHON_INCLUDE_PATH}
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
+	${PYTHON_INCLUDE_PATH}
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
 )
 
 # At this time, the AvaterUTest does not compile,
@@ -16,15 +16,15 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 	MessagingSystem
 	Control
 	comboreduct
-	${COGUTIL_LIBRARY}
 	pthread
+	${COGUTIL_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
 	${PROJECT_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(AvatarUTest winmm)
+	TARGET_LINK_LIBRARIES(AvatarUTest winmm)
 ENDIF(WIN32)
 ENDIF(0)
 
@@ -57,7 +57,7 @@ IF (TCL_TCLSH)
 	)
 
 	SET(OAC_MOCK_LINK_LIBS
-        oacmock
+		oacmock
 		oac
 		Procedure
 		behavior
@@ -65,18 +65,17 @@ IF (TCL_TCLSH)
 		MessagingSystem
 		Control
 		comboreduct
-		${COGUTIL_LIBRARY}
 		pthread
+		${COGUTIL_LIBRARY}
 		${Boost_DATE_TIME_LIBRARY}
 		${PROJECT_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
-        
 	)
 
-    TARGET_LINK_LIBRARIES(${OAC_MOCK_LINK_LIBS})
-    
+	TARGET_LINK_LIBRARIES(${OAC_MOCK_LINK_LIBS})
+
 	ADD_DEPENDENCIES(oacmock DistributeOACStuff)
-    
+
 ADD_CXXTEST(PsiDemandUpdaterAgentUTest)
 	TARGET_LINK_LIBRARIES(PsiDemandUpdaterAgentUTest
 		oacmock
@@ -94,16 +93,16 @@ ADD_CXXTEST(PsiFeelingUpdaterAgentUTest)
 
 ADD_CXXTEST(PsiActionSelectionAgentUTest)
 
-    SET(PASA_TEST_LINK_LIBS oacmock)
-    IF (HAVE_CYTHON)
-        SET(PASA_TEST_LINK_LIBS
-            ${PASA_TEST_LINK_LIBS}
-            PythonEval
-            PythonModule
-            atomspace
-            ${COGUTIL_LIBRARY}
-            ${PYTHON_LIBRARIES})
-    ENDIF (HAVE_CYTHON)
+	SET(PASA_TEST_LINK_LIBS oacmock)
+	IF (HAVE_CYTHON)
+		SET(PASA_TEST_LINK_LIBS
+			${PASA_TEST_LINK_LIBS}
+			PythonEval
+			PythonModule
+			${ATOMSPACE_LIBRARIES}
+			${COGUTIL_LIBRARY}
+			${PYTHON_LIBRARIES})
+	ENDIF (HAVE_CYTHON)
 
 	TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
 		${PASA_TEST_LINK_LIBS}

@@ -27,7 +27,8 @@ ADD_LIBRARY (spacetime SHARED
 	TimeServer.cc
 )
 
-TARGET_LINK_LIBRARIES(spacetime spacetime-types SpaceMap server atomspace)
+TARGET_LINK_LIBRARIES(spacetime spacetime-types SpaceMap server
+	${ATOMSPACE_LIBRARIES})
 
 INSTALL (FILES
 	HandleToTemporalEntryMap.h

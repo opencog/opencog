@@ -31,11 +31,30 @@ find_library(ATOMSPACE_execution_LIBRARY execution
 find_library(ATOMSPACE_lambda_LIBRARY lambda
    PATH ${ATOMSPACE_LIBPATH})
 
+find_library(ATOMSPACE_persist_LIBRARY persist
+   PATH ${ATOMSPACE_LIBPATH})
+
+find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
+   PATH ${ATOMSPACE_LIBPATH})
+
 find_library(ATOMSPACE_query_LIBRARY query
    PATH ${ATOMSPACE_LIBPATH})
 
 find_library(ATOMSPACE_smob_LIBRARY smob
    PATH ${ATOMSPACE_LIBPATH})
+
+set(ATOMSPACE_LIBRARIES
+	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_atomspaceutils_LIBRARY}
+	${ATOMSPACE_atomutils_LIBRARY}
+	${ATOMSPACE_clearbox_LIBRARY}
+	${ATOMSPACE_execution_LIBRARY}
+	${ATOMSPACE_lambda_LIBRARY}
+	${ATOMSPACE_persist_LIBRARY}
+	${ATOMSPACE_persist-sql_LIBRARY}
+	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_smob_LIBRARY}
+)
 
 INCLUDE (CheckIncludeFiles)
 
