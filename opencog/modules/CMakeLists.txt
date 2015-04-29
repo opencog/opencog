@@ -8,6 +8,28 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 # ----------------------------------------
+IF (TBB_FOUND)
+	INCLUDE_DIRECTORIES (
+		${TBB_INCLUDE_DIR}
+	)
+
+	LINK_DIRECTORIES(
+		${TBB_INCLUDE_DIR}
+		${TBB_LIBRARY_DIRS}
+	)
+
+	ADD_LIBRARY(plnmodule SHARED
+		PLNModule
+	)
+
+	TARGET_LINK_LIBRARIES(plnmodule
+		server
+		tbb
+		ruleengine
+	)
+ENDIF (TBB_FOUND)
+
+# ----------------------------------------
 # Build the query (pattern-matching) cogserver module
 ADD_LIBRARY(QueryModule SHARED
 	QueryModule.cc
