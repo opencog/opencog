@@ -195,6 +195,7 @@ void opencog::global_python_initialize()
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
     if (NULL == py_atomspace) {
+        PyErr_Print();
         logger().error("PythonEval::%s Failed to load"
                        "the opencog.atomspace module", __FUNCTION__);
     }
