@@ -68,7 +68,7 @@
 ;; --------------------------------------------------------------------
 ;; The set of allowed state transistions.  Its a triangular cycle,
 ;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The initial state transitions into green (and is never visted again).
 ;;
 ;; Each rule is labelled with the "my-fsm", so that rules for
 ;; different FSM's do not clash with one-another.  A ConextLink is used
@@ -79,10 +79,10 @@
 ;;         A
 ;;         B
 ;;
-;; representes the probibility of B contiditoned on A, and the TV holds
+;; representes the probibility of B conditioned on A, and the TV holds
 ;; the numeric value for P(B|A).  In this case, A is the current state
-;; of the machine, and B the the next state of theh machine, so that P(B|A)
-;; is the probability of transitioning to state B give that the machine is
+;; of the machine, and B the the next state of the machine, so that P(B|A)
+;; is the probability of transitioning to state B given that the machine is
 ;; in state A.  Such a system is called a Markov Chain.
 ;;
 
