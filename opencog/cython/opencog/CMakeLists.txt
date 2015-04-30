@@ -81,12 +81,11 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
-		${ATOMSPACE_LIBRARY}
-		${ATOMSPACE_atomspaceutils_LIBRARY}
 		attention-types
 		embodiment-types
 		nlp-types
 		spacetime-types
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -111,7 +110,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(type_constructors
-		${ATOMSPACE_LIBRARY}
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
 	
@@ -135,8 +134,8 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(utilities_cython
 		PythonEval
-		${ATOMSPACE_LIBRARY}
 		type_constructors
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -187,8 +186,7 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
-		${ATOMSPACE_query_LIBRARY}
-		${ATOMSPACE_smob_LIBRARY}
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
 	
@@ -239,6 +237,7 @@ IF (HAVE_SERVER)
 	)
 
 	TARGET_LINK_LIBRARIES(agent_finder
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -265,9 +264,9 @@ IF (HAVE_MOSES)
 	TARGET_LINK_LIBRARIES(moses_cython
 		moses_exec
 		moses
-		${COGUTIL_LIBRARY}
 		comboreduct
 		feature_selection
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_PROGRAM_OPTIONS_LIBRARY}
 		${Boost_THREAD_LIBRARY}
@@ -299,4 +298,3 @@ ENDIF (WIN32)
 INSTALL (FILES
 	__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
-
