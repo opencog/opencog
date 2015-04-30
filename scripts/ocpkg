@@ -130,17 +130,7 @@ PACKAGES_BUILD="
 		cython \
 		python-dev \
 		python-zmq \
-		python-matplotlib \
-		python-nose \
-		python-numpy \
-		python-scipy \
-		python-mock \
 		python-simplejson \
-		python-pyparsing \
-		python-dateutil \
-		python-six \
-		python-tornado \
-		python-wsgiref \
 		libboost-date-time-dev \
 		libboost-filesystem-dev \
 		libboost-math-dev \
@@ -524,6 +514,15 @@ cd ../..
 rm -rf master.tar.gz cogutils-master/
 }
 
+# Install Python Packages
+install_python_packages(){
+MESSAGE="Installing python packages...." ; message
+cd /tmp
+wget https://raw.githubusercontent.com/opencog/opencog/master/opencog/python/requirements.txt
+sudo pip install -U -r /tmp/requirements.txt
+rm requirements.txt
+}
+
 install_dependencies() {
 MESSAGE="Installing OpenCog build dependencies...." ; message
 if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
@@ -536,6 +535,7 @@ if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
   sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
 install_cogutil
+install_python_packages
 }
 
 update_opencog_source() {
