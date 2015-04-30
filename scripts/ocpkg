@@ -107,6 +107,7 @@ PACKAGES_TOOLS="
 		#testdrive \
 
 PACKAGES_FETCH="
+        python-pip \
 		git \
 			"
 		#bzr-rewrite \
