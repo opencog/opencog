@@ -56,7 +56,7 @@ void BackwardChainerUTest::setUp() {
 	load_scm_files_from_config(*as_);
 
 	// Setup the Backward Chainer
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "reasoning/engine/default_cpolicy.json"));
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "opencog/reasoning/engine/default_cpolicy.json"));
 	cpolicy_loader.load_config();
 	std::vector<Rule> rules;
 	for (Rule* pr : cpolicy_loader.get_rules()) {
