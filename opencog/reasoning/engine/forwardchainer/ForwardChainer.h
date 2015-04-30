@@ -43,7 +43,7 @@ private:
     RECommons _rec; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
-    string _conf_path = "reasoning/engine/default_cpolicy.json";
+    string _conf_path = "opencog/reasoning/engine/default_cpolicy.json";
 
     FCMemory _fcmem; //Stores history
     Logger * _log;
