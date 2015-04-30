@@ -78,8 +78,8 @@ void MicroplanningUTest::setUp(void)
     // Load the required data
     config().set("MODULES",
                  "opencog/nlp/types/libnlp-types.so,"
-                 "opencog/nlp/lg-dict/libLGDictModule.so,"
-                 "opencog/nlp/sureal/libSuRealModule.so,"
+                 "opencog/modules/libLGDictModule.so,"
+                 "opencog/modules/libSuRealModule.so,"
                  // need embodiment-types for SequentialAndLink...
                  "opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
