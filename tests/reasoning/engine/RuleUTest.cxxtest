@@ -103,7 +103,7 @@ void RuleUTest::setUp()
     load_scm_files_from_config(*as);
     
     config().set("MODULES",
-        "opencog/query/libQueryModule.so");
+        "opencog/modules/libQueryModule.so");
     
     cogserver().loadModules();
 }
