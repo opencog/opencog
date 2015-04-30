@@ -8,18 +8,21 @@ export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
 For example:
 export PYTHONPATH=build/opencog/cython
 
-Then:
+You also need to specify the library path:
+export LD_LIBRARY_PATH=build/opencog/cython
 
-nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/
-nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/atomspace/
-nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/guile/
-nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/server/
-nosetests -vs ${CMAKE_SOURCE_DIR}/tests/cython/moses/
+Then, from the project root directory:
+
+nosetests -vs tests/cython/
+nosetests -vs tests/cython/atomspace/
+nosetests -vs tests/cython/guile/
+nosetests -vs tests/cython/server/
+nosetests -vs tests/cython/moses/
 
 
 If you modify the cython bindings, you may need to manually remove
 some build files to get a clean rebuild.  Basically, the CMakefiles
 for cython/python are buggy, and fail to rebuild when changes are made.
-So:
+So, for example:
 
 rm build/opencog/cython/opencog/pymoses.cpp

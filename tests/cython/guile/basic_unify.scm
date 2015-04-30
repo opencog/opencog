@@ -3,6 +3,18 @@
 ;
 ; Create some misc atoms.
 
+(add-to-load-path "/usr/local/share/opencog/scm")
+(use-modules (opencog))
+
+(add-to-load-path ".")
+(add-to-load-path "./build")
+(add-to-load-path "../build")
+
+(load-from-path "utilities.scm")
+(load-from-path "opencog/nlp/types/nlp_types.scm")
+
+(define (stv mean conf) (cog-new-stv mean conf))
+
 (ListLink
 	(ConceptNode "hello" (stv 0.5 0.5))
 	(ConceptNode "world")
