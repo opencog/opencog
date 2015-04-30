@@ -69,7 +69,8 @@ public:
 
         url = "tcp://localhost:" + config()["ZMQ_EVENT_PORT"];
 
-        config().set("MODULES", "opencog/persist/zmq/events/libatomspacepublishermodule.so");
+        config().set("MODULES",
+                     "opencog/modules/events/libatomspacepublishermodule.so");
         
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
