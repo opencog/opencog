@@ -23,7 +23,7 @@
 (define TIME_NODE_TYPED_VARIABLE_LINK
     (TypedVariableLink
         (VariableNode "$var_time_node") 
-        (VariableTypeNode "TimeNode")
+        (TypeNode "TimeNode")
     )
 )
 
@@ -365,7 +365,7 @@
             (ListLink
                 (TypedVariableLink
                     (VariableNode "$var_time_node")
-                    (VariableTypeNode "TimeNode")
+                    (TypeNode "TimeNode")
                 )
                 (VariableNode "$var_attitude")
             )
@@ -544,7 +544,7 @@
     (ListLink
         (TypedVariableLink
             (VariableNode "$var_stimulus") 
-            (VariableTypeNode "ConceptNode")
+            (TypeNode "ConceptNode")
         )
 
         (VariableNode "$var_actor") 

@@ -92,7 +92,7 @@ Currently these files are not included in the .conf file.  In order to use the m
 
 If you want to use the testing atomspace, you also need
 ```
-(load "../opencog/nlp/microplanning/test-atomspace.scm")
+(load "../tests/nlp/microplanning/test-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with sample sentences of how you want the final output to looks like. Some examples would be those in `test-atomspace.scm`.

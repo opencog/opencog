@@ -15,7 +15,8 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
 		server
-		cogutil
+		${COGUTIL_LIBRARY}
+		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -32,7 +33,8 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PyEvalUTest
 		py-shell
 		server
-		cogutil
+		${COGUTIL_LIBRARY}
+		atomspace_cython
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
 		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
@@ -52,9 +54,26 @@ TARGET_LINK_LIBRARIES(PythonEvalUTest
 	smob
 	server
 	PythonEval
-	cogutil
+	${COGUTIL_LIBRARY}
+	atomspace_cython
 )
 SET_TESTS_PROPERTIES(PythonEvalUTest
+	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+
+
+# The PythonUtilitiesUTest tests C++ utility functions used from Cython bindings
+# outside of those bindings so failures are easier to debug.
+#
+ADD_CXXTEST(PythonUtilitiesUTest)
+
+TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
+	atomspace
+	PythonEval
+	${COGUTIL_LIBRARY}
+	utilities_cython
+	atomspace_cython
+)
+SET_TESTS_PROPERTIES(PythonUtilitiesUTest
 	PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
 
@@ -73,6 +92,20 @@ IF (HAVE_NOSETESTS)
 			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 	ENDIF (HAVE_ATOMSPACE)
 
+	IF (HAVE_ATOMSPACE)
+		ADD_TEST(CythonUtilities ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
+		SET_TESTS_PROPERTIES(CythonUtilities
+			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+	ENDIF (HAVE_ATOMSPACE)
+
+	IF (HAVE_ATOMSPACE)
+		ADD_TEST(CythonBindlink ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/bindlink/)
+		SET_TESTS_PROPERTIES(CythonBindlink
+			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python")
+	ENDIF (HAVE_ATOMSPACE)
+
 	IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 		ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/guile/)
@@ -87,12 +120,12 @@ IF (HAVE_NOSETESTS)
 			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents")
 	ENDIF(HAVE_SERVER)
 
-	IF (HAVE_MOSES)
-		ADD_TEST(CythonMoses ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/moses/)
-		SET_TESTS_PROPERTIES(CythonMoses
-			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
-	ENDIF (HAVE_MOSES)
+#	IF (HAVE_MOSES)
+#		ADD_TEST(CythonMoses ${NOSETESTS_EXECUTABLE} -vs
+#			${CMAKE_SOURCE_DIR}/tests/cython/moses/)
+#		SET_TESTS_PROPERTIES(CythonMoses
+#			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+#	ENDIF (HAVE_MOSES)
 
 ENDIF (HAVE_NOSETESTS)
 

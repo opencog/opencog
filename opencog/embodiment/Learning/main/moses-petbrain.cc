@@ -25,15 +25,15 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+#include <moses/moses/moses/moses_main.h>
+#include <moses/moses/optimization/hill-climbing.h>
+#include <moses/moses/optimization/optimization.h>
+#include <moses/moses/scoring/behave_cscore.h>
+
 #include <opencog/util/mt19937ar.h>
-
-#include <opencog/comboreduct/reduct/reduct.h>
-
-#include <opencog/learning/moses/moses/moses_main.h>
-#include <opencog/learning/moses/scoring/behave_cscore.h>
-#include <opencog/learning/moses/optimization/optimization.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-
 
 using namespace opencog;
 using namespace moses;

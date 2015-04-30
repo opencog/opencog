@@ -238,6 +238,6 @@
         (apply cog-new-node (append (list 'SemeNode) x)))
 (define (TypedVariableLink . x)
         (apply cog-new-link (append (list 'TypedVariableLink) x)))
-(define (VariableTypeNode . x)
-        (apply cog-new-node (append (list 'VariableTypeNode) x)))
+(define (TypeNode . x)
+        (apply cog-new-node (append (list 'TypeNode) x)))
 

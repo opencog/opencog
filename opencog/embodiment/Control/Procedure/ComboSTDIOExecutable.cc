@@ -21,14 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ComboInterpreter.h"
-#include "ComboProcedureRepository.h"
+#include <fstream>
+#include <iostream>
+
+#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/embodiment/WorldWrapper/ShellWorldWrapper.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <fstream>
-#include <iostream>
+
+#include "ComboInterpreter.h"
+#include "ComboProcedureRepository.h"
 
 
 int main(int argc, char** argv)

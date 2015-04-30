@@ -36,12 +36,19 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+
+//! Atom flag
+// #define WRITE_MUTEX             1  //BIT0
+#define MARKED_FOR_REMOVAL      2  //BIT1
+// #define MULTIPLE_TRUTH_VALUES   4  //BIT2
+// #define FIRED_ACTIVATION        8  //BIT3
+// #define HYPOTETHICAL_FLAG       16 //BIT4
+// #define REMOVED_BY_DECAY        32 //BIT5
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -51,15 +58,6 @@
 using namespace opencog;
 
 #define _avmtx _mtx
-
-Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
-  : _uuid(Handle::UNDEFINED.value()),
-    _atomTable(NULL),
-    _type(t),
-    _flags(0),
-    _truthValue(tv),
-    _attentionValue(av)
-{}
 
 Atom::~Atom()
 {
@@ -162,7 +160,7 @@ AttentionValuePtr Atom::getAttentionValue()
     return local;
 }
 
-void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
+void Atom::setAttentionValue(AttentionValuePtr av)
 {
     // Must obtain a local copy of the AV, since there may be
     // parallel writers in other threads.

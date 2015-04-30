@@ -164,7 +164,7 @@ int main ()
 	store->load(*table);
 
 	printf("Printing table:\n");
-	table->print();
+	// table->print();
 
 	delete store;
 #endif

@@ -46,17 +46,17 @@ void EdgeThin::set_atom_space(AtomSpace *as)
 }
 
 #ifdef PRUNE_DEBUG
-bool EdgeThin::count_sense(Handle sense_h, Handle sense_link_h)
+bool EdgeThin::count_sense(const Handle& sense_h, const Handle& sense_link_h)
 {
 	sense_count ++;
 	return false;
 }
 #endif
 
-bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
+bool EdgeThin::prune_sense(const Handle& sense_h, const Handle& sense_link_h)
 {
 	// If incoming set of this sense link is empty, remove it entirely.
-	if (atom_space->getIncoming(sense_link_h).size() == 0)
+	if (sense_link_h->getIncomingSetSize() == 0)
 	{
 		atom_space->removeAtom(sense_link_h, false);
 		prune_count ++;
@@ -65,7 +65,7 @@ bool EdgeThin::prune_sense(Handle sense_h, Handle sense_link_h)
 	return false;
 }
 
-bool EdgeThin::prune_word(Handle h)
+bool EdgeThin::prune_word(const Handle& h)
 {
 	bool rc = true;
 	while (rc)
@@ -88,7 +88,7 @@ bool EdgeThin::prune_word(Handle h)
  * Remove all word senses that are not attached to anything.
  * Argument should be a sentence parse.
  */
-void EdgeThin::prune_parse(Handle h)
+void EdgeThin::prune_parse(const Handle& h)
 {
 	prune_count = 0;
 	foreach_word_instance(h, &EdgeThin::prune_word, this);
@@ -140,7 +140,7 @@ void EdgeThin::dbg_parse(Handle h)
  * Similar to, but opposite of MihalceaEdge::annotate_parse()
  * rather than adding edges, it removes them.
  */
-void EdgeThin::thin_parse(Handle h, int _keep)
+void EdgeThin::thin_parse(const Handle& h, int _keep)
 {
 	edge_count = 0;
 	keep = _keep;
@@ -155,7 +155,7 @@ void EdgeThin::thin_parse(Handle h, int _keep)
  * Compare two senses, returning true if the first is more likely than
  * the second.
  */
-static bool sense_compare(Handle ha, Handle hb)
+static bool sense_compare(const Handle& ha, const Handle& hb)
 {
 	double sa = ha->getTruthValue()->getCount();
 	double sb = hb->getTruthValue()->getCount();
@@ -163,7 +163,7 @@ static bool sense_compare(Handle ha, Handle hb)
 	return false;
 }
 
-bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
+bool EdgeThin::make_sense_list(const Handle& sense_h, const Handle& sense_link_h)
 {
 	sense_list.push_back(sense_link_h);
 	return false;
@@ -174,7 +174,7 @@ bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
  * The arg should be a handle to a CosenseLink, previously constructed
  * by MihalceaEdge::sense_of_second_inst().
  */
-bool EdgeThin::delete_sim(Handle h)
+bool EdgeThin::delete_sim(const Handle& h)
 {
 #ifdef LINK_DEBUG
 	std::vector<Handle> oset = atom_space.getOutgoing(h);
@@ -206,7 +206,7 @@ bool EdgeThin::delete_sim(Handle h)
  * Similar to, but opposite to MihalceaEdge::annotate_word_pair()
  * rather than adding edges, it removes them.
  */
-bool EdgeThin::thin_word(Handle word_h)
+bool EdgeThin::thin_word(const Handle& word_h)
 {
 	sense_list.clear();
 	foreach_word_sense_of_inst(word_h, &EdgeThin::make_sense_list, this);
@@ -236,7 +236,7 @@ bool EdgeThin::thin_word(Handle word_h)
 		int deleted_links = 0;
 		while (rc)
 		{
-			rc = foreach_incoming_handle(sense_h, &EdgeThin::delete_sim, this);
+			rc = sense_h->foreach_incoming(&EdgeThin::delete_sim, this);
 			deleted_links ++;
 		}
 #ifdef THIN_DEBUG

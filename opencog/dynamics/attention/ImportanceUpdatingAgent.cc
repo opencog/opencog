@@ -37,20 +37,6 @@ using namespace opencog;
 ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
     Agent(cs)
 {
-    // Starting values for rent and wage
-    static const std::string defaultConfig[] = {
-        "ECAN_STARTING_ATOM_STI_RENT", "10",
-        "ECAN_STARTING_ATOM_LTI_RENT", "0", // TEMPORARILY SET TO 0
-        "ECAN_STARTING_ATOM_STI_WAGE", "2",
-        "ECAN_STARTING_ATOM_LTI_WAGE", "2",
-        "ECAN_RENT_TYPE","2", // RENT_LOG
-        "ECAN_RENT_AMNESTY","5",
-        "ECAN_RENT_EQUATION_PARAMETER_0","0.05",
-        "ECAN_RENT_EQUATION_PARAMETER_1","0.0",
-        "", ""
-    };
-    setParameters(defaultConfig);
-
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
@@ -272,18 +258,18 @@ bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
 	bool adjustmentMade = false;
 
-    log->debug("Checking STI funds = %d, range=[%d,%d]", a->getAttentionBank().getSTIFunds(),
+    log->debug("Checking STI funds = %d, range=[%d,%d]", a->getSTIFunds(),
                acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
-    if (!inRange(a->getAttentionBank().getSTIFunds(), acceptableLobeSTIRange)) {
+    if (!inRange(a->getSTIFunds(), acceptableLobeSTIRange)) {
         log->debug("Lobe STI funds out of bounds, re-adjusting.");
         lobeSTIOutOfBounds = true;
         adjustSTIFunds(a);
 		adjustmentMade = true;
     }
 
-    log->debug("Checking LTI funds = %d, range=[%d,%d]", a->getAttentionBank().getLTIFunds(),
+    log->debug("Checking LTI funds = %d, range=[%d,%d]", a->getLTIFunds(),
                acceptableLobeLTIRange[0], acceptableLobeLTIRange[1]);
-    if (!inRange(a->getAttentionBank().getLTIFunds(), acceptableLobeLTIRange)) {
+    if (!inRange(a->getLTIFunds(), acceptableLobeLTIRange)) {
         log->debug("Lobe LTI funds out of bounds, re-adjusting.");
         lobeLTIOutOfBounds = true;
         adjustLTIFunds(a);
@@ -336,7 +322,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     double taxAmount;
     HandleSeq hs;
 
-    oldTotal = a->getAttentionBank().getSTIFunds();
+    oldTotal = a->getSTIFunds();
     diff = targetLobeSTI - oldTotal;
     getHandlesToUpdate(a,hs);
     taxAmount = (double) diff / (double) hs.size();
@@ -358,11 +344,11 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     }
 
     log->info("AtomSpace STI Funds were %d, now %d. All atoms taxed %f.", \
-              oldTotal, a->getAttentionBank().getSTIFunds(), taxAmount);
+              oldTotal, a->getSTIFunds(), taxAmount);
     
 #ifdef DEBUG
     std::cout << "AtomSpace STI Funds were " << oldTotal << ", now " <<
-                 a->getAttentionBank().getSTIFunds() << ". All atoms taxed " <<
+                 a->getSTIFunds() << ". All atoms taxed " <<
                  taxAmount << "." << std::endl;
 #endif
 }
@@ -374,7 +360,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     double taxAmount;
     HandleSeq hs;
 
-    oldTotal = a->getAttentionBank().getLTIFunds();
+    oldTotal = a->getLTIFunds();
     diff = targetLobeLTI - oldTotal;
     getHandlesToUpdate(a,hs);
 
@@ -386,7 +372,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     }
 
     log->info("AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.", \
-              oldTotal, a->getAttentionBank().getLTIFunds(), taxAmount);
+              oldTotal, a->getLTIFunds(), taxAmount);
 }
 
 int ImportanceUpdatingAgent::getTaxAmount(double mean)
@@ -454,7 +440,7 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a, bool gradual)
 
     log->fine("STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
-    lobeSTIOutOfBounds = inRange(a->getAttentionBank().getSTIFunds(), acceptableLobeSTIRange);
+    lobeSTIOutOfBounds = inRange(a->getSTIFunds(), acceptableLobeSTIRange);
 }
 
 void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
@@ -529,7 +515,7 @@ void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, AgentPtr agent)
     if (current < STIAtomWage * 100)
         exchangeAmount = STIAtomWage * 100 - current;
 
-    a->getAttentionBank().updateSTIFunds(-exchangeAmount);
+    a->updateSTIFunds(-exchangeAmount);
 
     AttentionValuePtr old_av = agent->getAV();
     AttentionValuePtr new_av = createAV(current + exchangeAmount,
@@ -549,7 +535,7 @@ void ImportanceUpdatingAgent::updateAgentLTI(AtomSpace* a, AgentPtr agent)
     if (current < LTIAtomWage * 100)
         exchangeAmount = LTIAtomWage * 100 - current;
 
-    a->getAttentionBank().updateLTIFunds(-exchangeAmount);
+    a->updateLTIFunds(-exchangeAmount);
 
     AttentionValuePtr old_av = agent->getAV();
     AttentionValuePtr new_av = createAV(old_av->getSTI(),
@@ -581,7 +567,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) STIAtomWage;
         exchangeAmount += (AttentionValue::sti_t) wage * s;
         
-        a->getAttentionBank().updateSTIFunds(exchangeAmount);
+        a->updateSTIFunds(exchangeAmount);
 
         AttentionValuePtr old_av = agents[n]->getAV();
         AttentionValuePtr new_av = createAV(current - exchangeAmount,
@@ -668,7 +654,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) LTIAtomWage;
         exchangeAmount += (AttentionValue::lti_t) (wage * s);
 
-        a->getAttentionBank().updateLTIFunds(exchangeAmount);
+        a->updateLTIFunds(exchangeAmount);
 
         AttentionValuePtr old_av = agents[n]->getAV();
         AttentionValuePtr new_av = createAV(old_av->getSTI(),

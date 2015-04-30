@@ -1,0 +1,4 @@
+
+ADD_SUBDIRECTORY (bind)
+ADD_SUBDIRECTORY (execution)
+ADD_SUBDIRECTORY (reduct)

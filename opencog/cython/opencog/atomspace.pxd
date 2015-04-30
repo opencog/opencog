@@ -50,6 +50,7 @@ cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
 
 cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
+        void initialize(float,float)
         cSimpleTruthValue(float, float)
         strength_t getMean()
         confidence_t getConfidence()
@@ -99,6 +100,15 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
 # HandleSeq
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
+cdef class TruthValue:
+    cdef tv_ptr *cobj
+    cdef _mean(self)
+    cdef _confidence(self)
+    cdef _count(self)
+    cdef cTruthValue* _ptr(self)
+    cdef tv_ptr* _tvptr(self)
+    cdef _init(self, float mean, float count)
+    
 cdef class Handle:
     cdef cHandle *h
 
@@ -118,8 +128,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         cHandle addNode(Type t, string s) except +
         cHandle addNode(Type t, string s, tv_ptr tvn) except +
-
-        cHandle addPrefixedNode(Type t, string s) except +
 
         cHandle addLink(Type t, vector[cHandle]) except +
         cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +
@@ -152,12 +160,11 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # ==== query methods ====
         # get by type
         output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
-        # get by name
+        # XXX DEPRECATED, REMOVE ASAP XXX get by name
+        # Just do the right thing, here...
         output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
-        # get by target types
-        output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
-        # get by target handle
-        output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
+        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
+        output_iterator getIncomingSetByType(output_iterator,cHandle& h,Type t,bint subclass)
         # get by STI range
         output_iterator getHandlesByAV(output_iterator, short lowerBound, short upperBound)
         output_iterator getHandlesByAV(output_iterator, short lowerBound)
@@ -169,8 +176,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         void clear()
         bint removeAtom(cHandle h, bint recursive) 
-
-        void print_list "print" ()
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
@@ -187,4 +192,17 @@ cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
 cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
         TimeServer()
+
+
+cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
+    # C++: 
+    #   
+    #   HandleSeq get_predicates(const Handle& target, 
+    #                     Type predicateType=PREDICATE_NODE,
+    #                     bool subClasses=true)
+    #   void finalize_opencog();
+    #   void configuration_load(const char* configFile);
+    #
+    cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
+    cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
 

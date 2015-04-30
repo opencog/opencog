@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -55,14 +54,8 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
 
-			server(CogServer::createInstance);
-			as = &cogserver().getAtomSpace();
+			as = new AtomSpace();
 			eval = new SchemeEval(as);
-
-			// Load the required data
-			config().set("MODULES", "opencog/query/libQueryModule.so");
-
-			cogserver().loadModules();
 		}
 
 		~SudokuPuzzle()
@@ -95,7 +88,8 @@ void SudokuPuzzle::setUp(void)
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"opencog/scm/utilities.scm");
+		"opencog/scm/utilities.scm, "
+		"opencog/scm/opencog/query.scm");
 
 	load_scm_files_from_config(*as);
 }

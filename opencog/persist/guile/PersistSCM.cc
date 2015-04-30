@@ -68,7 +68,7 @@ void PersistSCM::init(void)
 Handle PersistSCM::fetch_atom(Handle h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-atom");
-	h = as->getImpl().fetchAtom(h);
+	h = as->fetchAtom(h);
 	return h;
 }
 
@@ -76,7 +76,7 @@ Handle PersistSCM::fetch_incoming_set(Handle h)
 {
 	// The "false" flag here means that the fetch is NOT recursive.
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	h = as->getImpl().fetchIncomingSet(h, false);
+	h = as->fetchIncomingSet(h, false);
 	return h;
 }
 
@@ -87,20 +87,20 @@ Handle PersistSCM::fetch_incoming_set(Handle h)
 Handle PersistSCM::store_atom(Handle h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atom");
-	as->getImpl().storeAtom(h);
+	as->storeAtom(h);
 	return h;
 }
 
 void PersistSCM::load_type(Type t)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	as->getImpl().loadType(t);
+	as->fetchAllAtomsOfType(t);
 }
 
 void PersistSCM::barrier(void)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("barrier");
-	as->getImpl().barrier();
+	as->barrier();
 }
 
 void opencog_persist_init(void)

@@ -24,7 +24,7 @@ void Sweep::set_atom_space(AtomSpace *as)
  * is the mihalcea graph, with word-senses as vertexes, and word-sense
  * pairs forming edges.
  */
-void Sweep::sweep_parse(Handle h)
+void Sweep::sweep_parse(const Handle& h)
 {
 	maxgraph.clear();
 	maxedges.clear();
@@ -34,7 +34,7 @@ void Sweep::sweep_parse(Handle h)
 /**
  * Walk over the entire connected graph for this word.
  */
-bool Sweep::mark_word(Handle wordinst)
+bool Sweep::mark_word(const Handle& wordinst)
 {
 	curgraph.clear();
 	curedges.clear();
@@ -53,7 +53,7 @@ bool Sweep::mark_word(Handle wordinst)
  * we've previously visited, and then search that bag for each new
  * sense that we encounter. Bummer.
  */
-bool Sweep::start_mark_sense(Handle sense, Handle slink)
+bool Sweep::start_mark_sense(const Handle& sense, const Handle& slink)
 {
 	// Have we already visited this node? If so, try the next sense.
 	if (maxgraph.end() != maxgraph.find(sense)) return false;
@@ -92,7 +92,7 @@ bool Sweep::start_mark_sense(Handle sense, Handle slink)
 /**
  * Recursive walk to all attached senses
  */
-bool Sweep::mark_sense(Handle sense, Handle edge)
+bool Sweep::mark_sense(const Handle& sense, const Handle& edge)
 {
 	curedges.insert(edge);
 	if (curgraph.end() != curgraph.find(sense)) return false;

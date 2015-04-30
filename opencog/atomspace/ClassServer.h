@@ -23,11 +23,11 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/signals2.hpp>
-#include <boost/thread/shared_mutex.hpp>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/atom_types.h>
@@ -38,7 +38,7 @@ namespace opencog
  *  @{
  */
 
-class ClassServer; 
+class ClassServer;
 
 typedef ClassServer* ClassServerFactory(void);
 
@@ -55,10 +55,15 @@ private:
     /** Private default constructor for this class to make it a singleton. */
     ClassServer();
 
-    /* Use boost, because we need a reader-writer implementation, which
-     * is not offered by C++11 ... but expected in C++14 ?? */
-    mutable boost::shared_mutex type_mutex;
-    mutable boost::mutex signal_mutex;
+    /* It is very tempting to make the type_mutex into a reader-writer
+     * mutex. However, it appears that this is a bad idea: reader-writer
+     * mutexes cause cache-line ping-ponging when there is contention,
+     * effecitvely serializing access, and are just plain slower when
+     * there is no contention.  Thus, the current implementations seem
+     * to be a lose-lose proposition. See the Anthony Williams post here:
+     * http://permalink.gmane.org/gmane.comp.lib.boost.devel/211180
+     */
+    mutable std::mutex type_mutex;
 
     Type nTypes;
 
@@ -75,7 +80,7 @@ public:
     static ClassServer* createInstance(void);
 
     /** Adds a new atom type with the given name and parent type */
-    Type addType(Type parent, const std::string& name);
+    Type addType(const Type parent, const std::string& name);
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or
@@ -100,7 +105,7 @@ public:
         return n_children;
     }
 
-    template<typename OutputIterator>
+    template <typename OutputIterator>
     unsigned long getChildrenRecursive(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
@@ -111,6 +116,14 @@ public:
             }
         }
         return n_children;
+    }
+
+    template <typename Function>
+    void foreachRecursive(Function func, Type type)
+    {
+        for (Type i = 0; i < nTypes; ++i) {
+            if (recursiveMap[type][i]) (func)(i);
+        }
     }
 
     /**
@@ -130,12 +143,14 @@ public:
      */
     bool isA(Type sub, Type super)
     {
-        /* Because this metod is called extremely often, we want
+        /* Because this method is called extremely often, we want
          * the best-case fast-path for it.  Since updates are extremely
          * unlikely after initialization, we use a multi-reader lock,
          * and don't care at all about writer starvation, since there
-         * will almost never be writers. */
-        boost::shared_lock<boost::shared_mutex> l(type_mutex);
+         * will almost never be writers. However, see comments above
+         * about multi-reader-locks -- we are not using them just right
+         * now, because they don't seem to actually help. */
+        std::lock_guard<std::mutex> l(type_mutex);
         if ((sub >= nTypes) || (super >= nTypes)) return false;
         return recursiveMap[super][sub];
     }

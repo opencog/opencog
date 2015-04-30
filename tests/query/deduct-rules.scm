@@ -59,7 +59,7 @@
 (define (decl-var type var)
 	(TypedVariableLink
 		(VariableNode var)
-		(VariableTypeNode type)
+		(TypeNode type)
 	)
 )
 
@@ -70,7 +70,7 @@
 (define (is-same-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -85,7 +85,7 @@
 				;; Basically, if we already know that person A and B
 				;; are the same person, then lets not deduce it again.
 				;; This not link is identical to the conclusion below
-				(NotLink
+				(AbsentLink
 					(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 				)
 			)
@@ -103,7 +103,7 @@
 (define (transitive-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -116,7 +116,7 @@
 				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
+				(AbsentLink
 					(clause VN "$predicate" VN "$person_b" VN "$attribute")
 				)
 			)
@@ -136,7 +136,7 @@
 (define (transitive-not-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
@@ -149,7 +149,7 @@
 				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
+				(AbsentLink
 					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 				)
 			)
@@ -165,7 +165,7 @@
 (define (by-elimination-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person")
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "ConceptNode" "$attr_a")
@@ -202,7 +202,7 @@
 				)
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				;(NotLink
+				;(AbsentLink
 				;	(clause VN "$predicate" VN "$person" VN "$attr_e")
 				;)
 			)
@@ -223,7 +223,7 @@
 (define (distinct-attr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "PredicateNode" "$predicate_common")
@@ -241,7 +241,7 @@
 				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				;(NotLink
+				;(AbsentLink
 				;	(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
 				;)
 			)
@@ -260,7 +260,7 @@
 (define (neighbor-not-attr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "PredicateNode" "$predicate")
@@ -273,7 +273,7 @@
 				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
-				(NotLink
+				(AbsentLink
 					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 				)
 			)
@@ -293,7 +293,7 @@
 (define (first-addr-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_a")
@@ -310,7 +310,7 @@
 				;; and the next house is one over
 				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
 				;; and we don't already know the conclusion
-				(NotLink
+				(AbsentLink
 					(clause PN "Address" VN "$person_b" VN "$addr_b")
 				)
 			)
@@ -328,7 +328,7 @@
 (define (neighbor-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_a")
@@ -341,7 +341,7 @@
 				(clause PN "Address" VN "$person_b" VN "$addr_b")
 				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
 				; Not interested in what we already know.
-				(NotLink
+				(AbsentLink
 					(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				)
 			)
@@ -358,7 +358,7 @@
 (define (neighbor-symmetry-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 		)
@@ -367,7 +367,7 @@
 			(AndLink
 				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				; Not interested in what we already know.
-				(NotLink
+				(AbsentLink
 					(clause PN "Neighbor" VN "$person_b" VN "$person_a")
 				)
 			)
@@ -384,7 +384,7 @@
 (define (found-solution-rule)
 	(BindLink
 		;; variable declarations
-		(ListLink
+		(VariableList
 			(decl-var "FeatureNode" "$person")
 			(decl-var "ConceptNode" "$nationality")
 			(decl-var "ConceptNode" "$drink")
@@ -404,7 +404,7 @@
 				(clause PN "Address"     VN "$person" VN "$addr")
 
 				;; Don't report a fact we already know.
-				(NotLink
+				(AbsentLink
          		(OrderedLink
 						(VN "$nationality")
 						(VN "$drink")

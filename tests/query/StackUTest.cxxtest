@@ -22,15 +22,16 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/PatternMatch.h>
 #include <opencog/util/Logger.h>
+
+#include "imply.h"
+#undef DEBUG
 
 using namespace opencog;
 
 class StackUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatchEngine pme;
 		AtomSpace *as;
 		Handle svar, wvar;
 		Handle p1, p2;
@@ -66,7 +67,7 @@ class TestPMCB :
 	Handle anch;
 	TestPMCB(AtomSpace* as) : DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
 
-	virtual bool clause_match(Handle& pattrn, Handle& grnd)
+	virtual bool clause_match(const Handle& pattrn, const Handle& grnd)
 	{
 		lcnt ++;
 		// match the initial anchor clause, but reject the rest.
@@ -165,11 +166,9 @@ void StackUTest::test_stack(void)
 	preds.push_back(p1);
 	preds.push_back(p2);
 
-	std::vector<Handle> negs;
-
 	TestPMCB pmcb(as);
 	pmcb.anch = anch;
-	pme.match(&pmcb, vars, preds, negs);
+	match(pmcb, vars, preds);
 
 	TSM_ASSERT_EQUALS("bad link-test call count", 7, pmcb.lcnt);
 	TSM_ASSERT_EQUALS("bad solution call count", 0, pmcb.scnt);

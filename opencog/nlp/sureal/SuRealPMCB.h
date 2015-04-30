@@ -43,22 +43,21 @@ namespace nlp
 class SuRealPMCB : public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, std::set<Handle> vars);
+    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars);
     ~SuRealPMCB();
 
-    virtual bool variable_match(Handle& hPat, Handle& hSoln);
-    virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h);
+    virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
+    virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h);
     virtual bool grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln);
-    virtual void perform_search(PatternMatchEngine* pPME,
-                                std::set<Handle>& vars,
-                                HandleSeq& clauses,
-                                HandleSeq& negations);
+    virtual bool initiate_search(PatternMatchEngine* pPME,
+                                const Variables& vars,
+                                const Pattern& pat);
 
     std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;   // store the PM results
 
 private:
-    virtual Handle find_starter(Handle, size_t&, Handle&, size_t&);
+    virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 
     std::set<Handle> m_vars;   // store nodes that are variables
 

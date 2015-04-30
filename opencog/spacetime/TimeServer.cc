@@ -86,7 +86,7 @@ bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRela
     return table->remove(h, t, criterion);
 }
 
-unsigned long TimeServer::getLatestTimestamp() const
+octime_t TimeServer::getLatestTimestamp() const
 {
     std::unique_lock<std::mutex> lock(ts_mutex);
     return latestTimestamp;
@@ -111,7 +111,7 @@ void TimeServer::clear()
     init();
 }
 
-Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, TruthValuePtr tv)
+Handle TimeServer::addTimeInfo(Handle h, octime_t timestamp, TruthValuePtr tv)
 {
     OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
@@ -142,7 +142,7 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthV
     return atTimeLink;
 }
 
-bool TimeServer::removeTimeInfo(Handle h, unsigned long timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
+bool TimeServer::removeTimeInfo(Handle h, octime_t timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
 {
     Temporal t(timestamp);
     return removeTimeInfo(h, t, criterion, removeDisconnectedTimeNodes, recursive);
@@ -190,8 +190,6 @@ bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
 
 Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
 {
-    Handle result = Handle::UNDEFINED;
-
     const Temporal& t = *(htp.getTemporal());
     Handle h = htp.getHandle();
     DPRINTF("TimeServer::getAtTimeLink: t = %s, h = %s\n", t.toString().c_str(), atomspace->atomAsString(h).c_str());
@@ -199,22 +197,9 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
     Handle timeNode = atomspace->getHandle(TIME_NODE, t.getTimeNodeName());
     DPRINTF("timeNode = %lu\n", timeNode.value());
     if (atomspace->isValidHandle(timeNode)) {
-        HandleSeq atTimeLinkOutgoing(2);
-        atTimeLinkOutgoing[0] = timeNode;
-        atTimeLinkOutgoing[1] = h;
-        HandleSeq atTimeLinks;
-        atomspace->getHandlesByOutgoing(back_inserter(atTimeLinks), atTimeLinkOutgoing,
-                NULL, NULL, 2, AT_TIME_LINK, false);
-        if (!atTimeLinks.empty()) {
-            result = atTimeLinks[0];
-            if (atTimeLinks.size() > 1) {
-                logger().warn(
-                    "TimeServer::getAtTimeLink: More than 1 AtTimeLink(TimeNode, TimedAtom) found for HandleTemporalPair = %s \n",
-                    htp.toString().c_str());
-            }
-        }
+        return atomspace->getHandle(AT_TIME_LINK, timeNode, h);
     }
-    return result;
+    return Handle::UNDEFINED;
 }
 
 void TimeServer::atomAdded(Handle h)

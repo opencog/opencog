@@ -2,12 +2,12 @@
 
 (define getChildren
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
-                (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
+                (TypeChoice
+                    (TypeNode "DefinedLinguisticRelationshipNode")
+                    (TypeNode "PrepositionalRelationshipNode")
                 )
             )
             (VariableNode "$target")

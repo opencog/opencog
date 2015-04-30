@@ -35,27 +35,16 @@ private:
 		return lptr1->getSTI() > lptr2->getSTI();
 	}
 public:
-	AttentionalFocusCB(AtomSpace * as) :
-		DefaultPatternMatchCB(as) {}
+	AttentionalFocusCB(AtomSpace*);
 
 	// Only match nodes if they are in the attentional focus
-	bool node_match(Handle&, Handle&);
+	bool node_match(const Handle&, const Handle&);
 
 	// Only match links if they are in the attentional focus
-	bool link_match(LinkPtr&, LinkPtr&);
+	bool link_match(const LinkPtr&, const LinkPtr&);
 
-	// Only get incomming sets that are in the attentional focus
-	IncomingSet get_incoming_set(Handle h);
-
-	// Does nothing, disconnected clauses are allowed
-	void validate_clauses(std::set<Handle>& vars,
-	                      std::vector<Handle>& clauses);
-
-	// Starts from atoms in the attentional focus, with the right types
-	void perform_search(PatternMatchEngine *pme,
-	                    std::set<Handle> &vars,
-	                    std::vector<Handle> &clauses,
-	                    std::vector<Handle> &negations);
+	// Only get incoming sets that are in the attentional focus
+	IncomingSet get_incoming_set(const Handle&);
 };
 
 } //namespace opencog

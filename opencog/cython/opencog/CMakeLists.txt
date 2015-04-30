@@ -28,7 +28,8 @@ MACRO(CYTHON_ADD_MODULE_PYX name)
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${name}.cpp
 		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -o ${name}.cpp --cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR} -o ${name}.cpp
+				--cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
 		DEPENDS ${DEPENDS}
 		COMMENT "Cythonizing ${name}.pyx")
 ENDMACRO(CYTHON_ADD_MODULE_PYX)
@@ -47,7 +48,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(logger_cython
-		cogutil
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 	)
 
@@ -57,8 +58,8 @@ IF (HAVE_ATOMSPACE)
 
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
-		"atom.pyx" "classserver.pyx" "atomspace_details.pyx"
-		"spacetime.pyx" opencog_atom_types
+		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
+		"atomspace_details.pyx" "spacetime.pyx" opencog_atom_types
 		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
 		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
 		"../../atomspace/AtomSpace.h"
@@ -85,12 +86,12 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
 		atomspace
+		atomspaceutils
 		attention-types
 		embodiment-types
 		nlp-types
-		PLNTypes
 		spacetime-types
-		cogutil
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -99,6 +100,83 @@ IF (HAVE_ATOMSPACE)
 	SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME atomspace)
+
+ENDIF (HAVE_ATOMSPACE)
+
+IF (HAVE_ATOMSPACE)
+	############################## type constructors #####################
+	CYTHON_ADD_MODULE_PYX(type_constructors
+		"atomspace.pxd" opencog_atom_types )
+
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
+
+	ADD_LIBRARY(type_constructors SHARED
+		type_constructors.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(type_constructors
+		atomspace
+		${PYTHON_LIBRARIES}
+	)
+	
+	SET_TARGET_PROPERTIES(type_constructors PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME type_constructors)
+
+ENDIF (HAVE_ATOMSPACE)
+
+IF (HAVE_ATOMSPACE)
+	############################## utilities #####################
+	CYTHON_ADD_MODULE_PYX(utilities
+		"atomspace.pxd" opencog_atom_types )
+
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
+
+	ADD_LIBRARY(utilities_cython SHARED
+		Utilities.cc
+		utilities.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(utilities_cython
+		PythonEval
+		atomspace
+		type_constructors
+		${COGUTIL_LIBRARY}
+		${PYTHON_LIBRARIES}
+		${Boost_THREAD_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
+	)
+	
+	SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME utilities)
+
+ENDIF (HAVE_ATOMSPACE)
+
+IF (HAVE_ATOMSPACE)
+	############################## bindlink #####################
+	CYTHON_ADD_MODULE_PYX(bindlink
+		"atomspace.pxd" opencog_atom_types
+		"../../query/BindLink.h")
+
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
+
+	ADD_LIBRARY(bindlink_cython SHARED
+		BindlinkStub.cc
+		bindlink.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(bindlink_cython
+		query
+		execution
+		${PYTHON_LIBRARIES}
+		${Boost_THREAD_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
+	)
+	
+	SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME bindlink)
 
 ENDIF (HAVE_ATOMSPACE)
 
@@ -189,7 +267,7 @@ ENDIF(HAVE_SERVER)
 
 IF (HAVE_MOSES)
 	CYTHON_ADD_MODULE_PYX(pymoses
-		"../../learning/moses/main/moses_exec.h"
+		# "<moses/moses/main/moses_exec.h>"
 	)
 
 	# opencog.pymoses Python bindings
@@ -200,7 +278,7 @@ IF (HAVE_MOSES)
 	TARGET_LINK_LIBRARIES(moses_cython
 		moses_exec
 		moses
-		cogutil
+		${COGUTIL_LIBRARY}
 		comboreduct
 		feature_selection
 		${PYTHON_LIBRARIES}

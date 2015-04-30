@@ -25,12 +25,20 @@ LINK_LIBRARIES(
 
 FIND_PROGRAM(PSQL_EXECUTABLE psql)
 IF (PSQL_EXECUTABLE)
-	SET(ENV{PGPASSWORD} cheese)
-	EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d test-persist -U opencog_tester -h localhost
-		OUTPUT_VARIABLE OUT
-		ERROR_VARIABLE ERR
-		RESULT_VARIABLE RC)
-	UNSET(ENV{PGPASSWORD})
+	SET(PG_HOST $ENV{PGHOST})
+	IF (PG_HOST)
+		EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d opencog_test -U opencog_tester
+			OUTPUT_VARIABLE OUT
+			ERROR_VARIABLE ERR
+			RESULT_VARIABLE RC)
+	ELSE (PG_HOST)
+		EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d opencog_test -U opencog_tester -h localhost
+			OUTPUT_VARIABLE OUT
+			ERROR_VARIABLE ERR
+			RESULT_VARIABLE RC)
+	ENDIF(PG_HOST)
+	UNSET(ENV{PG_HOST})
+
 
 	# Check the return code from PSQL
 	IF (RC)
@@ -47,6 +55,7 @@ ENDIF (PSQL_EXECUTABLE)
 IF (DB_IS_CONFIGURED)
 	ADD_CXXTEST(BasicSaveUTest)
 	ADD_CXXTEST(PersistUTest)
+	MESSAGE(STATUS "Postgres database is configured for unit tests." )
 ELSE (DB_IS_CONFIGURED)
-	MESSAGE(WARNING "SQL database not configured for unit tests! See the README!")
+	MESSAGE(WARNING "Postgres database not configured for unit tests! See the README!")
 ENDIF (DB_IS_CONFIGURED)

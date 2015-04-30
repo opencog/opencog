@@ -34,7 +34,7 @@ void IncomingIndex::resize()
 {
 }
 
-void IncomingIndex::insertAtom(AtomPtr a)
+void IncomingIndex::insertAtom(const AtomPtr& a)
 {
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
@@ -62,12 +62,12 @@ void IncomingIndex::insertAtom(AtomPtr a)
 		// Add hin to the incoming set of h.
 		UnorderedHandleSet inset = oldset;
 		inset.insert(hin);
-		idx.remove(h, oldset);
+		idx.remove(h);
 		idx.insert(h, inset);
 	}
 }
 
-void IncomingIndex::removeAtom(AtomPtr a)
+void IncomingIndex::removeAtom(const AtomPtr& a)
 {
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
@@ -95,7 +95,7 @@ void IncomingIndex::removeAtom(AtomPtr a)
 		{
 			// Remove hin from the incoming set of h.
 			inset.erase(oit);
-			idx.remove(h, oldset);
+			idx.remove(h);
 			idx.insert(h, inset);
 		}
 	}
@@ -104,11 +104,6 @@ void IncomingIndex::removeAtom(AtomPtr a)
 const UnorderedHandleSet& IncomingIndex::getIncomingSet(Handle h) const
 {
 	return idx.get(h);
-}
-
-void IncomingIndex::remove(bool (*filter)(Handle))
-{
-	idx.remove(filter);
 }
 
 // ================================================================

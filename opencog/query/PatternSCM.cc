@@ -2,7 +2,7 @@
  * PatternSCM.cc
  *
  * Guile Scheme bindings for the pattern matcher.
- * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -17,12 +17,19 @@
 
 using namespace opencog;
 
-PatternWrap::PatternWrap(Handle (f)(AtomSpace*, Handle), const char* n)
-	: _func(f), _name(n)
+PatternWrap::PatternWrap(Handle (f)(AtomSpace*, const Handle&), const char* n)
+	: _func(f), _pred(NULL), _name(n)
 {
 #ifdef HAVE_GUILE
-	// define_scheme_primitive(_name, &PatternWrap::wrapper, this);
 	define_scheme_primitive(_name, &PatternWrap::wrapper, this, "query");
+#endif
+}
+
+PatternWrap::PatternWrap(TruthValuePtr (p)(AtomSpace*, const Handle&), const char* n)
+	: _func(NULL), _pred(p), _name(n)
+{
+#ifdef HAVE_GUILE
+	define_scheme_primitive(_name, &PatternWrap::prapper, this, "query");
 #endif
 }
 
@@ -31,10 +38,20 @@ Handle PatternWrap::wrapper(Handle h)
 #ifdef HAVE_GUILE
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
-	Handle grounded_expressions = _func(as, h);
-	return grounded_expressions;
+	return _func(as, h);
 #else
 	return Handle::UNDEFINED;
+#endif
+}
+
+TruthValuePtr PatternWrap::prapper(Handle h)
+{
+#ifdef HAVE_GUILE
+	// XXX we should also allow opt-args to be a list of handles
+	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	return _pred(as, h);
+#else
+	return TruthValuePtr();
 #endif
 }
 
@@ -76,18 +93,16 @@ void PatternSCM::init_in_module(void*)
 	// first match.
 	_binders.push_back(new PatternWrap(single_bindlink, "cog-bind-single"));
 
-	// Run implication, assuming that the argument is a handle to
-	// an BindLink containing variables and an ImplicationLink
-	_binders.push_back(new PatternWrap(crisp_logic_bindlink, "cog-bind-crisp"));
-
 	// Mystery function
 	_binders.push_back(new PatternWrap(pln_bindlink, "cog-bind-pln"));
 
    // Fuzzy matching.
 	_binders.push_back(new PatternWrap(find_approximate_match, "cog-fuzzy-match"));
 
-	// Validate the bindlink for syntax correctness
-	_binders.push_back(new PatternWrap(validate_bindlink, "cog-validate-bindlink"));
+	// A bindlink that return a TV
+	_binders.push_back(new PatternWrap(satisfaction_link, "cog-satisfy"));
+
+	_binders.push_back(new PatternWrap(satisfying_set, "cog-satisfying-set"));
 }
 
 PatternSCM::~PatternSCM()

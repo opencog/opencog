@@ -20,11 +20,13 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/cython/PythonEval.h>
-#include <opencog/cython/PythonModule.h>
+#include <opencog/modules/python/PythonModule.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
 #include "AtomSpaceBenchmark.h"
+
+const char* VERSION_STRING = "Version 1.0.1";
 
 namespace opencog {
 
@@ -68,14 +70,16 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     doStats = false;
     testKind = BENCH_AS;
 
+    randomseed = (unsigned long) time(NULL);
+
+
     asp = NULL;
     atab = NULL;
 #if HAVE_CYTHON
     cogs = NULL;
     pymo = NULL;
 #endif
-
-    rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
+    rng = NULL;
 }
 
 AtomSpaceBenchmark::~AtomSpaceBenchmark()
@@ -195,48 +199,95 @@ void AtomSpaceBenchmark::showMethods() {
     cout << "Methods that can be tested:" << endl;
     cout << "  addNode" << endl;
     cout << "  addLink" << endl;
+    cout << "  removeAtom" << endl;
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
-    cout << "  getHandleSet" << endl;
-    cout << "  getNodeHandles" << endl;
+ #ifdef ZMQ_EXPERIMENT
+    cout << "  getTruthValueZMQ" << endl;
+#endif
+    cout << "  getHandlesByType" << endl;
     cout << "  getOutgoingSet" << endl;
-
+    cout << "  getIncomingSet" << endl;
 }
 
-void AtomSpaceBenchmark::setMethod(std::string _methodName)
+void AtomSpaceBenchmark::setMethod(std::string methodToTest)
 {
-    if (_methodName == "noop") {
+    bool foundMethod = false;
+
+    if (methodToTest == "all" || methodToTest == "noop") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
-    } else if (_methodName == "addNode") {
+        methodNames.push_back( "noop");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "addNode") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
-    } else if (_methodName == "addLink") {
+        methodNames.push_back( "addNode");
+        foundMethod = true;
+   } 
+
+    if (methodToTest == "all" || methodToTest == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
-    } else if (_methodName == "removeAtom") {
+        methodNames.push_back( "addLink");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "removeAtom") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
-    } else if (_methodName == "getType") {
+        methodNames.push_back( "removeAtom");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
-    } else if (_methodName == "getTV") {
+        methodNames.push_back( "getType");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
+        methodNames.push_back( "getTruthValue");
+        foundMethod = true;
+    } 
+
 #ifdef ZMQ_EXPERIMENT
-    } else if (_methodName == "getTVZmq") {
+    if (methodToTest == "all" || methodToTest == "getTruthValueZMQ") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
+        methodNames.push_back( "getTruthValueZMQ");
+        foundMethod = true;
+    } 
 #endif
-    } else if (_methodName == "setTV") {
+
+    if (methodToTest == "all" || methodToTest == "setTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
-    } else if (_methodName == "getHandleSet") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandleSet);
-    } else if (_methodName == "getNodeHandles") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getNodeHandles);
-    } else if (_methodName == "getOutgoingSet") {
+        methodNames.push_back( "setTruthValue");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getHandlesByType") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
+        methodNames.push_back( "getHandlesByType");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
-    } else if (_methodName == "getIncomingSet") {
+        methodNames.push_back( "getOutgoingSet");
+        foundMethod = true;
+    } 
+
+    if (methodToTest == "all" || methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
-    } else {
-        std::cerr << "Error: specified a bad test name: " << _methodName << std::endl;
+        methodNames.push_back( "getIncomingSet");
+        foundMethod = true;
+    } 
+
+    if (!foundMethod) {
+        std::cerr << "Error: specified a bad test name: " << methodToTest << std::endl;
         exit(1);
     }
-    methodNames.push_back( _methodName);
+    
 }
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -331,6 +382,16 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
+    cout << "OpenCog Atomspace Benchmark - " << VERSION_STRING << "\n";
+    cout << "\nRandom generator: MT19937\n";
+    cout << "Random seed: " << randomseed << "\n\n";
+
+    // Initialize the random number generator with the seed which might
+    // have been passed in on the command line.
+    if (rng)
+        delete rng;
+    rng = new opencog::MT19937RandGen(randomseed);
+
     // Make sure we are using the correct link mean!
     if (prg) delete prg;
     prg = new std::poisson_distribution<unsigned>(linkSize_mean);
@@ -414,6 +475,15 @@ AtomSpaceBenchmark::memoize_or_compile(std::string exp)
         return "(mk)\n";
     }
 #endif /* HAVE_GUILE */
+#if HAVE_CYTHON
+    if (memoize)
+    {
+        std::ostringstream dss;
+        dss << "def mk():\n" << exp << "\n\n";
+        pyev->eval(dss.str());
+        return "mk()\n\n";
+    }
+#endif /* HAVE_CYTHON */
 
     return exp;
 }
@@ -421,10 +491,20 @@ AtomSpaceBenchmark::memoize_or_compile(std::string exp)
 Type AtomSpaceBenchmark::randomType(Type t)
 {
     OC_ASSERT(t < numberOfTypes);
-    Type randomType = ATOM + rng->randint(numberOfTypes-1);
-    while (!classserver().isA(randomType, t))
-        randomType = ATOM + rng->randint(numberOfTypes-1);
-    return randomType;
+    Type candidateType;
+
+    // Loop until we get a type that is a subclass of t, skipping TYPE_NODE
+    // since that type can't handle randomly generated names. Also skip
+    // BIND_LINK and other validated types since the validation will fail.
+    do {
+        candidateType = ATOM + rng->randint(numberOfTypes-1);
+    } while (!classserver().isA(candidateType, t) or
+        !classserver().isA(candidateType, FREE_LINK) or
+        !classserver().isA(candidateType, SCOPE_LINK) or
+        candidateType == NUMBER_NODE or
+        candidateType == TYPE_NODE);
+
+    return candidateType;
 }
 
 clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
@@ -451,7 +531,10 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     if (csi.size() ==  0) {
         std::ostringstream oss;
         counter++;
-        oss << "node " << counter;
+        if (NUMBER_NODE == t)
+            oss << counter;    // number nodes must actually be numbers.
+        else
+            oss << "node " << counter;
         scp = oss.str();
     }
 
@@ -483,7 +566,10 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
             if (csi.size() ==  0) {
                 std::ostringstream oss;
                 counter++;
-                oss << "node " << counter;
+                if (NUMBER_NODE == t)
+                    oss << counter;  // number nodes must actually be numbers.
+                else
+                    oss << "node " << counter;
                 scp = oss.str();
             }
         }
@@ -498,8 +584,27 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
-        std::string ps = dss.str();
+        for (unsigned int i=0; i<Nloops; i++) {
+            if (memoize) dss << "    ";   // indentation
+            dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
+
+            p = rng->randdouble();
+            t = defaultNodeType;
+            if (p < chanceOfNonDefaultNode)
+                t = randomType(NODE);
+
+            scp = csi;
+            if (csi.size() ==  0) {
+                std::ostringstream oss;
+                counter++;
+                if (NUMBER_NODE == t)
+                    oss << counter;  // number nodes must actually be numbers.
+                else
+                    oss << "node " << counter;
+                scp = oss.str();
+            }
+        }
+        std::string ps = memoize_or_compile(dss.str());
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
@@ -531,6 +636,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.add_link (" << t << ", [";
         for (size_t j=0; j < arity; j++) {
@@ -689,6 +795,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.remove(Handle(" << h.value() << "))\n";
@@ -759,6 +866,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.get_type(Handle(" << h.value() << "))\n";
@@ -808,6 +916,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_tv(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
@@ -868,6 +977,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.set_tv(Handle(" << h.value()
             << "), TruthValue(" << strength << ", " << conf << "))\n";
@@ -914,55 +1024,13 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     return timepair_t(0,0);
 }
 
-timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
-{
-    HandleSeq results;
-    HandleSeq results2;
-    // Build node name first
-    std::ostringstream oss;
-    counter++;
-    oss << "node " << (rng->randint((atomCount-1) * percentLinks)+1);
-
-    clock_t t_begin;
-    clock_t time_taken;
-    switch (testKind) {
-#if HAVE_CYTHON
-    case BENCH_PYTHON: {
-        std::ostringstream dss;
-        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n";
-        std::string ps = dss.str();
-        clock_t t_begin = clock();
-        pyev->eval(ps);
-        return clock() - t_begin;
-    }
-#endif /* HAVE_CYTHON */
-#if HAVE_GUILE
-    case BENCH_SCM: {
-        // Currently not expose in the SCM API
-        return timepair_t(0,0);
-    }
-#endif /* HAVE_GUILE */
-    case BENCH_TABLE: {
-        t_begin = clock();
-        atab->getHandlesByName(back_inserter(results2), oss.str(), NODE, true);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->getHandlesByName(back_inserter(results), oss.str(), NODE, true);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
-    return timepair_t(0,0);
-}
-
-timepair_t AtomSpaceBenchmark::bm_getHandleSet()
+timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
 {
     Type t = randomType(ATOM);
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_atoms_by_type(" << t << ", True)\n";
         std::string ps = dss.str();
@@ -980,7 +1048,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     case BENCH_TABLE: {
         clock_t t_begin = clock();
         HandleSeq results;
-        atab->getHandlesByType(back_inserter(results), t, true);
+        asp->getHandlesByType(results, t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -1002,6 +1070,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
@@ -1049,6 +1118,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();

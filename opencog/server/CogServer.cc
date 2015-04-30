@@ -52,7 +52,7 @@
 #include <opencog/util/platform.h>
 
 #ifdef HAVE_SQL_STORAGE
-#include <opencog/persist/sql/PersistModule.h>
+#include <opencog/modules/PersistModule.h>
 #endif /* HAVE_SQL_STORAGE */
 
 #include "CogServer.h"
@@ -140,8 +140,8 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
-    SchemeEval* se = new SchemeEval(atomSpace);
-    delete se;
+    SchemeEval::init_scheme();
+    SchemeEval::set_scheme_as(atomSpace);
 #endif // HAVE_GUILE
 #ifdef HAVE_CYTHON
     // Initialize Python.

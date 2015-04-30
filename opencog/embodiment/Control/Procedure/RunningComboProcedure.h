@@ -36,18 +36,17 @@
  *  http://wiki.opencog.org/w/EmbodimentCombo_%28Embodiment%29#Interpreter_Design
  */
 
-#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
-
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
-#include <opencog/comboreduct/interpreter/eval.h>
-
 #include <stack>
 #include <exception>
 #include <boost/logic/tribool.hpp>
 
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/interpreter/eval.h>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapper.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 namespace opencog { namespace Procedure {
 

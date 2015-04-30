@@ -13,19 +13,8 @@ ADD_DEPENDENCIES (sureal
 
 TARGET_LINK_LIBRARIES(sureal
     nlp-types
+    lambda
     query
     smob
     atomspace
-)
-
-ADD_LIBRARY (SuRealModule SHARED
-    SuRealModule
-)
-
-ADD_DEPENDENCIES (SuRealModule
-    nlp_atom_types
-)
-
-TARGET_LINK_LIBRARIES(SuRealModule
-    sureal
 )

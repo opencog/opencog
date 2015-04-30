@@ -31,8 +31,12 @@
 #ifndef _PETAVERSE_IMITATION_LEARNING_BASE_H
 #define _PETAVERSE_IMITATION_LEARNING_BASE_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
+
+// namespace opencog { namespace embodiment {
+
+using namespace opencog;
 
 class PetaverseImitationLearningBase
 {
@@ -40,12 +44,12 @@ class PetaverseImitationLearningBase
 public:
 
     //ns = normal size
-    typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
+    typedef std::set<opencog::combo::combo_tree, opencog::size_tree_order<opencog::combo::vertex> >
     combo_tree_ns_set;
 
     typedef double fitness_t;
-    typedef std::set<combo::definite_object> definite_object_set;
-    typedef std::set<combo::vertex> operator_set;
+    typedef std::set<opencog::combo::definite_object> definite_object_set;
+    typedef std::set<opencog::combo::vertex> operator_set;
     typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
 
 
@@ -145,7 +149,7 @@ public:
      * is should return the program that has received the maximum reward
      * from the owner.
      */
-    virtual const combo::combo_tree& best_program() = 0;
+    virtual const opencog::combo::combo_tree& best_program() = 0;
 
     /**
      * This method is called in case there is no best_program,
@@ -154,7 +158,7 @@ public:
      * that is the one that has gotten the highest fitness score
      * of the last fitness estimator (since the last reset_estimator, if so).
      */
-    virtual const combo::combo_tree& best_program_estimated() = 0;
+    virtual const opencog::combo::combo_tree& best_program_estimated() = 0;
 
     /**
      * This method is called everytime the owner wants the pet to try
@@ -162,7 +166,7 @@ public:
      * a new solution should be returned. Typically this method should return
      * to the owner the best program never tried so far.
      */
-    virtual const combo::combo_tree& current_program() = 0;
+    virtual const opencog::combo::combo_tree& current_program() = 0;
 
 
     //-----------------------------------------------------------------------
@@ -189,6 +193,6 @@ public:
     virtual void reset_estimator() = 0;
 
 };
-
+		
 #endif
 

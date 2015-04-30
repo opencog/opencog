@@ -32,8 +32,9 @@
 using namespace opencog;
 
 const Handle Handle::UNDEFINED(ULONG_MAX);
+const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(AtomPtr atom) : _uuid(atom->_uuid), _ptr(atom) {}
+Handle::Handle(const AtomPtr& atom) : _uuid(atom->_uuid), _ptr(atom) {}
 
 Handle& Handle::operator=(const AtomPtr& a)
 {

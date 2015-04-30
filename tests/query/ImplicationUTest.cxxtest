@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/query/BindLink.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -73,6 +72,8 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
+extern "C" { void nlp_types_init(void); };
+
 /*
  * This function sets up an implication link, and some data.
  *
@@ -97,19 +98,12 @@ class ImplicationUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void ImplicationUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
 	// Load the atom types
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so");
+	nlp_types_init();
 
-	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm");
-
-	cogserver().loadModules();
 	load_scm_files_from_config(*as);
 
 	// Create initialzation
@@ -131,8 +125,10 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-node (append (list 'PredicateNode) x)))\n"
 	"(define (VariableNode . x)\n"
 	"   (apply cog-new-node (append (list 'VariableNode) x)))\n"
-	"(define (VariableTypeNode . x)\n"
-	"   (apply cog-new-node (append (list 'VariableTypeNode) x)))\n"
+	"(define (VariableList . x)\n"
+	"   (apply cog-new-link (append (list 'VariableList) x)))\n"
+	"(define (TypeNode . x)\n"
+	"   (apply cog-new-node (append (list 'TypeNode) x)))\n"
 	"(define (TypedVariableLink . x)\n"
 	"   (apply cog-new-link (append (list 'TypedVariableLink) x)))\n"
 	"(define (BindLink . x)\n"
@@ -196,7 +192,7 @@ void ImplicationUTest::setUp(void)
 	"(BindLink\n"
 	"   (TypedVariableLink\n"
 	"      (VariableNode \"$predNode\")\n"
-	"      (VariableTypeNode \"PredicateNode\")\n"
+	"      (TypeNode \"PredicateNode\")\n"
 	"   )\n"
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
@@ -214,18 +210,18 @@ void ImplicationUTest::setUp(void)
 	const char * strict2 =
 	"(define (restrict2)\n"
 	"(BindLink\n"
-	"   (ListLink\n"
+	"   (VariableList\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (VariableTypeNode \"PredicateNode\")\n"
+	"         (TypeNode \"PredicateNode\")\n"
 	"      )\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$framNode\")\n"
-	"         (VariableTypeNode \"WordSenseNode\")\n"
+	"         (TypeNode \"WordSenseNode\")\n"
 	"      )\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$framboise\")\n"
-	"         (VariableTypeNode \"WordSenseNode\")\n"
+	"         (TypeNode \"WordSenseNode\")\n"
 	"      )\n"
 	"   )\n"
 	"   (ImplicationLink\n"
@@ -286,29 +282,29 @@ void ImplicationUTest::test_exec(void)
 
 	// Result should be a ListLink
 	Handle result = imply(as, implication);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 
 	// There should be two solutions: 
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
 	result = imply(as, implication2);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
 	result = bindlink(as, varscope);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("third result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ one solution
 	result = bindlink(as, restrict);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("fourth result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	// Result should be a ListLink w/ one solution
 	result = bindlink(as, restrict2);
-	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("fifth result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);

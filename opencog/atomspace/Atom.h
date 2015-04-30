@@ -79,6 +79,7 @@ class Atom
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
+    friend class DeleteLink;      // Needs to call getAtomTable();
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
@@ -116,15 +117,24 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, TruthValuePtr = TruthValue::DEFAULT_TV(),
-            AttentionValuePtr = AttentionValue::DEFAULT_AV());
+    Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+            AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+      : _uuid(Handle::UNDEFINED.value()),
+        _atomTable(NULL),
+        _type(t),
+        _flags(0),
+        _truthValue(tv),
+        _attentionValue(av)
+    {}
 
     struct InSet
     {
         // The incoming set is not tracked by the garbage collector;
         // this is required, in order to avoid cyclic references.
         // That is, we use weak pointers here, not strong ones.
-        // std::set<ptr> uses 48 bytes (per atom).
+        // std::set<ptr> uses 48 bytes (per atom).  See the README file
+        // in this directory for a slightly longer explanation for why
+        // weak pointers are needed, and why bdgc cannot be used.
         WincomingSet _iset;
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
@@ -209,7 +219,7 @@ public:
     AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
-    void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+    void setAttentionValue(AttentionValuePtr);
 
     /// Handy-dandy convenience getters for attention values.
     AttentionValue::sti_t getSTI()
@@ -308,6 +318,22 @@ public:
             if (h) { *result = h; result ++; }
         }
         return result;
+    }
+
+    //! Invoke the callback on each atom in the incoming set of
+    //! handle h, until one of them returns true, in which case
+    //! iteration stopsm and true is returned. Otherwise the
+    //! callback is called on all incomings and false is returned.
+    template<class T>
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
+    {
+        // We make a copy of the set, so that we don't call the
+        //callback with locks held.
+        IncomingSet vh(getIncomingSet());
+
+        for (const LinkPtr& lp : vh)
+            if ((data->*cb)(Handle(lp))) return true;
+        return false;
     }
 
     /**

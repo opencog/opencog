@@ -1,0 +1,243 @@
+/*
+ * tests/query/ChoiceLinkUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ChoiceLinkUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    ChoiceLinkUTest(void)
+    {
+        try
+        {
+             config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~ChoiceLinkUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_basic_or(void);
+    void test_embed_or(void);
+    void test_nest_or(void);
+    void test_top_nest_or(void);
+    void test_nest_bad_or(void);
+    void test_top_nest_bad_or(void);
+    void test_top_disco(void);
+    void test_embed_disco(void);
+    void test_double_or(void);
+};
+
+void ChoiceLinkUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void ChoiceLinkUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/query.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+/*
+ * ChoiceLink most basic unit test.
+ */
+void ChoiceLinkUTest::test_basic_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-link.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (basic))");
+
+    TS_ASSERT_EQUALS(2, as->getArity(items));
+}
+
+/*
+ * ChoiceLink embeded unit test.
+ */
+void ChoiceLinkUTest::test_embed_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-embed.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (embed))");
+
+    TS_ASSERT_EQUALS(2, as->getArity(items));
+}
+
+/*
+ * ChoiceLink nested embeded unit test.
+ */
+void ChoiceLinkUTest::test_nest_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (nest))");
+
+    printf ("Nest found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(5, as->getArity(items));
+}
+
+/*
+ * ChoiceLink top-level nested unit test.
+ */
+void ChoiceLinkUTest::test_top_nest_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest))");
+
+    printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(5, as->getArity(items));
+}
+
+/*
+ * ChoiceLink bad nested embeded unit test.
+ */
+void ChoiceLinkUTest::test_nest_bad_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (nest-bad))");
+
+    printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(4, as->getArity(items));
+}
+
+/*
+ * ChoiceLink bad nested embeded unit test.
+ */
+void ChoiceLinkUTest::test_top_nest_bad_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
+
+    printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(4, as->getArity(items));
+}
+
+/*
+ * ChoiceLink disconnected unit test.
+ */
+void ChoiceLinkUTest::test_top_disco(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-disconnected.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (top-disco))");
+
+    printf ("Top-disco found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(items));
+
+    Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
+
+    printf ("Top-wrapped-disco found:\n%s\n", wrap->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(wrap));
+}
+
+/*
+ * ChoiceLink disconnected-embeded unit test.
+ * (Well, its not really disconnected, it just sort-of looks that way.)
+ */
+void ChoiceLinkUTest::test_embed_disco(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-embed-disco.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (embed-disco))");
+
+    printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
+    TS_ASSERT_EQUALS(2, as->getArity(items));
+}
+
+/*
+ * doubl ChoiceLink unit test.
+ */
+void ChoiceLinkUTest::test_double_or(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-double.scm");
+    load_scm_files_from_config(*as);
+
+    Handle items = eval->eval_h("(cog-bind (double))");
+
+    TS_ASSERT_EQUALS(3, as->getArity(items));
+}
+

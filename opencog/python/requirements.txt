@@ -11,6 +11,7 @@ wsgiref
 Flask
 flask-restful
 flask-restful-swagger
+flask-cors
 mock
 six
 graphviz

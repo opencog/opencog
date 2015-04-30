@@ -6,14 +6,14 @@
 
 (define filter-#12
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (VariableTypeNode "ParseNode")
+                (TypeNode "ParseNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
         (ImplicationLink

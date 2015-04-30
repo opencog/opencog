@@ -74,7 +74,7 @@ class SchemeEval : public GenericEval
 		void finish(void);
 		static void * c_wrap_finish(void *);
 
-		// Things related to (async) shell-evaluation
+		// Things related to (async) cogserver shell-evaluation
 		void do_eval(const std::string &);
 		std::string do_poll_result();
 		static void * c_wrap_eval(void *);
@@ -90,9 +90,21 @@ class SchemeEval : public GenericEval
 		SCM _pipe;
 		int _pipeno;
 
+		// Output port, for any printing done by scheme code.
+		SCM _outport;
+		SCM _saved_outport;
+		bool _in_shell;
+		bool _in_server;
+		int _in_redirect;
+		void capture_port();
+		void redirect_output();
+		void restore_output();
+		void drain_output();
+
 		// Straight-up evaluation
 		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
+		static void * c_wrap_eval_tv(void *);
 
 		// Apply function to arguments, returning Handle or TV
 		Handle do_apply(const std::string& func, Handle& varargs);
@@ -116,19 +128,23 @@ class SchemeEval : public GenericEval
 		// Printing of basic types
 		static std::string prt(SCM);
 
-		// Output port, for any printing done by scheme code.
-		SCM _outport;
-		SCM _saved_outport;
-		bool _in_shell;
-		void drain_output();
-
+		static void * c_wrap_set_atomspace(void *);
 		AtomSpace* atomspace;
 		int _gc_ctr;
 		bool _in_eval;
 
 	public:
-		SchemeEval(AtomSpace*);
+		// Call before first use.
+		static void init_scheme(void);
+
+		// Set per-thread global
+		static void set_scheme_as(AtomSpace*);
+
+		SchemeEval(AtomSpace* = NULL);
 		~SchemeEval();
+
+		// Return per-thread, per-atomspace singleton
+		static SchemeEval* get_evaluator(AtomSpace* = NULL);
 
 		// The async-output interface.
 		void begin_eval();
@@ -145,6 +161,10 @@ class SchemeEval : public GenericEval
 		Handle eval_h(const std::string&);
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
+		// Evaluate expression, returning TV.
+		TruthValuePtr eval_tv(const std::string&);
+		TruthValuePtr eval_tv(const std::stringstream& ss) { return eval_tv(ss.str()); }
+
 		// Apply expression to args, returning Handle or TV
 		Handle apply(const std::string& func, Handle varargs);
 		TruthValuePtr apply_tv(const std::string& func, Handle varargs);
@@ -153,8 +173,7 @@ class SchemeEval : public GenericEval
 		bool recursing(void) { return _in_eval; }
 };
 
-// Return per-thread singleton
-SchemeEval* get_evaluator(AtomSpace* as);
+
 
 /** @}*/
 }

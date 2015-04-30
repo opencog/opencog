@@ -43,28 +43,28 @@ SchemeShell::SchemeShell(void)
 	abort_prompt += normal_prompt;
 
 	pending_prompt = "... ";
-	evaluator = NULL;
 
 	do_async_output = true;
+
+	evaluator = SchemeEval::get_evaluator();
+
+	// Set the inital atomspace for this thread.
+	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
+	evaluator->begin_eval();
+	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
+	evaluator->poll_result();
 }
 
 SchemeShell::~SchemeShell()
 {
-	if (evaluator) delete evaluator;
 }
 
 /**
  * Register this shell with the console.
  */
-void SchemeShell::set_socket(ConsoleSocket *s)
+void SchemeShell::thread_init(void)
 {
-	// Let the generic shell do the basic work.
-	GenericShell::set_socket(s);
-
-	if (!evaluator) evaluator = new SchemeEval(&cogserver().getAtomSpace());
-	evaluator->begin_eval();
-	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
-	evaluator->poll_result();
+	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
 }
 
 #endif

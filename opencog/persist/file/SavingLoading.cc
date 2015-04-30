@@ -33,7 +33,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomutils/HandleMap.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -80,8 +80,6 @@ void SavingLoading::save(const char *fileName,
                           "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
-    // TODO: bad bad - saving and loading should be integrated as a request or
-    // use the AtomSpace API.
     AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
 
     // stores the total number of atoms in the system

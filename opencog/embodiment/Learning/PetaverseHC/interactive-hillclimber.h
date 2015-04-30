@@ -24,10 +24,10 @@
 #ifndef _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 #define _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 
-#include "hillclimber.h"
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include "hillclimber.h"
 
 namespace opencog { namespace hillclimbing {
 

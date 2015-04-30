@@ -80,12 +80,10 @@ std::string Link::toShortString(std::string indent)
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    Arity arity = getArity();
-    for (Arity i = 0; i < arity; i++) {
-        AtomPtr a(_outgoing[i]);
-        answer << a->toShortString(more_indent);
-    }
-    answer << indent << ") ; [" << getHandle().value() << "]\n";
+    for (const Handle& h : _outgoing)
+        answer << h->toShortString(more_indent);
+
+    answer << indent << ") ; [" << _uuid << "]\n";
     return answer.str();
 }
 
@@ -105,12 +103,11 @@ std::string Link::toString(std::string indent)
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    for (int i = 0; i < getArity(); i++) {
-        AtomPtr a(_outgoing[i]);
-        answer += a->toString(more_indent);
-    }
+    for (const Handle& h : _outgoing)
+        answer += h->toString(more_indent);
+
     answer += indent + ") ; [" + 
-            std::to_string(getHandle().value()).c_str() + "]\n";
+            std::to_string(_uuid).c_str() + "]\n";
     return answer;
 }
 
@@ -123,7 +120,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     if (classserver().isA(_type, ORDERED_LINK)) {
         return arity > 0 && _outgoing[0] == handle;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // if the links is unordered, the outgoing set is scanned, and the
+        // If the link is unordered, the outgoing set is scanned, and the
         // method returns true if any position is equal to the handle given.
         for (Arity i = 0; i < arity; i++) {
             if (_outgoing[i] == handle) {
@@ -137,7 +134,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
+bool Link::isSource(size_t i) const throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
     if (i > getArity()) {
@@ -157,9 +154,9 @@ bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
     }
 }
 
-bool Link::isTarget(Handle handle) throw (InvalidParamException)
+bool Link::isTarget(Handle handle) const throw (InvalidParamException)
 {
-    // on ordered links, the first position of the outgoing set defines the
+    // On ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
     // outgoing set from the second position searching for the given handle. If
     // it is found, true is returned.
@@ -172,7 +169,7 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
         }
         return false;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // if the links is unordered, all the outgoing set is scanned.
+        // If the links is unordered, all the outgoing set is scanned.
         for (Arity i = 0; i < arity; i++) {
             if (_outgoing[i] == handle) {
                 return true;
@@ -185,7 +182,7 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     return false;
 }
 
-bool Link::isTarget(size_t i) throw (IndexErrorException, InvalidParamException)
+bool Link::isTarget(size_t i) const throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
     if (i > getArity()) {

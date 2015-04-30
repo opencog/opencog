@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <iostream>
 #include <climits>
+#include <functional>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -43,8 +44,6 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
-typedef std::unordered_set<UUID> UnorderedUUIDSet;
-
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
@@ -71,11 +70,13 @@ private:
     AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
+
+    static const AtomPtr NULL_POINTER;
 public:
 
     static const Handle UNDEFINED;
 
-    explicit Handle(AtomPtr atom);
+    explicit Handle(const AtomPtr& atom);
     explicit Handle(const UUID u) : _uuid(u) {}
     explicit Handle() : _uuid(ULONG_MAX) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
@@ -167,15 +168,22 @@ public:
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return AtomPtr();
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
         Handle h(*this);
         return h.resolve_ptr();
     }
     operator AtomPtr() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return AtomPtr();
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
+/***
+    operator const AtomPtr&() {
+        if (_ptr.get()) return _ptr;
+        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        return resolve_ptr();
+    }
+***/
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
@@ -186,18 +194,19 @@ static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
 
 class HandlePredicate {
 public:
-    inline bool operator()(const Handle& h) { return this->test(h); }
-    virtual bool test(const Handle& h) { return true; }
+    inline bool operator()(const Handle& h) const { return this->test(h); }
+    virtual bool test(const Handle&) const = 0;
 };
 class AtomPredicate {
 public:
-    inline bool operator()(AtomPtr a) { return this->test(a); }
-    virtual bool test(AtomPtr) { return true; }
+    inline bool operator()(const AtomPtr& a) const { return this->test(a); }
+    virtual bool test(const AtomPtr&) const = 0;
 };
 class AtomComparator {
 public:
-    inline bool operator()(AtomPtr a, AtomPtr b) { return this->test(a,b); }
-    virtual bool test(AtomPtr, const AtomPtr) { return true; }
+    inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
+        { return this->test(a,b); }
+    virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
 };
 
 
@@ -234,6 +243,22 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+struct handle_seq_less
+{
+   bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
+   {
+       size_t sl = hsl.size();
+       size_t sr = hsr.size();
+       if (sl != sr) return sl < sr;
+       for (size_t i=0; i<sl; i++) {
+           UUID ul = hsl[i].value();
+           UUID ur = hsr[i].value();
+           if (ul != ur) return ul < ur;
+       }
+       return false;
+   }
+};
+
 //! append string representation of the Hash to the string
 static inline std::string operator+ (const char *lhs, Handle h)
 {
@@ -261,14 +286,34 @@ inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
 }
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+// The below used to work, but broke in gcc-4.7.2. The reason it
+// broke is that it fails to typedef result_type and argument_type,
+// which ... somehow used to work automagically?? It doesn't any more.
 // I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.  Use handle_hash, above, instead.
+// stackoverflow.  You have two choices: use handle_hash, above, or
+// cross your fingers, and hope the definition in the #else clause,
+// below, works.
 
 template<>
-inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+inline std::size_t
+std::hash<opencog::Handle>::operator()(opencog::Handle h) const
 {
     return static_cast<std::size_t>(h.value());
 }
+
+#else
+
+// This works for e, per note immediately above.
+template<>
+struct hash<opencog::Handle>
+{
+    typedef std::size_t result_type;
+    typedef opencog::Handle argument_type;
+    std::size_t
+    operator()(opencog::Handle h) const noexcept
+    { return static_cast<std::size_t>(h.value()); }
+};
+
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
 } //namespace std

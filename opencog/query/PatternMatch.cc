@@ -1,7 +1,7 @@
 /*
  * PatternMatch.cc
  *
- * Copyright (C) 2009, 2014 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -21,433 +21,280 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/BetaRedex.h>
+#include <opencog/atoms/bind/ConcreteLink.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/ClassServer.h>
+
 #include "PatternMatch.h"
-#include "PatternUtils.h"
+#include "PatternMatchEngine.h"
+#include "PatternMatchCallback.h"
 
 using namespace opencog;
 
-PatternMatch::PatternMatch(void) : _used(false) {}
-
-/// See the documentation for do_match() to see what this function does.
-/// This is just a convenience wrapper around do_match().
-void PatternMatch::match(PatternMatchCallback *cb,
-                         Handle hvarbles,
-                         Handle hclauses)
-{
-	// Both must be non-empty.
-	LinkPtr lclauses(LinkCast(hclauses));
-	LinkPtr lvarbles(LinkCast(hvarbles));
-	if (NULL == lclauses or NULL == lvarbles) return;
-
-	// Types must be as expected
-	Type tvarbles = hvarbles->getType();
-	Type tclauses = hclauses->getType();
-	if (LIST_LINK != tvarbles)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ListLink for bound variable list.");
-
-	if (AND_LINK != tclauses)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected AndLink for clause list.");
-
-	std::set<Handle> vars;
-	for (Handle v: lvarbles->getOutgoingSet()) vars.insert(v);
-
-	std::vector<Handle> clauses(lclauses->getOutgoingSet());
-
-	do_match(cb, vars, clauses);
-}
+// Uncomment below to enable debug print
+// #define DEBUG
+#ifdef DEBUG
+	#define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+	#define dbgprt(f, varargs...)
+#endif
 
 /* ================================================================= */
-/**
- * do_imply -- Evaluate an ImplicationLink.
- *
- * Given an ImplicationLink, this method will "evaluate" it, matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
- *
- *    ImplicationLink
- *       AndList
- *          EvaluationList
- *             PredicateNode "_obj"
- *             ListLink
- *                ConceptNode "make"
- *                VariableNode "$var0"
- *          EvaluationList
- *             PredicateNode "from"
- *             ListLink
- *                ConceptNode "make"
- *                VariableNode "$var1"
- *       EvaluationList
- *          PredicateNode "make_from"
- *          ListLink
- *             VariableNode "$var0"
- *             VariableNode "$var1"
- *
- * Then, if the atomspace also contains a parsed version of the English
- * sentence "Pottery is made from clay", that is, if it contains the
- * hypergraph
- *
- *    EvaluationList
- *       PredicateNode "_obj"
- *       ListLink
- *          ConceptNode "make"
- *          ConceptNode "pottery"
- *
- * and the hypergraph
- *
- *    EvaluationList
- *       PredicateNode "from"
- *       ListLink
- *          ConceptNode "make"
- *          ConceptNode "clay"
- *
- * Then, by pattern matching, the predicate part of the ImplicationLink
- * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
- * These bindings are refered to as the 'groundings' or 'solutions'
- * to the variables. So, e.g. $var0 is 'grounded' by "pottery".
- *
- * Next, a grounded copy of the implicand is then created; that is,
- * the following hypergraph is created and added to the atomspace:
- *
- *    EvaluationList
- *       PredicateNode "make_from"
- *       ListLink
- *          ConceptNode "pottery"
- *          ConceptNode "clay"
- *
- * As the above example illustrates, this function expects that the
- * input handle is an implication link. It expects the implication link
- * to consist entirely of one disjunct (one AndList) and one (ungrounded)
- * implicand.  The variables are explicitly declared in the 'varlist'
- * argument to this function. These variables should be understood as
- * 'bound variables' in the usual sense of lambda-calculus. (It is
- * strongly suggested that variables always be declared as VariableNodes;
- * there are several spots in the code where this is explicitly assumed,
- * and declaring some other node type as a vaiable may lead to
- * unexpected results.)
- *
- * Pattern-matching proceeds by finding groundings for these variables.
- * When a pattern match is found, the variables can be understood as
- * being grounded by some explicit terms in the atomspace. This
- * grounding is then used to create a grounded version of the
- * (ungrounded) implicand. That is, the variables in the implicand are
- * substituted by their grounding values.  This method then returns a
- * list of all of the grounded implicands that were created.
- *
- * The act of pattern-matching to the predicate of the implication has
- * an implicit 'for-all' flavour to it: the pattern is matched to 'all'
- * matches in the atomspace.  However, with a suitably defined
- * PatternMatchCallback, the search can be terminated at any time, and
- * so this method can be used to implement a 'there-exists' predicate,
- * or any quantifier whatsoever.
- *
- * Note that this method can be used to create a simple forward-chainer:
- * One need only to take a set of implication links, and call this
- * method repeatedly on them, until one is exhausted.
- */
-
-void PatternMatch::do_imply (Handle himplication,
-                             Implicator &impl,
-                             std::set<Handle>& varset)
+/// A pass-through class, which wraps a regular callback, but captures
+/// all of the different possible groundings that result.  This class is
+/// used to piece together graphs out of multiple components.
+class PMCGroundings : public PatternMatchCallback
 {
-	validate_implication(himplication);
+	private:
+		PatternMatchCallback& _cb;
 
-	// Extract the set of variables, if needed.
-	// This is used only by the deprecated imply() function, as the
-	// BindLink will include a list of variables up-front.
-	if (varset.empty())
-	{
-		FindVariables fv(VARIABLE_NODE);
-		fv.find_vars(_hclauses);
-		varset = fv.varset;
-	}
+	public:
+		PMCGroundings(PatternMatchCallback& cb) : _cb(cb) {}
 
-	// Now perform the search.
-	impl.implicand = _implicand;
-	do_match(&impl, varset, _clauses);
-}
-
-/* ================================================================= */
-typedef std::pair<Handle, const std::set<Type> > ATPair;
-
-/**
- * Extract the variable type(s) from a TypedVariableLink
- *
- * The call is expecting htypelink to point to one of the two
- * following structures:
- *
- *    TypedVariableLink
- *       VariableNode "$some_var_name"
- *       VariableTypeNode  "ConceptNode"
- *
- * or
- *
- *    TypedVariableLink
- *       VariableNode "$some_var_name"
- *       ListLink
- *          VariableTypeNode  "ConceptNode"
- *          VariableTypeNode  "NumberNode"
- *          VariableTypeNode  "WordNode"
- *
- * In either case, the variable itself is appended to "vset",
- * and the list of allowed types are associated with the variable
- * via the map "typemap".
- */
-int PatternMatch::get_vartype(Handle htypelink,
-                              std::set<Handle> &vset,
-                              VariableTypeMap &typemap)
-{
-	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
-	if (2 != oset.size())
-	{
-		logger().warn("%s: TypedVariableLink has wrong size",
-		              __FUNCTION__);
-		return 1;
-	}
-
-	Handle varname = oset[0];
-	Handle vartype = oset[1];
-
-	// The vartype is either a single type name, or a list of typenames.
-	Type t = vartype->getType();
-	if (VARIABLE_TYPE_NODE == t)
-	{
-		const std::string &tn = NodeCast(vartype)->getName();
-		Type vt = classserver().getType(tn);
-
-		if (NOTYPE == vt)
-		{
-			logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
-			               __FUNCTION__, tn.c_str());
-			return 4;
+		// Pass all the calls straight through, except one.
+		bool node_match(const Handle& node1, const Handle& node2) {
+			return _cb.node_match(node1, node2);
 		}
-
-		std::set<Type> ts = {vt};
-		typemap.insert(ATPair(varname, ts));
-		vset.insert(varname);
-	}
-	else if (LIST_LINK == t)
-	{
-		std::set<Type> ts;
-
-		const std::vector<Handle>& tset = LinkCast(vartype)->getOutgoingSet();
-		size_t tss = tset.size();
-		for (size_t i=0; i<tss; i++)
-		{
-			Handle h(tset[i]);
-			if (VARIABLE_TYPE_NODE != h->getType())
-			{
-				logger().warn("%s: TypedVariableLink has unexpected content:\n"
-				              "Expected VariableTypeNode, got %s",
-				              __FUNCTION__,
-				              classserver().getTypeName(h->getType()).c_str());
-				return 3;
-			}
-			const std::string &tn = NodeCast(h)->getName();
-			Type vt = classserver().getType(tn);
-			if (NOTYPE == vt)
-			{
-				logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
-				               __FUNCTION__, tn.c_str());
-				return 5;
-			}
-			ts.insert(vt);
+		bool variable_match(const Handle& node1, const Handle& node2) {
+			return _cb.variable_match(node1, node2);
 		}
-
-		typemap.insert(ATPair(varname,ts));
-		vset.insert(varname);
-	}
-	else
-	{
-		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
-				        "Expected VariableTypeNode or ListLink, got %s",
-		              __FUNCTION__,
-		              classserver().getTypeName(t).c_str());
-		return 2;
-	}
-
-	return 0;
-}
-
-/* ================================================================= */
-/**
- * Validate a BindLink for syntax correctness.
- *
- * Given a BindLink, this will check to make sure that the variable
- * declarations are appropriate.  Thus, for example, a structure
- * similar to the below is expected.
- *
- *    BindLink
- *       ListLink
- *          VariableNode "$var0"
- *          VariableNode "$var1"
- *       ImplicationLink
- *          etc ...
- *
- * The BindLink must indicate the bindings of the variables, and
- * (optionally) limit the types of acceptable groundings for the
- * varaibles.  The ImplicationLink is not validated here, it is
- * validated by validate_implication()
- *
- * As a side-effect, the variables and type restrictions are unpacked.
- */
-
-void PatternMatch::validate_bindvars(Handle hbindlink)
-	throw (InvalidParamException)
-{
-	// Must be non-empty.
-	LinkPtr lbl(LinkCast(hbindlink));
-	if (NULL == lbl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink");
-
-	// Type must be as expected
-	Type tscope = hbindlink->getType();
-	if (BIND_LINK != tscope)
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
-	const std::vector<Handle>& oset = lbl->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"BindLink has wrong size %d", oset.size());
-
-	Handle hdecls(oset[0]);  // VariableNode declarations
-	_himpl = oset[1];   // ImplicationLink
-
-	// Expecting the declaration list to be either a single
-	// variable, or a list of variable declarations
-	Type tdecls = hdecls->getType();
-	if ((VARIABLE_NODE == tdecls) or
-	    NodeCast(hdecls)) // allow *any* node as a variable
-	{
-		_varset.insert(hdecls);
-	}
-	else if (TYPED_VARIABLE_LINK == tdecls)
-	{
-		if (get_vartype(hdecls, _varset, _typemap))
+		bool link_match(const LinkPtr& link1, const LinkPtr& link2) {
+			return _cb.link_match(link1, link2);
+		}
+		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
+			return _cb.post_link_match(link1, link2);
+		}
+		bool evaluate_sentence(const Handle& link_h,
+		                       const std::map<Handle, Handle> &gnds) {
 			throw InvalidParamException(TRACE_INFO,
-				"Cannot understand the typed variable definition");
-	}
-	else if (LIST_LINK == tdecls)
-	{
-		// The list of variable declarations should be .. a list of
-		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
-		size_t dlen = dset.size();
-		for (size_t i=0; i<dlen; i++)
-		{
-			Handle h(dset[i]);
-			Type t = h->getType();
-			if (VARIABLE_NODE == t)
-			{
-				_varset.insert(h);
-			}
-			else if (TYPED_VARIABLE_LINK == t)
-			{
-				if (get_vartype(h, _varset, _typemap))
-					throw InvalidParamException(TRACE_INFO,
-						"Don't understand the TypedVariableLink");
-			}
-			else
-				throw InvalidParamException(TRACE_INFO,
-					"Expected a VariableNode or a TypedVariableLink");
+			              "Not expecting a virtual link here!");
 		}
-	}
-  	else
+		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
+			return _cb.clause_match(pattrn_link_h, grnd_link_h);
+		}
+		bool optional_clause_match(const Handle& pattrn, const Handle& grnd) {
+			return _cb.optional_clause_match(pattrn, grnd);
+		}
+		IncomingSet get_incoming_set(const Handle& h) {
+			return _cb.get_incoming_set(h);
+		}
+		void push(void) { _cb.push(); }
+		void pop(void) { _cb.pop(); }
+		bool initiate_search(PatternMatchEngine* pme,
+	                        const Variables& vars,
+	                        const Pattern& pat)
+		{
+			return _cb.initiate_search(pme, vars, pat);
+		}
+
+		// This one we don't pass through. Instead, we collect the
+		// groundings.
+		bool grounding(const std::map<Handle, Handle> &var_soln,
+		               const std::map<Handle, Handle> &term_soln)
+		{
+			_term_groundings.push_back(term_soln);
+			_var_groundings.push_back(var_soln);
+			return false;
+		}
+
+		std::vector<std::map<Handle, Handle>> _term_groundings;
+		std::vector<std::map<Handle, Handle>> _var_groundings;
+};
+
+/**
+ * Recursive evaluator/grounder/unifier of virtual link types.
+ * The virtual links are in 'virtuals', a partial set of groundings
+ * are in 'var_gnds' and 'term_gnds', and a collection of possible
+ * groundings for disconnected graph components are in 'comp_var_gnds'
+ * and 'comp_term_gnds'.
+ *
+ * Notes below explain the recursive step: how the various disconnected
+ * components are brought together into a candidate grounding. That
+ * candidate is then run through each of the virtual links.  If these
+ * accept the grounding, then the callback is called to make the final
+ * determination.
+ *
+ * The recursion step terminates when comp_var_gnds, comp_term_gnds
+ * are empty, at which point the actual unification is done.
+ */
+bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
+            const std::vector<Handle>& virtuals,
+            const std::vector<Handle>& negations, // currently ignored
+            const std::map<Handle, Handle>& var_gnds,
+            const std::map<Handle, Handle>& term_gnds,
+            // copies, NOT references!
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
+            std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds)
+{
+	// If we are done with the recursive step, then we have one of the
+	// many combinatoric possibilities in the var_gnds and term_gnds
+	// maps. Submit this grounding map to the virtual links, and see
+	// what they've got to say about it.
+	if (0 == comp_var_gnds.size())
 	{
-		throw InvalidParamException(TRACE_INFO,
-			"Expected a ListLink holding variable declarations");
+#ifdef DEBUG
+		dbgprt("\nExplore one possible combinatoric grounding "
+		       "(var_gnds.size = %zu, term_gnds.size = %zu):\n",
+			   var_gnds.size(), term_gnds.size());
+		PatternMatchEngine::print_solution(var_gnds, term_gnds);
+#endif
+
+		// Note, FYI, that if there are no virtual clauses at all,
+		// then this loop falls straight-through, and the grounding
+		// is reported as a match to the callback.  That is, the
+		// virtuals only serve to reject possibilities.
+		for (const Handle& virt : virtuals)
+		{
+			// At this time, we expect all virtual links to be in
+			// one of two forms: either EvaluationLink's or
+			// GreaterThanLink's. The EvaluationLinks should have
+			// the structure
+			//
+			//   EvaluationLink
+			//       GroundedPredicateNode "scm:blah"
+			//       ListLink
+			//           Arg1Atom
+			//           Arg2Atom
+			//
+			// The GreaterThanLink's should have the "obvious" structure
+			//
+			//   GreaterThanLink
+			//       Arg1Atom
+			//       Arg2Atom
+			//
+			// In either case, one or more VariableNodes should appear
+			// in the Arg atoms. So, we ground the args, and pass that
+			// to the callback.
+
+			bool match = cb.evaluate_sentence(virt, var_gnds);
+
+			if (not match) return false;
+		}
+
+		// Yay! We found one! We now have a fully and completely grounded
+		// pattern! See what the callback thinks of it.
+		return cb.grounding(var_gnds, term_gnds);
 	}
+	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
+
+	// Recurse over all components. If component k has N_k groundings,
+	// and there are m components, then we have to explore all
+	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
+	// We do this recursively, by poping N_m off the back, and calling
+	// ourselves.
+	//
+	// vg and vp will be the collection of all of the different possible
+	// groundings for one of the components (well, its for component m,
+	// in the above notation.) So the loop below tries every possibility.
+	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
+	comp_var_gnds.pop_back();
+	std::vector<std::map<Handle, Handle>> pg = comp_term_gnds.back();
+	comp_term_gnds.pop_back();
+
+	size_t ngnds = vg.size();
+	for (size_t i=0; i<ngnds; i++)
+	{
+		// Given a set of groundings, tack on those for this component,
+		// and recurse, with one less component. We need to make a copy,
+		// of course.
+		std::map<Handle, Handle> rvg(var_gnds);
+		std::map<Handle, Handle> rpg(term_gnds);
+
+		const std::map<Handle, Handle>& cand_vg(vg[i]);
+		const std::map<Handle, Handle>& cand_pg(pg[i]);
+		rvg.insert(cand_vg.begin(), cand_vg.end());
+		rpg.insert(cand_pg.begin(), cand_pg.end());
+
+		bool accept = recursive_virtual(cb, virtuals, negations, rvg, rpg,
+		                                comp_var_gnds, comp_term_gnds);
+
+		// Halt recursion immediately if match is accepted.
+		if (accept) return true;
+	}
+	return false;
 }
 
 /* ================================================================= */
 /**
- * Validate a ImplicationLink for syntax correctness.
+ * Ground (solve) a pattern; perform unification. That is, find one
+ * or more groundings for the variables occuring in a collection of
+ * clauses (a hypergraph). The hypergraph can be thought of as a
+ * a 'predicate' which becomes 'true' when a grounding exists.
  *
- * Given an ImplicatioLink, this will check to make sure that
- * it is of the appropriate structure: that it consists of two
- * parts: a set of clauses, and an implicand.  That is, it must
- * have the structure:
+ * The predicate is defined in terms of two hypergraphs: one is a
+ * hypergraph defining a pattern to be grounded, and the other is a
+ * list of bound variables in the first.
  *
- *    ImplicationLink
- *       SomeLink
- *       AnotherLink
+ * The bound variables are, by convention, VariableNodes.  (The code in
+ * the pattern match engine doesn't care whether the variable nodes are
+ * actually of type VariableNode, and so can work with variables that
+ * are any kind of node. However, the default callbacks do check for
+ * this type. Thus, the restriction, by convention, that the variables
+ * must be of type VariableNode.)  The list of bound variables is then
+ * assumed to be listed using the ListLink type. So, for example:
  *
- * The conetns of "SomeLink" is not validated here, it is
- * validated by validate_clauses()
+ *    ListLink
+ *        VariableNode "variable 1"
+ *        VariableNode "another variable"
  *
- * As a side-effect, if SomeLink is an AndLink, the list of clauses
- * is unpacked.
+ * The pattern hypergraph is assumed to be a list of "clauses", where
+ * each "clause" should be thought of as the tree defined by the outgoing
+ * sets in it.  The below assumes that the list of clauses is specified
+ * by means of an AndLink, so, for example:
+ *
+ *     AndLink
+ *        SomeLink ....
+ *        SomeOtherLink ...
+ *
+ * The clauses are assumed to be connected by variables, i.e. each
+ * clause has a variable that also appears in some other clause.  Even
+ * more strongly, it is assumed that there is just one connected
+ * component; the code below throws an error if there is more than one
+ * connected component.  The reason for this is to avoid unintended
+ * combinatoric explosions: the grounding of any one (connected)
+ * component is completely independent of the grounding of any other
+ * component.  So, if there are two components, and one has N groundings
+ * and the other has M groundings, then the two together trivially have
+ * MxN groundings. Its worse if there are 4, 4... components. Rather
+ * than stupidly reporting a result MxNx... times, we just throw an
+ * error, and let the user decide what to do.
+ *
+ * The grounding proceeds by requiring each clause to match some part
+ * of the atomspace (i.e. of the universe of hypergraphs stored in the
+ * atomspace). When a solution is found, PatternMatchCallback::solution
+ * method is called, and it is passed two maps: one mapping the bound
+ * variables to their groundings, and the other mapping the pattern
+ * clauses to their corresponding grounded clauses.
+ *
+ * Note: the pattern matcher itself doesn't use the atomspace, or care
+ * if the groundings live in the atomspace; it can search anything.
+ * However, the default callbacks do use the atomspace to find an
+ * initial starting point for the search, and thus the search defacto
+ * happens on the atomspace.  This restriction can be lifted by tweaking
+ * the callback that initially launches the search.
+ *
+ * At this time, the list of clauses is understood to be a single
+ * disjunct; that is, all of the clauses must be simultaneously
+ * satisfied.  A future extension could allow the use of MatchOrLinks
+ * to support multiple exclusive disjuncts. See the README for more info.
  */
-void PatternMatch::validate_implication (Handle himplication)
-	throw (InvalidParamException)
-{
-	// Must be non-empty.
-	LinkPtr limplication(LinkCast(himplication));
-	if (NULL == limplication)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	// Type must be as expected
-	Type timpl = himplication->getType();
-	if (IMPLICATION_LINK != timpl)
-		throw InvalidParamException(TRACE_INFO,
-			"Expected ImplicationLink");
-
-	const std::vector<Handle>& oset = limplication->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"ImplicationLink has wrong size: %d", oset.size());
-
-	_hclauses = oset[0];
-	_implicand = oset[1];
-
-	// The predicate is either an AndList, or a single clause
-	// If its an AndList, then its a list of clauses.
-	// XXX FIXME Perhaps, someday, some sort of embedded OrList should
-	// be supported, allowing several different patterns to be matched
-	// in one go. But not today, this is complex and low priority. See
-	// the README for slighly more detail
-	Type tclauses = _hclauses->getType();
-	if (AND_LINK == tclauses)
-	{
-		_clauses = LinkCast(_hclauses)->getOutgoingSet();
-	}
-	else
-	{
-		// There's just one single clause!
-		_clauses.push_back(_hclauses);
-	}
-}
 
 /* ================================================================= */
-/**
- * Run the full validation suite.
- */
-void PatternMatch::validate(Handle hbindlink)
-	throw (InvalidParamException)
-{
-	validate_bindvars(hbindlink);
-	validate_implication(_himpl);
-	validate_clauses(_varset, _clauses);
-}
-
 /* ================================================================= */
 /**
  * Evaluate an ImplicationLink embedded in a BindLink
  *
  * Given a BindLink containing variable declarations and an
- * ImplicationLink, this method will "evaluate" the implication, matching
- * the predicate, and creating a grounded implicand, assuming the
- * predicate can be satisfied. Thus, for example, given the structure
+ * ImplicationLink, this method will "evaluate" the implication,
+ * matching the predicate, and creating a grounded implicand,
+ * assuming the predicate can be satisfied. Thus, for example,
+ * given the structure
  *
  *    BindLink
  *       ListLink
@@ -457,25 +304,103 @@ void PatternMatch::validate(Handle hbindlink)
  *          AndList
  *             etc ...
  *
- * Evaluation proceeds as decribed in the "do_imply()" function above.
+ * Evaluation proceeds as decribed in the "do_imply()" function below.
  * The whole point of the BindLink is to do nothing more than
  * to indicate the bindings of the variables, and (optionally) limit
- * the types of acceptable groundings for the varaibles.
+ * the types of acceptable groundings for the variables.
  */
-
-void PatternMatch::do_bindlink (Handle hbindlink,
-                                Implicator& implicator)
+bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
 {
-	validate_bindvars(hbindlink);
-	implicator.set_type_restrictions(_typemap);
-	do_imply(_himpl, implicator, _varset);
+   if (check_conn and 0 == _virtual.size() and 0 < _components.size())
+		throw InvalidParamException(TRACE_INFO,
+			"BindLink consists of multiple disconnected components!");
+			// ConcreteLink::check_connectivity(_comps);
+
+	return SatisfactionLink::satisfy(pmc);
 }
 
-void PatternMatch::do_imply (Handle himplication,
-                             Implicator &impl)
+/* ================================================================= */
+
+// All clauses of the Concrete link are connected, so this is easy.
+bool ConcreteLink::satisfy(PatternMatchCallback& pmcb) const
 {
-	std::set<Handle> varset;
-	do_imply(himplication, impl, varset);
+   PatternMatchEngine pme(pmcb, _varlist, _pat);
+
+#ifdef DEBUG
+	debug_print();
+#endif
+
+	bool found = pmcb.initiate_search(&pme, _varlist, _pat);
+
+#ifdef DEBUG
+	printf("==================== Done with Search ==================\n");
+#endif
+	return found;
+}
+
+/* ================================================================= */
+
+bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
+{
+	// If there is just one connected component, we don't have to
+	// do anything special to find a grounding for it.  Proceed
+	// as normal.
+	if (1 == _num_comps)
+	{
+		return ConcreteLink::satisfy(pmcb);
+	}
+
+	// If we are here, then we've got a knot in the center of it all.
+	// Removing the virtual clauses from the hypergraph typically causes
+	// the hypergraph to fall apart into multiple components, (i.e. none
+	// are connected to one another). The virtual clauses tie all of
+	// these back together into a single connected graph.
+	//
+	// There are several solution strategies possible at this point.
+	// The one that we will pursue, for now, is to first ground all of
+	// the distinct components individually, and then run each possible
+	// grounding combination through the virtual link, for the final
+	// accept/reject determination.
+
+#ifdef DEBUG
+	printf("VIRTUAL PATTERN: ====================== "
+	       "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
+	printf("Virtuals are:\n");
+	size_t iii=0;
+	for (const Handle& v : _virtual)
+	{
+		printf("Virtual clause %zu of %zu:\n%s\n", iii, _num_virts,
+		       v->toShortString().c_str());
+		iii++;
+	}
+#endif
+
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
+	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+
+	for (size_t i=0; i<_num_comps; i++)
+	{
+		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
+		       i, _num_comps);
+		// Pass through the callbacks, collect up answers.
+		PMCGroundings gcb(pmcb);
+		ConcreteLinkPtr clp(ConcreteLinkCast(_components.at(i)));
+		clp->satisfy(gcb);
+
+		comp_var_gnds.push_back(gcb._var_groundings);
+		comp_term_gnds.push_back(gcb._term_groundings);
+	}
+
+	// And now, try grounding each of the virtual clauses.
+	dbgprt("BEGIN component recursion: ====================== "
+	       "num comp=%zd num virts=%zd\n",
+	       comp_var_gnds.size(), _virtual.size());
+	std::map<Handle, Handle> empty_vg;
+	std::map<Handle, Handle> empty_pg;
+	std::vector<Handle> optionals; // currently ignored
+	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
+	                  empty_vg, empty_pg,
+	                  comp_var_gnds, comp_term_gnds);
 }
 
 /* ===================== END OF FILE ===================== */

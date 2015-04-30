@@ -1,7 +1,7 @@
 /*
  * Instantiator.cc
  *
- * Copyright (C) 2009, 2014 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -21,26 +21,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
 
 using namespace opencog;
 
-Handle Instantiator::walk_tree(Handle expr)
+Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
 	if (not lexpr)
 	{
+		// If were are here, we are a Node.
 		if (VARIABLE_NODE != t)
-			return expr;
+			return Handle(expr);
 
 		// If we are here, we found a variable. Look it up. Return a
 		// grounding if it has one, otherwise return the variable
 		// itself
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		return _vmap->end() != it ? it->second : expr;
+		return _vmap->end() != it ? it->second : Handle(expr);
 	}
 
 	// If we are here, then we have a link. Walk it.
@@ -48,10 +49,20 @@ Handle Instantiator::walk_tree(Handle expr)
 	// Walk the subtree, substituting values for variables.
 	HandleSeq oset_results;
 	for (Handle h : lexpr->getOutgoingSet())
-		oset_results.push_back(walk_tree(h));
+	{
+		Handle hg = walk_tree(h);
+		// It would be a NULL handle if it's deleted... Just skip
+		// over it. We test the pointer here, not the uuid, since
+		// the uuid's are all Handle::UNDEFINED until we put them
+		// into the atomspace.
+		if (NULL != hg)
+			oset_results.push_back(hg);
+	}
 
 	// Fire execution links, if found.
-	if (t == EXECUTION_OUTPUT_LINK)
+	if ((EXECUTION_OUTPUT_LINK == t)
+	   or (PLUS_LINK == t)
+	   or (TIMES_LINK == t))
 	{
 		// The atoms being created above might not all be in the
 		// atomspace, just yet. Because we have no clue what the
@@ -65,7 +76,14 @@ Handle Instantiator::walk_tree(Handle expr)
 
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
-		return ExecutionOutputLink::do_execute(_as, oset_results);
+		return ExecutionOutputLink::do_execute(_as, t, oset_results);
+	}
+	else if (DELETE_LINK == t)
+	{
+		for (Handle h: oset_results)
+			_as->removeAtom(h, true);
+
+		return Handle::UNDEFINED;
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
@@ -86,9 +104,8 @@ Handle Instantiator::walk_tree(Handle expr)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(Handle& expr,
+Handle Instantiator::instantiate(const Handle& expr,
                                  const std::map<Handle, Handle> &vars)
-	throw (InvalidParamException)
 {
 	// throw, not assert, because this is a user error ...
 	if (Handle::UNDEFINED == expr)
@@ -101,7 +118,11 @@ Handle Instantiator::instantiate(Handle& expr,
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	return _as->addAtom(walk_tree(expr));
+	// A null pointer means that we hit
+	Handle gnd = walk_tree(expr);
+	if (NULL != gnd)
+		return _as->addAtom(gnd);
+	return gnd;
 }
 
 /* ===================== END OF FILE ===================== */

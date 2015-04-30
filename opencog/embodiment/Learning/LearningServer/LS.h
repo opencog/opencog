@@ -24,7 +24,7 @@
 #ifndef LS_H
 #define LS_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/util/Logger.h>
 

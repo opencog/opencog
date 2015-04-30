@@ -70,7 +70,7 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
-   
+
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
@@ -206,36 +206,41 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
  * @deprecated do not use in new code!
  */
 template<typename InputIterator>
-HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare)
+HandleSeq filter(InputIterator begin, InputIterator end, HandlePredicate& compare)
 {
     HandleSeq result;
     std::copy_if(begin, end, back_inserter(result),
-        [&](Handle h)->bool { return (*compare)(h); } );
+        [&](Handle h)->bool { return compare(h); } );
     return result;
 }
 
-struct STIAboveThreshold : public AtomPredicate {
+struct STIAboveThreshold : public HandlePredicate
+{
     STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-    virtual bool test(AtomPtr atom) {
+    virtual bool test(const Handle& atom) const
+    {
         return atom->getAttentionValue()->getSTI() > threshold;
     }
     AttentionValue::sti_t threshold;
 };
 
-struct LTIAboveThreshold : public AtomPredicate {
+struct LTIAboveThreshold : public HandlePredicate
+{
     LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-    virtual bool test(AtomPtr atom) {
+    virtual bool test(const Handle& atom) const
+    {
         return atom->getAttentionValue()->getLTI() > threshold;
     }
     AttentionValue::lti_t threshold;
 };
 
 template<typename InputIterator>
-HandleSeq filter_InAttentionalFocus(AtomSpace* as, InputIterator begin, InputIterator end) {
+HandleSeq filter_InAttentionalFocus(AtomSpace* as, InputIterator begin, InputIterator end)
+{
     STIAboveThreshold sti_above(as->getAttentionalFocusBoundary());
-    return filter(begin, end, &sti_above);
+    return filter(begin, end, sti_above);
 }
 
 /**
@@ -262,13 +267,13 @@ template <typename OutputIterator> OutputIterator
 getHandleSetFiltered(AtomSpace* as, OutputIterator result,
              Type type,
              bool subclass,
-             AtomPredicate* compare)
+             HandlePredicate& compare)
 {
     HandleSeq hs;
     as->getHandlesByType(back_inserter(hs), type, subclass);
 
     return std::copy_if(hs.begin(), hs.end(), result,
-        [&](Handle h)->bool { return (*compare)(h); } );
+        [&](Handle h)->bool { return compare(h); } );
 }
 
 // Wrapper for comparing atoms from a HandleSeq
@@ -342,14 +347,14 @@ public:
         delete atomSpace;
     }
 
-    struct mean : public AtomPredicate {
-        virtual bool test(AtomPtr h) {
+    struct mean : public HandlePredicate {
+        virtual bool test(const Handle& h) const {
             return h->getTruthValue()->getMean() > 0.8;
         }
     };
 
-    struct everything : public AtomPredicate {
-        virtual bool test(AtomPtr h) {
+    struct everything : public HandlePredicate {
+        virtual bool test(const Handle& h) const {
             return true;
         }
     };
@@ -432,7 +437,7 @@ public:
 
             mean m;
             HandleSeq high_mean;
-            getHandleSetFiltered(atomSpace, back_inserter(high_mean), ATOM, true, &m);
+            getHandleSetFiltered(atomSpace, back_inserter(high_mean), ATOM, true, m);
 
             //std::cout << "high mean size " << high_mean.size() << std::endl;
             //for (int jj = 0; jj < high_mean.size(); jj++) {
@@ -447,7 +452,7 @@ public:
 
             HandleSeq all;
             everything e;
-            getHandleSetFiltered(atomSpace, back_inserter(all), ATOM, true, &e);
+            getHandleSetFiltered(atomSpace, back_inserter(all), ATOM, true, e);
 
             HandleSeq AF_nodes = filter_InAttentionalFocus(atomSpace, nodes.begin(), nodes.end());
             HandleSeq AF_links = filter_InAttentionalFocus(atomSpace, links.begin(), links.end());
@@ -844,7 +849,7 @@ public:
 
         HandleSeq highSTI;
         STIAboveThreshold sti_above(1000);
-        getHandleSetFiltered(atomSpace, back_inserter(highSTI), NODE, true, &sti_above);
+        getHandleSetFiltered(atomSpace, back_inserter(highSTI), NODE, true, sti_above);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(STIAboveThreshold(1000) (highSTI[i]) );
         }
@@ -855,7 +860,7 @@ public:
 
         HandleSeq highLTI;
         LTIAboveThreshold lti_above(800);
-        getHandleSetFiltered(atomSpace, back_inserter(highLTI), NODE, true, &lti_above);
+        getHandleSetFiltered(atomSpace, back_inserter(highLTI), NODE, true, lti_above);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
         }
@@ -889,7 +894,7 @@ public:
         logger().debug("STIAboveThreshold");
 
         STIAboveThreshold sti_above(1000);
-        HandleSeq highSTI = filter(atoms.begin(), atoms.end(), &sti_above);
+        HandleSeq highSTI = filter(atoms.begin(), atoms.end(), sti_above);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             //std::cout << atomSpace->atomAsString(highSTI[i],false) << std::endl;
             //std::cout << atomSpace->getSTI(highSTI[i]) << std::endl;
@@ -901,7 +906,7 @@ public:
         logger().debug("LTIAboveThreshold");
 
         LTIAboveThreshold lti_above(800);
-        HandleSeq highLTI = filter(atoms.begin(), atoms.end(), &lti_above);
+        HandleSeq highLTI = filter(atoms.begin(), atoms.end(), lti_above);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
         }

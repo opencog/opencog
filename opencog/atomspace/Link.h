@@ -82,7 +82,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& h,
+    Link(Type t, const Handle& h,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -92,7 +92,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& ha, Handle &hb,
+    Link(Type t, const Handle& ha, const Handle &hb,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -103,7 +103,7 @@ public:
         init(oset);
     }
 
-    Link(Type t, Handle& ha, Handle &hb, Handle &hc,
+    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -114,7 +114,8 @@ public:
         oset.push_back(hc);
         init(oset);
     }
-    Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
+    Link(Type t, const Handle& ha, const Handle &hb,
+	      const Handle &hc, const Handle &hd,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -132,7 +133,9 @@ public:
      * Cannot be const, because the get() functions can't be,
      * because thread-safe locking required in the gets. */
     Link(Link &l)
-        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
+        : Atom(l.getType(),
+               l.getTruthValue()->clone(),
+               l.getAttentionValue()->clone())
     {
         init(l.getOutgoingSet());
     }
@@ -172,6 +175,19 @@ public:
         }
     }
 
+    //! Invoke the callback on each atom in the outgoing set of
+    //! handle h, until till one of them returns true, in which case,
+    //! the loop stops and returns true. Otherwise the callback is
+    //! called on all outgoings and false is returned.
+    template<class T>
+    inline bool foreach_outgoing(bool (T::*cb)(const Handle&), T *data)
+    {
+        for (const Handle& out_h : getOutgoingSet()) {
+            if ((data->*cb)(out_h)) return true;
+        }
+        return false;
+    }
+
     /**
      * Returns a string representation of the link.
      *
@@ -205,7 +221,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a source.
      */
-    bool isSource(size_t) throw (IndexErrorException, InvalidParamException);
+    bool isSource(size_t) const throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given handle is a target of this link.
@@ -213,7 +229,7 @@ public:
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
      */
-    bool isTarget(Handle) throw (InvalidParamException);
+    bool isTarget(Handle) const throw (InvalidParamException);
 
     /**
      * Returns whether the element in a given position in the
@@ -223,7 +239,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a target.
      */
-    bool isTarget(size_t) throw (IndexErrorException, InvalidParamException);
+    bool isTarget(size_t) const throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given atom is equal to the current link.
@@ -242,7 +258,8 @@ public:
 
 static inline LinkPtr LinkCast(const Handle& h)
     { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
-static inline LinkPtr LinkCast(AtomPtr a) { return std::dynamic_pointer_cast<Link>(a); }
+static inline LinkPtr LinkCast(const AtomPtr& a)
+    { return std::dynamic_pointer_cast<Link>(a); }
 
 // XXX temporary hack ...
 #define createLink std::make_shared<Link>

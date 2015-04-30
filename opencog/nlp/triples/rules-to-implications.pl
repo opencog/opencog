@@ -345,7 +345,7 @@ sub print_exec
 
 	# Print a copy of the original clause for reference
 	print "$indent;; \&$clause\n";
-	print "$indent(ExecutionLink\n";
+	print "$indent(ExecutionOutputLink\n";
 	print "$indent   (GroundedSchemaNode \"$link\")\n";
 	print "$indent   (ListLink\n";
 	if ($item1 =~ /^\$/)

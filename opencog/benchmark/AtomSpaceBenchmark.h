@@ -80,6 +80,7 @@ class AtomSpaceBenchmark
     std::string memoize_or_compile(std::string);
 
     std::vector<std::string>  methodNames;
+
 public:
     unsigned int Nreps;
     unsigned int Nloops;
@@ -90,7 +91,7 @@ public:
     int saveInterval;
     bool doStats;
     bool buildTestData;
-
+    unsigned long randomseed;
 
     enum BenchType { BENCH_AS = 1, BENCH_TABLE,
 #ifdef HAVE_GUILE
@@ -125,6 +126,7 @@ public:
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
             bool display = true);
     Handle getRandomHandle();
+    void setTestAllMethods() { setMethod("all"); }
 
     timepair_t bm_noop();
     timepair_t bm_addNode();
@@ -132,8 +134,7 @@ public:
     timepair_t bm_rmAtom();
 
     timepair_t bm_getType();
-    timepair_t bm_getNodeHandles();
-    timepair_t bm_getHandleSet();
+    timepair_t bm_getHandlesByType();
     timepair_t bm_getOutgoingSet();
     timepair_t bm_getIncomingSet();
 

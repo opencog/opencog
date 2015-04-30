@@ -26,11 +26,11 @@
 
 #include <opencog/util/tree.h>
 
-#include <opencog/learning/moses/deme/deme_expander.h>
-#include <opencog/learning/moses/metapopulation/metapopulation.h>
-#include <opencog/learning/moses/moses/moses_params.h>
-#include <opencog/learning/moses/scoring/scoring_base.h>
-#include <opencog/learning/moses/optimization/optimization.h>
+#include <moses/moses/deme/deme_expander.h>
+#include <moses/moses/metapopulation/metapopulation.h>
+#include <moses/moses/moses/moses_params.h>
+#include <moses/moses/scoring/scoring_base.h>
+#include <moses/moses/optimization/optimization.h>
 
 #include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>

@@ -4,12 +4,15 @@ guile           - Guile (scheme) usage examples
 python          - Python usage examples
 
 pattern-matcher - Provides example scheme code that defines a search
-                  pattern (using BindLink).
+                  pattern (using BindLink and SatisfactionLink).
+
 atomtypes       - Shows how to define custom atom types.
+
 hopfield        - Provides a toy example for Economic Attention
                   Allocation Networks, using OpenCog to emulate a
                   associate memory neural network known as a
                   'Hopfield network'.
+
 visual_demos    - A number of demos to visually represent the dynamics
                   of OpenCog.
 

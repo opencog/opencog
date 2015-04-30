@@ -77,7 +77,6 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 
 
 PythonEval* PythonEval::singletonInstance = NULL;
-AtomSpace* PythonEval::singletonAtomSpace = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
 const char* NO_FUNCTION_NAME = NULL;
@@ -89,9 +88,14 @@ const int MISSING_FUNC_CODE = -1;
 #define NO_COMPILER_FLAGS NULL
 
 static bool already_initialized = false;
+static bool initialized_outside_opencog = false;
 
 void opencog::global_python_initialize()
 {
+    // We don't really know the gstate yet but we'll set it here to avoid
+    // compiler warnings below.
+    PyGILState_STATE gstate = PyGILState_UNLOCKED;
+
     logger().debug("[global_python_initialize] Start");
 
     // Throw an exception if this is called more than once.
@@ -102,10 +106,23 @@ void opencog::global_python_initialize()
 
     // Remember this initialization.
     already_initialized = true;
+   
+    // Start up Python. 
+    if (Py_IsInitialized())  {
+        // If we were already initialized then someone else did it.
+        initialized_outside_opencog = true;
 
-    // Start up Python. (InitThreads grabs GIL implicitly)
-    Py_InitializeEx(NO_SIGNAL_HANDLERS);
-    PyEval_InitThreads();
+        // Just grab the GIL
+        gstate = PyGILState_Ensure();
+
+    } else {
+        // We are doing the initialization.
+        initialized_outside_opencog = false;
+
+        // Initialize Python (InitThreads grabs GIL implicitly)
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();        
+    }
 
     logger().debug("[global_python_initialize] Adding OpenCog sys.path "
             "directories");
@@ -178,8 +195,11 @@ void opencog::global_python_initialize()
     // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
     // Py_DECREF(pySysPath);
 
-    // Release the GIL. Otherwise the Python shell hangs on startup.
-    PyEval_ReleaseLock();
+    // Release the GIL, otherwise the Python shell hangs on startup.
+    if (initialized_outside_opencog)
+        PyGILState_Release(gstate);
+    else
+        PyEval_ReleaseLock();
 
     logger().debug("[global_python_initialize] Finish");
 }
@@ -188,8 +208,9 @@ void opencog::global_python_finalize()
 {
     logger().debug("[global_python_finalize] Start");
 
-    // Cleanup Python. 
-    Py_Finalize();
+    // Cleanup Python.
+    if (!initialized_outside_opencog)
+        Py_Finalize();
 
     // No longer initialized.
     already_initialized = false;
@@ -245,10 +266,6 @@ PythonEval::~PythonEval()
 */
 void PythonEval::create_singleton_instance(AtomSpace* atomspace)
 {
-    // Remember which atomspace is used for the singleton for
-    // later sanity checks.
-    singletonAtomSpace = atomspace;
-    
     // Create the single instance of a PythonEval object.
     singletonInstance = new PythonEval(atomspace);
 }
@@ -264,10 +281,6 @@ void PythonEval::delete_singleton_instance()
     // Delete the singleton PythonEval instance.
     delete singletonInstance;
     singletonInstance = NULL;
-
-    // Clear the reference to the atomspace. We do not own it so we
-    // won't delete it.
-    singletonAtomSpace = NULL;
 }
 
 PythonEval& PythonEval::instance(AtomSpace* atomspace)
@@ -508,6 +521,14 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Get the module and stripped function name.
     pyModule = this->module_for_function(moduleFunction, functionName);
 
+    // If we can't find that module then throw an exception.
+    if (!pyModule) {
+        PyGILState_Release(gstate);
+        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        throw (RuntimeException(TRACE_INFO, "Python module for '%s' not found!",
+                moduleFunction.c_str()));
+    }
+        
     // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
     pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());

@@ -26,7 +26,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/combo/indefinite_object.h>
+#include <moses/comboreduct/combo/indefinite_object.h>
 #include "avatar_operator.h"
 
 namespace opencog { namespace combo {

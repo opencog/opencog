@@ -41,10 +41,10 @@
 (define (exhaust)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -82,10 +82,10 @@
 (define (exhaust-2)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -130,10 +130,10 @@
 (define (exhaust-3)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -177,10 +177,10 @@
 (define (exhaust-4)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
          (VariableNode "$d")
@@ -222,10 +222,10 @@
 (define (exhaust-5)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c")
       )
@@ -289,10 +289,10 @@
 (define (exhaust-eq-12)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b")
          (VariableNode "$c1")
          (VariableNode "$c2")
@@ -337,10 +337,10 @@
 (define (exhaust-eq-6)
    (BindLink
       ;; variable decls
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$a")
-            (VariableTypeNode "ConceptNode"))
+            (TypeNode "ConceptNode"))
          (VariableNode "$b1")
          (VariableNode "$b2")
          (VariableNode "$c1")

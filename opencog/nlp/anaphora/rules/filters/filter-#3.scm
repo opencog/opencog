@@ -7,22 +7,22 @@
 
 (define filter-#3
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$antecedent-number")
-                (VariableTypeNode "NumberNode")
+                (TypeNode "NumberNode")
             )
             (TypedVariableLink
                 (VariableNode "$anaphor-number")
-                (VariableTypeNode "NumberNode")
+                (TypeNode "NumberNode")
             )
         )
         (ImplicationLink

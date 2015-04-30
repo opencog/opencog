@@ -20,7 +20,7 @@ ADD_LIBRARY (smob SHARED
 TARGET_LINK_LIBRARIES(smob
 	atomspace
 	execution
-	cogutil
+	${COGUTIL_LIBRARY}
 	${GUILE_LIBRARIES}
 )
 

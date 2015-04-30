@@ -27,18 +27,18 @@
 
 (define (rule-good)
    (BindLink
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$var2")
-            (VariableTypeNode "WordInstanceNode")
+            (TypeNode "WordInstanceNode")
          )
          (TypedVariableLink
             (VariableNode "$prep")
-            (VariableTypeNode "PrepositionalRelationshipNode")
+            (TypeNode "PrepositionalRelationshipNode")
          )
          (TypedVariableLink
              (VariableNode "$var3")
-             (VariableTypeNode "WordInstanceNode")
+             (TypeNode "WordInstanceNode")
          )
          (VariableNode "$var1")
       )
@@ -72,23 +72,23 @@
 )
 
 
-; This rule has an explicitly bad VariableTypeNode --
+; This rule has an explicitly bad TypeNode --
 ; PreposxitionalRelationshipNode is misspelled (on purpose,
 ; since we want to test for the mis-spelled case).
 (define (rule-bad)
    (BindLink
-      (ListLink
+      (VariableList
          (TypedVariableLink
             (VariableNode "$var2")
-            (VariableTypeNode "WordInstanceNode")
+            (TypeNode "WordInstanceNode")
          )
          (TypedVariableLink
             (VariableNode "$prep")
-            (VariableTypeNode "PreposxitionalRelationshipNode")
+            (TypeNode "PreposxitionalRelationshipNode")
          )
          (TypedVariableLink
              (VariableNode "$var3")
-             (VariableTypeNode "WordInstanceNode")
+             (TypeNode "WordInstanceNode")
          )
          (VariableNode "$var1")
       )

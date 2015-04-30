@@ -55,33 +55,33 @@
 (define (impy)
 
   (BindLink (stv 1 1)
-   (ListLink
+   (VariableList
     (TypedVariableLink
      (VariableNode "$agent")
-     (ListLink
-      (VariableTypeNode "ConceptNode")
-      (VariableTypeNode "WordInstanceNode")
+     (TypeChoice
+      (TypeNode "ConceptNode")
+      (TypeNode "WordInstanceNode")
       )
      )
     (TypedVariableLink
      (VariableNode "$framePredicateNode")
-     (VariableTypeNode "PredicateNode")
+     (TypeNode "PredicateNode")
      )
     (TypedVariableLink
      (VariableNode "$frameAgentPredicateNode")
-     (VariableTypeNode "PredicateNode")
+     (TypeNode "PredicateNode")
      )
     (TypedVariableLink
      (VariableNode "$frameDepictivePredicateNode")
-     (VariableTypeNode "PredicateNode")
+     (TypeNode "PredicateNode")
      )
     (TypedVariableLink
      (VariableNode "$frameEntityPredicateNode")
-     (VariableTypeNode "PredicateNode")
+     (TypeNode "PredicateNode")
      )
     (TypedVariableLink
      (VariableNode "$targetEntity")
-     (VariableTypeNode "WordInstanceNode")
+     (TypeNode "WordInstanceNode")
      )
     )
    (ImplicationLink

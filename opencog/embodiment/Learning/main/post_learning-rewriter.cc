@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/type_checker/type_tree.h>
 
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>

@@ -37,7 +37,7 @@ ParseRank::~ParseRank()
  * The returned value is the highest-ranked parse of the
  * bunch.
  */
-Handle ParseRank::get_top_ranked_parse(Handle h)
+Handle ParseRank::get_top_ranked_parse(const Handle& h)
 {
 	top = Handle::UNDEFINED;
 	top_rank = -123456.0;
@@ -48,7 +48,7 @@ Handle ParseRank::get_top_ranked_parse(Handle h)
 /**
  * Get the parse ranking for a given parse.
  */
-bool ParseRank::lookat_parse(Handle h)
+bool ParseRank::lookat_parse(const Handle& h)
 {
 	double rank = h->getTruthValue()->getConfidence();
 #ifdef DEBUG

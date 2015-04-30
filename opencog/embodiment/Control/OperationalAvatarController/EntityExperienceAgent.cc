@@ -27,6 +27,7 @@
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
 #include <opencog/embodiment/Control/OperationalAvatarController/EntityExperienceAgent.h>
 
@@ -46,7 +47,7 @@ void EntityExperienceAgent::run()
     // Disable this agent
     return;
 
-    logger().debug("EntityExperienceAgent::%s - Experiencing entities at moment '%d'", 
+    logger().debug("EntityExperienceAgent::%s - Experiencing entities at moment '%d'",
                    __FUNCTION__, this->elapsedMoments );
 
     AtomSpace& atomSpace = _cogserver.getAtomSpace();
@@ -66,8 +67,10 @@ void EntityExperienceAgent::run()
         HandleSeq links, link(2);
         link[0] = Handle::UNDEFINED;
         link[1] = Handle::UNDEFINED;
-        atomSpace.getHandlesByOutgoing( std::back_inserter(links), link, &type[0],
-                                 &subclasses[0], 2, REFERENCE_LINK, false );
+        getHandlesByOutgoing( std::back_inserter(links),
+                                 atomSpace,
+                                 REFERENCE_LINK, link, &type[0],
+                                 &subclasses[0], 2);
         unsigned int i;
         for( i = 0; i < links.size( ); ++i ) {
             semeNodes.push_back( atomSpace.getOutgoing( links[i], 1 ) );
@@ -79,22 +82,26 @@ void EntityExperienceAgent::run()
     // first, for each seme node, retrieve its class node(s) and then
     // compute its importance giving the agent perception of that object
     unsigned int i;
-    for ( i = 0; i < semeNodes.size( ); ++i ) {        
+    for ( i = 0; i < semeNodes.size( ); ++i ) {
 
         HandleSeq typeLinks, classLinks;
         {
             Type type[] = { SEME_NODE, CONCEPT_NODE };
             HandleSeq link = { semeNodes[i], Handle::UNDEFINED };
-            atomSpace.getHandlesByOutgoing( std::back_inserter( typeLinks ), link, 
-                                     &type[0], NULL, 2, INHERITANCE_LINK, false );
+            getHandlesByOutgoing( std::back_inserter( typeLinks ),
+                                    atomSpace,
+                                    INHERITANCE_LINK, link,
+                                     &type[0], NULL, 2);
         }
         {
             Type type[] = { CONCEPT_NODE, SEME_NODE };
             HandleSeq link = { Handle::UNDEFINED, semeNodes[i] };
-            atomSpace.getHandlesByOutgoing( std::back_inserter( classLinks ), link, 
-                                     &type[0], NULL, 2, REFERENCE_LINK, false );
+            getHandlesByOutgoing( std::back_inserter( classLinks ),
+                                     atomSpace,
+                                     REFERENCE_LINK, link,
+                                     &type[0], NULL, 2);
         }
-        
+
 
         const std::string& name = atomSpace.getName( semeNodes[i] );
         TruthValuePtr tv = atomSpace.getTV( semeNodes[i]);
@@ -105,11 +112,11 @@ void EntityExperienceAgent::run()
             const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( tv.get() );
             mean = stv.getMean();
             count = stv.getCount();
-        } // if 
+        } // if
 
         /// @todo this is not a proper use of the definition of
         /// TV.count, which is actually equivalent to elapesMoments
-        mean = static_cast<strength_t>( count ) / 
+        mean = static_cast<strength_t>( count ) /
             static_cast<strength_t>( this->elapsedMoments );
 
         bool containsObject = map.containsObject( semeNodes[i] );
@@ -119,7 +126,7 @@ void EntityExperienceAgent::run()
             ++count;
         } // if
 
-        logger().debug("EntityExperienceAgent::%s - Entity '%s' now has strength '%f' and count '%f'", 
+        logger().debug("EntityExperienceAgent::%s - Entity '%s' now has strength '%f' and count '%f'",
                        __FUNCTION__, name.c_str( ), mean, count );
 
         atomSpace.setTV( semeNodes[i], SimpleTruthValue::createTV( mean, count ) );
@@ -140,7 +147,7 @@ void EntityExperienceAgent::run()
             } // if
             nodeStatus[ classNode ] |= containsObject;
         } // for
-        
+
     } // for
 
     // now, compute the importance of the objects classes.
@@ -157,20 +164,20 @@ void EntityExperienceAgent::run()
             count = tv->getCount();
         } // if
 
-        mean = static_cast<strength_t>( count ) / 
+        mean = static_cast<strength_t>( count ) /
             static_cast<strength_t>( this->elapsedMoments );
 
         if ( it->second ) {
             ++count;
         } // if
 
-        logger().debug("EntityExperienceAgent::%s - Class '%s' now has strength '%f' and count '%f'", 
+        logger().debug("EntityExperienceAgent::%s - Class '%s' now has strength '%f' and count '%f'",
                        __FUNCTION__, atomSpace.getName( it->first ).c_str( ), mean, count );
 
         atomSpace.setTV( it->first, SimpleTruthValue::createTV( mean, count ) );
     } // for
-    
+
 
     ++this->elapsedMoments;
-    
+
 }

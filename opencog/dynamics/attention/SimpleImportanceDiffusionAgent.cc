@@ -22,10 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimpleImportanceDiffusionAgent.h"
-#include "SpreadDecider.h"
 #include <time.h>
 #include <math.h>
+
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
@@ -33,7 +34,9 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/atomspace/FollowLink.h>
+
+#include "SimpleImportanceDiffusionAgent.h"
+#include "SpreadDecider.h"
 
 #define DEBUG
 #define _unused(x) ((void)x)
@@ -44,32 +47,8 @@ namespace opencog
 SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     Agent(cs)
 {
-    /* ======================================================== */
-    // Default configuration settings
-    
-    // ECAN_MAX_SPREAD_PERCENTAGE
-    // Maximum percentage of STI that is spread from an atom
-    
-    // ECAN_SPREAD_HEBBIAN_ONLY
-    // If false, will diffuse along hebbian links only. If true,
-    // will also diffuse to all non-hebbian incident atoms in the
-    // incoming and outgoing sets
-    
-    // HEBBIAN_MAX_ALLOCATION_PERCENTAGE
-    // Maximum percentage that will be available for diffusion to hebbian links
-    
-    static const std::string defaultConfig[] = {
-        "ECAN_MAX_SPREAD_PERCENTAGE", "0.6",
-        "ECAN_SPREAD_HEBBIAN_ONLY", "false",
-        "HEBBIAN_MAX_ALLOCATION_PERCENTAGE", "0.5",
-        "",""
-    };
-    
-    setParameters(defaultConfig);
-    /* ======================================================== */
-    
     spreadDecider = NULL;
-    setSpreadDecider(STEP);
+    setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
                 (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
@@ -436,7 +415,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
     // Chase the hebbian links originating at this atom and obtain the 
     // adjacent atoms that are found by traversing those links
     HandleSeq resultSet = 
-            as->getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
     
     return resultSet;
 }
@@ -495,13 +474,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        HandleSeq searchAtoms(2);
-        searchAtoms[0] = source;
-        searchAtoms[1] = target;
-        HandleSeq resultList;
-        as->getHandlesByOutgoing(back_inserter(resultList), searchAtoms, NULL, 
-                                 NULL, 2, ASYMMETRIC_HEBBIAN_LINK, false);
-        Handle link = resultList.front();
+        Handle link = as->getHandle(ASYMMETRIC_HEBBIAN_LINK, source, target);
         
         // Calculate the discounted diffusion amount based on the link
         // attributes

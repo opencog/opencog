@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -632,9 +632,8 @@ Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & refere
     // Get the HandleSet to ReferenceLink
     std::vector<Handle> referenceLinkSet;
 
-    atomSpace.getHandleSet
-                  ( back_inserter(referenceLinkSet), // return value
-                    hConceptNode,      // returned link should contain this node
+    hConceptNode->getIncomingSetByType(
+                    back_inserter(referenceLinkSet), // return value
                     REFERENCE_LINK,    // type of the returned link 
                     false              // subclass is not acceptable, 
                                        // i.e. returned link should be exactly of 
@@ -691,9 +690,8 @@ Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referen
     // Get the HandleSet to ReferenceLink
     std::vector<Handle> referenceLinkSet;
 
-    atomSpace.getHandleSet
-                  ( back_inserter(referenceLinkSet), // return value
-                    hConceptNode,      // returned link should contain this node
+    hConceptNode->getIncomingSetByType(
+                    back_inserter(referenceLinkSet), // return value
                     REFERENCE_LINK,    // type of the returned link 
                     false              // subclass is not acceptable, 
                                        // i.e. returned link should be exactly of 

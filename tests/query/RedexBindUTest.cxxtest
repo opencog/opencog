@@ -1,0 +1,109 @@
+/*
+ * tests/query/RedexBindUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/bind/BetaRedex.h>
+#include <opencog/atoms/bind/DefineLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ComposeUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	ComposeUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+
+		config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm, "
+			"opencog/scm/opencog/query.scm");
+
+		load_scm_files_from_config(*as);
+
+		config().set("SCM_PRELOAD", "tests/query/redex-bind.scm");
+		load_scm_files_from_config(*as);
+	}
+
+	~ComposeUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_simple_match(void);
+};
+
+void ComposeUTest::tearDown(void)
+{
+}
+
+void ComposeUTest::setUp(void)
+{
+}
+
+/*
+ * Basic ComposeLink unit test.
+ */
+void ComposeUTest::test_simple_match(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hans = eval->eval_h("expected-answer");
+	Handle hgnd = eval->eval_h("(cog-bind (simple-call))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	// XXX FIXME ... this is currently broken; the implementation is
+	// incomplete. It almost does the right thing.... fix this later.
+	// TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

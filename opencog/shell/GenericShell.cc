@@ -115,6 +115,11 @@ void GenericShell::hush_prompt(bool hush)
 	show_prompt = !hush;
 }
 
+void GenericShell::sync_output(bool sync)
+{
+	do_async_output = !sync;
+}
+
 const std::string& GenericShell::get_prompt(void)
 {
 	static const std::string empty_prompt = "";
@@ -274,13 +279,14 @@ void GenericShell::do_eval(const std::string &expr)
 	{
 		auto async_wrapper = [&](GenericShell* p, const std::string& in)
 		{
+			thread_init();
 			p->evaluator->eval_expr(in.c_str());
 		};
 
-		// We cannot use one evaluator in two different threads.
-		// If we do, then bad things will happen.  So always wait
-		// for the previous thread to finish, before we go at it
-		// again.
+		// We cannot use the same evaluator in two different threads
+		// at the same time; a single evaluator is not thread-safe
+		// against itself. So always wait for the previous thread to
+		// finish, before we go at it again.
 		if (evalthr)
 		{
 			evalthr->join();
@@ -292,6 +298,11 @@ void GenericShell::do_eval(const std::string &expr)
 	{
 		evaluator->eval_expr(input.c_str());
 	}
+}
+
+void GenericShell::thread_init(void)
+{
+	/* No-op. The Scheme shell sets the current atomspace here */
 }
 
 /* ============================================================== */

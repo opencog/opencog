@@ -51,6 +51,7 @@ bool ListRequest::execute()
 {
     std::string name = "";
     Type type = NOTYPE;
+    long max_size = -1;
     Handle handle = Handle::UNDEFINED;
     bool subtypes = false;
     AtomSpace& as = _cogserver.getAtomSpace();
@@ -71,7 +72,7 @@ bool ListRequest::execute()
         } else if (*it == "-h") { // filter by handle
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            UUID uuid = strtol((*it).c_str(), NULL, 0);
+            UUID uuid = strtol(it->c_str(), NULL, 0);
             handle = Handle(uuid);
             if (!as.isValidHandle(handle)) {
                 _error << "Error: Invalid handle" << std::endl;
@@ -86,7 +87,7 @@ bool ListRequest::execute()
         } else if (*it == "-t") { // filter by type, excluding subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = classserver().getType((*it).c_str());
+            type = classserver().getType(it->c_str());
             if (type == NOTYPE) {
                 _error << "Error: Invalid type" << std::endl;
                 sendError();
@@ -95,13 +96,17 @@ bool ListRequest::execute()
         } else if (*it == "-T") { // filter by type, including subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = classserver().getType((*it).c_str());
+            type = classserver().getType(it->c_str());
             if (type == NOTYPE) {
                 _error << "invalid type" << std::endl;
                 sendError();
                 return false;
             }
             subtypes = true;
+        } else if (*it == "-m") { // list only the N first atoms
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            max_size = atol(it->c_str());
         } else {
             _error << "Error: unknown option \"" << *it <<"\"" << std::endl;
             sendError();
@@ -118,6 +123,11 @@ bool ListRequest::execute()
     } else {
         as.getHandlesByType(back_inserter(_handles), ATOM, true);
     }
+
+    // Remove the bottom handles
+    if (max_size > 0 && max_size < (long)_handles.size())
+        _handles.resize(max_size);
+
     sendOutput();
     return true;
 }
@@ -128,9 +138,8 @@ void ListRequest::sendOutput()
 
     if (_mimeType == "text/plain") {
         AtomSpace& as = _cogserver.getAtomSpace();
-        std::vector<Handle>::const_iterator it; 
-        for (it = _handles.begin(); it != _handles.end(); ++it) {
-            oss << as.atomAsString(*it) << std::endl;
+        for (Handle& h : _handles) {
+            oss << as.atomAsString(h) << std::endl;
         }
     } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
             _mimeType.c_str());
@@ -149,6 +158,7 @@ void ListRequest::sendError()
     _error << "-n name     List all atoms with name" << std::endl;
     _error << "-t type     List all atoms of type" << std::endl;
     _error << "-T type     List all atoms with type or subtype" << std::endl;
+    _error << "-m type     List all atoms up to a specified size" << std::endl;
     _error << "Options may be combined" << std::endl;
     send(_error.str());
 }

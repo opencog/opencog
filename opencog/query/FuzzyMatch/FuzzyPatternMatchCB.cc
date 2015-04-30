@@ -27,13 +27,13 @@ using namespace opencog;
 
 //#define DEBUG
 
-FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(as)
+FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
+	: DefaultPatternMatchCB(as)
 {
-
 }
 
 /**
- * Implement the perform_search calllback.
+ * Implement the initiate_search calllback.
  *
  * For a fuzzy match, it starts with a full atomspace search to find candidates.
  *
@@ -42,12 +42,38 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as) : DefaultPatternMatchCB(
  * @param clauses    The clauses for the query
  * @param negations  The negative clauses
  */
-void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
-                                         std::set<Handle>& vars,
-                                         std::vector<Handle>& clauses,
-                                         std::vector<Handle>& negations)
+bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
+                                          const Variables& vars,
+                                          const Pattern& pat)
 {
-    full_search(pme, clauses);
+    const HandleSeq& clauses = pat.mandatory;
+
+    _root = clauses[0];
+    _starter_term = _root;
+    // XXX FIXME  I'm pretty sure that this search is not going to be
+    // complete, probably missing lots of similar patterns, simply
+    // because it starts out with just the type of the very first
+    // clause, and thus missing things that are fuzzily close to it.
+    //
+    // I know that this is the case, because when I substitute the
+    // below with link_type_search(), which normally would be
+    // equivalent but faster, the FuzzyUTest failed. Tis means that
+    // if the "equivalent" search is missing answers, then the search
+    // below is missing them too.
+    //
+    // So, instead of using the type of clause[0], you probably want
+    // look at several types ???  There is a high risk that the
+    // resulting search will be very inefficeint: this inefficiency
+    // is exactly what link_type_search() was trying to avoid...
+    Type ptype = _root->getType();
+    HandleSeq handle_set;
+    _as->getHandlesByType(handle_set, ptype);
+    for (const Handle& h : handle_set)
+    {
+        bool found = pme->explore_neighborhood(_root, _starter_term, h);
+        if (found) return found;
+    }
+    return false;
 }
 
 /**
@@ -61,7 +87,7 @@ void FuzzyPatternMatchCB::perform_search(PatternMatchEngine* pme,
  * @param gLink  A possible grounding link found by the Pattern Matcher
  * @return       Always return false to search for more solutions
  */
-bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
+bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
 {
     // If two links are identical, skip it
     if (pLink == gLink) return false;
@@ -89,7 +115,7 @@ bool FuzzyPatternMatchCB::link_match(LinkPtr& pLink, LinkPtr& gLink)
  * @param gNode  A handle of a possible grounding node
  * @return       Always return false to search for more solutions
  */
-bool FuzzyPatternMatchCB::node_match(Handle& pNode, Handle& gNode)
+bool FuzzyPatternMatchCB::node_match(const Handle& pNode, const Handle& gNode)
 {
     // If two handles are identical, skip it
     if (pNode == gNode) return false;
@@ -105,11 +131,11 @@ bool FuzzyPatternMatchCB::node_match(Handle& pNode, Handle& gNode)
  * Always return false to search for more solutions.
  *
  * @param var_soln   The variable & links mapping
- * @param pred_soln  The clause mapping
+ * @param term_soln  The clause mapping
  * @return           Always return false to search for more solutions
  */
 bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
-                                    const std::map<Handle, Handle>& pred_soln)
+                                    const std::map<Handle, Handle>& term_soln)
 {
     return false;
 }

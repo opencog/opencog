@@ -28,10 +28,12 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
+
+// #define DEBUG 1
 
 namespace opencog {
 class PatternMatchEngine;
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -51,7 +53,8 @@ class PatternMatchCallback
 		 * Return true if the nodes match, else return
 		 * false. (i.e. return false if mis-match).
 		 */
-		virtual bool node_match(Handle& node1, Handle& node2) = 0;
+		virtual bool node_match(const Handle& patt_node,
+		                        const Handle& grnd_node) = 0;
 
 		/**
 		 * Called when a variable in the template pattern
@@ -62,7 +65,8 @@ class PatternMatchCallback
 		 * Return true if the grouding is acceptable, else
 		 * return false. (i.e. return false if mis-match).
 		 */
-		virtual bool variable_match(Handle& node1, Handle& node2) = 0;
+		virtual bool variable_match(const Handle& patt_node,
+		                            const Handle& grnd_node) = 0;
 
 		/**
 		 * Called right before link in the template pattern
@@ -89,7 +93,8 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(LinkPtr& link1, LinkPtr& link2) = 0;
+		virtual bool link_match(const LinkPtr& patt_link,
+		                        const LinkPtr& grnd_link) = 0;
 
 		/**
 		 * Called after a candidate grounding has been found
@@ -103,50 +108,69 @@ class PatternMatchCallback
 		 * found to match.  It offers a chance to record
 		 * the candidate grounding, or to reject it for some
 		 * reason.
+		 *
+		 * The first link is from the pattern, the second is
+		 * from the proposed grounding.
 		 */
-		virtual bool post_link_match(LinkPtr& link1, LinkPtr& link2)
+		virtual bool post_link_match(const LinkPtr& patt_link,
+		                             const LinkPtr& grnd_link)
 		{
 			return true; // Accept the match, by default.
 		}
 
 		/**
-		 * Invoked to perform the matching of a virtual link.
-		 * A virtual link is one that does not (might not) exist as a
-		 * real link in the AtomSpace, but might still exist in a
-		 * 'virtual' sense, in that it is instead considered to exist if
-		 * a GroundedPredicateNode evaluates to true or not.  When such
-		 * a virtual link is encountered, this callback is called to make
-		 * this decision. This should return false to reject the match.
-		 * That is, a return value of "false" denotes that the virtual
-		 * atom does not exist; while "true" implies that it does exist.
-		 * This is the same convention as link_match() and post_link_match().
+		 * Invoked to confirm or deny a candidate grounding for term that
+		 * consistes entirely of connectives and evaluatable terms.
+		 *
+		 * An 'evaluatable term' is any pattern term (term occuring in the
+		 * search pattern, either a node or link) that was  previously
+		 * declared as 'evaluatable', by the 'set_evaluatable_terms()'
+		 * callback below.  Thus, for example, the canonical, default
+		 * convention is that evaluatable terms are any terms that
+		 * contain a GPN -- a 'GroundedPredicateNode', and therefore
+		 * requires running code that lies outside of the pattern matcher
+		 * (typically scheme or python code).  In general, though,
+		 * evaluatable terms don't have to be of this sort -- they can
+		 * be any part of the search pattern that was previously
+		 * specified by the  'set_evaluatable_terms()' callback.
+		 *
+		 * Connectives are any link types that were declared by the
+		 * 'get_connectives()' callback, below. Connectives are those
+		 * link types that are are able to combine evaluatable terms.
+		 * For example, the canonical, default connectives are logic
+		 * connectives: AndLink, OrLink, NotLink. They don't have to
+		 * be these, but, that is what they would be if emulating a
+		 * logic that uses the classical boolean logic values of
+		 * true/false.
+		 *
+		 * For another example, they might be SetUnion, SetIntersectionLink,
+		 * and SetComplimentLink if emulating a logic that uses probability
+		 * values for truth values (so, e.g. SetUnionLink would connect
+		 * the probability of A or B, i.e. it would compute P(A or B)
+		 * SetIntersectionLink would compute P(A and B), and so on.
 		 *
 		 * Unlike the other callbacks, this takes arguments in s slightly
-		 * different form.  Here, 'virt' is the virtual link specification,
-		 * as it appears in the pattern.  At this time, it is assumed that
-		 * these are always of the form
+		 * different form.  Here, 'eval' is the evalutatable term, and
+		 * 'gnds' contains the currently-proposed grounding for any
+		 * variables occuring within that term. It is a map: the 'key' is
+		 * either a variable, or another term whose grounding is being
+		 * currently considered, and the 'value' is the proposed
+		 * grounding.
 		 *
-		 *       EvaluationLink
-		 *          GroundedPredicateNode "scm:some-function"
-		 *          ListLink
-		 *             SomeAtom arg1       ;; could be a VariableNode
-		 *             VariableNode $arg2  ;; could be some other node, too.
-		 *             EtcAtom ...
+		 * In ordinary logic, a well-formed formula with no free variables
+		 * is called a "sentence". Thus, in the sense of logic, the 'eval'
+		 * argument, together with 'gnds' combine to bind values to all
+		 * the variables in 'term', thus leaving a sentence with no free
+		 * variables. In logic, sentences are always true or false, ergo
+		 * the the return value.
 		 *
-		 * The 'args' handle is a candidate grounding for the ListLink.
-		 * Note that the candidate grounding is NOT instantiated in the
-		 * main AtomSpace (it is held in a temporary AtomSpace that is
-		 * deleted upon return from this callback).
+		 * The return value follows the same convention as all the other
+		 * callbacks: 'true' accepts the grounding, and the search for the
+		 * rest of the pattern continues, while 'false' rejects the
+		 * grounding, and forces a backtrack.
 		 */
-		virtual bool virtual_link_match(LinkPtr& virt, Handle& args) = 0;
-
-		/**
-		 * Called when a complete grounding to all clauses is found.
-		 * Should return false to search for more solutions; or return
-		 * true to terminate search.
-		 */
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln) = 0;
+		virtual bool evaluate_sentence(const Handle& eval,
+		                      const std::map<Handle,Handle>& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -160,9 +184,13 @@ class PatternMatchCallback
 		 * Return false to discard the use of this clause as a possible
 		 * grounding, return true to use this grounding.
 		 */
-		virtual bool clause_match(Handle& pattrn_link_h, Handle& grnd_link_h)
+		virtual bool clause_match(const Handle& pattrn_link_h,
+		                          const Handle& grnd_link_h)
 		{
-			//	if (pattrn_link_h == grnd_link_h) return true;
+			// By default, reject a clause that is grounded by itself.
+			// XXX someone commented this out... why??? Do you really
+			// want self-grounding???
+			//	if (pattrn_link_h == grnd_link_h) return false;
 			return true;
 		}
 
@@ -179,17 +207,21 @@ class PatternMatchCallback
 		 *
 		 * Note that all required clauses will have been grounded before
 		 * any optional clauses are examined.
-		 *
-		 * The default semantics here is to reject a match if the optional
-		 * clasues are detected.  This is in keeping with the semantics of
-		 * AbsentLink: a match is possible only if the indicated clauses
-		 * are absent!
 		 */
-		virtual bool optional_clause_match(Handle& pattrn, Handle& grnd)
-		{
-			if (Handle::UNDEFINED == grnd) return true;
-			return false;
-		}
+		virtual bool optional_clause_match(const Handle& pattrn,
+		                                   const Handle& grnd) = 0;
+
+		/**
+		 * Called when a complete grounding for all clauses is found.
+		 * Should return false to search for more solutions; or return
+		 * true to terminate search.  (Just as in all the other callbacks,
+		 * a return value of `true` means that the proposed grounding is
+		 * acceptable. The engine is designed to halt once an acceptable
+		 * solution has been found; thus, in order to force it to search
+		 * for more, a return value of false is needed.)
+		 */
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.
@@ -200,13 +232,13 @@ class PatternMatchCallback
 		 * is smaller than the full incoming set (for example, by
 		 * returning only those atoms with a high av-sti).
 		 */
-		virtual IncomingSet get_incoming_set(Handle h)
+		virtual IncomingSet get_incoming_set(const Handle& h)
 		{
 			return h->getIncomingSet();
 		}
 
 		/**
-		 * Called after a top-level predicate (tree) has been fully
+		 * Called after a top-level clause (tree) has been fully
 		 * grounded. This gives the callee the opportunity to save
 		 * state onto a stack, if needed.
 		 */
@@ -214,30 +246,14 @@ class PatternMatchCallback
 
 		/**
 		 * Called prior to starting a back-track, retreating from the
-		 * most recently grounded top-level predicate (tree). This
+		 * most recently grounded top-level clause (tree). This
 		 * gives the callee the opportunity to maintain state with a
 		 * stack, if needed.
 		 */
 		virtual void pop(void) {}
 
-		/**
-		 * Called very early, before pattern-matching has begun. This
-		 * conveys how the variable declarations in a BindLink were
-		 * decoded.  The argument is nothing more than the variable
-		 * declarations, as given in the atomspace, but re-expressed
-		 * in a slightly more convenient C++ form, is all.  This
-		 * callback may alter the typemap before returning.
-		 */
-		virtual void set_type_restrictions(VariableTypeMap &tm) {}
-
-		/**
-		 * Called by PatternMatch::validate_clauses before calling
-		 * perform_search for refining clause validation. For instance
-		 * disconnected clause may not be allowed by default but may be
-		 * allowed for PLN.
-		 */
-		virtual void validate_clauses(std::set<Handle>& vars,
-		                              std::vector<Handle>& clauses) = 0;
+		virtual const std::set<Type>& get_connectives(void)
+		{ static const std::set<Type> _empty; return _empty; }
 
 		/**
 		 * Called to initiate the search. This callback is responsible
@@ -246,11 +262,15 @@ class PatternMatchCallback
 		 * possibly limiting the breadth of the search.  It may also cull
 		 * the variables, clauses, or negated clauses to remove those that
 		 * will not alter the final semantics of the search.
+		 *
+		 * The return value is used to indicate if the search pattern was
+		 * satisfied (grounded) or not.  This is just like the return
+		 * values on all the other callbacks; it summarizes (passes
+		 * through) the return values of all the others.
 		 */
-		virtual void perform_search(PatternMatchEngine *,
-		                            std::set<Handle> &vars,
-		                            std::vector<Handle> &clauses,
-		                            std::vector<Handle> &negations) = 0;
+		virtual bool initiate_search(PatternMatchEngine *,
+		                             const Variables&,
+		                             const Pattern&) = 0;
 };
 
 } // namespace opencog

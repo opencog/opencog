@@ -2,10 +2,10 @@
 
 (define getAllNumberNodes
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (VariableNode "$number")
         )

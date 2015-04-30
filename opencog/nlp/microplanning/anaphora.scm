@@ -73,7 +73,7 @@
 	)
 
 	; Try to SuReal changed chunk again.  If any chunk failed, return the original chunk without the anaphora.
-	(par-for-each 
+	(for-each 
 		(lambda (changed index)
 			(if changed
 				(let* ((chunk (get-chunk results-set index))

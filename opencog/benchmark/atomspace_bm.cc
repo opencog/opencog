@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cstdlib>
+
 #include "AtomSpaceBenchmark.h"
 
 using namespace std;
@@ -13,18 +15,19 @@ int main(int argc, char** argv)
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
      "-A        \tBenchmark all methods\n"
-     "-x        \tTest the AtomSpaceImpl API\n"
      "-X        \tTest the AtomTable API\n"
      "-g        \tTest the Scheme API\n"
      "-M        \tMemoize Scheme expressions\n"
      "-C        \tCompile Scheme expressions\n"
      "-c        \tTest the Python API\n"
-     "-m <methodname>\tMethod to benchmark\n" 
+     "-m <methodname>\tMethod to benchmark\n"
      "-l        \tList valid method names to benchmark\n"
-     "-n <int>  \tHow many times to call the method in the measurement loop\n" 
+     "-n <int>  \tHow many times to call the method in the measurement loop\n"
      "          \t(default: 100000)\n"
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
      "          \t(default: 1)\n"
+     "-R <int>  \tUse specific randomseed; useful for benchmark comparisons\n"
+     "          \t(default: time(NULL))\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "          \t(default: 0)\n"
      "-- Build test data --\n"
@@ -49,7 +52,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:R:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -57,18 +60,7 @@ int main(int argc, char** argv)
              break;
            case 'A':
              benchmarker.buildTestData = true;
-             benchmarker.setMethod("noop");
-             benchmarker.setMethod("addNode");
-             benchmarker.setMethod("addLink");
-             benchmarker.setMethod("getType");
-             benchmarker.setMethod("getTV");
-//             benchmarker.setMethod("getTVZmq");
-             benchmarker.setMethod("setTV");
-             benchmarker.setMethod("getNodeHandles");
-             benchmarker.setMethod("getOutgoingSet");
-             benchmarker.setMethod("getIncomingSet");
-             benchmarker.setMethod("removeAtom");
-             benchmarker.setMethod("getHandleSet");
+             benchmarker.setTestAllMethods();
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
@@ -109,6 +101,11 @@ int main(int argc, char** argv)
            case 'r':
              benchmarker.Nloops = (unsigned int) atoi(optarg);
              break;
+           case 'R': {
+             char* last_arg_char = optarg + strlen(optarg);
+             benchmarker.randomseed = (unsigned long) std::strtoul(optarg,
+                    &last_arg_char, 10); }                    
+             break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
              break;
@@ -139,28 +136,42 @@ int main(int argc, char** argv)
        }
     }
 
+    if (true
 #ifdef HAVE_GUILE
-    if (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
+        and (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
 #endif // HAVE_GUILE
+#ifdef HAVE_CYTHON
+        and (opencog::AtomSpaceBenchmark::BENCH_PYTHON != benchmarker.testKind)
+#endif // HAVE_CYTHON
+    )
     {
         if (1 != benchmarker.Nloops)
         {
-            cerr << "Error: the python and atomspace tests currently do not support looping\n";
-            benchmarker.Nloops = 1;
+            cerr << "Fatal Error: the atomspace tests do not support looping\n";
+            exit(-1);
         }
-        if (true == benchmarker.memoize or true == benchmarker.compile)
+        if (true == benchmarker.memoize)
         {
-            cerr << "Fatal Error: Compiling and memoization supported only for the scheme tests\n";
-            exit(1);
+            cerr << "Fatal Error: memoization not supported for atomspace tests\n";
+            exit(-1);
         }
     }
+
+#ifdef HAVE_CYTHON
+    if ((true == benchmarker.compile)
+         and (opencog::AtomSpaceBenchmark::BENCH_PYTHON == benchmarker.testKind))
+    {
+        cerr << "Fatal Error: Python does not have a compiler\n";
+        exit(-1);
+     }
+#endif
 
 #ifdef HAVE_GUILE
     if (opencog::AtomSpaceBenchmark::BENCH_SCM == benchmarker.testKind)
     {
         if (true == benchmarker.memoize and true == benchmarker.compile)
         {
-            cerr << "Fatal Error: Can compile of memoize, but not both!\n";
+            cerr << "Fatal Error: Can compile or memoize, but not both!\n";
             exit(-1);
         }
     }

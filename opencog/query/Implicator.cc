@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atoms/bind/BindLink.h>
 
 #include "BindLink.h"
 #include "DefaultImplicator.h"
@@ -30,10 +31,19 @@
 
 using namespace opencog;
 
+/**
+ * This callback takes the reported grounding, runs it through the
+ * instantiator, to create the implicand, and then records the result in
+ * the public member `result_list`.  It then returns false, to search
+ * for more groundings.  (The engine will halt its search for a
+ * grounding once an acceptable one has been found; so, to continue
+ * hunting for more, we return `false` here. We want to find all
+ * possible groundings.)
+ */
 bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &pred_soln)
+                           const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
+	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h)
 	{
@@ -43,41 +53,11 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 }
 
 /**
- * The crisp implicator needs to tweak the truth value of the
- * resulting implicand. In most cases, this is not (strictly) needed,
- * for example, if the implicand has ungrounded variables, then
- * a truth value can be assigned to it, and the implicand will obtain
- * that truth value upon grounding.
- *
- * HOWEVER, if the implicand is fully grounded, then it will be given
- * a truth value of (false, uncertain) to start out with, and, if a
- * solution is found, then the goal here is to change its truth value
- * to (true, certain).  That is the whole point of this function:
- * to tweak (affirm) the truth value of existing clauses!
- */
-bool CrispImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                const std::map<Handle, Handle> &pred_soln)
-{
-	// PatternMatchEngine::print_solution(pred_soln,var_soln);
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-
-		// Set truth value to true+confident
-		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
-		h->setTruthValue(stv);
-	}
-	return false;
-}
-
-/**
  * The single implicator behaves like the default implicator, except that
  * it terminates after the first solution is found.
  */
 bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                 const std::map<Handle, Handle> &pred_soln)
+                                 const std::map<Handle, Handle> &term_soln)
 {
 	Handle h = inst.instantiate(implicand, var_soln);
 
@@ -86,6 +66,30 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
 		result_list.push_back(h);
 	}
 	return true;
+}
+
+namespace opencog
+{
+
+/* Simplified utility */
+static Handle do_imply(AtomSpace* as,
+                       const Handle& hbindlink,
+                       Implicator& impl,
+                       bool do_conn_check=true)
+{
+	BindLinkPtr bl(BindLinkCast(hbindlink));
+	if (NULL == bl)
+		bl = createBindLink(*LinkCast(hbindlink));
+
+	impl.implicand = bl->get_implicand();
+
+	bl->imply(impl, do_conn_check);
+
+	// The result_list contains a list of the grounded expressions.
+	// (The order of the list has no significance, so it's really a set.)
+	// Put the set into a SetLink, and return that.
+	Handle gl = as->addLink(SET_LINK, impl.result_list);
+	return gl;
 }
 
 /**
@@ -98,17 +102,11 @@ bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::bindlink(AtomSpace* as, Handle hbindlink)
+Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	DefaultImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	return do_imply(as, hbindlink, impl);
 }
 
 /**
@@ -119,75 +117,23 @@ Handle opencog::bindlink(AtomSpace* as, Handle hbindlink)
  *
  * See the do_bindlink function documentation for details.
  */
-Handle opencog::single_bindlink (AtomSpace* as, Handle hbindlink)
+Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	SingleImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
-}
-
-/**
- * Evaluate an ImplicationLink embedded in a BindLink
- *
- * Use the crisp-logic callback to evaluate boolean implication
- * statements; i.e. statements that have truth values assigned
- * their clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause
- * is true, its accepted, if its false, its rejected. If the
- * clause begins with a NotLink, true and false are reversed.
- *
- * The NotLink is also interpreted as an "absence of a clause";
- * if the atomspace does NOT contain a NotLink clause, then the
- * match is considered postive, and the clause is accepted (and
- * it has a null or "invalid" grounding).
- *
- * See the do_bindlink function documentation for details.
- */
-Handle opencog::crisp_logic_bindlink(AtomSpace* as, Handle hbindlink)
-{
-	// Now perform the search.
-	CrispImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	return do_imply(as, hbindlink, impl);
 }
 
 /**
  * PLN specific PatternMatchCallback implementation
  */
-Handle opencog::pln_bindlink(AtomSpace* as, Handle hbindlink)
+Handle pln_bindlink(AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	PLNImplicator impl(as);
-	PatternMatch pm;
-	pm.do_bindlink(hbindlink, impl);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = as->addLink(LIST_LINK, impl.result_list);
-	return gl;
+	return do_imply(as, hbindlink, impl, false);
 }
 
-/**
- * Verify a BindLink for syntax correctness. This will throw an
- * error if the syntax is bad.
- */
-Handle opencog::validate_bindlink(AtomSpace* as, Handle bindlink)
-{
-	PatternMatch pm;
-	pm.validate(bindlink);
-
-	return bindlink;
 }
 
 /* ===================== END OF FILE ===================== */

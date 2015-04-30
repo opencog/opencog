@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-#define BIG_TIMESTAMP (UINT_MAX/2-1)
+#define BIG_TIMESTAMP (OCTIME_MAX/2-1)
 
 class TemporalUTest :  public CxxTest::TestSuite
 {
@@ -83,17 +83,17 @@ public:
         TS_ASSERT(t8.getLowerBound() == 0);
         TS_ASSERT(t8.getUpperBound() == 20);
         TS_ASSERT(t8.isNormal());
-        Temporal t9(UINT_MAX, UINT_MAX);
-        TS_ASSERT(t9.getLowerBound() == UINT_MAX);
-        TS_ASSERT(t9.getUpperBound() == UINT_MAX);
+        Temporal t9(OCTIME_MAX, OCTIME_MAX);
+        TS_ASSERT(t9.getLowerBound() == OCTIME_MAX);
+        TS_ASSERT(t9.getUpperBound() == OCTIME_MAX);
         TS_ASSERT(!t9.isNormal());
-        Temporal t10(UINT_MAX - 1, 1, true);
-        TS_ASSERT(t10.getLowerBound() == UINT_MAX - 2);
-        TS_ASSERT(t10.getUpperBound() == UINT_MAX);
+        Temporal t10(OCTIME_MAX - 1, 1, true);
+        TS_ASSERT(t10.getLowerBound() == OCTIME_MAX - 2);
+        TS_ASSERT(t10.getUpperBound() == OCTIME_MAX);
         TS_ASSERT(t10.isNormal());
-        Temporal t11(UINT_MAX, 0, true);
-        TS_ASSERT(t11.getLowerBound() == UINT_MAX);
-        TS_ASSERT(t11.getUpperBound() == UINT_MAX);
+        Temporal t11(OCTIME_MAX, 0, true);
+        TS_ASSERT(t11.getLowerBound() == OCTIME_MAX);
+        TS_ASSERT(t11.getUpperBound() == OCTIME_MAX);
         TS_ASSERT(t11.isNormal());
 
         // Exception cases
@@ -101,9 +101,9 @@ public:
         TS_ASSERT_THROWS(Temporal(5, 1, false), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(1, 5, true), InvalidParamException&);
         TS_ASSERT_THROWS(Temporal(10000, 10001, true), InvalidParamException&);
-        TS_ASSERT_THROWS(Temporal(UINT_MAX, UINT_MAX, true), InvalidParamException&);
-        TS_ASSERT_THROWS(Temporal(UINT_MAX, 1, true), InvalidParamException&);
-        TS_ASSERT_THROWS(Temporal(UINT_MAX - UINT_MAX / 2, UINT_MAX / 2 + 1, true), InvalidParamException&);
+        TS_ASSERT_THROWS(Temporal(OCTIME_MAX, OCTIME_MAX, true), InvalidParamException&);
+        TS_ASSERT_THROWS(Temporal(OCTIME_MAX, 1, true), InvalidParamException&);
+        TS_ASSERT_THROWS(Temporal(OCTIME_MAX - OCTIME_MAX / 2, OCTIME_MAX / 2 + 1, true), InvalidParamException&);
     }
 
     void testGettersAndPrinters() {
@@ -296,7 +296,7 @@ public:
         TS_ASSERT(times1[2].compareTo(&(times3[1])) == 0);
         TS_ASSERT(times2[3].compareTo(&(times3[1])) > 0);
 
-        // Test special case where time values are greater than UINT_MAX/2
+        // Test special case where time values are greater than OCTIME_MAX/2
         // Just does the first test with greater values:
         Temporal times4[] = {
             Temporal(0, 0, true), // [0,0]
@@ -360,7 +360,7 @@ public:
         Temporal times[9] = {Temporal(0, 0), Temporal(0, 1), Temporal(1, 0, true), Temporal(1, 1, true),
                              Temporal(0, 0), Temporal(0, BIG_TIMESTAMP),
                              Temporal(BIG_TIMESTAMP, 0, true), Temporal(BIG_TIMESTAMP, BIG_TIMESTAMP, true),
-                             Temporal(UINT_MAX)
+                             Temporal(OCTIME_MAX)
                             };
         for (int i = 0; i < 9; i++) {
             //cout << "Testing TimeNode name conversion for " << times[i].toString() << endl;
@@ -371,11 +371,11 @@ public:
         }
         TS_ASSERT(!strcmp(Temporal(0).getTimeNodeName().c_str(), Temporal::getTimeNodeName(0).c_str()));
         TS_ASSERT(!strcmp(Temporal(5555).getTimeNodeName().c_str(), Temporal::getTimeNodeName(5555).c_str()));
-        TS_ASSERT(!strcmp(Temporal(UINT_MAX).getTimeNodeName().c_str(), Temporal::getTimeNodeName(UINT_MAX).c_str()));
+        TS_ASSERT(!strcmp(Temporal(OCTIME_MAX).getTimeNodeName().c_str(), Temporal::getTimeNodeName(OCTIME_MAX).c_str()));
 
 
         // test a specific range with big timestamps
-        for (unsigned long timestamp = UINT_MAX - 1000; timestamp < UINT_MAX; timestamp++) {
+        for (octime_t timestamp = OCTIME_MAX - 1000; timestamp < OCTIME_MAX; timestamp++) {
             Temporal t1(timestamp);
             const std::string& name1 = t1.getTimeNodeName();
             const Temporal& t2 = Temporal::getFromTimeNodeName(name1.c_str());

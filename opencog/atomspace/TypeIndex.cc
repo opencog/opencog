@@ -36,16 +36,29 @@ void TypeIndex::resize(void)
 	FixedIntegerIndex::resize(num_types + 1);
 }
 
-void TypeIndex::insertAtom(AtomPtr a)
+size_t TypeIndex::getNumAtomsOfType(Type type, bool count_subclasses) const
 {
-	Type t = a->getType();
-	insert(t, a->getHandle());
-}
+    iterator it(type, count_subclasses);
+    size_t atom_count = 0;
+    it.s = idx.begin();
+    it.send = idx.end();
 
-void TypeIndex::removeAtom(AtomPtr a)
-{
-	Type t = a->getType();
-	remove(t, a->getHandle());
+    // Loop over all the types looking for type and optional subclasses.
+    Type current_type = 0;
+    while (it.s != it.send)
+    {
+        // If this type is a match...
+        if ((type == current_type) || 
+            (count_subclasses && (classserver().isA(type, it.type))))
+        {
+            // Add the size of the atom set for this type.
+            atom_count += idx.at(current_type).size();
+        }
+        current_type++;
+        ++it.s;
+    }
+
+    return atom_count;
 }
 
 // ================================================================
@@ -103,7 +116,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 Handle TypeIndex::iterator::operator*(void)
 {
 	if (s == send) return Handle::UNDEFINED;
-	return Handle(*se);
+	return (*se)->getHandle();
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

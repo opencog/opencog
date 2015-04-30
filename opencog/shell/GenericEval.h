@@ -26,7 +26,7 @@
 #include <string>
 
 /**
- * The GenericEval class implements an very simple API for language
+ * The GenericEval class implements a very simple API for language
  * evaluators.  Currently, its sole purpose in life is to make the
  * abstraction of the GenericShell class possible.
  */

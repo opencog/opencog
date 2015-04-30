@@ -42,8 +42,7 @@ private:
 
 		/**
 		 * Recursively walk a tree starting with the root of the
-		 * hypergraph to instantiate (typically an
-		 * ExecutionOutputLink).
+		 * hypergraph to instantiate (typically an ExecutionOutputLink).
 		 *
 		 * Return the current result of the execution. If the node is an
 		 * ExecutionOutputLink then it returns the final result. If the
@@ -52,14 +51,17 @@ private:
 		 * respective groundings.
 		 *
 		 * If an execution occur then _did_exec is set to true.
+		 *
+		 * See also the related function VariableList::substitute(),
+		 * which will simply perform a substitution, without performing
+		 * any execution.
 		 */
-		Handle walk_tree(Handle tree);
+		Handle walk_tree(const Handle& tree);
 
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}
 
-		Handle instantiate(Handle& expr, const std::map<Handle, Handle> &vars)
-			throw (InvalidParamException);
+		Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
 };
 
 } // namespace opencog

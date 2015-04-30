@@ -36,6 +36,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
@@ -47,7 +48,6 @@
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
-#include <opencog/atomspace/TargetTypeIndex.h>
 
 class AtomTableUTest;
 
@@ -67,6 +67,8 @@ typedef boost::signals2::signal<void (const Handle&,
 typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
+
+class AtomSpace;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -93,7 +95,13 @@ private:
     // handle uuid and the actual atom pointer (since they are stored
     // together).  To some degree, this info is duplicated in the Node
     // and LinkIndex below; we have this here for convenience.
-    std::set<Handle, handle_less> _atom_set;
+    //
+    // This also plays a critical role for memory management: this is
+    // the only index that actually holds the atom shared_ptr, and thus
+    // increments the atom use count in a guaranteed fashion.  This is
+    // the one true guaranteee that the atom will not be deleted while
+    // it s in the atom table.
+    std::unordered_set<Handle, handle_hash> _atom_set;
 
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
@@ -101,7 +109,6 @@ private:
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
     ImportanceIndex importanceIndex;
-    TargetTypeIndex targetTypeIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(AtomPtr&);
@@ -139,6 +146,8 @@ private:
     bool inEnviron(AtomPtr);
     UUID _uuid;
 
+    // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
+    AtomSpace* _as;
     /**
      * Override and declare copy constructor and equals operator as
      * private.  This is to prevent large object copying by mistake.
@@ -151,31 +160,10 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable(AtomTable* parent=NULL);
+    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
     ~AtomTable();
     UUID get_uuid(void) { return _uuid; }
-
-    /**
-     * Prints atoms of this AtomTable to the given output stream.
-     * @param output  the output stream where the atoms will be printed
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void print(std::ostream& output = std::cout,
-               Type type = ATOM,
-               bool subclass = true) const;
-
-    /**
-     * Prints atoms of this AtomTable though the given logger
-     * @param logger the logger used to print the atoms
-     * @param type  the type of atoms that should be printed
-     * @param subclass  if true, matches all atoms whose type is
-     *        subclass of the given type. If false, matches only atoms of the
-     *        exact type.
-     */
-    void log(Logger& l = logger(), Type t = ATOM, bool subclass = true) const;
+    AtomSpace* getAtomSpace(void) { return _as; }
 
     /**
      * Return the number of atoms contained in a table.
@@ -183,6 +171,7 @@ public:
     size_t getSize() const;
     size_t getNumNodes() const;
     size_t getNumLinks() const;
+    size_t getNumAtomsOfType(Type type, bool subclass = true) const;
 
     /**
      * Returns the exact atom for the given name and type.
@@ -193,17 +182,13 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(Type, const std::string&) const;
-    Handle getHandle(NodePtr) const;
+    Handle getHandle(Type, std::string) const;
+    Handle getHandle(const NodePtr&) const;
 
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(LinkPtr) const;
-    Handle getHandle(AtomPtr) const;
+    Handle getHandle(const LinkPtr&) const;
+    Handle getHandle(const AtomPtr&) const;
     Handle getHandle(Handle&) const;
-
-protected:
-    /* A basic predicates */
-    static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
 
 public:
     /**
@@ -219,10 +204,9 @@ public:
                        bool subclass = false) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-                            isDefined);
+        return std::copy(typeIndex.begin(type, subclass),
+                         typeIndex.end(),
+                         result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -235,162 +219,9 @@ public:
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void {
-                  if (not isDefined(h)) return;
                   (func)(h);
              });
     }
-
-    /**
-     * Returns all atoms satisfying the predicate
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTypePred(OutputIterator result,
-                         Type type,
-                         bool subclass,
-                         AtomPredicate* pred) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-             [&](Handle h)->bool {
-                  return isDefined(h) and (*pred)(h);
-             });
-    }
-
-    /**
-     * Returns the set of atoms of a given type which have atoms of a
-     * given target type in their outgoing set (subclasses optionally).
-     *
-     * @param The desired type.
-     * @param The desired target type.
-     * @param Whether type subclasses should be considered.
-     * @param Whether target type subclasses should be considered.
-     * @return The set of atoms of a given type and target type
-     *         (subclasses optionally).
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTargetType(OutputIterator result,
-                             Type type,
-                             Type targetType,
-                             bool subclass,
-                             bool targetSubclass) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
-                            targetTypeIndex.end(),
-                            result,
-             [&](Handle h)->bool{
-                 return isDefined(h) and h->isType(type, subclass);
-             });
-    }
-
-    /**
-     * Returns the set of atoms with the given target handles and types
-     * (order is considered) in their outgoing sets, where the type and
-     * subclasses of the atoms are optional.
-     *
-     * @param  An array of handles to match the outgoing sets of the
-     *         searched atoms. This array can be empty (or each of its
-     *         elements can be null), if the handle value does not
-     *         matter or if it does not apply to the specific search.
-     *         Note that if this array is not empty, it must contain
-     *         "arity" elements.
-     * @param  An array of target types to match the types of the atoms
-     *         in the outgoing set of searched atoms.
-     * @param  An array of boolean values indicating whether each of the
-     *         above types must also consider subclasses. This array can
-     *         be null, which means that subclasses will not be considered.
-     *         Note that if this array is not null, it must contains
-     *         "arity" elements.
-     * @param  The length of the outgoing set of the atoms being searched.
-     * @param  The optional type of the atom.
-     * @param  Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     *         criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
-                              Type*, bool*, Arity,
-                              Type type = ATOM,
-                              bool subclass = true) const;
-
-    /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).  If the name is not null or the empty string, then
-     * this returns Nodes ONLY (of the requested name, of course). However,
-     * if the name is null (or empty string) then Links might be included!
-     * This behaviour is surprising, but is explicilty tested for in the
-     * AtomSpaceImplUTest. I don't know why its done like this.
-     *
-     * @param The desired name of the atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name.
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = ATOM,
-                     bool subclass = true) const
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
-
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
-     * Returns the set of atoms with the given target names and/or types
-     * (order is considered) in their outgoing sets, where the type
-     * and subclasses arguments of the searched atoms are optional.
-     *
-     * @param An array of names to match the outgoing sets of the searched
-     * atoms. This array (or each of its elements) can be null, if
-     * the names do not matter or if do not apply to the specific search.
-     * Note that if this array is not null, it must contain "arity" elements.
-     * @param An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms. If array of names is not null,
-     * this parameter *cannot* be null as well. Besides, if an element in a
-     * specific position in the array of names is not null, the corresponding
-     * type element in this array *cannot* be NOTYPE as well.
-     * @param An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Not that if this
-     * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const
-    throw (RuntimeException);
-
-    /**
-     * Returns the set of atoms with the given target names and/or types
-     * (order is considered) in their outgoing sets, where the type
-     * and subclasses arguments of the searched atoms are optional.
-     *
-     * @param An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms. This parameter (as well as any of
-     * its elements can be NOTYPE), what means that the type doesnt matter.
-     * Not that if this array is not null, it must contains "arity" elements.
-     * @param An array of boolean values indicating whether each of the
-     * above types must also consider subclasses. This array can be null,
-     * what means that subclasses will not be considered. Not that if this
-     * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the matching
-     * criteria in their outgoing set.
-     */
-    UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
-                              Type type = ATOM, bool subclass = true) const
-    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -415,8 +246,9 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
+        if (a->_atomTable != this) return;
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a, bin);
+        importanceIndex.updateImportance(a.operator->(), bin);
     }
 
     /**
@@ -440,7 +272,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async) throw (RuntimeException);
+    Handle add(AtomPtr, bool async);
 
     /**
      * Read-write synchronization barrier fence.  When called, this

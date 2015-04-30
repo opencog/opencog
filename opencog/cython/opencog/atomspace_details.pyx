@@ -3,107 +3,15 @@ from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
 from atomspace cimport *
+
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
-
-cdef class Handle:
-    def __cinit__(self, h):
-        self.h = new cHandle(h)
-    def __dealloc__(self):
-        del self.h
-    def value(self):
-        return self.h.value()
-    def __richcmp__(Handle h1, Handle h2, int op):
-        if op == 2: # ==
-            return deref(h1.h) == deref(h2.h)
-        elif op == 3: # !=
-            return deref(h1.h) != deref(h2.h)
-        elif op == 4: # >
-            return deref(h1.h) > deref(h2.h)
-        elif op == 0: # <
-            return deref(h1.h) < deref(h2.h)
-        elif op == 1: # <=
-            return deref(h1.h) <= deref(h2.h)
-        elif op == 5: # >=
-            return deref(h1.h) >= deref(h2.h)
-    def __str__(self):
-        return "<UUID:" + str(self.h.value()) + ">"
-    def __repr__(self):
-        return "Handle(" + str(self.h.value()) + ")"
-    def is_undefined(self):
-        if deref(self.h) == self.h.UNDEFINED: return True
-        return False
-    def __nonzero__(self):
-        """ Allows boolean comparison, return false is handle == UNDEFINED """
-        return not self.is_undefined()
     
+cdef api string get_path_as_string() with gil:
+    import sys
+    cdef bytes c_str = str(sys.path)
+    return string(c_str)
 
-cdef class TruthValue:
-    """ The truth value represents the strength and confidence of
-        a relationship or term. In OpenCog there are a number of TruthValue
-        types, but as these involve additional complexity we focus primarily on
-        the SimpleTruthValue type which allows strength and count
-
-        @todo Support IndefiniteTruthValue, DistributionalTV, NullTV etc
-    """
-    # This stores a pointer to a smart pointer to the C++ TruthValue object
-    # This indirection is unfortunately necessary because cython doesn't
-    # allow C++ objects on the stack
-    cdef tv_ptr *cobj
-
-    def __cinit__(self, strength=0.0, count=0.0):
-        # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, count))
-
-    def __dealloc__(self):
-        # This deletes the *smart pointer*, not the actual pointer
-        del self.cobj
-
-    property mean:
-        def __get__(self): return self._mean()
-
-    property confidence:
-        def __get__(self): return self._confidence()
-
-    property count:
-        def __get__(self): return self._count()
-
-    cdef _mean(self):
-        return self._ptr().getMean()
-
-    cdef _confidence(self):
-        return self._ptr().getConfidence()
-
-    cdef _count(self):
-        return self._ptr().getCount()
-
-    def __richcmp__(TruthValue h1, TruthValue h2, int op):
-        " @todo support the rest of the comparison operators"
-        if op == 2: # ==
-            return deref(h1._ptr()) == deref(h2._ptr())
-        
-        raise ValueError, "TruthValue does not yet support most comparison operators"
-
-    cdef cTruthValue* _ptr(self):
-        return self.cobj.get()
-
-    cdef tv_ptr* _tvptr(self):
-        return self.cobj
-
-    def truth_value_ptr_object(self):
-        return PyLong_FromVoidPtr(<void*>self.cobj)
-
-    def __str__(self):
-        return self._ptr().toString().c_str()
-
-    def confidence_to_count(self, float conf):
-        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
-
-    def count_to_confidence(self, float count):
-        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
-
-
-# @todo this should be a generator using the yield statement
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator iter
     cdef cHandle i
@@ -148,6 +56,23 @@ cdef class AtomSpace:
         if self.owns_atomspace:
             del self.atomspace
 
+    def __richcmp__(as_1, as_2, int op):
+        if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
+            return NotImplemented
+        cdef AtomSpace atomspace_1 = <AtomSpace>as_1
+        cdef AtomSpace atomspace_2 = <AtomSpace>as_1
+
+        cdef cAtomSpace* c_atomspace_1 = atomspace_1.atomspace
+        cdef cAtomSpace* c_atomspace_2 = atomspace_2.atomspace
+        
+        is_equal = True
+        if c_atomspace_1 != c_atomspace_2:
+            is_equal = False
+        if op == 2: # ==
+            return is_equal
+        elif op == 3: # !=
+            return not is_equal
+
     def add(self, Type t, name=None, out=None, TruthValue tv=None, prefixed=False):
         """ add method that determines exact method to call from type """
         if is_a(t,types.Node):
@@ -164,20 +89,20 @@ cdef class AtomSpace:
         @todo support type name for type.
         @returns the newly created Atom
         """
-        # convert to string
-        py_byte_string = atom_name.encode('UTF-8')
-        # create temporary cpp string
-        cdef string *name = new string(py_byte_string)
+        cdef string name = atom_name.encode('UTF-8')
         cdef cHandle result
+# XXX fix this prefixed thing -- the code should be clling the atomspace
+# utility for this.  How does one call a utility function here ??
+        prefixed = False
         if prefixed:
             # prefixed nodes ALWAYS generate a new atom using atom_name
             # as the prefix
-            result = self.atomspace.addPrefixedNode(t, deref(name))
+            # Need to call the utility that does prefixing, here.
+            # result = self.addPrefixedNode(atromspace, t, name)
+            pass
         else:
-            result = self.atomspace.addNode(t, deref(name))
+            result = self.atomspace.addNode(t, name)
 
-        # delete temporary string
-        del name
         if result == result.UNDEFINED: return None
         atom = Atom(Handle(result.value()), self);
         if tv :
@@ -191,14 +116,14 @@ cdef class AtomSpace:
         @returns handle referencing the newly created Atom
         """
         # create temporary cpp vector
-        cdef vector[cHandle] o_vect
+        cdef vector[cHandle] handle_vector
         for h in outgoing:
             if isinstance(h, Handle):
-                o_vect.push_back(deref((<Handle>h).h))
+                handle_vector.push_back(deref((<Handle>h).h))
             elif isinstance(h, Atom):
-                o_vect.push_back(deref((<Handle>(h.h)).h))
+                handle_vector.push_back(deref((<Handle>(h.h)).h))
         cdef cHandle result
-        result = self.atomspace.addLink(t, o_vect)
+        result = self.atomspace.addLink(t, handle_vector)
         if result == result.UNDEFINED: return None
         #return Handle(result.value());
         atom = Atom(Handle(result.value()), self);
@@ -295,15 +220,49 @@ cdef class AtomSpace:
 
     def get_outgoing(self, Handle handle):
         """ Get the outgoing set for a Link in the AtomSpace """
-        cdef vector[cHandle] o_vect
-        o_vect = self.atomspace.getOutgoing(deref(handle.h))
-        return convert_handle_seq_to_python_list(o_vect,self)
+        cdef vector[cHandle] handle_vector
+        handle_vector = self.atomspace.getOutgoing(deref(handle.h))
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_outgoing(self, Handle handle):
+        """ Get the outgoing set for a Link in the AtomSpace """
+        cdef vector[cHandle] handle_vector
+        handle_vector = self.atomspace.getOutgoing(deref(handle.h))
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def get_incoming(self, Handle handle):
         """ Get the incoming set for an Atom in the AtomSpace """
-        cdef vector[cHandle] o_vect
-        o_vect = self.atomspace.getIncoming(deref(handle.h))
-        return convert_handle_seq_to_python_list(o_vect,self)
+        cdef vector[cHandle] handle_vector
+        handle_vector = self.atomspace.getIncoming(deref(handle.h))
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_incoming(self, Handle handle):
+        """ Get the incoming set for an Atom in the AtomSpace """
+        cdef vector[cHandle] handle_vector
+        handle_vector = self.atomspace.getIncoming(deref(handle.h))
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def is_source(self, Handle source, Handle h):
         # This logic could probably easily be implemented client side, but best to
@@ -338,47 +297,175 @@ cdef class AtomSpace:
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
-        cdef vector[cHandle] o_vect
+        cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.getHandlesByType(back_inserter(o_vect),t,subt)
-        return convert_handle_seq_to_python_list(o_vect,self)
+        self.atomspace.getHandlesByType(back_inserter(handle_vector),t,subt)
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_atoms_by_type(self, Type t, subtype = True):
+        cdef vector[cHandle] handle_vector
+        cdef bint subt = subtype
+        self.atomspace.getHandlesByType(back_inserter(handle_vector),t,subt)
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def get_atoms_by_name(self, Type t, name, subtype = True):
-        cdef vector[cHandle] o_vect
-        # create temporary cpp string
-        py_byte_string = name.encode('UTF-8')
-        cdef string *cname = new string(py_byte_string)
+        cdef vector[cHandle] handle_vector
+        cdef string cname = name.encode('UTF-8')
         cdef bint subt = subtype
-        self.atomspace.getHandlesByName(back_inserter(o_vect), deref(cname), t, subt)
-        del cname
-        return convert_handle_seq_to_python_list(o_vect,self)
+        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_atoms_by_name(self, Type t, name, subtype = True):
+        cdef vector[cHandle] handle_vector
+        cdef string cname = name.encode('UTF-8')
+        cdef bint subt = subtype
+        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def get_atoms_by_av(self, lower_bound, upper_bound=None):
-        cdef vector[cHandle] o_vect
+        cdef vector[cHandle] handle_vector
         if upper_bound is not None:
-            self.atomspace.getHandlesByAV(back_inserter(o_vect), lower_bound, upper_bound)
+            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound, upper_bound)
         else:
-            self.atomspace.getHandlesByAV(back_inserter(o_vect), lower_bound)
-        return convert_handle_seq_to_python_list(o_vect, self)
+            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound)
+        return convert_handle_seq_to_python_list(handle_vector, self)
+
+    def xget_atoms_by_av(self, lower_bound, upper_bound=None):
+        cdef vector[cHandle] handle_vector
+        if upper_bound is not None:
+            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound, upper_bound)
+        else:
+            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound)
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def get_atoms_in_attentional_focus(self):
-        cdef vector[cHandle] o_vect
-        self.atomspace.getHandleSetInAttentionalFocus(back_inserter(o_vect))
-        return convert_handle_seq_to_python_list(o_vect, self)
+        cdef vector[cHandle] handle_vector
+        self.atomspace.getHandleSetInAttentionalFocus(back_inserter(handle_vector))
+        return convert_handle_seq_to_python_list(handle_vector, self)
 
-    def get_atoms_by_target_type(self, Type t, Type target_t, subtype = True, target_subtype = True):
-        cdef vector[cHandle] o_vect
-        cdef bint subt = subtype
-        cdef bint target_subt = target_subtype
-        self.atomspace.getHandleSet(back_inserter(o_vect),t,target_t,subt,target_subt)
-        return convert_handle_seq_to_python_list(o_vect,self)
+    def xget_atoms_in_attentional_focus(self):
+        cdef vector[cHandle] handle_vector
+        self.atomspace.getHandleSetInAttentionalFocus(back_inserter(handle_vector))
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     def get_atoms_by_target_atom(self, Type t, Atom target_atom, subtype = True):
-        cdef vector[cHandle] o_vect
+        cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef Handle target_h = target_atom.h
-        self.atomspace.getHandleSet(back_inserter(o_vect),deref(target_h.h),t,subt)
-        return convert_handle_seq_to_python_list(o_vect,self)
+        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_atoms_by_target_atom(self, Type t, Atom target_atom, subtype = True):
+        cdef vector[cHandle] handle_vector
+        cdef bint subt = subtype
+        cdef Handle target_h = target_atom.h
+        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
+
+    def get_predicates(self, Atom target, Type predicate_type = types.PredicateNode, subclasses=True):
+        cdef vector[cHandle] handle_vector
+        cdef bint want_subclasses = subclasses
+        cdef Handle target_h = target.h
+        handle_vector = c_get_predicates(deref(target_h.h), predicate_type, want_subclasses)
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_predicates(self, Atom target, Type predicate_type = types.PredicateNode, subclasses=True):
+        cdef vector[cHandle] handle_vector
+        cdef bint want_subclasses = subclasses
+        cdef Handle target_h = target.h
+        handle_vector = c_get_predicates(deref(target_h.h), predicate_type, want_subclasses)
+        
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
+
+    def get_predicates_for(self, Atom target, Atom predicate):
+        cdef vector[cHandle] handle_vector
+        cdef Handle target_h = target.h
+        cdef Handle predicate_h = predicate.h
+        handle_vector = c_get_predicates_for(deref(target_h.h), deref(predicate_h.h))
+        return convert_handle_seq_to_python_list(handle_vector,self)
+
+    def xget_predicates_for(self, Atom target, Atom predicate):
+        cdef vector[cHandle] handle_vector
+        cdef Handle target_h = target.h
+        cdef Handle predicate_h = predicate.h
+        handle_vector = c_get_predicates_for(deref(target_h.h), deref(predicate_h.h))
+        
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            temp_handle = Handle(current_c_handle.value())
+            yield Atom(temp_handle,self)
+            inc(c_handle_iter)
 
     @classmethod
     def include_incoming(cls, atoms):
@@ -405,7 +492,8 @@ cdef class AtomSpace:
                 [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
 
     def print_list(self):
-        self.atomspace.print_list()
+    #    self.atomspace.print_list()
+         pass
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
