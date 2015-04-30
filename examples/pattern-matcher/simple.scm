@@ -67,7 +67,7 @@
            (VariableNode "$H")
            (ConceptNode "human")
         )
-        (ExecutionLink
+        (ExecutionOutputLink
            (GroundedSchemaNode "scm: modify-stv")
            ; This is the list of arguments to pass to the formula.
            ; Notice that *two* arguments are passed.  The first
