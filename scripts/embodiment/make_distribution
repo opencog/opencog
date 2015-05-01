@@ -90,11 +90,11 @@ if  [file exists $buildDirH/opencog/cython/libPythonModule.so] then {
 }
 
 set schemeOpencogFiles [list \
-$pdh/opencog/scm/utilities.scm \
-$pdh/opencog/scm/file-utils.scm \
-$pdh/opencog/scm/persistence.scm \
-$pdh/opencog/scm/config.scm \
-$buildDirH/opencog/atomspace/core_types.scm \
+/usr/local/share/opencog/scm/utilities.scm \
+/usr/local/share/opencog/scm/file-utils.scm \
+/usr/local/share/opencog/scm/persistence.scm \
+/usr/local/share/opencog/scm/config.scm \
+/usr/local/share/opencog/scm/core_types.scm \
 $buildDirH/opencog/nlp/types/nlp_types.scm \
 $buildDirH/opencog/spacetime/spacetime_types.scm \
 $buildDirH/opencog/dynamics/attention/attention_types.scm \
