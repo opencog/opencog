@@ -6,7 +6,7 @@ You need to set up the PYTHON path:
 export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
 
 For example:
-export PYTHONPATH=build/opencog/cython:opencog/python:tests/cython/agents
+export PYTHONPATH=build/opencog/cython:opencog/python:tests/cython/agents:tests/nlp/anaphora
 
 You also need to specify the library path:
 export LD_LIBRARY_PATH=build/opencog/cython
