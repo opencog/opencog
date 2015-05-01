@@ -674,8 +674,13 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(std::vector<std::string> module_paths)
 {
-    if (module_paths.empty())
-        module_paths = DEFAULT_MODULE_PATHS;
+    if (module_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            module_paths.push_back(p);
+            module_paths.push_back(p + "/opencog");
+        }
+    }
 
     // Load modules specified in the config file
     std::vector<std::string> modules;
@@ -704,8 +709,14 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
 void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 {
 #ifdef HAVE_GUILE
-    if (module_paths.empty())
-        module_paths = DEFAULT_MODULE_PATHS;
+    if (module_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            module_paths.push_back(p);
+            module_paths.push_back(p + "/opencog");
+        }
+    }
+
 
     load_scm_files_from_config(*atomSpace, module_paths);
 #else /* HAVE_GUILE */
