@@ -22,33 +22,17 @@ installer at `/scripts/octool`.  Users of any version of Linux may
 use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
-###### boost
-> C++ utilities package
-> http://www.boost.org/ | libboost-dev
-
-###### cmake
-> Build management tool; v2.8 or higher recommended.
-> http://www.cmake.org/ | cmake
-
 ###### cogutil
 > Common OpenCog C++ utilities
 > http://github/opencog/cogutils
-> It uses exactly the same build proceedure as this pakcage. Be sure
+> It uses exactly the same build proceedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### cxxtest
-> Test framework
-> http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
-> Currently, opencog requires cxxtest version 3, and is not compatible
-  with version 4.
-
-###### guile
-> Embedded scheme interpreter (version 2.0.0 or newer is required)
-> http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
-
-###### libgsl
-> The GNU Scientific Library
-> http://www.gnu.org/software/gsl/ | libgsl0-dev
+###### atomspace
+> OpenCog Atomspace database and reasoning engine
+> http://github/opencog/atomspace
+> It uses exactly the same build proceedure as this package. Be sure
+  to `sudo make install` at the end.
 
 Optional Prerequisites
 ----------------------
@@ -65,11 +49,6 @@ the build, will be more precise as to which parts will not be built.
 > an XML parsing library
 > Used by Embodiment subsystem
 > http://expat.sourceforge.net/ | http://www.jclark.com/xml/expat.html (version 1.2) | libexpat1-dev
-
-###### HyperTable
-> Distributed storage
-> http://hypertable.org
-> This requires SIGAR as well
 
 ###### Link Grammar
 > Natural Language Parser for English, Russian, other languages.
@@ -101,11 +80,6 @@ the build, will be more precise as to which parts will not be built.
 ###### Threading Building Blocks
 > C++ template library for parallel programming
 > https://www.threadingbuildingblocks.org/download | libtbb-dev
-
-###### unixODBC
-> Generic SQL Database client access libraries
-> Required for the distributed-processing atomspace.
-> http://www.unixodbc.org/ | unixodbc-dev
 
 ###### xercesc
 > Apache Xerces-C++ XML Parser
