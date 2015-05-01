@@ -39,16 +39,16 @@ void AtomSpaceInterface::SearchAtom(AtomFilter* atomFilter, vector<Vertex*>& fou
 {
     string query="";
 	if(atomFilter->uuid!=-numeric_limits<unsigned long>::max())
-		${ATOMSPACE_query_LIBRARY}="list?handle=" + lexical_cast<string>(atomFilter->uuid);
+		query="list?handle=" + lexical_cast<string>(atomFilter->uuid);
 	else if(atomFilter->name.size()>0)
-		${ATOMSPACE_query_LIBRARY}="list?type=" + atomTypes->atomTypeNames[atomFilter->type] + "&name="+atomFilter->name;
+		query="list?type=" + atomTypes->atomTypeNames[atomFilter->type] + "&name="+atomFilter->name;
 	else
 	{
-		${ATOMSPACE_query_LIBRARY}="list?type=" + atomTypes->atomTypeNames[atomFilter->type];
+		query="list?type=" + atomTypes->atomTypeNames[atomFilter->type];
 		if(atomFilter->includeSubtypes)
-			${ATOMSPACE_query_LIBRARY}+="&subtype=1";
+			query+="&subtype=1";
 		else
-			${ATOMSPACE_query_LIBRARY}+="&subtype=0";
+			query+="&subtype=0";
 	}
 
 	switch(atomFilter->sortOrder)
@@ -56,35 +56,35 @@ void AtomSpaceInterface::SearchAtom(AtomFilter* atomFilter, vector<Vertex*>& fou
 		case 0:
 			break;
 		case 1:
-			${ATOMSPACE_query_LIBRARY}+="&order=sti&ascend=0";
+			query+="&order=sti&ascend=0";
 			break;
 		case 2:
-			${ATOMSPACE_query_LIBRARY}+="&order=lti&ascend=0";
+			query+="&order=lti&ascend=0";
 			break;
 		case 3:
-			${ATOMSPACE_query_LIBRARY}+="&order=tv.s&ascend=0";
+			query+="&order=tv.s&ascend=0";
 			break;
 		case 4:
-			${ATOMSPACE_query_LIBRARY}+="&order=tv.c&ascend=0";
+			query+="&order=tv.c&ascend=0";
 			break;
 		case 5:
-			${ATOMSPACE_query_LIBRARY}+="&order=sti&ascend=1";
+			query+="&order=sti&ascend=1";
 			break;
 		case 6:
-			${ATOMSPACE_query_LIBRARY}+="&order=lti&ascend=1";
+			query+="&order=lti&ascend=1";
 			break;
 		case 7:
-			${ATOMSPACE_query_LIBRARY}+="&order=tv.s&ascend=1";
+			query+="&order=tv.s&ascend=1";
 			break;
 		case 8:
-			${ATOMSPACE_query_LIBRARY}+="&order=tv.c&ascend=1";
+			query+="&order=tv.c&ascend=1";
 			break;
 	}
 
-	${ATOMSPACE_query_LIBRARY}+="&max=49";
+	query+="&max=49";
 
 	if(skip>0)
-		${ATOMSPACE_query_LIBRARY}+="&skip=" + lexical_cast<string>(skip);
+		query+="&skip=" + lexical_cast<string>(skip);
 
 	RetrieveVerticesFromCogServer(query, foundVertices, isFinished);
 }
@@ -113,10 +113,10 @@ void AtomSpaceInterface::GetConnectedAtoms(Vertex* vertex, NodeFilter* nodeFilte
 	for(int i=0; i<size;i++)
 	{
 		if(i>0)
-			${ATOMSPACE_query_LIBRARY}+="&";
-		${ATOMSPACE_query_LIBRARY}+="handle=" + vertex->connectedHandles[i];
+			query+="&";
+		query+="handle=" + vertex->connectedHandles[i];
 	}
-	${ATOMSPACE_query_LIBRARY}+="&max="+lexical_cast<string>(size);
+	query+="&max="+lexical_cast<string>(size);
 
 	bool dummy;
 	RetrieveVerticesFromCogServer(query, connectedVertices,dummy);
