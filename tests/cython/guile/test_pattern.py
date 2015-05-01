@@ -26,13 +26,14 @@ class SchemeTest(TestCase):
 
         # These relative paths are horridly ugly.
         # There must be a better way ...
-        status = load_scm(self.space, "opencog/atomspace/core_types.scm")
+        # status = load_scm(self.space, "/usr/local/share/opencog/scm/core_types.scm")
+        status = load_scm(self.space, "scm/core_types.scm")
         self.assertTrue(status)
 
-        status = load_scm(self.space, "opencog/nlp/types/nlp_types.scm")
+        status = load_scm(self.space, "./build/opencog/nlp/types/nlp_types.scm")
         self.assertTrue(status)
 
-        status = load_scm(self.space, "opencog/scm/utilities.scm")
+        status = load_scm(self.space, "scm/utilities.scm")
         self.assertTrue(status)
 
     # Load a file that results in atoms placed in the atomspace.
@@ -52,6 +53,7 @@ class SchemeTest(TestCase):
 
     # Run some basic evaluation tests
     def test_c_eval(self):
+
         basic = scheme_eval_h(self.space,
             "(ConceptNode \"whatever\" (stv 0.5 0.5))")
 

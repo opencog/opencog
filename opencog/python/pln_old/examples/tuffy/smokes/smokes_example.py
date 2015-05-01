@@ -16,7 +16,7 @@ EXTRA_DATA = True
 atomspace = AtomSpace()
 __init__(atomspace)
 
-data = ["opencog/atomspace/core_types.scm",
+data = ["opencog/scm/core_types.scm",
         "opencog/scm/utilities.scm",
         "opencog/python/pln_old/examples/tuffy/smokes/smokes.scm"]
 

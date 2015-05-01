@@ -3,6 +3,11 @@
 ;
 ; Create some misc atoms.
 
+(add-to-load-path "/usr/local/share/opencog/scm")
+(use-modules (opencog))
+
+(define (stv mean conf) (cog-new-stv mean conf))
+
 (ListLink
 	(ConceptNode "hello" (stv 0.5 0.5))
 	(ConceptNode "world")

@@ -188,9 +188,25 @@ void opencog::global_python_initialize()
     import_opencog__atomspace();
     import_opencog__agent_finder();
 
+    // The import_opencog__atomspace() call above sets the
+    // py_atomspace() function pointer if the cython module load
+    // succeeded. But the function pointer will be NULL if the
+    // opencopg.atomspace cython module failed to load. Avert
+    // a hard-to-debug crash on null-pointer-deref, and replace
+    // it by a hard-to-debug error message.
+    if (NULL == py_atomspace) {
+        PyErr_Print();
+        logger().error("PythonEval::%s Failed to load"
+                       "the opencog.atomspace module", __FUNCTION__);
+    }
+
     // Now we can use get_path_as_string() to get 'sys.path'
-    logger().info("Python 'sys.path' after OpenCog config adds is: " +
-            get_path_as_string());
+    // But only if import_opencog__atomspace() suceeded without error.
+    // When it fails, it fails silently, leaving get_path_as_string with
+    // a NULL PLT/GOT entry
+    if (NULL != get_path_as_string)
+        logger().info("Python 'sys.path' after OpenCog config adds is: " +
+               get_path_as_string());
 
     // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
     // Py_DECREF(pySysPath);
@@ -345,8 +361,17 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
 PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
 {
-    PyObject * pyAtomSpace;
+    // The py_atomspace function pointer will be NULL if the
+    // opencopg.atomspace cython module failed to load. Avert
+    // a hard-to-debug crash on null-pointer-deref, and replace
+    // it by a hard-to-debug error message.
+    if (NULL == py_atomspace) {
+        logger().error("PythonEval::%s Failed to load"
+                       "the opencog.atomspace module", __FUNCTION__);
+        return NULL;
+    }
 
+    PyObject * pyAtomSpace;
     if (atomspace)
         pyAtomSpace = py_atomspace(atomspace);
     else

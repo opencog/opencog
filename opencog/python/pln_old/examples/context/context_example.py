@@ -13,7 +13,7 @@ __author__ = 'Sebastian Ruder'
 atomspace = AtomSpace()
 __init__(atomspace)
 
-coreTypes = "opencog/atomspace/core_types.scm"
+coreTypes = "opencog/scm/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
 data = "tests/python/test_pln/scm/relex2logic_pln_examples/context-rules.scm"
 

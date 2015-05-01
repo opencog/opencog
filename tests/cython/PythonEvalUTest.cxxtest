@@ -267,7 +267,7 @@ public:
         CogServer cogServer;
         bool error;
 
-        config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
+        config().set("SCM_PRELOAD", "opencog/scm/core_types.scm");
         cogServer.loadSCMModules();
 
         // Get the python eval instance which the CogServer will have created.
