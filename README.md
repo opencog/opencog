@@ -97,19 +97,16 @@ the build, will be more precise as to which parts will not be built.
 
 Building OpenCog
 ----------------
-Peform the following steps at the shell prompt:
+Perform the following steps at the shell prompt:
 ```
     cd to project root dir
     mkdir build
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Release ..
+    cmake ..
     make
 ```
 Libraries will be built into subdirectories within build, mirroring
-the structure of the source directory root. The flag
-`-DCMAKE_BUILD_TYPE=Release` results in binaries that are optimized
-for for performance; ommitting this flag will result in faster builds,
-but slower executables.
+the structure of the source directory root.
 
 
 Unit tests
