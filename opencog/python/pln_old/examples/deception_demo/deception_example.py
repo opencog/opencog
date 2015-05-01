@@ -12,7 +12,7 @@ from pln.examples.interactive_agent import InteractiveAgent
 atomspace = AtomSpace()
 __init__(atomspace)
 
-coreTypes = "opencog/atomspace/core_types.scm"
+coreTypes = "opencog/scm/core_types.scm"
 embodimentTypes = "opencog/spacetime/spacetime_types.scm"
 utilities = "opencog/scm/utilities.scm"
 path = "opencog/python/pln_old/examples/deception_demo/"

@@ -50,7 +50,7 @@ public:
         this->as = &cogserver().getAtomSpace();
         config().load(NULL,false);
         config().set("SCM_PRELOAD",
-            "opencog/atomspace/core_types.scm, "
+            "opencog/scm/core_types.scm, "
             "opencog/scm/utilities.scm");
     
         load_scm_files_from_config(*as);

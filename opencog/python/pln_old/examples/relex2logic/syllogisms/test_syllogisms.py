@@ -69,7 +69,7 @@ def set_up_atomspace():
     Initializes a new atomspace, loads the core types and utitities.
     :return: an atomspace
     """
-    coreTypes = "opencog/atomspace/core_types.scm"
+    coreTypes = "opencog/scm/core_types.scm"
     utilities = "opencog/scm/utilities.scm"
     newly_created_atomspace = AtomSpace()
     __init__(newly_created_atomspace)
