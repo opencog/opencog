@@ -34,7 +34,7 @@ IF (TBB_FOUND)
 	)
 
 	TARGET_LINK_LIBRARIES(plnmodule
-		ruleengine
+		${ATOMSPACE_LIBRARIES}
 		server
 		tbb
 	)
@@ -71,7 +71,9 @@ ADD_LIBRARY(RuleEngineModule SHARED
 	RuleEngineModule.cc
 )
 
-TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
+TARGET_LINK_LIBRARIES(RuleEngineModule
+	${ATOMSPACE_LIBRARIES}
+)
 
 # ----------------------------------------
 # Surface realization cogserver module

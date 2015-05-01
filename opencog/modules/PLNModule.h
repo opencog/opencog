@@ -24,10 +24,10 @@
 #ifndef PLNAGENT_H_
 #define PLNAGENT_H_
 
-#include <opencog/server/Module.h>
-#include <opencog/atomspace/AtomSpace.h>
-
 #include <boost/signals2.hpp>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/Module.h>
 
 namespace opencog
 {

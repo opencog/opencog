@@ -40,6 +40,9 @@ find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
 find_library(ATOMSPACE_query_LIBRARY query
    PATH ${ATOMSPACE_LIBPATH})
 
+find_library(ATOMSPACE_ruleengine_LIBRARY ruleengine
+   PATH ${ATOMSPACE_LIBPATH})
+
 find_library(ATOMSPACE_smob_LIBRARY smob
    PATH ${ATOMSPACE_LIBPATH})
 
@@ -53,6 +56,7 @@ set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_persist_LIBRARY}
 	${ATOMSPACE_persist-sql_LIBRARY}
 	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
 )
 
