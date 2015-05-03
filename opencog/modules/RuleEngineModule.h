@@ -25,7 +25,7 @@
 #define RULEENGINEMODULE_H_
 
 #include <opencog/server/Module.h>
-#include <opencog/reasoning/engine/InferenceSCM.h>
+#include <opencog/rule-engine/InferenceSCM.h>
 
 namespace opencog {
 class RuleEngineModule: public Module {
