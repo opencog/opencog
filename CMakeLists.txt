@@ -129,6 +129,17 @@ ENDIF (WIN32)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
+# Check for cogutils first, then check for atomspace
+# Cogutils
+FIND_PACKAGE(CogUtil 2.0.1 REQUIRED)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+	SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
 # AtomSpace
 FIND_PACKAGE(AtomSpace)
 IF (ATOMSPACE_FOUND)
@@ -188,16 +199,6 @@ IF(Boost_MATH_C99_FOUND)
 ELSE(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
-
-# Cogutils
-FIND_PACKAGE(CogUtil 2.0.1 REQUIRED)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
 
 FIND_PACKAGE(CURL)
 IF (NOT CURL_FOUND)
