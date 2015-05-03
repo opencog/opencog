@@ -13465,17 +13465,22 @@ is the change in energy due to a state transition: the change in energy
 \end_layout
 
 \begin_layout Standard
-Detailed balance requires that:
+Detailed balance requires that, when the system reaches equilibirum, that
+ the transition rate into and out of the equlibrium state 
+\begin_inset Formula $p_{i}=\pi_{i}$
+\end_inset
+
+ are equal:
 \begin_inset Formula 
 \[
-H_{ji}p_{i}=H_{ij}p_{j}
+H_{ji}\pi_{i}=H_{ij}\pi{}_{j}
 \]
 
 \end_inset
 
 (there is NO repeated-index summation).
  Then, just write 
-\begin_inset Formula $p_{i}=\exp-E_{i}/kT$
+\begin_inset Formula $\pi_{i}=\exp-E_{i}/kT$
 \end_inset
 
 , and turn the crank.
@@ -13483,7 +13488,76 @@ H_{ji}p_{i}=H_{ij}p_{j}
 \emph on
 the log of the ratio of the forward and backward transition rates between
  two states must be proportional to the energy difference between those
- states!
+ states! 
+\end_layout
+
+\begin_layout Standard
+BTW the detailed-balance equation resembles Bayes Theorem, in that, if we
+ wrote 
+\begin_inset Formula $H_{ji}\rightarrow P(j|i)$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi_{i}\rightarrow P(i)$
+\end_inset
+
+, then detailed balance is written as 
+\begin_inset Formula $P(j|i)P(i)=P(i|j)P(j)$
+\end_inset
+
+.
+ So the master equation describes 
+\begin_inset Quotes eld
+\end_inset
+
+non-equilibrium Bayes statistics
+\begin_inset Quotes erd
+\end_inset
+
+, in a strange sense.
+ Hmm.
+ But, of course, this is just a Markov chanin/process.
+\end_layout
+
+\begin_layout Section*
+26 March 2015
+\end_layout
+
+\begin_layout Standard
+The Inverse Relationship Principle of Channel theory: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Whenever there is an increase in available information there is a corresponding
+ decrease in possibilities, and vice versa.
+\emph default
+
+\begin_inset Quotes eld
+\end_inset
+
+ Barwise, 
+\begin_inset Quotes eld
+\end_inset
+
+Information and Impossibilities.
+\begin_inset Quotes erd
+\end_inset
+
+ Notre Dame J.
+ Formal Logic Volume 38, Number 4, 488-515.
+ Barwise, Jon and Jerry Seligman 1997.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Information Flow: The Logic of Distributed Systems
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Cambridge: Cambridge University Press
 \end_layout
 
 \begin_layout Section*
