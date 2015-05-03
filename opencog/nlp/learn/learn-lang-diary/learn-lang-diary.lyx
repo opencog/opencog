@@ -10,7 +10,7 @@
 \maintain_unincluded_children false
 \language english
 \language_package default
-\inputencoding auto
+\inputencoding utf8
 \fontencoding global
 \font_roman times
 \font_sans helvet
@@ -11528,7 +11528,7 @@ Base
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.225636
+-0.225636
 \end_layout
 
 \end_inset
@@ -11656,7 +11656,7 @@ Y
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.16741
+-0.16741
 \end_layout
 
 \end_inset
@@ -11784,7 +11784,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.086427
+-0.086427
 \end_layout
 
 \end_inset
@@ -11912,7 +11912,7 @@ Y
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.199736
+-0.199736
 \end_layout
 
 \end_inset
@@ -12040,7 +12040,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.086427
+-0.086427
 \end_layout
 
 \end_inset
@@ -12156,7 +12156,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.225636
+-0.225636
 \end_layout
 
 \end_inset
@@ -12272,7 +12272,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.075146
+-0.075146
 \end_layout
 
 \end_inset
@@ -12875,7 +12875,7 @@ Base
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.239662
+-0.239662
 \end_layout
 
 \end_inset
@@ -12979,7 +12979,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.049883
+-0.049883
 \end_layout
 
 \end_inset
@@ -13083,7 +13083,7 @@ N
 \begin_inset Text
 
 \begin_layout Plain Layout
-−0.066932
+-0.066932
 \end_layout
 
 \end_inset
@@ -13561,7 +13561,496 @@ Information Flow: The Logic of Distributed Systems
 \end_layout
 
 \begin_layout Section*
-The End ￼
+3 May 2015
+\end_layout
+
+\begin_layout Standard
+Another Baez post: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+A Compositional Framework for Passive Linear Networks
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\emph default
+blog: https://johncarlosbaez.wordpress.com/2015/04/28/a-compositional-framework-fo
+r-passive-linear-networks/
+\end_layout
+
+\begin_layout Standard
+So first, we have the table:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="15col%">
+<column alignment="center" valignment="top" width="15col%">
+<column alignment="center" valignment="top" width="25col%">
+<column alignment="center" valignment="top" width="25col%">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+mechanics
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+electronics
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+information geometry
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+geometric mechanics
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+q
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+position
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+charge
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+entropy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+point on manifold
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\dot{q}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+velocity
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+current
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+entropy change
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tangent vector
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+p
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+flux linkage
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+temperature momentum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+covector (vector in cotangent bundle)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\dot{p}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+force
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+voltage
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+temperature
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+map from tangent bundle to cotangent bundle
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+principle of least action
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+principle of least power dissipation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+?
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+principle of least action
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This table is slightly oversimplified; the first four columns show only
+ the linear case.
+ The fifth column makes clear that force isn't really p-dot; that only holds
+ when the manifold is flat.
+ Anyway..
+\end_layout
+
+\begin_layout Standard
+Key concepts: (*) monoidal categories are needed, and (*) symplectic geometry
+ is needed.
+\end_layout
+
+\begin_layout Standard
+Baez does the linear passive-component electronics example, viz a network
+ of passive resistors, capacitors, inductors.
+ For the resistor network, voltages at each node are taken from the field
+ 
+\begin_inset Formula $\mathbb{F}=\mathbb{R}$
+\end_inset
+
+ while for the inductive network, the field is the field of rational functions
+ of one variable 
+\begin_inset Formula $\mathbb{F}=\mathbb{R}(t)$
+\end_inset
+
+ with 
+\begin_inset Formula $t$
+\end_inset
+
+ time: i.e.
+ voltage varying over time.
+ A Dirichlet form is a quadratic form 
+\begin_inset Formula 
+\[
+P(\phi)=\frac{1}{2}\sum_{i,j}\frac{(\phi_{i}-\phi_{j})^{2}}{r_{ij}}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $r_{ij}$
+\end_inset
+
+ is the reistance (impedance) between nodes i and j, and 
+\begin_inset Formula $\phi_{i}=\phi(i)$
+\end_inset
+
+ is the voltage at node i.
+ (Actually, we should be summing over edges, so as to handle parallel resistors).
+ Note that the space of Dirichlet forms is smaller than the space of quadratic
+ forms: Dirichlet forms do not have diagonal entries.
+ Note that P is (half) the power dissipation.
+\end_layout
+
+\begin_layout Standard
+The principle of least power dissipation is this: Given fixed voltages 
+\begin_inset Formula $\psi$
+\end_inset
+
+ on the boundary of the network, i.e.
+ on the input/output terminals, the actual power dissipated is
+\begin_inset Formula 
+\[
+Q(\psi)=\min_{\phi\in\mathbb{R}^{N},\phi|_{\partial N}=\psi}\; P(\phi)
+\]
+
+\end_inset
+
+Notation: there are N nodes, so voltages live in 
+\begin_inset Formula $\mathbb{R}^{N}$
+\end_inset
+
+.
+ The boundary of the network (input/output terminals) is written as 
+\begin_inset Formula $\partial N$
+\end_inset
+
+ and the voltages are held fixed at the boundary.
+ Note that Q is also a Dirichlet form.
+ Viz its a map 
+\begin_inset Formula $Q:\mathbb{R}^{\partial N}\to\mathbb{R}$
+\end_inset
+
+.
+ The black-box principle of equvalent resistor networks is that any two
+ resistor networks are black-box equivalent when they have the same Q.
+ 
+\end_layout
+
+\begin_layout Standard
+For the correct generalization to impedance, it is not enough to just replace
+ 
+\begin_inset Formula $\mathbb{F}=\mathbb{R}$
+\end_inset
+
+ by 
+\begin_inset Formula $\mathbb{F}=\mathbb{R}(t)$
+\end_inset
+
+ because this fails to deal with the time variation correctly.
+ Put it another way: for the pure resistor network, we are free to fix voltages
+ at both the input and output terminals arbitrarily; the internal currents
+ are determined entirely by these.
+ For the general case with impedance, we are not free to fix both voltages
+ and currents at both the input and output terminals.
+ Out of the total set of 
+\begin_inset Formula $2\dim(\partial N)$
+\end_inset
+
+ voltages and currents, we can fix only half the set, i.e.
+ a mixture of voltages, currents of 
+\begin_inset Formula $\dim(\partial N)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+To handle this, we need to construct a symplectic vector space, with a symplecti
+c form on it, and work in the Lagrangian subspace of it.
+ Thus, we have 
+\begin_inset Formula $\psi\in\mathbb{F}^{\partial N}$
+\end_inset
+
+ as the potentials at the network terminals, and 
+\begin_inset Formula $dQ_{\psi}\in\left(\mathbb{F}^{\partial N}\right)^{*}$
+\end_inset
+
+ as the conjugate currents.
+ Out of the total space 
+\begin_inset Formula $\mathbb{F}^{\partial N}\oplus\left(\mathbb{F}^{\partial N}\right)^{*}$
+\end_inset
+
+ of states, the subspace of actually attainable states is 
+\begin_inset Formula 
+\[
+{\rm Graph}\left(dQ\right)=\left\{ \left(\psi,dQ_{\psi}\right)\vert\psi\in\mathbb{F}^{\partial N}\right\} \subseteq\mathbb{F}^{\partial N}\oplus\left(\mathbb{F}^{\partial N}\right)^{*}
+\]
+
+\end_inset
+
+The set of Lagrangian subspaces is an algebraic variety, the Lagrangian
+ Grassmanian.
+\end_layout
+
+\begin_layout Standard
+Baez primary result on impedence networks is that the black box is describable
+ by the symplecitification of ..
+ OK I don't get it
+\end_layout
+
+\begin_layout Section*
+The End
 \end_layout
 
 \begin_layout Standard
