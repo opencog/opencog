@@ -20,7 +20,7 @@ ADD_DEPENDENCIES(embodiment-types spacetime_atom_types)
 ADD_DEPENDENCIES(embodiment-types embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (embodiment-types
-	atomspace
+	${ATOMSPACE_LIBRARY}
 )
 
 IF (HAVE_EMBODIMENT)
@@ -34,8 +34,8 @@ IF (HAVE_EMBODIMENT)
 
 	TARGET_LINK_LIBRARIES (AtomSpaceExtensions
 		embodiment-types
-		query
+		${ATOMSPACE_query_LIBRARY}
 		spacetime
-		atomspace
+		${ATOMSPACE_LIBRARY}
 	)
 ENDIF (HAVE_EMBODIMENT)

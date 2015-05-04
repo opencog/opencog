@@ -13,7 +13,7 @@ __author__ = 'Cosmo Harrigan, Sebastian Ruder'
 atomspace = AtomSpace()
 __init__(atomspace)
 
-coreTypes = "opencog/atomspace/core_types.scm"
+coreTypes = "opencog/scm/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
 data = "opencog/python/pln_old/examples/socrates_demo/socrates-r2l.scm"
 

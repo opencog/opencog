@@ -34,6 +34,7 @@ ADD_LIBRARY(PythonEval SHARED
 ADD_DEPENDENCIES(PythonEval atomspace_cython agent_finder)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	${ATOMSPACE_LIBRARIES}
 	${PYTHON_LIBRARIES}
 )
 

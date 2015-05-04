@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/reasoning/engine/InferenceSCM.h>
 #include "RuleEngineModule.h"
 
 using namespace opencog;

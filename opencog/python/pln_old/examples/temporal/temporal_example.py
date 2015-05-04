@@ -14,7 +14,7 @@ __author__ = 'Sebastian Ruder'
 
 num_steps = 100
 print_starting_contents = True
-coreTypes = "opencog/atomspace/core_types.scm"
+coreTypes = "opencog/scm/core_types.scm"
 utilities = "opencog/scm/utilities.scm"
 timeLinks = "opencog/spacetime/spacetime_types.scm"
 data = "tests/python/test_pln/scm_disabled/temporal/temporalToyExample.scm"

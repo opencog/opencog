@@ -23,8 +23,8 @@ ADD_DEPENDENCIES(viterbi viterbi_atom_types)
 
 TARGET_LINK_LIBRARIES(viterbi
 	lg-dict
-	query
-	atomspace
+	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_LIBRARY}
 	${LINK_GRAMMAR_LIBRARIES}
 )
 

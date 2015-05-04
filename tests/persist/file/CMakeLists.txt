@@ -12,7 +12,7 @@ LINK_LIBRARIES(
 	savable
 	spacetime
 	spacetime-types
-	atomspace
+	${ATOMSPACE_LIBRARY}
 )
 
 ADD_CXXTEST(SavingLoadingUTest)

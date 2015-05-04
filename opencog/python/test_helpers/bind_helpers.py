@@ -25,4 +25,3 @@ def increment_green():
 def increment_red():
     global red
     red += 1
-

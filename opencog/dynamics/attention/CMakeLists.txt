@@ -21,7 +21,9 @@ ADD_LIBRARY(attention-types SHARED
 ADD_DEPENDENCIES(attention-types opencog_atom_types)
 ADD_DEPENDENCIES(attention-types attention_atom_types)
 
-TARGET_LINK_LIBRARIES(attention-types atomspace)
+TARGET_LINK_LIBRARIES(attention-types
+	${ATOMSPACE_LIBRARY}
+)
 
 # --------------------------------------------------
 # AttentionModule
@@ -36,7 +38,7 @@ ADD_LIBRARY(attention SHARED
 	ImportanceUpdatingAgent
 )
 
-TARGET_LINK_LIBRARIES(attention server atomutils atomspace)
+TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
 
 # HebbianCreationModule
 IF (TBB_FOUND)

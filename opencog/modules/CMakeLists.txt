@@ -34,7 +34,7 @@ IF (TBB_FOUND)
 	)
 
 	TARGET_LINK_LIBRARIES(plnmodule
-		ruleengine
+		${ATOMSPACE_LIBRARIES}
 		server
 		tbb
 	)
@@ -45,7 +45,9 @@ ENDIF (TBB_FOUND)
 ADD_LIBRARY(QueryModule SHARED
 	QueryModule.cc
 )
-TARGET_LINK_LIBRARIES(QueryModule query server)
+TARGET_LINK_LIBRARIES(QueryModule
+	${ATOMSPACE_LIBRARIES}
+)
 
 # ----------------------------------------
 # The SQL persistance module
@@ -55,8 +57,7 @@ ADD_LIBRARY (PersistModule SHARED
 )
 
 TARGET_LINK_LIBRARIES(PersistModule
-	persist
-	persist-sql
+	${ATOMSPACE_LIBRARIES}
 )
 
 INSTALL (TARGETS PersistModule
@@ -70,7 +71,9 @@ ADD_LIBRARY(RuleEngineModule SHARED
 	RuleEngineModule.cc
 )
 
-TARGET_LINK_LIBRARIES(RuleEngineModule ruleengine server)
+TARGET_LINK_LIBRARIES(RuleEngineModule
+	${ATOMSPACE_LIBRARIES}
+)
 
 # ----------------------------------------
 # Surface realization cogserver module

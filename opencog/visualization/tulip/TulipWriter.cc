@@ -18,13 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TulipWriter.h"
-#include <CogServer.h>
-#include <AtomSpace.h>
-
-
 #include <time.h>
 #include <sstream>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include "TulipWriter.h"
 
 using std::endl;
 

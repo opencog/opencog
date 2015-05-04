@@ -16,7 +16,7 @@ from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init_
 atomspace = AtomSpace()
 __init__(atomspace)
 
-data = ["opencog/atomspace/core_types.scm",
+data = ["opencog/scm/core_types.scm",
         "opencog/scm/utilities.scm"]
 
 for item in data:

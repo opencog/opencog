@@ -13,7 +13,7 @@ LINK_DIRECTORIES(
 # list libsureal as a dependency, so that it gets rebuilt, if needed,
 # when building this test.
 LINK_LIBRARIES(
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	sureal
 	server
 )

@@ -2,7 +2,7 @@
 # Need to use -fno-strict-aliasing when compiling cython code, in order
 # to avoid nasty compiler warnings about aliasing.  Cython explicitly
 # performs aliasing, in order to emulate python object inheritance.
-# See, for example, 
+# See, for example,
 # https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
@@ -40,7 +40,7 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 IF (HAVE_ATOMSPACE)
 	###################### logger ##########################################
 	CYTHON_ADD_MODULE_PYX(logger)
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp" 
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp"
 		"../../util/Logger.h")
 
 	ADD_LIBRARY(logger_cython SHARED
@@ -59,10 +59,7 @@ IF (HAVE_ATOMSPACE)
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
 		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
-		"atomspace_details.pyx" "spacetime.pyx" opencog_atom_types
-		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
-		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
-		"../../atomspace/AtomSpace.h"
+		"atomspace_details.pyx" "spacetime.pyx"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
@@ -76,7 +73,6 @@ IF (HAVE_ATOMSPACE)
 
 	# XXX FIXME Cython should not static link the atom-types, but
 	# but should instead dynamic-load them, as needed.
-	ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython attention_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
@@ -85,12 +81,11 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
-		atomspace
-		atomspaceutils
 		attention-types
 		embodiment-types
 		nlp-types
 		spacetime-types
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -106,7 +101,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_ATOMSPACE)
 	############################## type constructors #####################
 	CYTHON_ADD_MODULE_PYX(type_constructors
-		"atomspace.pxd" opencog_atom_types )
+		"atomspace.pxd"  )
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
 
@@ -115,7 +110,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(type_constructors
-		atomspace
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
 	
@@ -128,7 +123,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_ATOMSPACE)
 	############################## utilities #####################
 	CYTHON_ADD_MODULE_PYX(utilities
-		"atomspace.pxd" opencog_atom_types )
+		"atomspace.pxd"  )
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
 
@@ -139,8 +134,8 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(utilities_cython
 		PythonEval
-		atomspace
 		type_constructors
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -156,8 +151,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_ATOMSPACE)
 	############################## bindlink #####################
 	CYTHON_ADD_MODULE_PYX(bindlink
-		"atomspace.pxd" opencog_atom_types
-		"../../query/BindLink.h")
+		"atomspace.pxd")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
@@ -167,8 +161,7 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	TARGET_LINK_LIBRARIES(bindlink_cython
-		query
-		execution
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -183,8 +176,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	############################## scheme wrapper #####################
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../../guile/load-file.h" "../../query/PatternSCM.h")
+		"PyScheme.h" "atomspace.pxd")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
@@ -194,8 +186,7 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
-		query
-		smob
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
 	
@@ -209,11 +200,8 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
-		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types
+		"request.pyx" "agent.pyx" "atomspace.pxd"
 		"agent_finder_types.h"
-		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
-		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
-		"../../atomspace/AtomSpace.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
@@ -237,9 +225,6 @@ IF (HAVE_SERVER)
 	CYTHON_ADD_MODULE_PYX(agent_finder
 		"atomspace.pxd" "cogserver.pxd"
 		"../../server/Agent.h" "../../server/Request.h"
-		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
-		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
-		"../../atomspace/AtomSpace.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
@@ -252,6 +237,7 @@ IF (HAVE_SERVER)
 	)
 
 	TARGET_LINK_LIBRARIES(agent_finder
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
@@ -278,9 +264,9 @@ IF (HAVE_MOSES)
 	TARGET_LINK_LIBRARIES(moses_cython
 		moses_exec
 		moses
-		${COGUTIL_LIBRARY}
 		comboreduct
 		feature_selection
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_PROGRAM_OPTIONS_LIBRARY}
 		${Boost_THREAD_LIBRARY}
@@ -309,7 +295,6 @@ ELSE (WIN32)
 	INSTALL (TARGETS atomspace_cython cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 
-INSTALL (FILES 
+INSTALL (FILES
 	__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
-
