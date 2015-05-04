@@ -121,30 +121,6 @@ IF (HAVE_ATOMSPACE)
 ENDIF (HAVE_ATOMSPACE)
 
 
-IF (HAVE_ATOMSPACE AND HAVE_GUILE)
-	############################## scheme wrapper #####################
-	CYTHON_ADD_MODULE_PYX(scheme_wrapper
-		"PyScheme.h" "atomspace.pxd")
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
-
-	ADD_LIBRARY(scheme_wrapper SHARED
-		PyScheme
-		scheme_wrapper.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(scheme_wrapper
-		${ATOMSPACE_LIBRARIES}
-		${PYTHON_LIBRARIES}
-	)
-	
-	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME scheme_wrapper)
-
-ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
-
-
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
