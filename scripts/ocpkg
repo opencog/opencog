@@ -524,6 +524,22 @@ sudo pip install -U -r /tmp/requirements.txt
 rm requirements.txt
 }
 
+# Install AtomSpace
+install_atomspace(){
+MESSAGE="Installing atomspace...." ; message
+cd /tmp/
+wget https://github.com/opencog/atomspace/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd atomspace-master/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+cd ../..
+rm -rf master.tar.gz atomspace-master/
+}
+
 install_dependencies() {
 MESSAGE="Installing OpenCog build dependencies...." ; message
 if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
@@ -537,6 +553,7 @@ if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
 fi
 install_cogutil
 install_python_packages
+install_atomspace
 }
 
 update_opencog_source() {
