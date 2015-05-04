@@ -26,8 +26,8 @@
 #include <opencog/util/tbb.h>
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/reasoning/engine/DefaultForwardChainerCB.h>
-#include <opencog/reasoning/engine/ForwardChainer.h>
+#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 
 #include <opencog/server/CogServer.h>
 #include "PLNModule.h"
