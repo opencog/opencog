@@ -31,6 +31,18 @@
 						(VariableNode "$subj")
  					)
 				)
+				(AbsentLink
+					(DefinedLinguisticRelationshipNode "_obj")
+				)				
+				(AbsentLink
+					(DefinedLinguisticRelationshipNode "_pobj")
+				)
+				(AbsentLink
+					(DefinedLinguisticRelationshipNode "_to-be")
+				)
+				(AbsentLink
+					(DefinedLinguisticRelationshipNode "_predadj")
+				)
 			)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-sv-rule")
