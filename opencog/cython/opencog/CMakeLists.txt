@@ -121,31 +121,6 @@ IF (HAVE_ATOMSPACE)
 ENDIF (HAVE_ATOMSPACE)
 
 
-IF (HAVE_ATOMSPACE)
-	############################## bindlink #####################
-	CYTHON_ADD_MODULE_PYX(bindlink
-		"atomspace.pxd")
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
-
-	ADD_LIBRARY(bindlink_cython SHARED
-		BindlinkStub.cc
-		bindlink.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(bindlink_cython
-		${ATOMSPACE_LIBRARIES}
-		${PYTHON_LIBRARIES}
-		${Boost_THREAD_LIBRARY}
-		${Boost_SYSTEM_LIBRARY}
-	)
-	
-	SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME bindlink)
-
-ENDIF (HAVE_ATOMSPACE)
-
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	############################## scheme wrapper #####################
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
