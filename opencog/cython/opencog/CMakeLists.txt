@@ -120,33 +120,6 @@ IF (HAVE_ATOMSPACE)
 
 ENDIF (HAVE_ATOMSPACE)
 
-IF (HAVE_ATOMSPACE)
-	############################## utilities #####################
-	CYTHON_ADD_MODULE_PYX(utilities
-		"atomspace.pxd"  )
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
-
-	ADD_LIBRARY(utilities_cython SHARED
-		Utilities.cc
-		utilities.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(utilities_cython
-		PythonEval
-		type_constructors
-		${ATOMSPACE_LIBRARIES}
-		${COGUTIL_LIBRARY}
-		${PYTHON_LIBRARIES}
-		${Boost_THREAD_LIBRARY}
-		${Boost_SYSTEM_LIBRARY}
-	)
-	
-	SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME utilities)
-
-ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_ATOMSPACE)
 	############################## bindlink #####################

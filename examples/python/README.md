@@ -1,5 +1,6 @@
 Python Examples
 ===============
+There are more basic examples in the atomspace repository.
 
 To run these examples, you must first set the `PYTHONPATH` to the
 opencog cython build directory.  In most cases, the following will
