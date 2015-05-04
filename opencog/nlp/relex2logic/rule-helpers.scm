@@ -968,14 +968,14 @@
 			(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance df-node-stv)  df-link-stv)
 			(SatisfyingSetLink df-link-stv
-				(LambdaLink ;; not yet supported
+				; (ScopeLink ;; not yet supported !? Huhh ??
 					(VariableNode var_name)
 					(EvaluationLink df-link-stv
 						(PredicateNode pred_instance df-node-stv)
 						(ListLink df-link-stv
 							(VariableNode var_name df-node-stv))
 					)
-				)
+				; )
 			)
 		)
 	)
