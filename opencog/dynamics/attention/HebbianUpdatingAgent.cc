@@ -129,7 +129,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             if (a->getType(h) == INVERSE_HEBBIAN_LINK) {
                 // if inverse normalised sti of source is negative
                 // (i.e. hebbian link is pointing in the wrong direction)
-                if (a->getNormalisedSTI(outgoing[0]) < 0.0f) {
+                if (a->getNormalisedSTI(outgoing[0],true,false) < 0.0f) {
                     tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
                     if (tc < 0) {
                         // link no longer representative
@@ -191,7 +191,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // if inverse normalised sti of source is positive
             // (i.e. hebbian link is pointing in the right direction)
             if (a->getType(h) == INVERSE_HEBBIAN_LINK &&
-                    a->getNormalisedSTI(outgoing[0]) < 0.0f) {
+                    a->getNormalisedSTI(outgoing[0],true,false) < 0.0f) {
 				new_tc = -new_tc;
             }
             tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
@@ -215,7 +215,7 @@ HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
     for (auto outgoing_i = outgoing.begin();outgoing_i != outgoing.end();) {
         float normsti;
         Handle oh = *outgoing_i;
-        normsti = a->getNormalisedSTI(oh);
+        normsti = a->getNormalisedSTI(oh,true,false);
         if (normsti > 0.0f) {
             theSource = oh;
             foundTheSource = true;
@@ -258,7 +258,7 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 		}
 
         // normalise each sti and multiply each
-        normsti = a->getNormalisedSTI(h);
+        normsti = a->getNormalisedSTI(h,true,false);
 
         // For debugging:
         normsti_v.push_back(normsti);
