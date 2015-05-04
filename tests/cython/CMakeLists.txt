@@ -77,19 +77,6 @@ SET_TESTS_PROPERTIES(PythonUtilitiesUTest
 
 IF (HAVE_NOSETESTS)
 
-	# Basic test, just does the cython wrapper for opencog/util
-	ADD_TEST(Cython ${NOSETESTS_EXECUTABLE} -vs
-		${CMAKE_SOURCE_DIR}/tests/cython/)
-	SET_TESTS_PROPERTIES(Cython
-		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
-
-	IF (HAVE_ATOMSPACE)
-		ADD_TEST(CythonAtomSpace ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/atomspace/)
-		SET_TESTS_PROPERTIES(CythonAtomSpace
-			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
-	ENDIF (HAVE_ATOMSPACE)
-
 	IF (HAVE_SERVER)
 		ADD_TEST(CythonServer ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/server/)
@@ -105,4 +92,3 @@ IF (HAVE_NOSETESTS)
 	ENDIF (HAVE_MOSES)
 
 ENDIF (HAVE_NOSETESTS)
-
