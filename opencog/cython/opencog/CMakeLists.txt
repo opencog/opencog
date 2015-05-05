@@ -38,24 +38,6 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 IF (HAVE_ATOMSPACE)
-	###################### logger ##########################################
-	CYTHON_ADD_MODULE_PYX(logger)
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp"
-		"../../util/Logger.h")
-
-	ADD_LIBRARY(logger_cython SHARED
-		logger.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(logger_cython
-		${COGUTIL_LIBRARY}
-		${PYTHON_LIBRARIES}
-	)
-
-	SET_TARGET_PROPERTIES(logger_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME logger)
-
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
 		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
