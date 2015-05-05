@@ -97,7 +97,6 @@ ADD_CXXTEST(PsiActionSelectionAgentUTest)
 	IF (HAVE_CYTHON)
 		SET(PASA_TEST_LINK_LIBS
 			${PASA_TEST_LINK_LIBS}
-			PythonEval
 			PythonModule
 			${ATOMSPACE_LIBRARIES}
 			${COGUTIL_LIBRARY}

@@ -14,8 +14,8 @@ ADD_LIBRARY (PythonModule SHARED
 	PyRequest.cc
 )
 TARGET_LINK_LIBRARIES(PythonModule
-	PythonEval
 	server
+	${ATOMSPACE_LIBRARIES}
 	${PYTHON_LIBRARIES}
 )
 ADD_DEPENDENCIES(PythonModule agent_finder)
