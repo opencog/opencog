@@ -15,11 +15,13 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
 		server
-		atomspace_cython
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
-		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+		PROPERTIES ENVIRONMENT
+		"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython"
+	)
 ENDIF (HAVE_SERVER)
 
 
@@ -33,11 +35,11 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PyEvalUTest
 		py-shell
 		server
-		atomspace_cython
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
-		PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+		PROPERTIES ENVIRONMENT "PYTHONPATH=/usr/local/share/opencog/python")
 
 ENDIF (HAVE_SERVER)
 
@@ -48,7 +50,8 @@ IF (HAVE_NOSETESTS)
 		ADD_TEST(CythonServer ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/server/)
 		SET_TESTS_PROPERTIES(CythonServer
-			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents")
+			PROPERTIES ENVIRONMENT
+			"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents")
 	ENDIF(HAVE_SERVER)
 
 	IF (HAVE_MOSES)

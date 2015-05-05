@@ -11,11 +11,11 @@ ENDIF (HAVE_VITERBI)
 
 IF (HAVE_NOSETESTS)
 
-    # Basic test, just does the cython wrapper for opencog/util
-    ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
-        ${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
-    SET_TESTS_PROPERTIES(AnaphoraTest
-        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/nlp:${PROJECT_SOURCE_DIR}/opencog/python")
+	# Basic test, just does the cython wrapper for opencog/util
+	ADD_TEST(AnaphoraTest ${NOSETESTS_EXECUTABLE} -vs
+		${CMAKE_SOURCE_DIR}/tests/nlp/anaphora)
+	SET_TESTS_PROPERTIES(AnaphoraTest
+		PROPERTIES ENVIRONMENT
+		"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_SOURCE_DIR}/opencog/nlp:${PROJECT_SOURCE_DIR}/opencog/python")
 
 ENDIF (HAVE_NOSETESTS)
-

@@ -12,4 +12,3 @@ cdef class Request:
 
     def send(self, msg):
         self.c_obj.send(string(msg))
-
