@@ -28,4 +28,3 @@ cdef class TimeServer:
     def __dealloc__(self):
         # Don't do anything because the AtomSpace takes care of cleaning up
         pass
-
