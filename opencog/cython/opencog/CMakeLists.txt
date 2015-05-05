@@ -38,51 +38,8 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 IF (HAVE_ATOMSPACE)
-	###################### atomspace ####################################
-	CYTHON_ADD_MODULE_PYX(atomspace
-		"atom.pyx" "handle.pyx" "atomspace_details.pyx" "spacetime.pyx"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-	)
-
-	# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
-
-	# opencog.atomspace Python bindings
-	ADD_LIBRARY(atomspace_cython SHARED
-		atomspace.cpp
-	)
-
-	# XXX FIXME Cython should not static link the atom-types, but
-	# but should instead dynamic-load them, as needed.
-	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython attention_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython embodiment_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
-
-	TARGET_LINK_LIBRARIES(atomspace_cython
-		attention-types
-		embodiment-types
-		nlp-types
-		spacetime-types
-		${ATOMSPACE_LIBRARIES}
-		${COGUTIL_LIBRARY}
-		${PYTHON_LIBRARIES}
-		${Boost_THREAD_LIBRARY}
-		${Boost_SYSTEM_LIBRARY}
-	)
-
-	SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME atomspace)
-
-ENDIF (HAVE_ATOMSPACE)
-
-IF (HAVE_ATOMSPACE)
 	############################## type constructors #####################
-	CYTHON_ADD_MODULE_PYX(type_constructors
-		"atomspace.pxd"  )
+	CYTHON_ADD_MODULE_PYX(type_constructors)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
 
@@ -90,7 +47,20 @@ IF (HAVE_ATOMSPACE)
 		type_constructors.cpp
 	)
 
+	# XXX FIXME Cython should not static link the atom-types, but
+	# but should instead dynamic-load them, as needed.
+	ADD_DEPENDENCIES(type_constructors nlp_atom_types)
+	ADD_DEPENDENCIES(type_constructors attention_atom_types)
+	ADD_DEPENDENCIES(type_constructors spacetime_atom_types)
+	ADD_DEPENDENCIES(type_constructors pln_atom_types)
+	ADD_DEPENDENCIES(type_constructors embodiment_atom_types)
+	ADD_DEPENDENCIES(type_constructors spacetime_atom_types)
+
 	TARGET_LINK_LIBRARIES(type_constructors
+		attention-types
+		embodiment-types
+		nlp-types
+		spacetime-types
 		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
@@ -105,8 +75,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
-		"request.pyx" "agent.pyx" "atomspace.pxd"
-		"agent_finder_types.h"
+		"request.pyx" "agent.pyx" "agent_finder_types.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
@@ -128,7 +97,7 @@ IF (HAVE_SERVER)
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
-		"atomspace.pxd" "cogserver.pxd"
+		"cogserver.pxd"
 		"../../server/Agent.h" "../../server/Request.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
@@ -147,8 +116,6 @@ IF (HAVE_SERVER)
 		${Boost_THREAD_LIBRARY}
 		${Boost_SYSTEM_LIBRARY}
 	)
-
-	ADD_DEPENDENCIES(agent_finder atomspace_cython)
 
 	SET_TARGET_PROPERTIES(agent_finder PROPERTIES
 		PREFIX ""
@@ -194,10 +161,10 @@ ENDIF (HAVE_MOSES)
 
 IF (WIN32)
 	INSTALL (TARGETS agent_finder DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS atomspace_cython cogserver_cython DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS cogserver_cython DESTINATION "${DATADIR}/python/opencog")
 ELSE (WIN32)
 	INSTALL (TARGETS agent_finder LIBRARY DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS atomspace_cython cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES

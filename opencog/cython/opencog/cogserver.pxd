@@ -1,4 +1,22 @@
-from opencog.atomspace cimport cHandle, cHandleSeq
+
+# Handle
+ctypedef public long UUID
+
+cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+    cdef cppclass cHandle "opencog::Handle":
+        cHandle()
+        cHandle(UUID)
+        UUID value()
+        bint operator==(cHandle h)
+        bint operator!=(cHandle h)
+        bint operator<(cHandle h)
+        bint operator>(cHandle h)
+        bint operator<=(cHandle h)
+        bint operator>=(cHandle h)
+        cHandle UNDEFINED
+# HandleSeq
+    cdef cppclass cHandleSeq "opencog::HandleSeq"
+
 
 # basic wrapping for std::string conversion
 cdef extern from "<string>" namespace "std":
@@ -36,4 +54,3 @@ cdef extern from "opencog/server/Request.h" namespace "opencog":
 
 cdef class Request:
     cdef cRequest *c_obj
-
