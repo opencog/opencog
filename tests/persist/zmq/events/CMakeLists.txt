@@ -22,3 +22,8 @@ ADD_CXXTEST(AtomSpacePublisherModuleUTest)
 TARGET_LINK_LIBRARIES(AtomSpacePublisherModuleUTest
 	atomspacepublishermodule
 )
+
+SET_TESTS_PROPERTIES(AtomSpacePublisherModuleUTest
+	PROPERTIES ENVIRONMENT
+	"PYTHONPATH=/usr/local/share/opencog/python"
+)
