@@ -37,6 +37,9 @@ find_library(ATOMSPACE_persist_LIBRARY persist
 find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
    PATH ${ATOMSPACE_LIBPATH})
 
+find_library(ATOMSPACE_PythonEval_LIBRARY PythonEval
+   PATH ${ATOMSPACE_LIBPATH})
+
 find_library(ATOMSPACE_query_LIBRARY query
    PATH ${ATOMSPACE_LIBPATH})
 
@@ -55,6 +58,7 @@ set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_lambda_LIBRARY}
 	${ATOMSPACE_persist_LIBRARY}
 	${ATOMSPACE_persist-sql_LIBRARY}
+	${ATOMSPACE_PythonEval_LIBRARY}
 	${ATOMSPACE_query_LIBRARY}
 	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}

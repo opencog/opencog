@@ -52,12 +52,11 @@ TARGET_LINK_LIBRARIES (oac
 	SpaceMap
 	json_spirit
 	PatternMiner
-	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_LIBRARIES}
 )
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES (oac
-		PythonEval
 		PythonModule
 		${PYTHON_LIBRARIES}
 	)
