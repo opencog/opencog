@@ -38,6 +38,8 @@ ADD_LIBRARY(attention SHARED
 	ImportanceUpdatingAgent
 )
 
+ADD_DEPENDENCIES(attention attention-types)
+
 TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
 
 # HebbianCreationModule
