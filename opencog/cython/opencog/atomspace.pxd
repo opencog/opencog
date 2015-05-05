@@ -29,18 +29,6 @@ cdef extern from "<vector>" namespace "std":
 # ClassServer
 ctypedef short Type
 
-cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
-    cdef cppclass cClassServer "opencog::ClassServer":
-        bint isNode(Type t)
-        bint isLink(Type t)
-        bint isA(Type t, Type t)
-
-        bint isDefined(string typename)
-        Type getType(string typename)
-        string getTypeName(Type t)
-        Type getNumberOfClasses()
-    cdef cClassServer classserver()
-
 cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
@@ -79,13 +67,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
 
-        cHandle getHandle(Type t, string s)
-        cHandle getHandle(Type t, vector[cHandle])
-
         bint isValidHandle(cHandle h)
         int getSize()
-        Type getType(cHandle h)
-
         void clear()
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)

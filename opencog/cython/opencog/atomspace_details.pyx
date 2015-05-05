@@ -93,21 +93,9 @@ cdef class AtomSpace:
         """ Return the number of atoms in the AtomSpace """
         return self.size()
 
-    def __getitem__(self, key):
-        """ Support self[handle] lookup to get an atom """
-        if not isinstance(key, Handle):
-            raise KeyError("Lookup only supported by opencog.atomspace.Handle")
-        if key in self:
-            return Atom(key,self)
-        raise IndexError("No Atom with handle %s" % str(key))
-
     def size(self):
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.getSize()
-
-    def get_type(self, Handle h):
-        """ Get the Type of an Atom in the AtomSpace """
-        return self.atomspace.getType(deref(h.h))
 
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:

@@ -5,7 +5,6 @@
 # Note that the ordering of include statements may influence whether
 # things work or not
 
-include "classserver.pyx"
 include "handle.pyx"
 include "atomspace_details.pyx"
 include "atom.pyx"
