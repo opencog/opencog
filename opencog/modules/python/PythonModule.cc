@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <opencog/cython/PyIncludeWrapper.h>
+#include <opencog/cython/PythonEval.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -104,6 +105,8 @@ void PythonModule::init()
 
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
+    global_python_initialize();
+
     // Make sure that Python has been properly initialized.
     if (not Py_IsInitialized() || not PyEval_ThreadsInitialized()) {
             throw opencog::RuntimeException(TRACE_INFO,
@@ -116,9 +119,20 @@ void PythonModule::init()
     // get a crash when you call an api function. 
     import_opencog__agent_finder();
 
+    // The import_opencog__agent_finder() call above sets the
+    // load_req_agent_module() function pointer if the cython module
+    // load succeeded. But the function pointer will be NULL if the
+    // opencopg.agent_finder cython module failed to load. Avert
+    // a hard-to-debug crash on null-pointer-deref, and replace
+    // it by a hard-to-debug error message.
+    if (NULL == load_req_agent_module) {
+        PyErr_Print();
+        logger().error("PythonModule::%s Failed to load the "
+                       "opencog.agent_finder module", __FUNCTION__);
+    }
+
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
-
 }
 
 bool PythonModule::preloadModules()
