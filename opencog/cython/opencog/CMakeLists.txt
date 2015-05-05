@@ -40,7 +40,7 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 IF (HAVE_ATOMSPACE)
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
-		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
+		"atom.pyx" "classserver.pyx" "handle.pyx"
 		"atomspace_details.pyx" "spacetime.pyx"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)

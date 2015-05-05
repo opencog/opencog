@@ -25,44 +25,6 @@ cdef extern from "<vector>" namespace "std":
     cdef output_iterator back_inserter(vector[cHandle])
 
 
-### TruthValue
-ctypedef double count_t
-ctypedef float confidence_t
-ctypedef float strength_t
-
-cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
-    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
-        tv_ptr()
-        tv_ptr(tv_ptr copy)
-        tv_ptr(cTruthValue* fun)
-        tv_ptr(cSimpleTruthValue* fun)
-        cTruthValue* get()
-
-    cdef cppclass cTruthValue "opencog::TruthValue":
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
-        tv_ptr DEFAULT_TV()
-        bint isNullTv()
-        string toString()
-        bint operator==(cTruthValue h)
-        bint operator!=(cTruthValue h)
-
-cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
-    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
-        void initialize(float,float)
-        cSimpleTruthValue(float, float)
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
-        count_t confidenceToCount(float)
-        confidence_t countToConfidence(float)
-        tv_ptr DEFAULT_TV()
-        string toString()
-        bint operator==(cTruthValue h)
-        bint operator!=(cTruthValue h)
-
-
 # Basic OpenCog types
 # ClassServer
 ctypedef short Type
@@ -100,15 +62,6 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
 # HandleSeq
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
-cdef class TruthValue:
-    cdef tv_ptr *cobj
-    cdef _mean(self)
-    cdef _confidence(self)
-    cdef _count(self)
-    cdef cTruthValue* _ptr(self)
-    cdef tv_ptr* _tvptr(self)
-    cdef _init(self, float mean, float count)
-    
 cdef class Handle:
     cdef cHandle *h
 
@@ -126,56 +79,14 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
 
-        cHandle addNode(Type t, string s) except +
-        cHandle addNode(Type t, string s, tv_ptr tvn) except +
-
-        cHandle addLink(Type t, vector[cHandle]) except +
-        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +
-
         cHandle getHandle(Type t, string s)
         cHandle getHandle(Type t, vector[cHandle])
 
         bint isValidHandle(cHandle h)
         int getSize()
-        string getName(cHandle h)
         Type getType(cHandle h)
-        tv_ptr getTV(cHandle h)
-        void setTV(cHandle h, tv_ptr tvn)
-
-        vector[cHandle] getOutgoing(cHandle h)
-        bint isSource(cHandle h, cHandle source)
-        vector[cHandle] getIncoming(cHandle h)
-
-        # these should alias the proper types for sti/lti/vlti
-        short getSTI(cHandle h)
-        short getLTI(cHandle h)
-        bint getVLTI(cHandle h)
-        void setSTI(cHandle h, short)
-        void setLTI(cHandle h, short)
-        void incVLTI(cHandle h)
-        void decVLTI(cHandle h)
-
-        string atomAsString(cHandle h, bint)
-
-        # ==== query methods ====
-        # get by type
-        output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by name
-        # Just do the right thing, here...
-        output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
-        output_iterator getIncomingSetByType(output_iterator,cHandle& h,Type t,bint subclass)
-        # get by STI range
-        output_iterator getHandlesByAV(output_iterator, short lowerBound, short upperBound)
-        output_iterator getHandlesByAV(output_iterator, short lowerBound)
-        # get from AttentionalFocus
-        output_iterator getHandleSetInAttentionalFocus(output_iterator)
-
-        # vector[chandle].iterator getHandlesByName(output_iterator, Type t, string name, bint subclass)
-        # vector[chandle].iterator getHandlesByType(output_iterator, Type t, xxx bint subclass)
 
         void clear()
-        bint removeAtom(cHandle h, bint recursive) 
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
