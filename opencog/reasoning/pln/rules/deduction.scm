@@ -8,19 +8,9 @@
 (define pln-rule-deduction
     (BindLink
         (VariableList
-            (TypedVariableLink
                 (VariableNode "$A")
-                (TypeNode "ConceptNode")
-            )
-            (TypedVariableLink
                 (VariableNode "$B")
-                (TypeNode "ConceptNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$C")
-                (TypeNode "ConceptNode")
-            )
-        )
+                (VariableNode "$C"))
         (ImplicationLink
             (AndLink
                 (InheritanceLink
@@ -93,47 +83,7 @@
 
         ; Returns sAC. Includes the consistency conditions
         (define (strength)
-            (cond
-                (
-                    (and
-                        (<=
-                            (if (= sA 0)
-                                0
-                                (max (/ (- (+ sA sB) 1) sA) 0)
-                            )
-                            sAB
-                            (if (= sA 0)
-                                1
-                                (min 1 (/ sB sA))
-                            )
-                        )
-                        (<=
-                            (if (= sB 0)
-                                0
-                                (max (/ (- (+ sB sC) 1) sB) 0)
-                            )
-                            sBC
-                            (if (= sB 0)
-                                1
-                                (min 1 (/ sC sB))
-                            )
-                        )
-                    )
-                    (+
-                        (* sAB sBC)
-                        (/
-                            (* (- 1 sAB) (- sC (* sB sBC)))
-                            (- 1 sB)
-                        )
-                    )
-                )
-                (
-                    (and (= 1 sB) (= sC sBC))
-                    (* sAB sBC)
-                )
-                (else 0)
-            )
-        )
+            (simple-deduction-formula sA sB sC sAB sBC))
 
         ; This is not consistant with the defintion on the wiki
         (define (confidence)
