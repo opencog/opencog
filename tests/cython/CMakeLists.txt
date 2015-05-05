@@ -15,7 +15,7 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
 		server
-		atomspace_cython
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
@@ -33,7 +33,7 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(PyEvalUTest
 		py-shell
 		server
-		atomspace_cython
+		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
 	)
 	SET_TESTS_PROPERTIES(PyEvalUTest
