@@ -40,6 +40,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
+    STIMaxAtomRent = config().get_int("ECAN_MAX_ATOM_STI_RENT");
     STITransitionalAtomRent = STIAtomRent;
     LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
@@ -628,6 +629,16 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
 			}
 			break;
+		case  RENT_LINEAR:
+		    // = max((MAX_RENT*(Si-Saf)/(recentMaxSti-Saf) ), MAX_RENT ) if Si >= Saf
+		    // = 0 else
+		    if(c > a->getAttentionalFocusBoundary()) {
+		        auto saf = a->getAttentionalFocusBoundary();
+		        auto rent = (STIMaxAtomRent*(c- saf))/(a->getMaxSTI()-saf);
+
+		        stiRentCharged = rent > STIMaxAtomRent ? rent : STIMaxAtomRent;
+		    }
+		    break;
 	}
     
     // Do not charge rent in excess of an atom's STI, so that STI does not go

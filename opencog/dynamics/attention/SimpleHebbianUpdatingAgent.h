@@ -29,7 +29,8 @@
 
 #include <opencog/server/CogServer.h>
 
-using namespace opencog;
+namespace opencog
+{
 
 /**
  * A less complex implementation of HebbianUpdatingAgent which basically obsoletes
@@ -53,4 +54,6 @@ public:
     float targetConjunction(HandleSeq handles);
 };
 
+typedef std::shared_ptr<SimpleHebbianUpdatingAgent> SimpleHebbianUpdatingAgentPtr;
+}
 #endif /* SIMPLEHEBBIANPDATINGAGENT_H_*/
