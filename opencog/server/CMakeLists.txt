@@ -53,27 +53,6 @@ IF (ODBC_FOUND)
 ENDIF (ODBC_FOUND)
 
 
-# to ease testing/debugging modules on the source tree
-# IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-# XXX what is this shit?  The below is one wild and insane violation of everything that
-# cmake stands for ... why bother using cmake, if we are going to crap on every principle
-# of intelligent makefile design.  WTF. 
-#
-# XXX it is even worse than that .. many of the libraries sepcified below are supposed to
-# be dynamically loaded, not linked... 
-IF (APPLE)
-	# We should eventually do Apple builds with "packages"
-	# Apple's linker seems not to understand a colon-separated list of
-	# rpaths.
-	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-                "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/${COGUTIL_LIBRARY} -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
-	# doesn't work for some reason...
-	#SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
-	#	${PROJECT_BINARY_DIR}/opencog/guile)
-	#SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-ENDIF (APPLE)
-#ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-
 ADD_EXECUTABLE(cogserver
 	CogServerMain
 )
@@ -89,10 +68,9 @@ IF (WIN32)
 	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)
 
-INSTALL (TARGETS cogserver
-	RUNTIME DESTINATION "bin"
-#	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+INSTALL (TARGETS cogserver RUNTIME DESTINATION "bin")
+
+INSTALL (TARGETS server DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	Agent.h
