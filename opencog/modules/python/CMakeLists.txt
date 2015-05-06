@@ -13,6 +13,7 @@ ADD_LIBRARY (PythonModule SHARED
 	PyMindAgent.cc
 	PyRequest.cc
 )
+
 TARGET_LINK_LIBRARIES(PythonModule
 	server
 	${ATOMSPACE_LIBRARIES}
@@ -20,6 +21,5 @@ TARGET_LINK_LIBRARIES(PythonModule
 )
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
-IF (WIN32)
-	INSTALL (TARGETS PythonModule DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ENDIF (WIN32)
+INSTALL (TARGETS PythonModule DESTINATION
+	"lib${LIB_DIR_SUFFIX}/opencog/modules")

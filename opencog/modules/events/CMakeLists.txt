@@ -23,3 +23,6 @@ TARGET_LINK_LIBRARIES(atomspacepublishermodule
 	json_spirit
 	tbb
 )
+
+INSTALL (TARGETS atomspacepublishermodule
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")

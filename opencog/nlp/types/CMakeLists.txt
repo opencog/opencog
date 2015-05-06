@@ -5,7 +5,7 @@ OPENCOG_ADD_ATOM_TYPES(
 	atom_types.definitions
 	atom_types.inheritance
 	nlp_types.scm
-    nlp_types.pyx
+	nlp_types.pyx
 )
 ADD_CUSTOM_TARGET(nlp_atom_types DEPENDS atom_types.h)
 
@@ -21,11 +21,11 @@ ADD_LIBRARY (nlp-types SHARED
 ADD_DEPENDENCIES(nlp-types nlp_atom_types)
 
 IF (WIN32)
-    INSTALL (TARGETS nlp-types DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ELSEIF (CYGWIN)
-    INSTALL (TARGETS nlp-types DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+    INSTALL (TARGETS nlp-types
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ELSE (WIN32)
-    INSTALL (TARGETS nlp-types LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+    INSTALL (TARGETS nlp-types
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ENDIF (WIN32)
 
 INSTALL (FILES

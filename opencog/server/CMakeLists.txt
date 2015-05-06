@@ -21,6 +21,11 @@ TARGET_LINK_LIBRARIES(builtinreqs
 	${COGUTIL_LIBRARY}
 )
 
+INSTALL (TARGETS builtinreqs
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+
+# ------------------------------------------------------------
+
 ADD_LIBRARY (server SHARED
 	Agent
 	BaseServer

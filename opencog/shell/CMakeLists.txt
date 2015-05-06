@@ -34,9 +34,11 @@ TARGET_LINK_LIBRARIES(scheme-shell
 )
 
 IF (WIN32)
-	INSTALL (TARGETS scheme-shell DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL (TARGETS py-shell scheme-shell
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ELSE (WIN32)
-	INSTALL (TARGETS scheme-shell LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL (TARGETS py-shell scheme-shell
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ENDIF (WIN32)
 
 INSTALL (FILES
