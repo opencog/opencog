@@ -28,4 +28,3 @@
 #define INITNAME spacetime_types_init
 
 #include <opencog/atomspace/atom_types.cc>
-

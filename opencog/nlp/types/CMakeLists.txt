@@ -32,3 +32,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/types"
 )
+INSTALL (FILES
+	${CMAKE_CURRENT_BINARY_DIR}/nlp_types.scm
+	DESTINATION "${DATADIR}/scm/nlp/types"
+)

@@ -46,3 +46,10 @@ INSTALL (FILES
 	DESTINATION "include/${PROJECT_NAME}/spacetime"
 )
 
+INSTALL (FILES
+	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
+	DESTINATION "${DATADIR}/scm/spacetime"
+)
+
+#INSTALL (TARGETS spacetime-types
+#	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
