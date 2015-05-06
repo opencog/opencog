@@ -51,11 +51,12 @@ static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
     // Search order for the config file:
-    "lib",       // First, we look in the build directory (cmake puts it here)
+    ".",         // First, we look in the current directory,
+    "lib",       // Next, we look in the build directory (cmake puts it here)
     "../lib",    // Next, we look at the source directory
     CONFDIR,     // Next, the install directory
 #ifndef WIN32
-    "/etc",      // Finally, in the standard ssytem directory.
+    "/etc",      // Finally, in the standard system directory.
 #endif // !WIN32
     NULL
 };
