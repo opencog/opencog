@@ -683,6 +683,7 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 
     // Load modules specified in the config file
+    bool load_failure = false;
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
     for (const std::string& module : modules) {
@@ -701,8 +702,13 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
         }
         if (!rc)
         {
-            logger().warn("Failed to load %s", module.c_str());
+            logger().warn("Failed to load cogserver module %s", module.c_str());
+				load_failure = true;
         }
+    }
+    if (load_failure) {
+        for (auto p : module_paths)
+            logger().warn("Searched for module at %s", p.c_str());
     }
 }
 

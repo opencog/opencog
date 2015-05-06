@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     string progname = argv[0];
 
     // parse command line
-    while (1) {
+    while (true) {
         c = getopt (argc, argv, optString);
         /* Detect end of options */
         if (c == -1) {
