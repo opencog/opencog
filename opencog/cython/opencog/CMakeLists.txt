@@ -39,24 +39,24 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 
 IF (HAVE_ATOMSPACE)
 	############################## type constructors #####################
-	CYTHON_ADD_MODULE_PYX(type_constructors)
+	CYTHON_ADD_MODULE_PYX(cogserver_type_constructors)
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver_type_constructors.cpp")
 
-	ADD_LIBRARY(type_constructors SHARED
-		type_constructors.cpp
+	ADD_LIBRARY(cogserver_type_constructors SHARED
+		cogserver_type_constructors.cpp
 	)
 
 	# XXX FIXME Cython should not static link the atom-types, but
 	# but should instead dynamic-load them, as needed.
-	ADD_DEPENDENCIES(type_constructors nlp_atom_types)
-	ADD_DEPENDENCIES(type_constructors attention_atom_types)
-	ADD_DEPENDENCIES(type_constructors spacetime_atom_types)
-	ADD_DEPENDENCIES(type_constructors pln_atom_types)
-	ADD_DEPENDENCIES(type_constructors embodiment_atom_types)
-	ADD_DEPENDENCIES(type_constructors spacetime_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors pln_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors embodiment_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
 
-	TARGET_LINK_LIBRARIES(type_constructors
+	TARGET_LINK_LIBRARIES(cogserver_type_constructors
 		attention-types
 		embodiment-types
 		nlp-types
@@ -65,10 +65,12 @@ IF (HAVE_ATOMSPACE)
 		${PYTHON_LIBRARIES}
 	)
 	
-	SET_TARGET_PROPERTIES(type_constructors PROPERTIES
+	SET_TARGET_PROPERTIES(cogserver_type_constructors PROPERTIES
 		PREFIX ""
-		OUTPUT_NAME type_constructors)
+		OUTPUT_NAME cogserver_type_constructors)
 
+	INSTALL (TARGETS cogserver_type_constructors
+		DESTINATION "${DATADIR}/python/opencog")
 ENDIF (HAVE_ATOMSPACE)
 
 
@@ -94,6 +96,9 @@ IF (HAVE_SERVER)
 	SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME cogserver)
+
+	INSTALL (TARGETS cogserver_cython
+		DESTINATION "${DATADIR}/python/opencog")
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
@@ -121,6 +126,8 @@ IF (HAVE_SERVER)
 		PREFIX ""
 		OUTPUT_NAME agent_finder)
 
+	INSTALL (TARGETS agent_finder
+		DESTINATION "${DATADIR}/python/opencog")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_MOSES)
@@ -156,16 +163,9 @@ IF (HAVE_MOSES)
 		PREFIX ""
 		OUTPUT_NAME pymoses)
 
+	INSTALL (TARGETS moses_cython
+		DESTINATION "${DATADIR}/python/opencog")
 ENDIF (HAVE_MOSES)
-
-
-IF (WIN32)
-	INSTALL (TARGETS agent_finder DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS cogserver_cython DESTINATION "${DATADIR}/python/opencog")
-ELSE (WIN32)
-	INSTALL (TARGETS agent_finder LIBRARY DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
-ENDIF (WIN32)
 
 INSTALL (FILES
 	__init__.py
