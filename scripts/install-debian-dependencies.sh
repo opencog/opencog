@@ -14,6 +14,8 @@ SELF_NAME=$(basename $0)
 PACKAGES_TOOLS="
 		git \
 		python-pip \
+		wget \
+		sudo \
 		"
 
 # Packages for building opencog
@@ -66,12 +68,50 @@ PACKAGES_RUNTIME="
 		postgresql-client \
 		"
 
-# Path to requirements file
-PACKAGES_PYTHON="../opencog/python/requirements.txt"
-
 # Template for messages printed.
 message() {
 echo -e "\e[1;34m[$SELF_NAME] $MESSAGE\e[0m"
+}
+
+# Install cogutils
+install_cogutil(){
+MESSAGE="Installing cogutils...." ; message
+cd /tmp/
+wget https://github.com/opencog/cogutils/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd cogutils-master/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+cd ../..
+rm -rf master.tar.gz cogutils-master/
+}
+
+# Install Python Packages
+install_python_packages(){
+MESSAGE="Installing python packages...." ; message
+cd /tmp
+wget https://raw.githubusercontent.com/opencog/opencog/master/opencog/python/requirements.txt
+sudo pip install -U -r /tmp/requirements.txt
+rm requirements.txt
+}
+
+# Install AtomSpace
+install_atomspace(){
+MESSAGE="Installing atomspace...." ; message
+cd /tmp/
+wget https://github.com/opencog/atomspace/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd atomspace-master/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+cd ../..
+rm -rf master.tar.gz atomspace-master/
 }
 
 # Function for installing all required dependenceis for building OpenCog,
@@ -81,11 +121,13 @@ MESSAGE="Updating Package db...." ; message
 apt-get update
 
 MESSAGE="Installing OpenCog build dependencies...." ; message
-if ! (apt-get -y install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_TOOLS && \
-		pip install -U -r $PACKAGES_PYTHON); then
+if ! (apt-get -y install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_TOOLS); then
   MESSAGE="Error installing some of the dependencies... :( :("  ; message
   exit 1
 fi
+install_python_packages
+install_cogutil
+install_atomspace
 }
 
 # Main Program
