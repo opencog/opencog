@@ -20,6 +20,7 @@
 
 import rospy
 import roslib
+import time
 
 # Eva ROS message imports
 from std_msgs.msg import String
@@ -41,7 +42,7 @@ class EventLoop():
 	def get_emotion_states_cb(self, msg):
 		print("Available Emotion States:" + str(msg.data))
 
-	def loop():
+	def loop(self):
 		time.sleep(1)
 
 	def __init__(self):
