@@ -171,6 +171,12 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
         moduleName.replace(moduleName.size()-3,3,"");
     }
 
+    // Avoid a null-pointer deref crash at the next step.
+    if (NULL == load_req_agent_module) {
+        return "Error: The opencog.agent_finder module is not loaded; "
+               "Cannot load other python modules as a result.";
+    }
+
     requests_and_agents_t thingsInModule = load_req_agent_module(moduleName);
     if (thingsInModule.err_string.size() > 0) {
         return thingsInModule.err_string;
