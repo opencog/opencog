@@ -36,7 +36,6 @@ cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
 
-cdef AtomSpace get_server_atomspace()
 
 # ideally we'd import these typedefs instead of defining them here but I don't
 # know how to do that with Cython
