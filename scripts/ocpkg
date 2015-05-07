@@ -551,9 +551,6 @@ source /etc/lsb-release
 if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
   sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
-install_cogutil
-install_python_packages
-install_atomspace
 }
 
 update_opencog_source() {
@@ -782,6 +779,9 @@ cleanup_iso
 if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
+  install_cogutil
+  install_python_packages
+  install_atomspace
   exit 0
 fi
 
