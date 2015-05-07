@@ -1,5 +1,5 @@
 #
-# face_track.py -  Registery and tracking of faces
+# face_track.py -  Registery and tracking of visible human faces
 # Copyright (C) 2014,2015  Hanson Robotics
 # Copyright (C) 2015 Linas Vepstas
 #
@@ -19,7 +19,6 @@
 
 import time
 
-from owyl import blackboard
 import rospy
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
@@ -46,13 +45,12 @@ class Face:
 #    seen.
 #
 # Provides the new-face, lost-face data to general-behavior, by putting
-# the face data into the owyl blackboard.
+# the face data into opencog... XXX Well, not yet it don't XXX
 class FaceTrack:
 
-	def __init__(self, owyl_bboard):
+	def __init__(self):
 
 		print("Starting Face Tracker")
-		self.blackboard = owyl_bboard
 
 		# List of currently visible faces
 		self.visible_faces = []
@@ -162,32 +160,34 @@ class FaceTrack:
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
-	# Add a face to the Owyl blackboard.
+	# Add a face to ... XXX FIXME
 	def add_face_to_bb(self, faceid):
+		return
 
-		# We already know about it.
-		if faceid in self.blackboard["background_face_targets"]:
-			return
-
-		# Update the blackboard.
-		self.blackboard["is_interruption"] = True
-		self.blackboard["new_face"] = faceid
-		self.blackboard["background_face_targets"].append(faceid)
+#		# We already know about it.
+#		if faceid in self.blackboard["background_face_targets"]:
+#			return
+#
+#		# Update the blackboard.
+#		self.blackboard["is_interruption"] = True
+#		self.blackboard["new_face"] = faceid
+#		self.blackboard["background_face_targets"].append(faceid)
 
 	# Remove a face from the Owyl blackboard.
 	def remove_face_from_bb(self, fid):
+		return
 
-		if fid not in self.blackboard["background_face_targets"]:
-			return
-
-		# Update the blackboard.
-		self.blackboard["is_interruption"] = True
-		self.blackboard["lost_face"] = fid
-		self.blackboard["background_face_targets"].remove(fid)
-		# If the robot lost the new face during the initial
-		# interaction, reset new_face variable
-		if self.blackboard["new_face"] == fid :
-			self.blackboard["new_face"] = ""
+#		if fid not in self.blackboard["background_face_targets"]:
+#			return
+#
+#		# Update the blackboard.
+#		self.blackboard["is_interruption"] = True
+#		self.blackboard["lost_face"] = fid
+#		self.blackboard["background_face_targets"].remove(fid)
+#		# If the robot lost the new face during the initial
+#		# interaction, reset new_face variable
+#		if self.blackboard["new_face"] == fid :
+#			self.blackboard["new_face"] = ""
 
 	# Start tracking a face
 	def add_face(self, faceid):
