@@ -91,6 +91,7 @@ IF (HAVE_SERVER)
 
 	TARGET_LINK_LIBRARIES(cogserver_cython
 		server
+		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
 
