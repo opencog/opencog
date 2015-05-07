@@ -322,11 +322,11 @@ PACKAGES_EXDEV="
 usage() {
 if [ "$SELF_NAME" == "setup.sh" ] ; then
   echo "Usage: $SELF_NAME OPTION"
-  echo " -a Add software repositories"
+  echo " -r Add software repositories"
   echo " -d Install base build dependencies"
   echo " -p Install python build dependencies"
   echo " -c Install Cogutils"
-  echo " -s Install Atomspace"
+  echo " -a Install Atomspace"
   echo " -l Install Link Grammar"
   echo " -m Install MOSES"
   echo " -h This help message"
@@ -355,13 +355,13 @@ fi
 if [ $# -eq 0 ] ; then NO_ARGS=true ; fi
 
 if [ "$SELF_NAME" == "setup.sh" ] ; then
-  while getopts "adpcslmh" flag ; do
+  while getopts "adpcrlmh" flag ; do
     case $flag in
-      a)	ADD_REPOSITORIES=true ;;
+      r)	ADD_REPOSITORIES=true ;;
       d)	INSTALL_DEPENDENCIES=true ;; #base development packages
       p)	INSTALL_PYTHON_PACKAGES=true ;;
       c)	INSTALL_COGUTIL=true ;;
-      s)	INSTALL_ATOMSPACE=true ;;
+      a)	INSTALL_ATOMSPACE=true ;;
       l)	INSTALL_LINK_GRAMMAR=true ;;
       m)	INSTALL_MOSES=true ;;
       h)	usage ;;
@@ -580,7 +580,17 @@ MESSAGE="Installing MOSES...." ; message
 cd /tmp/
 # cleaning up remnants from previous install failures, if any.
 rm -f master.tar.gz*
-#wget https://github.com/opencog/moses/archive/master.tar.gz
+wget https://github.com/opencog/moses/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd moses-master/
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+make install
+ldconfig
+cd ../..
+rm -rf master.tar.gz moses-master/
 }
 
 # Install Link-Grammar
@@ -844,7 +854,7 @@ cleanup_iso
 if [ "$SELF_NAME" == "setup.sh" ] ; then
     if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi
     if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi
-    if [ $INSTALL_PYTHON_PACKAGES] ; then install_python_packages ; fi
+    if [ $INSTALL_PYTHON_PACKAGES ] ; then install_python_packages ; fi
     if [ $INSTALL_COGUTIL ] ; then install_cogutil ; fi
     if [ $INSTALL_ATOMSPACE ] ; then install_atomspace ; fi
     if [ $INSTALL_LINK_GRAMMAR ] ; then install_link_grammar ; fi
