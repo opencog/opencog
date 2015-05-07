@@ -78,6 +78,7 @@ IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
 		"request.pyx" "agent.pyx" "agent_finder_types.h"
+		"../../server/Agent.h" "../../server/Request.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
