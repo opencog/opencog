@@ -121,7 +121,7 @@ void PythonModule::init()
     // NOTE: Even though the Cython docs do not say that you need to call this
     // more than once, you need to call the import functions in each separate
     // shared library that accesses Cython defined api. If you don't then you
-    // get a crash when you call an api function. 
+    // get a crash when you call an api function.
     import_opencog__agent_finder();
 
     // The import_opencog__agent_finder() call above sets the
@@ -249,4 +249,3 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
     // This gets printed out to the user at the shell prompt.
     return oss.str();
 }
-

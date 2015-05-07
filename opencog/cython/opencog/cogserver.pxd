@@ -31,11 +31,6 @@ cdef extern from "opencog/server/BaseServer.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace"
     cAtomSpace* server_atomspace()
 
-# Identical to the declaration in atomspace.pxd
-cdef class AtomSpace:
-    cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
-
 
 # ideally we'd import these typedefs instead of defining them here but I don't
 # know how to do that with Cython

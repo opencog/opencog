@@ -1,7 +1,7 @@
 # it'd be nice to define the type of atomspace but I can't get this working
 from opencog.cogserver cimport cAgent, stim_t, string
 
-from opencog.atomspace import Atom
+# from opencog.atomspace import Atom
 
 from cython.operator cimport dereference as deref
 

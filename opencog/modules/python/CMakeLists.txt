@@ -16,6 +16,7 @@ ADD_LIBRARY (PythonModule SHARED
 
 TARGET_LINK_LIBRARIES(PythonModule
 	server
+	agent_finder
 	${ATOMSPACE_LIBRARIES}
 	${PYTHON_LIBRARIES}
 )

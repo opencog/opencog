@@ -8,6 +8,7 @@
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 INCLUDE_DIRECTORIES(
+	${ATOMSPACE_INCLUDE_DIR}
 	${PYTHON_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
@@ -20,19 +21,21 @@ SET(CYTHON_FLAGS "-f")
 MACRO(CYTHON_ADD_MODULE_PYX name)
 	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
 		SET(DEPENDS ${name}.pyx ${name}.pxd)
-	ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
-		SET(DEPENDS ${name}.pyx)
 	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
 	# Allow the user to specify dependencies as optional arguments
 	SET(DEPENDS ${DEPENDS} ${ARGN})
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${name}.cpp
 		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR} -o ${name}.cpp
-				--cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+		ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR}
+		      -I ${ATOMSPACE_INCLUDE_DIR}/opencog/cython
+		      # -I /usr/local/include/opencog/cython
+		      -o ${name}.cpp
+		      --cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
 		DEPENDS ${DEPENDS}
 		COMMENT "Cythonizing ${name}.pyx")
 ENDMACRO(CYTHON_ADD_MODULE_PYX)
+
 
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
@@ -77,6 +80,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
+		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/atomspace.pxd"
 		"request.pyx" "agent.pyx" "agent_finder_types.h"
 		"../../server/Agent.h" "../../server/Request.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
@@ -92,6 +96,7 @@ IF (HAVE_SERVER)
 	TARGET_LINK_LIBRARIES(cogserver_cython
 		server
 		${ATOMSPACE_LIBRARIES}
+		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 	)
 
