@@ -39,6 +39,7 @@ declare -A PACKAGE_DESCRIPTION=(
     [kvm]="TBD Ubuntu KVM image with OpenCog Server"
  [demovm]="TBD Ubuntu VirtualBox image with OpenCog Unity3D proxy for demo"
    [debs]="TBD Ubuntu packages (deb files)"
+   [docker]="TBD Docker Images"
 )
 
 PATH_PREFIX=/usr/local
@@ -319,7 +320,24 @@ PACKAGES_EXDEV="
 # SECTION 2: Command line option handling
 
 usage() {
-if [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+  echo "Usage: $SELF_NAME OPTION"
+  echo " -r Add software repositories"
+  echo " -d Install base build dependencies"
+  echo " -p Install python build dependencies"
+  echo " -c Install Cogutils"
+  echo " -a Install Atomspace"
+  echo " -l Install Link Grammar"
+  echo " -m Install MOSES"
+  echo " -h This help message"
+elif [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
+  echo "Usage: $SELF_NAME OPTION"
+  echo " -a Add software repositories"
+  echo " -d Install all build dependencies"
+  echo " -u Update OpenCog source at $HOST_SOURCE_BRANCH"
+  echo " -b Build OpenCog"
+  echo " -t Test OpenCog"
+else
   echo "Usage: $SELF_NAME [OPTIONS] [PACKAGE-TYPE]"
   echo "  PACKAGE-TYPES:"
   for key in ${!PACKAGE_DESCRIPTION[@]}; do
@@ -331,41 +349,51 @@ if [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
   echo "    -o [filename]  ISO output filename"
   echo "    -j [jobs]      override number of auto-detected make jobs"
   echo "    -n             supress git updates"
-else
-  echo "Usage: $SELF_NAME OPTION"
-  echo " -a Add software repositories"
-  echo " -d Install build dependencies"
-  echo " -u Update OpenCog source at $HOST_SOURCE_BRANCH"
-  echo " -b Build OpenCog"
-  echo " -t Test OpenCog"
 fi
 }
 
 if [ $# -eq 0 ] ; then NO_ARGS=true ; fi
 
-while getopts ":i:o:j:s:c:l:r:adubtnxrvh" flag ; do
-  case $flag in
-    i)	INPUT_ISO_NAME="$OPTARG" ;;
-    o)	OUTPUT_ISO_NAME="$OPTARG" ;;
-    j)	MAKE_JOBS="$OPTARG" ;;			#override auto-detected MAKE_JOBS
-    s)	HOST_SOURCE_BRANCH="$OPTARG" ;;
-    c)	HOST_BUILD_DIR="$OPTARG" ;;		#local cached build dir
-    l)	LIVE_BUILD_DIR="$OPTARG" ;;		#live build directory
-    r)	BZR_REVISION="$OPTARG" ;;
-    a)	ADD_REPOSITORIES=true ;;
-    d)	INSTALL_DEPENDENCIES=true ;;		#ALL, none
-    u)	UPDATE_OPENCOG=true ;;			#git pull
-    b)	BUILD_OPENCOG=true ;;			#build opencog
-    t)	TEST_OPENCOG=true ;;                    #test opencog
-    n)	unset DEFAULT_UPDATE_OPENCOG ;;		#suppress git update
-    x)	unset DEFAULT_BUILD_OPENCOG ;;		#suppress build
-    p)	REINSTALL_PACKAGES=true ;;
-    v)	unset QUIET ;;
-    h)	usage ;;
-    \?)	usage ;;
-    *)  UNKNOWN_FLAGS=true ;;
-  esac
-done
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+  while getopts "adpcrlmh" flag ; do
+    case $flag in
+      r)	ADD_REPOSITORIES=true ;;
+      d)	INSTALL_DEPENDENCIES=true ;; #base development packages
+      p)	INSTALL_PYTHON_PACKAGES=true ;;
+      c)	INSTALL_COGUTIL=true ;;
+      a)	INSTALL_ATOMSPACE=true ;;
+      l)	INSTALL_LINK_GRAMMAR=true ;;
+      m)	INSTALL_MOSES=true ;;
+      h)	usage ;;
+      \?)	usage ;;
+      *)  UNKNOWN_FLAGS=true ;;
+    esac
+  done
+else
+  while getopts ":i:o:j:s:c:l:r:adubtnxrvh" flag ; do
+    case $flag in
+      i)	INPUT_ISO_NAME="$OPTARG" ;;
+      o)	OUTPUT_ISO_NAME="$OPTARG" ;;
+      j)	MAKE_JOBS="$OPTARG" ;;			#override auto-detected MAKE_JOBS
+      s)	HOST_SOURCE_BRANCH="$OPTARG" ;;
+      c)	HOST_BUILD_DIR="$OPTARG" ;;		#local cached build dir
+      l)	LIVE_BUILD_DIR="$OPTARG" ;;		#live build directory
+      r)	BZR_REVISION="$OPTARG" ;;
+      a)	ADD_REPOSITORIES=true ;;
+      d)	INSTALL_DEPENDENCIES=true ;;		#ALL, none
+      u)	UPDATE_OPENCOG=true ;;			#git pull
+      b)	BUILD_OPENCOG=true ;;			#build opencog
+      t)	TEST_OPENCOG=true ;;                    #test opencog
+      n)	unset DEFAULT_UPDATE_OPENCOG ;;		#suppress git update
+      x)	unset DEFAULT_BUILD_OPENCOG ;;		#suppress build
+      p)	REINSTALL_PACKAGES=true ;;
+      v)	unset QUIET ;;
+      h)	usage ;;
+      \?)	usage ;;
+      *)  UNKNOWN_FLAGS=true ;;
+    esac
+  done
+fi
 
 shift $((OPTIND-1))
 
@@ -503,6 +531,8 @@ fi
 install_cogutil(){
 MESSAGE="Installing cogutils...." ; message
 cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
 wget https://github.com/opencog/cogutils/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd cogutils-master/
@@ -519,15 +549,19 @@ rm -rf master.tar.gz cogutils-master/
 install_python_packages(){
 MESSAGE="Installing python packages...." ; message
 cd /tmp
+# cleaning up remnants from previous install failures, if any.
+rm -f requirements.txt*
 wget https://raw.githubusercontent.com/opencog/opencog/master/opencog/python/requirements.txt
 sudo pip install -U -r /tmp/requirements.txt
-rm requirements.txt
+rm -f requirements.txt*
 }
 
 # Install AtomSpace
 install_atomspace(){
 MESSAGE="Installing atomspace...." ; message
 cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
 wget https://github.com/opencog/atomspace/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd atomspace-master/
@@ -538,6 +572,45 @@ make -j$(nproc)
 sudo make install
 cd ../..
 rm -rf master.tar.gz atomspace-master/
+}
+
+# Install MOSES
+install_moses(){
+MESSAGE="Installing MOSES...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
+wget https://github.com/opencog/moses/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd moses-master/
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+make install
+ldconfig
+cd ../..
+rm -rf master.tar.gz moses-master/
+}
+
+# Install Link-Grammar
+install_link_grammar(){
+MESSAGE="Installing Link-Grammar...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -rf link-grammar-5.*/
+wget -r --no-parent -nH --cut-dirs=2 http://www.abisource.com/downloads/link-grammar/current/
+tar -zxf current/link-grammar-5*.tar.gz
+rm -r current
+cd link-grammar-5.*/
+mkdir build
+cd build
+../configure
+make -j$(nproc)
+make install
+ldconfig
+cd ../..
+rm -rf link-grammar-5.*/
 }
 
 install_dependencies() {
@@ -551,9 +624,6 @@ source /etc/lsb-release
 if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
   sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
-install_cogutil
-install_python_packages
-install_atomspace
 }
 
 update_opencog_source() {
@@ -779,9 +849,27 @@ cleanup_iso
 
 # SECTION 5: Main Program (MAIN main)
 
+# This is mainly for configuring workspaces depending on the type
+# of project being worked on.
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+    if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi
+    if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi
+    if [ $INSTALL_PYTHON_PACKAGES ] ; then install_python_packages ; fi
+    if [ $INSTALL_COGUTIL ] ; then install_cogutil ; fi
+    if [ $INSTALL_ATOMSPACE ] ; then install_atomspace ; fi
+    if [ $INSTALL_LINK_GRAMMAR ] ; then install_link_grammar ; fi
+    if [ $INSTALL_MOSES ] ; then install_moses ; fi
+    if [ $UNKNOWN_FLAGS ] ; then usage ; fi
+    if [ $NO_ARGS ] ; then usage ; fi
+exit 0
+fi
+
 if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
+  install_cogutil
+  install_python_packages
+  install_atomspace
   exit 0
 fi
 
