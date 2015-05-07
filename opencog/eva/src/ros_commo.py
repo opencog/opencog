@@ -46,9 +46,9 @@ class EventLoop():
 		# Create the message
 		exp = EmotionState()
 		exp.name = 'happy'
-		exp.magnitude = 0.5
+		exp.magnitude = 1.0
 		exp.duration.secs = 5
-		exp.duration.nsecs = 0
+		exp.duration.nsecs = 250*1000000
 		self.emotion_pub.publish(exp)
 		print "Just published: ", exp.name
 
@@ -56,16 +56,16 @@ class EventLoop():
 		# Create the message
 		exp = EmotionState()
 		exp.name = 'sad'
-		exp.magnitude = 0.5
+		exp.magnitude = 1.0
 		exp.duration.secs = 5
-		exp.duration.nsecs = 0
+		exp.duration.nsecs = 250*1000000
 		self.emotion_pub.publish(exp)
 		print "Just published: ", exp.name
 
 	def nod(self):
 		ges = SetGesture()
 		ges.name = 'nod-2'
-		ges.magnitude = 0.5
+		ges.magnitude = 1.0
 		ges.repeat = False
 		ges.speed = 1.0
 		self.gesture_pub.publish(ges)
