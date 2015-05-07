@@ -28,8 +28,8 @@ from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
 from blender_api_msgs.msg import EmotionState
 from blender_api_msgs.msg import SetGesture
 
-# face visibility stuff
-# from face_track import FaceTrack
+# Human face visibility tracker
+from face_track import FaceTrack
 
 
 
@@ -40,6 +40,15 @@ class EventLoop():
 		return not rospy.is_shutdown()
 
 	def look_left(self):
+		self.facetrack.look_at_point(1.0, 0.5, 0.0)
+		return
+
+	def look_right(self):
+		self.facetrack.look_at_point(1.0, -0.5, 0.0)
+		return
+
+	def look_center(self):
+		self.facetrack.look_at_point(1.0, 0.0, 0.0)
 		return
 
 	def happy(self):
@@ -100,3 +109,5 @@ class EventLoop():
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)
+
+		self.facetrack = FaceTrack()

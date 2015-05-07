@@ -158,6 +158,28 @@ class FaceTrack:
 		self.glance_howlong = howlong
 		self.first_glance = -1
 
+	# Turn only the eyes towards the given target point.
+	# Coordinates: meters; x==forward, y==to Eva's left.
+	def gaze_at_point(self, x, y, z):
+		print "gaze at point: ", x, y, z
+
+		trg = Target()
+		trg.x = x
+		trg.y = y
+		trg.z = z
+		self.gaze_pub.publish(trg)
+
+	# Turn head towards the given target point.
+	# Coordinates: meters; x==forward, y==to Eva's left.
+	def look_at_point(self, x, y, z):
+		print "look at point: ", x, y, z
+
+		trg = Target()
+		trg.x = x
+		trg.y = y
+		trg.z = z
+		self.look_pub.publish(trg)
+
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 	# Add a face to ... XXX FIXME
@@ -221,6 +243,7 @@ class FaceTrack:
 	# 2) updates the list of recently seen (but now lost) faces
 	# 3) If we should be looking at one of these faces, then look
 	#    at it, now.
+# XXX should not do step 3, atomspace needs to do this.
 	def do_look_at_actions(self) :
 		now = time.time()
 
