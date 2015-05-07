@@ -10,7 +10,7 @@
 from opencog.atomspace import AtomSpace, types
 
 atomspace = None
-def set_atomspace(new_atomspace):
+def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 

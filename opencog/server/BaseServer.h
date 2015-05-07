@@ -98,12 +98,23 @@ public:
 //
 // - Curtis Faith <curtis.m.faith@gmail.com>
 //
+// I dunno, this whole singleton instance idea is whack. What's wrong
+// with just doing it right? The number of problems that singleton
+// instances create exceeds the number of problems they solve. They
+// should be eliminated from the code.
+//
+// - Linas
 BaseServer& server(BaseServer* (*)() = BaseServer::createInstance);
 void set_current_server(BaseServer* currentServer);
 
 inline AtomSpace& atomspace(void)
 {
     return server().getAtomSpace();
+}
+
+inline unsigned long server_atomspace(void)
+{
+    return (unsigned long) &atomspace();
 }
 
 /** @}*/

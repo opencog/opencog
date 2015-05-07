@@ -6,11 +6,11 @@
 Example usage of the Python wrapper for the MOSES evolutionary program
 learning system
 
-Instantiates MOSES with a training dataset stored in a Python array and learns
-a program representation of the XOR operation
+Instantiates MOSES with a training dataset stored in a Python array
+and learns a program representation of the XOR operation.
 
-For complete documentation on how to pass additional parameters to MOSES,
-refer to the documentation at the following link:
+For complete documentation on how to pass additional parameters to
+MOSES, refer to the documentation at the following link:
 https://github.com/opencog/opencog/blob/master/opencog/cython/opencog/pymoses.pyx
 
 MOSES Details:
