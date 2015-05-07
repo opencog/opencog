@@ -113,6 +113,11 @@ void PythonModule::init()
                     "Python not initialized, missing global_python_init()");
     }
 
+    // Many python libraries (e.g. ROS) expect sys.argv to be set. So,
+    // avoid the error print, and let them know who we are.
+    static const char *argv0 = "cogserver";
+    PySys_SetArgv(1, (char **) &argv0);
+
     // NOTE: Even though the Cython docs do not say that you need to call this
     // more than once, you need to call the import functions in each separate
     // shared library that accesses Cython defined api. If you don't then you
