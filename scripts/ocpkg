@@ -531,6 +531,8 @@ fi
 install_cogutil(){
 MESSAGE="Installing cogutils...." ; message
 cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
 wget https://github.com/opencog/cogutils/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd cogutils-master/
@@ -547,16 +549,19 @@ rm -rf master.tar.gz cogutils-master/
 install_python_packages(){
 MESSAGE="Installing python packages...." ; message
 cd /tmp
+# cleaning up remnants from previous install failures, if any.
+rm -f requirements.txt*
 wget https://raw.githubusercontent.com/opencog/opencog/master/opencog/python/requirements.txt
 sudo pip install -U -r /tmp/requirements.txt
-rm requirements.txt
+rm -f requirements.txt*
 }
 
 # Install AtomSpace
 install_atomspace(){
 MESSAGE="Installing atomspace...." ; message
 cd /tmp/
-rm master.tar.gz
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
 wget https://github.com/opencog/atomspace/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd atomspace-master/
@@ -573,7 +578,9 @@ rm -rf master.tar.gz atomspace-master/
 install_moses(){
 MESSAGE="Installing MOSES...." ; message
 cd /tmp/
-#wget https://github.com/opencog/moses/archive/master.zip
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
+#wget https://github.com/opencog/moses/archive/master.tar.gz
 }
 
 # Install Link-Grammar
@@ -592,7 +599,7 @@ cd build
 make -j$(nproc)
 make install
 ldconfig
-cd ..
+cd ../..
 rm -rf link-grammar-5.*/
 }
 
