@@ -39,6 +39,46 @@ class EventLoop():
 		print "step once"
 		return not rospy.is_shutdown()
 
+	def look_left(self):
+		return
+
+	def happy(self):
+		# Create the message
+		exp = EmotionState()
+		exp.name = 'happy'
+		exp.magnitude = 0.5
+		exp.duration.secs = 5
+		exp.duration.nsecs = 0
+		self.emotion_pub.publish(exp)
+		print "Just published: ", exp.name
+
+	def sad(self):
+		# Create the message
+		exp = EmotionState()
+		exp.name = 'sad'
+		exp.magnitude = 0.5
+		exp.duration.secs = 5
+		exp.duration.nsecs = 0
+		self.emotion_pub.publish(exp)
+		print "Just published: ", exp.name
+
+	def nod(self):
+		ges = SetGesture()
+		ges.name = 'nod-2'
+		ges.magnitude = 0.5
+		ges.repeat = False
+		ges.speed = 1.0
+		self.gesture_pub.publish(ges)
+		print "Just published gesture: ", ges.name
+
+#   def glance_at(self):
+#      face_id =
+#      print "----- Glancing at face:" + str(face_id)
+#      glance_seconds = 1
+#      self.facetrack.glance_at_face(face_id, glance_seconds)
+
+
+	# Get the list of available gestures.
 	def get_gestures_cb(self, msg):
 		print("Available Gestures:" + str(msg.data))
 
