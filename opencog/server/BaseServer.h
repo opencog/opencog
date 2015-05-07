@@ -112,9 +112,9 @@ inline AtomSpace& atomspace(void)
     return server().getAtomSpace();
 }
 
-inline AtomSpace* server_atomspace(void)
+inline unsigned long server_atomspace(void)
 {
-    return &atomspace();
+    return (unsigned long) &atomspace();
 }
 
 /** @}*/

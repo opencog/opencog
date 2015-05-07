@@ -29,7 +29,7 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
 
 cdef extern from "opencog/server/BaseServer.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace"
-    cAtomSpace* server_atomspace()
+    long server_atomspace()
 
 
 # ideally we'd import these typedefs instead of defining them here but I don't

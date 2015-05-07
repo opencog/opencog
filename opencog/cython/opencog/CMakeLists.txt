@@ -80,7 +80,7 @@ ENDIF (HAVE_ATOMSPACE)
 IF (HAVE_SERVER)
 	############################ cogserver #########################
 	CYTHON_ADD_MODULE_PYX(cogserver
-		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/atomspace.pxd"
+		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
 		"request.pyx" "agent.pyx" "agent_finder_types.h"
 		"../../server/Agent.h" "../../server/Request.h"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
