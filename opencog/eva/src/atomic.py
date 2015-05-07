@@ -1,7 +1,6 @@
-#! /usr/bin/env python
 #
-# main.py - Main entry point for OpenCog behaviors.
-# Copyright (C) 2015  Hanson Robotics
+# atomic.py - Simple atoms for simple Eva demo
+# Copyright (C) 2015  Linas Vepstas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License v3 as
@@ -20,12 +19,27 @@
 
 
 from ros_commo import EventLoop
+from opencog.atomspace import AtomSpace
+from opencog.bindlink import satisfaction_link
+from opencog.type_constructors import *
 
-print "oc start"
-evl = EventLoop()
+from opencog.cogserver import get_server_atomspace
 
-# Demo stuff. Don't do these all at once!
-evl.sad()
-evl.happy()
-evl.look_left()
-evl.look_right()
+
+# The atomspace where everything will live.
+atomspace = get_server_atomspace()
+set_type_ctor_atomspace(atomspace)
+
+satisfaction_handle = SatisfactionLink(
+	SequentialAndLink(
+		EvaluationLink(
+			GroundedPredicateNode("py: stop_go"),
+			ListLink(
+				ConceptNode("green light")
+			)
+		)
+	)
+}.h
+
+
+result = satisfaction_link(atomspace, satisfaction_handle)
