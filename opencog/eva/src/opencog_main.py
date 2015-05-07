@@ -19,10 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-import rospy
 from ros_commo import EventLoop
 
-if __name__ == "__main__":
-	rospy.init_node("OpenCog_Eva")
-	print("Starting OpenCog Behavior Node")
-	EventLoop()
+print "oc start"
+evl = EventLoop()

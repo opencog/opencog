@@ -35,6 +35,10 @@ from blender_api_msgs.msg import SetGesture
 
 class EventLoop():
 
+	def step(self):
+		print "step once"
+		return not rospy.is_shutdown()
+
 	def get_gestures_cb(self, msg):
 		print("Available Gestures:" + str(msg.data))
 
@@ -42,10 +46,9 @@ class EventLoop():
 	def get_emotion_states_cb(self, msg):
 		print("Available Emotion States:" + str(msg.data))
 
-	def loop(self):
-		time.sleep(1)
-
 	def __init__(self):
+		rospy.init_node("OpenCog_Eva")
+		print("Starting OpenCog Behavior Node")
 
 		rospy.Subscriber("/blender_api/available_emotion_states",
 		       AvailableEmotionStates, self.get_emotion_states_cb)
@@ -57,6 +60,3 @@ class EventLoop():
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)
-
-		while not rospy.is_shutdown():
-			self.loop()
