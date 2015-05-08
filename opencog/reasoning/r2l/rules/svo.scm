@@ -3,7 +3,7 @@
 ; of pln and the rule-functions of r2l.
 (define svo
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$a-parse")
                 (TypeNode "ParseNode")
