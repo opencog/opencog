@@ -6,6 +6,7 @@ http://en.wikipedia.org/wiki/Visual_programming_language
 
 Yes
 ---
+* JS bootstrap + JS Angular + stuff Vytas recommended
 
 Maybe
 -----

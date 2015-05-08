@@ -19,7 +19,7 @@
 
 
 from ros_commo import EventLoop
-from opencog.atomspace import AtomSpace
+from opencog.atomspace import AtomSpace, TruthValue
 from opencog.bindlink import satisfaction_link
 from opencog.type_constructors import *
 
@@ -30,16 +30,32 @@ from opencog.cogserver import get_server_atomspace
 atomspace = get_server_atomspace()
 set_type_ctor_atomspace(atomspace)
 
+# The ROS layer.
+evl = EventLoop()
+
+# Global functions, beause that's what PythonEval expects.
+# The must return a TruthValue, since EvaluationLinks
+# expect TruthValues.
+def do_look_left():
+    evl.look_left()
+    return TruthValue(1, 1)
+
+def do_look_right():
+    evl.look_right()
+    return TruthValue(1, 1)
+
+# Define an executable pattern
 satisfaction_handle = SatisfactionLink(
 	SequentialAndLink(
 		EvaluationLink(
-			GroundedPredicateNode("py: stop_go"),
-			ListLink(
-				ConceptNode("green light")
-			)
+			# GroundedPredicateNode("py: evl.look_right"),
+			# GroundedPredicateNode("py: do_look_right"),
+			GroundedPredicateNode("py: do_look_left"),
+			ListLink()
 		)
 	)
-}.h
+).h
 
-
+# See if the pattern can be satsified.  This should result
+# in a ROS message being sent.
 result = satisfaction_link(atomspace, satisfaction_handle)
