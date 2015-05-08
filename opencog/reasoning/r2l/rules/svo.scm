@@ -49,6 +49,8 @@
                         (VariableNode "$Z")
                     )
                 )
+		(AbsentLink
+			(DefinedLinguisticRelationshipNode "_iobj")
             )
             (ExecutionOutputLink
                 (GroundedSchemaNode "scm: pre-svo-rule")
