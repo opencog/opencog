@@ -1,9 +1,12 @@
 Performance Scripting Interface
 ===============================
 Experimental user interface for creating performance scripts to control
-the Hanson Robotics Eva robot head.
+the Hanson Robotics Eva robot head. See:
 
-Goal: Creeate a Web UI that will allow theatrical performance artists
+* https://github.com/hansonrobotics/blender_api
+* https://github.com/opencog/docker/tree/master/indigo/eva
+
+Goal: Create a Web UI that will allow theatrical performance artists
 to script theatrical performances for the Eva head.  An example of a
 simple theatrical performance might be ''When a someone enters the room,
 briefly glance thier way, give a faint smile, then resume with the
@@ -26,8 +29,9 @@ explicitly with a certain OpenCog-based scripting language.
 
 Status
 ------
-This is version 0.0.0 of the project. Nothing is here yet. There's going
-to be lots of miscellaneous experiments and a mish-mash of code.
+This is version 0.0.1 of the project. Almost nothing is here yet.
+There's going to be lots of miscellaneous experiments and a
+mish-mash of code.
 
 
 Resources:
