@@ -867,8 +867,9 @@ fi
 if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
-  install_cogutil
   install_python_packages
+  install_link_grammar
+  install_cogutil
   install_atomspace
   exit 0
 fi
