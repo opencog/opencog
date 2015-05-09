@@ -22,7 +22,15 @@ import socket
 
 def netcat(hostname, port, content) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((hostname, port))
+
+	# If the cogserver is down, the connection will fail.
+	try:
+		s.connect((hostname, port))
+	except socket.error as msg:
+		print "Connect failed: ", msg
+		s.close()
+		return
+
 	s.sendall(content)
 	s.shutdown(socket.SHUT_WR)
 	while True:
