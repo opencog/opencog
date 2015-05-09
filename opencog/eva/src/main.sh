@@ -13,6 +13,10 @@ sleep 4;
 
 tmux new-window -n 'cogserver' 'cogserver; $SHELL'
 
+# Load data into the CogServer
+sleep 3
+echo -e "py\n" | cat - atomic.py |netcat localhost 17001
+
 # Fix the annoying byobu display
 echo "tmux_left=\"session\"" > $HOME/.byobu/status
 echo "tmux_right=\"load_average disk_io date time\"" >> $HOME/.byobu/status
