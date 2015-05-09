@@ -20,6 +20,11 @@ are OpenCog atoms; for example, the current visible-face structure is:
 This node also listens for look-at messages from OpenCog, and reacts to
 those, by giving Eva explicit instructions for where to look.
 
+Running
+-------
+Just start `main.py` in a terminal.  This does not have any of the
+pretty ROS rosrun, config, setup.py stuff in it yet.  Its a quick hack.
+
 Design discussion
 -----------------
 This is a stand-alone ROS node only because of a simple, stupid reason:
