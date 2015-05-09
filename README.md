@@ -31,7 +31,8 @@ be built and run.
 ###### atomspace
 > OpenCog Atomspace database and reasoning engine
 > http://github.com/opencog/atomspace
-> It uses exactly the same build procedure as this package.
+> It uses exactly the same build procedure as this package. Be sure
+  to `sudo make install` at the end.
 
 Optional Prerequisites
 ----------------------
