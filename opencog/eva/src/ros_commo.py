@@ -106,7 +106,7 @@ class EvaControl():
 		trg.x = x
 		trg.y = y
 		trg.z = z
-		self.look_pub.publish(trg)
+		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------
 	# Subscription callbacks
