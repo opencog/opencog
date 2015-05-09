@@ -32,7 +32,7 @@ class FaceAtomic:
 	# Add a face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
 		face = self.define_face(faceid)
-		netcat(self.hostname, self.port, face)
+		netcat(self.hostname, self.port, face + "\n")
 		print "Defined face in atomspace: ", faceid
 
 	# Remove a face from the atomspace.
@@ -40,7 +40,7 @@ class FaceAtomic:
 
 		# AtomSpace remove takes handle as an argument.
 		face = self.define_face(faceid)
-		msg = "(cog-delete! " + face + ")"
+		msg = "(cog-delete " + face + ")\n"
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
 		# XXX TODO Remove the NumberNode as well, if no
@@ -49,5 +49,5 @@ class FaceAtomic:
 	# Define simple string to define a face
 	def define_face(self, faceid):
 		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + ")))"
+		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
 		return face

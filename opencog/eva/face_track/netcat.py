@@ -24,11 +24,11 @@ def netcat(hostname, port, content) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((hostname, port))
 	s.sendall(content)
+	s.shutdown(socket.SHUT_WR)
 	while True:
 		data = s.recv(1024)
 		if not data or data == "":
 			break
-		print "Received:", repr(data)
-	print "Connection closed."
-	s.shutdown(socket.SHUT_RDWR)
+		# print "Received:", repr(data)
+	# print "Connection closed."
 	s.close()
