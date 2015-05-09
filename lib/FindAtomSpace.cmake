@@ -66,17 +66,17 @@ set(ATOMSPACE_LIBRARIES
 
 INCLUDE (CheckIncludeFiles)
 
-find_path(ATOMSPACE_INCLUDE_DIR opencog/atomspace/atomspace.h
+find_path(ATOMSPACE_INCLUDE_DIR opencog/atomspace/version.h
 	PATH /usr/include /usr/local/include
 )
 
 set(CMAKE_REQUIRED_INCLUDES ${ATOMSPACE_INCLUDE_DIR})
-CHECK_INCLUDE_FILES (opencog/atomspace/atomspace.h HAVE_ATOMSPACE_H)
+CHECK_INCLUDE_FILES (opencog/atomspace/version.h HAVE_ATOMSPACE_H)
 
 if (ATOMSPACE_LIBRARY AND HAVE_ATOMSPACE_H)
 	set(ATOMSPACE_FOUND TRUE)
 	set(ATOMSPACE_VERSION 0)
-	FILE(READ "${ATOMSPACE_INCLUDE_DIR}/opencog/atomspace/atomspace.h" _CU_H_CONTENTS)
+	FILE(READ "${ATOMSPACE_INCLUDE_DIR}/opencog/atomspace/version.h" _CU_H_CONTENTS)
 	STRING(REGEX MATCH
 		"#define ATOMSPACE_VERSION_STRING[  ]+\"([0-9.]+)\""
 		_MATCH "${_CU_H_CONTENTS}")
