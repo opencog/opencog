@@ -3,9 +3,10 @@ Design overview
 ===============
 This is a pre-prototype.  But still:
 
-* `face_track.py` receives ROS messages about human face locations
-  from the webcam + pi_vision subsystem.  It calls methods in
-  `face_atomic.py` to poke face-ids (ID numbers) into the atomspace.
+* The `face_track` directory contains code for visual servoing: it
+  receives ROS messages about human face locations from the webcam
+  + pi_vision subsystem.  It calls methods in `face_atomic.py` to
+  poke face-ids (ID numbers) into the atomspace.
 
 
 

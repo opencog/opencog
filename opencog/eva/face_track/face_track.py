@@ -52,7 +52,8 @@ class FaceTrack:
 
 	def __init__(self):
 
-		print("Starting Face Tracker")
+		rospy.init_node("OpenCog_Facetracker")
+		print("Starting OpenCog Face Tracker ROS Node")
 
 		# The OpenCog API
 		self.atomo = FaceAtomic()
@@ -219,7 +220,10 @@ class FaceTrack:
 	# 2) updates the list of recently seen (but now lost) faces
 	# 3) If we should be looking at one of these faces, then look
 	#    at it, now.
-# XXX should not do step 3, atomspace needs to do this.
+	#
+	# Note that step 3 is a kind-of imprecise visual-servoing. That is,
+	# if the look-at face is moving around, the step 3 will result in
+	# her automatically tracking that face, as it moves.
 	def do_look_at_actions(self) :
 		now = time.time()
 
