@@ -1,4 +1,13 @@
 
+Design overview
+===============
+This is a pre-prototype.  But still:
+
+* `face_track.py` receives ROS messages about human face locations
+  from the webcam + pi_vision subsystem.  It calls methods in
+  `face_atomic.py` to poke face-ids (ID numbers) into the atomspace.
+
+
 
 Debugging notes
 ===============
@@ -43,4 +52,13 @@ else it returns nil.
 ```
 rlwrap telnet localhost 17001
 (cog-node 'ConceptNode "green light")
+```
+
+Face tracking debug
+===================
+Print all visible faces in the atomspace:
+
+```
+rlwrap telnet localhost 17001
+(cog-incoming-set (ConceptNode "visible face"))
 ```

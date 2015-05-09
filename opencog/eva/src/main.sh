@@ -4,6 +4,9 @@
 #
 # Start the cogserver, run stuff
 
+# Without this, some ros messages seem to run astray.
+export ROS_IP=127.0.0.1
+
 # Use byobu so that the scroll bars actually work
 byobu new-session -d -n 'roscore' 'roscore; $SHELL'
 sleep 4;
