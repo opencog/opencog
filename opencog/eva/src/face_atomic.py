@@ -64,5 +64,4 @@ class FaceAtomic:
 			ConceptNode("visible face"),
 			ListLink(
 				NumberNode(str(faceid))))
-		face = atom.h
 		return face
