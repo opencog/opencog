@@ -91,6 +91,10 @@ class FaceTrack:
 
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
 
+		# Subscribed OpenCog commands
+		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
+		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
+
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
 		self.TOPIC_GAZE_TARGET = "/blender_api/set_gaze_target"
@@ -100,6 +104,9 @@ class FaceTrack:
 
 		# Face location information from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
+
+		# Which face to look at
+		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
 
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET, \
@@ -163,28 +170,6 @@ class FaceTrack:
 		self.glance_at = faceid
 		self.glance_howlong = howlong
 		self.first_glance = -1
-
-	# Turn only the eyes towards the given target point.
-	# Coordinates: meters; x==forward, y==to Eva's left.
-	def gaze_at_point(self, x, y, z):
-		print "gaze at point: ", x, y, z
-
-		trg = Target()
-		trg.x = x
-		trg.y = y
-		trg.z = z
-		self.gaze_pub.publish(trg)
-
-	# Turn head towards the given target point.
-	# Coordinates: meters; x==forward, y==to Eva's left.
-	def look_at_point(self, x, y, z):
-		print "look at point: ", x, y, z
-
-		trg = Target()
-		trg.x = x
-		trg.y = y
-		trg.z = z
-		self.look_pub.publish(trg)
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.

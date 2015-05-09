@@ -27,28 +27,25 @@ from std_msgs.msg import String
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
 from blender_api_msgs.msg import EmotionState
 from blender_api_msgs.msg import SetGesture
-
-# Human face visibility tracker
-from face_track import FaceTrack
+from blender_api_msgs.msg import Target
 
 
-
-class EventLoop():
+class EvaControl():
 
 	def step(self):
 		print "step once"
 		return not rospy.is_shutdown()
 
 	def look_left(self):
-#		self.facetrack.look_at_point(1.0, 0.5, 0.0)
+		self.look_at_point(1.0, 0.5, 0.0)
 		return
 
 	def look_right(self):
-#		self.facetrack.look_at_point(1.0, -0.5, 0.0)
+		self.look_at_point(1.0, -0.5, 0.0)
 		return
 
 	def look_center(self):
-#		self.facetrack.look_at_point(1.0, 0.0, 0.0)
+		self.look_at_point(1.0, 0.0, 0.0)
 		return
 
 	def happy(self):
@@ -86,7 +83,33 @@ class EventLoop():
 #      glance_seconds = 1
 #      self.facetrack.glance_at_face(face_id, glance_seconds)
 
+	# ----------------------------------------------------------
+	# Explicit directional look-at, gaze-at locations
 
+	# Turn only the eyes towards the given target point.
+	# Coordinates: meters; x==forward, y==to Eva's left.
+	def gaze_at_point(self, x, y, z):
+		print "gaze at point: ", x, y, z
+
+		trg = Target()
+		trg.x = x
+		trg.y = y
+		trg.z = z
+		self.gaze_pub.publish(trg)
+
+	# Turn head towards the given target point.
+	# Coordinates: meters; x==forward, y==to Eva's left.
+	def look_at_point(self, x, y, z):
+		print "look at point: ", x, y, z
+
+		trg = Target()
+		trg.x = x
+		trg.y = y
+		trg.z = z
+		self.look_pub.publish(trg)
+
+	# ----------------------------------------------------------
+	# Subscription callbacks
 	# Get the list of available gestures.
 	def get_gestures_cb(self, msg):
 		print("Available Gestures:" + str(msg.data))
@@ -109,3 +132,10 @@ class EventLoop():
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)
+
+		# XYZ coordinates of where to turn and look.
+		self.turn_pub = rospy.Publisher("/blender_api/set_face_target",
+			Target, queue_size=1)
+
+		self.gaze_pub = rospy.Publisher("/blender_api/set_gaze_target",
+			Target, queue_size=1)

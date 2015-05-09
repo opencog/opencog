@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from ros_commo import EventLoop
+from ros_commo import EvaControl
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.bindlink import satisfaction_link
 from opencog.type_constructors import *
@@ -31,7 +31,7 @@ atomspace = get_server_atomspace()
 set_type_ctor_atomspace(atomspace)
 
 # The ROS layer.
-evl = EventLoop()
+evl = EvaControl()
 
 # Global functions, beause that's what PythonEval expects.
 # The must return a TruthValue, since EvaluationLinks
