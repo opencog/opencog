@@ -36,9 +36,43 @@ mish-mash of code.
 Running
 -------
 * Start the webcam, pi_vision, and tf2 tracking nodes as usual.
+* Start the Eva blender node, as usual.
 * Start the opencog face-tracking node in the `face_track` directory
   here.
 
+Owyl implementation
+-------------------
+The previous implementation used Owyl trees to represent behaviors.
+It can be found here:
+https://github.com/hansonrobotics/eva_behavior
+Here's a summary of what it scripts:
+
+ * If the scene was empty and someone arrives, Eva interacts with the
+   new arrival. Start by showing 'surprised' expression.
+
+ * If Eva is currently interacting with someone, and someone else
+   arrives, she will either (dice-roll): glance at the newcomer or
+   ignore them.   The probability of a glance increases if she has
+   been interacting for a while.
+
+ * If the person she is interacting with leaves, show a frustrated
+   emotion. Frustrated emotions are: sad, confused, recoil, surprised.
+
+ * If someone else leaves, glance at that last location, or ignore
+   the departure.
+
+ * While interacting with someone:
+   -- randomly display one of: happy, comprehending, engaged
+   -- Ocasionally glance at other faces in the room.
+   -- If the interaction has been long-running, then switch and pay
+      attention to someone new
+
+ * If the room is empty:
+   -- showed bored expression (one of bored, sad, happy)
+   -- look around the room
+   -- If room still empty, yawn, blink-sleepy
+   -- Go to sleep. Periodically wake. Wake gestures: shake-2, shake-3,
+      blink
 
 
 Resources:
