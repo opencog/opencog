@@ -61,7 +61,7 @@ class FaceAtomic:
 	# Return the handle.
 	def define_face(self, faceid):
 		face = EvaluationLink(
-			ConceptNode("visible face"),
+			PredicateNode("visible face"),
 			ListLink(
 				NumberNode(str(faceid))))
 		return face

@@ -60,5 +60,5 @@ Print all visible faces in the atomspace:
 
 ```
 rlwrap telnet localhost 17001
-(cog-incoming-set (ConceptNode "visible face"))
+(cog-incoming-set (PredicateNode "visible face"))
 ```
