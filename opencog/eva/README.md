@@ -33,6 +33,13 @@ This is version 0.0.1 of the project. Almost nothing is here yet.
 There's going to be lots of miscellaneous experiments and a
 mish-mash of code.
 
+Running
+-------
+* Start the webcam, pi_vision, and tf2 tracking nodes as usual.
+* Start the opencog face-tracking node in the `face_track` directory
+  here.
+
+
 
 Resources:
 ----------
