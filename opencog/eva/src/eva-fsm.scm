@@ -6,77 +6,86 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(define my-trans (ConceptNode "My FSM's Transition Rule"))
-(define my-state (AnchorNode "My FSM's Current State"))
+(define eva-trans (ConceptNode "Eva Transition Rule"))
 
-;; The inital state of the FSM
-(ListLink
-	my-state
-	(ConceptNode "initial state")
-)
+; What emotional state is eva currently displaying?
+(define eva-state (AnchorNode "Eva Current State"))
+(define eva-bored (ConceptNode "Eva bored"))
+(define eva-surprised (ConceptNode "Eva surprised"))
 
-;; The set of allowed state transistions.  Its a triangular cycle,
-;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
-;;
-;; Each rule is labelled with the "my-fsm", so that rules for
-;; different FSM's do not clash with one-another.  A ConextLink is used
-;; because that will allow this example to generalize: Context's are
-;; usually used to  express conditional probabilities, so that 
-;;
-;;     Context  <TV>
-;;         A
-;;         B
-;;
-;; representes the probibility of B contiditoned on A, and the TV holds
-;; the numeric value for P(B|A).  In this case, A is the current state
-;; of the machine, and B the the next state of theh machine, so that P(B|A)
-;; is the probability of transitioning to state B give that the machine is
-;; in state A.  Such a system is called a Markov Chain.
-;; 
-;; For the example below, P(B|A) is always one.
+; Is the room empty, or is someone in it?
+(define room-state (AnchorNode "Room State"))
+(define room-empty (ConceptNode "room empty"))
+(define room-nonempty (ConceptNode "room nonempty"))
+
+;; Eva's inital state of the FSM
+(ListLink eva-state eva-bored)
+
+;; Assume room empty at first
+(ListLink room-state room-empty)
+
+;; Misc state transistions.
+;; if room empty and someone entered -> room non-empty
+;; if eva-bored and someone entered -> eva surprised
 
 (ContextLink
-	(ConceptNode "initial state")
-	(ListLink
-		my-trans
-		(ConceptNode "green")
-	)
+	(AndLink eva-bored room-non-empty)
+	(ListLink eva-trans eva-surprised)
 )
 
 (ContextLink
-	(ConceptNode "green")
-	(ListLink
-		my-trans
-		(ConceptNode "yellow")
+	(AndLink eva-surprised room-empty)
+	(ListLink eva-trans eva-bored)
+)
+
+;; Hack job
+(define wtf
+	(define var-eva-state (VariableNode "$eva-state"))
+	(define var-eva-next-state (VariableNode "$eva-next-state"))
+	(define var-room-state (VariableNode "$eva-room-state"))
+	(BindLink
+		(VariableList
+			var-eva-state var-eva-next-state var-room-state
+		)
+		(ImplicationLink
+			(AndLink
+				;; If Eva is in the current state ...
+				(ListLink eva-state var-eva-state)
+
+				;; ...and the room is in state ...
+				(ListLink room-state var-room-state)
+
+				;; ... and there is a transition ...
+				(ContextLink
+					(AndLink var-eva-state var-room-state)
+					(ListLink eva-trans var-eva-next-state)
+				)
+			)
+			(AndLink
+				;; ... Then, leave the current state ...
+				(DeleteLink (ListLink eva-state var-eva-state))
+
+				;; ... And transition to the new state ...
+				(ListLink eva-state var-eva-next-state)
+			)
+		)
 	)
 )
 
-(ContextLink
-	(ConceptNode "yellow")
-	(ListLink
-		my-trans
-		(ConceptNode "red")
+; More bad chacking
+(define chk-full
+	(BindLink
+		(VariableNode "$face-id")
+	)
+	(ImplicationLink
+		(EvaluationLink
+			(PredicateNode "visible face")
+			(ListLink (VariableNode "$face-id"))
+		)
+		(ListLink room-state room-empty)
 	)
 )
-
-(ContextLink
-	(ConceptNode "red")
-	(ListLink
-		my-trans
-		(ConceptNode "green")
-	)
-)
-
 
 ;;; Create "my-fsm"
 ;; (define my-fsm (create-fsm my-trans my-state))
 
-;;; Take one step.
-;(cog-bind my-fsm)
-
-;;; Take three steps.
-;;; Try it!
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)

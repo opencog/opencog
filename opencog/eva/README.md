@@ -39,13 +39,16 @@ Running
 * Start the Eva blender node, as usual.
 * Start the opencog face-tracking node in the `face_track` directory
   here.
+* Run `src/main.sh`
 
 Owyl implementation
 -------------------
 The previous implementation used Owyl trees to represent behaviors.
-It can be found here:
+There was no GUI or API for this: the behaviors are hard-coded in
+python.  It can be found here:
+
 https://github.com/hansonrobotics/eva_behavior
-Here's a summary of what it scripts:
+Here's a summary of the behaviors it scripts:
 
  * If the scene was empty and someone arrives, Eva interacts with the
    new arrival. Start by showing 'surprised' expression.
