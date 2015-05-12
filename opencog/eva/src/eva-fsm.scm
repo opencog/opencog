@@ -29,13 +29,21 @@
 ;; if eva-bored and someone entered -> eva surprised
 
 (ContextLink
-	(AndLink eva-bored room-non-empty)
+	(AndLink eva-bored room-nonempty)
 	(ListLink eva-trans eva-surprised)
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm: (display \"ola\")")
+		(ListLink)
+	)
 )
 
 (ContextLink
 	(AndLink eva-surprised room-empty)
 	(ListLink eva-trans eva-bored)
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm: (display \"bye\")")
+		(ListLink)
+	)
 )
 
 ;; Hack job
@@ -43,6 +51,7 @@
 	(define var-eva-state (VariableNode "$eva-state"))
 	(define var-eva-next-state (VariableNode "$eva-next-state"))
 	(define var-room-state (VariableNode "$eva-room-state"))
+	(define var-action (VariableNode "$eva-action"))
 	(BindLink
 		(VariableList
 			var-eva-state var-eva-next-state var-room-state
@@ -59,6 +68,7 @@
 				(ContextLink
 					(AndLink var-eva-state var-room-state)
 					(ListLink eva-trans var-eva-next-state)
+					var-action
 				)
 			)
 			(AndLink
@@ -67,6 +77,9 @@
 
 				;; ... And transition to the new state ...
 				(ListLink eva-state var-eva-next-state)
+
+				;; and perform teh action
+				var-action
 			)
 		)
 	)
@@ -108,6 +121,10 @@
 		)
 	)
 )
+
+;; Display the current room state
+(define (show-room-state)
+	(car (cog-chase-link 'ListLink 'ConceptNode room-state)))
 
 ;;; Create "my-fsm"
 ;; (define my-fsm (create-fsm my-trans my-state))

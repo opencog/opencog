@@ -9,6 +9,13 @@ This is a pre-prototype.  But still:
   poke face-ids (ID numbers) into the atomspace.
 
 
+Running
+=======
+
+* `echo -e "py\n" | cat - atomic.py |netcat localhost 17001`
+* `cat eva-fsm.scm |netcat localhost 17001`
+
+
 
 Debugging notes
 ===============
