@@ -4,7 +4,7 @@
 ;
 ; AND(Inheritance A B, Inheritance B C) entails Inheritance A C
 ; -----------------------------------------------------------------------------
-
+(include "formulas.scm")
 (define pln-rule-deduction
     (BindLink
         (VariableList
