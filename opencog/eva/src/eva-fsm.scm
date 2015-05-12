@@ -72,17 +72,40 @@
 	)
 )
 
-; More bad chacking
-(define chk-full
+; A hacky rule that looks for the visible-face marker, and
+; sets the room-is-not-empty flag if a face is visible.
+(define chk-room-non-empty
 	(BindLink
 		(VariableNode "$face-id")
-	)
-	(ImplicationLink
-		(EvaluationLink
-			(PredicateNode "visible face")
-			(ListLink (VariableNode "$face-id"))
+		(ImplicationLink
+			(EvaluationLink
+				(PredicateNode "visible face")
+				(ListLink
+					(VariableNode "$face-id")
+				)
+			)
+			; Change the status of the room to "non-empty"
+			(AssignLink (TypeNode "ListLink") room-state room-nonempty)
 		)
-		(ListLink room-state room-empty)
+	)
+)
+
+; A hack rule that inverts the above.
+(define chk-room-empty
+	(BindLink
+		(VariableNode "$face-id")
+		(ImplicationLink
+			(AbsentLink
+				(EvaluationLink
+					(PredicateNode "visible face")
+					(ListLink
+						(VariableNode "$face-id")
+					)
+				)
+			)
+			; Change the status of the room to "empty"
+			(AssignLink (TypeNode "ListLink") room-state room-empty)
+		)
 	)
 )
 
