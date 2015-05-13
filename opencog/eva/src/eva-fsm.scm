@@ -6,6 +6,9 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
+(add-to-load-path "/usr/local/share/opencog/scm")
+(load-from-path "utilities.scm")
+
 (define eva-trans (ConceptNode "Eva Transition Rule"))
 
 ; What emotional state is eva currently displaying?
@@ -28,11 +31,14 @@
 ;; if room empty and someone entered -> room non-empty
 ;; if eva-bored and someone entered -> eva surprised
 
+(define (ola) (display "ola\n"))
+(define (bye) (display "bye\n"))
+
 (ContextLink
 	(AndLink eva-bored room-nonempty)
 	(ListLink eva-trans eva-surprised)
 	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: (display \"ola\")")
+		(GroundedSchemaNode "scm: ola")
 		(ListLink)
 	)
 )
@@ -41,45 +47,46 @@
 	(AndLink eva-surprised room-empty)
 	(ListLink eva-trans eva-bored)
 	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: (display \"bye\")")
+		(GroundedSchemaNode "scm: bye")
 		(ListLink)
 	)
 )
 
 ;; Hack job
 (define wtf
-	(define var-eva-state (VariableNode "$eva-state"))
-	(define var-eva-next-state (VariableNode "$eva-next-state"))
-	(define var-room-state (VariableNode "$eva-room-state"))
-	(define var-action (VariableNode "$eva-action"))
-	(BindLink
-		(VariableList
-			var-eva-state var-eva-next-state var-room-state
-		)
-		(ImplicationLink
-			(AndLink
-				;; If Eva is in the current state ...
-				(ListLink eva-state var-eva-state)
+	(let ((var-eva-state (VariableNode "$eva-state"))
+			(var-eva-next-state (VariableNode "$eva-next-state"))
+			(var-room-state (VariableNode "$eva-room-state"))
+			(var-action (VariableNode "$eva-action")))
+		(BindLink
+			(VariableList
+				var-eva-state var-eva-next-state var-room-state var-action
+			)
+			(ImplicationLink
+				(AndLink
+					;; If Eva is in the current state ...
+					(ListLink eva-state var-eva-state)
 
-				;; ...and the room is in state ...
-				(ListLink room-state var-room-state)
+					;; ...and the room is in state ...
+					(ListLink room-state var-room-state)
 
-				;; ... and there is a transition ...
-				(ContextLink
-					(AndLink var-eva-state var-room-state)
-					(ListLink eva-trans var-eva-next-state)
+					;; ... and there is a transition ...
+					(ContextLink
+						(AndLink var-eva-state var-room-state)
+						(ListLink eva-trans var-eva-next-state)
+						var-action
+					)
+				)
+				(AndLink
+					;; ... Then, leave the current state ...
+					(DeleteLink (ListLink eva-state var-eva-state))
+
+					;; ... And transition to the new state ...
+					(ListLink eva-state var-eva-next-state)
+
+					;; and perform teh action
 					var-action
 				)
-			)
-			(AndLink
-				;; ... Then, leave the current state ...
-				(DeleteLink (ListLink eva-state var-eva-state))
-
-				;; ... And transition to the new state ...
-				(ListLink eva-state var-eva-next-state)
-
-				;; and perform teh action
-				var-action
 			)
 		)
 	)
@@ -126,6 +133,13 @@
 (define (show-room-state)
 	(car (cog-chase-link 'ListLink 'ConceptNode room-state)))
 
-;;; Create "my-fsm"
-;; (define my-fsm (create-fsm my-trans my-state))
+(cog-bind chk-room-empty)
+(cog-bind chk-room-non-empty)
+(show-room-state)
 
+(cog-incoming-set (PredicateNode "visible face"))
+
+
+(cog-bind wtf)
+
+;; ----
