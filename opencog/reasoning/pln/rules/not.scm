@@ -30,11 +30,11 @@
 		nA
 		(pln-formula-not-side-effect-free A))))
 
-(define (negate x)
+(define (negate-strength x)
   (- 1 x))
 
 (define (pln-formula-not-side-effect-free A)
   (let ((sA (cog-stv-strength A))
         (cA (cog-stv-confidence A)))
-    (stv (negate sA) cA)))
+    (stv (negate-strength sA) cA)))
 
