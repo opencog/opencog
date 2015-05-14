@@ -1,6 +1,6 @@
 (define SP
 	(BindLink
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$a-parse")
 				(TypeNode "ParseNode")

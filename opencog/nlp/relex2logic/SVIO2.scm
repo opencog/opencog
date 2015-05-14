@@ -1,6 +1,6 @@
 (define SVIO2
 	(BindLink
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$a-parse")
 				(TypeNode "ParseNode")
