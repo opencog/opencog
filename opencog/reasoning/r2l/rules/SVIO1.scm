@@ -63,7 +63,7 @@
 				)
 			)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-svio1-rule")
+			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
 				(VariableNode "$subj")
 				(VariableNode "$verb")

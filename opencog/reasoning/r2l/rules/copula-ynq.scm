@@ -1,6 +1,6 @@
-(define SVIO1
+(define copula-ynq
 	(BindLink
-		(ListLink
+		(VariableList
 			(TypedVariableLink
 				(VariableNode "$a-parse")
 				(TypeNode "ParseNode")
@@ -17,10 +17,6 @@
 				(VariableNode "$obj")
 				(TypeNode "WordInstanceNode")
 			)
-			(TypedVariableLink
-				(VariableNode "$iobj")
-				(TypeNode "WordInstanceNode")
-			)
 		)
 		(ImplicationLink
 			(AndLink
@@ -28,16 +24,8 @@
 					(VariableNode "$subj")
 					(VariableNode "$a-parse")
 				)
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
 				(WordInstanceLink
 					(VariableNode "$obj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$iobj")
 					(VariableNode "$a-parse")
 				)
 				(EvaluationLink
@@ -52,41 +40,37 @@
 					(ListLink
 						(VariableNode "$verb")
 						(VariableNode "$obj")
- 					)
+					)
 				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_iobj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$iobj")
- 					)
+				(LemmaLink
+					(VariableNode "$verb")
+					(WordNode "be")
+				)				
+				(InheritanceLink
+					(VariableNode "$verb")
+					(DefinedLinguisticConceptNode "truth-query")
 				)
 			)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-svio1-rule")
+			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
 				(VariableNode "$subj")
-				(VariableNode "$verb")
 				(VariableNode "$obj")
-				(VariableNode "$iobj")
 			)
 		)
 	)
 ))
 
 
-(InheritanceLink (stv 1 .99) (ConceptNode "SVIO1-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "SVIO1-Rule") SVIO1)
+(ReferenceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") copula-ynq)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-svio-rule subj verb obj iobj)
-	(SVIO-rule (word-inst-get-word-str subj) (cog-name subj)
-		(word-inst-get-word-str verb) (cog-name verb)
+(define (pre-copula-ynq-rule subj obj)
+	(cop-ynQ-rule (word-inst-get-word-str subj) (cog-name subj)
 		(word-inst-get-word-str obj) (cog-name obj)
-		(word-inst-get-word-str iobj) (cog-name iobj)
-
 	)
 )
 

@@ -902,7 +902,8 @@
 			(InheritanceLink (VariableNode var_name) (ConceptNode obj_instance df-node-stv) df-link-stv)
 			(SatisfyingSetLink df-link-stv
 				(VariableNode var_name) 	
-				(EvaluationLink df-link-stv (PredicateNode verb_instance df-node-stv)
+				(EvaluationLink df-link-stv 
+					(PredicateNode verb_instance df-node-stv)
 					(ListLink df-link-stv
 						(ConceptNode subj_instance df-node-stv)
 						(VariableNode var_name df-node-stv)
@@ -920,7 +921,7 @@
 		(list
 			(ImplicationLink (PredicateNode verb_instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
 			(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
-			(ImplicationLink (PredicateNode obj_instance df-node-stv) (PredicateNode obj_concept df-node-stv) df-link-stv)
+			(InheritanceLink (ConceptNode obj_instance df-node-stv) (ConceptNode obj_concept df-node-stv) df-link-stv)
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance df-node-stv) df-link-stv)
 			(SatisfyingSetLink df-link-stv
 				(VariableNode var_name)
@@ -968,12 +969,11 @@
 			(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)	
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance df-node-stv)  df-link-stv)
 			(SatisfyingSetLink df-link-stv
-				(LambdaLink ;; not yet supported
-					(VariableNode var_name)
-					(EvaluationLink df-link-stv
-						(PredicateNode pred_instance df-node-stv)
-						(ListLink df-link-stv
-							(VariableNode var_name df-node-stv))
+				(VariableNode var_name)
+				(EvaluationLink df-link-stv
+					(PredicateNode pred_instance df-node-stv)
+					(ListLink df-link-stv
+						(VariableNode var_name df-node-stv)
 					)
 				)
 			)
@@ -1115,7 +1115,15 @@
 
 ;-----------------------------------------------------------------------
 ; complement clauses
+;
+; This rule sets gains efficiency by breaking the analysis into two parts; the construction of the complement clause,
+; e.g. a that-clause, which-clause, as-clause, so-clause, when-clause, etc. And the construction of the 
+; matrix-verb + complementizer, e.g. "believe that," "he felt as if . . . " etc.
+;
 ;-----------------------------------------------------------------------
+
+; This is the rule that constructs all complements -- it makes the verb or other prpedicate of the sub-ordinate cluase
+; into an argument of the complementizer (that, when etc.)
 (define (complement-rule comp_concept comp_instance pred_concept pred_instance)
 	(list 
 		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
@@ -1129,7 +1137,8 @@
 	)
 )
 
-(define (compmod-rule comp_concept comp_instance pred_concept pred_instance)
+; This rule is for complements that tell you the manner of the matrix verb, e.g.:
+(define (compmod-rule pred_concept pred_instance comp_concept comp_instance)
 	(list 
 		(ImplicationLink (PredicateNode comp_instance df-node-stv) (PredicateNode comp_concept df-node-stv) df-link-stv)
 		(ImplicationLink (PredicateNode pred_instance df-node-stv) (PredicateNode pred_concept df-node-stv) df-link-stv)

@@ -1,7 +1,4 @@
-; The focus set (the implicant) is equivalent to input-template of pln and
-; criterium for r2l rules. The implicand is equivalent to the output-template
-; of pln and the rule-functions of r2l.
-(define svo
+(define whichobjQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -9,83 +6,84 @@
                 (TypeNode "ParseNode")
             )
             (TypedVariableLink
-                (VariableNode "$X")
+                (VariableNode "$subj")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$Y")
+                (VariableNode "$verb")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$Z")
+                (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$W")
+                (VariableNode "$qVar")
                 (TypeNode "WordInstanceNode")
             )		
         )
         (ImplicationLink
             (AndLink
                 (WordInstanceLink
-                    (VariableNode "$X")
+                    (VariableNode "$subj")
                     (VariableNode "$a-parse")
                 )
                 (WordInstanceLink
-                    (VariableNode "$Y")
+                    (VariableNode "$verb")
                     (VariableNode "$a-parse")
                 )
                 (WordInstanceLink
-                    (VariableNode "$Z")
+                    (VariableNode "$obj")
                     (VariableNode "$a-parse")
                 )
                 (EvaluationLink
                     (DefinedLinguisticRelationshipNode "_subj")
                     (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$X")
+                        (VariableNode "$verb")
+                        (VariableNode "$subj")
                     )
                 )
                 (EvaluationLink
                     (DefinedLinguisticRelationshipNode "_obj")
                     (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$Z")
+                        (VariableNode "$verb")
+                        (VariableNode "$obj")
                     )
                 )
-		(AbsentLink
-			
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_iobj")
-					(ListLink
-					(VariableNode "$Y")
-					(VariableNode "$W")
-				)
+		(EvaluationLink
+   			(DefinedLinguisticRelationshipNode "_det")
+  			 (ListLink
+     				(VariableNode "$obj")
+      				(VariableNode "$qVar")
 			)
+		)
+		(InheritanceLink
+			(VariableNode "$qVar")
+			(DefinedLinguisticConceptNode "which")
 		)
             )
             (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-svo-rule")
+           	   (GroundedSchemaNode "scm: pre-whichobjQ-rule")
            	      (ListLink
-           	         (VariableNode "$X")
-           	         (VariableNode "$Y")
-           	         (VariableNode "$Z")
+           	         (VariableNode "$subj")
+           	         (VariableNode "$verb")
+           	         (VariableNode "$obj")
                 )
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichobjQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichobjQ-Rule") whichobjQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-svo-rule subj verb obj)
-    (SVO-rule (word-inst-get-word-str subj) (cog-name subj)
+(define (pre-whichobjQ-rule subj verb obj)
+    (whichobjQ-rule (word-inst-get-word-str obj) (cog-name obj)
               (word-inst-get-word-str verb) (cog-name verb)
-              (word-inst-get-word-str obj) (cog-name obj)
+              (word-inst-get-word-str subj) (cog-name subj)
     )
 )
 
