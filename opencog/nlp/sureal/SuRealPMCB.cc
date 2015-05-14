@@ -39,8 +39,12 @@ using namespace opencog;
  * @param pAS    the corresponding AtomSpace
  * @param vars   the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars)
-    : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(SchemeEval::get_evaluator(pAS))
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
+    InitiateSearchCB(pAS),
+    DefaultPatternMatchCB(pAS),
+    m_as(pAS),
+    m_vars(vars),
+    m_eval(SchemeEval::get_evaluator(pAS))
 {
 
 }
@@ -78,15 +82,15 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
         return true;
 
-    std::string sPat = _as->getName(hPat);
+    std::string sPat = m_as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
-    std::string sSoln = _as->getName(hSoln);
+    std::string sSoln = m_as->getName(hSoln);
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = _as->getHandle(WORD_NODE, sPatWord);
+    Handle hPatWordNode = m_as->getHandle(WORD_NODE, sPatWord);
 
     // get the corresponding WordInstanceNode for hSoln
-    Handle hSolnWordInst = _as->getHandle(WORD_INSTANCE_NODE, sSoln);
+    Handle hSolnWordInst = m_as->getHandle(WORD_INSTANCE_NODE, sSoln);
 
     // no WordInstanceNode? reject!
     if (hSolnWordInst == Handle::UNDEFINED)
@@ -94,14 +98,14 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 
     // get the source connectors for the solution
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
-    HandleSeq qTargetConns = _as->getOutgoing(m_eval->eval_h(scmCode));
+    HandleSeq qTargetConns = m_as->getOutgoing(m_eval->eval_h(scmCode));
 
     HandleSeq qOr = getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
 
     auto insertHelper = [&](const Handle& h)
     {
-        HandleSeq q = _as->getOutgoing(h);
+        HandleSeq q = m_as->getOutgoing(h);
         qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
     };
 
@@ -118,7 +122,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         // check if hDisjunct is LgAnd or just a lone connector
         if (hDisjunct->getType() == LG_AND)
         {
-            HandleSeq q = _as->getOutgoing(hDisjunct);
+            HandleSeq q = m_as->getOutgoing(hDisjunct);
             sourceConns = std::list<Handle>(q.begin(), q.end());
         }
         else
@@ -159,7 +163,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
             }
 
             // dumb hacky way of checking of the connector is a multi-connector
-            if (_as->getOutgoing(sourceConns.front()).size() == 3)
+            if (m_as->getOutgoing(sourceConns.front()).size() == 3)
                 hMultiConn = sourceConns.front();
 
             sourceConns.pop_front();
@@ -194,7 +198,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
 {
     logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
 
-    HandleSeq qISet = _as->getIncoming(grnd_link_h);
+    HandleSeq qISet = m_as->getIncoming(grnd_link_h);
 
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -228,7 +232,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // helper to get the InterpretationNode
     auto getInterpretation = [this](const Handle& h)
     {
-        HandleSeq qISet = _as->getIncoming(h);
+        HandleSeq qISet = m_as->getIncoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
         HandleSeq results;
@@ -315,32 +319,38 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
-                                const Variables& vars,
-                                const Pattern& pat)
+bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
     _search_fail = false;
-    if (not vars.varset.empty())
+    if (not _variables->varset.empty())
     {
-        bool found = neighbor_search(pPME, vars, pat);
+        bool found = neighbor_search(pPME);
         if (not _search_fail) return found;
     }
 
-    // Reaching here means no contants, so do some search space reduction here
-    Handle bestClause = pat.mandatory[0];
+    // Reaching here means no constants, so do some search space
+    // reduction here
+    Handle bestClause = _pattern->mandatory[0];
 
-    logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
+    logger().debug("[SuReal] Start pred is: %s",
+                   bestClause->toShortString().c_str());
 
     // helper for checking for InterpretationNode
     auto hasNoInterpretation = [this](Handle& h)
     {
-        HandleSeq qISet = _as->getIncoming(h);
-        qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& hl) { return hl->getType() != SET_LINK; }), qISet.end());
+        HandleSeq qISet = m_as->getIncoming(h);
+        qISet.erase(
+            std::remove_if(
+                qISet.begin(),
+                qISet.end(),
+                [](Handle& hl) { return hl->getType() != SET_LINK; }),
+            qISet.end());
 
         auto hasNode = [this](Handle& hl)
         {
             HandleSeq qN = getNeighbors(hl, true, false, REFERENCE_LINK, false);
-            return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+            return std::any_of(qN.begin(), qN.end(),
+                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };
 
         return not std::any_of(qISet.begin(), qISet.end(), hasNode);
@@ -348,7 +358,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
 
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
-    _as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
+    m_as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
     qCandidate.erase(std::remove_if(qCandidate.begin(), qCandidate.end(), hasNoInterpretation), qCandidate.end());
 
     for (auto& c : qCandidate)
@@ -367,16 +377,17 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME,
  * Override find_starter so that it will not treat VariableNode variables,
  * but instead compare against the variable list.
  *
- * @param h       same as DefaultPatternMatchCB::find_starter
- * @param depth   same as DefaultPatternMatchCB::find_starter
- * @param start   same as DefaultPatternMatchCB::find_starter
- * @param width   same as DefaultPatternMatchCB::find_starter
- * @return        same as DefaultPatternMatchCB::find_starter but change
+ * @param h       same as InitiateSearchCB::find_starter
+ * @param depth   same as InitiateSearchCB::find_starter
+ * @param start   same as InitiateSearchCB::find_starter
+ * @param width   same as InitiateSearchCB::find_starter
+ * @return        same as InitiateSearchCB::find_starter but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth, Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth,
+                                Handle& start, size_t& width)
 {
-    Handle rh = DefaultPatternMatchCB::find_starter(h, depth, start, width);
+    Handle rh = InitiateSearchCB::find_starter(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)
@@ -384,4 +395,3 @@ Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth, Handle& start, s
 
     return rh;
 }
-
