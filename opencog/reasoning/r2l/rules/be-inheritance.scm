@@ -1,6 +1,6 @@
 (define be-inheritance
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$a-parse")
                 (TypeNode "ParseNode")
