@@ -364,7 +364,18 @@
                 (if (string=? "END." line)  ; continuing the tradition of RelEx
                     (break)
                     (begin
-                        (nlp-parse line)
+                        (catch #t
+                            (lambda ()
+                                (nlp-parse line)
+                            )
+                            (lambda (key . parameters)
+                                (begin
+                                    (display "*** Unable to parse: \"")
+                                    (display line)
+                                    (display "\"\n")
+                                )
+                            )
+                        )
                         (set! line (get-line port))
                     )
                 )

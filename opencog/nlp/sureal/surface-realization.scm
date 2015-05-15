@@ -36,7 +36,7 @@
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-            (create-sentence a-set-link)
+            (delete-duplicates (create-sentence a-set-link))
             (get-sentence interpretations)
             )
         )
