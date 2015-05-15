@@ -108,11 +108,7 @@
 ; Same as above. Return the scheme list of querying result given
 ; BindLink (using cog-bind-crisp),  return an empty list if fails
 (define (query_atom_space_crisp bind_link)
-<<<<<<< HEAD
-    (let* ( (query_rusult_list_link (cog-bind bind_link) )
-=======
-    (let* ( (query_result_list_link (cog-bind-crisp bind_link) )
->>>>>>> Rename rusult -> result in variable name
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
           (unpack_query_result query_result_list_link)
