@@ -516,7 +516,8 @@ bool CogServer::loadModule(const std::string& filename)
     dlerror();
 
     // search for id function
-    Module::IdFunction* id_func = (Module::IdFunction*) dlsym(dynLibrary, Module::id_function_name());
+    Module::IdFunction* id_func =
+	    (Module::IdFunction*) dlsym(dynLibrary, Module::id_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_id\": %s (module %s)", dlsymError, filename.c_str());
@@ -531,14 +532,16 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // search for 'load' & 'unload' symbols
-    Module::LoadFunction* load_func = (Module::LoadFunction*) dlsym(dynLibrary, Module::load_function_name());
+    Module::LoadFunction* load_func =
+	    (Module::LoadFunction*) dlsym(dynLibrary, Module::load_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_load\": %s", dlsymError);
         return false;
     }
 
-    Module::UnloadFunction* unload_func = (Module::UnloadFunction*) dlsym(dynLibrary, Module::unload_function_name());
+    Module::UnloadFunction* unload_func =
+	    (Module::UnloadFunction*) dlsym(dynLibrary, Module::unload_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_unload\": %s", dlsymError);

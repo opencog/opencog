@@ -62,8 +62,9 @@ using namespace opencog; /// @todo make it under the namespace opencog
 #define IS_HOLDING_PREDICATE_NAME "isHolding"
 #define IS_HOLDING_SOMETHING_PREDICATE_NAME "isHoldingSomething"
 
-// Initialize static variables that stores the LatestLinks for each type of information.
-// We cache these LatestLinks to accelerate updating.
+// Initialize static variables that stores the LatestLinks for each
+// type of information.  We cache these LatestLinks to accelerate
+// updating.
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAgentActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPhysiologicalFeeling;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarSayActionDone;
@@ -76,7 +77,8 @@ AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestFeelings;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestStimulus;
 
 const double AtomSpaceUtil::highLongTermImportance = 0.7;
-std::map<Handle, AtomSpaceUtil::HandleToHandleMap > AtomSpaceUtil::latestSpatialPredicate;
+std::map<Handle,
+         AtomSpaceUtil::HandleToHandleMap> AtomSpaceUtil::latestSpatialPredicate;
 std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
 boost::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;
 Handle AtomSpaceUtil::latestIsExemplarAvatar = Handle::UNDEFINED;

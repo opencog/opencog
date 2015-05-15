@@ -85,11 +85,11 @@
 
 ; Return the scheme list of querying result given the ListLink containing it, 
 ; this function will delete the ListLink once return
-(define (unpack_query_result query_rusult_list_link)
-    (let* ( (query_result_list (cog-outgoing-set query_rusult_list_link) )
+(define (unpack_query_result query_result_list_link)
+    (let* ( (query_result_list (cog-outgoing-set query_result_list_link) )
           )
 
-          (cog-delete query_rusult_list_link) 
+          (cog-delete query_result_list_link)
 
           query_result_list 
     ) 
@@ -98,20 +98,20 @@
 ; Return the scheme list of querying result given BindLink (using cog-bind), 
 ; return an empty list if fails
 (define (query_atom_space bind_link)
-    (let* ( (query_rusult_list_link (cog-bind bind_link) )
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
 ; Same as above. Return the scheme list of querying result given
 ; BindLink (using cog-bind-crisp),  return an empty list if fails
 (define (query_atom_space_crisp bind_link)
-    (let* ( (query_rusult_list_link (cog-bind bind_link) )
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
@@ -974,3 +974,21 @@
     )
 )
 
+; Given a list of atoms l return the atom with the lowest TV strengh
+(define (atom_with_lowest_tv_mean l)
+  (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return the atom with the lowest TV strengh
+(define (atom_with_highest_tv_mean l)
+  (max-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return them sorted by TVs (ascending order)
+(define (sort_by_tv l)
+  (sort l (lambda (a1 a2) (>=  (get_truth_value_mean (cog-tv a1))
+                               (get_truth_value_mean (cog-tv a2))
+                               )
+                  )
+        )
+  )

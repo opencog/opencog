@@ -119,14 +119,16 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 #define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
-    if (fileExists(XSD_FILE_NAME))  {
+    if (fileExists(XSD_FILE_NAME)) {
         schemaLocation += XSD_NAMESPACE " " XSD_FILE_NAME;
     } else if (fileExists(PVP_XSD_FILE_PATH)) {
         schemaLocation += XSD_NAMESPACE " " PVP_XSD_FILE_PATH;
     }
     if (schemaLocation.size() > 0) {
-        logger().info("PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
-        // The line bellow replace the path for the XSD file so that it does not need to be in the current directory...
+        logger().info("PAI - Setting the schemaLocation to: %s\n",
+                      schemaLocation.c_str());
+        // The line bellow replace the path for the XSD file so that
+        // it does not need to be in the current directory...
         parser->setExternalSchemaLocation(schemaLocation.c_str());
     }
 #endif
@@ -691,10 +693,15 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     DOMNodeList * list;
 
-    // TODO: Check if there is a specific order of XML elements that should be followed
-    // For now, MapInfo is processed first since it's supposed to inform SL object types.
-    // And Instructions are processed later so that all relevant perceptions
-    // are already processed when the owner asks for anything...
+    // TODO: Check if there is a specific order of XML elements that
+    // should be followed
+    //
+    // For now, MapInfo is processed first since it's supposed to
+    // inform SL object types.
+    //
+    // And Instructions are processed later so that all relevant
+    // perceptions are already processed when the owner asks for
+    // anything...
 
     // getting <map-info> elements from the XML message
     XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -709,10 +716,12 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
 #endif
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((DOMElement *)list->item(i), toUpdateHandles, useProtoBuf);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles,
+                       useProtoBuf);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d map-infos done", list->getLength());
+        logger().debug("PAI - Processing %d map-infos done",
+                       list->getLength());
 
 #ifdef HAVE_PROTOBUF
     // getting <terrain-info> elements from the XML message
@@ -723,7 +732,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
+        logger().debug("PAI - Processing %d terrain-infos done",
+                       list->getLength());
 #endif
 
     // getting <avatar-signal> elements from the XML message
@@ -734,7 +744,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAvatarSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d avatar-signals done", list->getLength());
+        logger().debug("PAI - Processing %d avatar-signals done",
+                       list->getLength());
 
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -744,7 +755,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAgentSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-signal done", list->getLength());
+        logger().debug("PAI - Processing %d agent-signal done",
+                       list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -754,17 +766,20 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processInstruction((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d instructions done", list->getLength());
+        logger().debug("PAI - Processing %d instructions done",
+                       list->getLength());
 
     // getting <agent-sensor-info> elements from the XML message
-    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
+        logger().debug("PAI - Processing %d agent-sensor-infos done",
+                       list->getLength());
 
     // getting <state-info> elements from the XML message
     XMLString::transcode(STATE_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1923,24 +1938,30 @@ void PAI::processInstruction(DOMElement * element)
                           );
         }
 
-        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent
-        // and dialog_system.scm will continue processing it.
-        scheme_return_value = evaluator->eval(parsedSentenceText);
+        // Put the newly parsed sentence into AtomSpace, then
+        // PsiActionSelectionAgent and dialog_system.scm will continue
+        // processing it.
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace",
-                           __FUNCTION__
-                          );
+            logger().error("PAI::%s - Failed to put the parsed result from"
+                           " RelexServer to AtomSpace", 
+                           __FUNCTION__);
         }
         delete evaluator;
     }
 #endif
 
     // Add the perceptions into AtomSpace
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
+    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE,
+                                                  ACTION_DONE_PREDICATE_NAME,
+                                                  true);
+    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace,
+                                                  GROUNDED_SCHEMA_NODE,
+                                                  SAY_SCHEMA_NAME, true);
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
     if (agentNode == Handle::UNDEFINED) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE,
+                                           internalAvatarId);
     }
 
     string sentence = "to:";
@@ -1949,7 +1970,8 @@ void PAI::processInstruction(DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-    Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
+    Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE,
+                                                 sentence.c_str());
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -2694,7 +2716,8 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
-void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
+void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
+                         bool useProtoBuf)
 {
     if (!useProtoBuf) {
         // Use the old parser to handle XML document.
@@ -2713,7 +2736,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         return;
     }
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
     bool isFirstPerceptWorld;
@@ -2740,8 +2764,9 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
-        logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
-
+        logger().debug("PAI - processMapInfo recieved mapinfos information: %s",
+                       mapinfoSeq.DebugString().c_str());
+        
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
@@ -3574,7 +3599,8 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
     XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
 
