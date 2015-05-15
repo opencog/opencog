@@ -21,6 +21,10 @@
 				(VariableNode "$iobj")
 				(TypeNode "WordInstanceNode")
 			)
+			(TypedVariableLink
+				(VariableNode "$to")
+				(TypeNode "WordInstanceNode")
+			)
 		)
 		(ImplicationLink
 			(AndLink
@@ -40,6 +44,14 @@
 					(VariableNode "$iobj")
 					(VariableNode "$a-parse")
 				)
+				(WordInstanceLink
+					(VariableNode "$to")
+					(VariableNode "$a-parse")
+				)
+				(LemmaLink
+					(VariableNode "$to")
+					(WordNode "to")
+				)
 				(EvaluationLink
 					(DefinedLinguisticRelationshipNode "_subj")
 					(ListLink
@@ -57,13 +69,13 @@
 				(EvaluationLink
 					(DefinedLinguisticRelationshipNode "_pobj")
 					(ListLink
-						(WordInstanceNode "to")
+						(VariableNode "$to")
 						(VariableNode "$iobj")
  					)
 				)
 			)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-svio2-rule")
+			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
 				(VariableNode "$subj")
 				(VariableNode "$verb")

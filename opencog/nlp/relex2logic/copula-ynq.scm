@@ -1,4 +1,4 @@
-(define TOBE
+(define copula-ynq
 	(BindLink
 		(VariableList
 			(TypedVariableLink
@@ -14,7 +14,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 			(TypedVariableLink
-				(VariableNode "$adj")
+				(VariableNode "$obj")
 				(TypeNode "WordInstanceNode")
 			)
 		)
@@ -24,20 +24,9 @@
 					(VariableNode "$subj")
 					(VariableNode "$a-parse")
 				)
- 				(WordInstanceLink
-					(VariableNode "$verb")
+				(WordInstanceLink
+					(VariableNode "$obj")
 					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
-					(VariableNode "$adj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_to-be")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$adj")
- 					)
 				)
 				(EvaluationLink
 					(DefinedLinguisticRelationshipNode "_subj")
@@ -46,28 +35,42 @@
 						(VariableNode "$subj")
  					)
 				)
+				(EvaluationLink
+					(DefinedLinguisticRelationshipNode "_obj")
+					(ListLink
+						(VariableNode "$verb")
+						(VariableNode "$obj")
+					)
+				)
+				(LemmaLink
+					(VariableNode "$verb")
+					(WordNode "be")
+				)				
+				(InheritanceLink
+					(VariableNode "$verb")
+					(DefinedLinguisticConceptNode "truth-query")
+				)
 			)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-tobe-rule")
+			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
-				(VariableNode "$verb")
-				(VariableNode "$adj")
 				(VariableNode "$subj")
+				(VariableNode "$obj")
 			)
 		)
 	)
 ))
 
-(InheritanceLink (stv 1 .99) (ConceptNode "TOBE-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "TOBE-Rule") SP)
+(InheritanceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") (ConceptNode "Rule"))
+
+(ReferenceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") copula-ynq)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-tobe-rule verb adj subj)
-	(to-be-rule (word-inst-get-word-str verb) (cog-name verb)
-		(word-inst-get-word-str adj) (cog-name adj)
-		(word-inst-get-word-str subj) (cog-name subj)
+(define (pre-copula-ynq-rule subj obj)
+	(cop-ynQ-rule (word-inst-get-word-str subj) (cog-name subj)
+		(word-inst-get-word-str obj) (cog-name obj)
 	)
 )
 
