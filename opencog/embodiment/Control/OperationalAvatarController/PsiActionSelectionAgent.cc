@@ -129,7 +129,7 @@ void PsiActionSelectionAgent::getActions(Handle hStep, HandleSeq & actions)
     }
     else if (atomType == OR_LINK ) {
         const HandleSeq & outgoings = atomspace.getOutgoing(hStep);
-        Handle hRandomSelected = select_rand_element(outgoings);
+        Handle hRandomSelected = rand_element(outgoings);
         this->getActions(hRandomSelected, actions);
     }
 }
