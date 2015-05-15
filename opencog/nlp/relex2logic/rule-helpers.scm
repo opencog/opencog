@@ -330,7 +330,7 @@
 				(list
 					(InheritanceLink (ConceptNode subj_instance df-node-stv) (ConceptNode subj_concept df-node-stv) df-link-stv)
 					(EvaluationLink df-link-stv
-						(PredicateNode var_name df-node-stv)
+						(VariableNode var_name df-node-stv)
 						(ListLink df-link-stv
 							(ConceptNode subj_instance df-node-stv)
 						)
@@ -427,9 +427,21 @@
 )
 
 (define (advmod-rule verb instance adv adv_instance)
-	(list (InheritanceLink  (ConceptNode adv_instance df-node-stv) (ConceptNode adv df-node-stv) df-link-stv)
-	(ImplicationLink  (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
-	(InheritanceLink  (SatisfyingSetLink (PredicateNode instance df-node-stv) df-link-stv) (ConceptNode adv_instance df-node-stv) df-link-stv)
+	(cond ((string=? verb "_$qVar")
+			(let ((var_name (choose-var-name)))
+				(list
+					(InheritanceLink  (ConceptNode adv_instance df-node-stv) (ConceptNode adv df-node-stv) df-link-stv)
+					(ImplicationLink  (PredicateNode instance df-node-stv) (VariableNode var_name df-node-stv) df-link-stv)
+					(InheritanceLink  (SatisfyingSetLink (PredicateNode instance df-node-stv) df-link-stv) (ConceptNode adv_instance df-node-stv) df-link-stv)
+				)
+			)
+		)
+		(else 
+			(list (InheritanceLink  (ConceptNode adv_instance df-node-stv) (ConceptNode adv df-node-stv) df-link-stv)
+			(ImplicationLink  (PredicateNode instance df-node-stv) (PredicateNode verb df-node-stv) df-link-stv)
+			(InheritanceLink  (SatisfyingSetLink (PredicateNode instance df-node-stv) df-link-stv) (ConceptNode adv_instance df-node-stv) df-link-stv)
+			)
+		)
 	)
 )
 ;-----------------------------------------------------------------------
@@ -565,7 +577,7 @@
 ; -----------------------------------------------------------------------
 ; misc rules
 ; -----------------------------------------------------------------------
-(define (number-rule noun noun_instance num num_instance)
+(define (quantity-rule noun noun_instance num num_instance)
 	(define noun_ins_concept (ConceptNode noun_instance df-node-stv))
 	(list (InheritanceLink noun_ins_concept (ConceptNode noun df-node-stv) df-link-stv)
 	(InheritanceLink (NumberNode num_instance df-node-stv) (NumberNode num df-node-stv) df-link-stv)
