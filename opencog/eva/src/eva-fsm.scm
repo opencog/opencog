@@ -133,6 +133,7 @@
 (define (show-room-state)
 	(car (cog-chase-link 'ListLink 'ConceptNode room-state)))
 
+#|
 (cog-bind chk-room-empty)
 (cog-bind chk-room-non-empty)
 (show-room-state)
@@ -141,5 +142,7 @@
 
 
 (cog-bind wtf)
+
+|#
 
 ;; ----

@@ -10,6 +10,7 @@ Yes
 
 Maybe
 -----
+* statecharts.org (Yakindu)
 * Snap!
   -- Pluses: web-based, AGPL
   -- Minuses: too focused on programming theory
