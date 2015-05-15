@@ -3,4 +3,4 @@
 ;
 (define-module (opencog cogserver))
 
-(load-extension "libcog-server" "opencog_cogserver_init")
+(load-extension "libguile-cogserver" "opencog_cogserver_init")

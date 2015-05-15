@@ -60,15 +60,17 @@ ENDIF (ODBC_FOUND)
 # ------------------------------------------------------------
 # This defines the guile scheme loadable module
 
-ADD_LIBRARY (cog-server SHARED
+ADD_LIBRARY (guile-cogserver SHARED
 	CogServerSCM
 )
 
-TARGET_LINK_LIBRARIES(cog-server
+TARGET_LINK_LIBRARIES(guile-cogserver
 	server
 	${Boost_SYSTEM_LIBRARY}
 	${GUILE_LIBRARIES}
 )
+
+INSTALL (TARGETS guile-cogserver DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 # ------------------------------------------------------------
 

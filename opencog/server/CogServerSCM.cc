@@ -21,10 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// The header file bits.
+
 #ifndef _OPENCOG_COGSERVER_SCM_H
 #define _OPENCOG_COGSERVER_SCM_H
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/CogServer.h>
 
 namespace opencog
 {
@@ -40,7 +43,7 @@ private:
     void start_server(void);
     void stop_server(void);
 
-
+    CogServer* srvr = NULL;
 public:
     CogServerSCM();
 };
@@ -57,7 +60,17 @@ void opencog_cogserver_init(void);
 
 #include <opencog/guile/SchemePrimitive.h>
 
-#include "CogServer.h"
+/**
+ * Implement a dynamically-loadable cogserver guile module.
+ * This is mostly to allow a networked, agent-based system to run.
+ *
+ * This is a bare-bones implementation. Things like the server
+ * port number, and maybe even the server atomspace, should be
+ * configurable from guile, instead of the conf file.
+ *
+ * If/when python agents are supplanted by something newer, then
+ * maybe this goes away.
+ */
 
 using namespace opencog;
 
@@ -83,7 +96,7 @@ void CogServerSCM::init_in_module(void* data)
 }
 
 /**
- * The main init function for the SuRealSCM object.
+ * The main init function for the CogServerSCM object.
  */
 void CogServerSCM::init()
 {
@@ -95,9 +108,28 @@ void opencog_cogserver_init(void)
     static CogServerSCM cogserver;
 }
 
+// --------------------------------------------------------------
+
 // void CogServerSCM::start_server(AtomSpace* as)
 void CogServerSCM::start_server(void)
 {
+    // singleton instance
+    if (srvr) return;
+
+    srvr = &cogserver();
+
+    // Open database *before* loading modules, since the modules
+    // might create atoms, and we can't have that happen until
+    // storage is open, as otherwise, there will be handle conflicts.
+    srvr->openDatabase();
+
+    // Load modules specified in config
+    srvr->loadModules();
+    srvr->loadSCMModules();
+
+    // Enable the network server and run the server's main loop
+    srvr->enableNetworkServer();
+    srvr->serverLoop();
 }
 
 void CogServerSCM::stop_server(void)
