@@ -175,8 +175,8 @@ public:
         SchemeEval evaluator(&atomSpace);
         std::string scheme_expression, scheme_return_value;
 
-        std::cout << "AtomSpace before planning" << std::endl;
-        atomSpace.print();
+        std::cout << "AtomSpace before planning" << std::endl
+                  << atomSpace;
 
         scheme_expression = "( do_planning )";
 
@@ -196,8 +196,8 @@ public:
 	        std::cout << "I caught it!!!" << std::endl;
         }
 
-        std::cout << "AtomSpace after planning" << std::endl;
-        atomSpace.print();
+        std::cout << "AtomSpace after planning" << std::endl
+                  << atomSpace;
 
         // give it an agent first.
         //oac.
