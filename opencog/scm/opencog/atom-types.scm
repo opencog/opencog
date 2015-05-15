@@ -8,7 +8,7 @@
 ; (define-module (opencog atomtypes spacetime-types))
 ; and so on, but I don't see the point of that, at the moment...
 
-(load-from-path "nlp_types.scm")
-(load-from-path "spacetime_types.scm")
-(load-from-path "attention_types.scm")
-(load-from-path "embodiment_types.scm")
+(load-from-path "nlp/types/nlp_types.scm")
+(load-from-path "spacetime/spacetime_types.scm")
+(load-from-path "dynamics/attention/attention_types.scm")
+(load-from-path "embodiment/embodiment_types.scm")
