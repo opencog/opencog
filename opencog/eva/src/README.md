@@ -12,9 +12,19 @@ This is a pre-prototype.  But still:
 Running
 =======
 
-* `echo -e "py\n" | cat - atomic.py |netcat localhost 17001`
-* `cat eva-fsm.scm |netcat localhost 17001`
-
+* Start guile, then from th guile prompt:
+```
+(use-modules (opencog cogserver))
+(start-cogserver)
+```
+Then load the python code:
+```
+echo -e "py\n" | cat - atomic.py |netcat localhost 17001
+```
+Then back at the guile prompt:
+```
+(load-from-path "eva-fsm.scm")
+```
 
 
 Debugging notes

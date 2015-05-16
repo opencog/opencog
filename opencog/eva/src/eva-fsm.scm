@@ -84,7 +84,7 @@
 					;; ... And transition to the new state ...
 					(ListLink eva-state var-eva-next-state)
 
-					;; and perform teh action
+					;; and perform the action
 					var-action
 				)
 			)
