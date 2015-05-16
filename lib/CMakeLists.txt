@@ -10,6 +10,6 @@ ADD_SUBDIRECTORY (json_spirit)
 # Place a default config file in a default location
 # CONFDIR normally expands to /usr/local/etc/
 INSTALL (FILES
-	opencog.conf
+	cogserver.conf
 	DESTINATION "${CONFDIR}"
 )
