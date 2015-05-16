@@ -57,6 +57,24 @@ IF (ODBC_FOUND)
 	TARGET_LINK_LIBRARIES(server PersistModule)
 ENDIF (ODBC_FOUND)
 
+# ------------------------------------------------------------
+# This defines the guile scheme loadable module
+
+IF (HAVE_GUILE)
+	ADD_LIBRARY (guile-cogserver SHARED
+		CogServerSCM
+	)
+
+	TARGET_LINK_LIBRARIES(guile-cogserver
+		server
+		${Boost_SYSTEM_LIBRARY}
+		${GUILE_LIBRARIES}
+	)
+
+	INSTALL (TARGETS guile-cogserver DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (HAVE_GUILE)
+
+# ------------------------------------------------------------
 
 ADD_EXECUTABLE(cogserver
 	CogServerMain

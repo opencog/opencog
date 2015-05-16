@@ -68,6 +68,7 @@ ADD_LIBRARY (PersistModule SHARED
 )
 
 TARGET_LINK_LIBRARIES(PersistModule
+	server  # needed for definition of _ZTIN7opencog7RequestE
 	${ATOMSPACE_LIBRARIES}
 )
 
