@@ -133,6 +133,21 @@
 (define (show-room-state)
 	(car (cog-chase-link 'ListLink 'ConceptNode room-state)))
 
+
+; Quick hack to clear the room
+(define (make-room-nonempty)
+	(ListLink room-state (ConceptNode "room nonempty"))
+	(cog-delete (ListLink room-state (ConceptNode "room empty")))
+)
+
+; Quick hack to fill the room.
+(define (make-room-empty)
+	(ListLink room-state (ConceptNode "room empty"))
+	(cog-delete (ListLink room-state (ConceptNode "room nonempty")))
+)
+
+
+
 #|
 (cog-bind chk-room-empty)
 (cog-bind chk-room-non-empty)
@@ -142,6 +157,14 @@
 
 
 (cog-bind wtf)
+
+(define (hoy) (display "hoy hoy hoy wrape em up\n"))
+(define stuff
+	(EvaluationLink
+		(GroundedPredicateNode "py: do_look_left")
+		(ListLink)))
+(cog-evaluate! stuff)
+
 
 |#
 
