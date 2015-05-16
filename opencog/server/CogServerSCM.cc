@@ -105,6 +105,7 @@ void CogServerSCM::init_in_module(void* data)
 void CogServerSCM::init()
 {
     define_scheme_primitive("c-start-cogserver", &CogServerSCM::start_server, this, "cogserver");
+    define_scheme_primitive("stop-cogserver", &CogServerSCM::stop_server, this, "cogserver");
 }
 
 extern "C" {
@@ -148,4 +149,17 @@ void CogServerSCM::start_server(const std::string& cfg)
 
 void CogServerSCM::stop_server(void)
 {
+    // delete singleton instance
+    if (NULL == srvr) return;
+
+    // This is probably not thread-safe...
+    srvr->stop();
+    main_loop->join();
+
+    // I suspect this does not close the listen socket correctly.
+    // XXX this all needs to be fixed.
+    srvr->disableNetworkServer();
+    delete main_loop;
+    delete srvr;
+    srvr = NULL;
 }
