@@ -104,7 +104,7 @@ void CogServerSCM::init_in_module(void* data)
  */
 void CogServerSCM::init()
 {
-    define_scheme_primitive("start-cogserver", &CogServerSCM::start_server, this, "cogserver");
+    define_scheme_primitive("c-start-cogserver", &CogServerSCM::start_server, this, "cogserver");
 }
 
 extern "C" {
