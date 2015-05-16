@@ -1,5 +1,3 @@
-from _ast import Expr
-
 __author__ = 'DongMin Kim'
 
 import os.path; import sys
@@ -31,8 +29,8 @@ class ShellBlending:
         log.info("Start ShellBlending")
 
         self.call_experiment_functions()
-        print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
-        print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
+        # print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
+        # print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
 
         # Simulate cogserver environment.
         # Blending methods will be located in here.
@@ -40,9 +38,7 @@ class ShellBlending:
             break
 
         # DEBUG: To keep program in running while view my result of coding.
-        while 1:
-            while 1:
-                break
+        raw_input("Press enter to exit")
 
 
 # Log will be written to opencog.log in the current directory.
