@@ -26,6 +26,8 @@
 #ifndef _OPENCOG_COGSERVER_SCM_H
 #define _OPENCOG_COGSERVER_SCM_H
 
+#include <thread>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 
@@ -39,11 +41,12 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    // void start_server(AtomSpace* = NULL);
-    void start_server(void);
+    void start_server(const std::string&);
     void stop_server(void);
 
     CogServer* srvr = NULL;
+    std::thread * main_loop = NULL;
+
 public:
     CogServerSCM();
 };
@@ -58,6 +61,7 @@ void opencog_cogserver_init(void);
 
 // --------------------------------------------------------------
 
+#include <opencog/util/Config.h>
 #include <opencog/guile/SchemePrimitive.h>
 
 /**
@@ -100,21 +104,27 @@ void CogServerSCM::init_in_module(void* data)
  */
 void CogServerSCM::init()
 {
-    define_scheme_primitive("start-server", &CogServerSCM::start_server, this, "cogserver");
+    define_scheme_primitive("start-cogserver", &CogServerSCM::start_server, this, "cogserver");
 }
 
+extern "C" {
 void opencog_cogserver_init(void)
 {
     static CogServerSCM cogserver;
 }
+};
 
 // --------------------------------------------------------------
 
-// void CogServerSCM::start_server(AtomSpace* as)
-void CogServerSCM::start_server(void)
+void CogServerSCM::start_server(const std::string& cfg)
 {
     // singleton instance
     if (srvr) return;
+
+    if (0 < cfg.size())
+        config().load(cfg.c_str(), true);
+    else
+        config().load(NULL, true);
 
     srvr = &cogserver();
 
@@ -129,7 +139,7 @@ void CogServerSCM::start_server(void)
 
     // Enable the network server and run the server's main loop
     srvr->enableNetworkServer();
-    srvr->serverLoop();
+    main_loop = new std::thread(&CogServer::serverLoop, srvr);
 }
 
 void CogServerSCM::stop_server(void)
