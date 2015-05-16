@@ -1,7 +1,5 @@
 __author__ = 'DongMin Kim'
 
-import os.path; import sys
-
 # To avoid unresolved reference complain in PyCharm 4.0.6
 from opencog.atomspace import AtomSpace, types
 from opencog.utilities import initialize_opencog
