@@ -121,10 +121,14 @@ void CogServerSCM::start_server(const std::string& cfg)
     // singleton instance
     if (srvr) return;
 
+    // The default config file is installed from
+    // $SRCDIR/lib/cogserver.conf and is copied to
+    // /usr/local/etc/cogservedr.conf
+    // by default. Use it if we can; it has sane file paths in it.
     if (0 < cfg.size())
         config().load(cfg.c_str(), true);
     else
-        config().load(NULL, true);
+        config().load("cogserver.conf", true);
 
     srvr = &cogserver();
 
