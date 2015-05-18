@@ -3,7 +3,7 @@
 ;
 ; AND(Inheritance A C, Inheritance B C) entails Inheritance A B
 ;------------------------------------------------------------------------------
-(include "formulas.scm")
+(load-scm-from-file "formulas.scm")
 (define pln-rule-abduction
 	(BindLink
 		(VariableList
