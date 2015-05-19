@@ -20,7 +20,10 @@ class TestCaseMaker:
         # Dummy truth values.
         self.atom_tv = TruthValue(1, 1)
         self.link_tv = TruthValue(1, 1)
+
         # - Base Concepts
+        # Make temporary concept - To define which node is target to blend.
+        self.a_blend_target = ConceptNode("BlendTarget", self.atom_tv)
         # Make space & frame concept.
         self.a_space = ConceptNode("Space", self.atom_tv)
         self.a_frame = ConceptNode("Frame", self.atom_tv)

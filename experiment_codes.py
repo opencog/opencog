@@ -1,6 +1,6 @@
 __author__ = 'DongMin Kim'
 
-import os.path;
+import os.path
 import sys
 
 # To avoid unresolved reference complain in PyCharm 4.0.6

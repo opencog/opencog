@@ -20,24 +20,52 @@ class ShellBlending:
         self.experiment_codes_class = ExperimentCodes(self.a)
 
     def print_atomspace_for_debug(self):
-        # print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
-        # print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
-        return
+        print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
+        print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
 
     def get_atomspace_for_debug(self):
         return self.a
 
+    def _delete_blend_target_for_debug(self):
+        a_blend_target = \
+            self.a.get_atoms_by_name(types.Atom, "BlendTarget")[0]
+
+        l_link_list = self.a.get_incoming(a_blend_target.h)
+
+        for link in l_link_list:
+            self.a.remove(link)
+
+        self.a.remove(a_blend_target)
+
     def call_experiment_functions(self):
         self.experiment_codes_class.execute()
+
+    # Select atoms which are connected to specific atom.
+    def _get_incoming_dst_atom(self, atom, atom_type=types.Atom):
+        ret = []
+
+        l_link_list = self.a.get_incoming(atom.h)
+
+        for link in l_link_list:
+            if (link.out.__len__() > 0) and (link.out[0].t == atom_type):
+                ret.append(link.out[0])
+
+        return ret
 
     # Select atoms randomly and return
     # atom_type = decide the type of atoms to select
     # count = decide the number of atoms to select
-    def _get_random_atom(self, atom_type=types.Atom, count=2):
+    def _get_random_atom(self, count=2):
         ret = []
 
-        a_list = self.a.get_atoms_by_type(atom_type)
-        a_list_size = a_list.__len__()
+        # TODO: change to search all atomspace
+        # (BlendTarget is only useful in development phase)
+        a_blend_target = \
+            self.a.get_atoms_by_name(types.Atom, "BlendTarget")[0]
+
+        a_atom_list = \
+            self._get_incoming_dst_atom(a_blend_target, types.ConceptNode)
+        a_list_size = a_atom_list.__len__()
 
         if a_list_size < count:
             print('Size of atom list is too small')
@@ -46,7 +74,7 @@ class ShellBlending:
         a_index_list = random.sample(range(0, a_list_size), count)
 
         for i in a_index_list:
-            ret.append(a_list[i])
+            ret.append(a_atom_list[i])
 
         return ret
 
@@ -54,7 +82,7 @@ class ShellBlending:
         log.warn("Start RandomBlending")
 
         # Select nodes to blending.
-        a_nodes = self._get_random_atom(types.ConceptNode, 2)
+        a_nodes = self._get_random_atom(2)
 
         # Decide whether or not to execute blending and prepare.
         # - Do nothing.
@@ -87,13 +115,16 @@ class ShellBlending:
 
         self.call_experiment_functions()
 
+        # self.print_atomspace_for_debug()
         self._random_blending()
+
         # Simulate cogserver environment.
         # Blending methods will be located in here.
         while 1:
             break
 
         # DEBUG: To keep program in running while view my result of coding.
+        self._delete_blend_target_for_debug()
         raw_input("Press enter to exit\n")
 
 

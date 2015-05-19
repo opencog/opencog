@@ -3,8 +3,8 @@ __author__ = 'DongMin Kim'
 # To avoid unresolved reference complain in PyCharm 4.0.6
 from opencog.atomspace import AtomSpace, TruthValue, types
 from opencog.type_constructors \
-    import ConceptNode, TypeNode, VariableNode,\
-        UnorderedLink, MemberLink, InheritanceLink
+    import ConceptNode, TypeNode, VariableNode, \
+    UnorderedLink, MemberLink, InheritanceLink
 
 
 # Paul & Sally example in the book 'The Way We Think'
@@ -14,13 +14,19 @@ class PaulSallyExample:
         self.a = atomspace
         self.atom_list_for_debug = []
         self.link_list_for_debug = []
-
-    # space: part of whole knowledge(atoms) from database = atomspace
-    # frame: some principle to extract & make space
-    def _make_default_concept(self):
-        # Dummy truth values.
         self.atom_tv = TruthValue(0.9, 0.8)
         self.link_tv = TruthValue(0.7, 0.6)
+        self.a_blend_target = \
+            self.a.get_atoms_by_name(types.Atom, "BlendTarget")[0]
+
+    def _make_link_all(
+            self,
+            link_type,
+            src_node_list,
+            dst_node
+    ):
+        for node in src_node_list:
+            self.a.add_link(link_type, [node, dst_node])
 
     # - Input Space 0
     # Start to make 'Family' network.
@@ -38,19 +44,28 @@ class PaulSallyExample:
         a_son = ConceptNode("Son", self.atom_tv)
         a_daughter = ConceptNode("Daughter", self.atom_tv)
 
+        # Link with blend target.
+        self._make_link_all(
+            types.MemberLink,
+            [a_grand_father, a_grand_mother,
+             a_father, a_mother, a_son, a_daughter],
+            self.a_blend_target
+        )
+
         # Link with family frame type.
-        l_family_0 = MemberLink(a_grand_father, a_family, self.link_tv)
-        l_family_1 = MemberLink(a_grand_mother, a_family, self.link_tv)
-        l_family_2 = MemberLink(a_father, a_family, self.link_tv)
-        l_family_3 = MemberLink(a_mother, a_family, self.link_tv)
-        l_family_4 = MemberLink(a_son, a_family, self.link_tv)
-        l_family_5 = MemberLink(a_daughter, a_family, self.link_tv)
+        self._make_link_all(
+            types.MemberLink,
+            [a_grand_father, a_grand_mother,
+             a_father, a_mother, a_son, a_daughter],
+            a_family
+        )
 
         # Link with input space 0 type.
-        l_input_space_0_0 = MemberLink(
-            a_father, a_input_space_0, self.link_tv)
-        l_input_space_0_1 = MemberLink(
-            a_daughter, a_input_space_0, self.link_tv)
+        self._make_link_all(
+            types.MemberLink,
+            [a_father, a_daughter],
+            a_input_space_0
+        )
 
         """
         # Define new space&frame by linking.
@@ -77,6 +92,13 @@ class PaulSallyExample:
         a_paul = VariableNode("Paul", TruthValue(0.9, 0.8))
         a_sally = VariableNode("Sally", TruthValue(0.9, 0.8))
 
+        # Link with blend target.
+        self._make_link_all(
+            types.MemberLink,
+            [a_paul, a_sally],
+            self.a_blend_target
+        )
+
         # Link with input space 1 type.
         l_input_space_1_0 = MemberLink(a_paul, a_input_space_1, self.link_tv)
         l_input_space_1_1 = MemberLink(a_sally, a_input_space_1, self.link_tv)
@@ -100,49 +122,44 @@ class PaulSallyExample:
         a_man = ConceptNode("Man", self.atom_tv)
         a_woman = ConceptNode("Woman", self.atom_tv)
 
+        # Link with blend target.
+        self._make_link_all(
+            types.MemberLink,
+            [a_human, a_man, a_woman],
+            self.a_blend_target
+        )
+
         # Link with man type.
-        l_man_0 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Grandfather")[0],
-            a_man,
-            self.link_tv)
-        l_man_1 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Father")[0],
-            a_man,
-            self.link_tv)
-        l_man_2 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Son")[0],
-            a_man,
-            self.link_tv)
-        l_man_3 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Paul")[0],
-            a_man,
-            self.link_tv)
+        self._make_link_all(
+            types.InheritanceLink,
+            [
+                self.a.get_atoms_by_name
+                (types.Atom, "Grandfather")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Father")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Son")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Paul")[0]
+            ],
+            a_man
+        )
 
         # Link with woman type.
-        l_woman_0 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Grandmother")[0],
-            a_woman,
-            self.link_tv)
-        l_woman_1 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Mother")[0],
-            a_woman,
-            self.link_tv)
-        l_woman_2 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Daughter")[0],
-            a_woman,
-            self.link_tv)
-        l_woman_3 = InheritanceLink(
-            self.a.get_atoms_by_name(
-                types.Atom, "Sally")[0],
-            a_woman,
-            self.link_tv)
+        self._make_link_all(
+            types.InheritanceLink,
+            [
+                self.a.get_atoms_by_name
+                (types.Atom, "Grandmother")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Mother")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Daughter")[0],
+                self.a.get_atoms_by_name
+                (types.Atom, "Sally")[0]
+            ],
+            a_woman
+        )
 
         """
         # Link with human being type.
@@ -160,18 +177,11 @@ class PaulSallyExample:
         l_human_1 = InheritanceLink(a_woman, a_human, self.link_tv)
 
         # Link with input space 0 type.
-        l_generic_space_0 = MemberLink(
-            a_man,
-            a_generic_space,
-            self.link_tv)
-        l_generic_space_1 = MemberLink(
-            a_woman,
-            a_generic_space,
-            self.link_tv)
-        l_generic_space_1 = MemberLink(
-            a_human,
-            a_generic_space,
-            self.link_tv)
+        self._make_link_all(
+            types.MemberLink,
+            [a_man, a_woman, a_human],
+            a_generic_space
+        )
 
         """
         # Define new space by linking.
@@ -188,7 +198,6 @@ class PaulSallyExample:
         print ""
 
     def make(self):
-        self._make_default_concept()
         self._make_input_space_0()
         self._make_input_space_1()
         self._make_generic_space()
