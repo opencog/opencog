@@ -135,7 +135,7 @@ class PaulSallyExample:
             self.link_tv)
         l_woman_2 = InheritanceLink(
             self.a.get_atoms_by_name(
-                types.Atom, "Woman")[0],
+                types.Atom, "Daughter")[0],
             a_woman,
             self.link_tv)
         l_woman_3 = InheritanceLink(
