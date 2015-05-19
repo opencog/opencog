@@ -7,13 +7,7 @@ ADD_LIBRARY (oac SHARED
 	ProcedureInterpreterAgent
 	ActionSelectionAgent
 	EntityExperienceAgent
-	PsiModulatorUpdaterAgent
-	PsiDemandUpdaterAgent
-	PsiActionSelectionAgent
-	PsiRelationUpdaterAgent
-	PsiFeelingUpdaterAgent
 	EventDetectionAgent
-	PsiRuleUtil
 	StimulusUpdaterAgent
 	SleepAgent
 	MockOpcHCTest
@@ -60,7 +54,7 @@ IF (HAVE_CYTHON)
 		PythonModule
 		${PYTHON_LIBRARIES}
 	)
-ENDIF (HAVE_CYTHON)	
+ENDIF (HAVE_CYTHON)
 
 
 IF (HAVE_ZMQ)
@@ -86,7 +80,7 @@ TARGET_LINK_LIBRARIES (oac-exec
 	comboreduct
 	AvatarComboVocabulary
 	ImaginaryLife
-	${Boost_THREAD_LIBRARY} 
+	${Boost_THREAD_LIBRARY}
 	${ZMQ_LIBRARIES}
 )
 SET_TARGET_PROPERTIES(oac-exec PROPERTIES OUTPUT_NAME "oac")
@@ -103,4 +97,3 @@ TARGET_LINK_LIBRARIES (opcHcTester
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (opcHcTester LearningServerMessages ${PROTOBUF_LIBRARY})
 ENDIF (HAVE_PROTOBUF)
-
