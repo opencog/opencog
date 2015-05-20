@@ -59,6 +59,10 @@ class RandomBlender(BaseBlender):
                             (out.name != dst_node.name):
                         self.a.add_link(link.t, [out, dst_node], link.tv)
 
+    def _correct_strength_of_links(self, dst_node):
+        link_list = self.a.get_atoms_by_target_atom(types.Link, dst_node)
+        # TODO: check truth value bug?
+
     def blend(self):
         log.warn("Start RandomBlending")
 
@@ -89,7 +93,7 @@ class RandomBlender(BaseBlender):
         self._copy_link_from_exist_node([a_node_0, a_node_1], a_blended_node)
 
         # Correct some attribute value of new links.
-        # - Do nothing.
+        self._correct_strength_of_links(a_blended_node)
 
         # Detect and improve conflict links in newly blended node.
         # - Do nothing.

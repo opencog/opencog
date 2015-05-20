@@ -28,10 +28,11 @@ class PaulSallyExample:
             self,
             link_type,
             src_node_list,
-            dst_node
+            dst_node,
+            tv
     ):
         for node in src_node_list:
-            self.a.add_link(link_type, [node, dst_node])
+            self.a.add_link(link_type, [node, dst_node], tv)
 
     # - Input Space 0
     # Start to make 'Family' network.
@@ -54,7 +55,8 @@ class PaulSallyExample:
             types.MemberLink,
             [a_grand_father, a_grand_mother,
              a_father, a_mother, a_son, a_daughter],
-            self.a_blend_target
+            self.a_blend_target,
+            self.link_tv
         )
 
         # Link with family frame type.
@@ -62,14 +64,16 @@ class PaulSallyExample:
             types.MemberLink,
             [a_grand_father, a_grand_mother,
              a_father, a_mother, a_son, a_daughter],
-            a_family
+            a_family,
+            self.link_tv
         )
 
         # Link with input space 0 type.
         self._make_link_all(
             types.MemberLink,
             [a_father, a_daughter],
-            a_input_space_0
+            a_input_space_0,
+            self.link_tv
         )
 
         # Define new space&frame by linking.
@@ -99,7 +103,8 @@ class PaulSallyExample:
         self._make_link_all(
             types.MemberLink,
             [a_paul, a_sally],
-            self.a_blend_target
+            self.a_blend_target,
+            self.link_tv
         )
 
         # Link with input space 1 type.
@@ -127,7 +132,8 @@ class PaulSallyExample:
         self._make_link_all(
             types.MemberLink,
             [a_human, a_man, a_woman],
-            self.a_blend_target
+            self.a_blend_target,
+            self.link_tv
         )
 
         # Link with man type.
@@ -143,7 +149,8 @@ class PaulSallyExample:
                 self.a.get_atoms_by_name
                 (types.Atom, "Paul")[0]
             ],
-            a_man
+            a_man,
+            self.link_tv
         )
 
         # Link with woman type.
@@ -159,7 +166,8 @@ class PaulSallyExample:
                 self.a.get_atoms_by_name
                 (types.Atom, "Sally")[0]
             ],
-            a_woman
+            a_woman,
+            self.link_tv
         )
 
         """
@@ -181,7 +189,8 @@ class PaulSallyExample:
         self._make_link_all(
             types.MemberLink,
             [a_man, a_woman, a_human],
-            a_generic_space
+            a_generic_space,
+            self.link_tv
         )
 
         # Define new space by linking.
