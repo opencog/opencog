@@ -97,6 +97,15 @@ class ShellBlending:
             str(a_node_1.name)
         )
 
+        # Link with blend target.
+        self.a.add_link(
+            types.MemberLink,
+            [
+                a_blended_node,
+                self.a.get_atoms_by_name(types.Atom, "BlendTarget")[0]
+            ]
+        )
+
         # Make the links between exist nodes and newly blended node.
         # - Do nothing.
 
@@ -118,9 +127,9 @@ class ShellBlending:
         # Blending methods will be located in here.
         while 1:
             self._random_blending()
-            # is_stop = raw_input("Input Q to stop, or continue.\n")
-            # if is_stop == 'q' or is_stop == 'Q':
-            #   break
+            is_stop = raw_input("Input q to stop, or continue.\n")
+            if is_stop == 'q' or is_stop == 'Q':
+                break
 
         # DEBUG: To keep program in running while view my result of coding.
         self._delete_blend_target_for_debug()
