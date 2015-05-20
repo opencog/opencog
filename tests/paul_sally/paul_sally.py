@@ -1,3 +1,5 @@
+import blending_util
+
 __author__ = 'DongMin Kim'
 
 # To avoid unresolved reference complain in PyCharm 4.0.6
@@ -17,7 +19,10 @@ class PaulSallyExample:
         self.atom_tv = TruthValue(0.9, 0.8)
         self.link_tv = TruthValue(0.7, 0.6)
         self.a_blend_target = \
-            self.a.get_atoms_by_name(types.Atom, "BlendTarget")[0]
+            self.a.get_atoms_by_name(
+                types.Atom,
+                blending_util.BLEND_TARGET_NODE_NAME
+            )[0]
 
     def _make_link_all(
             self,
@@ -67,7 +72,6 @@ class PaulSallyExample:
             a_input_space_0
         )
 
-        """
         # Define new space&frame by linking.
         l_space_0 = InheritanceLink(
             a_input_space_0,
@@ -79,7 +83,6 @@ class PaulSallyExample:
             self.a.get_atoms_by_name(
                 types.Atom, "Frame")[0],
             self.link_tv)
-        """
 
     # - Input Space 1
     # Start to make 'actual human' network.
@@ -103,14 +106,12 @@ class PaulSallyExample:
         l_input_space_1_0 = MemberLink(a_paul, a_input_space_1, self.link_tv)
         l_input_space_1_1 = MemberLink(a_sally, a_input_space_1, self.link_tv)
 
-        """
         # Define new space by linking.
         l_space_1 = InheritanceLink(
             a_input_space_1,
             self.a.get_atoms_by_name(
                 types.Atom, "Space")[0],
             self.link_tv)
-        """
 
     # - Generic Space
     def _make_generic_space(self):
@@ -162,6 +163,7 @@ class PaulSallyExample:
         )
 
         """
+        # TODO: deep inheritance or direct inheritance?
         # Link with human being type.
         l_human_0 = InheritanceLink(a_grand_father, a_human, self.link_tv)
         l_human_1 = InheritanceLink(a_grand_mother, a_human, self.link_tv)
@@ -170,8 +172,7 @@ class PaulSallyExample:
         l_human_4 = InheritanceLink(a_son, a_human, self.link_tv)
         l_human_5 = InheritanceLink(a_daughter, a_human, self.link_tv)
         """
-
-        # TODO: deep inheritance or direct inheritance?
+        
         # Link with human being type.
         l_human_0 = InheritanceLink(a_man, a_human, self.link_tv)
         l_human_1 = InheritanceLink(a_woman, a_human, self.link_tv)
@@ -183,14 +184,12 @@ class PaulSallyExample:
             a_generic_space
         )
 
-        """
         # Define new space by linking.
         l_space_2 = InheritanceLink(
             a_generic_space,
             self.a.get_atoms_by_name(
-                types.Atom, "Space"),
+                types.Atom, "Space")[0],
             self.link_tv)
-        """
 
     # - Blended Space
     def _make_blended_space(self):
@@ -201,5 +200,3 @@ class PaulSallyExample:
         self._make_input_space_0()
         self._make_input_space_1()
         self._make_generic_space()
-
-

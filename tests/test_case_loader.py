@@ -1,18 +1,15 @@
+import blending_util
+
 __author__ = 'DongMin Kim'
 
-from opencog.atomspace import AtomSpace, TruthValue, types
-from opencog.type_constructors \
-    import ConceptNode, TypeNode, VariableNode,\
-        UnorderedLink, MemberLink, InheritanceLink
-
+from opencog.type_constructors import *
 from tests.paul_sally.paul_sally import PaulSallyExample
 
 # Make several test cases for debug.
 class TestCaseMaker:
+
     def __init__(self, atomspace):
         self.a = atomspace
-        self.atom_list_for_debug = []
-        self.link_list_for_debug = []
         self._make_default_concept()
         self.paul_sally_example = PaulSallyExample(self.a)
 
@@ -22,14 +19,10 @@ class TestCaseMaker:
         self.link_tv = TruthValue(1, 1)
 
         # - Base Concepts
-        # Make temporary concept - To define which node is target to blend.
-        self.a_blend_target = ConceptNode("BlendTarget", self.atom_tv)
         # Make space & frame concept.
         self.a_space = ConceptNode("Space", self.atom_tv)
         self.a_frame = ConceptNode("Frame", self.atom_tv)
 
     def make_all(self):
         self.paul_sally_example.make()
-        # self.atom_list_for_debug.extend([a1, a2])
-        # self.link_list_for_debug.extend([l1])
 
