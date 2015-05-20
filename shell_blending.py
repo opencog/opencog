@@ -2,11 +2,10 @@ __author__ = 'DongMin Kim'
 
 import random
 
-# To avoid unresolved reference complain in PyCharm 4.0.6
-from opencog.atomspace import AtomSpace, types
-from opencog.type_constructors import ConceptNode
-from opencog.utilities import initialize_opencog
-from opencog.logger import log
+from opencog.atomspace import *
+from opencog.type_constructors import *
+from opencog.utilities import *
+from opencog.logger import *
 
 from experiment_codes import ExperimentCodes
 
@@ -115,13 +114,13 @@ class ShellBlending:
 
         self.call_experiment_functions()
 
-        # self.print_atomspace_for_debug()
-        self._random_blending()
-
         # Simulate cogserver environment.
         # Blending methods will be located in here.
         while 1:
-            break
+            self._random_blending()
+            # is_stop = raw_input("Input Q to stop, or continue.\n")
+            # if is_stop == 'q' or is_stop == 'Q':
+            #   break
 
         # DEBUG: To keep program in running while view my result of coding.
         self._delete_blend_target_for_debug()
