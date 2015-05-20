@@ -172,7 +172,7 @@ class PaulSallyExample:
         l_human_4 = InheritanceLink(a_son, a_human, self.link_tv)
         l_human_5 = InheritanceLink(a_daughter, a_human, self.link_tv)
         """
-        
+
         # Link with human being type.
         l_human_0 = InheritanceLink(a_man, a_human, self.link_tv)
         l_human_1 = InheritanceLink(a_woman, a_human, self.link_tv)
