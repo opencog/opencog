@@ -3,8 +3,8 @@
 
 ## Now
 ### In Progress
-* Make "agent-step" command simulating.
-* Make the links in newly blended node and correct some attribute value.
+* Find the method to get my link's truthvalue (link.tv is not match with my input).
+* Implement blender selector by passing instance which is subclass of abstract class.
 * Check for made blended node and trying to test with several case.
 * Select nodes to blending.
   * Implement checking for some values in HebbianLink and SimilarityLink when 
@@ -40,6 +40,8 @@
 * Decide whether or not to execute blending and prepare.
   * Try blending immediately
 * Make the simple, newly blended node and put in AtomSpace.
+* Make "agent-step" command simulating.
+* Make the links in newly blended node and correct some attribute value.
 
 ### Fail
 * (empty)
