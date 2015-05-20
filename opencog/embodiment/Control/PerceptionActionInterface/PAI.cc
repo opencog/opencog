@@ -3176,7 +3176,6 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
         Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, SIZE_PREDICATE_NAME, true);
-
         Handle lengthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(length).c_str());
         Handle widthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(width).c_str());
         Handle heightNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(height).c_str());
@@ -3260,9 +3259,10 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         entityClass = "block";
     }
 
-    return spaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
-                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
+    return spaceServer().addSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp, (int)position.x, (int)position.y, (int)position.z,
+                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept,);
 }
+
 */
 void PAI::addSemanticStructure(Handle objectNode,
         const std::string& entityId,
@@ -3641,11 +3641,11 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes(toUpdateHandles);
+	      spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
+	      spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3750,7 +3750,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    spaceServer().removeSpaceInfo(objectNode, timestamp);
+    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
@@ -3815,7 +3815,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
         if (isSelfObject) {
             unsigned int agentRadius = sqrt(length * length + width * width) / 2;
             spaceServer().setAgentRadius(agentRadius);
-            spaceServer().setAgentHeight(roundDoubleToInt(height) );
+            spaceServer().setAgentHeight(roundDoubleToInt(height), spaceServer().getLatestMapHandle());
         }
     } else {
         // Get the length, width and height of the object
@@ -3887,8 +3887,8 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 
     // Space server insertion
     // round up these values
-    return spaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
-                                    roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
+    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+				      roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
 
@@ -4425,14 +4425,14 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
     {
         printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
-        spaceServer().findAllBlockEntitiesOnTheMap();
+        spaceServer().findAllBlockEntitiesOnTheMap(spaceServer().getLatestMapHandle());
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes(toUpdateHandles);
+        spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles,spaceServer().getLatestMapHandle());
 
         int t2 = time(NULL);
 

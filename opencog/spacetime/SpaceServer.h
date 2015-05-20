@@ -84,12 +84,6 @@ public:
     typedef spatial::Octree3DMapManager SpaceMap;
     typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
 
-    /**
-     * space maps contained by this SpaceServer. Each space map is
-     * associated to an Atom handle, which is associated to a
-     * specific zone map.
-     */
-    HandleToSpaceMap spaceMaps;
 
     explicit SpaceServer(AtomSpace&);
     virtual ~SpaceServer();
@@ -124,17 +118,29 @@ public:
      * to avoid really changing the real spaceMap.
      */
     SpaceMap* cloneTheLatestSpaceMap() const;
+    SpaceMap* cloneSpaceMap(Handle spaceMapHandle) const;
 
     // add create a new spaceMap for a new scene (it will create a new Octree3DMapMananger)
     // if there is already a spaceMap of this _mapName, just get it and set it to be the current map, not to created a new spaceMap
     Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
 
-    bool addSpaceInfo(Handle objectNode, bool isSelfObject, octime_t timestamp,
+    /**
+     * comment@20150520 by YiShan
+     * The last argument is for compatibility to the old ocde.
+     * In the old embodiment code there is only one current map,
+     * so we just operate on it. 
+     * In the new embodiment code there may be multiple scenes, 
+     * So the user may want to add space info in the different space map.
+     * Some member functions having the same problems also have the argument.
+     */
+    bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, octime_t timestamp,
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
                       double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material = "");
 
-    void removeSpaceInfo(Handle objectNode, octime_t timestamp = 0);
+
+
+    void removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp = 0);
 
     // SpaceServerContainer virtual methods:
     void mapRemoved(Handle mapId);
@@ -146,7 +152,7 @@ public:
     void setAgentRadius(unsigned int radius);
 
     // Sets the agent height.
-    void setAgentHeight(unsigned int height);
+    void setAgentHeight(unsigned int height, Handle spaceMapHandle);
 
     /**
      * Remove the spaceMap for the given handle.
@@ -171,42 +177,31 @@ public:
      */
     std::string mapToString(Handle mapHandle) const;
 
-    /**
-     * Add a whole space map into the SpaceServer.
-     * NOTE: This is just used when a whole space map is received
-     * from a remote SpaceServer (in LearningServer, for instance).
-     */
-    Handle addSpaceMap(SpaceServer::SpaceMap * spaceMap);
-
     // TODO
     Handle mapFromString(const std::string& stringMap);
 
-    /**
-     * Overrides and declares copy constructor and equals operator as private
-     * for avoiding large object copying by mistake.
+    /*
+     Overrides and declares copy constructor and equals operator as deleted function for avoiding large object copying by mistake.
      */
-    SpaceServer& operator=(const SpaceServer&);
-    SpaceServer(const SpaceServer&);
+    SpaceServer& operator=(const SpaceServer&)=delete;
+    SpaceServer(const SpaceServer&)=delete;
 
     void markCurMapPerceptedForFirstTime();
 
     // after the first time percept a map, we should find all the blockEntities on this map
-    void findAllBlockEntitiesOnTheMap();
+    void findAllBlockEntitiesOnTheMap(Handle spaceMapHandle);
 
     // add all the newly constructed BlockEntity nodes to the atomspace
-    void addBlockEntityNodes(HandleSeq &toUpdateHandles);
+    void addBlockEntityNodes(HandleSeq &toUpdateHandles, Handle spaceMapHandle);
 
     // add blocklist to an entity
-    void addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp);
+    void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle);
 
     // add properties predicate link to an entity node when there is a change
     // this including addBlocksLisitPredicateToEntity
-    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp);
+    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle);
 
-    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles);
-
-    // input raw data to the learning server for blockEntities identification learning
-    void sendRawAdjancentBlocksDataToLS();
+    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle);
 
     void setTimeServer(TimeServer*);
 
@@ -224,61 +219,30 @@ private:
     void atomRemoved(AtomPtr);
     void atomAdded(Handle);
 
-    // the current scene map, match the spaceMapNodeHandle
+    Handle addPropertyPredicate(
+        std::string predicateName,
+        Handle,
+        Handle,
+        TruthValuePtr);
+
+
+    /**
+     * space maps contained by this SpaceServer. Each space map is
+     * associated to an Atom handle, which is associated to a
+     * specific zone map.
+     */
+    HandleToSpaceMap spaceMaps;
+
+    /**
+     * comment@20150520 by YiShan
+     * Because we'd like to have multiple map in the new embodiment code,
+     * we use the "spaceMaps" data members to represent all the current scenes we know. 
+     * The "curMap" and "curSpaceMapHandle" members are used in the old embodiment code to represent a single current scene.
+     * To be compatible to the old code we still preserve these two members.
+     */
     SpaceMap* curMap;
-
-    // the Node of the current scene map
+    // the Node of the curMap
     Handle curSpaceMapHandle;
-
-    /**
-     * Current xMin
-     */
-    int xMin;
-
-    /**
-     * Current yMin
-     */
-    int yMin;
-
-    /**
-     * Current zMin
-     */
-    int zMin;
-
-    /**
-     * Current xMax
-     */
-    int xMax;
-
-    /**
-     * Current yMax
-     */
-    int yMax;
-
-    /**
-     * Current zMax
-     */
-    int zMax;
-
-    /**
-     * Current X direction grid map dimension
-     */
-    unsigned int xDim;
-
-    /**
-     * Current Y direction grid map dimension
-     */
-    unsigned int yDim;
-
-    /**
-     * Current Z direction grid map dimension
-     */
-    unsigned int zDim;
-
-    /**
-     * Current floor height (z)
-     */
-    int floorHeight;
 
     /**
      * Current agent radius
@@ -290,14 +254,56 @@ private:
      */
     unsigned int agentHeight;
 
-    Handle addPropertyPredicate(
-        std::string predicateName,
-        Handle,
-        Handle,
-        TruthValuePtr);
 
+    /** 
+     * comment@20150520 by YiShan
+     * The following are some old data members which are not used in the new code.
+     * Since they're used in the commented "addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle) function, we just comment them out.
+
+    // Current xMin
+     
+    int xMin;
+
+    // Current yMin
+     
+    int yMin;
+
+    // Current zMin
+     
+    int zMin;
+
+    // Current xMax
+     
+    int xMax;
+
+    // Current yMax
+     
+    int yMax;
+
+    // Current zMax
+    int zMax;
+
+    // Current X direction grid map dimension
+    unsigned int xDim;
+
+    // Current Y direction grid map dimension
+    unsigned int yDim;
+
+    // Current Z direction grid map dimension
+    unsigned int zDim;
+
+    // Current floor height (z)
+    int floorHeight;
+
+    */
 
 };
+
+
+
+
+
+
 
 //class SpaceServer
 //{
