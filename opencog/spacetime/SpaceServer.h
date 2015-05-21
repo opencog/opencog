@@ -120,39 +120,53 @@ public:
     SpaceMap* cloneTheLatestSpaceMap() const;
     SpaceMap* cloneSpaceMap(Handle spaceMapHandle) const;
 
-    // add create a new spaceMap for a new scene (it will create a new Octree3DMapMananger)
-    // if there is already a spaceMap of this _mapName, just get it and set it to be the current map, not to created a new spaceMap
+    /**
+     * create a new spaceMap for a new scene 
+     * (it will create a new Octree3DMapMananger)
+     * if there is already a spaceMap of this _mapName, 
+     * just get it and set it to be the current map, 
+     * not to create a new spaceMap
+     */
     Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
 
     /**
      * comment@20150520 by YiShan
-     * The last argument is for compatibility to the old ocde.
-     * In the old embodiment code there is only one current map,
-     * so we just operate on it. 
      * In the new embodiment code there may be multiple scenes, 
-     * So the user may want to add space info in the different space map.
-     * Some member functions having the same problems also have the argument.
+     * So the user may want to add space info in different space map.
+     * To fix this, we insert the second parameter "spaceMapHandle"
+     * to allow user to add space info in different scene.
+     * Some member functions having the same problem also have the argument.
      */
-    bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, octime_t timestamp,
+    bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, 
+		      bool isSelfObject, octime_t timestamp,
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
-                      double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material = "");
-
+                      double objYaw, bool isObstacle,  
+		      std::string entityClass, std::string objectName, std::string material = "");
 
 
     void removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp = 0);
 
-    // SpaceServerContainer virtual methods:
+    /**
+     * SpaceServerContainer virtual methods:
+     */
     void mapRemoved(Handle mapId);
     void mapPersisted(Handle mapId);
     std::string getMapIdString(Handle mapId) const;
 
-    // Sets the agent radius needed to define which grid cells are free for
-    // navigation purposes
+    
+    /**
+     * Sets the agent radius needed to define which grid cells are free for
+     * navigation purposes
+     */
     void setAgentRadius(unsigned int radius);
 
-    // Sets the agent height.
+    /**
+     * Sets the agent height.
+     */
     void setAgentHeight(unsigned int height, Handle spaceMapHandle);
+
+    void setTimeServer(TimeServer*);
 
     /**
      * Remove the spaceMap for the given handle.
@@ -177,33 +191,45 @@ public:
      */
     std::string mapToString(Handle mapHandle) const;
 
-    // TODO
+    /**
+     * TODO
+     */
     Handle mapFromString(const std::string& stringMap);
 
-    /*
-     Overrides and declares copy constructor and equals operator as deleted function for avoiding large object copying by mistake.
+    /**
+     * Overrides and declares copy constructor and equals operator 
+     * as deleted function for avoiding large object copying by mistake.
      */
     SpaceServer& operator=(const SpaceServer&)=delete;
     SpaceServer(const SpaceServer&)=delete;
 
     void markCurMapPerceptedForFirstTime();
 
-    // after the first time percept a map, we should find all the blockEntities on this map
+    /**
+     * after the first time percept a map, 
+     * we should find all the blockEntities on this map
+     */
     void findAllBlockEntitiesOnTheMap(Handle spaceMapHandle);
 
-    // add all the newly constructed BlockEntity nodes to the atomspace
+    /**
+     *  add all the newly constructed BlockEntity nodes to the atomspace
+     */
     void addBlockEntityNodes(HandleSeq &toUpdateHandles, Handle spaceMapHandle);
 
-    // add blocklist to an entity
+    /**
+     *  add blocklist to an entity
+     */
     void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle);
 
-    // add properties predicate link to an entity node when there is a change
-    // this including addBlocksLisitPredicateToEntity
+    /**
+     * add properties predicate link to an entity node when there is a change
+     * this including addBlocksListPredicateToEntity
+     */
     void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle);
 
     void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle);
 
-    void setTimeServer(TimeServer*);
+
 
 private:
 
@@ -225,7 +251,6 @@ private:
         Handle,
         TruthValuePtr);
 
-
     /**
      * space maps contained by this SpaceServer. Each space map is
      * associated to an Atom handle, which is associated to a
@@ -241,7 +266,6 @@ private:
      * To be compatible to the old code we still preserve these two members.
      */
     SpaceMap* curMap;
-    // the Node of the curMap
     Handle curSpaceMapHandle;
 
     /**
