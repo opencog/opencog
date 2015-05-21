@@ -1,5 +1,3 @@
-import blending_util
-
 __author__ = 'DongMin Kim'
 
 # To avoid unresolved reference complain in PyCharm 4.0.6
@@ -8,6 +6,8 @@ from opencog.type_constructors \
     import ConceptNode, TypeNode, VariableNode, \
     UnorderedLink, MemberLink, InheritanceLink
 
+import blending_util
+from blending_util import *
 
 # Paul & Sally example in the book 'The Way We Think'
 # It is a simplex network example.
@@ -56,7 +56,7 @@ class PaulSallyExample:
             [a_grand_father, a_grand_mother,
              a_father, a_mother, a_son, a_daughter],
             self.a_blend_target,
-            self.link_tv
+            blend_target_link_tv
         )
 
         # Link with family frame type.
@@ -104,7 +104,7 @@ class PaulSallyExample:
             types.MemberLink,
             [a_paul, a_sally],
             self.a_blend_target,
-            self.link_tv
+            blend_target_link_tv
         )
 
         # Link with input space 1 type.
@@ -133,7 +133,7 @@ class PaulSallyExample:
             types.MemberLink,
             [a_human, a_man, a_woman],
             self.a_blend_target,
-            self.link_tv
+            blend_target_link_tv
         )
 
         # Link with man type.
