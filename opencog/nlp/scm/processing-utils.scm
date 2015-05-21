@@ -311,8 +311,6 @@
 				       ; multiple instances in a sentence.  Since there is no clean way
 				       ; to get to the abstracted node from an instanced node yet, such
 				       ; repeatition are ignored for now
-				       ; XXX FIXME R2L's rule-helpers are reseting the TV to stv everytime,
-				       ; that need to be removed before this code work
 				       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
 					(par-map
 						(lambda (n)
