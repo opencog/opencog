@@ -1,5 +1,6 @@
 __author__ = 'DongMin Kim'
 
+import sys
 from opencog.atomspace import *
 from opencog.type_constructors import *
 from opencog.utilities import *
@@ -47,6 +48,31 @@ class ShellBlending:
 
         self.a.remove(self.a_blend_target)
 
+    def _backup_temp_link_list_for_debug(self, node_name_list):
+        info_list = []
+
+        for name in node_name_list:
+            dst_node = self.a.get_atoms_by_name(types.Node, name)[0]
+            get_target_link = \
+                self.a.get_atoms_by_target_atom(types.Link, dst_node)
+
+            for link in get_target_link:
+                xget_target_link_node = self.a.xget_outgoing(link.h)
+                for src_node in xget_target_link_node:
+                    if src_node.h != dst_node.h:
+                        info_list.append((link.t, src_node, dst_node, link.tv))
+                self.a.remove(link)
+
+        return info_list
+
+    def _restore_temp_link_list_for_debug(self, info_list):
+        for info in info_list:
+            self.a.add_link(
+                info[0],
+                [info[1], info[2]],
+                info[3]
+            )
+
     def call_experiment_functions(self):
         self.experiment_codes_inst.execute()
 
@@ -58,9 +84,30 @@ class ShellBlending:
         # Simulate cogserver environment.
         # Blending methods will be located in here.
         while 1:
-            self.random_blending_inst.blend()
-            is_stop = raw_input("Input q to stop, or continue.\n")
-            if is_stop == 'q' or is_stop == 'Q':
+            exec_result = self.random_blending_inst.blend()
+
+            if exec_result != 0:
+                print "Error in blending class."
+                break
+
+            log.warn("Input n to preserve temp links, or delete.")
+            is_delete_temp_link = raw_input()
+            if is_delete_temp_link != 'n' or is_delete_temp_link != 'N':
+                link_list_backup = \
+                    self._backup_temp_link_list_for_debug(
+                        [
+                            "BlendTarget",
+                            "InputSpace0", "InputSpace1", "GenericSpace"
+                        ]
+                    )
+
+            log.warn("Input n to stop, or continue.")
+            is_stop = raw_input()
+
+            if is_delete_temp_link != 'n' or is_delete_temp_link != 'N':
+                self._restore_temp_link_list_for_debug(link_list_backup)
+
+            if is_stop == 'n' or is_stop == 'N':
                 break
 
 # Log will be written to opencog.log in the current directory.
