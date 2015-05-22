@@ -10,7 +10,7 @@
 	))
 ))
 ;---------------------------------------------------------------------------------------------
-;Accept user's quey and user's id as an input
+;Accept user's query and user's id as an input
 ;call "check_query_type" function to check if the query is  'wh' or 'yes-or-no' question
 ;if query is yes-or-no call 'truth_query_process' else call 'wh_query_process'
 ;----------------------------------------------------------------------------------------------
@@ -23,8 +23,8 @@
 		      (wh_query_process querySentence)))
 
 ;----------------------------------------------------------------------------------------------
-;Use bakward chaning to process the 'yes-or-no' quetion
-;depending on the backward chaning result the answer will be generated (using SuRel)
+;Use backward chaning to process 'yes-or-no' question
+;depending on the backward chaning generate the answer (using SuRel)
 ;----------------------------------------------------------------------------------------------
 (define (truth_query_process query)
 	(define tmp (fAtom query))
@@ -44,12 +44,12 @@
 
 ;---------------------------------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward chaining
-; Example : if the query is "is mattew student?"
+; Example : if the query is "is Matthew student?"
 ; this function will find 
 ; Inheritance 
-;	"mattew" 
+;	"Matthew" 
 ;	"student" 
-; from the parse and by substituting mattew with variable $X the backward chaning will be called 
+; from the parse and by substituting Matthew with variable $X the backward chaning will be called 
 ; (cog-bc (InherintanceLink $X "student"))
 ;---------------------------------------------------------------------------------------------
 (define (fAtom query)
