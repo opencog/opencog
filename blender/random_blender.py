@@ -17,22 +17,17 @@ class RandomBlender(BaseBlender):
         super(self.__class__, self).__init__(atomspace)
 
     # Select atoms which are connected to specific atom.
-    def _get_incoming_dst_atom(self, atom, atom_type=types.Atom):
+    def _get_incoming_node_list(self, target):
         ret = []
 
-        l_link_list = self.a.get_atoms_by_target_atom(types.Atom, atom)
+        xget_target_link = self.a.xget_atoms_by_target_atom(types.Link, target)
 
-        for link in l_link_list:
-            for node in link.out:
-                if (node.t == atom_type) and \
-                        (node.h != self.a_blend_target.h):
-                    ret.append(link.out[0])
+        for link in xget_target_link:
+            xget_target_link_node = self.a.xget_outgoing(link.h)
+            for node in xget_target_link_node:
+                if node.h != target.h:
+                    ret.append(node)
 
-        return ret
-
-    def _get_valuable_blend_target_list(self):
-        ret = self._get_incoming_dst_atom(
-            self.a_blend_target, types.ConceptNode)
         return ret
 
     # Select atoms randomly and return
@@ -43,7 +38,7 @@ class RandomBlender(BaseBlender):
 
         # TODO: change to search all atomspace
         # (BlendTarget is only useful in development phase)
-        a_atom_list = self._get_valuable_blend_target_list()
+        a_atom_list = self._get_incoming_node_list(self.a_blend_target)
         a_list_size = a_atom_list.__len__()
 
         if a_list_size < count:
@@ -57,97 +52,76 @@ class RandomBlender(BaseBlender):
 
         return ret
 
-    def _correct_strength_of_links(self, found_link, exist_link):
-        found_s = found_link.tv.mean
-        found_c = found_link.tv.confidence
-        exist_s = exist_link.tv.mean
-        exist_c = exist_link.tv.confidence
+    def _correct_strength_of_links(
+            self, src_link_dict, dst_link_dict, non_exclusive_link_set
+    ):
+        for link in non_exclusive_link_set:
+            src_link = self.a[Handle(src_link_dict[link])]
+            dst_link = self.a[Handle(dst_link_dict[link])]
 
-        # sC = (cA sA + cB sB) / (cA + cB)
-        # https://groups.google.com/forum/#!topic/opencog/fa5c4yE8YdU
-        new_strength = \
-            ((found_c * found_s) + (exist_c * exist_s)) \
-            / (found_c + exist_c)
+            found_s = src_link.tv.mean
+            found_c = src_link.tv.confidence
+            exist_s = dst_link.tv.mean
+            exist_c = dst_link.tv.confidence
 
-        # TODO: Currently, conflicting confidence value for new blended node
-        # is just average of old value.
-        new_confidence = (found_c + exist_c) / 2
+            # sC = (cA sA + cB sB) / (cA + cB)
+            # https://groups.google.com/forum/#!topic/opencog/fa5c4yE8YdU
+            new_strength = \
+                ((found_c * found_s) + (exist_c * exist_s)) \
+                / (found_c + exist_c)
 
-        return TruthValue(new_strength, new_confidence)
+            # TODO: Currently, conflicting confidence value for new blended node
+            # is just average of old value.
+            new_confidence = (found_c + exist_c) / 2
 
-    def _copy_link_from_exist_node_list(self, src_node_list, dst_node):
-        """
-        valuable_node_list = self._get_valuable_blend_target_list()
-        valuable_node_handle_set = set()
-        for valuable_node in valuable_node_list:
-            valuable_node_handle_set.add(valuable_node.h.value())
+            dst_link.tv = TruthValue(new_strength, new_confidence)
 
-        dst_node_link_out_handle_set = []
+    def _get_linktype_linktarget_pair_dict(self, link_list, src_node):
+        ret_dict = dict()
+        for link in link_list:
+            xget_link_node = self.a.xget_outgoing(link.h)
+            for link_node in xget_link_node:
+                if link_node.h != src_node.h:
+                    type_target_pair = (link.t, link_node.h.value())
+                    ret_dict[type_target_pair] = link.h.value()
+
+        return ret_dict
+
+    def _copy_all_link_to_new_node(self, src_node_list, dst_node):
+        dst_link_list = \
+            self.a.get_atoms_by_target_atom(types.Link, dst_node)
+
+        dst_link_dict = \
+            self._get_linktype_linktarget_pair_dict(dst_link_list, dst_node)
+        dst_link_set = set(dst_link_dict.keys())
 
         for src_node in src_node_list:
-            src_node_link_list = self.a.get_atoms_by_target_atom(
-                types.Link, src_node
+            src_link_list = \
+                self.a.get_atoms_by_target_atom(types.Link, src_node)
+            src_link_dict = \
+                self._get_linktype_linktarget_pair_dict(src_link_list, src_node)
+            src_link_set = set(src_link_dict.keys())
+
+            exclusive_link_set = src_link_set - dst_link_set
+            non_exclusive_link_set = src_link_set & dst_link_set
+
+            # Add new link to target node.
+            for link_pair in exclusive_link_set:
+                src_link = self.a[Handle(src_link_dict[link_pair])]
+                src_link_type = link_pair[0]
+                src_link_node = self.a[Handle(link_pair[1])]
+                new_link = self.a.add_link(
+                    src_link_type,
+                    [dst_node, src_link_node],
+                    src_link.tv
+                )
+                dst_link_dict[link_pair] = new_link.h.value()
+                dst_link_set.add(link_pair)
+
+            # Correct conflict link value in target node.
+            self._correct_strength_of_links(
+                src_link_dict, dst_link_dict, non_exclusive_link_set
             )
-
-            for src_node_link in src_node_link_list:
-                src_node_link_out_list = self.a.get_outgoing(src_node_link.h)
-
-                for src_node_link_out in src_node_link_out_list:
-                    if src_node_link_out.h.value() in valuable_node_handle_set:
-                        dst_node_link_out_handle_set. \
-                            append((src_node_link_out, src_node_link))
-
-        dst_node_list = list(
-            dst_node_link_out_handle_set & valuable_node_handle_set
-        )
-
-        for node in src_node_list:
-            src_link_list = self.a.get_atoms_by_target_atom(types.Link,
-                                                            src_node)
-            dst_link_list = self.a.get_atoms_by_target_atom(types.Link,
-                                                            dst_node)
-
-            dst_out_dict = dict()
-            for dst_link in dst_link_list:
-                dst_out_list = self.a.get_outgoing(dst_link.h)
-                dst_out_handle_set = set()
-
-                for dst_out in dst_out_list:
-                    dst_out_handle_set.add(dst_out.h.value())
-
-                dst_out_handle_set &= valuable_node_handle_set
-
-                for dst_out_handle in list(dst_out_handle_set):
-                    dst_out_dict[dst_out_handle] = self.a.g
-
-            for src_link in src_link_list:
-                src_out_list = self.a.get_outgoing(src_link.h)
-                src_out_set = set()
-
-                for src_out in src_out_list:
-                    src_out_set.add(src_out.h.value())
-
-                src_out_set &= valuable_node_handle_set
-
-                for src_out in list(src_out_set):
-                    corrected_link_tv = src_out.tv
-
-                    if src_out.h.value() in dst_out_dict:
-                        corrected_link_tv = \
-                            self._correct_strength_of_links(
-                                src_link,
-                                dst_out_dict.get(src_out.h.value())
-                            )
-
-                    if (src_out.h != src_node.h) and \
-                            (src_out.h != dst_node.h):
-                        self.a.add_link(
-                            src_link.t,
-                            [src_out, dst_node],
-                            corrected_link_tv
-                        )
-        """
-        return None
 
     def blend(self):
         log.warn("Start RandomBlending")
@@ -169,24 +143,35 @@ class RandomBlender(BaseBlender):
             str(a_node_1.name)
         )
 
-        print "New node: " + a_blended_node.name
+        # Make the links between source nodes and newly blended node.
+        # TODO: Change to make with proper reason, not make in every blending.
+        self.a.add_link(
+            types.AssociativeLink,
+            [a_node_0, a_blended_node],
+            TruthValue(0.7, 0.6)
+        )
+        self.a.add_link(
+            types.AssociativeLink,
+            [a_node_1, a_blended_node],
+            TruthValue(0.7, 0.6)
+        )
 
-        # Link with blend target.
+        # Make the links between exist nodes and newly blended node.
+        # Correct some attribute value of new links.
+        self._copy_all_link_to_new_node([a_node_0, a_node_1],
+                                        a_blended_node)
+
+        # Detect and improve conflict links in newly blended node.
+        # - Do nothing.
+
+        # DEBUG: Link with blend target.
         self.a.add_link(
             types.MemberLink,
             [a_blended_node, self.a_blend_target],
             blend_target_link_tv
         )
 
-        # Make the links between exist nodes and newly blended node.
-        self._copy_link_from_exist_node_list([a_node_0, a_node_1],
-                                             a_blended_node)
-
-        # Correct some attribute value of new links.
-        # self._correct_strength_of_links(a_blended_node)
-
-        # Detect and improve conflict links in newly blended node.
-        # - Do nothing.
-
-        log.warn(str(a_blended_node.h) + str(a_blended_node.name))
+        log.warn(str(a_blended_node.h) + " " + str(a_blended_node.name))
         log.warn("Finish RandomBlending")
+
+        return 0
