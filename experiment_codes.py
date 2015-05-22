@@ -3,12 +3,15 @@ __author__ = 'DongMin Kim'
 import os.path
 import sys
 
+import logging
+import subprocess
+
 # To avoid unresolved reference complain in PyCharm 4.0.6
 from opencog.atomspace import AtomSpace, TruthValue, types
 from opencog.bindlink import bindlink
 from opencog.type_constructors \
-    import ConceptNode, TypeNode, VariableNode,\
-        UnorderedLink, MemberLink, InheritanceLink
+    import ConceptNode, TypeNode, VariableNode, \
+    UnorderedLink, MemberLink, InheritanceLink
 from opencog.scheme_wrapper \
     import load_scm, scheme_eval, scheme_eval_h, __init__
 
@@ -21,10 +24,14 @@ from tests.test_case_loader import TestCaseMaker
 class RESTAPILoader:
     def __init__(self, atomspace):
         self.a = atomspace
-        self.restapi = web.api.restapi.Start()
 
     def run(self):
-        self.restapi.run("", self.a)
+        # To avoid debug messages of restapi.
+        import logging
+        logging.basicConfig(level=logging.CRITICAL)
+        restapi = web.api.restapi.Start()
+        restapi.run("", self.a)
+        return 0
 
 
 # Class for dongmin's practice & experiment & test
@@ -89,4 +96,6 @@ class ExperimentCodes:
 
         # DEBUG: Run RESTAPI server automatically to see my atomspace.
         rest_api_loader = RESTAPILoader(self.a)
-        rest_api_loader.run()
+        exec_result = rest_api_loader.run()
+        if exec_result != 0:
+            print "Error in restapi class."
