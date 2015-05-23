@@ -101,6 +101,8 @@ class ShellBlending:
                         ]
                     )
 
+            # self.print_atomspace_for_debug()
+
             log.warn("Input n to stop, or continue.")
             is_stop = raw_input()
 
