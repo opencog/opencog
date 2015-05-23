@@ -12,8 +12,11 @@ inst.run()
 
 ## Files
 * shell_blending.py: Main program.
-* experiment_codes.py : Several dummy codes for (testing || developing || debugging).
+* shell_auto_run.py: Auto load and run blending for debug.
 
 ## Folders
-* note: Various notes to save useful information for my project.
+* blender: Available blenders.
 * diary: My working progress reports for GSoC 2015 project.
+* note: Various notes to save useful information for my project.
+* tests: Input data for test conceptual blending.
+* util: Several util files.

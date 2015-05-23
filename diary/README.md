@@ -3,7 +3,6 @@
 
 ## Now
 ### In Progress
-* Find the method to get my link's truthvalue (link.tv is not match with my input).
 * Implement blender selector by passing instance which is subclass of abstract class.
 * Check for made blended node and trying to test with several case.
 * Select nodes to blending.
@@ -25,25 +24,25 @@
 * Decide whether or not to execute blending and prepare
   * Implement skipping blend and run the next cycle
   * Implement selecting ConceptNode which has best value (proper value)
+* Check the conflict links in each node and remove.
+  * Implement removing conflict links
+* Detect and improve conflict links in newly blended node
+  * Select one by random in 2^k possible things
 
 ### Pause
 * Search for good algorithms to use in each step.
 * Design about public API of my project.
   * I think I need to start creating mindagent as soon as possible, instead of 
  various considering about architecture.
-
+* Implement correct truthvalue of link method selector by passing instance 
+ which is subclass of abstract class.
+* Make API document.
 
 ## Result
 ### Done
-* Select nodes to blending.
-  * Select by random
-* Decide whether or not to execute blending and prepare.
-  * Try blending immediately
-* Make the simple, newly blended node and put in AtomSpace.
-* Make "agent-step" command simulating.
-* Make the links in newly blended node and correct some attribute value.
+* (empty)
 
-### Fail
+### Fail & Deadline Missed
 * (empty)
 
 ### Cancel
