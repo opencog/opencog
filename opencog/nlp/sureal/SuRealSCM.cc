@@ -25,7 +25,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -168,7 +168,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
         SuRealPMCB pmcb(pAS, qVars);
-        SatisfactionLinkPtr slp(createSatisfactionLink(qVars, qClause));
+        PatternLinkPtr slp(createPatternLink(qVars, qClause));
         slp->satisfy(pmcb);
 
         // no pattern matcher result
