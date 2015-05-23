@@ -1,15 +1,10 @@
 __author__ = 'DongMin Kim'
 
-import sys
-from opencog.atomspace import *
-from opencog.type_constructors import *
 from opencog.utilities import *
-from opencog.logger import *
 
 from blender.random_blender import *
-import blending_util
-
-from experiment_codes import ExperimentCodes
+from util import blending_util
+from util.experiment_codes import ExperimentCodes
 
 # Perform Conceptual Blending.
 class ShellBlending:

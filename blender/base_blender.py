@@ -2,10 +2,9 @@ __author__ = 'DongMin Kim'
 
 from abc import ABCMeta, abstractmethod
 
-from opencog.atomspace import *
 from opencog.type_constructors import *
 
-import blending_util
+from util import blending_util
 
 
 class BaseBlender(object):

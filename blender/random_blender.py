@@ -4,10 +4,11 @@ __author__ = 'DongMin Kim'
 
 import random
 
+from opencog.atomspace import *
 from opencog.logger import *
 
 from base_blender import *
-from blending_util import *
+from util.blending_util import *
 
 class LinkCopier:
     def __init__(self, atomspace):

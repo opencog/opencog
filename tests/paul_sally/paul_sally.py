@@ -1,13 +1,14 @@
 __author__ = 'DongMin Kim'
 
 # To avoid unresolved reference complain in PyCharm 4.0.6
-from opencog.atomspace import AtomSpace, TruthValue, types
+from opencog.atomspace import types
 from opencog.type_constructors \
-    import ConceptNode, TypeNode, VariableNode, \
-    UnorderedLink, MemberLink, InheritanceLink
+    import ConceptNode, VariableNode, \
+    MemberLink, InheritanceLink
 
-import blending_util
-from blending_util import *
+from util import blending_util
+from util.blending_util import *
+
 
 # Paul & Sally example in the book 'The Way We Think'
 # It is a simplex network example.

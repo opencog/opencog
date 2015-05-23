@@ -1,9 +1,9 @@
-import blending_util
-
 __author__ = 'DongMin Kim'
 
 from opencog.type_constructors import *
+
 from tests.paul_sally.paul_sally import PaulSallyExample
+
 
 # Make several test cases for debug.
 class TestCaseMaker:
