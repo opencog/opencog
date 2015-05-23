@@ -1,5 +1,6 @@
 __author__ = 'DongMin Kim'
 
+from opencog.atomspace import *
 from opencog.utilities import *
 
 from blender.random_blender import *
@@ -15,6 +16,10 @@ class ShellBlending:
 
         self.experiment_codes_inst = ExperimentCodes(self.a)
         self.random_blending_inst = RandomBlender(self.a)
+
+        # Log will be written to opencog.log in the current directory.
+        log.set_level('WARN')
+        log.use_stdout()
 
     def __del__(self):
         self._delete_blend_target_for_debug()
@@ -43,7 +48,7 @@ class ShellBlending:
 
         self.a.remove(self.a_blend_target)
 
-    def _backup_temp_link_list_for_debug(self, node_name_list):
+    def __backup_debug_link_list(self, node_name_list):
         info_list = []
 
         for name in node_name_list:
@@ -60,7 +65,7 @@ class ShellBlending:
 
         return info_list
 
-    def _restore_temp_link_list_for_debug(self, info_list):
+    def __restore_debug_link_list(self, info_list):
         for info in info_list:
             self.a.add_link(
                 info[0],
@@ -85,11 +90,13 @@ class ShellBlending:
                 print "Error in blending class."
                 break
 
-            log.warn("Input n to preserve temp links, or delete.")
-            is_delete_temp_link = raw_input()
-            if is_delete_temp_link != 'n' or is_delete_temp_link != 'N':
+            # log.warn("Input n to preserve temp links, or delete.")
+            # is_delete_temp_link = raw_input()
+            is_preserve_debug_link = 'y'
+            link_list_backup = []
+            if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
                 link_list_backup = \
-                    self._backup_temp_link_list_for_debug(
+                    self.__backup_debug_link_list(
                         [
                             "BlendTarget",
                             "InputSpace0", "InputSpace1", "GenericSpace"
@@ -101,20 +108,8 @@ class ShellBlending:
             log.warn("Input n to stop, or continue.")
             is_stop = raw_input()
 
-            if is_delete_temp_link != 'n' or is_delete_temp_link != 'N':
-                self._restore_temp_link_list_for_debug(link_list_backup)
+            if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
+                self.__restore_debug_link_list(link_list_backup)
 
             if is_stop == 'n' or is_stop == 'N':
                 break
-
-# Log will be written to opencog.log in the current directory.
-log.set_level('WARN')
-log.use_stdout()
-
-# Start Conceptual Blending.
-inst = ShellBlending()
-inst.run()
-inst.__del__()
-
-# DEBUG: To keep program in running while view my result of coding.
-# raw_input("Press enter to exit\n")
