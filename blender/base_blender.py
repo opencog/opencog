@@ -8,6 +8,9 @@ from util import blending_util
 
 
 class BaseBlender(object):
+    """
+    :type a: opencog.atomspace_details.AtomSpace
+    """
     __metaclass__ = ABCMeta
 
     def __init__(self, atomspace):

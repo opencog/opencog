@@ -1,8 +1,13 @@
+from opencog.type_constructors import Link
+
 __author__ = 'DongMin Kim'
 
 from opencog.atomspace import *
 
 class LinkCopier:
+    """
+    :type a: opencog.atomspace_details.AtomSpace
+    """
     def __init__(self, atomspace):
         self.a = atomspace
 
@@ -12,8 +17,12 @@ class LinkCopier:
     # (C) is dst_node
     # (B) is src_node in LinkCopier context.
     # (B) is dst_node in LinkSrcInfo context.
-
     class LinkSrcInfoContainer:
+        """
+        :type link_list: list[opencog.type_constructors.Link]
+        :type link_dict: dict[LinkSrcInfo, LinkInfo]
+        :type link_set: set
+        """
         def __init__(self, link_list=None, link_dict=None, link_set=None):
             self.link_list = link_list
             self.link_dict = link_dict
@@ -32,11 +41,25 @@ class LinkCopier:
             return self.link_set
 
     class LinkSrcInfo:
+        """
+        :type t: opencog.atomspace.types
+        :type src_h: int
+        """
         def __init__(self, link_type=None, link_src_handle=None):
             self.t = link_type
             self.src_h = link_src_handle
 
+        def __eq__(self, other):
+            return (self.t == other.t) and (self.src_h == other.src_h)
+
+        def __hash__(self):
+            return hash(self.src_h)
+
     class LinkInfo:
+        """
+        :type h: opencog.atomspace.Handle
+        :type tv: opencog.atomspace.TruthValue
+        """
         def __init__(self, link_h_value=None, link_tv=None):
             self.h = link_h_value
             self.tv = link_tv
@@ -74,19 +97,20 @@ class LinkCopier:
         for link_src_info in link_set:
             src_node = self.a[Handle(link_src_info.src_h)]
             link_info = src_info_cont.d[link_src_info]
-            self.a.add_link(
-                link_src_info.t,
-                [src_node, dst_node],
-                link_info.tv
-            )
+            if src_node.h != dst_node.h:
+                self.a.add_link(
+                    link_src_info.t,
+                    [src_node, dst_node],
+                    link_info.tv
+                )
 
     def __modify_exist_links(self, src_info_cont, dst_info_cont, link_set):
         # Correct conflict link value in target node.
         for link_src_info in link_set:
             src_link_info = src_info_cont.d[link_src_info]
             dst_link_info = dst_info_cont.d[link_src_info]
-            src_link = self.a[Handle(src_link_info.h)]
-            dst_link = self.a[Handle(dst_link_info.h)]
+            src_link = self.a[src_link_info.h]
+            dst_link = self.a[dst_link_info.h]
 
             # Correct conflict link value in target node.
             self.__correct_strength_of_links(src_link, dst_link)

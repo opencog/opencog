@@ -39,7 +39,6 @@ class ShellBlending:
         )
 
     def _delete_blend_target_for_debug(self):
-        # l_link_list = self.a.get_incoming(self.a_blend_target.h)
         l_link_list = self.a.get_atoms_by_target_atom(
             types.Link, self.a_blend_target
         )

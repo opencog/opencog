@@ -11,6 +11,7 @@ from base_blender import *
 from util.blending_util import *
 from util.link_copier import *
 
+
 class RandomBlender(BaseBlender):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
@@ -59,11 +60,19 @@ class RandomBlender(BaseBlender):
 
         return ret
 
+    def __get_concrete_atom_for_debug(self):
+        return \
+            [
+                self.a.get_atoms_by_name(types.Atom, 'Mother')[0],
+                self.a.get_atoms_by_name(types.Atom, 'Daughter')[0],
+            ]
+
     def blend(self):
         log.warn("Start RandomBlending")
 
         # Select nodes to blending.
         a_nodes = self.__get_random_atom(2)
+        # a_nodes = self.__get_concrete_atom_for_debug()
 
         # Decide whether or not to execute blending and prepare.
         # - Do nothing.
