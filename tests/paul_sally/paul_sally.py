@@ -203,10 +203,11 @@ class PaulSallyExample:
 
     # - Blended Space
     def _make_blended_space(self):
-        # do nothing
-        print ""
+        # Make instance of space concept.
+        a_blended_space = ConceptNode("BlendedSpace", self.atom_tv)
 
     def make(self):
         self._make_input_space_0()
         self._make_input_space_1()
         self._make_generic_space()
+        self._make_blended_space()

@@ -103,6 +103,19 @@ class RandomBlender(BaseBlender):
             blend_target_link_tv
         )
 
+        # DEBUG: Link with Generic Space.
+        a_blended_space = \
+            self.a.get_atoms_by_name(
+                types.Atom,
+                "BlendedSpace"
+            )[0]
+
+        self.a.add_link(
+            types.MemberLink,
+            [a_blended_node, a_blended_space],
+            blend_target_link_tv
+        )
+
         log.warn(str(a_blended_node.h) + " " + str(a_blended_node.name))
         log.warn("Finish RandomBlending")
 
