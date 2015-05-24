@@ -17,7 +17,15 @@ class BaseBlender(object):
                 types.Atom,
                 blending_util.BLEND_TARGET_NODE_NAME
             )[0]
+        self.last_status = 0
+
+    def __str__(self):
+        return 'BaseBlender'
 
     @abstractmethod
     def blend(self):
+        pass
+
+    @abstractmethod
+    def get_last_status(self):
         pass

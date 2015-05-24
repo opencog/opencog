@@ -1,3 +1,5 @@
+from blender.blender_factory import BlenderFactory
+
 __author__ = 'DongMin Kim'
 
 from opencog.atomspace import *
@@ -9,13 +11,19 @@ from util.experiment_codes import ExperimentCodes
 
 # Perform Conceptual Blending.
 class ShellBlending:
+    """
+    :type a: opencog.atomspace_details.AtomSpace
+    :type blender_inst: blender.base_blender.BaseBlender
+    """
     def __init__(self):
         self.a = AtomSpace()
         initialize_opencog(self.a)
         self._make_blend_target_for_debug()
 
         self.experiment_codes_inst = ExperimentCodes(self.a)
-        self.random_blending_inst = RandomBlender(self.a)
+
+        self.blender_factory = BlenderFactory(self.a)
+        self.blender_inst = None
 
         # Log will be written to opencog.log in the current directory.
         log.set_level('WARN')
@@ -23,13 +31,6 @@ class ShellBlending:
 
     def __del__(self):
         self._delete_blend_target_for_debug()
-
-    def print_atomspace_for_debug(self):
-        print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
-        print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
-
-    def get_atomspace_for_debug(self):
-        return self.a
 
     # DEBUG: Make temporary concept - To define which node is target to blend.
     def _make_blend_target_for_debug(self):
@@ -73,6 +74,44 @@ class ShellBlending:
                 info[3]
             )
 
+    def __ask_user_to_run_or_stop(self):
+        # log.warn("Input n to preserve temp links, or delete.")
+        # is_delete_temp_link = raw_input()
+        is_preserve_debug_link = 'y'
+        link_list_backup = []
+        if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
+            link_list_backup = \
+                self.__backup_debug_link_list(
+                    [
+                        "BlendTarget",
+                        "InputSpace0", "InputSpace1", "GenericSpace"
+                    ]
+                )
+
+        # self.print_atomspace_for_debug()
+
+        log.warn("Input n to stop, or continue.")
+        is_stop = raw_input()
+
+        if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
+            self.__restore_debug_link_list(link_list_backup)
+
+        return is_stop
+
+    def __blender_select(self, id_or_name=None):
+        if id_or_name is None:
+            self.blender_factory.print_blender_list()
+            id_or_name = self.blender_factory.ask_to_user()
+
+        self.blender_inst = self.blender_factory.get_blender(id_or_name)
+
+    def print_atomspace_for_debug(self):
+        print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
+        print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
+
+    def get_atomspace_for_debug(self):
+        return self.a
+
     def call_experiment_functions(self):
         self.experiment_codes_inst.execute()
 
@@ -80,36 +119,19 @@ class ShellBlending:
         log.warn("Start ShellBlending")
 
         self.call_experiment_functions()
+        # self.__blender_select(0)
+        self.__blender_select('RandomBlender')
 
         # Simulate cogserver environment.
         # Blending methods will be located in here.
         while 1:
-            exec_result = self.random_blending_inst.blend()
+            self.blender_inst.blend()
 
-            if exec_result != 0:
-                print "Error in blending class."
+            if self.blender_inst.get_last_status() != 0:
+                print log.warn('Error in blending class.')
                 break
 
-            # log.warn("Input n to preserve temp links, or delete.")
-            # is_delete_temp_link = raw_input()
-            is_preserve_debug_link = 'y'
-            link_list_backup = []
-            if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
-                link_list_backup = \
-                    self.__backup_debug_link_list(
-                        [
-                            "BlendTarget",
-                            "InputSpace0", "InputSpace1", "GenericSpace"
-                        ]
-                    )
-
-            # self.print_atomspace_for_debug()
-
-            log.warn("Input n to stop, or continue.")
-            is_stop = raw_input()
-
-            if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':
-                self.__restore_debug_link_list(link_list_backup)
+            is_stop = self.__ask_user_to_run_or_stop()
 
             if is_stop == 'n' or is_stop == 'N':
                 break

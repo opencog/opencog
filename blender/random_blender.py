@@ -17,6 +17,12 @@ class RandomBlender(BaseBlender):
 
         self.link_copier_class = LinkCopier(self.a)
 
+    def __str__(self):
+        return 'RandomBlender'
+
+    def get_last_status(self):
+        return self.last_status
+
     # Select atoms which are connected to specific atom.
     def __get_incoming_node_list(self, target):
         ret = []
