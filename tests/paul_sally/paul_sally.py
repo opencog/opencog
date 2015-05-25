@@ -1,5 +1,6 @@
+from tests.base_test_case import BaseTestCase
 from util import blending_util
-from util.blending_util import blend_target_link_tv, rand_tv
+from util.blending_util import *
 
 __author__ = 'DongMin Kim'
 
@@ -11,37 +12,17 @@ from opencog.type_constructors \
 
 # Paul & Sally example in the book 'The Way We Think'
 # It is a simplex network example.
-class PaulSallyExample:
+class PaulSallyExample(BaseTestCase):
     def __init__(self, atomspace):
-        self.a = atomspace
-        self.atom_list_for_debug = []
-        self.link_list_for_debug = []
-        self.default_atom_tv = TruthValue(0.9, 0.8)
-        self.default_link_tv = TruthValue(0.7, 0.6)
-        self.a_blend_target = \
-            self.a.get_atoms_by_name(
-                types.Atom,
-                blending_util.BLEND_TARGET_NODE_NAME
-            )[0]
+        super(self.__class__, self).__init__(atomspace)
 
-    def __make_link_all(
-            self,
-            link_type,
-            src_node_list,
-            dst_node,
-            tv=None
-    ):
-        if tv is None:
-            for node in src_node_list:
-                self.a.add_link(link_type, [node, dst_node], rand_tv())
-        else:
-            for node in src_node_list:
-                self.a.add_link(link_type, [node, dst_node], tv)
+    def __str__(self):
+        return 'PaulSallyExample'
 
     # - Input Space 0
     # Start to make 'Family' network.
     # It has frame. It not has variables.
-    def _make_input_space_0(self):
+    def __make_input_space_0(self):
         # Make instance of space&frame concept.
         a_input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
         a_family = ConceptNode("Family", rand_tv())
@@ -55,7 +36,8 @@ class PaulSallyExample:
         a_daughter = ConceptNode("Daughter", rand_tv())
 
         # Link with blend target.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_grand_father, a_grand_mother,
              a_father, a_mother, a_son, a_daughter],
@@ -64,7 +46,8 @@ class PaulSallyExample:
         )
 
         # Link with family frame type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_grand_father, a_grand_mother,
              a_father, a_mother, a_son, a_daughter],
@@ -72,7 +55,8 @@ class PaulSallyExample:
         )
 
         # Link with input space 0 type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_father, a_daughter],
             a_input_space_0,
@@ -94,7 +78,7 @@ class PaulSallyExample:
     # - Input Space 1
     # Start to make 'actual human' network.
     # It not has frame. It has variables.
-    def _make_input_space_1(self):
+    def __make_input_space_1(self):
         # Make instance of space concept.
         a_input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
 
@@ -103,7 +87,8 @@ class PaulSallyExample:
         a_sally = VariableNode("Sally", rand_tv())
 
         # Link with blend target.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_paul, a_sally],
             self.a_blend_target,
@@ -122,7 +107,7 @@ class PaulSallyExample:
             self.default_link_tv)
 
     # - Generic Space
-    def _make_generic_space(self):
+    def __make_generic_space(self):
         # Make instance of space concept.
         a_generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
 
@@ -132,7 +117,8 @@ class PaulSallyExample:
         a_woman = ConceptNode("Woman", rand_tv())
 
         # Link with blend target.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_human, a_man, a_woman],
             self.a_blend_target,
@@ -140,7 +126,8 @@ class PaulSallyExample:
         )
 
         # Link with man type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.InheritanceLink,
             [
                 self.a.get_atoms_by_name
@@ -156,7 +143,8 @@ class PaulSallyExample:
         )
 
         # Link with woman type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.InheritanceLink,
             [
                 self.a.get_atoms_by_name
@@ -183,14 +171,16 @@ class PaulSallyExample:
         """
 
         # Link with human being type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.InheritanceLink,
             [a_man, a_woman],
             a_human
         )
 
         # Link with input space 0 type.
-        self.__make_link_all(
+        make_link_all(
+            self.a,
             types.MemberLink,
             [a_man, a_woman, a_human],
             a_generic_space,
@@ -205,12 +195,12 @@ class PaulSallyExample:
             self.default_link_tv)
 
     # - Blended Space
-    def _make_blended_space(self):
+    def __make_blended_space(self):
         # Make instance of space concept.
         a_blended_space = ConceptNode("BlendedSpace", self.default_atom_tv)
 
     def make(self):
-        self._make_input_space_0()
-        self._make_input_space_1()
-        self._make_generic_space()
-        self._make_blended_space()
+        self.__make_input_space_0()
+        self.__make_input_space_1()
+        self.__make_generic_space()
+        self.__make_blended_space()
