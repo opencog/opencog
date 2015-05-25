@@ -50,6 +50,13 @@ class DebugBlender(BaseBlender):
             rand_tv()
         )
 
+        # Make the links between exist nodes and newly blended node.
+        # Correct some attribute value of new links.
+        self.link_copier_class.copy_all_link_to_new_node(
+            [a_node_0, a_node_1],
+            a_blended_node
+        )
+
         # Make the links between source nodes and newly blended node.
         self.a.add_link(
             types.AssociativeLink,
@@ -60,13 +67,6 @@ class DebugBlender(BaseBlender):
             types.AssociativeLink,
             [a_node_1, a_blended_node],
             rand_tv()
-        )
-
-        # Make the links between exist nodes and newly blended node.
-        # Correct some attribute value of new links.
-        self.link_copier_class.copy_all_link_to_new_node(
-            [a_node_0, a_node_1],
-            a_blended_node
         )
 
         # Detect and improve conflict links in newly blended node.
