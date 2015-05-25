@@ -85,7 +85,8 @@ class RandomBlender(BaseBlender):
         a_node_1 = a_nodes[1]
         a_blended_node = ConceptNode(
             str(a_node_0.name) +
-            str(a_node_1.name)
+            str(a_node_1.name),
+            rand_tv()
         )
 
         # Make the links between source nodes and newly blended node.
