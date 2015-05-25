@@ -4,7 +4,7 @@
  the same time.
 
 # Input
-![Image of paul-sally example's input]
-(https://github.com/kim135797531/opencog-python-blending/blob/develop/tests/debate_with_kant/input.png)
+![Image of debate with kant example's input]
+(https://github.com/kim135797531/opencog-python-blending/blob/master/tests/debate_with_kant/input.png)
 
 # Output Goal
