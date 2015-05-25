@@ -63,8 +63,8 @@ class RandomBlender(BaseBlender):
     def __get_concrete_atom_for_debug(self):
         return \
             [
-                self.a.get_atoms_by_name(types.Atom, 'Mother')[0],
-                self.a.get_atoms_by_name(types.Atom, 'Daughter')[0],
+                self.a.get_atoms_by_name(types.Atom, 'Man')[0],
+                self.a.get_atoms_by_name(types.Atom, 'Woman')[0],
             ]
 
     def blend(self):
