@@ -118,8 +118,10 @@ class ShellBlending:
         log.warn("Start ShellBlending")
 
         self.call_experiment_functions()
-        # self.__blender_select(0)
-        self.__blender_select('RandomBlender')
+
+        # if no argument -> custom select.
+        # if (0) or ('RandomBlender') -> pre-defined select.
+        self.__blender_select('DebugBlender')
 
         # Simulate cogserver environment.
         # Blending methods will be located in here.

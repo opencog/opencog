@@ -1,3 +1,4 @@
+from blender.debug_blender import DebugBlender
 from blender.random_blender import RandomBlender
 from opencog.logger import log
 
@@ -13,7 +14,8 @@ class BlenderFactory(object):
         self.a = atomspace
 
         self.blender_list = [
-            RandomBlender(self.a)
+            RandomBlender(self.a),
+            DebugBlender(self.a)
         ]
 
         self.blender_count = len(self.blender_list)

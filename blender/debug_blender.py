@@ -12,59 +12,28 @@ from util.blending_util import *
 from util.link_copier import *
 
 
-class RandomBlender(BaseBlender):
+class DebugBlender(BaseBlender):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
 
         self.link_copier_class = LinkCopier(self.a)
 
     def __str__(self):
-        return 'RandomBlender'
+        return 'DebugBlender'
 
     def get_last_status(self):
         return self.last_status
 
-    # Select atoms which are connected to specific atom.
-    def __get_incoming_node_list(self, target):
+    def __get_concrete_atom_for_debug(self, name_list):
         ret = []
-
-        xget_target_link = self.a.xget_atoms_by_target_atom(types.Link, target)
-
-        for link in xget_target_link:
-            xget_target_link_node = self.a.xget_outgoing(link.h)
-            for node in xget_target_link_node:
-                if node.h != target.h:
-                    ret.append(node)
+        for name in name_list:
+            ret.append(self.a.get_atoms_by_name(types.Atom, name)[0])
 
         return ret
 
-    # Select atoms randomly and return
-    # atom_type = decide the type of atoms to select
-    # count = decide the number of atoms to select
-    def __get_random_atom(self, count=2):
-        ret = []
-
-        # TODO: change to search all atomspace
-        # (BlendTarget is only useful in development phase)
-        a_atom_list = self.__get_incoming_node_list(self.a_blend_target)
-        a_list_size = a_atom_list.__len__()
-
-        if a_list_size < count:
-            print('Size of atom list is too small')
-            return ret
-
-        a_index_list = random.sample(range(0, a_list_size), count)
-
-        for i in a_index_list:
-            ret.append(a_atom_list[i])
-
-        return ret
-
-    def blend(self):
-        log.warn("Start RandomBlending")
-
+    def __algorithm_for_debug(self, name_list):
         # Select nodes to blending.
-        a_nodes = self.__get_random_atom(2)
+        a_nodes = self.__get_concrete_atom_for_debug(name_list)
 
         # Decide whether or not to execute blending and prepare.
         # - Do nothing.
@@ -82,7 +51,6 @@ class RandomBlender(BaseBlender):
         )
 
         # Make the links between source nodes and newly blended node.
-        # TODO: Change to make with proper reason, not make in every blending.
         self.a.add_link(
             types.AssociativeLink,
             [a_node_0, a_blended_node],
@@ -125,6 +93,10 @@ class RandomBlender(BaseBlender):
         )
 
         log.warn(str(a_blended_node.h) + " " + str(a_blended_node.name))
-        log.warn("Finish RandomBlending")
 
+    def blend(self):
+        log.warn("Start DebugBlending")
+        self.__algorithm_for_debug(['Father', 'Paul'])
+        self.__algorithm_for_debug(['Daughter', 'Sally'])
+        log.warn("Finish DebugBlending")
         return 0
