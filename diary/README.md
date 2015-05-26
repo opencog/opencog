@@ -1,11 +1,15 @@
 # Progress summary of this week
-* Beautiful version is available in my wiki (http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending)
+* Beautiful version is available in my wiki 
+ (http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending)
 
 ## Now
 ### In Progress
+* Try to apply STI in my test cases. (Currently test cases use 'BlendTarget' 
+ which is only useful in development stage)
 * Select nodes to blending.
   * Implement checking for some values in HebbianLink and SimilarityLink when 
  select node
+    * Try to apply Attention Allocation agents
   * Make the waiting queue of ConceptNode
 * Decide whether or not to execute blending and prepare
   * Implement skipping blend and run the next cycle
@@ -17,7 +21,7 @@
 
 **Study**
 
-* (empty)
+* Try to use Unified Rule Engine, PLN in python.
 
 **CodingCodingCoding**
 
