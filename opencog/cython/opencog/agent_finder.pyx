@@ -31,20 +31,7 @@ import imp
 import traceback
 import opencog.cogserver
 from opencog.cogserver cimport cAgent, stim_t, cRequest
-
-cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
-    cdef cppclass cAtomSpace "opencog::AtomSpace":
-        AtomSpace()
-
-cdef class AtomSpace:
-    cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
-
-cdef AtomSpace_factory(cAtomSpace *to_wrap):
-    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.atomspace = to_wrap
-    instance.owns_atomspace = False
-    return instance
+from opencog.atomspace cimport cAtomSpace, AtomSpace_factory
 
 cdef extern from "agent_finder_types.h" namespace "opencog":
     cdef struct requests_and_agents_t:
