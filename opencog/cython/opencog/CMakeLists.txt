@@ -14,6 +14,12 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
+MESSAGE("cython path ${ATOMSPACE_INCLUDE_DIR}, 	${PYTHON_INCLUDE_DIRS},
+    ${PROJECT_BINARY_DIR},
+	${CMAKE_CURRENT_SOURCE_DIR},
+	${CMAKE_CURRENT_BINARY_DIR}
+")
+
 SET(CYTHON_FLAGS "-f")
 
 # Cythonizes one .pyx file into a .cpp file
@@ -74,7 +80,35 @@ IF (HAVE_ATOMSPACE)
 
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "${DATADIR}/python/opencog")
+    ############################ spaceserver #########################
+	CYTHON_ADD_MODULE_PYX(spaceserver
+		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
+		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+	)
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spaceserver.cpp")
+	ADD_LIBRARY(spaceserver SHARED
+		spaceserver.cpp
+	)
+
+    TARGET_LINK_LIBRARIES(spaceserver
+	    SpaceMap
+		spacetime
+		${ATOMSPACE_LIBRARIES}
+		${COGUTIL_LIBRARY}
+		${PYTHON_LIBRARIES}
+	)
+
+	SET_TARGET_PROPERTIES(spaceserver PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME spaceserver)
+
+	INSTALL (TARGETS spaceserver
+		DESTINATION "${DATADIR}/python/opencog")
+
+	
 ENDIF (HAVE_ATOMSPACE)
+
+	
 
 
 IF (HAVE_SERVER)
