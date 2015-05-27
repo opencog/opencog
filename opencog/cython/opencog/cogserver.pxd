@@ -26,11 +26,9 @@ cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
 # AtomSpaces
-
+from opencog.atomspace cimport cAtomSpace
 cdef extern from "opencog/server/BaseServer.h" namespace "opencog":
-    cdef cppclass cAtomSpace "opencog::AtomSpace"
-    long server_atomspace()
-
+    cAtomSpace* server_atomspace()
 
 # ideally we'd import these typedefs instead of defining them here but I don't
 # know how to do that with Cython
