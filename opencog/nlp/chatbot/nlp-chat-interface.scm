@@ -14,14 +14,19 @@
 ;call "check_query_type" function to check if the query is  'wh' or 'yes-or-no' question
 ;if query is yes-or-no call 'truth_query_process' else call 'wh_query_process'
 ;----------------------------------------------------------------------------------------------
-(define (process_query query user)
-	(define querySentence (car (nlp-parse query)))
-	(cond 
-		((eq? (check_query_type querySentence) "TruthQuerySpeechAct")
-		      (truth_query_process querySentence)
-        	((eq? (check_query_type querySentence) "InterrogativeSpeechAct")
-		      (wh_query_process querySentence)))
-
+(define (process_query user query)
+        (display "Hello ")
+        (display user)
+        (display ", you said: \"")
+        (display query)
+        (define querySentence (car (nlp-parse query)))
+        (cond
+                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(truth_query_process querySentence)
+                (display "You ask a TruthQuerySpeechAct"))
+                ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(wh_query_process querySentence)
+                (display "You as an InterrogativeSpeechAct"))
+        )
+)
 ;----------------------------------------------------------------------------------------------
 ;Use backward chaning to process 'yes-or-no' question
 ;depending on the backward chaning generate the answer (using SuRel)
