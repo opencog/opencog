@@ -21,11 +21,12 @@
         (display user)
         (display ", you said: \"")
         (display query)
+        (newline)
         (cond
-                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(truth_query_process querySentence)
-                (display "You ask a TruthQuerySpeechAct"))
-                ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(wh_query_process querySentence)
-                (display "You as an InterrogativeSpeechAct"))
+                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query")
+                (truth_query_process querySentence))
+                ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You ask an InterrogativeSpeechAct")
+                (wh_query_process querySentence))
         )
 )
 ;----------------------------------------------------------------------------------------------
@@ -42,14 +43,12 @@
 ; process wh-question using the fuzzy hyper graph Matcher
 ;----------------------------------------------------------------------------------------------
 (define (wh_query_process query)
-;;call the graph matcher 
- (get-similar-sentences query)
-
+    (get-similar-sentences query)
 )
 
 ;---------------------------------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward chaining
-; Example : if the query is "is Matthew student?"
+; Example : if the query is "is Matthew a student?"
 ; this function will find 
 ; Inheritance 
 ;	"Matthew" 
@@ -57,14 +56,15 @@
 ; from the parse and by substituting Matthew with variable $X the backward chaning will be called 
 ; (cog-bc (InherintanceLink $X "student"))
 ;---------------------------------------------------------------------------------------------
-(define (fAtom query)
-	(define x (cog-filter 'EvaluationLink (cog-outgoing-set 
-		(car (cog-chase-link 'ReferenceLink 'SetLink 
-			(car (cog-chase-link 'InterpretationLink 'InterpretationNode 
-				(car (cog-chase-link 'ParseLink 'ParseNode  query))
-			))
-		))
-	)))
+(define (fAtom querySentence)
+        (define x)
+        (set! x (cog-filter 'EvaluationLink (cog-outgoing-set
+                (car (cog-chase-link 'ReferenceLink 'SetLink
+                        (car (cog-chase-link 'InterpretationLink 'InterpretationNode
+                                (car (cog-chase-link 'ParseLink 'ParseNode  querySentence))
+                        ))
+                ))
+        )))
 (gar (gdr (car (filter cAtom? x)))))
 ;-----------------------------------------------------------------------------------------------
 (define cAtom?
