@@ -91,6 +91,8 @@ void ViterbiUTest::setUp(void)
 	// and not by the test-case.
 	config().set("SCM_PRELOAD",
 		"opencog/scm/core_types.scm, "
+		"opencog/scm/opencog.scm, "
+		"opencog/scm/opencog/query.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
 		"opencog/nlp/viterbi/viterbi_types.scm, "
 		"opencog/nlp/viterbi/parse.scm");

@@ -88,6 +88,7 @@ void Parser::initialize_state()
 
 	// We are expecting the initial wall to be unique.
 	//OC_ASSERT(atomspace().getArity(wall_conset_h) == 1, "Unexpected wall structure");
+	_scm_eval->eval("(use-modules (opencog query))");
 
 	// Initial state is anchored where it can be found.
 	stringstream pole;
