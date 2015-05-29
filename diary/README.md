@@ -47,6 +47,10 @@
 * Check for made blended node and trying to test with several case.
   * Done. (Paul & Sally example, Debate with Kant example)
   * However, it doesn't make any sense at current time.
+* Fix the atomspace issues in python binding.
+  * Occured by wrong AtomSpace definition in cython binding.
+  * See my PR(https://github.com/opencog/opencog/pull/1632)
+  * See my PR(https://github.com/opencog/atomspace/pull/63)
 
 ### Fail & Deadline Missed
 * (empty)
