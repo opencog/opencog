@@ -880,20 +880,18 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
 std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing)
 {
     // Create BindLink used by pattern matcher
-    std::vector<Handle> inheritanceLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+    std::vector<Handle> inheritanceLinkOutgoings, bindLinkOutgoings;
 
     Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
 
     inheritanceLinkOutgoings.push_back(hFirstOutgoing);
     inheritanceLinkOutgoings.push_back(hVariableNode);
-    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings);
-
-    implicationLinkOutgoings.push_back(hinheritanceLink);
-    implicationLinkOutgoings.push_back(hinheritanceLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-
+    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK,
+                                                inheritanceLinkOutgoings);
+    
     bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(hinheritanceLink);
+    bindLinkOutgoings.push_back(hinheritanceLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher

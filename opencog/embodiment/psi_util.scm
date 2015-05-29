@@ -197,24 +197,21 @@
 
             ); ListLink 
 
-            (ImplicationLink
-                ; Pattern to be searched
-                (AtTimeLink
-                    (VariableNode "$var_time_node_type") 
-                    (SimilarityLink
-                        (VariableNode "$var_number_node_type") 
-                        updater_execution_output_link
-                    )         
-                )             
-              
-                ; Return values encapsulated by a ListLink
-                (ListLink
-                    (VariableNode "$var_time_node_type")    
+            ; Pattern to be searched
+            (AtTimeLink
+                (VariableNode "$var_time_node_type") 
+                (SimilarityLink
                     (VariableNode "$var_number_node_type") 
                     updater_execution_output_link
-                )
-
-            ); ImplicationLink
+                )         
+            )             
+          
+            ; Return values encapsulated by a ListLink
+            (ListLink
+                (VariableNode "$var_time_node_type")    
+                (VariableNode "$var_number_node_type") 
+                updater_execution_output_link
+            )
 
         ); BindLink 
 
@@ -394,22 +391,20 @@
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (EvaluationLink
-                (PredicateNode
-                    (string-trim-both predicate_name)                  
-                ) 
-                (VariableNode "$var_list_link_type")
-            )
+        ; Pattern to be searched    
+        (EvaluationLink
+            (PredicateNode
+                (string-trim-both predicate_name)                  
+            ) 
+            (VariableNode "$var_list_link_type")
+        )
 
-            ; Return values
-            (EvaluationLink
-                (PredicateNode
-                    (string-trim-both predicate_name)                  
-                ) 
-                (VariableNode "$var_list_link_type")
-            )
+        ; Return values
+        (EvaluationLink
+            (PredicateNode
+                (string-trim-both predicate_name)                  
+            ) 
+            (VariableNode "$var_list_link_type")
         )
 
     ); BindLink 
@@ -543,21 +538,8 @@
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (LatestLink 
-                (AtTimeLink
-                    (VariableNode "$var_time_node_type") 
-                    (EvaluationLink
-                        (PredicateNode
-                            (string-trim-both predicate_name)                  
-                        ) 
-                        (VariableNode "$var_list_link_type") 
-                    )
-                ) 
-            ); LatestLink     
-                 
-            ; Return values
+        ; Pattern to be searched    
+        (LatestLink 
             (AtTimeLink
                 (VariableNode "$var_time_node_type") 
                 (EvaluationLink
@@ -566,8 +548,19 @@
                     ) 
                     (VariableNode "$var_list_link_type") 
                 )
-            ); AtTimeLink 
-        )
+            ) 
+        ); LatestLink     
+             
+        ; Return values
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type") 
+            )
+        ); AtTimeLink 
 
     ); BindLink 
 )
@@ -799,29 +792,27 @@
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (AtTimeLink
-                (VariableNode "$var_time_node_type") 
-                (EvaluationLink
-                    (PredicateNode
-                        (string-trim-both predicate_name)                  
-                    ) 
-                    (VariableNode "$var_list_link_type")
-                )
+        ; Pattern to be searched    
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
             )
-                 
-            ; Return values
-            (AtTimeLink
-                (VariableNode "$var_time_node_type") 
-                (EvaluationLink
-                    (PredicateNode
-                        (string-trim-both predicate_name)                  
-                    ) 
-                    (VariableNode "$var_list_link_type")
-                )
-            ); AtTimeLink 
         )
+             
+        ; Return values
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
+            )
+        ); AtTimeLink 
 
     ); BindLink 
 )
@@ -837,19 +828,17 @@
         ; Variables
         (VariableNode "$var_any")
 
-        (ImplicationLink
-            ; Pattern to be searched
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
+        ; Pattern to be searched
+        (ReferenceLink
+            first_outgoing
+            (VariableNode "$var_any")
+        ) 
 
-            ; Return result
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
-        ); ImplicationLink
+        ; Return result
+        (ReferenceLink
+            first_outgoing
+            (VariableNode "$var_any")
+        ) 
 
     ); BindLink 
 )

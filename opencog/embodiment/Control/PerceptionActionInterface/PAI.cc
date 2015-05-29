@@ -4174,11 +4174,8 @@ double PAI::getAvatarWeight(Handle avatarNode)
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    implicationLinkOutgoings.push_back(evalLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-
     bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(evalLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
