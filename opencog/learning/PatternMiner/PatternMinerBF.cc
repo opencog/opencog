@@ -628,18 +628,16 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 //          (VariableNode "$var_1")
 //          (VariableNode "$var_2")
 //          ...
-//        (ImplicationLink
-//          ;; The pattern to be searched for
-//          (pattern)
-//          (Listlink)
-//              ;; The instance to be returned.
-//              (result)
-//              (variable Listlink)
-//        )
+//        ;; The pattern to be searched for
+//        (pattern)
+//        (Listlink)
+//            ;; The instance to be returned.
+//            (result)
+//            (variable Listlink)
 //     )
 
 
-   HandleSeq implicationLinkOutgoings, bindLinkOutgoings, variableNodes, linksWillBeDel;
+   HandleSeq bindLinkOutgoings, variableNodes, linksWillBeDel;
 
    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
@@ -664,22 +662,17 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
    hAndLink->merge(TruthValue::TRUE_TV());
    Handle hOutPutListLink = originalAtomSpace->addLink(LIST_LINK, patternToMatch);
    hOutPutListLink->merge(TruthValue::TRUE_TV());
-   implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-   implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
 //    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
 //            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
-
-
-   Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-   hImplicationLink->merge(TruthValue::TRUE_TV());
 
    // add variable atoms
    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes);
    hVariablesListLink->merge(TruthValue::TRUE_TV());
 
    bindLinkOutgoings.push_back(hVariablesListLink);
-   bindLinkOutgoings.push_back(hImplicationLink);
+   bindLinkOutgoings.push_back(hAndLink);
+   bindLinkOutgoings.push_back(hOutPutListLink);
    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings);
    hBindLink->merge(TruthValue::TRUE_TV());
 
