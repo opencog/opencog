@@ -14,30 +14,28 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$verb")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$adv")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_advmod")
+                (ListLink
                     (VariableNode "$verb")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
                     (VariableNode "$adv")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_advmod")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$adv")
-                    )
                 )
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-advmod-rule")
-           	      (ListLink
-           	         (VariableNode "$verb")
-           	         (VariableNode "$adv")
-                )
+        )
+        (ExecutionOutputLink
+       	   (GroundedSchemaNode "scm: pre-advmod-rule")
+       	      (ListLink
+       	         (VariableNode "$verb")
+       	         (VariableNode "$adv")
             )
         )
     )

@@ -38,31 +38,30 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (InheritanceLink
-                (AndLink
+        (InheritanceLink
+            (AndLink
+                (VariableNode "$C")
+                (VariableNode "$A"))
+            (AndLink
+                (VariableNode "$C")
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context")
+            (ListLink
+                ; this ContextLink is the desired output
+                (ContextLink
                     (VariableNode "$C")
-                    (VariableNode "$A"))
-                (AndLink
-                    (VariableNode "$C")
-                    (VariableNode "$B")))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context")
-                (ListLink
-                    ; this ContextLink is the desired output
-                    (ContextLink
-                        (VariableNode "$C")
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$B")))
-                    ; the 2nd argument of pln-formula-context
                     (InheritanceLink
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$B"))))))))
+                        (VariableNode "$A")
+                        (VariableNode "$B")))
+                ; the 2nd argument of pln-formula-context
+                (InheritanceLink
+                    (AndLink
+                        (VariableNode "$C")
+                        (VariableNode "$A"))
+                    (AndLink
+                        (VariableNode "$C")
+                        (VariableNode "$B")))))))
 
 
 ; In an EvaluationLink, the PredicateNode is not 'andified'
@@ -78,28 +77,27 @@
                 (TypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (EvaluationLink
-                (VariableNode "$A")
-                (ListLink
-                    (AndLink
-                        (VariableNode "$C")
-                        (VariableNode "$B"))))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context")
-                (ListLink
-                    (ContextLink ; output link
-                        (VariableNode "$C")
-                        (EvaluationLink
-                            (VariableNode "$A")
-                            (ListLink
-                                (VariableNode "$B"))))
-                    (EvaluationLink ; input link
+        (EvaluationLink
+            (VariableNode "$A")
+            (ListLink
+                (AndLink
+                    (VariableNode "$C")
+                    (VariableNode "$B"))))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context")
+            (ListLink
+                (ContextLink ; output link
+                    (VariableNode "$C")
+                    (EvaluationLink
                         (VariableNode "$A")
                         (ListLink
-                            (AndLink
-                                (VariableNode "$C")
-                                (VariableNode "$B")))))))))
+                            (VariableNode "$B"))))
+                (EvaluationLink ; input link
+                    (VariableNode "$A")
+                    (ListLink
+                        (AndLink
+                            (VariableNode "$C")
+                            (VariableNode "$B"))))))))
 
 ;----------------------------------------------------------------------
 ; b)
@@ -130,19 +128,18 @@
         (VariableList
             (VariableNode "$C")
             (VariableNode "$A"))
-        (ImplicationLink
-            (SubsetLink
-                (VariableNode "$C")
-                (VariableNode "$A"))
-           (ExecutionOutputLink
-               (GroundedSchemaNode "scm:pln-formula-context")
-               (ListLink
-                   (ContextLink ; output link
-                       (VariableNode "$C")
-                       (VariableNode "$A"))
-                   (SubsetLink ; input link
-                       (VariableNode "$C")
-                       (VariableNode "$A")))))))
+        (SubsetLink
+            (VariableNode "$C")
+            (VariableNode "$A"))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm:pln-formula-context")
+            (ListLink
+                (ContextLink ; output link
+                    (VariableNode "$C")
+                    (VariableNode "$A"))
+                (SubsetLink ; input link
+                    (VariableNode "$C")
+                    (VariableNode "$A"))))))
 
 ;----------------------------------------------------------------------
 ; AndLink <TV1>
@@ -163,38 +160,37 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (AndLink
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))
-                (InheritanceLink
-                    (VariableNode "$B")
-                    (VariableNode "$C")))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
-                (ListLink
-                    (InheritanceLink ; main output link
-                        (AndLink
-                            (VariableNode "$A")
-                            (VariableNode "$B"))
-                        (VariableNode "$C"))
-                    (AndLink ; embedded output AndLink
+        (AndLink
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$C"))
+            (InheritanceLink
+                (VariableNode "$B")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+            (ListLink
+                (InheritanceLink ; main output link
+                    (AndLink
                         (VariableNode "$A")
                         (VariableNode "$B"))
-                    (AndLink ; main input link
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$C"))
-                        (InheritanceLink
-                            (VariableNode "$B")
-                            (VariableNode "$C")))
-                   (InheritanceLink ; embedded input InheritanceLink
+                    (VariableNode "$C"))
+                (AndLink ; embedded output AndLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (AndLink ; main input link
+                    (InheritanceLink
                         (VariableNode "$A")
                         (VariableNode "$C"))
-                   (InheritanceLink ; embedded input InheritanceLink
+                    (InheritanceLink
                         (VariableNode "$B")
-                        (VariableNode "$C")))))))
+                        (VariableNode "$C")))
+               (InheritanceLink ; embedded input InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
+               (InheritanceLink ; embedded input InheritanceLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
 
 
 
@@ -217,38 +213,37 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (AndLink
-                (InheritanceLink
+        (AndLink
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+            (ListLink
+                (InheritanceLink ; main output link
                     (VariableNode "$A")
-                    (VariableNode "$B"))
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$C")))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
-                (ListLink
-                    (InheritanceLink ; main output link
-                        (VariableNode "$A")
-                        (AndLink
-                            (VariableNode "$B")
-                            (VariableNode "$C")))
-                    (AndLink ; embedded output AndLink
-                            (VariableNode "$B")
-                            (VariableNode "$C"))
-                    (AndLink ; main input link
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$B"))
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$C")))
-                   (InheritanceLink ; embedded input InheritanceLink
+                    (AndLink
+                        (VariableNode "$B")
+                        (VariableNode "$C")))
+                (AndLink ; embedded output AndLink
+                        (VariableNode "$B")
+                        (VariableNode "$C"))
+                (AndLink ; main input link
+                    (InheritanceLink
                         (VariableNode "$A")
                         (VariableNode "$B"))
-                   (InheritanceLink ; embedded input InheritanceLink
+                    (InheritanceLink
                         (VariableNode "$A")
-                        (VariableNode "$C")))))))
+                        (VariableNode "$C")))
+               (InheritanceLink ; embedded input InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+               (InheritanceLink ; embedded input InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))))
 
 ; TODO define formula appropriately (see comment in inheritance_rules.py
 ; AndCreationInsideLinkRule) 

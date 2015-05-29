@@ -18,39 +18,38 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%atLocation")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)			
-                		)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_subj")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$subj")
-                    			)			
-                		)
-				(LemmaLink
-					(VariableNode "$verb")
-					(WordNode "be")
-				)
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%atLocation")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)			
+            		)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_subj")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$subj")
+                			)			
+            		)
+			(LemmaLink
+				(VariableNode "$verb")
+				(WordNode "be")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-where-cop-q-rule")
 			(ListLink
@@ -58,7 +57,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "where-cop-q-Rule") (ConceptNode "Rule"))

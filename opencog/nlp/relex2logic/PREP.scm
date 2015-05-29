@@ -18,35 +18,34 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$prep")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$obj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_psubj")
+				(ListLink
 					(VariableNode "$prep")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
-					(VariableNode "$obj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_psubj")
-					(ListLink
-						(VariableNode "$prep")
-						(VariableNode "$subj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_pobj")
-					(ListLink
-						(VariableNode "$prep")
-						(VariableNode "$obj")
- 					)
+					(VariableNode "$subj")
 				)
 			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_pobj")
+				(ListLink
+					(VariableNode "$prep")
+					(VariableNode "$obj")
+				)
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-prep-rule")
 			(ListLink
@@ -56,7 +55,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "PREP-Rule") (ConceptNode "Rule"))

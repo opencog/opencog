@@ -18,41 +18,39 @@
                 (TypeNode "WordInstanceNode")
             )		
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
-                    (VariableNode "$subj")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$predadj")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_predadj")
-                    (ListLink
-			(VariableNode "$subj")
-			(VariableNode "$predadj")
-                    )
-                )
-		(EvaluationLink
-   			(DefinedLinguisticRelationshipNode "_det")
-  			 (ListLink
-     				(VariableNode "$subj")
-      				(VariableNode "$qVar")
-			)
-		)
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
-		)
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$subj")
+                (VariableNode "$a-parse")
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-whichpredadjQ-rule")
-           	      (ListLink
-           	         (VariableNode "$subj")
-           	         (VariableNode "$predadj")
+            (WordInstanceLink
+                (VariableNode "$predadj")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_predadj")
+                (ListLink
+					(VariableNode "$subj")
+					(VariableNode "$predadj")
                 )
+            )
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_det")
+				(ListLink
+ 					(VariableNode "$subj")
+  					(VariableNode "$qVar")
+				)
+			)
+			(InheritanceLink
+				(VariableNode "$qVar")
+				(DefinedLinguisticConceptNode "which")
+			)
+        )
+        (ExecutionOutputLink
+       	    (GroundedSchemaNode "scm: pre-whichpredadjQ-rule")
+       	    (ListLink
+       	       (VariableNode "$subj")
+       	       (VariableNode "$predadj")
             )
         )
     )

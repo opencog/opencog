@@ -25,15 +25,14 @@
     (TypedVariableLink
      (VariableNode "$B")
      (TypeNode "PredicateNode")))
-   (ImplicationLink
-    (AndLink
+   (AndLink
+    (VariableNode "$A")
+    (VariableNode "$B"))
+   (ExecutionOutputLink
+    (GroundedSchemaNode "scm: pln-formula-and")
+    (ListLink
      (VariableNode "$A")
-     (VariableNode "$B"))
-    (ExecutionOutputLink
-     (GroundedSchemaNode "scm: pln-formula-and")
-     (ListLink
-      (VariableNode "$A")
-      (VariableNode "$B"))))))
+     (VariableNode "$B")))))
 
 (define (pln-formula-and A B)
   (cog-set-tv!

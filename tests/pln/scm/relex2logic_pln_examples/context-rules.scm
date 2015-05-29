@@ -58,50 +58,49 @@
 
 (define check-output
     (BindLink
-        (ImplicationLink
-            (AndLink
-                ; 1) output
-                (ContextLink (stv .8 .8)
-                    (ConceptNode "doing_mathematics")
-                    (InheritanceLink
-                        (ConceptNode "Ben")
-                        (ConceptNode "competent")))
-                ; 2) output 
-                (ContextLink (stv .8 .8)
-                    (ConceptNode "earth")
-                    (EvaluationLink (stv .8 .7)
-                        (PredicateNode "isBlue")
-                        (ListLink
-                            (ConceptNode "sky"))))
-                (ContextLink (stv .8 .8)
-                    (ConceptNode "moon")
-                    (EvaluationLink (stv .0 .2)
-                        (PredicateNode "isBlue")
-                        (ListLink
-                            (ConceptNode "sky"))))
-                ; 3) output
-                (ContextLink (stv .8 .8)
-                    (ConceptNode "dogs")
-                    (ConceptNode "animals"))
-                ; output of decontextualize-rules is
-                ; input 1-3
-                ; 4) output                
-                (InheritanceLink (stv .8 .8)
-                    (AndLink
-                        (ConceptNode "Ben")
-                        (ConceptNode "doing_mathematics"))
-                    (AndLink
-                        (ConceptNode "competent")
-                        (ConceptNode "doing_mathematics")))
-                ; 5) output
-                (EvaluationLink (stv .8 .8)
+        (AndLink
+            ; 1) output
+            (ContextLink (stv .8 .8)
+                (ConceptNode "doing_mathematics")
+                (InheritanceLink
+                    (ConceptNode "Ben")
+                    (ConceptNode "competent")))
+            ; 2) output 
+            (ContextLink (stv .8 .8)
+                (ConceptNode "earth")
+                (EvaluationLink (stv .8 .7)
                     (PredicateNode "isBlue")
                     (ListLink
-                        (AndLink
-                            (ConceptNode "sky")
-                            (ConceptNode "earth"))))
-                ; 6) output
-                (SubsetLink (stv .8 .8)
-                    (ConceptNode "dogs")
-                    (ConceptNode "animals")))
-            (ConceptNode "true"))))
+                        (ConceptNode "sky"))))
+            (ContextLink (stv .8 .8)
+                (ConceptNode "moon")
+                (EvaluationLink (stv .0 .2)
+                    (PredicateNode "isBlue")
+                    (ListLink
+                        (ConceptNode "sky"))))
+            ; 3) output
+            (ContextLink (stv .8 .8)
+                (ConceptNode "dogs")
+                (ConceptNode "animals"))
+            ; output of decontextualize-rules is
+            ; input 1-3
+            ; 4) output                
+            (InheritanceLink (stv .8 .8)
+                (AndLink
+                    (ConceptNode "Ben")
+                    (ConceptNode "doing_mathematics"))
+                (AndLink
+                    (ConceptNode "competent")
+                    (ConceptNode "doing_mathematics")))
+            ; 5) output
+            (EvaluationLink (stv .8 .8)
+                (PredicateNode "isBlue")
+                (ListLink
+                    (AndLink
+                        (ConceptNode "sky")
+                        (ConceptNode "earth"))))
+            ; 6) output
+            (SubsetLink (stv .8 .8)
+                (ConceptNode "dogs")
+                (ConceptNode "animals")))
+        (ConceptNode "true")))

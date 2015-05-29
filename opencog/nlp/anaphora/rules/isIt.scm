@@ -8,21 +8,19 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (LemmaLink
-                    (VariableNode "$target")
-                    (WordNode "it")
-                )
-            )
+        (AndLink
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
             )
+            (LemmaLink
+                (VariableNode "$target")
+                (WordNode "it")
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

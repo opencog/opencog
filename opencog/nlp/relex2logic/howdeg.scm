@@ -14,33 +14,31 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$pred")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%howdeg")
-                    			(ListLink
-                        			(VariableNode "$pred")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-				(InheritanceLink
-   					(VariableNode "$qVar")
-   					(DefinedLinguisticConceptNode "how_much")
-				)
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
 			)
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-howdeg-q-rule")
-			(ListLink
+			(WordInstanceLink
 				(VariableNode "$pred")
+				(VariableNode "$a-parse")
 			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%howdeg")
+                			(ListLink
+                    			(VariableNode "$pred")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+			(InheritanceLink
+				(VariableNode "$qVar")
+				(DefinedLinguisticConceptNode "how_much")
+			)
+		)
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm: pre-howdeg-q-rule")
+		(ListLink
+			(VariableNode "$pred")
 		)
 	)
 ))

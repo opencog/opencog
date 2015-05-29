@@ -18,39 +18,38 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%how")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_subj")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$subj")
-                    			)					
-                		)
-				(LemmaLink
-					(WordInstanceNode "$verb")
-					(WordNode "be")
-				)
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%how")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_subj")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$subj")
+                			)					
+            		)
+			(LemmaLink
+				(WordInstanceNode "$verb")
+				(WordNode "be")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howpredadj1-q-rule")
 			(ListLink
@@ -58,7 +57,7 @@
 			)
 		)
 	)
-))
+)
 
 (InheritanceLink (stv 1 .99) (ConceptNode "howpredadj1-q-Rule") (ConceptNode "Rule"))
 

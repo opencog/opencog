@@ -18,30 +18,28 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$noun")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$adj")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_amod")
+                (ListLink
                     (VariableNode "$noun")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
                     (VariableNode "$adj")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_amod")
-                    (ListLink
-                        (VariableNode "$noun")
-                        (VariableNode "$adj")
-                    )
                 )
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-amod-rule")
-           	      (ListLink
-           	         (VariableNode "$noun")
-           	         (VariableNode "$adj")
-                )
+        )
+        (ExecutionOutputLink
+       	   (GroundedSchemaNode "scm: pre-amod-rule")
+       	      (ListLink
+       	         (VariableNode "$noun")
+       	         (VariableNode "$adj")
             )
         )
     )

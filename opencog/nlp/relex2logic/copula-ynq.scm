@@ -18,39 +18,38 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$obj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_subj")
+				(ListLink
+					(VariableNode "$verb")
 					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$obj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_subj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_obj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$obj")
-					)
-				)
-				(LemmaLink
-					(VariableNode "$verb")
-					(WordNode "be")
-				)				
-				(InheritanceLink
-					(VariableNode "$verb")
-					(DefinedLinguisticConceptNode "truth-query")
 				)
 			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_obj")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$obj")
+				)
+			)
+			(LemmaLink
+				(VariableNode "$verb")
+				(WordNode "be")
+			)				
+			(InheritanceLink
+				(VariableNode "$verb")
+				(DefinedLinguisticConceptNode "truth-query")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
@@ -59,7 +58,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") (ConceptNode "Rule"))

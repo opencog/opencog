@@ -18,45 +18,43 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$X")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$Y")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$Z")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_subj")
+                (ListLink
+                    (VariableNode "$Y")
                     (VariableNode "$X")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$Y")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$Z")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$X")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$Z")
-                    )
-                )
-                (LemmaLink
-                    (VariableNode "$Y")
-                    (WordNode "be")
                 )
             )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-be-inheritance-rule")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_obj")
                 (ListLink
-                    (VariableNode "$X")
+                    (VariableNode "$Y")
                     (VariableNode "$Z")
                 )
+            )
+            (LemmaLink
+                (VariableNode "$Y")
+                (WordNode "be")
+            )
+        )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-be-inheritance-rule")
+            (ListLink
+                (VariableNode "$X")
+                (VariableNode "$Z")
             )
         )
     )

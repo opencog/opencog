@@ -14,24 +14,23 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_subj")
+				(ListLink
 					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_subj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
- 					)
+					(VariableNode "$subj")
 				)
 			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-sv-rule")
 			(ListLink
@@ -40,7 +39,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "SV-Rule") (ConceptNode "Rule"))

@@ -654,15 +654,9 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     Handle hOutPutListLink = atomSpace->addLink(LIST_LINK, HNode->pattern);
     // XXX why do we need to set the TV ???
     hOutPutListLink->merge(TruthValue::TRUE_TV());
-    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hOutPutListLink); // the results to return
 
 //    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
 //            << atomSpace->atomAsString(hAndLink).c_str() << std::endl;
-
-
-    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-    hImplicationLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
     set<Handle> allVariableNodesInPattern;
@@ -683,7 +677,8 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     hVariablesListLink->merge(TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(hAndLink);
+    bindLinkOutgoings.push_back(hOutPutListLink);
     Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
     // XXX why do we need to set the TV ???
     hBindLink->merge(TruthValue::TRUE_TV());
@@ -725,7 +720,6 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     }
 
     atomSpace->removeAtom(hBindLink);
-    atomSpace->removeAtom(hImplicationLink);
     atomSpace->removeAtom(hAndLink);
     atomSpace->removeAtom(hOutPutListLink);
 

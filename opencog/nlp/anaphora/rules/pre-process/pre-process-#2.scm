@@ -12,31 +12,29 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (InheritanceLink
-                    (VariableNode "$target")
-                    (DefinedLinguisticConceptNode "numeric")
-                )
-                (NotLink
-                    (EvaluationLink
-                        (PrepositionalRelationshipNode "of")
-                        (ListLink
-                            (VariableNode "$target")
-                            (VariableNode "$word")
-                        )
-                    )
-
-                )
-            )
+        (AndLink
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
             )
+            (InheritanceLink
+                (VariableNode "$target")
+                (DefinedLinguisticConceptNode "numeric")
+            )
+            (NotLink
+                (EvaluationLink
+                    (PrepositionalRelationshipNode "of")
+                    (ListLink
+                        (VariableNode "$target")
+                        (VariableNode "$word")
+                    )
+                )
+
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

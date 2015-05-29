@@ -10,17 +10,16 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(InheritanceLink
-					(VariableNode "$verb")
-					(DefinedLinguisticConceptNode "truth-query")
-				)
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(InheritanceLink
+				(VariableNode "$verb")
+				(DefinedLinguisticConceptNode "truth-query")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-pred-ynq-rule")
 			(ListLink
@@ -28,7 +27,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "pred-ynq-Rule") (ConceptNode "Rule"))

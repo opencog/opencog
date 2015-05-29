@@ -14,30 +14,28 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
-                    (VariableNode "$pred")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$pred")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$comp")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_comp")
+                (ListLink
                     (VariableNode "$comp")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_comp")
-                    (ListLink
-                        (VariableNode "$comp")
-                        (VariableNode "$pred")
-                    )
+                    (VariableNode "$pred")
                 )
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-comp-rule")
-           	      (ListLink
-           	         (VariableNode "$comp")
-           	         (VariableNode "$pred")
-                )
+        )
+        (ExecutionOutputLink
+       	   (GroundedSchemaNode "scm: pre-comp-rule")
+       	      (ListLink
+       	         (VariableNode "$comp")
+       	         (VariableNode "$pred")
             )
         )
     )

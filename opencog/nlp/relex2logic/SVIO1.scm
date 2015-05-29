@@ -22,46 +22,45 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$obj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$iobj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_subj")
+				(ListLink
 					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$obj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$iobj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_subj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_obj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$obj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_iobj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$iobj")
- 					)
+					(VariableNode "$subj")
 				)
 			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_obj")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$obj")
+				)
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_iobj")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$iobj")
+				)
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
@@ -72,7 +71,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "SVIO1-Rule") (ConceptNode "Rule"))

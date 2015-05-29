@@ -18,35 +18,34 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$adj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_to-be")
+				(ListLink
 					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
 					(VariableNode "$adj")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_to-be")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$adj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_subj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
- 					)
 				)
 			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_subj")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$subj")
+				)
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")
 			(ListLink
@@ -56,7 +55,7 @@
 			)
 		)
 	)
-))
+)
 
 (InheritanceLink (stv 1 .99) (ConceptNode "TOBE-Rule") (ConceptNode "Rule"))
 

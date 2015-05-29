@@ -510,22 +510,21 @@ by running the pattern matcher on the following:
            TypedVariableLink
                VariableNode "$left-word"
                TypeNode "WordNode"
-       ImplicationLink
-           ;; The IF clause
+       ;; The IF clause
+       PredicateLink
+           RelationshipNode "word-pair"
+           ListLink
+               VariableNode "$left-word"
+               WordNode "tire"
+
+       ;; the THEN clause
+       ExecutionLink
+           GroundedSchemaNode "scm:incr-count"
            PredicateLink
                RelationshipNode "word-pair"
                ListLink
-                   VariableNode "$left-word"
+                   DefinedCountNode "*"
                    WordNode "tire"
-
-           ;; the THEN clause
-           ExecutionLink
-               GroundedSchemaNode "scm:incr-count"
-               PredicateLink
-                   RelationshipNode "word-pair"
-                   ListLink
-                       DefinedCountNode "*"
-                       WordNode "tire"
 
 where the scheme function "scm:incr-count" increments the count on the
 CountTruthValue of the argument passed in --  in this case, the 
@@ -541,29 +540,28 @@ should run the following pattern:
            TypedVariableLink
                VariableNode "$left-word"
                TypeNode "WordNode"
-       ImplicationLink
-           ;; The IF clause
-           AndLink
-               PredicateLink
-                   RelationshipNode "word-pair"
-                   ListLink
-                       VariableNode "$left-word"
-                       WordNode "tire"
-               PredicateLink
-                   RelationshipNode "word-pair"
-                   ListLink
-                       VariableNode "$left-word"
-                       WordNode "wheel"
+       ;; The IF clause
+       AndLink
+           PredicateLink
+               RelationshipNode "word-pair"
+               ListLink
+                   VariableNode "$left-word"
+                   WordNode "tire"
+           PredicateLink
+               RelationshipNode "word-pair"
+               ListLink
+                   VariableNode "$left-word"
+                   WordNode "wheel"
 
-           ;; the THEN clause
-           ExecutionLink
-               GroundedSchemaNode "scm:incr-count"
-               PredicateLink
-                   RelationshipNode "left-word-pair-inter"
-                   ListLink
-                       DefinedCountNode "*"
-                       WordNode "tire"
-                       WordNode "wheel" xxxxxxxxxxxwrong  how to rep this ... 
+       ;; the THEN clause
+       ExecutionLink
+           GroundedSchemaNode "scm:incr-count"
+           PredicateLink
+               RelationshipNode "left-word-pair-inter"
+               ListLink
+                   DefinedCountNode "*"
+                   WordNode "tire"
+                   WordNode "wheel" xxxxxxxxxxxwrong  how to rep this ... 
 
 
 
