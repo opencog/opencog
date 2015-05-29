@@ -6,15 +6,13 @@
             (VariableNode "$parse node")
             (VariableNode "$sentence")
         )
-        (ImplicationLink
-            (ParseLink
-                    (VariableNode "$parse node")
-                    (VariableNode "$sentence")
-            )
-            (ListLink
-                (AnchorNode "CurrentResult")
+        (ParseLink
                 (VariableNode "$parse node")
-            )
+                (VariableNode "$sentence")
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (VariableNode "$parse node")
         )
     )
 )

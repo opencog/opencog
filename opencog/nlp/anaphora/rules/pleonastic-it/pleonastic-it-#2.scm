@@ -16,35 +16,33 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (ListLink
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
+            )
+            (LemmaLink
+                (VariableNode "$seems")
+                (WordNode "seem")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_expl")
                 (ListLink
-                    (AnchorNode "CurrentTarget")
+                    (VariableNode "$seems")
                     (VariableNode "$target")
                 )
-                (LemmaLink
+            )
+            (EvaluationLink
+                (PrepositionalRelationshipNode "that")
+                (ListLink
                     (VariableNode "$seems")
-                    (WordNode "seem")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_expl")
-                    (ListLink
-                        (VariableNode "$seems")
-                        (VariableNode "$target")
-                    )
-                )
-                (EvaluationLink
-                    (PrepositionalRelationshipNode "that")
-                    (ListLink
-                        (VariableNode "$seems")
-                        (VariableNode "$word")
-                    )
+                    (VariableNode "$word")
                 )
             )
-            (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
-            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

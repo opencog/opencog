@@ -19,37 +19,35 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                ;; Connection between two clauses
-                (ListLink
-                    (AnchorNode "CurrentResolution")
-                    (VariableNode "$word-inst-anaphor")
-                    (VariableNode "$word-inst-antecedent")
-                )
-                (ListLink
-                    (AnchorNode "CurrentPronoun")
-                    (VariableNode "$word-inst-anaphor")
-                )
-                (ListLink
-                    (AnchorNode "CurrentProposal")
-                    (VariableNode "$word-inst-antecedent")
-                )
-
-                ;; filter
-                (ReferenceLink
-                    (VariableNode "$word-inst-anaphor")
-                    (WordNode "it")
-                )
-                (InheritanceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (DefinedLinguisticConceptNode "plural")
-                )
+        (AndLink
+            ;; Connection between two clauses
+            (ListLink
+                (AnchorNode "CurrentResolution")
+                (VariableNode "$word-inst-anaphor")
+                (VariableNode "$word-inst-antecedent")
             )
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Filtered")
+                (AnchorNode "CurrentPronoun")
+                (VariableNode "$word-inst-anaphor")
             )
+            (ListLink
+                (AnchorNode "CurrentProposal")
+                (VariableNode "$word-inst-antecedent")
+            )
+
+            ;; filter
+            (ReferenceLink
+                (VariableNode "$word-inst-anaphor")
+                (WordNode "it")
+            )
+            (InheritanceLink
+                (VariableNode "$word-inst-antecedent")
+                (DefinedLinguisticConceptNode "plural")
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Filtered")
         )
     )
 )

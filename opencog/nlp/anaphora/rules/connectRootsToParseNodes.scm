@@ -34,35 +34,33 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-               (WordInstanceLink
+        (AndLink
+           (WordInstanceLink
+                (VariableNode "$root")
+                (VariableNode "$parse node")
+           )
+           (EvaluationLink
+                (VariableNode "$top relationship")
+                (ListLink
                     (VariableNode "$root")
-                    (VariableNode "$parse node")
-               )
-               (EvaluationLink
-                    (VariableNode "$top relationship")
-                    (ListLink
-                        (VariableNode "$root")
-                        (VariableNode "$child")
-                    )
+                    (VariableNode "$child")
                 )
-                (NotLink
-                    (EvaluationLink
-                        (VariableNode "$other relationship")
-                        (ListLink
-                            (VariableNode "$parent")
-                            (VariableNode "$root")
-                        )
+            )
+            (NotLink
+                (EvaluationLink
+                    (VariableNode "$other relationship")
+                    (ListLink
+                        (VariableNode "$parent")
+                        (VariableNode "$root")
                     )
                 )
             )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "__temp__")
-                (ListLink
-                    (VariableNode "$parse node")
-                    (VariableNode "$root")
-                )
+        )
+        (EvaluationLink
+            (DefinedLinguisticRelationshipNode "__temp__")
+            (ListLink
+                (VariableNode "$parse node")
+                (VariableNode "$root")
             )
         )
     )

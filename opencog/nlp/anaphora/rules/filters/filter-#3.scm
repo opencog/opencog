@@ -25,44 +25,42 @@
                 (TypeNode "NumberNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                ;; Connection between two clauses
-                (ListLink
-                    (AnchorNode "CurrentResolution")
-                    (VariableNode "$word-inst-anaphor")
-                    (VariableNode "$word-inst-antecedent")
-                )
-                (ListLink
-                    (AnchorNode "CurrentPronoun")
-                    (VariableNode "$word-inst-anaphor")
-                )
-                (ListLink
-                    (AnchorNode "CurrentProposal")
-                    (VariableNode "$word-inst-antecedent")
-                )
-                (WordSequenceLink
-                    (VariableNode "$word-inst-anaphor")
-                    (VariableNode "$anaphor-number")
-                )
-                (WordSequenceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (VariableNode "$antecedent-number")
-                )
-
-                ;; filter
-                (EvaluationLink
-                    (GroundedPredicateNode "c++:greater")
-                    (ListLink
-                        (VariableNode "$antecedent-number")
-                        (VariableNode "$anaphor-number")
-                    )
-                )
+        (AndLink
+            ;; Connection between two clauses
+            (ListLink
+                (AnchorNode "CurrentResolution")
+                (VariableNode "$word-inst-anaphor")
+                (VariableNode "$word-inst-antecedent")
             )
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Filtered")
+                (AnchorNode "CurrentPronoun")
+                (VariableNode "$word-inst-anaphor")
             )
+            (ListLink
+                (AnchorNode "CurrentProposal")
+                (VariableNode "$word-inst-antecedent")
+            )
+            (WordSequenceLink
+                (VariableNode "$word-inst-anaphor")
+                (VariableNode "$anaphor-number")
+            )
+            (WordSequenceLink
+                (VariableNode "$word-inst-antecedent")
+                (VariableNode "$antecedent-number")
+            )
+
+            ;; filter
+            (EvaluationLink
+                (GroundedPredicateNode "c++:greater")
+                (ListLink
+                    (VariableNode "$antecedent-number")
+                    (VariableNode "$anaphor-number")
+                )
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Filtered")
         )
     )
 )
