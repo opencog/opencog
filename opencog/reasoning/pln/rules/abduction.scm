@@ -10,29 +10,29 @@
 			(VariableNode "$A")
 			(VariableNode "$B")
 			(VariableNode "$C"))
-		(ImplicationLink
-			(AndLink
+		(AndLink
+			(InheritanceLink
+				(VariableNode "$A")
+				(VariableNode "$C"))
+			(InheritanceLink
+				(VariableNode "$B")
+				(VariableNode "$C")))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pln-formula-abduction")
+			(ListLink
+				(InheritanceLink
+					(VariableNode "$A")
+					(VariableNode "$B"))
 				(InheritanceLink
 					(VariableNode "$A")
 					(VariableNode "$C"))
 				(InheritanceLink
 					(VariableNode "$B")
-					(VariableNode "$C")))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm: pln-formula-abduction")
-				(ListLink
-					(InheritanceLink
-						(VariableNode "$A")
-						(VariableNode "$B"))
-					(InheritanceLink
-						(VariableNode "$A")
-						(VariableNode "$C"))
-					(InheritanceLink
-						(VariableNode "$B")
-						(VariableNode "$C"))
-					(VariableNode "$A")
-					(VariableNode "$B")
-					(VariableNode "$C"))))))
+					(VariableNode "$C"))
+				(VariableNode "$A")
+				(VariableNode "$B")
+				(VariableNode "$C")))))
+
 ; -----------------------------------------------------------------------------
 ; Abduction Formula
 ; -----------------------------------------------------------------------------

@@ -11,38 +11,36 @@
                 (VariableNode "$A")
                 (VariableNode "$B")
                 (VariableNode "$C"))
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+            )
+            (InheritanceLink
+                (VariableNode "$B")
+                (VariableNode "$C")
+            )
+            ; To avoid matching (Inheritance A B) and (Inheritance B A)
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
+                )
+            )
+        )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
-                    (VariableNode "$B")
-                )
+                    (VariableNode "$B"))
                 (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C")
                 )
-                ; To avoid matching (Inheritance A B) and (Inheritance B A)
-                (NotLink
-                    (EqualLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
-                )
-            )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-simple-deduction")
-                (ListLink
-                    (InheritanceLink
-                        (VariableNode "$A")
-                        (VariableNode "$B"))
-                    (InheritanceLink
-                        (VariableNode "$B")
-                        (VariableNode "$C")
-                    )
-                    (InheritanceLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
                 )
             )
         )

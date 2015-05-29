@@ -15,24 +15,23 @@
    			(TypedVariableLink
     				(VariableNode "$D")
     				(TypeNode "PredicateNode")))
-		(ImplicationLink
-			(MemberLink
-				(VariableNode "$B")
-				(SatisfyingSetLink
-					(VariableNode "$X")
-					(EvaluationLink
-						(VariableNode "$D")
-						(VariableNode "$C"))))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-member-to-evaluation")
-				(ListLink
-					(MemberLink
-						(VariableNode "$B")
-						(SatisfyingSetLink
-							(VariableNode "$X")
-							(EvaluationLink
-								(VariableNode "$D")
-								(VariableNode "$C")))))))))
+		(MemberLink
+			(VariableNode "$B")
+			(SatisfyingSetLink
+				(VariableNode "$X")
+				(EvaluationLink
+					(VariableNode "$D")
+					(VariableNode "$C"))))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm:pln-formula-member-to-evaluation")
+			(ListLink
+				(MemberLink
+					(VariableNode "$B")
+					(SatisfyingSetLink
+						(VariableNode "$X")
+						(EvaluationLink
+							(VariableNode "$D")
+							(VariableNode "$C"))))))))
 
 ; -----------------------------------------------------------------------------
 ; Member To Evaluation Formula

@@ -15,18 +15,17 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$C"))
-        (ImplicationLink
-            (AndLink
-                (VariableNode "$C")
-                (VariableNode "$A"))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context-free-to-sensitive")
-                (ListLink
-                    (ContextLink
-                        (VariableNode "$C")
-                        (VariableNode "$A"))
+        (AndLink
+            (VariableNode "$C")
+            (VariableNode "$A"))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context-free-to-sensitive")
+            (ListLink
+                (ContextLink
                     (VariableNode "$C")
-                    (VariableNode "$A"))))))
+                    (VariableNode "$A"))
+                (VariableNode "$C")
+                (VariableNode "$A")))))
 
 (define (pln-formula-context-free-to-sensitive Context C A)
     (cog-set-tv! Context

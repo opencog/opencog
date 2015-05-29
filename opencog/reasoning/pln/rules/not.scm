@@ -19,12 +19,11 @@
       (TypedVariableLink
        (VariableNode "$A")
        (TypeNode "PredicateNode")))
-    (ImplicationLink
-      (VariableNode "$A")
-      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: pln-formula-not")
-        (ListLink
-          (VariableNode "$A"))))))
+    (VariableNode "$A")
+    (ExecutionOutputLink
+      (GroundedSchemaNode "scm: pln-formula-not")
+      (ListLink
+        (VariableNode "$A")))))
 
 (define (pln-formula-not A)
   (cog-set-tv!

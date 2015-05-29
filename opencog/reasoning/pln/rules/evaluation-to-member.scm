@@ -31,23 +31,22 @@
 			(TypedVariableLink
 				(VariableNode "$D")
 				(TypeNode "PredicateNode")))
-		(ImplicationLink
-			(EvaluationLink
-				(VariableNode "$D")
-				(VariableNode "$A"))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-0")
-					(ListLink
-						(MemberLink
-							(VariableNode "$A")
-							(SatisfyingSetLink
-								(VariableNode "$X")
-								(EvaluationLink
-									(VariableNode "$D")
-									(VariableNode "$X"))))
-						(EvaluationLink
-							(VariableNode "$D")
-							(VariableNode "$A")))))))
+		(EvaluationLink
+			(VariableNode "$D")
+			(VariableNode "$A"))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-0")
+				(ListLink
+					(MemberLink
+						(VariableNode "$A")
+						(SatisfyingSetLink
+							(VariableNode "$X")
+							(EvaluationLink
+								(VariableNode "$D")
+								(VariableNode "$X"))))
+					(EvaluationLink
+						(VariableNode "$D")
+						(VariableNode "$A"))))))
 
 (define (pln-formula-evaluation-to-member-0 MAXDX DA)
 	(cog-set-tv! MAXDX
@@ -72,26 +71,25 @@
 			(TypedVariableLink
 				(VariableNode "$D")
 				(TypeNode "PredicateNode")))
-		(ImplicationLink
-			(EvaluationLink
-				(VariableNode "$D")
+		(EvaluationLink
+			(VariableNode "$D")
+			(ListLink
+				(VariableNode "$A")))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-1")
 				(ListLink
-					(VariableNode "$A")))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-1")
-					(ListLink
-						(MemberLink
-							(VariableNode "$A")
-							(SatisfyingSetLink
-								(VariableNode "$X")
-								(EvaluationLink
-									(VariableNode "$D")
-									(ListLink
-										(VariableNode "$X")))))
-						(EvaluationLink
-							(VariableNode "$D")
-							(ListLink
-								(VariableNode "$A"))))))))
+					(MemberLink
+						(VariableNode "$A")
+						(SatisfyingSetLink
+							(VariableNode "$X")
+							(EvaluationLink
+								(VariableNode "$D")
+								(ListLink
+									(VariableNode "$X")))))
+					(EvaluationLink
+						(VariableNode "$D")
+						(ListLink
+							(VariableNode "$A")))))))
 
 (define (pln-formula-evaluation-to-member-1 MAXDX DA)
 	(cog-set-tv! MAXDX
@@ -117,38 +115,37 @@
 			(TypedVariableLink
 				(VariableNode "$D")
 				(TypeNode "PredicateNode")))
-		(ImplicationLink
-			(EvaluationLink
-				(VariableNode "$D")
+		(EvaluationLink
+			(VariableNode "$D")
+			(ListLink
+				(VariableNode "$A")
+				(VariableNode "$B")))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-2")
 				(ListLink
-					(VariableNode "$A")
-					(VariableNode "$B")))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-2")
-					(ListLink
-						(MemberLink
+					(MemberLink
+						(VariableNode "$A")
+						(SatisfyingSetLink
+							(VariableNode "$X")
+							(EvaluationLink
+								(VariableNode "$D")
+								(ListLink
+									(VariableNode "$X")
+									(VariableNode "$B")))))
+					(MemberLink
+						(VariableNode "$B")
+						(SatisfyingSetLink
+							(VariableNode "$X")
+							(EvaluationLink
+								(VariableNode "$D")
+								(ListLink
+									(VariableNode "$A")
+									(VariableNode "$X")))))
+					(EvaluationLink
+						(VariableNode "$D")
+						(ListLink
 							(VariableNode "$A")
-							(SatisfyingSetLink
-								(VariableNode "$X")
-								(EvaluationLink
-									(VariableNode "$D")
-									(ListLink
-										(VariableNode "$X")
-										(VariableNode "$B")))))
-						(MemberLink
-							(VariableNode "$B")
-							(SatisfyingSetLink
-								(VariableNode "$X")
-								(EvaluationLink
-									(VariableNode "$D")
-									(ListLink
-										(VariableNode "$A")
-										(VariableNode "$X")))))
-						(EvaluationLink
-							(VariableNode "$D")
-							(ListLink
-								(VariableNode "$A")
-								(VariableNode "$B"))))))))
+							(VariableNode "$B")))))))
 
 
 (define (pln-formula-evaluation-to-member-2 MAXDXB MBXDAX DAB)
@@ -173,16 +170,15 @@
 ;			(TypedVariableLink
 ;				(VariableNode "$D")
 ;				(TypeNode "PredicateNode")))
-;       (ImplicationLink
-;            (EvaluationLink
-;                (VariableNode "$D")
-;                (VariableNode "$A"))
-;            (ExecutionOutputLink
-;                (GroundedSchemaNode "scm:pln-formula-evaluation-to-member")
-;                (ListLink
-;                    (EvaluationLink
-;                        (VariableNode "$D")
-;                        (VariableNode "$A")))))))
+;       (EvaluationLink
+;           (VariableNode "$D")
+;           (VariableNode "$A"))
+;       (ExecutionOutputLink
+;           (GroundedSchemaNode "scm:pln-formula-evaluation-to-member")
+;           (ListLink
+;               (EvaluationLink
+;                   (VariableNode "$D")
+;                   (VariableNode "$A"))))))
 
 ; -----------------------------------------------------------------------------
 ; Evaluation To Member Formula

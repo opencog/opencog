@@ -10,19 +10,18 @@
 		(VariableList
 			(VariableNode "$B")
 			(VariableNode "$C"))
-		(ImplicationLink
-			(InheritanceLink
-				(VariableNode "$B")
-				(VariableNode "$C"))
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
-				(ListLink
-					(MemberLink
-						(VariableNode "$B")
-						(VariableNode "$C"))
-					(InheritanceLink
-						(VariableNode "$B")
-						(VariableNode "$C")))))))
+		(InheritanceLink
+			(VariableNode "$B")
+			(VariableNode "$C"))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
+			(ListLink
+				(MemberLink
+					(VariableNode "$B")
+					(VariableNode "$C"))
+				(InheritanceLink
+					(VariableNode "$B")
+					(VariableNode "$C"))))))
 
 ; -----------------------------------------------------------------------------
 ; Inheritance To Member Formula

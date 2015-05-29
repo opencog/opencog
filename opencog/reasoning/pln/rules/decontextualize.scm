@@ -21,27 +21,26 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (ContextLink
-                (VariableNode "$C")
+        (ContextLink
+            (VariableNode "$C")
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context")
+            (ListLink
                 (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$B")))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context")
-                (ListLink
-                    (InheritanceLink
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$A"))
-                        (AndLink
-                            (VariableNode "$C")
-                            (VariableNode "$B")))
-                    (ContextLink
+                    (AndLink
                         (VariableNode "$C")
-                        (InheritanceLink
-                            (VariableNode "$A")
-                            (VariableNode "$B"))))))))
+                        (VariableNode "$A"))
+                    (AndLink
+                        (VariableNode "$C")
+                        (VariableNode "$B")))
+                (ContextLink
+                    (VariableNode "$C")
+                    (InheritanceLink
+                        (VariableNode "$A")
+                        (VariableNode "$B")))))))
 
 ; Inverse of (pln-rule-contextualize-evaluation):
 ; in an EvaluationLink, the PredicateNode is not 'andified';
@@ -54,28 +53,27 @@
                 (TypeNode "PredicateNode"))
             (VariableNode "$B")
             (VariableNode "$C"))
-        (ImplicationLink
-            (ContextLink
-                (VariableNode "$C")
+        (ContextLink
+            (VariableNode "$C")
+            (EvaluationLink
+                (VariableNode "$A")
+                (ListLink
+                    (VariableNode "$B"))))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context")
+            (ListLink
                 (EvaluationLink
                     (VariableNode "$A")
                     (ListLink
-                        (VariableNode "$B"))))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context")
-                (ListLink
+                        (AndLink
+                            (VariableNode "$C")
+                            (VariableNode "$B"))))
+                (ContextLink
+                    (VariableNode "$C")
                     (EvaluationLink
                         (VariableNode "$A")
                         (ListLink
-                            (AndLink
-                                (VariableNode "$C")
-                                (VariableNode "$B"))))
-                    (ContextLink
-                        (VariableNode "$C")
-                        (EvaluationLink
-                            (VariableNode "$A")
-                            (ListLink
-                                (VariableNode "$B")))))))))
+                            (VariableNode "$B"))))))))
 
 ;----------------------------------------------------------------------
 ; b)
@@ -94,19 +92,18 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$C"))
-        (ImplicationLink
-            (ContextLink
-                (VariableNode "$C")
-                (VariableNode "$A"))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-context")
-                (ListLink
-                    (SubsetLink
-                        (VariableNode "$C")
-                        (VariableNode "$A"))
-                    (ContextLink
-                        (VariableNode "$C")
-                        (VariableNode "$A")))))))
+        (ContextLink
+            (VariableNode "$C")
+            (VariableNode "$A"))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-context")
+            (ListLink
+                (SubsetLink
+                    (VariableNode "$C")
+                    (VariableNode "$A"))
+                (ContextLink
+                    (VariableNode "$C")
+                    (VariableNode "$A"))))))
 
 (define (pln-formula-context Relation Context)
     (cog-set-tv! Relation (cog-tv Context)))

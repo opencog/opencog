@@ -9,19 +9,18 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (VariableNode "$A"))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
+            (ListLink
+                (VariableNode "$B")
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$B"))
-                (VariableNode "$A"))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
-                (ListLink
-                    (VariableNode "$B")
-                    (ImplicationLink
-                        (VariableNode "$A")
-                        (VariableNode "$B")))))))
+                    (VariableNode "$B"))))))
 
 ; -----------------------------------------------------------------------------
 ; Modus Ponens Formula
