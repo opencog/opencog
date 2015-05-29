@@ -21,44 +21,43 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
-                    (VariableNode "$X")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$Y")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$Z")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$X")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$Y")
-                        (VariableNode "$Z")
-                    )
-                )
-		(AbsentLink
-			(DefinedLinguisticRelationshipNode "_iobj")
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$X")
+                (VariableNode "$a-parse")
             )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-svo-rule")
+            (WordInstanceLink
+                (VariableNode "$Y")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$Z")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
+                    (VariableNode "$Y")
                     (VariableNode "$X")
+                )
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_obj")
+                (ListLink
                     (VariableNode "$Y")
                     (VariableNode "$Z")
                 )
+            )
+			(AbsentLink
+				(DefinedLinguisticRelationshipNode "_iobj")
+            )
+		)
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-svo-rule")
+            (ListLink
+                (VariableNode "$X")
+                (VariableNode "$Y")
+                (VariableNode "$Z")
             )
         )
     )

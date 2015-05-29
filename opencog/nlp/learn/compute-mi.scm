@@ -475,20 +475,18 @@
 				(VariableNode "$left-word")
 				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						(VariableNode "$left-word")
-						word
-					)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					(VariableNode "$left-word")
+					word
 				)
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						(VariableNode "$left-word")
-						word
-					)
+			)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					(VariableNode "$left-word")
+					word
 				)
 			)
 		)
@@ -500,20 +498,18 @@
 				(VariableNode "$right-word")
 				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						word
-						(VariableNode "$right-word")
-					)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					word
+					(VariableNode "$right-word")
 				)
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						word
-						(VariableNode "$right-word")
-					)
+			)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					word
+					(VariableNode "$right-word")
 				)
 			)
 		)
@@ -934,13 +930,11 @@
 				(VariableNode "$left-word")
 				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink lg_rel
-					(ListLink (VariableNode "$left-word") right-word)
-				)
-				(EvaluationLink lg_rel
-					(ListLink (VariableNode "$left-word") right-word)
-				)
+			(EvaluationLink lg_rel
+				(ListLink (VariableNode "$left-word") right-word)
+			)
+			(EvaluationLink lg_rel
+				(ListLink (VariableNode "$left-word") right-word)
 			)
 		)
 	)

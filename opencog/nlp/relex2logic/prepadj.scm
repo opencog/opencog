@@ -17,30 +17,28 @@
                 (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$noun")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$adv")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_prepadj")
+                (ListLink
                     (VariableNode "$noun")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
                     (VariableNode "$adv")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_prepadj")
-                    (ListLink
-                        (VariableNode "$noun")
-                        (VariableNode "$adv")
-                    )
                 )
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-prepadj-rule")
-           	      (ListLink
-           	         (VariableNode "$noun")
-           	         (VariableNode "$adv")
-                )
+        )
+        (ExecutionOutputLink
+       	   (GroundedSchemaNode "scm: pre-prepadj-rule")
+       	      (ListLink
+       	         (VariableNode "$noun")
+       	         (VariableNode "$adv")
             )
         )
     )

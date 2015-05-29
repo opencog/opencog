@@ -22,53 +22,51 @@
                 (TypeNode "WordInstanceNode")
             )		
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
-                    (VariableNode "$subj")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$verb")
-                    (VariableNode "$a-parse")
-                )
-                (WordInstanceLink
-                    (VariableNode "$obj")
-                    (VariableNode "$a-parse")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_subj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$subj")
-                    )
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_obj")
-                    (ListLink
-                        (VariableNode "$verb")
-                        (VariableNode "$obj")
-                    )
-                )
-		(EvaluationLink
-   			(DefinedLinguisticRelationshipNode "_det")
-  			 (ListLink
-     				(VariableNode "$subj")
-      				(VariableNode "$qVar")
-			)
-		)
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
-		)
+        (AndLink
+            (WordInstanceLink
+                (VariableNode "$subj")
+                (VariableNode "$a-parse")
             )
-            (ExecutionOutputLink
-           	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
-           	      (ListLink
-           	         (VariableNode "$subj")
-           	         (VariableNode "$verb")
-           	         (VariableNode "$obj")
+            (WordInstanceLink
+                (VariableNode "$verb")
+                (VariableNode "$a-parse")
+            )
+            (WordInstanceLink
+                (VariableNode "$obj")
+                (VariableNode "$a-parse")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_subj")
+                (ListLink
+                    (VariableNode "$verb")
+                    (VariableNode "$subj")
                 )
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_obj")
+                (ListLink
+                    (VariableNode "$verb")
+                    (VariableNode "$obj")
+                )
+            )
+	(EvaluationLink
+		(DefinedLinguisticRelationshipNode "_det")
+		 (ListLink
+ 				(VariableNode "$subj")
+  				(VariableNode "$qVar")
+		)
+	)
+	(InheritanceLink
+		(VariableNode "$qVar")
+		(DefinedLinguisticConceptNode "which")
+	)
+        )
+        (ExecutionOutputLink
+       	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
+       	      (ListLink
+       	         (VariableNode "$subj")
+       	         (VariableNode "$verb")
+       	         (VariableNode "$obj")
             )
         )
     )

@@ -18,29 +18,27 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(PrepositionalRelationshipNode "how")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-			)
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-how-q-rule")
-			(ListLink
+		(AndLink	
+			(WordInstanceLink
 				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(PrepositionalRelationshipNode "how")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+		)
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm: pre-how-q-rule")
+		(ListLink
+			(VariableNode "$verb")
 		)
 	)
 ))

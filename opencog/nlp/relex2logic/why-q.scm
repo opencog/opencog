@@ -14,30 +14,29 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%because")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+			(AbsentLink
+				(LemmaLink
 					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%because")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-				(AbsentLink
-					(LemmaLink
-						(VariableNode "$verb")
-						(WordNode "be")
-					)
+					(WordNode "be")
 				)
 			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-why-q-rule")
 			(ListLink
@@ -45,7 +44,7 @@
 			)
 		)
 	)
-))
+)
 
 (InheritanceLink (stv 1 .99) (ConceptNode "why-q-Rule") (ConceptNode "Rule"))
 

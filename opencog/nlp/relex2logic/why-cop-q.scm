@@ -18,57 +18,56 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%because")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)			
+            		)
+			(ChoiceLink
+				(AndLink					
+					(EvaluationLink
+            	    				(DefinedLinguisticRelationshipNode "_subj")
+            	    				(ListLink
+            	        				(VariableNode "$verb")
+            	        				(VariableNode "$subj")
+            	    				)			
+            				)
+					(LemmaLink
+						(VariableNode "$verb")
+						(WordNode "be")
+					)
 				)
 				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%because")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)			
-                		)
-				(ChoiceLink
-					(AndLink					
-						(EvaluationLink
-                	    				(DefinedLinguisticRelationshipNode "_subj")
-                	    				(ListLink
-                	        				(VariableNode "$verb")
-                	        				(VariableNode "$subj")
-                	    				)			
-                				)
-						(LemmaLink
-							(VariableNode "$verb")
-							(WordNode "be")
-						)
+					(DefinedLinguisticRelationshipNode "_predadj")
+					(ListLink
+						(VariableNode "$subj")
+						(VariableNode "$verb")
 					)
-					(EvaluationLink
-						(DefinedLinguisticRelationshipNode "_predadj")
-						(ListLink
-							(VariableNode "$subj")
-							(VariableNode "$verb")
-						)
-					)
-					(EvaluationLink
-						(DefinedLinguisticRelationshipNode "_psubj")
-						(ListLink
-							(VariableNode "$verb")
-							(VariableNode "$subj")
-						)
+				)
+				(EvaluationLink
+					(DefinedLinguisticRelationshipNode "_psubj")
+					(ListLink
+						(VariableNode "$verb")
+						(VariableNode "$subj")
 					)
 				)
 			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-why-cop-q-rule")
 			(ListLink
@@ -76,7 +75,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "why-cop-q-Rule") (ConceptNode "Rule"))

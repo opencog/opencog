@@ -26,54 +26,53 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(WordInstanceLink
-					(VariableNode "$subj")
-					(VariableNode "$a-parse")
-				)
- 				(WordInstanceLink
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$subj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$obj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$iobj")
+				(VariableNode "$a-parse")
+			)
+			(WordInstanceLink
+				(VariableNode "$to")
+				(VariableNode "$a-parse")
+			)
+			(LemmaLink
+				(VariableNode "$to")
+				(WordNode "to")
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_subj")
+				(ListLink
 					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$obj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$iobj")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$to")
-					(VariableNode "$a-parse")
-				)
-				(LemmaLink
-					(VariableNode "$to")
-					(WordNode "to")
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_subj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_obj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$obj")
- 					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_pobj")
-					(ListLink
-						(VariableNode "$to")
-						(VariableNode "$iobj")
- 					)
+					(VariableNode "$subj")
 				)
 			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_obj")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$obj")
+				)
+			)
+			(EvaluationLink
+				(DefinedLinguisticRelationshipNode "_pobj")
+				(ListLink
+					(VariableNode "$to")
+					(VariableNode "$iobj")
+				)
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
@@ -84,7 +83,7 @@
 			)
 		)
 	)
-))
+)
 
 
 (InheritanceLink (stv 1 .99) (ConceptNode "SVIO2-Rule") (ConceptNode "Rule"))

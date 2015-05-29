@@ -14,17 +14,16 @@
 				(TypeNode "InterpretationNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(InheritanceLink
-   					(VariableNode "$verb")
-   					(DefinedLinguisticConceptNode "imperative")
-				)
+		(AndLink
+			(WordInstanceLink
+				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(InheritanceLink
+				(VariableNode "$verb")
+				(DefinedLinguisticConceptNode "imperative")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-imp-rule")
 			(ListLink

@@ -45,24 +45,22 @@
 	(define var (VariableNode "$simple-chain-var"))
 	(BindLink
 		var
-		(ImplicationLink
-			(AndLink
-				(EvaluationLink
-					pred-first
-					(ListLink
-						evaluand-a
-						var
-					)
-				)
-				(EvaluationLink
-					pred-next
-					(ListLink
-						var
-						evaluand-b
-					)
+		(AndLink
+			(EvaluationLink
+				pred-first
+				(ListLink
+					evaluand-a
+					var
 				)
 			)
-			hypothesis
+			(EvaluationLink
+				pred-next
+				(ListLink
+					var
+					evaluand-b
+				)
+			)
 		)
+		hypothesis
 	)
 )

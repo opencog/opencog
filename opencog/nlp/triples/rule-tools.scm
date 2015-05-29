@@ -491,10 +491,8 @@
 		; The Big Kahuna -- a list of variables, and the implication.
 		(BindLink
 			(VariableList pv ff)
-			(ImplicationLink 
-				(AndLink pc)
-				ic
-			)
+			(AndLink pc)
+			ic
 		)
 	)
 )

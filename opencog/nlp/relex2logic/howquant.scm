@@ -14,28 +14,27 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$noun")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_quantity")
-                    			(ListLink
-                        			(VariableNode "$noun")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-				(InheritanceLink
-   					(VariableNode "$qVar")
-   					(DefinedLinguisticConceptNode "how_much")
-				)
+		(AndLink	
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
 			)
+			(WordInstanceLink
+				(VariableNode "$noun")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_quantity")
+                			(ListLink
+                    			(VariableNode "$noun")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+			(InheritanceLink
+				(VariableNode "$qVar")
+				(DefinedLinguisticConceptNode "how_much")
+			)
+		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howquant-q-rule")
 			(ListLink
@@ -43,7 +42,7 @@
 			)
 		)
 	)
-))
+)
 
 (InheritanceLink (stv 1 .99) (ConceptNode "howquant-q-Rule") (ConceptNode "Rule"))
 

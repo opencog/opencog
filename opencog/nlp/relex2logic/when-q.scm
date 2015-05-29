@@ -14,35 +14,33 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink	
- 				(WordInstanceLink
-					(VariableNode "$verb")
-					(VariableNode "$a-parse")
-				)
-				(WordInstanceLink
-					(VariableNode "$qVar")
-					(VariableNode "$a-parse")
-				)
-				(EvaluationLink
-                    			(DefinedLinguisticRelationshipNode "_%atTime")
-                    			(ListLink
-                        			(VariableNode "$verb")
-                        			(VariableNode "$qVar")
-                    			)					
-                		)
-				(AbsentLink
-					(LemmaLink
-						(VariableNode "$verb")
-						(WordNode "be")
-					)
-				)
-			)
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-when-q-rule")
-			(ListLink
+		(AndLink	
+			(WordInstanceLink
 				(VariableNode "$verb")
+				(VariableNode "$a-parse")
 			)
+			(WordInstanceLink
+				(VariableNode "$qVar")
+				(VariableNode "$a-parse")
+			)
+			(EvaluationLink
+                			(DefinedLinguisticRelationshipNode "_%atTime")
+                			(ListLink
+                    			(VariableNode "$verb")
+                    			(VariableNode "$qVar")
+                			)					
+            		)
+			(AbsentLink
+				(LemmaLink
+					(VariableNode "$verb")
+					(WordNode "be")
+				)
+			)
+		)
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm: pre-when-q-rule")
+		(ListLink
+			(VariableNode "$verb")
 		)
 	)
 ))
