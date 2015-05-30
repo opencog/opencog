@@ -74,7 +74,10 @@ IF (HAVE_ATOMSPACE)
 
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "${DATADIR}/python/opencog")
+	
 ENDIF (HAVE_ATOMSPACE)
+
+	
 
 
 IF (HAVE_SERVER)
