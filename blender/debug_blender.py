@@ -1,11 +1,7 @@
 # coding=utf-8
+from util.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
-
-import random
-
-from opencog.atomspace import *
-from opencog.logger import *
 
 from base_blender import *
 from util.blending_util import *
@@ -45,8 +41,9 @@ class DebugBlender(BaseBlender):
         a_node_0 = a_nodes[0]
         a_node_1 = a_nodes[1]
         a_blended_node = ConceptNode(
-            str(a_node_0.name) + '_' +
-            str(a_node_1.name),
+            '(' +
+            str(a_node_0.name) + '_' + str(a_node_1.name) +
+            ')',
             rand_tv()
         )
 
@@ -92,11 +89,11 @@ class DebugBlender(BaseBlender):
             blend_target_link_tv
         )
 
-        log.warn(str(a_blended_node.h) + " " + str(a_blended_node.name))
+        BlendingLoggerForDebug().log(str(a_blended_node.h) + " " + str(a_blended_node.name))
 
     def blend(self):
-        log.warn("Start DebugBlending")
+        BlendingLoggerForDebug().log("Start DebugBlending")
         self.__algorithm_for_debug(['Father', 'Paul'])
         self.__algorithm_for_debug(['Daughter', 'Sally'])
-        log.warn("Finish DebugBlending")
+        BlendingLoggerForDebug().log("Finish DebugBlending")
         return 0

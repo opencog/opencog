@@ -1,3 +1,5 @@
+from util.blending_util import BlendTargetCtlForDebug
+
 __author__ = 'DongMin Kim'
 
 from abc import ABCMeta, abstractmethod
@@ -15,11 +17,7 @@ class BaseBlender(object):
 
     def __init__(self, atomspace):
         self.a = atomspace
-        self.a_blend_target = \
-            self.a.get_atoms_by_name(
-                types.Atom,
-                blending_util.BLEND_TARGET_NODE_NAME
-            )[0]
+        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
         self.last_status = 0
 
     def __str__(self):

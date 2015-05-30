@@ -1,6 +1,7 @@
 from blender.debug_blender import DebugBlender
 from blender.random_blender import RandomBlender
 from opencog.logger import log
+from util.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
 
@@ -21,10 +22,10 @@ class BlenderFactory(object):
         self.blender_count = len(self.blender_list)
 
     def print_blender_list(self):
-        log.warn('Please select blender number to use.')
+        BlendingLoggerForDebug().log('Please select blender number to use.')
         for i in range(self.blender_count):
             blender = self.blender_list[i]
-            log.warn(str(i) + ': ' + str(blender))
+            BlendingLoggerForDebug().log(str(i) + ': ' + str(blender))
 
     def ask_to_user(self):
         index = -1

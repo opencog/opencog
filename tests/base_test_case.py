@@ -1,3 +1,5 @@
+from util.blending_util import BlendTargetCtlForDebug
+
 __author__ = 'DongMin Kim'
 
 from abc import ABCMeta, abstractmethod
@@ -19,11 +21,7 @@ class BaseTestCase(object):
         self.link_list_for_debug = []
         self.default_atom_tv = TruthValue(0.9, 0.8)
         self.default_link_tv = TruthValue(0.7, 0.6)
-        self.a_blend_target = \
-            self.a.get_atoms_by_name(
-                types.Atom,
-                blending_util.BLEND_TARGET_NODE_NAME
-            )[0]
+        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
 
     def __str__(self):
         return 'BaseTestCase'

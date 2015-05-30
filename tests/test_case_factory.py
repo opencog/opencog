@@ -1,3 +1,5 @@
+from util.general_util import BlendingLoggerForDebug
+
 __author__ = 'DongMin Kim'
 
 from opencog.type_constructors import *
@@ -31,10 +33,10 @@ class TestCaseFactory:
         self.a_frame = ConceptNode("Frame", self.atom_tv)
 
     def print_test_case_list(self):
-        log.warn('Please select test case number to use.')
+        BlendingLoggerForDebug().log('Please select test case number to use.')
         for i in range(self.test_case_count):
             test_case = self.test_case_list[i]
-            log.warn(str(i) + ': ' + str(test_case))
+            BlendingLoggerForDebug().log(str(i) + ': ' + str(test_case))
 
     def ask_to_user(self):
         index = -1
