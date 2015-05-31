@@ -1,11 +1,25 @@
 # Progress summary of this week
-* Beautiful version is available in my wiki 
+* Beautiful version is available in my wiki
  (http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending)
 
 ## Now
 ### In Progress
+* Try to connect python debugger to cogserver.
 * Try to apply STI in my test cases. (Currently test cases use 'BlendTarget' 
  which is only useful in development stage)
+ 
+### To do
+**Think**
+* (empty)
+
+**Study**
+* Try to use Unified Rule Engine, PLN in python.
+
+**CodingCodingCoding**
+* Check the conflict links in each node and remove.
+  * Implement removing conflict links
+* Detect and improve conflict links in newly blended node
+  * Select one by random in 2^k possible things
 * Select nodes to blending.
   * Implement checking for some values in HebbianLink and SimilarityLink when 
  select node
@@ -14,21 +28,7 @@
 * Decide whether or not to execute blending and prepare
   * Implement skipping blend and run the next cycle
   * Implement selecting ConceptNode which has best value (proper value)
-### To do
-**Think**
-
-* (empty)
-
-**Study**
-
-* Try to use Unified Rule Engine, PLN in python.
-
-**CodingCodingCoding**
-
-* Check the conflict links in each node and remove.
-  * Implement removing conflict links
-* Detect and improve conflict links in newly blended node
-  * Select one by random in 2^k possible things
+* Optimize implemented code and make simple documentation.
 
 ### Pause
 * Search for good algorithms to use in each step.
@@ -41,16 +41,7 @@
 
 ## Result
 ### Done
-* Implement blender selector by passing instance which is subclass of abstract class.
-  * Implement blender selector.
-  * Implement test case selector.
-* Check for made blended node and trying to test with several case.
-  * Done. (Paul & Sally example, Debate with Kant example)
-  * However, it doesn't make any sense at current time.
-* Fix the atomspace issues in python binding.
-  * Occured by wrong AtomSpace definition in cython binding.
-  * See my PR(https://github.com/opencog/opencog/pull/1632)
-  * See my PR(https://github.com/opencog/atomspace/pull/63)
+* (empty)
 
 ### Fail & Deadline Missed
 * (empty)
