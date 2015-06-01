@@ -1,4 +1,5 @@
 from util_b.blending_util import BlendTargetCtlForDebug
+from util_b.general_util import BlendingConfigLoader
 
 __author__ = 'DongMin Kim'
 
@@ -25,7 +26,9 @@ class BaseTestCase(object):
         self.link_list_for_debug = []
         self.default_atom_tv = TruthValue(0.9, 0.8)
         self.default_link_tv = TruthValue(0.7, 0.6)
-        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
+
+        if BlendingConfigLoader().is_use_blend_target:
+            self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
 
     def __str__(self):
         return 'BaseTestCase'

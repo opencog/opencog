@@ -1,30 +1,19 @@
 __author__ = 'DongMin Kim'
 
-import web.api.restapi
 from util_b.general_util import *
 from util_b.blending_util import *
-
-# Note: Divided to standalone class because I'll remove
-class RESTAPILoader:
-    def __init__(self, atomspace):
-        self.a = atomspace
-
-    def run(self):
-        # To avoid debug messages of restapi.
-        # import logging
-
-        # logging.basicConfig(level=logging.CRITICAL)
-        restapi = web.api.restapi.Start()
-        restapi.run("", self.a)
 
 
 class ShellWrapper:
     def __init__(self):
         self.a = AtomSpace()
 
-        # DEBUG: Run RESTAPI server automatically to see my atomspace.
-        rest_api_loader = RESTAPILoader(self.a)
-        rest_api_loader.run()
+        # Run RESTAPI server automatically to see my atomspace.
+        if BlendingConfigLoader().get('RestAPI', 'USE_RESTAPI') == 'True':
+            address = BlendingConfigLoader().get('RestAPI', 'IP_ADDRESS')
+            port = BlendingConfigLoader().get('RestAPI', 'PORT')
+            rest_api_loader = RESTAPILoader(self.a)
+            rest_api_loader.run(address, port)
 
     def ask_user_to_run_or_stop_for_debug(self):
         # BlendingLoggerForDebug().log("Input n to preserve temp links, or delete.")

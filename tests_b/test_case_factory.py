@@ -1,4 +1,5 @@
-from util_b.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlendingLoggerForDebug, get_class, \
+    get_class_by_split_name
 
 __author__ = 'DongMin Kim'
 
@@ -16,8 +17,8 @@ class TestCaseFactory:
         self.__make_default_concept()
 
         self.test_case_list = [
-            PaulSallyExample(self.a),
-            DebateWithKantExample(self.a)
+            PaulSallyExample,
+            DebateWithKantExample
         ]
 
         self.test_case_count = len(self.test_case_list)
@@ -48,11 +49,14 @@ class TestCaseFactory:
     def make(self, id_or_name):
         if type(id_or_name) is str:
             for test_case in self.test_case_list:
-                if str(test_case) == id_or_name:
-                    test_case.make()
+                if str(test_case).find(id_or_name) != -1:
+                    maker_inst = test_case(self.a)
+                    maker_inst.make()
         else:
-            self.test_case_list[id_or_name].make()
+            maker_inst = self.test_case_list[id_or_name](self.a)
+            maker_inst.make()
 
     def make_all(self):
         for test_case in self.test_case_list:
-            test_case.make()
+            maker_inst = test_case(self.a)
+            maker_inst.make()

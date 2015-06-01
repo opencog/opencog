@@ -1,6 +1,7 @@
 from tests_b.base_test_case import BaseTestCase
 from util_b import blending_util
 from util_b.blending_util import *
+from util_b.general_util import BlendingConfigLoader
 
 __author__ = 'DongMin Kim'
 
@@ -386,4 +387,6 @@ class DebateWithKantExample(BaseTestCase):
         self.__make_input_space_1()
         self.__make_generic_space()
         self.__make_blended_space()
-        self.__link_with_blend_target_for_debug()
+
+        if BlendingConfigLoader().is_use_blend_target:
+            self.__link_with_blend_target_for_debug()

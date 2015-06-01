@@ -37,9 +37,8 @@ class PyCharmDebugServer:
 """
 
 class ExperimentCodes:
-    def __init__(self, atomspace, run_by_server):
-        self.a = atomspace
-        self.run_by_server = run_by_server
+    def __init__(self, a):
+        self.a = a
 
     def print_atomspace_for_debug(self):
         print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))

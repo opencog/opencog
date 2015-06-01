@@ -9,6 +9,9 @@ blend_target_link_tv = TruthValue(1.0, 1.0)
 # Singleton class
 # From now, this class don't check any validity of atomspace, so be careful!
 class BlendTargetCtlForDebug(Singleton):
+    def __init__(cls):
+        super(BlendTargetCtlForDebug, cls).__init__()
+
     BLEND_TARGET_NAME = 'BlendTarget'
 
     a = None

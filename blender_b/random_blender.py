@@ -77,12 +77,13 @@ class RandomBlender(BaseBlender):
         # Detect and improve conflict links in newly blended node.
         # - Do nothing.
 
-        # DEBUG: Link with blend target.
-        self.a.add_link(
-            types.MemberLink,
-            [a_blended_node, self.a_blend_target],
-            blend_target_link_tv
-        )
+        if BlendingConfigLoader().is_use_blend_target:
+            # DEBUG: Link with blend target.
+            self.a.add_link(
+                types.MemberLink,
+                [a_blended_node, self.a_blend_target],
+                blend_target_link_tv
+            )
 
         # DEBUG: Link with Blended Space.
         a_blended_space = \
@@ -97,7 +98,11 @@ class RandomBlender(BaseBlender):
             blend_target_link_tv
         )
 
-        BlendingLoggerForDebug().log(str(a_blended_node.h) + " " + str(a_blended_node.name))
-        # BlendingLoggerForDebug().log("Finish RandomBlending")
+        BlendingLoggerForDebug().log(
+            str(a_blended_node.h) +
+            " " +
+            str(a_blended_node.name)
+        )
 
+        # BlendingLoggerForDebug().log("Finish RandomBlending")
         return 0
