@@ -24,4 +24,5 @@ QueryModule::~QueryModule()
 void QueryModule::init(void)
 {
 	_pat = new PatternSCM();
+	_pat->module_init();
 }
