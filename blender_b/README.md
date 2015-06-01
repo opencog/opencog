@@ -1,4 +1,4 @@
-# blender
+# blender_b
 * Directory to save the available blenders.
 
 ## Files

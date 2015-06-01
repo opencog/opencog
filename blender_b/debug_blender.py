@@ -1,11 +1,11 @@
 # coding=utf-8
-from util.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
 
 from base_blender import *
-from util.blending_util import *
-from util.link_copier import *
+from util_b.blending_util import *
+from util_b.link_copier import *
 
 
 class DebugBlender(BaseBlender):

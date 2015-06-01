@@ -1,6 +1,6 @@
-from tests.base_test_case import BaseTestCase
-from util import blending_util
-from util.blending_util import *
+from tests_b.base_test_case import BaseTestCase
+from util_b import blending_util
+from util_b.blending_util import *
 
 __author__ = 'DongMin Kim'
 

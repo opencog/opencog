@@ -1,8 +1,8 @@
 __author__ = 'DongMin Kim'
 
 import web.api.restapi
-from util.general_util import *
-from util.blending_util import *
+from util_b.general_util import *
+from util_b.blending_util import *
 
 # Note: Divided to standalone class because I'll remove
 class RESTAPILoader:
@@ -11,9 +11,9 @@ class RESTAPILoader:
 
     def run(self):
         # To avoid debug messages of restapi.
-        import logging
+        # import logging
 
-        logging.basicConfig(level=logging.CRITICAL)
+        # logging.basicConfig(level=logging.CRITICAL)
         restapi = web.api.restapi.Start()
         restapi.run("", self.a)
 

@@ -1,11 +1,11 @@
-from util.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
 
 from opencog.type_constructors import *
 
-from tests.paul_sally.paul_sally import PaulSallyExample
-from tests.debate_with_kant.debate_with_kant import DebateWithKantExample
+from tests_b.paul_sally.paul_sally import PaulSallyExample
+from tests_b.debate_with_kant.debate_with_kant import DebateWithKantExample
 
 from opencog.logger import log
 

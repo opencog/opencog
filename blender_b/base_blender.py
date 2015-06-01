@@ -1,4 +1,4 @@
-from util.blending_util import BlendTargetCtlForDebug
+from util_b.blending_util import BlendTargetCtlForDebug
 
 __author__ = 'DongMin Kim'
 
@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 
 from opencog.type_constructors import *
 
-from util import blending_util
+from util_b import blending_util
 
 
 class BaseBlender(object):

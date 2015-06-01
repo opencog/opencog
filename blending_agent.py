@@ -1,16 +1,13 @@
 __author__ = 'DongMin Kim'
 
-
 import opencog.cogserver
 from opencog.utilities import *
 
-from blender.random_blender import *
-from util.experiment_codes import ExperimentCodes
-from util.general_util import *
-from util.blending_util import *
-from blender.blender_factory import BlenderFactory
-from tests.test_case_factory import TestCaseFactory
-
+from util_b.experiment_codes import ExperimentCodes
+from util_b.general_util import *
+from util_b.blending_util import *
+from blender_b.blender_factory import BlenderFactory
+from tests_b.test_case_factory import TestCaseFactory
 
 
 # Perform Conceptual Blending.

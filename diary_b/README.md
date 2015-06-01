@@ -4,7 +4,6 @@
 
 ## Now
 ### In Progress
-* Try to connect python debugger to cogserver.
 * Try to apply STI in my test cases. (Currently test cases use 'BlendTarget' 
  which is only useful in development stage)
  
@@ -41,7 +40,10 @@
 
 ## Result
 ### Done
-* (empty)
+* Try to connect python debugger to cogserver.
+:* Done.
+:* Python's GIL(GlobalInterpreterLock) policy has little bug in Python 2.x, so
+ debugging with PyCharm libraries should be use with some hack codes..
 
 ### Fail & Deadline Missed
 * (empty)

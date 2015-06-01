@@ -2,7 +2,7 @@ __author__ = 'DongMin Kim'
 
 import random
 from opencog.type_constructors import *
-from util.general_util import Singleton
+from util_b.general_util import Singleton
 
 blend_target_link_tv = TruthValue(1.0, 1.0)
 

@@ -1,13 +1,13 @@
-from blender.debug_blender import DebugBlender
-from blender.random_blender import RandomBlender
+from blender_b.debug_blender import DebugBlender
+from blender_b.random_blender import RandomBlender
 from opencog.logger import log
-from util.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
 
 from opencog.type_constructors import *
 
-from util import blending_util
+from util_b import blending_util
 
 
 class BlenderFactory(object):

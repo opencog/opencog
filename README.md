@@ -37,8 +37,8 @@ inst.run('blending_agent.BlendingAgent')
 * blending.conf: Config file.
 
 ## Folders
-* blender: Available blenders.
-* diary: My working progress reports for GSoC 2015 project.
-* note: Various notes to save useful information for my project.
-* tests: Input data for test conceptual blending.
-* util: Several util files.
+* blender_b: Available blenders.
+* diary_b: My working progress reports for GSoC 2015 project.
+* note_b: Various notes to save useful information for my project.
+* tests_b: Input data for test conceptual blending.
+* util_b: Several util files.
