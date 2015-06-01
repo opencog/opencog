@@ -106,3 +106,20 @@ def make_link_all(atomspace, link_type, src_node_list, dst_node, tv=None):
         for node in src_node_list:
             atomspace.add_link(link_type, [node, dst_node], tv)
 
+def make_sti_all(atomspace, src_node_list, sti):
+    for node in src_node_list:
+        node.av = {'sti': sti}
+
+# Select atoms which are connected to specific atom.
+def get_incoming_node_list(atomspace, target):
+    ret = []
+
+    xget_target_link = atomspace.xget_atoms_by_target_atom(types.Link, target)
+
+    for link in xget_target_link:
+        xget_target_link_node = atomspace.xget_outgoing(link.h)
+        for node in xget_target_link_node:
+            if node.h != target.h:
+                ret.append(node)
+
+    return ret

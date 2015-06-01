@@ -15,6 +15,9 @@ from opencog.type_constructors \
 class PaulSallyExample(BaseTestCase):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
+        self.JUST_TARGET = 8
+        self.IMPORTANT = 16
+        self.VERY_IMPORTANT = 32
 
     def __str__(self):
         return 'PaulSallyExample'
@@ -26,6 +29,7 @@ class PaulSallyExample(BaseTestCase):
         # Make instance of space&frame concept.
         a_input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
         a_family = ConceptNode("Family", rand_tv())
+        a_family.av = {'sti': self.JUST_TARGET}
 
         # Make role concept.
         a_grand_father = ConceptNode("Grandfather", rand_tv())
@@ -35,6 +39,7 @@ class PaulSallyExample(BaseTestCase):
         a_son = ConceptNode("Son", rand_tv())
         a_daughter = ConceptNode("Daughter", rand_tv())
 
+        """
         # Link with blend target.
         make_link_all(
             self.a,
@@ -43,6 +48,20 @@ class PaulSallyExample(BaseTestCase):
              a_father, a_mother, a_son, a_daughter],
             self.a_blend_target,
             blend_target_link_tv
+        )
+        """
+
+        make_sti_all(
+            self.a,
+            [a_grand_father, a_grand_mother,
+             a_mother, a_son],
+            self.JUST_TARGET
+        )
+
+        make_sti_all(
+            self.a,
+            [a_father, a_daughter],
+            self.IMPORTANT
         )
 
         # Link with family frame type.
@@ -86,6 +105,7 @@ class PaulSallyExample(BaseTestCase):
         a_paul = VariableNode("Paul", rand_tv())
         a_sally = VariableNode("Sally", rand_tv())
 
+        """
         # Link with blend target.
         make_link_all(
             self.a,
@@ -93,6 +113,13 @@ class PaulSallyExample(BaseTestCase):
             [a_paul, a_sally],
             self.a_blend_target,
             blend_target_link_tv
+        )
+        """
+
+        make_sti_all(
+            self.a,
+            [a_paul, a_sally],
+            self.IMPORTANT
         )
 
         # Link with input space 1 type.
@@ -116,13 +143,21 @@ class PaulSallyExample(BaseTestCase):
         a_man = ConceptNode("Man", rand_tv())
         a_woman = ConceptNode("Woman", rand_tv())
 
+        """
         # Link with blend target.
         make_link_all(
             self.a,
             types.MemberLink,
-            [a_human, a_man, a_woman],
+            [a_human, a_human, a_woman],
             self.a_blend_target,
             blend_target_link_tv
+        )
+        """
+
+        make_sti_all(
+            self.a,
+            [a_human, a_human, a_woman],
+            self.JUST_TARGET
         )
 
         # Link with man type.

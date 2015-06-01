@@ -20,42 +20,6 @@ class RandomBlender(BaseBlender):
     def get_last_status(self):
         return self.last_status
 
-    # Select atoms which are connected to specific atom.
-    def __get_incoming_node_list(self, target):
-        ret = []
-
-        xget_target_link = self.a.xget_atoms_by_target_atom(types.Link, target)
-
-        for link in xget_target_link:
-            xget_target_link_node = self.a.xget_outgoing(link.h)
-            for node in xget_target_link_node:
-                if node.h != target.h:
-                    ret.append(node)
-
-        return ret
-
-    # Select atoms randomly and return
-    # atom_type = decide the type of atoms to select
-    # count = decide the number of atoms to select
-    def __get_random_atom(self, count=2):
-        ret = []
-
-        # TODO: change to search all atomspace
-        # (BlendTarget is only useful in development phase)
-        a_atom_list = self.__get_incoming_node_list(self.a_blend_target)
-        a_list_size = a_atom_list.__len__()
-
-        if a_list_size < count:
-            print('Size of atom list is too small')
-            return ret
-
-        a_index_list = random.sample(range(0, a_list_size), count)
-
-        for i in a_index_list:
-            ret.append(a_atom_list[i])
-
-        return ret
-
     def blend(self):
         BlendingLoggerForDebug().log("Start RandomBlending")
 

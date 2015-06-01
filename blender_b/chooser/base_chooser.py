@@ -1,4 +1,3 @@
-from blender_b.chooser.chooser_factory import ChooserFactory
 from util_b.blending_util import BlendTargetCtlForDebug
 
 __author__ = 'DongMin Kim'
@@ -10,7 +9,7 @@ from opencog.type_constructors import *
 from util_b import blending_util
 
 
-class BaseBlender(object):
+class BaseChooser(object):
     """
     :type a: opencog.atomspace_details.AtomSpace
     """
@@ -21,15 +20,13 @@ class BaseBlender(object):
         self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
         self.last_status = 0
 
-        self.chooser_factory = ChooserFactory(self.a)
-
     def __str__(self):
-        return 'BaseBlender'
+        return 'BaseChooser'
 
     @abstractmethod
-    def blend(self):
-        pass
-
-    @abstractmethod
-    def get_last_status(self):
+    def atom_choose(self, option):
+        """
+        :param option: dict
+        :return: list
+        """
         pass
