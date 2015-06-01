@@ -12,5 +12,3 @@ at.get_atoms_by_av(6000)
 at.get_atoms_in_attentional_focus()
 
 a1.av={'sti':100}
-
-alacarte

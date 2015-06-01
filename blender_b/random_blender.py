@@ -12,10 +12,21 @@ class RandomBlender(BaseBlender):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
 
-        self.link_copier_class = LinkCopier(self.a)
+        self.chooser = self.chooser = \
+            self.chooser_factory.get_chooser("RandomInSTIRange")
+
+        self.link_copier_inst = LinkCopier(self.a)
 
     def __str__(self):
         return 'RandomBlender'
+
+    def __atom_choose(self):
+        chooser_option = {
+            'atom_type': types.Node,
+            'count': 2,
+            'sti_min': 8
+        }
+        return self.chooser.atom_choose(chooser_option)
 
     def get_last_status(self):
         return self.last_status
@@ -24,7 +35,7 @@ class RandomBlender(BaseBlender):
         BlendingLoggerForDebug().log("Start RandomBlending")
 
         # Select nodes to blending.
-        a_nodes = self.__get_random_atom(2)
+        a_nodes = self.__atom_choose()
 
         # Decide whether or not to execute blending and prepare.
         # - Do nothing.
@@ -44,7 +55,7 @@ class RandomBlender(BaseBlender):
 
         # Make the links between exist nodes and newly blended node.
         # Correct some attribute value of new links.
-        self.link_copier_class.copy_all_link_to_new_node(
+        self.link_copier_inst.copy_all_link_to_new_node(
             [a_node_0, a_node_1],
             a_blended_node
         )

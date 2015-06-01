@@ -1,49 +1,61 @@
 import random
+import random_all
+from opencog.type_constructors import types
 from blender_b.chooser.base_chooser import BaseChooser
 from util_b.blending_util import get_incoming_node_list
 
 __author__ = 'DongMin Kim'
 
+
 class RandomInSTIRange(BaseChooser):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
 
+    def __str__(self):
+        return 'RandomInSTIRange'
+
     # Select atoms randomly and return
     # atom_type = decide the type of atoms to select
     # count = decide the number of atoms to select
-    # sti_start = start value of sti to select
-    # sti_end = end value of sti to select
-    def __get_random_atom_in_sti_range(self, count=2, sti_start, sti_end):
+    # sti_min = min value of sti to select
+    # sti_max = max value of sti to select
+    def __get_randoms_atom_in_sti_range(
+            self, atom_type, count,
+            sti_min, sti_max=None
+    ):
         ret = []
 
-        a_atom_list = self.a.xget_atoms_by_av(sti_start, sti_end)
-        if len(a_atom_list) < count:
+        a_atom_list = self.a.get_atoms_by_type(atom_type, True)
+        a_atom_in_sti_list = self.a.get_atoms_by_av(sti_min, sti_max)
+        if (len(a_atom_list) < count) or \
+                (len(a_atom_in_sti_list) < count):
             print('Size of atom list is too small')
             return ret
 
-        a_node_list = []
-        for atom in a_atom_list:
-            self.at.
+        # TODO: this is very inefficient method to check type of atoms.
+        # Why AtomSpace doesn't provide API like 'is_type(type, atom)'?
+        a_atom_set = set(a_atom_list)
+        a_atom_in_sti_list = set(a_atom_in_sti_list)
 
+        a_found_set = a_atom_set & a_atom_in_sti_list
+        if len(a_atom_set) < count:
+            print('Size of requested list is too small')
+            return ret
 
+        a_found_list = list(a_found_set)
 
-            self.a.get_atoms_by_type(
-            types.Node, at.get_atoms_by_av(
-            10000))
-        a_list_size = a_atom_list.__len__()
-
-
-        a_index_list = random.sample(range(0, a_list_size), count)
-
+        a_index_list = random.sample(range(0, len(a_found_list)), count)
         for i in a_index_list:
-            ret.append(a_atom_list[i])
+            ret.append(a_found_list[i])
 
         return ret
 
     def atom_choose(self, option):
-        count = option['count']
-        sti_start = option['sti_start']
-        sti_end = option['sti_end']
-        return self.__get_random_atom_in_sti_range(count, sti_start, sti_end)
-
-
+        atom_type = option.get('atom_type')
+        count = option.get('count')
+        sti_min = option.get('sti_min')
+        sti_max = option.get('sti_max')
+        return self.__get_randoms_atom_in_sti_range(
+            atom_type, count,
+            sti_min, sti_max
+        )

@@ -12,7 +12,7 @@ class DebugBlender(BaseBlender):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
 
-        self.link_copier_class = LinkCopier(self.a)
+        self.link_copier_inst = LinkCopier(self.a)
 
     def __str__(self):
         return 'DebugBlender'
@@ -49,7 +49,7 @@ class DebugBlender(BaseBlender):
 
         # Make the links between exist nodes and newly blended node.
         # Correct some attribute value of new links.
-        self.link_copier_class.copy_all_link_to_new_node(
+        self.link_copier_inst.copy_all_link_to_new_node(
             [a_node_0, a_node_1],
             a_blended_node
         )
