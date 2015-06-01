@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
@@ -38,15 +39,18 @@ using namespace opencog;
  * @param pAS    the corresponding AtomSpace
  * @param vars   the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, std::set<Handle> vars)
-    : DefaultPatternMatchCB(pAS), m_vars(vars), m_eval(new SchemeEval(pAS))
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
+    InitiateSearchCB(pAS),
+    DefaultPatternMatchCB(pAS),
+    m_as(pAS),
+    m_vars(vars),
+    m_eval(SchemeEval::get_evaluator(pAS))
 {
 
 }
 
 SuRealPMCB::~SuRealPMCB()
 {
-    delete m_eval;
 }
 
 /**
@@ -66,7 +70,7 @@ SuRealPMCB::~SuRealPMCB()
  * @param hSoln   the potential mapping
  * @return        false if solution is rejected, true if accepted
  */
-bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
+bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
     logger().debug("[SuReal] In variable_match, looking at %s", hSoln->toShortString().c_str());
 
@@ -78,15 +82,15 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
         return true;
 
-    std::string sPat = _as->getName(hPat);
+    std::string sPat = m_as->getName(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
-    std::string sSoln = _as->getName(hSoln);
+    std::string sSoln = m_as->getName(hSoln);
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = _as->getHandle(WORD_NODE, sPatWord);
+    Handle hPatWordNode = m_as->getHandle(WORD_NODE, sPatWord);
 
     // get the corresponding WordInstanceNode for hSoln
-    Handle hSolnWordInst = _as->getHandle(WORD_INSTANCE_NODE, sSoln);
+    Handle hSolnWordInst = m_as->getHandle(WORD_INSTANCE_NODE, sSoln);
 
     // no WordInstanceNode? reject!
     if (hSolnWordInst == Handle::UNDEFINED)
@@ -94,14 +98,14 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
 
     // get the source connectors for the solution
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
-    HandleSeq qTargetConns = _as->getOutgoing(m_eval->eval_h(scmCode));
+    HandleSeq qTargetConns = m_as->getOutgoing(m_eval->eval_h(scmCode));
 
-    HandleSeq qOr = _as->getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qOr = getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
 
     auto insertHelper = [&](const Handle& h)
     {
-        HandleSeq q = _as->getOutgoing(h);
+        HandleSeq q = m_as->getOutgoing(h);
         qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
     };
 
@@ -118,7 +122,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
         // check if hDisjunct is LgAnd or just a lone connector
         if (hDisjunct->getType() == LG_AND)
         {
-            HandleSeq q = _as->getOutgoing(hDisjunct);
+            HandleSeq q = m_as->getOutgoing(hDisjunct);
             sourceConns = std::list<Handle>(q.begin(), q.end());
         }
         else
@@ -159,7 +163,7 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
             }
 
             // dumb hacky way of checking of the connector is a multi-connector
-            if (_as->getOutgoing(sourceConns.front()).size() == 3)
+            if (m_as->getOutgoing(sourceConns.front()).size() == 3)
                 hMultiConn = sourceConns.front();
 
             sourceConns.pop_front();
@@ -190,11 +194,11 @@ bool SuRealPMCB::variable_match(Handle &hPat, Handle &hSoln)
  * @param grnd_link_h     the corresponding grounding to be checked
  * @return                false if rejected, true if accepted
  */
-bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
+bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_link_h)
 {
     logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
 
-    HandleSeq qISet = _as->getIncoming(grnd_link_h);
+    HandleSeq qISet = m_as->getIncoming(grnd_link_h);
 
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -202,7 +206,7 @@ bool SuRealPMCB::clause_match(Handle &pattrn_link_h, Handle &grnd_link_h)
     // helper lambda function to check for linkage to an InterpretationNode, given SetLink
     auto hasInterpretation = [this](Handle& h)
     {
-        HandleSeq qN = _as->getNeighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = getNeighbors(h, true, false, REFERENCE_LINK, false);
         return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
     };
 
@@ -228,14 +232,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // helper to get the InterpretationNode
     auto getInterpretation = [this](const Handle& h)
     {
-        HandleSeq qISet = _as->getIncoming(h);
+        HandleSeq qISet = m_as->getIncoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
         HandleSeq results;
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = _as->getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN  = getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -301,9 +305,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 }
 
 /**
- * Implement the perform_search method.
+ * Implement the initiate_search method.
  *
- * Similar to DefaultPatternMatcherCB::perform_search, in which we start search
+ * Similar to DefaultPatternMatcherCB::initiate_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -315,50 +319,38 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * @param clauses    the clauses for the query
  * @param negations  the negative clauses
  */
-void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars, HandleSeq& clauses, HandleSeq& negations)
+bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
-    size_t bestClauseIndex;
-    Handle bestClause, bestSubClause, bestSubNode;
-
-    // find the thinnest clause with constants
-    bestSubNode = find_thinnest(clauses, bestSubClause, bestClauseIndex);
-
-    if (bestSubNode != Handle::UNDEFINED && !vars.empty())
+    _search_fail = false;
+    if (not _variables->varset.empty())
     {
-        bestClause = clauses[bestClauseIndex];
-
-        logger().debug("[SuReal] Search start node: %s", bestSubNode->toShortString().c_str());
-        logger().debug("[SuReal] Start pred is: %s", bestSubClause->toShortString().c_str());
-
-        IncomingSet iset = get_incoming_set(bestSubNode);
-
-        for (auto& l : iset)
-        {
-            Handle h(l);
-            logger().debug("[SuReal] Loop candidate: %s", h->toShortString().c_str());
-
-            if (pPME->do_candidate(bestClause, bestSubClause, h))
-                break;
-        }
-
-        return;
+        bool found = neighbor_search(pPME);
+        if (not _search_fail) return found;
     }
 
-    // reaching here means no contants, so do some search space reduction here
-    bestClause = clauses[0];
+    // Reaching here means no constants, so do some search space
+    // reduction here
+    Handle bestClause = _pattern->mandatory[0];
 
-    logger().debug("[SuReal] Start pred is: %s", bestClause->toShortString().c_str());
+    logger().debug("[SuReal] Start pred is: %s",
+                   bestClause->toShortString().c_str());
 
     // helper for checking for InterpretationNode
     auto hasNoInterpretation = [this](Handle& h)
     {
-        HandleSeq qISet = _as->getIncoming(h);
-        qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& hl) { return hl->getType() != SET_LINK; }), qISet.end());
+        HandleSeq qISet = m_as->getIncoming(h);
+        qISet.erase(
+            std::remove_if(
+                qISet.begin(),
+                qISet.end(),
+                [](Handle& hl) { return hl->getType() != SET_LINK; }),
+            qISet.end());
 
         auto hasNode = [this](Handle& hl)
         {
-            HandleSeq qN = _as->getNeighbors(hl, true, false, REFERENCE_LINK, false);
-            return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+            HandleSeq qN = getNeighbors(hl, true, false, REFERENCE_LINK, false);
+            return std::any_of(qN.begin(), qN.end(),
+                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };
 
         return not std::any_of(qISet.begin(), qISet.end(), hasNode);
@@ -366,16 +358,17 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
 
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
-    _as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
+    m_as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
     qCandidate.erase(std::remove_if(qCandidate.begin(), qCandidate.end(), hasNoInterpretation), qCandidate.end());
 
     for (auto& c : qCandidate)
     {
         logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
 
-        if (pPME->do_candidate(bestClause, bestClause, c))
-            break;
+        if (pPME->explore_neighborhood(bestClause, bestClause, c))
+            return true;
     }
+    return false;
 }
 
 /**
@@ -384,16 +377,17 @@ void SuRealPMCB::perform_search(PatternMatchEngine* pPME, std::set<Handle>& vars
  * Override find_starter so that it will not treat VariableNode variables,
  * but instead compare against the variable list.
  *
- * @param h       same as DefaultPatternMatchCB::find_starter
- * @param depth   same as DefaultPatternMatchCB::find_starter
- * @param start   same as DefaultPatternMatchCB::find_starter
- * @param width   same as DefaultPatternMatchCB::find_starter
- * @return        same as DefaultPatternMatchCB::find_starter but change
+ * @param h       same as InitiateSearchCB::find_starter
+ * @param depth   same as InitiateSearchCB::find_starter
+ * @param start   same as InitiateSearchCB::find_starter
+ * @param width   same as InitiateSearchCB::find_starter
+ * @return        same as InitiateSearchCB::find_starter but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(Handle h, size_t& depth, Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth,
+                                Handle& start, size_t& width)
 {
-    Handle rh = DefaultPatternMatchCB::find_starter(h, depth, start, width);
+    Handle rh = InitiateSearchCB::find_starter(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)
@@ -401,4 +395,3 @@ Handle SuRealPMCB::find_starter(Handle h, size_t& depth, Handle& start, size_t& 
 
     return rh;
 }
-

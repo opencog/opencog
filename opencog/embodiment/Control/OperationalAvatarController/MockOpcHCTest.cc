@@ -106,16 +106,16 @@ void MockOpcHCTest::init(const std::string & myId,
                                  boost::lexical_cast<string>(2));
 
 
-    spaceServer().addSpaceInfo(pet_h, true,T1, PET_X, PET_Y, PET_Z,
-                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"pet",petId);
-    spaceServer().addSpaceInfo(obj_h, false,T1, OBJ_X, OBJ_Y, OBJ_Z,
-                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,false,"object",OBJ_NAME);
-    spaceServer().addSpaceInfo(owner_h, false,T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
-                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    spaceServer().addSpaceInfo(owner_h, false, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
-                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
-    spaceServer().addSpaceInfo(owner_h,false, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
-                            OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
+    spaceServer().addSpaceInfo(pet_h, spaceServer().getLatestMapHandle(), true,T1, PET_X, PET_Y, PET_Z,
+			       OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"pet",petId);
+    spaceServer().addSpaceInfo(obj_h, spaceServer().getLatestMapHandle(), false,T1, OBJ_X, OBJ_Y, OBJ_Z,
+			       OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,false,"object",OBJ_NAME);
+    spaceServer().addSpaceInfo(owner_h, spaceServer().getLatestMapHandle(), false,T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
+			       OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
+    spaceServer().addSpaceInfo(owner_h, spaceServer().getLatestMapHandle(), false, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
+			       OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
+    spaceServer().addSpaceInfo(owner_h, spaceServer().getLatestMapHandle(), false, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
+			       OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW,true,"avatar",OWNER_NAME);
 
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);

@@ -47,6 +47,7 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument(
             'dot', type=str, location='args',
             choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument('limit', type=int, location='args')
 
         super(AtomCollectionAPI, self).__init__()
 
@@ -60,7 +61,7 @@ class AtomCollectionAPI(Resource):
 <code>atoms?type=[type]&name=[name]&filterby=[filterby]
     &tvStrengthMin=[tvStrengthMin]&tvConfidenceMin=[tvConfidenceMin]
     &tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
-    &includeOutgoing=[includeOutgoing]&callback=[callback]</code>
+    &includeOutgoing=[includeOutgoing]&limit=[limit]&callback=[callback]</code>
 
 <p>Example:
 
@@ -235,6 +236,17 @@ class AtomCollectionAPI(Resource):
 		'paramType': 'query'
 	    },
 	    {
+		'name': 'limit',
+		'description': '''To specify the maximum number of atoms to be returned.
+		    If the query results are greater than the number specified by
+		    <code>limit</code>, then the result set list is truncated to the
+		    first <code>limit</code> number of atoms.''',
+		'required': False,
+		'allowMultiple': False,
+		'dataType': 'int',
+		'paramType': 'query'
+	    },
+	    {
 		'name': 'callback',
 		'description': '''JavaScript callback function for JSONP support''',
 		'required': False,
@@ -270,6 +282,8 @@ class AtomCollectionAPI(Resource):
         include_outgoing = args.get('includeOutgoing')
 
         dot_format = args.get('dot')
+
+        limit = args.get('limit')
 
         if id != "":
             try:
@@ -328,6 +342,11 @@ class AtomCollectionAPI(Resource):
         # Optionally, include the outgoing set
         if include_outgoing in ['True', 'true', '1']:
             atoms = self.atomspace.include_outgoing(atoms)
+
+        # Optionally, limit number of atoms returned
+        if limit is not None:
+            if len(atoms) > limit:
+                atoms = atoms[0:limit]
 
         # The default is to return the atom set as JSON atoms. Optionally, a
         # DOT return format is also supported

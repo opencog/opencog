@@ -1,9 +1,0 @@
-
-                         ComboReduct
-                        =============
-
-ComboReduct is a library initially developed by Moshe Looks and
-Novamente LLC.  It is used in MOSES, the Meta-Optimizing Semantic 
-Evolutionary Search system.  It implements a small programming language,
-named Combo, and the reduction and type checker engines for it.
-

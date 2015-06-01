@@ -54,11 +54,11 @@ private:
     /**
      * Outputs a ubigraph node for an atom.
      */
-    bool addVertex(Handle h);
+    bool addVertex(const Handle& h);
     /**
      * Outputs ubigraph links for an atom's outgoing connections.
      */
-    bool addEdges(Handle h);
+    bool addEdges(const Handle& h);
     /**
      * Removes the ubigraph node for an atom.
      */

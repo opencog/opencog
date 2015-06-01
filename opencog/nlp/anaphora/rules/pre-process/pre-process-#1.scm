@@ -2,40 +2,38 @@
 
 (define pre-process-#1
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (InheritanceLink
-                    (VariableNode "$target")
-                    (DefinedLinguisticConceptNode "pronoun")
-                )
-                (NotLink
-                    (EvaluationLink
-                        (PrepositionalRelationshipNode "of")
-                        (ListLink
-                            (VariableNode "$target")
-                            (VariableNode "$word")
-                        )
+        (AndLink
+            (ListLink
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
+            )
+            (InheritanceLink
+                (VariableNode "$target")
+                (DefinedLinguisticConceptNode "pronoun")
+            )
+            (NotLink
+                (EvaluationLink
+                    (PrepositionalRelationshipNode "of")
+                    (ListLink
+                        (VariableNode "$target")
+                        (VariableNode "$word")
                     )
                 )
             )
-            (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
-            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

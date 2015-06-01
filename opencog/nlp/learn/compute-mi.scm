@@ -473,22 +473,20 @@
 			; eval links with AnyNode floating around ...
 			(TypedVariableLink
 				(VariableNode "$left-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						(VariableNode "$left-word")
-						word
-					)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					(VariableNode "$left-word")
+					word
 				)
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						(VariableNode "$left-word")
-						word
-					)
+			)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					(VariableNode "$left-word")
+					word
 				)
 			)
 		)
@@ -498,22 +496,20 @@
 		(BindLink
 			(TypedVariableLink
 				(VariableNode "$right-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						word
-						(VariableNode "$right-word")
-					)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					word
+					(VariableNode "$right-word")
 				)
-				(EvaluationLink
-					lg_rel
-					(ListLink
-						word
-						(VariableNode "$right-word")
-					)
+			)
+			(EvaluationLink
+				lg_rel
+				(ListLink
+					word
+					(VariableNode "$right-word")
 				)
 			)
 		)
@@ -932,15 +928,13 @@
 			; eval links with AnyNode floating around ...
 			(TypedVariableLink
 				(VariableNode "$left-word")
-				(VariableTypeNode item-type-str)
+				(TypeNode item-type-str)
 			)
-			(ImplicationLink
-				(EvaluationLink lg_rel
-					(ListLink (VariableNode "$left-word") right-word)
-				)
-				(EvaluationLink lg_rel
-					(ListLink (VariableNode "$left-word") right-word)
-				)
+			(EvaluationLink lg_rel
+				(ListLink (VariableNode "$left-word") right-word)
+			)
+			(EvaluationLink lg_rel
+				(ListLink (VariableNode "$left-word") right-word)
 			)
 		)
 	)

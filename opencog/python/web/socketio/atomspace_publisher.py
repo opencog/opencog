@@ -7,10 +7,10 @@ to a socket.io socket accessible from web applications using
 JavaScript and JQuery, including cross-domain requests
 
 Dependencies:
-gevent
+gevent:
 sudo apt-get install python-gevent
 
-gevent-socketio
+gevent-socketio:
 pip install gevent-socketio
 
 Instructions:
@@ -21,7 +21,9 @@ Instructions:
 
 2) Start the CogServer
 
-3) Ensure that libatomspacepublishermodule.so is loaded
+3) Ensure that libatomspacepublishermodule.so is loaded: you will need to include it
+in the list of active modules in the MODULES section of opencog.conf. The module
+path is: opencog/persist/zmq/events/libatomspacepublishermodule.so
 
 4) Browse to: http://localhost:8080/ to load an example client, defined in 'index.html'
 
@@ -61,6 +63,7 @@ class AtomSpaceNamespace(BaseNamespace, BroadcastMixin):
         print 'ZeroMQ listener initialized'
         while True:
             [address, contents] = subscriber.recv_multipart()
+            print("[%s] %s" % (address, contents))
             self.emit(address, contents)
 
 

@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(EntropyFilterUTest
 	AvatarComboVocabulary
 	Filter
 	comboreduct
-	cogutil
+	${COGUTIL_LIBRARY}
 	${PROJECT_LIBRARIES}
 )
 
@@ -18,14 +18,14 @@ TARGET_LINK_LIBRARIES(ActionFilterUTest
 	AvatarComboVocabulary
 	Filter
 	comboreduct
-	cogutil
+	${COGUTIL_LIBRARY}
 	${PROJECT_LIBRARIES}
 )
 
 ADD_CXXTEST(EntityRelevanceFilterUTest)
 TARGET_LINK_LIBRARIES(EntityRelevanceFilterUTest 
 	Filter 
-	cogutil
+	${COGUTIL_LIBRARY}
 	${PROJECT_LIBRARIES}
 )
 IF(WIN32)

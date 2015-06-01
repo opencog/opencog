@@ -1,4 +1,4 @@
-ADD_LIBRARY(AvatarComboVocabulary
+ADD_LIBRARY(AvatarComboVocabulary SHARED
 	avatar_builtin_action
 	avatar_perception
 	avatar_action_symbol

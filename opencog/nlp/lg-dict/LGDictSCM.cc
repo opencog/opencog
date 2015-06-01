@@ -107,11 +107,11 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 
-    if (pAS->isNode(h) && pAS->getType(h) == WORD_NODE)
+    if (pAS->isNode(h) and h->getType() == WORD_NODE)
     {
 		// check if the dictionary entry is already in the atomspace
 		HandleSeq qExisting;
-		pAS->getHandleSet(std::back_inserter(qExisting), h, LG_WORD_CSET, false);
+		h->getIncomingSetByType(std::back_inserter(qExisting), LG_WORD_CSET, false);
 
 		// avoid the disjuncts building if entries exist
 		if (not qExisting.empty())

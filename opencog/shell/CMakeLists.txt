@@ -12,10 +12,9 @@ ADD_LIBRARY (py-shell SHARED
 )
 
 TARGET_LINK_LIBRARIES(py-shell
-	smob
-	atomspace
-	cogutil
-	PythonEval
+	${ATOMSPACE_smob_LIBRARY}
+	${ATOMSPACE_LIBRARY}
+	${COGUTIL_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 	${PYTHON_LIBRARIES}
 )
@@ -28,16 +27,18 @@ ADD_LIBRARY (scheme-shell SHARED
 )
 
 TARGET_LINK_LIBRARIES(scheme-shell
-	smob
-	atomspace
-	cogutil
+	${ATOMSPACE_smob_LIBRARY}
+	${ATOMSPACE_LIBRARY}
+	${COGUTIL_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 )
 
 IF (WIN32)
-	INSTALL (TARGETS scheme-shell DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL (TARGETS py-shell scheme-shell
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ELSE (WIN32)
-	INSTALL (TARGETS scheme-shell LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	INSTALL (TARGETS py-shell scheme-shell
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ENDIF (WIN32)
 
 INSTALL (FILES

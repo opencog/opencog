@@ -85,11 +85,11 @@
 
 ; Return the scheme list of querying result given the ListLink containing it, 
 ; this function will delete the ListLink once return
-(define (unpack_query_result query_rusult_list_link)
-    (let* ( (query_result_list (cog-outgoing-set query_rusult_list_link) )
+(define (unpack_query_result query_result_list_link)
+    (let* ( (query_result_list (cog-outgoing-set query_result_list_link) )
           )
 
-          (cog-delete query_rusult_list_link) 
+          (cog-delete query_result_list_link)
 
           query_result_list 
     ) 
@@ -98,20 +98,20 @@
 ; Return the scheme list of querying result given BindLink (using cog-bind), 
 ; return an empty list if fails
 (define (query_atom_space bind_link)
-    (let* ( (query_rusult_list_link (cog-bind bind_link) )
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
-; Return the scheme list of querying result given BindLink (using cog-bind-crisp),  
-; return an empty list if fails
+; Same as above. Return the scheme list of querying result given
+; BindLink (using cog-bind-crisp),  return an empty list if fails
 (define (query_atom_space_crisp bind_link)
-    (let* ( (query_rusult_list_link (cog-bind-crisp bind_link) )
+    (let* ( (query_result_list_link (cog-bind bind_link) )
           )
           
-          (unpack_query_result query_rusult_list_link)
+          (unpack_query_result query_result_list_link)
     ) 
 )
 
@@ -187,34 +187,31 @@
             (ListLink
                 (TypedVariableLink
                     (VariableNode "$var_time_node_type") 
-                    (VariableTypeNode "TimeNode")
+                    (TypeNode "TimeNode")
                 )
 
                 (TypedVariableLink
                     (VariableNode "$var_number_node_type") 
-                    (VariableTypeNode "NumberNode")
+                    (TypeNode "NumberNode")
                 )
 
             ); ListLink 
 
-            (ImplicationLink
-                ; Pattern to be searched
-                (AtTimeLink
-                    (VariableNode "$var_time_node_type") 
-                    (SimilarityLink
-                        (VariableNode "$var_number_node_type") 
-                        updater_execution_output_link
-                    )         
-                )             
-              
-                ; Return values encapsulated by a ListLink
-                (ListLink
-                    (VariableNode "$var_time_node_type")    
+            ; Pattern to be searched
+            (AtTimeLink
+                (VariableNode "$var_time_node_type") 
+                (SimilarityLink
                     (VariableNode "$var_number_node_type") 
                     updater_execution_output_link
-                )
-
-            ); ImplicationLink
+                )         
+            )             
+          
+            ; Return values encapsulated by a ListLink
+            (ListLink
+                (VariableNode "$var_time_node_type")    
+                (VariableNode "$var_number_node_type") 
+                updater_execution_output_link
+            )
 
         ); BindLink 
 
@@ -390,26 +387,24 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (EvaluationLink
-                (PredicateNode
-                    (string-trim-both predicate_name)                  
-                ) 
-                (VariableNode "$var_list_link_type")
-            )
+        ; Pattern to be searched    
+        (EvaluationLink
+            (PredicateNode
+                (string-trim-both predicate_name)                  
+            ) 
+            (VariableNode "$var_list_link_type")
+        )
 
-            ; Return values
-            (EvaluationLink
-                (PredicateNode
-                    (string-trim-both predicate_name)                  
-                ) 
-                (VariableNode "$var_list_link_type")
-            )
+        ; Return values
+        (EvaluationLink
+            (PredicateNode
+                (string-trim-both predicate_name)                  
+            ) 
+            (VariableNode "$var_list_link_type")
         )
 
     ); BindLink 
@@ -535,29 +530,16 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_time_node_type") 
-                (VariableTypeNode "TimeNode")
+                (TypeNode "TimeNode")
             )
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (LatestLink 
-                (AtTimeLink
-                    (VariableNode "$var_time_node_type") 
-                    (EvaluationLink
-                        (PredicateNode
-                            (string-trim-both predicate_name)                  
-                        ) 
-                        (VariableNode "$var_list_link_type") 
-                    )
-                ) 
-            ); LatestLink     
-                 
-            ; Return values
+        ; Pattern to be searched    
+        (LatestLink 
             (AtTimeLink
                 (VariableNode "$var_time_node_type") 
                 (EvaluationLink
@@ -566,8 +548,19 @@
                     ) 
                     (VariableNode "$var_list_link_type") 
                 )
-            ); AtTimeLink 
-        )
+            ) 
+        ); LatestLink     
+             
+        ; Return values
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type") 
+            )
+        ); AtTimeLink 
 
     ); BindLink 
 )
@@ -791,37 +784,35 @@
         (ListLink
             (TypedVariableLink
                 (VariableNode "$var_time_node_type") 
-                (VariableTypeNode "TimeNode")
+                (TypeNode "TimeNode")
             )
             (TypedVariableLink
                 (VariableNode "$var_list_link_type") 
-                (VariableTypeNode "ListLink")
+                (TypeNode "ListLink")
             ) 
         ) 
 
-        (ImplicationLink
-            ; Pattern to be searched    
-            (AtTimeLink
-                (VariableNode "$var_time_node_type") 
-                (EvaluationLink
-                    (PredicateNode
-                        (string-trim-both predicate_name)                  
-                    ) 
-                    (VariableNode "$var_list_link_type")
-                )
+        ; Pattern to be searched    
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
             )
-                 
-            ; Return values
-            (AtTimeLink
-                (VariableNode "$var_time_node_type") 
-                (EvaluationLink
-                    (PredicateNode
-                        (string-trim-both predicate_name)                  
-                    ) 
-                    (VariableNode "$var_list_link_type")
-                )
-            ); AtTimeLink 
         )
+             
+        ; Return values
+        (AtTimeLink
+            (VariableNode "$var_time_node_type") 
+            (EvaluationLink
+                (PredicateNode
+                    (string-trim-both predicate_name)                  
+                ) 
+                (VariableNode "$var_list_link_type")
+            )
+        ); AtTimeLink 
 
     ); BindLink 
 )
@@ -837,19 +828,17 @@
         ; Variables
         (VariableNode "$var_any")
 
-        (ImplicationLink
-            ; Pattern to be searched
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
+        ; Pattern to be searched
+        (ReferenceLink
+            first_outgoing
+            (VariableNode "$var_any")
+        ) 
 
-            ; Return result
-            (ReferenceLink
-                first_outgoing
-                (VariableNode "$var_any")
-            ) 
-        ); ImplicationLink
+        ; Return result
+        (ReferenceLink
+            first_outgoing
+            (VariableNode "$var_any")
+        ) 
 
     ); BindLink 
 )
@@ -974,3 +963,21 @@
     )
 )
 
+; Given a list of atoms l return the atom with the lowest TV strengh
+(define (atom_with_lowest_tv_mean l)
+  (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return the atom with the lowest TV strengh
+(define (atom_with_highest_tv_mean l)
+  (max-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  )
+
+; Given a list of atoms l return them sorted by TVs (ascending order)
+(define (sort_by_tv l)
+  (sort l (lambda (a1 a2) (>=  (get_truth_value_mean (cog-tv a1))
+                               (get_truth_value_mean (cog-tv a2))
+                               )
+                  )
+        )
+  )

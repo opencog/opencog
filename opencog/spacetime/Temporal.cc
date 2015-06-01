@@ -29,10 +29,15 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include <boost/format.hpp>
+
 #include <opencog/util/platform.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
+
+using boost::format;
+using boost::str;
 
 using namespace opencog;
 
@@ -44,8 +49,8 @@ std::ostream& operator<<(std::ostream& out, const Temporal& t)
 // Values of A, B and NORMAL for the UNDEFINED_TEMPORAL Temporal instance
 // These values should not compose a valid Temporal, btw.
 // In other words, if someone pass these values for a Temporal constructor it will throw an exception.
-#define UNDEFINED_A UINT_MAX
-#define UNDEFINED_B UINT_MAX
+#define UNDEFINED_A OCTIME_MAX
+#define UNDEFINED_B OCTIME_MAX
 #define UNDEFINED_NORMAL true
 
 // USED TO SEEK MEMORY LEAK
@@ -62,17 +67,18 @@ void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamExce
     if (normal) {
         if (b > a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (normal-distribution) with the variance (%lu) greater than the mean (%lu). This causes negative lower bound.", b,  a);
+                                        str(format("Cannot create a Temporal (normal-distribution) with the variance (%1%) greater than the mean (%2%). This causes negative lower bound.") % a % b).c_str());
         }
-        octime_t long sum = (octime_t long) a + b;
-        if (sum > (octime_t long) UINT_MAX) {
+        octime_t sum = a + b;
+        // if the addition caused an overflow
+        if (sum < a) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Temporal - Upper bound reached when creating a Temporal (normal-distribution): %lu.", sum);
+                                        str(format("Temporal - Upper bound reached when creating a Temporal (normal-distribution): %1%.") % sum).c_str());
         }
     } else {
         if (a > b) {
             throw InvalidParamException(TRACE_INFO,
-                                        "Cannot create a Temporal (uniform-distribution) with lower bound (%lu) greater than upper bound (%lu)", b, a);
+                                        str(format("Cannot create a Temporal (uniform-distribution) with lower bound (%1%) greater than upper bound (%2%)") % b % a).c_str());
         }
     }
     this->normal = normal;
@@ -146,23 +152,20 @@ octime_t Temporal::getUpperBound() const
 std::string Temporal::toString() const
 {
     if (*this == UNDEFINED_TEMPORAL) return "UNDEFINED_TEMPORAL";
-    char buf[1 << 8];
-    char* answer = buf;
-    sprintf(answer, "(%s,%lu,%lu)", (normal ? "NORMAL" : "UNIFORM"), a, b);
-    return answer;
+    return str(format("(%1%,%2%,%3%)") % (normal ? "NORMAL" : "UNIFORM") % a % b);
 }
 
 std::string Temporal::getTimeNodeName() const
 {
-    char buffer[1000];
+    std::string name;
     if (normal) {
-        sprintf(buffer, "%lu:%lu:%d", a, b, normal);
+        name = str(format("%1%:%2%:%3%") % a % b % normal);
     } else if (a == b) {
-        sprintf(buffer, "%lu", a);
+        name = str(format("%1%") % a);
     } else {
-        sprintf(buffer, "%lu:%lu", a, b);
+        name = str(format("%1%:%2%") % a % b);
     }
-    return buffer;
+    return name;
 }
 
 std::string Temporal::getTimeNodeName(octime_t timestamp)
@@ -170,17 +173,16 @@ std::string Temporal::getTimeNodeName(octime_t timestamp)
     // NOTE: The strictly correct way to implement this would be like follows:
     //   return Temporal(timestamp).getTimeNodeName();
     // However, for performance reasons, this is implemented as bellow:
-    char buffer[1000];
-    sprintf(buffer, "%lu", timestamp);
-    return buffer;
+
+    return str(format("%1%") % timestamp);
 }
 
 Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
 {
     const char* nextToken = timeNodeName;
-    octime_t a = (octime_t) strtoul(nextToken,NULL,10);
+    octime_t a = (octime_t) strtoull(nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
+    DPRINTF("Temporal::getFromTimeNodeName: %llu %llu %llu / %s\n", a, a, (octime_t)atof(timeNodeName), timeNodeName);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
@@ -188,9 +190,10 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     if (!(*nextToken)) {
         return Temporal(a);
     }
-    octime_t b = (octime_t)strtoul(++nextToken,NULL,10);
 
-    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
+    octime_t b = (octime_t)strtoull(++nextToken,NULL,10);
+
+    DPRINTF("Temporal::getFromTimeNodeName: %llu %llu / %s\n", b, b, nextToken);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;

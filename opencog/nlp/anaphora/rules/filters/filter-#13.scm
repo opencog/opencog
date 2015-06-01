@@ -8,47 +8,45 @@
 
 (define filter-#13
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "a number")
-                (VariableTypeNode "NumberNode")
+                (TypeNode "NumberNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                ;; Connection between two clauses
-                (ListLink
-                    (AnchorNode "CurrentResolution")
-                    (VariableNode "$word-inst-anaphor")
-                    (VariableNode "$word-inst-antecedent")
-                )
-                (ListLink
-                    (AnchorNode "CurrentPronoun")
-                    (VariableNode "$word-inst-anaphor")
-                )
-                (ListLink
-                    (AnchorNode "CurrentProposal")
-                    (VariableNode "$word-inst-antecedent")
-                )
-
-                ;; filter
-                (ReferenceLink
-                    (VariableNode "$word-inst-antecedent")
-                    (VariableNode "a number")
-                )
+        (AndLink
+            ;; Connection between two clauses
+            (ListLink
+                (AnchorNode "CurrentResolution")
+                (VariableNode "$word-inst-anaphor")
+                (VariableNode "$word-inst-antecedent")
             )
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Filtered")
+                (AnchorNode "CurrentPronoun")
+                (VariableNode "$word-inst-anaphor")
             )
+            (ListLink
+                (AnchorNode "CurrentProposal")
+                (VariableNode "$word-inst-antecedent")
+            )
+
+            ;; filter
+            (ReferenceLink
+                (VariableNode "$word-inst-antecedent")
+                (VariableNode "a number")
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Filtered")
         )
     )
 )

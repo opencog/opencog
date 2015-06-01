@@ -27,9 +27,9 @@
 #include <exception>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/variable_unifier.h>
-#include <opencog/comboreduct/combo/definite_object.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/variable_unifier.h>
+#include <moses/comboreduct/combo/definite_object.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -224,13 +224,13 @@ public:
      * AtomSpace querying for inheritance links of nullary predicates
      * (e.g. food_bowl)
      */
-    static std::string lookupInheritanceLink(const AtomSpace& as, Handle);
+    static std::string lookupInheritanceLink(AtomSpace&, Handle);
 
     /**
      * AtomSpace querying for execution links of nullary predicates
      * (e.g. pet_bowl)
      */
-    static std::string lookupExecLink(const AtomSpace& as, Handle);
+    static std::string lookupExecLink(AtomSpace&, Handle);
 
     /**
      * convenience function - used to create predicates for filtering

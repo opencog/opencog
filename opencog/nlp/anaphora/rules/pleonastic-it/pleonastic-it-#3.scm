@@ -2,49 +2,47 @@
 
 (define pleonastic-it-#3
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$appears")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (ListLink
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
+            )
+            (LemmaLink
+                (VariableNode "$appears")
+                (WordNode "appear")
+            )
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_expl")
                 (ListLink
-                    (AnchorNode "CurrentTarget")
+                    (VariableNode "$appears")
                     (VariableNode "$target")
                 )
-                (LemmaLink
+            )
+            (EvaluationLink
+                (PrepositionalRelationshipNode "that")
+                (ListLink
                     (VariableNode "$appears")
-                    (WordNode "appear")
-                )
-                (EvaluationLink
-                    (DefinedLinguisticRelationshipNode "_expl")
-                    (ListLink
-                        (VariableNode "$appears")
-                        (VariableNode "$target")
-                    )
-                )
-                (EvaluationLink
-                    (PrepositionalRelationshipNode "that")
-                    (ListLink
-                        (VariableNode "$appears")
-                        (VariableNode "$word")
-                    )
+                    (VariableNode "$word")
                 )
             )
-            (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
-            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

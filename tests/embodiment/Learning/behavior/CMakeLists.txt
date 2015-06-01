@@ -8,7 +8,7 @@ LINK_LIBRARIES (
 	behavior
 	comboreduct
 	comboant
-	cogutil
+	${COGUTIL_LIBRARY}
 	${PROJECT_LIBRARIES}	
 )
 

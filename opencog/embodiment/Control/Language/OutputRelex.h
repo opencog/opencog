@@ -65,7 +65,7 @@ public:
      * TODO assert that the number of handles is the same number of
      * variables (frames_order)
      */
-    virtual std::string getOutput( const AtomSpace &atomSpace, const std::vector< std::pair<std::string, Handle> >& handles );
+    virtual std::string getOutput(AtomSpace &, const std::vector< std::pair<std::string, Handle> >& handles );
 
 };
 

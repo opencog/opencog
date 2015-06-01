@@ -52,7 +52,7 @@ public:
     /**
      * Outputs a dotty node for an atom.
      */
-    bool do_nodes(Handle h)
+    bool do_nodes(const Handle& h)
     {
         AtomPtr a(h);
 
@@ -85,7 +85,7 @@ public:
     /**
      * Outputs dotty links for an atom's outgoing connections.
      */
-    bool do_links(Handle h)
+    bool do_links(const Handle& h)
     {
         AtomPtr a(h);
         std::ostringstream ost;

@@ -6,28 +6,21 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
-ADD_SUBDIRECTORY (util)
-ADD_SUBDIRECTORY (comboreduct)
 ADD_SUBDIRECTORY (learning)
-ADD_SUBDIRECTORY (reasoning)
 
 IF (HAVE_ATOMSPACE)
-    ADD_SUBDIRECTORY (atomspace)
-    ADD_SUBDIRECTORY (execution)
-    ADD_SUBDIRECTORY (benchmark)
-    ADD_SUBDIRECTORY (query)
     ADD_SUBDIRECTORY (nlp)
     ADD_SUBDIRECTORY (persist)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (dynamics)
+    ADD_SUBDIRECTORY (modules)
     ADD_SUBDIRECTORY (server)
 ENDIF(HAVE_SERVER)
 
 # Extension language support
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
-	ADD_SUBDIRECTORY (guile)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (shell)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)

@@ -21,5 +21,7 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 TARGET_LINK_LIBRARIES (dimensionalembedding
-	cogutil 
+	${ATOMSPACE_atomspaceutils_LIBRARY}
+	${ATOMSPACE_LIBRARY}
+	${COGUTIL_LIBRARY}
 )

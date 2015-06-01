@@ -37,7 +37,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/server/BaseServer.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/atom_types.h>
@@ -1340,8 +1340,11 @@ HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<i
 
     Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
 
+    OC_ASSERT(implicationLinkOutgoings.size() == 1);
+    
     bindLinkOutgoings.push_back(hVariablesListLink);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(implicationLinkOutgoings.front());
+    bindLinkOutgoings.push_back(hVariablesListLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
 //    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl

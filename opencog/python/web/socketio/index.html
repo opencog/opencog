@@ -17,7 +17,7 @@ socket.on('connect', function () {
 });
 
 function printLine(data, message) {
-    atom = jQuery.parseJSON(data).atoms;
+    atom = jQuery.parseJSON(data).atom;
     $('#lines').prepend($('<p><strong>Handle #' + atom.handle + ' ' + message + ':<br></strong><code>' +
             JSON.stringify(atom, undefined, 1) + '</code></p>'));
 }

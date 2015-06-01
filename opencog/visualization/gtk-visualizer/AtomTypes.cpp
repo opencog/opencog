@@ -130,12 +130,14 @@ void AtomTypes::AddSymbol(string typeName)
         symbol="∀";
     if(typeName.compare("ExistsLink")==0)
         symbol="∃";
-    if(typeName.compare("VariableTypeNode")==0)
-        symbol="VT";
+    if(typeName.compare("TypeNode")==0)
+        symbol="T";
     if(typeName.compare("ImplicationLink")==0)
         symbol="⇒";
-    if(typeName.compare("EvaluationLink")==0)
+    if(typeName.compare("EquivalenceLink")==0)
         symbol="=";
+    if(typeName.compare("EvaluationLink")==0)
+        symbol="⊢";
     if(typeName.compare("InheritanceLink")==0)
         symbol="is";
 

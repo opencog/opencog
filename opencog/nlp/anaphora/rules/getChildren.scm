@@ -2,35 +2,33 @@
 
 (define getChildren
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$relationshipNode")
-                (ListLink
-                    (VariableTypeNode "DefinedLinguisticRelationshipNode")
-                    (VariableTypeNode "PrepositionalRelationshipNode")
+                (TypeChoice
+                    (TypeNode "DefinedLinguisticRelationshipNode")
+                    (TypeNode "PrepositionalRelationshipNode")
                 )
             )
             (VariableNode "$target")
             (VariableNode "$child")
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (EvaluationLink
-                    (VariableNode "$relationshipNode")
-                    (ListLink
-                        (VariableNode "$target")
-                        (VariableNode "$child")
-                    )
-                )
-            )
+        (AndLink
             (ListLink
-                (AnchorNode "CurrentResult")
-                (VariableNode "$child")
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
             )
+            (EvaluationLink
+                (VariableNode "$relationshipNode")
+                (ListLink
+                    (VariableNode "$target")
+                    (VariableNode "$child")
+                )
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (VariableNode "$child")
         )
     )
 )

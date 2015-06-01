@@ -17,9 +17,14 @@ ADD_LIBRARY (builtinreqs SHARED
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
-	atomspace
-	cogutil
+	${ATOMSPACE_LIBRARY}
+	${COGUTIL_LIBRARY}
 )
+
+INSTALL (TARGETS builtinreqs
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+
+# ------------------------------------------------------------
 
 ADD_LIBRARY (server SHARED
 	Agent
@@ -34,45 +39,42 @@ ADD_LIBRARY (server SHARED
 
 TARGET_LINK_LIBRARIES(server
 	nlp-types
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	dl
 )
 
 IF (HAVE_CYTHON)
-	TARGET_LINK_LIBRARIES(server PythonEval py-shell)
+	TARGET_LINK_LIBRARIES(server py-shell ${ATOMSPACE_LIBRARIES} ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(server smob scheme-shell)
+	TARGET_LINK_LIBRARIES(server scheme-shell ${ATOMSPACE_LIBRARIES})
 ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
 	TARGET_LINK_LIBRARIES(server PersistModule)
 ENDIF (ODBC_FOUND)
 
+# ------------------------------------------------------------
+# This defines the guile scheme loadable module
 
-# to ease testing/debugging modules on the source tree
-# IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-# XXX what is this shit?  The below is one wild and insane violation of everything that
-# cmake stands for ... why bother using cmake, if we are going to crap on every principle
-# of intelligent makefile design.  WTF. 
-#
-# XXX it is even worse than that .. many of the libraries sepcified below are supposed to
-# be dynamically loaded, not linked... 
-IF (APPLE)
-	# We should eventually do Apple builds with "packages"
-	# Apple's linker seems not to understand a colon-separated list of
-	# rpaths.
-	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-                "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cogutil -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
-	# doesn't work for some reason...
-	#SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
-	#	${PROJECT_BINARY_DIR}/opencog/guile)
-	#SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-ENDIF (APPLE)
-#ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+IF (HAVE_GUILE)
+	ADD_LIBRARY (guile-cogserver SHARED
+		CogServerSCM
+	)
+
+	TARGET_LINK_LIBRARIES(guile-cogserver
+		server
+		${Boost_SYSTEM_LIBRARY}
+		${GUILE_LIBRARIES}
+	)
+
+	INSTALL (TARGETS guile-cogserver DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+ENDIF (HAVE_GUILE)
+
+# ------------------------------------------------------------
 
 ADD_EXECUTABLE(cogserver
 	CogServerMain
@@ -89,10 +91,9 @@ IF (WIN32)
 	SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libctm")
 ENDIF (WIN32)
 
-INSTALL (TARGETS cogserver
-	RUNTIME DESTINATION "bin"
-#	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+INSTALL (TARGETS cogserver RUNTIME DESTINATION "bin")
+
+INSTALL (TARGETS server DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	Agent.h

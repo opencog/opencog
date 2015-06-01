@@ -24,7 +24,7 @@
 #ifndef _SIZEPENALTY_H
 #define _SIZEPENALTY_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 namespace FitnessEstimator
 {

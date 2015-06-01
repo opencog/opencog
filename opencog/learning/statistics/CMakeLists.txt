@@ -8,7 +8,7 @@ ADD_LIBRARY (statistics SHARED
 
 
 TARGET_LINK_LIBRARIES (statistics
-	cogutil
+	${COGUTIL_LIBRARY}
 )
 
 INSTALL (TARGETS statistics

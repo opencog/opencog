@@ -39,6 +39,7 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
@@ -123,7 +124,7 @@ Handle WorldWrapperUtil::toHandle(AtomSpace& as,
 }
 
 std::string WorldWrapperUtil::lookupInheritanceLink(
-        const AtomSpace& as,
+        AtomSpace& as,
         Handle h)
 {
 
@@ -134,8 +135,8 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
     seq.push_back(h);
 
     std::vector<Handle> res;
-    as.getHandlesByOutgoing(back_inserter(res),
-                    seq, NULL, NULL, 2, INHERITANCE_LINK, false);
+    getHandlesByOutgoing(back_inserter(res),
+                    as, INHERITANCE_LINK, seq, NULL, NULL, 2);
     if (res.empty())
         return id::null_obj;
 
@@ -144,7 +145,7 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
 }
 
 std::string WorldWrapperUtil::lookupExecLink(
-        const AtomSpace& as,
+        AtomSpace& as,
         Handle h)
 {
     //look for x satisfying ExecutionLink(h,ListLink(),ListLink(x))
@@ -152,8 +153,9 @@ std::string WorldWrapperUtil::lookupExecLink(
     std::vector<Handle> match(3);
     match[0] = h;
     Type t[] = { PREDICATE_NODE, LIST_LINK, LIST_LINK };
-    as.getHandlesByOutgoing(back_inserter(res), match, t,
-                    NULL, 3, EXECUTION_LINK, true);
+    getHandlesByOutgoing(back_inserter(res),
+                    as, EXECUTION_LINK, match, t,
+                    NULL, 3, true);
     if (res.empty())
         return id::null_obj;
     return (as.getName(res[randGen().randint(res.size())]));
@@ -1426,8 +1428,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
                              "WWUtil - There should be a ConceptNode for currentActionRepetition");
 
             HandleSeq result;
-            atomSpace.getHandleSet(back_inserter(result),
-                                   handle, FREQUENCY_LINK, false);
+            handle->getIncomingSetByType(back_inserter(result),
+                                    FREQUENCY_LINK, false);
 
             if (result.size() != 1) {
                 logger().warn("WWUtil - There should be only one FrequencyLink, got '%d'",

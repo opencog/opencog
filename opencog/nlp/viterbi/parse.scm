@@ -14,56 +14,54 @@
   (BindLink
     ; Bound variable declarations. These are the variables we expect
     ; to match up when connnecting the left and right words with a connector.
-    (ListLink
+    (VariableList
       (TypedVariableLink
         (VariableNode "$left word")
-        (VariableTypeNode "WordNode")
+        (TypeNode "WordNode")
       )
       (TypedVariableLink
         (VariableNode "$right word")
-        (VariableTypeNode "WordNode")
+        (TypeNode "WordNode")
       )
       (TypedVariableLink
         (VariableNode "$connector")
-        (VariableTypeNode "LgConnectorNode")
+        (TypeNode "LgConnectorNode")
       )
     )
-    (ImplicationLink
-      ; First, a list of all the graphs we want to match
-      (AndLink
-        ; Fish out the first unconnected connector in the state pair.
-        (LgStatePair
-          (LgSeq
-            (LgWordCset
-              (VariableNode "$left word")
-              (LgConnector
-                (VariableNode "$connector")
-                (LgConnDirNode "+")
-              )
+    ; First, a list of all the graphs we want to match
+    (AndLink
+      ; Fish out the first unconnected connector in the state pair.
+      (LgStatePair
+        (LgSeq
+          (LgWordCset
+            (VariableNode "$left word")
+            (LgConnector
+              (VariableNode "$connector")
+              (LgConnDirNode "+")
             )
-            ; XXX TODO if there's more in the seqeunce, we don't care ...
           )
-          ; The output state could be anything; ignore it
-          ; (VariableNode "$whatever dont care")
-          ; XXX TODO how do we ignore a link!??
-          (LgSeq)
+          ; XXX TODO if there's more in the seqeunce, we don't care ...
         )
-        ; We also want to match up a word ...
-        (LgWordCset
-          (VariableNode "$right word")
-          (LgConnector
-            (VariableNode "$connector")
-            (LgConnDirNode "-")
-          )
-        )
+        ; The output state could be anything; ignore it
+        ; (VariableNode "$whatever dont care")
+        ; XXX TODO how do we ignore a link!??
+        (LgSeq)
       )
-      ; OK if the above matched, then we create the below..
-      (ListLink
-        (ConceptNode "whopee we got one")
-        (VariableNode "$connector")
-        (VariableNode "$left word")
+      ; We also want to match up a word ...
+      (LgWordCset
         (VariableNode "$right word")
+        (LgConnector
+          (VariableNode "$connector")
+          (LgConnDirNode "-")
+        )
       )
+    )
+    ; OK if the above matched, then we create the below..
+    (ListLink
+      (ConceptNode "whopee we got one")
+      (VariableNode "$connector")
+      (VariableNode "$left word")
+      (VariableNode "$right word")
     )
   )
 )

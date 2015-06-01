@@ -123,12 +123,14 @@ public:
     enum rentType_t {
         RENT_FLAT, //!< Use a flat rent
         RENT_EXP, //!< Use an exponential rent
-        RENT_LOG //!< Use a logarithmic rent
+        RENT_LOG, //!< Use a logarithmic rent
+        RENT_LINEAR //!< Use a linear rent
     };
 
 private:
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
+    AttentionValue::sti_t STIMaxAtomRent; //!< Maximum allowed atom STI rent.
     opencog::recent_val<AttentionValue::sti_t> STITransitionalAtomRent; //!< Decaying rent
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 
@@ -337,7 +339,7 @@ private:
      * @param hs The HandleSeq to add handles to.
      */
     void getHandlesToUpdate(AtomSpace* a, HandleSeq& hs);
-    
+
     void updateRentAndWages(AtomSpace*);
 
     /** Set the agent's logger object

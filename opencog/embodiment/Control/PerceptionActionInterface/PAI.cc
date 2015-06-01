@@ -55,9 +55,10 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -118,14 +119,16 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 #define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
-    if (fileExists(XSD_FILE_NAME))  {
+    if (fileExists(XSD_FILE_NAME)) {
         schemaLocation += XSD_NAMESPACE " " XSD_FILE_NAME;
     } else if (fileExists(PVP_XSD_FILE_PATH)) {
         schemaLocation += XSD_NAMESPACE " " PVP_XSD_FILE_PATH;
     }
     if (schemaLocation.size() > 0) {
-        logger().info("PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
-        // The line bellow replace the path for the XSD file so that it does not need to be in the current directory...
+        logger().info("PAI - Setting the schemaLocation to: %s\n",
+                      schemaLocation.c_str());
+        // The line bellow replace the path for the XSD file so that
+        // it does not need to be in the current directory...
         parser->setExternalSchemaLocation(schemaLocation.c_str());
     }
 #endif
@@ -690,10 +693,15 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     DOMNodeList * list;
 
-    // TODO: Check if there is a specific order of XML elements that should be followed
-    // For now, MapInfo is processed first since it's supposed to inform SL object types.
-    // And Instructions are processed later so that all relevant perceptions
-    // are already processed when the owner asks for anything...
+    // TODO: Check if there is a specific order of XML elements that
+    // should be followed
+    //
+    // For now, MapInfo is processed first since it's supposed to
+    // inform SL object types.
+    //
+    // And Instructions are processed later so that all relevant
+    // perceptions are already processed when the owner asks for
+    // anything...
 
     // getting <map-info> elements from the XML message
     XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -708,10 +716,12 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
 #endif
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((DOMElement *)list->item(i), toUpdateHandles, useProtoBuf);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles,
+                       useProtoBuf);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d map-infos done", list->getLength());
+        logger().debug("PAI - Processing %d map-infos done",
+                       list->getLength());
 
 #ifdef HAVE_PROTOBUF
     // getting <terrain-info> elements from the XML message
@@ -722,7 +732,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
+        logger().debug("PAI - Processing %d terrain-infos done",
+                       list->getLength());
 #endif
 
     // getting <avatar-signal> elements from the XML message
@@ -733,7 +744,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAvatarSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d avatar-signals done", list->getLength());
+        logger().debug("PAI - Processing %d avatar-signals done",
+                       list->getLength());
 
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -743,7 +755,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAgentSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-signal done", list->getLength());
+        logger().debug("PAI - Processing %d agent-signal done",
+                       list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -753,17 +766,20 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processInstruction((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d instructions done", list->getLength());
+        logger().debug("PAI - Processing %d instructions done",
+                       list->getLength());
 
     // getting <agent-sensor-info> elements from the XML message
-    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
+        logger().debug("PAI - Processing %d agent-sensor-infos done",
+                       list->getLength());
 
     // getting <state-info> elements from the XML message
     XMLString::transcode(STATE_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1922,24 +1938,30 @@ void PAI::processInstruction(DOMElement * element)
                           );
         }
 
-        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent
-        // and dialog_system.scm will continue processing it.
-        scheme_return_value = evaluator->eval(parsedSentenceText);
+        // Put the newly parsed sentence into AtomSpace, then
+        // PsiActionSelectionAgent and dialog_system.scm will continue
+        // processing it.
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace",
-                           __FUNCTION__
-                          );
+            logger().error("PAI::%s - Failed to put the parsed result from"
+                           " RelexServer to AtomSpace", 
+                           __FUNCTION__);
         }
         delete evaluator;
     }
 #endif
 
     // Add the perceptions into AtomSpace
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
+    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE,
+                                                  ACTION_DONE_PREDICATE_NAME,
+                                                  true);
+    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace,
+                                                  GROUNDED_SCHEMA_NODE,
+                                                  SAY_SCHEMA_NAME, true);
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
     if (agentNode == Handle::UNDEFINED) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE,
+                                           internalAvatarId);
     }
 
     string sentence = "to:";
@@ -1948,7 +1970,8 @@ void PAI::processInstruction(DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-    Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
+    Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE,
+                                                 sentence.c_str());
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -2693,7 +2716,8 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
-void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
+void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
+                         bool useProtoBuf)
 {
     if (!useProtoBuf) {
         // Use the old parser to handle XML document.
@@ -2712,7 +2736,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         return;
     }
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
     bool isFirstPerceptWorld;
@@ -2739,8 +2764,9 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
-        logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
-
+        logger().debug("PAI - processMapInfo recieved mapinfos information: %s",
+                       mapinfoSeq.DebugString().c_str());
+        
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
@@ -3150,7 +3176,6 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
         Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, SIZE_PREDICATE_NAME, true);
-
         Handle lengthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(length).c_str());
         Handle widthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(width).c_str());
         Handle heightNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(height).c_str());
@@ -3234,9 +3259,10 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         entityClass = "block";
     }
 
-    return spaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
-                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
+    return spaceServer().addSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp, (int)position.x, (int)position.y, (int)position.z,
+                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept,);
 }
+
 */
 void PAI::addSemanticStructure(Handle objectNode,
         const std::string& entityId,
@@ -3573,7 +3599,8 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
     XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
 
@@ -3614,11 +3641,11 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes(toUpdateHandles);
+	      spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
+	      spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3723,7 +3750,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    spaceServer().removeSpaceInfo(objectNode, timestamp);
+    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
@@ -3788,7 +3815,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
         if (isSelfObject) {
             unsigned int agentRadius = sqrt(length * length + width * width) / 2;
             spaceServer().setAgentRadius(agentRadius);
-            spaceServer().setAgentHeight(roundDoubleToInt(height) );
+            spaceServer().setAgentHeight(roundDoubleToInt(height), spaceServer().getLatestMapHandle());
         }
     } else {
         // Get the length, width and height of the object
@@ -3801,7 +3828,9 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
             HandleSeq outgoing;
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
-            atomSpace.getHandlesByOutgoing(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
+            getHandlesByOutgoing(back_inserter(sizeEvalLinks),
+                 atomSpace,
+                 EVALUATION_LINK, outgoing, NULL, NULL, 2);
             for (Handle evalLink : sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);
                 if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
@@ -3858,8 +3887,8 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 
     // Space server insertion
     // round up these values
-    return spaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
-                                    roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
+    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+				      roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
 
@@ -4145,11 +4174,8 @@ double PAI::getAvatarWeight(Handle avatarNode)
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    implicationLinkOutgoings.push_back(evalLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-
     bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(evalLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
@@ -4396,14 +4422,14 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
     {
         printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
-        spaceServer().findAllBlockEntitiesOnTheMap();
+        spaceServer().findAllBlockEntitiesOnTheMap(spaceServer().getLatestMapHandle());
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes(toUpdateHandles);
+        spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles,spaceServer().getLatestMapHandle());
 
         int t2 = time(NULL);
 

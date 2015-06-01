@@ -29,14 +29,14 @@ class SenseSimilarityLCH :
 		int follow_holo_cnt;
 		int max_follow_holo;
 		Handle join_candidate; // aka least common subsumer
-		bool up_first(Handle);
-		bool up_second(Handle);
+		bool up_first(const Handle&);
+		bool up_second(const Handle&);
 
 	public:
 		SenseSimilarityLCH();
 		virtual ~SenseSimilarityLCH();
 
-		virtual SimpleTruthValuePtr similarity(Handle, Handle);
+		virtual SimpleTruthValuePtr similarity(const Handle&, const Handle&);
 };
 
 } // namespace opencog

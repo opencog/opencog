@@ -4,6 +4,8 @@ LINK_LIBRARIES (
 	server
 	attention-types
 	attention
+	${ATOMSPACE_atomutils_LIBRARY}
+	${ATOMSPACE_LIBRARY}
 	${GSL_LIBRARIES}
 )
 

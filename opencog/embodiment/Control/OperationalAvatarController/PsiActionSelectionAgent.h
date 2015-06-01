@@ -30,6 +30,8 @@ class PsiActionSelectionAgentUTest;
 
 namespace opencog { namespace oac {
 
+class OAC;
+
 /**
  * @class
  *
@@ -91,6 +93,8 @@ class PsiActionSelectionAgent : public opencog::Agent
     friend class::PsiActionSelectionAgentUTest;
 
 private:
+	OAC& oac;
+	AtomSpace& atomspace;
 
     unsigned long cycleCount;  // Indicate how many times this mind
                                // agent has been executed
@@ -100,14 +104,17 @@ private:
     // unless you call 'forceInitNextCycle' method. 
     bool bInitialized; 
 
-    Procedure::RunningProcedureID currentSchemaId;  // Scheme Id of current running Action (a combo script)
+	// Scheme Id of current running Action (a combo script)
+    Procedure::RunningProcedureID currentSchemaId;
 
-    // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
+    // Time out for executing Action (combo script) defined by
+    // PROCEDURE_EXECUTION_TIMEOUT
     long procedureExecutionTimeout; 
 
     time_t timeStartCurrentAction; // When the current action was executed 
 
-    std::vector<Handle> psi_demand_goal_list; // Handles to all the demand goals (EvaluationLink)
+	// Handles to all the demand goals (EvaluationLink)
+    std::vector<Handle> psi_demand_goal_list;
 
     // Planning result
     Handle plan_selected_demand_goal; 
@@ -115,17 +122,20 @@ private:
     std::vector<Handle> plan_context_list; 
     std::vector<Handle> plan_action_list;
 
-    // A copy of plan_action_list, each time pop up and execute one of the action
+    // A copy of plan_action_list, each time pop up and execute one of
+    // the action
     std::vector<Handle> temp_action_list;     
 
     // Each action(or step) in plan_action_list (or temp_action_list) may actually 
-    // contains multiple actions. For example in plan_action_list there might
+    // contain multiple actions. For example in plan_action_list there might
     // be an SequentialAndLink containing goto_obj(food) and eat(food) actions. 
     // However, OAC can not do both actions all at once. So in planner side both
     // actions can be considered as just one action, while in OAC side they are 
     // two actions. 
     //
-    // Currently our solution is that firstly we copy both actions to current_actions,
+    // Currently our solution is that firstly we copy both actions to
+    // current_actions,
+	//
     // then make OAC execute actions in current_actions one by one. When all the
     // actions in current_actions have been done, we ask temp_action_list for more 
     // actions. 
@@ -133,7 +143,7 @@ private:
     Handle current_action; 
 
     // Return actions given one step in plan_action_list (or temp_action_list)
-    void getActions(AtomSpace & atomSpace, Handle hStep, std::vector<Handle> & actions); 
+    void getActions(Handle hStep, std::vector<Handle> & actions);
 
     // Initialize demandGoalList etc.
     void init();
@@ -154,19 +164,19 @@ private:
     //             ListLink
     //         ...
     //
-    void initDemandGoalList(AtomSpace & atomSpace);
+    void initDemandGoalList();
 
     /**
      * Get the plan stored in AtomSpace
      *
      * @return true if get the plan successfully, false otherwise 
      */
-    bool getPlan(AtomSpace & atomSpace);
+    bool getPlan();
 
     /**
      * Print the plan to the screen, only used for debugging
      */
-    void printPlan(AtomSpace & atomSpace);
+    void printPlan();
 
     /**
      * Stimulate atoms related to the plan, ImportanceUpdatingAgent will then 
@@ -187,8 +197,7 @@ private:
      *         SentenceNode ...
      *         ...
      */
-    void executeAction(AtomSpace & atomSpace, 
-                       LanguageComprehension & languageTool,
+    void executeAction(LanguageComprehension & languageTool,
                        Procedure::ProcedureInterpreter & procedureInterpreter, 
                        const Procedure::ProcedureRepository & procedureRepository, 
                        Handle hActionExecutionLink); 
@@ -210,8 +219,8 @@ public:
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
 
-    // After calling this function, the Agent will invoke its "init" method firstly 
-    // in "run" function during its next cycle
+    // After calling this function, the Agent will invoke its "init"
+    // method firstly in "run" function during its next cycle
     void forceInitNextCycle() {
         this->bInitialized = false;
     }

@@ -21,10 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpaceUtils.h>
+#include <opencog/util/Logger.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/query/PatternMatchEngine.h>
-#include <opencog/query/PatternUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "SuRealSCM.h"
@@ -105,7 +107,6 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
 
     std::set<Handle> sVars;
-    HandleSeq qNegs;
 
     // Extract the graph under the SetLink; this is done so that the content
     // of the SetLink could be matched to another SetLink with differnet arity.
@@ -117,7 +118,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = AtomSpaceUtils::getAllUniqueNodes(pAS, h);
+    UnorderedHandleSet allNodes = getAllUniqueNodes(h);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher
@@ -142,31 +143,33 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
 
         // if no LG dictionary entry
-        if (pAS->getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+        if (getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
             continue;
 
         sVars.insert(n);
     }
 
     // separate the disconnected clauses (this will happen often with SuReal)
-    std::set<HandleSeq> connectedClauses;
-    get_connected_components(sVars, qClauses, connectedClauses);
+    std::vector<HandleSeq> connectedClauses;
+    std::vector<std::set<Handle>> connectedVars;
+    get_connected_components(sVars, qClauses, connectedClauses, connectedVars);
 
     logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
 
     std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
 
     // call the pattern matcher on each set of disconnected commponents
-    for (auto& c : connectedClauses)
+    for (size_t i=0; i<connectedClauses.size(); i++)
     {
         logger().debug("[SuReal] starting pattern matcher");
+        const HandleSeq& qClause(connectedClauses[i]);
+        const std::set<Handle>& qVars(connectedVars[i]);
 
-        // copy the clause for passing const stuff to non-const argument list
-        HandleSeq qClause(c);
-
-        SuRealPMCB pmcb(pAS, sVars);
-        PatternMatchEngine pme;
-        pme.match(&pmcb, sVars, qClause, qNegs);
+        // I replaced sVars by qVars in the below. sVars had extra
+        // variables that don't appear anywhere in the clauses -- linas.
+        SuRealPMCB pmcb(pAS, qVars);
+        PatternLinkPtr slp(createPatternLink(qVars, qClause));
+        slp->satisfy(pmcb);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())
@@ -259,8 +262,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     auto itprComp = [&pAS](const Handle& hi, const Handle& hj)
     {
         // get the corresponding SetLink
-        HandleSeq qi = pAS->getNeighbors(hi, false, true, REFERENCE_LINK, false);
-        HandleSeq qj = pAS->getNeighbors(hj, false, true, REFERENCE_LINK, false);
+        HandleSeq qi = getNeighbors(hi, false, true, REFERENCE_LINK, false);
+        HandleSeq qj = getNeighbors(hj, false, true, REFERENCE_LINK, false);
         qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
         qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
 

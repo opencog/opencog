@@ -15,6 +15,6 @@ TARGET_LINK_LIBRARIES (behavior
 	PAI
 	MessagingSystem
 	AtomSpaceExtensions
-	atomspace
-	cogutil
+	${ATOMSPACE_LIBRARY}
+	${COGUTIL_LIBRARY}
 )

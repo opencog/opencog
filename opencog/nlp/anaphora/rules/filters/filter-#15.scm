@@ -14,52 +14,50 @@
 
 (define filter-#15
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$word-inst-antecedent")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$word-inst-anaphor")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                ;; Connection between two clauses
-                (ListLink
-                    (AnchorNode "CurrentResolution")
-                    (VariableNode "$word-inst-anaphor")
-                    (VariableNode "$word-inst-antecedent")
-                )
-                (ListLink
-                    (AnchorNode "CurrentPronoun")
-                    (VariableNode "$word-inst-anaphor")
-                )
-                (ListLink
-                    (AnchorNode "CurrentProposal")
-                    (VariableNode "$word-inst-antecedent")
-                )
-
-                ;; filter
-                (NotLink
-                    (InheritanceLink
-                        (VariableNode "$word-inst-anaphor")
-                        (DefinedLinguisticConceptNode "reflexive")
-                    )
-                )
-                (EvaluationLink
-                    (PrepositionalRelationshipNode "of")
-                    (ListLink
-                        (VariableNode "$word-inst-antecedent")
-                        (VariableNode "$word-inst-anaphor")
-                    )
-                )
+        (AndLink
+            ;; Connection between two clauses
+            (ListLink
+                (AnchorNode "CurrentResolution")
+                (VariableNode "$word-inst-anaphor")
+                (VariableNode "$word-inst-antecedent")
             )
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Filtered")
+                (AnchorNode "CurrentPronoun")
+                (VariableNode "$word-inst-anaphor")
             )
+            (ListLink
+                (AnchorNode "CurrentProposal")
+                (VariableNode "$word-inst-antecedent")
+            )
+
+            ;; filter
+            (NotLink
+                (InheritanceLink
+                    (VariableNode "$word-inst-anaphor")
+                    (DefinedLinguisticConceptNode "reflexive")
+                )
+            )
+            (EvaluationLink
+                (PrepositionalRelationshipNode "of")
+                (ListLink
+                    (VariableNode "$word-inst-antecedent")
+                    (VariableNode "$word-inst-anaphor")
+                )
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Filtered")
         )
     )
 )

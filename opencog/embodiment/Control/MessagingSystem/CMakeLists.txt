@@ -36,8 +36,9 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 
 # ------------------------------------------------------
 
+IF (HAVE_MOSES)
 ADD_EXECUTABLE (router RouterExecutable.cc)
-TARGET_LINK_LIBRARIES (router 
+TARGET_LINK_LIBRARIES (router
 	MessagingSystem
 	lslib
 )
@@ -45,11 +46,14 @@ TARGET_LINK_LIBRARIES (router
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (router LearningServerMessages ${PROTOBUF_LIBRARY})
 ENDIF (HAVE_PROTOBUF)
+ENDIF (HAVE_MOSES)
+
 
 # ------------------------------------------------------
 
+IF (HAVE_MOSES)
 ADD_EXECUTABLE (spawner SpawnerExecutable.cc)
-TARGET_LINK_LIBRARIES (spawner 
+TARGET_LINK_LIBRARIES (spawner
 	MessagingSystem
 	lslib
 )
@@ -57,15 +61,20 @@ TARGET_LINK_LIBRARIES (spawner
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (spawner LearningServerMessages ${PROTOBUF_LIBRARY})
 ENDIF (HAVE_PROTOBUF)
-
+ENDIF (HAVE_MOSES)
+#
 # ------------------------------------------------------
 
 ADD_EXECUTABLE (msgtester MessageTesterExecutable.cc)
 TARGET_LINK_LIBRARIES (msgtester
 	MessagingSystem
 	Control
-	lslib
 )
+
+IF (HAVE_MOSES)
+	TARGET_LINK_LIBRARIES (msgtester lslib)
+ENDIF (HAVE_MOSES)
+
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (msgtester ${PROTOBUF_LIBRARY})
 ENDIF (HAVE_PROTOBUF)

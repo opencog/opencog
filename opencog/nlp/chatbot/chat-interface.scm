@@ -218,7 +218,7 @@
 	(for-each
 		(lambda (rule) 
 			(cog-delete ; need to delete the returned ListLink
-				(cog-bind-crisp rule)
+				(cog-bind rule)
 			)
 		)
 		rule-list
@@ -388,7 +388,7 @@
 
 		; The cog-bind returns a ListLink. We need to nuke
 		; that, as otherwise it will only cause trouble later.
-		(let ((rslt (cog-bind-crisp quest)))
+		(let ((rslt (cog-bind quest)))
 (dbg-display "q-apply result is\n")
 (display rslt)
 (end-dbg-display)
@@ -585,7 +585,7 @@
 		)
 		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
-					(ans (cog-bind-crisp (make-simple-chain ftrip)))
+					(ans (cog-bind (make-simple-chain ftrip)))
 				)
 (dbg-display "duude question-deduct trip-semes are:\n")
 (display trip-semes)

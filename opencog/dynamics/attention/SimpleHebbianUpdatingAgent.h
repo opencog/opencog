@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef SIMPLEHEBBIANPDATINGAGENT_H_
 #define SIMPLEHEBBIANPDATINGAGENT_H_
 
@@ -30,7 +29,8 @@
 
 #include <opencog/server/CogServer.h>
 
-using namespace opencog;
+namespace opencog
+{
 
 /**
  * A less complex implementation of HebbianUpdatingAgent which basically obsoletes
@@ -39,10 +39,21 @@ using namespace opencog;
  */
 class SimpleHebbianUpdatingAgent: public virtual opencog::HebbianUpdatingAgent {
 public:
-	SimpleHebbianUpdatingAgent(CogServer& cs);
-	virtual ~SimpleHebbianUpdatingAgent();
-	void hebbianUpdatingUpdate();
-	float targetConjunction(HandleSeq handles);
+    virtual const ClassInfo& classinfo() const
+    {
+        return info();
+    }
+    static const ClassInfo& info()
+    {
+        static const ClassInfo _ci("opencog::SimpleHebbianUpdatingAgent");
+        return _ci;
+    }
+    SimpleHebbianUpdatingAgent(CogServer& cs);
+    virtual ~SimpleHebbianUpdatingAgent();
+    void hebbianUpdatingUpdate();
+    float targetConjunction(HandleSeq handles);
 };
 
+typedef std::shared_ptr<SimpleHebbianUpdatingAgent> SimpleHebbianUpdatingAgentPtr;
+}
 #endif /* SIMPLEHEBBIANPDATINGAGENT_H_*/

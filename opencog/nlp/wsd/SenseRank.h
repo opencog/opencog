@@ -21,38 +21,38 @@ class AtomSpace;
 class SenseRank
 {
 	private:
-		bool init_word(Handle);
-		bool init_senses(Handle, Handle);
+		bool init_word(const Handle&);
+		bool init_senses(const Handle&, const Handle&);
 
-		bool rank_parse_f(Handle);
-		bool start_word(Handle);
-		bool start_sense(Handle, Handle);
+		bool rank_parse_f(const Handle&);
+		bool start_word(const Handle&);
+		bool start_sense(const Handle&, const Handle&);
 
 		double damping_factor;
 		double rank_sum;
-		void rank_sense(Handle);
-		bool outer_sum(Handle, Handle);
+		void rank_sense(const Handle&);
+		bool outer_sum(const Handle&, const Handle&);
 
 		double edge_sum;
-		bool inner_sum(Handle, Handle);
+		bool inner_sum(const Handle&, const Handle&);
 
 		double randy;
-		Handle pick_random_edge(Handle);
-		bool random_sum(Handle, Handle);
+		Handle pick_random_edge(const Handle&);
+		bool random_sum(const Handle&, const Handle&);
 		Handle next_sense;
 
 		double converge;
 		double convergence_damper;
 		double convergence_limit;
 
-		void log_bad_sense(Handle, const std::string&, bool);
+		void log_bad_sense(const Handle&, const std::string&, bool);
 
 	public:
 		SenseRank();
 		~SenseRank();
-		void init_parse(Handle);
-		void rank_parse(Handle);
-		void rank_sentence(Handle);
+		void init_parse(const Handle&);
+		void rank_parse(const Handle&);
+		void rank_sentence(const Handle&);
 		void rank_document(const std::deque<Handle> &);
 
 };

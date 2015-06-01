@@ -68,7 +68,7 @@ PredicatesUpdater::~PredicatesUpdater()
     delete this->petPsychePredicatesUpdater;
 }
 
-void PredicatesUpdater::update(std::vector<Handle> & objects, unsigned long timestamp)
+void PredicatesUpdater::update(std::vector<Handle> & objects, octime_t timestamp)
 {
     Handle petHandle = atomSpace.getHandle(PET_NODE, petId);
 

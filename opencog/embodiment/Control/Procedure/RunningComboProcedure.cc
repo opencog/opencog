@@ -21,17 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RunningComboProcedure.h"
-#include "ComboProcedure.h"
 #include <boost/bind.hpp>
 #include <sstream>
 #include <map>
+#include <moses/comboreduct/interpreter/interpreter.h>
+
 #include <opencog/util/functional.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include <opencog/comboreduct/interpreter/interpreter.h>
+#include "RunningComboProcedure.h"
+#include "ComboProcedure.h"
 
 namespace opencog { namespace Procedure {
 

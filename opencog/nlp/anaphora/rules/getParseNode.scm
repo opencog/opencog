@@ -2,29 +2,27 @@
 
 (define getParseNode
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$parse node")
-                (VariableTypeNode "ParseNode")
+                (TypeNode "ParseNode")
             )
             (VariableNode "$target")
 
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (WordInstanceLink
-                    (VariableNode "$target")
-                    (VariableNode "$parse node")
-                )
-            )
+        (AndLink
             (ListLink
-                (AnchorNode "CurrentResult")
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
+            )
+            (WordInstanceLink
+                (VariableNode "$target")
                 (VariableNode "$parse node")
             )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (VariableNode "$parse node")
         )
     )
 )

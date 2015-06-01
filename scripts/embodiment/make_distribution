@@ -51,10 +51,10 @@ $buildDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
 $buildDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $buildDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $buildDirH/opencog/embodiment/Learning/LearningServer/learningServer \
-$buildDirH/opencog/query/libQueryModule.so \
+$buildDirH/opencog/modules/libQueryModule.so \
 $buildDirH/opencog/server/libbuiltinreqs.so \
 $buildDirH/opencog/shell/libscheme-shell.so \
-$buildDirH/opencog/persist/sql/libPersistModule.so \
+$buildDirH/opencog/modules/libPersistModule.so \
 ./cleanup.sh \
 ./stop_embodiment.sh \
 ./start_embodiment.sh \
@@ -85,16 +85,16 @@ $pdh/opencog/embodiment/framesInheritance.list \
 ]
 
 # Python module might not be built if cython is not installed
-if  [file exists $buildDirH/opencog/cython/libPythonModule.so] then {
-   lappend flist $buildDirH/opencog/cython/libPythonModule.so
+if  [file exists $buildDirH/opencog/modules/python/libPythonModule.so] then {
+   lappend flist $buildDirH/opencog/modules/python/libPythonModule.so
 }
 
 set schemeOpencogFiles [list \
-$pdh/opencog/scm/utilities.scm \
-$pdh/opencog/scm/file-utils.scm \
-$pdh/opencog/scm/persistence.scm \
-$pdh/opencog/scm/config.scm \
-$buildDirH/opencog/atomspace/core_types.scm \
+/usr/local/share/opencog/scm/utilities.scm \
+/usr/local/share/opencog/scm/file-utils.scm \
+/usr/local/share/opencog/scm/persistence.scm \
+/usr/local/share/opencog/scm/config.scm \
+/usr/local/share/opencog/scm/core_types.scm \
 $buildDirH/opencog/nlp/types/nlp_types.scm \
 $buildDirH/opencog/spacetime/spacetime_types.scm \
 $buildDirH/opencog/dynamics/attention/attention_types.scm \

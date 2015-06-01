@@ -7,7 +7,7 @@
 ## @section LICENSE	Permission to copy and modify is granted under the GPL
 ## @section REQUIREMENT	Ubuntu Linux 14.04 "Trusty Tahr". See opencog/ocpkg repo for 12.04 version
 ## @section SEEALSO	Dockerfile - compile and run OpenCog in a Linux container
- 
+
 # This bash script is organized in sections
 # SECTION 1. Global variable setting
 # SECTION 2. Command line option handling
@@ -38,31 +38,32 @@ declare -A PACKAGE_DESCRIPTION=(
     [dev]="LiveDVD ISO image ~900MB with OpenCog Developement Environment"
     [kvm]="TBD Ubuntu KVM image with OpenCog Server"
  [demovm]="TBD Ubuntu VirtualBox image with OpenCog Unity3D proxy for demo"
-   [debs]="TBD Ubuntu packages (deb files)" 
+   [debs]="TBD Ubuntu packages (deb files)"
+   [docker]="TBD Docker Images"
 )
 
 PATH_PREFIX=/usr/local
 CURRENT_DIR=$(pwd)
 
 if [ "$USER" == "root" ] ; then
- HOST_SOURCE_BRANCH=$PATH_PREFIX/src/opencog  
+ HOST_SOURCE_BRANCH=$PATH_PREFIX/src/opencog
  HOST_BUILD_DIR=/tmp/opencog_build
 else
- HOST_SOURCE_BRANCH=$CURRENT_DIR/opencog/src  
+ HOST_SOURCE_BRANCH=$CURRENT_DIR/opencog/src
  HOST_BUILD_DIR=$CURRENT_DIR/opencog/build
 fi
 
 SLEEP_TIME=0
 
-OUTPUT_ISO_NAME=OpenCogLive.iso 
+OUTPUT_ISO_NAME=OpenCogLive.iso
 OUTPUT_ISO_LOCATION=$CURRENT_DIR
 
-DEFAULT_PACKAGE_TYPE=local		
+DEFAULT_PACKAGE_TYPE=local
 DEFAULT_ADD_REPOSITORIES=true
-DEFAULT_INSTALL_DEPENDENCIES=true	
-DEFAULT_UPDATE_OPENCOG=true		
-#DEFAULT_BUILD_OPENCOG=true		
-#DEFAULT_TEST_OPENCOG=true		
+DEFAULT_INSTALL_DEPENDENCIES=true
+DEFAULT_UPDATE_OPENCOG=true
+#DEFAULT_BUILD_OPENCOG=true
+#DEFAULT_TEST_OPENCOG=true
 
 # TBD: update for Ubuntu 14.04
 UBUNTU_ISO=ubuntu-12.04.2-desktop-amd64.iso
@@ -87,7 +88,7 @@ QUIET="" 				#for apt-get
 
 LIVE_DESKTOP_SOURCE="OpenCog Source Code"
 
-REPOSITORIES="		
+REPOSITORIES="
 		ppa:opencog-dev/ppa \
 		"
 		#opencog-dev: cxxtest
@@ -98,7 +99,7 @@ REPOSITORIES="
 #               ppa:chris-lea/python-simplejson \
 #               ppa:gandelman-a/test-catalog \
 
-PACKAGES_TOOLS="	
+PACKAGES_TOOLS="
 		squashfs-tools \
 		genisoimage \
 		"
@@ -106,19 +107,20 @@ PACKAGES_TOOLS="
 		#qemu-kvm \
 		#testdrive \
 
-PACKAGES_FETCH="	
+PACKAGES_FETCH="
+        python-pip \
 		git \
 			"
 		#bzr-rewrite \
 
-PACKAGES_ADMIN="	
+PACKAGES_ADMIN="
 		apt-rdepends \
 		synaptic \
 		gdebi \
 		epiphany-browser \
 		"
 
-PACKAGES_BUILD="	
+PACKAGES_BUILD="
 		build-essential \
 		cmake \
 		cxxtest \
@@ -130,17 +132,7 @@ PACKAGES_BUILD="
 		cython \
 		python-dev \
 		python-zmq \
-		python-matplotlib \
-		python-nose \
-		python-numpy \
-		python-scipy \
-		python-mock \
 		python-simplejson \
-		python-pyparsing \
-		python-dateutil \
-		python-six \
-		python-tornado \
-		python-wsgiref \
 		libboost-date-time-dev \
 		libboost-filesystem-dev \
 		libboost-math-dev \
@@ -174,13 +166,13 @@ PACKAGES_BUILD="
 		#python-flask \
 		#python-flask-restful \
 
-PACKAGES_RUNTIME="	
+PACKAGES_RUNTIME="
 		unixodbc \
 		odbc-postgresql \
 		postgresql-client \
 		"
 
-PACKAGES_DOC="		
+PACKAGES_DOC="
 		ubuntu-docs \
 		libglib2.0-doc \
 		libpango1.0-doc \
@@ -193,7 +185,7 @@ PACKAGES_DOC="
  		dot2tex \
 		"
 
-PACKAGES_REMOVE="	
+PACKAGES_REMOVE="
 		ubuntu-desktop \
 		example-content \
 		software-center \
@@ -266,7 +258,7 @@ PACKAGES_REMOVE="
 		#language-pack-gnome-zh-hans-base \
 		#language-pack-kde-zh-hans-base \
 		# NOTES
-		# apps listed first, then libraries that they depend upon which will 
+		# apps listed first, then libraries that they depend upon which will
 		#	also uninstall other stuff
 		#	ubiquity - graphical Ubuntu installer that runs on boot
 		#  23MB app-install-data (ubuntu software center)
@@ -276,7 +268,7 @@ PACKAGES_REMOVE="
 		# 200MB libreoffice
 		#  45MB smbclient
 
-PACKAGES_EXDEV="	
+PACKAGES_EXDEV="
 		autoconf automake autotools-dev \
 		blt \
 		comerr-dev \
@@ -328,7 +320,24 @@ PACKAGES_EXDEV="
 # SECTION 2: Command line option handling
 
 usage() {
-if [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+  echo "Usage: $SELF_NAME OPTION"
+  echo " -r Add software repositories"
+  echo " -d Install base build dependencies"
+  echo " -p Install python build dependencies"
+  echo " -c Install Cogutils"
+  echo " -a Install Atomspace"
+  echo " -l Install Link Grammar"
+  echo " -m Install MOSES"
+  echo " -h This help message"
+elif [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
+  echo "Usage: $SELF_NAME OPTION"
+  echo " -a Add software repositories"
+  echo " -d Install all build dependencies"
+  echo " -u Update OpenCog source at $HOST_SOURCE_BRANCH"
+  echo " -b Build OpenCog"
+  echo " -t Test OpenCog"
+else
   echo "Usage: $SELF_NAME [OPTIONS] [PACKAGE-TYPE]"
   echo "  PACKAGE-TYPES:"
   for key in ${!PACKAGE_DESCRIPTION[@]}; do
@@ -340,41 +349,51 @@ if [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
   echo "    -o [filename]  ISO output filename"
   echo "    -j [jobs]      override number of auto-detected make jobs"
   echo "    -n             supress git updates"
-else 
-  echo "Usage: $SELF_NAME OPTION"
-  echo " -a Add software repositories"
-  echo " -d Install build dependencies"
-  echo " -u Update OpenCog source at $HOST_SOURCE_BRANCH"
-  echo " -b Build OpenCog"
-  echo " -t Test OpenCog"
-fi 
+fi
 }
 
 if [ $# -eq 0 ] ; then NO_ARGS=true ; fi
 
-while getopts ":i:o:j:s:c:l:r:adubtnxrvh" flag ; do
-  case $flag in
-    i)	INPUT_ISO_NAME="$OPTARG" ;;          
-    o)	OUTPUT_ISO_NAME="$OPTARG" ;;          
-    j)	MAKE_JOBS="$OPTARG" ;;			#override auto-detected MAKE_JOBS
-    s)	HOST_SOURCE_BRANCH="$OPTARG" ;;   
-    c)	HOST_BUILD_DIR="$OPTARG" ;;		#local cached build dir
-    l)	LIVE_BUILD_DIR="$OPTARG" ;;		#live build directory
-    r)	BZR_REVISION="$OPTARG" ;;		
-    a)	ADD_REPOSITORIES=true ;;
-    d)	INSTALL_DEPENDENCIES=true ;;		#ALL, none
-    u)	UPDATE_OPENCOG=true ;;			#git pull
-    b)	BUILD_OPENCOG=true ;;			#build opencog
-    t)	TEST_OPENCOG=true ;;                    #test opencog
-    n)	unset DEFAULT_UPDATE_OPENCOG ;;		#suppress git update
-    x)	unset DEFAULT_BUILD_OPENCOG ;;		#suppress build
-    p)	REINSTALL_PACKAGES=true ;; 
-    v)	unset QUIET ;; 
-    h)	usage ;; 
-    \?)	usage ;;
-    *)  UNKNOWN_FLAGS=true ;;
-  esac
-done
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+  while getopts "adpcrlmh" flag ; do
+    case $flag in
+      r)	ADD_REPOSITORIES=true ;;
+      d)	INSTALL_DEPENDENCIES=true ;; #base development packages
+      p)	INSTALL_PYTHON_PACKAGES=true ;;
+      c)	INSTALL_COGUTIL=true ;;
+      a)	INSTALL_ATOMSPACE=true ;;
+      l)	INSTALL_LINK_GRAMMAR=true ;;
+      m)	INSTALL_MOSES=true ;;
+      h)	usage ;;
+      \?)	usage ;;
+      *)  UNKNOWN_FLAGS=true ;;
+    esac
+  done
+else
+  while getopts ":i:o:j:s:c:l:r:adubtnxrvh" flag ; do
+    case $flag in
+      i)	INPUT_ISO_NAME="$OPTARG" ;;
+      o)	OUTPUT_ISO_NAME="$OPTARG" ;;
+      j)	MAKE_JOBS="$OPTARG" ;;			#override auto-detected MAKE_JOBS
+      s)	HOST_SOURCE_BRANCH="$OPTARG" ;;
+      c)	HOST_BUILD_DIR="$OPTARG" ;;		#local cached build dir
+      l)	LIVE_BUILD_DIR="$OPTARG" ;;		#live build directory
+      r)	BZR_REVISION="$OPTARG" ;;
+      a)	ADD_REPOSITORIES=true ;;
+      d)	INSTALL_DEPENDENCIES=true ;;		#ALL, none
+      u)	UPDATE_OPENCOG=true ;;			#git pull
+      b)	BUILD_OPENCOG=true ;;			#build opencog
+      t)	TEST_OPENCOG=true ;;                    #test opencog
+      n)	unset DEFAULT_UPDATE_OPENCOG ;;		#suppress git update
+      x)	unset DEFAULT_BUILD_OPENCOG ;;		#suppress build
+      p)	REINSTALL_PACKAGES=true ;;
+      v)	unset QUIET ;;
+      h)	usage ;;
+      \?)	usage ;;
+      *)  UNKNOWN_FLAGS=true ;;
+    esac
+  done
+fi
 
 shift $((OPTIND-1))
 
@@ -385,7 +404,7 @@ echo -e "\e[1;34m[$SELF_NAME] $MESSAGE\e[0m"
 PACKAGE_TYPE=$DEFAULT_PACKAGE_TYPE
 
 if [ $1 ] && [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
- case $1 in 
+ case $1 in
    debs)  PACKAGE_TYPE=$1 ;;
    dev)   PACKAGE_TYPE=$1 ;;
    demo)  PACKAGE_TYPE=$1 ;;
@@ -403,7 +422,7 @@ fi
 
 debug() {
 MESSAGE="Dropping to debugging chroot prompt..." ; message
-chroot $LIVE_SQUASH_UNION /bin/bash -l 
+chroot $LIVE_SQUASH_UNION /bin/bash -l
 }
 
 cleanup_squash() {
@@ -486,18 +505,18 @@ if [ "$SELF_NAME" != "$TOOL_NAME" ] ; then
 fi
 }
 
-trap error_trap ERR 
-trap exit_trap  EXIT 
+trap error_trap ERR
+trap exit_trap  EXIT
 trap quit_trap  INT HUP QUIT TERM
 
 # SECTION 4: Function Definitions
 
 add_repositories() {
 MESSAGE="Adding software repositories..." ; message
-for REPO in $REPOSITORIES ; do 
+for REPO in $REPOSITORIES ; do
   sudo apt-add-repository -y $REPO
 done
-sudo apt-get $QUIET --assume-yes update 
+sudo apt-get $QUIET --assume-yes update
 }
 
 install_admin() {
@@ -508,6 +527,92 @@ if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_ADMIN ; the
 fi
 }
 
+# Install cogutils
+install_cogutil(){
+MESSAGE="Installing cogutils...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
+wget https://github.com/opencog/cogutils/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd cogutils-master/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+cd ../..
+rm -rf master.tar.gz cogutils-master/
+}
+
+# Install Python Packages
+install_python_packages(){
+MESSAGE="Installing python packages...." ; message
+cd /tmp
+# cleaning up remnants from previous install failures, if any.
+rm -f requirements.txt*
+wget https://raw.githubusercontent.com/opencog/opencog/master/opencog/python/requirements.txt
+sudo pip install -U -r /tmp/requirements.txt
+rm -f requirements.txt*
+}
+
+# Install AtomSpace
+install_atomspace(){
+MESSAGE="Installing atomspace...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
+wget https://github.com/opencog/atomspace/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd atomspace-master/
+mkdir build
+cd build/
+cmake ..
+make -j$(nproc)
+sudo make install
+cd ../..
+rm -rf master.tar.gz atomspace-master/
+}
+
+# Install MOSES
+install_moses(){
+MESSAGE="Installing MOSES...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -f master.tar.gz*
+wget https://github.com/opencog/moses/archive/master.tar.gz
+tar -xvf master.tar.gz
+cd moses-master/
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+make install
+ldconfig
+cd ../..
+rm -rf master.tar.gz moses-master/
+}
+
+# Install Link-Grammar
+install_link_grammar(){
+MESSAGE="Installing Link-Grammar...." ; message
+cd /tmp/
+# cleaning up remnants from previous install failures, if any.
+rm -rf link-grammar-5.*/
+wget -r --no-parent -nH --cut-dirs=2 http://www.abisource.com/downloads/link-grammar/current/
+tar -zxf current/link-grammar-5*.tar.gz
+rm -r current
+cd link-grammar-5.*/
+mkdir build
+cd build
+../configure
+make -j$(nproc)
+make install
+ldconfig
+cd ../..
+rm -rf link-grammar-5.*/
+}
+
 install_dependencies() {
 MESSAGE="Installing OpenCog build dependencies...." ; message
 if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_FETCH; then
@@ -516,12 +621,12 @@ if ! sudo apt-get $QUIET --no-upgrade --assume-yes install $PACKAGES_BUILD $PACK
 fi
 # test for and fix Ubuntu 14.04 libiberty-dev includefile bug
 source /etc/lsb-release
-if [ "$DISTRIB_CODENAME" == "trusty" ] ; then 
+if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
   sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
 }
 
-update_opencog_source() { 
+update_opencog_source() {
 if sudo apt-get --no-upgrade --assume-yes $QUIET install $PACKAGES_FETCH ; then
   echo -n
 else
@@ -537,7 +642,7 @@ else
   if [ $UPDATE_OPENCOG ] ; then
     MESSAGE="Updating OpenCog source at $OPENCOG_SOURCE_DIR..." ; message
     cd $OPENCOG_SOURCE_DIR
-    git pull 
+    git pull
     cd -
   fi
 fi
@@ -551,7 +656,7 @@ cmake $LIVE_SOURCE_BRANCH
 MESSAGE="make -j$MAKE_JOBS" ; message
 make -j$MAKE_JOBS
 
-if [ $TEST_OPENCOG ] ; then 
+if [ $TEST_OPENCOG ] ; then
   make test
 fi
 
@@ -566,10 +671,10 @@ esac
 }
 
 locate_live_iso() {
-if [ $INPUT_ISO_NAME ]; then 
+if [ $INPUT_ISO_NAME ]; then
   MESSAGE="Using Ubuntu image specified at $INPUT_ISO_NAME" ; message
   UBUNTU_ISO_IMAGE=$INPUT_ISO_NAME
-else 
+else
   UBUNTU_LOCATIONS=$(locate --existing --basename "\\$UBUNTU_ISO" | grep $HOME)
   for LOC in $UBUNTU_LOCATIONS ; do
     MESSAGE="Ubuntu image found at $LOC. Checksumming, please wait..." ; message
@@ -577,11 +682,11 @@ else
   if [ "$LOC_MD5SUM" == "$UBUNTU_MD5SUM" ] ; then
     UBUNTU_ISO_IMAGE=$LOC
     MESSAGE="Using image found at $UBUNTU_ISO_IMAGE." ; message
-    break 
+    break
   else
     MESSAGE="...checksum failed." ; message
-  fi 
-done 
+  fi
+done
 fi
 if [ ! -f $UBUNTU_ISO_IMAGE ] ; then
  #aria2c --seed-time=0 ${UBUNTU_URL}${UBUNTU_ISO}.torrent
@@ -591,7 +696,7 @@ fi
 
 remove_packages() {
 MESSAGE="$PACKAGE_TYPE install type: Removing unecessary packages..." ; message
-chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes $QUIET purge $PACKAGES_REMOVE --auto-remove 
+chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes $QUIET purge $PACKAGES_REMOVE --auto-remove
 chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes $QUIET autoremove
 # stupid stupid stupid hack
 chroot $LIVE_SQUASH_UNION service cups stop
@@ -603,7 +708,7 @@ apt-get --no-upgrade --assume-yes $QUIET install $PACKAGES_REMOVE
 }
 
 keep_source() {
-MESSAGE="$PACKAGE_TYPE install type: Keeping source code..." ; message 
+MESSAGE="$PACKAGE_TYPE install type: Keeping source code..." ; message
 chroot $LIVE_SQUASH_UNION chown -R 999 $LIVE_SOURCE_BRANCH $LIVE_BUILD_DIR || true
 chroot $LIVE_SQUASH_UNION mkdir -p /home/$LIVE_USERNAME/Desktop/ || true
 chroot $LIVE_SQUASH_UNION ln -s "$LIVE_SOURCE_BRANCH" "/home/$LIVE_USERNAME/Desktop/$LIVE_DESKTOP_SOURCE" || true
@@ -611,25 +716,25 @@ chroot $LIVE_SQUASH_UNION ln -s "$LIVE_SOURCE_BRANCH" "/home/$LIVE_USERNAME/Desk
 
 remove_source() {
 MESSASGE="$PACKAGE_TYPE install type: Removing source code..." ; message
-chroot $LIVE_SQUASH_UNION umount $VERBOSE $LIVE_SOURCE_BRANCH	
+chroot $LIVE_SQUASH_UNION umount $VERBOSE $LIVE_SOURCE_BRANCH
 }
 
 remove_build() {
-MESSAGE="$PACKAGE_TYPE install type: Removing build files..." ; message 
-echo umount $VERBOSE $LIVE_SQUASH_UNION$LIVE_BUILD_DIR 
-umount $VERBOSE $LIVE_SQUASH_UNION$LIVE_BUILD_DIR || true 	
+MESSAGE="$PACKAGE_TYPE install type: Removing build files..." ; message
+echo umount $VERBOSE $LIVE_SQUASH_UNION$LIVE_BUILD_DIR
+umount $VERBOSE $LIVE_SQUASH_UNION$LIVE_BUILD_DIR || true
 rm -rf $LIVE_SQUASH_UNION$LIVE_BUILD_DIR || true
 }
 
 remove_dev_debs() {
-MESSAGE="$PACKAGE_TYPE install type: Removing development packages..." ; message 
-chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes purge $PACKAGES_BUILD $PACKAGES_EXDEV --auto-remove 
+MESSAGE="$PACKAGE_TYPE install type: Removing development packages..." ; message
+chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes purge $PACKAGES_BUILD $PACKAGES_EXDEV --auto-remove
 chroot $LIVE_SQUASH_UNION apt-get $QUIET autoremove --assume-yes
 }
 
 remove_doc_debs() {
-MESSAGE="$PACKAGE_TYPE install type: Removing documentation packages..." ; message 
-chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes purge $PACKAGES_DOC --auto-remove 
+MESSAGE="$PACKAGE_TYPE install type: Removing documentation packages..." ; message
+chroot $LIVE_SQUASH_UNION apt-get --no-upgrade --assume-yes purge $PACKAGES_DOC --auto-remove
 chroot $LIVE_SQUASH_UNION apt-get $QUIET autoremove --assume-yes
 }
 
@@ -732,7 +837,7 @@ fi
 
 write_live_media() {
 MESSAGE="Creating new compressed filesystem..." ; message
-mksquashfs $LIVE_SQUASH_UNION $LIVE_ISO_UNION/casper/filesystem.squashfs $SQUASHFS_OPTIONS 
+mksquashfs $LIVE_SQUASH_UNION $LIVE_ISO_UNION/casper/filesystem.squashfs $SQUASHFS_OPTIONS
 printf $(sudo du -sx --block-size=1 $LIVE_SQUASH_UNION | cut -f1) > $LIVE_ISO_UNION/casper/filesystem.size
 MESSAGE="Creating new bootable ISO image..." ; message
 mkisofs -D -r -V $OUTPUT_ISO_LOCATION/$OUTPUT_ISO_NAME -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o "$OUTPUT_ISO_LOCATION/$OUTPUT_ISO_NAME" $LIVE_ISO_UNION
@@ -744,15 +849,34 @@ cleanup_iso
 
 # SECTION 5: Main Program (MAIN main)
 
+# This is mainly for configuring workspaces depending on the type
+# of project being worked on.
+if [ "$SELF_NAME" == "setup.sh" ] ; then
+    if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi
+    if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi
+    if [ $INSTALL_PYTHON_PACKAGES ] ; then install_python_packages ; fi
+    if [ $INSTALL_COGUTIL ] ; then install_cogutil ; fi
+    if [ $INSTALL_ATOMSPACE ] ; then install_atomspace ; fi
+    if [ $INSTALL_LINK_GRAMMAR ] ; then install_link_grammar ; fi
+    if [ $INSTALL_MOSES ] ; then install_moses ; fi
+    if [ $UNKNOWN_FLAGS ] ; then usage ; fi
+    if [ $NO_ARGS ] ; then usage ; fi
+exit 0
+fi
+
 if [ "$SELF_NAME" == "install-dependencies-trusty" ] ; then
   add_repositories
   install_dependencies
+  install_python_packages
+  install_link_grammar
+  install_cogutil
+  install_atomspace
   exit 0
 fi
 
 if [ "$SELF_NAME" == "$TOOL_NAME" ] ; then
- if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi 
- if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi 
+ if [ $ADD_REPOSITORIES ] ; then add_repositories ; fi
+ if [ $INSTALL_DEPENDENCIES ] ; then install_dependencies ; fi
  if [ $UPDATE_OPENCOG ] ; then update_opencog_source ; fi
  if [ $BUILD_OPENCOG ] ; then build_opencog ; fi
  if [ $REINSTALL_PACKAGES ] ; then reinstall_removed ; fi
@@ -763,18 +887,18 @@ fi
 
 # option flag conditionals are finished, so set defaults
 
-if [ ! $ADD_REPOSITORIES ] ; then ADD_REPOSITORIES=$DEFAULT_ADD_REPOSITORIES; fi 
-if [ ! $INSTALL_DEPENDENCIES ] ; then INSTALL_DEPENDENCIES=$DEFAULT_INSTALL_DEPENDENCIES; fi 
-if [ ! $UPDATE_OPENCOG ] ; then UPDATE_OPENCOG=$DEFAULT_UPDATE_OPENCOG; fi 
-if [ ! $BUILD_OPENCOG ] ; then BUILD_OPENCOG=$DEFAULT_BUILD_OPENCOG; fi 
-if [ ! $TEST_OPENCOG ] ; then TEST_OPENCOG=$DEFAULT_TEST_OPENCOG; fi 
+if [ ! $ADD_REPOSITORIES ] ; then ADD_REPOSITORIES=$DEFAULT_ADD_REPOSITORIES; fi
+if [ ! $INSTALL_DEPENDENCIES ] ; then INSTALL_DEPENDENCIES=$DEFAULT_INSTALL_DEPENDENCIES; fi
+if [ ! $UPDATE_OPENCOG ] ; then UPDATE_OPENCOG=$DEFAULT_UPDATE_OPENCOG; fi
+if [ ! $BUILD_OPENCOG ] ; then BUILD_OPENCOG=$DEFAULT_BUILD_OPENCOG; fi
+if [ ! $TEST_OPENCOG ] ; then TEST_OPENCOG=$DEFAULT_TEST_OPENCOG; fi
 
 # package type selected when invoked as 'ocpkg'
 
 case $PACKAGE_TYPE in
   demo)	install_package_tools; locate_live_iso ; mount_live_iso ; remove_packages ;;
   min)	install_package_tools; locate_live_iso ; mount_live_iso ; remove_packages ;;
-  dev)	install_package_tools; locate_live_iso ; mount_live_iso 
+  dev)	install_package_tools; locate_live_iso ; mount_live_iso
       	MESSAGE="$PACKAGE_TYPE install type: Keeping all Ubuntu packages..." ; message ;;
 esac
 

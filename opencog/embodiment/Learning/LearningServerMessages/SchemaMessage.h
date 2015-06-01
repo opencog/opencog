@@ -24,8 +24,8 @@
 #ifndef SCHEMAMESSAGE_H_
 #define SCHEMAMESSAGE_H_
 
+#include <moses/comboreduct/combo/vertex.h>
 #include <opencog/embodiment/Control/MessagingSystem/Message.h>
-#include <opencog/comboreduct/combo/vertex.h>
 
 namespace opencog { namespace learningserver { namespace messages {
 
@@ -57,7 +57,8 @@ public:
     // If candidate schema name isn't set then it is assumed that the
     // message carries the final schema
     SchemaMessage(const std::string &from, const std::string &to,
-                  const opencog::combo::combo_tree & comboSchema, const std::string &schemaName,
+                  const opencog::combo::combo_tree & comboSchema,
+                  const std::string &schemaName,
                   const std::string &candidateSchemaName = "");
 
     /**

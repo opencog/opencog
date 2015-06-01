@@ -2,26 +2,24 @@
 
 (define getAllNumberNodes
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
             (VariableNode "$number")
         )
-        (ImplicationLink
-            (AndLink
-                (WordSequenceLink
-                    (VariableNode "$target")
-                    (VariableNode "$number")
-                )
+        (AndLink
+            (WordSequenceLink
+                (VariableNode "$target")
+                (VariableNode "$number")
             )
-            (ListLink
-                (AnchorNode "CurrentResult")
-                (WordSequenceLink
-                    (VariableNode "$target")
-                    (VariableNode "$number")
-                )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (WordSequenceLink
+                (VariableNode "$target")
+                (VariableNode "$number")
             )
         )
     )

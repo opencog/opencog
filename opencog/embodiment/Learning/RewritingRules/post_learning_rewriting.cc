@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <moses/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/meta_rules.h>
 
 #include "post_learning_rewriting.h"
 #include "post_learning_rules.h"

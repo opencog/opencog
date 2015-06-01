@@ -51,11 +51,12 @@ static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
     // Search order for the config file:
-    "lib",       // First, we look in the build directory (cmake puts it here)
+    ".",         // First, we look in the current directory,
+    "lib",       // Next, we look in the build directory (cmake puts it here)
     "../lib",    // Next, we look at the source directory
     CONFDIR,     // Next, the install directory
 #ifndef WIN32
-    "/etc",      // Finally, in the standard ssytem directory.
+    "/etc",      // Finally, in the standard system directory.
 #endif // !WIN32
     NULL
 };
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
     string progname = argv[0];
 
     // parse command line
-    while (1) {
+    while (true) {
         c = getopt (argc, argv, optString);
         /* Detect end of options */
         if (c == -1) {
@@ -201,8 +202,8 @@ int main(int argc, char *argv[])
     cogserve.openDatabase(); 
 
     // Load modules specified in config
-    cogserve.loadModules(DEFAULT_MODULE_PATHS); 
-    cogserve.loadSCMModules(DEFAULT_MODULE_PATHS);
+    cogserve.loadModules();
+    cogserve.loadSCMModules();
 
     // enable the network server and run the server's main loop
     cogserve.enableNetworkServer();

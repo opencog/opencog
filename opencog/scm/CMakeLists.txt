@@ -1,12 +1,6 @@
+
 INSTALL (FILES
-	apply.scm
-	core-docs.scm
-	file-utils.scm
-	example-dbi.scm
-	persistence.scm
-	repl-shell.scm
-	utilities.scm
-	DESTINATION "${DATADIR}/scm"
+   opencog/atom-types.scm
+   opencog/cogserver.scm
+   DESTINATION "${DATADIR}/scm/opencog"
 )
-# No CMakeLists.txt in dir:
-#ADD_SUBDIRECTORY (wires)

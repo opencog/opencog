@@ -2,27 +2,25 @@
 
 (define isIt
     (BindLink
-        (ListLink
+        (VariableList
             (TypedVariableLink
                 (VariableNode "$target")
-                (VariableTypeNode "WordInstanceNode")
+                (TypeNode "WordInstanceNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (ListLink
-                    (AnchorNode "CurrentTarget")
-                    (VariableNode "$target")
-                )
-                (LemmaLink
-                    (VariableNode "$target")
-                    (WordNode "it")
-                )
-            )
+        (AndLink
             (ListLink
-                (AnchorNode "CurrentResult")
-                (AnchorNode "Matched")
+                (AnchorNode "CurrentTarget")
+                (VariableNode "$target")
             )
+            (LemmaLink
+                (VariableNode "$target")
+                (WordNode "it")
+            )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (AnchorNode "Matched")
         )
     )
 )

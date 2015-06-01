@@ -129,7 +129,7 @@ unsigned long CompositeBehaviorDescription::getStartTime() const
     if (entries.empty())
         return 0;
     else {
-        unsigned long minT;
+        octime_t minT;
         std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
         minT = ei->temporal.getLowerBound();
         ++ei;
@@ -144,7 +144,7 @@ unsigned long CompositeBehaviorDescription::getEndTime() const
     if (entries.empty())
         return 0;
     else {
-        unsigned long maxT;
+        octime_t maxT;
         std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
         maxT = ei->temporal.getUpperBound();
         ++ei;
@@ -159,7 +159,7 @@ Temporal CompositeBehaviorDescription::getTimeInterval() const
     if (entries.empty())
         return Temporal(0, 0);
     else {
-        unsigned long minT, maxT;
+        octime_t minT, maxT;
         std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
         minT = ei->temporal.getLowerBound();
         maxT = ei->temporal.getUpperBound();
