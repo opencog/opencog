@@ -72,7 +72,7 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         BlendingConfigLoader().set(key, value)
 
     def run(self, atomspace):
-        BlendingLoggerForDebug().log("Start BlendingAgent")
+        # BlendingLoggerForDebug().log("Start BlendingAgent")
         self.__initialize(atomspace)
 
         self.__blender_select()
@@ -84,4 +84,4 @@ class BlendingAgent(opencog.cogserver.MindAgent):
             BlendingLoggerForDebug().log('Error in blending class.')
 
         self.__finalize()
-        BlendingLoggerForDebug().log("Finish BlendingAgent")
+        # BlendingLoggerForDebug().log("Finish BlendingAgent")

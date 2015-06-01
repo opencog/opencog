@@ -12,8 +12,8 @@ from opencog.type_constructors \
 # Debate with Kant example in the book 'The Way We Think'
 # It is a mirror network example.
 class DebateWithKantExample(BaseTestCase):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def __str__(self):
         return 'DebateWithKantExample'
@@ -54,6 +54,20 @@ class DebateWithKantExample(BaseTestCase):
         self.a_reason = ConceptNode("Reason", rand_tv())
         self.a_search_for_truth = ConceptNode("SearchForTruth", rand_tv())
         self.a_1784 = ConceptNode("1784", rand_tv())
+        make_sti_all(
+            self.a,
+            [
+                self.a_kant,
+                self.a_claims,
+                self.a_musings,
+                self.a_writing,
+                self.a_german,
+                self.a_reason,
+                self.a_search_for_truth,
+                self.a_1784
+            ],
+            self.JUST_TARGET
+        )
 
         # Use in InputSpace1.
         self.a_me = ConceptNode("Me", rand_tv())
@@ -63,6 +77,19 @@ class DebateWithKantExample(BaseTestCase):
         self.a_1995 = ConceptNode("1995", rand_tv())
         self.a_dead = ConceptNode("Dead", rand_tv())
         self.a_aware = ConceptNode("Aware", rand_tv())
+        make_sti_all(
+            self.a,
+            [
+                self.a_me,
+                self.a_speaking,
+                self.a_english,
+                self.a_cognitive_process,
+                self.a_1995,
+                self.a_dead,
+                self.a_aware
+            ],
+            self.JUST_TARGET
+        )
 
         # Use in GenericSpace.
         self.a_thinker = ConceptNode("Thinker", rand_tv())
@@ -71,6 +98,7 @@ class DebateWithKantExample(BaseTestCase):
         self.a_issue = ConceptNode("Issue", rand_tv())
         self.a_purpose = ConceptNode("Purpose", rand_tv())
         self.a_time = ConceptNode("Time", rand_tv())
+        # Not blend target.
 
         # Use in BlendedSpace.
         self.a_counterclaims = ConceptNode("Counterclaims", rand_tv())
@@ -160,9 +188,6 @@ class DebateWithKantExample(BaseTestCase):
             rand_tv()
         )
 
-        # It is not blend target.
-        # Do nothing.
-
     # - Input Space 0
     # Start to make 'Original Kant' network.
     def __make_input_space_0(self):
@@ -180,26 +205,19 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_search_for_truth,
                 self.a_1784
             ],
-            self.a_input_space_0,
-            self.default_link_tv
+            self.a_input_space_0
         )
 
-        # Link with blend target.
-        make_link_all(
+        make_sti_all(
             self.a,
-            types.MemberLink,
             [
                 self.a_kant,
                 self.a_claims,
                 self.a_musings,
                 self.a_writing,
-                self.a_german,
-                self.a_reason,
-                self.a_search_for_truth,
-                self.a_1784
+                self.a_search_for_truth
             ],
-            self.a_blend_target,
-            blend_target_link_tv
+            self.IMPORTANT
         )
 
     # - Input Space 1
@@ -222,8 +240,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_dead,
                 self.a_aware
             ],
-            self.a_input_space_1,
-            self.default_link_tv
+            self.a_input_space_1
         )
 
         # Make status of kant in modern.
@@ -236,10 +253,8 @@ class DebateWithKantExample(BaseTestCase):
         MemberLink([l_me_aware_kant, self.a_aware], TruthValue(0.9, 0.9))
         MemberLink([l_kant_not_aware_me, self.a_aware], TruthValue(0.1, 0.9))
 
-        # Link with blend target.
-        make_link_all(
+        make_sti_all(
             self.a,
-            types.MemberLink,
             [
                 self.a_me,
                 self.a_claims,
@@ -253,8 +268,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_dead,
                 self.a_aware
             ],
-            self.a_blend_target,
-            blend_target_link_tv
+            self.IMPORTANT
         )
 
     # - Generic Space
@@ -321,16 +335,49 @@ class DebateWithKantExample(BaseTestCase):
             rand_tv()
         )
 
-        # It is not blend target.
-        # Do nothing.
-
     # - Blended Space
     def __make_blended_space(self):
-        # Make instance of space concept.
-        a_blended_space = ConceptNode("BlendedSpace", self.default_atom_tv)
+        pass
 
-        # It is not blend target.
-        # Do nothing.
+    def __link_with_blend_target_for_debug(self):
+        # Link with blend target.
+        make_link_all(
+            self.a,
+            types.MemberLink,
+            [
+                self.a_me,
+                self.a_claims,
+                self.a_musings,
+                self.a_speaking,
+                self.a_english,
+                self.a_cognitive_process,
+                self.a_search_for_truth,
+                self.a_1995,
+                self.a_kant,
+                self.a_dead,
+                self.a_aware
+            ],
+            self.a_blend_target,
+            blend_target_link_tv
+        )
+
+        # Link with blend target.
+        make_link_all(
+            self.a,
+            types.MemberLink,
+            [
+                self.a_kant,
+                self.a_claims,
+                self.a_musings,
+                self.a_writing,
+                self.a_german,
+                self.a_reason,
+                self.a_search_for_truth,
+                self.a_1784
+            ],
+            self.a_blend_target,
+            blend_target_link_tv
+        )
 
     def make(self):
         self.__make_atoms()
@@ -339,3 +386,4 @@ class DebateWithKantExample(BaseTestCase):
         self.__make_input_space_1()
         self.__make_generic_space()
         self.__make_blended_space()
+        self.__link_with_blend_target_for_debug()

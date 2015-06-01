@@ -97,7 +97,6 @@ def rand_tv():
     c = random.uniform(0.5, 0.9)
     return TruthValue(s, c)
 
-
 def make_link_all(atomspace, link_type, src_node_list, dst_node, tv=None):
     if tv is None:
         for node in src_node_list:

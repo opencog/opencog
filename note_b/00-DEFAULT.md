@@ -12,3 +12,7 @@ at.get_atoms_by_av(6000)
 at.get_atoms_in_attentional_focus()
 
 a1.av={'sti':100}
+
+새로운 노드의 STI는?
+다른 뽑는 방법 테스트
+다른 예제도 바꾸기

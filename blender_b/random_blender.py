@@ -1,4 +1,5 @@
 # coding=utf-8
+from tests_b.base_test_case import BaseTestCase
 from util_b.general_util import BlendingLoggerForDebug
 
 __author__ = 'DongMin Kim'
@@ -24,7 +25,7 @@ class RandomBlender(BaseBlender):
         chooser_option = {
             'atom_type': types.Node,
             'count': 2,
-            'sti_min': 8
+            'sti_min': BaseTestCase.IMPORTANT
         }
         return self.chooser.atom_choose(chooser_option)
 
@@ -32,7 +33,7 @@ class RandomBlender(BaseBlender):
         return self.last_status
 
     def blend(self):
-        BlendingLoggerForDebug().log("Start RandomBlending")
+        # BlendingLoggerForDebug().log("Start RandomBlending")
 
         # Select nodes to blending.
         a_nodes = self.__atom_choose()
@@ -97,6 +98,6 @@ class RandomBlender(BaseBlender):
         )
 
         BlendingLoggerForDebug().log(str(a_blended_node.h) + " " + str(a_blended_node.name))
-        BlendingLoggerForDebug().log("Finish RandomBlending")
+        # BlendingLoggerForDebug().log("Finish RandomBlending")
 
         return 0

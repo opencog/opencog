@@ -15,8 +15,12 @@ class BaseTestCase(object):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, atomspace):
-        self.a = atomspace
+    JUST_TARGET = 8
+    IMPORTANT = 16
+    VERY_IMPORTANT = 32
+
+    def __init__(self, a):
+        self.a = a
         self.atom_list_for_debug = []
         self.link_list_for_debug = []
         self.default_atom_tv = TruthValue(0.9, 0.8)

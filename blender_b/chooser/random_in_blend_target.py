@@ -29,7 +29,8 @@ class RandomInBlendTarget(BaseChooser):
             return ret
 
         a_index_list = random.sample(range(0, len(a_atom_list)), count)
-        ret.extend(a_index_list)
+        for i in a_index_list:
+            ret.append(a_atom_list[i])
 
         return ret
 
