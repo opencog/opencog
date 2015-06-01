@@ -34,7 +34,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::unordered_set<AtomPtr> UnorderedAtomSet;
+typedef std::unordered_set<Atom*> UnorderedAtomSet;
 
 /**
  * Implements a vector of atom sets; each set can be found via an
@@ -51,13 +51,13 @@ class FixedIntegerIndex
 
 	public:
 		~FixedIntegerIndex() {}
-		void insert(size_t i, AtomPtr a)
+		void insert(size_t i, Atom* a)
 		{
 			UnorderedAtomSet &s(idx.at(i));
 			s.insert(a);
 		}
 
-		void remove(size_t i, AtomPtr a)
+		void remove(size_t i, Atom* a)
 		{
 			UnorderedAtomSet &s = idx.at(i);
 			s.erase(a);
@@ -70,7 +70,6 @@ class FixedIntegerIndex
 		}
 
 		size_t size(void) const;
-		void remove(bool (*)(Handle));
 };
 
 /** @}*/

@@ -24,47 +24,54 @@
 #include "ForwardChainPatternMatchCB.h"
 
 ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
-		Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(
-				as), _as(as) {
-	_fcmem = nullptr;
+        Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as),
+                PLNImplicator(as), _as(as)
+{
+    _fcmem = nullptr;
 }
 
-ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB() {
+ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB()
+{
 }
 
-bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2) {
-	//constrain search within target list
-	if (_fcmem->is_search_in_af())
-		return (_fcmem->isin_target_list(node2)
-				and AttentionalFocusCB::node_match(node1, node2));
-	else
-		return (_fcmem->isin_target_list(node2)
-				and DefaultPatternMatchCB::node_match(node1, node2));
+bool ForwardChainPatternMatchCB::node_match(Handle& node1, Handle& node2)
+{
+    //constrain search within premise list
+    if (_fcmem->is_search_in_af())
+        return (_fcmem->isin_premise_list(node2) and AttentionalFocusCB::node_match(
+                node1, node2));
+    else
+        return (_fcmem->isin_premise_list(node2) and DefaultPatternMatchCB::node_match(
+                node1, node2));
 }
-bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln) {
-	//constrain search within target list
-	if (_fcmem->is_search_in_af())
-		return (_fcmem->isin_target_list(Handle(lsoln))
-				and AttentionalFocusCB::link_match(lpat, lsoln));
-	else
-		return (_fcmem->isin_target_list(Handle(lsoln))
-				and DefaultPatternMatchCB::link_match(lpat, lsoln));
+bool ForwardChainPatternMatchCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+{
+    //constrain search within premise list
+    if (_fcmem->is_search_in_af())
+        return (_fcmem->isin_premise_list(Handle(lsoln)) and AttentionalFocusCB::link_match(
+                lpat, lsoln));
+    else
+        return (_fcmem->isin_premise_list(Handle(lsoln)) and DefaultPatternMatchCB::link_match(
+                lpat, lsoln));
 }
 bool ForwardChainPatternMatchCB::grounding(
-		const std::map<Handle, Handle> &var_soln,
-		const std::map<Handle, Handle> &pred_soln) {
-	Handle h = inst.instantiate(implicand, var_soln);
-	if (Handle::UNDEFINED != h) {
-		result_list.push_back(h);
-	}
-	return false;
+        const std::map<Handle, Handle> &var_soln,
+        const std::map<Handle, Handle> &pred_soln)
+{
+    Handle h = inst.instantiate(implicand, var_soln);
+    if (Handle::UNDEFINED != h) {
+        result_list.push_back(h);
+    }
+    return false;
 }
 
-void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem) {
-	_fcmem = fcmem;
+void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem)
+{
+    _fcmem = fcmem;
 }
-HandleSeq ForwardChainPatternMatchCB::get_products() {
-	auto product = result_list;
-	result_list.clear();
-	return product;
+HandleSeq ForwardChainPatternMatchCB::get_products()
+{
+    auto product = result_list;
+    result_list.clear();
+    return product;
 }

@@ -32,6 +32,8 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+typedef unsigned long octime_t;
+
 /** \addtogroup grp_spacetime
  *  @{
  */
@@ -47,7 +49,7 @@ private:
     /**
      * Initializes the attributes of this Temporal object. Used by constructors only.
      */
-    void init(unsigned long, unsigned long, bool) throw (InvalidParamException);
+    void init(octime_t, octime_t, bool) throw (InvalidParamException);
 
     /**
      * Creates a unique instance for UNDEFINED_TEMPORAL object
@@ -72,14 +74,14 @@ public:
      *   - a uniform distribution is used (normal argument is ommited or false) and "a" is greater than "b".
      *   - a normal distribution is used (normal argument is true) and "b" is greater than "a" (this causes negative value for the lower bound).
      */
-    Temporal(unsigned long, unsigned long, bool = false);
+    Temporal(octime_t, octime_t, bool = false);
 
     /**
      * Special constructor for timestamps only. Using this constructor passing a timestamp argument T is
      * equivalent to call the more comprehensive constructor passing as follows: Temporal(T,T,false).
      * @param timestamp The value of both lower and upper bounds, since this is a just time point.
      */
-    Temporal(unsigned long);
+    Temporal(octime_t);
 
     /**
      * Destructor
@@ -94,22 +96,22 @@ public:
     /**
      * @return The A attribute of this Temporal: If using normal distribution, the mean value. Otherwise, the lower bound value.
      */
-    unsigned long getA() const;
+    octime_t getA() const;
 
     /**
      * @return The B attribute of this Temporal: If using normal distribution, the variance value (mean +/- variance). Otherwise, the upper bound value.
      */
-    unsigned long getB() const;
+    octime_t getB() const;
 
     /**
      * @return the Lower bound of this Temporal object
      */
-    unsigned long getLowerBound() const;
+    octime_t getLowerBound() const;
 
     /**
      * @return the upper bound of this Temporal object
      */
-    unsigned long getUpperBound() const;
+    octime_t getUpperBound() const;
 
 
     /**
@@ -128,7 +130,7 @@ public:
     /**
      * Gets the name of the TimeNode that represents the given timestamp value
      */
-    static std::string getTimeNodeName(unsigned long);
+    static std::string getTimeNodeName(octime_t);
 
     /**
      * Gets the Temporal object that corresponds to the TimeNode with the given name.
@@ -167,14 +169,14 @@ public:
 
 private:
     bool normal;
-    unsigned long a;
-    unsigned long b;
+    octime_t a;
+    octime_t b;
 
 };
 
 struct hashTemporal {
     int operator()(Temporal* tl) const {
-        int hashCode =  boost::hash<unsigned long>()(tl->getA());
+        int hashCode =  boost::hash<octime_t>()(tl->getA());
         return(hashCode);
     }
 };

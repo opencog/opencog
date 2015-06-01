@@ -52,9 +52,8 @@ class IncomingIndex
 		HandleSetIndex idx;
 	public:
 		IncomingIndex(void);
-		void insertAtom(AtomPtr a);
-		void removeAtom(AtomPtr a);
-		void remove(bool (*)(Handle));
+		void insertAtom(const AtomPtr& a);
+		void removeAtom(const AtomPtr& a);
 		void resize();
 
 		const UnorderedHandleSet& getIncomingSet(Handle) const;

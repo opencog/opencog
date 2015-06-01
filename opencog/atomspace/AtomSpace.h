@@ -436,7 +436,7 @@ public:
     }
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle h, TruthValuePtr tv) {
+    void setTV(Handle h, TruthValuePtr tv) const {
         h->setTruthValue(tv);
     }
 

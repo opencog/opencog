@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ; ============================================================================= 
+=======
+; =============================================================================
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 ; GeneralEvaluationToMemberRule 
 ;	Takes EvaluationLinks with >=2 Arguments and creates a Member Link
 ;
@@ -11,6 +15,11 @@
 ;		(EvaluationLink (pred D (ListLink X C))))))
 ; -----------------------------------------------------------------------------
 
+<<<<<<< HEAD
+=======
+(include "formulas.scm")
+
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 (define pln-rule-evaluation-to-member
 	(BindLink
 		(ListLink
@@ -29,12 +38,16 @@
                         (VariableNode "$D")
                         (VariableNode "$A")))))))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 ; -----------------------------------------------------------------------------
 ; Evaluation To Member Formula
 ; -----------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------
+<<<<<<< HEAD
 ; Side-effect: TruthValue of the new links stays the same
 ; -----------------------------------------------------------------------------
 
@@ -65,10 +78,32 @@
 	(if (not (null? trailing-nodes))
 		(begin
 			(MemberLink (stv (cog-stv-strength DBC) (cog-stv-confidence DBC))
+=======
+; Side-effect: TruthValue of the new link/s stays the same
+; -----------------------------------------------------------------------------
+
+(define (pln-formula-evaluation-to-member DA)
+	(if (= (cog-arity (gdr DA)) 0)
+		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
+			(gdr DA)
+			(SatisfyingSetLink
+				(VariableNode "$X")
+				(EvaluationLink
+					(gar DA)
+					(VariableNode "$X"))))
+		(ListLink
+			(create-multiple-links DA '() (cog-outgoing-set (gdr DA))))))
+
+(define (create-multiple-links DA preceding-nodes trailing-nodes)
+	(if (not (null? trailing-nodes))
+		(cons
+			(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 				(car trailing-nodes)
 				(SatisfyingSetLink
 					(VariableNode "$X")
 					(EvaluationLink
+<<<<<<< HEAD
 						(gar DBC)
 						(ListLink
 							(append
@@ -89,5 +124,19 @@
 			(pln-create-member DBC 
 				(reverse (cons (car trailing-nodes) (reverse preceding-nodes)))
 				(cdr trailing-nodes)))))
+=======
+						(gar DA)
+						(ListLink
+							(append
+								preceding-nodes
+								(cons
+									(VariableNode "$X")
+									(cdr trailing-nodes)))))))
+			(create-multiple-links 
+				DA
+				(reverse (cons (car trailing-nodes) (reverse preceding-nodes)))
+				(cdr trailing-nodes)))
+		'())) 
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 
 ; =============================================================================

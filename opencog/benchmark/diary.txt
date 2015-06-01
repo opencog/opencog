@@ -371,7 +371,7 @@ more complex form that Handle now has, resulting in more copying.
 
 
 The second column replaces Handle by UUID in the TypeIndex. This improves
-performance by avoiding excess copying during ahndle manipulations.
+performance by avoiding excess copying during handle manipulations.
 
 Column III shows the profile after two significant changes: rejiggering
 the way the AtomPtr is held by the handle, and by adding locks to the
@@ -866,3 +866,18 @@ for python, either, can't tell why...
   getOutgoingSet    17.2          7.04
   getIncomingSet    16.1          7.15
   removeAtom        15.1         crash
+
+======================================================================
+19 March 2015:
+
+Replaced AtomPtr in the AtomTable indexes with Atom*.  This should
+improve atom insert and remove performance. It does seem to, but not very
+much.
+
+                   -A
+   test          AtomSpace
+   name          K-ops/sec
+   ----          ---------
+  addNode          195
+  addLink          101
+  removeAtom       170

@@ -120,8 +120,8 @@ Handle AtomTable::getHandle(Type t, std::string name) const
         name = std::to_string(std::stod(name));
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    AtomPtr atom(nodeIndex.getAtom(t, name));
-    if (atom) return Handle(atom);
+    Atom* atom = nodeIndex.getAtom(t, name);
+    if (atom) return atom->getHandle();
     if (_environ and NULL == atom)
         return _environ->getHandle(t, name);
     return Handle::UNDEFINED;
@@ -130,12 +130,15 @@ Handle AtomTable::getHandle(Type t, std::string name) const
 /// Find an equivalent atom that has exactly the same name and type.
 /// That is, if there is an atom with this name and type already in
 /// the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const NodePtr n) const
+Handle AtomTable::getHandle(const NodePtr& n) const
 {
-    Handle h(getHandle(n->getType(), n->getName()));
-    if (_environ and Handle::UNDEFINED == h)
-        _environ->getHandle(n);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (n->_atomTable == env) return Handle(n);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(n->getType(), n->getName());
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
@@ -167,18 +170,21 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// Find an equivalent atom that has exactly the same type and outgoing
 /// set.  That is, if there is an atom with this ype and outset already
 /// in the table, then return that; else return undefined.
-Handle AtomTable::getHandle(LinkPtr l) const
+Handle AtomTable::getHandle(const LinkPtr& l) const
 {
-    Handle h(getHandle(l->getType(), l->getOutgoingSet()));
-    if (_environ and Handle::UNDEFINED == h)
-        return _environ->getHandle(l);
-    return h;
+    const AtomTable *env = this;
+    do {
+        if (l->_atomTable == env) return Handle(l);
+        env = env->_environ;
+    } while (env);
+
+    return getHandle(l->getType(), l->getOutgoingSet());
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr a) const
+Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     NodePtr nnn(NodeCast(a));
     if (nnn)
@@ -197,10 +203,20 @@ Handle AtomTable::getHandle(Handle& h) const
     if (Handle::UNDEFINED.value() == h.value())
         return getHandle(AtomPtr(h));
 
-    // If we have both a uuid and pointer, there's nothing to do.
+    // If we have both a uuid and pointer, AND the pointer is
+    // pointing to an atom that is in this table (not some other
+    // table), then there's nothing to do.  Otherwise, we have to
+    // find the equivalent atom in this atomspace.
     // Note: we access the naked pointer itself; that's because
     // Handle itself calls this method to resolve null pointers.
-    if (h._ptr) return h;
+    if (h._ptr) {
+        if (this == h._ptr->_atomTable)
+            return h;
+        else if (_environ)
+            return _environ->getHandle(h);
+        else
+            return getHandle(AtomPtr(h));
+    }
 
     // Read-lock for the _atom_set.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -583,11 +599,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    nodeIndex.insertAtom(atom);
+    Atom* pat = atom.operator->();
+    nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
-    typeIndex.insertAtom(atom);
-    targetTypeIndex.insertAtom(atom);
-    importanceIndex.insertAtom(atom);
+    typeIndex.insertAtom(pat);
+    targetTypeIndex.insertAtom(pat);
+    importanceIndex.insertAtom(pat);
 }
 
 void AtomTable::barrier()
@@ -788,17 +805,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     size--;
     _atom_set.erase(handle);
 
-    nodeIndex.removeAtom(atom);
+    Atom* pat = atom.operator->();
+    nodeIndex.removeAtom(pat);
     linkIndex.removeAtom(atom);
-    typeIndex.removeAtom(atom);
+    typeIndex.removeAtom(pat);
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-    targetTypeIndex.removeAtom(atom);
-    importanceIndex.removeAtom(atom);
+    targetTypeIndex.removeAtom(pat);
+    importanceIndex.removeAtom(pat);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and

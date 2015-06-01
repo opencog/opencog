@@ -22,107 +22,129 @@
  */
 #include "FCMemory.h"
 
-FCMemory::FCMemory(AtomSpace* as) {
-	as_ = as;
+FCMemory::FCMemory(AtomSpace* as)
+{
+    as_ = as;
 }
 
-FCMemory::~FCMemory() {
+FCMemory::~FCMemory()
+{
 }
 
-void FCMemory::update_target_list(HandleSeq input) {
-	for (Handle i : input) {
-		if (find(target_list_.begin(), target_list_.end(), i)
-				== target_list_.end())
-			target_list_.push_back(i);
-	}
+void FCMemory::update_premise_list(HandleSeq input)
+{
+    for (Handle i : input) {
+        if (find(premise_list_.begin(), premise_list_.end(), i) == premise_list_.end())
+            premise_list_.push_back(i);
+    }
 }
 
-vector<Rule*> FCMemory::get_rules(void) {
-	return rules_;
+vector<Rule*> FCMemory::get_rules(void)
+{
+    return rules_;
 }
-void FCMemory::set_rules(vector<Rule*> rules) {
-	rules_ = rules;
+void FCMemory::set_rules(vector<Rule*> rules)
+{
+    rules_ = rules;
 }
-void FCMemory::set_target(Handle target) {
-	cur_target_ = target;
-	target_list_.push_back(cur_target_);
+void FCMemory::set_target(Handle target)
+{
+    cur_target_ = target;
+    target_list_.push_back(cur_target_);
 }
-HandleSeq FCMemory::get_target_list(void) {
-	return target_list_;
+HandleSeq FCMemory::get_target_list(void)
+{
+    return target_list_;
 }
-bool FCMemory::is_search_in_af(void) {
-	return search_in_af_;
+HandleSeq FCMemory::get_premise_list(void)
+{
+    return premise_list_;
 }
-Rule* FCMemory::get_cur_rule(void) {
-	return cur_rule_;
+bool FCMemory::is_search_in_af(void)
+{
+    return search_in_af_;
 }
-void FCMemory::set_cur_rule(Rule* r) {
-	cur_rule_ = r;
+Rule* FCMemory::get_cur_rule(void)
+{
+    return cur_rule_;
 }
-void FCMemory::add_rules_product(int iteration, HandleSeq product) {
-	for (Handle p : product) {
-		Inference inf;
-		inf.iter_step = iteration;
-		inf.applied_rule = cur_rule_;
-		inf.inf_product.push_back(p);
-		inf_history_.push_back(inf);
-	}
+void FCMemory::set_cur_rule(Rule* r)
+{
+    cur_rule_ = r;
+}
+void FCMemory::add_rules_product(int iteration, HandleSeq product)
+{
+    for (Handle p : product) {
+        Inference inf;
+        inf.iter_step = iteration;
+        inf.applied_rule = cur_rule_;
+        inf.inf_product.push_back(p);
+        inf_history_.push_back(inf);
+    }
 }
 void FCMemory::add_inference(int iter_step, HandleSeq product,
-		HandleSeq matched_nodes) {
-	Inference inf;
-	inf.applied_rule = cur_rule_;
-	inf.iter_step = iter_step;
-	for (Handle p : product)
-		inf.inf_product.push_back(p);
-	for (Handle mn : matched_nodes)
-		inf.matched_nodes.push_back(mn);
-	inf_history_.push_back(inf);
+                             HandleSeq matched_nodes)
+{
+    Inference inf;
+    inf.applied_rule = cur_rule_;
+    inf.iter_step = iter_step;
+    for (Handle p : product)
+        inf.inf_product.push_back(p);
+    for (Handle mn : matched_nodes)
+        inf.matched_nodes.push_back(mn);
+    inf_history_.push_back(inf);
 }
-Handle FCMemory::get_cur_target(void) {
-	return cur_target_;
+Handle FCMemory::get_cur_target(void)
+{
+    return cur_target_;
 }
-
-bool FCMemory::isin_target_list(Handle h) {
-	for (Handle hi : target_list_) {
-		if (hi.value() == h.value())
-			return true;
-		//recursive lookup
-		else if (LinkCast(hi)) {
-			HandleSeqSeq hseqs;
-			hseqs.push_back(as_->getOutgoing(hi));
-			do {
-				HandleSeq iset = hseqs[hseqs.size() - 1];
-				hseqs.pop_back();
-				for (Handle i : iset) {
-					if (i.value() == h.value())
-						return true;
-					else if (LinkCast(i))
-						hseqs.push_back(as_->getOutgoing(i));
-				}
-			} while (not hseqs.empty());
-		}
-	}
-	return false;
+bool FCMemory::isin_target_list(Handle h)
+{
+    return (find(target_list_.begin(), target_list_.end(), h) != target_list_.end());
 }
-
-HandleSeq FCMemory::get_result() {
-	HandleSeq result;
-	for (Inference i : inf_history_)
-		result.insert(result.end(), i.inf_product.begin(), i.inf_product.end());
-	return result;
-}
-
-vector<Inference>& FCMemory::get_inf_history() {
-	return inf_history_;
+bool FCMemory::isin_premise_list(Handle h)
+{
+    for (Handle hi : premise_list_) {
+        if (hi.value() == h.value())
+            return true;
+        //recursive lookup
+        else if (LinkCast(hi)) {
+            HandleSeqSeq hseqs;
+            hseqs.push_back(as_->getOutgoing(hi));
+            do {
+                HandleSeq iset = hseqs[hseqs.size() - 1];
+                hseqs.pop_back();
+                for (Handle i : iset) {
+                    if (i.value() == h.value())
+                        return true;
+                    else if (LinkCast(i))
+                        hseqs.push_back(as_->getOutgoing(i));
+                }
+            } while (not hseqs.empty());
+        }
+    }
+    return false;
 }
 
-vector<Rule*> FCMemory::get_applied_rules(void) {
-	vector<Rule*> applied_rules;
-	for (Inference i : inf_history_) {
-		if (find(applied_rules.begin(), applied_rules.end(), i.applied_rule)
-				== applied_rules.end())
-			applied_rules.push_back(i.applied_rule);
-	}
-	return applied_rules;
+HandleSeq FCMemory::get_result()
+{
+    HandleSeq result;
+    for (Inference i : inf_history_)
+        result.insert(result.end(), i.inf_product.begin(), i.inf_product.end());
+    return result;
+}
+
+vector<Inference>& FCMemory::get_inf_history()
+{
+    return inf_history_;
+}
+
+vector<Rule*> FCMemory::get_applied_rules(void)
+{
+    vector<Rule*> applied_rules;
+    for (Inference i : inf_history_) {
+        if (find(applied_rules.begin(), applied_rules.end(), i.applied_rule) == applied_rules.end())
+            applied_rules.push_back(i.applied_rule);
+    }
+    return applied_rules;
 }

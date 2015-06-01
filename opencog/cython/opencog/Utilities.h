@@ -1,7 +1,8 @@
 /*
- * opencog/atomspace/StringIndex.cc
+ * opencog/cython/Utilities.h
  *
- * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2011 by The OpenCog Foundation
+ * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,21 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/StringIndex.h>
+#ifndef _OPENCOG_UTILITIES_H
+#define _OPENCOG_UTILITIES_H
 
-using namespace opencog;
 
-void StringIndex::remove(bool (*filter)(AtomPtr))
-{
-	std::map<std::string, AtomPtr>::iterator i, j;
-	
-	i = idx.begin();
-	while (i != idx.end())
-	{
-		j = i;
-		++i;
-		if (filter(j->second))
-			idx.erase(j->first);
-	}
-}
+namespace opencog {
 
+void initialize_opencog(AtomSpace* atomSpace, const char* configFile = NULL);
+void finalize_opencog();
+
+void configuration_load(const char* configFile);
+
+} // namespace opencog
+
+
+#endif // _OPENCOG_UTILITIES_H

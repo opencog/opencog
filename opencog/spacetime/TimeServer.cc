@@ -86,7 +86,7 @@ bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRela
     return table->remove(h, t, criterion);
 }
 
-unsigned long TimeServer::getLatestTimestamp() const
+octime_t TimeServer::getLatestTimestamp() const
 {
     std::unique_lock<std::mutex> lock(ts_mutex);
     return latestTimestamp;
@@ -111,7 +111,7 @@ void TimeServer::clear()
     init();
 }
 
-Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, TruthValuePtr tv)
+Handle TimeServer::addTimeInfo(Handle h, octime_t timestamp, TruthValuePtr tv)
 {
     OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
@@ -142,7 +142,7 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthV
     return atTimeLink;
 }
 
-bool TimeServer::removeTimeInfo(Handle h, unsigned long timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
+bool TimeServer::removeTimeInfo(Handle h, octime_t timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
 {
     Temporal t(timestamp);
     return removeTimeInfo(h, t, criterion, removeDisconnectedTimeNodes, recursive);

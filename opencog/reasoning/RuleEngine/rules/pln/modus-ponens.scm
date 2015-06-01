@@ -10,10 +10,9 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (ImplicationLink
-            (AndLink
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B")))
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
             (ListLink
                 (ExecutionOutputLink
                     (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")

@@ -1,4 +1,17 @@
 ; =============================================================================
+<<<<<<< HEAD
+=======
+; A list of the helper functions necessary in different inference rules
+; -----------------------------------------------------------------------------
+; Index
+; - inversion-formula
+; - simple-deduction-formula
+; - find-replace
+;------------------------------------------------------------------------------
+
+
+; =============================================================================
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 ; Inversion Formula
 ; sBA = (sAB * sB)/sA
 ; -----------------------------------------------------------------------------
@@ -34,6 +47,10 @@
 		sAB))
 
 ; Main Formula
+<<<<<<< HEAD
+=======
+
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 (define (simple-deduction-formula sA sB sC sAB sBC)
 	(if
 		(and
@@ -50,3 +67,21 @@
 						(* sB sBC))) 
 				(- 1 sB)))
 		0 ))
+<<<<<<< HEAD
+=======
+
+; =============================================================================
+; Basic find and replace formula
+;
+; Returns a new list by replacing first occurance of an element in the 
+; list(here old) to another element in the list(here new).
+; -----------------------------------------------------------------------------
+
+(define (find-replace l old new)
+	(cond
+		((null? l) '())
+		((equal? (car l) old) (cons new (cdr l)))
+		(else
+			(cons (car l) (find-replace (cdr l) old new)))))
+
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c

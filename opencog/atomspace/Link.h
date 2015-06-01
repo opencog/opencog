@@ -242,7 +242,8 @@ public:
 
 static inline LinkPtr LinkCast(const Handle& h)
     { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
-static inline LinkPtr LinkCast(AtomPtr a) { return std::dynamic_pointer_cast<Link>(a); }
+static inline LinkPtr LinkCast(const AtomPtr& a)
+    { return std::dynamic_pointer_cast<Link>(a); }
 
 // XXX temporary hack ...
 #define createLink std::make_shared<Link>

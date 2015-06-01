@@ -46,14 +46,14 @@ class LinkIndex
         std::vector<HandleSeqIndex> idx;
     public:
         LinkIndex(void);
-        void insertAtom(AtomPtr a);
-        void removeAtom(AtomPtr a);
-        void remove(bool (*)(Handle));
+        void insertAtom(const AtomPtr&);
+        void removeAtom(const AtomPtr&);
+        void remove(bool (*)(const Handle&));
         void resize();
         size_t size() const;
 
         Handle getHandle(Type type, const HandleSeq&) const;
-        UnorderedHandleSet getHandleSet(Type type, const HandleSeq &, bool subclass) const;
+        UnorderedHandleSet getHandleSet(Type type, const HandleSeq&, bool subclass) const;
 };
 
 /** @}*/

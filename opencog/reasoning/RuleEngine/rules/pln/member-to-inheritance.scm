@@ -2,7 +2,11 @@
 ; MemberToInheritanceRule
 ;	MemberLink( B C )
 ;			becomes
+<<<<<<< HEAD
 ;	InheritanceLink( {B} C )
+=======
+;	InheritanceLink( B C )
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 ; -----------------------------------------------------------------------------
 
 (define pln-rule-member-to-inheritance
@@ -18,8 +22,12 @@
 				(GroundedSchemaNode "scm:pln-formula-member-to-inheritance")
 				(ListLink
 					(InheritanceLink
+<<<<<<< HEAD
 						(SetLink
 							(VariableNode "$B"))
+=======
+						(VariableNode "$B")
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 						(VariableNode "$C"))
 					(MemberLink
 						(VariableNode "$B")
@@ -47,6 +55,10 @@
 (define (pln-formula-member-to-inheritance-side-effect-free IBC MBC)
 	(stv
 		(cog-stv-strength MBC)
+<<<<<<< HEAD
 		(cog-stv-confidence MBC)))
+=======
+		(* (cog-stv-confidence MBC) 0.9)))
+>>>>>>> 69ea3d6728fe4179ead54fd57625473a5498704c
 
 ; =============================================================================

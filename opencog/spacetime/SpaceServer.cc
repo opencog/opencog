@@ -482,7 +482,7 @@ Handle SpaceServer::getSpaceMapNode(std::string _mapName)
     return result;
 }*/
 /*
-bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
+bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
                               int objX, int objY, int objZ,
                               int objLength, int objWidth, int objHeight,
                               double objYaw, bool isObstacle, const std::string& entityClass) {
@@ -496,7 +496,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, unsigned long timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned long timestamp,
+bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, octime_t timestamp,
                               int objX, int objY, int objZ,
                               int objLength, int objWidth, int objHeight,
                               double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material)
@@ -527,7 +527,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, bool isSelfObject, unsigned lo
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(unsigned long timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
                                      int _xDim, int _yDim, int _zDim, int _floorHeight)
 {
     Handle spaceMapNode = atomspace->getHandle(SPACE_MAP_NODE,_mapName);
@@ -554,7 +554,7 @@ Handle SpaceServer::addOrGetSpaceMap(unsigned long timestamp, std::string _mapNa
     return spaceMapNode;
 }
 
-void SpaceServer::removeSpaceInfo(Handle objectNode, unsigned long timestamp)
+void SpaceServer::removeSpaceInfo(Handle objectNode, octime_t timestamp)
 {
     if (curSpaceMapHandle == Handle::UNDEFINED)
     {
@@ -652,7 +652,7 @@ std::string SpaceServer::mapToString(Handle mapHandle) const
 Handle SpaceServer::mapFromString(const std::string& stringMap)
 {
 /*
-    unsigned long timestamp;
+    octime_t timestamp;
     std::stringstream mapParser;
     {
         std::stringstream parser( stringMap );
@@ -717,7 +717,7 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles)
 }
 
 // add blocklist to an entity
-void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const unsigned long timeStamp)
+void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp)
 {
 
     //  Add every block a eval link that it's part of this block entity:
@@ -782,7 +782,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
 
 }
 
-void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, unsigned long timestamp)
+void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, octime_t timestamp)
 {
     addBlocksLisitPredicateToEntity(_entity, timestamp);
 
@@ -816,7 +816,7 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
 
 }
 
-void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp,HandleSeq &toUpdateHandles)
+void SpaceServer::updateBlockEntitiesProperties(octime_t timestamp,HandleSeq &toUpdateHandles)
 {
     vector<opencog::spatial::BlockEntity*>::iterator it = curMap->updateBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;

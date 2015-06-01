@@ -94,6 +94,12 @@ private:
     // handle uuid and the actual atom pointer (since they are stored
     // together).  To some degree, this info is duplicated in the Node
     // and LinkIndex below; we have this here for convenience.
+    //
+    // This also plays a critical role for memory management: this is
+    // the only index that actually holds the atom shared_ptr, and thus
+    // increments the atom use count in a guaranteed fashion.  This is
+    // the one true guaranteee that the atom will not be deleted while
+    // it s in the atom table.
     std::unordered_set<Handle, handle_hash> _atom_set;
 
     //!@{
@@ -195,11 +201,11 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, std::string) const;
-    Handle getHandle(NodePtr) const;
+    Handle getHandle(const NodePtr&) const;
 
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(LinkPtr) const;
-    Handle getHandle(AtomPtr) const;
+    Handle getHandle(const LinkPtr&) const;
+    Handle getHandle(const AtomPtr&) const;
     Handle getHandle(Handle&) const;
 
 public:
@@ -362,8 +368,9 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
+        if (a->_atomTable != this) return;
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a, bin);
+        importanceIndex.updateImportance(a.operator->(), bin);
     }
 
     /**
