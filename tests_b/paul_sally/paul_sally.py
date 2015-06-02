@@ -57,16 +57,15 @@ class PaulSallyExample(BaseTestCase):
              self.a_grand_father, self.a_grand_mother,
              self.a_father, self.a_mother,
              self.a_son, self.a_daughter],
-            self.JUST_TARGET
+            sti_value_dict['JUST_TARGET']
         )
-
         # Use in InputSpace1.
         self.a_paul = VariableNode("Paul", rand_tv())
         self.a_sally = VariableNode("Sally", rand_tv())
         make_sti_all(
             self.a,
             [self.a_paul, self.a_sally],
-            self.JUST_TARGET
+            sti_value_dict['JUST_TARGET']
         )
 
         # Use in Generic Space.
@@ -76,7 +75,7 @@ class PaulSallyExample(BaseTestCase):
         make_sti_all(
             self.a,
             [self.a_human, self.a_human, self.a_woman],
-            self.JUST_TARGET
+            sti_value_dict['JUST_TARGET']
         )
 
     # - Input Space 0
@@ -99,7 +98,7 @@ class PaulSallyExample(BaseTestCase):
         make_sti_all(
             self.a,
             [self.a_father, self.a_daughter],
-            self.IMPORTANT
+            sti_value_dict['IMPORTANT']
         )
         # Link with input space 0 type.
         make_link_all(
@@ -118,7 +117,7 @@ class PaulSallyExample(BaseTestCase):
         make_sti_all(
             self.a,
             [self.a_paul, self.a_sally],
-            self.IMPORTANT
+            sti_value_dict['IMPORTANT']
         )
         # Link with input space 1 type.
         make_link_all(

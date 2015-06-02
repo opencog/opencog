@@ -25,7 +25,9 @@ class RandomBlender(BaseBlender):
         chooser_option = {
             'atom_type': types.Node,
             'count': 2,
-            'sti_min': BaseTestCase.IMPORTANT
+            # If we don't pass value, chooser will use value in config file.
+            'sti_min': None,
+            'sti_max': None
         }
         return self.chooser.atom_choose(chooser_option)
 

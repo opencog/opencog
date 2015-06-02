@@ -4,33 +4,45 @@
 [General]
 USE_CONFIG_FILE: True
 
+# Release or Debug
 AGENT_MODE: Release
-# AGENT_MODE: Debug
+
 
 [Blender]
+# RandomBlender or DebugBlender
 BLENDER: RandomBlender
+
 USE_BLEND_TARGET_FOR_DEBUG: False
 
+
 [RandomBlender]
-# ATOMS_CHOOSER: RandomAll
-# ATOMS_CHOOSER: RandomInBlendTarget
+#
+# Atoms chooser in RandomBlender.
+# 
+# Options:
+# RandomAll, RandomBlendTarget, RandomInSTIRange
+#
 ATOMS_CHOOSER: RandomInSTIRange
 
-[RandomInSTIRange]
-# MAX_STI: NONE
-# MIN_STI: JUST_TARGET
-MIN_STI: IMPORTANT
-# MIN_STI: VERY_INPORTANT
 
-MAX_STI: NONE
-# MAX_STI: JUST_TARGET
-# MAX_STI: IMPORTANT
-# MAX_STI: VERY_INPORTANT
+[RandomInSTIRange]
+#
+# STI value range in RandomInSTIRange.
+# 
+# Options:
+# NONE, JUST_TARGET, IMPORTANT, VERY_IMPORTANT
+#
+STI_MIN: IMPORTANT
+STI_MAX: NONE
+
 
 [Example]
 EXAMPLE_LOAD: True
+#
+# Auto load example to test or debug.
+#
+# Options: PaulSallyExample, DebateWithKantExample
 EXAMPLE: PaulSallyExample
-# EXAMPLE: DebateWithKantExample
 
 [Log]
 LOG_RELEASE_LEVEL: INFO
@@ -42,6 +54,10 @@ LOG_DEBUG_PREFIX: \n[BA]==>
 LOG_DEBUG_POSTFIX: \n
 
 [RestAPI]
+# 
+# Auto load RestAPI when executed in standalone python shell to test or debug.
+# 
 USE_RESTAPI: True
 IP_ADDRESS: 127.0.0.1
 PORT: 5001
+

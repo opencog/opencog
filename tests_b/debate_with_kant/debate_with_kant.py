@@ -67,7 +67,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_search_for_truth,
                 self.a_1784
             ],
-            self.JUST_TARGET
+            sti_value_dict['JUST_TARGET']
         )
 
         # Use in InputSpace1.
@@ -89,7 +89,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_dead,
                 self.a_aware
             ],
-            self.JUST_TARGET
+            sti_value_dict['JUST_TARGET']
         )
 
         # Use in GenericSpace.
@@ -218,7 +218,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_writing,
                 self.a_search_for_truth
             ],
-            self.IMPORTANT
+            sti_value_dict['IMPORTANT']
         )
 
     # - Input Space 1
@@ -269,7 +269,7 @@ class DebateWithKantExample(BaseTestCase):
                 self.a_dead,
                 self.a_aware
             ],
-            self.IMPORTANT
+            sti_value_dict['IMPORTANT']
         )
 
     # - Generic Space

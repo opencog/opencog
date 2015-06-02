@@ -2,7 +2,7 @@ __author__ = 'DongMin Kim'
 
 import random
 from opencog.type_constructors import *
-from util_b.general_util import Singleton
+from util_b.general_util import Singleton, BlendingConfigLoader
 
 blend_target_link_tv = TruthValue(1.0, 1.0)
 
@@ -108,10 +108,6 @@ def make_link_all(atomspace, link_type, src_node_list, dst_node, tv=None):
         for node in src_node_list:
             atomspace.add_link(link_type, [node, dst_node], tv)
 
-def make_sti_all(atomspace, src_node_list, sti):
-    for node in src_node_list:
-        node.av = {'sti': sti}
-
 # Select atoms which are connected to specific atom.
 def get_incoming_node_list(atomspace, target):
     ret = []
@@ -125,3 +121,16 @@ def get_incoming_node_list(atomspace, target):
                 ret.append(node)
 
     return ret
+
+# For control STI values.
+sti_value_dict = {
+    'NONE': None,
+    'JUST_TARGET': 16,
+    'IMPORTANT': 32,
+    'VERY_IMPORTANT': 64
+}
+
+def make_sti_all(atomspace, src_node_list, sti):
+    for node in src_node_list:
+        node.av = {'sti': sti}
+
