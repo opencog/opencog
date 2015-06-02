@@ -297,7 +297,7 @@ namespace PatternMining
 
      bool checkPatternExist(const string& patternKeyStr);
 
-     void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false);
+     void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false, int surprisingness = 1);
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
 
