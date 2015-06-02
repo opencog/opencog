@@ -16,9 +16,9 @@ class BaseTestCase(object):
     """
     __metaclass__ = ABCMeta
 
-    JUST_TARGET = 8
-    IMPORTANT = 16
-    VERY_IMPORTANT = 32
+    JUST_TARGET = 16
+    IMPORTANT = 32
+    VERY_IMPORTANT = 64
 
     def __init__(self, a):
         self.a = a

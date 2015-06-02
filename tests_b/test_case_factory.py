@@ -12,8 +12,8 @@ from opencog.logger import log
 
 # Make several test cases for debug.
 class TestCaseFactory:
-    def __init__(self, atomspace):
-        self.a = atomspace
+    def __init__(self, a):
+        self.a = a
         self.__make_default_concept()
 
         self.test_case_list = [

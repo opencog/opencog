@@ -12,27 +12,35 @@ from tests_b.test_case_factory import TestCaseFactory
 
 # Perform Conceptual Blending.
 class BlendingAgent(opencog.cogserver.MindAgent):
-    # run_by_server = True
-    a = None
+    def __init__(self):
+        self.run_by_server = True
+        self.a = None
 
-    experiment_codes_inst = None
-    test_case_factory = None
+        self.experiment_codes_inst = None
+        self.test_case_factory = None
 
-    blender_factory = None
-    blender_inst = None
+        self.blender_factory = None
+        self.blender_inst = None
 
-    config = None
+        self.config = None
 
     def __initialize(self, a):
-        # BlendingLoggerForDebug().log("Start BlendingAgent")
+        # Agent was already loaded.
+        if self.a is not None:
+            return
+
+        BlendingLoggerForDebug().log("Start BlendingAgent")
         self.a = a
+        initialize_opencog(self.a)
+
+        # Remove all exist atoms to focus debug only blending agent.
+        if BlendingConfigLoader().get('General', 'AGENT_MODE') == 'Debug':
+            self.a.clear()
 
         if BlendingConfigLoader().is_use_blend_target:
             BlendTargetCtlForDebug().a = self.a
             BlendTargetCtlForDebug().make_blend_target()
             BlendTargetCtlForDebug().restore_debug_link_list()
-
-        initialize_opencog(self.a)
 
         self.blender_factory = BlenderFactory(self.a)
         self.test_case_factory = TestCaseFactory(self.a)
