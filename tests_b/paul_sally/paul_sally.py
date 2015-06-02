@@ -1,6 +1,6 @@
 from tests_b.base_test_case import BaseTestCase
 from util_b.blending_util import *
-from util_b.general_util import BlendingConfigLoader
+from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
 
@@ -226,5 +226,5 @@ class PaulSallyExample(BaseTestCase):
         self.__make_generic_space()
         self.__make_blended_space()
 
-        if BlendingConfigLoader().is_use_blend_target:
+        if BlConfig().is_use_blend_target:
             self.__link_with_blend_target_for_debug()

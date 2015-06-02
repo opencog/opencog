@@ -2,7 +2,7 @@ __author__ = 'DongMin Kim'
 
 import random
 from opencog.type_constructors import *
-from util_b.general_util import Singleton, BlendingConfigLoader
+from util_b.general_util import Singleton, BlConfig
 
 blend_target_link_tv = TruthValue(1.0, 1.0)
 
@@ -100,19 +100,19 @@ def rand_tv():
     c = random.uniform(0.5, 0.9)
     return TruthValue(s, c)
 
-def make_link_all(atomspace, link_type, src_node_list, dst_node, tv=None):
+def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
     if tv is None:
         for node in src_node_list:
-            atomspace.add_link(link_type, [node, dst_node], rand_tv())
+            a.add_link(link_type, [node, dst_node], rand_tv())
     else:
         for node in src_node_list:
-            atomspace.add_link(link_type, [node, dst_node], tv)
+            a.add_link(link_type, [node, dst_node], tv)
 
 # Select atoms which are connected to specific atom.
-def get_incoming_node_list(atomspace, target):
+def get_incoming_node_list(a, target):
     ret = []
 
-    xget_target_link = atomspace.xget_atoms_by_target_atom(types.Link, target)
+    xget_target_link = a.xget_atoms_by_target_atom(types.Link, target)
 
     for link in xget_target_link:
         xget_target_link_node = atomspace.xget_outgoing(link.h)
@@ -130,7 +130,7 @@ sti_value_dict = {
     'VERY_IMPORTANT': 64
 }
 
-def make_sti_all(atomspace, src_node_list, sti):
+def make_sti_all(a, src_node_list, sti):
     for node in src_node_list:
         node.av = {'sti': sti}
 

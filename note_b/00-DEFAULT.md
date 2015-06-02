@@ -29,6 +29,6 @@ python agent가 매번 새로 초기화되는데 어쩔..?
 -> 꼼수 쓴다
 ocviewer STI 밸류 안 되는거 고침
 config 파일 변경 안되게 바꿈
-
 STI 설정에서 불러오기
+
 새로운 노드의 STI는?

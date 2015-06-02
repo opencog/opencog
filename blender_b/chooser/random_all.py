@@ -1,6 +1,5 @@
 import random
 from opencog.type_constructors import types
-import random_all
 from blender_b.chooser.base_chooser import BaseChooser
 from util_b.blending_util import get_incoming_node_list
 

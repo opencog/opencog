@@ -1,4 +1,4 @@
-from util_b.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlLogger
 
 __author__ = 'DongMin Kim'
 
@@ -26,8 +26,8 @@ class PyCharmDebugServer:
 
         sys.path.append("/usr/local/lib/python2.7/pycharm-debug.egg")
 
-        BlendingLoggerForDebug().log('Python %s on %s' % (sys.version, sys.platform))
-        BlendingLoggerForDebug().log('remote debugging')
+        BlLogger().log('Python %s on %s' % (sys.version, sys.platform))
+        BlLogger().log('remote debugging')
 
         import pydevd
 

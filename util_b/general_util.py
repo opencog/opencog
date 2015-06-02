@@ -1,7 +1,6 @@
 import ConfigParser
 import os
 from opencog.logger import log
-import web.api.restapi
 
 __author__ = 'DongMin Kim'
 
@@ -38,10 +37,11 @@ def get_class_by_split_name(module_path, class_name):
     return get_class(str(module_path)+"."+str(class_name))
 
 
+# BlConfig: BlendingConfigLoader
 # TODO: link with global config in cogserver
-class BlendingConfigLoader(Singleton):
+class BlConfig(Singleton):
     def __init__(cls):
-        super(BlendingConfigLoader, cls).__init__()
+        super(BlConfig, cls).__init__()
 
         cls.use_config_file = False
         cls.use_blend_target = False
@@ -63,19 +63,6 @@ class BlendingConfigLoader(Singleton):
                 option_dict[option] = config_parser.get(section, option)
 
             cls.blending_config[section] = option_dict
-
-        """
-        options = config_parser.options('General')
-        for option in options:
-            try:
-                cls.blending_config[option] = \
-                    config_parser.get('General', option)
-                if cls.blending_config[option] == -1:
-                    BlendingLoggerForDebug().log("skip: %s" % option)
-            except:
-                BlendingLoggerForDebug().log("exception on %s!" % option)
-                cls.blending_config[option] = None
-        """
 
         if cls.get('General', 'USE_CONFIG_FILE') == 'True':
             cls.use_config_file = True
@@ -109,26 +96,20 @@ class BlendingConfigLoader(Singleton):
         return cls.use_blend_target
 
 
-class BlendingLoggerForDebug(Singleton):
+class BlLogger(Singleton):
     def __init__(cls):
-        super(BlendingLoggerForDebug, cls).__init__()
+        super(BlLogger, cls).__init__()
 
-        cls.mode = BlendingConfigLoader().get('General', 'AGENT_MODE')
+        cls.mode = BlConfig().get('General', 'AGENT_MODE')
         if cls.mode == 'Release':
-            cls.level = \
-                BlendingConfigLoader().get('Log', 'LOG_RELEASE_LEVEL')
-            cls.log_prefix = \
-                BlendingConfigLoader().get('Log', 'LOG_RELEASE_PREFIX')
-            cls.log_postfix = \
-                BlendingConfigLoader().get('Log', 'LOG_RELEASE_POSTFIX')
+            cls.level = BlConfig().get('Log', 'LOG_RELEASE_LEVEL')
+            cls.log_prefix = BlConfig().get('Log', 'LOG_RELEASE_PREFIX')
+            cls.log_postfix = BlConfig().get('Log', 'LOG_RELEASE_POSTFIX')
         else:
             log.use_stdout()
-            cls.level = \
-                BlendingConfigLoader().get('Log', 'LOG_DEBUG_LEVEL')
-            cls.log_prefix = \
-                BlendingConfigLoader().get('Log', 'LOG_DEBUG_PREFIX')
-            cls.log_postfix = \
-                BlendingConfigLoader().get('Log', 'LOG_DEBUG_POSTFIX')
+            cls.level = BlConfig().get('Log', 'LOG_DEBUG_LEVEL')
+            cls.log_prefix = BlConfig().get('Log', 'LOG_DEBUG_PREFIX')
+            cls.log_postfix = BlConfig().get('Log', 'LOG_DEBUG_POSTFIX')
 
     def log(cls, msg):
         cls.log_prefix = cls.log_prefix.replace("\\n", "\n")
@@ -143,6 +124,7 @@ class RESTAPILoader:
         self.a = a
 
     def run(self, address, port):
+        import web.api.restapi
         # To avoid debug messages of restapi.
         # import logging
         # logging.basicConfig(level=logging.CRITICAL)

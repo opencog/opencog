@@ -1,5 +1,6 @@
 __author__ = 'DongMin Kim'
 
+import opencog
 import opencog.cogserver
 from opencog.utilities import *
 
@@ -29,15 +30,15 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         if self.a is not None:
             return
 
-        BlendingLoggerForDebug().log("Start BlendingAgent")
+        BlLogger().log("Start BlendingAgent")
         self.a = a
         initialize_opencog(self.a)
 
         # Remove all exist atoms to focus debug only blending agent.
-        if BlendingConfigLoader().get('General', 'AGENT_MODE') == 'Debug':
+        if BlConfig().get('General', 'AGENT_MODE') == 'Debug':
             self.a.clear()
 
-        if BlendingConfigLoader().is_use_blend_target:
+        if BlConfig().is_use_blend_target:
             BlendTargetCtlForDebug().a = self.a
             BlendTargetCtlForDebug().make_blend_target()
             BlendTargetCtlForDebug().restore_debug_link_list()
@@ -49,13 +50,13 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.experiment_codes_inst.execute()
 
     def __finalize(self):
-        if BlendingConfigLoader().is_use_blend_target:
+        if BlConfig().is_use_blend_target:
             BlendTargetCtlForDebug().backup_debug_link_list()
-        # BlendingLoggerForDebug().log("Finish BlendingAgent")
+        # BlLogger().log("Finish BlendingAgent")
 
     def __blender_select(self, id_or_name=None):
-        if BlendingConfigLoader().is_use_config_file() is True:
-            id_or_name = BlendingConfigLoader().get('Blender', 'BLENDER')
+        if BlConfig().is_use_config_file() is True:
+            id_or_name = BlConfig().get('Blender', 'BLENDER')
 
         """
         else:
@@ -67,11 +68,11 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.blender_inst = self.blender_factory.get_blender(id_or_name)
 
     def __test_case_select(self, id_or_name=None):
-        if BlendingConfigLoader().get('Example', 'EXAMPLE_LOAD') == 'False':
+        if BlConfig().get('Example', 'EXAMPLE_LOAD') == 'False':
             return
 
-        if BlendingConfigLoader().is_use_config_file() is True:
-            id_or_name = BlendingConfigLoader().get('Example', 'EXAMPLE')
+        if BlConfig().is_use_config_file() is True:
+            id_or_name = BlConfig().get('Example', 'EXAMPLE')
 
         """
         else:
@@ -91,6 +92,6 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.blender_inst.blend()
 
         if self.blender_inst.get_last_status() != 0:
-            BlendingLoggerForDebug().log('Error in blending class.')
+            BlLogger().log('Error in blending class.')
 
         self.__finalize()

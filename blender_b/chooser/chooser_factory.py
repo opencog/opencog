@@ -2,7 +2,7 @@ from blender_b.chooser.random_all import RandomAll
 from blender_b.chooser.random_in_blend_target import RandomInBlendTarget
 from blender_b.chooser.random_in_sti_range import RandomInSTIRange
 from opencog.logger import log
-from util_b.general_util import BlendingLoggerForDebug, get_class, \
+from util_b.general_util import BlLogger, get_class, \
     get_class_by_split_name
 
 __author__ = 'DongMin Kim'
@@ -13,8 +13,8 @@ from util_b import blending_util
 
 
 class ChooserFactory(object):
-    def __init__(self, atomspace):
-        self.a = atomspace
+    def __init__(self, a):
+        self.a = a
 
         self.chooser_list = [
             RandomAll,

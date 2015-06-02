@@ -1,5 +1,5 @@
 from util_b.blending_util import BlendTargetCtlForDebug
-from util_b.general_util import BlendingConfigLoader
+from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
 
@@ -16,9 +16,9 @@ class BaseChooser(object):
     """
     __metaclass__ = ABCMeta
 
-    def __init__(self, atomspace):
-        self.a = atomspace
-        if BlendingConfigLoader().is_use_blend_target:
+    def __init__(self, a):
+        self.a = a
+        if BlConfig().is_use_blend_target:
             self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
         self.last_status = 0
 

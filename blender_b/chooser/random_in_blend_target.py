@@ -2,7 +2,7 @@ import random
 import random_all
 from blender_b.chooser.base_chooser import BaseChooser
 from util_b.blending_util import get_incoming_node_list
-from util_b.general_util import BlendingConfigLoader, BlendingLoggerForDebug
+from util_b.general_util import BlConfig, BlLogger
 
 __author__ = 'DongMin Kim'
 
@@ -36,8 +36,8 @@ class RandomInBlendTarget(BaseChooser):
         return ret
 
     def atom_choose(self, option):
-        if BlendingConfigLoader().is_use_blend_target:
-            BlendingLoggerForDebug().log(
+        if BlConfig().is_use_blend_target:
+            BlLogger().log(
                 "Can't use blend target! Please Check your config file."
             )
             return []

@@ -1,6 +1,6 @@
 # coding=utf-8
 from tests_b.base_test_case import BaseTestCase
-from util_b.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlLogger
 
 __author__ = 'DongMin Kim'
 
@@ -10,8 +10,8 @@ from util_b.link_copier import *
 
 
 class RandomBlender(BaseBlender):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
         self.chooser = self.chooser = \
             self.chooser_factory.get_chooser("RandomInSTIRange")
@@ -35,7 +35,7 @@ class RandomBlender(BaseBlender):
         return self.last_status
 
     def blend(self):
-        # BlendingLoggerForDebug().log("Start RandomBlending")
+        # BlLogger().log("Start RandomBlending")
 
         # Select nodes to blending.
         a_nodes = self.__atom_choose()
@@ -79,7 +79,7 @@ class RandomBlender(BaseBlender):
         # Detect and improve conflict links in newly blended node.
         # - Do nothing.
 
-        if BlendingConfigLoader().is_use_blend_target:
+        if BlConfig().is_use_blend_target:
             # DEBUG: Link with blend target.
             self.a.add_link(
                 types.MemberLink,
@@ -100,11 +100,11 @@ class RandomBlender(BaseBlender):
             blend_target_link_tv
         )
 
-        BlendingLoggerForDebug().log(
+        BlLogger().log(
             str(a_blended_node.h) +
             " " +
             str(a_blended_node.name)
         )
 
-        # BlendingLoggerForDebug().log("Finish RandomBlending")
+        # BlLogger().log("Finish RandomBlending")
         return 0

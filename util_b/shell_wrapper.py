@@ -9,14 +9,14 @@ class ShellWrapper:
         self.a = AtomSpace()
 
         # Run RESTAPI server automatically to see my atomspace.
-        if BlendingConfigLoader().get('RestAPI', 'USE_RESTAPI') == 'True':
-            address = BlendingConfigLoader().get('RestAPI', 'IP_ADDRESS')
-            port = BlendingConfigLoader().get('RestAPI', 'PORT')
+        if BlConfig().get('RestAPI', 'USE_RESTAPI') == 'True':
+            address = BlConfig().get('RestAPI', 'IP_ADDRESS')
+            port = BlConfig().get('RestAPI', 'PORT')
             rest_api_loader = RESTAPILoader(self.a)
             rest_api_loader.run(address, port)
 
     def ask_user_to_run_or_stop_for_debug(self):
-        # BlendingLoggerForDebug().log("Input n to preserve temp links, or delete.")
+        # BlLogger().log("Input n to preserve temp links, or delete.")
         # is_delete_temp_link = raw_input()
         # is_preserve_debug_link = 'y'
 
@@ -25,7 +25,7 @@ class ShellWrapper:
 
         # self.experiment_codes_inst.print_atomspace_for_debug()
 
-        BlendingLoggerForDebug().log("Input n to stop, or continue.")
+        BlLogger().log("Input n to stop, or continue.")
         is_stop = raw_input()
 
         # if is_preserve_debug_link != 'n' or is_preserve_debug_link != 'N':

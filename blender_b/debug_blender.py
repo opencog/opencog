@@ -1,5 +1,5 @@
 # coding=utf-8
-from util_b.general_util import BlendingLoggerForDebug
+from util_b.general_util import BlLogger
 
 __author__ = 'DongMin Kim'
 
@@ -9,8 +9,8 @@ from util_b.link_copier import *
 
 
 class DebugBlender(BaseBlender):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
         self.link_copier_inst = LinkCopier(self.a)
 
@@ -89,11 +89,11 @@ class DebugBlender(BaseBlender):
             blend_target_link_tv
         )
 
-        BlendingLoggerForDebug().log(str(a_blended_node.h) + " " + str(a_blended_node.name))
+        BlLogger().log(str(a_blended_node.h) + " " + str(a_blended_node.name))
 
     def blend(self):
-        BlendingLoggerForDebug().log("Start DebugBlending")
+        BlLogger().log("Start DebugBlending")
         self.__algorithm_for_debug(['Father', 'Paul'])
         self.__algorithm_for_debug(['Daughter', 'Sally'])
-        BlendingLoggerForDebug().log("Finish DebugBlending")
+        BlLogger().log("Finish DebugBlending")
         return 0

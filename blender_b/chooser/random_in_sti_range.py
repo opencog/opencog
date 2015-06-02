@@ -3,7 +3,7 @@ import random_all
 from opencog.type_constructors import types
 from blender_b.chooser.base_chooser import BaseChooser
 from util_b.blending_util import get_incoming_node_list, sti_value_dict
-from util_b.general_util import BlendingConfigLoader
+from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
 
@@ -58,11 +58,11 @@ class RandomInSTIRange(BaseChooser):
         sti_max = option.get('sti_max')
 
         if sti_min is None:
-            a = BlendingConfigLoader().get('RandomInSTIRange', 'STI_MIN')
+            a = BlConfig().get('RandomInSTIRange', 'STI_MIN')
             sti_min = sti_value_dict[a]
 
         if sti_max is None:
-            b = BlendingConfigLoader().get('RandomInSTIRange', 'STI_MAX')
+            b = BlConfig().get('RandomInSTIRange', 'STI_MAX')
             sti_max = sti_value_dict[b]
 
         return self.__get_randoms_atom_in_sti_range(

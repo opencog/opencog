@@ -1,4 +1,4 @@
-from util_b.general_util import BlendingLoggerForDebug, get_class, \
+from util_b.general_util import BlLogger, get_class, \
     get_class_by_split_name
 
 __author__ = 'DongMin Kim'
@@ -34,10 +34,10 @@ class TestCaseFactory:
         self.a_frame = ConceptNode("Frame", self.atom_tv)
 
     def print_test_case_list(self):
-        BlendingLoggerForDebug().log('Please select test case number to use.')
+        BlLogger().log('Please select test case number to use.')
         for i in range(self.test_case_count):
             test_case = self.test_case_list[i]
-            BlendingLoggerForDebug().log(str(i) + ': ' + str(test_case))
+            BlLogger().log(str(i) + ': ' + str(test_case))
 
     def ask_to_user(self):
         index = -1
