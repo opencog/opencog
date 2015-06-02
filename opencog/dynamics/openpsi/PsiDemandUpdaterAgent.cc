@@ -1,5 +1,5 @@
 /*
- * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.cc
+ * @file opencog/dynamics/openpsi/PsiDemandUpdaterAgent.cc
  *
  * @author Jinhua Chua <JinhuaChua@gmail.com>
  * @date   2011-11-22
@@ -23,17 +23,17 @@
 #include <boost/lexical_cast.hpp>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/spacetime/TimeServer.h>
+#include <opencog/spacetime/SpaceTime.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
 
-#include <lib/json_spirit/json_spirit.h>
+// TODO: the methods from AtomSpaceUtil to openpsi directory
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
-#include "OAC.h"
 #include "PsiDemandUpdaterAgent.h"
 
-#include "PsiRuleUtil.h"
+using namespace opencog;
 
-
-using namespace opencog::oac;
 
 bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
 {
@@ -70,7 +70,7 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
     return true;
 }
 
-bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, const unsigned long timeStamp)
+bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, const octime_t timeStamp)
 {
     // Get the GroundedPredicateNode "fuzzy_within"
     Handle hGroundedPredicateNode = atomSpace.getOutgoing(hFuzzyWithin, 0);
@@ -207,87 +207,29 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
 }
 
-void PsiDemandUpdaterAgent::sendUpdatedValues()
-{
-    logger().debug( "PsiDemandUpdaterAgent::%s - Sending updated demand truth values to the virtual world [ cycle =%d ]",
-                    __FUNCTION__, this->cycleCount);
-    // Get OAC
-    OAC * oac = dynamic_cast<OAC *>(&_cogserver);
-
-    // Get AtomSpace
-//    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
-
-    // Get petName
-    const std::string & petName = oac->getPet().getName();
-
-    // Prepare the data to be sent
-    std::map <std::string, float> demandValueMap;
-
-    for (Demand & demand : this->demandList) {
-        if ( demand.getDemandName() != "Energy" &&   // these demand values are
-             demand.getDemandName() != "Integrity")  // updated by virtual world
-            demandValueMap[ demand.getDemandName() ] = demand.getDemandValue();
-    }
-
-    // Send updated feelings to the virtual world where the pet lives
-    oac->getPAI().sendDemandSatisfactions(petName, demandValueMap);
-}
-
 PsiDemandUpdaterAgent::~PsiDemandUpdaterAgent()
 {
-#ifdef HAVE_ZMQ
-    delete this->publisher;
-#endif
+    logger().info("[PsiDemandUpdaterAgent] destructor");
 }
+
 
 PsiDemandUpdaterAgent::PsiDemandUpdaterAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
-#ifdef HAVE_ZMQ
-    this->publisher = NULL;
-#endif
-
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
+
+    _cogserver.createAgent(this->info().id, true);
 }
-
-#ifdef HAVE_ZMQ
-void PsiDemandUpdaterAgent::publishUpdatedValue(Plaza & plaza,
-                                                zmq::socket_t & publisher,
-                                                const unsigned long timeStamp)
-{
-    using namespace json_spirit;
-
-    // Send the name of current mind agent which would be used as a filter key by subscribers
-    std::string keyString = "PsiDemandUpdaterAgent";
-    plaza.publishStringMore(publisher, keyString);
-
-    // Pack time stamp and all the Demand values in json format
-    Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
-    jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
-
-    for (Demand & demand : this->demandList) {
-        jsonObj.push_back( Pair( demand.getDemandName()+"TruthValue", demand.getDemandTruthValue() ) );
-    }
-
-    // Publish the data packed in json format
-    std::string dataString = write_formatted(jsonObj);
-    plaza.publishString(publisher, dataString);
-}
-#endif // HAVE_ZMQ
 
 void PsiDemandUpdaterAgent::init()
 {
     logger().debug( "PsiDemandUpdaterAgent::%s - Initialize the Agent [cycle = %d]",
                     __FUNCTION__, this->cycleCount);
 
-    // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
-    OC_ASSERT(oac, "Did not get an OAC server");
-
     // Get AtomSpace
-    AtomSpace& atomSpace = oac->getAtomSpace();
+    AtomSpace& atomSpace = _cogserver.getAtomSpace();
 
     // Clear old demandList
     this->demandList.clear();
@@ -325,18 +267,6 @@ void PsiDemandUpdaterAgent::init()
                         __FUNCTION__, demandName.c_str(), this->cycleCount);
     }// for
 
-    // Initialize ZeroMQ publisher and add it to the plaza
-#ifdef HAVE_ZMQ
-    // Get petId
-    const std::string & petId = oac->getPet().getPetId();
-
-    Plaza & plaza = oac->getPlaza();
-    this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
-    this->publishEndPoint = "ipc://" + petId + ".PsiDemandUpdaterAgent.ipc";
-    this->publisher->bind( this->publishEndPoint.c_str() );
-
-    plaza.addPublisher(this->publishEndPoint);
-#endif
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -352,14 +282,16 @@ void PsiDemandUpdaterAgent::run()
                      __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
-    OC_ASSERT(oac, "Did not get an OAC server!");
+    //OAC* oac = dynamic_cast<OAC*>(&_cogserver);
+    //OC_ASSERT(oac, "Did not get an OAC server!");
 
     // Get AtomSpace
-    AtomSpace& atomSpace = oac->getAtomSpace();
+    // FIXME: why here and in init()
+    AtomSpace& atomSpace = _cogserver.getAtomSpace();
 
     // Get current time stamp
-    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
+    //unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
+    octime_t timeStamp = timeServer().getLatestTimestamp();
 
     // Initialize the Agent (demandList etc)
     if ( !this->bInitialized )
@@ -381,16 +313,7 @@ void PsiDemandUpdaterAgent::run()
         demand.updateDemandGoal(atomSpace, timeStamp);
     }
 
-    // Send the truth values of demand goals to the virtual world
-    this->sendUpdatedValues();
-
     hasPsiDemandUpdaterForTheFirstTime = true;
-
-#ifdef HAVE_ZMQ
-    // Publish updated Demand values via ZeroMQ
-    Plaza & plaza = oac->getPlaza();
-    this->publishUpdatedValue(plaza, *this->publisher, timeStamp);
-#endif
 
 }
 

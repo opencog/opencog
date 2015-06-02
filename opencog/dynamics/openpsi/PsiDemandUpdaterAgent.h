@@ -1,5 +1,5 @@
 /*
- * @file opencog/embodiment/Control/OperationalAvatarController/PsiDemandUpdaterAgent.h
+ * @file opencog/dynamics/openpsi/PsiDemandUpdaterAgent.h
  *
  * @author Jinhua Chua <JinhuaChua@gmail.com>
  * @date   2011-11-22
@@ -28,7 +28,7 @@
 
 class PsiDemandUpdaterAgentUTest;
 
-namespace opencog { namespace oac {
+namespace opencog {
 
 /**
  * @class
@@ -36,7 +36,7 @@ namespace opencog { namespace oac {
  * @brief Agent of updating Demands
  *
  * Updates the demands (for example, how hungry the agent is)
- * 
+ *
  * The format of DemandSchema in AtomSpace is
  *
  * AtTimeLink
@@ -53,7 +53,7 @@ namespace opencog { namespace oac {
  *     EvaluationLink
  *         (SimpleTruthValue indicates how well the demand is satisfied)
  *         (ShortTermInportance indicates the urgency of the demand)
- *         PredicateNode: "demand_name_goal" 
+ *         PredicateNode: "demand_name_goal"
  *         ListLink (empty)
  *     EvaluationLink
  *         GroundedPredicateNode: "fuzzy_within"
@@ -101,7 +101,7 @@ private:
         {
             return this->hDemandGoal;
         }
-   
+
         inline Handle getHandleFuzzyWithin() const
         {
             return this->hFuzzyWithin;
@@ -123,11 +123,11 @@ private:
          *
          * @note This function does three jobs as follows:
          *
-         *       1. Create a new NumberNode and SimilarityLink to store the result, 
+         *       1. Create a new NumberNode and SimilarityLink to store the result,
          *          and then time stamp the SimilarityLink.
          *
-         *          Since OpenCog would forget (remove) those Nodes and Links gradually, 
-         *          unless you create them to be permanent, don't worry about the overflow of memory. 
+         *          Since OpenCog would forget (remove) those Nodes and Links gradually,
+         *          unless you create them to be permanent, don't worry about the overflow of memory.
          *
          *          AtTimeLink
          *              TimeNode "timestamp"
@@ -137,9 +137,9 @@ private:
          *                      GroundedSchemaNode: xxxDemandUpdater
          *                      ListLink (empty)
          *
-         *       2. Run the procedure named "FuzzyWithin", and then set the result to the truth value of 
+         *       2. Run the procedure named "FuzzyWithin", and then set the result to the truth value of
          *         both EvaluationLink of Demand Goal and FuzzyWithin
-         *       
+         *
          *       3. Update corresponding LatestLink
          *
          *          LatestLink
@@ -150,7 +150,7 @@ private:
          */
         bool updateDemandGoal(AtomSpace & atomSpace, const unsigned long timeStamp);
 
-    private:        
+    private:
 
         std::string demandName; // The name of the Demand
 
@@ -166,26 +166,10 @@ private:
 
     std::vector<Demand> demandList; // List of Demands
 
-#ifdef HAVE_ZMQ    
-    std::string publishEndPoint; // Publish all the messages to this end point
-    zmq::socket_t * publisher;   // ZeroMQ publisher
-
-    /**
-     * Publish updated demand truth values via ZeroMQ
-     */
-    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
-#endif
-
-    /**
-     * Send updated values to the virtual world where the pet lives
-     */
-    void sendUpdatedValues(); 
-
-
     // Initialize demandList etc.
     void init();
 
-    bool bInitialized; 
+    bool bInitialized;
 
     bool hasPsiDemandUpdaterForTheFirstTime;
 
@@ -199,20 +183,20 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiDemandUpdaterAgent");
+        static const ClassInfo _ci("OpenCog::PsiDemandUpdaterAgent");
         return _ci;
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
 
-    // After calling this function, the Agent will invoke its "init" method firstly 
+    // After calling this function, the Agent will invoke its "init" method firstly
     // in "run" function during its next cycle
     void forceInitNextCycle() {
         this->bInitialized = false;
     }
 
-    double getDemandValue(string demanName) const;
+    double getDemandValue(std::string demandName) const;
 
     bool getHasPsiDemandUpdaterForTheFirstTime() const {return hasPsiDemandUpdaterForTheFirstTime;}
 
@@ -221,7 +205,6 @@ public:
 
 typedef std::shared_ptr<PsiDemandUpdaterAgent> PsiDemandUpdaterAgentPtr;
 
-} } // namespace opencog::oac
+} // namespace opencog
 
 #endif
-
