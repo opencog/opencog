@@ -4,8 +4,13 @@
 
 ## Now
 ### In Progress
-* Try to apply STI in my test cases. (Currently test cases use 'BlendTarget' 
- which is only useful in development stage)
+*  Select nodes to blending.
+  * Implement checking for some values in HebbianLink and SimilarityLink when select node
+    * Try to apply Attention Allocation agents
+  * Make the waiting queue of ConceptNode
+* Decide whether or not to execute blending and prepare
+  * Implement skipping blend and run the next cycle
+  * Implement selecting ConceptNode which has best value (proper value)
  
 ### To do
 **Think**
@@ -19,14 +24,6 @@
   * Implement removing conflict links
 * Detect and improve conflict links in newly blended node
   * Select one by random in 2^k possible things
-* Select nodes to blending.
-  * Implement checking for some values in HebbianLink and SimilarityLink when 
- select node
-    * Try to apply Attention Allocation agents
-  * Make the waiting queue of ConceptNode
-* Decide whether or not to execute blending and prepare
-  * Implement skipping blend and run the next cycle
-  * Implement selecting ConceptNode which has best value (proper value)
 * Optimize implemented code and make simple documentation.
 
 ### Pause
@@ -41,9 +38,12 @@
 ## Result
 ### Done
 * Try to connect python debugger to cogserver.
-:* Done.
-:* Python's GIL(GlobalInterpreterLock) policy has little bug in Python 2.x, so
+  * Done.
+  * Python's GIL(GlobalInterpreterLock) policy has little bug in Python 2.x, so
  debugging with PyCharm libraries should be use with some hack codes..
+* Try to apply STI in my test cases.
+  * Done.
+  * 'BlendTarget', which is only useful in development stage, still can be used in test cases by changing option in config file.
 
 ### Fail & Deadline Missed
 * (empty)

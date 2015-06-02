@@ -107,3 +107,5 @@ Makefile
 *~
 *.autosave
 
+### Blending ###
+blending.conf

@@ -6,20 +6,16 @@
 ## Usage
 ### Running the program in cogserver shell
 ```bash
-loadpy blending_agent
-agents-step blending_agent.BlendingAgent
+agents-stop-loop
+loadpy /your/path/opencog-python-blending/blending_agent
+agents-start /your/path/opencog-python-blending/blending_agent.BlendingAgent
+agents-step opencog::PyMindAgent(/your/path/opencog-python-blending/blending_agent.BlendingAgent)
 ```
 ### Running the program in linux shell
 ```bash
 ipython blending_agent.py
 ```
 ### Alternatives
-* If cogserver can't find your agent, please check ${PYTHON_EXTENSION_DIRS}.
-  Or, you can use absolute path.
-```bash
-loadpy /your/path/opencog-python-blending/blending_agent
-agents-step /your/path/opencog-python-blending/blending_agent.BlendingAgent
-```
 * If you don't have IPython, just run with default python interpreter.
 ```bash
 py blending_agent.py
@@ -34,7 +30,7 @@ inst.run('blending_agent.BlendingAgent')
 ## Files
 * blending_agent.py: Main program. (Conceptual Blending MindAgent)
 * blending_shell.py: Auto load and run blending for debug.
-* blending.conf: Config file.
+* blending.conf.example: Example of config file.
 
 ## Folders
 * blender_b: Available blenders.

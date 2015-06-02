@@ -1,8 +1,11 @@
+### BLENDING CONFIG FILE ###
+# To use, please change file name to 'blending.conf'.
+
 [General]
 USE_CONFIG_FILE: True
 
-# AGENT_MODE: Release
-AGENT_MODE: Debug
+AGENT_MODE: Release
+# AGENT_MODE: Debug
 
 [Blender]
 BLENDER: RandomBlender
@@ -14,10 +17,15 @@ USE_BLEND_TARGET_FOR_DEBUG: False
 ATOMS_CHOOSER: RandomInSTIRange
 
 [RandomInSTIRange]
+# MAX_STI: NONE
 # MIN_STI: JUST_TARGET
 MIN_STI: IMPORTANT
 # MIN_STI: VERY_INPORTANT
+
 MAX_STI: NONE
+# MAX_STI: JUST_TARGET
+# MAX_STI: IMPORTANT
+# MAX_STI: VERY_INPORTANT
 
 [Example]
 EXAMPLE_LOAD: True
