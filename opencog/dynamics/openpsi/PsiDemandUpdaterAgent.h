@@ -183,7 +183,7 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OpenCog::PsiDemandUpdaterAgent");
+        static const ClassInfo _ci("opencog::PsiDemandUpdaterAgent");
         return _ci;
     }
 
