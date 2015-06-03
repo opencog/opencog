@@ -220,7 +220,6 @@ PsiDemandUpdaterAgent::PsiDemandUpdaterAgent(CogServer& cs) : Agent(cs)
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 
-    _cogserver.createAgent(this->info().id, true);
 }
 
 void PsiDemandUpdaterAgent::init()
@@ -281,12 +280,7 @@ void PsiDemandUpdaterAgent::run()
     logger().debug( "PsiDemandUpdaterAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
 
-    // Get OAC
-    //OAC* oac = dynamic_cast<OAC*>(&_cogserver);
-    //OC_ASSERT(oac, "Did not get an OAC server!");
-
     // Get AtomSpace
-    // FIXME: why here and in init()
     AtomSpace& atomSpace = _cogserver.getAtomSpace();
 
     // Get current time stamp
