@@ -145,7 +145,7 @@
             (PredicateNode "cancer")
             (ListLink
                 (VariableNode "$person")))
-        (VariableNode "$person"))))
+        (VariableNode "$person")))
 
 ; Retrieves a count of people who have cancer:
 ;   (count-people-with-cancer)
