@@ -38,13 +38,14 @@ IF (HAVE_EMBODIMENT)
 		spacetime
 		${ATOMSPACE_LIBRARY}
 	)
+
+	INSTALL (TARGETS AtomSpaceExtensions
+   	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	)
 ENDIF (HAVE_EMBODIMENT)
 
 INSTALL (FILES
-   ${CMAKE_CURRENT_BINARY_DIR}/embodiment_types.scm
-   DESTINATION "${DATADIR}/scm/embodiment"
+  	${CMAKE_CURRENT_BINARY_DIR}/embodiment_types.scm
+  	DESTINATION "${DATADIR}/scm/embodiment"
 )
 
-INSTALL (TARGETS AtomSpaceExtensions
-   LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
