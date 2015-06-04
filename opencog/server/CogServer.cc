@@ -36,7 +36,9 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
+#endif
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/Agent.h>
