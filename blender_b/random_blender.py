@@ -1,6 +1,3 @@
-from blender_b.chooser.base_chooser import BaseChooser
-from util_b.general_util import BlLogger
-
 from base_blender import *
 from util_b.blending_util import *
 from util_b.link_copier import *
@@ -18,23 +15,27 @@ class RandomBlender(BaseBlender):
         self.config = None
         self.link_copier_inst = LinkCopier(self.a)
 
+        self.a_chosen_atoms_list = None
+        self.a_decided_atoms = None
+
         # TODO: change to works in several case, like 'link blending'.
         # Currently blender always makes new atom from 2 nodes.
         self.a_atom_0 = None
         self.a_atom_1 = None
 
+        self.a_new_blended_atom = None
+
     def __str__(self):
         return self.__class__.__name__
 
     def make_default_config(self):
-        default_config = [
-            ['ATOMS_CHOOSER', 'ChooseInSTIRange']
-        ]
+        default_config = {
+            'ATOMS_CHOOSER': 'ChooseInSTIRange'
+        }
         BlConfig().make_default_config(str(self), default_config)
 
     def prepare_hook(self, config):
         # BlLogger().log("Start RandomBlending")
-        self.last_status = self.Status.IN_PROCESS
         if config is None:
             config = BlConfig().get_section(str(self))
         self.config = config
@@ -43,23 +44,22 @@ class RandomBlender(BaseBlender):
         self.a_decided_atoms = None
         self.a_new_blended_atom = None
 
+    def choose_atoms(self):
         self.chooser = self.chooser_finder.get_chooser(
             self.config.get('ATOMS_CHOOSER')
         )
-
-    def choose_atoms(self):
         self.a_chosen_atoms_list = self.chooser.atom_choose()
-
-        if self.chooser.last_status != BaseChooser.Status.SUCCESS_CHOOSE:
-            self.last_status = self.Status.ERROR_IN_CHOOSER
-            return
 
     def decide_to_blend(self):
         # Currently, just check number of atoms.
-        if len(self.a_chosen_atoms_list) < 2:
-            BlLogger().log("No atoms to blend.")
+        if self.a_chosen_atoms_list is None or \
+           len(self.a_chosen_atoms_list) < 2:
             self.last_status = self.Status.NO_ATOMS_TO_BLEND
-            return
+            raise UserWarning('No atoms to blend.')
+
+        if len(self.a_chosen_atoms_list) < 2:
+            self.last_status = self.Status.NO_ATOMS_TO_BLEND
+            raise UserWarning('No atoms to blend.')
 
         a_index_list = random.sample(range(0, len(self.a_chosen_atoms_list)), 2)
         self.a_decided_atoms = [
@@ -130,5 +130,5 @@ class RandomBlender(BaseBlender):
             str(self.a_new_blended_atom.name)
         )
 
-        self.last_status = self.Status.SUCCESS_BLEND
+        self.ret = self.a_new_blended_atom
         # BlLogger().log("Finish RandomBlending")

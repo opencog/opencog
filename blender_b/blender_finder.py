@@ -20,9 +20,9 @@ class BlenderFinder(object):
         return self.__class__.__name__
 
     def set_default_config(self):
-        default_config = [
-            ['BLENDER', 'RandomBlender']
-        ]
+        default_config = {
+            'BLENDER': 'RandomBlender'
+        }
         BlConfig().make_default_config(str(self), default_config)
 
     def get_blender(self, id_or_name=None):
@@ -33,5 +33,4 @@ class BlenderFinder(object):
         if blender is not None:
             return blender(self.a)
         else:
-            raise NameError('Blender not found.')
-
+            raise UserWarning('Blender not found.')

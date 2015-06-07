@@ -17,14 +17,14 @@ AGENT_MODE: Debug
 # DO NOT CHANGE VERSION NUMBER
 CONFIG_FILE_VERSION: 1
 #####################
-[Log]
+[BlLogger]
 LOG_RELEASE_LEVEL: INFO
 LOG_RELEASE_PREFIX: [BlendingAgent]::
 LOG_RELEASE_POSTFIX:
 
 LOG_DEBUG_LEVEL: WARN
-LOG_DEBUG_PREFIX: \n[BA]==>
-LOG_DEBUG_POSTFIX: \n
+LOG_DEBUG_PREFIX: [BA]==>
+LOG_DEBUG_POSTFIX: 
 #####################
 [BlenderFinder]
 #
@@ -94,7 +94,7 @@ STI_MAX: NONE
 #
 ###
 #####################
-[Example]
+[TestCaseLoader]
 EXAMPLE_LOAD: True
 #
 # Auto load example to test or debug.

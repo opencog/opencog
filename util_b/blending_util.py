@@ -133,4 +133,3 @@ sti_value_dict = {
 def make_sti_all(a, src_node_list, sti):
     for node in src_node_list:
         node.av = {'sti': sti}
-

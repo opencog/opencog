@@ -46,6 +46,3 @@ class ShellWrapper:
 
             if is_stop == 'n' or is_stop == 'N':
                 break
-
-
-

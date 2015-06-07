@@ -1,11 +1,8 @@
-# coding=utf-8
-from util_b.general_util import BlLogger
-
-__author__ = 'DongMin Kim'
-
 from base_blender import *
 from util_b.blending_util import *
 from util_b.link_copier import *
+
+__author__ = 'DongMin Kim'
 
 
 class DebugBlender(BaseBlender):

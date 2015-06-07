@@ -1,9 +1,10 @@
 from blender_b.chooser.choose_all import ChooseAll
 from blender_b.chooser.choose_in_blend_target import ChooseInBlendTarget
 from blender_b.chooser.choose_in_sti_range import ChooseInSTIRange
-from util_b.general_util import BlConfig, BlLogger
+from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
+
 
 class ChooserFinder(object):
     def __init__(self, a):
@@ -21,9 +22,9 @@ class ChooserFinder(object):
         return self.__class__.__name__
 
     def set_default_config(self):
-        default_config = [
-            ['ATOMS_CHOOSER', 'ChooseAll']
-        ]
+        default_config = {
+            'ATOMS_CHOOSER': 'ChooseAll'
+        }
         BlConfig().make_default_config(str(self), default_config)
 
     def get_chooser(self, id_or_name=None):
@@ -34,4 +35,4 @@ class ChooserFinder(object):
         if chooser is not None:
             return chooser(self.a)
         else:
-            raise NameError('Chooser not found.')
+            raise UserWarning('Chooser not found.')

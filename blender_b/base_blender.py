@@ -1,27 +1,28 @@
+from abc import ABCMeta, abstractmethod
 from blender_b.chooser.chooser_finder import ChooserFinder
-from util_b.blending_util import BlendTargetCtlForDebug
-from util_b.general_util import BlConfig, enum_simulate
+from util_b.general_util import enum_simulate, BlLogger
 
 __author__ = 'DongMin Kim'
-
-from abc import ABCMeta, abstractmethod
 
 
 class BaseBlender(object):
     """
     :type a: opencog.atomspace_details.AtomSpace
     """
+    __metaclass__ = ABCMeta
 
     Status = enum_simulate(
         'SUCCESS_BLEND',
         'IN_PROCESS',
         'UNKNOWN_ERROR',
+        'ERROR_IN_PREPARE_HOOK'
         'ERROR_IN_CHOOSER',
         'ERROR_IN_DECIDER',
+        'ERROR_IN_INIT_NEW_BLEND',
+        'ERROR_IN_CONNECT_LINKS',
+        'ERROR_IN_FINISH_HOOK',
         'NO_ATOMS_TO_BLEND'
     )
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, a):
         self.a = a
@@ -29,18 +30,19 @@ class BaseBlender(object):
         self.make_default_config()
 
         self.chooser_finder = ChooserFinder(self.a)
-
         self.chooser = None
 
-        self.a_chosen_atoms_list = None
-        self.a_decided_atoms = None
-        self.a_new_blended_atom = None
+        self.ret = None
+        self.make_default_config()
 
     def __str__(self):
         return self.__class__.__name__
 
-    def get_last_status(self):
-        return self.last_status
+    def is_succeeded(self):
+        return (lambda x: True
+                if x == BaseBlender.Status.SUCCESS_BLEND
+                else False
+                )(self.last_status)
 
     def make_default_config(self):
         pass
@@ -55,7 +57,7 @@ class BaseBlender(object):
     (Option) Finish rest of blending.
     """
     def prepare_hook(self, config):
-        self.last_status = self.Status.IN_PROCESS
+        pass
 
     @abstractmethod
     def choose_atoms(self):
@@ -74,32 +76,45 @@ class BaseBlender(object):
         raise NotImplementedError("Please implement this method.")
 
     def finish_hook(self):
-        self.last_status = self.Status.SUCCESS_BLEND
+        pass
     """
     End of define.
     """
 
     def blend(self, config=None):
-        # Give interface to each blenders to suitable prepare works.
-        # eg. caching, ...
-        self.prepare_hook(config)
+        self.last_status = self.Status.IN_PROCESS
+        self.ret = None
 
-        # Choose nodes to blending.
-        self.choose_atoms()
+        try:
+            # Give interface to each blenders to suitable prepare works.
+            # eg. caching, ...
+            self.prepare_hook(config)
 
-        # Decide whether or not to execute blending and prepare.
-        self.decide_to_blend()
-        if self.last_status == self.Status.NO_ATOMS_TO_BLEND:
-            return
+            # Choose nodes to blending.
+            self.choose_atoms()
 
-        # Initialize the new blend node.
-        self.init_new_blend_atom()
+            # Decide whether or not to execute blending and prepare.
+            self.decide_to_blend()
 
-        # Make the links between exist nodes and newly blended node.
-        # Check the severe conflict links in each node and remove.
-        # Detect and improve conflict links in newly blended node.
-        self.connect_links()
+            # Initialize the new blend node.
+            self.init_new_blend_atom()
 
-        # Give interface to each blenders to finish works.
-        self.finish_hook()
+            # Make the links between exist nodes and newly blended node.
+            # Check the severe conflict links in each node and remove.
+            # Detect and improve conflict links in newly blended node.
+            self.connect_links()
 
+            # Give interface to each blenders to finish works.
+            self.finish_hook()
+        except UserWarning as e:
+            BlLogger().log("Skipping blend, caused by '" + str(e) + "'")
+            BlLogger().log(
+                "Last status is '" +
+                self.Status.reverse_mapping[self.last_status] +
+                "'"
+            )
+
+        if self.last_status == self.Status.IN_PROCESS:
+            self.last_status = self.Status.SUCCESS_BLEND
+
+        return self.ret

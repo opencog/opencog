@@ -1,10 +1,9 @@
 from tests_b.base_test_case import BaseTestCase
 from util_b.blending_util import *
 from util_b.general_util import BlConfig
+from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'
-
-from opencog.type_constructors import *
 
 
 # Paul & Sally example in the book 'The Way We Think'
@@ -23,8 +22,8 @@ class PaulSallyExample(BaseTestCase):
         #
 
         # Make default concepts.
-        self.a_space = self.a.get_atoms_by_name(types.Atom, "Space", True)[0]
-        self.a_frame = self.a.get_atoms_by_name(types.Atom, "Frame", True)[0]
+        self.a_space = ConceptNode("Space", self.default_atom_tv)
+        self.a_frame = ConceptNode("Frame", self.default_atom_tv)
         self.a_input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
         self.a_input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
         self.a_generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
@@ -190,6 +189,8 @@ class PaulSallyExample(BaseTestCase):
         pass
 
     def __link_with_blend_target_for_debug(self):
+        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
+
         # Link with blend target.
         make_link_all(
             self.a,

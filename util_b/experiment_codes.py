@@ -1,23 +1,46 @@
-from util_b.general_util import BlLogger
+from tests_b.test_case_finder import TestCaseLoader
+from util_b.blending_util import BlendTargetCtlForDebug
+from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
 
+
+class ExperimentCodes:
+    def __init__(self, a):
+        self.a = a
+
+    def test_ure(self):
+        pass
+
+    def foo(self):
+        self.test_ure()
+
+    def init_hook(self):
+        # Remove all exist atoms to focus debug only blending agent.
+        if BlConfig().get('General', 'AGENT_MODE') == 'Debug':
+            self.a.clear()
+
+        if BlConfig().is_use_blend_target:
+            BlendTargetCtlForDebug().a = self.a
+            BlendTargetCtlForDebug().make_blend_target()
+            BlendTargetCtlForDebug().restore_debug_link_list()
+
+        test_case_finder = TestCaseLoader(self.a)
+        test_case_finder.make()
+
+    def final_hook(self):
+        if BlConfig().is_use_blend_target:
+            BlendTargetCtlForDebug().backup_debug_link_list()
+
+"""
 import os.path
 import sys
-
-import logging
 import subprocess
 
-# To avoid unresolved reference complain in PyCharm 4.0.6
-from opencog.atomspace import *
-from opencog.type_constructors import *
-from opencog.bindlink import *
-from opencog.scheme_wrapper \
-    import load_scm, scheme_eval, scheme_eval_h, __init__
+from opencog.scheme_wrapper import *
 
 # Remote debug is not working due to threading issue.
 # Py_Initialize() method must be called by out of cogserver.
-"""
 class PyCharmDebugServer:
     def __init__(self):
         pass
@@ -35,20 +58,3 @@ class PyCharmDebugServer:
             'localhost', port=19001, stdoutToServer=True, stderrToServer=True
         )
 """
-
-class ExperimentCodes:
-    def __init__(self, a):
-        self.a = a
-
-    def test_ure(self):
-        pass
-
-    def print_atomspace_for_debug(self):
-        print "Current Nodes: \n" + str(self.a.get_atoms_by_type(types.Node))
-        print "Current Links: \n" + str(self.a.get_atoms_by_type(types.Link))
-
-    def execute(self):
-        # DEBUG: Run remote debug server for PyCharm remote debugging.
-        # debug = PyCharmDebugServer()
-        # debug.start()
-        self.test_ure()
