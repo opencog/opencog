@@ -13,12 +13,12 @@ agents-step opencog::PyMindAgent(/your/path/opencog-python-blending/blending_age
 ```
 ### Running the program in linux shell
 ```bash
-ipython blending_agent.py
+ipython blending_shell.py
 ```
 ### Alternatives
 * If you don't have IPython, just run with default python interpreter.
 ```bash
-py blending_agent.py
+py blending_shell.py
 ```
 * If you want load agent in your own code, you can use below code.
 ```python

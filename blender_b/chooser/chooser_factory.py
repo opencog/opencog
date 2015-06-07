@@ -1,6 +1,6 @@
 from blender_b.chooser.random_all import RandomAll
 from blender_b.chooser.random_in_blend_target import RandomInBlendTarget
-from blender_b.chooser.random_in_sti_range import RandomInSTIRange
+from blender_b.chooser.choose_in_sti_range import ChooseInSTIRange
 from opencog.logger import log
 from util_b.general_util import BlLogger, get_class, \
     get_class_by_split_name
@@ -19,7 +19,7 @@ class ChooserFactory(object):
         self.chooser_list = [
             RandomAll,
             RandomInBlendTarget,
-            RandomInSTIRange
+            ChooseInSTIRange
         ]
 
         self.chooser_count = len(self.chooser_list)

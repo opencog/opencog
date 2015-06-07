@@ -7,7 +7,7 @@ from opencog.utilities import *
 from util_b.experiment_codes import ExperimentCodes
 from util_b.general_util import *
 from util_b.blending_util import *
-from blender_b.blender_factory import BlenderFactory
+from blender_b.blender_finder import BlenderFactory
 from tests_b.test_case_factory import TestCaseFactory
 
 
@@ -30,7 +30,7 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         if self.a is not None:
             return
 
-        BlLogger().log("Start BlendingAgent")
+        # BlLogger().log("Start BlendingAgent")
         self.a = a
         initialize_opencog(self.a)
 
@@ -55,15 +55,8 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         # BlLogger().log("Finish BlendingAgent")
 
     def __blender_select(self, id_or_name=None):
-        if BlConfig().is_use_config_file() is True:
+        if id_or_name is None:
             id_or_name = BlConfig().get('Blender', 'BLENDER')
-
-        """
-        else:
-            if id_or_name is None:
-                self.blender_factory.print_blender_list()
-                id_or_name = self.blender_factory.ask_to_user()
-        """
 
         self.blender_inst = self.blender_factory.get_blender(id_or_name)
 
@@ -71,15 +64,8 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         if BlConfig().get('Example', 'EXAMPLE_LOAD') == 'False':
             return
 
-        if BlConfig().is_use_config_file() is True:
+        if id_or_name is None:
             id_or_name = BlConfig().get('Example', 'EXAMPLE')
-
-        """
-        else:
-            if id_or_name is None:
-                self.test_case_factory.print_test_case_list()
-                id_or_name = self.test_case_factory.ask_to_user()
-        """
 
         self.test_case_factory.make(id_or_name)
 
@@ -91,7 +77,7 @@ class BlendingAgent(opencog.cogserver.MindAgent):
 
         self.blender_inst.blend()
 
-        if self.blender_inst.get_last_status() != 0:
-            BlLogger().log('Error in blending class.')
+        # if self.blender_inst.get_last_status() != 0:
+        #    BlLogger().log('Error in blending class.')
 
         self.__finalize()

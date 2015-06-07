@@ -56,20 +56,28 @@ class BlConfig(Singleton):
         )
 
         sections = config_parser.sections()
-        for section in sections:
-            option_dict = dict()
-            options = config_parser.options(section)
-            for option in options:
-                option_dict[option] = config_parser.get(section, option)
 
-            cls.blending_config[section] = option_dict
+        if len(sections) > 0:
+            for section in sections:
+                option_dict = dict()
+                options = config_parser.options(section)
+                for option in options:
+                    option_dict[option] = config_parser.get(section, option)
+                cls.blending_config[section] = option_dict
 
         if cls.get('General', 'USE_CONFIG_FILE') == 'True':
             cls.use_config_file = True
+        else:
+            cls.make_default_config()
+
         if cls.get('Blender', 'USE_BLEND_TARGET_FOR_DEBUG') == 'True':
             cls.use_blend_target = True
 
         cls.is_loaded = True
+
+    # TODO: make default configs
+    def make_default_config(cls):
+        pass
 
     def is_use_config_file(cls):
         return cls.use_config_file

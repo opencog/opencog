@@ -17,9 +17,6 @@ class DebugBlender(BaseBlender):
     def __str__(self):
         return 'DebugBlender'
 
-    def get_last_status(self):
-        return self.last_status
-
     def __get_concrete_atom_for_debug(self, name_list):
         ret = []
         for name in name_list:
