@@ -7,8 +7,8 @@ from opencog.utilities import *
 from util_b.experiment_codes import ExperimentCodes
 from util_b.general_util import *
 from util_b.blending_util import *
-from blender_b.blender_finder import BlenderFactory
-from tests_b.test_case_factory import TestCaseFactory
+from blender_b.blender_finder import BlenderFinder
+from tests_b.test_case_finder import TestCaseFactory
 
 
 # Perform Conceptual Blending.
@@ -18,9 +18,9 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.a = None
 
         self.experiment_codes_inst = None
-        self.test_case_factory = None
+        self.test_case_finder = None
 
-        self.blender_factory = None
+        self.blender_finder = None
         self.blender_inst = None
 
         self.config = None
@@ -43,8 +43,8 @@ class BlendingAgent(opencog.cogserver.MindAgent):
             BlendTargetCtlForDebug().make_blend_target()
             BlendTargetCtlForDebug().restore_debug_link_list()
 
-        self.blender_factory = BlenderFactory(self.a)
-        self.test_case_factory = TestCaseFactory(self.a)
+        self.blender_finder = BlenderFinder(self.a)
+        self.test_case_finder = TestCaseFactory(self.a)
 
         self.experiment_codes_inst = ExperimentCodes(self.a)
         self.experiment_codes_inst.execute()
@@ -54,27 +54,12 @@ class BlendingAgent(opencog.cogserver.MindAgent):
             BlendTargetCtlForDebug().backup_debug_link_list()
         # BlLogger().log("Finish BlendingAgent")
 
-    def __blender_select(self, id_or_name=None):
-        if id_or_name is None:
-            id_or_name = BlConfig().get('Blender', 'BLENDER')
-
-        self.blender_inst = self.blender_factory.get_blender(id_or_name)
-
-    def __test_case_select(self, id_or_name=None):
-        if BlConfig().get('Example', 'EXAMPLE_LOAD') == 'False':
-            return
-
-        if id_or_name is None:
-            id_or_name = BlConfig().get('Example', 'EXAMPLE')
-
-        self.test_case_factory.make(id_or_name)
-
     def run(self, a):
         self.__initialize(a)
 
-        self.__blender_select()
-        self.__test_case_select()
+        self.test_case_finder.make()
 
+        self.blender_inst = self.blender_finder.get_blender()
         self.blender_inst.blend()
 
         # if self.blender_inst.get_last_status() != 0:

@@ -1,49 +1,22 @@
 ### BLENDING CONFIG FILE ###
 # To use, please change file name to 'blending.conf'.
+###
 
+###
+#
+# 1. Overall options.
+#
+###
+#####################
 [General]
 USE_CONFIG_FILE: True
 
 # Release or Debug
-AGENT_MODE: Release
+AGENT_MODE: Debug
 
-
-[Blender]
-# RandomBlender or DebugBlender
-BLENDER: RandomBlender
-
-USE_BLEND_TARGET_FOR_DEBUG: False
-
-
-[RandomBlender]
-#
-# Atoms chooser in RandomBlender.
-# 
-# Options:
-# RandomAll, RandomBlendTarget, RandomInSTIRange
-#
-ATOMS_CHOOSER: RandomInSTIRange
-
-
-[RandomInSTIRange]
-#
-# STI value range in RandomInSTIRange.
-# 
-# Options:
-# NONE, JUST_TARGET, IMPORTANT, VERY_IMPORTANT
-#
-STI_MIN: IMPORTANT
-STI_MAX: NONE
-
-
-[Example]
-EXAMPLE_LOAD: True
-#
-# Auto load example to test or debug.
-#
-# Options: PaulSallyExample, DebateWithKantExample
-EXAMPLE: PaulSallyExample
-
+# DO NOT CHANGE VERSION NUMBER
+CONFIG_FILE_VERSION: 1
+#####################
 [Log]
 LOG_RELEASE_LEVEL: INFO
 LOG_RELEASE_PREFIX: [BlendingAgent]::
@@ -52,7 +25,84 @@ LOG_RELEASE_POSTFIX:
 LOG_DEBUG_LEVEL: WARN
 LOG_DEBUG_PREFIX: \n[BA]==>
 LOG_DEBUG_POSTFIX: \n
+#####################
+[BlenderFinder]
+#
+# Blender select.
+# Options:
+# RandomBlender, DebugBlender
+#
+BLENDER: RandomBlender
+#####################
+[ChooserFinder]
+#
+# Default chooser select.
+# 
+# Options:
+# ChooseAll, ChooseInBlendTarget, ChooseInSTIRange
+#
+ATOMS_CHOOSER: ChooseInSTIRange
+#####################
 
+
+###
+#
+# 2. Blender custom options
+#
+###
+#####################
+[RandomBlender]
+# ATOMS_CHOOSER: 
+#####################
+[DebugBlender]
+# ATOMS_CHOOSER: 
+#####################
+
+
+###
+#
+# 3. Chooser custom options.
+#
+###
+#####################
+[ChooseAll]
+ATOM_TYPE: Node
+LEAST_COUNT: 2
+#####################
+[ChooseInBlendTarget]
+ATOM_TYPE: Node
+LEAST_COUNT: 2
+#####################
+[ChooseInSTIRange]
+ATOM_TYPE: Node
+LEAST_COUNT: 2
+
+#
+# STI value range in ChooseInSTIRange.
+# 
+# Options:
+# NONE, JUST_TARGET, IMPORTANT, VERY_IMPORTANT
+#
+STI_MIN: IMPORTANT
+STI_MAX: NONE
+#####################
+
+
+###
+#
+# 4. Developer options.
+#
+###
+#####################
+[Example]
+EXAMPLE_LOAD: True
+#
+# Auto load example to test or debug.
+#
+# Options: PaulSallyExample, DebateWithKantExample
+EXAMPLE: PaulSallyExample
+# EXAMPLE: DebateWithKantExample
+#####################
 [RestAPI]
 # 
 # Auto load RestAPI when executed in standalone python shell to test or debug.
@@ -60,4 +110,7 @@ LOG_DEBUG_POSTFIX: \n
 USE_RESTAPI: True
 IP_ADDRESS: 127.0.0.1
 PORT: 5001
+#####################
+[ETC]
+USE_BLEND_TARGET_FOR_DEBUG: False
 

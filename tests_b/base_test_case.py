@@ -27,7 +27,7 @@ class BaseTestCase(object):
             self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
 
     def __str__(self):
-        return 'BaseTestCase'
+        return self.__class__.__name__
 
     @abstractmethod
     def make(self):

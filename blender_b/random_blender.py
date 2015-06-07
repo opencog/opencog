@@ -1,18 +1,21 @@
 from blender_b.chooser.base_chooser import BaseChooser
-
-__author__ = 'DongMin Kim'
-
 from util_b.general_util import BlLogger
 
 from base_blender import *
 from util_b.blending_util import *
 from util_b.link_copier import *
 
+__author__ = 'DongMin Kim'
+
 
 class RandomBlender(BaseBlender):
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 
+        if BlConfig().is_use_blend_target:
+            self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
+
+        self.config = None
         self.link_copier_inst = LinkCopier(self.a)
 
         # TODO: change to works in several case, like 'link blending'.
@@ -21,29 +24,41 @@ class RandomBlender(BaseBlender):
         self.a_atom_1 = None
 
     def __str__(self):
-        return 'RandomBlender'
+        return self.__class__.__name__
 
-    def prepare_hook(self):
+    def make_default_config(self):
+        default_config = [
+            ['ATOMS_CHOOSER', 'ChooseInSTIRange']
+        ]
+        BlConfig().make_default_config(str(self), default_config)
+
+    def prepare_hook(self, config):
         # BlLogger().log("Start RandomBlending")
-        self.last_status = self.IN_PROCESS
+        self.last_status = self.Status.IN_PROCESS
+        if config is None:
+            config = BlConfig().get_section(str(self))
+        self.config = config
+
         self.a_chosen_atoms_list = None
         self.a_decided_atoms = None
         self.a_new_blended_atom = None
 
-    def choose_atoms(self):
-        chooser = self.chooser_factory.get_chooser("ChooseInSTIRange")
-        # If we don't pass value, chooser will use value in config file.
-        self.a_chosen_atoms_list = chooser.atom_choose()
+        self.chooser = self.chooser_finder.get_chooser(
+            self.config.get('ATOMS_CHOOSER')
+        )
 
-        if chooser.last_status != BaseChooser.SUCCESS_CHOOSE:
-            self.last_status = self.ERROR_IN_CHOOSER
+    def choose_atoms(self):
+        self.a_chosen_atoms_list = self.chooser.atom_choose()
+
+        if self.chooser.last_status != BaseChooser.Status.SUCCESS_CHOOSE:
+            self.last_status = self.Status.ERROR_IN_CHOOSER
             return
 
     def decide_to_blend(self):
         # Currently, just check number of atoms.
         if len(self.a_chosen_atoms_list) < 2:
             BlLogger().log("No atoms to blend.")
-            self.last_status = self.NO_ATOMS_TO_BLEND
+            self.last_status = self.Status.NO_ATOMS_TO_BLEND
             return
 
         a_index_list = random.sample(range(0, len(self.a_chosen_atoms_list)), 2)
@@ -115,5 +130,5 @@ class RandomBlender(BaseBlender):
             str(self.a_new_blended_atom.name)
         )
 
-        self.last_status = self.SUCCESS_BLEND
+        self.last_status = self.Status.SUCCESS_BLEND
         # BlLogger().log("Finish RandomBlending")

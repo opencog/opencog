@@ -1,13 +1,8 @@
-from util_b.blending_util import BlendTargetCtlForDebug
-from util_b.general_util import BlConfig
+from util_b.general_util import enum_simulate
 
 __author__ = 'DongMin Kim'
 
 from abc import ABCMeta, abstractmethod
-
-from opencog.type_constructors import *
-
-from util_b import blending_util
 
 
 class BaseChooser(object):
@@ -15,31 +10,34 @@ class BaseChooser(object):
     :type a: opencog.atomspace_details.AtomSpace
     """
 
-    SUCCESS_CHOOSE = 0
-    IN_PROCESS = 1
-
-    UNKNOWN_ERROR = 10
-    PARAMETER_ERROR = 11
-
-    NOT_ENOUGH_ATOMS = 12
+    Status = enum_simulate(
+        'SUCCESS_CHOOSE',
+        'IN_PROCESS',
+        'UNKNOWN_ERROR',
+        'PARAMETER_ERROR',
+        'NOT_ENOUGH_ATOMS'
+    )
 
     __metaclass__ = ABCMeta
 
     def __init__(self, a):
         self.a = a
-        if BlConfig().is_use_blend_target:
-            self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
-
-        self.last_status = self.UNKNOWN_ERROR
+        self.last_status = self.Status.UNKNOWN_ERROR
+        self.make_default_config()
 
     def __str__(self):
-        return 'BaseChooser'
+        return self.__class__.__name__
+
+    def get_last_status(self):
+        return self.last_status
+
+    def make_default_config(self):
+        pass
 
     @abstractmethod
-    def atom_choose(self, is_use_config_file=True, option=None):
+    def atom_choose(self, config=None):
         """
-        :param is_use_config_file: bool
-        :param option: dict
+        :param config: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")

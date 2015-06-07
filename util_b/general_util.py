@@ -36,12 +36,20 @@ def get_class(kls):
 def get_class_by_split_name(module_path, class_name):
     return get_class(str(module_path)+"."+str(class_name))
 
+# http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
+def enum_simulate(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    reverse = dict((value, key) for key, value in enums.iteritems())
+    enums['reverse_mapping'] = reverse
+    return type('Enum', (), enums)
 
 # BlConfig: BlendingConfigLoader
 # TODO: link with global config in cogserver
 class BlConfig(Singleton):
     def __init__(cls):
         super(BlConfig, cls).__init__()
+
+        cls.minimum_config_file_version = 1
 
         cls.use_config_file = False
         cls.use_blend_target = False
@@ -67,20 +75,26 @@ class BlConfig(Singleton):
 
         if cls.get('General', 'USE_CONFIG_FILE') == 'True':
             cls.use_config_file = True
-        else:
-            cls.make_default_config()
 
-        if cls.get('Blender', 'USE_BLEND_TARGET_FOR_DEBUG') == 'True':
+        if int(cls.get('General', 'CONFIG_FILE_VERSION')) < \
+                cls.minimum_config_file_version:
+            raise DeprecationWarning('Please update config file.')
+
+        if cls.get('ETC', 'USE_BLEND_TARGET_FOR_DEBUG') == 'True':
             cls.use_blend_target = True
 
         cls.is_loaded = True
 
-    # TODO: make default configs
-    def make_default_config(cls):
-        pass
+    def make_default_config(cls, section, default_config):
+        if cls.blending_config.get(str(section)) is not None:
+            return
+        cls.blending_config[str(section)] = default_config
 
     def is_use_config_file(cls):
         return cls.use_config_file
+
+    def get_section(cls, section):
+        return cls.blending_config[str(section)]
 
     def get(cls, section, key):
         return cls.blending_config[str(section)][str(key)]

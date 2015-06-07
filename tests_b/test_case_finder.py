@@ -1,5 +1,5 @@
 from util_b.general_util import BlLogger, get_class, \
-    get_class_by_split_name
+    get_class_by_split_name, BlConfig
 
 __author__ = 'DongMin Kim'
 
@@ -33,20 +33,13 @@ class TestCaseFactory:
         self.a_space = ConceptNode("Space", self.atom_tv)
         self.a_frame = ConceptNode("Frame", self.atom_tv)
 
-    def print_test_case_list(self):
-        BlLogger().log('Please select test case number to use.')
-        for i in range(self.test_case_count):
-            test_case = self.test_case_list[i]
-            BlLogger().log(str(i) + ': ' + str(test_case))
+    def make(self, id_or_name=None):
+        if BlConfig().get('Example', 'EXAMPLE_LOAD') == 'False':
+            return
 
-    def ask_to_user(self):
-        index = -1
-        while (index < 0) or (index >= self.test_case_count):
-            index = input()
+        if id_or_name is None:
+            id_or_name = BlConfig().get('Example', 'EXAMPLE')
 
-        return index
-
-    def make(self, id_or_name):
         if type(id_or_name) is str:
             for test_case in self.test_case_list:
                 if str(test_case).find(id_or_name) != -1:

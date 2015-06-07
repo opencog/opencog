@@ -108,7 +108,7 @@ def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
         for node in src_node_list:
             a.add_link(link_type, [node, dst_node], tv)
 
-# Select atoms which are connected to specific atom.
+# Choose atoms which are connected to specific atom.
 def get_incoming_node_list(a, target):
     ret = []
 

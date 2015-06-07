@@ -14,7 +14,7 @@ class PaulSallyExample(BaseTestCase):
         super(self.__class__, self).__init__(a)
 
     def __str__(self):
-        return 'PaulSallyExample'
+        return self.__class__.__name__
 
     # Make all concept and link.
     def __make_atoms(self):

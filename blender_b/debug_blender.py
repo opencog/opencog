@@ -15,7 +15,7 @@ class DebugBlender(BaseBlender):
         self.link_copier_inst = LinkCopier(self.a)
 
     def __str__(self):
-        return 'DebugBlender'
+        return self.__class__.__name__
 
     def __get_concrete_atom_for_debug(self, name_list):
         ret = []
@@ -25,7 +25,7 @@ class DebugBlender(BaseBlender):
         return ret
 
     def __algorithm_for_debug(self, name_list):
-        # Select nodes to blending.
+        # Choose nodes to blending.
         a_nodes = self.__get_concrete_atom_for_debug(name_list)
 
         # Decide whether or not to execute blending and prepare.
