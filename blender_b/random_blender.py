@@ -1,3 +1,4 @@
+# coding=utf-8
 from base_blender import *
 from blender_b.connector.connect_util import ConnectUtil
 from util_b.blending_util import *
@@ -20,6 +21,7 @@ class RandomBlender(BaseBlender):
 
         # TODO: change to works in several case, like 'link blending'.
         # Currently blender always makes new atom from 2 nodes.
+        # 링크 같은 개념에 대해서도 동작하게 하기. 현재는 무조건 2개 노드에서만 동작.
         self.a_atom_0 = None
         self.a_atom_1 = None
 
@@ -92,6 +94,8 @@ class RandomBlender(BaseBlender):
 
         # TODO: Optimize dst_info_container update period.
         # It should be move to out of src_node_list loop.
+        # 타겟 정보를 담고있는 컨테이너 업데이트 주기 최적화 하기.
+        # 지금은 루프 안에 있지만, 루프 밖으로 빼내야 한다.
         for src_node in self.a_decided_atoms:
             src_info_cont = ConnectUtil().make_equal_link_containers(
                 self.a, src_node
@@ -111,7 +115,8 @@ class RandomBlender(BaseBlender):
             )
 
         # Make the links between source nodes and newly blended node.
-        # TODO: Change to make with proper reason, not make in every blending.
+        # TODO: Give proper truth value, not random.
+        # 랜덤 진릿값 말고 적당한 진릿값을 주어야 한다.
         make_link_all(
             self.a,
             types.AssociativeLink,

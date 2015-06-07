@@ -1,3 +1,4 @@
+# coding=utf-8
 import ConfigParser
 import os
 from opencog.logger import log
@@ -48,6 +49,7 @@ def enum_simulate(*sequential, **named):
 
 # BlConfig: BlendingConfigLoader
 # TODO: link with global config in cogserver
+# 자체 관리가 아닌 cogserver의 config 전역 시스템에 연결하기
 class BlConfig(Singleton):
     def __init__(cls):
         super(BlConfig, cls).__init__()

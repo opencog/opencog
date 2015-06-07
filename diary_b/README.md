@@ -4,49 +4,48 @@
 
 ## Now
 ### In Progress
-*  Select nodes to blending.
-  * Implement checking for some values in HebbianLink and SimilarityLink when select node
-    * Try to apply Attention Allocation agents
-  * Make the waiting queue of ConceptNode
 * Decide whether or not to execute blending and prepare
-  * Implement skipping blend and run the next cycle
   * Implement selecting ConceptNode which has best value (proper value)
- 
-### To do
-**Think**
-* (empty)
-
-**Study**
-* Try to use Unified Rule Engine, PLN in python.
-
-**CodingCodingCoding**
 * Check the conflict links in each node and remove.
   * Implement removing conflict links
+
+### To do
+**Think**
+
+* Use python or change to C++?
+* How to make blending agent to really useful to OpenCog?
+
+**Study**
+
+* Read thesis written by Goguen and another thesis written by Markus, et al.
+
+**CodingCodingCoding**
+
 * Detect and improve conflict links in newly blended node
   * Select one by random in 2^k possible things
-* Optimize implemented code and make simple documentation.
+  * Implement checking for some values in HebbianLink and SimilarityLink when 
+   select link
+  * Implement evaluating degree of reasonable fitness using 
+  information-theoretic method
 
 ### Pause
 * Search for good algorithms to use in each step.
-* Design about public API of my project.
-  * I think I need to start creating mindagent as soon as possible, instead of 
- various considering about architecture.
-* Implement correct truthvalue of link method selector by passing instance 
- which is subclass of abstract class.
-* Make API document.
+* Design about public API of my project, and make its document.
+* Select nodes to blending.
+  * Make the waiting queue of ConceptNode
+  * Currently queue is not need for blending, because now agent make only one 
+   new blended node in each step.
+  * It will be useful when optimizing blending agent speed by save candidate 
+   cache.
+* Try to use Unified Rule Engine, PLN in python.
+* Change config system to use cogserver's config system.
 
 ## Result
 ### Done
-* Try to connect python debugger to cogserver.
-  * Done.
-  * Python's GIL(GlobalInterpreterLock) policy has little bug in Python 2.x, so
- debugging with PyCharm libraries should be use with some hack codes..
-* Try to apply STI in my test cases.
-  * Done.
-  * 'BlendTarget', which is only useful in development stage, still can be used in test cases by changing option in config file.
+* (empty)
 
 ### Fail & Deadline Missed
 * (empty)
-
+  
 ### Cancel
 * (empty)

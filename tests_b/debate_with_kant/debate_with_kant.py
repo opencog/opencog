@@ -1,3 +1,4 @@
+# coding=utf-8
 from tests_b.base_test_case import BaseTestCase
 from util_b.blending_util import *
 from util_b.general_util import BlConfig
@@ -242,9 +243,11 @@ class DebateWithKantExample(BaseTestCase):
 
         # Make status of kant in modern.
         # TODO: Strong TruthValue instead of random value?
+        # 죽었다는게 확실하니 확실한 진릿값을 주어야 하나?
         MemberLink([self.a_kant, self.a_dead], rand_tv())
 
         # TODO: Is this expression is correct method?
+        # 겹치는 이 표현방법이 맞는 방법인가?
         l_me_aware_kant = AssociativeLink([self.a_me, self.a_kant])
         l_kant_not_aware_me = AssociativeLink([self.a_kant, self.a_me])
         MemberLink([l_me_aware_kant, self.a_aware], TruthValue(0.9, 0.9))

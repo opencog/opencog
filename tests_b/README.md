@@ -7,4 +7,4 @@
 
 ## Files
 * base_test_case.py: Abstract class to provide 'make()' interface.
-* blender_factory.py: Make and load predefined test case to blend.
+* test_case_finder.py: Make the predefined test case to blend.

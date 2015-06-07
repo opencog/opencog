@@ -1,3 +1,4 @@
+# coding=utf-8
 from opencog.type_constructors import types
 from opencog.atomspace import Handle
 from util_b.blending_util import rand_tv
@@ -79,6 +80,7 @@ class ConnectUtil(Singleton):
         super(ConnectUtil, cls).__init__()
 
     # TODO: How to check and merge link which has ingoing atoms?
+    # 흔한 경우는 아니지만 Link가 ingoing atom들을 갖고 있으면 어떡하지?
     def __get_equal_link_dict(cls, a, link_list, dst_node):
         """
         :param a: opencog.atomspace_details.AtomSpace

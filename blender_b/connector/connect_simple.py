@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = 'DongMin Kim'
 
 from opencog.atomspace import *
@@ -31,6 +32,8 @@ class ConnectSimple:
 
     def add_new_links(self, src_info_cont, link_set, dst_node):
         # Add new link to target node.
+        # TODO: Change to make with proper reason, not make in every blending.
+        # 적절한 이유가 있을 때만 연결시켜야 한다.
         for link_key in link_set:
             src_h_list = link_key.get_src_h_list()
 
@@ -68,6 +71,7 @@ class ConnectSimple:
 
         # TODO: Currently, conflicting confidence value for new blended node
         # is just average of old value.
+        # 충돌값 보정을 단순 평균이 아닌 적절한 이유를 가진 값으로 바꿔야 한다.
         new_confidence = (found_c + exist_c) / 2
 
         tv = TruthValue(new_strength, new_confidence)
