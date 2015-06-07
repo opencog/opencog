@@ -60,7 +60,7 @@ class ChooseInBlendTarget(BaseChooser):
             atom_type = types.Atom
         try:
             least_count = int(least_count)
-        except TypeError or ValueError:
+        except (TypeError, ValueError):
             least_count = 0
 
         self.__get_atoms_in_blend_target(atom_type, least_count)

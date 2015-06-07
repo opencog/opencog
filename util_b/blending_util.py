@@ -95,11 +95,6 @@ class BlendTargetCtlForDebug(Singleton):
                 )
 
 
-def rand_tv():
-    s = random.uniform(0.5, 0.9)
-    c = random.uniform(0.5, 0.9)
-    return TruthValue(s, c)
-
 def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
     if tv is None:
         for node in src_node_list:
@@ -108,6 +103,7 @@ def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
         for node in src_node_list:
             a.add_link(link_type, [node, dst_node], tv)
 
+
 # Choose atoms which are connected to specific atom.
 def get_incoming_node_list(a, target):
     ret = []
@@ -115,12 +111,18 @@ def get_incoming_node_list(a, target):
     xget_target_link = a.xget_atoms_by_target_atom(types.Link, target)
 
     for link in xget_target_link:
-        xget_target_link_node = atomspace.xget_outgoing(link.h)
+        xget_target_link_node = a.xget_outgoing(link.h)
         for node in xget_target_link_node:
             if node.h != target.h:
                 ret.append(node)
 
     return ret
+
+
+def rand_tv():
+    s = random.uniform(0.5, 0.9)
+    c = random.uniform(0.5, 0.9)
+    return TruthValue(s, c)
 
 # For control STI values.
 sti_value_dict = {
@@ -129,6 +131,7 @@ sti_value_dict = {
     'IMPORTANT': 32,
     'VERY_IMPORTANT': 64
 }
+
 
 def make_sti_all(a, src_node_list, sti):
     for node in src_node_list:

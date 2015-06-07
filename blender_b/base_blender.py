@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from blender_b.chooser.chooser_finder import ChooserFinder
+from blender_b.connector.connector_finder import ConnectorFinder
 from util_b.general_util import enum_simulate, BlLogger
 
 __author__ = 'DongMin Kim'
@@ -30,7 +31,10 @@ class BaseBlender(object):
         self.make_default_config()
 
         self.chooser_finder = ChooserFinder(self.a)
+        self.connector_finder = ConnectorFinder(self.a)
+
         self.chooser = None
+        self.connector = None
 
         self.ret = None
         self.make_default_config()

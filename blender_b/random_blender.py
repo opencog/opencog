@@ -1,6 +1,7 @@
 from base_blender import *
+from blender_b.connector.connect_util import ConnectUtil
 from util_b.blending_util import *
-from util_b.link_copier import *
+from blender_b.connector.connect_simple import *
 
 __author__ = 'DongMin Kim'
 
@@ -13,7 +14,6 @@ class RandomBlender(BaseBlender):
             self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
 
         self.config = None
-        self.link_copier_inst = LinkCopier(self.a)
 
         self.a_chosen_atoms_list = None
         self.a_decided_atoms = None
@@ -30,7 +30,8 @@ class RandomBlender(BaseBlender):
 
     def make_default_config(self):
         default_config = {
-            'ATOMS_CHOOSER': 'ChooseInSTIRange'
+            'ATOMS_CHOOSER': 'ChooseInSTIRange',
+            'LINK_CONNECTOR': 'ConnectSimple'
         }
         BlConfig().make_default_config(str(self), default_config)
 
@@ -79,28 +80,44 @@ class RandomBlender(BaseBlender):
         )
 
     def connect_links(self):
-        # Make the links between exist nodes and newly blended node.
-        # Adjust the attribute value of new links.
-        self.link_copier_inst.copy_all_link_to_new_node(
-            [self.a_atom_0, self.a_atom_1],
-            self.a_new_blended_atom
-        )
-
-        # Make the links between source nodes and newly blended node.
-        # TODO: Change to make with proper reason, not make in every blending.
-        self.a.add_link(
-            types.AssociativeLink,
-            [self.a_atom_0, self.a_new_blended_atom],
-            rand_tv()
-        )
-        self.a.add_link(
-            types.AssociativeLink,
-            [self.a_atom_1, self.a_new_blended_atom],
-            rand_tv()
+        self.connector = self.connector_finder.get_connector(
+            self.config.get('LINK_CONNECTOR')
         )
 
         # Detect and improve conflict links in newly blended node.
         # - Do nothing.
+
+        # Make the links between exist nodes and newly blended node.
+        # Adjust the attribute value of new links.
+
+        # TODO: Optimize dst_info_container update period.
+        # It should be move to out of src_node_list loop.
+        for src_node in self.a_decided_atoms:
+            src_info_cont = ConnectUtil().make_equal_link_containers(
+                self.a, src_node
+            )
+            dst_info_cont = ConnectUtil().make_equal_link_containers(
+                self.a, self.a_new_blended_atom
+            )
+
+            exclusive_link_set = src_info_cont.s - dst_info_cont.s
+            non_exclusive_link_set = src_info_cont.s & dst_info_cont.s
+
+            self.connector.add_new_links(
+                src_info_cont, exclusive_link_set, self.a_new_blended_atom
+            )
+            self.connector.modify_exist_links(
+                src_info_cont, dst_info_cont, non_exclusive_link_set
+            )
+
+        # Make the links between source nodes and newly blended node.
+        # TODO: Change to make with proper reason, not make in every blending.
+        make_link_all(
+            self.a,
+            types.AssociativeLink,
+            self.a_decided_atoms,
+            self.a_new_blended_atom
+        )
 
     def finish_hook(self):
         # DEBUG: Link with blend target.

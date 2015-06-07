@@ -58,11 +58,12 @@ class ChooseInSTIRange(BaseChooser):
             atom_type = types.Atom
         try:
             least_count = int(least_count)
-        except TypeError or ValueError:
+        except (TypeError, ValueError):
             least_count = 0
         try:
             sti_min = sti_value_dict[sti_min]
-        except KeyError:
+            sti_min = int(sti_min)
+        except (KeyError, TypeError):
             sti_min = 1
         try:
             sti_max = sti_value_dict[sti_max]

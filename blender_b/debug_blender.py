@@ -1,6 +1,6 @@
 from base_blender import *
 from util_b.blending_util import *
-from util_b.link_copier import *
+from blender_b.connector.connect_simple import *
 
 __author__ = 'DongMin Kim'
 
@@ -9,7 +9,7 @@ class DebugBlender(BaseBlender):
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 
-        self.link_copier_inst = LinkCopier(self.a)
+        self.link_copier_inst = ConnectSimple(self.a)
 
     def __str__(self):
         return self.__class__.__name__
