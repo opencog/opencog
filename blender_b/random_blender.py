@@ -33,6 +33,7 @@ class RandomBlender(BaseBlender):
     def make_default_config(self):
         default_config = {
             'ATOMS_CHOOSER': 'ChooseInSTIRange',
+            'BLENDING_DECIDER': 'DecideBestSTI',
             'LINK_CONNECTOR': 'ConnectSimple'
         }
         BlConfig().make_default_config(str(self), default_config)
@@ -54,21 +55,12 @@ class RandomBlender(BaseBlender):
         self.a_chosen_atoms_list = self.chooser.atom_choose()
 
     def decide_to_blend(self):
-        # Currently, just check number of atoms.
-        if self.a_chosen_atoms_list is None or \
-           len(self.a_chosen_atoms_list) < 2:
-            self.last_status = self.Status.NO_ATOMS_TO_BLEND
-            raise UserWarning('No atoms to blend.')
-
-        if len(self.a_chosen_atoms_list) < 2:
-            self.last_status = self.Status.NO_ATOMS_TO_BLEND
-            raise UserWarning('No atoms to blend.')
-
-        a_index_list = random.sample(range(0, len(self.a_chosen_atoms_list)), 2)
-        self.a_decided_atoms = [
-            self.a_chosen_atoms_list[a_index_list[0]],
-            self.a_chosen_atoms_list[a_index_list[1]]
-        ]
+        self.decider = self.decider_finder.get_decider(
+            self.config.get('BLENDING_DECIDER')
+        )
+        self.a_decided_atoms = self.decider.blending_decide(
+            self.a_chosen_atoms_list
+        )
 
     def init_new_blend_atom(self):
         # Make the blended node.

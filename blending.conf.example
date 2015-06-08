@@ -41,8 +41,27 @@ BLENDER: RandomBlender
 # Options:
 # ChooseAll, ChooseInBlendTarget, ChooseInSTIRange
 #
-ATOMS_CHOOSER: ChooseInSTIRange
+ATOMS_CHOOSER: ChooseAll
 #####################
+[DeciderFinder]
+#
+# Default decider select.
+# 
+# Options:
+# DecideRandom, DecideBestSTI
+#
+BLENDING_DECIDER: DecideBestSTI
+#####################
+[ConnectorFinder]
+#
+# Default connector select.
+# 
+# Options:
+# DecideRandom, DecideInSTI
+#
+LINK_CONNECTOR: ConnectSimple
+#####################
+
 
 
 ###

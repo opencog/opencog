@@ -19,7 +19,7 @@ class ChooseInBlendTarget(BaseChooser):
 
     def make_default_config(self):
         default_config = {
-            'ATOM_TYPE': 'Atom',
+            'ATOM_TYPE': 'Node',
             'LEAST_COUNT': '0',
         }
         BlConfig().make_default_config(str(self), default_config)
@@ -57,7 +57,7 @@ class ChooseInBlendTarget(BaseChooser):
         try:
             atom_type = types.__dict__[atom_type]
         except KeyError:
-            atom_type = types.Atom
+            atom_type = types.Node
         try:
             least_count = int(least_count)
         except (TypeError, ValueError):
