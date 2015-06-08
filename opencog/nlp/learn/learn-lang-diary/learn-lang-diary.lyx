@@ -14059,7 +14059,7 @@ Results from Rohit:
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename images/frequency-vs-frequency-rank-words.png
+	filename images/regression-word-rank-frequency.png
 	lyxscale 50
 	width 80col%
 
@@ -14070,14 +14070,18 @@ Results from Rohit:
 
 \begin_layout Standard
 Above is for single words.
- The log is the natural log.
+ Frequency is the number of times the word was observed.
+\end_layout
+
+\begin_layout Standard
+The log is the natural log.
  Below is for word-pairs.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename images/frequency-rank-vs-frequency.png
-	lyxscale 80
+	filename images/regression-frequency-vs-frequency-rank-wordpairs.png
+	lyxscale 50
 	width 80col%
 
 \end_inset
