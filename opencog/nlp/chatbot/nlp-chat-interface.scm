@@ -23,10 +23,12 @@
         (display query)
         (newline)
         (cond
-                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query")
-                (truth_query_process querySentence))
+                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query ")
+                ;;(truth_query_process querySentence)
+                (display "I can't process truth query for now"))
                 ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You ask an InterrogativeSpeechAct")
                 (wh_query_process querySentence))
+                (else (display "you made a statement"))
         )
 )
 ;----------------------------------------------------------------------------------------------
