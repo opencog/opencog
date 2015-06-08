@@ -44,7 +44,7 @@ bin:\
 "
 
 # Return ANY langauge parses on default port 4445.
-java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --link --port 4445
+java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --link --lang any -n 16 --port 4445
 
 # Like the above, but sents the output to a different host, instead of
 # replying on the same socket.
