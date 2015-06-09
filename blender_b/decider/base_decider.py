@@ -57,6 +57,7 @@ class BaseDecider(object):
                 self.Status.reverse_mapping[self.last_status] +
                 "'"
             )
+            raise e
 
         if self.last_status == self.Status.IN_PROCESS:
             self.last_status = self.Status.SUCCESS_DECIDE
