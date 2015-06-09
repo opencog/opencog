@@ -109,7 +109,7 @@ void PLNModule::add_af_signal_handler(const Handle& h,
 {
     //!start the chainer xxx more code here
     DefaultForwardChainerCB dfcb(as_);
-    ForwardChainer fc(as_, "I am broken now");
+    ForwardChainer fc(as_, Handle::UNDEFINED);
     fc.do_chain(dfcb, h);
 }
 /*
@@ -129,6 +129,6 @@ void PLNModule::add_atom_signal_handler(const Handle& h)
 {
     //!Start the chainer xxx more code here/
     DefaultForwardChainerCB dfcb(as_);
-    ForwardChainer fc(as_, "I am still very broken");
+    ForwardChainer fc(as_, Handle::UNDEFINED);
     fc.do_chain(dfcb, h);
 }
