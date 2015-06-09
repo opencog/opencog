@@ -3,7 +3,9 @@
 # eva.sh
 #
 # ROS + blender launch script for the Hanson Robotics Eva blender head.
-# This shell script is automatically started within the docker container.
+# This shell script wiill start up the various bits and pieces needed to
+# get things to work.
+#
 # It needs to run in the catkin_ws directory where the various ROS nodes
 # and blender models were installed. It assumes that catkin_make was
 # already run.
@@ -19,7 +21,7 @@ sleep 4;
 tmux new-window -n 'trk' 'roslaunch robots_config tracker-single-cam.launch; $SHELL'
 # Publish the geometry messages
 tmux new-window -n 'geo' 'roslaunch robots_config geometry.launch gui:=false; $SHELL'
-tmux new-window -n 'bhave' 'rosrun eva_behavior main.py; $SHELL'
+# tmux new-window -n 'bhave' 'rosrun eva_behavior main.py; $SHELL'
 tmux new-window -n 'eva' 'cd /catkin_ws/src/blender_api && blender -y Eva.blend -P autostart.py; $SHELL'
 
 # Spare-usage shell
