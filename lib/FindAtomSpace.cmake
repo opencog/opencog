@@ -84,7 +84,7 @@ endif (ATOMSPACE_LIBRARY AND HAVE_ATOMSPACE_H)
 
 if ( ATOMSPACE_FOUND )
 #	message(STATUS "Found CogUtil version ${ATOMSPACE_VERSION} at ${ATOMSPACE_LIBRARY}")
-	message(STATUS "Found AtomSpaced at ${ATOMSPACE_LIBRARY}")
+	message(STATUS "Found AtomSpace at ${ATOMSPACE_LIBRARY}")
 else ( ATOMSPACE_FOUND )
 	message(STATUS "AtomSpace not found")
 endif ( ATOMSPACE_FOUND )
