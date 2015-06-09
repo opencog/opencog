@@ -21,6 +21,8 @@ cogport=$4
 
 splitter=/home/linas/src/relex/src/split-sentences/split-sentences.pl
 splitter=/usr/local/bin/split-sentences.pl
+splitter=./split-sentences.pl
+
 splitdir=split-articles
 subdir=submitted-articles
 
