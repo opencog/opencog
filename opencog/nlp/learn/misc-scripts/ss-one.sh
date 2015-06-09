@@ -6,6 +6,8 @@
 # Sentence-split one file, submit it, via perl script, to the parser.
 # When done, move the file over to a 'finished' directory.
 #
+# Example usage:
+#    ./ss-one.sh en Barbara localhost 17001
 #
 
 # Set up assorted constants needed to run.
