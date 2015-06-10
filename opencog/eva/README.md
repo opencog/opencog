@@ -35,6 +35,9 @@ mish-mash of code.
 
 Running
 -------
+* Use the scripts/eva.sh file, after adjusting paths in it for your
+  installation. Or use the below:
+
 * Start the webcam, pi_vision, and tf2 tracking nodes as usual.
 * Start the Eva blender node, as usual.
 * Start the opencog face-tracking node in the `face_track` directory
