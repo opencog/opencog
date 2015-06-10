@@ -65,4 +65,30 @@ void PythonShell::set_socket(ConsoleSocket *s)
     if (!evaluator) evaluator = &PythonEval::instance();
 }
 
+void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
+{
+    bool selfie = self_destruct;
+    self_destruct = false;
+    GenericShell::eval(expr, s);
+    if (selfie) {
+        self_destruct = true;
+
+        // Eval an empty string as a end-of-file marker. This is needed
+        // to flush pending input in the python sehll, as otherwise,
+        // there is no way to know that no more python input will
+        // arrive!
+        GenericShell::eval("", s);
+    }
+}
+
+void PythonShell::socketClosed(void)
+{
+    // Eval an empty string as a end-of-file marker. This is needed
+    // to flush pending input in the python sehll, as otherwise,
+    // there is no way to know that no more python input will
+    // arrive!
+    GenericShell::eval("", NULL);
+    GenericShell::socketClosed();
+}
+
 #endif
