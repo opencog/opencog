@@ -10,6 +10,8 @@
 # and blender models were installed. It assumes that catkin_make was
 # already run.
 
+BLENDIR=../hr/blender_api
+
 source devel/setup.sh
 echo "Starting... this will take 15-20 seconds..."
 
@@ -21,8 +23,10 @@ sleep 4;
 tmux new-window -n 'trk' 'roslaunch robots_config tracker-single-cam.launch; $SHELL'
 # Publish the geometry messages
 tmux new-window -n 'geo' 'roslaunch robots_config geometry.launch gui:=false; $SHELL'
+
+### XXX adjust below for your setup!
 # tmux new-window -n 'bhave' 'rosrun eva_behavior main.py; $SHELL'
-tmux new-window -n 'eva' 'cd /catkin_ws/src/blender_api && blender -y Eva.blend -P autostart.py; $SHELL'
+tmux new-window -n 'eva' 'cd ../hr/blender_api && blender -y Eva.blend -P autostart.py; $SHELL'
 
 # Spare-usage shell
 tmux new-window -n 'bash' 'sleep 4; rostopic  pub --once /behavior_switch std_msgs/String btree_on; $SHELL'
