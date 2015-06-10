@@ -1,34 +1,8 @@
 # coding=utf-8
 from opencog.type_constructors import types
 from opencog.atomspace import Handle
-from util_b.blending_util import rand_tv
-from util_b.general_util import Singleton
 
 __author__ = 'DongMin Kim'
-
-
-class EqualLinkContainers:
-    """
-    :type link_list: list[types.Link]
-    :type link_dict: dict[EqualLinkKey]
-    :type link_set: set
-    """
-    def __init__(self, link_list=None, link_dict=None, link_set=None):
-        self.link_list = link_list
-        self.link_dict = link_dict
-        self.link_set = link_set
-
-    @property
-    def l(self):
-        return self.link_list
-
-    @property
-    def d(self):
-        return self.link_dict
-
-    @property
-    def s(self):
-        return self.link_set
 
 
 class EqualLinkKey:
@@ -75,37 +49,105 @@ class EqualLinkKey:
         return ret
 
 
-class ConnectUtil(Singleton):
-    def __init__(cls):
-        super(ConnectUtil, cls).__init__()
+# TODO: How to check and merge link which has ingoing atoms?
+# 흔한 경우는 아니지만 Link가 ingoing atom들을 갖고 있으면 어떡하지?
+def get_equal_link_keys(a, original_links, dst_atom):
+    """
+    :param a: opencog.atomspace_details.AtomSpace
+    :param original_links: types.Link
+    :param dst_atom: types.Node
+    :rtype : list[EqualLinkKey]
+    """
+    ret = list()
+    for link in original_links:
+        equal_link_key = EqualLinkKey(link.t)
 
-    # TODO: How to check and merge link which has ingoing atoms?
-    # 흔한 경우는 아니지만 Link가 ingoing atom들을 갖고 있으면 어떡하지?
-    def __get_equal_link_dict(cls, a, link_list, dst_node):
-        """
-        :param a: opencog.atomspace_details.AtomSpace
-        :param link_list: types.Link
-        :param dst_node: types.Node
-        :rtype : dict[EqualLinkKey]
-        """
-        ret = dict()
-        for link in link_list:
-            equal_link_key = EqualLinkKey(link.t)
+        xget_link_src = a.xget_outgoing(link.h)
+        for i, link_src in enumerate(xget_link_src):
+            if link_src.h == dst_atom.h:
+                equal_link_key.dst_pos_in_outgoing = i
+            else:
+                equal_link_key.add_src_h(link_src)
 
-            xget_link_src = a.xget_outgoing(link.h)
-            for i, link_src in enumerate(xget_link_src):
-                if link_src.h == dst_node.h:
-                    equal_link_key.dst_pos_in_outgoing = i
-                else:
-                    equal_link_key.add_src_h(link_src)
+        ret.append(equal_link_key)
 
-            ret[equal_link_key] = link.h
+    return ret
 
-        return ret
 
-    def make_equal_link_containers(cls, a, dst_node):
-        src_link_list = a.get_atoms_by_target_atom(types.Link, dst_node)
-        src_link_dict = cls.__get_equal_link_dict(a, src_link_list, dst_node)
-        src_link_set = set(src_link_dict.keys())
+def find_duplicate_links(a, a_decided_atoms):
+    atom_link_pair_list = {}
 
-        return EqualLinkContainers(src_link_list, src_link_dict, src_link_set)
+    for atom in a_decided_atoms:
+        original_links = a.get_atoms_by_target_atom(types.Link, atom)
+        equal_links = get_equal_link_keys(a, original_links, atom)
+        atom_link_pair_list[atom.handle_uuid()] = equal_links
+
+    inverted_links_index = get_inverted_index_value(atom_link_pair_list)
+
+    duplicate_links = []
+    non_duplicate_links = []
+    for values in inverted_links_index.values():
+        if len(values) > 1:
+            duplicate_links.append(values)
+        else:
+            non_duplicate_links.append(values)
+
+    return duplicate_links, non_duplicate_links
+
+
+def make_link_from_equal_link_key(a, link_key, dst_atom, tv):
+    """
+    Add new link to target node.
+
+    :param AtomSpace a: An atomspace.
+    :param EqualLinkKey link_key: EqualLinkKey which has information of new
+    link.
+    :param types.Atom dst_atom: Destination of connecting new link.
+    :param TruthValue tv: New link's truth value.
+    """
+    # TODO: Change to make with proper reason, not make in every blending.
+    # 적절한 이유가 있을 때만 연결시켜야 한다.
+    src_h_list = link_key.get_src_h_list()
+
+    # To avoid self-pointing
+    if dst_atom.h in src_h_list:
+        return
+
+    src_h_list.insert(link_key.dst_pos_in_outgoing, dst_atom)
+    a.add_link(link_key.t, src_h_list, tv)
+
+
+def get_inverted_index_key(key_value_pair_list):
+    inverted_index = {}
+
+    all_values = []
+    for values in key_value_pair_list.values():
+        all_values.extend(values)
+
+    all_values = set(all_values)
+    for value in all_values:
+        key_list = []
+        for pair_key, pair_value in key_value_pair_list.items():
+            if value in pair_value:
+                key_list.append(pair_key)
+        inverted_index[value] = key_list
+
+    return inverted_index
+
+
+def get_inverted_index_value(key_value_pair_list):
+    inverted_index = {}
+
+    all_values = []
+    for values in key_value_pair_list.values():
+        all_values.extend(values)
+
+    all_values = set(all_values)
+    for value in all_values:
+        value_list = []
+        for pair_key, pair_value in key_value_pair_list.items():
+            if value in pair_value:
+                value_list.append(pair_value)
+        inverted_index[value] = value_list
+
+    return inverted_index

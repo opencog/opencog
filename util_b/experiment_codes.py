@@ -1,6 +1,7 @@
 from tests_b.test_case_finder import TestCaseLoader
 from util_b.blending_util import BlendTargetCtlForDebug
 from util_b.general_util import BlConfig
+from utility.util import pp
 
 __author__ = 'DongMin Kim'
 
@@ -13,6 +14,24 @@ class ExperimentCodes:
         pass
 
     def foo(self):
+        texts = {
+            'T0.txt': ['it', 'is', 'what', 'it', 'is'],
+            'T1.txt': ['what', 'is', 'it'],
+            'T2.txt': ['it', 'is', 'a', 'banana']
+        }
+        words = ['a', 'banana', 'is', 'it', 'what']
+
+        inv_index = {
+            word: set(
+                txt
+                for txt, apple in texts.items()
+                if word in apple
+            )
+            for word in words
+        }
+        print('\nInverted Index')
+        pp({k: sorted(v) for k, v in inv_index.items()})
+
         self.test_ure()
 
     def init_hook(self):
@@ -31,6 +50,7 @@ class ExperimentCodes:
     def final_hook(self):
         if BlConfig().is_use_blend_target:
             BlendTargetCtlForDebug().backup_debug_link_list()
+
 
 """
 import os.path

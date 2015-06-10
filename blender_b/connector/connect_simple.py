@@ -1,23 +1,15 @@
 # coding=utf-8
+from opencog.atomspace import TruthValue
+from blender_b.connector.base_connector import BaseConnector
+from blender_b.connector.connect_util import *
+from util_b.general_util import BlConfig
+
 __author__ = 'DongMin Kim'
 
-from opencog.atomspace import *
 
-
-class ConnectSimple:
-    """
-    If (A) -> (B), and (C) is new blended node,
-    purpose of ConnectSimple is link with (A) -> (C).
-    (A) is src_node
-    (C) is dst_node
-    (B) is src_node in ConnectSimple context.
-    (B) is dst_node in EqualLinkKey context.
-
-    :type a: opencog.atomspace_details.AtomSpace
-    """
-
+class ConnectSimple(BaseConnector):
     def __init__(self, atomspace):
-        self.a = atomspace
+        super(self.__class__, self).__init__(atomspace)
 
     def __str__(self):
         return self.__class__.__name__
@@ -30,49 +22,117 @@ class ConnectSimple:
         """
         pass
 
-    def add_new_links(self, src_info_cont, link_set, dst_node):
-        # Add new link to target node.
-        # TODO: Change to make with proper reason, not make in every blending.
-        # 적절한 이유가 있을 때만 연결시켜야 한다.
-        for link_key in link_set:
-            src_h_list = link_key.get_src_h_list()
+    def __get_weighted_tv(self, links):
+        """
+        Make new TruthValue by evaluate weighted average of exist
+        link's TruthValue.
 
-            if dst_node.h in src_h_list:
-                continue
+        https://groups.google.com/forum/#!topic/opencog/fa5c4yE8YdU
 
-            src_h_list.insert(link_key.dst_pos_in_outgoing, dst_node)
-            src_link = self.a[src_info_cont.d[link_key]]
-            self.a.add_link(
-                src_link.t,
-                src_h_list,
-                src_link.tv,
+        :param list(EqualLinkKey) links: List of EqualLinkKey which are
+        expected to make weighted average TruthValue from theirs.
+        :rtype TruthValue: New truth value.
+        """
+        if len(links) < 2:
+            self.last_status = self.Status.UNKNOWN_ERROR
+            raise UserWarning(
+                "Weighted TruthValue can't be evaluated with small size."
             )
 
-    def modify_exist_links(self, src_info_cont, dst_info_cont, link_set):
-        # Correct conflict link value in target node.
-        for link_key in link_set:
-            src_link = self.a[src_info_cont.d[link_key]]
-            dst_link = self.a[dst_info_cont.d[link_key]]
+        weighted_strength_sum = 0
+        confidence_sum = 0
+        link_count = 0
 
-            # Correct conflict link value in target node.
-            self.__correct_strength_of_links(src_link, dst_link)
+        for link in links:
+            weighted_strength_sum += (link.tv.confidence * link.tv.mean)
+            confidence_sum += link.tv.confidence
+            link_count += 1
 
-    def __correct_strength_of_links(self, src_link, dst_link):
-        found_s = src_link.tv.mean
-        found_c = src_link.tv.confidence
-        exist_s = dst_link.tv.mean
-        exist_c = dst_link.tv.confidence
+        new_strength = weighted_strength_sum / confidence_sum
 
-        # sC = (cA sA + cB sB) / (cA + cB)
-        # https://groups.google.com/forum/#!topic/opencog/fa5c4yE8YdU
-        new_strength = \
-            ((found_c * found_s) + (exist_c * exist_s)) \
-            / (found_c + exist_c)
-
-        # TODO: Currently, conflicting confidence value for new blended node
-        # is just average of old value.
+        # TODO: Currently, confidence value for new blended node is just
+        # average of old value.
         # 충돌값 보정을 단순 평균이 아닌 적절한 이유를 가진 값으로 바꿔야 한다.
-        new_confidence = (found_c + exist_c) / 2
+        new_confidence = confidence_sum / link_count
 
-        tv = TruthValue(new_strength, new_confidence)
-        self.a.set_tv(dst_link.h, tv)
+        return TruthValue(new_strength, new_confidence)
+
+    def __connect_duplicate_links(self, duplicate_links, dst_node):
+        """
+        Connect duplicate links.
+
+        Make the links between exist nodes, with detect and improve conflict
+        links in newly blended node.
+
+        :param dict(Handle, list(EqualLinkKey)) duplicate_links: List of
+        duplicated link expressed by EqualLinkKey list.
+        :param types.Atom dst_node: node to connect new links.
+        """
+        # 1. If duplicate links have big conflict, remove one of them.
+        # -- Do nothing.
+
+        # 2. Others, evaluate the weighted average of truth value between
+        # the duplicate links.
+        for links in duplicate_links:
+            # array elements are same except original node.
+            link_key = links[0]
+            weighted_tv = self.__get_weighted_tv(links)
+            make_link_from_equal_link_key(
+                self.a, link_key, dst_node, weighted_tv
+            )
+
+    def __connect_non_duplicate_links(self, non_duplicate_links, dst_node):
+        """
+        Connect non-duplicate links.
+
+        Make the links between exist nodes.
+
+        :param dict(Handle, list(EqualLinkKey)) non_duplicate_links: List of
+        non-duplicated link expressed by EqualLinkKey list.
+        :param types.Atom dst_node: node to connect new links.
+        """
+        # Just copying.
+        for links in non_duplicate_links:
+            for link in links:
+                make_link_from_equal_link_key(self.a, link, dst_node, link.tv)
+
+    def link_connect_impl(self, a_decided_atoms, a_new_blended_atom, config):
+        """
+        Implementation of simple link connector.
+
+        1. Find duplicate, non-duplicate links both.
+        2. Try to improve some conflict in duplicate links and connect to new
+         blended atom.
+        3. Try to connect to new blended atom.
+
+        :param list(types.Atom) a_decided_atoms: List of atoms to search
+        links to be connected to new blended atom.
+        :param types.Atom a_new_blended_atom: New blended atom.
+        :param dict config: config.
+        """
+        duplicate_links, non_duplicate_links = \
+            find_duplicate_links(self.a, a_decided_atoms)
+
+        self.__connect_duplicate_links(duplicate_links, a_new_blended_atom)
+        self.__connect_non_duplicate_links(non_duplicate_links, a_new_blended_atom)
+
+    def link_connect(self, a_decided_atoms, a_new_blended_atom, config=None):
+        if config is None:
+            config = BlConfig().get_section(str(self))
+
+        self.link_connect_impl(a_decided_atoms, a_new_blended_atom, config)
+
+
+"""
+    def __get_atoms_all(self, atom_type, least_count):
+
+        Choose all atoms.
+        :param Type atom_type: type of atoms to choose.
+        :param int least_count: minimum number of atoms to choose.
+
+        self.ret = self.a.get_atoms_by_type(atom_type, True)
+
+        if len(self.ret) < least_count:
+            self.last_status = self.Status.NOT_ENOUGH_ATOMS
+            raise UserWarning('Size of atom list is too small.')
+"""
