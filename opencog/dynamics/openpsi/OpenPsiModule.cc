@@ -38,13 +38,16 @@ OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
 {
     logger().info("[OpenPsiModule] Entering constructor");
     _cogserver.registerAgent(PsiDemandUpdaterAgent::info().id,
-    &demandUpdaterFactory);
+                            &demandUpdaterFactory);
+    _cogserver.registerAgent(PsiActionSelectionAgent::info().id,
+                            &actionSelectionFactory);
 }
 
 OpenPsiModule::~OpenPsiModule()
 {
     logger().info("[OpenPsiModule] Entering destructor");
     _cogserver.unregisterAgent(PsiDemandUpdaterAgent::info().id);
+    _cogserver.unregisterAgent(PsiActionSelectionAgent::info().id);
 }
 
 

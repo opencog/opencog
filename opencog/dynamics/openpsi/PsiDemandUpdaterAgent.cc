@@ -282,10 +282,13 @@ void PsiDemandUpdaterAgent::run()
 
     // Get AtomSpace
     AtomSpace& atomSpace = _cogserver.getAtomSpace();
-
+logger().debug("got atomspace");
     // Get current time stamp
     //unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
-    octime_t timeStamp = timeServer().getLatestTimestamp();
+
+    TimeServer timeServer(atomSpace);
+    octime_t timeStamp = timeServer.getLatestTimestamp();
+logger().debug("timestamp %s", timeStamp);
 
     // Initialize the Agent (demandList etc)
     if ( !this->bInitialized )

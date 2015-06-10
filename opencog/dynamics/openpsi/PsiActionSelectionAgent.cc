@@ -23,14 +23,15 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+//#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/nlp/types/atom_types.h>
-#include <opencog/spacetime/atom_types.h>
-#include <opencog/spacetime/SpaceServer.h>
+//#include <opencog/spacetime/atom_types.h>
+//#include <opencog/spacetime/SpaceServer.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/random.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
-#include "OAC.h"
 #include "PsiActionSelectionAgent.h"
 #include "PsiRuleUtil.h"
 
@@ -40,12 +41,11 @@ extern int currentDebugLevel;
 
 PsiActionSelectionAgent::~PsiActionSelectionAgent()
 {
-
+    logger().debug("[PsiActionSelectionAgent] destructor");
 }
 
 PsiActionSelectionAgent::PsiActionSelectionAgent(CogServer& cs)
-	: Agent(cs), oac(dynamic_cast<OAC&>(cs)),
-	  atomspace(oac.getAtomSpace()), cycleCount(0)
+    : Agent(cs), atomspace(cs.getAtomSpace()),cycleCount(0)
 {
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
@@ -61,9 +61,9 @@ void PsiActionSelectionAgent::init()
     this->initDemandGoalList();
 
     // Initialize other members
-    this->currentSchemaId = 0;
+    //this->currentSchemaId = 0;
     this->procedureExecutionTimeout =
-	    config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
+        config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -219,6 +219,12 @@ void PsiActionSelectionAgent::stimulateAtoms()
 
     logger().warn("PsiActionSelectionAgent::%s - Stimulate plan related atoms [cycle = %d]",
                    __FUNCTION__, this->cycleCount);
+}
+
+void PsiActionSelectionAgent::executeAction(Handle hActionExecutionOutputLink)
+{
+    Instantiator inst(atomspace);
+    inst.execute(hActionExecutionOutputLink);
 }
 
 void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool,
@@ -383,12 +389,12 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
         //
         const Procedure::GeneralProcedure & procedure = procedureRepository.get(actionName);
 
-        this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
+        //this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
 
         logger().debug( "PsiActionSelectionAgent::%s - running action: %s [schemaId = %d, cycle = %d]",
                         __FUNCTION__,
                         procedure.getName().c_str(),
-                        this->currentSchemaId,
+                        /*this->currentSchemaId,*/
                         this->cycleCount
                       );
 
@@ -492,45 +498,6 @@ void PsiActionSelectionAgent::run()
     logger().debug("PsiActionSelectionAgent::%s - Executing run %d times",
                    __FUNCTION__, this->cycleCount);
 
-    // Get Language Comprehension Tool
-    LanguageComprehension & languageTool = oac.getPAI().getLanguageTool();
-
-    // Get ProcedureInterpreter
-    Procedure::ProcedureInterpreter & procedureInterpreter =
-        oac.getProcedureInterpreter();
-
-    // Get Procedure repository
-    const Procedure::ProcedureRepository & procedureRepository =
-        oac.getProcedureRepository();
-
-    // Variables used by combo interpreter
-    combo::vertex result; // combo::vertex is actually of type boost::variant <...>
-
-    // Get pet
-    Pet & pet = oac.getPet();
-
-    // Get petId
-    const std::string & petId = pet.getPetId();
-
-    // Check if map info data is available
-    if ( spaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
-        logger().warn("PsiActionSelectionAgent::%s - "
-                      "There is no map info available yet [cycle = %d]",
-                      __FUNCTION__,
-                      this->cycleCount);
-        return;
-    }
-
-    // Check if the pet spatial info is already received
-    Handle agent = AtomSpaceUtil::getAgentHandle(atomspace, petId);
-    if (!spaceServer().getLatestMap().containsObject(agent)) {
-        logger().warn("PsiActionSelectionAgent::%s - "
-                      "Pet was not inserted in the space map yet [cycle = %d]",
-                      __FUNCTION__,
-                      this->cycleCount);
-        return;
-    }
-
     // Initialize the Mind Agent (demandGoalList etc)
     if ( !this->bInitialized )
         this->init();
@@ -542,7 +509,7 @@ void PsiActionSelectionAgent::run()
     // say the current Action is still running, do nothing and simply
     // returns.
     //
-    if (this->currentSchemaId != 0) {
+    /*if (this->currentSchemaId != 0) {
 
         logger().debug("PsiActionSelectionAgent::%s "
                        "currentSchemaId = %d [cycle = %d] ",
@@ -706,7 +673,7 @@ void PsiActionSelectionAgent::run()
         // Reset current schema id
         this->currentSchemaId = 0;
 
-    }// if (this->currentSchemaId != 0)
+    }// if (this->currentSchemaId != 0) */
 
 #if HAVE_GUILE
     // If we've used up the current plan, do a new planning
@@ -758,7 +725,8 @@ void PsiActionSelectionAgent::run()
             return;
         }
 
-        this->stimulateAtoms();
+        // TODO: Should the stimulation be handled by the agent?
+        //this->stimulateAtoms();
 
         // std::cout << std::endl
         //           << "Done (do_planning), scheme_return_value(Handle): "
@@ -802,8 +770,9 @@ void PsiActionSelectionAgent::run()
     }
 
     // Execute current action
-    this->executeAction(languageTool, procedureInterpreter, procedureRepository,
-                        this->current_action);
+    this->executeAction(atom)
+    //this->executeAction(languageTool, procedureInterpreter, procedureRepository,
+    //                    this->current_action);
     this->timeStartCurrentAction = time(NULL);
 
 /**
@@ -871,4 +840,3 @@ void PsiActionSelectionAgent::run()
     }// if
 */
 }
-

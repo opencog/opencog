@@ -25,6 +25,8 @@
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spacetime/Temporal.h>
+
 
 class PsiDemandUpdaterAgentUTest;
 
