@@ -20,6 +20,11 @@
 
 import socket
 
+# This implements netcat in python.
+#
+# If you don't now what netcat is, then you should google it.
+# Its important and not complicated.
+#
 def netcat(hostname, port, content) :
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

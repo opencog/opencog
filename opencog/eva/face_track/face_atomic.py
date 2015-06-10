@@ -23,6 +23,8 @@ from netcat import netcat
 # visible faces into the cogserver atomspace. It opens a socket to
 # the cogserver, and sends some atoms across.
 #
+# TODO: Send the face location as well.
+#
 class FaceAtomic:
 
 	def __init__(self):
