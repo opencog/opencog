@@ -10,9 +10,9 @@
 # and blender models were installed. It assumes that catkin_make was
 # already run.
 
-# Change thise for your setup!
-BLENDIR=../hr/blender_api
-OCBHAVE=../opencog/ros-behavior-scripting/
+# Change this for your setup!
+export BLENDIR="../hr/blender_api"
+export OCBHAVE="../opencog/ros-behavior-scripting/"
 
 # Without this, some ros messages seem to run astray.
 export ROS_IP=127.0.0.1
@@ -21,7 +21,7 @@ source devel/setup.sh
 echo "Starting... this will take 15-20 seconds..."
 
 # Use byobu so that the scroll bars actually work
-byobu new-session -d -n 'roscore' 'roscore; $SHELL'
+byobu new-session -d -n 'ros' 'roscore; $SHELL'
 sleep 4;
 
 # Single Video (body) camera and face tracker
@@ -33,23 +33,25 @@ tmux new-window -n 'geo' 'roslaunch robots_config geometry.launch gui:=false; $S
 tmux new-window -n 'eva' 'cd $BLENDIR && blender -y Eva.blend -P autostart.py; $SHELL'
 
 # Start the cogserver.
-tmux new-window -n 'cogserver' 'cogserver; $SHELL'
+tmux new-window -n 'cog' 'cogserver -c $OCBHAVE/scripts/opencog.conf; $SHELL'
 
 cd $OCBHAVE/src
 # Load data into the CogServer
-sleep 3
+sleep 5
 echo -e "py\n" | cat - atomic.py |netcat localhost 17001
 cat universal-fsm.scm |netcat localhost 17001
+sleep 5
 
 # Run the new face-tracker.
-tmux new-window -n 'face' 'cd ../face_track; ./main.py; $SHELL'
+# tmux new-window -n 'face' '$OCBHAVE/face_track/main.py; $SHELL'
+tmux new-window -n 'fce' '../face_track/main.py; $SHELL'
 
-# Spare-usage shell
-tmux new-window -n 'bash' '$SHELL'
+# Telnet shell
+tmux new-window -n 'tel' 'rlwrap telnet localhost 17001; $SHELL'
 
 # Fix the annoying byobu display
 echo "tmux_left=\"session\"" > $HOME/.byobu/status
-echo "tmux_right=\"load_average disk_io date time\"" >> $HOME/.byobu/status
+echo "tmux_right=\"load_average disk_io\"" >> $HOME/.byobu/status
 tmux attach
 
 echo "Started"
