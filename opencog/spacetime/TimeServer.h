@@ -76,6 +76,10 @@ public:
     // TODO: Why does the it need SPaceServer? Add constructor that takes
     // AtomSpace reference.
     TimeServer(AtomSpace& a, SpaceServer* ss);
+
+    // A temporary hack for working with OpenPsi, because it doesn't need
+    // a SpaceTimeCogserver
+    TimeServer(AtomSpace& a);
     virtual ~TimeServer();
 
     /**

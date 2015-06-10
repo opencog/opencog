@@ -42,6 +42,18 @@ void TimeServer::init()
 {
     table = new TemporalTable();
     latestTimestamp = 0;
+    //TODO: Add a UTC time entry. It might be useful for syncronizing
+    // the times in multiple atomspaces.
+    // Eg. use case: suppose multiple robots/virtual-agents/IOT collect time
+    // series data merging of these data, for analysis/mining.
+}
+
+TimeServer::TimeServer(AtomSpace& a)
+{
+    init();
+    // Connect signals
+    addedAtomConnection = a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1));
+    removedAtomConnection = a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1));
 }
 
 TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
@@ -94,13 +106,13 @@ octime_t TimeServer::getLatestTimestamp() const
 
 TimeServer& TimeServer::operator=(const TimeServer& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "TimeServer - Cannot copy an object of this class");
 }
 
-TimeServer::TimeServer(const TimeServer& other) 
+TimeServer::TimeServer(const TimeServer& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "TimeServer - Cannot copy an object of this class");
 }
 
@@ -235,13 +247,13 @@ void TimeServer::atomRemoved(AtomPtr atom)
         lll->getArity());
 
     AtomPtr timeNode = lll->getOutgoingAtom(0);
- 
+
     // If it's not a TimeNode, then it's a VariableNode which can stand
     // in for a TimeNode. So we can ignore it here.
     if (timeNode->getType() != TIME_NODE) return;
 
     AtomPtr timedAtom = lll->getOutgoingAtom(1);
-    
+
 #if DOES_NOT_COMPILE_RIGHT_NOW
     // We have to do the check here instead of in the spaceServer
     // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
