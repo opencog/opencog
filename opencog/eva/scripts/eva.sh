@@ -38,6 +38,7 @@ tmux new-window -n 'cog' 'cogserver -c $OCBHAVE/scripts/opencog.conf; $SHELL'
 cd $OCBHAVE/src
 # Load data into the CogServer
 sleep 5
+echo -e "py\n" | cat - ros_commo.py |netcat localhost 17001
 echo -e "py\n" | cat - atomic.py |netcat localhost 17001
 cat universal-fsm.scm |netcat localhost 17001
 sleep 5
