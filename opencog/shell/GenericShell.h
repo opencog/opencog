@@ -69,6 +69,7 @@ class GenericShell
 		virtual const std::string& get_prompt(void);
 
 		virtual void thread_init(void);
+		virtual void line_discipline(const std::string &expr);
 		virtual void do_eval(const std::string &expr);
 
 		// Async output handling.

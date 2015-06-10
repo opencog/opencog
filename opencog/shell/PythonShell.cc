@@ -77,7 +77,7 @@ void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
         // to flush pending input in the python sehll, as otherwise,
         // there is no way to know that no more python input will
         // arrive!
-        GenericShell::eval("", s);
+        GenericShell::do_eval("");
     }
 }
 
@@ -87,7 +87,7 @@ void PythonShell::socketClosed(void)
     // to flush pending input in the python sehll, as otherwise,
     // there is no way to know that no more python input will
     // arrive!
-    GenericShell::eval("", NULL);
+    GenericShell::do_eval("");
     GenericShell::socketClosed();
 }
 

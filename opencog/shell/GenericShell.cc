@@ -169,7 +169,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 	// Launch the evaluator, possibly in a different thread,
 	// and then send out whatever is reported back.
-	do_eval(expr);
+	line_discipline(expr);
 	std::string retstr = poll_output();
 	while (0 < retstr.size())
 	{
@@ -189,13 +189,14 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 /* ============================================================== */
 /**
- * Evaluate the expression
+ * Handle special characters, evaluate the expression
  */
-void GenericShell::do_eval(const std::string &expr)
+void GenericShell::line_discipline(const std::string &expr)
 {
 	size_t len = expr.length();
 
-    logger().debug("[GenericShell] do_eval: expr, len of %zd ='%s'", len, expr.c_str());
+	logger().debug("[GenericShell] line disc: expr, len of %zd ='%s'",
+		len, expr.c_str());
 
 	// Make sure there is at least one character if we are checking
 	// for abort, interrrupt, escape, etc.
@@ -251,8 +252,8 @@ void GenericShell::do_eval(const std::string &expr)
 		// by itself. This means "leave the shell". We leave the shell by
 		// unsetting the shell pointer in the ConsoleSocket.
 		// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
-		if ((false == evaluator->input_pending()) &&
-		    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
+		if ((false == evaluator->input_pending()) and
+		    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 		{
 			self_destruct = true;
 			put_output("");
@@ -263,16 +264,21 @@ void GenericShell::do_eval(const std::string &expr)
 	}
 
 	/* 
-	 * Sometimes the newline gets cut !?!? This may not be true any
-	 * longer, with the new whiz-bang socket code.
-	 *
-	 * Re-insert it; otherwise, comments within procedures will
-	 * have the effect of commenting out the rest of the procedure,
-	 * leading to garbage.
-	 *
-	 * (This is a pointless string copy, it should be eliminated)
+	 * The newline is always cut. Re-insert it; otherwise, comments
+	 * within procedures will have the effect of commenting out the
+	 * rest of the procedure, leading to garbage.
+	 * (This is a pointless string copy, it should be eliminated.)
 	 */
 	std::string input = expr + "\n";
+	do_eval(input);
+}
+
+/* ============================================================== */
+/**
+ * Evaluate the expression. Assumes line discipline was already done.
+ */
+void GenericShell::do_eval(const std::string &input)
+{
 	eval_done = false;
 	evaluator->begin_eval(); // must be called in same thread as result_poll
 	if (do_async_output)
