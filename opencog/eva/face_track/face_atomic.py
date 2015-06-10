@@ -41,7 +41,7 @@ class FaceAtomic:
 	def remove_face_from_atomspace(self, faceid):
 
 		# AtomSpace cog-delete takes handle as an argument.
-		face = self.delete_face(faceid)
+		msg = self.delete_face(faceid)
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
 
