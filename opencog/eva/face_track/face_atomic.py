@@ -38,16 +38,24 @@ class FaceAtomic:
 	# Remove a face from the atomspace.
 	def remove_face_from_atomspace(self, faceid):
 
-		# AtomSpace remove takes handle as an argument.
-		face = self.define_face(faceid)
-		msg = "(cog-delete " + face + ")\n"
+		# AtomSpace cog-delete takes handle as an argument.
+		face = self.delete_face(faceid)
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
-		# XXX TODO Remove the NumberNode as well, if no
-		# one is using it.
 
 	# Define simple string to define a face
 	def define_face(self, faceid):
 		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
 		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
+		return face
+
+	# Define commands to delete the face, and also to garbage-collect
+	# the ListLink NumberNode.
+	def delete_face(self, faceid):
+		face = "(cog-delete " + \
+		       "(EvaluationLink (PredicateNode \"visible face\") " + \
+		       "(ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
+		       "(cog-delete " + \
+		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n" +\
+		       "(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
 		return face
