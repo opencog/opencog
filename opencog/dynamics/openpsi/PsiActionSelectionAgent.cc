@@ -227,7 +227,7 @@ void PsiActionSelectionAgent::executeAction(Handle hActionExecutionOutputLink)
     inst.execute(hActionExecutionOutputLink);
 }
 
-void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool,
+/*void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool,
                                             Procedure::ProcedureInterpreter & procedureInterpreter,
                                             const Procedure::ProcedureRepository & procedureRepository,
                                             Handle hActionExecutionLink)
@@ -489,7 +489,7 @@ void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool
         }
 #endif // HAVE_GUILE
     }
-}
+} */
 
 void PsiActionSelectionAgent::run()
 {

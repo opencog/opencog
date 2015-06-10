@@ -30,8 +30,6 @@ class PsiActionSelectionAgentUTest;
 
 namespace opencog {
 
-class OAC;
-
 /**
  * @class
  *
@@ -212,7 +210,7 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiActionSelectionAgent");
+        static const ClassInfo _ci("opencog::PsiActionSelectionAgent");
         return _ci;
     }
 
