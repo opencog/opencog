@@ -44,18 +44,15 @@ def do_look_right():
     evl.look_right()
     return TruthValue(1, 1)
 
-# Define an executable pattern
-satisfaction_handle = SatisfactionLink(
-	SequentialAndLink(
-		EvaluationLink(
-			# GroundedPredicateNode("py: evl.look_right"),
-			# GroundedPredicateNode("py: do_look_right"),
-			GroundedPredicateNode("py: do_look_left"),
-			ListLink()
-		)
-	)
-).h
-
-# See if the pattern can be satsified.  This should result
-# in a ROS message being sent.
-result = satisfaction_link(atomspace, satisfaction_handle)
+### Define an executable pattern
+##satisfaction_handle = SatisfactionLink(
+##	SequentialAndLink(
+##		EvaluationLink(
+##			# GroundedPredicateNode("py: evl.look_right"),
+##			# GroundedPredicateNode("py: do_look_right"),
+##			GroundedPredicateNode("py: do_look_left"),
+##			ListLink()))).h
+##
+### See if the pattern can be satsified.  This should result
+### in a ROS message being sent.
+##result = satisfaction_link(atomspace, satisfaction_handle)

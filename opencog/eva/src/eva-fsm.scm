@@ -1,12 +1,14 @@
 ;
-; Exerpimental Eva Behavior Finite State Machine (FSM).
+; Experimental Eva Behavior Finite State Machine (FSM).
 ;
 ; A simple finite state machine for controlling Eva's behaviors
 ;
+(add-to-load-path "/usr/local/share/opencog/scm")
+
 (use-modules (opencog))
+(use-modules (opencog exec))
 (use-modules (opencog query))
 
-(add-to-load-path "/usr/local/share/opencog/scm")
 (load-from-path "utilities.scm")
 
 (define eva-trans (ConceptNode "Eva Transition Rule"))
