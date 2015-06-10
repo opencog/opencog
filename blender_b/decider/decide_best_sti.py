@@ -54,6 +54,7 @@ class DecideBestSTI(BaseDecider):
             )
 
         self.ret.reverse()
+        self.ret = self.ret[0:result_atoms_count]
 
     def blending_decide_impl(self, a_chosen_atoms_list, config):
         if config is None:

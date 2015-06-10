@@ -75,10 +75,11 @@ class ConnectSimple(BaseConnector):
         # the duplicate links.
         for links in duplicate_links:
             # array elements are same except original node.
-            link_key = links[0]
+            link_key_sample = links[0]
+
             weighted_tv = self.__get_weighted_tv(links)
             make_link_from_equal_link_key(
-                self.a, link_key, dst_node, weighted_tv
+                self.a, link_key_sample, dst_node, weighted_tv
             )
 
     def __connect_non_duplicate_links(self, non_duplicate_links, dst_node):
@@ -96,7 +97,7 @@ class ConnectSimple(BaseConnector):
             for link in links:
                 make_link_from_equal_link_key(self.a, link, dst_node, link.tv)
 
-    def link_connect_impl(self, a_decided_atoms, a_new_blended_atom, config):
+    def __connect_links_simple(self, a_decided_atoms, a_new_blended_atom):
         """
         Implementation of simple link connector.
 
@@ -108,7 +109,6 @@ class ConnectSimple(BaseConnector):
         :param list(types.Atom) a_decided_atoms: List of atoms to search
         links to be connected to new blended atom.
         :param types.Atom a_new_blended_atom: New blended atom.
-        :param dict config: config.
         """
         duplicate_links, non_duplicate_links = \
             find_duplicate_links(self.a, a_decided_atoms)
@@ -116,23 +116,8 @@ class ConnectSimple(BaseConnector):
         self.__connect_duplicate_links(duplicate_links, a_new_blended_atom)
         self.__connect_non_duplicate_links(non_duplicate_links, a_new_blended_atom)
 
-    def link_connect(self, a_decided_atoms, a_new_blended_atom, config=None):
+    def link_connect_impl(self, a_decided_atoms, a_new_blended_atom, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
-        self.link_connect_impl(a_decided_atoms, a_new_blended_atom, config)
-
-
-"""
-    def __get_atoms_all(self, atom_type, least_count):
-
-        Choose all atoms.
-        :param Type atom_type: type of atoms to choose.
-        :param int least_count: minimum number of atoms to choose.
-
-        self.ret = self.a.get_atoms_by_type(atom_type, True)
-
-        if len(self.ret) < least_count:
-            self.last_status = self.Status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
-"""
+        self.__connect_links_simple(a_decided_atoms, a_new_blended_atom)

@@ -1,4 +1,3 @@
-from blender_b.debug_blender import DebugBlender
 from blender_b.random_blender import RandomBlender
 from util_b.general_util import BlConfig
 
@@ -10,8 +9,7 @@ class BlenderFinder(object):
         self.a = a
 
         self.blender_list = {
-            RandomBlender.__name__: RandomBlender,
-            DebugBlender.__name__: DebugBlender
+            RandomBlender.__name__: RandomBlender
         }
 
         self.set_default_config()
