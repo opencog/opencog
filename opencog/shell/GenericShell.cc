@@ -195,7 +195,8 @@ void GenericShell::line_discipline(const std::string &expr)
 {
 	size_t len = expr.length();
 
-	logger().info("[GenericShell] line disc: expr, len of %zd ='%s'", len, expr.c_str());
+	logger().debug("[GenericShell] line disc: expr, len of %zd ='%s'",
+		len, expr.c_str());
 
 	// Make sure there is at least one character if we are checking
 	// for abort, interrrupt, escape, etc.
