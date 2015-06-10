@@ -40,9 +40,9 @@ Running
 
 * Start the webcam, pi_vision, and tf2 tracking nodes as usual.
 * Start the Eva blender node, as usual.
-* Start the opencog face-tracking node in the `face_track` directory
-  here.
-* Run `src/main.sh`
+* Start the cogserver.
+* Load the scripts shown in scripts/eva.sh
+* Start the opencog face-tracking node in the `face_track` directory.
 
 Owyl implementation
 -------------------
