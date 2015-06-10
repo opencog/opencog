@@ -13,6 +13,7 @@
 # Change this for your setup!
 export BLENDIR="../hr/blender_api"
 export OCBHAVE="../opencog/ros-behavior-scripting/"
+export PYTHONPATH=$PYTHONPATH:`pwd`/$OCBHAVE/src
 
 # Without this, some ros messages seem to run astray.
 export ROS_IP=127.0.0.1
@@ -38,7 +39,7 @@ tmux new-window -n 'cog' 'cogserver -c $OCBHAVE/scripts/opencog.conf; $SHELL'
 cd $OCBHAVE/src
 # Load data into the CogServer
 sleep 5
-echo -e "py\n" | cat - ros_commo.py |netcat localhost 17001
+# echo -e "py\n" | cat - ros_commo.py |netcat localhost 17001
 echo -e "py\n" | cat - atomic.py |netcat localhost 17001
 cat universal-fsm.scm |netcat localhost 17001
 sleep 5
