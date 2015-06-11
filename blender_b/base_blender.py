@@ -2,7 +2,8 @@ from abc import ABCMeta, abstractmethod
 from blender_b.chooser.chooser_finder import ChooserFinder
 from blender_b.connector.connector_finder import ConnectorFinder
 from blender_b.decider.decider_finder import DeciderFinder
-from util_b.general_util import enum_simulate, BlLogger
+from blender_b.maker.maker_finder import MakerFinder
+from util_b.general_util import enum_simulate, BlLogger, BlConfig
 
 __author__ = 'DongMin Kim'
 
@@ -29,18 +30,19 @@ class BaseBlender(object):
     def __init__(self, a):
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
-        self.make_default_config()
+        self.config = self.make_default_config()
 
         self.chooser_finder = ChooserFinder(self.a)
         self.connector_finder = ConnectorFinder(self.a)
+        self.maker_finder = MakerFinder(self.a)
         self.decider_finder = DeciderFinder(self.a)
 
         self.chooser = None
-        self.connector = None
         self.decider = None
+        self.maker = None
+        self.connector = None
 
         self.ret = None
-        self.make_default_config()
 
     def __str__(self):
         return self.__class__.__name__
@@ -63,26 +65,28 @@ class BaseBlender(object):
     4. Connect links to new blend atom from exist atom
     (Option) Finish rest of blending.
     """
+    @abstractmethod
     def prepare_hook(self, config):
         pass
 
     @abstractmethod
-    def choose_atoms(self):
+    def create_chooser(self):
         raise NotImplementedError("Please implement this method.")
 
     @abstractmethod
-    def decide_to_blend(self):
+    def create_decider(self):
         raise NotImplementedError("Please implement this method.")
 
     @abstractmethod
-    def init_new_blend_atom(self):
+    def create_maker(self):
         raise NotImplementedError("Please implement this method.")
 
     @abstractmethod
-    def connect_links(self):
+    def create_connector(self):
         raise NotImplementedError("Please implement this method.")
 
-    def finish_hook(self):
+    @abstractmethod
+    def finish_hook(self, a_new_blended_atom):
         pass
     """
     End of define.
@@ -92,27 +96,40 @@ class BaseBlender(object):
         self.last_status = self.Status.IN_PROCESS
         self.ret = None
 
+        self.config = config
+        if self.config is None:
+            self.config = BlConfig().get_section(str(self))
+
         try:
+            self.create_chooser()
+            self.create_decider()
+            self.create_maker()
+            self.create_connector()
+
             # Give interface to each blenders to suitable prepare works.
             # eg. caching, ...
             self.prepare_hook(config)
 
             # Choose nodes to blending.
-            self.choose_atoms()
+            a_chosen_atoms_list = self.chooser.atom_choose()
 
             # Decide whether or not to execute blending and prepare.
-            self.decide_to_blend()
+            a_decided_atoms = self.decider.blending_decide(a_chosen_atoms_list)
 
             # Initialize the new blend node.
-            self.init_new_blend_atom()
+            a_new_blended_atom = self.maker.new_blend_make(a_decided_atoms)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
-            self.connect_links()
+            self.connector.link_connect(a_decided_atoms, a_new_blended_atom)
 
             # Give interface to each blenders to finish works.
-            self.finish_hook()
+            self.finish_hook(a_new_blended_atom)
+
+            # If all task finished successfully, save new atom to return.
+            self.ret = a_new_blended_atom
+
         except UserWarning as e:
             BlLogger().log("Skipping blend, caused by '" + str(e) + "'")
             BlLogger().log(

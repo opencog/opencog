@@ -1,4 +1,4 @@
-from blender_b.random_blender import RandomBlender
+from blender_b.no_rule_blender import NoRuleBlender
 from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
@@ -9,7 +9,7 @@ class BlenderFinder(object):
         self.a = a
 
         self.blender_list = {
-            RandomBlender.__name__: RandomBlender
+            NoRuleBlender.__name__: NoRuleBlender
         }
 
         self.set_default_config()
@@ -19,7 +19,7 @@ class BlenderFinder(object):
 
     def set_default_config(self):
         default_config = {
-            'BLENDER': 'RandomBlender'
+            'BLENDER': 'NoRuleBlender'
         }
         BlConfig().make_default_config(str(self), default_config)
 

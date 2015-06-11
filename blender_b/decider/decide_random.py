@@ -34,10 +34,9 @@ class DecideRandom(BaseDecider):
         a_index_list = random.sample(
             range(0, len(a_chosen_atoms_list)), result_atoms_count
         )
-        self.ret = [
-            a_chosen_atoms_list[a_index_list[0]],
-            a_chosen_atoms_list[a_index_list[1]]
-        ]
+
+        for index in a_index_list:
+            self.ret.extend(a_chosen_atoms_list[index])
 
     def blending_decide_impl(self, a_chosen_atoms_list, config):
         if config is None:

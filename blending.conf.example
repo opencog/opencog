@@ -12,10 +12,10 @@
 USE_CONFIG_FILE: True
 
 # Release or Debug
-AGENT_MODE: Debug
+AGENT_MODE: Release
 
 # DO NOT CHANGE VERSION NUMBER
-CONFIG_FILE_VERSION: 1
+CONFIG_FILE_VERSION: 2
 #####################
 [BlLogger]
 LOG_RELEASE_LEVEL: INFO
@@ -30,9 +30,9 @@ LOG_DEBUG_POSTFIX:
 #
 # Blender select.
 # Options:
-# RandomBlender, DebugBlender
+# NoRuleBlender
 #
-BLENDER: RandomBlender
+BLENDER: NoRuleBlender
 #####################
 [ChooserFinder]
 #
@@ -52,16 +52,25 @@ ATOMS_CHOOSER: ChooseAll
 #
 BLENDING_DECIDER: DecideBestSTI
 #####################
+[MakerFinder]
+#
+# Default maker select.
+# 
+# Options:
+# MakeSimple
+#
+NEW_BLEND_ATOM_MAKER: MakeSimple
+#####################
+#####################
 [ConnectorFinder]
 #
 # Default connector select.
 # 
 # Options:
-# DecideRandom, DecideInSTI
+# ConnectSimple
 #
 LINK_CONNECTOR: ConnectSimple
 #####################
-
 
 
 ###
@@ -70,11 +79,11 @@ LINK_CONNECTOR: ConnectSimple
 #
 ###
 #####################
-[RandomBlender]
+[NoRuleBlender]
 # ATOMS_CHOOSER: 
-#####################
-[DebugBlender]
-# ATOMS_CHOOSER: 
+# BLENDING_DECIDER: 
+# NEW_BLEND_ATOM_MAKER: 
+# LINK_CONNECTOR: 
 #####################
 
 
@@ -95,7 +104,6 @@ LEAST_COUNT: 2
 [ChooseInSTIRange]
 ATOM_TYPE: Node
 LEAST_COUNT: 2
-
 #
 # STI value range in ChooseInSTIRange.
 # 
@@ -109,12 +117,54 @@ STI_MAX: NONE
 
 ###
 #
-# 4. Developer options.
+# 4. Decider custom options.
+#
+###
+#####################
+[DecideRandom]
+RESULT_ATOMS_COUNT: 2
+#####################
+[DecideBestSTI]
+RESULT_ATOMS_COUNT: 2
+#
+# STI value range in ChooseInSTIRange.
+# 
+# Options:
+# NONE, JUST_TARGET, IMPORTANT, VERY_IMPORTANT
+#
+STI_MIN: IMPORTANT
+STI_MAX: NONE
+#####################
+
+###
+#
+# 5. Maker custom options.
+#
+###
+#####################
+[MakeSimple]
+#####################
+
+
+###
+#
+# 6. Connector custom options.
+#
+###
+#####################
+[ConnectSimple]
+#####################
+
+
+###
+#
+# 7. Developer options.
 #
 ###
 #####################
 [TestCaseLoader]
 EXAMPLE_LOAD: True
+# EXAMPLE_LOAD: False
 #
 # Auto load example to test or debug.
 #
