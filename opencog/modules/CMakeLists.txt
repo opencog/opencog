@@ -112,3 +112,18 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 	)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+
+# ----------------------------------------
+# Build the execute module
+
+IF (HAVE_GUILE)
+	ADD_LIBRARY (ExecModule SHARED ExecModule)
+
+	TARGET_LINK_LIBRARIES(ExecModule
+		${ATOMSPACE_LIBRARIES}
+	)
+
+	INSTALL (TARGETS ExecModule
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	)
+ENDIF (HAVE_GUILE)
