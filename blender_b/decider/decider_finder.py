@@ -1,4 +1,5 @@
 from blender_b.decider.decide_best_sti import DecideBestSTI
+from blender_b.decider.decide_null import DecideNull
 from blender_b.decider.decide_random import DecideRandom
 from util_b.general_util import BlConfig
 
@@ -10,6 +11,7 @@ class DeciderFinder(object):
         self.a = a
 
         self.decider_list = {
+            DecideNull.__name__: DecideNull,
             DecideRandom.__name__: DecideRandom,
             DecideBestSTI.__name__: DecideBestSTI
         }

@@ -1,4 +1,5 @@
 from blender_b.no_rule_blender import NoRuleBlender
+from blender_b.rule_blender import RuleBlender
 from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'
@@ -9,6 +10,7 @@ class BlenderFinder(object):
         self.a = a
 
         self.blender_list = {
+            RuleBlender.__name__: RuleBlender,
             NoRuleBlender.__name__: NoRuleBlender
         }
 

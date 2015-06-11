@@ -24,7 +24,7 @@ class ChooseInBlendTarget(BaseChooser):
         }
         BlConfig().make_default_config(str(self), default_config)
 
-    def __get_atoms_in_blend_target(self, atom_type, least_count):
+    def __get_atoms_in_blend_target(self, asked_atom_list, atom_type, least_count):
         """
         Choose atoms which are connected with 'BlendTarget' ConceptNode.
         :param Type atom_type: type of atoms to choose.
@@ -41,7 +41,7 @@ class ChooseInBlendTarget(BaseChooser):
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, config):
+    def atom_choose_impl(self, asked_atom_list, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -60,7 +60,9 @@ class ChooseInBlendTarget(BaseChooser):
             atom_type = types.Node
         try:
             least_count = int(least_count)
+            if least_count < 0:
+                raise ValueError('Least count of atom list is too small.')
         except (TypeError, ValueError):
             least_count = 0
 
-        self.__get_atoms_in_blend_target(atom_type, least_count)
+        self.__get_atoms_in_blend_target(asked_atom_list, atom_type, least_count)

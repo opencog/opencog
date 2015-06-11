@@ -4,7 +4,7 @@ from util_b.general_util import *
 from util_b.blending_util import *
 
 
-class ShellWrapper:
+class AgentShellWrapper:
     def __init__(self):
         self.a = AtomSpace()
 

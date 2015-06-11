@@ -6,7 +6,7 @@ from blender_b.connector.connect_simple import *
 __author__ = 'DongMin Kim'
 
 
-class NoRuleBlender(BaseBlender):
+class RuleBlender(BaseBlender):
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 
@@ -18,6 +18,8 @@ class NoRuleBlender(BaseBlender):
 
     def make_default_config(self):
         default_config = {
+            'ATOMS_CHOOSER': 'ChooseInSTIRange',
+            'BLENDING_DECIDER': 'DecideBestSTI',
             'NEW_BLEND_ATOM_MAKER': 'MakeSimple',
             'LINK_CONNECTOR': 'ConnectSimple'
         }
@@ -28,10 +30,14 @@ class NoRuleBlender(BaseBlender):
         pass
 
     def create_chooser(self):
-        self.chooser = self.chooser_finder.get_chooser('ChooseNull')
+        self.chooser = self.chooser_finder.get_chooser(
+            self.config.get('ATOMS_CHOOSER')
+        )
 
     def create_decider(self):
-        self.decider = self.decider_finder.get_decider('DecideNull')
+        self.decider = self.decider_finder.get_decider(
+            self.config.get('BLENDING_DECIDER')
+        )
 
     def create_maker(self):
         self.maker = self.maker_finder.get_maker(

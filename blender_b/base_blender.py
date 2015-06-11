@@ -42,6 +42,9 @@ class BaseBlender(object):
         self.maker = None
         self.connector = None
 
+        self.a_chosen_atoms_list = None
+        self.a_decided_atoms = None
+        self.a_new_blended_atom = None
         self.ret = None
 
     def __str__(self):
@@ -111,24 +114,28 @@ class BaseBlender(object):
             self.prepare_hook(config)
 
             # Choose nodes to blending.
-            a_chosen_atoms_list = self.chooser.atom_choose()
+            self.a_chosen_atoms_list = self.chooser.atom_choose()
 
             # Decide whether or not to execute blending and prepare.
-            a_decided_atoms = self.decider.blending_decide(a_chosen_atoms_list)
+            self.a_decided_atoms = \
+                self.decider.blending_decide(self.a_chosen_atoms_list)
 
             # Initialize the new blend node.
-            a_new_blended_atom = self.maker.new_blend_make(a_decided_atoms)
+            self.a_new_blended_atom = \
+                self.maker.new_blend_make(self.a_decided_atoms)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
-            self.connector.link_connect(a_decided_atoms, a_new_blended_atom)
+            self.connector.link_connect(
+                self.a_decided_atoms, self.a_new_blended_atom
+            )
 
             # Give interface to each blenders to finish works.
-            self.finish_hook(a_new_blended_atom)
+            self.finish_hook(self.a_new_blended_atom)
 
             # If all task finished successfully, save new atom to return.
-            self.ret = a_new_blended_atom
+            self.ret = self.a_new_blended_atom
 
         except UserWarning as e:
             BlLogger().log("Skipping blend, caused by '" + str(e) + "'")

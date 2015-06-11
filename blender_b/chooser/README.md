@@ -3,6 +3,8 @@
 
 ## Files
 * base_chooser.py: Abstract class to provide 'atom_choose()' interface.
+
+* choose_null.py: Not choose, just return requested atoms.
 * choose_all.py: Choose all atoms.
 * choose_in_blend_target.py: Choose atoms which are connected with 
   'BlendTarget' ConceptNode. 
