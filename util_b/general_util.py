@@ -57,7 +57,6 @@ class BlConfig(Singleton):
         cls.minimum_config_file_version = 3
 
         cls.use_config_file = False
-        cls.use_blend_target = False
         cls.blending_config = dict()
 
         config_parser = ConfigParser.ConfigParser()
@@ -108,9 +107,6 @@ class BlConfig(Singleton):
                 )
             )
 
-        if cls.get('ETC', 'USE_BLEND_TARGET_FOR_DEBUG') == 'True':
-            cls.use_blend_target = True
-
         cls.is_loaded = True
 
     def make_default_config(cls, section, default_config):
@@ -139,14 +135,6 @@ class BlConfig(Singleton):
         :type cls.use_config_file: Boolean
         """
         return cls.use_config_file
-
-    @property
-    def is_use_blend_target(cls):
-        """
-        :type cls.use_blend_target: Boolean
-        """
-        return cls.use_blend_target
-
 
 class BlLogger(Singleton):
     def __init__(cls):

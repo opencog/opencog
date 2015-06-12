@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 __author__ = 'DongMin Kim'
 
 
-class BaseTestCase(object):
+class BaseExample(object):
     """
     :type a: opencog.atomspace_details.AtomSpace
     """

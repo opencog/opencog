@@ -1,5 +1,5 @@
-from tests_b.paul_sally.paul_sally import PaulSallyExample
-from tests_b.debate_with_kant.debate_with_kant import DebateWithKantExample
+from examples_b.paul_sally.paul_sally import PaulSallyExample
+from examples_b.debate_with_kant.debate_with_kant import DebateWithKantExample
 from util_b.general_util import BlConfig
 
 __author__ = 'DongMin Kim'

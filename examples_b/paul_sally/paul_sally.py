@@ -1,4 +1,4 @@
-from tests_b.base_test_case import BaseTestCase
+from examples_b.base_example import BaseExample
 from util_b.blending_util import *
 from util_b.general_util import BlConfig
 from opencog.type_constructors import *
@@ -8,7 +8,7 @@ __author__ = 'DongMin Kim'
 
 # Paul & Sally example in the book 'The Way We Think'
 # It is a simplex network example.
-class PaulSallyExample(BaseTestCase):
+class PaulSallyExample(BaseExample):
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 
@@ -188,44 +188,9 @@ class PaulSallyExample(BaseTestCase):
     def __make_blended_space(self):
         pass
 
-    def __link_with_blend_target_for_debug(self):
-        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
-
-        # Link with blend target.
-        make_link_all(
-            self.a,
-            types.MemberLink,
-            [self.a_grand_father, self.a_grand_mother,
-             self.a_father, self.a_mother,
-             self.a_son, self.a_daughter],
-            self.a_blend_target,
-            blend_target_link_tv
-        )
-
-        # Link with blend target.
-        make_link_all(
-            self.a,
-            types.MemberLink,
-            [self.a_paul, self.a_sally],
-            self.a_blend_target,
-            blend_target_link_tv
-        )
-
-        # Link with blend target.
-        make_link_all(
-            self.a,
-            types.MemberLink,
-            [self.a_human, self.a_human, self.a_woman],
-            self.a_blend_target,
-            blend_target_link_tv
-        )
-
     def make(self):
         self.__make_atoms()
         self.__make_input_space_0()
         self.__make_input_space_1()
         self.__make_generic_space()
         self.__make_blended_space()
-
-        if BlConfig().is_use_blend_target:
-            self.__link_with_blend_target_for_debug()

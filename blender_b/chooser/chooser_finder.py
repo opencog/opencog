@@ -1,5 +1,4 @@
 from blender_b.chooser.choose_all import ChooseAll
-from blender_b.chooser.choose_in_blend_target import ChooseInBlendTarget
 from blender_b.chooser.choose_in_sti_range import ChooseInSTIRange
 from blender_b.chooser.choose_null import ChooseNull
 from util_b.general_util import BlConfig
@@ -14,7 +13,6 @@ class ChooserFinder(object):
         self.chooser_list = {
             ChooseNull.__name__: ChooseNull,
             ChooseAll.__name__: ChooseAll,
-            ChooseInBlendTarget.__name__: ChooseInBlendTarget,
             ChooseInSTIRange.__name__: ChooseInSTIRange
         }
 

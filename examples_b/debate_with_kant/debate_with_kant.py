@@ -1,5 +1,5 @@
 # coding=utf-8
-from tests_b.base_test_case import BaseTestCase
+from examples_b.base_example import BaseExample
 from util_b.blending_util import *
 from util_b.general_util import BlConfig
 from opencog.type_constructors import *
@@ -9,7 +9,7 @@ __author__ = 'DongMin Kim'
 
 # Debate with Kant example in the book 'The Way We Think'
 # It is a mirror network example.
-class DebateWithKantExample(BaseTestCase):
+class DebateWithKantExample(BaseExample):
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 
@@ -96,7 +96,6 @@ class DebateWithKantExample(BaseTestCase):
         self.a_issue = ConceptNode("Issue", rand_tv())
         self.a_purpose = ConceptNode("Purpose", rand_tv())
         self.a_time = ConceptNode("Time", rand_tv())
-        # Not blend target.
 
         # Use in BlendedSpace.
         self.a_counterclaims = ConceptNode("Counterclaims", rand_tv())
@@ -339,48 +338,6 @@ class DebateWithKantExample(BaseTestCase):
     def __make_blended_space(self):
         pass
 
-    def __link_with_blend_target_for_debug(self):
-        self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
-
-        # Link with blend target.
-        make_link_all(
-            self.a,
-            types.MemberLink,
-            [
-                self.a_me,
-                self.a_claims,
-                self.a_musings,
-                self.a_speaking,
-                self.a_english,
-                self.a_cognitive_process,
-                self.a_search_for_truth,
-                self.a_1995,
-                self.a_kant,
-                self.a_dead,
-                self.a_aware
-            ],
-            self.a_blend_target,
-            blend_target_link_tv
-        )
-
-        # Link with blend target.
-        make_link_all(
-            self.a,
-            types.MemberLink,
-            [
-                self.a_kant,
-                self.a_claims,
-                self.a_musings,
-                self.a_writing,
-                self.a_german,
-                self.a_reason,
-                self.a_search_for_truth,
-                self.a_1784
-            ],
-            self.a_blend_target,
-            blend_target_link_tv
-        )
-
     def make(self):
         self.__make_atoms()
         self.__make_debate_frame()
@@ -388,6 +345,3 @@ class DebateWithKantExample(BaseTestCase):
         self.__make_input_space_1()
         self.__make_generic_space()
         self.__make_blended_space()
-
-        if BlConfig().is_use_blend_target:
-            self.__link_with_blend_target_for_debug()

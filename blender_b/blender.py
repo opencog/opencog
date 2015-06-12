@@ -4,8 +4,7 @@ from blender_b.chooser.chooser_finder import ChooserFinder
 from blender_b.connector.connector_finder import ConnectorFinder
 from blender_b.decider.decider_finder import DeciderFinder
 from blender_b.maker.maker_finder import MakerFinder
-from util_b.blending_util import BlendTargetCtlForDebug, blend_target_link_tv, \
-    rand_tv
+from util_b.blending_util import *
 from util_b.general_util import enum_simulate, BlLogger, BlConfig
 
 __author__ = 'DongMin Kim'
@@ -34,9 +33,6 @@ class Blender(object):
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
         self.config = self.make_default_config()
-
-        if BlConfig().is_use_blend_target:
-            self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
 
         self.chooser_finder = ChooserFinder(self.a)
         self.connector_finder = ConnectorFinder(self.a)
@@ -106,14 +102,6 @@ class Blender(object):
         )
 
     def finish_hook(self, a_new_blended_atom):
-        # DEBUG: Link with blend target.
-        if BlConfig().is_use_blend_target:
-            self.a.add_link(
-                types.MemberLink,
-                [a_new_blended_atom, self.a_blend_target],
-                blend_target_link_tv
-            )
-
         # DEBUG: Link with Blended Space.
         a_blended_space = self.a.get_atoms_by_name(types.Atom, "BlendedSpace")[0]
 
