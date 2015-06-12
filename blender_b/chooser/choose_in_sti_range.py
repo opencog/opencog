@@ -43,7 +43,7 @@ class ChooseInSTIRange(BaseChooser):
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, asked_atom_list, config):
+    def atom_choose_impl(self, focus_atom_list, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -73,5 +73,5 @@ class ChooseInSTIRange(BaseChooser):
             sti_max = None
 
         return self.__get_atoms_in_sti_range(
-            asked_atom_list, atom_type, least_count, sti_min, sti_max
+            focus_atom_list, atom_type, least_count, sti_min, sti_max
         )

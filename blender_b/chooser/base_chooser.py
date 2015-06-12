@@ -37,18 +37,18 @@ class BaseChooser(object):
         pass
 
     @abstractmethod
-    def atom_choose_impl(self, asked_atom_list, config):
+    def atom_choose_impl(self, focus_atom_list, config):
         """
         :param config: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def atom_choose(self, asked_atom_list=None, config=None):
+    def atom_choose(self, focus_atom_list=None, config=None):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.atom_choose_impl(asked_atom_list, config)
+            self.atom_choose_impl(focus_atom_list, config)
         except UserWarning as e:
             BlLogger().log("Skipping choose, caused by '" + str(e) + "'")
             BlLogger().log(

@@ -41,7 +41,7 @@ class ChooseInBlendTarget(BaseChooser):
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, asked_atom_list, config):
+    def atom_choose_impl(self, focus_atom_list, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -65,4 +65,4 @@ class ChooseInBlendTarget(BaseChooser):
         except (TypeError, ValueError):
             least_count = 0
 
-        self.__get_atoms_in_blend_target(asked_atom_list, atom_type, least_count)
+        self.__get_atoms_in_blend_target(focus_atom_list, atom_type, least_count)
