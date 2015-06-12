@@ -8,7 +8,7 @@ class ConnectorFinder(object):
     def __init__(self, a):
         self.a = a
 
-        self.connector_list = {
+        self.connectors = {
             ConnectSimple.__name__: ConnectSimple
         }
 
@@ -27,7 +27,7 @@ class ConnectorFinder(object):
         if id_or_name is None:
             id_or_name = BlConfig().get(str(self), 'LINK_CONNECTOR')
 
-        connector = self.connector_list.get(str(id_or_name))
+        connector = self.connectors.get(str(id_or_name))
         if connector is not None:
             return connector(self.a)
         else:

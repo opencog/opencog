@@ -22,58 +22,58 @@ class PaulSallyExample(BaseExample):
         #
 
         # Make default concepts.
-        self.a_space = ConceptNode("Space", self.default_atom_tv)
-        self.a_frame = ConceptNode("Frame", self.default_atom_tv)
-        self.a_input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
-        self.a_input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
-        self.a_generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
-        self.a_blended_space = ConceptNode("BlendedSpace", self.default_atom_tv)
+        self.space = ConceptNode("Space", self.default_atom_tv)
+        self.frame = ConceptNode("Frame", self.default_atom_tv)
+        self.input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
+        self.input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
+        self.generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
+        self.blend_space = ConceptNode("BlendSpace", self.default_atom_tv)
 
         make_link_all(
             self.a,
             types.InheritanceLink,
             [
-                self.a_input_space_0,
-                self.a_input_space_1,
-                self.a_generic_space,
-                self.a_blended_space
+                self.input_space_0,
+                self.input_space_1,
+                self.generic_space,
+                self.blend_space
             ],
-            self.a_space,
+            self.space,
             self.default_link_tv
         )
 
         # Use in InputSpace0.
-        self.a_family = ConceptNode("Family", rand_tv())
-        self.a_grand_father = ConceptNode("Grandfather", rand_tv())
-        self.a_grand_mother = ConceptNode("Grandmother", rand_tv())
-        self.a_father = ConceptNode("Father", rand_tv())
-        self.a_mother = ConceptNode("Mother", rand_tv())
-        self.a_son = ConceptNode("Son", rand_tv())
-        self.a_daughter = ConceptNode("Daughter", rand_tv())
+        self.family = ConceptNode("Family", rand_tv())
+        self.grand_father = ConceptNode("Grandfather", rand_tv())
+        self.grand_mother = ConceptNode("Grandmother", rand_tv())
+        self.father = ConceptNode("Father", rand_tv())
+        self.mother = ConceptNode("Mother", rand_tv())
+        self.son = ConceptNode("Son", rand_tv())
+        self.daughter = ConceptNode("Daughter", rand_tv())
         make_sti_all(
             self.a,
-            [self.a_family,
-             self.a_grand_father, self.a_grand_mother,
-             self.a_father, self.a_mother,
-             self.a_son, self.a_daughter],
+            [self.family,
+             self.grand_father, self.grand_mother,
+             self.father, self.mother,
+             self.son, self.daughter],
             sti_value_dict['JUST_TARGET']
         )
         # Use in InputSpace1.
-        self.a_paul = VariableNode("Paul", rand_tv())
-        self.a_sally = VariableNode("Sally", rand_tv())
+        self.paul = VariableNode("Paul", rand_tv())
+        self.sally = VariableNode("Sally", rand_tv())
         make_sti_all(
             self.a,
-            [self.a_paul, self.a_sally],
+            [self.paul, self.sally],
             sti_value_dict['JUST_TARGET']
         )
 
         # Use in Generic Space.
-        self.a_human = ConceptNode("Human", rand_tv())
-        self.a_man = ConceptNode("Man", rand_tv())
-        self.a_woman = ConceptNode("Woman", rand_tv())
+        self.human = ConceptNode("Human", rand_tv())
+        self.man = ConceptNode("Man", rand_tv())
+        self.woman = ConceptNode("Woman", rand_tv())
         make_sti_all(
             self.a,
-            [self.a_human, self.a_human, self.a_woman],
+            [self.human, self.human, self.woman],
             sti_value_dict['JUST_TARGET']
         )
 
@@ -82,29 +82,29 @@ class PaulSallyExample(BaseExample):
     # It has frame. It not has variables.
     def __make_input_space_0(self):
         # Make instance of frame concept.
-        InheritanceLink(self.a_family, self.a_frame, self.default_link_tv)
+        InheritanceLink(self.family, self.frame, self.default_link_tv)
         # Link with family frame type.
         make_link_all(
             self.a,
             types.MemberLink,
-            [self.a_grand_father, self.a_grand_mother,
-             self.a_father, self.a_mother,
-             self.a_son, self.a_daughter],
-            self.a_family
+            [self.grand_father, self.grand_mother,
+             self.father, self.mother,
+             self.son, self.daughter],
+            self.family
         )
 
         # Make role concept.
         make_sti_all(
             self.a,
-            [self.a_father, self.a_daughter],
+            [self.father, self.daughter],
             sti_value_dict['IMPORTANT']
         )
         # Link with input space 0 type.
         make_link_all(
             self.a,
             types.MemberLink,
-            [self.a_father, self.a_daughter],
-            self.a_input_space_0,
+            [self.father, self.daughter],
+            self.input_space_0,
             self.default_link_tv
         )
 
@@ -115,15 +115,15 @@ class PaulSallyExample(BaseExample):
         # Make variable concept.
         make_sti_all(
             self.a,
-            [self.a_paul, self.a_sally],
+            [self.paul, self.sally],
             sti_value_dict['IMPORTANT']
         )
         # Link with input space 1 type.
         make_link_all(
             self.a,
             types.MemberLink,
-            [self.a_paul, self.a_sally],
-            self.a_input_space_1,
+            [self.paul, self.sally],
+            self.input_space_1,
             self.default_link_tv
         )
 
@@ -133,8 +133,8 @@ class PaulSallyExample(BaseExample):
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_man, self.a_woman],
-            self.a_human
+            [self.man, self.woman],
+            self.human
         )
 
         """
@@ -143,12 +143,12 @@ class PaulSallyExample(BaseExample):
             self.a,
             types.InheritanceLink,
             [
-                self.a_grand_father, self.a_grand_mother,
-                self.a_father, self.a_mother,
-                self.a_son, self.a_daughter,
-                self.a_paul, self.a_sally
+                self.grand_father, self.grand_mother,
+                self.father, self.mother,
+                self.son, self.daughter,
+                self.paul, self.sally
             ],
-            self.a_human
+            self.human
         )
         """
 
@@ -157,11 +157,11 @@ class PaulSallyExample(BaseExample):
             self.a,
             types.InheritanceLink,
             [
-                self.a_grand_father, self.a_father,
-                self.a_son,
-                self.a_paul
+                self.grand_father, self.father,
+                self.son,
+                self.paul
             ],
-            self.a_man
+            self.man
         )
 
         # Link with woman type.
@@ -169,23 +169,23 @@ class PaulSallyExample(BaseExample):
             self.a,
             types.InheritanceLink,
             [
-                self.a_grand_mother, self.a_mother,
-                self.a_daughter,
-                self.a_sally
+                self.grand_mother, self.mother,
+                self.daughter,
+                self.sally
             ],
-            self.a_woman
+            self.woman
         )
 
         # Link with generic space type.
         make_link_all(
             self.a,
             types.MemberLink,
-            [self.a_man, self.a_woman, self.a_human],
-            self.a_generic_space
+            [self.man, self.woman, self.human],
+            self.generic_space
         )
 
     # - Blended Space
-    def __make_blended_space(self):
+    def __make_blend_space(self):
         pass
 
     def make(self):
@@ -193,4 +193,4 @@ class PaulSallyExample(BaseExample):
         self.__make_input_space_0()
         self.__make_input_space_1()
         self.__make_generic_space()
-        self.__make_blended_space()
+        self.__make_blend_space()

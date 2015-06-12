@@ -37,18 +37,18 @@ class BaseConnector(object):
         pass
 
     @abstractmethod
-    def link_connect_impl(self, a_decided_atoms, a_new_blended_atom, config):
+    def link_connect_impl(self, decided_atoms, new_blended_atom, config):
         """
         :param config: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def link_connect(self, a_decided_atoms, a_new_blended_atom, config=None):
+    def link_connect(self, decided_atoms, new_blended_atom, config=None):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.link_connect_impl(a_decided_atoms, a_new_blended_atom, config)
+            self.link_connect_impl(decided_atoms, new_blended_atom, config)
         except UserWarning as e:
             BlLogger().log("Skipping connect, caused by '" + str(e) + "'")
             BlLogger().log(

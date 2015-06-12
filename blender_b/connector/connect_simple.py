@@ -63,7 +63,7 @@ class ConnectSimple(BaseConnector):
                     self.a, link, dst_node, link.tv
                 )
 
-    def __connect_links_simple(self, a_decided_atoms, a_new_blended_atom):
+    def __connect_links_simple(self, decided_atoms, new_blended_atom):
         """
         Implementation of simple link connector.
 
@@ -72,18 +72,18 @@ class ConnectSimple(BaseConnector):
          blended atom.
         3. Try to connect to new blended atom.
 
-        :param list(types.Atom) a_decided_atoms: List of atoms to search
+        :param list(types.Atom) decided_atoms: List of atoms to search
         links to be connected to new blended atom.
-        :param types.Atom a_new_blended_atom: New blended atom.
+        :param types.Atom new_blended_atom: New blended atom.
         """
         duplicate_links, non_duplicate_links = \
-            find_duplicate_links(self.a, a_decided_atoms)
+            find_duplicate_links(self.a, decided_atoms)
 
-        self.__connect_duplicate_links(duplicate_links, a_new_blended_atom)
-        self.__connect_non_duplicate_links(non_duplicate_links, a_new_blended_atom)
+        self.__connect_duplicate_links(duplicate_links, new_blended_atom)
+        self.__connect_non_duplicate_links(non_duplicate_links, new_blended_atom)
 
-    def link_connect_impl(self, a_decided_atoms, a_new_blended_atom, config):
+    def link_connect_impl(self, decided_atoms, new_blended_atom, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
-        self.__connect_links_simple(a_decided_atoms, a_new_blended_atom)
+        self.__connect_links_simple(decided_atoms, new_blended_atom)

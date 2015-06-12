@@ -37,19 +37,19 @@ class BaseDecider(object):
         pass
 
     @abstractmethod
-    def blending_decide_impl(self, a_chosen_atoms_list, config):
+    def blending_decide_impl(self, chosen_atoms, config):
         """
-        :param a_chosen_atoms_list: list
+        :param chosen_atoms: list
         :param config: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def blending_decide(self, a_chosen_atoms_list, config=None):
+    def blending_decide(self, chosen_atoms, config=None):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.blending_decide_impl(a_chosen_atoms_list, config)
+            self.blending_decide_impl(chosen_atoms, config)
         except UserWarning as e:
             BlLogger().log("Skipping decide, caused by '" + str(e) + "'")
             BlLogger().log(

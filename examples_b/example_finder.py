@@ -10,7 +10,7 @@ class TestCaseLoader:
     def __init__(self, a):
         self.a = a
 
-        self.test_case_list = {
+        self.test_cases = {
             PaulSallyExample.__name__: PaulSallyExample,
             DebateWithKantExample.__name__: DebateWithKantExample
         }
@@ -36,12 +36,12 @@ class TestCaseLoader:
         if id_or_name is None:
             id_or_name = config.get('EXAMPLE')
 
-        test_case = self.test_case_list.get(str(id_or_name))
+        test_case = self.test_cases.get(str(id_or_name))
         if test_case is not None:
             test_case(self.a).make()
         else:
             raise UserWarning('Test case not found.')
 
     def make_all(self):
-        for test_case in self.test_case_list.values():
+        for test_case in self.test_cases.values():
             test_case(self.a).make()

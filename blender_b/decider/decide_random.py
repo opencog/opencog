@@ -20,25 +20,25 @@ class DecideRandom(BaseDecider):
         }
         BlConfig().make_default_config(str(self), default_config)
 
-    def __decide_atoms_random(self, a_chosen_atoms_list, result_atoms_count):
+    def __decide_atoms_random(self, chosen_atoms, result_atoms_count):
         """
         Choose all atoms.
-        :param List a_chosen_atoms_list: atoms list to decide.
+        :param List chosen_atoms: atoms list to decide.
         :param int result_atoms_count: maximum number of atoms to blend.
         """
 
-        if len(a_chosen_atoms_list) < result_atoms_count:
+        if len(chosen_atoms) < result_atoms_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-        a_index_list = random.sample(
-            range(0, len(a_chosen_atoms_list)), result_atoms_count
+        random_atom_indexes = random.sample(
+            range(0, len(chosen_atoms)), result_atoms_count
         )
 
-        for index in a_index_list:
-            self.ret.extend(a_chosen_atoms_list[index])
+        for index in random_atom_indexes:
+            self.ret.extend(chosen_atoms[index])
 
-    def blending_decide_impl(self, a_chosen_atoms_list, config):
+    def blending_decide_impl(self, chosen_atoms, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -49,4 +49,4 @@ class DecideRandom(BaseDecider):
         except (TypeError, ValueError):
             result_atoms_count = 2
 
-        self.__decide_atoms_random(a_chosen_atoms_list, result_atoms_count)
+        self.__decide_atoms_random(chosen_atoms, result_atoms_count)

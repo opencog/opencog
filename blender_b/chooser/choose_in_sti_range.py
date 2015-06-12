@@ -23,7 +23,7 @@ class ChooseInSTIRange(BaseChooser):
         BlConfig().make_default_config(str(self), default_config)
 
     def __get_atoms_in_sti_range(
-            self, asked_atom_list, atom_type, least_count, sti_min, sti_max
+            self, focus_atoms, atom_type, least_count, sti_min, sti_max
     ):
         """
         Choose atoms within proper STI range.
@@ -32,18 +32,18 @@ class ChooseInSTIRange(BaseChooser):
         :param float sti_min: min value of sti to choose.
         :param float sti_max: max value of sti to choose.
         """
-        a_atom_list = self.a.get_atoms_by_av(sti_min, sti_max)
+        atoms = self.a.get_atoms_by_av(sti_min, sti_max)
 
-        if len(a_atom_list) < least_count:
+        if len(atoms) < least_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-        self.ret = filter(lambda atom: atom.is_a(atom_type), a_atom_list)
+        self.ret = filter(lambda atom: atom.is_a(atom_type), atoms)
         if len(self.ret) < least_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, focus_atom_list, config):
+    def atom_choose_impl(self, focus_atoms, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -73,5 +73,5 @@ class ChooseInSTIRange(BaseChooser):
             sti_max = None
 
         return self.__get_atoms_in_sti_range(
-            focus_atom_list, atom_type, least_count, sti_min, sti_max
+            focus_atoms, atom_type, least_count, sti_min, sti_max
         )

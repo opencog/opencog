@@ -8,7 +8,7 @@ class MakerFinder(object):
     def __init__(self, a):
         self.a = a
 
-        self.maker_list = {
+        self.makers = {
             MakeSimple.__name__: MakeSimple
         }
 
@@ -27,7 +27,7 @@ class MakerFinder(object):
         if id_or_name is None:
             id_or_name = BlConfig().get(str(self), 'NEW_BLEND_ATOM_MAKER')
 
-        maker = self.maker_list.get(str(id_or_name))
+        maker = self.makers.get(str(id_or_name))
         if maker is not None:
             return maker(self.a)
         else:

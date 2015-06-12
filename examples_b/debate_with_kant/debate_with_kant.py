@@ -23,132 +23,132 @@ class DebateWithKantExample(BaseExample):
         #
 
         # Make default concepts.
-        self.a_space = ConceptNode("Space", self.default_atom_tv)
-        self.a_frame = ConceptNode("Frame", self.default_atom_tv)
-        self.a_input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
-        self.a_input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
-        self.a_generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
-        self.a_blended_space = ConceptNode("BlendedSpace", self.default_atom_tv)
+        self.space = ConceptNode("Space", self.default_atom_tv)
+        self.frame = ConceptNode("Frame", self.default_atom_tv)
+        self.input_space_0 = ConceptNode("InputSpace0", self.default_atom_tv)
+        self.input_space_1 = ConceptNode("InputSpace1", self.default_atom_tv)
+        self.generic_space = ConceptNode("GenericSpace", self.default_atom_tv)
+        self.blend_space = ConceptNode("BlendSpace", self.default_atom_tv)
 
         make_link_all(
             self.a,
             types.InheritanceLink,
             [
-                self.a_input_space_0,
-                self.a_input_space_1,
-                self.a_generic_space,
-                self.a_blended_space
+                self.input_space_0,
+                self.input_space_1,
+                self.generic_space,
+                self.blend_space
             ],
-            self.a_space,
+            self.space,
             self.default_link_tv
         )
 
         # Use in InputSpace0.
-        self.a_kant = ConceptNode("Kant", rand_tv())
-        self.a_claims = ConceptNode("Claims", rand_tv())
-        self.a_musings = ConceptNode("Musings", rand_tv())
-        self.a_writing = ConceptNode("Writing", rand_tv())
-        self.a_german = ConceptNode("German", rand_tv())
-        self.a_reason = ConceptNode("Reason", rand_tv())
-        self.a_search_for_truth = ConceptNode("SearchForTruth", rand_tv())
+        self.kant = ConceptNode("Kant", rand_tv())
+        self.claims = ConceptNode("Claims", rand_tv())
+        self.musings = ConceptNode("Musings", rand_tv())
+        self.writing = ConceptNode("Writing", rand_tv())
+        self.german = ConceptNode("German", rand_tv())
+        self.reason = ConceptNode("Reason", rand_tv())
+        self.search_for_truth = ConceptNode("SearchForTruth", rand_tv())
         self.a_1784 = ConceptNode("1784", rand_tv())
         make_sti_all(
             self.a,
             [
-                self.a_kant,
-                self.a_claims,
-                self.a_musings,
-                self.a_writing,
-                self.a_german,
-                self.a_reason,
-                self.a_search_for_truth,
+                self.kant,
+                self.claims,
+                self.musings,
+                self.writing,
+                self.german,
+                self.reason,
+                self.search_for_truth,
                 self.a_1784
             ],
             sti_value_dict['JUST_TARGET']
         )
 
         # Use in InputSpace1.
-        self.a_me = ConceptNode("Me", rand_tv())
-        self.a_speaking = ConceptNode("Speaking", rand_tv())
-        self.a_english = ConceptNode("English", rand_tv())
-        self.a_cognitive_process = ConceptNode("CognitiveProcess", rand_tv())
+        self.me = ConceptNode("Me", rand_tv())
+        self.speaking = ConceptNode("Speaking", rand_tv())
+        self.english = ConceptNode("English", rand_tv())
+        self.cognitive_process = ConceptNode("CognitiveProcess", rand_tv())
         self.a_1995 = ConceptNode("1995", rand_tv())
-        self.a_dead = ConceptNode("Dead", rand_tv())
-        self.a_aware = ConceptNode("Aware", rand_tv())
+        self.dead = ConceptNode("Dead", rand_tv())
+        self.aware = ConceptNode("Aware", rand_tv())
         make_sti_all(
             self.a,
             [
-                self.a_me,
-                self.a_speaking,
-                self.a_english,
-                self.a_cognitive_process,
+                self.me,
+                self.speaking,
+                self.english,
+                self.cognitive_process,
                 self.a_1995,
-                self.a_dead,
-                self.a_aware
+                self.dead,
+                self.aware
             ],
             sti_value_dict['JUST_TARGET']
         )
 
         # Use in GenericSpace.
-        self.a_thinker = ConceptNode("Thinker", rand_tv())
-        self.a_mode_of_expression = ConceptNode("ModeOfExpression", rand_tv())
-        self.a_language = ConceptNode("Language", rand_tv())
-        self.a_issue = ConceptNode("Issue", rand_tv())
-        self.a_purpose = ConceptNode("Purpose", rand_tv())
-        self.a_time = ConceptNode("Time", rand_tv())
+        self.thinker = ConceptNode("Thinker", rand_tv())
+        self.mode_of_expression = ConceptNode("ModeOfExpression", rand_tv())
+        self.language = ConceptNode("Language", rand_tv())
+        self.issue = ConceptNode("Issue", rand_tv())
+        self.purpose = ConceptNode("Purpose", rand_tv())
+        self.time = ConceptNode("Time", rand_tv())
 
-        # Use in BlendedSpace.
-        self.a_counterclaims = ConceptNode("Counterclaims", rand_tv())
-        self.a_questions = ConceptNode("Questions", rand_tv())
-        self.a_answers = ConceptNode("Answers", rand_tv())
-        self.a_cognition = ConceptNode("Cognition", rand_tv())
-        self.a_alive = ConceptNode("Alive", rand_tv())
+        # Use in BlendSpace.
+        self.counterclaims = ConceptNode("Counterclaims", rand_tv())
+        self.questions = ConceptNode("Questions", rand_tv())
+        self.answers = ConceptNode("Answers", rand_tv())
+        self.cognition = ConceptNode("Cognition", rand_tv())
+        self.alive = ConceptNode("Alive", rand_tv())
 
         # Make 'Debate' frame.
-        self.a_debate = ConceptNode("Debate", rand_tv())
+        self.debate = ConceptNode("Debate", rand_tv())
 
         # Make 'Debate->Rhetorical Actions'
-        self.a_rhetorical_actions = ConceptNode("RhetoricalActions", rand_tv())
-        self.a_agrees = ConceptNode("Agrees", rand_tv())
-        self.a_retorts = ConceptNode("Retorts", rand_tv())
-        self.a_challenges = ConceptNode("Challenges", rand_tv())
-        self.a_anticipates = ConceptNode("Anticipates", rand_tv())
-        self.a_concurs = ConceptNode("Concurs", rand_tv())
-        self.a_reinforces = ConceptNode("Reinforces", rand_tv())
+        self.rhetorical_actions = ConceptNode("RhetoricalActions", rand_tv())
+        self.agrees = ConceptNode("Agrees", rand_tv())
+        self.retorts = ConceptNode("Retorts", rand_tv())
+        self.challenges = ConceptNode("Challenges", rand_tv())
+        self.anticipates = ConceptNode("Anticipates", rand_tv())
+        self.concurs = ConceptNode("Concurs", rand_tv())
+        self.reinforces = ConceptNode("Reinforces", rand_tv())
 
         # Make 'Debate->Argumentation Connectives'
-        self.a_argumentation_connectives = \
+        self.argumentation_connectives = \
             ConceptNode("ArgumentationConnectives", rand_tv())
-        self.a_but = ConceptNode("But", rand_tv())
-        self.a_however = ConceptNode("However", rand_tv())
-        self.a_therefore = ConceptNode("Therefore", rand_tv())
-        self.a_on_the_contrary = ConceptNode("OnTheContrary", rand_tv())
-        self.a_exactly = ConceptNode("Exactly", rand_tv())
-        self.a_true_enough = ConceptNode("TrueEnough", rand_tv())
-        self.a_not_so_fast = ConceptNode("NotSoFast", rand_tv())
+        self.but = ConceptNode("But", rand_tv())
+        self.however = ConceptNode("However", rand_tv())
+        self.therefore = ConceptNode("Therefore", rand_tv())
+        self.on_the_contrary = ConceptNode("OnTheContrary", rand_tv())
+        self.exactly = ConceptNode("Exactly", rand_tv())
+        self.true_enough = ConceptNode("TrueEnough", rand_tv())
+        self.not_so_fast = ConceptNode("NotSoFast", rand_tv())
 
         # Make 'Debate->AffirmationNegation'
-        self.a_affirmation_negation = \
+        self.affirmation_negation = \
             ConceptNode("AffirmationNegation", rand_tv())
-        self.a_yes = ConceptNode("Yes", rand_tv())
-        self.a_no = ConceptNode("No", rand_tv())
-        self.a_yes_or_no = ConceptNode("YesOrNo", rand_tv())
+        self.yes = ConceptNode("Yes", rand_tv())
+        self.no = ConceptNode("No", rand_tv())
+        self.yes_or_no = ConceptNode("YesOrNo", rand_tv())
 
     # - Debate Frame
     def __make_debate_frame(self):
         # Make instance of frame concept.
-        InheritanceLink(self.a_debate, self.a_frame, self.default_link_tv)
+        InheritanceLink(self.debate, self.frame, self.default_link_tv)
 
         # Link with debate frame type.
         make_link_all(
             self.a,
             types.MemberLink,
             [
-                self.a_rhetorical_actions,
-                self.a_argumentation_connectives,
-                self.a_affirmation_negation
+                self.rhetorical_actions,
+                self.argumentation_connectives,
+                self.affirmation_negation
             ],
-            self.a_debate,
+            self.debate,
             rand_tv()
         )
 
@@ -157,31 +157,31 @@ class DebateWithKantExample(BaseExample):
             self.a,
             types.MemberLink,
             [
-                self.a_agrees, self.a_retorts, self.a_challenges,
-                self.a_anticipates, self.a_concurs, self.a_reinforces,
-                self.a_questions, self.a_answers
+                self.agrees, self.retorts, self.challenges,
+                self.anticipates, self.concurs, self.reinforces,
+                self.questions, self.answers
             ],
-            self.a_rhetorical_actions,
+            self.rhetorical_actions,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.MemberLink,
             [
-                self.a_but, self.a_however, self.a_therefore,
-                self.a_on_the_contrary, self.a_exactly,
-                self.a_true_enough, self.a_not_so_fast
+                self.but, self.however, self.therefore,
+                self.on_the_contrary, self.exactly,
+                self.true_enough, self.not_so_fast
             ],
-            self.a_argumentation_connectives,
+            self.argumentation_connectives,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.MemberLink,
             [
-                self.a_yes, self.a_no, self.a_yes_or_no
+                self.yes, self.no, self.yes_or_no
             ],
-            self.a_affirmation_negation,
+            self.affirmation_negation,
             rand_tv()
         )
 
@@ -193,26 +193,26 @@ class DebateWithKantExample(BaseExample):
             self.a,
             types.MemberLink,
             [
-                self.a_kant,
-                self.a_claims,
-                self.a_musings,
-                self.a_writing,
-                self.a_german,
-                self.a_reason,
-                self.a_search_for_truth,
+                self.kant,
+                self.claims,
+                self.musings,
+                self.writing,
+                self.german,
+                self.reason,
+                self.search_for_truth,
                 self.a_1784
             ],
-            self.a_input_space_0
+            self.input_space_0
         )
 
         make_sti_all(
             self.a,
             [
-                self.a_kant,
-                self.a_claims,
-                self.a_musings,
-                self.a_writing,
-                self.a_search_for_truth
+                self.kant,
+                self.claims,
+                self.musings,
+                self.writing,
+                self.search_for_truth
             ],
             sti_value_dict['IMPORTANT']
         )
@@ -225,47 +225,47 @@ class DebateWithKantExample(BaseExample):
             self.a,
             types.MemberLink,
             [
-                self.a_me,
-                self.a_claims,
-                self.a_musings,
-                self.a_speaking,
-                self.a_english,
-                self.a_cognitive_process,
-                self.a_search_for_truth,
+                self.me,
+                self.claims,
+                self.musings,
+                self.speaking,
+                self.english,
+                self.cognitive_process,
+                self.search_for_truth,
                 self.a_1995,
-                self.a_kant,
-                self.a_dead,
-                self.a_aware
+                self.kant,
+                self.dead,
+                self.aware
             ],
-            self.a_input_space_1
+            self.input_space_1
         )
 
         # Make status of kant in modern.
         # TODO: Strong TruthValue instead of random value?
         # 죽었다는게 확실하니 확실한 진릿값을 주어야 하나?
-        MemberLink([self.a_kant, self.a_dead], rand_tv())
+        MemberLink([self.kant, self.dead], rand_tv())
 
         # TODO: Is this expression is correct method?
         # 겹치는 이 표현방법이 맞는 방법인가?
-        l_me_aware_kant = AssociativeLink([self.a_me, self.a_kant])
-        l_kant_not_aware_me = AssociativeLink([self.a_kant, self.a_me])
-        MemberLink([l_me_aware_kant, self.a_aware], TruthValue(0.9, 0.9))
-        MemberLink([l_kant_not_aware_me, self.a_aware], TruthValue(0.1, 0.9))
+        l_me_aware_kant = AssociativeLink([self.me, self.kant])
+        l_kant_not_aware_me = AssociativeLink([self.kant, self.me])
+        MemberLink([l_me_aware_kant, self.aware], TruthValue(0.9, 0.9))
+        MemberLink([l_kant_not_aware_me, self.aware], TruthValue(0.1, 0.9))
 
         make_sti_all(
             self.a,
             [
-                self.a_me,
-                self.a_claims,
-                self.a_musings,
-                self.a_speaking,
-                self.a_english,
-                self.a_cognitive_process,
-                self.a_search_for_truth,
+                self.me,
+                self.claims,
+                self.musings,
+                self.speaking,
+                self.english,
+                self.cognitive_process,
+                self.search_for_truth,
                 self.a_1995,
-                self.a_kant,
-                self.a_dead,
-                self.a_aware
+                self.kant,
+                self.dead,
+                self.aware
             ],
             sti_value_dict['IMPORTANT']
         )
@@ -277,16 +277,16 @@ class DebateWithKantExample(BaseExample):
             self.a,
             types.MemberLink,
             [
-                self.a_thinker,
-                self.a_claims,
-                self.a_musings,
-                self.a_mode_of_expression,
-                self.a_language,
-                self.a_issue,
-                self.a_purpose,
-                self.a_time
+                self.thinker,
+                self.claims,
+                self.musings,
+                self.mode_of_expression,
+                self.language,
+                self.issue,
+                self.purpose,
+                self.time
             ],
-            self.a_generic_space,
+            self.generic_space,
             self.default_link_tv
         )
 
@@ -294,48 +294,48 @@ class DebateWithKantExample(BaseExample):
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_kant, self.a_me],
-            self.a_thinker,
+            [self.kant, self.me],
+            self.thinker,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_writing, self.a_speaking],
-            self.a_mode_of_expression,
+            [self.writing, self.speaking],
+            self.mode_of_expression,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_german, self.a_english],
-            self.a_language,
+            [self.german, self.english],
+            self.language,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_reason, self.a_cognitive_process],
-            self.a_issue,
+            [self.reason, self.cognitive_process],
+            self.issue,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.InheritanceLink,
-            [self.a_search_for_truth],
-            self.a_purpose,
+            [self.search_for_truth],
+            self.purpose,
             rand_tv()
         )
         make_link_all(
             self.a,
             types.InheritanceLink,
             [self.a_1784, self.a_1995],
-            self.a_time,
+            self.time,
             rand_tv()
         )
 
     # - Blended Space
-    def __make_blended_space(self):
+    def __make_blend_space(self):
         pass
 
     def make(self):
@@ -344,4 +344,4 @@ class DebateWithKantExample(BaseExample):
         self.__make_input_space_0()
         self.__make_input_space_1()
         self.__make_generic_space()
-        self.__make_blended_space()
+        self.__make_blend_space()

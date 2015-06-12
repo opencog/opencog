@@ -10,7 +10,7 @@ class ChooserFinder(object):
     def __init__(self, a):
         self.a = a
 
-        self.chooser_list = {
+        self.choosers = {
             ChooseNull.__name__: ChooseNull,
             ChooseAll.__name__: ChooseAll,
             ChooseInSTIRange.__name__: ChooseInSTIRange
@@ -31,7 +31,7 @@ class ChooserFinder(object):
         if id_or_name is None:
             id_or_name = BlConfig().get(str(self), 'ATOMS_CHOOSER')
 
-        chooser = self.chooser_list.get(str(id_or_name))
+        chooser = self.choosers.get(str(id_or_name))
         if chooser is not None:
             return chooser(self.a)
         else:

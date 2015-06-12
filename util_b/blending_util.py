@@ -5,17 +5,17 @@ import random
 from opencog.type_constructors import *
 from util_b.general_util import *
 
-def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
+def make_link_all(a, link_type, src_nodes, dst_node, tv=None):
     if tv is None:
-        for node in src_node_list:
+        for node in src_nodes:
             a.add_link(link_type, [node, dst_node], rand_tv())
     else:
-        for node in src_node_list:
+        for node in src_nodes:
             a.add_link(link_type, [node, dst_node], tv)
 
 
 # Choose atoms which are connected to specific atom.
-def get_incoming_node_list(a, target):
+def get_incoming_nodes(a, target):
     ret = []
 
     xget_target_link = a.xget_atoms_by_target_atom(types.Link, target)
@@ -43,8 +43,8 @@ sti_value_dict = {
 }
 
 
-def make_sti_all(a, src_node_list, sti):
-    for node in src_node_list:
+def make_sti_all(a, src_nodes, sti):
+    for node in src_nodes:
         node.av = {'sti': sti}
 
 

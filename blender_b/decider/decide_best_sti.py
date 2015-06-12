@@ -25,22 +25,22 @@ class DecideBestSTI(BaseDecider):
         BlConfig().make_default_config(str(self), default_config)
 
     def __decide_atoms_best_sti(
-            self, a_chosen_atoms_list,
+            self, chosen_atoms,
             result_atoms_count, sti_min, sti_max
     ):
         """
         Choose all atoms.
-        :param List a_chosen_atoms_list: atoms list to decide.
+        :param List chosen_atoms: atoms list to decide.
         :param int result_atoms_count: maximum number of atoms to blend.
         :param float sti_min: min value of sti to choose.
         :param float sti_max: max value of sti to choose.
         """
 
-        if len(a_chosen_atoms_list) < result_atoms_count:
+        if len(chosen_atoms) < result_atoms_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-        self.ret = sorted(a_chosen_atoms_list, key=lambda atom: atom.av['sti'])
+        self.ret = sorted(chosen_atoms, key=lambda atom: atom.av['sti'])
         keys = [atom.av['sti'] for atom in self.ret]
 
         l_index = bisect_left(keys, sti_min)
@@ -56,7 +56,7 @@ class DecideBestSTI(BaseDecider):
         self.ret.reverse()
         self.ret = self.ret[0:result_atoms_count]
 
-    def blending_decide_impl(self, a_chosen_atoms_list, config):
+    def blending_decide_impl(self, chosen_atoms, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
@@ -80,6 +80,6 @@ class DecideBestSTI(BaseDecider):
             sti_max = None
 
         self.__decide_atoms_best_sti(
-            a_chosen_atoms_list,
+            chosen_atoms,
             result_atoms_count, sti_min, sti_max
         )

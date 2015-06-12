@@ -10,7 +10,7 @@ class DeciderFinder(object):
     def __init__(self, a):
         self.a = a
 
-        self.decider_list = {
+        self.deciders = {
             DecideNull.__name__: DecideNull,
             DecideRandom.__name__: DecideRandom,
             DecideBestSTI.__name__: DecideBestSTI
@@ -31,7 +31,7 @@ class DeciderFinder(object):
         if id_or_name is None:
             id_or_name = BlConfig().get(str(self), 'BLENDING_DECIDER')
 
-        decider = self.decider_list.get(str(id_or_name))
+        decider = self.deciders.get(str(id_or_name))
         if decider is not None:
             return decider(self.a)
         else:

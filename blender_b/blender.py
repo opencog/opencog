@@ -44,9 +44,9 @@ class Blender(object):
         self.maker = None
         self.connector = None
 
-        self.a_chosen_atoms_list = None
-        self.a_decided_atoms = None
-        self.a_new_blended_atom = None
+        self.chosen_atoms = None
+        self.decided_atoms = None
+        self.new_blended_atom = None
         self.ret = None
 
     def __str__(self):
@@ -101,20 +101,20 @@ class Blender(object):
             self.config.get('LINK_CONNECTOR')
         )
 
-    def finish_hook(self, a_new_blended_atom):
+    def finish_hook(self, new_blended_atom):
         # DEBUG: Link with Blended Space.
-        a_blended_space = self.a.get_atoms_by_name(types.Atom, "BlendedSpace")[0]
+        blend_space = self.a.get_atoms_by_name(types.Atom, "BlendSpace")[0]
 
         self.a.add_link(
             types.MemberLink,
-            [a_new_blended_atom, a_blended_space],
+            [new_blended_atom, blend_space],
             rand_tv()
         )
 
         BlLogger().log(
-            str(a_new_blended_atom.h) +
+            str(new_blended_atom.h) +
             " " +
-            str(a_new_blended_atom.name)
+            str(new_blended_atom.name)
         )
     """
     End of define.
@@ -139,28 +139,28 @@ class Blender(object):
             self.prepare_hook(config)
 
             # Choose nodes to blending.
-            self.a_chosen_atoms_list = self.chooser.atom_choose()
+            self.chosen_atoms = self.chooser.atom_choose()
 
             # Decide whether or not to execute blending and prepare.
-            self.a_decided_atoms = \
-                self.decider.blending_decide(self.a_chosen_atoms_list)
+            self.decided_atoms = \
+                self.decider.blending_decide(self.chosen_atoms)
 
             # Initialize the new blend node.
-            self.a_new_blended_atom = \
-                self.maker.new_blend_make(self.a_decided_atoms)
+            self.new_blended_atom = \
+                self.maker.new_blend_make(self.decided_atoms)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
             self.connector.link_connect(
-                self.a_decided_atoms, self.a_new_blended_atom
+                self.decided_atoms, self.new_blended_atom
             )
 
             # Give interface to each blenders to finish works.
-            self.finish_hook(self.a_new_blended_atom)
+            self.finish_hook(self.new_blended_atom)
 
             # If all task finished successfully, save new atom to return.
-            self.ret = self.a_new_blended_atom
+            self.ret = self.new_blended_atom
 
         except UserWarning as e:
             BlLogger().log("Skipping blend, caused by '" + str(e) + "'")

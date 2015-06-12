@@ -20,14 +20,14 @@ class MakeSimple(BaseMaker):
         }
         BlConfig().make_default_config(str(self), default_config)
 
-    def __make_atom_from_all(self, a_decided_atoms_list):
+    def __make_atom_from_all(self, decided_atoms):
         """
         Choose all atoms.
-        :param List a_decided_atoms_list: atoms list to make new atom.
+        :param List decided_atoms: atoms list to make new atom.
         """
         # Make the new blend node.
         new_blend_atom_name = '('
-        for atom in a_decided_atoms_list:
+        for atom in decided_atoms:
             new_blend_atom_name += str(atom.name)
             new_blend_atom_name += '-'
 
@@ -36,7 +36,7 @@ class MakeSimple(BaseMaker):
 
         self.ret = ConceptNode(
             new_blend_atom_name,
-            get_weighted_tv(a_decided_atoms_list)
+            get_weighted_tv(decided_atoms)
         )
 
         # Make the links between source nodes and newly blended node.
@@ -45,12 +45,12 @@ class MakeSimple(BaseMaker):
         make_link_all(
             self.a,
             types.AssociativeLink,
-            a_decided_atoms_list,
+            decided_atoms,
             self.ret
         )
 
-    def new_blend_make_impl(self, a_decided_atoms_list, config):
+    def new_blend_make_impl(self, decided_atoms, config):
         if config is None:
             config = BlConfig().get_section(str(self))
 
-        self.__make_atom_from_all(a_decided_atoms_list)
+        self.__make_atom_from_all(decided_atoms)
