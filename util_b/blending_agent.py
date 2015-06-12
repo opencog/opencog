@@ -1,6 +1,6 @@
 import opencog.cogserver
 from opencog.utilities import *
-from blender_b.blender_finder import BlenderFinder
+from blender_b.blender import Blender
 from util_b.experiment_codes import ExperimentCodes
 from util_b.general_util import BlLogger
 
@@ -14,7 +14,7 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.a = None
 
         self.blender_finder = None
-        self.blender_inst = None
+        self.blender = None
 
         self.config = None
 
@@ -28,8 +28,6 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         self.experiment_codes = ExperimentCodes(self.a)
         self.experiment_codes.init_hook()
 
-        self.blender_finder = BlenderFinder(self.a)
-
     def __finalize(self):
         self.experiment_codes.final_hook()
 
@@ -37,8 +35,8 @@ class BlendingAgent(opencog.cogserver.MindAgent):
         # BlLogger().log("Start BlendingAgent")
         self.__initialize(a)
 
-        self.blender_inst = self.blender_finder.get_blender()
-        self.blender_inst.blend()
+        self.blender = Blender(self.a)
+        self.blender.blend()
 
         self.__finalize()
         # BlLogger().log("Finish BlendingAgent")

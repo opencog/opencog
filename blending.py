@@ -1,6 +1,6 @@
 import opencog.cogserver
 from opencog.utilities import *
-from blender_b.blender_finder import BlenderFinder
+from blender_b.blender import Blender
 from util_b.experiment_codes import ExperimentCodes
 from util_b.general_util import BlLogger
 
@@ -15,10 +15,9 @@ class ConceptualBlending:
     Attributes:
         a: An instance of atomspace.
         blender_finder:
-        blender_inst:
+        blender:
         :type a: AtomSpace
-        :type blender_finder: BlenderFinder
-        :type blender_inst: BaseBlender
+        :type blender: Blender
     """
 
     def __init__(self, a):
@@ -34,11 +33,9 @@ class ConceptualBlending:
         # If blending function was not called in python environment, how to
         # check if python's atomspace was initialized?
         self.a = a
+        self.blender = None
 
-        self.blender_finder = None
-        self.blender_inst = None
-
-    def blend(self, target_atoms=None, config=None):
+    def run(self, target_atoms=None, config=None):
         """Execute conceptual blending.
 
         TODO: Write detailed description.
@@ -59,9 +56,5 @@ class ConceptualBlending:
             If a list is empty, then blender can't find proper blend atoms.
             :rtype : list[Atom]
         """
-        if config is None:
-            self.blender_inst = self.blender_finder.get_blender("NoRuleBlender")
-        else:
-            self.blender_inst = self.blender_finder.get_blender("RuleBlender")
-
-        self.blender_inst.blend()
+        self.blender = Blender(self.a)
+        self.blender.blend()

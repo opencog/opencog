@@ -1,14 +1,17 @@
 from abc import ABCMeta, abstractmethod
+from opencog.type_constructors import types
 from blender_b.chooser.chooser_finder import ChooserFinder
 from blender_b.connector.connector_finder import ConnectorFinder
 from blender_b.decider.decider_finder import DeciderFinder
 from blender_b.maker.maker_finder import MakerFinder
+from util_b.blending_util import BlendTargetCtlForDebug, blend_target_link_tv, \
+    rand_tv
 from util_b.general_util import enum_simulate, BlLogger, BlConfig
 
 __author__ = 'DongMin Kim'
 
 
-class BaseBlender(object):
+class Blender(object):
     """
     :type a: opencog.atomspace_details.AtomSpace
     """
@@ -32,6 +35,9 @@ class BaseBlender(object):
         self.last_status = self.Status.UNKNOWN_ERROR
         self.config = self.make_default_config()
 
+        if BlConfig().is_use_blend_target:
+            self.a_blend_target = BlendTargetCtlForDebug().get_blend_target()
+
         self.chooser_finder = ChooserFinder(self.a)
         self.connector_finder = ConnectorFinder(self.a)
         self.maker_finder = MakerFinder(self.a)
@@ -52,12 +58,19 @@ class BaseBlender(object):
 
     def is_succeeded(self):
         return (lambda x: True
-                if x == BaseBlender.Status.SUCCESS_BLEND
+                if x == Blender.Status.SUCCESS_BLEND
                 else False
                 )(self.last_status)
 
     def make_default_config(self):
-        pass
+        default_config = {
+            'ATOMS_CHOOSER': 'ChooseInSTIRange',
+            'BLENDING_DECIDER': 'DecideBestSTI',
+            'NEW_BLEND_ATOM_MAKER': 'MakeSimple',
+            'LINK_CONNECTOR': 'ConnectSimple'
+        }
+        BlConfig().make_default_config(str(self), default_config)
+        return default_config
 
     """
     Define template blending method.
@@ -68,29 +81,53 @@ class BaseBlender(object):
     4. Connect links to new blend atom from exist atom
     (Option) Finish rest of blending.
     """
-    @abstractmethod
     def prepare_hook(self, config):
+        # BlLogger().log("Start RandomBlending")
         pass
 
-    @abstractmethod
     def create_chooser(self):
-        raise NotImplementedError("Please implement this method.")
+        self.chooser = self.chooser_finder.get_chooser(
+            self.config.get('ATOMS_CHOOSER')
+        )
 
-    @abstractmethod
     def create_decider(self):
-        raise NotImplementedError("Please implement this method.")
+        self.decider = self.decider_finder.get_decider(
+            self.config.get('BLENDING_DECIDER')
+        )
 
-    @abstractmethod
     def create_maker(self):
-        raise NotImplementedError("Please implement this method.")
+        self.maker = self.maker_finder.get_maker(
+            self.config.get('NEW_BLEND_ATOM_MAKER')
+        )
 
-    @abstractmethod
     def create_connector(self):
-        raise NotImplementedError("Please implement this method.")
+        self.connector = self.connector_finder.get_connector(
+            self.config.get('LINK_CONNECTOR')
+        )
 
-    @abstractmethod
     def finish_hook(self, a_new_blended_atom):
-        pass
+        # DEBUG: Link with blend target.
+        if BlConfig().is_use_blend_target:
+            self.a.add_link(
+                types.MemberLink,
+                [a_new_blended_atom, self.a_blend_target],
+                blend_target_link_tv
+            )
+
+        # DEBUG: Link with Blended Space.
+        a_blended_space = self.a.get_atoms_by_name(types.Atom, "BlendedSpace")[0]
+
+        self.a.add_link(
+            types.MemberLink,
+            [a_new_blended_atom, a_blended_space],
+            rand_tv()
+        )
+
+        BlLogger().log(
+            str(a_new_blended_atom.h) +
+            " " +
+            str(a_new_blended_atom.name)
+        )
     """
     End of define.
     """

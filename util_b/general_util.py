@@ -54,7 +54,7 @@ class BlConfig(Singleton):
     def __init__(cls):
         super(BlConfig, cls).__init__()
 
-        cls.minimum_config_file_version = 1
+        cls.minimum_config_file_version = 3
 
         cls.use_config_file = False
         cls.use_blend_target = False
