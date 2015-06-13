@@ -14105,6 +14105,20 @@ Below is a scatterplot for mutual information of word-paris vs rank.
 \end_layout
 
 \begin_layout Standard
+number of word pairs as function of word rank
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/Nth-word-frequency-regression.png
+	lyxscale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Summary: these are more or less exactly as expected.
  Will need to make cuts to get rid of the low-frequency word pairs...
 \end_layout
