@@ -1,7 +1,9 @@
 # coding=utf-8
 import ConfigParser
 import os
+from opencog.type_constructors import *
 from opencog.logger import log
+from opencog.scheme_wrapper import *
 
 __author__ = 'DongMin Kim'
 
@@ -45,6 +47,166 @@ def enum_simulate(*sequential, **named):
     reverse = dict((value, key) for key, value in enums.iteritems())
     enums['reverse_mapping'] = reverse
     return type('Enum', (), enums)
+
+
+class BlAtomConfig(Singleton):
+    DEFAULT_CONFIG_NAME = "BLEND"
+    DEFAULT_CONFIG_SET = \
+        {
+            "config-format-version",
+            "execute-mode",
+
+            "log-level",
+            "log-prefix",
+            "log-postfix",
+
+            "atoms-chooser",
+            "blending-decider",
+            "new-blend-atom-maker",
+            "link-connector",
+
+            "choose-atom-type",
+            "choose-least-count",
+            "choose-sti-min",
+            "choose-sti-max",
+
+            "decide-result-atoms-count",
+            "decide-sti-min",
+            "decide-sti-max"
+        }
+
+    # noinspection PyTypeChecker
+    def __init__(cls):
+        super(BlAtomConfig, cls).__init__()
+        cls.a = None
+
+        # TODO: How to find the scheme module in beautiful?
+        scheme_eval(
+            cls.a,
+            '(add-to-load-path "/home/kdm/atomspace")' +
+            '(add-to-load-path "/home/kdm/atomspace/build")' +
+            '(add-to-load-path "/home/kdm/atomspace/opencog/scm")' +
+            '(add-to-load-path "/home/kdm/opencog")' +
+            '(add-to-load-path "/home/kdm/opencog/build")' +
+            '(add-to-load-path "/home/kdm/opencog/opencog/scm")' +
+            '(add-to-load-path ".")'
+        )
+
+        scheme_eval(
+            cls.a,
+            '(use-modules (opencog))' +
+            '(use-modules (opencog query))' +
+            '(use-modules (opencog rule-engine))'
+        )
+
+    def __initialize(cls, a):
+        cls.a = a
+        if len(cls.a.get_atoms_by_name(types.ConceptNode, cls.name)) is 0:
+            cls.__make_default_config()
+
+    def __make_default_config(cls):
+        # blend
+        default_config_node = cls.a.add_node(types.ConceptNode, cls.name)
+
+        # blend config
+        # TODO: Inherit chooser, decider, ... to BLEND?
+        cls.a.add_link(
+            types.ExecutionLink,
+            [
+                cls.__get_schema_node("config-format-version"),
+                default_config_node,
+                cls.a.add_node(types.ConceptNode, "1")
+            ]
+        )
+        cls.a.add_link(
+            types.ExecutionLink,
+            [
+                cls.__get_schema_node("execute-mode"),
+                default_config_node,
+                cls.a.add_node(types.ConceptNode, "Release")
+            ]
+        )
+
+    def __get_schema_node(cls, config_name):
+        if config_name in cls.__set:
+            return cls.a.add_node(types.SchemaNode, cls.name+':'+config_name)
+        else:
+            raise UserWarning("Wrong config name.")
+
+    def add(cls, a, config_name, config_dst_name, config):
+        cls.__initialize(a)
+
+        try:
+            cls.a.add_link(
+                types.ExecutionLink,
+                [
+                    cls.__get_schema_node(config_name),
+                    cls.a.add_node(types.ConceptNode, config_dst_name),
+                    config
+                ]
+            )
+        except UserWarning as e:
+            print e
+            print "Skip add config."
+
+    # noinspection PyTypeChecker
+    def get(cls, a, config_name, config_dst_name=None):
+        cls.__initialize(a)
+
+        if config_dst_name is None:
+            config_dst_name = cls.name
+
+        result_var = cls.a.add_node(types.VariableNode, "$"+cls.name+"result")
+        try:
+            outgoing_set = \
+                [
+                    cls.__get_schema_node(config_name),
+                    cls.a.add_node(types.ConceptNode, config_dst_name),
+                    result_var
+                ]
+        except UserWarning as e:
+            print e
+            print "Skip get config."
+            return
+
+        try:
+            get_link = cls.a.add_link(
+                types.GetLink,
+                [cls.a.add_link(
+                    types.ExecutionLink,
+                    outgoing_set
+                )]
+            )
+
+            result_set_uuid = scheme_eval_h(
+                cls.a,
+                '(cog-satisfying-set ' +
+                '  (cog-atom '+str(get_link.handle_uuid())+')' +
+                ')'
+            )
+
+            result_set = cls.a[result_set_uuid]
+            if len(result_set.out) != 1:
+                raise UserWarning(
+                    "TODO: Currently, config have to keep unique.")
+        except UserWarning as e:
+            print e
+            print "Skip get config."
+            return
+
+        cls.a.remove(result_var)
+
+        print result_set.out[0]
+        return result_set.out[0]
+
+    @property
+    def __set(cls):
+        return BlAtomConfig.DEFAULT_CONFIG_SET
+
+    @property
+    def name(cls):
+        return BlAtomConfig.DEFAULT_CONFIG_NAME
+
 
 
 # BlConfig: BlendingConfigLoader

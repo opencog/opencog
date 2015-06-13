@@ -1,7 +1,8 @@
+from opencog.bindlink import execute_atom
+from opencog.scheme_wrapper import *
 from opencog.type_constructors import *
 from examples_b.example_finder import TestCaseLoader
-from util_b.general_util import BlConfig
-from utility.util import pp
+from util_b.general_util import BlConfig, BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -12,22 +13,6 @@ class ExperimentCodes:
 
     def test_ure(self):
         pass
-
-    # TODO: Inherit chooser, decider, ... to BLEND?
-    def __config_general_default(self):
-        # blend
-        ConceptNode("BLEND")
-        # blend config
-        ExecutionLink(
-            SchemaNode("BLEND:config-format-version"),
-            ConceptNode("BLEND"),
-            ConceptNode("1")
-        )
-        ExecutionLink(
-            SchemaNode("BLEND:execute-mode"),
-            ConceptNode("BLEND"),
-            ConceptNode("Release")
-        )
 
     def __config_logger_default(self):
         # blend logger config
@@ -179,8 +164,11 @@ class ExperimentCodes:
             ConceptNode("Debug")
         )
 
+    # noinspection PyTypeChecker
     def foo(self):
+        BlAtomConfig().get(self.a, "execute-mode")
         # self.test_ure()
+        """
         self.__config_general_default()
         self.__config_logger_default()
         self.__config_blender_default()
@@ -196,6 +184,7 @@ class ExperimentCodes:
         self.__config_decider_sti_min_default()
         self.__config_decider_sti_max_default()
         self.__config_my_test_case()
+        """
 
     def init_hook(self):
         self.foo()
@@ -208,4 +197,3 @@ class ExperimentCodes:
 
     def final_hook(self):
         pass
-

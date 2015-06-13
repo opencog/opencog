@@ -49,6 +49,9 @@ class MakeSimple(BaseMaker):
             self.ret
         )
 
+        # TODO: Give proper attention value.
+        # new_blend_atom_name.av = {}
+
     def new_blend_make_impl(self, decided_atoms, config):
         if config is None:
             config = BlConfig().get_section(str(self))
