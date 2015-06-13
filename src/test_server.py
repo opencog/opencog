@@ -18,18 +18,25 @@ class PerceptionManager:
         self._atomspace = atomspace
 
 
-    def buildBlockNodes(self,block,timestamp):
+    def buildBlockNodes(self,block,timestamp,scene):
 
         #hack to make static object No. variable in class method
         if not hasattr(self.buildBlockNodes.__func__,"objNo"):
             self.buildBlockNodes.__func__.objNo=0            
+        #Note: in 3DSpaceMap using structure node to represent block.
         objnode=self._atomspace.add_node(types.StructureNode,"obj%s".format(self.buildBlockNodes.__func__.objNo))
         self.buildBlockNodes.__func__.objNo+=1
 
-        self._atomspace.add_link(types.EvaluationLink,[
-        self._atomspace.add_node(types.PredicateNode,"MC_position"),
+        mapnodes=self._atomspace.get_atoms_by_name(types.SpaceMapNode,scene)
+        if mapnodes == []:
+            print "there is no spacemap named %s!"%(scene)
+            return Handle(-1)
+        else: mapnode=mapnodes[0]
+        #TODO: using AtLocationLink to save location info
+        self._atomspace.add_link(types.AtLocationLink,[
+            objnode,
+            mapnode,
             self._atomspace.add_link(types.ListLink,[
-                objnode,
                 self._atomspace.add_node(types.NumberNode,str(block.x)),
                 self._atomspace.add_node(types.NumberNode,str(block.y)),
                 self._atomspace.add_node(types.NumberNode,str(block.z))])])
@@ -69,6 +76,8 @@ def main():
 
 def processMapMessage(data):
 
+    #TODO:the unit measurement of timestamp in game is per sec
+    #Need a more accurate timestamp
     print 'callback, timestamp %s'%(data.timestamp)
 
     global a,pm,ss,ts
@@ -81,24 +90,19 @@ def processMapMessage(data):
         maphandle=(ss.addMap(data.timestamp,data.scene,-60,-30,-400,50,50,50,-370))
 
     curscenemap=ss.getMap(maphandle)
-#    ctr=0
+
     for block in data.blocks:
-#        print ctr
-#        ctr+=1
-        blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
-
-#        print blockhandle
-#        print 'block handle is_undefind()? %s'%(blockhandle.is_undefined())
-        if blockinfo != None:
-
+        blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
+        #Check if it's undefined, note that we don't use the is_undefined(),see
+        #the bug info in spacetime.pyx
+        if blockhandle.value() != -1:
+            blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
             if blockinfo.getMaterial()==str(block.btype):
-                blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
                 ts.addTimeInfo(blockhandle,data.timestamp)
                 continue
             else:
                 ss.removeMapInfo(blockhandle,maphandle,data.timestamp)
-            
-        blocknode=pm.buildBlockNodes(block,data.timestamp)
+        blocknode=pm.buildBlockNodes(block,data.timestamp,data.scene)
         ss.addMapInfo(blocknode.h,maphandle,False,data.timestamp,
                               block.x,block.y,block.z,
                               1,1,1,0,0,
@@ -106,6 +110,7 @@ def processMapMessage(data):
         ts.addTimeInfo(blocknode.h,data.timestamp)
 
     print pm._atomspace.size()
+
 #TODO
 def processEntityMessage(data):
     pass
