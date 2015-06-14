@@ -1,44 +1,48 @@
 # Progress summary of this week
-* Beautiful version is available in my wiki
- (http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending)
+* Beautiful version is available in [my wiki](http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending).
 
 ## Now
 ### In Progress
-* Decide whether or not to execute blending and prepare
-  * Implement selecting ConceptNode which has best value (proper value)
-* Check the conflict links in each node and remove.
-  * Implement removing conflict links
+* Make inheritance-config check algorithm.
+* Change algorithms to work only within given atoms, not in overall atomspace.
+* Detect and improve conflict links in newly blended node.
+  * Implement checking for some values in HebbianLink and SimilarityLink when 
+   select link
+  * Select one by random in 2^k possible things
 
 ### To do
 **Think**
 
-* Use python or change to C++?
-* How to make blending agent to really useful to OpenCog?
+* Search for good algorithms to use in each step.
 
 **Study**
 
-* Read thesis written by Goguen and another thesis written by Markus, et al.
+* Read the research papers.
+ * Goguen, *Mathematical Models of Cognitive Space and Time*
+ * Markus, et al, *A computational account of conceptual blending in basic 
+  mathematics*
 
 **CodingCodingCoding**
 
-* Detect and improve conflict links in newly blended node
-  * Select one by random in 2^k possible things
-  * Implement checking for some values in HebbianLink and SimilarityLink when 
-   select link
+* Detect and improve conflict links in newly blended node.
   * Implement evaluating degree of reasonable fitness using 
-  information-theoretic method
-
+   information-theoretic method
+  * Try simple PLN inference to see if contradictions are unveiled
+   
 ### Pause
-* Search for good algorithms to use in each step.
 * Design about public API of my project, and make its document.
+* Try to use Unified Rule Engine, PLN in python.
 * Select nodes to blending.
   * Make the waiting queue of ConceptNode
   * Currently queue is not need for blending, because now agent make only one 
    new blended node in each step.
   * It will be useful when optimizing blending agent speed by save candidate 
    cache.
-* Try to use Unified Rule Engine, PLN in python.
-* Change config system to use cogserver's config system.
+  * (15/06/14) I stopped to making Conceptual Blending with MindAgent design.
+   It will be resumed when I finish to making Conceptual Blending API.
+* Make the links in newly blended node and correct some attribute value
+  * Make correction of value level in each source node.
+  * (15/06/14) What does it works for?
 
 ## Result
 ### Done
