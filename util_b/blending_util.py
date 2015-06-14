@@ -5,6 +5,7 @@ import random
 from opencog.type_constructors import *
 from util_b.general_util import *
 
+
 def make_link_all(a, link_type, src_nodes, dst_node, tv=None):
     if tv is None:
         for node in src_nodes:
@@ -30,9 +31,9 @@ def get_incoming_nodes(a, target):
 
 
 def rand_tv():
-    s = random.uniform(0.5, 0.9)
-    c = random.uniform(0.5, 0.9)
-    return TruthValue(s, c)
+    strength = random.uniform(0.5, 0.9)
+    confidence = random.uniform(0.5, 0.9)
+    return TruthValue(strength, confidence)
 
 # For control STI values.
 sti_value_dict = {
@@ -43,7 +44,7 @@ sti_value_dict = {
 }
 
 
-def make_sti_all(a, src_nodes, sti):
+def make_sti_all(src_nodes, sti):
     for node in src_nodes:
         node.av = {'sti': sti}
 

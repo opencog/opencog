@@ -1,8 +1,6 @@
 import random
-from opencog.type_constructors import types
-from blender_b.chooser.base_chooser import BaseChooser
 from blender_b.decider.base_decider import BaseDecider
-from util_b.general_util import BlLogger, BlConfig
+from util_b.general_util import BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -15,10 +13,7 @@ class DecideRandom(BaseDecider):
         return self.__class__.__name__
 
     def make_default_config(self):
-        default_config = {
-            'RESULT_ATOMS_COUNT': '2'
-        }
-        BlConfig().make_default_config(str(self), default_config)
+        super(self.__class__, self).make_default_config()
 
     def __decide_atoms_random(self, chosen_atoms, result_atoms_count):
         """
@@ -38,11 +33,10 @@ class DecideRandom(BaseDecider):
         for index in random_atom_indexes:
             self.ret.extend(chosen_atoms[index])
 
-    def blending_decide_impl(self, chosen_atoms, config):
-        if config is None:
-            config = BlConfig().get_section(str(self))
-
-        result_atoms_count = config.get('RESULT_ATOMS_COUNT')
+    def blending_decide_impl(self, chosen_atoms, config_base):
+        result_atoms_count = BlAtomConfig().get_int(
+            self.a, "decide-result-atoms-count", config_base
+        )
 
         try:
             result_atoms_count = int(result_atoms_count)

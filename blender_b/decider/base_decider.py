@@ -1,4 +1,4 @@
-from util_b.general_util import enum_simulate, BlLogger
+from util_b.general_util import enum_simulate, BlLogger, BlAtomConfig
 from abc import ABCMeta, abstractmethod
 
 __author__ = 'DongMin Kim'
@@ -34,22 +34,21 @@ class BaseDecider(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        pass
+        BlAtomConfig().add(self.a, "decide-result-atoms-count", "2")
 
     @abstractmethod
-    def blending_decide_impl(self, chosen_atoms, config):
+    def blending_decide_impl(self, chosen_atoms, config_base):
         """
         :param chosen_atoms: list
-        :param config: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def blending_decide(self, chosen_atoms, config=None):
+    def blending_decide(self, chosen_atoms, config_base):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.blending_decide_impl(chosen_atoms, config)
+            self.blending_decide_impl(chosen_atoms, config_base)
         except UserWarning as e:
             BlLogger().log("Skipping decide, caused by '" + str(e) + "'")
             BlLogger().log(

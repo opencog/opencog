@@ -2,8 +2,6 @@
 from blender_b.connector.base_connector import BaseConnector
 from blender_b.connector.connect_util import *
 from util_b.blending_util import get_weighted_tv
-from util_b.general_util import BlConfig
-
 __author__ = 'DongMin Kim'
 
 
@@ -15,12 +13,7 @@ class ConnectSimple(BaseConnector):
         return self.__class__.__name__
 
     def make_default_config(self):
-        """
-        default_config = {
-        }
-        BlConfig().make_default_config(str(self), default_config)
-        """
-        pass
+        super(self.__class__, self).make_default_config()
 
     def __connect_duplicate_links(self, duplicate_links, dst_node):
         """
@@ -82,8 +75,5 @@ class ConnectSimple(BaseConnector):
         self.__connect_duplicate_links(duplicate_links, new_blended_atom)
         self.__connect_non_duplicate_links(non_duplicate_links, new_blended_atom)
 
-    def link_connect_impl(self, decided_atoms, new_blended_atom, config):
-        if config is None:
-            config = BlConfig().get_section(str(self))
-
+    def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
         self.__connect_links_simple(decided_atoms, new_blended_atom)

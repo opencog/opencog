@@ -1,4 +1,4 @@
-from util_b.general_util import enum_simulate, BlLogger
+from util_b.general_util import enum_simulate, BlLogger, BlAtomConfig
 from abc import ABCMeta, abstractmethod
 
 __author__ = 'DongMin Kim'
@@ -34,21 +34,22 @@ class BaseChooser(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        pass
+        BlAtomConfig().add(self.a, "choose-atom-type", "Node")
+        BlAtomConfig().add(self.a, "choose-least-count", "2")
 
     @abstractmethod
-    def atom_choose_impl(self, focus_atoms, config):
+    def atom_choose_impl(self, focus_atoms, config_base):
         """
-        :param config: dict
+        :param focus_atoms: dict
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def atom_choose(self, focus_atoms=None, config=None):
+    def atom_choose(self, focus_atoms, config_base):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.atom_choose_impl(focus_atoms, config)
+            self.atom_choose_impl(focus_atoms, config_base)
         except UserWarning as e:
             BlLogger().log("Skipping choose, caused by '" + str(e) + "'")
             BlLogger().log(

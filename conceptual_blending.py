@@ -1,8 +1,6 @@
-import opencog.cogserver
-from opencog.utilities import *
+from opencog.type_constructors import *
 from blender_b.blender import Blender
-from util_b.experiment_codes import ExperimentCodes
-from util_b.general_util import BlLogger
+from util_b.general_util import BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -16,7 +14,7 @@ class ConceptualBlending:
         a: An instance of atomspace.
         blender_finder:
         blender:
-        :type a: AtomSpace
+        :type a: opencog.atomspace.AtomSpace
         :type blender: Blender
     """
 
@@ -24,7 +22,7 @@ class ConceptualBlending:
         """
         Args:
             a: An instance of atomspace.
-            :param a: AtomSpace
+            :param a: opencog.atomspace.AtomSpace
         """
 
         # TODO: Remove atomspace instance in Conceptual Blending tool.
@@ -35,16 +33,16 @@ class ConceptualBlending:
         self.a = a
         self.blender = None
 
-    def run(self, target_atoms=None, config=None):
+    def run(self, focus_atoms=None, config_base=None):
         """Execute conceptual blending.
 
         TODO: Write detailed description.
 
         Args:
-            target_atoms:
-            config:
-            :param target_atoms: list[Atom]
-            :param config: Atom
+            focus_atoms:
+            config_base:
+            :param focus_atoms: list[Atom]
+            :param config_base: Atom
 
         Returns:
             The blended atom(s). For example:
@@ -56,5 +54,13 @@ class ConceptualBlending:
             If a list is empty, then blender can't find proper blend atoms.
             :rtype : list[Atom]
         """
+        # BlAtomConfig().add(self.a, "blender", "RuleBlender")
+
+        if config_base is None:
+            config_base = self.a.add_node(types.ConceptNode, BlAtomConfig().name)
+        else:
+            # TODO: If config_base exists, enroll custom config_base.
+            pass
+
         self.blender = Blender(self.a)
-        self.blender.blend()
+        return self.blender.blend(focus_atoms, config_base)

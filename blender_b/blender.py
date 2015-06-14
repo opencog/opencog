@@ -1,16 +1,15 @@
-from abc import ABCMeta, abstractmethod
-from opencog.type_constructors import types
+from abc import ABCMeta
 from blender_b.chooser.chooser_finder import ChooserFinder
 from blender_b.connector.connector_finder import ConnectorFinder
 from blender_b.decider.decider_finder import DeciderFinder
 from blender_b.maker.maker_finder import MakerFinder
 from util_b.blending_util import *
-from util_b.general_util import enum_simulate, BlLogger, BlConfig
+from util_b.general_util import enum_simulate, BlLogger
 
 __author__ = 'DongMin Kim'
 
 
-class Blender(object):
+class Blender:
     """
     :type a: opencog.atomspace_details.AtomSpace
     """
@@ -32,7 +31,7 @@ class Blender(object):
     def __init__(self, a):
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
-        self.config = self.make_default_config()
+        self.make_default_config()
 
         self.chooser_finder = ChooserFinder(self.a)
         self.connector_finder = ConnectorFinder(self.a)
@@ -59,14 +58,44 @@ class Blender(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        default_config = {
-            'ATOMS_CHOOSER': 'ChooseInSTIRange',
-            'BLENDING_DECIDER': 'DecideBestSTI',
-            'NEW_BLEND_ATOM_MAKER': 'MakeSimple',
-            'LINK_CONNECTOR': 'ConnectSimple'
-        }
-        BlConfig().make_default_config(str(self), default_config)
-        return default_config
+        BlAtomConfig().add(self.a, "atoms-chooser", "ChooseAll")
+        BlAtomConfig().add(self.a, "blending-decider", "DecideBestSTI")
+        BlAtomConfig().add(self.a, "new-blend-atom-maker", "MakeSimple")
+        BlAtomConfig().add(self.a, "link-connector", "ConnectSimple")
+
+    def prepare_hook(self, config_base):
+        pass
+
+    def make_workers(self, config_base):
+        self.chooser = self.chooser_finder.get_chooser(
+            BlAtomConfig().get_str(self.a, "atoms-chooser", config_base)
+        )
+        self.decider = self.decider_finder.get_decider(
+            BlAtomConfig().get_str(self.a, "blending-decider", config_base)
+        )
+        self.maker = self.maker_finder.get_maker(
+            BlAtomConfig().get_str(self.a, "new-blend-atom-maker", config_base)
+        )
+        self.connector = self.connector_finder.get_connector(
+            BlAtomConfig().get_str(self.a, "link-connector", config_base)
+        )
+
+    def finish_hook(self, new_blended_atom, config_base):
+        """
+        # DEBUG: Link with Blended Space.
+        blend_space = self.a.get_atoms_by_name(types.Atom, "BlendSpace")[0]
+
+        self.a.add_link(
+            types.MemberLink,
+            [new_blended_atom, blend_space],
+            rand_tv()
+        )
+        """
+        BlLogger().log(
+            str(new_blended_atom.h) +
+            " " +
+            str(new_blended_atom.name)
+        )
 
     """
     Define template blending method.
@@ -77,87 +106,38 @@ class Blender(object):
     4. Connect links to new blend atom from exist atom
     (Option) Finish rest of blending.
     """
-    def prepare_hook(self, config):
-        # BlLogger().log("Start RandomBlending")
-        pass
-
-    def create_chooser(self):
-        self.chooser = self.chooser_finder.get_chooser(
-            self.config.get('ATOMS_CHOOSER')
-        )
-
-    def create_decider(self):
-        self.decider = self.decider_finder.get_decider(
-            self.config.get('BLENDING_DECIDER')
-        )
-
-    def create_maker(self):
-        self.maker = self.maker_finder.get_maker(
-            self.config.get('NEW_BLEND_ATOM_MAKER')
-        )
-
-    def create_connector(self):
-        self.connector = self.connector_finder.get_connector(
-            self.config.get('LINK_CONNECTOR')
-        )
-
-    def finish_hook(self, new_blended_atom):
-        # DEBUG: Link with Blended Space.
-        blend_space = self.a.get_atoms_by_name(types.Atom, "BlendSpace")[0]
-
-        self.a.add_link(
-            types.MemberLink,
-            [new_blended_atom, blend_space],
-            rand_tv()
-        )
-
-        BlLogger().log(
-            str(new_blended_atom.h) +
-            " " +
-            str(new_blended_atom.name)
-        )
-    """
-    End of define.
-    """
-
-    def blend(self, config=None):
+    def blend(self, focus_atoms, config_base):
         self.last_status = self.Status.IN_PROCESS
         self.ret = None
 
-        self.config = config
-        if self.config is None:
-            self.config = BlConfig().get_section(str(self))
-
         try:
-            self.create_chooser()
-            self.create_decider()
-            self.create_maker()
-            self.create_connector()
+            self.make_workers(config_base)
 
             # Give interface to each blenders to suitable prepare works.
             # eg. caching, ...
-            self.prepare_hook(config)
+            self.prepare_hook(config_base)
 
             # Choose nodes to blending.
-            self.chosen_atoms = self.chooser.atom_choose()
+            self.chosen_atoms = \
+                self.chooser.atom_choose(focus_atoms, config_base)
 
             # Decide whether or not to execute blending and prepare.
             self.decided_atoms = \
-                self.decider.blending_decide(self.chosen_atoms)
+                self.decider.blending_decide(self.chosen_atoms, config_base)
 
             # Initialize the new blend node.
             self.new_blended_atom = \
-                self.maker.new_blend_make(self.decided_atoms)
+                self.maker.new_blend_make(self.decided_atoms, config_base)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
             self.connector.link_connect(
-                self.decided_atoms, self.new_blended_atom
+                self.decided_atoms, self.new_blended_atom, config_base
             )
 
             # Give interface to each blenders to finish works.
-            self.finish_hook(self.new_blended_atom)
+            self.finish_hook(self.new_blended_atom, config_base)
 
             # If all task finished successfully, save new atom to return.
             self.ret = self.new_blended_atom

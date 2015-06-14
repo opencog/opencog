@@ -1,6 +1,4 @@
 # coding=utf-8
-import ConfigParser
-import os
 from opencog.type_constructors import *
 from opencog.logger import log
 from opencog.scheme_wrapper import *
@@ -49,6 +47,8 @@ def enum_simulate(*sequential, **named):
     return type('Enum', (), enums)
 
 
+# BlAtomConfig: BlendingConfigLoader
+# noinspection PyTypeChecker
 class BlAtomConfig(Singleton):
     DEFAULT_CONFIG_NAME = "BLEND"
     DEFAULT_CONFIG_SET = \
@@ -79,6 +79,7 @@ class BlAtomConfig(Singleton):
     def __init__(cls):
         super(BlAtomConfig, cls).__init__()
         cls.a = None
+        cls.is_initialized = False
 
         # TODO: How to find the scheme module in beautiful?
         scheme_eval(
@@ -96,108 +97,146 @@ class BlAtomConfig(Singleton):
             cls.a,
             '(use-modules (opencog))' +
             '(use-modules (opencog query))' +
+            '(use-modules (opencog exec))' +
             '(use-modules (opencog rule-engine))'
         )
 
     def __initialize(cls, a):
-        cls.a = a
-        if len(cls.a.get_atoms_by_name(types.ConceptNode, cls.name)) is 0:
+        if cls.a is not a:
+            cls.is_initialized = False
+            cls.a = a
+
+        if cls.is_initialized is not True:
+            cls.is_initialized = True
             cls.__make_default_config()
 
     def __make_default_config(cls):
         # blend
-        default_config_node = cls.a.add_node(types.ConceptNode, cls.name)
+        cls.a.add_node(types.ConceptNode, cls.name)
 
         # blend config
         # TODO: Inherit chooser, decider, ... to BLEND?
-        cls.a.add_link(
-            types.ExecutionLink,
-            [
-                cls.__get_schema_node("config-format-version"),
-                default_config_node,
-                cls.a.add_node(types.ConceptNode, "1")
-            ]
-        )
-        cls.a.add_link(
-            types.ExecutionLink,
-            [
-                cls.__get_schema_node("execute-mode"),
-                default_config_node,
-                cls.a.add_node(types.ConceptNode, "Release")
-            ]
-        )
+        # TODO: Possible infinite loop. add->init->make->add->init->...
+        cls.add(cls.a, "config-format-version", "1")
+        cls.add(cls.a, "execute-mode", "Debug")
 
-    def __get_schema_node(cls, config_name):
-        if config_name in cls.__set:
-            return cls.a.add_node(types.SchemaNode, cls.name+':'+config_name)
-        else:
+    def __make_list_link(cls, config_name, config_base, free_var):
+        if config_name not in cls.__set:
             raise UserWarning("Wrong config name.")
 
-    def add(cls, a, config_name, config_dst_name, config):
+        return cls.a.add_link(
+            types.ListLink,
+            [
+                cls.a.add_node(types.SchemaNode, cls.name + ':' + config_name),
+                config_base,
+                free_var
+            ]
+        )
+
+    def add(cls, a, config_name, config, config_base=None):
         cls.__initialize(a)
 
+        if config_base is None:
+            config_base = cls.name
+
+        if (type(config_base) is str) or (type(config_base) is unicode):
+            config_base = cls.a.add_node(types.ConceptNode, config_base)
+
+        if (type(config) is str) or (type(config) is unicode):
+            config = cls.a.add_node(types.ConceptNode, config)
+
+        free_var = cls.a.add_node(
+            types.VariableNode,
+            "$" + cls.name + "_free"
+        )
+
         try:
-            cls.a.add_link(
-                types.ExecutionLink,
+            put_link = cls.a.add_link(
+                types.PutLink,
                 [
-                    cls.__get_schema_node(config_name),
-                    cls.a.add_node(types.ConceptNode, config_dst_name),
+                    cls.__make_list_link(config_name, config_base, free_var),
                     config
                 ]
             )
+            scheme_eval_h(
+                cls.a,
+                '(cog-execute! ' +
+                '  (cog-atom ' + str(put_link.handle_uuid()) + ')' +
+                ')'
+            )
         except UserWarning as e:
-            print e
-            print "Skip add config."
+            BlLogger().log(e)
+            BlLogger().log("Skip add config.")
+            return
+
+        cls.a.remove(free_var, False)
 
     # noinspection PyTypeChecker
-    def get(cls, a, config_name, config_dst_name=None):
+    def get(cls, a, config_name, config_base=None):
         cls.__initialize(a)
 
-        if config_dst_name is None:
-            config_dst_name = cls.name
+        if config_base is None:
+            config_base = cls.name
 
-        result_var = cls.a.add_node(types.VariableNode, "$"+cls.name+"result")
-        try:
-            outgoing_set = \
-                [
-                    cls.__get_schema_node(config_name),
-                    cls.a.add_node(types.ConceptNode, config_dst_name),
-                    result_var
-                ]
-        except UserWarning as e:
-            print e
-            print "Skip get config."
-            return
+        if (type(config_base) is str) or (type(config_base) is unicode):
+            config_base = cls.a.add_node(types.ConceptNode, config_base)
+
+        free_var = cls.a.add_node(
+            types.VariableNode,
+            "$" + cls.name + "_free"
+        )
 
         try:
             get_link = cls.a.add_link(
                 types.GetLink,
-                [cls.a.add_link(
-                    types.ExecutionLink,
-                    outgoing_set
-                )]
+                [
+                    cls.a.add_link(types.VariableList, [free_var]),
+                    cls.__make_list_link(config_name, config_base, free_var)
+                ]
             )
-
             result_set_uuid = scheme_eval_h(
                 cls.a,
-                '(cog-satisfying-set ' +
-                '  (cog-atom '+str(get_link.handle_uuid())+')' +
+                '(cog-execute! ' +
+                '  (cog-atom ' + str(get_link.handle_uuid()) + ')' +
                 ')'
             )
-
-            result_set = cls.a[result_set_uuid]
-            if len(result_set.out) != 1:
-                raise UserWarning(
-                    "TODO: Currently, config have to keep unique.")
         except UserWarning as e:
-            print e
-            print "Skip get config."
-            return
+            BlLogger().log(e)
+            BlLogger().log("Skip get config.")
+            return None
 
-        cls.a.remove(result_var)
+        result_set = cls.a[result_set_uuid]
 
-        print result_set.out[0]
+        try:
+            if len(result_set.out) > 1:
+                raise UserWarning(
+                    "TODO: Currently, config have to keep in unique."
+                )
+            if len(result_set.out) < 1:
+                raise KeyError("Can't find element.")
+        except UserWarning as e:
+            BlLogger().log(
+                str(config_name) + ' in ' +
+                str(config_base) + ' = ' +
+                str(result_set.out))
+            BlLogger().log(e)
+            BlLogger().log("Trying to use first element...")
+
+        cls.a.remove(free_var, False)
+
         return result_set.out[0]
+
+    def get_str(cls, a, config_name, config_base=None):
+        ret = cls.get(a, config_name, config_base)
+        if ret is not None:
+            ret = ret.name
+        return ret
+
+    def get_int(cls, a, config_name, config_base=None):
+        ret = cls.get_str(a, config_name, config_base)
+        if ret is not None:
+            ret = int(ret)
+        return ret
 
     @property
     def __set(cls):
@@ -208,131 +247,49 @@ class BlAtomConfig(Singleton):
         return BlAtomConfig.DEFAULT_CONFIG_NAME
 
 
-
-# BlConfig: BlendingConfigLoader
-# TODO: link with global config in cogserver
-# 자체 관리가 아닌 cogserver의 config 전역 시스템에 연결하기
-class BlConfig(Singleton):
-    def __init__(cls):
-        super(BlConfig, cls).__init__()
-
-        cls.minimum_config_file_version = 3
-
-        cls.use_config_file = False
-        cls.blending_config = dict()
-
-        config_parser = ConfigParser.ConfigParser()
-        config_parser.optionxform = str
-
-        config_parser.read(
-            os.path.dirname(os.path.realpath(__file__)) +
-            '/../blending.conf'
-        )
-
-        sections = config_parser.sections()
-
-        if len(sections) > 0:
-            for section in sections:
-                option_dict = dict()
-                options = config_parser.options(section)
-                for option in options:
-                    option_dict[option] = config_parser.get(section, option)
-                cls.blending_config[section] = option_dict
-        else:
-            cls.use_config_file = False
-            log.log(
-                log.string_as_level("WARN"),
-                "Can't load config file.\n"
-                'Please check your config file in here:\n'
-                '{0}'
-                .format(
-                    os.path.dirname(os.path.realpath(__file__)) +
-                    '/../blending.conf'
-                )
-            )
-            return
-
-        if cls.get('General', 'USE_CONFIG_FILE') == 'True':
-            cls.use_config_file = True
-
-        if int(cls.get('General', 'CONFIG_FILE_VERSION')) < \
-                cls.minimum_config_file_version:
-            log.log(
-                log.string_as_level("WARN"),
-                'Please update config file.\n'
-                'Required: {0}\n'
-                'Current: {1}\n'
-                'Now going to use default config.'
-                .format(
-                    str(cls.minimum_config_file_version),
-                    str(cls.get('General', 'CONFIG_FILE_VERSION'))
-                )
-            )
-
-        cls.is_loaded = True
-
-    def make_default_config(cls, section, default_config):
-        if cls.blending_config.get(str(section)) is not None:
-            return
-        cls.blending_config[str(section)] = default_config
-
-    def is_use_config_file(cls):
-        return cls.use_config_file
-
-    def get_section(cls, section):
-        return cls.blending_config.get(str(section))
-
-    def get(cls, section, key):
-        section = cls.get_section(section)
-        if section is not None:
-            return section[str(key)]
-
-    def set(cls, section, key, value):
-        cls.blending_config[str(section)][str(key)] = value
-
-    # To get variable using frequently.
-    @property
-    def is_use(cls):
-        """
-        :type cls.use_config_file: Boolean
-        """
-        return cls.use_config_file
-
 class BlLogger(Singleton):
     def __init__(cls):
         super(BlLogger, cls).__init__()
-        cls.__make_default_config()
-
-        config = BlConfig().get_section(str(cls))
-
-        cls.mode = BlConfig().get('General', 'AGENT_MODE')
-        if (cls.mode is None) or (cls.mode == 'Release'):
-            cls.level = config.get('LOG_RELEASE_LEVEL')
-            cls.log_prefix = config.get('LOG_RELEASE_PREFIX')
-            cls.log_postfix = config.get('LOG_RELEASE_POSTFIX')
-        else:
-            log.use_stdout()
-            cls.level = config.get('LOG_DEBUG_LEVEL')
-            cls.log_prefix = config.get('LOG_DEBUG_PREFIX')
-            cls.log_postfix = config.get('LOG_DEBUG_POSTFIX')
+        cls.log_level = "INFO"
+        cls.log_prefix = "[BlendingAgent]::"
+        cls.log_postfix = ""
 
     def __str__(self):
         return self.__class__.__name__
 
-    def __make_default_config(cls):
-        default_config = {
-            'LOG_RELEASE_LEVEL': 'INFO',
-            'LOG_RELEASE_PREFIX': '[BlendingAgent]::',
-            'LOG_RELEASE_POSTFIX': ''
-        }
-        BlConfig().make_default_config(str(cls), default_config)
+    def make_default_config(cls, a):
+        BlAtomConfig().add(a, "log-level", "INFO", "Release")
+        BlAtomConfig().add(a, "log-prefix", "[ConceptualBlending]::", "Release")
+        BlAtomConfig().add(a, "log-postfix", "", "Release")
+
+        BlAtomConfig().add(a, "log-level", "WARN", "Debug")
+        BlAtomConfig().add(a, "log-prefix", "[BA]==>", "Debug")
+        BlAtomConfig().add(a, "log-postfix", "", "Debug")
+
+    def change_config(cls, a):
+        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
+        if execute_mode.upper() == "DEBUG":
+            log.use_stdout(True)
+        else:
+            log.use_stdout(False)
+
+        log_level = BlAtomConfig().get_str(a, "log-level", execute_mode)
+        log_prefix = BlAtomConfig().get_str(a, "log-prefix", execute_mode)
+        log_postfix = BlAtomConfig().get_str(a, "log-postfix", execute_mode)
+
+        if log_level is not None:
+            cls.log_level = log_level
+        if log_prefix is not None:
+            cls.log_prefix = log_prefix
+        if log_postfix is not None:
+            cls.log_postfix = log_postfix
 
     def log(cls, msg):
         cls.log_prefix = cls.log_prefix.replace("\\n", "\n")
         cls.log_postfix = cls.log_postfix.replace("\\n", "\n")
         log.log(
-            log.string_as_level(cls.level),
-            cls.log_prefix + msg + cls.log_postfix
+            log.string_as_level(cls.log_level),
+            cls.log_prefix + str(msg) + cls.log_postfix
         )
 
 

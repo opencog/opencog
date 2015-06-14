@@ -1,7 +1,6 @@
 # coding=utf-8
 from examples_b.base_example import BaseExample
 from util_b.blending_util import *
-from util_b.general_util import BlConfig
 from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'
@@ -53,7 +52,6 @@ class DebateWithKantExample(BaseExample):
         self.search_for_truth = ConceptNode("SearchForTruth", rand_tv())
         self.a_1784 = ConceptNode("1784", rand_tv())
         make_sti_all(
-            self.a,
             [
                 self.kant,
                 self.claims,
@@ -76,7 +74,6 @@ class DebateWithKantExample(BaseExample):
         self.dead = ConceptNode("Dead", rand_tv())
         self.aware = ConceptNode("Aware", rand_tv())
         make_sti_all(
-            self.a,
             [
                 self.me,
                 self.speaking,
@@ -206,7 +203,6 @@ class DebateWithKantExample(BaseExample):
         )
 
         make_sti_all(
-            self.a,
             [
                 self.kant,
                 self.claims,
@@ -253,7 +249,6 @@ class DebateWithKantExample(BaseExample):
         MemberLink([l_kant_not_aware_me, self.aware], TruthValue(0.1, 0.9))
 
         make_sti_all(
-            self.a,
             [
                 self.me,
                 self.claims,

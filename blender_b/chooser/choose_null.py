@@ -10,7 +10,7 @@ class ChooseNull(BaseChooser):
     def __str__(self):
         return self.__class__.__name__
 
-    def atom_choose_impl(self, focus_atoms, config):
+    def atom_choose_impl(self, focus_atoms, config_base):
         if focus_atoms is None or len(focus_atoms) < 2:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')

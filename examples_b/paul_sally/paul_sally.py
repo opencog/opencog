@@ -1,6 +1,5 @@
 from examples_b.base_example import BaseExample
 from util_b.blending_util import *
-from util_b.general_util import BlConfig
 from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'
@@ -51,7 +50,6 @@ class PaulSallyExample(BaseExample):
         self.son = ConceptNode("Son", rand_tv())
         self.daughter = ConceptNode("Daughter", rand_tv())
         make_sti_all(
-            self.a,
             [self.family,
              self.grand_father, self.grand_mother,
              self.father, self.mother,
@@ -62,7 +60,6 @@ class PaulSallyExample(BaseExample):
         self.paul = VariableNode("Paul", rand_tv())
         self.sally = VariableNode("Sally", rand_tv())
         make_sti_all(
-            self.a,
             [self.paul, self.sally],
             sti_value_dict['JUST_TARGET']
         )
@@ -72,7 +69,6 @@ class PaulSallyExample(BaseExample):
         self.man = ConceptNode("Man", rand_tv())
         self.woman = ConceptNode("Woman", rand_tv())
         make_sti_all(
-            self.a,
             [self.human, self.human, self.woman],
             sti_value_dict['JUST_TARGET']
         )
@@ -95,7 +91,6 @@ class PaulSallyExample(BaseExample):
 
         # Make role concept.
         make_sti_all(
-            self.a,
             [self.father, self.daughter],
             sti_value_dict['IMPORTANT']
         )
@@ -114,7 +109,6 @@ class PaulSallyExample(BaseExample):
     def __make_input_space_1(self):
         # Make variable concept.
         make_sti_all(
-            self.a,
             [self.paul, self.sally],
             sti_value_dict['IMPORTANT']
         )

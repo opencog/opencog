@@ -1,7 +1,7 @@
 from opencog.type_constructors import types
 from blender_b.chooser.base_chooser import BaseChooser
 from util_b.blending_util import sti_value_dict
-from util_b.general_util import BlConfig, BlLogger
+from util_b.general_util import BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -14,13 +14,9 @@ class ChooseInSTIRange(BaseChooser):
         return self.__class__.__name__
 
     def make_default_config(self):
-        default_config = {
-            'ATOM_TYPE': 'Node',
-            'LEAST_COUNT': '0',
-            'STI_MIN': '1',
-            'STI_MAX': 'NONE'
-        }
-        BlConfig().make_default_config(str(self), default_config)
+        super(self.__class__, self).make_default_config()
+        BlAtomConfig().add(self.a, "choose-sti-min", "IMPORTANT")
+        BlAtomConfig().add(self.a, "choose-sti-max", "NONE")
 
     def __get_atoms_in_sti_range(
             self, focus_atoms, atom_type, least_count, sti_min, sti_max
@@ -43,14 +39,11 @@ class ChooseInSTIRange(BaseChooser):
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, focus_atoms, config):
-        if config is None:
-            config = BlConfig().get_section(str(self))
-
-        atom_type = config.get('ATOM_TYPE')
-        least_count = config.get('LEAST_COUNT')
-        sti_min = config.get('STI_MIN')
-        sti_max = config.get('STI_MAX')
+    def atom_choose_impl(self, focus_atoms, config_base):
+        atom_type = BlAtomConfig().get_str(self.a, "choose-atom-type", config_base)
+        least_count = BlAtomConfig().get_int(self.a, "choose-least-count", config_base)
+        sti_min = BlAtomConfig().get_str(self.a, "choose-sti-min", config_base)
+        sti_max = BlAtomConfig().get_str(self.a, "choose-sti-max", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]
