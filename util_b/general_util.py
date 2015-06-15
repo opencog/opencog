@@ -124,13 +124,148 @@ class BlAtomConfig(Singleton):
         cls.update(cls.a, "config-format-version", "1")
         cls.update(cls.a, "execute-mode", "Release")
 
-    def __py_cog_execute_h(cls, link):
-        return scheme_eval_h(
+    def __blend_config_name_node(cls, config_name):
+        if config_name not in cls.__set:
+            raise UserWarning("Wrong config name.")
+
+        return cls.a.add_node(types.SchemaNode, cls.name + ':' + config_name)
+
+    def __create_put_link(cls, config_dict):
+        """
+        PutLink
+            ListLink
+                ConceptNode <BLEND:config_name>
+                ConceptNode <Config Base>
+                VariableNode $X
+            <Config>
+
+        Args:
+            :param config_dict: dict
+
+        Returns:
+            :rtype: dict
+        """
+        config_name = config_dict["config_name"]
+        config_base = config_dict["config_base"]
+        config = config_dict["config"]
+
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var_list = cls.a.add_link(types.VariableList, [free_var])
+        list_link = cls.a.add_link(
+            types.ListLink,
+            [cls.__blend_config_name_node(config_name), config_base, free_var]
+        )
+        put_link = cls.a.add_link(types.PutLink, [list_link, config])
+        return dict(
+            execute_link=put_link,
+            to_remove_links=[free_var, free_var_list, list_link]
+        )
+
+    def __create_get_link(cls, config_dict):
+        """
+        GetLink
+            VariableList
+                VariableNode $X
+            ListLink
+                ConceptNode <BLEND:config_name>
+                ConceptNode <Config Base>
+                VariableNode $X
+        """
+        config_name = config_dict["config_name"]
+        config_base = config_dict["config_base"]
+
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var_list = cls.a.add_link(types.VariableList, [free_var])
+        list_link = cls.a.add_link(
+            types.ListLink,
+            [cls.__blend_config_name_node(config_name), config_base, free_var]
+        )
+        get_link = cls.a.add_link(types.GetLink, [free_var_list, list_link])
+        return dict(
+            execute_link=get_link,
+            to_remove_links=[free_var, free_var_list, list_link, get_link]
+        )
+
+    def __create_del_link(cls, config_dict):
+        """
+        PutLink
+            DeleteLink
+                ListLink
+                    ConceptNode <BLEND:config_name>
+                    ConceptNode <Config Base>
+                    VariableNode $X
+            <Config>
+        """
+        config_name = config_dict["config_name"]
+        config_base = config_dict["config_base"]
+        config = config_dict["config"]
+
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var_list = cls.a.add_link(types.VariableList, [free_var])
+        list_link = cls.a.add_link(
+            types.ListLink,
+            [cls.__blend_config_name_node(config_name), config_base, free_var]
+        )
+        del_link = cls.a.add_link(types.DeleteLink, [list_link])
+        put_link = cls.a.add_link(types.PutLink, [del_link, config])
+        return dict(
+            execute_link=put_link,
+            to_remove_links=[free_var, free_var_list, list_link, del_link]
+        )
+
+    def __create_inheritance_link(cls, config_dict):
+        """
+        GetLink
+            VariableList
+                VariableNode $X
+            InheritanceLink
+                ConceptNode <Config Base>
+                VariableNode $X
+        """
+        config_base = config_dict["config_base"]
+
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var_list = cls.a.add_link(types.VariableList, [free_var])
+        list_link = cls.a.add_link(
+            types.InheritanceLink, [config_base, free_var]
+        )
+        get_link = cls.a.add_link(types.GetLink, [free_var_list, list_link])
+        return dict(
+            execute_link=get_link,
+            to_remove_links=[free_var, free_var_list, list_link]
+        )
+
+    def __create_execute_link(cls, call_type, config_dict):
+        if call_type == "PUT":
+            return cls.__create_put_link(config_dict)
+        elif call_type == "GET":
+            return cls.__create_get_link(config_dict)
+        elif call_type == "DEL":
+            return cls.__create_del_link(config_dict)
+        elif call_type == "INHERITANCE":
+            return cls.__create_inheritance_link(config_dict)
+        else:
+            raise AttributeError("Non valid API!")
+
+    def __py_cog_execute_factory(cls, call_type, config_dict):
+        execute_link_dict = cls.__create_execute_link(call_type, config_dict)
+        execute_link = execute_link_dict['execute_link']
+
+        result_set_uuid = scheme_eval_h(
             cls.a,
             '(cog-execute! ' +
-            '  (cog-atom ' + str(link.handle_uuid()) + ')' +
+            '  (cog-atom ' + str(execute_link.handle_uuid()) + ')' +
             ')'
         )
+
+        cls.a.remove(execute_link)
+        for link in execute_link_dict['to_remove_links']:
+            cls.a.remove(link)
+
+        if cls.a.is_valid(result_set_uuid):
+            return cls.a[result_set_uuid]
+        else:
+            return None
 
     def __wrap_config_name(cls, config):
         if config is None:
@@ -140,100 +275,76 @@ class BlAtomConfig(Singleton):
         else:
             return config
 
-    def __make_list_link(cls, config_name, config_base, free_var):
-        if config_name not in cls.__set:
-            raise UserWarning("Wrong config name.")
-
-        return cls.a.add_link(
-            types.ListLink,
-            [
-                cls.a.add_node(types.SchemaNode, cls.name + ':' + config_name),
-                config_base,
-                free_var
-            ]
-        )
-
-    def __add_impl(cls, config_name, config, config_base):
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
-        list_link = cls.__make_list_link(config_name, config_base, free_var)
-        put_link = cls.a.add_link(types.PutLink, [list_link, config])
-
-        cls.__py_cog_execute_h(put_link)
-
-        cls.a.remove(put_link)
-        cls.a.remove(list_link)
-        cls.a.remove(free_var)
-
-    def __get_impl(cls, config_name, config_base):
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
-        free_var_list = cls.a.add_link(types.VariableList, [free_var])
-        list_link = cls.__make_list_link(config_name, config_base, free_var)
-        get_link = cls.a.add_link(types.GetLink, [free_var_list, list_link])
-
-        result_set_uuid = cls.__py_cog_execute_h(get_link)
-
-        cls.a.remove(get_link)
-        cls.a.remove(list_link)
-        cls.a.remove(free_var_list)
-        cls.a.remove(free_var)
-
-        # GetLink always returns valid SetLink even it has no element.
-        return cls.a[result_set_uuid]
-
-    def __del_impl(cls, config_name, config, config_base):
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
-        list_link = cls.__make_list_link(config_name, config_base, free_var)
-        del_link = cls.a.add_link(types.DeleteLink, [list_link])
-        put_link = cls.a.add_link(types.PutLink, [del_link, config])
-
-        cls.__py_cog_execute_h(put_link)
-
-        cls.a.remove(put_link)
-        cls.a.remove(del_link)
-        cls.a.remove(list_link)
-        cls.a.remove(free_var)
-
     def update(cls, a, config_name, config, config_base=None):
         cls.__initialize(a)
 
         config = cls.__wrap_config_name(config)
         config_base = cls.__wrap_config_name(config_base)
-        result_set = cls.__get_impl(config_name, config_base)
+
+        config_dict = {
+            "config_name": config_name,
+            "config_base": config_base,
+            "config": config
+        }
+        exist_set = cls.__py_cog_execute_factory("GET", config_dict)
 
         # TODO: Currently, just update one node.
-        if len(result_set.out) > 0:
-            cls.__del_impl(config_name, result_set.out[0], config_base)
+        if len(exist_set.out) > 0:
+            config_dict["config"] = exist_set.out[0]
+            cls.__py_cog_execute_factory("DEL", config_dict)
 
-        cls.__add_impl(config_name, config, config_base)
+        config_dict["config"] = config
+        cls.__py_cog_execute_factory("PUT", config_dict)
 
-        cls.a.remove(result_set)
+        cls.a.remove(exist_set)
 
     # noinspection PyTypeChecker
     def get(cls, a, config_name, config_base=None):
         cls.__initialize(a)
 
         config_base = cls.__wrap_config_name(config_base)
-        result_set = cls.__get_impl(config_name, config_base)
+
+        config_dict = {
+            "config_name": config_name,
+            "config_base": config_base
+        }
+
+        exist_set = None
+        while True:
+            exist_set = cls.__py_cog_execute_factory("GET", config_dict)
+            if len(exist_set.out) > 0:
+                break
+
+            parent_set = cls.__py_cog_execute_factory(
+                "INHERITANCE", config_dict
+            )
+
+            if len(parent_set.out) == 0:
+                exist_set = None
+                break
+            else:
+                config_dict["config_base"] = parent_set.out[0]
 
         try:
-            if len(result_set.out) > 1:
+            if exist_set is None:
+                raise KeyError("Can't find element.")
+            if len(exist_set.out) > 1:
                 raise UserWarning(
                     "TODO: Currently, config have to keep in unique."
                 )
-            if len(result_set.out) < 1:
-                raise KeyError("Can't find element.")
+
         except UserWarning as e:
             BlLogger().debug_log(
                 cls.a,
                 str(config_name) + ' in ' +
                 str(config_base) + ' = ' +
-                str(result_set.out)
+                str(exist_set.out)
             )
             BlLogger().log(e)
             BlLogger().log("Trying to use first element...")
 
-        ret = result_set.out[0]
-        cls.a.remove(result_set)
+        ret = exist_set.out[0]
+        cls.a.remove(exist_set)
         return ret
 
     def get_str(cls, a, config_name, config_base=None):

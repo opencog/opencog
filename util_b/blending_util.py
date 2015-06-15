@@ -66,6 +66,8 @@ def get_weighted_tv(atoms):
             "Weighted TruthValue can't be evaluated with small size."
         )
 
+    mean_sum = 0
+
     weighted_strength_sum = 0
     confidence_sum = 0
     link_count = 0
@@ -75,11 +77,16 @@ def get_weighted_tv(atoms):
         confidence_sum += atom.tv.confidence
         link_count += 1
 
-    new_strength = weighted_strength_sum / confidence_sum
+    try:
+        new_strength = weighted_strength_sum / confidence_sum
+    except ZeroDivisionError:
+        # This is arithmetic mean, maybe given atoms doesn't have TruthValue.
+        for atom in atoms:
+            mean_sum += atom.tv.mean
+        new_strength = mean_sum / link_count
 
     # TODO: Currently, confidence value for new blended node is just
     # average of old value.
     # 충돌값 보정을 단순 평균이 아닌 적절한 이유를 가진 값으로 바꿔야 한다.
     new_confidence = confidence_sum / link_count
-
     return TruthValue(new_strength, new_confidence)
