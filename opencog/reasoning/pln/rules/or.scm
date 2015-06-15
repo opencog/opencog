@@ -1,17 +1,16 @@
 ; =====================================================================
-; AndRule
-; (http://wiki.opencog.org/w/AndRule TODO)
+; OrRule
 ;
 ; A<TV1>
 ; B<TV2>
 ; |-
-; AndLink <TV>
+; OrLink <TV>
 ;    A
 ;    B
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-and
+(define pln-rule-or
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -20,21 +19,21 @@
     (VariableNode "$A")
     (VariableNode "$B"))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-and")
+    (GroundedSchemaNode "scm: pln-formula-or")
     (ListLink
      (VariableNode "$A")
      (VariableNode "$B")))))
 
-(define (pln-formula-and A B)
+(define (pln-formula-or A B)
   (cog-set-tv!
-   (AndLink A B)
-   (pln-formula-and-side-effect-free A B))
+   (OrLink A B)
+   (pln-formula-or-side-effect-free A B))
 )
 
-(define (pln-formula-and-side-effect-free A B)
+(define (pln-formula-or-side-effect-free A B)
   (let 
       ((sA (cog-stv-strength A))
        (sB (cog-stv-strength B))
        (cA (cog-stv-confidence A))
        (cB (cog-stv-confidence B)))
-    (stv (* sA sB) (min cA cB))))
+    (stv (- (+ sA sB) (* sA sB)) (min cA cB))))
