@@ -22,8 +22,8 @@ py blending_shell.py
 ```
 * If you want load agent in your own code, you can use below code.
 ```python
-from util.shell_wrapper import ShellWrapper
-inst = ShellWrapper()
+from util.shell_wrapper import AgentShellWrapper
+inst = AgentShellWrapper()
 inst.run('blending_agent.BlendingAgent')
 ```
 

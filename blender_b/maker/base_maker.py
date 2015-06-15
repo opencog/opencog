@@ -36,17 +36,17 @@ class BaseMaker(object):
         pass
 
     @abstractmethod
-    def new_blend_make_impl(self, a_decided_atoms_list, config):
+    def new_blend_make_impl(self, decided_atoms, config_base):
         """
-        :param a_decided_atoms_list: list
+        :param decided_atoms: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def new_blend_make(self, a_decided_atoms_list, config=None):
+    def new_blend_make(self, decided_atoms, config_base):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.new_blend_make_impl(a_decided_atoms_list, config)
+            self.new_blend_make_impl(decided_atoms, config_base)
         except UserWarning as e:
             BlLogger().log("Skipping make, caused by '" + str(e) + "'")
             BlLogger().log(

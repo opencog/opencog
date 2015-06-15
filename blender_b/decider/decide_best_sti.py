@@ -1,10 +1,7 @@
 from bisect import bisect_left, bisect_right
-import random
-from opencog.type_constructors import types
-from blender_b.chooser.base_chooser import BaseChooser
 from blender_b.decider.base_decider import BaseDecider
 from util_b.blending_util import sti_value_dict
-from util_b.general_util import BlLogger, BlConfig
+from util_b.general_util import BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -17,30 +14,30 @@ class DecideBestSTI(BaseDecider):
         return self.__class__.__name__
 
     def make_default_config(self):
-        default_config = {
-            'RESULT_ATOMS_COUNT': '2',
-            'STI_MIN': '1',
-            'STI_MAX': 'NONE'
-        }
-        BlConfig().make_default_config(str(self), default_config)
+        super(self.__class__, self).make_default_config()
+        BlAtomConfig().update(self.a, "decide-sti-min", "IMPORTANT")
+        BlAtomConfig().update(self.a, "decide-sti-max", "NONE")
 
     def __decide_atoms_best_sti(
-            self, a_chosen_atoms_list,
+            self, chosen_atoms,
             result_atoms_count, sti_min, sti_max
     ):
         """
         Choose all atoms.
-        :param List a_chosen_atoms_list: atoms list to decide.
+        :param List chosen_atoms: atoms list to decide.
         :param int result_atoms_count: maximum number of atoms to blend.
         :param float sti_min: min value of sti to choose.
         :param float sti_max: max value of sti to choose.
         """
 
-        if len(a_chosen_atoms_list) < result_atoms_count:
+        if len(chosen_atoms) < result_atoms_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-        self.ret = sorted(a_chosen_atoms_list, key=lambda atom: atom.av['sti'])
+        self.ret = sorted(
+            chosen_atoms,
+            key=lambda chosen_atom: chosen_atom.av['sti']
+        )
         keys = [atom.av['sti'] for atom in self.ret]
 
         l_index = bisect_left(keys, sti_min)
@@ -56,13 +53,12 @@ class DecideBestSTI(BaseDecider):
         self.ret.reverse()
         self.ret = self.ret[0:result_atoms_count]
 
-    def blending_decide_impl(self, a_chosen_atoms_list, config):
-        if config is None:
-            config = BlConfig().get_section(str(self))
-
-        result_atoms_count = config.get('RESULT_ATOMS_COUNT')
-        sti_min = config.get('STI_MIN')
-        sti_max = config.get('STI_MAX')
+    def blending_decide_impl(self, chosen_atoms, config_base):
+        result_atoms_count = BlAtomConfig().get_int(
+            self.a, "decide-result-atoms-count", config_base
+        )
+        sti_min = BlAtomConfig().get_str(self.a, "decide-sti-min", config_base)
+        sti_max = BlAtomConfig().get_str(self.a, "decide-sti-max", config_base)
 
         try:
             result_atoms_count = int(result_atoms_count)
@@ -80,6 +76,6 @@ class DecideBestSTI(BaseDecider):
             sti_max = None
 
         self.__decide_atoms_best_sti(
-            a_chosen_atoms_list,
+            chosen_atoms,
             result_atoms_count, sti_min, sti_max
         )

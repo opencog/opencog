@@ -5,108 +5,18 @@ import random
 from opencog.type_constructors import *
 from util_b.general_util import *
 
-blend_target_link_tv = TruthValue(1.0, 1.0)
 
-# Singleton class
-# From now, this class don't check any validity of atomspace, so be careful!
-class BlendTargetCtlForDebug(Singleton):
-    def __init__(cls):
-        super(BlendTargetCtlForDebug, cls).__init__()
-
-    BLEND_TARGET_NAME = 'BlendTarget'
-
-    a = None
-    a_blend_target = None
-    link_list_backup = []
-
-    def is_exist(self):
-        if self.a is None:
-            return False
-        elif self.a_blend_target is None:
-            return False
-        else:
-            return True
-
-    def get_blend_target(self):
-        if self.is_exist() is False:
-            self.make_blend_target()
-        return self.a_blend_target
-
-    # DEBUG: Make temporary concept - To define which node is target to blend.
-    def make_blend_target(self):
-        if self.is_exist() is False:
-            self.a_blend_target = \
-                self.a.add_node(types.ConceptNode, self.BLEND_TARGET_NAME)
-
-    def delete_blend_target(self):
-        if self.is_exist() is False:
-            self.make_blend_target()
-
-        l_link_list = self.a.get_atoms_by_target_atom(
-            types.Link, self.a_blend_target
-        )
-
-        for link in l_link_list:
-            self.a.remove(link)
-
-        self.a.remove(self.a_blend_target)
-        self.a_blend_target = None
-
-    def backup_debug_link_list(self):
-        if self.is_exist() is False:
-            self.make_blend_target()
-
-        node_name_list = [
-            "BlendTarget",
-            "InputSpace0",
-            "InputSpace1",
-            "GenericSpace"
-        ]
-        self.link_list_backup = []
-
-        for name in node_name_list:
-            dst_node = self.a.get_atoms_by_name(types.Node, name)[0]
-            get_target_link = \
-                self.a.get_atoms_by_target_atom(types.Link, dst_node)
-
-            for link in get_target_link:
-                xget_target_link_node = self.a.xget_outgoing(link.h)
-                for src_node in xget_target_link_node:
-                    if src_node.h != dst_node.h:
-                        self.link_list_backup.append(
-                            {
-                                'type': link.t,
-                                'src_node': src_node,
-                                'dst_node': dst_node,
-                                'tv': link.tv
-                            }
-                        )
-                self.a.remove(link)
-
-    def restore_debug_link_list(self):
-        if self.is_exist() is False:
-            self.make_blend_target()
-
-        if self.link_list_backup.__len__() > 0:
-            for info in self.link_list_backup:
-                self.a.add_link(
-                    info['type'],
-                    [info['src_node'], info['dst_node']],
-                    info['tv']
-                )
-
-
-def make_link_all(a, link_type, src_node_list, dst_node, tv=None):
+def make_link_all(a, link_type, src_nodes, dst_node, tv=None):
     if tv is None:
-        for node in src_node_list:
+        for node in src_nodes:
             a.add_link(link_type, [node, dst_node], rand_tv())
     else:
-        for node in src_node_list:
+        for node in src_nodes:
             a.add_link(link_type, [node, dst_node], tv)
 
 
 # Choose atoms which are connected to specific atom.
-def get_incoming_node_list(a, target):
+def get_incoming_nodes(a, target):
     ret = []
 
     xget_target_link = a.xget_atoms_by_target_atom(types.Link, target)
@@ -121,9 +31,9 @@ def get_incoming_node_list(a, target):
 
 
 def rand_tv():
-    s = random.uniform(0.5, 0.9)
-    c = random.uniform(0.5, 0.9)
-    return TruthValue(s, c)
+    strength = random.uniform(0.5, 0.9)
+    confidence = random.uniform(0.5, 0.9)
+    return TruthValue(strength, confidence)
 
 # For control STI values.
 sti_value_dict = {
@@ -134,8 +44,8 @@ sti_value_dict = {
 }
 
 
-def make_sti_all(a, src_node_list, sti):
-    for node in src_node_list:
+def make_sti_all(src_nodes, sti):
+    for node in src_nodes:
         node.av = {'sti': sti}
 
 
@@ -156,6 +66,8 @@ def get_weighted_tv(atoms):
             "Weighted TruthValue can't be evaluated with small size."
         )
 
+    mean_sum = 0
+
     weighted_strength_sum = 0
     confidence_sum = 0
     link_count = 0
@@ -165,11 +77,16 @@ def get_weighted_tv(atoms):
         confidence_sum += atom.tv.confidence
         link_count += 1
 
-    new_strength = weighted_strength_sum / confidence_sum
+    try:
+        new_strength = weighted_strength_sum / confidence_sum
+    except ZeroDivisionError:
+        # This is arithmetic mean, maybe given atoms doesn't have TruthValue.
+        for atom in atoms:
+            mean_sum += atom.tv.mean
+        new_strength = mean_sum / link_count
 
     # TODO: Currently, confidence value for new blended node is just
     # average of old value.
     # 충돌값 보정을 단순 평균이 아닌 적절한 이유를 가진 값으로 바꿔야 한다.
     new_confidence = confidence_sum / link_count
-
     return TruthValue(new_strength, new_confidence)

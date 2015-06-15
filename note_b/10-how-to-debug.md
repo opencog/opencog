@@ -1,5 +1,5 @@
 # Debug python agents
-* A hacky sctipt to attach python agents to remote python debug server by gdb.
+* A hacky script to attach python agents to remote python debug server by gdb.
 * It can be used in any of python code!
 
 ## Debug if you run agent in PyCharm

@@ -1,6 +1,6 @@
 from opencog.type_constructors import types
 from blender_b.chooser.base_chooser import BaseChooser
-from util_b.general_util import BlLogger, BlConfig
+from util_b.general_util import BlAtomConfig
 
 __author__ = 'DongMin Kim'
 
@@ -13,13 +13,9 @@ class ChooseAll(BaseChooser):
         return self.__class__.__name__
 
     def make_default_config(self):
-        default_config = {
-            'ATOM_TYPE': 'Node',
-            'LEAST_COUNT': '0',
-        }
-        BlConfig().make_default_config(str(self), default_config)
+        super(self.__class__, self).make_default_config()
 
-    def __get_atoms_all(self, atom_type, least_count):
+    def __get_atoms_all(self, focus_atoms, atom_type, least_count):
         """
         Choose all atoms.
         :param Type atom_type: type of atoms to choose.
@@ -31,12 +27,9 @@ class ChooseAll(BaseChooser):
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, config):
-        if config is None:
-            config = BlConfig().get_section(str(self))
-
-        atom_type = config.get('ATOM_TYPE')
-        least_count = config.get('LEAST_COUNT')
+    def atom_choose_impl(self, focus_atoms, config_base):
+        atom_type = BlAtomConfig().get_str(self.a, "choose-atom-type", config_base)
+        least_count = BlAtomConfig().get_int(self.a, "choose-least-count", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]
@@ -44,7 +37,9 @@ class ChooseAll(BaseChooser):
             atom_type = types.Node
         try:
             least_count = int(least_count)
+            if least_count < 0:
+                raise ValueError('Least count of atom list is too small.')
         except (TypeError, ValueError):
             least_count = 0
 
-        self.__get_atoms_all(atom_type, least_count)
+        self.__get_atoms_all(focus_atoms, atom_type, least_count)
