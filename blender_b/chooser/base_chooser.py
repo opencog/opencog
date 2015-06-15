@@ -34,8 +34,8 @@ class BaseChooser(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().add(self.a, "choose-atom-type", "Node")
-        BlAtomConfig().add(self.a, "choose-least-count", "2")
+        BlAtomConfig().update(self.a, "choose-atom-type", "Node")
+        BlAtomConfig().update(self.a, "choose-least-count", "2")
 
     @abstractmethod
     def atom_choose_impl(self, focus_atoms, config_base):

@@ -34,7 +34,7 @@ class BaseDecider(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().add(self.a, "decide-result-atoms-count", "2")
+        BlAtomConfig().update(self.a, "decide-result-atoms-count", "2")
 
     @abstractmethod
     def blending_decide_impl(self, chosen_atoms, config_base):

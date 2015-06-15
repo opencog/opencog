@@ -58,10 +58,10 @@ class Blender:
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().add(self.a, "atoms-chooser", "ChooseAll")
-        BlAtomConfig().add(self.a, "blending-decider", "DecideBestSTI")
-        BlAtomConfig().add(self.a, "new-blend-atom-maker", "MakeSimple")
-        BlAtomConfig().add(self.a, "link-connector", "ConnectSimple")
+        BlAtomConfig().update(self.a, "atoms-chooser", "ChooseAll")
+        BlAtomConfig().update(self.a, "blending-decider", "DecideBestSTI")
+        BlAtomConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
+        BlAtomConfig().update(self.a, "link-connector", "ConnectSimple")
 
     def prepare_hook(self, config_base):
         pass

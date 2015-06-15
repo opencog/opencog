@@ -1,4 +1,5 @@
 # coding=utf-8
+from os.path import expanduser
 from opencog.type_constructors import *
 from opencog.logger import log
 from opencog.scheme_wrapper import *
@@ -56,6 +57,7 @@ class BlAtomConfig(Singleton):
             "config-format-version",
             "execute-mode",
 
+            "log-stdout",
             "log-level",
             "log-prefix",
             "log-postfix",
@@ -84,12 +86,13 @@ class BlAtomConfig(Singleton):
         # TODO: How to find the scheme module in beautiful?
         scheme_eval(
             cls.a,
-            '(add-to-load-path "/home/kdm/atomspace")' +
-            '(add-to-load-path "/home/kdm/atomspace/build")' +
-            '(add-to-load-path "/home/kdm/atomspace/opencog/scm")' +
-            '(add-to-load-path "/home/kdm/opencog")' +
-            '(add-to-load-path "/home/kdm/opencog/build")' +
-            '(add-to-load-path "/home/kdm/opencog/opencog/scm")' +
+            '(add-to-load-path "' + expanduser("~/atomspace") + '")' +
+            '(add-to-load-path "' + expanduser("~/atomspace/build") + '")' +
+            '(add-to-load-path "' + expanduser(
+                "~/atomspace/opencog/scm") + '")' +
+            '(add-to-load-path "' + expanduser("~/opencog") + '")' +
+            '(add-to-load-path "' + expanduser("~/opencog/build") + '")' +
+            '(add-to-load-path "' + expanduser("~/opencog/opencog/scm") + '")' +
             '(add-to-load-path ".")'
         )
 
@@ -98,7 +101,8 @@ class BlAtomConfig(Singleton):
             '(use-modules (opencog))' +
             '(use-modules (opencog query))' +
             '(use-modules (opencog exec))' +
-            '(use-modules (opencog rule-engine))'
+            '(use-modules (opencog rule-engine))' +
+            '(load-from-path "utilities.scm")'
         )
 
     def __initialize(cls, a):
@@ -117,8 +121,24 @@ class BlAtomConfig(Singleton):
         # blend config
         # TODO: Inherit chooser, decider, ... to BLEND?
         # TODO: Possible infinite loop. add->init->make->add->init->...
-        cls.add(cls.a, "config-format-version", "1")
-        cls.add(cls.a, "execute-mode", "Debug")
+        cls.update(cls.a, "config-format-version", "1")
+        cls.update(cls.a, "execute-mode", "Release")
+
+    def __py_cog_execute_h(cls, link):
+        return scheme_eval_h(
+            cls.a,
+            '(cog-execute! ' +
+            '  (cog-atom ' + str(link.handle_uuid()) + ')' +
+            ')'
+        )
+
+    def __wrap_config_name(cls, config):
+        if config is None:
+            return cls.a.add_node(types.ConceptNode, cls.name)
+        elif isinstance(config, str) or isinstance(config, unicode):
+            return cls.a.add_node(types.ConceptNode, config)
+        else:
+            return config
 
     def __make_list_link(cls, config_name, config_base, free_var):
         if config_name not in cls.__set:
@@ -133,79 +153,67 @@ class BlAtomConfig(Singleton):
             ]
         )
 
-    def add(cls, a, config_name, config, config_base=None):
+    def __add_impl(cls, config_name, config, config_base):
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        list_link = cls.__make_list_link(config_name, config_base, free_var)
+        put_link = cls.a.add_link(types.PutLink, [list_link, config])
+
+        cls.__py_cog_execute_h(put_link)
+
+        cls.a.remove(put_link)
+        cls.a.remove(list_link)
+        cls.a.remove(free_var)
+
+    def __get_impl(cls, config_name, config_base):
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var_list = cls.a.add_link(types.VariableList, [free_var])
+        list_link = cls.__make_list_link(config_name, config_base, free_var)
+        get_link = cls.a.add_link(types.GetLink, [free_var_list, list_link])
+
+        result_set_uuid = cls.__py_cog_execute_h(get_link)
+
+        cls.a.remove(get_link)
+        cls.a.remove(list_link)
+        cls.a.remove(free_var_list)
+        cls.a.remove(free_var)
+
+        # GetLink always returns valid SetLink even it has no element.
+        return cls.a[result_set_uuid]
+
+    def __del_impl(cls, config_name, config, config_base):
+        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        list_link = cls.__make_list_link(config_name, config_base, free_var)
+        del_link = cls.a.add_link(types.DeleteLink, [list_link])
+        put_link = cls.a.add_link(types.PutLink, [del_link, config])
+
+        cls.__py_cog_execute_h(put_link)
+
+        cls.a.remove(put_link)
+        cls.a.remove(del_link)
+        cls.a.remove(list_link)
+        cls.a.remove(free_var)
+
+    def update(cls, a, config_name, config, config_base=None):
         cls.__initialize(a)
 
-        if config_base is None:
-            config_base = cls.name
+        config = cls.__wrap_config_name(config)
+        config_base = cls.__wrap_config_name(config_base)
+        result_set = cls.__get_impl(config_name, config_base)
 
-        if (type(config_base) is str) or (type(config_base) is unicode):
-            config_base = cls.a.add_node(types.ConceptNode, config_base)
+        # TODO: Currently, just update one node.
+        if len(result_set.out) > 0:
+            cls.__del_impl(config_name, result_set.out[0], config_base)
 
-        if (type(config) is str) or (type(config) is unicode):
-            config = cls.a.add_node(types.ConceptNode, config)
+        cls.__add_impl(config_name, config, config_base)
 
-        free_var = cls.a.add_node(
-            types.VariableNode,
-            "$" + cls.name + "_free"
-        )
-
-        try:
-            put_link = cls.a.add_link(
-                types.PutLink,
-                [
-                    cls.__make_list_link(config_name, config_base, free_var),
-                    config
-                ]
-            )
-            scheme_eval_h(
-                cls.a,
-                '(cog-execute! ' +
-                '  (cog-atom ' + str(put_link.handle_uuid()) + ')' +
-                ')'
-            )
-        except UserWarning as e:
-            BlLogger().log(e)
-            BlLogger().log("Skip add config.")
-            return
-
-        cls.a.remove(free_var, False)
+        cls.a.remove(result_set)
 
     # noinspection PyTypeChecker
     def get(cls, a, config_name, config_base=None):
         cls.__initialize(a)
 
-        if config_base is None:
-            config_base = cls.name
-
-        if (type(config_base) is str) or (type(config_base) is unicode):
-            config_base = cls.a.add_node(types.ConceptNode, config_base)
-
-        free_var = cls.a.add_node(
-            types.VariableNode,
-            "$" + cls.name + "_free"
-        )
-
-        try:
-            get_link = cls.a.add_link(
-                types.GetLink,
-                [
-                    cls.a.add_link(types.VariableList, [free_var]),
-                    cls.__make_list_link(config_name, config_base, free_var)
-                ]
-            )
-            result_set_uuid = scheme_eval_h(
-                cls.a,
-                '(cog-execute! ' +
-                '  (cog-atom ' + str(get_link.handle_uuid()) + ')' +
-                ')'
-            )
-        except UserWarning as e:
-            BlLogger().log(e)
-            BlLogger().log("Skip get config.")
-            return None
-
-        result_set = cls.a[result_set_uuid]
+        config_base = cls.__wrap_config_name(config_base)
+        result_set = cls.__get_impl(config_name, config_base)
 
         try:
             if len(result_set.out) > 1:
@@ -215,16 +223,18 @@ class BlAtomConfig(Singleton):
             if len(result_set.out) < 1:
                 raise KeyError("Can't find element.")
         except UserWarning as e:
-            BlLogger().log(
+            BlLogger().debug_log(
+                cls.a,
                 str(config_name) + ' in ' +
                 str(config_base) + ' = ' +
-                str(result_set.out))
+                str(result_set.out)
+            )
             BlLogger().log(e)
             BlLogger().log("Trying to use first element...")
 
-        cls.a.remove(free_var, False)
-
-        return result_set.out[0]
+        ret = result_set.out[0]
+        cls.a.remove(result_set)
+        return ret
 
     def get_str(cls, a, config_name, config_base=None):
         ret = cls.get(a, config_name, config_base)
@@ -258,21 +268,21 @@ class BlLogger(Singleton):
         return self.__class__.__name__
 
     def make_default_config(cls, a):
-        BlAtomConfig().add(a, "log-level", "INFO", "Release")
-        BlAtomConfig().add(a, "log-prefix", "[ConceptualBlending]::", "Release")
-        BlAtomConfig().add(a, "log-postfix", "", "Release")
+        BlAtomConfig().update(a, "log-stdout", "True")
 
-        BlAtomConfig().add(a, "log-level", "WARN", "Debug")
-        BlAtomConfig().add(a, "log-prefix", "[BA]==>", "Debug")
-        BlAtomConfig().add(a, "log-postfix", "", "Debug")
+        BlAtomConfig().update(a, "log-level", "INFO", "Release")
+        BlAtomConfig().update(a, "log-prefix", "[ConceptualBlending]::", "Release")
+        BlAtomConfig().update(a, "log-postfix", "", "Release")
+
+        BlAtomConfig().update(a, "log-level", "WARN", "Debug")
+        BlAtomConfig().update(a, "log-prefix", "[BA]==>", "Debug")
+        BlAtomConfig().update(a, "log-postfix", "", "Debug")
 
     def change_config(cls, a):
-        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
-        if execute_mode.upper() == "DEBUG":
-            log.use_stdout(True)
-        else:
-            log.use_stdout(False)
+        log_stdout = BlAtomConfig().get_str(a, "log-stdout")
+        log.use_stdout(True if log_stdout.upper() == "TRUE" else False)
 
+        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
         log_level = BlAtomConfig().get_str(a, "log-level", execute_mode)
         log_prefix = BlAtomConfig().get_str(a, "log-prefix", execute_mode)
         log_postfix = BlAtomConfig().get_str(a, "log-postfix", execute_mode)
@@ -283,6 +293,11 @@ class BlLogger(Singleton):
             cls.log_prefix = log_prefix
         if log_postfix is not None:
             cls.log_postfix = log_postfix
+
+    def debug_log(cls, a, msg):
+        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
+        if execute_mode.upper() == "DEBUG":
+            cls.log(msg)
 
     def log(cls, msg):
         cls.log_prefix = cls.log_prefix.replace("\\n", "\n")

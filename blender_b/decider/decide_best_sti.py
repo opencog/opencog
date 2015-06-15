@@ -15,8 +15,8 @@ class DecideBestSTI(BaseDecider):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlAtomConfig().add(self.a, "decide-sti-min", "IMPORTANT")
-        BlAtomConfig().add(self.a, "decide-sti-max", "NONE")
+        BlAtomConfig().update(self.a, "decide-sti-min", "IMPORTANT")
+        BlAtomConfig().update(self.a, "decide-sti-max", "NONE")
 
     def __decide_atoms_best_sti(
             self, chosen_atoms,
