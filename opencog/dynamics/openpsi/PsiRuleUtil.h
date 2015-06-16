@@ -31,10 +31,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
-#include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
+//#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
+//#include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 
-namespace opencog { namespace oac {
+namespace opencog {
 
 /**
  * @class
@@ -125,10 +125,10 @@ public:
      *
      * @return  The number of arguments got
      */
-    static bool getSchemaArguments(const AtomSpace & atomSpace,
+    /*static bool getSchemaArguments(const AtomSpace & atomSpace,
                                    Handle hListLink,
                                    const std::vector<std::string> & varBindCandidates,
-                                   std::vector <combo::vertex> & schemaArguments);
+                                   std::vector <combo::vertex> & schemaArguments);*/
 
     /**
      * Initialize all the possible variable bindings in Psi Rule with all the entities the pet encounters
@@ -136,7 +136,7 @@ public:
      * @param atomSpace          The AtomSpace
      * @param varBindCandidates  All the possible variable bindings
      */
-    static void initVarBindCandidates(const AtomSpace & atomSpace, std::vector<std::string> & varBindCandidates);
+    /*static void initVarBindCandidates(const AtomSpace & atomSpace, std::vector<std::string> & varBindCandidates);*/
 
     /**
      * Initialize the unifier with the given all the possible variable bindings
@@ -150,7 +150,7 @@ public:
      *
      *        We usually call this function before running a combo procedure that needs a unifier.
      */
-    static void initUnifier(combo::variable_unifier & unifier, const std::vector<std::string> & varBindCandidates);
+    /*static void initUnifier(combo::variable_unifier & unifier, const std::vector<std::string> & varBindCandidates);*/
 
     /**
      * Updating the possible variable bindings in Psi Rule, based on the result return by combo interpreter
@@ -166,7 +166,7 @@ public:
      *        So after running the combo procedure, you can usually call this function,
      *        which would find variable bindings that are actually valid by simply checking their states.
      */
-    static void updateVarBindCandidates(const combo::variable_unifier & unifier, std::vector<std::string> & varBindCandidates);
+    /*static void updateVarBindCandidates(const combo::variable_unifier & unifier, std::vector<std::string> & varBindCandidates);*/
 
     /**
      * Check if the given Precondition is satisfied.
@@ -186,19 +186,19 @@ public:
      *        If the EvaluationLink holds a GroundedPredicateNode,
      *        we would run the corresponding combo procedure firstly, and then judge based on the execution result.
      */
-    static bool isSatisfied(const AtomSpace & atomSpace,
+    /*static bool isSatisfied(const AtomSpace & atomSpace,
                             Procedure::ProcedureInterpreter & procedureInterpreter,
                             const Procedure::ProcedureRepository & procedureRepository,
                             Handle hPrecondition,
-                            combo::variable_unifier & unifier);
+                            combo::variable_unifier & unifier);*/
 
     /**
      * Slightly easier-to-use version of the above, which creates unifier itself.
      */
-    static bool isSatisfied(const AtomSpace & atomSpace,
+    /*static bool isSatisfied(const AtomSpace & atomSpace,
                             Procedure::ProcedureInterpreter & procedureInterpreter,
                             const Procedure::ProcedureRepository & procedureRepository,
-                            Handle hPrecondition);
+                            Handle hPrecondition);*/
 
     /**
      * Check if all the Preconditions of a given Psi Rule are satisfied.
@@ -212,11 +212,11 @@ public:
      *
      * @return true if all the preconditions of the given Psi Rule are satisfied, otherwise return false
      */
-    static bool allPreconditionsSatisfied(const AtomSpace & atomSpace,
+    /*static bool allPreconditionsSatisfied(const AtomSpace & atomSpace,
                                           Procedure::ProcedureInterpreter & procedureInterpreter,
                                           const Procedure::ProcedureRepository & procedureRepository,
                                           Handle hPsiRule,
-                                          std::vector<std::string> & varBindCandidates);
+                                          std::vector<std::string> & varBindCandidates);*/
 
     /**
      * Apply the given Psi Rule.
@@ -238,11 +238,11 @@ public:
      *        'run' method is responsible for dealing with the result of execution during next "cognitive cycle"
      *        after calling the 'applyPsiRule' method.
      */
-    static Procedure::RunningProcedureID applyPsiRule(const AtomSpace & atomSpace,
+    /*static Procedure::RunningProcedureID applyPsiRule(const AtomSpace & atomSpace,
                                                       Procedure::ProcedureInterpreter & procedureInterpreter,
                                                       const Procedure::ProcedureRepository & procedureRepository,
                                                       Handle hPsiRule,
-                                                      const std::vector<std::string> & varBindCandidates);
+                                                      const std::vector<std::string> & varBindCandidates);*/
 
     /**
      * Get/ set previous/ current Demand Goal (EvaluationLink)
@@ -269,6 +269,6 @@ public:
     static void setCurrentDemandGoal(AtomSpace & atomSpace, Handle hCurrentlySelectedDemandGoal);
 }; // class
 
-} } // namespace opencog::oac
+} // namespace opencog
 
 #endif

@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <moses/comboreduct/combo/vertex.h>
+//#include <moses/comboreduct/combo/vertex.h>
 
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -28,8 +28,7 @@
 #include "PsiRuleUtil.h"
 
 using namespace opencog;
-using namespace oac;
-using namespace combo;
+//using namespace combo;
 
 bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
                                const Handle hPsiRule,
@@ -179,7 +178,7 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
     return true;
 }
 
-bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
+/*bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
                                      Handle hListLink,
                                      const std::vector<std::string> & varBindCandidates,
                                      std::vector <vertex> & schemaArguments)
@@ -250,17 +249,17 @@ bool PsiRuleUtil::getSchemaArguments(const AtomSpace & atomSpace,
     }// foreach
 
     return true;
-}
+}*/
 
-void PsiRuleUtil::initVarBindCandidates(const AtomSpace & atomSpace,
+/*void PsiRuleUtil::initVarBindCandidates(const AtomSpace & atomSpace,
                                         std::vector<std::string> & varBindCandidates)
 {
     varBindCandidates.clear();
     const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
     spaceMap.findAllEntities( back_inserter(varBindCandidates) );
-}
+}*/
 
-void PsiRuleUtil::initUnifier(variable_unifier & unifier,
+/*void PsiRuleUtil::initUnifier(variable_unifier & unifier,
                               const std::vector<std::string> & varBindCandidates)
 {
     unifier.clear();
@@ -272,9 +271,9 @@ void PsiRuleUtil::initUnifier(variable_unifier & unifier,
                              // after running the procedure.
                       );
     }
-} 
+}*/
 
-void PsiRuleUtil::updateVarBindCandidates(const variable_unifier & unifier,
+/*void PsiRuleUtil::updateVarBindCandidates(const variable_unifier & unifier,
                                           std::vector<std::string> & varBindCandidates)
 {
     varBindCandidates.clear();
@@ -295,9 +294,9 @@ void PsiRuleUtil::updateVarBindCandidates(const variable_unifier & unifier,
                           );
         }
     }
-}
+}*/
 
-bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
+/*bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                               Procedure::ProcedureInterpreter & procedureInterpreter,
                               const Procedure::ProcedureRepository & procedureRepository,
                               Handle hPrecondition)
@@ -329,9 +328,9 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
             procedureRepository,
             hPrecondition,
             unifier);
-}
+}*/
 
-bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
+/*bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
                               Procedure::ProcedureInterpreter & procedureInterpreter,
                               const Procedure::ProcedureRepository & procedureRepository,
                               Handle hPrecondition,
@@ -452,9 +451,9 @@ bool PsiRuleUtil::isSatisfied(const AtomSpace & atomSpace,
         return false;
     }// if
     return false;
-}
+}*/
 
-bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
+/*bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
                                             Procedure::ProcedureInterpreter & procedureInterpreter,
                                             const Procedure::ProcedureRepository & procedureRepository,
                                             Handle hPsiRule,
@@ -527,9 +526,9 @@ bool PsiRuleUtil::allPreconditionsSatisfied(const AtomSpace & atomSpace,
     }
 
     return bAllPreconditionsSatisfied;
-}
+}*/
 
-Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSpace,
+/*Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSpace,
                                                         Procedure::ProcedureInterpreter & procedureInterpreter,
                                                         const Procedure::ProcedureRepository & procedureRepository,
                                                         Handle hPsiRule,
@@ -590,7 +589,7 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
                   );
 
     return executingSchemaId;
-}
+}*/
 
     /**
      * Get/ set previous/ current Demand Goal
