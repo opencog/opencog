@@ -48,7 +48,7 @@ void TimeServer::init()
     // series data merging of these data, for analysis/mining.
 }
 
-TimeServer::TimeServer(AtomSpace& a)
+TimeServer::TimeServer(AtomSpace& a): atomspace(&a), spaceServer(NULL)
 {
     init();
     // Connect signals
