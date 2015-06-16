@@ -888,7 +888,7 @@ std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Ha
     inheritanceLinkOutgoings.push_back(hVariableNode);
     Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK,
                                                 inheritanceLinkOutgoings);
-    
+
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hinheritanceLink);
     bindLinkOutgoings.push_back(hinheritanceLink);
@@ -1048,8 +1048,12 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
 Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
                                        Handle hFirstOutgoing)
 {
+    // XXX: This should throw a RunTimeException, but for now will do.
+    if (hFirstOutgoing == Handle::UNDEFINED)
+        return Handle::UNDEFINED;
+
     // Create BindLink used by pattern matcher
-    std::vector<Handle> referenceLinkOutgoings,
+    HandleSeq referenceLinkOutgoings,
         implicationLinkOutgoings, bindLinkOutgoings;
 
     Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
@@ -1059,18 +1063,13 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
     Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK,
                                               referenceLinkOutgoings);
 
-    implicationLinkOutgoings.push_back(hReferenceLink);
-    implicationLinkOutgoings.push_back(hReferenceLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK,
-                                                implicationLinkOutgoings);
-
     bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(hReferenceLink);
+    bindLinkOutgoings.push_back(hReferenceLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(&atomSpace, hBindLink);
-
     // Get result
     // Note: Don't forget remove the hResultListLink, otherwise some scheme script
     //       may fail to remove the ReferenceLink when necessary.
@@ -1107,6 +1106,10 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
 
 Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
 {
+    // XXX: This should throw a RunTimeException, but for now will do.
+    if (hFirstOutgoing == Handle::UNDEFINED)
+        return Handle::UNDEFINED;
+
     Handle hReferenceLink = AtomSpaceUtil::getReferenceLink(atomSpace,
                                                             hFirstOutgoing);
 
