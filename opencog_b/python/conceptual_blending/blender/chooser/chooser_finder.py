@@ -24,7 +24,7 @@ class ChooserFinder(object):
 
     def get_chooser(self, id_or_name=None):
         if id_or_name is None:
-            id_or_name = BlAtomConfig().get_str(self.a, "atoms-chooser")
+            id_or_name = BlendConfig().get_str(self.a, "atoms-chooser")
 
         chooser = self.choosers.get(str(id_or_name))
         if chooser is not None:

@@ -1,7 +1,7 @@
 from opencog.type_constructors import *
 from blender.blender import Blender
-from opencog_b.python.conceptual_blending.util.general_util import BlLogger
-from util.general_util import BlAtomConfig
+from opencog_b.python.conceptual_blending.util.general_util import BlLogger, \
+    BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -55,14 +55,17 @@ class ConceptualBlending:
             If a list is empty, then blender can't find proper blend atoms.
             :rtype : list[Atom]
         """
-        
         if config_base is None:
-            config_base = self.a.add_node(types.ConceptNode, BlAtomConfig().name)
+            config_base = self.a.add_node(types.ConceptNode, BlendConfig().name)
         else:
             # TODO: If config_base exists, enroll custom config_base.
             # BlAtomConfig().add(self.a, "blender", "RuleBlender")
             pass
 
-        BlLogger().change_config(self.a)
+        # TODO: Remove custom logger or migrate with OpenCog logger
+        # If you want to set logger's config..
+        BlLogger().make_default_config(self.a)
+        BlLogger().change_config(self.a, config_base)
+
         self.blender = Blender(self.a)
         return self.blender.blend(focus_atoms, config_base)

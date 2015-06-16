@@ -1,3 +1,4 @@
+
 from abc import ABCMeta, abstractmethod
 
 from opencog_b.python.conceptual_blending.util.general_util import *
@@ -35,8 +36,8 @@ class BaseChooser(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().update(self.a, "choose-atom-type", "Node")
-        BlAtomConfig().update(self.a, "choose-least-count", "2")
+        BlendConfig().update(self.a, "choose-atom-type", "Node")
+        BlendConfig().update(self.a, "choose-least-count", "2")
 
     @abstractmethod
     def atom_choose_impl(self, focus_atoms, config_base):

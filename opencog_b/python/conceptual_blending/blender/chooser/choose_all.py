@@ -1,14 +1,13 @@
 from opencog.type_constructors import types
 from opencog_b.python.conceptual_blending.blender.chooser.base_chooser import \
     BaseChooser
-from opencog_b.python.conceptual_blending.util.general_util import BlAtomConfig
-
+from opencog_b.python.conceptual_blending.util.general_util import *
 __author__ = 'DongMin Kim'
 
 
 class ChooseAll(BaseChooser):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def __str__(self):
         return self.__class__.__name__
@@ -29,8 +28,8 @@ class ChooseAll(BaseChooser):
             raise UserWarning('Size of atom list is too small.')
 
     def atom_choose_impl(self, focus_atoms, config_base):
-        atom_type = BlAtomConfig().get_str(self.a, "choose-atom-type", config_base)
-        least_count = BlAtomConfig().get_int(self.a, "choose-least-count", config_base)
+        atom_type = BlendConfig().get_str(self.a, "choose-atom-type", config_base)
+        least_count = BlendConfig().get_int(self.a, "choose-least-count", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]

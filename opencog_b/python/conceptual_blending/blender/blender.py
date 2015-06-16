@@ -8,8 +8,7 @@ from opencog_b.python.conceptual_blending.blender.decider.decider_finder import 
     DeciderFinder
 from opencog_b.python.conceptual_blending.blender.maker.maker_finder import \
     MakerFinder
-from opencog_b.python.conceptual_blending.util.general_util import enum_simulate, \
-    BlAtomConfig, BlLogger
+from opencog_b.python.conceptual_blending.util.general_util import *
 
 __author__ = 'DongMin Kim'
 
@@ -63,26 +62,26 @@ class Blender:
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().update(self.a, "atoms-chooser", "ChooseAll")
-        BlAtomConfig().update(self.a, "blending-decider", "DecideBestSTI")
-        BlAtomConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
-        BlAtomConfig().update(self.a, "link-connector", "ConnectSimple")
+        BlendConfig().update(self.a, "atoms-chooser", "ChooseAll")
+        BlendConfig().update(self.a, "blending-decider", "DecideBestSTI")
+        BlendConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
+        BlendConfig().update(self.a, "link-connector", "ConnectSimple")
 
     def prepare_hook(self, config_base):
         pass
 
     def make_workers(self, config_base):
         self.chooser = self.chooser_finder.get_chooser(
-            BlAtomConfig().get_str(self.a, "atoms-chooser", config_base)
+            BlendConfig().get_str(self.a, "atoms-chooser", config_base)
         )
         self.decider = self.decider_finder.get_decider(
-            BlAtomConfig().get_str(self.a, "blending-decider", config_base)
+            BlendConfig().get_str(self.a, "blending-decider", config_base)
         )
         self.maker = self.maker_finder.get_maker(
-            BlAtomConfig().get_str(self.a, "new-blend-atom-maker", config_base)
+            BlendConfig().get_str(self.a, "new-blend-atom-maker", config_base)
         )
         self.connector = self.connector_finder.get_connector(
-            BlAtomConfig().get_str(self.a, "link-connector", config_base)
+            BlendConfig().get_str(self.a, "link-connector", config_base)
         )
 
     def finish_hook(self, new_blended_atom, config_base):

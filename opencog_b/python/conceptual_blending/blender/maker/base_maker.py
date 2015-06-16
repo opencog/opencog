@@ -34,7 +34,9 @@ class BaseMaker(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        pass
+        BlendConfig().update(self.a, "make-atom-prefix", "")
+        BlendConfig().update(self.a, "make-atom-separator", "-")
+        BlendConfig().update(self.a, "make-atom-postfix", "")
 
     @abstractmethod
     def new_blend_make_impl(self, decided_atoms, config_base):

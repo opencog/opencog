@@ -1,6 +1,8 @@
+
 from opencog_b.python.conceptual_blending.blender.connector.connect_simple import \
     ConnectSimple
-from opencog_b.python.conceptual_blending.util.general_util import BlAtomConfig
+from opencog_b.python.conceptual_blending.util.general_util import BlendConfig
+
 
 __author__ = 'DongMin Kim'
 
@@ -18,7 +20,7 @@ class ConnectorFinder(object):
 
     def get_connector(self, id_or_name=None):
         if id_or_name is None:
-            id_or_name = BlAtomConfig().get_str(self.a, "link-connector")
+            id_or_name = BlendConfig().get_str(self.a, "link-connector")
 
         connector = self.connectors.get(str(id_or_name))
         if connector is not None:

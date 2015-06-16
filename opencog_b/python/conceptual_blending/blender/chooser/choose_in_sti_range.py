@@ -1,3 +1,4 @@
+
 from opencog_b.python.conceptual_blending.blender.chooser.base_chooser import \
     BaseChooser
 from opencog_b.python.conceptual_blending.util.blending_util import *
@@ -15,8 +16,8 @@ class ChooseInSTIRange(BaseChooser):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlAtomConfig().update(self.a, "choose-sti-min", "IMPORTANT")
-        BlAtomConfig().update(self.a, "choose-sti-max", "NONE")
+        BlendConfig().update(self.a, "choose-sti-min", "IMPORTANT")
+        BlendConfig().update(self.a, "choose-sti-max", "NONE")
 
     def __get_atoms_in_sti_range(
             self, focus_atoms, atom_type, least_count, sti_min, sti_max
@@ -40,10 +41,10 @@ class ChooseInSTIRange(BaseChooser):
             raise UserWarning('Size of atom list is too small.')
 
     def atom_choose_impl(self, focus_atoms, config_base):
-        atom_type = BlAtomConfig().get_str(self.a, "choose-atom-type", config_base)
-        least_count = BlAtomConfig().get_int(self.a, "choose-least-count", config_base)
-        sti_min = BlAtomConfig().get_str(self.a, "choose-sti-min", config_base)
-        sti_max = BlAtomConfig().get_str(self.a, "choose-sti-max", config_base)
+        atom_type = BlendConfig().get_str(self.a, "choose-atom-type", config_base)
+        least_count = BlendConfig().get_int(self.a, "choose-least-count", config_base)
+        sti_min = BlendConfig().get_str(self.a, "choose-sti-min", config_base)
+        sti_max = BlendConfig().get_str(self.a, "choose-sti-max", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]

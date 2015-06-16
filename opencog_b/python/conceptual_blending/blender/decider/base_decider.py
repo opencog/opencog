@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from opencog_b.python.conceptual_blending.util.general_util import BlAtomConfig, \
+from opencog_b.python.conceptual_blending.util.general_util import BlendConfig, \
     BlLogger, enum_simulate
 
 __author__ = 'DongMin Kim'
@@ -36,7 +36,7 @@ class BaseDecider(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().update(self.a, "decide-result-atoms-count", "2")
+        BlendConfig().update(self.a, "decide-result-atoms-count", "2")
 
     @abstractmethod
     def blending_decide_impl(self, chosen_atoms, config_base):

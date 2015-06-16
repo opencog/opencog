@@ -34,7 +34,7 @@ class DecideRandom(BaseDecider):
             self.ret.extend(chosen_atoms[index])
 
     def blending_decide_impl(self, chosen_atoms, config_base):
-        result_atoms_count = BlAtomConfig().get_int(
+        result_atoms_count = BlendConfig().get_int(
             self.a, "decide-result-atoms-count", config_base
         )
 
