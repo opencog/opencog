@@ -1,5 +1,5 @@
-from examples.python.conceptual_blending.networks.base_network import *
-from opencog_b.python.conceptual_blending.util.blending_util import *
+from networks.base_network import *
+from opencog_b.python.blending.util.blending_util import *
 from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'

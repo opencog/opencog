@@ -1,40 +1,31 @@
 # opencog-python-blending
 ## Description
-* Temp repository to test early version of blending algorithm with python shell.
-* Can be executed both in cogserver, linux shell.
+* Implement of Conceptual Blending algorithm in [OpenCog](https://github.com/opencog/opencog) Framework.
+
+## Prerequisites
+* [Python 2.7.x](https://www.python.org/downloads/release/python-2710)
+* [AtomSpace](https://github.com/opencog/atomspace)
+* [OpenCog](https://github.com/opencog/opencog) (with Cython binding)
 
 ## Usage
-### Running the program in cogserver shell
-```bash
-agents-stop-loop
-loadpy /your/path/opencog-python-blending/blending_agent
-agents-start /your/path/opencog-python-blending/blending_agent.BlendingAgent
-agents-step opencog::PyMindAgent(/your/path/opencog-python-blending/blending_agent.BlendingAgent)
-```
-### Running the program in linux shell
-```bash
-ipython blending_shell.py
-```
-### Alternatives
-* If you don't have IPython, just run with default python interpreter.
-```bash
-py blending_shell.py
-```
-* If you want load agent in your own code, you can use below code.
 ```python
-from util.shell_wrapper import AgentShellWrapper
-inst = AgentShellWrapper()
-inst.run('blending_agent.BlendingAgent')
+from opencog_b.python.blending.blend import ConceptualBlending
+ConceptualBlending(atomspace).run(focus_atoms, config_base)
 ```
-
-## Files
-* blending_agent.py: Main program. (Conceptual Blending MindAgent)
-* blending_shell.py: Auto load and run blending for debug.
-* blending.conf.example: Example of config file.
+* Make new blend with atoms from given atoms list.
+* Use the custom configs. See [Conceptual Blending Config Format].
+* Options
+  * focus_atoms: If it is None, then blender will try to blend with all atoms 
+  in atomspace.
+  * config_base: If it is None, then blender will try to blend with default
+  (hard-coded) configs.
+  
+## Development Progress  
+* See [doc/diary/README.md](https://github.com/kim135797531/opencog-python-blending/tree/master/doc/diary)
 
 ## Folders
-* blender_b: Available blenders.
-* diary_b: My working progress reports for GSoC 2015 project.
-* note_b: Various notes to save useful information for my project.
-* tests_b: Input data for test conceptual blending.
-* util_b: Several util files.
+* doc: API documents, project progress reports, etc.
+* examples: Various examples that use the Conceptual Blending algorithm.
+* opencog_b: Code of Conceptual Blending algorithm.
+  * '_b' is temporary postfix to avoid conflict with real OpenCog Framework.
+ 

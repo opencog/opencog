@@ -3,7 +3,6 @@
 
 ## Now
 ### In Progress
-* Make inheritance-config check algorithm.
 * Change algorithms to work only within given atoms, not in overall atomspace.
 * Detect and improve conflict links in newly blended node.
   * Implement checking for some values in HebbianLink and SimilarityLink when 
@@ -46,7 +45,8 @@
 
 ## Result
 ### Done
-* (empty)
+* Make inheritance-config check algorithm.
+* Reorganize project directory structure.
 
 ### Fail & Deadline Missed
 * (empty)

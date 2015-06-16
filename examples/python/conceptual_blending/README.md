@@ -1,10 +1,9 @@
-# tests_b
-* Directory to save test cases.
+# Conceptual Blending Examples
+* Examples using Conceptual Blending API.
 
 ## Folders
-* paul_sally: Paul and Sally test case.
-* debate_with_kant: Debate with Kant test case.
+* networks: Provide the sample input network data.
 
 ## Files
-* base_test_case.py: Abstract class to provide 'make()' interface.
-* test_case_finder.py: Make the predefined test case to blend.
+* blend_simple.py: Simple example to use blend API.
+* blend_with_config.py: Request to blend API with custom config. 
