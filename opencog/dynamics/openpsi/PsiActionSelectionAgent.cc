@@ -192,6 +192,9 @@ bool PsiActionSelectionAgent::getPlan()
 
 void PsiActionSelectionAgent::printPlan()
 {
+    if(this->plan_selected_demand_goal == Handle::UNDEFINED)
+        return;
+
     std::cout << std::endl << "Selected Demand Goal [cycle = "
               << this->cycleCount << "]:" << std::endl
               << atomspace.atomAsString(this->plan_selected_demand_goal)
@@ -200,6 +203,11 @@ void PsiActionSelectionAgent::printPlan()
     int i = 1;
 
     for ( const Handle hAction : this->plan_action_list ) {
+        if(hAction == Handle::UNDEFINED)
+        {
+            ++i;
+            continue;
+        }
         std::cout << std::endl << "Step No."<< i
                   << std::endl << atomspace.atomAsString(hAction);
 
@@ -273,7 +281,7 @@ void PsiActionSelectionAgent::run()
                            __FUNCTION__,
                            scheme_expression.c_str());
 
-            return;
+            //return;
         }
 
         // Try to get the plan stored in AtomSpace
@@ -283,6 +291,9 @@ void PsiActionSelectionAgent::run()
                           "for the selected demand goal [cycle = %d]",
                           __FUNCTION__,
                           this->cycleCount);
+
+            if(this->plan_selected_demand_goal == Handle::UNDEFINED)
+                return;
 
             std::cout << "'do_planning' can not find any suitable "
                       << "plan for the selected demand goal:"
@@ -308,11 +319,12 @@ void PsiActionSelectionAgent::run()
         PsiRuleUtil::setCurrentDemandGoal(atomspace,
                                           this->plan_selected_demand_goal);
 
-        logger().debug("PsiActionSelectionAgent::%s - "
-                       "do planning for the Demand Goal: %s [cycle = %d]",
-                       __FUNCTION__,
-                       atomspace.atomAsString(this->plan_selected_demand_goal).c_str(),
-                       this->cycleCount);
+        if(this->plan_selected_demand_goal != Handle::UNDEFINED)
+            logger().debug("PsiActionSelectionAgent::%s - "
+                           "do planning for the Demand Goal: %s [cycle = %d]",
+                           __FUNCTION__,
+                           atomspace.atomAsString(this->plan_selected_demand_goal).c_str(),
+                           this->cycleCount);
     }
 #endif // HAVE_GUILE
 
