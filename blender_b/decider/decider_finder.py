@@ -1,7 +1,7 @@
 from blender_b.decider.decide_best_sti import DecideBestSTI
 from blender_b.decider.decide_null import DecideNull
 from blender_b.decider.decide_random import DecideRandom
-from util_b.general_util import BlAtomConfig
+from util_b.general_util import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -21,7 +21,7 @@ class DeciderFinder(object):
 
     def get_decider(self, id_or_name=None):
         if id_or_name is None:
-            id_or_name = BlAtomConfig().get_str(self.a, "blending-decider")
+            id_or_name = BlendConfig().get_str(self.a, "blending-decider")
 
         decider = self.deciders.get(str(id_or_name))
         if decider is not None:

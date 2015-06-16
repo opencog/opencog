@@ -48,9 +48,59 @@ def enum_simulate(*sequential, **named):
     return type('Enum', (), enums)
 
 
-# BlAtomConfig: BlendingConfigLoader
 # noinspection PyTypeChecker
-class BlAtomConfig(Singleton):
+class PyCogExecute(Singleton):
+    def __init__(cls):
+        super(PyCogExecute, cls).__init__()
+        cls.a = None
+        cls.is_initialized = False
+
+    def __initialize(cls, a):
+        if cls.a is not a:
+            cls.is_initialized = False
+            cls.a = a
+
+        if cls.is_initialized is not True:
+            cls.is_initialized = True
+
+            # TODO: How to find the scheme module in beautiful?
+            scheme_eval(
+                cls.a,
+                '(add-to-load-path "' + expanduser("~/atomspace") + '")' +
+                '(add-to-load-path "' + expanduser("~/atomspace/build") + '")' +
+                '(add-to-load-path "' + expanduser("~/atomspace/opencog/scm") + '")' +
+                '(add-to-load-path "' + expanduser("~/opencog") + '")' +
+                '(add-to-load-path "' + expanduser("~/opencog/build") + '")' +
+                '(add-to-load-path "' + expanduser("~/opencog/opencog/scm") + '")' +
+                '(add-to-load-path ".")'
+            )
+
+            scheme_eval(
+                cls.a,
+                '(use-modules (opencog))' +
+                '(use-modules (opencog query))' +
+                '(use-modules (opencog exec))' +
+                '(use-modules (opencog rule-engine))' +
+                '(load-from-path "utilities.scm")'
+            )
+
+    def execute(cls, a, execute_link):
+        cls.__initialize(a)
+
+        result_set_uuid = scheme_eval_h(
+            cls.a,
+            '(cog-execute! ' +
+            '  (cog-atom ' + str(execute_link.handle_uuid()) + ')' +
+            ')'
+        )
+
+        if cls.a.is_valid(result_set_uuid):
+            return cls.a[result_set_uuid]
+        else:
+            return None
+
+# noinspection PyTypeChecker
+class BlendConfig(Singleton):
     DEFAULT_CONFIG_NAME = "BLEND"
     DEFAULT_CONFIG_SET = \
         {
@@ -74,36 +124,18 @@ class BlAtomConfig(Singleton):
 
             "decide-result-atoms-count",
             "decide-sti-min",
-            "decide-sti-max"
+            "decide-sti-max",
+
+            "make-atom-prefix",
+            "make-atom-separator",
+            "make-atom-postfix"
         }
 
     # noinspection PyTypeChecker
     def __init__(cls):
-        super(BlAtomConfig, cls).__init__()
+        super(BlendConfig, cls).__init__()
         cls.a = None
         cls.is_initialized = False
-
-        # TODO: How to find the scheme module in beautiful?
-        scheme_eval(
-            cls.a,
-            '(add-to-load-path "' + expanduser("~/atomspace") + '")' +
-            '(add-to-load-path "' + expanduser("~/atomspace/build") + '")' +
-            '(add-to-load-path "' + expanduser(
-                "~/atomspace/opencog/scm") + '")' +
-            '(add-to-load-path "' + expanduser("~/opencog") + '")' +
-            '(add-to-load-path "' + expanduser("~/opencog/build") + '")' +
-            '(add-to-load-path "' + expanduser("~/opencog/opencog/scm") + '")' +
-            '(add-to-load-path ".")'
-        )
-
-        scheme_eval(
-            cls.a,
-            '(use-modules (opencog))' +
-            '(use-modules (opencog query))' +
-            '(use-modules (opencog exec))' +
-            '(use-modules (opencog rule-engine))' +
-            '(load-from-path "utilities.scm")'
-        )
 
     def __initialize(cls, a):
         if cls.a is not a:
@@ -149,11 +181,13 @@ class BlAtomConfig(Singleton):
         config_base = config_dict["config_base"]
         config = config_dict["config"]
 
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var = cls.a.add_node(types.VariableNode,
+                                  "$" + cls.name + "_free")
         free_var_list = cls.a.add_link(types.VariableList, [free_var])
         list_link = cls.a.add_link(
             types.ListLink,
-            [cls.__blend_config_name_node(config_name), config_base, free_var]
+            [cls.__blend_config_name_node(config_name), config_base,
+             free_var]
         )
         put_link = cls.a.add_link(types.PutLink, [list_link, config])
         return dict(
@@ -174,11 +208,13 @@ class BlAtomConfig(Singleton):
         config_name = config_dict["config_name"]
         config_base = config_dict["config_base"]
 
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var = cls.a.add_node(types.VariableNode,
+                                  "$" + cls.name + "_free")
         free_var_list = cls.a.add_link(types.VariableList, [free_var])
         list_link = cls.a.add_link(
             types.ListLink,
-            [cls.__blend_config_name_node(config_name), config_base, free_var]
+            [cls.__blend_config_name_node(config_name), config_base,
+             free_var]
         )
         get_link = cls.a.add_link(types.GetLink, [free_var_list, list_link])
         return dict(
@@ -200,11 +236,13 @@ class BlAtomConfig(Singleton):
         config_base = config_dict["config_base"]
         config = config_dict["config"]
 
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var = cls.a.add_node(types.VariableNode,
+                                  "$" + cls.name + "_free")
         free_var_list = cls.a.add_link(types.VariableList, [free_var])
         list_link = cls.a.add_link(
             types.ListLink,
-            [cls.__blend_config_name_node(config_name), config_base, free_var]
+            [cls.__blend_config_name_node(config_name), config_base,
+             free_var]
         )
         del_link = cls.a.add_link(types.DeleteLink, [list_link])
         put_link = cls.a.add_link(types.PutLink, [del_link, config])
@@ -224,7 +262,8 @@ class BlAtomConfig(Singleton):
         """
         config_base = config_dict["config_base"]
 
-        free_var = cls.a.add_node(types.VariableNode, "$" + cls.name + "_free")
+        free_var = cls.a.add_node(types.VariableNode,
+                                  "$" + cls.name + "_free")
         free_var_list = cls.a.add_link(types.VariableList, [free_var])
         list_link = cls.a.add_link(
             types.InheritanceLink, [config_base, free_var]
@@ -247,26 +286,6 @@ class BlAtomConfig(Singleton):
         else:
             raise AttributeError("Non valid API!")
 
-    def __py_cog_execute_factory(cls, call_type, config_dict):
-        execute_link_dict = cls.__create_execute_link(call_type, config_dict)
-        execute_link = execute_link_dict['execute_link']
-
-        result_set_uuid = scheme_eval_h(
-            cls.a,
-            '(cog-execute! ' +
-            '  (cog-atom ' + str(execute_link.handle_uuid()) + ')' +
-            ')'
-        )
-
-        cls.a.remove(execute_link)
-        for link in execute_link_dict['to_remove_links']:
-            cls.a.remove(link)
-
-        if cls.a.is_valid(result_set_uuid):
-            return cls.a[result_set_uuid]
-        else:
-            return None
-
     def __wrap_config_name(cls, config):
         if config is None:
             return cls.a.add_node(types.ConceptNode, cls.name)
@@ -274,6 +293,15 @@ class BlAtomConfig(Singleton):
             return cls.a.add_node(types.ConceptNode, config)
         else:
             return config
+
+    def __clean_up_obsolete_dict(cls, obsolete_dict):
+        obsolete_links = obsolete_dict.values()
+        for link in obsolete_links:
+            if isinstance(link, list):
+                obsolete_links.extend(link)
+                obsolete_links.remove(link)
+            else:
+                cls.a.remove(link)
 
     def update(cls, a, config_name, config, config_base=None):
         cls.__initialize(a)
@@ -286,15 +314,22 @@ class BlAtomConfig(Singleton):
             "config_base": config_base,
             "config": config
         }
-        exist_set = cls.__py_cog_execute_factory("GET", config_dict)
+
+        get_link_dict = cls.__create_execute_link("GET", config_dict)
+        exist_set = PyCogExecute().execute(a, get_link_dict['execute_link'])
+        cls.__clean_up_obsolete_dict(get_link_dict)
 
         # TODO: Currently, just update one node.
         if len(exist_set.out) > 0:
             config_dict["config"] = exist_set.out[0]
-            cls.__py_cog_execute_factory("DEL", config_dict)
+            del_link_dict = cls.__create_execute_link("DEL", config_dict)
+            PyCogExecute().execute(a, del_link_dict['execute_link'])
+            cls.__clean_up_obsolete_dict(del_link_dict)
 
         config_dict["config"] = config
-        cls.__py_cog_execute_factory("PUT", config_dict)
+        put_link_dict = cls.__create_execute_link("PUT", config_dict)
+        PyCogExecute().execute(a, put_link_dict['execute_link'])
+        cls.__clean_up_obsolete_dict(put_link_dict)
 
         cls.a.remove(exist_set)
 
@@ -311,13 +346,16 @@ class BlAtomConfig(Singleton):
 
         exist_set = None
         while True:
-            exist_set = cls.__py_cog_execute_factory("GET", config_dict)
+            get_link_dict = cls.__create_execute_link("GET", config_dict)
+            exist_set = PyCogExecute().execute(a, get_link_dict['execute_link'])
+            cls.__clean_up_obsolete_dict(get_link_dict)
+
             if len(exist_set.out) > 0:
                 break
 
-            parent_set = cls.__py_cog_execute_factory(
-                "INHERITANCE", config_dict
-            )
+            inh_link_dict = cls.__create_execute_link("INHERITANCE", config_dict)
+            parent_set = PyCogExecute().execute(a, inh_link_dict['execute_link'])
+            cls.__clean_up_obsolete_dict(inh_link_dict)
 
             if len(parent_set.out) == 0:
                 exist_set = None
@@ -361,11 +399,11 @@ class BlAtomConfig(Singleton):
 
     @property
     def __set(cls):
-        return BlAtomConfig.DEFAULT_CONFIG_SET
+        return BlendConfig.DEFAULT_CONFIG_SET
 
     @property
     def name(cls):
-        return BlAtomConfig.DEFAULT_CONFIG_NAME
+        return BlendConfig.DEFAULT_CONFIG_NAME
 
 
 class BlLogger(Singleton):
@@ -379,24 +417,32 @@ class BlLogger(Singleton):
         return self.__class__.__name__
 
     def make_default_config(cls, a):
-        BlAtomConfig().update(a, "log-stdout", "True")
+        BlendConfig().update(a, "log-stdout", "True")
 
-        BlAtomConfig().update(a, "log-level", "INFO", "Release")
-        BlAtomConfig().update(a, "log-prefix", "[ConceptualBlending]::", "Release")
-        BlAtomConfig().update(a, "log-postfix", "", "Release")
+        BlendConfig().update(a, "log-level", "INFO", "Release")
+        BlendConfig().update(a, "log-prefix", "[ConceptualBlending]::", "Release")
+        BlendConfig().update(a, "log-postfix", "", "Release")
 
-        BlAtomConfig().update(a, "log-level", "WARN", "Debug")
-        BlAtomConfig().update(a, "log-prefix", "[BA]==>", "Debug")
-        BlAtomConfig().update(a, "log-postfix", "", "Debug")
+        BlendConfig().update(a, "log-level", "WARN", "Debug")
+        BlendConfig().update(a, "log-prefix", "[BA]==>", "Debug")
+        BlendConfig().update(a, "log-postfix", "", "Debug")
 
-    def change_config(cls, a):
-        log_stdout = BlAtomConfig().get_str(a, "log-stdout")
+    def change_config(cls, a, config_base):
+        log_stdout = BlendConfig().get_str(a, "log-stdout", config_base)
         log.use_stdout(True if log_stdout.upper() == "TRUE" else False)
 
-        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
-        log_level = BlAtomConfig().get_str(a, "log-level", execute_mode)
-        log_prefix = BlAtomConfig().get_str(a, "log-prefix", execute_mode)
-        log_postfix = BlAtomConfig().get_str(a, "log-postfix", execute_mode)
+        execute_mode = BlendConfig().get_str(
+            a, "execute-mode", config_base
+        )
+        log_level = BlendConfig().get_str(
+            a, "log-level", execute_mode
+        )
+        log_prefix = BlendConfig().get_str(
+            a, "log-prefix", execute_mode
+        )
+        log_postfix = BlendConfig().get_str(
+            a, "log-postfix", execute_mode
+        )
 
         if log_level is not None:
             cls.log_level = log_level
@@ -406,7 +452,7 @@ class BlLogger(Singleton):
             cls.log_postfix = log_postfix
 
     def debug_log(cls, a, msg):
-        execute_mode = BlAtomConfig().get_str(a, "execute-mode")
+        execute_mode = BlendConfig().get_str(a, "execute-mode")
         if execute_mode.upper() == "DEBUG":
             cls.log(msg)
 

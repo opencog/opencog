@@ -1,6 +1,6 @@
 from opencog.type_constructors import types
 from blender_b.chooser.base_chooser import BaseChooser
-from util_b.general_util import BlAtomConfig
+from util_b.general_util import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -28,8 +28,8 @@ class ChooseAll(BaseChooser):
             raise UserWarning('Size of atom list is too small.')
 
     def atom_choose_impl(self, focus_atoms, config_base):
-        atom_type = BlAtomConfig().get_str(self.a, "choose-atom-type", config_base)
-        least_count = BlAtomConfig().get_int(self.a, "choose-least-count", config_base)
+        atom_type = BlendConfig().get_str(self.a, "choose-atom-type", config_base)
+        least_count = BlendConfig().get_int(self.a, "choose-least-count", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]
