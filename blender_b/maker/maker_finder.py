@@ -1,5 +1,5 @@
 from blender_b.maker.make_simple import MakeSimple
-from util_b.general_util import BlAtomConfig
+from util_b.general_util import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -17,7 +17,7 @@ class MakerFinder(object):
 
     def get_maker(self, id_or_name=None):
         if id_or_name is None:
-            id_or_name = BlAtomConfig().get_str(self.a, "link-connector")
+            id_or_name = BlendConfig().get_str(self.a, "link-connector")
 
         maker = self.makers.get(str(id_or_name))
         if maker is not None:

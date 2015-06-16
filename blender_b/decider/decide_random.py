@@ -1,6 +1,6 @@
 import random
 from blender_b.decider.base_decider import BaseDecider
-from util_b.general_util import BlAtomConfig
+from util_b.general_util import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -34,7 +34,7 @@ class DecideRandom(BaseDecider):
             self.ret.extend(chosen_atoms[index])
 
     def blending_decide_impl(self, chosen_atoms, config_base):
-        result_atoms_count = BlAtomConfig().get_int(
+        result_atoms_count = BlendConfig().get_int(
             self.a, "decide-result-atoms-count", config_base
         )
 

@@ -1,4 +1,4 @@
-from util_b.general_util import enum_simulate, BlLogger, BlAtomConfig
+from util_b.general_util import enum_simulate, BlLogger, BlendConfig
 from abc import ABCMeta, abstractmethod
 
 __author__ = 'DongMin Kim'
@@ -34,8 +34,8 @@ class BaseChooser(object):
                 )(self.last_status)
 
     def make_default_config(self):
-        BlAtomConfig().update(self.a, "choose-atom-type", "Node")
-        BlAtomConfig().update(self.a, "choose-least-count", "2")
+        BlendConfig().update(self.a, "choose-atom-type", "Node")
+        BlendConfig().update(self.a, "choose-least-count", "2")
 
     @abstractmethod
     def atom_choose_impl(self, focus_atoms, config_base):

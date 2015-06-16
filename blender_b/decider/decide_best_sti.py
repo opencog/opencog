@@ -1,7 +1,7 @@
 from bisect import bisect_left, bisect_right
 from blender_b.decider.base_decider import BaseDecider
 from util_b.blending_util import sti_value_dict
-from util_b.general_util import BlAtomConfig
+from util_b.general_util import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -15,8 +15,8 @@ class DecideBestSTI(BaseDecider):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlAtomConfig().update(self.a, "decide-sti-min", "IMPORTANT")
-        BlAtomConfig().update(self.a, "decide-sti-max", "NONE")
+        BlendConfig().update(self.a, "decide-sti-min", "IMPORTANT")
+        BlendConfig().update(self.a, "decide-sti-max", "NONE")
 
     def __decide_atoms_best_sti(
             self, chosen_atoms,
@@ -54,11 +54,11 @@ class DecideBestSTI(BaseDecider):
         self.ret = self.ret[0:result_atoms_count]
 
     def blending_decide_impl(self, chosen_atoms, config_base):
-        result_atoms_count = BlAtomConfig().get_int(
+        result_atoms_count = BlendConfig().get_int(
             self.a, "decide-result-atoms-count", config_base
         )
-        sti_min = BlAtomConfig().get_str(self.a, "decide-sti-min", config_base)
-        sti_max = BlAtomConfig().get_str(self.a, "decide-sti-max", config_base)
+        sti_min = BlendConfig().get_str(self.a, "decide-sti-min", config_base)
+        sti_max = BlendConfig().get_str(self.a, "decide-sti-max", config_base)
 
         try:
             result_atoms_count = int(result_atoms_count)
