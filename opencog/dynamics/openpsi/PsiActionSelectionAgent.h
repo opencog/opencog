@@ -106,7 +106,7 @@ private:
 
     // Time out for executing Action (combo script) defined by
     // PROCEDURE_EXECUTION_TIMEOUT
-    long procedureExecutionTimeout;
+    //long procedureExecutionTimeout;
 
     time_t timeStartCurrentAction; // When the current action was executed
 

@@ -27,17 +27,20 @@
 #include <opencog/nlp/types/atom_types.h>
 //#include <opencog/spacetime/atom_types.h>
 //#include <opencog/spacetime/SpaceServer.h>
-#include <opencog/util/platform.h>
+//#include <opencog/util/platform.h>
 #include <opencog/util/random.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
+
 
 #include "PsiActionSelectionAgent.h"
 #include "PsiRuleUtil.h"
 
-using namespace opencog::oac;
+using namespace opencog;
 
-extern int currentDebugLevel;
+//extern int currentDebugLevel;
 
 PsiActionSelectionAgent::~PsiActionSelectionAgent()
 {
@@ -62,8 +65,8 @@ void PsiActionSelectionAgent::init()
 
     // Initialize other members
     //this->currentSchemaId = 0;
-    this->procedureExecutionTimeout =
-        config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
+    //this->procedureExecutionTimeout =
+    //    config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -223,273 +226,9 @@ void PsiActionSelectionAgent::stimulateAtoms()
 
 void PsiActionSelectionAgent::executeAction(Handle hActionExecutionOutputLink)
 {
-    Instantiator inst(atomspace);
+    Instantiator inst(&atomspace);
     inst.execute(hActionExecutionOutputLink);
 }
-
-/*void PsiActionSelectionAgent::executeAction(LanguageComprehension & languageTool,
-                                            Procedure::ProcedureInterpreter & procedureInterpreter,
-                                            const Procedure::ProcedureRepository & procedureRepository,
-                                            Handle hActionExecutionLink)
-{
-    std::cout << "Currently executing Action: "
-              << atomspace.atomAsString(this->current_action)
-              << std::endl << std::endl;
-
-#if HAVE_GUILE
-    // Variables used by combo interpreter
-    std::vector<combo::vertex> schemaArguments;
-
-    // Get Action type
-    Type actionType =
-        atomspace.getType(atomspace.getOutgoing(hActionExecutionLink, 0));
-
-    // Get Action name
-    std::string actionName =
-        atomspace.getName(atomspace.getOutgoing(hActionExecutionLink, 0));
-
-    // Get scheme function name if any
-    // @todo replace by opencog/execute call
-    bool bSchemeFunction = false;
-    size_t scm_prefix_index = actionName.find("scm:");
-
-    if ( scm_prefix_index != std::string::npos ) {
-        actionName = actionName.substr(scm_prefix_index+4);
-        boost::trim(actionName);
-        bSchemeFunction = true;
-    }
-
-    // Initialize scheme evaluator
-    SchemeEval evaluator1(&atomspace);
-    std::string scheme_expression, scheme_return_value;
-
-    // If it is a SPEECH_ACT_SCHEMA_NODE, run the corresponding scheme function,
-    // to create answers. The generated answers are stored in the format below,
-    //
-    // ReferenceLink
-    //     UtteranceNode "utterance_sentences"
-    //     ListLink
-    //         SentenceNode ...
-    //         ...
-    // TODO: this is unnecessary, remove it later.
-    // Why???
-    if (actionType == SPEECH_ACT_SCHEMA_NODE) {
-        scheme_expression = "( " + actionName + " )";
-
-        // Run the speech act schema to generate answers
-        scheme_return_value = evaluator1.eval(scheme_expression);
-
-        if ( evaluator1.eval_error() ) {
-            logger().error("PsiActionSelectionAgent::%s - Failed to execute '%s'",
-                           __FUNCTION__,
-                           scheme_expression.c_str());
-        }
-
-        logger().debug("PsiActionSelectionAgent::%s - "
-                       "generate answers successfully by "
-                       "SpeechActSchema: %s [cycle = %d]",
-                       __FUNCTION__,
-                       actionName.c_str(),
-                       this->cycleCount);
-    }
-    // If it is a scheme function, call scheme evaluator
-    else if ( bSchemeFunction ) {
-        // Get arguments for the scheme function
-        scheme_expression = actionName;
-
-        // @todo replace by opencog/execute call
-        if ( atomspace.getArity(hActionExecutionLink) == 2 ) {
-            // Handle to ListLink containing arguments
-            Handle hListLink = atomspace.getOutgoing(hActionExecutionLink, 1);
-
-            // Process the arguments according to its type
-            for (Handle hArgument : atomspace.getOutgoing(hListLink)) {
-                Type argumentType = atomspace.getType(hArgument);
-                if (argumentType == NUMBER_NODE) {
-                    scheme_expression += " " + atomspace.getName(hArgument);
-                }
-                else {
-                    scheme_expression += " \""
-                        + atomspace.getName(hArgument) + "\"";
-                }
-            } // for
-        } // if
-
-        // TODO: A better approach is implementing 'answer_question'
-        //       in 'unity_speech_act_schema.scm'.  We implement it
-        //       here is because many previous c++ are required.
-        if ( actionName == "answer_question" ) {
-            languageTool.resolveLatestSentenceReference();
-            languageTool.answerQuestion();
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "executed function: %s [cycle = %d]",
-                           __FUNCTION__,
-                           actionName.c_str(),
-                           this->cycleCount);
-        }
-        else {
-            scheme_expression = "( " + scheme_expression + " )";
-
-            // Run scheme function
-            scheme_return_value = evaluator1.eval(scheme_expression);
-
-            if ( evaluator1.eval_error() ) {
-                logger().error("PsiActionSelectionAgent::%s - "
-                               "Failed to execute '%s'",
-                               __FUNCTION__,
-                               scheme_expression.c_str());
-            }
-            else {
-                logger().debug("PsiActionSelectionAgent::%s - Successfully executed scheme function: %s [cycle = %d]",
-                               __FUNCTION__,
-                               scheme_expression.c_str(),
-                               this->cycleCount);
-            }
-        } // if (actionName == "answer_question")
-    }
-    // If it is a combo function, call ProcedureInterpreter to execute
-    // the function
-    else  {
-        // Get combo arguments for Action
-        if ( atomspace.getArity(hActionExecutionLink) == 2 ) {
-            // Handle to ListLink containing arguments
-            Handle hListLink = atomspace.getOutgoing(hActionExecutionLink, 1);
-
-            // Process the arguments according to its type
-            for (Handle hArgument : atomspace.getOutgoing(hListLink)) {
-
-                Type argumentType = atomspace.getType(hArgument);
-
-                if (argumentType == NUMBER_NODE) {
-                    string num_str = atomspace.getName(hArgument);
-                    combo::contin_t num_c =
-                        boost::lexical_cast<combo::contin_t>(num_str);
-                    schemaArguments.push_back(combo::contin_t(num_c));
-                }
-                else {
-                    schemaArguments.push_back(atomspace.getName(hArgument));
-                }
-            }// for
-        }// if
-
-        // Run the Procedure of the Action
-        //
-        // We will not check the state of the execution of the Action
-        // here. Because it may take some time to finish it.  Instead,
-        // we will check the result of the execution within 'run'
-        // method during next "cognitive cycle".
-        //
-        // There are three kinds of results: success, fail and time
-        // out (defined by 'PROCEDURE_EXECUTION_TIMEOUT')
-        //
-        // TODO: Before running the combo procedure, check the number
-        // of arguments the procedure needed and it actually got
-        //
-        // Reference: "SchemaRunner.cc" line 264-286
-        //
-        const Procedure::GeneralProcedure & procedure = procedureRepository.get(actionName);
-
-        //this->currentSchemaId = procedureInterpreter.runProcedure(procedure, schemaArguments);
-
-        logger().debug( "PsiActionSelectionAgent::%s - running action: %s [schemaId = %d, cycle = %d]",
-                        __FUNCTION__,
-                        procedure.getName().c_str(),
-                        /*this->currentSchemaId,*/
-                        this->cycleCount
-                      );
-
-    }
-#endif // HAVE_GUILE
-
-    // If the agent has something to say, generate a bunch of say
-    // actions (one for each sentence node) which would be executed
-    // from the next cognitive cycle
-    {
-        std::string sentenceNodeName, listerner, content;
-
-        boost::regex expListener("TO\\s*:\\s*([^,\\s]*)[\\s|,]*");
-        boost::regex expContent("CONTENT\\s*:\\s*(.*)");
-        boost::smatch what;
-
-        Handle hSpeakAction, hSpeakActionArgument;
-        HandleSeq tempOutgoingSet;
-
-        Handle hUtteranceSentencesList =
-            AtomSpaceUtil::getReference(atomspace,
-                                        atomspace.getHandle(UTTERANCE_NODE,
-                                                            "utterance_sentences"
-                                                           )
-                                       );
-
-        for (Handle hSentenceNode : atomspace.getOutgoing(hUtteranceSentencesList) ) {
-            sentenceNodeName = atomspace.getName(hSentenceNode);
-
-            // get listener and content of the sentence
-            if ( boost::regex_search(sentenceNodeName, what, expListener) &&
-                 what.size() == 2 && what[1].matched ) {
-                listerner = what[1];
-            }
-            else
-                listerner = "";
-
-            if ( boost::regex_search(sentenceNodeName, what, expContent) &&
-                 what.size() == 2 && what[1].matched ) {
-                content = what[1];
-            }
-            else
-                content = "";
-
-            // skip the sentence with empty content (we should not get in there)
-            if ( content=="" )
-                continue;
-
-            // create say action for the sentence and insert it into the action
-            // list, which would be executed during next cognitive cycle
-            tempOutgoingSet = { atomspace.addNode(SENTENCE_NODE, content),
-                                atomspace.addNode(OBJECT_NODE, listerner) };
-            hSpeakActionArgument = atomspace.addLink(LIST_LINK, tempOutgoingSet);
-
-            tempOutgoingSet = { atomspace.addNode(GROUNDED_PREDICATE_NODE, "say"),
-                                hSpeakActionArgument };
-            hSpeakAction = atomspace.addLink(EXECUTION_LINK, tempOutgoingSet);
-
-            this->temp_action_list.insert(this->temp_action_list.begin(),
-                                          hSpeakAction);
-
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "generate say action: %s [cycle = %d]",
-                           __FUNCTION__,
-                           atomspace.atomAsString(hSpeakAction).c_str(),
-                           this->cycleCount);
-
-            std::cout << std::endl << "Generate say action "
-                      << atomspace.atomAsString(hSpeakAction)
-                      << " [cycle = " << this->cycleCount << "]" << std::endl;
-
-        } // for
-
-#if HAVE_GUILE
-        // @todo this could be replaced by a GSN call (with opencog/execute)
-        scheme_expression = "( reset_utterance_node \"utterance_sentences\" )";
-
-        // Move sentences from UtteranceNode to DialogNode, then these sentences
-        // will not be said again.
-        scheme_return_value = evaluator1.eval(scheme_expression);
-
-        if ( evaluator1.eval_error() ) {
-            logger().error("PsiActionSelectionAgent::%s - Failed to execute '%s'",
-                           __FUNCTION__,
-                           scheme_expression.c_str());
-        }
-        else {
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "reset utterance node [cycle = %d]",
-                           __FUNCTION__,
-                           this->cycleCount);
-        }
-#endif // HAVE_GUILE
-    }
-} */
 
 void PsiActionSelectionAgent::run()
 {
@@ -502,178 +241,6 @@ void PsiActionSelectionAgent::run()
     if ( !this->bInitialized )
         this->init();
 
-    // Check the state of current running Action:
-    //
-    // If it success, fails, or is time out, update corresponding
-    // information respectively, and continue processing.  Otherwise,
-    // say the current Action is still running, do nothing and simply
-    // returns.
-    //
-    /*if (this->currentSchemaId != 0) {
-
-        logger().debug("PsiActionSelectionAgent::%s "
-                       "currentSchemaId = %d [cycle = %d] ",
-                       __FUNCTION__,
-                       this->currentSchemaId,
-                       this->cycleCount);
-        bool schemaFailed =
-            procedureInterpreter.isFailed(this->currentSchemaId);
-        bool schemaComplete =
-            procedureInterpreter.isFinished(this->currentSchemaId);
-        // If the Action has completed, and was reported successful,
-        // check the result
-        if (schemaComplete && !schemaFailed) {
-
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "The Action %s is finished [SchemaId = %d, cycle = %d]",
-                           __FUNCTION__,
-                           atomspace.atomAsString(this->current_action).c_str(),
-                           this->currentSchemaId,
-                           this->cycleCount);
-
-            std::cout << std::endl << "Action "
-                      << atomspace.atomAsString(this->current_action)
-                      <<" is done [SchemaId = "  << this->currentSchemaId
-                      << ", cycle = " << this->cycleCount << "]" << std::endl;
-
-            combo::vertex result =
-                procedureInterpreter.getResult(this->currentSchemaId);
-
-            // If check result: success
-            if ((is_action_result(result)
-                 && get_action(result) == combo::id::action_success)
-                || (is_builtin(result)
-                    && get_builtin(result) == combo::id::logical_true)) {
-
-               logger().debug("PsiActionSelectionAgent::%s - "
-                              "The Action %s succeeds [SchemaId = %d, cycle = %d]",
-                              __FUNCTION__,
-                              atomspace.atomAsString(this->current_action).c_str(),
-                              this->currentSchemaId,
-                              this->cycleCount);
-
-               std::cout << "Action state: success" << std::endl << std::endl;
-               // TODO: record the success and update the weight of
-               // corresponding rule
-
-            }
-            // If check result: fail
-            else if (is_action_result(result) || is_builtin(result)) {
-
-                logger().debug("PsiActionSelectionAgent::%s - "
-                               "The Action %s fails [SchemaId = %d, cycle = %d]",
-                               __FUNCTION__,
-                               atomspace.atomAsString(this->current_action).c_str(),
-                               this->currentSchemaId,
-                               this->cycleCount);
-
-                std::cout << "action status: fail" << std::endl;
-
-               // TODO: record the failure and update the weight of
-               // corresponding rule
-            }
-            // If check result: unexpected result
-            else {
-                stringstream unexpected_result;
-                unexpected_result << result;
-                logger().warn("PsiActionSelectionAgent::%s - "
-                              "Action procedure result should be "
-                              "'built-in' or 'action result'. "
-                              "Got '%s' [SchemaId = %d,  cycle = %d].",
-                              __FUNCTION__,
-                              unexpected_result.str().c_str(),
-                              this->currentSchemaId,
-                              this->cycleCount);
-
-                std::cout << "action status: unexpected result" << std::endl;
-
-                // TODO: record the failure and update the weight of
-                // corresponding rule
-            }
-        }
-        // If the Action fails
-        else if ( schemaFailed ) {
-
-            // TODO: How to judge whether an Action has failed?
-            //
-            //       Approach 1: Check if the Action has been
-            //       finished, get the result, and then analyze the
-            //       result
-            //
-            //       Approach 2: Check if the Action has failed
-            //       directly via ProcedureInterpreter.isFailed method
-            //
-            //       We have implemented both approaches
-            //       currently. However it seems one of them is
-            //       surplus.
-            //
-            //       We should erase one of them, when we really
-            //       understand the difference between both.
-            //
-            //       [By Zhennua Cai, on 2011-02-03]
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "The Action %s fails [SchemaId = %d, cycle = %d]",
-                           __FUNCTION__,
-                           atomspace.atomAsString(this->current_action).c_str(),
-                           this->currentSchemaId,
-                           this->cycleCount);
-
-            std::cout << "action status: fail" << std::endl;
-
-            // TODO: record the failure and update the weight of
-            // corresponding rule
-
-            // Troy: now that this action failed, the following action sequence
-            // should be dropped.
-            this->current_actions.clear();
-            this->temp_action_list.clear();
-        }
-        // If the Action is time out
-        else if (time(NULL) - this->timeStartCurrentAction
-                 >  this->procedureExecutionTimeout) {
-
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "The Action %s is time out [SchemaId = %d, cycle = %d]",
-                           __FUNCTION__,
-                           atomspace.atomAsString(this->current_action).c_str(),
-                           this->currentSchemaId,
-                           this->cycleCount);
-
-            // add 'actionFailed' predicates for timeout actions
-            oac.getPAI().setPendingActionPlansFailed();
-
-            // Stop the time out Action
-            procedureInterpreter.stopProcedure(this->currentSchemaId);
-
-            std::cout << "action status: timeout" << std::endl;
-
-            // TODO: record the time out and update the weight of
-            // corresponding rule
-
-            // Troy: now that this action failed, the following action sequence
-            // should be dropped.
-            this->current_actions.clear();
-            this->temp_action_list.clear();
-        }
-        // If the Action is still running and is not time out, simply returns
-        else {
-            logger().debug("PsiActionSelectionAgent::%s - "
-                           "Current Action is still running. "
-                           "[SchemaId = %d, cycle = %d]",
-                           __FUNCTION__,
-                           this->currentSchemaId, this->cycleCount);
-
-            std::cout << "Current action is still running [SchemaId = "
-                      << this->currentSchemaId << ", cycle = "
-                      << this->cycleCount<<"] ... " << std::endl;
-
-            return;
-        }
-
-        // Reset current schema id
-        this->currentSchemaId = 0;
-
-    }// if (this->currentSchemaId != 0) */
 
 #if HAVE_GUILE
     // If we've used up the current plan, do a new planning
@@ -725,7 +292,7 @@ void PsiActionSelectionAgent::run()
             return;
         }
 
-        // TODO: Should the stimulation be handled by the agent?
+        // XXX: Should the stimulation be handled by the agent?
         //this->stimulateAtoms();
 
         // std::cout << std::endl
@@ -770,7 +337,7 @@ void PsiActionSelectionAgent::run()
     }
 
     // Execute current action
-    this->executeAction(atom)
+    this->executeAction(this->current_action);
     //this->executeAction(languageTool, procedureInterpreter, procedureRepository,
     //                    this->current_action);
     this->timeStartCurrentAction = time(NULL);
