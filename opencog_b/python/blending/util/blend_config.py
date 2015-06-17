@@ -8,34 +8,37 @@ __author__ = 'DongMin Kim'
 # noinspection PyTypeChecker
 class BlendConfig(Singleton):
     DEFAULT_CONFIG_NAME = "BLEND"
-    DEFAULT_CONFIG_SET = \
-        {
-            "config-format-version",
-            "execute-mode",
+    DEFAULT_CONFIG_SET = {
+        "execute-mode",
 
-            "log-stdout",
-            "log-level",
-            "log-prefix",
-            "log-postfix",
+        "atoms-chooser",
+        "blending-decider",
+        "new-blend-atom-maker",
+        "link-connector",
 
-            "atoms-chooser",
-            "blending-decider",
-            "new-blend-atom-maker",
-            "link-connector",
+        "choose-atom-type",
+        "choose-least-count",
+        "choose-sti-min",
+        "choose-sti-max",
 
-            "choose-atom-type",
-            "choose-least-count",
-            "choose-sti-min",
-            "choose-sti-max",
+        "decide-result-atoms-count",
+        "decide-sti-min",
+        "decide-sti-max",
 
-            "decide-result-atoms-count",
-            "decide-sti-min",
-            "decide-sti-max",
+        "make-atom-prefix",
+        "make-atom-separator",
+        "make-atom-postfix",
 
-            "make-atom-prefix",
-            "make-atom-separator",
-            "make-atom-postfix"
-        }
+        "connect-check-type",
+        "connect-check-strength-threshold",
+        "connect-check-confidence-threshold"
+    }
+
+    # TODO: Private setting handling
+    DEFAULT_CONFIG_SET.update({
+        "config-format-version",
+        "log-initialized"
+    })
 
     # noinspection PyTypeChecker
     def __init__(cls):
@@ -65,7 +68,7 @@ class BlendConfig(Singleton):
 
     def __blend_config_name_node(cls, config_name):
         if config_name not in cls.__set:
-            raise UserWarning("Wrong config name.")
+            raise UserWarning("Wrong config name: " + str(config_name))
 
         return cls.a.add_node(types.SchemaNode, cls.name + ':' + config_name)
 
@@ -226,7 +229,8 @@ class BlendConfig(Singleton):
         exist_set = PyCogExecute().execute(a, get_link_dict['execute_link'])
         cls.__clean_up_obsolete_dict(get_link_dict)
 
-        # TODO: Currently, just update one node.
+        # TODO: Should be changed to find recursively.
+        # Currently, just update one node.
         if len(exist_set.out) > 0:
             config_dict["config"] = exist_set.out[0]
             del_link_dict = cls.__create_execute_link("DEL", config_dict)
@@ -260,10 +264,8 @@ class BlendConfig(Singleton):
             if len(exist_set.out) > 0:
                 break
 
-            inh_link_dict = cls.__create_execute_link("INHERITANCE",
-                                                      config_dict)
-            parent_set = PyCogExecute().execute(a,
-                                                inh_link_dict['execute_link'])
+            inh_link_dict = cls.__create_execute_link("INHERITANCE", config_dict)
+            parent_set = PyCogExecute().execute(a, inh_link_dict['execute_link'])
             cls.__clean_up_obsolete_dict(inh_link_dict)
 
             if len(parent_set.out) == 0:
@@ -272,10 +274,17 @@ class BlendConfig(Singleton):
             else:
                 config_dict["config_base"] = parent_set.out[0]
 
+        if exist_set is None:
+            return None
+
+        ret = None
         try:
-            if exist_set is None:
-                raise KeyError("Can't find element.")
-            if len(exist_set.out) > 1:
+            if len(exist_set.out) < 1:
+                ret = None
+            elif len(exist_set.out) == 1:
+                ret = exist_set.out[0]
+            elif len(exist_set.out) > 1:
+                ret = exist_set.out[0]
                 raise UserWarning(
                     "TODO: Currently, config have to keep in unique." +
                     "Trying to use first element..." +
@@ -283,11 +292,9 @@ class BlendConfig(Singleton):
                     str(config_base) + ' = ' +
                     str(exist_set.out)
                 )
-
         except UserWarning as e:
             print e
 
-        ret = exist_set.out[0]
         cls.a.remove(exist_set)
         return ret
 

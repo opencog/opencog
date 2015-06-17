@@ -1,4 +1,3 @@
-from abc import ABCMeta
 from opencog.type_constructors import *
 
 from opencog_b.python.blending.chooser.chooser_finder import ChooserFinder
@@ -23,7 +22,6 @@ class ConceptualBlending:
         blender:
         :type a: opencog.atomspace_details.AtomSpace
     """
-    __metaclass__ = ABCMeta
 
     Status = enum_simulate(
         'SUCCESS_BLEND',
