@@ -136,6 +136,7 @@ Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, TruthValuePtr tv)
     OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
     OC_ASSERT(t != UNDEFINED_TEMPORAL, "TimeServer::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
+    this->add(h, t);
     return addTimeInfo(h, t.getTimeNodeName(), tv);
 }
 
