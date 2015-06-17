@@ -41,6 +41,8 @@ OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
                             &demandUpdaterFactory);
     _cogserver.registerAgent(PsiActionSelectionAgent::info().id,
                             &actionSelectionFactory);
+    _cogserver.registerAgent(PsiModulatorUpdaterAgent::info().id,
+                            &modulatorUpdaterFactory);
 }
 
 OpenPsiModule::~OpenPsiModule()
@@ -48,6 +50,7 @@ OpenPsiModule::~OpenPsiModule()
     logger().info("[OpenPsiModule] Entering destructor");
     _cogserver.unregisterAgent(PsiDemandUpdaterAgent::info().id);
     _cogserver.unregisterAgent(PsiActionSelectionAgent::info().id);
+    _cogserver.unregisterAgent(PsiModulatorUpdaterAgent::info().id);
 }
 
 

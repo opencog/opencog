@@ -27,6 +27,7 @@
 #include <opencog/server/Module.h>
 #include <opencog/dynamics/openpsi/PsiDemandUpdaterAgent.h>
 #include <opencog/dynamics/openpsi/PsiActionSelectionAgent.h>
+#include <opencog/dynamics/openpsi/PsiModulatorUpdaterAgent.h>
 
 namespace opencog
 {
@@ -40,6 +41,7 @@ class OpenPsiModule : public Module
 private:
     Factory<PsiDemandUpdaterAgent, Agent> demandUpdaterFactory;
     Factory<PsiActionSelectionAgent, Agent> actionSelectionFactory;
+    Factory<PsiModulatorUpdaterAgent, Agent> modulatorUpdaterFactory;
 
 public:
     OpenPsiModule(CogServer&);
