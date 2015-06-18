@@ -26,11 +26,9 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-class PsiActionSelectionAgentUTest; 
+class PsiActionSelectionAgentUTest;
 
-namespace opencog { namespace oac {
-
-class OAC;
+namespace opencog {
 
 /**
  * @class
@@ -40,13 +38,13 @@ class OAC;
  * Ideally using PLN, looking for, or inferring cognitive schematics and choosing
  * the one according to their weights (calculating the weight can depend on the
  * Modulator Certainty).
- * 
- * Each Rule here means a cognitive schematic, that is 
+ *
+ * Each Rule here means a cognitive schematic, that is
  *     Contex & Procedure ==> Goal
  *
  * Rules here has nothing to do with that in PLN, so don't confuse them!
  *
- * An OpenPsi Rule is represented in AtomSpace as below: 
+ * An OpenPsi Rule is represented in AtomSpace as below:
  *
  * Note: AtTimeLink is missing currently
  *       ImplicationLink is used instead of PredictiveImplicationLink, since
@@ -66,26 +64,26 @@ class OAC;
  *                         Node:arguments
  *                         ...
  *                 ...
- *                            
+ *
  *             ExecutionLink
  *                 GroundedSchemaNode "schema_name"
  *                 ListLink
  *                     Node:arguments
  *                     ...
- *    
+ *
  *         EvaluationLink
  *             (SimpleTruthValue indicates how well the demand is satisfied)
  *             (ShortTermInportance indicates the urgency of the demand)
- *             PredicateNode: "goal_name" 
+ *             PredicateNode: "goal_name"
  *             ListLink
  *                 Node:arguments
  *                 ...
  *
- * For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
+ * For each Rule, there's only a Goal, an Action and a bunch of Preconditions.
  * And all these Preconditions should be grouped in an AndLink.
  * If you want to use OrLink, then just split the Rule into several Rules.
  * For the efficiency and simplicity of the planner (backward chaining),
- * NotLink is forbidden currently.  
+ * NotLink is forbidden currently.
 */
 
 class PsiActionSelectionAgent : public opencog::Agent
@@ -93,54 +91,53 @@ class PsiActionSelectionAgent : public opencog::Agent
     friend class::PsiActionSelectionAgentUTest;
 
 private:
-	OAC& oac;
 	AtomSpace& atomspace;
 
     unsigned long cycleCount;  // Indicate how many times this mind
                                // agent has been executed
 
-    // Indicate whether the mind agent has been initialized, 
-    // then the 'run' method will not initialize it over and over, 
-    // unless you call 'forceInitNextCycle' method. 
-    bool bInitialized; 
+    // Indicate whether the mind agent has been initialized,
+    // then the 'run' method will not initialize it over and over,
+    // unless you call 'forceInitNextCycle' method.
+    bool bInitialized;
 
 	// Scheme Id of current running Action (a combo script)
-    Procedure::RunningProcedureID currentSchemaId;
+    //Procedure::RunningProcedureID currentSchemaId;
 
     // Time out for executing Action (combo script) defined by
     // PROCEDURE_EXECUTION_TIMEOUT
-    long procedureExecutionTimeout; 
+    //long procedureExecutionTimeout;
 
-    time_t timeStartCurrentAction; // When the current action was executed 
+    time_t timeStartCurrentAction; // When the current action was executed
 
 	// Handles to all the demand goals (EvaluationLink)
     std::vector<Handle> psi_demand_goal_list;
 
     // Planning result
-    Handle plan_selected_demand_goal; 
-    std::vector<Handle> plan_rule_list; 
-    std::vector<Handle> plan_context_list; 
+    Handle plan_selected_demand_goal;
+    std::vector<Handle> plan_rule_list;
+    std::vector<Handle> plan_context_list;
     std::vector<Handle> plan_action_list;
 
     // A copy of plan_action_list, each time pop up and execute one of
     // the action
-    std::vector<Handle> temp_action_list;     
+    std::vector<Handle> temp_action_list;
 
-    // Each action(or step) in plan_action_list (or temp_action_list) may actually 
+    // Each action(or step) in plan_action_list (or temp_action_list) may actually
     // contain multiple actions. For example in plan_action_list there might
-    // be an SequentialAndLink containing goto_obj(food) and eat(food) actions. 
+    // be an SequentialAndLink containing goto_obj(food) and eat(food) actions.
     // However, OAC can not do both actions all at once. So in planner side both
-    // actions can be considered as just one action, while in OAC side they are 
-    // two actions. 
+    // actions can be considered as just one action, while in OAC side they are
+    // two actions.
     //
     // Currently our solution is that firstly we copy both actions to
     // current_actions,
 	//
     // then make OAC execute actions in current_actions one by one. When all the
-    // actions in current_actions have been done, we ask temp_action_list for more 
-    // actions. 
-    std::vector<Handle> current_actions; 
-    Handle current_action; 
+    // actions in current_actions have been done, we ask temp_action_list for more
+    // actions.
+    std::vector<Handle> current_actions;
+    Handle current_action;
 
     // Return actions given one step in plan_action_list (or temp_action_list)
     void getActions(Handle hStep, std::vector<Handle> & actions);
@@ -150,7 +147,7 @@ private:
 
     // Add the list of demand goals in AtomSpace
     //
-    // It firstly reads the names of demands in config file (PSI_DEMANDS) and 
+    // It firstly reads the names of demands in config file (PSI_DEMANDS) and
     // creates a ReferenceLink as follows
     //
     // ReferenceLink
@@ -169,7 +166,7 @@ private:
     /**
      * Get the plan stored in AtomSpace
      *
-     * @return true if get the plan successfully, false otherwise 
+     * @return true if get the plan successfully, false otherwise
      */
     bool getPlan();
 
@@ -179,17 +176,17 @@ private:
     void printPlan();
 
     /**
-     * Stimulate atoms related to the plan, ImportanceUpdatingAgent will then 
-     * use these stimulates to renew corresponding attention values. 
+     * Stimulate atoms related to the plan, ImportanceUpdatingAgent will then
+     * use these stimulates to renew corresponding attention values.
      */
-    void stimulateAtoms(); 
+    void stimulateAtoms();
 
     /**
      * Execute the given action
      *
-     * @note It also handles SpeechActSchemas and generate 'say' actions 
-     *       automatically if the agent has something to say. That is there's 
-     *       SentenceNodes in the structure below: 
+     * @note It also handles SpeechActSchemas and generate 'say' actions
+     *       automatically if the agent has something to say. That is there's
+     *       SentenceNodes in the structure below:
      *
      * ReferenceLink
      *     UtteranceNode "utterance_sentences"
@@ -197,10 +194,11 @@ private:
      *         SentenceNode ...
      *         ...
      */
-    void executeAction(LanguageComprehension & languageTool,
-                       Procedure::ProcedureInterpreter & procedureInterpreter, 
-                       const Procedure::ProcedureRepository & procedureRepository, 
-                       Handle hActionExecutionLink); 
+    void executeAction(Handle hActionExecutionOutputLink);
+    /*void executeAction(LanguageComprehension & languageTool,
+                       Procedure::ProcedureInterpreter & procedureInterpreter,
+                       const Procedure::ProcedureRepository & procedureRepository,
+                       Handle hActionExecutionLink); */
 
 public:
 
@@ -212,7 +210,7 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiActionSelectionAgent");
+        static const ClassInfo _ci("opencog::PsiActionSelectionAgent");
         return _ci;
     }
 
@@ -229,6 +227,6 @@ public:
 
 typedef std::shared_ptr<PsiActionSelectionAgent> PsiActionSelectionAgentPtr;
 
-} } // namespace opencog::oac
+} // namespace opencog::oac
 
 #endif

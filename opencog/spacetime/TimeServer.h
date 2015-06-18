@@ -33,6 +33,13 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TemporalTable.h>
 
+// TODO: Wrap this up in a module and add a scheme binding with options of
+// indexing with/without concurrent entry in the atomspace.
+// * Why not enter an atom's timestamp in the atomspace by using AtTimeLink?
+// -> There maybe cases where the timestamp could be entered in the atomsapce
+//    but for a very large data set we maynot need that, and one can retreive
+//    that data from TemporalTable.
+// * How to keep the handle in multiple copy of atomspaces?
 
 namespace opencog
 {
@@ -44,11 +51,11 @@ class TimeServerSavable;
 
 /**
  * This class is used to associate temporal information (timestamps or timelags) to
- * atom handles. 
+ * atom handles.
  * All information added to this object should also be present in the
- * corresponding AtomSpace hypergraph in the following way: 
- *     AtTimeLink ( TimeNode "<timestamp or timelag>", Handle ) 
- * 
+ * corresponding AtomSpace hypergraph in the following way:
+ *     AtTimeLink ( TimeNode "<timestamp or timelag>", Handle )
+ *
  * See also http://www.opencog.org/wiki/TimeServer
  */
 class TimeServer
@@ -73,7 +80,13 @@ public:
     //static int timeServerEntries;
     //static std::set<Temporal> temporalSet;
 
+    // TODO: Why does the it need SPaceServer? Add constructor that takes
+    // AtomSpace reference.
     TimeServer(AtomSpace& a, SpaceServer* ss);
+
+    // A temporary hack for working with OpenPsi, because it doesn't need
+    // a SpaceTimeCogserver
+    TimeServer(AtomSpace& a);
     virtual ~TimeServer();
 
     /**
@@ -132,7 +145,7 @@ public:
     void clear();
 
     /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom representation into the AtomTable 
+     * Adds both the AtTime(TimeNode <timestamp>, atom) atom representation into the AtomTable
      * and the entry (atom, * timestamp) into the TimeServer of the given AtomSpace.
      *
      * @param atom       the Handle of the atom to be associated to the timestamp
@@ -345,7 +358,7 @@ private:
 
     void atomAdded(Handle);
     void atomRemoved(AtomPtr);
- 
+
     /**
      * The temporal table used by this TimeServer
      */
@@ -357,7 +370,7 @@ private:
     octime_t latestTimestamp;
 
     /**
-     * Overrides and declares copy constructor and equals operator as private 
+     * Overrides and declares copy constructor and equals operator as private
      * for avoiding large object copying by mistake.
      */
     TimeServer& operator=(const TimeServer&);
