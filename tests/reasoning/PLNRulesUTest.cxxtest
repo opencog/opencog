@@ -113,7 +113,9 @@ void PLNRulesUTest::test_and()
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     config().set("SCM_PRELOAD",
-                 "tests/rule-engine/simple-predicates.scm, "
+                 "opencog/scm/core_types.scm, "
+                 "opencog/scm/utilities.scm, "
+                 "tests/reasoning/simple-predicates.scm, "
                  "reasoning/pln/rules/and.scm");
     load_scm_files_from_config(as);
 
@@ -133,7 +135,7 @@ void PLNRulesUTest::test_not()
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     config().set("SCM_PRELOAD",
-                 "tests/rule-engine/simple-predicates.scm, "
+                 "tests/reasoning/simple-predicates.scm, "
                  "reasoning/pln/rules/not.scm");
     load_scm_files_from_config(as);
 
