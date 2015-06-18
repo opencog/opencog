@@ -1,3 +1,8 @@
+Remarks
+-------
+
+This test is soon to be obsolete as the Python version of PLN is being
+replaced by the URE-based version.
 
 HOWTO run these tests by hand:
 ------------------------------
