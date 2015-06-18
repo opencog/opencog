@@ -225,13 +225,26 @@ class BlendConfig(Singleton):
             "config": config
         }
 
-        get_link_dict = cls.__create_execute_link("GET", config_dict)
-        exist_set = PyCogExecute().execute(a, get_link_dict['execute_link'])
-        cls.__clean_up_obsolete_dict(get_link_dict)
+        exist_set = None
+        while True:
+            get_link_dict = cls.__create_execute_link("GET", config_dict)
+            exist_set = PyCogExecute().execute(a, get_link_dict['execute_link'])
+            cls.__clean_up_obsolete_dict(get_link_dict)
 
-        # TODO: Should be changed to find recursively.
-        # Currently, just update one node.
-        if len(exist_set.out) > 0:
+            if len(exist_set.out) > 0:
+                break
+
+            inh_link_dict = cls.__create_execute_link("INHERITANCE", config_dict)
+            parent_set = PyCogExecute().execute(a, inh_link_dict['execute_link'])
+            cls.__clean_up_obsolete_dict(inh_link_dict)
+
+            if len(parent_set.out) == 0:
+                exist_set = None
+                break
+            else:
+                config_dict["config_base"] = parent_set.out[0]
+
+        if exist_set is not None:
             config_dict["config"] = exist_set.out[0]
             del_link_dict = cls.__create_execute_link("DEL", config_dict)
             PyCogExecute().execute(a, del_link_dict['execute_link'])
@@ -242,7 +255,8 @@ class BlendConfig(Singleton):
         PyCogExecute().execute(a, put_link_dict['execute_link'])
         cls.__clean_up_obsolete_dict(put_link_dict)
 
-        cls.a.remove(exist_set)
+        if exist_set is not None:
+            cls.a.remove(exist_set)
 
     # noinspection PyTypeChecker
     def get(cls, a, config_name, config_base=None):
