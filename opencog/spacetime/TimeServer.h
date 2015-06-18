@@ -33,6 +33,13 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TemporalTable.h>
 
+// TODO: Wrap this up in a module and add a scheme binding with options of
+// indexing with/without concurrent entry in the atomspace.
+// * Why not enter an atom's timestamp in the atomspace by using AtTimeLink?
+// -> There maybe cases where the timestamp could be entered in the atomsapce
+//    but for a very large data set we maynot need that, and one can retreive
+//    that data from TemporalTable.
+// * How to keep the handle in multiple copy of atomspaces?
 
 namespace opencog
 {
