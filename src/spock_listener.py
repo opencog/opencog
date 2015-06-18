@@ -11,7 +11,8 @@ from spock.plugins.helpers.physics import PhysicsPlugin
 from spock.plugins.helpers.entities import EntityPlugin
 from spock.plugins.helpers.clientinfo import ClientInfoPlugin
 from spock.plugins.helpers.visibility import VisibilityPlugin
-from spock.plugins.helpers.mcros import ROSPlugin
+from spock.plugins.helpers.SpockControl import SpockControlPlugin
+
 from spockbot.plugins.CursesCommand import *
 from spockbot.plugins.BaseCommands import BaseCommandsPlugin
 from spockbot.plugins.ChatCommand import ChatCommandPlugin
@@ -33,7 +34,7 @@ plugins.append(('Physics', PhysicsPlugin))
 plugins.append(('Entities', EntityPlugin))
 plugins.append(('ClientInfo', ClientInfoPlugin))
 plugins.append(('Visibility', VisibilityPlugin))
-plugins.append(('ROS',ROSPlugin))
+plugins.append(('SpockControl',SpockControlPlugin))
 client = Client(plugins = plugins, settings = settings)
 
 #client.start() with no arguments will automatically connect to localhost
