@@ -26,6 +26,7 @@
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/octime.h>
 
 // TODO: the methods from AtomSpaceUtil to openpsi directory
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
@@ -217,6 +218,8 @@ PsiDemandUpdaterAgent::PsiDemandUpdaterAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
+    // This is needed for time stamping
+    initReferenceTime();
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 
@@ -282,13 +285,8 @@ void PsiDemandUpdaterAgent::run()
 
     // Get AtomSpace
     AtomSpace& atomSpace = _cogserver.getAtomSpace();
-logger().debug("got atomspace");
     // Get current time stamp
-    //unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
-
-    TimeServer timeServer(atomSpace);
-    octime_t timeStamp = timeServer.getLatestTimestamp();
-logger().debug("timestamp %s", timeStamp);
+    octime_t timeStamp = getElapsedMillis();
 
     // Initialize the Agent (demandList etc)
     if ( !this->bInitialized )
