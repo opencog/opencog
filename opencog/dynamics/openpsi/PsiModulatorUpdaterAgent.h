@@ -25,10 +25,11 @@
 
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/spacetime/Temporal.h>
 
 class PsiModulatorUpdaterAgentUTest;
 
-namespace opencog { namespace oac {
+namespace opencog {
 
 /**
  * @class
@@ -38,7 +39,7 @@ namespace opencog { namespace oac {
  * Controls the dynamic of the emotion of the agent (Perhaps how angry an
  * agent is. Note that "angry" should either correspond to a modulator, or,
  * more likely a configuration of modulators, but this is just an example).
- * 
+ *
  * The format of Modulator in AtomSpace is
  *
  * AtTimeLink
@@ -58,7 +59,7 @@ namespace opencog { namespace oac {
 */
 class PsiModulatorUpdaterAgent : public opencog::Agent
 {
-    friend class::PsiModulatorUpdaterAgentUTest; 
+    friend class::PsiModulatorUpdaterAgentUTest;
 
 private:
 
@@ -72,16 +73,16 @@ private:
         Modulator(const std::string & modulatorName) : modulatorName(modulatorName)
         {};
 
-        inline const std::string & getModulatorName() 
+        inline const std::string & getModulatorName()
         {
             return this->modulatorName;
         }
 
         inline double getModulatorLevel()
         {
-            return this->currentModulatorValue; 
+            return this->currentModulatorValue;
         }
-  
+
         /**
          * Update the Modulator Value
          *
@@ -96,11 +97,11 @@ private:
          *
          * TODO: Only current (latest) modulator value is considered, also take previous modulator values in future
          *
-         * @note This function woule create a new NumberNode and SimilarityLink to store the result, 
+         * @note This function woule create a new NumberNode and SimilarityLink to store the result,
          *       and then time stamp the SimilarityLink.
          *
-         *       Since OpenCog would forget (remove) those Nodes and Links gradually, 
-         *       unless you create them to be permanent, don't worry about the overflow of memory. 
+         *       Since OpenCog would forget (remove) those Nodes and Links gradually,
+         *       unless you create them to be permanent, don't worry about the overflow of memory.
          *
          *       AtTimeLink
          *           TimeNode "timestamp"
@@ -116,35 +117,26 @@ private:
          *               EvaluationLink (stv denotes the level of the modulator)
          *                   PredicateNode "xxxModulator"
          */
-        bool updateModulator(AtomSpace & atomSpace, const unsigned long timeStamp);
+        bool updateModulator(AtomSpace & atomSpace, const octime_t timeStamp);
 
-    private:        
+    private:
 
         std::string modulatorName;    // The name of the Modulator
         double currentModulatorValue; // Store current (latest) value of Modulator
 
     };// class Modulator
 
-    double pleasure; 
+    double pleasure;
 
     unsigned long cycleCount;
 
     std::vector<Modulator> modulatorList;  // List of Modulators
 
-#ifdef HAVE_ZMQ    
-    std::string publishEndPoint; // Publish all the messages to this end point
-    zmq::socket_t * publisher;   // ZeroMQ publisher
-
-    /**
-     * Publish updated modulator values via ZeroMQ
-     */
-    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
-#endif    
 
     // Initialize modulatorList etc.
     void init();
 
-    bool bInitialized; 
+    bool bInitialized;
 
 public:
 
@@ -156,14 +148,14 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiModulatorUpdaterAgent");
+        static const ClassInfo _ci("opencog::PsiModulatorUpdaterAgent");
         return _ci;
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
 
-    // After calling this function, the Agent will invoke its "init" method firstly 
+    // After calling this function, the Agent will invoke its "init" method firstly
     // in "run" function during its next cycle
     void forceInitNextCycle() {
         this->bInitialized = false;
@@ -173,6 +165,6 @@ public:
 
 typedef std::shared_ptr<PsiModulatorUpdaterAgent> PsiModulatorUpdaterAgentPtr;
 
-} } // namespace opencog::oac
+} // namespace opencog
 
 #endif
