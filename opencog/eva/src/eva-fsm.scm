@@ -64,31 +64,29 @@
 			(VariableList
 				var-eva-state var-eva-next-state var-room-state var-action
 			)
-			(ImplicationLink
-				(AndLink
-					;; If Eva is in the current state ...
-					(ListLink eva-state var-eva-state)
+			(AndLink
+				;; If Eva is in the current state ...
+				(ListLink eva-state var-eva-state)
 
-					;; ...and the room is in state ...
-					(ListLink room-state var-room-state)
+				;; ...and the room is in state ...
+				(ListLink room-state var-room-state)
 
-					;; ... and there is a transition ...
-					(ContextLink
-						(AndLink var-eva-state var-room-state)
-						(ListLink eva-trans var-eva-next-state)
-						var-action
-					)
-				)
-				(AndLink
-					;; ... Then, leave the current state ...
-					(DeleteLink (ListLink eva-state var-eva-state))
-
-					;; ... And transition to the new state ...
-					(ListLink eva-state var-eva-next-state)
-
-					;; and perform the action
+				;; ... and there is a transition ...
+				(ContextLink
+					(AndLink var-eva-state var-room-state)
+					(ListLink eva-trans var-eva-next-state)
 					var-action
 				)
+			)
+			(AndLink
+				;; ... Then, leave the current state ...
+				(DeleteLink (ListLink eva-state var-eva-state))
+
+				;; ... And transition to the new state ...
+				(ListLink eva-state var-eva-next-state)
+
+				;; and perform the action
+				var-action
 			)
 		)
 	)
@@ -99,16 +97,14 @@
 (define chk-room-non-empty
 	(BindLink
 		(VariableNode "$face-id")
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "visible face")
-				(ListLink
-					(VariableNode "$face-id")
-				)
+		(EvaluationLink
+			(PredicateNode "visible face")
+			(ListLink
+				(VariableNode "$face-id")
 			)
-			; Change the status of the room to "non-empty"
-			(AssignLink (TypeNode "ListLink") room-state room-nonempty)
 		)
+		; Change the status of the room to "non-empty"
+		(AssignLink (TypeNode "ListLink") room-state room-nonempty)
 	)
 )
 
@@ -116,18 +112,16 @@
 (define chk-room-empty
 	(BindLink
 		(VariableNode "$face-id")
-		(ImplicationLink
-			(AbsentLink
-				(EvaluationLink
-					(PredicateNode "visible face")
-					(ListLink
-						(VariableNode "$face-id")
-					)
+		(AbsentLink
+			(EvaluationLink
+				(PredicateNode "visible face")
+				(ListLink
+					(VariableNode "$face-id")
 				)
 			)
-			; Change the status of the room to "empty"
-			(AssignLink (TypeNode "ListLink") room-state room-empty)
 		)
+		; Change the status of the room to "empty"
+		(AssignLink (TypeNode "ListLink") room-state room-empty)
 	)
 )
 
