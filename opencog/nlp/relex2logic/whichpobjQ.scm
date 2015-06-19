@@ -1,4 +1,4 @@
-(define whichsubjSVOQ
+(define whichpobjQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -10,15 +10,19 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$verb")
+                (VariableNode "$prep")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$obj")
+                (VariableNode "$pobj")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
                 (VariableNode "$qVar")
+                (TypeNode "WordInstanceNode")
+            )	
+	(TypedVariableLink
+                (VariableNode "$be")
                 (TypeNode "WordInstanceNode")
             )		
         )
@@ -28,60 +32,69 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$verb")
+                (VariableNode "$prep")
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$obj")
+                (VariableNode "$pobj")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
-                    (VariableNode "$verb")
+                    (VariableNode "$be")
                     (VariableNode "$subj")
                 )
             )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_obj")
                 (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
+                    (VariableNode "$prep")
+                    (VariableNode "$pobj")
                 )
             )
-	(EvaluationLink
-		(DefinedLinguisticRelationshipNode "_det")
-		 (ListLink
- 				(VariableNode "$subj")
-  				(VariableNode "$qVar")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_advmod")
+                (ListLink
+			(VariableNode "$be")
+                    (VariableNode "$prep")
+                )
+            )
+
+
+		(EvaluationLink
+   			(DefinedLinguisticRelationshipNode "_det")
+  			 (ListLink
+   				(VariableNode "$pobj")
+      				(VariableNode "$qVar")
+			)
 		)
-	)
-	(InheritanceLink
-		(VariableNode "$qVar")
-		(DefinedLinguisticConceptNode "which")
-	)
+		(InheritanceLink
+			(VariableNode "$qVar")
+			(DefinedLinguisticConceptNode "which")
+		)
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjSVOQ-rule")
+       	   (GroundedSchemaNode "scm: pre-whichpobjQ-rule")
        	      (ListLink
        	         (VariableNode "$subj")
-       	         (VariableNode "$verb")
-       	         (VariableNode "$obj")
+       	         (VariableNode "$prep")
+       	         (VariableNode "$pobj")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjSVOQ-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichpobjQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjSVOQ-Rule") whichsubjSVOQ)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichpobjQ-Rule") whichpobjQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichsubjSVOQ-rule subj verb obj)
-    (whichsubjSVOQ-rule (word-inst-get-word-str subj) (cog-name subj)
-              (word-inst-get-word-str verb) (cog-name verb)
-              (word-inst-get-word-str obj) (cog-name obj)
+(define (pre-whichpobjQ-rule subj prep pobj)
+    (whichpobjQ-rule (word-inst-get-word-str pobj) (cog-name pobj)
+              (word-inst-get-word-str prep) (cog-name prep)
+              (word-inst-get-word-str subj) (cog-name subj)
     )
 )
 
