@@ -460,6 +460,14 @@
 	(InheritanceLink (PredicateNode instance) (ConceptNode tense))
 	)
 )
+
+(define (quantity-rule noun_concept noun_instance quantifier_concept quantifier_instance)
+	(list (InheritanceLink (ConceptNode noun_instance) (ConceptNode noun_concept))
+	(InheritanceLink (ConceptNode quantifier_instance) (ConceptNode quantifier_concept))
+	(QuantityLink (ConceptNode noun_instance)(ConceptNode quantifier_instance))
+	)
+)	
+
 ;-----------------------------------------------------------------------------
 ; Determiner-question-word questions, e.g.
 ; "At what time . . . ", "For what reason . . .", "In what way . . .", "To what degree . . . ", "At what location . . ."
@@ -843,8 +851,8 @@
 		(list
 			(InheritanceLink (ConceptNode instance) (ConceptNode concept))
 			(QuantityLink	
-				(VariableNode var_name)
 				(ConceptNode instance)
+				(VariableNode var_name)
 			)
 		)
 	)
