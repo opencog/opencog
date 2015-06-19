@@ -12,7 +12,8 @@ class EqualLinkKey:
     :type dst_pos_in_outgoing: int
     """
 
-    def __init__(self, link_type=None, truth_value=None):
+    def __init__(self, link_h=None, link_type=None, truth_value=None):
+        self.h = link_h
         self.t = link_type
         self.tv = truth_value
         self.src_h_list_str = ''
@@ -61,7 +62,7 @@ def get_equal_link_keys(a, original_links, dst_atom):
     """
     ret = list()
     for link in original_links:
-        equal_link_key = EqualLinkKey(link.t, link.tv)
+        equal_link_key = EqualLinkKey(link.h, link.t, link.tv)
 
         xget_link_src = a.xget_outgoing(link.h)
         for i, link_src in enumerate(xget_link_src):

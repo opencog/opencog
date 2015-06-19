@@ -48,16 +48,6 @@ class MakeSimple(BaseMaker):
             get_weighted_tv(decided_atoms)
         )
 
-        # Make the links between source nodes and newly blended node.
-        # TODO: Give proper truth value, not random.
-        # 랜덤 진릿값 말고 적당한 진릿값을 주어야 한다.
-        make_link_all(
-            self.a,
-            types.AssociativeLink,
-            decided_atoms,
-            self.ret
-        )
-
         # TODO: Give proper attention value.
         # new_blend_atom_name.av = {}
 

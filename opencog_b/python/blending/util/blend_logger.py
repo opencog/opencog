@@ -1,6 +1,5 @@
 from opencog.atomspace import AtomSpace
 from opencog.logger import log
-from opencog_b.python.blending.util.blend_config import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -26,10 +25,22 @@ def log_debug_setting():
     global log_config
     log_config = {
         'log_stdout': "True",
-        'log_level': "WARN",
+        'log_level': "DEBUG",
         'log_prefix': "[CB]::",
         'log_postfix': ""
     }
+
+
+def fine_log(msg):
+    global log_config
+    config_backup = log_config.copy()
+
+    log_debug_setting()
+    log_config['log_level'] = "FINE"
+    blend_log(msg)
+
+    log_config = config_backup.copy()
+
 
 def debug_log(msg):
     global log_config

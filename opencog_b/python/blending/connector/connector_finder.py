@@ -1,3 +1,5 @@
+from opencog_b.python.blending.connector.connect_conflict_random import \
+    ConnectConflictRandom
 from opencog_b.python.blending.connector.connect_simple import ConnectSimple
 from opencog_b.python.blending.util.blend_config import BlendConfig
 
@@ -10,7 +12,8 @@ class ConnectorFinder(object):
         self.a = a
 
         self.connectors = {
-            ConnectSimple.__name__: ConnectSimple
+            ConnectSimple.__name__: ConnectSimple,
+            ConnectConflictRandom.__name__: ConnectConflictRandom
         }
 
     def __str__(self):

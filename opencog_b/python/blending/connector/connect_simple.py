@@ -78,5 +78,15 @@ class ConnectSimple(BaseConnector):
         self.__connect_duplicate_links(duplicate_links, new_blended_atom)
         self.__connect_non_duplicate_links(non_duplicate_links, new_blended_atom)
 
+        # Make the links between source nodes and newly blended node.
+        # TODO: Give proper truth value, not random.
+        # 랜덤 진릿값 말고 적당한 진릿값을 주어야 한다.
+        make_link_all(
+            self.a,
+            types.AssociativeLink,
+            decided_atoms,
+            new_blended_atom
+        )
+
     def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
         self.__connect_links_simple(decided_atoms, new_blended_atom)

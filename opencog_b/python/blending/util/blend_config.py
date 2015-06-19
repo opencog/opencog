@@ -1,4 +1,6 @@
 from opencog.type_constructors import *
+from opencog_b.python.blending.util.blend_logger import debug_log, fine_log, \
+    blend_log
 from opencog_b.python.blending.util.general_util import Singleton
 from opencog_b.python.blending.util.py_cog_execute import PyCogExecute
 
@@ -30,14 +32,13 @@ class BlendConfig(Singleton):
         "make-atom-postfix",
 
         "connect-check-type",
-        "connect-check-strength-threshold",
-        "connect-check-confidence-threshold"
+        "connect-strength-diff-limit",
+        "connect-confidence-above-limit"
     }
 
     # TODO: Private setting handling
     DEFAULT_CONFIG_SET.update({
-        "config-format-version",
-        "log-initialized"
+        "config-format-version"
     })
 
     # noinspection PyTypeChecker
@@ -307,9 +308,10 @@ class BlendConfig(Singleton):
                     str(exist_set.out)
                 )
         except UserWarning as e:
-            print e
+            debug_log(e)
 
         cls.a.remove(exist_set)
+        fine_log(ret)
         return ret
 
     def get_str(cls, a, config_name, config_base=None):
