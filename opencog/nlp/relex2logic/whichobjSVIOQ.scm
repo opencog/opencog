@@ -1,3 +1,7 @@
+; This rule is for which objects in indirect object sentences,
+; such as "Which book did you give to your friend?"
+; (AN June 2015)
+
 (define whichobjSVIOQ
     (BindLink
         (VariableList

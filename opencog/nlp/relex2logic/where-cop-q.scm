@@ -1,3 +1,7 @@
+; This rule is for where questions with verb "be"
+; such as "Where is the meeting?"
+;(AN June 2015)
+
 (define where-cop-q
 	(BindLink
 		(VariableList

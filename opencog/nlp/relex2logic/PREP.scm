@@ -1,3 +1,10 @@
+; This rule is for sentences in which the main predicate is basically a preposition,
+; as in "The book is ON the table." "You are OVER the top."  This rule only assigns
+; the preposition to the subject, the object of the preposition is assigned by another
+; rule.
+; (AN June 2015)
+
+
 (define PREP
 	(BindLink
 		(VariableList

@@ -1,6 +1,9 @@
-; this rule would be correct but doesn't fire because the relex output doesn't output an _iobj
+; This is for which-indirect objects as in "Which man did you give the message to?"
+; or "To which man did you give the message?"
+
+; This rule would be correct but doesn't fire because the relex output doesn't output an _iobj
 ; or a _pobj for it, due to the syntax.  No way to write a set of conditions that will work for
-; this one until I fix the relex error -- AN
+; this one until I fix the relex error -- AN June 2015
 
 (define whichiobjQ
     (BindLink

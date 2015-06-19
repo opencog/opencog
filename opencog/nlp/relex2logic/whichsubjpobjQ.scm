@@ -1,3 +1,8 @@
+; This rule is for which-subjects of prepositional objects, as in
+; "Which toy is in this box?"
+; (AN June 2015)
+
+
 (define whichsubjpobjQ
     (BindLink
         (VariableList

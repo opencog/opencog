@@ -1,3 +1,7 @@
+; This is for why-questions with a verb other than to-be, as in
+; "Why did you sleep late?"
+; (AN June 2015)
+
 (define why-q
 	(BindLink
 		(VariableList

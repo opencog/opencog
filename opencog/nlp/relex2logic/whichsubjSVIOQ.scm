@@ -1,4 +1,8 @@
-(define whichsubjSVOQ
+; This rule is for which-subjects of SVIO sentences, such as 
+; "Which agent sent you this message?"
+; (AN June 2015)
+
+(define whichsubjSVIOQ
     (BindLink
         (VariableList
             (TypedVariableLink

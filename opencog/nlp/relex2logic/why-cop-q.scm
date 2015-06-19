@@ -1,3 +1,8 @@
+; This is for why-questions with the verb to-be, such as 
+; "Why are you such a scmhuck?"
+; (AN June 2015)
+
+
 (define why-cop-q
 	(BindLink
 		(VariableList

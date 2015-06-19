@@ -1,3 +1,7 @@
+; This rule is for when copula questions, such as "When is the meeting."
+; Well actually that's not a copula but let's not get into that, okay. You get the idea anyway.
+; (AN June 2015)
+
 (define when-cop-q
 	(BindLink
 		(VariableList

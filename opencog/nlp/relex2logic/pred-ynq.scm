@@ -1,3 +1,8 @@
+; This rule is for yes/no questions with verbs other than "be"
+; such as "Did you sleep well?"
+; (AN June 2015)
+
+
 (define pred-ynq
 	(BindLink
 		(VariableList

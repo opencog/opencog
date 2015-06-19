@@ -1,3 +1,8 @@
+; This rule is for which-subjects in predicate-adjective sentences, as in
+; "Which book is better?"
+; (AN June 2015)
+
+
 (define whichpredadjQ
     (BindLink
         (VariableList

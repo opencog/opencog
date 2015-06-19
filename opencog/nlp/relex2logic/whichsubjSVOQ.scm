@@ -1,3 +1,7 @@
+; This rule is for which-subject sof SVO sentences, as in
+; "Which one of you ate all the ice cream?"
+; (AN june 2015)
+
 (define whichsubjSVOQ
     (BindLink
         (VariableList

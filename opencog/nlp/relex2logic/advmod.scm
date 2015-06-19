@@ -1,3 +1,9 @@
+; This handles adverbs and many adverbial phrases, because I rigged relex to treat a lot of adverbial phrases as adverbs.
+; so, for example "She sings well" is treated the same way as "She sings with an accent."  'with an qccent' is treated
+; as an adverb.  This is why I changed the individual triadic prepositional relations into two rules each -- one to assign
+; the preposition as an adverbial or adjectival or predicate, and the other to assign the object of the preposition.
+; (AN June 2015)
+
 (define advmod
     (BindLink
         (VariableList

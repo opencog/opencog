@@ -1,3 +1,13 @@
+; Tihs rule is for sentential complements following propositional attitude verbs, such as 
+; "I know that you lied to me." or "I imagine you will make a fine garbage man someday, son."
+; It hooks up know to that, and imagine to will in the sentences above.
+; this relation exists so that someday OpenCog will understand that the situations described
+; in the sentences following propositional attitude verbs must be interpreted as 'representations'
+; rather than 'reality' which means that you can't infer anything about reality from them. 
+; look up Jackendoff's writing on this subject if  you wish to understand more . . . 
+; (AN June 2015)
+
+
 (define rep
     (BindLink
         (VariableList

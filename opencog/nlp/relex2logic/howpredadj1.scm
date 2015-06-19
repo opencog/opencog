@@ -1,3 +1,7 @@
+; This rule is for how-=predicate-adjective questions, such as "How are you?" or "How was the movie?"
+; (AN June 2015)
+
+
 (define howpredadj1-q
 	(BindLink
 		(VariableList

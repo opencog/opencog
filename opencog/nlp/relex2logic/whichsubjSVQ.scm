@@ -1,3 +1,9 @@
+; This is for which-subjects of SV sentences, as in
+; "Which movie sucks more, "Enemy Mine" or "Event Horizon"?
+; (definitely Enemy Mine)
+; (AN June 2015)
+
+
 (define whichsubjSVQ
     (BindLink
         (VariableList

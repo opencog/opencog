@@ -1,3 +1,7 @@
+; This rule is for which-prepositional objects, as in 
+; "Which box are the drugs in?" or "In which way does this make sense?"
+; (AN June 2015)
+
 (define whichpobjQ
     (BindLink
         (VariableList

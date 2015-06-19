@@ -1,3 +1,6 @@
+; This rule is for copula yes/no questions, such as . . . "Are you my mommy?"
+; (AN June 2015)
+
 (define copula-ynq
 	(BindLink
 		(VariableList

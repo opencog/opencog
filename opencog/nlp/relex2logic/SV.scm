@@ -1,3 +1,7 @@
+; This rule is for subject-verb sentences, such as 
+; "The Lord giveth and the lord taketh away." or "You suck."
+; (AN June 2015)
+
 (define SV
 	(BindLink
 		(VariableList

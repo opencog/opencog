@@ -1,3 +1,7 @@
+; this rule handles the _%because relation, which mainly handles because-phrases and 
+; why-questions.
+; (AN June 2015)
+
 (define because
     (BindLink
         (VariableList

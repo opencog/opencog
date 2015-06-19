@@ -1,3 +1,6 @@
+; This is for how-of-quantity questions, such as "How much did that bong cost?"
+; (AN June 2015)
+
 (define howquant-q
 	(BindLink
 		(VariableList

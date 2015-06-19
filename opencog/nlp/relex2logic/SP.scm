@@ -1,3 +1,8 @@
+; This rule is for the main predicate in predicate-adjective sentences
+; such as "You are very young, sir."
+; (AN June 2015)
+
+
 (define SP
 	(BindLink
 		(VariableList

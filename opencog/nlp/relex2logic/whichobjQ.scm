@@ -1,3 +1,7 @@
+; This rule is for which-objects as in
+; "Which book did you read?"
+; (AN June 2015)
+
 (define whichobjQ
     (BindLink
         (VariableList

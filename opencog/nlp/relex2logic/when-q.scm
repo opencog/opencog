@@ -1,3 +1,8 @@
+; This is for when questions with verbs other than "be"
+; such as "When did ytou arrive?"
+; (AN June 2015)
+
+
 (define when-q
 	(BindLink
 		(VariableList

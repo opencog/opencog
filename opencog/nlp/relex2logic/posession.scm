@@ -1,9 +1,8 @@
-; This rule assigns the relation between a preposition and its object-noun,
-; such as "on the table" and "in bed."
+; This rule is for nouns which are posessed by words marked as posessives by relex,
+; such as "my doggy" or "your mama"
 ; (AN June 2015)
 
-
-(define pp
+(define poss
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -15,7 +14,7 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$prep")
+                (VariableNode "$poss")
                 (TypeNode "WordInstanceNode")
             )
         )
@@ -25,37 +24,36 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$prep")
+                (VariableNode "$poss")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
+                (DefinedLinguisticRelationshipNode "_poss")
                 (ListLink
-                    (VariableNode "$prep")
                     (VariableNode "$noun")
+                    (VariableNode "$poss")
                 )
             )
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-pp-rule")
+       	   (GroundedSchemaNode "scm: pre-poss-rule")
        	      (ListLink
-       	         (VariableNode "$prep")
        	         (VariableNode "$noun")
+       	         (VariableNode "$poss")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "pp-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "poss-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "pp-Rule") pp)
+(ReferenceLink (stv 1 .99) (ConceptNode "poss-Rule") poss)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-pp-rule prep noun)
-    	(pp-rule (word-inst-get-word-str prep) (cog-name prep)
-	(word-inst-get-word-str noun) (cog-name noun)
-              
+(define (pre-poss-rule noun poss)
+    (possessive-rule (word-inst-get-word-str noun) (cog-name noun)
+              (word-inst-get-word-str poss) (cog-name poss)
     )
 )
 

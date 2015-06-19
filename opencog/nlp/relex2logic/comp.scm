@@ -1,3 +1,7 @@
+; This rule constructs sentential complements that have complementizers.
+; e.g. in "I know that you are a fool." this constructs the relation between "that" and "are"
+; (AN June 2015)
+
 (define comp
     (BindLink
         (VariableList

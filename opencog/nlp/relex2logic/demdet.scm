@@ -1,3 +1,8 @@
+; This rule is for demonstrative determiners such as "that bozo" and "this job."  It used to be called the det rule
+; but I changed it because there are lots of other determiners.
+; (AN June 2015)
+
+
 (define demdet
     (BindLink
         (VariableList

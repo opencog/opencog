@@ -1,3 +1,8 @@
+; This rule relates relative-pronouns to the verbs in the relative clauses,
+; as in "What happened to the pizza that I put in the fridge?" This rule relates "that" to "put"
+; (AN June 2015)
+
+
 (define rel
     (BindLink
         (VariableList

@@ -1,3 +1,8 @@
+; This rule is for where questions without the verb "be"
+; such as "Where do you go every night?"
+; (AN June 2015)
+
+
 (define where-q
 	(BindLink
 		(VariableList

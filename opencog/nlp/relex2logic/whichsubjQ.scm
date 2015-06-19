@@ -1,3 +1,7 @@
+; This rule is for which-subjects of SVO sentences, as in
+; "Which guy ate all the pizza?"
+; (AN June 2015)
+
 (define whichsubjQ
     (BindLink
         (VariableList

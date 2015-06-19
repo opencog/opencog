@@ -1,3 +1,13 @@
+; This rule is for adjectival intensional complements of certain verbs,
+; such as in "He seems to be happy." I'm not sure how it gets assigned; it's
+; one of those random things that was here when I got here; I want to point
+; out that there are also uses of these verbs with other word-types following them,
+; such as "He seems like a nice guy." and "He seems to run the show." So, this rule
+; should probably be handled by something more gerneral, but I haven't gotten
+; around to it yet.
+; (AN June 2015)
+
+
 (define TOBE
 	(BindLink
 		(VariableList

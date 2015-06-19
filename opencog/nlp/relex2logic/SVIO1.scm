@@ -1,3 +1,8 @@
+; This rule is for sentences in which the indirect object is detected properly by relex,
+; such as "I gave the dog some LSD."
+; (AN June 2015)
+
+
 (define SVIO1
 	(BindLink
 		(VariableList

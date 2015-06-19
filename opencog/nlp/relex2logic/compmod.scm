@@ -1,3 +1,11 @@
+; This rule hooks up a complementizer with the verb it complementizes.
+; E.g. "I run if I have energy."  This rule relates "run" to "if"; the _comp
+; rule constructs the "if" phrase.  It may be hard to predict when this rule
+; will fire because there are other rules for some specific complementizers,
+; that work sometimes, and it seems right now, relex is giving _rel sometimes
+; when it should give _comp, which doesn't really make any difference . . .
+; (AN June 21015)
+
 (define compmod
     (BindLink
         (VariableList
