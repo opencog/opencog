@@ -8,7 +8,9 @@
 ;    A
 ;    B
 ;----------------------------------------------------------------------
-
+;; Given rule is binary because creating more than one link would create
+;; an issue with backward chaining.
+;; TODO :- Create the rule n-ary
 
 (define pln-rule-and-elimination
   (BindLink
