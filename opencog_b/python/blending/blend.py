@@ -145,6 +145,9 @@ class ConceptualBlending:
         self.last_status = self.Status.IN_PROCESS
         self.ret = None
 
+        if focus_atoms is None:
+            focus_atoms = self.a.get_atoms_by_type(types.Node)
+
         if config_base is None:
             config_base = self.a.add_node(types.ConceptNode, BlendConfig().name)
         else:

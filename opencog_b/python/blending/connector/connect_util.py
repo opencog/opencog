@@ -7,6 +7,11 @@ __author__ = 'DongMin Kim'
 
 
 def find_duplicate_links(a, decided_atoms):
+    # ex) atom_link_pairs =
+    # {
+    #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
+    #   <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
+    # }
     atom_link_pairs = {}
 
     for atom in decided_atoms:
@@ -14,15 +19,34 @@ def find_duplicate_links(a, decided_atoms):
         equal_links = get_equal_link_keys(a, original_links, atom)
         atom_link_pairs[atom.handle_uuid()] = equal_links
 
+    # ex) inverted_links_index =
+    # {
+    #   <type=a>: [<l1, type=a>, <l4, type=a>]
+    #   <type=b>: [<l2, type=b>]
+    #   <type=c>: [<l3, type=c>]
+    #   <type=x>: [<l5, type=x>]
+    #   <type=y>: [<l6, type=y>]
+    # }
     inverted_links_index = get_inverted_index_value(atom_link_pairs)
 
+    # ex) duplicate_links =
+    # [
+    #   [<l1, type=a>, <l4, type=a>]
+    # ]
+
+    # ex) non_duplicate_links =
+    # {
+    #   [<l2, type=b>]
+    #   [<l3, type=c>]
+    #   [<l5, type=x>]
+    #   [<l6, type=y>]
+    # }
     duplicate_links = []
     non_duplicate_links = []
-    for key, values in inverted_links_index.items():
-        if len(values) > 1:
-            duplicate_links.append(values)
-        else:
-            non_duplicate_links.append(values)
+
+    for item in inverted_links_index.itervalues():
+        duplicate_links.append(item) if len(item) > 1 \
+            else non_duplicate_links.append(item)
 
     return duplicate_links, non_duplicate_links
 
@@ -50,16 +74,29 @@ def make_link_from_equal_link_key(a, link_key, dst_atom, tv):
 
 
 def get_inverted_index_key(key_value_pairs):
+    # ex) input =
+    # {
+    #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
+    #   <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
+    # }
+    # ex) output =
+    # {
+    #   <type=a>: [<a1>, <a2>]
+    #   <type=b>: [<a1>]
+    #   <type=c>: [<a1>]
+    #   <type=x>: [<a2>]
+    #   <type=y>: [<a2>]
+    # }
     inverted_index = {}
 
     all_values = []
-    for values in key_value_pairs.values():
+    for values in key_value_pairs.itervalues():
         all_values.extend(values)
 
     all_values = set(all_values)
     for value in all_values:
         keys = []
-        for pair_key, pair_value in key_value_pairs.items():
+        for pair_key, pair_value in key_value_pairs.iteritems():
             if value in pair_value:
                 keys.append(pair_key)
         inverted_index[value] = keys
@@ -68,16 +105,29 @@ def get_inverted_index_key(key_value_pairs):
 
 
 def get_inverted_index_value(key_value_pairs):
+    # ex) input =
+    # {
+    #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
+    #   <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
+    # }
+    # ex) output =
+    # {
+    #   <type=a>: [<l1, type=a>, <l4, type=a>]
+    #   <type=b>: [<l2, type=b>]
+    #   <type=c>: [<l3, type=c>]
+    #   <type=x>: [<l5, type=x>]
+    #   <type=y>: [<l6, type=y>]
+    # }
     inverted_index = {}
 
     all_values = []
-    for key, values in key_value_pairs.items():
+    for key, values in key_value_pairs.iteritems():
         all_values.extend(values)
 
     all_values = set(all_values)
     for value in all_values:
         values = []
-        for pair_key, pair_value in key_value_pairs.items():
+        for pair_key, pair_value in key_value_pairs.iteritems():
             if value in pair_value:
                 values.append(pair_value[pair_value.index(value)])
         inverted_index[value] = values

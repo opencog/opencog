@@ -1,4 +1,4 @@
-
+from opencog.atomspace import Handle
 from opencog_b.python.blending.chooser.base_chooser import \
     BaseChooser
 from opencog_b.python.blending.util.blending_util import *
@@ -16,8 +16,8 @@ class ChooseInSTIRange(BaseChooser):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlendConfig().update(self.a, "choose-sti-min", "IMPORTANT")
-        BlendConfig().update(self.a, "choose-sti-max", "NONE")
+        BlendConfig().update(self.a, "choose-sti-min", "32")
+        BlendConfig().update(self.a, "choose-sti-max", "None")
 
     def __get_atoms_in_sti_range(
             self, focus_atoms, atom_type, least_count, sti_min, sti_max
@@ -29,13 +29,19 @@ class ChooseInSTIRange(BaseChooser):
         :param float sti_min: min value of sti to choose.
         :param float sti_max: max value of sti to choose.
         """
-        atoms = self.a.get_atoms_by_av(sti_min, sti_max)
+        all_atoms = self.a.get_atoms_by_av(sti_min, sti_max)
 
-        if len(atoms) < least_count:
+        all_atoms_h_set = set(map(lambda atom: atom.handle_uuid(), all_atoms))
+        focus_atoms_h_set = set(map(lambda atom: atom.handle_uuid(), focus_atoms))
+
+        atoms_h_set = all_atoms_h_set & focus_atoms_h_set
+
+        if len(atoms_h_set) < least_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
 
-        self.ret = filter(lambda atom: atom.is_a(atom_type), atoms)
+        self.ret = map(lambda atom_h: self.a[Handle(atom_h)], atoms_h_set)
+        self.ret = filter(lambda atom: atom.is_a(atom_type), self.ret)
         if len(self.ret) < least_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS
             raise UserWarning('Size of atom list is too small.')
@@ -59,13 +65,10 @@ class ChooseInSTIRange(BaseChooser):
         try:
             sti_min = int(sti_min)
         except ValueError:
-            sti_min = sti_value_dict[sti_min]
-            sti_min = int(sti_min)
-        except (KeyError, ValueError):
             sti_min = 1
         try:
-            sti_max = sti_value_dict[sti_max]
-        except KeyError:
+            sti_max = int(sti_max)
+        except ValueError:
             sti_max = None
 
         return self.__get_atoms_in_sti_range(

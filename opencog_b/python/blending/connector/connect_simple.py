@@ -1,8 +1,11 @@
 # coding=utf-8
+from examples.python.conceptual_blending.networks.network_util import \
+    make_link_all
 from opencog_b.python.blending.connector.base_connector import \
     BaseConnector
 from opencog_b.python.blending.connector.connect_util import \
     make_link_from_equal_link_key, find_duplicate_links
+from opencog_b.python.blending.util.blend_logger import blend_log
 from opencog_b.python.blending.util.blending_util import *
 
 __author__ = 'DongMin Kim'
@@ -79,14 +82,19 @@ class ConnectSimple(BaseConnector):
         self.__connect_non_duplicate_links(non_duplicate_links, new_blended_atom)
 
         # Make the links between source nodes and newly blended node.
-        # TODO: Give proper truth value, not random.
-        # 랜덤 진릿값 말고 적당한 진릿값을 주어야 한다.
-        make_link_all(
-            self.a,
-            types.AssociativeLink,
-            decided_atoms,
-            new_blended_atom
-        )
+        # TODO: Give proper truth value, not average of truthvalue.
+        # 평균 진릿값 말고 적당한 진릿값을 주어야 한다.
+        try:
+            weighted_tv = get_weighted_tv(self.a.get_incoming(new_blended_atom.h))
+        except UserWarning as e:
+            blend_log(e)
+            weighted_tv = TruthValue()
+        for decided_atom in decided_atoms:
+            self.a.add_link(
+                types.AssociativeLink,
+                [decided_atom, new_blended_atom],
+                weighted_tv
+            )
 
     def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
         self.__connect_links_simple(decided_atoms, new_blended_atom)

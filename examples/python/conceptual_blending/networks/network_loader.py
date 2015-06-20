@@ -24,5 +24,5 @@ class NetworkLoader:
             raise UserWarning('Test case not found.')
 
     def make_all(self):
-        for network in self.networks.values():
+        for network in self.networks.itervalues():
             network(self.a).make()

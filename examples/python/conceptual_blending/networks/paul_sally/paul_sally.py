@@ -1,5 +1,6 @@
 from examples.python.conceptual_blending.networks.base_network import *
-from opencog_b.python.blending.util.blending_util import *
+from examples.python.conceptual_blending.networks.network_util import \
+    make_link_all, rand_tv, make_sti_all
 from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'
@@ -54,14 +55,14 @@ class PaulSallyNetwork(BaseNetwork):
              self.grand_father, self.grand_mother,
              self.father, self.mother,
              self.son, self.daughter],
-            sti_value_dict['JUST_TARGET']
+            self.sti_value_dict['JUST_TARGET']
         )
         # Use in InputSpace1.
         self.paul = VariableNode("Paul", rand_tv())
         self.sally = VariableNode("Sally", rand_tv())
         make_sti_all(
             [self.paul, self.sally],
-            sti_value_dict['JUST_TARGET']
+            self.sti_value_dict['JUST_TARGET']
         )
 
         # Use in Generic Space.
@@ -70,7 +71,7 @@ class PaulSallyNetwork(BaseNetwork):
         self.woman = ConceptNode("Woman", rand_tv())
         make_sti_all(
             [self.human, self.human, self.woman],
-            sti_value_dict['JUST_TARGET']
+            self.sti_value_dict['JUST_TARGET']
         )
 
     # - Input Space 0
@@ -92,7 +93,7 @@ class PaulSallyNetwork(BaseNetwork):
         # Make role concept.
         make_sti_all(
             [self.father, self.daughter],
-            sti_value_dict['IMPORTANT']
+            self.sti_value_dict['IMPORTANT']
         )
         # Link with input space 0 type.
         make_link_all(
@@ -110,7 +111,7 @@ class PaulSallyNetwork(BaseNetwork):
         # Make variable concept.
         make_sti_all(
             [self.paul, self.sally],
-            sti_value_dict['IMPORTANT']
+            self.sti_value_dict['IMPORTANT']
         )
         # Link with input space 1 type.
         make_link_all(

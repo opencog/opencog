@@ -17,7 +17,8 @@ class BaseMaker(object):
         'SUCCESS_MAKE',
         'IN_PROCESS',
         'UNKNOWN_ERROR',
-        'PARAMETER_ERROR'
+        'PARAMETER_ERROR',
+        'NOT_ENOUGH_ATOMS'
     )
 
     def __init__(self, a):

@@ -1,3 +1,4 @@
+import random
 from opencog_b.python.blending.decider.base_decider import BaseDecider
 from opencog_b.python.blending.util.blending_util import *
 from opencog_b.python.blending.util.blend_config import BlendConfig

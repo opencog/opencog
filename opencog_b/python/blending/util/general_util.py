@@ -22,19 +22,6 @@ class Singleton(
     pass
 
 
-def get_class(kls):
-    parts = kls.split('.')
-    module = ".".join(parts[:-1])
-    m = __import__(module)
-    for comp in parts[1:]:
-        m = getattr(m, comp)
-    return m
-
-
-def get_class_by_split_name(module_path, class_name):
-    return get_class(str(module_path) + "." + str(class_name))
-
-
 # http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
 def enum_simulate(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)

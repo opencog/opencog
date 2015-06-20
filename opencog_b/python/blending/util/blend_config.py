@@ -64,11 +64,11 @@ class BlendConfig(Singleton):
         # blend config
         # TODO: Inherit chooser, decider, ... to BLEND?
         # TODO: Possible infinite loop. add->init->make->add->init->...
-        cls.update(cls.a, "config-format-version", "1")
+        cls.update(cls.a, "config-format-version", "2")
         cls.update(cls.a, "execute-mode", "Release")
 
     def __blend_config_name_node(cls, config_name):
-        if config_name not in cls.__set:
+        if config_name not in cls.DEFAULT_CONFIG_SET:
             raise UserWarning("Wrong config name: " + str(config_name))
 
         return cls.a.add_node(types.SchemaNode, cls.name + ':' + config_name)
@@ -325,10 +325,6 @@ class BlendConfig(Singleton):
         if ret is not None:
             ret = int(ret)
         return ret
-
-    @property
-    def __set(cls):
-        return BlendConfig.DEFAULT_CONFIG_SET
 
     @property
     def name(cls):

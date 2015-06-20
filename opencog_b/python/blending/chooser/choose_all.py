@@ -21,7 +21,7 @@ class ChooseAll(BaseChooser):
         :param Type atom_type: type of atoms to choose.
         :param int least_count: minimum number of atoms to choose.
         """
-        self.ret = self.a.get_atoms_by_type(atom_type, True)
+        self.ret = filter(lambda atom: atom.is_a(atom_type), focus_atoms)
 
         if len(self.ret) < least_count:
             self.last_status = self.Status.NOT_ENOUGH_ATOMS

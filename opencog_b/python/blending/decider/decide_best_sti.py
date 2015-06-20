@@ -16,7 +16,7 @@ class DecideBestSTI(BaseDecider):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlendConfig().update(self.a, "decide-sti-min", "IMPORTANT")
+        BlendConfig().update(self.a, "decide-sti-min", "32")
         BlendConfig().update(self.a, "decide-sti-max", "NONE")
 
     def __decide_atoms_best_sti(
@@ -68,14 +68,10 @@ class DecideBestSTI(BaseDecider):
         try:
             sti_min = int(sti_min)
         except ValueError:
-            sti_min = sti_value_dict[sti_min]
-            sti_min = int(sti_min)
-        except (KeyError, ValueError):
             sti_min = 1
         try:
-            sti_max = sti_value_dict[sti_max]
-        except KeyError:
-            # Including if config was 'None'
+            sti_max = int(sti_max)
+        except ValueError:
             sti_max = None
 
         self.__decide_atoms_best_sti(

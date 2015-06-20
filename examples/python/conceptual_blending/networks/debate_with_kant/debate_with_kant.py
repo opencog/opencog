@@ -1,6 +1,7 @@
 # coding=utf-8
 from examples.python.conceptual_blending.networks.base_network import *
-from opencog_b.python.blending.util.blending_util import *
+from examples.python.conceptual_blending.networks.network_util import \
+    make_link_all, rand_tv, make_sti_all
 from opencog.type_constructors import *
 
 __author__ = 'DongMin Kim'
@@ -62,7 +63,7 @@ class DebateWithKantNetwork(BaseNetwork):
                 self.search_for_truth,
                 self.a_1784
             ],
-            sti_value_dict['JUST_TARGET']
+            self.sti_value_dict['JUST_TARGET']
         )
 
         # Use in InputSpace1.
@@ -83,7 +84,7 @@ class DebateWithKantNetwork(BaseNetwork):
                 self.dead,
                 self.aware
             ],
-            sti_value_dict['JUST_TARGET']
+            self.sti_value_dict['JUST_TARGET']
         )
 
         # Use in GenericSpace.
@@ -210,7 +211,7 @@ class DebateWithKantNetwork(BaseNetwork):
                 self.writing,
                 self.search_for_truth
             ],
-            sti_value_dict['IMPORTANT']
+            self.sti_value_dict['IMPORTANT']
         )
 
     # - Input Space 1
@@ -262,7 +263,7 @@ class DebateWithKantNetwork(BaseNetwork):
                 self.dead,
                 self.aware
             ],
-            sti_value_dict['IMPORTANT']
+            self.sti_value_dict['IMPORTANT']
         )
 
     # - Generic Space

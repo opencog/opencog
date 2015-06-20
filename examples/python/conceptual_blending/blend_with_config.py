@@ -2,6 +2,7 @@ from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
 
 from opencog_b.python.blending.blend import ConceptualBlending
+from opencog_b.python.blending.util.blend_logger import log_debug_setting
 
 __author__ = 'DongMin Kim'
 

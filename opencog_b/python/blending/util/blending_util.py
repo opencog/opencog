@@ -1,18 +1,7 @@
 # coding=utf-8
 __author__ = 'DongMin Kim'
 
-import random
-
 from opencog.type_constructors import *
-
-
-def make_link_all(a, link_type, src_nodes, dst_node, tv=None):
-    if tv is None:
-        for node in src_nodes:
-            a.add_link(link_type, [node, dst_node], rand_tv())
-    else:
-        for node in src_nodes:
-            a.add_link(link_type, [node, dst_node], tv)
 
 
 # Choose atoms which are connected to specific atom.
@@ -28,25 +17,6 @@ def get_incoming_nodes(a, target):
                 ret.append(node)
 
     return ret
-
-
-def rand_tv():
-    strength = random.uniform(0.5, 0.9)
-    confidence = random.uniform(0.5, 0.9)
-    return TruthValue(strength, confidence)
-
-# For control STI values.
-sti_value_dict = {
-    'NONE': None,
-    'JUST_TARGET': 16,
-    'IMPORTANT': 32,
-    'VERY_IMPORTANT': 64
-}
-
-
-def make_sti_all(src_nodes, sti):
-    for node in src_nodes:
-        node.av = {'sti': sti}
 
 
 def get_weighted_tv(atoms):
