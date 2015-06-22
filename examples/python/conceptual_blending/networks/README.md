@@ -26,10 +26,16 @@
 
 #### Output Goal
 
+### MIT ConceptNetwork
+* Simple ConceptNetwork Loader.
+* It needs opencog's [test-dataset](https://github.com/opencog/test-datasets).
+
 ## Folders
 * paul_sally: Paul and Sally sample network.
 * debate_with_kant: Debate with Kant sample network.
+* concept_net: ConceptNet sample network.
 
 ## Files
 * base_network.py: Abstract class to provide 'make()' interface.
 * network_loader.py: Make the pre-defined sample network to blend.
+* network_util.py: Utils for sample networks loader.

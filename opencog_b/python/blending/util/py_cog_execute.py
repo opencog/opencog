@@ -23,16 +23,20 @@ class PyCogExecute(Singleton):
             cls.is_initialized = True
 
             # TODO: How to find the scheme module in beautiful?
+            usr = expanduser("~/")
+
             scheme_eval(
                 cls.a,
-                '(add-to-load-path "' + expanduser("~/atomspace") + '")' +
-                '(add-to-load-path "' + expanduser("~/atomspace/build") + '")' +
-                '(add-to-load-path "' + expanduser(
-                    "~/atomspace/opencog/scm") + '")' +
-                '(add-to-load-path "' + expanduser("~/opencog") + '")' +
-                '(add-to-load-path "' + expanduser("~/opencog/build") + '")' +
-                '(add-to-load-path "' + expanduser(
-                    "~/opencog/opencog/scm") + '")' +
+                '(add-to-load-path "' + usr + "atomspace" + '")' +
+                '(add-to-load-path "' + usr + "atomspace/build" + '")' +
+                '(add-to-load-path "' + usr + "atomspace/build/opencog" + '")' +
+                '(add-to-load-path "' + usr + "atomspace/opencog" + '")' +
+                '(add-to-load-path "' + usr + "atomspace/opencog/scm" + '")' +
+                '(add-to-load-path "' + usr + "opencog" + '")' +
+                '(add-to-load-path "' + usr + "opencog/build" + '")' +
+                '(add-to-load-path "' + usr + "opencog/build/opencog" + '")' +
+                '(add-to-load-path "' + usr + "opencog/opencog" + '")' +
+                '(add-to-load-path "' + usr + "opencog/opencog/scm" + '")' +
                 '(add-to-load-path ".")'
             )
 

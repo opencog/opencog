@@ -1,3 +1,5 @@
+from examples.python.conceptual_blending.networks.concept_net.concept_net import \
+    ConceptNetNetwork
 from paul_sally.paul_sally import PaulSallyNetwork
 from debate_with_kant.debate_with_kant import DebateWithKantNetwork
 
@@ -10,7 +12,8 @@ class NetworkLoader:
 
         self.networks = {
             PaulSallyNetwork.__name__: PaulSallyNetwork,
-            DebateWithKantNetwork.__name__: DebateWithKantNetwork
+            DebateWithKantNetwork.__name__: DebateWithKantNetwork,
+            ConceptNetNetwork.__name__: ConceptNetNetwork
         }
 
     def __str__(self):
