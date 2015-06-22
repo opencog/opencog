@@ -1,9 +1,9 @@
-; This rule assigns the relation between a preposition and its object-noun,
-; such as "on the table" and "in bed."
+; This rule is for demonstrative determiners such as "that bozo" and "this job."  It used to be called the det rule
+; but I changed it because there are lots of other determiners.
 ; (AN June 2015)
 
 
-(define pp
+(define demdet
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -15,7 +15,7 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$prep")
+                (VariableNode "$demdet")
                 (TypeNode "WordInstanceNode")
             )
         )
@@ -25,36 +25,37 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$prep")
+                (VariableNode "$demdet")
                 (VariableNode "$a-parse")
             )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$noun")
-                )
-            )
+	    (EvaluationLink
+   		(DefinedLinguisticRelationshipNode "_det")
+   			(ListLink
+      				(VariableNode "$noun")
+      				(VariableNode "$demdet")
+   			)
+		)
+
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-pp-rule")
+       	   (GroundedSchemaNode "scm: pre-demdet-rule")
        	      (ListLink
-       	         (VariableNode "$prep")
+       	         (VariableNode "$demdet")
        	         (VariableNode "$noun")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "pp-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "demdet-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "pp-Rule") pp)
+(ReferenceLink (stv 1 .99) (ConceptNode "demdet-Rule") demdet)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-pp-rule prep noun)
-    	(pp-rule (word-inst-get-word-str prep) (cog-name prep)
-	(word-inst-get-word-str noun) (cog-name noun)
+(define (pre-demdet-rule demdet noun)
+    	(demdet-rule (word-inst-get-word-str noun) (cog-name noun)
+	(word-inst-get-word-str demdet) (cog-name demdet)
               
     )
 )

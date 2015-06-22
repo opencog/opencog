@@ -1,8 +1,9 @@
-; This rule is for which-subjects of SVO sentences, as in
-; "Which guy ate all the pizza?"
+; This rule is for which-subjects of prepositional objects, as in
+; "Which toy is in this box?"
 ; (AN June 2015)
 
-(define whichsubjQ
+
+(define whichsubjpobjQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -14,11 +15,11 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$verb")
+                (VariableNode "$prep")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$obj")
+                (VariableNode "$pobj")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
@@ -32,60 +33,60 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$verb")
+                (VariableNode "$prep")
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$obj")
+                (VariableNode "$pobj")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb")
+                (DefinedLinguisticRelationshipNode "_predadj")
+                (ListLink 
                     (VariableNode "$subj")
+		    (VariableNode "$prep")
                 )
             )
             (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
+                (DefinedLinguisticRelationshipNode "_pobj")
                 (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
+                    (VariableNode "$prep")
+                    (VariableNode "$pobj")
                 )
             )
-			(EvaluationLink
-   				(DefinedLinguisticRelationshipNode "_det")
-  			 	(ListLink
-     					(VariableNode "$subj")
-      					(VariableNode "$qVar")
-				)
+		(EvaluationLink
+   			(DefinedLinguisticRelationshipNode "_det")
+  			 (ListLink
+   				(VariableNode "$subj")
+      				(VariableNode "$qVar")
 			)
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+		)
+		(InheritanceLink
+			(VariableNode "$qVar")
+			(DefinedLinguisticConceptNode "which")
+		)
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
+       	   (GroundedSchemaNode "scm: pre-whichsubjpobjQ-rule")
        	      (ListLink
        	         (VariableNode "$subj")
-       	         (VariableNode "$verb")
-       	         (VariableNode "$obj")
+       	         (VariableNode "$prep")
+       	         (VariableNode "$pobj")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjpobjQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") whichsubjQ)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjpobjQ-Rule") whichsubjpobjQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichsubjQ-rule subj verb obj)
-    (whichsubjQ-rule (word-inst-get-word-str subj) (cog-name subj)
-              (word-inst-get-word-str verb) (cog-name verb)
-              (word-inst-get-word-str obj) (cog-name obj)
+(define (pre-whichsubjpobjQ-rule subj prep pobj)
+    (whichsubjpobjQ-rule (word-inst-get-word-str pobj) (cog-name pobj)
+              (word-inst-get-word-str prep) (cog-name prep)
+              (word-inst-get-word-str subj) (cog-name subj)
     )
 )
 

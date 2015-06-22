@@ -1,6 +1,7 @@
-; The focus set (the implicant) is equivalent to input-template of pln and
-; criterium for r2l rules. The implicand is equivalent to the output-template
-; of pln and the rule-functions of r2l.
+; This the rule for subject-verb-object sentences, such as 
+; "Johnny ate the dog." 
+; (AN June 2015)
+
 (define svo
     (BindLink
         (VariableList

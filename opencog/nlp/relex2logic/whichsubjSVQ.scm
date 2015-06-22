@@ -1,8 +1,10 @@
-; This rule is for which-subjects of SVO sentences, as in
-; "Which guy ate all the pizza?"
+; This is for which-subjects of SV sentences, as in
+; "Which movie sucks more, "Enemy Mine" or "Event Horizon"?
+; (definitely Enemy Mine)
 ; (AN June 2015)
 
-(define whichsubjQ
+
+(define whichsubjSVQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -35,10 +37,6 @@
                 (VariableNode "$verb")
                 (VariableNode "$a-parse")
             )
-            (WordInstanceLink
-                (VariableNode "$obj")
-                (VariableNode "$a-parse")
-            )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
@@ -46,13 +44,15 @@
                     (VariableNode "$subj")
                 )
             )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
-                )
-            )
+		(AbsentLink            
+			(EvaluationLink
+        	        	(DefinedLinguisticRelationshipNode "_obj")
+        	       		 (ListLink
+        	           		 (VariableNode "$verb")
+        	           		 (VariableNode "$obj")
+        	        	)
+        	   	 )
+		)
 			(EvaluationLink
    				(DefinedLinguisticRelationshipNode "_det")
   			 	(ListLink
@@ -66,26 +66,25 @@
 			)
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
+       	   (GroundedSchemaNode "scm: pre-whichsubjSVQ-rule")
        	      (ListLink
        	         (VariableNode "$subj")
        	         (VariableNode "$verb")
-       	         (VariableNode "$obj")
+
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjSVQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") whichsubjQ)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjSVQ-Rule") whichsubjSVQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichsubjQ-rule subj verb obj)
-    (whichsubjQ-rule (word-inst-get-word-str subj) (cog-name subj)
+(define (pre-whichsubjSVQ-rule subj verb)
+    (whichsubjSVQ-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str verb) (cog-name verb)
-              (word-inst-get-word-str obj) (cog-name obj)
     )
 )
 

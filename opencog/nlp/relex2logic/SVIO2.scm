@@ -1,3 +1,8 @@
+; This rule is for snagging some of the indirect objects that aren't lucky enough to get
+; the _iobj relation from relex.  So, instead theyre just object sof the preposition "to". Pooer things.
+; as in "I sent the money to your boss." 
+; (AN June 2015)
+
 (define SVIO2
 	(BindLink
 		(VariableList

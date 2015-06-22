@@ -1,9 +1,9 @@
-; This rule assigns the relation between a preposition and its object-noun,
-; such as "on the table" and "in bed."
+; This is a new rule -- the previous version of relex had an all-rule, but no quantity rule.
+; I am not porting the all-rule, because it seems silly to pick out that one quantifier for 
+; its own rule, but none of the others -- some, many, few etc. etc. which also get _quantity
 ; (AN June 2015)
 
-
-(define pp
+(define quantity
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -15,7 +15,7 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$prep")
+                (VariableNode "$quant")
                 (TypeNode "WordInstanceNode")
             )
         )
@@ -25,37 +25,36 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$prep")
+                (VariableNode "$quant")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
+                (DefinedLinguisticRelationshipNode "_quantity")
                 (ListLink
-                    (VariableNode "$prep")
                     (VariableNode "$noun")
+                    (VariableNode "$quant")
                 )
             )
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-pp-rule")
+       	   (GroundedSchemaNode "scm: pre-quantity-rule")
        	      (ListLink
-       	         (VariableNode "$prep")
        	         (VariableNode "$noun")
+       	         (VariableNode "$quant")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "pp-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "quantity-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "pp-Rule") pp)
+(ReferenceLink (stv 1 .99) (ConceptNode "quantity-Rule") quantity)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-pp-rule prep noun)
-    	(pp-rule (word-inst-get-word-str prep) (cog-name prep)
-	(word-inst-get-word-str noun) (cog-name noun)
-              
+(define (pre-quantity-rule noun quant)
+    (quantity-rule (word-inst-get-word-str noun) (cog-name noun)
+              (word-inst-get-word-str quant) (cog-name quant)
     )
 )
 

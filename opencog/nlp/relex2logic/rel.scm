@@ -1,8 +1,9 @@
-; this rule handles the _%because relation, which mainly handles because-phrases and 
-; why-questions.
+; This rule relates relative-pronouns to the verbs in the relative clauses,
+; as in "What happened to the pizza that I put in the fridge?" This rule relates "that" to "put"
 ; (AN June 2015)
 
-(define because
+
+(define rel
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -14,7 +15,7 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$comp")
+                (VariableNode "$rel")
                 (TypeNode "WordInstanceNode")
             )
         )
@@ -24,38 +25,38 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$comp")
+                (VariableNode "$rel")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_%because")
+                (DefinedLinguisticRelationshipNode "_rel")
                 (ListLink
+                    (VariableNode "$rel")
                     (VariableNode "$pred")
-					(VariableNode "$comp")     
                 )
             )
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-because-rule")
+       	   (GroundedSchemaNode "scm: pre-rel-rule")
        	      (ListLink
-       	        (VariableNode "$comp")  
-				(VariableNode "$pred")         	         
+       	         (VariableNode "$rel")
+       	         (VariableNode "$pred")
             )
         )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "because-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "rel-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "because-Rule") comp)
+(ReferenceLink (stv 1 .99) (ConceptNode "rel-Rule") rel)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-because-rule comp pred)
-    	(because-rule
-		(word-inst-get-word-str comp) (cog-name comp)
-		(word-inst-get-word-str pred) (cog-name pred)		              
-	)
+(define (pre-rel-rule rel pred)
+    	(complement-rule (word-inst-get-word-str rel) (cog-name rel)
+	(word-inst-get-word-str pred) (cog-name pred)
+              
+    )
 )
 
 

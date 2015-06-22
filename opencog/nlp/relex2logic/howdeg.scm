@@ -1,3 +1,6 @@
+; This rule is for "how of degree questions" such as "How fast can you run?"
+; (AN June 2015)
+
 (define howdeg-q
 	(BindLink
 		(VariableList

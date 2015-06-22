@@ -1,4 +1,8 @@
-(define whichsubjQ
+; This rule is for which-subject sof SVO sentences, as in
+; "Which one of you ate all the ice cream?"
+; (AN june 2015)
+
+(define whichsubjSVOQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -62,7 +66,7 @@
 	)
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
+       	   (GroundedSchemaNode "scm: pre-whichsubjSVOQ-rule")
        	      (ListLink
        	         (VariableNode "$subj")
        	         (VariableNode "$verb")
@@ -72,14 +76,14 @@
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjSVOQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") whichsubjQ)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjSVOQ-Rule") whichsubjSVOQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichsubjQ-rule subj verb obj)
-    (whichsubjQ-rule (word-inst-get-word-str subj) (cog-name subj)
+(define (pre-whichsubjSVOQ-rule subj verb obj)
+    (whichsubjSVOQ-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str verb) (cog-name verb)
               (word-inst-get-word-str obj) (cog-name obj)
     )

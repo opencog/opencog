@@ -1,5 +1,7 @@
-; NB: this rule could not be assimilated to the amod rule like the adnounials were assimilated to the advmod rule because
-; these phrases are picked out in Relex for further processing in phrases like "the man to whom I spoke."
+; This rule processes a relatively new relex relation -- prepositional-adjectival --
+; as in "the man in the sombrero" or "the moose under the table"
+; (AN June 2015)
+
 
 (define prepadj
     (BindLink
@@ -13,7 +15,7 @@
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$adv")
+                (VariableNode "$adj")
                 (TypeNode "WordInstanceNode")
             )
         )
@@ -23,14 +25,14 @@
                 (VariableNode "$a-parse")
             )
             (WordInstanceLink
-                (VariableNode "$adv")
+                (VariableNode "$adj")
                 (VariableNode "$a-parse")
             )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_prepadj")
                 (ListLink
                     (VariableNode "$noun")
-                    (VariableNode "$adv")
+                    (VariableNode "$adj")
                 )
             )
         )
@@ -38,7 +40,7 @@
        	   (GroundedSchemaNode "scm: pre-prepadj-rule")
        	      (ListLink
        	         (VariableNode "$noun")
-       	         (VariableNode "$adv")
+       	         (VariableNode "$adj")
             )
         )
     )
@@ -50,9 +52,9 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-prepadj-rule noun adv)
+(define (pre-prepadj-rule noun adj)
     (prepadj-rule (word-inst-get-word-str noun) (cog-name noun)
-              (word-inst-get-word-str adv) (cog-name adv)
+              (word-inst-get-word-str adj) (cog-name adj)
     )
 )
 

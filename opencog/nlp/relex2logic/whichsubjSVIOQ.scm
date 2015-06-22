@@ -1,8 +1,8 @@
-; This rule is for which-subjects of SVO sentences, as in
-; "Which guy ate all the pizza?"
+; This rule is for which-subjects of SVIO sentences, such as 
+; "Which agent sent you this message?"
 ; (AN June 2015)
 
-(define whichsubjQ
+(define whichsubjSVIOQ
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -19,6 +19,10 @@
             )
             (TypedVariableLink
                 (VariableNode "$obj")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$iobj")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
@@ -39,6 +43,10 @@
                 (VariableNode "$obj")
                 (VariableNode "$a-parse")
             )
+	    (WordInstanceLink
+                (VariableNode "$iobj")
+                (VariableNode "$a-parse")
+            )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
@@ -53,20 +61,27 @@
                     (VariableNode "$obj")
                 )
             )
-			(EvaluationLink
-   				(DefinedLinguisticRelationshipNode "_det")
-  			 	(ListLink
-     					(VariableNode "$subj")
-      					(VariableNode "$qVar")
-				)
-			)
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_iobj")
+                (ListLink
+                    (VariableNode "$verb")
+                    (VariableNode "$iobj")
+                )
+            )
+	(EvaluationLink
+		(DefinedLinguisticRelationshipNode "_det")
+		 (ListLink
+ 				(VariableNode "$subj")
+  				(VariableNode "$qVar")
+		)
+	)
+	(InheritanceLink
+		(VariableNode "$qVar")
+		(DefinedLinguisticConceptNode "which")
+	)
         )
         (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
+       	   (GroundedSchemaNode "scm: pre-whichsubjSVIOQ-rule")
        	      (ListLink
        	         (VariableNode "$subj")
        	         (VariableNode "$verb")
@@ -76,16 +91,17 @@
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") (ConceptNode "Rule"))
+(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjSVIOQ-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjQ-Rule") whichsubjQ)
+(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjSVIOQ-Rule") whichsubjSVIOQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichsubjQ-rule subj verb obj)
-    (whichsubjQ-rule (word-inst-get-word-str subj) (cog-name subj)
+(define (pre-whichsubjSVIOQ-rule subj verb obj iobj)
+    (whichsubjSVIOQ-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str verb) (cog-name verb)
               (word-inst-get-word-str obj) (cog-name obj)
+		(word-inst-get-word-str iobj) (cog-name iobj)
     )
 )
 
