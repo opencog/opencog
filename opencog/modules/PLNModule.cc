@@ -108,8 +108,8 @@ void PLNModule::add_af_signal_handler(const Handle& h,
                                       const AttentionValuePtr& av_new)
 {
     //!start the chainer xxx more code here
-    DefaultForwardChainerCB dfcb(as_);
-    ForwardChainer fc(as_, Handle::UNDEFINED);
+    DefaultForwardChainerCB dfcb(*as_);
+    ForwardChainer fc(*as_, Handle::UNDEFINED);
     fc.do_chain(dfcb, h);
 }
 /*
@@ -128,7 +128,7 @@ void PLNModule::add_atom_signal(const Handle& new_atom)
 void PLNModule::add_atom_signal_handler(const Handle& h)
 {
     //!Start the chainer xxx more code here/
-    DefaultForwardChainerCB dfcb(as_);
-    ForwardChainer fc(as_, Handle::UNDEFINED);
+    DefaultForwardChainerCB dfcb(*as_);
+    ForwardChainer fc(*as_, Handle::UNDEFINED);
     fc.do_chain(dfcb, h);
 }
