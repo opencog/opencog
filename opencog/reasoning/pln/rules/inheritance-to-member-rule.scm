@@ -1,50 +1,56 @@
 ; =============================================================================
-; MemberToInheritanceRule
-;	MemberLink( B C )
-;			becomes
-;	InheritanceLink( B C )
+; InheritanceToMemberRule
+;
+; InheritanceLink
+;   B 
+;   C
+; |-
+; MemberLink
+;   B 
+;   C
+;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-member-to-inheritance
+(define pln-rule-inheritance-to-member
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
 			(VariableNode "$C"))
-		(MemberLink
+		(InheritanceLink
 			(VariableNode "$B")
 			(VariableNode "$C"))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-member-to-inheritance")
+			(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
 			(ListLink
-				(InheritanceLink
+				(MemberLink
 					(VariableNode "$B")
 					(VariableNode "$C"))
-				(MemberLink
+				(InheritanceLink
 					(VariableNode "$B")
 					(VariableNode "$C"))))))
 
 ; -----------------------------------------------------------------------------
-; Member To Inheritance Formula
+; Inheritance To Member Formula
 ; -----------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------
 ; Side-effect: TruthValue of the new link stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-member-to-inheritance IBC MBC)
+(define (pln-formula-inheritance-to-member MBC IBC)
 	(cog-set-tv!
-		IBC
+		MBC
 		(pln-formula-member-to-inheritance-side-effect-free
-			IBC
-			MBC)))
+			MBC
+			IBC)))
 
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-member-to-inheritance-side-effect-free IBC MBC)
+(define (pln-formula-inheritance-to-member-side-effect-free MBC IBC)
 	(stv
-		(cog-stv-strength MBC)
-		(* (cog-stv-confidence MBC) 0.9)))
+		(cog-stv-strength IBC)
+		(* (cog-stv-confidence IBC) 0.9)))
 
 ; =============================================================================
