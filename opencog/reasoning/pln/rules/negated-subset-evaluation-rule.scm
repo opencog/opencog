@@ -47,7 +47,7 @@
     (cog-set-tv!
         nAB (pln-formula-negated-subset-evaluation-side-effect-free nAB CA CB)))
 
-(define (pln-formual-subset-negated-evaluation-side-effect-free nAB CA CB)
+(define (pln-formula-subset-negated-evaluation-side-effect-free nAB CA CB)
     (let 
         ((snCA (- 1 (cog-stv-strength CA)))
          (cnCA (cog-stv-confidence CA))

@@ -28,7 +28,7 @@
             (AttractionLink
                 (VariableNode "$C")
                 (VariableNode "$B")))
-        (InecutionOutputLink
+        (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-intensional-similarity-evaluation")
             (ListLink
                 (IntensionalSimilarityLink
@@ -45,7 +45,7 @@
     (cog-set-tv!
         AB (pln-formula-intensional-similarity-evaluation-side-effect-free AB CA CB)))
 
-(define (pln-formual-intensional-similarity-evaluation-side-effect-free AB CA CB)
+(define (pln-formula-intensional-similarity-evaluation-side-effect-free AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))

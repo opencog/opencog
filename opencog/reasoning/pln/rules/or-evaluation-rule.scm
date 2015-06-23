@@ -45,7 +45,7 @@
     (cog-set-tv!
         AB (pln-formula-or-evaluation-side-effect-free AB CA CB)))
 
-(define (pln-formual-or-evaluation-side-effect-free AB CA CB)
+(define (pln-formula-or-evaluation-side-effect-free AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
