@@ -587,7 +587,7 @@ mkdir build
 cd build
 cmake ..
 make -j$(nproc)
-make install
+sudo make install
 ldconfig
 cd ../..
 rm -rf master.tar.gz moses-master/
@@ -607,7 +607,7 @@ mkdir build
 cd build
 ../configure
 make -j$(nproc)
-make install
+sudo make install
 ldconfig
 cd ../..
 rm -rf link-grammar-5.*/
