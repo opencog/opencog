@@ -1,3 +1,3 @@
-string scene=MCworld
+string scene=MCWorld
 int64 timestamp
 block[] blocks

@@ -1,15 +1,15 @@
 #! /usr/bin/env python
 
-import roslib; roslib.load_manifest('minecraft_bot')
-import rospy
-from minecraft_bot.msg import visible_blocks_msg,mobs_msg,playerpos_msg
-
-#Note:must import spacetime before atomspace, 
-#or the types class won't include spacetime atom types
+from opencog.atomspace import AtomSpace,Handle,types,get_refreshed_types
 from opencog.spacetime import SpaceServer,TimeServer
-from opencog.atomspace import AtomSpace,Handle,types
-from opencog.utilities import initialize_opencog,finalize_opencog
-    
+#update spacetime types imported
+types=get_refreshed_types()
+
+#helper function for adding predicate
+def addPredicate(atomspace,predicatestr,atomlist):
+    return self._atomspace.add_link(types.EvaluationLink,[
+        self._atomspace.add_node(types.PredicateNode,predicatestr),
+        self._atomspace.add_link(types.ListLink,atomlist)])
 
 class PerceptionManager:
 
@@ -22,7 +22,7 @@ class PerceptionManager:
         #But actually it should receive these borders argument from ROS to initialize the SpaceMap
         self._spaceserver.addMap(123456,"MCWorld",
                                  -100,-100,-100,
-                                 100,100,100,-100)
+                                 200,200,200,-100)
 
     def buildBlockNodes(self,block,maphandle):
 
@@ -30,7 +30,7 @@ class PerceptionManager:
         if not hasattr(self.buildBlockNodes.__func__,"objNo"):
             self.buildBlockNodes.__func__.objNo=0            
         #Note: in 3DSpaceMap using structure node to represent block.
-        objnode=self._atomspace.add_node(types.StructureNode,"obj%s".format(self.buildBlockNodes.__func__.objNo))
+        objnode=self._atomspace.add_node(types.StructureNode,"obj%s"%(self.buildBlockNodes.__func__.objNo))
         self.buildBlockNodes.__func__.objNo+=1
         updatedevallinks=[]
 
@@ -43,6 +43,7 @@ class PerceptionManager:
                 self._atomspace.add_node(types.NumberNode,str(block.z))])])
         updatedevallinks.append(locationlink)
 
+        # materiallink=addPredicate(self._atomspace,predicate,atomlist)
         materiallink=self._atomspace.add_link(types.EvaluationLink,[
             self._atomspace.add_node(types.PredicateNode,"material"),
             self._atomspace.add_link(types.ListLink,[
@@ -141,7 +142,7 @@ class PerceptionManager:
         return updatedevallinks
         
 
-    def ProcessANewWorld(self,data):
+    def processANewWorld(self,data):
         #TODO:For now the border of map is defined by Brad's flat world size,from(x,z)=(-100,-100) to (0,0)
         #But actually it should receive these borders argument from ROS to initialize the SpaceMap
         self._spaceserver.addMap(data.timestamp,"MCWorld",
@@ -153,18 +154,15 @@ class PerceptionManager:
     #TODO:the unit measurement of timestamp in game is per sec
     #Need a more accurate timestamp
     #->ROS node will send two time:one is time in game world and one is time in ROS timer
-        print 'callback, timestamp %s'%(data.timestamp)
-
         try:
             maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,data.scene)[0]).h
         except IndexError:
             return 
 
-            curscenemap=self._spaceserver.getMap(maphandle)
-
+        curscenemap=self._spaceserver.getMap(maphandle)
         for block in data.blocks:
             blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
-            #Check if it's undefined, note that we don't use the is_undefined(),
+            #Check if it's undefined, note that we don't use the is_undefined()
             #see the bug info in spacetime.pyx
             if blockhandle.value() != -1:
                 blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
@@ -173,6 +171,7 @@ class PerceptionManager:
                 else:
                     self._spaceserver.removeMapInfo(blockhandle,maphandle,data.timestamp)
                     #TODO: add a predicate to mark block is disappeared->This predicate should be added later in PredicateUpdater
+
             blocknode,updatedatoms=self.buildBlockNodes(block,maphandle)
             self._spaceserver.addMapInfo(blocknode.h,maphandle,False,data.timestamp,
                                          block.x,block.y,block.z,
@@ -207,7 +206,7 @@ class PerceptionManager:
                 self._timeserver.addTimeInfo(atom.h,data.timestamp)
 
 
-
+    """
     def processPlayerPosMessage(self,data):
     
         try:
@@ -231,34 +230,9 @@ class PerceptionManager:
                           'player',"myself","player")
         for atom in allupdatedatoms:
             self._timeserver.addTimeInfo(atom.h,data.timestamp)
+    """
 
-
-    def remove(self):
+#    def remove(self):
         # make sure this is called by the time script exits
-        finalize_opencog()
-        del self._atomspace
-
-    
-
-def main():
-
-    a = AtomSpace()
-    ss = SpaceServer(a)
-    ts = TimeServer(a,ss)
-    pm = PerceptionManager(a,ss,ts)
-
-    ss.setTimeServer(ts)
-    initialize_opencog(a)
-
-    rospy.init_node('OpenCog_Perception')
-    rospy.Subscriber('visible_blocks_data',visible_blocks_msg,pm.processMapMessage)    
-    rospy.Subscriber('mobs_data',mobs_msg,pm.processMobMessage)
-    rospy.Subscriber('playerpos_data',playerpos_msg,pm.processPlayerPosMessage)
-
-    while not rospy.is_shutdown():
-        rospy.sleep(1.)
-
-    pm.remove()
-
-if __name__ == "__main__":
-    main()
+#        finalize_opencog()
+#        del self._atomspace
