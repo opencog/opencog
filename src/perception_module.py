@@ -4,12 +4,7 @@ from opencog.atomspace import AtomSpace,Handle,types,get_refreshed_types
 from opencog.spacetime import SpaceServer,TimeServer
 #update spacetime types imported
 types=get_refreshed_types()
-
-#helper function for adding predicate
-def addPredicate(atomspace,predicatestr,atomlist):
-    return self._atomspace.add_link(types.EvaluationLink,[
-        self._atomspace.add_node(types.PredicateNode,predicatestr),
-        self._atomspace.add_link(types.ListLink,atomlist)])
+from atomspace_util import addPredicate,addLocation
 
 class PerceptionManager:
 
@@ -34,21 +29,13 @@ class PerceptionManager:
         self.buildBlockNodes.__func__.objNo+=1
         updatedevallinks=[]
 
-        locationlink=self._atomspace.add_link(types.AtLocationLink,[
-            objnode,
-            maphandle,
-            self._atomspace.add_link(types.ListLink,[
-                self._atomspace.add_node(types.NumberNode,str(block.x)),
-                self._atomspace.add_node(types.NumberNode,str(block.y)),
-                self._atomspace.add_node(types.NumberNode,str(block.z))])])
+        locationlink=addLocation(self._atomspace,objnode,maphandle,
+                                 [block.x,block.y,block.z])
         updatedevallinks.append(locationlink)
 
-        # materiallink=addPredicate(self._atomspace,predicate,atomlist)
-        materiallink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"material"),
-            self._atomspace.add_link(types.ListLink,[
-                objnode,
-                self._atomspace.add_node(types.ConceptNode,str(block.btype))])])
+        typenode=self._atomspace.add_node(types.ConceptNode,str(block.btype))
+        materiallink=addPredicate(self._atomspace,"material",
+                                  [objnode,typenode])
         updatedevallinks.append(materiallink)
         return objnode,updatedevallinks
 
@@ -56,55 +43,35 @@ class PerceptionManager:
         entitynode=self._atomspace.add_node(types.ObjectNode,str(entity.eid))
         updatedevallinks=[]
 
-        locationlink=self._atomspace.add_link(types.AtLocationLink,[
-            entitynode,
-            maphandle,
-            self._atomspace.add_link(types.ListLink,[
-                self._atomspace.add_node(types.NumberNode,str(entity.x)),
-                self._atomspace.add_node(types.NumberNode,str(entity.y)),
-                self._atomspace.add_node(types.NumberNode,str(entity.z))])])
+        locationlink=addLocation(self._atomspace,entitynode,maphandle,
+                                 [entity.x,entity.y,entity.z])
         updatedevallinks.append(locationlink)
 
-        typelink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"type"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.ConceptNode,str(entity.mob_type))])])
+        typenode=self._atomspace.add_node(types.ConceptNode,str(entity.mob_type))
+        typelink=addPredicate(self._atomspace,"entitytype",
+                              [entitynode,typenode])
         updatedevallinks.append(typelink)
 
-        looklink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"look"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.head_yaw)),
-                self._atomspace.add_node(types.NumberNode,str(entity.head_pitch))])])
+        yawnode=self._atomspace.add_node(types.NumberNode,str(entity.head_yaw))
+        pitchnode=self._atomspace.add_node(types.NumberNode,str(entity.head_pitch))
+        looklink=addPredicate(self._atomspace,"look",
+                              [entitynode,yawnode,pitchnode])
         updatedevallinks.append(looklink)
 
-        sizelink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"size"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.length)),
-                self._atomspace.add_node(types.NumberNode,str(entity.width)),
-                self._atomspace.add_node(types.NumberNode,str(entity.height))])])
-        updatedevallinks.append(sizelink)
+        lengthnode=self._atomspace.add_node(types.NumberNode,str(entity.length))
+        widthnode=self._atomspace.add_node(types.NumberNode,str(entity.width))
+        heightnode=self._atomspace.add_node(types.NumberNode,str(entity.height))
+        sizelink=addPredicate(self._atomspace,"size",
+                              [entitynode,
+                               lengthnode,widthnode,heightnode])               
+        updatedevallinks.append(sizelink)        
 
-        looklink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"look"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.head_yaw)),
-                self._atomspace.add_node(types.NumberNode,str(entity.head_pitch))])])
-        updatedevallinks.append(looklink)
-        
-
-        velocitylink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"velocity"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_x)),
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_y)),
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_z))])])
+        v_xnode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_x))
+        v_ynode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_y))
+        v_znode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_z))
+        velocitylink=addPredicate(self._atomspace,"velocity",
+                                  [entitynode,
+                                   v_xnode,v_ynode,v_znode])
         updatedevallinks.append(velocitylink)
 
         return entitynode,updatedevallinks
@@ -112,33 +79,26 @@ class PerceptionManager:
     def updateEntityNode(self,entitynode,entity,maphandle):
         
         updatedevallinks=[]
-        
-        locationlink=self._atomspace.add_link(types.AtLocationLink,[
-            entitynode,
-            maphandle,
-            self._atomspace.add_link(types.ListLink,[
-                self._atomspace.add_node(types.NumberNode,str(entity.x)),
-                self._atomspace.add_node(types.NumberNode,str(entity.y)),
-                self._atomspace.add_node(types.NumberNode,str(entity.z))])])
+
+        locationlink=addLocation(self._atomspace,entitynode,maphandle,
+                                 [entity.x,entity.y,entity.z])
         updatedevallinks.append(locationlink)
 
-        looklink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"look"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.head_yaw)),
-                self._atomspace.add_node(types.NumberNode,str(entity.head_pitch))])])
+        yawnode=self._atomspace.add_node(types.NumberNode,str(entity.head_yaw))
+        pitchnode=self._atomspace.add_node(types.NumberNode,str(entity.head_pitch))
+        looklink=addPredicate(self._atomspace,"look",
+                              [entitynode,yawnode,pitchnode])
         updatedevallinks.append(looklink)
 
-        velocitylink=self._atomspace.add_link(types.EvaluationLink,[
-            self._atomspace.add_node(types.PredicateNode,"velocity"),
-            self._atomspace.add_link(types.ListLink,[
-                entitynode,
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_x)),
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_y)),
-                self._atomspace.add_node(types.NumberNode,str(entity.velocity_z))])])
+        v_xnode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_x))
+        v_ynode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_y))
+        v_znode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_z))
+        velocitylink=addPredicate(self._atomspace,"velocity",
+                                  [entitynode,
+                                   v_xnode,v_ynode,v_znode])
         updatedevallinks.append(velocitylink)
-        
+
+                
         return updatedevallinks
         
 
