@@ -33,7 +33,7 @@ class PerceptionManager:
                                  [block.x,block.y,block.z])
         updatedevallinks.append(locationlink)
 
-        typenode=self._atomspace.add_node(types.ConceptNode,str(block.btype))
+        typenode=self._atomspace.add_node(types.ConceptNode,str(block.blockid))
         materiallink=addPredicate(self._atomspace,"material",
                                   [objnode,typenode])
         updatedevallinks.append(materiallink)
@@ -109,8 +109,40 @@ class PerceptionManager:
                                  -100,-100,-100,
                                  100,100,100,-100)
 
-    def processMapMessage(self,data):
+    def processBlockMessage(self,block):
+            #TODO:the unit measurement of timestamp in game is per sec
+    #Need a more accurate timestamp
+    #->ROS node will send two time:one is time in game world and one is time in ROS timer
+        try:
+            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,block.scene)[0]).h
+        except IndexError:
+            return 
+        
+        curscenemap=self._spaceserver.getMap(maphandle)        
+        blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
+        #Check if it's undefined, note that we don't use the is_undefined()
+        #see the bug info in spacetime.pyx
+        if blockhandle.value() != -1:
+            blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
+            if blockinfo.getMaterial()==str(block.blockid):
+                return
+            else:
+                print blockinfo.getMaterial(),str(block.blockid)
+                print (block.x,block.y,block.z)
+                self._spaceserver.removeMapInfo(blockhandle,maphandle,block.timestamp)
+                #TODO: add a predicate to mark block is disappeared->This predicate should be added later in PredicateUpdater
 
+        blocknode,updatedatoms=self.buildBlockNodes(block,maphandle)
+        self._spaceserver.addMapInfo(blocknode.h,maphandle,False,block.timestamp,
+                                     block.x,block.y,block.z,
+                                     1,1,1,0,
+                                     'block',blocknode.name,str(block.blockid))
+        self._timeserver.addTimeInfo(blocknode.h,block.timestamp)
+        for link in updatedatoms:
+            self._timeserver.addTimeInfo(link.h,block.timestamp)
+
+    def processMapMessage(self,data):
+        
     #TODO:the unit measurement of timestamp in game is per sec
     #Need a more accurate timestamp
     #->ROS node will send two time:one is time in game world and one is time in ROS timer
@@ -126,7 +158,7 @@ class PerceptionManager:
             #see the bug info in spacetime.pyx
             if blockhandle.value() != -1:
                 blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
-                if blockinfo.getMaterial()==str(block.btype):
+                if blockinfo.getMaterial()==str(block.blockid):
                     continue
                 else:
                     self._spaceserver.removeMapInfo(blockhandle,maphandle,data.timestamp)
@@ -136,7 +168,7 @@ class PerceptionManager:
             self._spaceserver.addMapInfo(blocknode.h,maphandle,False,data.timestamp,
                                          block.x,block.y,block.z,
                                          1,1,1,0,
-                                         'block',blocknode.name,str(block.btype))
+                                         'block',blocknode.name,str(block.blockid))
             self._timeserver.addTimeInfo(blocknode.h,data.timestamp)
             for link in updatedatoms:
                 self._timeserver.addTimeInfo(link.h,data.timestamp)
