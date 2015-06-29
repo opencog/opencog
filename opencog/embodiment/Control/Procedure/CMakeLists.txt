@@ -22,7 +22,9 @@ ADD_DEPENDENCIES(Procedure
 
 ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
 TARGET_LINK_LIBRARIES (combo_shell_stdio
-	oac
+	# OAC is deprecated.  If you are working on refactoring some of the code
+	# you can uncomment.
+	#oac
 	Procedure
 	WorldWrapper
 	AvatarComboVocabulary
