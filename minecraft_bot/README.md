@@ -14,7 +14,7 @@ The catkin (ROS) package for running the Minecraft bot
 4. Start any of the testbot.py files to initialize the Spock bot and test custom plugins. It will start Spock and a ROS node (SpockControl.py). This node will only be responsible for receiving Minecraft packets and sending raw environment data to the map node.
 
 
-All source for our custom SpockBot plugins are in opencog-to-minecraft/spock/plugins/. ROS nodes are all in this directory.
+All source for our custom SpockBot plugins are in spockextras/plugins/helpers. ROS nodes are all in this directory.
 
 
 
