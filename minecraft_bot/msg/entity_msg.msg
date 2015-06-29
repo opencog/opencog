@@ -10,4 +10,4 @@ entity_object_meta object
 entity_painting_meta painting
 entity_player_meta player
 entity_exp_meta exp
-entity_global_meta global
+entity_global_meta globalentity
