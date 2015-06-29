@@ -13,7 +13,7 @@ from opencog_b.python.blending.blend import ConceptualBlending
 ConceptualBlending(atomspace).run(focus_atoms, config_base)
 ```
 * Make new blend with atoms from given atoms list.
-* Use the custom configs. See [Conceptual Blending Config Format].
+* Use the custom configs. See [Conceptual Blending Config Format](https://github.com/kim135797531/opencog-python-blending/tree/master/doc/blend-config-format.md).
 * Options
   * focus_atoms: If it is None, then blender will try to blend with all atoms 
   in atomspace.
