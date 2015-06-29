@@ -49,7 +49,9 @@ So you have to add these files in src/opencog/ as the following procedure:
 2. start cogserver, remember put this directory in the PYTHON_EXTENSION_DIRS variable in the opencog.conf so we can import those python file we need; Besides you have to execute cogserver under your opencog/build/ directory or the cogshell will fail to load the commands.
 
 3. run 
+
    echo -e 'py\n' | cat - opencog_intializer.py | netcat localhost 17001 
+
 (Thanks to Linas' netcat module!)to start the ROS node and intialize perception manager in cogserver.
 
 4. start mapnode.py. It will start a ROS node to receive primary blocks messages, save them and send block information to opencog. So far we just send the whole world to opencog. And in the future we will add more information(Entity/players...) and visibility calculation in the ROS node.
@@ -57,6 +59,7 @@ So you have to add these files in src/opencog/ as the following procedure:
 5. start testbot3.py. It will start Spock and a new ROS node. This node will only be responsible for receiving Minecraft packets and sending primary blocks message to the mapnode.
 
 6. Then you can connect with cogserver by:
+
    rlwrap telnet localhost 17001
 
 Now you should see the block atoms in the cogserver. You can also check them by using pyshell/guile shell.
