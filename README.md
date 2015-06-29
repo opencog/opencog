@@ -60,11 +60,9 @@ So you have to add these files in src/opencog/ as the following procedure:
 
 (Thanks to Linas' netcat module!)to start the ROS node and intialize perception manager in cogserver.
 
-4. start mapnode.py. It will start a ROS node to receive primary blocks messages, save them and send block information to opencog. So far we just send the whole world to opencog. And in the future we will add more information(Entity/players...) and visibility calculation in the ROS node.
+4. Follow instructions in minecraft_bot to start ROS and initialize Spock.
 
-5. start testbot3.py. It will start Spock and a new ROS node. This node will only be responsible for receiving Minecraft packets and sending primary blocks message to the mapnode.
-
-6. Then you can connect with cogserver by:
+5. Then you can connect with cogserver by:
 
    `rlwrap telnet localhost 17001`
 
