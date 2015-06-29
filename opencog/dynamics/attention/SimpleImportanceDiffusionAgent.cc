@@ -415,7 +415,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
     // Chase the hebbian links originating at this atom and obtain the 
     // adjacent atoms that are found by traversing those links
     HandleSeq resultSet = 
-            getNeighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_neighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
     
     return resultSet;
 }

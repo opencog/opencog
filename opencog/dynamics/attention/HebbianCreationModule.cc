@@ -99,9 +99,9 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
     HandleSeq existingAsSource =
-            getNeighbors(source, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_neighbors(source, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
     HandleSeq existingAsTarget =
-            getNeighbors(source, true, false, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_neighbors(source, true, false, ASYMMETRIC_HEBBIAN_LINK, false);
 
     // Get the set differences between the AttentionalFocus
     // and the sets of existing sources and targets
