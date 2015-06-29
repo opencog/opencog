@@ -50,7 +50,7 @@ So you have to add these files in src/opencog/ as the following procedure:
 
 3. run 
 
-   echo -e 'py\n' | cat - opencog_intializer.py | netcat localhost 17001 
+   `echo -e 'py\n' | cat - opencog_intializer.py | netcat localhost 17001` 
 
 (Thanks to Linas' netcat module!)to start the ROS node and intialize perception manager in cogserver.
 
@@ -60,7 +60,7 @@ So you have to add these files in src/opencog/ as the following procedure:
 
 6. Then you can connect with cogserver by:
 
-   rlwrap telnet localhost 17001
+   `rlwrap telnet localhost 17001`
 
 Now you should see the block atoms in the cogserver. You can also check them by using pyshell/guile shell.
 
