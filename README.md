@@ -11,6 +11,8 @@ To start this, you should have installed:
 
 ####ROS http://www.ros.org/
 
+After installing ROS you have to create a workspace and move this repository into the new workspace.
+
 ####Opencog https://github.com/opencog/opencog
 
 For installing Opencog you also have to install 
@@ -46,7 +48,7 @@ So you have to add these files in src/opencog/ as the following procedure:
 
 1. start roscore and Minecraft Server
 
-2. start cogserver, remember put this directory in the PYTHON_EXTENSION_DIRS variable in the opencog.conf so we can import those python file we need; Besides you have to execute cogserver under your opencog/build/ directory or the cogshell will fail to load the commands.
+2. start cogserver, remember put the src/ path in the PYTHON_EXTENSION_DIRS variable in the opencog.conf so we can import those python file we need; Besides you have to execute cogserver under your opencog/build/ directory or the cogshell will fail to load the commands.
 
 3. run 
 
