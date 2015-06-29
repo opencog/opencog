@@ -532,7 +532,7 @@ install_cogutil(){
 MESSAGE="Installing cogutils...." ; message
 cd /tmp/
 # cleaning up remnants from previous install failures, if any.
-rm -f master.tar.gz*
+rm -rf master.tar.gz* cogutils-master
 wget https://github.com/opencog/cogutils/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd cogutils-master/
@@ -561,7 +561,7 @@ install_atomspace(){
 MESSAGE="Installing atomspace...." ; message
 cd /tmp/
 # cleaning up remnants from previous install failures, if any.
-rm -f master.tar.gz*
+rm -rf master.tar.gz* atomspace-master
 wget https://github.com/opencog/atomspace/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd atomspace-master/
@@ -579,7 +579,7 @@ install_moses(){
 MESSAGE="Installing MOSES...." ; message
 cd /tmp/
 # cleaning up remnants from previous install failures, if any.
-rm -f master.tar.gz*
+rm -rf master.tar.gz*  moses-master
 wget https://github.com/opencog/moses/archive/master.tar.gz
 tar -xvf master.tar.gz
 cd moses-master/
