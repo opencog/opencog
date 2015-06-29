@@ -1,9 +1,7 @@
 uint16 blockid
 uint16 meta
-int16 blocklight
-int16 skylight
+uint8 blocklight
+uint8 skylight
 int32 x
 int32 y
 int32 z
-uint64 timestamp
-string scene=MCWorld
