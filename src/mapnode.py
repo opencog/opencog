@@ -224,13 +224,13 @@ def unwrapChunk(data, column):
          
 def sendBlockData(data, column, x, y, z):
     
-    chunk_x = data.chunk_x
-    chunk_z = data.chunk_z
+    base_x = data.chunk_x*16
+    base_z = data.chunk_z*16
     
     msg = map_block_msg()
-    msg.x = x + chunk_x
+    msg.x = x + base_x
     msg.y = y
-    msg.z = z + chunk_z
+    msg.z = z + base_z
 
     block_id, block_meta, light, sky = column.get_block(msg.x, msg.y, msg.z)
     if (msg.x,msg.y,msg.z) == (-39,13,-45):
@@ -297,11 +297,6 @@ def handleBlockData(data):
     msg.x = data.x
     msg.y = data.y
     msg.z = data.z
-    if (msg.x,msg.y,msg.z) == (-39,13,-45):
-        print "in single block change:it's gold right? %s"%(data.block_id)
-    if block_id==14:
-        print 'in single block change: it is gold, pos %s %s %s'%(msg.x,msg.y,msg.z)
-
     # need to change this. find a way to get light, sky, and meta
     # data from the original block change message (if possible)
     # otherwise, will have to look at light information from previous
@@ -312,6 +307,8 @@ def handleBlockData(data):
     msg.blockid = data.blockid 
     rostime = rospy.get_rostime()
     msg.timestamp = rostime.secs*(10e9)+rostime.nsecs
+    print 'in single block change, %s type in %s %s %s'%(str(msg.blockid),str(msg.x),str(msg.y),str(msg.z))
+
     # in other words, if not air...
     if msg.blockid != 0:
         blockpub.publish(msg)
