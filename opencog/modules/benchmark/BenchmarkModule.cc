@@ -78,7 +78,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
 
     OMP_ALGO::for_each(indices.begin(), indices.end(), [this](int index)
     {
-        addPrefixedNode(*as, CONCEPT_NODE, "test_atom_");
+        add_prefixed_node(*as, CONCEPT_NODE, "test_atom_");
     });
 
     // Retrieve all the ConceptNodes into an iterator
