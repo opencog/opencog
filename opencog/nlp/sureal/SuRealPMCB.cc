@@ -100,7 +100,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
     HandleSeq qTargetConns = m_as->getOutgoing(m_eval->eval_h(scmCode));
 
-    HandleSeq qOr = getNeighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+    HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
 
     auto insertHelper = [&](const Handle& h)
@@ -206,7 +206,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // helper lambda function to check for linkage to an InterpretationNode, given SetLink
     auto hasInterpretation = [this](Handle& h)
     {
-        HandleSeq qN = getNeighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
         return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
     };
 
@@ -239,7 +239,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = getNeighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN  = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -348,7 +348,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         auto hasNode = [this](Handle& hl)
         {
-            HandleSeq qN = getNeighbors(hl, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_neighbors(hl, true, false, REFERENCE_LINK, false);
             return std::any_of(qN.begin(), qN.end(),
                 [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };

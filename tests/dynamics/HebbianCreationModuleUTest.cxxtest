@@ -146,11 +146,11 @@ public:
         // them: "Kermit", "Frog", "Animal", "alive"
         for (Handle node : attentionalFocus) {
             HandleSeq existingAsSource =
-                    getNeighbors(node, false, true,
-                                     ASYMMETRIC_HEBBIAN_LINK, false);
+                    get_neighbors(node, false, true,
+                                  ASYMMETRIC_HEBBIAN_LINK, false);
             HandleSeq existingAsTarget =
-                    getNeighbors(node, true, false,
-                                     ASYMMETRIC_HEBBIAN_LINK, false);
+                    get_neighbors(node, true, false,
+                                  ASYMMETRIC_HEBBIAN_LINK, false);
             TS_ASSERT(existingAsSource.size() == 3);
             TS_ASSERT(existingAsTarget.size() == 3);
         }

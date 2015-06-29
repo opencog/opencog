@@ -143,7 +143,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
 
         // if no LG dictionary entry
-        if (getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+        if (get_neighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
             continue;
 
         sVars.insert(n);
@@ -262,8 +262,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     auto itprComp = [&pAS](const Handle& hi, const Handle& hj)
     {
         // get the corresponding SetLink
-        HandleSeq qi = getNeighbors(hi, false, true, REFERENCE_LINK, false);
-        HandleSeq qj = getNeighbors(hj, false, true, REFERENCE_LINK, false);
+        HandleSeq qi = get_neighbors(hi, false, true, REFERENCE_LINK, false);
+        HandleSeq qj = get_neighbors(hj, false, true, REFERENCE_LINK, false);
         qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
         qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
 

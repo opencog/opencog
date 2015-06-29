@@ -486,7 +486,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     HandleSeq tempGrid(hGrid);
 
     // get all links from key node
-    HandleSeq neighbours = getNeighbors(keyHandle,true,true,HEBBIAN_LINK);
+    HandleSeq neighbours = get_neighbors(keyHandle,true,true,HEBBIAN_LINK);
     
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
