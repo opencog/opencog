@@ -138,7 +138,7 @@ class SendEntityDataPlugin:
         entity.type = 3
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
     def handle_spawn_player(self, event, packet):
@@ -157,7 +157,7 @@ class SendEntityDataPlugin:
         entity.type = 3
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
         
     def handle_spawn_object(self, event, packet):
@@ -175,7 +175,7 @@ class SendEntityDataPlugin:
         entity.type = 1
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
     def handle_spawn_mob(self, event, packet):
@@ -193,7 +193,7 @@ class SendEntityDataPlugin:
         entity.type = 0
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
     def handle_spawn_painting(self, event, packet):
@@ -208,7 +208,7 @@ class SendEntityDataPlugin:
         entity.type = 2
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
     def handle_spawn_experience_orb(self, event, packet):
@@ -238,7 +238,7 @@ class SendEntityDataPlugin:
         entity.type = 5
 
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
     def handle_relative_move(self, event, packet):
@@ -254,7 +254,7 @@ class SendEntityDataPlugin:
         entity.z = packet.data['dz']
         
         print(entity)
-        self.event.emit('ros_entity_data', entity)
+        self.event.emit('ros_entity_data', entity.__dict__)
 
 
 

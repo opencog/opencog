@@ -11,8 +11,15 @@ currently the ROS message is passed along unmodified. this may need to change la
 
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
+import rosutils
 from minecraft_bot.msg import movement_msg, place_block_msg, mine_block_msg
 from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, block_data_msg
+
+from minecraft_bot.msg import entity_msg, entity_exp_meta, entity_global_meta, entity_mob_meta
+from minecraft_bot.msg import entity_movement_meta, entity_object_meta, entity_painting_meta, entity_player_meta 
+
+
+
 
 
 from spock.mcp import mcdata
@@ -40,17 +47,19 @@ class SpockControlPlugin:
         # simply load all of the plugins
         #ploader.requires('NewMovement')
         #ploader.requires('MineAndPlace')
-        ploader.requires('SendMapData')
+        #ploader.requires('SendMapData')
+        ploader.requires('SendEntityData')
 
         #ploader.reg_event_handler('ros_time_update', self.sendTimeUpdate)
         #ploader.reg_event_handler('ros_new_dimension', self.sendNewDimension)
         #ploader.reg_event_handler('ros_chunk_data', self.sendChunkData)
-        ploader.reg_event_handler('ros_chunk_bulk', self.sendChunkBulk)
+        #ploader.reg_event_handler('ros_chunk_bulk', self.sendChunkBulk)
         #ploader.reg_event_handler('ros_block_update', self.sendBlockUpdate)
         #ploader.reg_event_handler('ros_world_reset', self.sendWorldReset)
-
-        self.scc = SpockControlCore()
-        ploader.provides('SpockControl', self.scc)
+        ploader.reg_event_handler('ros_entity_data', self.sendEntityData)
+        
+        self.core = SpockControlCore()
+        ploader.provides('SpockControl', self.core)
         
         self.initSpockControlNode()
 
@@ -67,10 +76,11 @@ class SpockControlPlugin:
 
         #self.pub_time =      rospy.Publisher('time_data', time_msg, queue_size = 1)
         #self.pub_dim =       rospy.Publisher('dimension_data', dim_msg, queue_size = 1)
-        self.pub_chunk =     rospy.Publisher('chunk_data', chunk_data_msg, queue_size = 1000)
-        self.pub_block =     rospy.Publisher('block_data', block_data_msg, queue_size = 1000)
-        self.pub_bulk =      rospy.Publisher('chunk_bulk', chunk_bulk_msg, queue_size = 1000)
-        #pub_wstate =    rospy.Publisher('world_state', world_state_msg, queue_size = 1)
+        #self.pub_chunk =     rospy.Publisher('chunk_data', chunk_data_msg, queue_size = 1000)
+        #self.pub_block =     rospy.Publisher('block_data', block_data_msg, queue_size = 1000)
+        #self.pub_bulk =      rospy.Publisher('chunk_bulk', chunk_bulk_msg, queue_size = 1000)
+        #self.pub_wstate =    rospy.Publisher('world_state', world_state_msg, queue_size = 1)
+        self.pub_entity =       rospy.Publisher('entity_data', entity_msg, queue_size = 100)
 
     ### ROS Subscriber callbacks simply pass data along to the Spock event handlers
     def moveTo(self, data):
@@ -107,6 +117,8 @@ class SpockControlPlugin:
     
     """
 
+    # Need to move message population to the plugin. Too messy to leave it here...
+    # Maybe a function to turn dict into msg
     def sendChunkData(self, name, data):
         
         msg = chunk_data_msg()
@@ -154,8 +166,17 @@ class SpockControlPlugin:
         self.pub_block.publish(msg)
     
     
-    """
-    def sendWorldReset(self, name, data):
+    
+    #def sendWorldReset(self, name, data):
+    #    
+    #    pub_wstate.publish(data)
+
+
+    def sendEntityData(self, name, data):
         
-        pub_wstate.publish(data)
-    """
+        msg = entity_msg()
+        rosutils.setMessage(msg, data)
+
+        print(msg)
+        self.pub_entity.publish(msg)
+
