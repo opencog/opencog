@@ -13,8 +13,8 @@ from spock.plugins import DefaultPlugins
 #from spockextras.plugins.MineAndPlace import MineAndPlacePlugin
 #from spockextras.plugins.NewMovement import NewMovementPlugin
 #from spockextras.plugins.NewPhysics import NewPhysicsPlugin
-from spockextras.plugins.SpockControl import SpockControlPlugin
-from spockextras.plugins.SendMapData import SendMapDataPlugin
+from spockextras.plugins.helpers.SpockControl import SpockControlPlugin
+from spockextras.plugins.helpers.SendMapData import SendMapDataPlugin
 
 # connect to localhost server
 settings = {'start': {'username': 'Bot',},'auth': {'authenticated': False,},}

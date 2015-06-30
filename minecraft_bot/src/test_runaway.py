@@ -11,7 +11,7 @@ from spock.plugins.helpers.entities import EntityPlugin
 from spock.plugins.helpers.clientinfo import ClientInfoPlugin
 
 # my plugin. I interpret the capitalized name to mean a non-standard plugin
-from spockextras.plugins.Runaway import RunAwayPlugin
+from spockextras.plugins.helpers.Runaway import RunAwayPlugin
 
 # connect to localhost server
 settings = {'start': {'username': 'Bot',},'auth': {'authenticated': False,},}
