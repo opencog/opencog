@@ -46,7 +46,7 @@ class SuRealPMCB :
     public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars);
+    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, size_t thoroughness);
     ~SuRealPMCB();
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
@@ -70,6 +70,8 @@ private:
     std::set<Handle> m_vars;   // store nodes that are variables
 
     SchemeEval* m_eval;
+
+    size_t m_thoroughness;   // max no. of results being returned
 
     struct CandHandle
     {

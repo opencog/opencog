@@ -97,7 +97,7 @@ void SuRealSCM::init()
  * @return    a list of the form returned by sureal_get_mapping, but spanning
  *            multiple InterpretationNode
  */
-HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
+HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, int thoroughness)
 {
 #ifdef HAVE_GUILE
     // only accept SetLink
@@ -167,7 +167,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars);
+        SuRealPMCB pmcb(pAS, qVars, thoroughness);
         PatternLinkPtr slp(createPatternLink(qVars, qClause));
         slp->satisfy(pmcb);
 

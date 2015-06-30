@@ -30,13 +30,22 @@
 )
 
 ; ---------------------------------------------------------------------
+; A wrapper, call SuReal with or without the optional parameter "thoroughness",
+; which is the number of results will be returned by SuRealPMCB
+(define sureal 
+	(case-lambda
+		((setlink) (sureal-main setlink 20))
+		((setlink thoroughness) (sureal-main setlink thoroughness))
+	)
+)
+
 ; A SetLink is the input because it is assumed that the output of the micro-planner
 ; is unordered.
-(define (sureal a-set-link)
+(define (sureal-main a-set-link thoroughness)
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-            (delete-duplicates (create-sentence a-set-link))
+            (delete-duplicates (create-sentence a-set-link thoroughness))
             (get-sentence interpretations)
             )
         )
@@ -46,7 +55,7 @@
 
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link)
+(define (create-sentence a-set-link thoroughness)
     (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
@@ -113,7 +122,7 @@
         )
     )
 
-    (let* ((results (sureal-match a-set-link))
+    (let* ((results (sureal-match a-set-link thoroughness))
            (interps (delete-duplicates (map car results))))
         (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
     )

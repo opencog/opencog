@@ -28,8 +28,6 @@
 
 #include "SuRealPMCB.h"
 
-#define MAX_RESULTS 20
-
 
 using namespace opencog::nlp;
 using namespace opencog;
@@ -41,12 +39,13 @@ using namespace opencog;
  * @param pAS    the corresponding AtomSpace
  * @param vars   the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thoroughness) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars),
-    m_eval(SchemeEval::get_evaluator(pAS))
+    m_eval(SchemeEval::get_evaluator(pAS)),
+    m_thoroughness(thoroughness)
 {
 
 }
@@ -388,7 +387,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
 
-        if (m_results.size() == MAX_RESULTS) break;
+        if (m_results.size() == m_thoroughness) return true;
     }
     return false;
 }
