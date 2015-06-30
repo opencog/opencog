@@ -28,6 +28,8 @@
 
 #include "SuRealPMCB.h"
 
+#define MAX_RESULTS 20
+
 
 using namespace opencog::nlp;
 using namespace opencog;
@@ -335,38 +337,58 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
     logger().debug("[SuReal] Start pred is: %s",
                    bestClause->toShortString().c_str());
 
-    // helper for checking for InterpretationNode
-    auto hasNoInterpretation = [this](Handle& h)
-    {
-        HandleSeq qISet = m_as->getIncoming(h);
-        qISet.erase(
-            std::remove_if(
-                qISet.begin(),
-                qISet.end(),
-                [](Handle& hl) { return hl->getType() != SET_LINK; }),
-            qISet.end());
-
-        auto hasNode = [this](Handle& hl)
-        {
-            HandleSeq qN = get_neighbors(hl, true, false, REFERENCE_LINK, false);
-            return std::any_of(qN.begin(), qN.end(),
-                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
-        };
-
-        return not std::any_of(qISet.begin(), qISet.end(), hasNode);
-    };
-
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
     m_as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
-    qCandidate.erase(std::remove_if(qCandidate.begin(), qCandidate.end(), hasNoInterpretation), qCandidate.end());
+
+    // selected candidates, a subset of qCandidate
+    std::vector<CandHandle> sCandidate;
 
     for (auto& c : qCandidate)
     {
-        logger().debug("[SuReal] Loop candidate: %s", c->toShortString().c_str());
+        auto rm = [](Handle& h)
+        {
+            if (h->getType() != SET_LINK) return true;
 
-        if (pPME->explore_neighborhood(bestClause, bestClause, c))
+            HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
+            return not std::any_of(qN.begin(), qN.end(),
+                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+        };
+
+        HandleSeq qISet = m_as->getIncoming(c);
+
+        // Erase atoms that are neither R2L-Setlink nor SetLink
+        qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
+
+        if (qISet.size() >= 1)
+        {
+            size_t maxSize = 0;
+            for (Handle& q : qISet)
+            {
+                size_t s = LinkCast(q)->getArity();
+                if (s > maxSize) maxSize = s;
+            }
+
+            CandHandle ch;
+            ch.handle = c;
+            ch.r2lSetLinkSize = maxSize;
+            sCandidate.push_back(ch);
+        }
+    }
+
+    auto sortBySize = [](const CandHandle& h1, const CandHandle& h2)
+    { return h1.r2lSetLinkSize < h2.r2lSetLinkSize; };
+
+    std::sort(sCandidate.begin(), sCandidate.end(), sortBySize);
+
+    for (auto& c : sCandidate)
+    {
+        logger().debug("[SuReal] Loop candidate: %s", c.handle->toShortString().c_str());
+
+        if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
+
+        if (m_results.size() == MAX_RESULTS) break;
     }
     return false;
 }

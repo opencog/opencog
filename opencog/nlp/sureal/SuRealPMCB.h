@@ -70,6 +70,12 @@ private:
     std::set<Handle> m_vars;   // store nodes that are variables
 
     SchemeEval* m_eval;
+
+    struct CandHandle
+    {
+        Handle handle;
+        size_t r2lSetLinkSize;
+    };
 };
 
 }
