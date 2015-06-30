@@ -37,7 +37,7 @@ HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 HandleToTemporalEntryMap::~HandleToTemporalEntryMap()
 {
     HandleMapIterator<TemporalEntry*>* keys = internalMap->keys();
-    while (keys->hasNext()) {
+    while (keys->has_next()) {
         delete (internalMap->get(keys->next()));
     }
     delete keys;
@@ -71,12 +71,12 @@ TemporalEntry* HandleToTemporalEntryMap::remove(Handle key)
 
 int HandleToTemporalEntryMap::getCount()
 {
-    return(internalMap->getCount());
+    return(internalMap->get_count());
 }
 
 int HandleToTemporalEntryMap::getSize()
 {
-    return internalMap->getSize();
+    return internalMap->get_size();
 }
 
 HandleMapIterator<TemporalEntry *> *HandleToTemporalEntryMap::keys()
@@ -88,7 +88,7 @@ HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 {
     HandleToTemporalEntryMap *ret = new HandleToTemporalEntryMap();
     HandleMapIterator<TemporalEntry *> *originalKeys = keys();
-    while (originalKeys->hasNext()) {
+    while (originalKeys->has_next()) {
         Handle nextKey = originalKeys->next();
         ret->add(nextKey, get(nextKey));
     }
@@ -99,7 +99,7 @@ HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 std::string HandleToTemporalEntryMap::toString()
 {
     std::string answer;
-    for (HandleMapIterator<TemporalEntry *> *it = keys(); it->hasNext();) {
+    for (HandleMapIterator<TemporalEntry *> *it = keys(); it->has_next();) {
         Handle key = it->next();
         TemporalEntry* value = get(key);
         /* append key */
@@ -108,7 +108,7 @@ std::string HandleToTemporalEntryMap::toString()
         answer += ":";
         /* append value */
         answer += value->toString();
-        if (it->hasNext()) {
+        if (it->has_next()) {
             answer += ",";
         }
     }

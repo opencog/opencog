@@ -53,7 +53,7 @@ TemporalTable::~TemporalTable()
 {
     //delete(tailHandleMap);
     HandleMapIterator<TemporalEntry *> *keys = tailHandleMap->keys();
-    while (keys->hasNext()) {
+    while (keys->has_next()) {
         Handle nextKey = keys->next();
         tailHandleMap->remove(nextKey);
     }
