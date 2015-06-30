@@ -64,7 +64,7 @@ class ConceptualBlending:
 
         self.chosen_atoms = None
         self.decided_atoms = None
-        self.new_blended_atom = None
+        self.new_blended_atoms = None
         self.ret = None
 
     def __str__(self):
@@ -100,16 +100,6 @@ class ConceptualBlending:
         )
 
     def finish_hook(self, new_blended_atom, config_base):
-        """
-        # DEBUG: Link with Blended Space.
-        blend_space = self.a.get_atoms_by_name(types.Atom, "BlendSpace")[0]
-
-        self.a.add_link(
-            types.MemberLink,
-            [new_blended_atom, blend_space],
-            rand_tv()
-        )
-        """
         pass
 
     """
@@ -171,21 +161,21 @@ class ConceptualBlending:
                 self.decider.blending_decide(self.chosen_atoms, config_base)
 
             # Initialize the new blend node.
-            self.new_blended_atom = \
+            self.new_blended_atoms = \
                 self.maker.new_blend_make(self.decided_atoms, config_base)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
             self.connector.link_connect(
-                self.decided_atoms, self.new_blended_atom, config_base
+                self.decided_atoms, self.new_blended_atoms, config_base
             )
 
             # Give interface to each blenders to finish works.
-            self.finish_hook(self.new_blended_atom, config_base)
+            self.finish_hook(self.new_blended_atoms, config_base)
 
-            # If all task finished successfully, save new atom to return.
-            self.ret = self.new_blended_atom
+            # If all task finished successfully, save new atoms to return.
+            self.ret = self.new_blended_atoms
 
         except UserWarning as e:
             blend_log("Skipping blend, caused by '" + str(e) + "'")

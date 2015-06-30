@@ -17,7 +17,8 @@ class BaseConnector(object):
         'IN_PROCESS',
         'UNKNOWN_ERROR',
         'PARAMETER_ERROR',
-        'NOT_ENOUGH_ATOMS'
+        'NOT_ENOUGH_ATOMS',
+        'TOO_MANY_ATOMS'
     )
 
     def __init__(self, a):
@@ -39,19 +40,19 @@ class BaseConnector(object):
         pass
 
     @abstractmethod
-    def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
+    def link_connect_impl(self, decided_atoms, new_blended_atoms, config_base):
         """
         :param decided_atoms: list
-        :param new_blended_atom: Atom
+        :param new_blended_atoms: list
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def link_connect(self, decided_atoms, new_blended_atom, config_base):
+    def link_connect(self, decided_atoms, new_blended_atoms, config_base):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.link_connect_impl(decided_atoms, new_blended_atom, config_base)
+            self.link_connect_impl(decided_atoms, new_blended_atoms, config_base)
         except UserWarning as e:
             blend_log("Skipping connect, caused by '" + str(e) + "'")
             blend_log(
