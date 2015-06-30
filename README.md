@@ -40,17 +40,13 @@ So you have to add these files in src/opencog/ as the following procedure:
 
 (2015-06-30)We are changing the TimeServer.* to make it enable to save multiple timedomain (ex.ROS time/Minecraft World time..) at the same time. That's not finished so don't put them into opencog/spacetime now.
 
-1.put the classserver.pxd in atomspace/opencog/cython/opencog. It's for updating the atom types after adding spacetime module.
+1.put the CMakeList,spacetime.pyx/pxd, spatial.pyx/pxd, in opencog/opencog/cython/opencog. These are the cython binding of Space/Time Server and SpaceMap.
 
-2.build the atomspace
+2.put the Octree.h and Octree.cc in opencog/opencog/spatial/3DSpaceMap. It's a small fix for a bug in Octree.
 
-3.put the CMakeList,spacetime.pyx/pxd, spatial.pyx/pxd, in opencog/opencog/cython/opencog. These are the cython binding of Space/Time Server and SpaceMap.
+3.put the atom_types.script in opencog/opencog/spacetime. We add AtLocationLink in this file.
 
-4.put the Octree.h and Octree.cc in opencog/opencog/spatial/3DSpaceMap. It's a small fix for a bug in Octree.
-
-5.put the atom_types.script in opencog/opencog/spacetime. We add AtLocationLink in this file.
-
-6.build the opencog
+4.build the opencog
 
 ##step to run##
 
