@@ -137,7 +137,7 @@ class SendEntityDataPlugin:
         entity.player = meta
         entity.type = 3
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
@@ -156,7 +156,7 @@ class SendEntityDataPlugin:
         entity.player = meta
         entity.type = 3
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
         
@@ -174,7 +174,7 @@ class SendEntityDataPlugin:
         entity.object = meta
         entity.type = 1
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
@@ -192,7 +192,7 @@ class SendEntityDataPlugin:
         entity.mob = meta
         entity.type = 0
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
@@ -207,7 +207,7 @@ class SendEntityDataPlugin:
         entity.painting = meta
         entity.type = 2
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
@@ -222,7 +222,7 @@ class SendEntityDataPlugin:
         entity.exp = meta
         entity.type = 4
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity)
 
 
@@ -237,7 +237,7 @@ class SendEntityDataPlugin:
         entity.globalentity = meta
         entity.type = 5
 
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
@@ -253,7 +253,7 @@ class SendEntityDataPlugin:
         entity.y = packet.data['dy']
         entity.z = packet.data['dz']
         
-        print(entity)
+        #print(entity)
         self.event.emit('ros_entity_data', entity.__dict__)
 
 
