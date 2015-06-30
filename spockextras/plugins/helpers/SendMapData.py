@@ -84,30 +84,34 @@ class SendMapDataPlugin:
             z = block['z'] + chunk_z
             y = block['y']
             self.event.emit('ros_block_update', {
-                'location': {
-                    'x': x,
-                    'y': y,
-                    'z': z,
-                    },
-                'block_data': block['block_data'],
+                'x': x,
+                'y': y,
+                'z': z,
+                'blockid': block['block_data']>>4,
+                'blockdata': block['block_data'] & 0b00001111
                 })
 
 	
     #Block Change - Update a single block
     def handleBlockChange(self, name, packet):
         
-        #print "block change"
-        #print packet
-        self.event.emit('ros_block_update', packet.data)
+        data = packet.data
+        print packet.data['block_data']
+        self.event.emit('ros_block_update', {
+            'x': data['location']['x'],
+            'y': data['location']['y'],
+            'z': data['location']['z'],
+            'blockid': data['block_data']>>4,
+            'blockdata': data['block_data'] & 0b00001111
+            })
 
 
     #Map Chunk Bulk - Update World state
     def handleChunkBulk(self, name, packet):
         
-        #print "bulk chunk data"
-        #print packet
         self.event.emit('ros_chunk_bulk', packet.data)
     
     
     def handleDisconnect(self, name, data):
+        
         self.event.emit('ros_world_reset')

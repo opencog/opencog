@@ -47,14 +47,14 @@ class SpockControlPlugin:
         # simply load all of the plugins
         #ploader.requires('NewMovement')
         #ploader.requires('MineAndPlace')
-        #ploader.requires('SendMapData')
+        ploader.requires('SendMapData')
         ploader.requires('SendEntityData')
 
         #ploader.reg_event_handler('ros_time_update', self.sendTimeUpdate)
         #ploader.reg_event_handler('ros_new_dimension', self.sendNewDimension)
-        #ploader.reg_event_handler('ros_chunk_data', self.sendChunkData)
-        #ploader.reg_event_handler('ros_chunk_bulk', self.sendChunkBulk)
-        #ploader.reg_event_handler('ros_block_update', self.sendBlockUpdate)
+        ploader.reg_event_handler('ros_chunk_data', self.sendChunkData)
+        ploader.reg_event_handler('ros_chunk_bulk', self.sendChunkBulk)
+        ploader.reg_event_handler('ros_block_update', self.sendBlockUpdate)
         #ploader.reg_event_handler('ros_world_reset', self.sendWorldReset)
         ploader.reg_event_handler('ros_entity_data', self.sendEntityData)
         
@@ -76,11 +76,11 @@ class SpockControlPlugin:
 
         #self.pub_time =      rospy.Publisher('time_data', time_msg, queue_size = 1)
         #self.pub_dim =       rospy.Publisher('dimension_data', dim_msg, queue_size = 1)
-        #self.pub_chunk =     rospy.Publisher('chunk_data', chunk_data_msg, queue_size = 1000)
-        #self.pub_block =     rospy.Publisher('block_data', block_data_msg, queue_size = 1000)
-        #self.pub_bulk =      rospy.Publisher('chunk_bulk', chunk_bulk_msg, queue_size = 1000)
+        self.pub_chunk =    rospy.Publisher('chunk_data', chunk_data_msg, queue_size = 1000)
+        self.pub_block =    rospy.Publisher('block_data', block_data_msg, queue_size = 1000)
+        self.pub_bulk =     rospy.Publisher('chunk_bulk', chunk_bulk_msg, queue_size = 1000)
         #self.pub_wstate =    rospy.Publisher('world_state', world_state_msg, queue_size = 1)
-        self.pub_entity =       rospy.Publisher('entity_data', entity_msg, queue_size = 100)
+        self.pub_entity =   rospy.Publisher('entity_data', entity_msg, queue_size = 100)
 
     ### ROS Subscriber callbacks simply pass data along to the Spock event handlers
     def moveTo(self, data):
@@ -103,32 +103,27 @@ class SpockControlPlugin:
 
     
     ### Perception handlers. Invoke ROS Publishers
-    """
-    def sendTimeUpdate(self, name, data):
-        
-        msg = time_msg()
-
-        pub_time.publish(data)
+    
+    #def sendTimeUpdate(self, name, data):
+    #    
+    #    msg = time_msg()
+    #
+    #    pub_time.publish(data)
     
     
-    def sendNewDimension(self, data):
-        
-        pub_dim.publish(data)
+    #def sendNewDimension(self, data):
+    #    
+    #    pub_dim.publish(data)
     
-    """
 
     # Need to move message population to the plugin. Too messy to leave it here...
     # Maybe a function to turn dict into msg
     def sendChunkData(self, name, data):
         
         msg = chunk_data_msg()
-        msg.chunk_x = data['chunk_x']
-        msg.chunk_z = data['chunk_z']
-        msg.continuous = data['continuous']
-        msg.primary_bitmap = data['primary_bitmap']
-        msg.data = data['data']
-        #print "sent chunk data message"
-        #print msg
+        rosutils.setMessage(msg, data)
+        
+        rospy.loginfo("published chunk message: loc: %d, %d", msg.chunk_x, msg.chunk_z)
         self.pub_chunk.publish(msg)
     
     
@@ -136,33 +131,24 @@ class SpockControlPlugin:
         
         msg = chunk_bulk_msg()
         
-        meta = []
-        for i in range(len(data['metadata'])):
-            meta.append(chunk_meta_msg())
-            meta[i].chunk_x = data['metadata'][i]['chunk_x']
-            meta[i].chunk_z = data['metadata'][i]['chunk_z']
-            # bulk chunk packet doesn't have continuous field?
-	    #meta[i].continuous = data['metadata'][i]['continuous']
-            meta[i].primary_bitmap = data['metadata'][i]['primary_bitmap']
-
-        msg.sky_light = data['sky_light']
-	msg.metadata = meta
-        msg.data = data['data']
-
-        #print "sent chunk bulk message"
-        #print msg
+        #meta = []
+        #for i in range(len(data['metadata'])):
+        #    meta.append(chunk_meta_msg())
+        #    rosutils.setMessage(meta[i], data['metadata'][i])
+        
+        rosutils.setMessage(msg, data)
+        
+        rospy.loginfo("published chunk bulk message, sky: %s", msg.sky_light)
         self.pub_bulk.publish(msg)
     
     
     def sendBlockUpdate(self, name, data):
         
         msg = block_data_msg()
-        msg.blockid = data['block_data']
-        msg.x = data['location']['x']
-        msg.y = data['location']['y']
-        msg.z = data['location']['z']
-        #print "sent block data message"
-        #print msg
+        rosutils.setMessage(msg, data)
+        
+        rospy.loginfo("published block update: id: %d, data, %d loc: %d, %d, %d", 
+                msg.blockid, msg.blockdata, msg.x, msg.y, msg.z)
         self.pub_block.publish(msg)
     
     
@@ -174,9 +160,11 @@ class SpockControlPlugin:
 
     def sendEntityData(self, name, data):
         
+        print(data)
         msg = entity_msg()
         rosutils.setMessage(msg, data)
 
-        print(msg)
+        rospy.loginfo("published entity message: type: %d, uid: %d, loc: %d, %d, %d",
+                msg.type, msg.eid, msg.x, msg.y, msg.z)
         self.pub_entity.publish(msg)
 
