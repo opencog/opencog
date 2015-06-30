@@ -38,14 +38,11 @@ class MakeSimple(BaseMaker):
         new_blend_atom_name = new_blend_atom_name[0:-1]
         new_blend_atom_name += atom_postfix
 
-        self.new_blend_atom = self.a.add_node(
+        self.ret = self.a.add_node(
             types.ConceptNode,
             new_blend_atom_name,
             get_weighted_tv(decided_atoms)
         )
-
-        # Return 'List' which has one element, not 'Atom'.
-        self.ret = [self.new_blend_atom]
 
         # TODO: Give proper attention value.
         # new_blend_atom_name.av = {}

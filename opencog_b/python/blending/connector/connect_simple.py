@@ -62,7 +62,7 @@ class ConnectSimple(BaseConnector):
                     self.a, link, dst_node, link.tv
                 )
 
-    def __connect_links_simple(self, decided_atoms, new_blended_atoms):
+    def __connect_links_simple(self, decided_atoms, new_blended_atom):
         """
         Implementation of simple link connector.
 
@@ -73,23 +73,8 @@ class ConnectSimple(BaseConnector):
 
         :param list(types.Atom) decided_atoms: List of atoms to search
         links to be connected to new blended atom.
-        :param types.Atom new_blended_atoms: New blended atom.
+        :param types.Atom new_blended_atom: New blended atom.
         """
-        # In ConnectSimple, number of result atoms is only one.
-        if len(new_blended_atoms) < 1:
-            self.last_status = self.Status.NOT_ENOUGH_ATOMS
-            raise UserWarning(
-                'New target atoms to copy links was not provided.'
-            )
-        elif len(new_blended_atoms) > 1:
-            self.last_status = self.Status.TOO_MANY_ATOMS
-            raise UserWarning(
-                'Too many new target atoms. ' +
-                'ConnectSimple can handle one atom in each execute.'
-            )
-
-        new_blended_atom = new_blended_atoms[0]
-
         duplicate_links, non_duplicate_links = \
             find_duplicate_links(self.a, decided_atoms)
 
@@ -111,5 +96,7 @@ class ConnectSimple(BaseConnector):
                 weighted_tv
             )
 
-    def link_connect_impl(self, decided_atoms, new_blended_atoms, config_base):
-        self.__connect_links_simple(decided_atoms, new_blended_atoms)
+        self.ret.append(new_blended_atom)
+
+    def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
+        self.__connect_links_simple(decided_atoms, new_blended_atom)

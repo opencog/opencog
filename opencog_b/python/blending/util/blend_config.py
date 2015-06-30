@@ -33,7 +33,8 @@ class BlendConfig(Singleton):
 
         "connect-check-type",
         "connect-strength-diff-limit",
-        "connect-confidence-above-limit"
+        "connect-confidence-above-limit",
+        "connect-viable-atoms-count-limit"
     }
 
     # TODO: Private setting handling

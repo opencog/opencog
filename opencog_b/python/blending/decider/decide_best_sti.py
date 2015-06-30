@@ -16,7 +16,7 @@ class DecideBestSTI(BaseDecider):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlendConfig().update(self.a, "decide-sti-min", "32")
+        BlendConfig().update(self.a, "decide-sti-min", "1")
         BlendConfig().update(self.a, "decide-sti-max", "NONE")
 
     def __decide_atoms_best_sti(

@@ -70,6 +70,7 @@ Config name           | Description
 --------------------- | -----------
 ConnectSimple         | Make new links from whole links in target atoms to the new blend atom.
 ConnectConflictRandom | Make new links from whole non-conflict links, and randomly choose one link in each conflict links set.
+ConnectConflictAllViable | Make 2^k available(viable) new blend atoms if there exists k conflicts.     
 
 ##### Example
 
@@ -95,51 +96,58 @@ ListLink
 * (Empty)
 
 #### ChooseAll
-Config name        | Example
------------------- | -------
-choose-atom-type   | Node
-choose-least-count | 2
+Config name              | Example
+------------------------ | -------
+BLEND:choose-atom-type   | Node
+BLEND:choose-least-count | 2
 
 #### ChooseInSTIRange
-Config name        | Example 
------------------- | -------  
-choose-atom-type   | Node
-choose-least-count | 2
-choose-sti-min     | 1
-choose-sti-max     | 32 (or None)
+Config name              | Example 
+------------------------ | -------  
+BLEND:choose-atom-type   | Node
+BLEND:choose-least-count | 2
+BLEND:choose-sti-min     | 1
+BLEND:choose-sti-max     | 32 (or None)
 
 #### DecideNull
 * (empty)
 
 #### DecideRandom
-Config name                 | Example
---------------------------- | -------
-decide-result-atoms-count   | 2
+Config name                       | Example
+--------------------------------- | -------
+BLEND:decide-result-atoms-count   | 2
 
 #### DecideBestSTI
-Config name                 | Example
---------------------------- | -------
-decide-result-atoms-count   | 2
-decide-sti-min              | 1
-decide-sti-max              | 32 (or None)
+Config name                       | Example
+--------------------------------- | -------
+BLEND:decide-result-atoms-count   | 2
+BLEND:decide-sti-min              | 1
+BLEND:decide-sti-max              | 32 (or None)
 
 #### MakeSimple
-Config name        | Example 
------------------- | -------  
-make-atom-prefix   | (
-make-atom-separator| -
-make-atom-postfix  | )
+Config name              | Example 
+------------------------ | -------  
+BLEND:make-atom-prefix   | (
+BLEND:make-atom-separator| -
+BLEND:make-atom-postfix  | )
 
 #### ConnectSimple
 * (empty)
 
 #### ConnectConflictRandom
-Config name                    | Example 
------------------------------- | -------  
-connect-check-type             | SimilarityLink
-connect-strength-diff-limit    | 0.3
-connect-confidence-above-limit | 0.7
+Config name                          | Example 
+------------------------------------ | -------  
+BLEND:connect-check-type             | SimilarityLink
+BLEND:connect-strength-diff-limit    | 0.3
+BLEND:connect-confidence-above-limit | 0.7
 
+#### ConnectConflictAllViable
+Config name                            | Example 
+-------------------------------------- | -------  
+BLEND:connect-check-type               | SimilarityLink
+BLEND:connect-strength-diff-limit      | 0.3
+BLEND:connect-confidence-above-limit   | 0.7
+BLEND:connect-viable-atoms-count-limit | 100
 
 ##### Example
 

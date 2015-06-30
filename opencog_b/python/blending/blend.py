@@ -64,6 +64,7 @@ class ConceptualBlending:
 
         self.chosen_atoms = None
         self.decided_atoms = None
+        self.new_blended_atom = None
         self.new_blended_atoms = None
         self.ret = None
 
@@ -112,7 +113,7 @@ class ConceptualBlending:
     (Option) Finish rest of blending.
     """
     def run(self, focus_atoms=None, config_base=None):
-        """Execute conceptual blending.
+        """Execute conceptual blending.new_blended_atoms
 
         TODO: Write detailed description.
 
@@ -161,14 +162,14 @@ class ConceptualBlending:
                 self.decider.blending_decide(self.chosen_atoms, config_base)
 
             # Initialize the new blend node.
-            self.new_blended_atoms = \
+            self.new_blended_atom = \
                 self.maker.new_blend_make(self.decided_atoms, config_base)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
-            self.connector.link_connect(
-                self.decided_atoms, self.new_blended_atoms, config_base
+            self.new_blended_atoms = self.connector.link_connect(
+                self.decided_atoms, self.new_blended_atom, config_base
             )
 
             # Give interface to each blenders to finish works.

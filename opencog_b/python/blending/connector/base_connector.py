@@ -25,7 +25,7 @@ class BaseConnector(object):
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
         self.make_default_config()
-        self.ret = None
+        self.ret = []
 
     def __str__(self):
         return self.__class__.__name__
@@ -40,19 +40,19 @@ class BaseConnector(object):
         pass
 
     @abstractmethod
-    def link_connect_impl(self, decided_atoms, new_blended_atoms, config_base):
+    def link_connect_impl(self, decided_atoms, new_blended_atom, config_base):
         """
         :param decided_atoms: list
-        :param new_blended_atoms: list
+        :param new_blended_atom: Atom
         :return: list
         """
         raise NotImplementedError("Please implement this method.")
 
-    def link_connect(self, decided_atoms, new_blended_atoms, config_base):
+    def link_connect(self, decided_atoms, new_blended_atom, config_base):
         self.last_status = self.Status.IN_PROCESS
 
         try:
-            self.link_connect_impl(decided_atoms, new_blended_atoms, config_base)
+            self.link_connect_impl(decided_atoms, new_blended_atom, config_base)
         except UserWarning as e:
             blend_log("Skipping connect, caused by '" + str(e) + "'")
             blend_log(
