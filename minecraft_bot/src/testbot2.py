@@ -9,10 +9,10 @@ from spock.plugins import DefaultPlugins
 from spock.plugins.helpers.entities import EntityPlugin
 
 # load custom plugins. I use capitalized names to indicate non-standard plugins
-from spockextras.plugins.MineAndPlace import MineAndPlacePlugin
-from spockextras.plugins.NewMovement import NewMovementPlugin
-from spockextras.plugins.NewPhysics import NewPhysicsPlugin
-from spockextras.plugins.SpockControl import SpockControlPlugin
+from spockextras.plugins.helpers.MineAndPlace import MineAndPlacePlugin
+from spockextras.plugins.helpers.NewMovement import NewMovementPlugin
+from spockextras.plugins.helpers.NewPhysics import NewPhysicsPlugin
+from spockextras.plugins.helpers.SpockControl import SpockControlPlugin
 
 
 # connect to localhost server
