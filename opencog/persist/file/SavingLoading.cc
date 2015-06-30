@@ -299,7 +299,7 @@ void SavingLoading::load(const char *fileName,
     loadLinks(f, handles, atomTable, dumpToCore);
 
     HandleMapIterator<AtomPtr> *it = handles->keys();
-    while (it->hasNext()) {
+    while (it->has_next()) {
         AtomPtr element(handles->get(it->next()));
         updateHandles(element, handles);
     }

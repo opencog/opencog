@@ -118,7 +118,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = getAllUniqueNodes(h);
+    UnorderedHandleSet allNodes = get_all_unique_nodes(h);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher
