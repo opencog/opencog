@@ -108,6 +108,6 @@ void Sweep::delete_edges(std::set<Handle> &edges)
 	for (it=edges.begin(); it != edges.end(); ++it)
 	{
 		Handle edge_h = *it;
-		atom_space->removeAtom(edge_h, false);
+		atom_space->remove_atom(edge_h, false);
 	}
 }

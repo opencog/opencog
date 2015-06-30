@@ -204,42 +204,42 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         Handle h1 = *ps1.getSet().begin();
         Handle h2 = *ps2.getSet().begin();
 
-        OC_ASSERT(atomSpace->getType(h1) == EVALUATION_LINK && atomSpace->getArity(h1) == 2,
+        OC_ASSERT(atomSpace->get_type(h1) == EVALUATION_LINK && atomSpace->get_arity(h1) == 2,
                          "Handle h1 should be an 'EVALUATION_LINK' and have arity 2.");
-        OC_ASSERT(atomSpace->getType(h2) == EVALUATION_LINK && atomSpace->getArity(h2) == 2,
+        OC_ASSERT(atomSpace->get_type(h2) == EVALUATION_LINK && atomSpace->get_arity(h2) == 2,
                          "Handle h2 should be an 'EVALUATION_LINK' and have arity 2.");
 
-        Handle hargs1 = atomSpace->getOutgoing(h1, 1);
-        Handle hargs2 = atomSpace->getOutgoing(h2, 1);
+        Handle hargs1 = atomSpace->get_outgoing(h1, 1);
+        Handle hargs2 = atomSpace->get_outgoing(h2, 1);
 
-        OC_ASSERT(atomSpace->getType(hargs1) == LIST_LINK && atomSpace->getArity(hargs1) >= 2,
+        OC_ASSERT(atomSpace->get_type(hargs1) == LIST_LINK && atomSpace->get_arity(hargs1) >= 2,
                          "Handle hargs1 should be an 'LIST_LINK' and have arity 2.");
-        OC_ASSERT(atomSpace->getType(hargs2) == LIST_LINK && atomSpace->getArity(hargs2) >= 2,
+        OC_ASSERT(atomSpace->get_type(hargs2) == LIST_LINK && atomSpace->get_arity(hargs2) >= 2,
                          "Handle hargs2 should be an 'LIST_LINK' and have arity 2.");
 
-        Handle hact1 = atomSpace->getOutgoing(hargs1, 1);
-        Handle hact2 = atomSpace->getOutgoing(hargs2, 1);
+        Handle hact1 = atomSpace->get_outgoing(hargs1, 1);
+        Handle hact2 = atomSpace->get_outgoing(hargs2, 1);
 
         //print for debug
         //std::cout << "act1 : " << hact1->toString() << std::endl;
         //std::cout << "act2 : " << hact2->toString() << std::endl;
         //~print for debug
 
-        OC_ASSERT( atomSpace->isNode(hact1), "hact1 is not a 'Node'");
-        OC_ASSERT( atomSpace->isNode(hact2), "hact2 is not a 'Node'");
+        OC_ASSERT( atomSpace->is_node(hact1), "hact1 is not a 'Node'");
+        OC_ASSERT( atomSpace->is_node(hact2), "hact2 is not a 'Node'");
 
-        if (atomSpace->getName(hact1) == atomSpace->getName(hact2)) {
-            int a1 = atomSpace->getArity(hargs1);
-            int a2 = atomSpace->getArity(hargs2);
+        if (atomSpace->get_name(hact1) == atomSpace->get_name(hact2)) {
+            int a1 = atomSpace->get_arity(hargs1);
+            int a2 = atomSpace->get_arity(hargs2);
             if (a1 == a2) {
                 for (int i = 2; i < a1; ++i) {
                     //compare action parameters
-                    Handle arg_p_1 = atomSpace->getOutgoing(hargs1, i);
-                    Handle arg_p_2 = atomSpace->getOutgoing(hargs2, i);
+                    Handle arg_p_1 = atomSpace->get_outgoing(hargs1, i);
+                    Handle arg_p_2 = atomSpace->get_outgoing(hargs2, i);
                     //we only compare if there type is not NUMBER_NODE
-                    if (atomSpace->getType(arg_p_1) != NUMBER_NODE
-                            && atomSpace->getType(arg_p_2) != NUMBER_NODE
-                            && atomSpace->getName(arg_p_1) != atomSpace->getName(arg_p_2)) {
+                    if (atomSpace->get_type(arg_p_1) != NUMBER_NODE
+                            && atomSpace->get_type(arg_p_2) != NUMBER_NODE
+                            && atomSpace->get_name(arg_p_1) != atomSpace->get_name(arg_p_2)) {
                         return 0.0;
                     }
                 }

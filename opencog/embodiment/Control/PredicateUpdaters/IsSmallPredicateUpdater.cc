@@ -77,7 +77,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     }
 
     logger().fine("IsSmall - Updating is_small for obj %s.",
-                 atomSpace.getName(object).c_str());
+                 atomSpace.get_name(object).c_str());
 
     // truth value - mean equals 0.0 --> not smaller than pet
     //                 mean equals 1.0 --> is  smaller than pet
@@ -116,13 +116,13 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     if ( objectVolume/agentVolume < 0.9 ) {
         tv = SimpleTruthValue::createTV(1.0, 1.0);
 
-        std::string objectName = atomSpace.getName( object );
-        std::string agentName = atomSpace.getName( pet );
+        std::string objectName = atomSpace.get_name( object );
+        std::string agentName = atomSpace.get_name( pet );
 
         std::map<std::string, Handle> agentSizeElements;
-        agentSizeElements["Dimension"] = atomSpace.addNode( CONCEPT_NODE, "Volume" );
-        agentSizeElements["Object"] = atomSpace.addNode( SEME_NODE, agentName );
-        agentSizeElements["Measurement"] = atomSpace.addNode( NUMBER_NODE, 
+        agentSizeElements["Dimension"] = atomSpace.add_node( CONCEPT_NODE, "Volume" );
+        agentSizeElements["Object"] = atomSpace.add_node( SEME_NODE, agentName );
+        agentSizeElements["Measurement"] = atomSpace.add_node( NUMBER_NODE, 
            boost::lexical_cast<std::string>( agentVolume ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Dimension",
@@ -130,9 +130,9 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
 
         std::map<std::string, Handle> objectSizeElements;
-        objectSizeElements["Dimension"] = atomSpace.addNode( CONCEPT_NODE, "Volume" );
-        objectSizeElements["Object"] = atomSpace.addNode( SEME_NODE, objectName );
-        objectSizeElements["Measurement"] = atomSpace.addNode( NUMBER_NODE, 
+        objectSizeElements["Dimension"] = atomSpace.add_node( CONCEPT_NODE, "Volume" );
+        objectSizeElements["Object"] = atomSpace.add_node( SEME_NODE, objectName );
+        objectSizeElements["Measurement"] = atomSpace.add_node( NUMBER_NODE, 
            boost::lexical_cast<std::string>( objectVolume ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Dimension",
@@ -145,7 +145,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
         comparisonElements["Standard_attribute"] = objectSizeElements["Dimension"];
         comparisonElements["Profiled_item"] = agentSizeElements["Object"];
         comparisonElements["Standard_item"] = objectSizeElements["Object"];
-        comparisonElements["Value"] = atomSpace.addNode( NUMBER_NODE, 
+        comparisonElements["Value"] = atomSpace.add_node( NUMBER_NODE, 
            boost::lexical_cast<std::string>( objectVolume / agentVolume ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Evaluative_comparison",

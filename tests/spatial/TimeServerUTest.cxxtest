@@ -65,14 +65,14 @@ public:
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            handles[i] = atomspace().addNode(NUMBER_NODE, name);
+            handles[i] = atomspace().add_node(NUMBER_NODE, name);
         }
     }
 
     ~TimeServerUTest() {
         for (int i = 0; i < N_TIMES; i++) {
             delete times[i];
-            atomspace().removeAtom(handles[i]);
+            atomspace().remove_atom(handles[i]);
         }
     }
 
@@ -1254,14 +1254,14 @@ public:
     void testAddGetTimeInfo() {
         AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
-        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
-        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        Handle node1 = atomSpace.add_node(CONCEPT_NODE, "test1");
+        Handle node2 = atomSpace.add_node(CONCEPT_NODE, "test2");
 
         Handle atTimeLink = timeServer().addTimeInfo(node1, 1000);
         TS_ASSERT(atTimeLink != Handle::UNDEFINED);
-        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
-        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
-        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
+        TS_ASSERT(atomSpace.get_outgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.get_outgoing(atTimeLink, 1) == node1);
         vector<HandleTemporalPair> res;
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.size() == 1);
@@ -1272,9 +1272,9 @@ public:
         Temporal t2(2000, 3000);
         atTimeLink = timeServer().addTimeInfo(node1, t2);
         TS_ASSERT(atTimeLink != Handle::UNDEFINED);
-        timeNode = atomSpace.getHandle(TIME_NODE, t2.getTimeNodeName());
-        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 0) == timeNode);
-        TS_ASSERT(atomSpace.getOutgoing(atTimeLink, 1) == node1);
+        timeNode = atomSpace.get_handle(TIME_NODE, t2.getTimeNodeName());
+        TS_ASSERT(atomSpace.get_outgoing(atTimeLink, 0) == timeNode);
+        TS_ASSERT(atomSpace.get_outgoing(atTimeLink, 1) == node1);
         res.clear();
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.size() == 2);
@@ -1543,8 +1543,8 @@ public:
     void testGetAtTimeLink() {
         AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
-        Handle h1 = atomSpace.addNode(CONCEPT_NODE, "test1");
-        Handle h2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        Handle h1 = atomSpace.add_node(CONCEPT_NODE, "test1");
+        Handle h2 = atomSpace.add_node(CONCEPT_NODE, "test2");
         Temporal* t1 = new Temporal(1000);
         Temporal* t2 = new Temporal(500, 1500);
         //printf("After add\n");
@@ -1613,7 +1613,7 @@ public:
     void testRemoveTimeInfo() {
         AtomSpace& atomSpace = atomspace();
         atomSpace.clear();
-        Handle node1 = atomSpace.addNode(CONCEPT_NODE, "test1");
+        Handle node1 = atomSpace.add_node(CONCEPT_NODE, "test1");
         TS_ASSERT(!timeServer().removeTimeInfo(node1, 1000));
         TS_ASSERT(!timeServer().removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
 
@@ -1622,57 +1622,57 @@ public:
         TS_ASSERT(timeServer().removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
 
         // Check if the TimeNode was removed from AtomTable. I should not, since removeDisconnectedTimeNodes flag is false.
-        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
         TS_ASSERT((NULL != timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq outgoing;
         outgoing.push_back(timeNode);
         outgoing.push_back(node1);
-        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
         // Check if the pair(node1, T) was removed from TimeServer
         vector<HandleTemporalPair> res;
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.empty());
         // Check if node1 was not affected
-        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
 
         timeServer().addTimeInfo(node1, 1000);
         TS_ASSERT(timeServer().removeTimeInfo(node1, 1000));
 
         // Since the removeDisconnectedTimeNodes flag is true, TimeNode should have been removed too
-        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
         TS_ASSERT((NULL == timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq atTimeLinks;
-        atomSpace.getHandlesByType(back_inserter(atTimeLinks), AT_TIME_LINK, false);
+        atomSpace.get_handles_by_type(back_inserter(atTimeLinks), AT_TIME_LINK, false);
         TS_ASSERT(atTimeLinks.empty());
         // Check if the pair(node1, T) was removed from TimeServer
         res.clear();
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.empty());
         // Check if node1 was not affected
-        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
 
 
         timeServer().addTimeInfo(node1, 1000);
-        Handle node2 = atomSpace.addNode(CONCEPT_NODE, "test2");
+        Handle node2 = atomSpace.add_node(CONCEPT_NODE, "test2");
         timeServer().addTimeInfo(node2, 1000);
         TS_ASSERT(timeServer().removeTimeInfo(node1, 1000));
 
         // Even the removeDisconnectedTimeNodes flag being true, TimeNode should not have been removed, since there is another atom associated to it.
-        timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
+        timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
         TS_ASSERT(timeNode != Handle::UNDEFINED);
         // Check if the AtTimeLink was removed from AtomTable
         outgoing.clear();
         outgoing.push_back(timeNode);
         outgoing.push_back(node1);
-        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
         // Check if the pair(node1, T) was removed from TimeServer
         res.clear();
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.empty());
         // Check if node1 was not affected
-        TS_ASSERT(atomSpace.getHandle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(CONCEPT_NODE, "test1") != Handle::UNDEFINED);
         // Check if the Timeinfo related to node2 is still there
         res.clear();
         timeServer().getTimeInfo(back_inserter(res), Handle::UNDEFINED);

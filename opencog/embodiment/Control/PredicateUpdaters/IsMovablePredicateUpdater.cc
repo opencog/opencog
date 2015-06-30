@@ -49,10 +49,10 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
     }
 
     logger().fine("IsMovable - Updating is_movable for obj %s.",
-                 atomSpace.getName(object).c_str());
+                 atomSpace.get_name(object).c_str());
     
     // 2. all avatars are movable - TV set to 1.0
-    Type objectType = atomSpace.getType(object);
+    Type objectType = atomSpace.get_type(object);
     
     bool isMovable = ( objectType == PET_NODE || 
                        objectType == AVATAR_NODE ||

@@ -228,25 +228,25 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
 
     OC_ASSERT( h != Handle::UNDEFINED,
                  "h must conrrespond to a defined handle");
-    OC_ASSERT( as.getType(h) == EVALUATION_LINK,
+    OC_ASSERT( as.get_type(h) == EVALUATION_LINK,
                  "ActionFilter - h should be of type EVALUATION_LINK.");
 
     //get the list of args
-    Handle list_arg_h = as.getOutgoing(h, 1);
+    Handle list_arg_h = as.get_outgoing(h, 1);
 
     OC_ASSERT(list_arg_h != Handle::UNDEFINED,
                  "list_arg_h must correspond to a defined handle");
-    OC_ASSERT( as.getType(list_arg_h) == LIST_LINK,
+    OC_ASSERT( as.get_type(list_arg_h) == LIST_LINK,
                  "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
 
     //get finally action name
-    Handle action_h = as.getOutgoing(list_arg_h, 1);
+    Handle action_h = as.get_outgoing(list_arg_h, 1);
 
-    OC_ASSERT( as.isNode(action_h),
+    OC_ASSERT( as.is_node(action_h),
                  "ActionFilter - action handle should inherits from NODE");
 
     //get the action name
-    std::string action_name = (as.getName(action_h));
+    std::string action_name = (as.get_name(action_h));
 
     // print debug
     std::cout << "action_name = " << action_name << std::endl;
@@ -269,16 +269,16 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     if (_bas.find(get_builtin_action(head_v)) != _bas.end()) {
         //get arg list names and generate all possible list of arguments
         std::vector<vertex> operand_list;
-        int list_arg_arity = as.getArity(list_arg_h);
+        int list_arg_arity = as.get_arity(list_arg_h);
 
         if (list_arg_arity == 2) { //check if the action has no argument
             act_set.insert(combo_tree(head_v));
         } else { //the action has arguments
             for (int i = 2; i < list_arg_arity; ++i) {
-                Handle arg_h = as.getOutgoing(list_arg_h, i);
+                Handle arg_h = as.get_outgoing(list_arg_h, i);
 
-                Type arg_type = as.getType(arg_h);
-                const string& arg_name = as.getName(arg_h);
+                Type arg_type = as.get_type(arg_h);
+                const string& arg_name = as.get_name(arg_h);
                 //check if the argument is an identifier
                 if (classserver().isA(arg_type, OBJECT_NODE)) {
                     vertex arg_v =

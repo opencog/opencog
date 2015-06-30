@@ -41,44 +41,44 @@ bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
     // TODO: Use PredictiveImplicationLink instead of ImplicationLink
     //       if ( atomSpace.getType(hPsiRule) != PREDICTIVE_IMPLICATION_LINK ||
     //            atomSpace.getArity(hPsiRule) != 2 )
-    if ( atomSpace.getType(hPsiRule) != IMPLICATION_LINK ||
-         atomSpace.getArity(hPsiRule) != 2 ){
+    if ( atomSpace.get_type(hPsiRule) != IMPLICATION_LINK ||
+         atomSpace.get_arity(hPsiRule) != 2 ){
 
         logger().error( "PsiRuleUtil::%s - %s is not a valid Psi Rule. The correct Psi Rule should be of type ImplicationLink and with two arity.",
                         __FUNCTION__,
-                        atomSpace.atomAsString(hPsiRule).c_str()
+                        atomSpace.atom_as_string(hPsiRule).c_str()
                       );
 
         return false;
     }
 
     // Get handles to premise and goal
-    Handle andLinkPreconditionAction = atomSpace.getOutgoing(hPsiRule, 0);
-    Handle evaluationLinkGoal = atomSpace.getOutgoing(hPsiRule, 1);
+    Handle andLinkPreconditionAction = atomSpace.get_outgoing(hPsiRule, 0);
+    Handle evaluationLinkGoal = atomSpace.get_outgoing(hPsiRule, 1);
 
     // Check goal
-    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
-         atomSpace.getArity(evaluationLinkGoal) != 2 ||
+    if ( atomSpace.get_type(evaluationLinkGoal) != EVALUATION_LINK ||
+         atomSpace.get_arity(evaluationLinkGoal) != 2 ||
          ! classserver().isA(
-         atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0) ),
+         atomSpace.get_type( atomSpace.get_outgoing(evaluationLinkGoal, 0) ),
                             PREDICATE_NODE) ) {
 
         logger().error( "PsiRuleUtil::%s - %s is not a valid Psi Goal. The correct Psi Goal should be of type EvaluationLink, with two arity and its first outgoing should be of type PredicateNode.",
                         __FUNCTION__,
-                        atomSpace.atomAsString(evaluationLinkGoal).c_str()
+                        atomSpace.atom_as_string(evaluationLinkGoal).c_str()
                       );
 
         return false;
     }
 
     // Check premise
-    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK ||
-         atomSpace.getArity(andLinkPreconditionAction) != 2 ) {
+    if ( atomSpace.get_type(andLinkPreconditionAction) != AND_LINK ||
+         atomSpace.get_arity(andLinkPreconditionAction) != 2 ) {
 
         logger().error(
                 "PsiRuleUtil::%s - Failed to find an AndLink holding the Action and all the Preconditions in %s",
                        __FUNCTION__,
-                       atomSpace.atomAsString(hPsiRule).c_str()
+                       atomSpace.atom_as_string(hPsiRule).c_str()
                       );
 
         return false;
@@ -88,35 +88,35 @@ bool PsiRuleUtil::splitPsiRule(const AtomSpace & atomSpace,
     Handle executionLinkAction;
     Handle andLinkPreconditions;
 
-    if ( atomSpace.getType( atomSpace.getOutgoing(andLinkPreconditionAction, 0)
+    if ( atomSpace.get_type( atomSpace.get_outgoing(andLinkPreconditionAction, 0)
                           ) == EXECUTION_LINK ) {
-        executionLinkAction = atomSpace.getOutgoing(andLinkPreconditionAction, 0);
-        andLinkPreconditions = atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+        executionLinkAction = atomSpace.get_outgoing(andLinkPreconditionAction, 0);
+        andLinkPreconditions = atomSpace.get_outgoing(andLinkPreconditionAction, 1);
     }
     else {
-        executionLinkAction = atomSpace.getOutgoing(andLinkPreconditionAction, 1);
-        andLinkPreconditions = atomSpace.getOutgoing(andLinkPreconditionAction, 0);
+        executionLinkAction = atomSpace.get_outgoing(andLinkPreconditionAction, 1);
+        andLinkPreconditions = atomSpace.get_outgoing(andLinkPreconditionAction, 0);
     }
 
     // Check action
-    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
-         atomSpace.getArity(executionLinkAction) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE ) {
+    if ( atomSpace.get_type(executionLinkAction) != EXECUTION_LINK ||
+         atomSpace.get_arity(executionLinkAction) != 2 ||
+         atomSpace.get_type( atomSpace.get_outgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE ) {
 
         logger().error( "PsiRuleUtil::%s - %s is not a valid Psi Action. The correct Psi Action should be of type ExecutionLink, with two arity and its first outgoing should be of type GroundedSchemaNode.",
                         __FUNCTION__,
-                        atomSpace.atomAsString(executionLinkAction).c_str()
+                        atomSpace.atom_as_string(executionLinkAction).c_str()
                       );
 
         return false;
     }
 
     // Check preconditions
-    if ( atomSpace.getType(andLinkPreconditions) != AND_LINK ) {
+    if ( atomSpace.get_type(andLinkPreconditions) != AND_LINK ) {
 
         logger().error( "PsiRuleUtil::%s - %s is not a valid AndLink containing all the Psi preconditions.",
                         __FUNCTION__,
-                        atomSpace.atomAsString(andLinkPreconditions).c_str()
+                        atomSpace.atom_as_string(andLinkPreconditions).c_str()
                       );
 
         return false;
@@ -134,43 +134,43 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
 {
     logger().debug("PsiRuleUtil::%s - Going to check Atom: '%s'.",
                    __FUNCTION__,
-                   atomSpace.atomAsString(h).c_str()
+                   atomSpace.atom_as_string(h).c_str()
                   );
 
     // Check h
     // TODO: Use PredictiveImplicationLink instead of ImplicationLink
     //       if ( atomSpace.getType(h) != PREDICTIVE_IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
-    if ( atomSpace.getType(h) != IMPLICATION_LINK || atomSpace.getArity(h) != 2 )
+    if ( atomSpace.get_type(h) != IMPLICATION_LINK || atomSpace.get_arity(h) != 2 )
         return false;
 
     // Get handles to premise and goal
-    Handle andLinkPreconditionAction = atomSpace.getOutgoing(h, 0);
-    Handle evaluationLinkGoal = atomSpace.getOutgoing(h, 1);
+    Handle andLinkPreconditionAction = atomSpace.get_outgoing(h, 0);
+    Handle evaluationLinkGoal = atomSpace.get_outgoing(h, 1);
 
     // Check premise
-    if ( atomSpace.getType(andLinkPreconditionAction) != AND_LINK ||
-         atomSpace.getArity(andLinkPreconditionAction) != 2 )
+    if ( atomSpace.get_type(andLinkPreconditionAction) != AND_LINK ||
+         atomSpace.get_arity(andLinkPreconditionAction) != 2 )
         return false;
 
     // Get handle to action
-    Handle executionLinkAction = atomSpace.getType(
-                                                      atomSpace.getOutgoing(andLinkPreconditionAction, 0)
+    Handle executionLinkAction = atomSpace.get_type(
+                                                      atomSpace.get_outgoing(andLinkPreconditionAction, 0)
                                                   ) == EXECUTION_LINK ?
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 0) :
-                                 atomSpace.getOutgoing(andLinkPreconditionAction, 1);
+                                 atomSpace.get_outgoing(andLinkPreconditionAction, 0) :
+                                 atomSpace.get_outgoing(andLinkPreconditionAction, 1);
 
     // Check action
-    if ( atomSpace.getType(executionLinkAction) != EXECUTION_LINK ||
-         atomSpace.getArity(executionLinkAction) != 2 ||
-         atomSpace.getType( atomSpace.getOutgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE
+    if ( atomSpace.get_type(executionLinkAction) != EXECUTION_LINK ||
+         atomSpace.get_arity(executionLinkAction) != 2 ||
+         atomSpace.get_type( atomSpace.get_outgoing(executionLinkAction, 0) ) != GROUNDED_SCHEMA_NODE
        )
         return false;
 
     // Check goal
-    if ( atomSpace.getType(evaluationLinkGoal) != EVALUATION_LINK ||
-         atomSpace.getArity(evaluationLinkGoal) != 2 ||
-         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 0)), PREDICATE_NODE) ||
-         ! classserver().isA(atomSpace.getType( atomSpace.getOutgoing(evaluationLinkGoal, 1)), LIST_LINK)
+    if ( atomSpace.get_type(evaluationLinkGoal) != EVALUATION_LINK ||
+         atomSpace.get_arity(evaluationLinkGoal) != 2 ||
+         ! classserver().isA(atomSpace.get_type( atomSpace.get_outgoing(evaluationLinkGoal, 0)), PREDICATE_NODE) ||
+         ! classserver().isA(atomSpace.get_type( atomSpace.get_outgoing(evaluationLinkGoal, 1)), LIST_LINK)
        )
         return false;
 
@@ -612,13 +612,13 @@ bool PsiRuleUtil::isHandleToPsiRule(const AtomSpace & atomSpace, Handle h)
 Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & referenceLink)
 {
     // Get the (ConceptNode "PreviousDemandGoal")
-    Handle hConceptNode = atomSpace.getHandle
+    Handle hConceptNode = atomSpace.get_handle
                               ( CONCEPT_NODE,        // Type of the Atom wanted
                                 "PreviousDemandGoal" // Name of the Atom wanted
                               );
 
     if ( hConceptNode == Handle::UNDEFINED ||
-         atomSpace.getType(hConceptNode) != CONCEPT_NODE ) {
+         atomSpace.get_type(hConceptNode) != CONCEPT_NODE ) {
 
         logger().warn( "PsiRuleUtil::%s - Found no ConceptNode named 'PreviousDemandGoal'. Return UNDEFINED handle",
                        __FUNCTION__
@@ -641,7 +641,7 @@ Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & refere
     if ( referenceLinkSet.size() != 1 ) {
         logger().error( "PsiRuleUtil::%s - Number of ReferenceLink containing '%s' should be exactly 1, but got %d",
                         __FUNCTION__,
-                        atomSpace.atomAsString(hConceptNode).c_str(),
+                        atomSpace.atom_as_string(hConceptNode).c_str(),
                         referenceLinkSet.size()
                       );
 
@@ -651,13 +651,13 @@ Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & refere
 
     // Get the Handle to previous DemandGoal (EvaluationLink)
     referenceLink = referenceLinkSet[0];
-    Handle hDemandGoalEvaluationLink = atomSpace.getOutgoing(referenceLink, 1);
+    Handle hDemandGoalEvaluationLink = atomSpace.get_outgoing(referenceLink, 1);
 
-    if ( atomSpace.getType(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
-         atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
+    if ( atomSpace.get_type(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
+         atomSpace.get_arity(hDemandGoalEvaluationLink) != 2 ) {
         logger().error( "PsiRuleUtil::%s - The previous DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'",
                          __FUNCTION__,
-                         atomSpace.atomAsString(hDemandGoalEvaluationLink).c_str()
+                         atomSpace.atom_as_string(hDemandGoalEvaluationLink).c_str()
                       );
 
         return Handle::UNDEFINED;
@@ -670,13 +670,13 @@ Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & refere
 Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referenceLink)
 {
     // Get the (ConceptNode "CurrentDemandGoal")
-    Handle hConceptNode = atomSpace.getHandle
+    Handle hConceptNode = atomSpace.get_handle
                               ( CONCEPT_NODE,        // Type of the Atom wanted
                                 "CurrentDemandGoal"  // Name of the Atom wanted
                               );
 
     if ( hConceptNode == Handle::UNDEFINED ||
-         atomSpace.getType(hConceptNode) != CONCEPT_NODE ) {
+         atomSpace.get_type(hConceptNode) != CONCEPT_NODE ) {
 
         logger().warn( "PsiRuleUtil::%s - Found no ConceptNode named 'CurrentDemandGoal'. Return UNDEFINED handle",
                        __FUNCTION__
@@ -699,7 +699,7 @@ Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referen
     if ( referenceLinkSet.size() != 1 ) {
         logger().error( "PsiRuleUtil::%s - Number of ReferenceLink containing '%s' should be exactly 1, but got %d",
                         __FUNCTION__,
-                        atomSpace.atomAsString(hConceptNode).c_str(),
+                        atomSpace.atom_as_string(hConceptNode).c_str(),
                         referenceLinkSet.size()
                       );
 
@@ -709,13 +709,13 @@ Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referen
 
     // Get the Handle to current DemandGoal (EvaluationLink)
     referenceLink = referenceLinkSet[0];
-    Handle hDemandGoalEvaluationLink = atomSpace.getOutgoing(referenceLink, 1);
+    Handle hDemandGoalEvaluationLink = atomSpace.get_outgoing(referenceLink, 1);
 
-    if ( atomSpace.getType(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
-         atomSpace.getArity(hDemandGoalEvaluationLink) != 2 ) {
+    if ( atomSpace.get_type(hDemandGoalEvaluationLink) != EVALUATION_LINK ||
+         atomSpace.get_arity(hDemandGoalEvaluationLink) != 2 ) {
         logger().error( "PsiRuleUtil::%s - The current DemandGoal should be an EvaluationLink with 2 outgoing. But got '%s'",
                          __FUNCTION__,
-                         atomSpace.atomAsString(hDemandGoalEvaluationLink).c_str()
+                         atomSpace.atom_as_string(hDemandGoalEvaluationLink).c_str()
                       );
 
         return Handle::UNDEFINED;
@@ -730,9 +730,9 @@ void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace,
 {
     // Get Handles to old ReferenceLink and EvaluationLink
     Handle hCurrentDemandGoalConceptNode =
-        atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal");
+        atomSpace.add_node(CONCEPT_NODE, "CurrentDemandGoal");
     Handle hPreviousDemandGoalConceptNode =
-        atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal");
+        atomSpace.add_node(CONCEPT_NODE, "PreviousDemandGoal");
 
     Handle hOldCurrentDemandGoalReferenceLink =
         AtomSpaceUtil::getReferenceLink(atomSpace, hCurrentDemandGoalConceptNode);
@@ -742,12 +742,12 @@ void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace,
 
     Handle hOldCurrentDemandGoalEvaluationLink =
         hOldCurrentDemandGoalReferenceLink != Handle::UNDEFINED ?
-            atomSpace.getOutgoing(hOldCurrentDemandGoalReferenceLink, 1):
+            atomSpace.get_outgoing(hOldCurrentDemandGoalReferenceLink, 1):
             Handle::UNDEFINED;
 
     Handle hOldPreviousDemandGoalEvaluationLink =
         hOldPreviousDemandGoalReferenceLink != Handle::UNDEFINED ?
-            atomSpace.getOutgoing(hOldPreviousDemandGoalReferenceLink, 1):
+            atomSpace.get_outgoing(hOldPreviousDemandGoalReferenceLink, 1):
             Handle::UNDEFINED;
 
     // If currently selected Demand Goal doesn't change, return immediately
@@ -756,28 +756,28 @@ void PsiRuleUtil::setCurrentDemandGoal(AtomSpace & atomSpace,
 
     // Try to delete old ReferenceLink containing previous/ current DemandGoal
     if ( hOldCurrentDemandGoalReferenceLink != Handle::UNDEFINED )
-        atomSpace.removeAtom( hOldCurrentDemandGoalReferenceLink );
+        atomSpace.remove_atom( hOldCurrentDemandGoalReferenceLink );
 
     if ( hOldPreviousDemandGoalReferenceLink != Handle::UNDEFINED )
-        atomSpace.removeAtom( hOldPreviousDemandGoalReferenceLink );
+        atomSpace.remove_atom( hOldPreviousDemandGoalReferenceLink );
 
     // Create ReferenceLink containing previous DemandGoal
     std::vector<Handle> outgoingSet;
 
     if ( hOldCurrentDemandGoalEvaluationLink != Handle::UNDEFINED ) {
         outgoingSet.clear();
-        outgoingSet.push_back( atomSpace.addNode(CONCEPT_NODE, "PreviousDemandGoal") );
+        outgoingSet.push_back( atomSpace.add_node(CONCEPT_NODE, "PreviousDemandGoal") );
         outgoingSet.push_back( hOldCurrentDemandGoalEvaluationLink );
 
-        atomSpace.addLink(REFERENCE_LINK, outgoingSet);
+        atomSpace.add_link(REFERENCE_LINK, outgoingSet);
     }
 
     // Create ReferenceLink containing current DemandGoal
     if ( hCurrentlySelectedDemandGoal != Handle::UNDEFINED )  {
         outgoingSet.clear();
-        outgoingSet.push_back( atomSpace.addNode(CONCEPT_NODE, "CurrentDemandGoal") );
+        outgoingSet.push_back( atomSpace.add_node(CONCEPT_NODE, "CurrentDemandGoal") );
         outgoingSet.push_back( hCurrentlySelectedDemandGoal );
 
-        atomSpace.addLink(REFERENCE_LINK, outgoingSet);
+        atomSpace.add_link(REFERENCE_LINK, outgoingSet);
     }
 }

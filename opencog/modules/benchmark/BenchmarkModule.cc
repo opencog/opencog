@@ -83,7 +83,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
 
     // Retrieve all the ConceptNodes into an iterator
     HandleSeq atoms;
-    as->getHandlesByType(back_inserter(atoms), CONCEPT_NODE);
+    as->get_handles_by_type(back_inserter(atoms), CONCEPT_NODE);
 
     // Create a fully connected graph between them with bidirectional directed
     // edges: requires n^2 - n edges
@@ -93,7 +93,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
         for_each(atoms.begin(), atoms.end(),
             [&handleSource, this](Handle handleTarget)
         {
-            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget)->setTruthValue(SimpleTruthValue::createTV(0, 1));
+            as->add_link(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget)->setTruthValue(SimpleTruthValue::createTV(0, 1));
         });
     });
 
@@ -105,13 +105,13 @@ int BenchmarkModule::updateSTITestConcurrent()
     srand(time(NULL));
 
     HandleSeq atoms;
-    as->getHandlesByType(back_inserter(atoms), ATOM, true);
+    as->get_handles_by_type(back_inserter(atoms), ATOM, true);
 
     OMP_ALGO::for_each(atoms.begin(), atoms.end(),
         [this](Handle handle)
     {
         int newSTI = rand() % 1000;
-        as->setSTI(handle, newSTI);
+        as->set_STI(handle, newSTI);
     });
 
     return atoms.size();
@@ -158,12 +158,12 @@ BenchmarkModule::do_fullyConnectedTest(Request *dummy,
     {
         // Delete all ConceptNodes and their incoming sets
         HandleSeq atoms;
-        as->getHandlesByType(back_inserter(atoms), CONCEPT_NODE);
+        as->get_handles_by_type(back_inserter(atoms), CONCEPT_NODE);
 
         OMP_ALGO::for_each(atoms.begin(), atoms.end(),
             [this](Handle handle)
         {
-            as->removeAtom(handle, true);
+            as->remove_atom(handle, true);
         });
 
         return "All ConceptNodes and their incoming sets deleted.\n";

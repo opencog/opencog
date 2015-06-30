@@ -232,7 +232,7 @@ void HopfieldOptions::parseOptions (int argc, char *argv[])
         case 'f':
             AttentionValue::sti_t f;
             f = (AttentionValue::sti_t) atoi(optarg);
-            hServer->getAtomSpace().setAttentionalFocusBoundary(f);
+            hServer->getAtomSpace().set_attentional_focus_boundary(f);
 			// If vizThreshold hasn't been manually set, then update to be
 			// the same as the AF boundary.
 			if (!vizSet) vizThreshold = (int) f;
@@ -404,7 +404,7 @@ void HopfieldOptions::printConfiguration()
     cout << "Stimulus for pattern retrieval " << hServer->patternStimulus
 		<< endl;
     cout << "Attention Focus Boundary " <<
-		hServer->getAtomSpace().getAttentionalFocusBoundary() << endl;
+		hServer->getAtomSpace().get_attentional_focus_boundary() << endl;
 
     cout << "Visualization threshold " << vizThreshold <<
 		"(atoms with STI < then are not \"active\")" << endl;

@@ -311,7 +311,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
-    atoms_start = atomSpace->getSize();
+    atoms_start = atomSpace->get_size();
 
     logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
                    agent->classinfo().id.c_str(),  this->cycleCount);
@@ -321,7 +321,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
-    atoms_end = atomSpace->getSize();
+    atoms_end = atomSpace->get_size();
 
     time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
                 (timer_start.tv_sec*1000000  + timer_start.tv_usec);

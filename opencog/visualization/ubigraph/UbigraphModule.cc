@@ -124,13 +124,13 @@ std::string UbigraphModule::do_ubigraphRandomSTI(Request *dummy, std::list<std::
     int nNodes = 2;
 
     if (!args.empty()) nNodes = atoi(args.front().c_str());
-    _cogserver.getAtomSpace().getHandlesByType(out_hi, NODE, true);
+    _cogserver.getAtomSpace().get_handles_by_type(out_hi, NODE, true);
     if (hs.size() == 0) return "";
     while (nNodes > 0) {
-        _cogserver.getAtomSpace().setSTI(hs[rng.randint(hs.size())], 1000);
+        _cogserver.getAtomSpace().set_STI(hs[rng.randint(hs.size())], 1000);
         nNodes--;
     }
-    _cogserver.getAtomSpace().updateMaxSTI(1000);
+    _cogserver.getAtomSpace().update_max_STI(1000);
 
     return "";
 }

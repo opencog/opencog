@@ -49,7 +49,7 @@ public:
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            handles[i] = as.addNode(NUMBER_NODE, name);
+            handles[i] = as.add_node(NUMBER_NODE, name);
         }
     }
 
@@ -1380,7 +1380,7 @@ public:
     }
 
     void testSpecificRemoveCase1() {
-        Handle h1 = as.addNode(CONCEPT_NODE, "H1");
+        Handle h1 = as.add_node(CONCEPT_NODE, "H1");
         TemporalTable table;
         Temporal t1(100);
         Temporal t2(200);

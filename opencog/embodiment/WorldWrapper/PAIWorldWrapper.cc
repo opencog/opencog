@@ -758,7 +758,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 {
     AtomSpace& atomSpace = pai.getAtomSpace();
     const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
-    std::string goalName = atomSpace.getName(goalHandle);
+    std::string goalName = atomSpace.get_name(goalHandle);
 
     OC_ASSERT(goalHandle != Handle::UNDEFINED);
     OC_ASSERT(spaceMap.containsObject(goalHandle));
@@ -1205,7 +1205,7 @@ string PAIWorldWrapper::resolveType(combo::vertex v)
 }
 string PAIWorldWrapper::resolveType(Handle h)
 {
-    Type objType = pai.getAtomSpace().getType(h);
+    Type objType = pai.getAtomSpace().get_type(h);
     return (objType == AVATAR_NODE ? AVATAR_OBJECT_TYPE :
             objType == PET_NODE ? PET_OBJECT_TYPE :
             objType == HUMANOID_NODE ? HUMANOID_OBJECT_TYPE :
@@ -1250,11 +1250,11 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (ComboException, Asse
     if (sm.containsObject(slobj)) {
         //return the yaw
         double result = sm.getEntity(slobj)->getYaw();
-        logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
+        logger().debug("getAngleFacing(%s) => %f", as.get_name(slobj).c_str(), result);
         return result;
     }
     std::stringstream stream (std::stringstream::out);
-    stream << "Can't find angle that Object '" << as.getName(slobj)
+    stream << "Can't find angle that Object '" << as.get_name(slobj)
         << "' is facing at" << std::endl;
     throw ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
                                   stream.str().c_str());

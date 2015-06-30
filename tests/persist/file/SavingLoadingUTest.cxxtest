@@ -97,33 +97,33 @@ public:
         SavingLoading savingLoading;
 
         // Insert 3 basic concept nodes with the already declared names and tvs.
-        Handle h1 = atomSpace.addNode(CONCEPT_NODE, (string)NODE1_NAME);
+        Handle h1 = atomSpace.add_node(CONCEPT_NODE, (string)NODE1_NAME);
         h1->setTruthValue(tvs[0]);
-        Handle h2 = atomSpace.addNode(CONCEPT_NODE, (string)NODE2_NAME);
+        Handle h2 = atomSpace.add_node(CONCEPT_NODE, (string)NODE2_NAME);
         h2->setTruthValue(tvs[1]);
-        Handle h3 = atomSpace.addNode(CONCEPT_NODE, (string)NODE3_NAME);
+        Handle h3 = atomSpace.add_node(CONCEPT_NODE, (string)NODE3_NAME);
         h3->setTruthValue(tvs[2]);
         //logger().debug("runSaving() 1");
 
         //logger().debug("runSaving() 2");
-        Handle h4 = atomSpace.addNode(CONCEPT_NODE, (string)NODE4_NAME);
+        Handle h4 = atomSpace.add_node(CONCEPT_NODE, (string)NODE4_NAME);
         h4->setTruthValue(tvs[3]);
-        Handle h5 = atomSpace.addNode(CONCEPT_NODE, (string)NODE5_NAME);
+        Handle h5 = atomSpace.add_node(CONCEPT_NODE, (string)NODE5_NAME);
         h5->setTruthValue(tvs[4]);
         //logger().debug("runSaving() 3");
 
         // Insert some links
         HandleSeq outgoing;
-        Handle h6 = atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h6 = atomSpace.add_link(LIST_LINK, outgoing);
         outgoing.push_back(h1);
-        Handle h13 = atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h13 = atomSpace.add_link(LIST_LINK, outgoing);
         outgoing.push_back(h2);
         outgoing.push_back(h3);
-        Handle h14 = atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h14 = atomSpace.add_link(LIST_LINK, outgoing);
         outgoing.clear();
         outgoing.push_back(h4);
         outgoing.push_back(h5);
-        Handle h9 = atomSpace.addLink(LIST_LINK, outgoing);
+        Handle h9 = atomSpace.add_link(LIST_LINK, outgoing);
 
         // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
         Handle h15 = ts->addTimeInfo(h1, Temporal(0, 0));
@@ -133,13 +133,13 @@ public:
         Handle h19 = ts->addTimeInfo(h9, Temporal(10, 100));
         Handle h20 = ts->addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
-        Handle h10 = atomSpace.addNode(NUMBER_NODE, "1");
-        Handle h11 = atomSpace.addNode(CONCEPT_NODE, "fido");
+        Handle h10 = atomSpace.add_node(NUMBER_NODE, "1");
+        Handle h11 = atomSpace.add_node(CONCEPT_NODE, "fido");
         outgoing.clear();
         outgoing.push_back(h10);
         outgoing.push_back(h11);
-        Handle h21 = atomSpace.addLink(LIST_LINK, outgoing);
-        Handle h12 = atomSpace.addNode(CONCEPT_NODE, "fido");
+        Handle h21 = atomSpace.add_link(LIST_LINK, outgoing);
+        Handle h12 = atomSpace.add_node(CONCEPT_NODE, "fido");
         TS_ASSERT(h11 == h12);
 
         savingLoading.save(DUMP_FILENAME, atomSpace, *ss, *ts);
@@ -158,65 +158,65 @@ public:
         // Check if it loads all inserted atoms with the same attributes (specially TruthValues)
 
         // Check nodes
-        Handle h1 = atomSpace.getHandle(CONCEPT_NODE, NODE1_NAME);
+        Handle h1 = atomSpace.get_handle(CONCEPT_NODE, NODE1_NAME);
         TS_ASSERT(h1 != Handle::UNDEFINED);
-        AttentionValuePtr av1 = atomSpace.getAV(h1);
+        AttentionValuePtr av1 = atomSpace.get_AV(h1);
         TS_ASSERT(av1->getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av1->getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av1->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
-        TruthValuePtr tv1 = atomSpace.getTV(h1);
+        TruthValuePtr tv1 = atomSpace.get_TV(h1);
         TS_ASSERT(tv1->getType() == tvs[0]->getType());
         TS_ASSERT(tv1->getMean() == tvs[0]->getMean());
         TS_ASSERT(tv1->getCount() == tvs[0]->getCount());
         TS_ASSERT(fabs(tv1->getConfidence() - tvs[0]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-        Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
+        Handle h2 = atomSpace.get_handle(CONCEPT_NODE, NODE2_NAME);
         TS_ASSERT(h2 != Handle::UNDEFINED);
-        AttentionValuePtr av2 = atomSpace.getAV(h2);
+        AttentionValuePtr av2 = atomSpace.get_AV(h2);
         TS_ASSERT(av2->getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av2->getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av2->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        TruthValuePtr tv2 = atomSpace.getTV(h2);
+        TruthValuePtr tv2 = atomSpace.get_TV(h2);
         TS_ASSERT(tv2->getType() == tvs[1]->getType());
         TS_ASSERT(tv2->getMean() == tvs[1]->getMean());
         TS_ASSERT(tv2->getCount() == tvs[1]->getCount());
         TS_ASSERT(fabs(tv2->getConfidence() - tvs[1]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-        Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
+        Handle h3 = atomSpace.get_handle(CONCEPT_NODE, NODE3_NAME);
         TS_ASSERT(h3 != Handle::UNDEFINED);
-        AttentionValuePtr av3 = atomSpace.getAV(h3);
+        AttentionValuePtr av3 = atomSpace.get_AV(h3);
         TS_ASSERT(av3->getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av3->getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av3->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        TruthValuePtr tv3 = atomSpace.getTV(h3);
+        TruthValuePtr tv3 = atomSpace.get_TV(h3);
         TS_ASSERT(tv3->getType() == tvs[2]->getType());
         TS_ASSERT(fabs(tv3->getMean() - tvs[2]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv3->getCount() - tvs[2]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv3->getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-        Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
+        Handle h4 = atomSpace.get_handle(CONCEPT_NODE, NODE4_NAME);
         TS_ASSERT(h4 != Handle::UNDEFINED);
-        AttentionValuePtr av4 = atomSpace.getAV(h4);
+        AttentionValuePtr av4 = atomSpace.get_AV(h4);
         TS_ASSERT(av4->getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av4->getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av4->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        TruthValuePtr tv4 = atomSpace.getTV(h4);
+        TruthValuePtr tv4 = atomSpace.get_TV(h4);
         TS_ASSERT(tv4->getType() == tvs[3]->getType());
         TS_ASSERT(fabs(tv4->getMean() - tvs[3]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv4->getCount() - tvs[3]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv4->getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
 
-        Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
+        Handle h5 = atomSpace.get_handle(CONCEPT_NODE, NODE5_NAME);
         TS_ASSERT(h5 != Handle::UNDEFINED);
-        AttentionValuePtr av5 = atomSpace.getAV(h5);
+        AttentionValuePtr av5 = atomSpace.get_AV(h5);
         TS_ASSERT(av5->getSTI()  == AttentionValue::DEFAULTATOMSTI);
         TS_ASSERT(av5->getLTI()  == AttentionValue::DEFAULTATOMLTI);
         TS_ASSERT(av5->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
-        TruthValuePtr tv5 = atomSpace.getTV(h5);
+        TruthValuePtr tv5 = atomSpace.get_TV(h5);
         TS_ASSERT(tv5->getType() == tvs[4]->getType());
         TS_ASSERT(fabs(tv5->getMean() - tvs[4]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv5->getCount() - tvs[4]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
@@ -225,22 +225,22 @@ public:
         // Check links
 
         HandleSeq outgoing;
-        Handle h6 = atomSpace.getHandle(LIST_LINK, outgoing);
+        Handle h6 = atomSpace.get_handle(LIST_LINK, outgoing);
         TS_ASSERT(h6 != Handle::UNDEFINED);
 
         outgoing.push_back(h1);
-        Handle h7 = atomSpace.getHandle(LIST_LINK, outgoing);
+        Handle h7 = atomSpace.get_handle(LIST_LINK, outgoing);
         TS_ASSERT(h7 != Handle::UNDEFINED);
 
         outgoing.push_back(h2);
         outgoing.push_back(h3);
-        Handle h8 = atomSpace.getHandle(LIST_LINK, outgoing);
+        Handle h8 = atomSpace.get_handle(LIST_LINK, outgoing);
         TS_ASSERT(h8 != Handle::UNDEFINED);
 
         outgoing.clear();
         outgoing.push_back(h4);
         outgoing.push_back(h5);
-        Handle h9 = atomSpace.getHandle(LIST_LINK, outgoing);
+        Handle h9 = atomSpace.get_handle(LIST_LINK, outgoing);
         TS_ASSERT(h9 != Handle::UNDEFINED);
 
         // Check TimeServer entries
@@ -266,16 +266,16 @@ public:
         TS_ASSERT(*(result[1].getTemporal()) == Temporal(0, 10));
         TS_ASSERT(*(result[2].getTemporal()) == Temporal(10, 100));
 
-        Handle h10 = atomSpace.getHandle(NUMBER_NODE, "1");
+        Handle h10 = atomSpace.get_handle(NUMBER_NODE, "1");
         TS_ASSERT(h10 != Handle::UNDEFINED);
-        Handle h11 = atomSpace.getHandle(CONCEPT_NODE, "fido");
+        Handle h11 = atomSpace.get_handle(CONCEPT_NODE, "fido");
         TS_ASSERT(h11 != Handle::UNDEFINED);
         outgoing.clear();
         outgoing.push_back(h10);
         outgoing.push_back(h11);
-        TS_ASSERT(atomSpace.getHandle(LIST_LINK, outgoing) != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(LIST_LINK, outgoing) != Handle::UNDEFINED);
 
-        Handle h12 = atomSpace.addNode(CONCEPT_NODE, "fido");
+        Handle h12 = atomSpace.add_node(CONCEPT_NODE, "fido");
         TS_ASSERT(h11 == h12);
 
         logger().debug("runLoading() ended");
@@ -324,23 +324,23 @@ public:
         ts = new TimeServer(*atomSpace5, ss);
         
         HandleSeq execLinkOutgoing;
-        execLinkOutgoing.push_back( atomSpace5->addNode( SAVING_LOADING_TEST_NODE, "test1") );
-        execLinkOutgoing.push_back( atomSpace5->addLink( SAVING_LOADING_TEST_LINK, HandleSeq() ) );
+        execLinkOutgoing.push_back( atomSpace5->add_node( SAVING_LOADING_TEST_NODE, "test1") );
+        execLinkOutgoing.push_back( atomSpace5->add_link( SAVING_LOADING_TEST_LINK, HandleSeq() ) );
         
         HandleSeq externalLinkOutgoing;
-        externalLinkOutgoing.push_back( atomSpace5->addLink( EXECUTION_LINK, execLinkOutgoing ) );
+        externalLinkOutgoing.push_back( atomSpace5->add_link( EXECUTION_LINK, execLinkOutgoing ) );
 
-        atomSpace5->addLink( LIST_LINK, externalLinkOutgoing );
+        atomSpace5->add_link( LIST_LINK, externalLinkOutgoing );
 
         HandleSeq frequeLink;
-        frequeLink.push_back( atomSpace5->addNode( SAVING_LOADING_TEST_NODE, "currentActionRepetition" ) );
-        frequeLink.push_back( atomSpace5->addNode( NUMBER_NODE, "0" ) );
+        frequeLink.push_back( atomSpace5->add_node( SAVING_LOADING_TEST_NODE, "currentActionRepetition" ) );
+        frequeLink.push_back( atomSpace5->add_node( NUMBER_NODE, "0" ) );
         
 
-        Handle oldLink = atomSpace5->addLink( SAVING_LOADING_TEST_LINK, frequeLink );
-        TS_ASSERT( atomSpace5->removeAtom(oldLink) )
+        Handle oldLink = atomSpace5->add_link( SAVING_LOADING_TEST_LINK, frequeLink );
+        TS_ASSERT( atomSpace5->remove_atom(oldLink) )
 
-        atomSpace5->addLink( SAVING_LOADING_TEST_LINK, frequeLink );
+        atomSpace5->add_link( SAVING_LOADING_TEST_LINK, frequeLink );
 
         savingLoading.save( DUMP_FILENAME, *atomSpace5, *ss, *ts);
         delete ts;

@@ -84,7 +84,7 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
 {
     definite_object_set result;
     //get all maps that span over the exemplars of the trick
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick_name);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trick_name);
     OC_ASSERT(h != Handle::UNDEFINED,
                      "EntityRelevanceFilter - There is no CONCEPT_NODE in AtomSpace for trick '%s'.",
                      trick_name.c_str());
@@ -118,7 +118,7 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
 {
     message_set res;
     //get all temporals denoting the start and end of the exemplars of the trick
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trickName);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trickName);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
@@ -156,11 +156,11 @@ const message_set EntityRelevanceFilter::getMessages(AtomSpace& atomSpace,
     message_set res;
     //check if all atoms of the structure to find are present
     //returns the empty set of messages if one is missing
-    Handle action_done_h = atomSpace.getHandle(PREDICATE_NODE,
+    Handle action_done_h = atomSpace.get_handle(PREDICATE_NODE,
                            ACTION_DONE_PREDICATE_NAME);
     if (action_done_h == Handle::UNDEFINED)
         return res;
-    Handle say_h = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
+    Handle say_h = atomSpace.get_handle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
     if (say_h == Handle::UNDEFINED)
         return res;
     if (strict_within)
@@ -199,14 +199,14 @@ const message_set EntityRelevanceFilter::getMessages(AtomSpace& atomSpace,
             //0 points to ExecutionLink
             //1 points to ListLink
             //1 points to SentenceNode
-            Handle listLink_h = atomSpace.getOutgoing(evalLink_h, 1);
-            Handle executionLink_h = atomSpace.getOutgoing(listLink_h, 0);
-            listLink_h = atomSpace.getOutgoing(executionLink_h, 1);
-            Handle sentence_h = atomSpace.getOutgoing(listLink_h, 1);
+            Handle listLink_h = atomSpace.get_outgoing(evalLink_h, 1);
+            Handle executionLink_h = atomSpace.get_outgoing(listLink_h, 0);
+            listLink_h = atomSpace.get_outgoing(executionLink_h, 1);
+            Handle sentence_h = atomSpace.get_outgoing(listLink_h, 1);
 
-            OC_ASSERT(atomSpace.getType(sentence_h),
+            OC_ASSERT(atomSpace.get_type(sentence_h),
                              "sentence_h is not a NODE.");
-            std::string message_str = atomSpace.getName(sentence_h);
+            std::string message_str = atomSpace.get_name(sentence_h);
             if (exclude_prefix) {
                 std::string pref = string("to:") + toID + string(": ");
                 //check if the message is for toID
@@ -231,7 +231,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
 {
     agent_to_actions res;
     //get all temporals denoting the start and end of the exemplars of the trick
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trick);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
@@ -282,7 +282,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(AtomSpace& as,
     agent_to_actions res;
     //check if all atoms of the structure to find are present
     //returns the empty set of messages if one is missing
-    Handle action_done_h = as.getHandle(PREDICATE_NODE,
+    Handle action_done_h = as.get_handle(PREDICATE_NODE,
                                         ACTION_DONE_PREDICATE_NAME);
     if (action_done_h == Handle::UNDEFINED)
         return res;
@@ -311,17 +311,17 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(AtomSpace& as,
         //check if evalLink_h match the template
         if (dft(evalLink_h)) {
             //get listLink
-            Handle listLink_h = as.getOutgoing(evalLink_h, 1);
+            Handle listLink_h = as.get_outgoing(evalLink_h, 1);
             //get agent
-            Handle agent_h = as.getOutgoing(listLink_h, 0);
-            std::string agent_id = as.getName(agent_h);
+            Handle agent_h = as.get_outgoing(listLink_h, 0);
+            std::string agent_id = as.get_name(agent_h);
             //get action
-            Handle action_h = as.getOutgoing(listLink_h, 1);
-            definite_object_vec dov(1, get_action_definite_object(as.getName(action_h)));
+            Handle action_h = as.get_outgoing(listLink_h, 1);
+            definite_object_vec dov(1, get_action_definite_object(as.get_name(action_h)));
             //get action arguments
-            for (int a = 2; a < as.getArity(listLink_h); a++) {
-                Handle h = as.getOutgoing(listLink_h, a);
-                dov.push_back(WorldWrapperUtil::atom_name_to_definite_object(as.getName(h), selfID, ownerID));
+            for (int a = 2; a < as.get_arity(listLink_h); a++) {
+                Handle h = as.get_outgoing(listLink_h, a);
+                dov.push_back(WorldWrapperUtil::atom_name_to_definite_object(as.get_name(h), selfID, ownerID));
             }
 
             //std::cout << "AGENT ID : " << agent_id << " ACTION NAME : " << action_name << std::endl;

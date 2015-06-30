@@ -41,35 +41,35 @@ void CustomAtomTypesTester::createAtoms()
 
     AtomSpace& as = server().getAtomSpace();
 
-    Handle number_handle = as.addNode(NUMBER_NODE,"1");
+    Handle number_handle = as.add_node(NUMBER_NODE,"1");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atomAsString(number_handle).c_str(), number_handle.value());
+            as.atom_as_string(number_handle).c_str(), number_handle.value());
 
-    Handle foo_handle = as.addNode(FOO_NODE, "foo");
+    Handle foo_handle = as.add_node(FOO_NODE, "foo");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atomAsString(foo_handle).c_str(), foo_handle.value());
+            as.atom_as_string(foo_handle).c_str(), foo_handle.value());
 
-    Handle bar_handle = as.addNode(BAR_NODE, "bar");
+    Handle bar_handle = as.add_node(BAR_NODE, "bar");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atomAsString(bar_handle).c_str(), bar_handle.value());
+            as.atom_as_string(bar_handle).c_str(), bar_handle.value());
 
     std::vector<Handle> v;
     v.push_back(foo_handle);
     v.push_back(bar_handle);
-    Handle foobar_handle = as.addLink(FOOBAR_LINK, v);
+    Handle foobar_handle = as.add_link(FOOBAR_LINK, v);
     logger().info("[CustomAtomTypesTester] new link: %s (%d)",
-            as.atomAsString(foobar_handle).c_str(), foobar_handle.value());
+            as.atom_as_string(foobar_handle).c_str(), foobar_handle.value());
 
-    Handle list_handle = as.addLink(LIST_LINK, v);
+    Handle list_handle = as.add_link(LIST_LINK, v);
     logger().info("[CustomAtomTypesTester] new link: %s (%d)",
-            as.atomAsString(list_handle).c_str(), list_handle.value());
+            as.atom_as_string(list_handle).c_str(), list_handle.value());
 }
 
 static void dumpHandleSeq(HandleSeq& hs, const char *id)
 {
     for( Handle handle: hs) {
         logger().info("[CustomAtomTypesTester] %s: %s",
-                id, server().getAtomSpace().atomAsString(handle).c_str());
+                id, server().getAtomSpace().atom_as_string(handle).c_str());
     }
 }
 
@@ -78,19 +78,19 @@ void CustomAtomTypesTester::dumpAtoms()
     logger().info("[CustomAtomTypesTester.dumpAtoms]");
     AtomSpace& as = server().getAtomSpace();
     HandleSeq hs;
-    as.getHandlesByType(back_inserter(hs), BAR_NODE);
+    as.get_handles_by_type(back_inserter(hs), BAR_NODE);
     dumpHandleSeq(hs, "bar node");
     hs.clear();
-    as.getHandlesByType(back_inserter(hs), NODE, true);
+    as.get_handles_by_type(back_inserter(hs), NODE, true);
     dumpHandleSeq(hs, "node");
     hs.clear();
-    as.getHandlesByType(back_inserter(hs), FOOBAR_LINK);
+    as.get_handles_by_type(back_inserter(hs), FOOBAR_LINK);
     dumpHandleSeq(hs, "foobar link");
     hs.clear();
-    as.getHandlesByType(back_inserter(hs), UNORDERED_LINK, true);
+    as.get_handles_by_type(back_inserter(hs), UNORDERED_LINK, true);
     dumpHandleSeq(hs, "unordered link");
     hs.clear();
-    as.getHandlesByType(back_inserter(hs), LINK, true);
+    as.get_handles_by_type(back_inserter(hs), LINK, true);
     dumpHandleSeq(hs, "link");
     hs.clear();
 }

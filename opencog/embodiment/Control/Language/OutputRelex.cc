@@ -65,9 +65,9 @@ std::string OutputRelex::getOutput(AtomSpace &atomSpace, const std::vector< std:
                 //for each effect, replace the variable of the frame
                 //order by the hande value
                 for ( iter_effect = outputEffect.begin(); iter_effect != outputEffect.end(); ++iter_effect ) {
-                    std::string elementValue = atomSpace.getName(iter_handles->second);
+                    std::string elementValue = atomSpace.get_name(iter_handles->second);
                     
-                    if ( atomSpace.getType( iter_handles->second ) == SEME_NODE ) {
+                    if ( atomSpace.get_type( iter_handles->second ) == SEME_NODE ) {
                         HandleSeq realObject(2);
                         realObject[0] = Handle::UNDEFINED;
                         realObject[1] = iter_handles->second;
@@ -85,7 +85,7 @@ std::string OutputRelex::getOutput(AtomSpace &atomSpace, const std::vector< std:
                                 logger().error( "OutputRelex:%s - It should be linked just one real node to the SemeNode %s but # %d links were found",
                                                 __FUNCTION__, elementValue.c_str( ), refLinks.size( ) );
                             } // if
-                            elementValue = AtomSpaceUtil::getObjectName( atomSpace, atomSpace.getOutgoing( refLinks[0], 0) );
+                            elementValue = AtomSpaceUtil::getObjectName( atomSpace, atomSpace.get_outgoing( refLinks[0], 0) );
                         } // if
                     } // if
                     

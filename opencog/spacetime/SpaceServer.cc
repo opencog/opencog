@@ -44,7 +44,7 @@
 //#define DPRINTF printf
 #define DPRINTF(...)
 // To simplify debug log output
-#define ATOM_AS_STRING(h) (atomspace->atomAsString(h).c_str())
+#define ATOM_AS_STRING(h) (atomspace->atom_as_string(h).c_str())
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -495,11 +495,11 @@ Handle SpaceServer::getSpaceMapNode(std::string _mapName)
 {
     Handle result = spaceMapNodeHandle;
     if (result == Handle::UNDEFINED) {
-        result = atomspace->addNode(SPACE_MAP_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
-        atomspace->setLTI(result, 1);
+        result = atomspace->add_node(SPACE_MAP_NODE, SpaceServer::SPACE_MAP_NODE_NAME)->get_result();
+        atomspace->set_LTI(result, 1);
     } else {
-        if (atomspace->getLTI(result)->get_result() < 1) {
-            atomspace->setLTI(result, 1);
+        if (atomspace->get_LTI(result)->get_result() < 1) {
+            atomspace->set_LTI(result, 1);
         }
     }
     return result;
@@ -512,7 +512,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
 
     Handle spaceMapNode = getSpaceMapNode();
     Handle spaceMapAtTimeLink = timeServer->addTimeInfo(spaceMapNode, timestamp);
-    bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomspace->getName(objectNode)->get_result(),
+    bool result =  add( keepPreviousMap, spaceMapAtTimeLink, atomspace->get_name(objectNode)->get_result(),
                         objX, objY, objZ, objLength, objWidth, objHeight, objYaw, entityClass, isObstacle);
 
     return result;
@@ -555,13 +555,13 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
                                      int _xDim, int _yDim, int _zDim, int _floorHeight)
 {
-    Handle spaceMapNode = atomspace->getHandle(SPACE_MAP_NODE,_mapName);
+    Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
     // There is not a space map node for this map in the atomspace, so create a new one
     if (spaceMapNode == Handle::UNDEFINED)
     {
-        spaceMapNode = atomspace->addNode(SPACE_MAP_NODE,_mapName);
-        atomspace->setLTI(spaceMapNode, 1);
+        spaceMapNode = atomspace->add_node(SPACE_MAP_NODE,_mapName);
+        atomspace->set_LTI(spaceMapNode, 1);
         timeser->addTimeInfo(spaceMapNode, timestamp);
 
         SpaceMap* newSpaceMap = new SpaceMap( _mapName, _xMin,  _yMin, _zMin,  _xDim,  _yDim,  _zDim,  _floorHeight);
@@ -597,7 +597,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
 
     SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
     
-    if (atomspace->getType(objectNode) == STRUCTURE_NODE)
+    if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
     {
         theSpaceMap->removeSolidUnitBlock(objectNode);
     }
@@ -606,7 +606,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         theSpaceMap->removeNoneBlockEntity(objectNode);
     }
 
-    logger().debug("%s(%s)\n", __FUNCTION__, atomspace->getName(objectNode).c_str());
+    logger().debug("%s(%s)\n", __FUNCTION__, atomspace->get_name(objectNode).c_str());
 
 }
 /*
@@ -639,7 +639,7 @@ void SpaceServer::cleanupSpaceServer(){
             logger().debug("SpaceServer - Removing map (%s)",
                     ATOM_AS_STRING(mapHandle));
             // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
-            atomspace->removeAtom(mapHandle, true);
+            atomspace->remove_atom(mapHandle, true);
         }
     }
     logger().debug("SpaceServer - Number of deleted maps: %d.", j);
@@ -648,23 +648,23 @@ void SpaceServer::cleanupSpaceServer(){
 void SpaceServer::mapRemoved(Handle mapId)
 {
     // Remove this atom from AtomSpace since its map does not exist anymore 
-    atomspace->removeAtom(mapId);
+    atomspace->remove_atom(mapId);
 }
 
 void SpaceServer::mapPersisted(Handle mapId)
 {
     // set LTI to a value that prevents the corresponding atom to be removed
     // from AtomSpace
-    atomspace->setLTI(mapId, 1);
+    atomspace->set_LTI(mapId, 1);
 }
 
 std::string SpaceServer::getMapIdString(Handle mapHandle) const
 {
     // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
     // So, just get the name of the TimeNode as its string representation
-    // return atomspace->getName(atomspace->getOutgoing(mapHandle, 0))->get_result();
+    // return atomspace->get_name(atomspace->get_outgoing(mapHandle, 0))->get_result();
 
-    return atomspace->getName(mapHandle);
+    return atomspace->get_name(mapHandle);
 }    
 
 // TODO
@@ -735,8 +735,8 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
     for (; it != theMap->newAppearBlockEntityList.end(); ++it)
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
-        entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
-        atomspace->setSTI(entity->mEntityNode, 10000);
+        entity->mEntityNode = atomspace->add_node(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
+        atomspace->set_STI(entity->mEntityNode, 10000);
 
         bool addit = true;
         HandleSeq::const_iterator it;
@@ -813,7 +813,7 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
         blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
     }
 
-    Handle blocklistLink = atomspace->addLink(LIST_LINK, blocklist);
+    Handle blocklistLink = atomspace->add_link(LIST_LINK, blocklist);
 
     SimpleTruthValue tv(1.0, 1.0);
     Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
@@ -836,19 +836,19 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
 
     // add width : the x extent
     int x = _entity->getWidth();
-    numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(x).c_str() );
+    numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(x).c_str() );
     evalLink = addPropertyPredicate( "width", _entity->mEntityNode, numberNode,tv);
     timeser->addTimeInfo(evalLink,timestamp);
 
     // add length: the y extent
     int y = _entity->getHeight();
-    numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(y).c_str() );
+    numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(y).c_str() );
     evalLink = addPropertyPredicate("length", _entity->mEntityNode, numberNode,tv);
     timeser->addTimeInfo(evalLink,timestamp);
 
     // add height: how tall it's, the z extent
     int z = _entity->getHeight();
-    numberNode = atomspace->addNode(NUMBER_NODE,  opencog::toString(z).c_str() );
+    numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(z).c_str() );
     evalLink = addPropertyPredicate("height", _entity->mEntityNode, numberNode,tv);
     timeser->addTimeInfo(evalLink,timestamp);
 
@@ -886,22 +886,22 @@ Handle SpaceServer::addPropertyPredicate(
         Handle b,
         TruthValuePtr tv)
 {
-    Handle ph = atomspace->addNode(PREDICATE_NODE, predicateName);
+    Handle ph = atomspace->add_node(PREDICATE_NODE, predicateName);
 
     HandleSeq ll_out;
     ll_out.push_back(a);
     ll_out.push_back(b);
 
-    Handle ll =  atomspace->addLink(LIST_LINK, ll_out);
+    Handle ll =  atomspace->add_link(LIST_LINK, ll_out);
 
     HandleSeq hs2;
     hs2.push_back(ph);
     hs2.push_back(ll);
-    Handle result = atomspace->addLink(EVALUATION_LINK, hs2);
+    Handle result = atomspace->add_link(EVALUATION_LINK, hs2);
 
-    atomspace->setTV(result, tv);
+    atomspace->set_TV(result, tv);
 
-    //atomspace->setLTI(result, 1);
+    //atomspace->set_LTI(result, 1);
     return result;
 }
 

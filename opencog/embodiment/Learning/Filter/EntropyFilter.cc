@@ -297,7 +297,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                                        Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 
                 pre_it head_child_it = head_it.begin();
-                Handle action_done_h = _atomSpace.getHandle(PREDICATE_NODE,
+                Handle action_done_h = _atomSpace.get_handle(PREDICATE_NODE,
                                        ACTION_DONE_PREDICATE_NAME);
                 Handle agent_h =
                     WorldWrapperUtil::toHandle(_atomSpace, get_definite_object(*head_child_it),

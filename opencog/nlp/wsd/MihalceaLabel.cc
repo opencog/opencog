@@ -37,7 +37,7 @@ MihalceaLabel::~MihalceaLabel()
 void MihalceaLabel::set_atom_space(AtomSpace *as)
 {
 	atom_space = as;
-	no_sense = atom_space->addNode(WORD_SENSE_NODE, "#UNKNOWN SENSE");
+	no_sense = atom_space->add_node(WORD_SENSE_NODE, "#UNKNOWN SENSE");
 }
 
 /**
@@ -136,7 +136,7 @@ bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 
 	// Give it a true truth value; but no confidence.
 	TruthValuePtr ctv(CountTruthValue::createTV(1.0f, 0.0f, 1.0f));
-	atom_space->addLink(INHERITANCE_LINK, out)->setTruthValue(ctv);
+	atom_space->add_link(INHERITANCE_LINK, out)->setTruthValue(ctv);
 
 	return false;
 }
@@ -145,13 +145,13 @@ bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 
 bool MihalceaLabel::have_sense(const Handle& h)
 {
-	if (atom_space->getType(h) == WORD_SENSE_LINK) return true;
+	if (atom_space->get_type(h) == WORD_SENSE_LINK) return true;
 	return false;
 }
 
 bool MihalceaLabel::pull_pos(const Handle& sense_h)
 {
-	atom_space->fetchIncomingSet(sense_h, false);
+	atom_space->fetch_incoming_set(sense_h, false);
 	return false;
 }
 
@@ -174,7 +174,7 @@ void MihalceaLabel::fetch_senses(const Handle& lemma_h)
    if (rc) return;
 
 	// If we are here, we need to pull senses from the database.
-	atom_space->fetchIncomingSet(lemma_h, false);
+	atom_space->fetch_incoming_set(lemma_h, false);
 
 	// Also pull the POS tags.
 	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);
@@ -184,7 +184,7 @@ void MihalceaLabel::fetch_senses(const Handle& lemma_h)
 	if (rc) return;
 
 	// Add a bogus sense.
-	atom_space->addLink(WORD_SENSE_LINK, lemma_h, no_sense);
+	atom_space->add_link(WORD_SENSE_LINK, lemma_h, no_sense);
 }
 
 /* ============================== END OF FILE ====================== */

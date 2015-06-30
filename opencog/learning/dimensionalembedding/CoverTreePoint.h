@@ -63,10 +63,10 @@ class CoverTreePoint {
 
  void CoverTreePoint::print(AtomSpace& atomspace) {
      std::ostringstream oss;
-     if(!atomspace.isValidHandle(_handle)) {
+     if(!atomspace.is_valid_handle(_handle)) {
          oss << "[NODE'S BEEN DELETED]" << " : (";
      } else {
-         oss << atomspace.atomAsString(_handle, true) << " : (";
+         oss << atomspace.atom_as_string(_handle, true) << " : (";
      }
      for(std::vector<double>::const_iterator it=_vector.begin();
          it!=_vector.end(); ++it)
