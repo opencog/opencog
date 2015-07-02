@@ -47,7 +47,7 @@
          ))
         ; Accepts an optional parameter "thoroughness", controlling how many
         ; results (i.e. sentences) SuReal will be returning
-        ; Default value is 0, which means SuReal will return as many as possible
+        ; Default value is 0, which means SuReal will return as many sentences as possible
         (case-lambda
             ((a-set-link) (main a-set-link 0))
             ((a-set-link thoroughness) (main a-set-link thoroughness))

@@ -358,7 +358,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         HandleSeq qISet = m_as->getIncoming(c);
 
-        // Erase atoms that are neither R2L-Setlink nor SetLink
+        // erase atoms that are neither R2L-Setlink nor SetLink
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
 
         if (qISet.size() >= 1)
@@ -389,6 +389,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
 
+        // stop the search if it already found enough results in a non-complete search
         if (m_thoroughness > 0 and m_results.size() >= m_thoroughness) return true;
     }
     return false;
