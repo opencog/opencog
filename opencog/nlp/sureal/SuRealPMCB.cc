@@ -36,8 +36,10 @@ using namespace opencog;
 /**
  * The constructor for the PatternMatcherCallback.
  *
- * @param pAS    the corresponding AtomSpace
- * @param vars   the set of nodes that should be treated as variables
+ * @param pAS            the corresponding AtomSpace
+ * @param vars           the set of nodes that should be treated as variables
+ * @param thoroughness   the completeness of the search (the minimum number of
+ *                       results being returned)
  */
 SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thoroughness) :
     InitiateSearchCB(pAS),
@@ -387,7 +389,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
 
-        if (m_results.size() == m_thoroughness) return true;
+        if (m_thoroughness > 0 and m_results.size() >= m_thoroughness) return true;
     }
     return false;
 }

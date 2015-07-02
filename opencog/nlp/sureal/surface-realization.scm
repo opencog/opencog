@@ -30,26 +30,28 @@
 )
 
 ; ---------------------------------------------------------------------
-; A wrapper, call SuReal with or without the optional parameter "thoroughness",
-; which is the number of results will be returned by SuRealPMCB
-(define sureal 
-	(case-lambda
-		((setlink) (sureal-main setlink 20))
-		((setlink thoroughness) (sureal-main setlink thoroughness))
-	)
-)
-
 ; A SetLink is the input because it is assumed that the output of the micro-planner
 ; is unordered.
-(define (sureal-main a-set-link thoroughness)
-    (if (equal? 'SetLink (cog-type a-set-link))
-        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
-            (if (null? interpretations)
-            (delete-duplicates (create-sentence a-set-link thoroughness))
-            (get-sentence interpretations)
-            )
+(define sureal
+    (let ((main
+            (lambda (a-set-link thoroughness)
+            (if (equal? 'SetLink (cog-type a-set-link))
+                (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+                    (if (null? interpretations)
+                        (delete-duplicates (create-sentence a-set-link thoroughness))
+                        (get-sentence interpretations)
+                    )
+                )
+                (display "Please input a SetLink only")
+            ))
+         ))
+        ; Accepts an optional parameter "thoroughness", controlling how many
+        ; results (i.e. sentences) SuReal will be returning
+        ; Default value is 0, which means SuReal will return as many as possible
+        (case-lambda
+            ((a-set-link) (main a-set-link 0))
+            ((a-set-link thoroughness) (main a-set-link thoroughness))
         )
-        (display "Please input a SetLink only")
     )
 )
 
