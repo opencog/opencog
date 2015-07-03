@@ -106,7 +106,3 @@ Makefile
 ### Linux ###
 *~
 *.autosave
-
-### Blending ###
-doc/note/99-KOREAN*
-examples/python/conceptual_blending/temp
