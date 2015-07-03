@@ -15,25 +15,9 @@ from spock.utils import pl_announce
 from spock.mcmap import smpmap, mapdata
 from spock.mcp import mcdata
 
-DIMENSION_NETHER   = -0x01
-DIMENSION_OVERWOLD =  0x00
-DIMENSION_END      =  0x01
-
-
-
-def handle_add_two_ints(req):
-        print "Returning [%s + %s = %s]"%(req.a, req.b, (req.a + req.b))
-            return AddTwoIntsResponse(req.a + req.b)
-
-        def add_two_ints_server():
-                rospy.init_node('add_two_ints_server')
-                    s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)
-                        print "Ready to add two ints."
-                            rospy.spin()
-
-                            if __name__ == "__main__":
-                                    add_two_ints_server()
-
+DIMENSION_NETHER    = -0x01
+DIMENSION_OVERWORLD =  0x00
+DIMENSION_END       =  0x01
 
 
 # modified from class 'Dimension' in smpmap.py from spock
@@ -129,7 +113,7 @@ class MinecraftMap(object):
             return 0
         
         data = chunk.block_data.get(rx,ry,rz)
-        return data
+        return data >> 4, data&0x0F
 
 
     def getLight(self, x, y, z):
@@ -163,6 +147,7 @@ class MinecraftMap(object):
 
 
     def setLight(self, x, y, z, light_block = None, light_sky = None):
+        
         x, rx = divmod(x, 16)
         y, ry = divmod(y, 16)
         z, rz = divmod(z, 16)
@@ -205,13 +190,18 @@ class MinecraftMap(object):
 
 
 if __name__ == "__main__":
-    rospy.init_node('minecraft_map_node')
 
-    rospy.Subscriber('chunk_data', chunk_data_msg, handleChunkData)
-    rospy.Subscriber('chunk_bulk', chunk_bulk_msg, handleChunkBulk)
-    rospy.Subscriber('block_data', block_data_msg, handleBlockData)
+    rospy.init_node('minecraft_map_server')
 
-    blockpub = rospy.Publisher('block', map_block_msg, queue_size = 100000)
+    world = MinecraftMap(DIMENSION_OVERWORLD)
     
+    rospy.Subscriber('chunk_data', chunk_data_msg, world.handleUnpackChunk)
+    rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handleUnpackBulk)
+    rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
+
+    serv_block = rospy.Service('get_block_data', block_data_msg, world.getBlock)
+    serv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
+    serv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
+
     rospy.spin()
 
