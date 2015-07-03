@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+find_package(octomap
+)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -109,8 +111,11 @@ catkin_package(
 	message_runtime
   DEPENDS
   	system_lib
+  	octomap
+	octomap_ros
+	octomap_msgs
+	octomap_server
 )
-
 ###########
 ## Build ##
 ###########
@@ -120,8 +125,9 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
 )
-
+link_libraries(${OCTOMAP_LIBRARIES})
 ## Declare a cpp library
 # add_library(minecraft_bot
 #   src/${PROJECT_NAME}/minecraft_bot.cpp
