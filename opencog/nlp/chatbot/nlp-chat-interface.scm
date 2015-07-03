@@ -27,7 +27,7 @@
                 ;;(truth_query_process querySentence)
                 (display "I can't process truth query for now"))
                 ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You ask an InterrogativeSpeechAct")
-                (wh_query_process querySentence))
+                (wh_query_process query))
                 (else (display "you made a statement"))
         )
 )
