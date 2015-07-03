@@ -1,9 +1,30 @@
+#! /usr/bin/env python
+#
+# blend.py
+#
+"""
+Example usage of Conceptual Blending API.
+Instantiates blender with a simple dataset stored in an AtomSpace
+and learns a new concept.
+For complete documentation on how to pass additional parameters to
+blender, refer to the documentation at the following link:
+https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md
+"""
+
+__author__ = 'DongMin Kim'
+
 from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
 from blending.blend import ConceptualBlending
 
-__author__ = 'DongMin Kim'
-
+"""
+Second Example:
+- Blend with custom config.
+- Give focus atom manually.
+- Atoms that have STI value above 12 will be considered to blend.
+- Force to start blend, and choose 2 nodes randomly.
+"""
+print "--------Start second example--------"
 a = AtomSpace()
 initialize_opencog(a)
 
@@ -17,7 +38,8 @@ a.set_av(man.h, 13)
 a.set_av(block.h, 5)
 a.set_av(build.h, 5)
 focus_atoms = [car, man, block, build]
-# Make custom concept network end.
+print "Source data:\n" + \
+      str(focus_atoms) + "\n"
 
 # Make custom config.
 InheritanceLink(
@@ -48,11 +70,11 @@ ListLink(
     ConceptNode("my-config"),
     ConceptNode("2")
 )
-# Make custom config end.
 
 # Start Conceptual Blending.
 result = ConceptualBlending(a).run(
     focus_atoms,
     ConceptNode("my-config")
 )
-print result
+print "Newly blended node: \n" + \
+      str(result)

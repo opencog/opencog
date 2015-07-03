@@ -8,15 +8,15 @@ from blending.blend import ConceptualBlending
 ConceptualBlending(atomspace).run(focus_atoms, config_base)
 ```
 * Make new blend with atoms from given atoms list.
-* Use the custom configs. See [Conceptual Blending Config Format](https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md).
-* Options
+* Support the custom configs. See [Conceptual Blending Config Format](https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md).
+* Arguments
   * focus_atoms: If it is None, then blender will try to blend with all atoms 
   in atomspace.
   * config_base: If it is None, then blender will try to blend with default
   (hard-coded) configs.
 
 ## Examples
-* See [Conceptual Blending Examples](https://github.com/opencog/opencog/tree/master/examples/python/blending/README.md)
+* See [Conceptual Blending Examples](https://github.com/opencog/opencog/tree/master/examples/python/conceptual_blending/README.md)
 
 ## Development Progress (For GSoC 2015)
 * See [Development Progress](http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending#Progress)

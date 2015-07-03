@@ -177,7 +177,7 @@ InheritanceLink(
 # ...
 
 InheritanceLink(
-    ConceptNode("very-my-config"),
+    ConceptNode("cool-my-config"),
     ConceptNode("my-config")
 )
 
@@ -188,7 +188,7 @@ InheritanceLink(
 # Run blending
 ConceptualBlending(atomspace).run(
     focus_atoms,
-    ConceptNode("very-my-config")
+    ConceptNode("cool-my-config")
 )
 ```
 * If there exists not defined config, system will find them in parent config node. 
