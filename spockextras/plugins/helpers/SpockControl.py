@@ -138,7 +138,7 @@ class SpockControlPlugin:
         
         rosutils.setMessage(msg, data)
         
-        rospy.loginfo("published chunk bulk message, sky: %s", msg.sky_light)
+        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light,msg.ROStimestamp,msg.MCtimestamp)
         self.pub_bulk.publish(msg)
     
     

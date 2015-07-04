@@ -5,5 +5,6 @@ uint8 skylight
 int32 x
 int32 y
 int32 z
-uint64 timestamp
+uint64 ROStimestamp
+int64 MCtimestamp
 string scene=MCWorld
