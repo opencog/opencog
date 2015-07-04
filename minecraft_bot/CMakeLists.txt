@@ -49,9 +49,6 @@ find_package(octomap
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
-   controller_msg.msg
-   visibility_msg.msg
-   block.msg
 
    movement_msg.msg
    mine_block_msg.msg
