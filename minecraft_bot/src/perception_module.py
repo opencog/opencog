@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from opencog.atomspace import AtomSpace,Handle,types,get_refreshed_types
+from opencog.atomspace import AtomSpace,Handle,TruthValue,types,get_refreshed_types
 from opencog.spacetime import SpaceServer,TimeServer
 #update spacetime types imported
 types=get_refreshed_types()
@@ -129,17 +129,20 @@ class PerceptionManager:
             else:
                 print blockinfo.getMaterial(),str(block.blockid)
                 print (block.x,block.y,block.z)
-                self._spaceserver.removeMapInfo(blockhandle,maphandle,block.timestamp)
+                self._spaceserver.removeMapInfo(blockhandle,maphandle,block.ROStimestamp)
                 #TODO: add a predicate to mark block is disappeared->This predicate should be added later in PredicateUpdater
-
+        if block.blockid==0:
+            return
         blocknode,updatedatoms=self.buildBlockNodes(block,maphandle)
-        self._spaceserver.addMapInfo(blocknode.h,maphandle,False,block.timestamp,
+        self._spaceserver.addMapInfo(blocknode.h,maphandle,False,block.ROStimestamp,
                                      block.x,block.y,block.z,
                                      1,1,1,0,
                                      'block',blocknode.name,str(block.blockid))
-        self._timeserver.addTimeInfo(blocknode.h,block.timestamp)
+        self._timeserver.addTimeInfo(blocknode.h,block.ROStimestamp,TruthValue(1.0,1.0e35),"ROStimestamp")
+        self._timeserver.addTimeInfo(blocknode.h,block.MCtimestamp,TruthValue(1.0,1.0e35),"MCtimestamp")
         for link in updatedatoms:
-            self._timeserver.addTimeInfo(link.h,block.timestamp)
+            self._timeserver.addTimeInfo(link.h,block.ROStimestamp,TruthValue(1.0,1.0e35),"ROStimestamp")
+            self._timeserver.addTimeInfo(link.h,block.MCtimestamp,TruthValue(1.0,1.0e35),"MCtimestamp")
 
     def processMapMessage(self,data):
         
