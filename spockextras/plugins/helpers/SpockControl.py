@@ -130,15 +130,17 @@ class SpockControlPlugin:
     def sendChunkBulk(self, name, data):
         
         msg = chunk_bulk_msg()
-        
-        #meta = []
-        #for i in range(len(data['metadata'])):
-        #    meta.append(chunk_meta_msg())
-        #    rosutils.setMessage(meta[i], data['metadata'][i])
-        
+                
         rosutils.setMessage(msg, data)
+        #It seems that we still need to set attribute in the meta data array..
+        meta = []
+        for i in range(len(data['metadata'])):
+            meta.append(chunk_meta_msg())
+            rosutils.setMessage(meta[i], data['metadata'][i])
+        msg.metadata=meta
+
         
-        rospy.loginfo("published chunk bulk message, sky: %s", msg.sky_light)
+        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light,msg.ROStimestamp,msg.MCtimestamp)
         self.pub_bulk.publish(msg)
     
     

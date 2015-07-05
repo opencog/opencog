@@ -88,7 +88,9 @@ class SendMapDataPlugin:
                 'y': y,
                 'z': z,
                 'blockid': block['block_data']>>4,
-                'blockdata': block['block_data'] & 0b00001111
+                'blockdata': block['block_data'] & 0b00001111,
+                'ROStimestamp' : data['ROStimestamp'],
+                'MCtimestamp' : data['MCtimestamp']
                 })
 
 	
@@ -102,7 +104,9 @@ class SendMapDataPlugin:
             'y': data['location']['y'],
             'z': data['location']['z'],
             'blockid': data['block_data']>>4,
-            'blockdata': data['block_data'] & 0b00001111
+            'blockdata': data['block_data'] & 0b00001111,
+            'ROStimestamp' : data['ROStimestamp'],
+            'MCtimestamp' : data['MCtimestamp']
             })
 
 
