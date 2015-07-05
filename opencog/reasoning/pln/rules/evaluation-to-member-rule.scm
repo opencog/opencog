@@ -1,11 +1,24 @@
 ; =============================================================================
-; TODO:-GeneralEvaluationToMemberRule 
-;	Takes EvaluationLinks with >=2 Arguments and creates a Member Link
+; TODO:-GeneralEvaluationToMemberRule
+; 
+;	Takes EvaluationLinks and creates a Member Link
 ;
-;	EvaluationLink (pred D (ListLink B C))
-;		becomes
-;	MemberLink( B (SatisfyingSetLink( Variable $X 
-;		(EvaluationLink (pred D (ListLink X C))))))
+; EvaluationLink
+;   D 
+;   ListLink 
+;       B 
+;       C
+; |-
+; MemberLink
+;   B 
+;   SatisfyingSetLink
+;       X 
+;		EvaluationLink
+;           D 
+;           ListLink 
+;               X 
+;               C
+;
 ; -----------------------------------------------------------------------------
 ; Temporary Rule for now. EvaluationToMemberRule split into three parts for 
 ; three different kinds of rules.

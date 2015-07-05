@@ -1,10 +1,28 @@
 ; ============================================================================= 
-; GeneralMemberToEvaluationRule
-;	MemberLink( B (SatisfyingSetLink( Variable $X 
-;		(EvaluationLink (pred D (ListLink X C))))))
-;		becomes
-;	EvaluationLink (pred D (ListLink B C))
+; MemberToEvaluationRule
+;
+; MemberLink 
+;   B 
+;   SatisfyingSetLink
+;       X 
+;		EvaluationLink
+;           D
+;           ListLink 
+;               X 
+;               C
+; |-
+; EvaluationLink
+;   D 
+;   ListLink 
+;       B 
+;       C
+;
 ; -----------------------------------------------------------------------------
+; The position of X is not fixed in the evaluation link. Basically, the rule
+; replaces X in the evaluation link with B.
+; NOTE:- This rule can create issues with backward chaining since the new link
+;        is created in the trailing function.
+
 (include "formulas.scm")
 
 (define pln-rule-member-to-evaluation
@@ -23,7 +41,7 @@
 					(VariableNode "$D")
 					(VariableNode "$C"))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-member-to-evaluation")
+			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
 			(ListLink
 				(MemberLink
 					(VariableNode "$B")
@@ -35,11 +53,15 @@
 
 ; -----------------------------------------------------------------------------
 ; Member To Evaluation Formula
+;
+; The formula checks if the argumentset of the evaluation link is n-ary or 
+; unary. If it is unary, the first condition is satisfied and an evaluation
+; link is created with the predicatenode and variable B. If the evaluation link
+; is n-ary, find-replace function is called which replaces variable X in the 
+; link element's list with variable B.
 ; -----------------------------------------------------------------------------
 
-; -----------------------------------------------------------------------------
-; Side-effect: TruthValue of the new link stays the same
-; -----------------------------------------------------------------------------
+
 
 (define (pln-formula-member-to-evaluation BXDC)
 	(if (= (cog-arity (gdddr BXDC)) 0)
@@ -53,5 +75,3 @@
 					(cog-outgoing-set (gdddr BXDC)) 
 					(VariableNode "$X") 
 					(gar BXDC))))))
-
-; =============================================================================
