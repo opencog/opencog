@@ -3,7 +3,7 @@ from blending.src.connector.base_connector import \
     BaseConnector
 from blending.src.connector.connect_util import \
     make_link_from_equal_link_key, find_duplicate_links
-from blending.util.blend_logger import blend_log
+from opencog.logger import log
 from blending.util.blending_util import *
 
 __author__ = 'DongMin Kim'
@@ -88,7 +88,7 @@ class ConnectSimple(BaseConnector):
                 self.a.get_incoming(new_blended_atom.h)
             )
         except UserWarning as e:
-            blend_log(e)
+            log.info(str(e))
             weighted_tv = TruthValue()
         for decided_atom in decided_atoms:
             self.a.add_link(

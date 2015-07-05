@@ -4,7 +4,7 @@ from opencog.atomspace import get_type, get_type_name
 from blending.src.connector.base_connector import BaseConnector
 from blending.src.connector.connect_util import *
 from blending.util.blend_config import BlendConfig
-from blending.util.blend_logger import blend_log, debug_log
+from opencog.logger import log
 from blending.util.blending_util import *
 
 __author__ = 'DongMin Kim'
@@ -91,7 +91,7 @@ class ConnectConflictAllViable(BaseConnector):
             if self.viable_atoms_count_threshold < 2 ** len(conflict_links):
                 # TODO: Control if expected result atoms count
                 # is bigger than threshold
-                debug_log(
+                log.warn(
                     "ConnectConflictAllViable: Too many atoms! ->" +
                     str(2 ** len(conflict_links)) +
                     " atoms will produce."
@@ -181,7 +181,7 @@ class ConnectConflictAllViable(BaseConnector):
                 weighted_tv = get_weighted_tv(
                     self.a.get_incoming(new_blended_atom.h))
             except UserWarning as e:
-                blend_log(e)
+                log.info(str(e))
                 weighted_tv = TruthValue()
             for decided_atom in decided_atoms:
                 self.a.add_link(

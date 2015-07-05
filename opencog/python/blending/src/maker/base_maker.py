@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from blending.util.blend_logger import blend_log
+from opencog.logger import log
 from blending.util.general_util import *
 from blending.util.blend_config import BlendConfig
 
@@ -54,8 +54,8 @@ class BaseMaker(object):
         try:
             self.new_blend_make_impl(decided_atoms, config_base)
         except UserWarning as e:
-            blend_log("Skipping make, caused by '" + str(e) + "'")
-            blend_log(
+            log.info("Skipping make, caused by '" + str(e) + "'")
+            log.info(
                 "Last status is '" +
                 self.Status.reverse_mapping[self.last_status] +
                 "'"

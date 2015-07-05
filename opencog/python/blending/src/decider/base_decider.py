@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from blending.util.blend_config import BlendConfig
-from blending.util.blend_logger import blend_log
+from opencog.logger import log
 from blending.util.general_util import enum_simulate
 
 __author__ = 'DongMin Kim'
@@ -53,8 +53,8 @@ class BaseDecider(object):
         try:
             self.blending_decide_impl(chosen_atoms, config_base)
         except UserWarning as e:
-            blend_log("Skipping decide, caused by '" + str(e) + "'")
-            blend_log(
+            log.info("Skipping decide, caused by '" + str(e) + "'")
+            log.info(
                 "Last status is '" +
                 self.Status.reverse_mapping[self.last_status] +
                 "'"

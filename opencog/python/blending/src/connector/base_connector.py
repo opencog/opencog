@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
+from opencog.logger import log
 
-from blending.util.blend_logger import blend_log
 from blending.util.general_util import enum_simulate
 
 __author__ = 'DongMin Kim'
@@ -54,8 +54,8 @@ class BaseConnector(object):
         try:
             self.link_connect_impl(decided_atoms, new_blended_atom, config_base)
         except UserWarning as e:
-            blend_log("Skipping connect, caused by '" + str(e) + "'")
-            blend_log(
+            log.info("Skipping connect, caused by '" + str(e) + "'")
+            log.info(
                 "Last status is '" +
                 self.Status.reverse_mapping[self.last_status] +
                 "'"

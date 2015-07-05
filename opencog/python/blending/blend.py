@@ -1,10 +1,10 @@
 from opencog.type_constructors import *
+from opencog.logger import log
 
 from blending.src.chooser.chooser_finder import ChooserFinder
 from blending.src.connector.connector_finder import ConnectorFinder
 from blending.src.decider.decider_finder import DeciderFinder
 from blending.src.maker.maker_finder import MakerFinder
-from blending.util.blend_logger import blend_log
 from blending.util.blend_config import BlendConfig
 from blending.util.general_util import enum_simulate
 
@@ -170,8 +170,8 @@ class ConceptualBlending:
             self.ret = self.new_blended_atoms
 
         except UserWarning as e:
-            blend_log("Skipping blend, caused by '" + str(e) + "'")
-            blend_log(
+            log.warn("Skipping blend, caused by '" + str(e) + "'")
+            log.warn(
                 "Last status is '" +
                 self.Status.reverse_mapping[self.last_status] +
                 "'"

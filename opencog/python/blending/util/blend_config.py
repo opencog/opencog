@@ -1,5 +1,5 @@
+from opencog.logger import log
 from opencog.type_constructors import *
-from blending.util.blend_logger import debug_log, fine_log
 from blending.util.general_util import Singleton
 from blending.util.py_cog_execute import PyCogExecute
 
@@ -316,10 +316,9 @@ class BlendConfig(Singleton):
                     str(exist_set.out)
                 )
         except UserWarning as e:
-            debug_log(e)
+            log.warn(str(e))
 
         cls.a.remove(exist_set)
-        fine_log(ret)
         return ret
 
     def get_str(cls, a, config_name, config_base=None):
