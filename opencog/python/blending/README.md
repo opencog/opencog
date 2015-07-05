@@ -16,7 +16,7 @@ ConceptualBlending(atomspace).run(focus_atoms, config_base)
   (hard-coded) configs.
 
 ## Examples
-* See [Conceptual Blending Examples](https://github.com/opencog/opencog/tree/master/examples/python/conceptual_blending/README.md)
+* See [Conceptual Blending Examples](https://github.com/opencog/opencog/tree/master/examples/python/conceptual_blending)
 
 ## Development Progress (For GSoC 2015)
 * See [Development Progress](http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending#Progress)

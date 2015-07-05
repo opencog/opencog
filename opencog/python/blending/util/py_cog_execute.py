@@ -1,5 +1,3 @@
-from os.path import expanduser
-
 import opencog.atomspace
 from opencog.scheme_wrapper import *
 from blending.util.general_util import Singleton
@@ -43,7 +41,8 @@ class PyCogExecute(Singleton):
         scheme_eval(
             cls.a,
             '(add-to-load-path "' + path_of_opencog_lib + '")' +
-            '(add-to-load-path "' + path_of_opencog_lib + "/opencog/scm/opencog" + '")'
+            '(add-to-load-path "' + path_of_opencog_lib +
+            "/opencog/scm/opencog" + '")'
         )
 
         # 3. Find by common uses path

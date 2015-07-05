@@ -7,7 +7,7 @@ IF(HAVE_CYTHON AND PYTHONINTERP_FOUND)
             PROPERTIES ENVIRONMENT "PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python:${PROJECT_SOURCE_DIR}/opencog/python/opencog:${PROJECT_SOURCE_DIR}/opencog/nlp;PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR};PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}")
 
        ADD_TEST(BlendingTest ${NOSETESTS_EXECUTABLE} -vs --with-doctest
-           ${CMAKE_SOURCE_DIR}/tests/python/blending)
+           ${CMAKE_SOURCE_DIR}/tests/python/blending_test)
        SET_TESTS_PROPERTIES(BlendingTest
            PROPERTIES ENVIRONMENT "PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python;PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR};PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}")
 

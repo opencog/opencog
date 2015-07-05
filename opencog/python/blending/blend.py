@@ -42,7 +42,6 @@ class ConceptualBlending:
             a: An instance of atomspace.
             :param a: opencog.atomspace.AtomSpace
         """
-
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
         self.make_default_config()
