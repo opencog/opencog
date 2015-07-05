@@ -28,6 +28,8 @@ class ChooseAll(BaseChooser):
             raise UserWarning('Size of atom list is too small.')
 
     def atom_choose_impl(self, focus_atoms, config_base):
+        if len(focus_atoms) == 0:
+            focus_atoms = self.a.get_atoms_by_type(types.Atom)
         atom_type = BlendConfig().get_str(
             self.a, "choose-atom-type", config_base
         )

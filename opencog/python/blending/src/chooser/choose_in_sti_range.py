@@ -16,7 +16,7 @@ class ChooseInSTIRange(BaseChooser):
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()
-        BlendConfig().update(self.a, "choose-sti-min", "32")
+        BlendConfig().update(self.a, "choose-sti-min", "1")
         BlendConfig().update(self.a, "choose-sti-max", "None")
 
     def __get_atoms_in_sti_range(
