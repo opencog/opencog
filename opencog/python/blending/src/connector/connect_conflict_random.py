@@ -142,7 +142,6 @@ class ConnectConflictRandom(BaseConnector):
 
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
-        # 평균 진릿값 말고 적당한 진릿값을 주어야 한다.
         for new_blended_atom in self.ret:
             try:
                 weighted_tv = get_weighted_tv(

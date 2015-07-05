@@ -57,6 +57,5 @@ def get_weighted_tv(atoms):
 
     # TODO: Currently, confidence value for new blended node is just
     # average of old value.
-    # 충돌값 보정을 단순 평균이 아닌 적절한 이유를 가진 값으로 바꿔야 한다.
     new_confidence = confidence_sum / link_count
     return TruthValue(new_strength, new_confidence)

@@ -83,7 +83,6 @@ class ConnectSimple(BaseConnector):
 
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
-        # 평균 진릿값 말고 적당한 진릿값을 주어야 한다.
         try:
             weighted_tv = get_weighted_tv(
                 self.a.get_incoming(new_blended_atom.h)

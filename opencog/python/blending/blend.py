@@ -43,11 +43,6 @@ class ConceptualBlending:
             :param a: opencog.atomspace.AtomSpace
         """
 
-        # TODO: Remove atomspace instance in Conceptual Blending tool.
-        # Blending do not always need atomspace. If anywhere exists that
-        # needs atomspace, there should prepare check functions by themselves.
-        # If blending function was not called in python environment, how to
-        # check if python's atomspace was initialized?
         self.a = a
         self.last_status = self.Status.UNKNOWN_ERROR
         self.make_default_config()
@@ -141,10 +136,6 @@ class ConceptualBlending:
 
         if config_base is None:
             config_base = self.a.add_node(types.ConceptNode, BlendConfig().name)
-        else:
-            # TODO: If config_base exists, enroll custom config_base.
-            # BlAtomConfig().add(self.a, "blender", "RuleBlender")
-            pass
 
         try:
             self.make_workers(config_base)

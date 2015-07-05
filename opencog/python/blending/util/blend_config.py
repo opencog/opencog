@@ -6,7 +6,7 @@ from blending.util.py_cog_execute import PyCogExecute
 __author__ = 'DongMin Kim'
 
 
-# noinspection PyTypeChecker
+# noinspection PyTypeChecker,PyMethodParameters
 class BlendConfig(Singleton):
     DEFAULT_CONFIG_NAME = "BLEND"
     DEFAULT_CONFIG_SET = {
@@ -62,7 +62,6 @@ class BlendConfig(Singleton):
         cls.a.add_node(types.ConceptNode, cls.name)
 
         # blend config
-        # TODO: Inherit chooser, decider, ... to BLEND?
         # TODO: Possible infinite loop. add->init->make->add->init->...
         cls.update(cls.a, "config-format-version", "2")
         cls.update(cls.a, "execute-mode", "Release")
@@ -335,6 +334,7 @@ class BlendConfig(Singleton):
             ret = int(ret)
         return ret
 
+    # noinspection PyPropertyDefinition
     @property
     def name(cls):
         return BlendConfig.DEFAULT_CONFIG_NAME

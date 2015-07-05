@@ -62,7 +62,6 @@ def make_link_from_equal_link_key(a, link_key, dst_atom, tv):
     :param TruthValue tv: New link's truth value.
     """
     # TODO: Change to make with proper reason, not make in every blending.
-    # 적절한 이유가 있을 때만 연결시켜야 한다.
     src_list = link_key.get_src_list(a)
 
     # To avoid self-pointing

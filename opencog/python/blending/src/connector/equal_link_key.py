@@ -52,7 +52,6 @@ class EqualLinkKey:
 
 
 # TODO: How to check and merge link which has ingoing atoms?
-# 흔한 경우는 아니지만 Link가 ingoing atom들을 갖고 있으면 어떡하지?
 def get_equal_link_keys(a, original_links, dst_atom):
     """
     :param a: opencog.atomspace_details.AtomSpace
