@@ -32,6 +32,10 @@
    (ConceptNode "URE")
 )
 
+; Define pln-fc and pln-bc for convenience 
+(define (pln-fc source) (cog-fc source pln-rbs))
+(define (pln-bc target) (cog-bc target pln-rbs))
+
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
