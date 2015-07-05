@@ -13,8 +13,10 @@ https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend
 
 __author__ = 'DongMin Kim'
 
-from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
+from opencog.type_constructors import *
+
+from opencog.atomspace import AtomSpace
 from blending.blend import ConceptualBlending
 
 """
@@ -32,27 +34,46 @@ a = AtomSpace()
 initialize_opencog(a)
 
 # Make custom concept network.
-vehicle = ConceptNode("vehicle")
-human = ConceptNode("human")
-thing = ConceptNode("thing")
-metal = ConceptNode("metal")
-a.set_av(vehicle.h, 11)
-a.set_av(human.h, 25)
-a.set_av(thing.h, 7)
-a.set_av(metal.h, 20)
-
+"""
+Make test nodes.
+"""
+# Nodes will be blended:
 car = ConceptNode("car")
 man = ConceptNode("man")
-a.set_av(car.h, 50)
-a.set_av(man.h, 64)
 
+# A. Car is metal. (Not duplicated)
+metal = ConceptNode("metal")
+
+# B. Car moves, man moves. (Duplicated, not conflicted)
+move = ConceptNode("move")
+
+# C.1. Car is vehicle, man is not vehicle. (Duplicated and conflicted)
+# C.2. Car is not person, man is person. (Duplicated and conflicted)
+vehicle = ConceptNode("vehicle")
+person = ConceptNode("person")
+
+"""
+Give some stimulates.
+"""
+a.set_av(car.h, 19)
+a.set_av(man.h, 18)
+
+a.set_av(metal.h, 1)
+a.set_av(move.h, 2)
+
+a.set_av(vehicle.h, 13)
+a.set_av(person.h, 12)
+
+"""
+Make test links.
+"""
 # A. Not duplicated link.
 l1 = MemberLink(car, metal)
 a.set_tv(l1.h, TruthValue(0.6, 0.8))
 
 # B. Duplicated, not conflicted link.
-l2 = SimilarityLink(car, thing)
-l3 = SimilarityLink(man, thing)
+l2 = SimilarityLink(car, move)
+l3 = SimilarityLink(man, move)
 a.set_tv(l2.h, TruthValue(0.9, 0.8))
 a.set_tv(l3.h, TruthValue(0.7, 0.9))
 
@@ -63,12 +84,12 @@ a.set_tv(l4.h, TruthValue(0.9, 0.8))
 a.set_tv(l5.h, TruthValue(0.1, 0.9))
 
 # C.2 Duplicated, conflicted link.
-l6 = SimilarityLink(car, human)
-l7 = SimilarityLink(man, human)
+l6 = SimilarityLink(car, person)
+l7 = SimilarityLink(man, person)
 a.set_tv(l6.h, TruthValue(0.1, 0.8))
 a.set_tv(l7.h, TruthValue(0.8, 0.9))
 
-focus_atoms = [car, man, thing]
+focus_atoms = [car, man, move]
 print "Source data:\n" + \
       str(focus_atoms) + "\n"
 
@@ -117,7 +138,7 @@ for node in result:
     print node
     for sim_link in a.xget_atoms_by_target_atom(types.SimilarityLink, node):
         for out_node in a.xget_outgoing(sim_link.h):
-            if out_node.name == "vehicle" or out_node.name == 'human':
+            if out_node.name == "vehicle" or out_node.name == 'person':
                 print str(out_node.name) + "=> " + \
                       str(sim_link.type_name) + " " + \
                       str(sim_link.tv)

@@ -13,8 +13,10 @@ https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend
 
 __author__ = 'DongMin Kim'
 
-from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog
+from opencog.type_constructors import *
+
+from opencog.atomspace import AtomSpace
 from blending.blend import ConceptualBlending
 
 """

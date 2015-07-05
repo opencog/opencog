@@ -43,6 +43,17 @@ except ImportError:
 else:
     from blending.blend import ConceptualBlending
 
+try:
+    from blending.util.py_cog_execute import PyCogExecute
+    PyCogExecute().load_scheme()
+except (ImportError, RuntimeError):
+    import unittest
+
+    raise unittest.SkipTest(
+        "Can't load Scheme." +
+        "make sure the you installed atomspace to /usr/local/share/opencog."
+    )
+
 
 # noinspection PyArgumentList, PyTypeChecker
 class TestConceptualBlendingBase(object):

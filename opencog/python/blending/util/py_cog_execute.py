@@ -1,5 +1,6 @@
 from os.path import expanduser
 
+import opencog.atomspace
 from opencog.scheme_wrapper import *
 from blending.util.general_util import Singleton
 
@@ -20,46 +21,65 @@ class PyCogExecute(Singleton):
             cls.a = a
 
         if cls.is_initialized is not True:
+            cls.load_scheme()
             cls.is_initialized = True
 
-            # TODO: How to find the scheme module in beautiful?
-            usr = expanduser("~/")
+    def load_scheme(cls):
+        # TODO: FIXME: Hacky method to find scheme framework..
+        # 1. Find by current loaded atomspace library's file path
+        atomspace_lib_file = opencog.atomspace.__file__
+        path_of_opencog_lib = '/'.join(atomspace_lib_file.split('/')[0:-3])
+        path_of_scm_lib = path_of_opencog_lib + '/scm'
 
-            scheme_eval(
-                cls.a,
-                '(add-to-load-path "' + usr + "atomspace" + '")' +
-                '(add-to-load-path "' + usr + "atomspace/build" + '")' +
-                '(add-to-load-path "' + usr + "atomspace/build/opencog" + '")' +
-                '(add-to-load-path "' + usr + "atomspace/opencog" + '")' +
-                '(add-to-load-path "' + usr + "atomspace/opencog/scm" + '")' +
-                '(add-to-load-path "' + usr + "opencog" + '")' +
-                '(add-to-load-path "' + usr + "opencog/build" + '")' +
-                '(add-to-load-path "' + usr + "opencog/build/opencog" + '")' +
-                '(add-to-load-path "' + usr + "opencog/opencog" + '")' +
-                '(add-to-load-path "' + usr + "opencog/opencog/scm" + '")' +
-                '(add-to-load-path ".")'
-            )
-
-            scheme_eval(
-                cls.a,
-                '(use-modules (opencog))' +
-                '(use-modules (opencog query))' +
-                '(use-modules (opencog exec))' +
-                '(use-modules (opencog rule-engine))' +
-                '(load-from-path "utilities.scm")'
-            )
-
-    def execute(cls, a, execute_link):
-        cls.__initialize(a)
-
-        result_set_uuid = scheme_eval_h(
+        scheme_eval(
             cls.a,
-            '(cog-execute! ' +
-            '  (cog-atom ' + str(execute_link.handle_uuid()) + ')' +
-            ')'
+            '(add-to-load-path "' + path_of_scm_lib + '")' +
+            '(add-to-load-path "' + path_of_scm_lib + "/opencog" + '")'
         )
 
-        if cls.a.is_valid(result_set_uuid):
-            return cls.a[result_set_uuid]
-        else:
-            return None
+        # 2. Find by current python file's path
+        current_file = __file__
+        path_of_opencog_lib = '/'.join(current_file.split('/')[0:-5])
+        scheme_eval(
+            cls.a,
+            '(add-to-load-path "' + path_of_opencog_lib + '")' +
+            '(add-to-load-path "' + path_of_opencog_lib + "/opencog/scm/opencog" + '")'
+        )
+
+        # 3. Find by common uses path
+        scheme_eval(
+            cls.a,
+            '(add-to-load-path "/usr/local/share/opencog/scm")'
+        )
+
+        scheme_eval(
+            cls.a,
+            '(use-modules (opencog))' +
+            '(use-modules (opencog query))' +
+            '(use-modules (opencog exec))' +
+            '(use-modules (opencog rule-engine))'
+        )
+
+    def execute(cls, a, execute_link):
+        try:
+            cls.__initialize(a)
+
+            result_set_uuid = scheme_eval_h(
+                cls.a,
+                '(cog-execute! ' +
+                '  (cog-atom ' + str(execute_link.handle_uuid()) + ')' +
+                ')'
+            )
+
+            if cls.a.is_valid(result_set_uuid):
+                return cls.a[result_set_uuid]
+            else:
+                return None
+        except RuntimeError as e:
+            raise RuntimeError(
+                str(e) +
+                "\n\n" +
+                "Can't load scheme's cog-execute function.\n" +
+                "Make sure the you had installed atomspace "
+                "to /usr/local/share/opencog."
+            )
