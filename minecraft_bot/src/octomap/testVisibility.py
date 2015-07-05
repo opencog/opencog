@@ -9,7 +9,7 @@ import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
 from minecraft_bot.msg import visible_blocks_msg
 
-from math import sin, cos, radians, pi
+from math import sin, cos, radians, pi, floor
 import numpy as np
 from sys import argv
 
@@ -79,14 +79,33 @@ def getVisibleBlocks(x, y, z, pitch, yaw):
 				cdist += D_DIST
 				cpitch += D_PITCH
 				cyaw += D_YAW
-
-				block = getBlock(cx, cy, cz)
+                                
+                                block = getBlockData(floor(cx), floor(cy), floor(cz))
 				if (cx, cy, cz) not in vis_blocks:
 					if isSolid(block):
 						vis_blocks[(cx, cy, cz)] = block
 						break
 				else:
 					break
+        
+        print "list of visible blocks:"
+        print vis_blocks
+        
+        return vis_blocks
+
+
+# this client waits for block data on request
+def getBlockData(x, y, z):
+
+    rospy.wait_for_service('get_block_data')
+    
+    try:
+        get_block_client = rospy.ServiceProxy('get_block_data', getBlock)
+	block = getBlock(cx, cy, cz)
+        return block
+    except rospy.ServiceException, e:
+        print "service call failed: %s"%e
+
 
 
 def visibleBlocksServer():
@@ -94,7 +113,8 @@ def visibleBlocksServer():
 	initBlockMats()
 	
 	rospy.init_node('visibility_server')
-	vb_srv = rospy.Service('get_visible_blocks', visible_blocks_msg, getVisibleBlocks)
+	
+        vb_srv = rospy.Service('get_visible_blocks', visible_blocks_msg, getVisibleBlocks)
 
 	print("visibility server initialized")
 	print("call getVisibleBlocks() with args: (x, y, z, pitch, yaw)")

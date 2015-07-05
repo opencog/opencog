@@ -113,6 +113,7 @@ class MinecraftMap(object):
             return 0
         
         data = chunk.block_data.get(rx,ry,rz)
+
         return data >> 4, data&0x0F
 
 
@@ -188,20 +189,33 @@ class MinecraftMap(object):
         return column.biome.set(rx, rz, data)
 
 
+# the service
+def getBlock(req):
+
+    msg = block_data_msg()
+    msg.x = req.x
+    msg.y = req.y
+    msg.z = req.z
+    
+    blockid, data = world.getBlock(req.x, req.y, req.z)
+    msg.blockid = blockid
+    msg.blockdata = data
+    return msg
+
+
+world = MinecraftMap(DIMENSION_OVERWORLD)
 
 if __name__ == "__main__":
 
     rospy.init_node('minecraft_map_server')
 
-    world = MinecraftMap(DIMENSION_OVERWORLD)
-    
     rospy.Subscriber('chunk_data', chunk_data_msg, world.handleUnpackChunk)
     rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handleUnpackBulk)
     rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
 
-    serv_block = rospy.Service('get_block_data', block_data_msg, world.getBlock)
-    serv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
-    serv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
+    serv_block = rospy.Service('get_block_data', get_block, world.getBlock)
+    #serv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
+    #serv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
 
     rospy.spin()
 
