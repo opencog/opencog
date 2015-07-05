@@ -128,23 +128,23 @@ void BDTracker::addMemberLink(Handle bdAtTimeLink, Handle trickExemplarAtTimeLin
     HandleSeq memberLinkHS;
     memberLinkHS.push_back(bdAtTimeLink);
     memberLinkHS.push_back(trickExemplarAtTimeLink);
-    atomspace->addLink(MEMBER_LINK, memberLinkHS);
+    atomspace->add_link(MEMBER_LINK, memberLinkHS);
 }
 
 bool MovementBDTracker::BDUpToDate(Handle bd, Handle percept) const
 {
     HandleSeq hs1, hs11, hs2, hs21;
-    hs1 = (atomspace->getOutgoing(bd)); //hs1 = (beh, eval(goto, list(pos
+    hs1 = (atomspace->get_outgoing(bd)); //hs1 = (beh, eval(goto, list(pos
     if (hs1.size() < 2)
         return false;
-    hs11 = atomspace->getOutgoing(hs1[1]); //hs11 = (goto, list(pos
+    hs11 = atomspace->get_outgoing(hs1[1]); //hs11 = (goto, list(pos
     if (hs11.size() < 5)
         return false;
 
-    hs2 = (atomspace->getOutgoing(percept)); //hs2 = (agisimpos, list(pos
+    hs2 = (atomspace->get_outgoing(percept)); //hs2 = (agisimpos, list(pos
     if (hs2.size() < 2)
         return false;
-    hs21 = (atomspace->getOutgoing(hs2[1])); //hs2 = (agisimpos, list(pos
+    hs21 = (atomspace->get_outgoing(hs2[1])); //hs2 = (agisimpos, list(pos
     if (hs21.size() < 2)
         return false;
 
@@ -189,7 +189,7 @@ Handle MovementBDTracker::UpdateBD(Handle percept, Handle obj, const Temporal& n
         if (!BDUpToDate(it->second, percept)) {
             next_obj_has_moved = true;
 //        printf("Removing old form: %s\n", it->second->toString().c_str());
-            atomspace->removeAtom(it->second, false);
+            atomspace->remove_atom(it->second, false);
             Handle ret = CreateBD(percept, obj, now, old_interval_start);
 
 //     printf("New form:%s \n",ret->toString().c_str());
@@ -208,12 +208,12 @@ Handle MovementBDTracker::UpdateBD(Handle percept, Handle obj, const Temporal& n
 Handle MovementBDTracker::getBDHandle(Handle obj, Handle percept)
 {
     HandleSeq hs2;
-    hs2.push_back(atomspace->addNode(PREDICATE_NODE, "behaved"));
+    hs2.push_back(atomspace->add_node(PREDICATE_NODE, "behaved"));
     HandleSeq listLinkHS;
-    Handle perceptListLink = atomspace->getOutgoing(percept, 1);
-    OC_ASSERT(atomspace->getType(perceptListLink) == LIST_LINK,
+    Handle perceptListLink = atomspace->get_outgoing(percept, 1);
+    OC_ASSERT(atomspace->get_type(perceptListLink) == LIST_LINK,
                      "Handle perceptListLink should be a 'LIST_LINK'.");
-    HandleSeq perceptListLinkHS = atomspace->getOutgoing(perceptListLink);
+    HandleSeq perceptListLinkHS = atomspace->get_outgoing(perceptListLink);
     listLinkHS.push_back(perceptListLinkHS[0]);
 
     // next_obj_has_moved indicates that the obj in question has changed position.
@@ -221,14 +221,14 @@ Handle MovementBDTracker::getBDHandle(Handle obj, Handle percept)
     // This should made more elegant when the BDTracker API is updated the next time.
 
 // printf("getBDHandle: %s %s\n", (next_obj_has_moved ? "goto" : "standingAt"), obj->toString().c_str());
-    listLinkHS.push_back(atomspace->addNode(NODE,
+    listLinkHS.push_back(atomspace->add_node(NODE,
                                             (next_obj_has_moved ? "goto" : "standingAt")));
     next_obj_has_moved = false;
 
     std::copy(++(perceptListLinkHS.begin()), perceptListLinkHS.end(), back_inserter(listLinkHS));
-    hs2.push_back(atomspace->addLink(LIST_LINK, listLinkHS));
+    hs2.push_back(atomspace->add_link(LIST_LINK, listLinkHS));
 
-    return obj2lastBD[obj] = atomspace->addLink(EVALUATION_LINK, hs2);
+    return obj2lastBD[obj] = atomspace->add_link(EVALUATION_LINK, hs2);
 }
 
 bool MovementBDTracker::isPerceptOfObj(Handle percept, Handle obj) const
@@ -237,10 +237,10 @@ bool MovementBDTracker::isPerceptOfObj(Handle percept, Handle obj) const
     // object "obj"
 
     HandleSeq hs1;
-    hs1 = (atomspace->getOutgoing(percept));
+    hs1 = (atomspace->get_outgoing(percept));
     if (hs1.size() < 2)
         return false;
-    Handle p_obj = atomspace->getOutgoing(hs1[1], 0);
+    Handle p_obj = atomspace->get_outgoing(hs1[1], 0);
 
     return p_obj == obj;
 }
@@ -254,10 +254,10 @@ Handle ActionBDTracker::UpdateBD(Handle percept, Handle obj, const Temporal& now
 Handle ActionBDTracker::getBDHandle(Handle obj, Handle percept)
 {
     HandleSeq hs2;
-    hs2.push_back(atomspace->addNode(PREDICATE_NODE, "behaved"));
-    hs2.push_back( atomspace->getOutgoing(percept, 1) );
+    hs2.push_back(atomspace->add_node(PREDICATE_NODE, "behaved"));
+    hs2.push_back( atomspace->get_outgoing(percept, 1) );
 
-    return obj2lastBD[obj] = atomspace->addLink(EVALUATION_LINK, hs2);
+    return obj2lastBD[obj] = atomspace->add_link(EVALUATION_LINK, hs2);
 }
 
 bool ActionBDTracker::isPerceptOfObj(Handle percept, Handle obj) const
@@ -268,10 +268,10 @@ bool ActionBDTracker::isPerceptOfObj(Handle percept, Handle obj) const
 
     // Eval(pred, List(obj, ...))
     HandleSeq hs1;
-    hs1 = (atomspace->getOutgoing(percept));
+    hs1 = (atomspace->get_outgoing(percept));
     if (hs1.size() < 2)
         return false;
-    Handle p_obj = atomspace->getOutgoing(hs1[1], 0);
+    Handle p_obj = atomspace->get_outgoing(hs1[1], 0);
 
     return p_obj == obj;
 }

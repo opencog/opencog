@@ -70,10 +70,10 @@ PredicatesUpdater::~PredicatesUpdater()
 
 void PredicatesUpdater::update(std::vector<Handle> & objects, octime_t timestamp)
 {
-    Handle petHandle = atomSpace.getHandle(PET_NODE, petId);
+    Handle petHandle = atomSpace.get_handle(PET_NODE, petId);
 
     if ( petHandle == Handle::UNDEFINED ) {
-        petHandle = atomSpace.getHandle(HUMANOID_NODE, petId);
+        petHandle = atomSpace.get_handle(HUMANOID_NODE, petId);
     } 
 
     for (BasicPredicateUpdater * updater : updaters)

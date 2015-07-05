@@ -92,7 +92,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     int count = 0;
     int removalAmount;
 
-    a->getHandlesByType(output2, ATOM, true);
+    a->get_handles_by_type(output2, ATOM, true);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
     std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
 
@@ -100,13 +100,13 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size(); i++) {
-        if (a->getLTI(atomsVector[i]) <= forgetThreshold
+        if (a->get_LTI(atomsVector[i]) <= forgetThreshold
                 && count < removalAmount) {
-            if (a->getVLTI(atomsVector[i]) == AttentionValue::DISPOSABLE ) {
-                std::string atomName = a->atomAsString(atomsVector[i]);
+            if (a->get_VLTI(atomsVector[i]) == AttentionValue::DISPOSABLE ) {
+                std::string atomName = a->atom_as_string(atomsVector[i]);
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
-                if (!a->removeAtom(atomsVector[i])) {
+                if (!a->remove_atom(atomsVector[i])) {
                     // Atom must have already been removed through having 
                     // previously removed atoms in it's outgoing set.
                     log->error("Couldn't remove atom %s", atomName.c_str());

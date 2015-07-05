@@ -163,7 +163,7 @@ bool Ubigrapher::handleAddSignal(Handle h)
             // don't make nodes for binary links with no incoming
             LinkPtr l(LinkCast(h));
             if (l and l->getOutgoingSet().size() == 2 and
-                     space.getIncoming(h).size() == 0)
+                     space.get_incoming(h).size() == 0)
                 return addEdges(h);
         }
         return (addVertex(h) || addEdges(h));
@@ -184,7 +184,7 @@ bool Ubigrapher::atomRemoveSignal(AtomPtr a)
             // don't make nodes for binary links with no incoming
             LinkPtr l(LinkCast(a));
             if (l and l->getOutgoingSet().size() == 2 and
-                     space.getIncoming(h).size() == 0)
+                     space.get_incoming(h).size() == 0)
                 return removeEdges(h);
         }
         return removeVertex(h);
@@ -200,17 +200,17 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     case NONE:
         break;
     case TV_STRENGTH:
-        scaler = space.getMean(h) * multiplier;
+        scaler = space.get_mean(h) * multiplier;
         break;
     case STI:
-        scaler = space.getNormalisedZeroToOneSTI(h,false,true)
+        scaler = space.get_normalised_zero_to_one_STI(h,false,true)
             * multiplier;
     }
     ost << baseline + scaler;
     LinkPtr l(LinkCast(h));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact and out.size() == 2 and space.getIncoming(h).size() == 0) {
+        if (compact and out.size() == 2 and space.get_incoming(h).size() == 0) {
             ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
         } else
             ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
@@ -227,7 +227,7 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float 
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space.getHandlesByType(out_hi, t, true);
+    space.get_handles_by_type(out_hi, t, true);
     // For each, get prop, scale... and 
     for (Handle h : hs) {
         updateSizeOfHandle(h, p, multiplier, baseline);
@@ -256,10 +256,10 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         scaler = 1.0f;
         break;
     case TV_STRENGTH:
-        scaler = space.getMean(h);
+        scaler = space.get_mean(h);
         break;
     case STI:
-        scaler = space.getNormalisedZeroToOneSTI(h,false,true);
+        scaler = space.get_normalised_zero_to_one_STI(h,false,true);
     }
     if (hard == 0.0f) {
         if (p == TV_STRENGTH) scaler *= multiplierForTV;
@@ -282,7 +282,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     LinkPtr l(LinkCast(h));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
+        if (compact && out.size() == 2 and space.get_incoming(h).size() == 0) {
             //ubigraph_set_edge_attribute(h.value(), "color", "#ffffff");
             ubigraph_set_edge_attribute(h.value(), "color", ost.str().c_str());
             //ubigraph_set_edge_attribute(h.value(), "width", "2");
@@ -305,7 +305,7 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     
     // Get all atoms (and subtypes) of type t
-    space.getHandlesByType(out_hi, t, true);
+    space.get_handles_by_type(out_hi, t, true);
     // For each, get prop, scale... and 
     for (Handle h : hs) {
         updateColourOfHandle(h, p, startRGB, endRGB, hard);
@@ -319,7 +319,7 @@ void Ubigrapher::applyStyleToType(Type t, int style)
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     // Get all atoms (and subtypes) of type t
-    space.getHandlesByType(out_hi, t, true);
+    space.get_handles_by_type(out_hi, t, true);
     applyStyleToHandleSeq(hs, style);
 }
 
@@ -330,7 +330,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space.getHandlesByType(out_hi, t, true);
+    space.get_handles_by_type(out_hi, t, true);
     // For each, get prop, scale... and 
     for (Handle h : hs) {
         bool okToApply = true;
@@ -338,16 +338,16 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
         case NONE:
             break;
         case TV_STRENGTH:
-            if (space.getMean(h) < limit) okToApply = false;
+            if (space.get_mean(h) < limit) okToApply = false;
             break;
         case STI:
-            if (space.getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
+            if (space.get_normalised_zero_to_one_STI(h,false,true) < limit) okToApply = false;
         }
         if (okToApply) {
             LinkPtr l(LinkCast(h));
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
-                if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
+                if (compact && out.size() == 2 and space.get_incoming(h).size() == 0) {
                     ubigraph_change_edge_style(h.value(), style);
                 } else
                     ubigraph_change_vertex_style(h.value(), style);
@@ -365,7 +365,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
         LinkPtr l(LinkCast(h));
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
-            if (compact and out.size() == 2 and space.getIncoming(h).size() == 0) {
+            if (compact and out.size() == 2 and space.get_incoming(h).size() == 0) {
                 ubigraph_change_edge_style(h.value(), style);
             } else
                 ubigraph_change_vertex_style(h.value(), style);
@@ -390,7 +390,7 @@ bool Ubigrapher::addVertex(const Handle& h)
         ubigraph_change_vertex_style(id, nodeStyle);
     } else {
         LinkPtr l(LinkCast(h));
-        if (l and compact and l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
+        if (l and compact and l->getOutgoingSet().size() == 2 and space.get_incoming(h).size() == 0)
             return false;
         int status = ubigraph_new_vertex_w_id(id);
         if (status)
@@ -414,7 +414,7 @@ bool Ubigrapher::addVertex(const Handle& h)
             LinkPtr l(LinkCast(a));
             l = l; // TODO: anything to output for links?
         }*/
-        ost << ":" << space.getMean(h);
+        ost << ":" << space.get_mean(h);
         ubigraph_set_vertex_attribute(id, "label", ost.str().c_str());
     }
     return false;
@@ -437,7 +437,7 @@ bool Ubigrapher::addEdges(const Handle& h)
 //      // it's later necessary to change this edge
 //      int status = ubigraph_new_edge_w_id(id,x,y);
 
-        if (compact and out.size() == 2 and space.getIncoming(h).size() == 0)
+        if (compact and out.size() == 2 and space.get_incoming(h).size() == 0)
         {
             int id = h.value();
             int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
@@ -456,7 +456,7 @@ bool Ubigrapher::addEdges(const Handle& h)
                 } else {
                     ost << type;
                 }
-                ost << ":" << space.getMean(h);
+                ost << ":" << space.get_mean(h);
                 ubigraph_set_edge_attribute(id, "label", ost.str().c_str());
             }
             return false;
@@ -487,7 +487,7 @@ bool Ubigrapher::removeVertex(Handle h)
         // Won't have made a node for a binary link with no incoming
         LinkPtr l(LinkCast(h));
         if (l and l->getOutgoingSet().size() == 2 
-              and space.getIncoming(h).size() == 0)
+              and space.get_incoming(h).size() == 0)
             return false;
     }
 
@@ -511,7 +511,7 @@ bool Ubigrapher::removeEdges(Handle h)
     {
         LinkPtr l(LinkCast(h));
         if (l and l->getOutgoingSet().size() == 2 
-              and space.getIncoming(h).size() == 0)
+              and space.get_incoming(h).size() == 0)
         {                     
             int id = h.value();
             int status = ubigraph_remove_edge(id);

@@ -74,39 +74,39 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
 bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, const octime_t timeStamp)
 {
     // Get the GroundedPredicateNode "fuzzy_within"
-    Handle hGroundedPredicateNode = atomSpace.getOutgoing(hFuzzyWithin, 0);
+    Handle hGroundedPredicateNode = atomSpace.get_outgoing(hFuzzyWithin, 0);
 
-    bool isNotPredicateNode = atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE;
-    bool isOutgoingNotPredicateNode = atomSpace.getType(atomSpace.getOutgoing(hGroundedPredicateNode, 0)) != GROUNDED_PREDICATE_NODE;
+    bool isNotPredicateNode = atomSpace.get_type(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE;
+    bool isOutgoingNotPredicateNode = atomSpace.get_type(atomSpace.get_outgoing(hGroundedPredicateNode, 0)) != GROUNDED_PREDICATE_NODE;
 
     if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED || (isNotPredicateNode && isOutgoingNotPredicateNode)) {
 
         logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a GroundedPredicateNode for demand '%s'. But got '%s'",
-                       __FUNCTION__, this->demandName.c_str(), atomSpace.atomAsString(hGroundedPredicateNode).c_str());
+                       __FUNCTION__, this->demandName.c_str(), atomSpace.atom_as_string(hGroundedPredicateNode).c_str());
         return false;
     }
 
     // Get ListLink containing ExecutionOutputLink and parameters of FuzzyWithin
-    Handle hListLink = atomSpace.getOutgoing(hFuzzyWithin, 1);
+    Handle hListLink = atomSpace.get_outgoing(hFuzzyWithin, 1);
 
     if ( hListLink == opencog::Handle::UNDEFINED ||
-         atomSpace.getType(hListLink) != LIST_LINK ||
-         atomSpace.getArity(hListLink) != 3 ) {
+         atomSpace.get_type(hListLink) != LIST_LINK ||
+         atomSpace.get_arity(hListLink) != 3 ) {
 
         logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect a ListLink for demand '%s' with three arity (parameters of FuzzyWithin). But got '%s'",
-                       __FUNCTION__, this->demandName.c_str(), atomSpace.atomAsString(hListLink).c_str());
+                       __FUNCTION__, this->demandName.c_str(), atomSpace.atom_as_string(hListLink).c_str());
         return false;
     }
 
     // Get the ExecutionOutputLink
-    Handle hExecutionOutputLink = atomSpace.getOutgoing(hListLink, 2);
+    Handle hExecutionOutputLink = atomSpace.get_outgoing(hListLink, 2);
 
     if ( hExecutionOutputLink == opencog::Handle::UNDEFINED ||
-         atomSpace.getType(hExecutionOutputLink) != EXECUTION_OUTPUT_LINK ||
-         atomSpace.getArity(hExecutionOutputLink) != 1 ) {
+         atomSpace.get_type(hExecutionOutputLink) != EXECUTION_OUTPUT_LINK ||
+         atomSpace.get_arity(hExecutionOutputLink) != 1 ) {
 
         logger().error("PsiDemandUpdaterAgent::Demand::%s - Expect an ExecutionOutputLink (updater) for demand '%s' with only one arity. But got '%s'",
-                       __FUNCTION__, this->demandName.c_str(), atomSpace.atomAsString(hExecutionOutputLink).c_str());
+                       __FUNCTION__, this->demandName.c_str(), atomSpace.atom_as_string(hExecutionOutputLink).c_str());
         return false;
     }
 
@@ -141,11 +141,11 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
                    __FUNCTION__, this->demandName.c_str(), this->currentDemandValue);
 
     // Get the fuzzy_within scheme procedure name, which should be "fuzzy_within"
-    std::string demandGoalEvaluator = atomSpace.getName(hGroundedPredicateNode);
+    std::string demandGoalEvaluator = atomSpace.get_name(hGroundedPredicateNode);
 
     // Get min/ max acceptable values
-    std::string minValueStr = atomSpace.getName( atomSpace.getOutgoing(hListLink, 0) );
-    std::string maxValueStr = atomSpace.getName( atomSpace.getOutgoing(hListLink, 1) );
+    std::string minValueStr = atomSpace.get_name( atomSpace.get_outgoing(hListLink, 0) );
+    std::string maxValueStr = atomSpace.get_name( atomSpace.get_outgoing(hListLink, 1) );
 
     scheme_expression = "( fuzzy_within " +
                                boost::lexical_cast<std::string>(this->currentDemandValue) + " " +
@@ -168,7 +168,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     // TODO: Use PLN forward chainer to handle this?
     TruthValuePtr demand_satisfaction = SimpleTruthValue::createTV(atof(scheme_return_value.c_str()), 1.0f);
 
-    atomSpace.setTV(this->hDemandGoal, demand_satisfaction);
+    atomSpace.set_TV(this->hDemandGoal, demand_satisfaction);
 
     // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
     Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal,
@@ -178,20 +178,20 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
 //    // Update the LatestLink
     std::string predicateName = this->demandName + "DemandGoal";
-    Handle demandPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str());
+    Handle demandPredicateNode = atomSpace.add_node(PREDICATE_NODE, predicateName.c_str());
 
     std::vector <Handle> outgoings;
-    Handle listLink = atomSpace.addLink(LIST_LINK, outgoings);
+    Handle listLink = atomSpace.add_link(LIST_LINK, outgoings);
     outgoings.push_back(demandPredicateNode);
     outgoings.push_back(listLink);
-    Handle evaluationLink = atomSpace.addLink(EVALUATION_LINK, outgoings);
-    atomSpace.setTV(evaluationLink, demand_satisfaction);
+    Handle evaluationLink = atomSpace.add_link(EVALUATION_LINK, outgoings);
+    atomSpace.set_TV(evaluationLink, demand_satisfaction);
 
     atTimeLink = timeServer().addTimeInfo(evaluationLink, timeStamp, demand_satisfaction);
 
     AtomSpaceUtil::updateLatestDemand(atomSpace, atTimeLink, demandPredicateNode);
 
-    atomSpace.setTV( this->hFuzzyWithin, demand_satisfaction);
+    atomSpace.set_TV( this->hFuzzyWithin, demand_satisfaction);
 
     this->currentDemandTruthValue = atof(scheme_return_value.c_str());
 

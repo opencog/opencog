@@ -274,34 +274,34 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
-    Type type = as->getType(h);
+    Type type = as->get_type(h);
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
-    std::string nameString = as->getName(h);
+    std::string nameString = as->get_name(h);
 
     // Handle
     std::string handle = std::to_string(h.value());
 
     // AttentionValue
-    AttentionValuePtr av = as->getAV(h);
+    AttentionValuePtr av = as->get_AV(h);
     Object jsonAV;
     jsonAV = avToJSON(av);
 
     // TruthValue
-    TruthValuePtr tvp = as->getTV(h);
+    TruthValuePtr tvp = as->get_TV(h);
     Object jsonTV;
     jsonTV = tvToJSON(tvp);
 
     // Incoming set
-    HandleSeq incomingHandles = as->getIncoming(h);
+    HandleSeq incomingHandles = as->get_incoming(h);
     Array incoming;
     for (uint i = 0; i < incomingHandles.size(); i++) {
         incoming.push_back(std::to_string(incomingHandles[i].value()));
     }
 
     // Outgoing set
-    HandleSeq outgoingHandles = as->getOutgoing(h);
+    HandleSeq outgoingHandles = as->get_outgoing(h);
     Array outgoing;
     for (uint i = 0; i < outgoingHandles.size(); i++) {
         outgoing.push_back(std::to_string(outgoingHandles[i].value()));

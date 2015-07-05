@@ -46,7 +46,7 @@ public:
     void testAddNode() {
         AtomSpace atomSpace;
         Handle addedNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "test1");
-        Handle gotNode = atomSpace.getHandle(CONCEPT_NODE, "test1");
+        Handle gotNode = atomSpace.get_handle(CONCEPT_NODE, "test1");
         TS_ASSERT(addedNode == gotNode);
         TruthValuePtr tv1 = gotNode->getTruthValue();
         TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::DEFAULT_TV()->getMean());
@@ -64,7 +64,7 @@ public:
         HandleSeq outgoing;
         outgoing.push_back(node);
         Handle addedLink =  AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
-        Handle gotLink = atomSpace.getHandle(LIST_LINK, outgoing);
+        Handle gotLink = atomSpace.get_handle(LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
         TruthValuePtr tv1 = gotLink->getTruthValue();
         TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::TRUE_TV()->getMean());
@@ -81,22 +81,22 @@ public:
         AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
-        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
+        Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
         TS_ASSERT(timeNode != Handle::UNDEFINED);
-        Handle predNode = atomSpace.getHandle(PREDICATE_NODE, "1.+++");
+        Handle predNode = atomSpace.get_handle(PREDICATE_NODE, "1.+++");
         TS_ASSERT(predNode != Handle::UNDEFINED);
         HandleSeq emptyOutgoing;
-        Handle listLink = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        Handle listLink = atomSpace.get_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(listLink != Handle::UNDEFINED);
         HandleSeq evalLinkOutgoing;
         evalLinkOutgoing.push_back(predNode);
         evalLinkOutgoing.push_back(listLink);
-        Handle evalLink2 = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+        Handle evalLink2 = atomSpace.get_handle(EVALUATION_LINK, evalLinkOutgoing);
         TS_ASSERT(evalLink2 == evalLink);
         HandleSeq atTimeLinkOutgoing;
         atTimeLinkOutgoing.push_back(timeNode);
         atTimeLinkOutgoing.push_back(evalLink);
-        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
     }
 
     void testAddPunishmentPredicate() {
@@ -104,22 +104,22 @@ public:
         AtomSpace& atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
-        Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
+        Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
         TS_ASSERT(timeNode != Handle::UNDEFINED);
-        Handle predNode = atomSpace.getHandle(PREDICATE_NODE, "1.---");
+        Handle predNode = atomSpace.get_handle(PREDICATE_NODE, "1.---");
         TS_ASSERT(predNode != Handle::UNDEFINED);
         HandleSeq emptyOutgoing;
-        Handle listLink = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
+        Handle listLink = atomSpace.get_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(listLink != Handle::UNDEFINED);
         HandleSeq evalLinkOutgoing;
         evalLinkOutgoing.push_back(predNode);
         evalLinkOutgoing.push_back(listLink);
-        Handle evalLink2 = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+        Handle evalLink2 = atomSpace.get_handle(EVALUATION_LINK, evalLinkOutgoing);
         TS_ASSERT(evalLink2 == evalLink);
         HandleSeq atTimeLinkOutgoing;
         atTimeLinkOutgoing.push_back(timeNode);
         atTimeLinkOutgoing.push_back(evalLink);
-        TS_ASSERT(atomSpace.getHandle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
+        TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
     }
 
     void testIsActionPredicatePresent() {

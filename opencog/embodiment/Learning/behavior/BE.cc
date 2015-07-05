@@ -191,30 +191,30 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
             does_fit_template does_match_template =
                 does_fit_template(vf.first, &as);
             if (does_match_template(h)) {
-                logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", as.atomAsString(h).c_str());
+                logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", as.atom_as_string(h).c_str());
 
                 //create BD
-                OC_ASSERT(as.getType(h) == EVALUATION_LINK,
+                OC_ASSERT(as.get_type(h) == EVALUATION_LINK,
                                  "Handle h should be an 'EVALUATION_LINK'.");
-                OC_ASSERT(as.getArity(h) == 2,
+                OC_ASSERT(as.get_arity(h) == 2,
                                  "Handle h should have arity 2.");
 
-                Handle behaved_h = as.addNode(PREDICATE_NODE, BEHAVED_PREDICATE_NAME);
+                Handle behaved_h = as.add_node(PREDICATE_NODE, BEHAVED_PREDICATE_NAME);
 
-                Handle arg_list_h = as.getOutgoing(h, 1);
-                OC_ASSERT(as.getType(arg_list_h) == LIST_LINK,
+                Handle arg_list_h = as.get_outgoing(h, 1);
+                OC_ASSERT(as.get_type(arg_list_h) == LIST_LINK,
                                  "Handle h outgoingAtom[1] should be a 'LIST_LINK'.");
 
                 //determine the subject
-                Handle subject_h = as.getOutgoing(arg_list_h, 0);
-                const std::string& subject_id = as.getName(subject_h);
+                Handle subject_h = as.get_outgoing(arg_list_h, 0);
+                const std::string& subject_id = as.get_name(subject_h);
 
                 //to be checked if walk perceptions
                 //per_h is in fact the action of the subject observed
-                Handle per_h = as.getOutgoing(arg_list_h, 1);
-                OC_ASSERT(as.isNode(per_h), "Handle per_h should be a 'Node'.");
+                Handle per_h = as.get_outgoing(arg_list_h, 1);
+                OC_ASSERT(as.is_node(per_h), "Handle per_h should be a 'Node'.");
 
-                bool is_walk = as.getName(per_h) == WALK_PERCEPT_NAME;
+                bool is_walk = as.get_name(per_h) == WALK_PERCEPT_NAME;
 
                 //deternime tl and tu of the perception
 
@@ -239,29 +239,29 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //get walk destination coordinates
                     //check if the walk destination is close to an object
 
-                    OC_ASSERT(as.getArity(arg_list_h) > 2,
+                    OC_ASSERT(as.get_arity(arg_list_h) > 2,
                                      "arg_list_h should have more than 2 outgoings" );
 
-                    Handle actionParametersList_h = as.getOutgoing(arg_list_h, 2);
+                    Handle actionParametersList_h = as.get_outgoing(arg_list_h, 2);
 
                     //get the position of the walk destination
-                    OC_ASSERT(as.getArity(actionParametersList_h) > 0,
+                    OC_ASSERT(as.get_arity(actionParametersList_h) > 0,
                                      "ListLink arg_list should have arity greater than 0 (walk perception).");
 
-                    Handle pos_list_h = as.getOutgoing(actionParametersList_h, 0);
-                    OC_ASSERT(as.getType(pos_list_h) == LIST_LINK,
+                    Handle pos_list_h = as.get_outgoing(actionParametersList_h, 0);
+                    OC_ASSERT(as.get_type(pos_list_h) == LIST_LINK,
                                      "Handle pos_list should be a 'LIST_LINK' (walk perception)");
-                    OC_ASSERT(as.getArity(pos_list_h) == 3,
+                    OC_ASSERT(as.get_arity(pos_list_h) == 3,
                                      "ListLink pos_list should have arity 3 (walk perception)." );
 
-                    Handle x_h = as.getOutgoing(pos_list_h, 0);
-                    OC_ASSERT(as.getType(x_h) == NUMBER_NODE,
+                    Handle x_h = as.get_outgoing(pos_list_h, 0);
+                    OC_ASSERT(as.get_type(x_h) == NUMBER_NODE,
                                      "Handle x_h should be a 'NUMBER_NODE'.");
-                    float x = atof(as.getName(x_h).c_str());
-                    Handle y_h = as.getOutgoing(pos_list_h, 1);
-                    OC_ASSERT(as.getType(y_h) == NUMBER_NODE,
+                    float x = atof(as.get_name(x_h).c_str());
+                    Handle y_h = as.get_outgoing(pos_list_h, 1);
+                    OC_ASSERT(as.get_type(y_h) == NUMBER_NODE,
                                      "Handle y_h should be a 'NUMBER_NODE'.");
-                    float y = atof(as.getName(y_h).c_str());
+                    float y = atof(as.get_name(y_h).c_str());
                     SpaceServer::SpaceMapPoint p_walk_dest(x, y);
 
                     // define pred to find nearest obj
@@ -406,7 +406,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         //get handle of goto_obj action
                         string goto_obj_name =
                             get_instance(id::goto_obj)->get_name();
-                        Handle goto_obj_h = as.addNode(NODE, goto_obj_name);
+                        Handle goto_obj_h = as.add_node(NODE, goto_obj_name);
 
                         //get handle of the destination object
                         std::list<Handle> ret;
@@ -416,31 +416,31 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                                          "HandleSet should contain exactly one object.");
                         Handle obj_h = *ret.begin();
                         //get handle of speed
-                        Handle speed_h = as.addNode(NUMBER_NODE,
+                        Handle speed_h = as.add_node(NUMBER_NODE,
                                                     boost::lexical_cast<string>(GOTO_OBJ_SPEED));
 
                         HandleSeq arg_seq{subject_h, goto_obj_h, obj_h, speed_h};
                             
-                        new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
+                        new_arg_list_h = as.add_link(LIST_LINK, arg_seq);
                     } //~else
 
                 } //~if(walk)
                 else {//not a walk command
                     //we just need to flatten the action arguments
                     HandleSeq arg_seq{subject_h, per_h};
-                    if (as.getArity(arg_list_h) > 2) {
+                    if (as.get_arity(arg_list_h) > 2) {
 
-                        Handle action_arg_list_h = as.getOutgoing(arg_list_h, 2);
+                        Handle action_arg_list_h = as.get_outgoing(arg_list_h, 2);
                         OC_ASSERT(
-                                         as.getType(action_arg_list_h) == LIST_LINK,
+                                         as.get_type(action_arg_list_h) == LIST_LINK,
                                          "It is assumed that the arguments of the subject's action are wrapped in a listLink");
 
-                        HandleSeq action_arg_seq = as.getOutgoing(action_arg_list_h);
+                        HandleSeq action_arg_seq = as.get_outgoing(action_arg_list_h);
                         arg_seq.insert(arg_seq.end(),
                                        action_arg_seq.begin(),
                                        action_arg_seq.end());
                     }
-                    new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
+                    new_arg_list_h = as.add_link(LIST_LINK, arg_seq);
                 }
                 //if the instruction pointer arrives at that point of the code
                 //it means either that the action being tracked is not a
@@ -460,17 +460,17 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 }
 
                 HandleSeq el_seq{behaved_h, new_arg_list_h};
-                Handle bd_h = as.addLink(EVALUATION_LINK, el_seq);
+                Handle bd_h = as.add_link(EVALUATION_LINK, el_seq);
                 Temporal t(tl, tu);
                 Handle bd_t_h = as.getTimeServer().addTimeInfo(bd_h, t);
 
                 //add member link
                 HandleSeq memberLinkHS{bd_t_h, trickExemplarAtTime};
-                as.addLink(MEMBER_LINK, memberLinkHS);
+                as.add_link(MEMBER_LINK, memberLinkHS);
 
                 logger().debug(
                              "BE - New elementary behavior description created: %s",
-                             as.atomAsString(bd_t_h).c_str());
+                             as.atom_as_string(bd_t_h).c_str());
 
 
                 //this in order to tell the converter walk to goto that we are not in
@@ -603,11 +603,11 @@ bool BehaviorEncoder::isUpdated() const
 //Eval(Pred, List(Objname, ...))
 Handle extractObjectID::operator()(Handle h) const
 {
-    Handle out1 = atomspace->getOutgoing(h, 0);
-    if (atomspace->isNode(out1)) {
-        Handle out21 = atomspace->getOutgoing(h, 1);
-        if (atomspace->getArity(out21) > 0)
-            return atomspace->getOutgoing(out21, 0);
+    Handle out1 = atomspace->get_outgoing(h, 0);
+    if (atomspace->is_node(out1)) {
+        Handle out21 = atomspace->get_outgoing(h, 1);
+        if (atomspace->get_arity(out21) > 0)
+            return atomspace->get_outgoing(out21, 0);
     }
 
     OC_ASSERT(0, "Perception data syntax error!");

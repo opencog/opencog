@@ -80,7 +80,7 @@ void SavingLoading::save(const char *fileName,
                           "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
-    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.get_atomtable());
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -255,7 +255,7 @@ void SavingLoading::load(const char *fileName,
     logger().fine("Starting Memory load");
 
     // sanity check
-    if (atomSpace.getSize() > 0) {
+    if (atomSpace.get_size() > 0) {
         throw RuntimeException(TRACE_INFO,
             "SavingLoading - Can only load binary image from disk into an empty atom table.");
     }
@@ -291,7 +291,7 @@ void SavingLoading::load(const char *fileName,
     processed = 0;
     total = atomCount;
 
-    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.get_atomtable());
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);

@@ -79,13 +79,13 @@ float HopfieldServer::totalEnergy()
         for (int i = 0; i < N; i++) {
             if (i==j) continue;
             
-            Handle ret(a.getHandle(HEBBIAN_LINK, hGrid[i], hGrid[j]));
+            Handle ret(a.get_handle(HEBBIAN_LINK, hGrid[i], hGrid[j]));
             // If no links then skip
             if (NULL == ret) { continue; }
 
             float iSTI, jSTI;
-            iSTI = a.getNormalisedSTI(hGrid[i],false);
-            jSTI = a.getNormalisedSTI(hGrid[j],false);
+            iSTI = a.get_normalised_STI(hGrid[i],false);
+            jSTI = a.get_normalised_STI(hGrid[j],false);
             if (iSTI > 0.0f || jSTI > 0.0f) {
                 Type rType = ret->getType();
                 if (rType == SYMMETRIC_HEBBIAN_LINK) {
@@ -111,7 +111,7 @@ float HopfieldServer::totalEnergy()
     E = E * -0.5f;
     float thresholdSum = 0.0f;
     for (int i = 0; i < N; i++) {
-        thresholdSum += options->vizThreshold * a.getSTI(hGrid[i]);
+        thresholdSum += options->vizThreshold * a.get_STI(hGrid[i]);
     }
     E += thresholdSum;
     return E;
@@ -328,10 +328,10 @@ void HopfieldServer::init(int width, int height, int numLinks)
         for (int j = 0; j < this->height; j++) {
             nodeName = "Hopfield_";
             nodeName += to_string(i) + "_" + to_string(j);
-            Handle h = atomSpace.addNode(CONCEPT_NODE, nodeName.c_str());
+            Handle h = atomSpace.add_node(CONCEPT_NODE, nodeName.c_str());
             // We don't want the forgetting process to remove
             // the atoms perceiving the patterns
-            atomSpace.incVLTI(h);
+            atomSpace.inc_VLTI(h);
             hGrid.push_back(h);
             if (options->keyNodes) {
                 hGridKey.push_back(false);
@@ -390,9 +390,9 @@ void HopfieldServer::reset()
     HandleSeq toRemove;
 
     // Remove all links and replace
-    atomSpace.getHandlesByType(back_inserter(toRemove), HEBBIAN_LINK, true);
+    atomSpace.get_handles_by_type(back_inserter(toRemove), HEBBIAN_LINK, true);
     for (Handle handle: toRemove) {
-        atomSpace.removeAtom(handle);
+        atomSpace.remove_atom(handle);
     }
     resetNodes();
 
@@ -407,7 +407,7 @@ void HopfieldServer::addRandomLinks()
     int maxAttempts = 10000;
 
     // Add links if less than desired number and to replace forgotten links
-    atomSpace.getHandlesByType(back_inserter(countLinks), HEBBIAN_LINK, true);
+    atomSpace.get_handles_by_type(back_inserter(countLinks), HEBBIAN_LINK, true);
     int amount = this->links - countLinks.size();
 
     logger().fine("Adding %d random Hebbian Links.", amount);
@@ -419,16 +419,16 @@ void HopfieldServer::addRandomLinks()
         target = rng->randint(hGrid.size() - 1);
         if (target >= source) target++;
 
-        Handle selected = atomSpace.getHandle(HEBBIAN_LINK, hGrid[source], hGrid[target]);
+        Handle selected = atomSpace.get_handle(HEBBIAN_LINK, hGrid[source], hGrid[target]);
         // try links going the other way (because some Hebbian links are
         // ordered)
         if (selected == NULL) {
-            selected = atomSpace.getHandle(HEBBIAN_LINK, hGrid[target], hGrid[source]);
+            selected = atomSpace.get_handle(HEBBIAN_LINK, hGrid[target], hGrid[source]);
         }
         if (selected) {
             attempts++;
         } else {
-            Handle rl = atomSpace.addLink(SYMMETRIC_HEBBIAN_LINK, hGrid[source], hGrid[target]);
+            Handle rl = atomSpace.add_link(SYMMETRIC_HEBBIAN_LINK, hGrid[source], hGrid[target]);
             recentlyAddedLinks.push_back(rl);
 #ifdef HAVE_UBIGRAPH
             if (options->visualize) {
@@ -448,25 +448,25 @@ void HopfieldServer::resetNodes(bool toDefault)
     AtomSpace& a = getAtomSpace();
     HandleSeq nodes;
 
-    a.getHandlesByType(back_inserter(nodes), NODE, true);
+    a.get_handles_by_type(back_inserter(nodes), NODE, true);
 
 	if (toDefault) {
         for (Handle handle: nodes) {
 			// Set all nodes to default STI and default LTI
-			a.setSTI(handle, AttentionValue::DEFAULTATOMSTI);
-			a.setLTI(handle, AttentionValue::DEFAULTATOMLTI);
+			a.set_STI(handle, AttentionValue::DEFAULTATOMSTI);
+			a.set_LTI(handle, AttentionValue::DEFAULTATOMLTI);
 		}
 	} else {
 		// Set nodes to negative of AF boundary - patternStimulus*wages
 		AttentionValue::sti_t startSTI;
 		AttentionValue::lti_t startLTI;
-		startSTI = getAtomSpace().getAttentionalFocusBoundary() -
+		startSTI = getAtomSpace().get_attentional_focus_boundary() -
 			(patternStimulus * importUpdateAgent->getSTIAtomWage())/hGrid.size();
-		startLTI = getAtomSpace().getAttentionalFocusBoundary() -
+		startLTI = getAtomSpace().get_attentional_focus_boundary() -
 			(patternStimulus * importUpdateAgent->getLTIAtomWage())/hGrid.size();
         for (Handle handle: nodes) {
-			a.setSTI(handle, startSTI);
-			a.setLTI(handle, startLTI);
+			a.set_STI(handle, startSTI);
+			a.set_LTI(handle, startLTI);
 		}
 	}
 #ifdef HAVE_UBIGRAPH
@@ -496,14 +496,14 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
         // check whether destination exists in the map
         if (find(neighbours.begin(), neighbours.end(), hGrid[i]) == neighbours.end()) {
             // it doesn't, so add it.
-            a.addLink(SYMMETRIC_HEBBIAN_LINK, keyHandle, hGrid[i]);
+            a.add_link(SYMMETRIC_HEBBIAN_LINK, keyHandle, hGrid[i]);
         }
     
     }
     // randomly remove other links from other key nodes if # links > max
     HandleSeq links;
     std::back_insert_iterator< HandleSeq > lo(links);
-    atomSpace->getHandlesByType(lo, HEBBIAN_LINK, true);
+    atomSpace->get_handles_by_type(lo, HEBBIAN_LINK, true);
     int amountToRemove = links.size() - this->links;
     if (amountToRemove > 0 && keyNodes.size() == 1) {
         logger().info("Only one keyNode, so unable to remove any links to "
@@ -517,7 +517,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
         for (HandleSeq::iterator i = keyNodes.begin();
             i != keyNodes.end(); ++i) {
             if (*i == keyHandle) continue;
-            HandleSeq out = a.getOutgoing(*i);
+            HandleSeq out = a.get_outgoing(*i);
             eligibleForRemoval.insert(eligibleForRemoval.end(),
                     out.begin(), out.end());
         }
@@ -527,10 +527,10 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
             // select random link
             int index = rng->randint(eligibleForRemoval.size());
             Handle lh = eligibleForRemoval[index];
-            if (a.removeAtom(lh))
+            if (a.remove_atom(lh))
                 amountToRemove--;
             else
-                logger().error("Failed to remove link %s\n", atomSpace->atomAsString(lh).c_str());
+                logger().error("Failed to remove link %s\n", atomSpace->atom_as_string(lh).c_str());
         }
     }
 }
@@ -541,14 +541,14 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
     //! AtomSpace, by having the dest map keys be of type HandleSeq.
     //! returns in destinations mapped to link that got there.
     std::map<Handle,Handle> result;
-    HandleSeq links = getAtomSpace().getIncoming(src);
+    HandleSeq links = getAtomSpace().get_incoming(src);
     HandleSeq::iterator j;
     for(j = links.begin(); j != links.end(); ++j) {
         Handle lh = *j;
-        if (!classserver().isA(getAtomSpace().getType(lh),linkType))
+        if (!classserver().isA(getAtomSpace().get_type(lh),linkType))
             continue;
         Handle destH;
-        HandleSeq lseq = getAtomSpace().getOutgoing(lh);
+        HandleSeq lseq = getAtomSpace().get_outgoing(lh);
         // get handle at other end of the link
         for (HandleSeq::iterator k=lseq.begin();
                 k < lseq.end() && destH == Handle::UNDEFINED; ++k) {
@@ -580,13 +580,13 @@ Handle HopfieldServer::findKeyNode()
             float sim = 0.0f;
             Handle iHandle = *i;
             //get all Hebbian links from keyHandle
-            HandleSeq links = a.getIncoming(iHandle);
+            HandleSeq links = a.get_incoming(iHandle);
             HandleSeq::iterator j;
             for(j = links.begin(); j != links.end(); ++j) {
                 Handle lh = *j;
                 Handle patternH;
-                Type lt = a.getType(lh); 
-                HandleSeq lseq = a.getOutgoing(lh);
+                Type lt = a.get_type(lh); 
+                HandleSeq lseq = a.get_outgoing(lh);
                 // get handle at other end of the link
                 // TODO: create AtomSpace utility method that returns a map
                 // between link and destination, see getDestinationsFrom
@@ -598,7 +598,7 @@ Handle HopfieldServer::findKeyNode()
                 }
                 // check type of link 
                 if (lt == SYMMETRIC_HEBBIAN_LINK) {
-                    sim += a.getTV(lh)->getMean() * a.getNormalisedSTI(patternH,false);
+                    sim += a.get_TV(lh)->getMean() * a.get_normalised_STI(patternH,false);
                     break;
                 } else if (lt == ASYMMETRIC_HEBBIAN_LINK) {
                     logger().error("Asymmetic links are not supported by the Hopfield "
@@ -606,7 +606,7 @@ Handle HopfieldServer::findKeyNode()
                     break;
                 } else if (lt == INVERSE_HEBBIAN_LINK ||
                         lt == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
-                    sim += a.getTV(lh)->getMean() * -a.getNormalisedSTI(patternH,false);
+                    sim += a.get_TV(lh)->getMean() * -a.get_normalised_STI(patternH,false);
                     break;
                 }
             }
@@ -627,8 +627,8 @@ Handle HopfieldServer::findKeyNode()
             for (uint j = 0; j < hGrid.size(); j++) {
                 if (hGridKey[j]) continue;
                 
-                diff += fabs(ska.h(i,j,w) * a.getNormalisedSTI(hGrid[j],false)) +
-                    fabs(ska.h(j,i,w) * a.getNormalisedSTI(hGrid[i],false));
+                diff += fabs(ska.h(i,j,w) * a.get_normalised_STI(hGrid[j],false)) +
+                    fabs(ska.h(j,i,w) * a.get_normalised_STI(hGrid[i],false));
             }
             if (diff < minDiff) {
                 minDiff = diff;
@@ -689,7 +689,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             logger().fine("---Imprint:Finding key node");
             keyNodeHandle = findKeyNode();
             // Make key node "Active"
-            getAtomSpace().setSTI(keyNodeHandle, (AttentionValue::sti_t)
+            getAtomSpace().set_STI(keyNodeHandle, (AttentionValue::sti_t)
                     patternStimulus / max(pattern.activity(),1));
 #ifdef HAVE_UBIGRAPH
             if (options->visualize) {
@@ -780,7 +780,7 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 //    }
     // getAtomSpace().setSTI(imprintAgent, patternStimulus);
     
-    getAtomSpace().updateSTIFunds(-patternStimulus);
+    getAtomSpace().update_STI_funds(-patternStimulus);
 
     AttentionValuePtr old_av = imprintAgent->getAV();
     AttentionValuePtr new_av = createAV(patternStimulus,
@@ -867,7 +867,7 @@ Pattern HopfieldServer::getGridSTIAsPattern(bool blankKeys)
             // Keynodes should be blank
             out[i] = 0;
         } else {
-            out[i] = getAtomSpace().getSTI(h);
+            out[i] = getAtomSpace().get_STI(h);
         }
     }
     return out;
@@ -980,7 +980,7 @@ void HopfieldServer::printStatus()
         }
         cout << "| ";
         for (col = 0; col < width; col++) {
-            printf("% 1.2f ", nodeSTI[i*width + col] / (float) getAtomSpace().getMaxSTI());
+            printf("% 1.2f ", nodeSTI[i*width + col] / (float) getAtomSpace().get_max_STI());
         }
         cout << "| ";
 
@@ -1024,7 +1024,7 @@ void HopfieldServer::printLinks()
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    getAtomSpace().getHandlesByType(out_hi, LINK, true);
+    getAtomSpace().get_handles_by_type(out_hi, LINK, true);
     // For each, get prop, scale... and 
 //    for (Handle h: hs) {
 //        cout << getAtomSpace->atomAsString(h) << endl;

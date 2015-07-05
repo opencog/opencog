@@ -89,7 +89,7 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
 {
     // Retrieve the atoms in the AttentionalFocus
     HandleSeq attentionalFocus;
-    as->getHandleSetInAttentionalFocus(back_inserter(attentionalFocus));
+    as->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
 
     // Exclude the source atom
     attentionalFocus.erase(std::remove(attentionalFocus.begin(),
@@ -115,12 +115,12 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // Resulting in the sets of nodes that require
     // a new AsymmetricHebbianLink in either direction
     for (Handle atom : needToBeSource) {
-        as->addLink(ASYMMETRIC_HEBBIAN_LINK, atom, source)->setTruthValue(
-                    SimpleTruthValue::createTV(0, 1));
+        as->add_link(ASYMMETRIC_HEBBIAN_LINK, atom, source)->setTruthValue(
+                     SimpleTruthValue::createTV(0, 1));
     }
 
     for (Handle atom : needToBeTarget) {
-        as->addLink(ASYMMETRIC_HEBBIAN_LINK, source, atom)->setTruthValue(
-                    SimpleTruthValue::createTV(0, 1));
+        as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, atom)->setTruthValue(
+                     SimpleTruthValue::createTV(0, 1));
     }
 }

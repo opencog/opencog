@@ -98,40 +98,40 @@ void PsiActionSelectionAgent::initDemandGoalList()
         demandPredicateName = (*iDemandName) + "DemandGoal";
 
         // Get EvaluationLink to the demand goal
-        outgoings = { atomspace.addNode(PREDICATE_NODE, demandPredicateName) };
+        outgoings = { atomspace.add_node(PREDICATE_NODE, demandPredicateName) };
 
-        this->psi_demand_goal_list.push_back(atomspace.addLink(EVALUATION_LINK,
-                                                               outgoings));
+        this->psi_demand_goal_list.push_back(atomspace.add_link(EVALUATION_LINK,
+                                                                outgoings));
 
     }// for
 
     // Create an ReferenceLink holding all the demand goals (EvaluationLink)
-    outgoings = { atomspace.addNode(CONCEPT_NODE, "psi_demand_goal_list"),
-                  atomspace.addLink(LIST_LINK, this->psi_demand_goal_list) };
+    outgoings = { atomspace.add_node(CONCEPT_NODE, "psi_demand_goal_list"),
+                  atomspace.add_link(LIST_LINK, this->psi_demand_goal_list) };
     Handle referenceLink = AtomSpaceUtil::addLink(atomspace, REFERENCE_LINK,
                                                   outgoings, true);
 
     logger().debug("PsiActionSelectionAgent::%s - "
                    "Add the list of demand goals to AtomSpace: %s [cycle = %d]",
-                   __FUNCTION__, atomspace.atomAsString(referenceLink).c_str(),
+                   __FUNCTION__, atomspace.atom_as_string(referenceLink).c_str(),
                    this->cycleCount);
 }
 
 void PsiActionSelectionAgent::getActions(Handle hStep, HandleSeq & actions)
 {
-    opencog::Type atomType = atomspace.getType(hStep);
+    opencog::Type atomType = atomspace.get_type(hStep);
 
     if (atomType == EXECUTION_LINK) {
         actions.insert(actions.begin(), hStep);
     }
     else if (atomType == AND_LINK ||
             atomType == SEQUENTIAL_AND_LINK) {
-        for ( Handle hOutgoing : atomspace.getOutgoing(hStep) ) {
+        for ( Handle hOutgoing : atomspace.get_outgoing(hStep) ) {
             this->getActions(hOutgoing, actions);
         }
     }
     else if (atomType == OR_LINK ) {
-        const HandleSeq & outgoings = atomspace.getOutgoing(hStep);
+        const HandleSeq & outgoings = atomspace.get_outgoing(hStep);
         Handle hRandomSelected = rand_element(outgoings);
         this->getActions(hRandomSelected, actions);
     }
@@ -141,19 +141,19 @@ bool PsiActionSelectionAgent::getPlan()
 {
     // Check the state of latest planning
     HandleSeq tempOutgoingSet =
-        { atomspace.addNode(PREDICATE_NODE, "plan_success"),
-          atomspace.addLink(LIST_LINK, HandleSeq()) };
+        { atomspace.add_node(PREDICATE_NODE, "plan_success"),
+          atomspace.add_link(LIST_LINK, HandleSeq()) };
 
-    Handle hPlanSuccessEvaluationLink = atomspace.addLink(EVALUATION_LINK,
-                                                          tempOutgoingSet);
-    if ( atomspace.getTV(hPlanSuccessEvaluationLink)->getMean() < 0.9 )
+    Handle hPlanSuccessEvaluationLink = atomspace.add_link(EVALUATION_LINK,
+                                                           tempOutgoingSet);
+    if ( atomspace.get_TV(hPlanSuccessEvaluationLink)->getMean() < 0.9 )
         return false;
 
     // Get the planning result
     Handle hSelectedDemandGoal =
         AtomSpaceUtil::getReference(atomspace,
-                                    atomspace.getHandle(CONCEPT_NODE,
-                                                        "plan_selected_demand_goal"
+                                    atomspace.get_handle(CONCEPT_NODE,
+                                                         "plan_selected_demand_goal"
                                                        )
                                    );
 
@@ -161,30 +161,30 @@ bool PsiActionSelectionAgent::getPlan()
 
     Handle hRuleList =
         AtomSpaceUtil::getReference(atomspace,
-                                    atomspace.getHandle(CONCEPT_NODE,
+                                    atomspace.get_handle(CONCEPT_NODE,
                                                         "plan_rule_list"
                                                        )
                                    );
 
-    this->plan_rule_list = atomspace.getOutgoing(hRuleList);
+    this->plan_rule_list = atomspace.get_outgoing(hRuleList);
 
     Handle hContextList =
         AtomSpaceUtil::getReference(atomspace,
-                                    atomspace.getHandle(CONCEPT_NODE,
+                                    atomspace.get_handle(CONCEPT_NODE,
                                                         "plan_context_list"
                                                        )
                                    );
 
-    this->plan_context_list = atomspace.getOutgoing(hContextList);
+    this->plan_context_list = atomspace.get_outgoing(hContextList);
 
     Handle hActionList =
         AtomSpaceUtil::getReference(atomspace,
-                                    atomspace.getHandle(CONCEPT_NODE,
+                                    atomspace.get_handle(CONCEPT_NODE,
                                                         "plan_action_list"
                                                        )
                                    );
 
-    this->plan_action_list = atomspace.getOutgoing(hActionList);
+    this->plan_action_list = atomspace.get_outgoing(hActionList);
     this->temp_action_list = this->plan_action_list;
 
     return true;
@@ -197,7 +197,7 @@ void PsiActionSelectionAgent::printPlan()
 
     std::cout << std::endl << "Selected Demand Goal [cycle = "
               << this->cycleCount << "]:" << std::endl
-              << atomspace.atomAsString(this->plan_selected_demand_goal)
+              << atomspace.atom_as_string(this->plan_selected_demand_goal)
               << std::endl;
 
     int i = 1;
@@ -209,7 +209,7 @@ void PsiActionSelectionAgent::printPlan()
             continue;
         }
         std::cout << std::endl << "Step No."<< i
-                  << std::endl << atomspace.atomAsString(hAction);
+                  << std::endl << atomspace.atom_as_string(hAction);
 
         ++i;
     }
@@ -297,7 +297,7 @@ void PsiActionSelectionAgent::run()
 
             std::cout << "'do_planning' can not find any suitable "
                       << "plan for the selected demand goal:"
-                      << atomspace.atomAsString(this->plan_selected_demand_goal)
+                      << atomspace.atom_as_string(this->plan_selected_demand_goal)
                       << ", [cycle = "
                       << this->cycleCount << "]." << std::endl;
             return;
@@ -323,7 +323,7 @@ void PsiActionSelectionAgent::run()
             logger().debug("PsiActionSelectionAgent::%s - "
                            "do planning for the Demand Goal: %s [cycle = %d]",
                            __FUNCTION__,
-                           atomspace.atomAsString(this->plan_selected_demand_goal).c_str(),
+                           atomspace.atom_as_string(this->plan_selected_demand_goal).c_str(),
                            this->cycleCount);
     }
 #endif // HAVE_GUILE

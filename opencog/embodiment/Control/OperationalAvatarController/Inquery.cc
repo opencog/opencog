@@ -83,7 +83,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
     {
         string *concept = boost::get<string>(&stateOwnerParamValue);
         if (concept)
-            return atomSpace->getHandle(CONCEPT_NODE, *concept);
+            return atomSpace->get_handle(CONCEPT_NODE, *concept);
     }
 
     return Handle::UNDEFINED;
@@ -133,14 +133,14 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      }
 
 //     std::cout<<"Debug: evalLink from the Atomspace: " << std::endl
-//             << atomSpace->atomAsString(evalLink).c_str() <<std::endl;
+//             << atomSpace->atom_as_string(evalLink).c_str() <<std::endl;
 
-     if (atomSpace->getMean( evalLink ) >= 0.5f )
+     if (atomSpace->get_mean( evalLink ) >= 0.5f )
          is_true = true;
      else
          is_true = false;
 
-     Handle listLink = atomSpace->getOutgoing(evalLink, 1);
+     Handle listLink = atomSpace->get_outgoing(evalLink, 1);
 
      if (listLink== Handle::UNDEFINED)
      {
@@ -155,7 +155,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      // the size of the state owners
      int ownerSize = stateOwnerList.size();
 
-     HandleSeq listLinkOutgoings = atomSpace->getOutgoing(listLink);
+     HandleSeq listLinkOutgoings = atomSpace->get_outgoing(listLink);
 
 
      if ( listLinkOutgoings.size() == (std::size_t)ownerSize )
@@ -177,7 +177,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
              return UNDEFINED_VALUE;
          }
 
-         if (atomSpace->getMean(evalLink) > 0.5)
+         if (atomSpace->get_mean(evalLink) > 0.5)
              return "true";
          else
              return "false";
@@ -192,7 +192,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          //               (ConceptNode "Stone" (av -23 0 0))
          //            )
          //         )
-         Handle valueHandle = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+         Handle valueHandle = atomSpace->get_outgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
 
          if ( valueHandle == Handle::UNDEFINED )
          {
@@ -208,10 +208,10 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          case FLOAT_CODE:
          case STRING_CODE:
 
-             return (atomSpace->getName(valueHandle));
+             return (atomSpace->get_name(valueHandle));
 
          case ENTITY_CODE:
-             return Entity(atomSpace->getName(valueHandle) ,PAI::getObjectTypeFromHandle(*atomSpace, valueHandle));
+             return Entity(atomSpace->get_name(valueHandle) ,PAI::getObjectTypeFromHandle(*atomSpace, valueHandle));
 
          default:
              logger().error("Inquery::getParamValueFromAtomspace : There is more than one value node for the Evaluation Link: "
@@ -224,8 +224,8 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      else if (listLinkOutgoings.size() - ownerSize == 2)
      {
          // when this state value is fuzzy number interval, there will be 2 number nodes for the value
-         Handle valueHandle1 = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
-         Handle valueHandle2 = atomSpace->getOutgoing(listLink, ownerSize + 1);
+         Handle valueHandle1 = atomSpace->get_outgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+         Handle valueHandle2 = atomSpace->get_outgoing(listLink, ownerSize + 1);
 
          if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) )
          {
@@ -238,15 +238,15 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          {
          case FUZZY_INTERVAL_INT_CODE:
          {
-             int lowInt = atoi(atomSpace->getName(valueHandle1).c_str());
-             int highInt = atoi(atomSpace->getName(valueHandle2).c_str());
+             int lowInt = atoi(atomSpace->get_name(valueHandle1).c_str());
+             int highInt = atoi(atomSpace->get_name(valueHandle2).c_str());
              return FuzzyIntervalInt(lowInt,highInt);
          }
 
          case FUZZY_INTERVAL_FLOAT_CODE:
          {
-             float lowf = atof(atomSpace->getName(valueHandle1).c_str());
-             float highf = atof(atomSpace->getName(valueHandle2).c_str());
+             float lowf = atof(atomSpace->get_name(valueHandle1).c_str());
+             float highf = atof(atomSpace->get_name(valueHandle2).c_str());
              return FuzzyIntervalFloat(lowf,highf);
          }
 
@@ -268,9 +268,9 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          //              (NumberNode "104.5" (av -23 0 0))
          //           )
          //        )
-         Handle valueHandle1 = atomSpace->getOutgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
-         Handle valueHandle2 = atomSpace->getOutgoing(listLink, ownerSize + 1);
-         Handle valueHandle3 = atomSpace->getOutgoing(listLink, ownerSize + 2);
+         Handle valueHandle1 = atomSpace->get_outgoing(listLink, ownerSize);// the ownerSize is just the index of the value node
+         Handle valueHandle2 = atomSpace->get_outgoing(listLink, ownerSize + 1);
+         Handle valueHandle3 = atomSpace->get_outgoing(listLink, ownerSize + 2);
 
          if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
          {
@@ -279,9 +279,9 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
              return UNDEFINED_VALUE;
          }
 
-         double x = atof(atomSpace->getName(valueHandle1).c_str());
-         double y = atof(atomSpace->getName(valueHandle2).c_str());
-         double z = atof(atomSpace->getName(valueHandle3).c_str());
+         double x = atof(atomSpace->get_name(valueHandle1).c_str());
+         double y = atof(atomSpace->get_name(valueHandle2).c_str());
+         double z = atof(atomSpace->get_name(valueHandle3).c_str());
 
          switch (state.getActionParamType().getCode())
          {
@@ -350,11 +350,11 @@ ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
     {
         case ENTITY_CODE:
         {
-            return Entity(atomSpace->getName(valueH) ,PAI::getObjectTypeFromHandle(*atomSpace, valueH));
+            return Entity(atomSpace->get_name(valueH) ,PAI::getObjectTypeFromHandle(*atomSpace, valueH));
         }
         case BOOLEAN_CODE:
         {
-            string strVar = atomSpace->getName(valueH);
+            string strVar = atomSpace->get_name(valueH);
             if ((strVar == "true")||(strVar == "True"))
                 return opencog::oac::SV_TRUE;
             else
@@ -364,13 +364,13 @@ ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
         case FLOAT_CODE:
         case STRING_CODE:
         {
-            return (atomSpace->getName(valueH));
+            return (atomSpace->get_name(valueH));
         }
         case VECTOR_CODE:
         {
-            Handle valueHandle1 = atomSpace->getOutgoing(valueH, 0);// the ownerSize is just the index of the value node
-            Handle valueHandle2 = atomSpace->getOutgoing(valueH, 1);
-            Handle valueHandle3 = atomSpace->getOutgoing(valueH, 2);
+            Handle valueHandle1 = atomSpace->get_outgoing(valueH, 0);// the ownerSize is just the index of the value node
+            Handle valueHandle2 = atomSpace->get_outgoing(valueH, 1);
+            Handle valueHandle3 = atomSpace->get_outgoing(valueH, 2);
 
             if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
             {
@@ -379,9 +379,9 @@ ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
                 return UNDEFINED_VALUE;
             }
 
-            double x = atof(atomSpace->getName(valueHandle1).c_str());
-            double y = atof(atomSpace->getName(valueHandle2).c_str());
-            double z = atof(atomSpace->getName(valueHandle3).c_str());
+            double x = atof(atomSpace->get_name(valueHandle1).c_str());
+            double y = atof(atomSpace->get_name(valueHandle2).c_str());
+            double z = atof(atomSpace->get_name(valueHandle3).c_str());
 
             return Vector(x,y,z);
         }
@@ -1348,18 +1348,18 @@ HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<i
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
 //    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+//            << atomSpace->atom_as_string(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
 //    std::cout<<"Debug: pattern matching results: " << std::endl
-//            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+//            << atomSpace->atom_as_string(hResultListLink).c_str() <<std::endl;
 
     // Get result
     // Note: Don't forget remove the hResultListLink
-    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
-    atomSpace->removeAtom(hResultListLink);
+    HandleSeq resultSet = atomSpace->get_outgoing(hResultListLink);
+    atomSpace->remove_atom(hResultListLink);
 
     // loop through all the result groups, remove the groups that bind the same variables to different variables
     if (allVariables.size() > 1)
@@ -1367,7 +1367,7 @@ HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<i
         HandleSeq nonDuplicatedResultSet;
         for (Handle listH  : resultSet)
         {
-            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+            HandleSeq oneGroup = atomSpace->get_outgoing(listH);
             sort(oneGroup.begin(),oneGroup.end());
 
             if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
@@ -1525,7 +1525,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             {
                 for (Handle listH : hs)
                 {
-                    atomSpace->removeAtom(listH);
+                    atomSpace->remove_atom(listH);
                 }
             }
         }
@@ -1538,9 +1538,9 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             HandleSeqSeq tmpResult; // every element is a vector of outgoings for a list link
             for (Handle listH : resultSets.front())
             {
-                HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
+                HandleSeq candidateHandlesInOneGroup = atomSpace->get_outgoing(listH);
                 tmpResult.push_back(candidateHandlesInOneGroup);
-                atomSpace->removeAtom(listH);
+                atomSpace->remove_atom(listH);
             }
 
             for (ssi = second; ssi != resultSets.end(); ssi ++)
@@ -1552,11 +1552,11 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
                 {
                     for (Handle listH : addToSeq)
                     {
-                        HandleSeq handlesInOneGroup = atomSpace->getOutgoing(listH);
+                        HandleSeq handlesInOneGroup = atomSpace->get_outgoing(listH);
                         HandleSeq combination = sq;
                         combination.insert(combination.end(),handlesInOneGroup.begin(), handlesInOneGroup.end());
                         tmptmpResult.push_back(combination);
-                        atomSpace->removeAtom(listH);
+                        atomSpace->remove_atom(listH);
                     }
                 }
 
@@ -1567,20 +1567,20 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             HandleSeq tmpResultSet;
             for (HandleSeq hs : tmpResult)
             {
-                Handle listLink = atomSpace->addLink(LIST_LINK, hs);
+                Handle listLink = atomSpace->add_link(LIST_LINK, hs);
                 tmpResultSet.push_back(listLink);
             }
 
             // loop through all the result groups, remove the groups that bind the same variables to different variables
             for (Handle listH : tmpResultSet)
             {
-                HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+                HandleSeq oneGroup = atomSpace->get_outgoing(listH);
                 sort(oneGroup.begin(),oneGroup.end());
 
                 if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
                     result.push_back(listH);
                 else
-                    atomSpace->removeAtom(listH);
+                    atomSpace->remove_atom(listH);
 
             }
 

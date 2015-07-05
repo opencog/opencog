@@ -52,27 +52,27 @@ void IsNoisyPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     }
 
     logger().fine("IsNoisy - Updating is_noisy for obj %s.",
-                 atomSpace.getName(object).c_str());
+                 atomSpace.get_name(object).c_str());
 
     // truth value - mean equals 0.0 --> not noisy
     //               mean equals 1.0 --> is  noisy
     TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
 
     // 1. agents (pet, humanoid or avatar) are noisy since they can produce sounds
-    if ( atomSpace.getType(object) == AVATAR_NODE ||
-         atomSpace.getType(object) == PET_NODE ||
-         atomSpace.getType(object) == HUMANOID_NODE) {
+    if ( atomSpace.get_type(object) == AVATAR_NODE ||
+         atomSpace.get_type(object) == PET_NODE ||
+         atomSpace.get_type(object) == HUMANOID_NODE) {
         
         tv = SimpleTruthValue::createTV(1.0, 1.0);
         
-        std::string objectName = atomSpace.getName( object );
+        std::string objectName = atomSpace.get_name( object );
 
         // 1.1 create a frame for this predicate
         std::map<std::string, Handle> elements;
-        elements["Noisy_event"] = atomSpace.addNode( SEME_NODE, "walking" );
-        elements["Sound"] = atomSpace.addNode( SEME_NODE, "scratch" );
-        elements["Sound_source"] = atomSpace.addNode( SEME_NODE, objectName );
-        elements["Degree"] = atomSpace.addNode( SEME_NODE, "medium" );
+        elements["Noisy_event"] = atomSpace.add_node( SEME_NODE, "walking" );
+        elements["Sound"] = atomSpace.add_node( SEME_NODE, "scratch" );
+        elements["Sound_source"] = atomSpace.add_node( SEME_NODE, objectName );
+        elements["Degree"] = atomSpace.add_node( SEME_NODE, "medium" );
         
         AtomSpaceUtil::setPredicateFrameFromHandles(atomSpace, "#Make_noise",
             objectName + "_is_noisy", elements, tv );

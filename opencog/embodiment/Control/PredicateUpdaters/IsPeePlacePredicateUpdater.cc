@@ -52,26 +52,26 @@ void IsPeePlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
     }
 
     logger().fine("IsPeePlace - Updating is_pee_place for obj %s.",
-                 atomSpace.getName(object).c_str());
+                 atomSpace.get_name(object).c_str());
 
     // truth value - mean equals 0.0 --> not pee place
     //     mean equals 1.0 --> is pee place
     TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
 
     // only structures are considered pee place
-    if (atomSpace.getType(object) == STRUCTURE_NODE) {
-        std::string objectName = atomSpace.getName(object);
-        Handle objectSemeNode = atomSpace.addNode( SEME_NODE, objectName );        
-        Handle staticObjectConceptNode = atomSpace.addNode( CONCEPT_NODE, "Structure" );
+    if (atomSpace.get_type(object) == STRUCTURE_NODE) {
+        std::string objectName = atomSpace.get_name(object);
+        Handle objectSemeNode = atomSpace.add_node( SEME_NODE, objectName );        
+        Handle staticObjectConceptNode = atomSpace.add_node( CONCEPT_NODE, "Structure" );
 
         HandleSeq inheritsFrom;
         inheritsFrom.push_back( objectSemeNode );        
         inheritsFrom.push_back( staticObjectConceptNode );
-        Handle link = atomSpace.addLink( INHERITANCE_LINK, inheritsFrom );
+        Handle link = atomSpace.add_link( INHERITANCE_LINK, inheritsFrom );
         
         tv = SimpleTruthValue::createTV(1.0, 1.0);
-        atomSpace.setLTI( link, 1);
-        atomSpace.setTV( link, tv );
+        atomSpace.set_LTI( link, 1);
+        atomSpace.set_TV( link, tv );
 
     }
     // all other objects are not pee places

@@ -91,7 +91,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     setSchemaArguments(argumentsList);
 
     //look for the exemplars time intervals to fill spaceMaps
-    Handle trick_h = atomSpace.getHandle(CONCEPT_NODE, schm);
+    Handle trick_h = atomSpace.get_handle(CONCEPT_NODE, schm);
     if (trick_h == Handle::UNDEFINED) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "LearnMessage - AtomSpace does not contain '%s' concept node.",
@@ -120,22 +120,22 @@ throw (opencog::InvalidParamException, std::bad_exception):
 #else
                     logger().debug(
                                  "LearnMessage - adding space map (%s) to the message.",
-                                 atomSpace.atomAsString(sm_h).c_str());
+                                 atomSpace.atom_as_string(sm_h).c_str());
                     spaceMaps.push_back(spacServer.mapToString(sm_h));
 #endif
                 } else {
                     logger().error(
                                  "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
-                                 atomSpace.atomAsString(sm_h).c_str());
+                                 atomSpace.atom_as_string(sm_h).c_str());
                     // TODO: is this really needed? If not, we can get a const
                     // AtomSpace reference instead. Check if this atom will be
                     // removed by forgetting mechanism later anyway
-                    atomSpace.removeAtom(sm_h, true);
+                    atomSpace.remove_atom(sm_h, true);
                 }
             } catch (opencog::AssertionException& e) {
                 logger().error(
                              "LearnMessage - Failed to add map (%s) into LearnMessage.",
-                             atomSpace.atomAsString(sm_h).c_str());
+                             atomSpace.atom_as_string(sm_h).c_str());
             }
         }
     }
@@ -144,14 +144,14 @@ throw (opencog::InvalidParamException, std::bad_exception):
     for (Handle sm_h : mapsToSend) {
         logger().debug(
                      "LearnMessage - adding space map (%s) to the message.",
-                     atomSpace.atomAsString(sm_h).c_str());
+                     atomSpace.atom_as_string(sm_h).c_str());
         spaceMaps.push_back(spacServer.MapToString(sm_h));
     }
 #endif
 
     // why are we assigning the entire atomspace?
     HandleSeq hs;
-    atomSpace.getHandlesByType(back_inserter(hs), ATOM, true);
+    atomSpace.get_handles_by_type(back_inserter(hs), ATOM, true);
     // behaviorDescriptions.assign(exporter.toXML(hs));
     logger().debug("LearnMessage - finished creating message (behavior descriptors just added.");
 }

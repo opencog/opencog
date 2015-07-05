@@ -150,7 +150,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
 {
     opencog::AtomSpace& as = this->agent.getAtomSpace();
     HandleSeq commands(2);
-    commands[0] = as.addNode( PREDICATE_NODE, predicateName );
+    commands[0] = as.add_node( PREDICATE_NODE, predicateName );
     commands[1] = Handle::UNDEFINED;
     
     Type types[] = {PREDICATE_NODE, LIST_LINK };
@@ -166,7 +166,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     unsigned int k;
     for( k = 0; k < evalLinks.size(); ++k ) {
         Handle latestEvalLink = evalLinks[k];
-        TruthValuePtr tvp = as.getTV(latestEvalLink);
+        TruthValuePtr tvp = as.get_TV(latestEvalLink);
         if ( tvp->isNullTv() || tvp->getMean() == 0 ) {
             continue;
         } // if
@@ -184,8 +184,8 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
 
         activeEvalLinkFound = true;
         logger().debug( "LanguageComprehension::%s - Chosen link '%s'", 
-                        __FUNCTION__, as.atomAsString( evalLinks[k] ).c_str() );
-        arguments = as.getOutgoing(as.getOutgoing( evalLinks[k], 1 ));
+                        __FUNCTION__, as.atom_as_string( evalLinks[k] ).c_str() );
+        arguments = as.get_outgoing(as.get_outgoing( evalLinks[k], 1 ));
     } // for
 
     return arguments;
@@ -212,33 +212,33 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
     unsigned int i;
     for( i = 0; i < elements.size(); ++i ) {
         Handle execLink = elements[i];
-        if (EXECUTION_LINK != as.getType( execLink ) ) {
+        if (EXECUTION_LINK != as.get_type( execLink ) ) {
             logger().error( "LanguageComprehension::%s - Only Execution links are allowed to be here.",
                             __FUNCTION__ );
             return;
         } // if
-        if ( as.getArity( execLink ) != 2 ) {
+        if ( as.get_arity( execLink ) != 2 ) {
             logger().error( "LanguageComprehension::%s - Malformed Execution link. It should has 2 outgoings but %d was found.", 
-                             __FUNCTION__, as.getArity(execLink) );
+                             __FUNCTION__, as.get_arity(execLink) );
             return;
         } // if
-        Handle gsn = as.getOutgoing(execLink, 0);
-        Handle argumentsList = as.getOutgoing(execLink, 1 );
-        if ( GROUNDED_SCHEMA_NODE != as.getType(gsn) || LIST_LINK != as.getType(argumentsList) ) {
+        Handle gsn = as.get_outgoing(execLink, 0);
+        Handle argumentsList = as.get_outgoing(execLink, 1 );
+        if ( GROUNDED_SCHEMA_NODE != as.get_type(gsn) || LIST_LINK != as.get_type(argumentsList) ) {
             logger().error( "LanguageComprehension::%s - Malformed Execution link. "
                             "It should link a GroundedSchemaNode and a ListLink of arguments. "
                             "But types are 0 -> %d and 1 -> %d", 
                             __FUNCTION__, 
-                            as.getType(gsn), as.getType(argumentsList) 
+                            as.get_type(gsn), as.get_type(argumentsList) 
                           );
             return;
         } // if
         std::vector<std::string> arguments;
-        arguments.push_back( as.getName(gsn) );
+        arguments.push_back( as.get_name(gsn) );
         unsigned int j;
-        unsigned int numberOfArguments = as.getArity( argumentsList );
+        unsigned int numberOfArguments = as.get_arity( argumentsList );
         for( j = 0; j < numberOfArguments; ++j ) {
-            arguments.push_back( as.getName( as.getOutgoing( argumentsList, j ) ) );
+            arguments.push_back( as.get_name( as.get_outgoing( argumentsList, j ) ) );
         } // for
         
         std::stringstream argsDump;
@@ -299,7 +299,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
                 logger().error( "LanguageComprehension::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );
             } 
 
-            frameName = as.getName( as.getOutgoing( inheritanceLinks[0], 1 ) );
+            frameName = as.get_name( as.get_outgoing( inheritanceLinks[0], 1 ) );
             logger().debug( "LanguageComprehension::%s - FrameName detected: %s", 
                             __FUNCTION__, 
                             frameName.c_str() 
@@ -308,7 +308,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
         else {
             logger().debug( "LanguageComprehension::%s - The given handle '%s' isn't a Frame instance. It doesn't inherit from a DEFINED_FRAME_NODE",
                             __FUNCTION__,
-                            as.getName(frameInstance).c_str() 
+                            as.get_name(frameInstance).c_str() 
                           );
             return "";
         } 
@@ -320,7 +320,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
         logger().debug( "LanguageComprehension::%s - Number of frame elements found: '%d' for frame instance: '%s'", 
                         __FUNCTION__, 
                         frameElementInstanceNameValues.size(), 
-                        as.atomAsString(frameInstance).c_str() 
+                        as.atom_as_string(frameInstance).c_str() 
                       );
         
         std::map<std::string, Handle>::iterator it;
@@ -330,7 +330,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
             logger().debug( "LanguageComprehension::%s - Inspecting frame element instance name: '%s' value: '%s'", 
                             __FUNCTION__, 
                             it->first.c_str(),
-                            as.atomAsString(it->second).c_str() 
+                            as.atom_as_string(it->second).c_str() 
                           );
             std::string frameElementName = frameName + ":" + it->first;
             handles.push_back( std::pair<std::string, Handle>(frameElementName, it->second) );
@@ -367,7 +367,7 @@ std::string LanguageComprehension::resolveFrames2Sentence(void)
     std::string answerFrameInstancesStr; 
 
     for (Handle frameInstance : answerFrameInstances) {
-        answerFrameInstancesStr += as.atomAsString(frameInstance) + "    "; 
+        answerFrameInstancesStr += as.atom_as_string(frameInstance) + "    "; 
     }
 
     // resolve frame to relex
@@ -460,30 +460,30 @@ HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
 
     HandleSeq heardSentences;
     
-    Handle node = atomSpace.getHandle( PREDICATE_NODE, "heard_sentence" );
+    Handle node = atomSpace.get_handle( PREDICATE_NODE, "heard_sentence" );
     if ( node == Handle::UNDEFINED ) {
         return heardSentences;
     } 
 
-    HandleSeq incomingSet = atomSpace.getIncoming(node);
+    HandleSeq incomingSet = atomSpace.get_incoming(node);
 
     for (Handle incoming : incomingSet) {
-        if ( atomSpace.getType(incoming) != EVALUATION_LINK ||
-             atomSpace.getTV(incoming)->isNullTv() || 
-             atomSpace.getMean(incoming) == 0 ||
-             atomSpace.getArity(incoming) != 2 ||
-             atomSpace.getOutgoing(incoming, 1) == node ) {
+        if ( atomSpace.get_type(incoming) != EVALUATION_LINK ||
+             atomSpace.get_TV(incoming)->isNullTv() || 
+             atomSpace.get_mean(incoming) == 0 ||
+             atomSpace.get_arity(incoming) != 2 ||
+             atomSpace.get_outgoing(incoming, 1) == node ) {
             continue;
         } 
 
-        Handle listLink = atomSpace.getOutgoing(incoming, 1);
-        Handle sentenceNode = atomSpace.getOutgoing(listLink, 0);
-        if ( atomSpace.getType(sentenceNode) != SENTENCE_NODE ) {
+        Handle listLink = atomSpace.get_outgoing(incoming, 1);
+        Handle sentenceNode = atomSpace.get_outgoing(listLink, 0);
+        if ( atomSpace.get_type(sentenceNode) != SENTENCE_NODE ) {
             continue;
         }
 
         // "to:agentId: sentencetext"
-        std::string nodeName = atomSpace.getName( sentenceNode );
+        std::string nodeName = atomSpace.get_name( sentenceNode );
         static const boost::regex pattern( "^to:[^:]+:\\s.+$");
         if ( !boost::regex_match( nodeName, pattern ) ) {
             logger().error( "LanguageComprehension::%s - Invalid sentence node '%s'. "
@@ -500,18 +500,18 @@ HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
 std::string LanguageComprehension::getTextFromSentencePredicate( Handle evalLink )
 {
     opencog::AtomSpace& atomSpace = agent.getAtomSpace( );    
-    Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, "heard_sentence" );
+    Handle predicateNode = atomSpace.get_handle( PREDICATE_NODE, "heard_sentence" );
     if ( evalLink == Handle::UNDEFINED ||
          predicateNode == Handle::UNDEFINED ||
-         atomSpace.getType( evalLink ) != EVALUATION_LINK || 
-         atomSpace.getArity( evalLink ) != 2 ||
-         atomSpace.getOutgoing( evalLink, 0 ) != predicateNode ) {
+         atomSpace.get_type( evalLink ) != EVALUATION_LINK || 
+         atomSpace.get_arity( evalLink ) != 2 ||
+         atomSpace.get_outgoing( evalLink, 0 ) != predicateNode ) {
         return "";
     } // if
-    Handle listLink = atomSpace.getOutgoing( evalLink, 1 );
-    Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+    Handle listLink = atomSpace.get_outgoing( evalLink, 1 );
+    Handle sentenceNode = atomSpace.get_outgoing( listLink, 0 );
 
-    std::string nodeName = atomSpace.getName( sentenceNode );
+    std::string nodeName = atomSpace.get_name( sentenceNode );
     static const boost::regex pattern( "^to:[^:]+:\\s(.+)$");
     boost::smatch matchResults;
     if ( !boost::regex_match( nodeName, matchResults, pattern ) ) {
@@ -555,12 +555,12 @@ void LanguageComprehension::answerQuestion()
     for (Handle hEvalSentence : heardSentences) {
         logger().debug("LanguageComprehension::%s - Cached heard sentence: %s", 
                        __FUNCTION__, 
-                       atomSpace.atomAsString(hEvalSentence).c_str()
+                       atomSpace.atom_as_string(hEvalSentence).c_str()
                       ); 
     }
 
-    Handle listLink = atomSpace.getOutgoing( heardSentences.front(), 1 );
-    Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+    Handle listLink = atomSpace.get_outgoing( heardSentences.front(), 1 );
+    Handle sentenceNode = atomSpace.get_outgoing( listLink, 0 );
 
     // If latest heard sentence is not a question, do not process any more. 
     bool bIsQuestion = AtomSpaceUtil::isPredicateTrue( atomSpace, "is_question", sentenceNode ); 
@@ -572,7 +572,7 @@ void LanguageComprehension::answerQuestion()
                         __FUNCTION__, 
                         bIsQuestion? "True": "False", 
                         bWasAnswered? "True": "False", 
-                        atomSpace.atomAsString(sentenceNode).c_str()
+                        atomSpace.atom_as_string(sentenceNode).c_str()
                       );
         return; 
     }
@@ -622,7 +622,7 @@ void LanguageComprehension::answerQuestion()
         } 
         else {
             HandleSeq link(2);
-            link[0] = atomSpace.getHandle( PREDICATE_NODE, "unknownTerm" );
+            link[0] = atomSpace.get_handle( PREDICATE_NODE, "unknownTerm" );
             link[1] = Handle::UNDEFINED;
 
             if ( link[0] != Handle::UNDEFINED ) {
@@ -637,11 +637,11 @@ void LanguageComprehension::answerQuestion()
                 bool unknownTermFound = false;
                 unsigned int i;
                 for (i = 0; i < evalLinks.size( ); ++i ) {
-                    TruthValuePtr ev_tv = atomSpace.getTV( evalLinks[i] );
+                    TruthValuePtr ev_tv = atomSpace.get_TV( evalLinks[i] );
                     if ( ev_tv->isNullTv() || ev_tv->getMean() == 0 ) {
                         continue;                    
                     }
-                    atomSpace.setTV( evalLinks[i], TruthValue::FALSE_TV() );
+                    atomSpace.set_TV( evalLinks[i], TruthValue::FALSE_TV() );
                     unknownTermFound = true;
                 } // for
                 
@@ -674,9 +674,9 @@ void LanguageComprehension::answerQuestion()
     //         (PsiActionSelectionAgent::executeAction will generate 'say' actions later)
 
     HandleSeq sentences; 
-    sentences.push_back( atomSpace.addNode( ANCHOR_NODE, "# Possible Sentences" ) );
-    sentences.push_back( atomSpace.addNode( SENTENCE_NODE, answer_sentence) ); 
-    atomSpace.addLink( LIST_LINK, sentences)->setTruthValue(SimpleTruthValue::createTV( 1, 1 ) );
+    sentences.push_back( atomSpace.add_node( ANCHOR_NODE, "# Possible Sentences" ) );
+    sentences.push_back( atomSpace.add_node( SENTENCE_NODE, answer_sentence) ); 
+    atomSpace.add_link( LIST_LINK, sentences)->setTruthValue(SimpleTruthValue::createTV( 1, 1 ) );
 
     answer = evaluator->eval( "(choose-sentence)");
     logger().debug( "LanguageComprehension::%s - (choose-sentence) answer: %s",
@@ -695,10 +695,10 @@ void LanguageComprehension::answerQuestion()
 
     // now set to false all heard sentences and set as answered all heard questions
     for( unsigned int i = 0; i < heardSentences.size(); ++i ) {
-        atomSpace.setTV( heardSentences[i], SimpleTruthValue::createTV( 0, 1) );
+        atomSpace.set_TV( heardSentences[i], SimpleTruthValue::createTV( 0, 1) );
 
-        Handle listLink = atomSpace.getOutgoing( heardSentences[i], 1 );
-        Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+        Handle listLink = atomSpace.get_outgoing( heardSentences[i], 1 );
+        Handle sentenceNode = atomSpace.get_outgoing( listLink, 0 );
 
         if ( AtomSpaceUtil::isPredicateTrue( atomSpace, "is_question", sentenceNode ) ) {
             AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -732,17 +732,17 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     if ( scm_is_null(objectObserver) ) {
         logger().error( "ComputeSpatialRelations::%s - Invalid null observer reference",
                         __FUNCTION__ );
-        return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
+        return SchemeSmob::handle_to_scm( atomSpace.add_link( LIST_LINK, resultingFrames ) );
     } // if
     if ( scm_is_null(groundSemeNode) ) {
         logger().error( "ComputeSpatialRelations::%s - Invalid null reference ground object",
                         __FUNCTION__ );
-        return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
+        return SchemeSmob::handle_to_scm( atomSpace.add_link( LIST_LINK, resultingFrames ) );
     } // if
     if ( scm_is_null(figureSemeNode) ) {
         logger().error( "ComputeSpatialRelations::%s - Invalid null reference figure object",
                         __FUNCTION__ );
-        return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
+        return SchemeSmob::handle_to_scm( atomSpace.add_link( LIST_LINK, resultingFrames ) );
     } // if
     
     Handle observer = SchemeSmob::scm_to_handle(objectObserver);
@@ -757,11 +757,11 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     
     {
         std::stringstream msg;
-        msg << "observer[" << atomSpace.atomAsString( observer ) << "] ";
-        msg << "objectA[" << atomSpace.atomAsString( objectA ) << "] ";
-        msg << "objectB[" << atomSpace.atomAsString( objectB ) << "] ";
+        msg << "observer[" << atomSpace.atom_as_string( observer ) << "] ";
+        msg << "objectA[" << atomSpace.atom_as_string( objectA ) << "] ";
+        msg << "objectB[" << atomSpace.atom_as_string( objectB ) << "] ";
         if ( objectC != Handle::UNDEFINED ) {
-            msg << "objectC[" << atomSpace.getName( objectC ) << "] ";
+            msg << "objectC[" << atomSpace.get_name( objectC ) << "] ";
         } // if            
         logger().debug( "ComputeSpatialRelations::%s - Computing spatial relations for '%s'",
                         __FUNCTION__, msg.str( ).c_str( ) );
@@ -778,42 +778,42 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     //     (AccessoryNode "id_4410" (av -8 1 0))
     //     (SemeNode "id_4410" (stv 1 0.051008303))
     // )
-    if ( atomSpace.getType( objectA ) == VARIABLE_NODE ) {
+    if ( atomSpace.get_type( objectA ) == VARIABLE_NODE ) {
         spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
     } else {
-        HandleSeq incoming = atomSpace.getIncoming( objectA );
+        HandleSeq incoming = atomSpace.get_incoming( objectA );
         unsigned int i;
         for( i = 0; i < incoming.size( ); ++i ) {
-            Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-            if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                entitiesA.push_back( atomSpace.getName( firstElement ) );
+            Handle firstElement = atomSpace.get_outgoing(incoming[i], 0 );
+            if ( classserver().isA( atomSpace.get_type(firstElement), OBJECT_NODE ) ) {
+                entitiesA.push_back( atomSpace.get_name( firstElement ) );
             } // if
         } // for            
     } // else
     
-    if ( atomSpace.getType( objectB ) == VARIABLE_NODE ) {
+    if ( atomSpace.get_type( objectB ) == VARIABLE_NODE ) {
         spaceMap.getAllObjects( std::back_inserter( entitiesB ) );
     } else {
-        HandleSeq incoming = atomSpace.getIncoming( objectB );
+        HandleSeq incoming = atomSpace.get_incoming( objectB );
         unsigned int i;
         for( i = 0; i < incoming.size( ); ++i ) {
-            Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-            if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                entitiesB.push_back( atomSpace.getName( firstElement ) );
+            Handle firstElement = atomSpace.get_outgoing(incoming[i], 0 );
+            if ( classserver().isA( atomSpace.get_type(firstElement), OBJECT_NODE ) ) {
+                entitiesB.push_back( atomSpace.get_name( firstElement ) );
             } // if
         } // for
     } // else
     
     if ( objectC != Handle::UNDEFINED ) {
-        if ( atomSpace.getType( objectC ) == VARIABLE_NODE ) {
+        if ( atomSpace.get_type( objectC ) == VARIABLE_NODE ) {
             spaceMap.getAllObjects( std::back_inserter( entitiesC ) );
         } else {
-            HandleSeq incoming = atomSpace.getIncoming( objectC );
+            HandleSeq incoming = atomSpace.get_incoming( objectC );
             unsigned int i;
             for( i = 0; i < incoming.size( ); ++i ) {
-                Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-                if ( classserver().isA( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                    entitiesC.push_back( atomSpace.getName( firstElement ) );
+                Handle firstElement = atomSpace.get_outgoing(incoming[i], 0 );
+                if ( classserver().isA( atomSpace.get_type(firstElement), OBJECT_NODE ) ) {
+                    entitiesC.push_back( atomSpace.get_name( firstElement ) );
                 } // if
             } // for
         } // else            
@@ -823,7 +823,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                     __FUNCTION__, entitiesA.size( ), entitiesB.size( ), entitiesC.size( ) );
     
     try {
-        const spatial::Entity3D* observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
+        const spatial::Entity3D* observerEntity = spaceMap.getEntity( atomSpace.get_name( observer ) );
         
         unsigned int i, j, k;
         for( i = 0; i < entitiesA.size( ); ++i ) {
@@ -852,10 +852,10 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
         } // for
     } catch( const opencog::NotFoundException& ex ) {
         logger().error( "LanguageComprehension::%s - %s", __FUNCTION__, ex.getMessage( ) );
-        return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
+        return SchemeSmob::handle_to_scm( atomSpace.add_link( LIST_LINK, resultingFrames ) );
     } // if
         
-    return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
+    return SchemeSmob::handle_to_scm( atomSpace.add_link( LIST_LINK, resultingFrames ) );
 }
 #endif
 
@@ -869,9 +869,9 @@ void LanguageComprehension::createFrameInstancesFromRelations(
         std::string relationName = SpaceServer::SpaceMap::spatialRelationToString( *it );
 
         std::map<std::string, Handle> elements;
-        elements["Figure"] = atomSpace.getHandle( SEME_NODE, objectA );
-        elements["Ground"] = atomSpace.getHandle( SEME_NODE, objectB );
-        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, relationName );
+        elements["Figure"] = atomSpace.get_handle( SEME_NODE, objectA );
+        elements["Ground"] = atomSpace.get_handle( SEME_NODE, objectB );
+        elements["Relation_type"] = atomSpace.add_node( CONCEPT_NODE, relationName );
 
         std::stringstream instanceName;
         instanceName << objectA;
@@ -879,7 +879,7 @@ void LanguageComprehension::createFrameInstancesFromRelations(
         instanceName << objectB;
 
         if ( *it == spatial::BETWEEN ) {
-            elements["Ground_2"] = atomSpace.getHandle( SEME_NODE, objectC );
+            elements["Ground_2"] = atomSpace.get_handle( SEME_NODE, objectC );
             instanceName << "_";
             instanceName << objectC;
         } // if            
@@ -925,18 +925,18 @@ void LanguageComprehension::loadFrames(void)
 
             std::string frameName = "#" + tokens[0];
 
-            Handle frameNode = atomSpace.addNode( DEFINED_FRAME_NODE, frameName );
+            Handle frameNode = atomSpace.add_node( DEFINED_FRAME_NODE, frameName );
             HandleSeq element(2);
             element[0] = frameNode;
 
             unsigned int i;
             for( i = 1; i < tokens.size( ); ++i ) {
                 std::string frameElementName = frameName + ":" + tokens[i];
-                element[1] = atomSpace.addNode( DEFINED_FRAME_ELEMENT_NODE, frameElementName );
-                Handle elementLink = atomSpace.addLink( FRAME_ELEMENT_LINK, element );
-                atomSpace.setTV( elementLink, opencog::TruthValue::TRUE_TV() );
-                atomSpace.setLTI( elementLink, 1 );
-                atomSpace.incVLTI(elementLink); // prvent it from removing
+                element[1] = atomSpace.add_node( DEFINED_FRAME_ELEMENT_NODE, frameElementName );
+                Handle elementLink = atomSpace.add_link( FRAME_ELEMENT_LINK, element );
+                atomSpace.set_TV( elementLink, opencog::TruthValue::TRUE_TV() );
+                atomSpace.set_LTI( elementLink, 1 );
+                atomSpace.inc_VLTI(elementLink); // prvent it from removing
             } // if
 
         } // while
@@ -978,14 +978,14 @@ void LanguageComprehension::loadFrames(void)
                 std::vector<std::string> tokens;
                 boost::split( tokens, inheritance, boost::is_any_of( ";" ) );
                 HandleSeq inheritance;
-                inheritance.push_back( atomSpace.addNode( DEFINED_FRAME_NODE, "#"+tokens[1] ) ); // child
-                inheritance.push_back( atomSpace.addNode( DEFINED_FRAME_NODE, "#"+tokens[0] ) ); // parent
+                inheritance.push_back( atomSpace.add_node( DEFINED_FRAME_NODE, "#"+tokens[1] ) ); // child
+                inheritance.push_back( atomSpace.add_node( DEFINED_FRAME_NODE, "#"+tokens[0] ) ); // parent
 
                 
-                Handle inheritanceLink = atomSpace.addLink( INHERITANCE_LINK, inheritance );
-                atomSpace.setTV( inheritanceLink, opencog::TruthValue::TRUE_TV( ) );
-                atomSpace.setLTI( inheritanceLink, 1 );
-                atomSpace.incVLTI(inheritanceLink); // prevent it from removing
+                Handle inheritanceLink = atomSpace.add_link( INHERITANCE_LINK, inheritance );
+                atomSpace.set_TV( inheritanceLink, opencog::TruthValue::TRUE_TV( ) );
+                atomSpace.set_LTI( inheritanceLink, 1 );
+                atomSpace.inc_VLTI(inheritanceLink); // prevent it from removing
             }
 
         } // while

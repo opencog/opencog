@@ -169,17 +169,17 @@ combo::vertex AvatarActionSchema::execute(const std::vector<combo::vertex>& argu
                 // Builds the Entity param
                 AtomSpace& atomSpace = pai.getAtomSpace();
                 HandleSeq hs;
-                atomSpace.getHandlesByName(back_inserter(hs), objectId, OBJECT_NODE, true);
+                atomSpace.get_handles_by_name(back_inserter(hs), objectId, OBJECT_NODE, true);
                 if (!hs.empty()) {
                     if (hs.size() > 1) {
                         std::string atomTypes;
                         for (Handle h : hs) {
-                            atomTypes += classserver().getTypeName(atomSpace.getType(h));
+                            atomTypes += classserver().getTypeName(atomSpace.get_type(h));
                             atomTypes += " ";
                         }
                         logger().warn("WARNING: Got multiple ObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());
                     }
-                    Type atomType = atomSpace.getType(hs[0]);
+                    Type atomType = atomSpace.get_type(hs[0]);
                     // TODO: What about the other types of SL object? (accessory and structure)
                     Entity entity(objectId, (atomType == AVATAR_NODE) ? AVATAR_OBJECT_TYPE : (atomType == PET_NODE) ? PET_OBJECT_TYPE : (atomType == HUMANOID_NODE) ? HUMANOID_OBJECT_TYPE : UNKNOWN_OBJECT_TYPE);
                     ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, entity);
