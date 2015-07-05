@@ -89,7 +89,6 @@
 ;
 ; to be sure there is ever only one value associated to a parameter.
 ;
-; TODO: automatically convert the numerical value to string
 ; TODO: fix the deletion of previous ExecutionLink
 (define (set-pln-num-parameter name value)
   ;; ; Delete any previous parameter
@@ -107,7 +106,7 @@
   (ExecutionLink
      (SchemaNode name)
      pln-rbs
-     (NumberNode value))
+     (NumberNode (number->string value)))
 )
 
 ; Helper to set (fuzzy) bool parameters. Given a parameter name and
@@ -123,7 +122,7 @@
 )
 
 ; Termination criteria parameters
-(set-pln-num-parameter "URE:maximum-iterations" "20")
+(set-pln-num-parameter "URE:maximum-iterations" 20)
 
 ; Attention allocation (0 to disable it, 1 to enable it)
 (set-pln-fuzzy-bool-parameter "URE:attention-allocation" 0)
