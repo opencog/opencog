@@ -7,7 +7,8 @@ calculates set of visible blocks for a givent client position pitch and yaw (hea
 
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
-from minecraft_bot.msg import visible_blocks_msg
+from minecraft_bot.srv import visible_blocks_srv
+from minecraft_bot.msg import block_data_msg
 
 from math import sin, cos, radians, pi, floor
 import numpy as np
@@ -91,7 +92,7 @@ def getVisibleBlocks(x, y, z, pitch, yaw):
         print "list of visible blocks:"
         print vis_blocks
         
-        return vis_blocks
+        return list(vis_blocks)
 
 
 # this client waits for block data on request
@@ -114,10 +115,10 @@ def visibleBlocksServer():
 	
 	rospy.init_node('visibility_server')
 	
-        vb_srv = rospy.Service('get_visible_blocks', visible_blocks_msg, getVisibleBlocks)
+        vb_srv = rospy.Service('get_visible_blocks', visible_blocks_srv, getVisibleBlocks)
 
 	print("visibility server initialized")
-	print("call getVisibleBlocks() with args: (x, y, z, pitch, yaw)")
+        print("usage: call getVisibleBlocks() with args: (x, y, z, pitch, yaw)")
 	
 	rospy.spin()
 

@@ -9,9 +9,9 @@ Provides a client/server api for Minecraft world data
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
 from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, block_data_msg, map_block_msg
+from minecraft_bot.srv import get_block_srv
 
-
-from spock.utils import pl_announce
+from spock.utils import pl_announce, BoundBuffer
 from spock.mcmap import smpmap, mapdata
 from spock.mcp import mcdata
 
@@ -34,7 +34,7 @@ class MinecraftMap(object):
     def handleUnpackBulk(self, data):
         
         skylight = data.sky_light
-        bbuff = utils.BoundBuffer(data.data)
+        bbuff = BoundBuffer(data.data)
         
         for meta in data.metadata:
             chunk_x = meta.chunk_x
@@ -44,9 +44,11 @@ class MinecraftMap(object):
             key = (chunk_x, chunk_z)
             
             if key not in self.columns:
-                self.columns[key] = ChunkColumn()
+                self.columns[key] = smpmap.ChunkColumn()
             
             self.columns[key].unpack(bbuff, mask, skylight)
+
+        print "unpacking bulk"
 
 
     def handleUnpackChunk(self, data):
@@ -55,7 +57,7 @@ class MinecraftMap(object):
         chunk_z = data.chunk_z
         mask = data.primary_bitmap
         continuous = data.continuous
-        bbuff = utils.BoundBuffer(data.data)
+        bbuff = BoundBuffer(data.data)
         
         if self.dimension == DIMENSION_OVERWOLD:
             skylight = True
@@ -65,9 +67,11 @@ class MinecraftMap(object):
         key = (x_chunk, z_chunk)
         
         if key not in self.columns:
-            self.columns[key] = ChunkColumn()
+            self.columns[key] = smpmap.ChunkColumn()
         
         self.columns[key].unpack(bbuff, mask, skylight, continuous)
+
+        print "unpacking chunk"
     
     
     def handleUnpackBlock(self, data):
@@ -83,16 +87,18 @@ class MinecraftMap(object):
         if (x,z) in self.columns:
             column = self.columns[(x,z)]
         else:
-            column = ChunkColumn()
+            column = smpmap.ChunkColumn()
             self.columns[(x,z)] = column
         
         chunk = column.chunks[y]
         
         if chunk == None:
-            chunk = Chunk()
+            chunk = smpmap.Chunk()
             column.chunks[y] = chunk
         
         chunk.block_data.set(rx, ry, rz, data.data)
+
+        print "unpacking block"
 
 
     # note, returns block ID and meta in the same byte (data) for consistency
@@ -159,13 +165,13 @@ class MinecraftMap(object):
         if (x,z) in self.columns:
             column = self.columns[(x, z)]
         else:
-            column = ChunkColumn()
+            column = smpmap.ChunkColumn()
             self.columns[(x, z)] = column
         
         chunk = column.chunks[y]
         
         if chunk == None:
-            chunk = Chunk()
+            chunk = smpmap.Chunk()
             column.chunks[y] = chunk
 
         if light_block != None:
@@ -183,7 +189,7 @@ class MinecraftMap(object):
         if (x,z) in self.columns:
             column = self.columns[(x,z)]
         else:
-            column = ChunkColumn()
+            column = smpmap.ChunkColumn()
             self.columns[(x,z)] = column
 
         return column.biome.set(rx, rz, data)
@@ -213,9 +219,9 @@ if __name__ == "__main__":
     rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handleUnpackBulk)
     rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
 
-    serv_block = rospy.Service('get_block_data', get_block, world.getBlock)
-    #serv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
-    #serv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
+    srv_block = rospy.Service('get_block_data', get_block_srv, world.getBlock)
+    #srv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
+    #srv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
 
     rospy.spin()
 

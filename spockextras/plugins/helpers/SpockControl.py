@@ -116,8 +116,6 @@ class SpockControlPlugin:
     #    pub_dim.publish(data)
     
 
-    # Need to move message population to the plugin. Too messy to leave it here...
-    # Maybe a function to turn dict into msg
     def sendChunkData(self, name, data):
         
         msg = chunk_data_msg()
@@ -130,17 +128,17 @@ class SpockControlPlugin:
     def sendChunkBulk(self, name, data):
         
         msg = chunk_bulk_msg()
-                
+        
         rosutils.setMessage(msg, data)
-        #It seems that we still need to set attribute in the meta data array..
+
         meta = []
         for i in range(len(data['metadata'])):
             meta.append(chunk_meta_msg())
             rosutils.setMessage(meta[i], data['metadata'][i])
-        msg.metadata=meta
-
         
-        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light,msg.ROStimestamp,msg.MCtimestamp)
+        msg.metadata = meta
+        rospy.loginfo("published chunk bulk message, sky: %s", msg.sky_light)
+        
         self.pub_bulk.publish(msg)
     
     
