@@ -85,15 +85,15 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
         return true;
 
-    std::string sPat = m_as->getName(hPat);
+    std::string sPat = m_as->get_name(hPat);
     std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
-    std::string sSoln = m_as->getName(hSoln);
+    std::string sSoln = m_as->get_name(hSoln);
 
     // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = m_as->getHandle(WORD_NODE, sPatWord);
+    Handle hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
 
     // get the corresponding WordInstanceNode for hSoln
-    Handle hSolnWordInst = m_as->getHandle(WORD_INSTANCE_NODE, sSoln);
+    Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
     // no WordInstanceNode? reject!
     if (hSolnWordInst == Handle::UNDEFINED)
@@ -101,14 +101,14 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 
     // get the source connectors for the solution
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
-    HandleSeq qTargetConns = m_as->getOutgoing(m_eval->eval_h(scmCode));
+    HandleSeq qTargetConns = m_as->get_outgoing(m_eval->eval_h(scmCode));
 
     HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
 
     auto insertHelper = [&](const Handle& h)
     {
-        HandleSeq q = m_as->getOutgoing(h);
+        HandleSeq q = m_as->get_outgoing(h);
         qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
     };
 
@@ -125,7 +125,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         // check if hDisjunct is LgAnd or just a lone connector
         if (hDisjunct->getType() == LG_AND)
         {
-            HandleSeq q = m_as->getOutgoing(hDisjunct);
+            HandleSeq q = m_as->get_outgoing(hDisjunct);
             sourceConns = std::list<Handle>(q.begin(), q.end());
         }
         else
@@ -166,7 +166,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
             }
 
             // dumb hacky way of checking of the connector is a multi-connector
-            if (m_as->getOutgoing(sourceConns.front()).size() == 3)
+            if (m_as->get_outgoing(sourceConns.front()).size() == 3)
                 hMultiConn = sourceConns.front();
 
             sourceConns.pop_front();
@@ -201,7 +201,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
 {
     logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
 
-    HandleSeq qISet = m_as->getIncoming(grnd_link_h);
+    HandleSeq qISet = m_as->get_incoming(grnd_link_h);
 
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -235,7 +235,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // helper to get the InterpretationNode
     auto getInterpretation = [this](const Handle& h)
     {
-        HandleSeq qISet = m_as->getIncoming(h);
+        HandleSeq qISet = m_as->get_incoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
         HandleSeq results;
@@ -340,7 +340,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
-    m_as->getHandlesByType(std::back_inserter(qCandidate), bestClause->getType());
+    m_as->get_handles_by_type(std::back_inserter(qCandidate), bestClause->getType());
 
     // selected candidates, a subset of qCandidate
     std::vector<CandHandle> sCandidate;
@@ -356,7 +356,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
                 [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
         };
 
-        HandleSeq qISet = m_as->getIncoming(c);
+        HandleSeq qISet = m_as->get_incoming(c);
 
         // erase atoms that are neither R2L-Setlink nor SetLink
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());

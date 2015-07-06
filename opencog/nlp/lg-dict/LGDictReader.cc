@@ -83,19 +83,19 @@ Handle LGDictReader::getAtom(const std::string& word)
         return Handle::UNDEFINED;
 
     HandleSeq outgoing;
-    Handle hWord = _as->addNode(WORD_NODE, word);
+    Handle hWord = _as->add_node(WORD_NODE, word);
 
     for (Dict_node* dn = dn_head; dn; dn = dn->right)
     {
         Exp* exp = dn->exp;
         Handle hLG = lg_exp_to_container(exp).to_handle(_as);
 
-        outgoing.push_back(_as->addLink(LG_WORD_CSET, hWord, hLG));
+        outgoing.push_back(_as->add_link(LG_WORD_CSET, hWord, hLG));
     }
 
     free_lookup_list(_dictionary, dn_head);
 
-    return _as->addLink(SET_LINK, outgoing);
+    return _as->add_link(SET_LINK, outgoing);
 }
 
 /**
