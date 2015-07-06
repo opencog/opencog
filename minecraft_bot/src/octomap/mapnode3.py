@@ -33,14 +33,20 @@ class MinecraftMap(object):
 
     def handleUnpackBulk(self, data):
         
+        #print "unpacking bulk"        
         skylight = data.sky_light
         bbuff = BoundBuffer(data.data)
         
+        #print "light: %s: buffer:"%skylight
+        #print bbuff
+
         for meta in data.metadata:
             chunk_x = meta.chunk_x
             chunk_z = meta.chunk_z
             mask = meta.primary_bitmap
             
+            #print "unpacking chunk meta x: %d, z: %d, mask: %d"%(chunk_x, chunk_z, mask)
+
             key = (chunk_x, chunk_z)
             
             if key not in self.columns:
@@ -48,7 +54,6 @@ class MinecraftMap(object):
             
             self.columns[key].unpack(bbuff, mask, skylight)
 
-        print "unpacking bulk"
 
 
     def handleUnpackChunk(self, data):
@@ -71,8 +76,9 @@ class MinecraftMap(object):
         
         self.columns[key].unpack(bbuff, mask, skylight, continuous)
 
-        print "unpacking chunk"
-    
+        #print "unpacking chunk full x: %d, z: %d, mask: %d, cont: %s"%(chunk_x, chunk_z, mask, continuous)
+        #print "light: %d, buffer:"%skylight
+        #print bbuff
     
     def handleUnpackBlock(self, data):
         
@@ -98,7 +104,7 @@ class MinecraftMap(object):
         
         chunk.block_data.set(rx, ry, rz, data.data)
 
-        print "unpacking block"
+        #print "unpacking block x: %d, y: %d, z: %d, data: %d"%(data.x, data.y, data.z, data.data)
 
 
     # note, returns block ID and meta in the same byte (data) for consistency
@@ -110,15 +116,15 @@ class MinecraftMap(object):
         z, rz = divmod(z, 16)
         
         if (x, z) not in self.columns or y > 0x0F:
-            return 0
+            return 0, 0
         
         column = self.columns[(x,z)]
         chunk = column.chunks[y]
         
         if chunk == None:
-            return 0
+            return 0, 0
         
-        data = chunk.block_data.get(rx,ry,rz)
+        data = chunk.block_data.get(rx, ry, rz)
 
         return data >> 4, data&0x0F
 
@@ -198,14 +204,13 @@ class MinecraftMap(object):
 # the service
 def getBlock(req):
 
-    msg = block_data_msg()
+    msg = map_block_msg()
     msg.x = req.x
     msg.y = req.y
     msg.z = req.z
     
-    blockid, data = world.getBlock(req.x, req.y, req.z)
-    msg.blockid = blockid
-    msg.blockdata = data
+    msg.blockid, msg.metadata = world.getBlock(req.x, req.y, req.z)
+    print msg
     return msg
 
 
@@ -219,7 +224,7 @@ if __name__ == "__main__":
     rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handleUnpackBulk)
     rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
 
-    srv_block = rospy.Service('get_block_data', get_block_srv, world.getBlock)
+    srv_block = rospy.Service('get_block_data', get_block_srv, getBlock)
     #srv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
     #srv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
 
