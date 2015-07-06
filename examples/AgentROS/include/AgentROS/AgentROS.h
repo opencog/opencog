@@ -47,6 +47,9 @@ public:
     }
 
     AgentR(CogServer&);
+    //ros::NodeHandle n;
+    ros::NodeHandle *n;
+    ros::ServiceServer *service;
     virtual ~AgentR();
     virtual void run();
 

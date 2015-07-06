@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(AgentROS)
-
+#set(ROS_BUILD_SHARED_LIBS 1)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   message_generation
+  #genmsg
 )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 #//assuming atomspace and cogutil are there
@@ -249,9 +250,9 @@ include_directories(
 # add_dependencies(AgentROS_node AgentROS_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(AgentROS_node
-#   ${catkin_LIBRARIES}
-# )
+ target_link_libraries(AgentROS
+   ${catkin_LIBRARIES}
+ )
 
 #############
 ## Install ##

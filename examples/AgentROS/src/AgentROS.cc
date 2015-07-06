@@ -52,9 +52,9 @@ void rosModule::init()
     logger().info("[rosModule] init");
     _cogserver.registerAgent(AgentR::info().id, &factory);
     _cogserver.createAgent(AgentR::info().id, true);
-    char* argv[]={"dummy"};
-    int argc=1;
-    ros::init(argc,argv,"string_atom_server");
+//    char* argv[]={"dummy"};
+//    int argc=1;
+//    ros::init(argc,argv,"string_atom_server");
 }
 
 AgentR* AgentR::thisAgent;
@@ -62,13 +62,20 @@ AgentR::AgentR(CogServer& cs) : Agent(cs, 100)
 {
     logger().info("[AgentR] constructor");
     thing_a_ma_bob = 0;
-    thisAgent=(this);
-    ros::NodeHandle n;
-    ros::ServiceServer service = n.advertiseService("add_string_atom", add);
+    thisAgent=(this);//only one instance of AgentROS can be created because service callback uses cogserver variable from agent class
+    char* argv[]={"/home/mandeep/code/ocog/opencog/build/opencog/server/cogserver"};
+    int argc=1;
+    ros::init(argc,argv,"string_atom_server");//init should be called first before any ros functions
+
+    //ros::NodeHandle n;
+    n=new ros::NodeHandle();//needs to stay in scope after constructor ends and needs be called after ros init
+    service =new ros::ServiceServer ( n->advertiseService("/add_string_atom", add));//needs to stay in scope after constructor ends and needs be called after nodehandle
 }
 
 AgentR::~AgentR()
 {
+	delete service;
+	delete n;
     logger().info("[AgentROS] destructor");
 }
 
@@ -81,11 +88,11 @@ void AgentR::run()
 bool AgentR::add(AgentROS::string_atom::Request  &req,
             AgentROS::string_atom::Response &res)
 {
-	ROS_INFO("%s",req.name.c_str());
+	//ROS_INFO("%s",req.name.c_str());
 	AtomSpace& as=thisAgent->_cogserver.getAtomSpace();
 	std::stringstream ss;
 	ss << as;
-	ROS_INFO("%s",ss.str().c_str());
+	//ROS_INFO("%s",ss.str().c_str());
 	std::cout<<as;
 	res.ok=true;
 	return true;
