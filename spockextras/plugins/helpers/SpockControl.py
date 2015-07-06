@@ -43,6 +43,7 @@ class SpockControlPlugin:
     def __init__(self, ploader, settings):
         
         self.event = ploader.requires('Event')
+        self.msgr = ploader.requires('Messenger')
         
         # simply load all of the plugins
         #ploader.requires('NewMovement')
@@ -119,7 +120,7 @@ class SpockControlPlugin:
     def sendChunkData(self, name, data):
         
         msg = chunk_data_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
         
         rospy.loginfo("published chunk message: loc: %d, %d", msg.chunk_x, msg.chunk_z)
         self.pub_chunk.publish(msg)
@@ -129,15 +130,15 @@ class SpockControlPlugin:
         
         msg = chunk_bulk_msg()
         
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
 
         meta = []
         for i in range(len(data['metadata'])):
             meta.append(chunk_meta_msg())
-            rosutils.setMessage(meta[i], data['metadata'][i])
+            self.msgr.setMessage(meta[i], data['metadata'][i])
         
         msg.metadata = meta
-        rospy.loginfo("published chunk bulk message, sky: %s", msg.sky_light)
+        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light, msg.ROStimestamp, msg.MCtimestamp)
         
         self.pub_bulk.publish(msg)
     
@@ -145,7 +146,7 @@ class SpockControlPlugin:
     def sendBlockUpdate(self, name, data):
         
         msg = block_data_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
         
         rospy.loginfo("published block update: id: %d, data, %d loc: %d, %d, %d", 
                 msg.blockid, msg.blockdata, msg.x, msg.y, msg.z)
@@ -162,7 +163,7 @@ class SpockControlPlugin:
         
         print(data)
         msg = entity_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
 
         rospy.loginfo("published entity message: type: %d, uid: %d, loc: %d, %d, %d",
                 msg.type, msg.eid, msg.x, msg.y, msg.z)

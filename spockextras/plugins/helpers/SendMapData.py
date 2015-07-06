@@ -81,8 +81,7 @@ class SendMapDataPlugin:
                 'x': block['x'] + chunk_x,
                 'y': block['y'],
                 'z': block['z'] + chunk_z,
-                'data': block['block_data'],
-                'level': 1
+                'data': block['block_data']
                 })
 
 	
@@ -95,8 +94,8 @@ class SendMapDataPlugin:
             'x': data['location']['x'],
             'y': data['location']['y'],
             'z': data['location']['z'],
-            'data': data['block_data'],
-            'level': 1
+            'data': data['block_data']
+
             })
 
 
