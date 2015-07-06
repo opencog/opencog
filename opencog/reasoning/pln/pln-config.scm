@@ -21,6 +21,7 @@
 
 (load-from-path "utilities.scm")
 (load-from-path "av-tv.scm")
+(load-from-path "rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
@@ -54,75 +55,15 @@
                     (list pln-rule-modus-ponens 1))
 )
 
-; Given a pair (rule weight) create
-;
-; MemberLink (stv weight 1)
-;    rule
-;    (ConceptNode "PLN")
-(define (add-rule-to-pln weighted-rule)
-  (MemberLink (stv (cadr weighted-rule) 1)
-     (car weighted-rule)
-     pln-rbs)
-)
-
 ; Associate rules to PLN
-(for-each add-rule-to-pln rules)
+(ure-add-rules pln-rbs rules)
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Other paramters ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-; Helper to set numerical parameters. Given a parameter name and its
-; value create
-;
-; ExecutionLink
-;    SchemaNode name
-;    (ConceptNode "PLN")
-;    (NumberNode value)
-;
-; It will also delete the any
-;
-; ExecutionLink
-;    SchemaNode name
-;    (ConceptNode "PLN")
-;    *
-;
-; to be sure there is ever only one value associated to a parameter.
-;
-; TODO: fix the deletion of previous ExecutionLink
-(define (set-pln-num-parameter name value)
-  ;; ; Delete any previous parameter
-  ;; (cog-bind (BindLink
-  ;;              (ExecutionLink
-  ;;                 (SchemaNode name)
-  ;;                 pln-rbs
-  ;;                 (VariableNode "__VALUE__"))
-  ;;              (DeleteLink
-  ;;                 (ExecutionLink
-  ;;                    (SchemaNode name)
-  ;;                    pln-rbs
-  ;;                    (VariableNode "__VALUE__")))))
-  ; Set new value for that parameter
-  (ExecutionLink
-     (SchemaNode name)
-     pln-rbs
-     (NumberNode (number->string value)))
-)
-
-; Helper to set (fuzzy) bool parameters. Given a parameter name and
-; its value create (or overwrite)
-;
-; EvaluationLink (stv value 1)
-;    PredicateNode name
-;    (ConceptNode "PLN")
-(define (set-pln-fuzzy-bool-parameter name value)
-  (EvaluationLink (stv value 1)
-     (SchemaNode name)
-     pln-rbs)
-)
-
 ; Termination criteria parameters
-(set-pln-num-parameter "URE:maximum-iterations" 20)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20)
 
 ; Attention allocation (0 to disable it, 1 to enable it)
-(set-pln-fuzzy-bool-parameter "URE:attention-allocation" 0)
+(ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
