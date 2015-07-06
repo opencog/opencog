@@ -24,8 +24,9 @@ cdef class TimeServer:
         if self.ctimeserver:
             del self.ctimeserver
 
-    def addTimeInfo(self,Handle h,timestamp, TruthValue tv=TruthValue(1.0,1.0e35)):
-        cdef cHandle cattimelinkhandle = self.ctimeserver.addTimeInfo(deref((<Handle>h).h),timestamp, deref(tv._tvptr()))
+    def addTimeInfo(self,Handle h,timestamp, TruthValue tv=TruthValue(1.0,1.0e35), timeDomain="DefalutTimeDomain"):
+        cdef string ctimeDomain=timeDomain.encode('UTF-8')
+        cdef cHandle cattimelinkhandle = self.ctimeserver.addTimeInfo(deref((<Handle>h).h),timestamp, deref(tv._tvptr()),ctimeDomain)
         return Handle(cattimelinkhandle.value())
 
 

@@ -1,0 +1,31 @@
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
+#include <opencog/spatial/3DSpaceMap/Block3D.h>
+#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+
+using namespace octomap;
+using namespace opencog;
+using namespace opencog::spatial;
+
+class OctomapOctreeUTest : public CxxTest::TestSuite
+{
+private:
+
+public:
+
+	void testAddSolidUnitBlock()
+	{
+		OctomapOcTree* testOctree= new OctomapOcTree(1);
+		BlockVector testpos(3,4,5);
+		Block3D* testBlock1= new Block3D(1,testpos,"testmaterial","testcolor");
+		testOctree->addSolidBlock(testBlock1);
+		Block3D* testBlock2;
+		testOctree->checkIsSolid(testpos,testBlock2);
+		TS_ASSERT(testBlock2->getBlockMaterial()==testBlock1->getBlockMaterial());
+		TS_ASSERT(testBlock2->getPosition()==testBlock1->getPosition());
+
+		delete testOctree;
+	}
+
+};

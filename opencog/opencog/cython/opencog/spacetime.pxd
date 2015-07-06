@@ -11,7 +11,7 @@ cdef extern from "opencog/spacetime/Temporal.h":
 cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
         cTimeServer(cAtomSpace& a, cSpaceServer* ss)
-        cHandle addTimeInfo(cHandle, octime_t, tv_ptr)
+        cHandle addTimeInfo(cHandle, octime_t, tv_ptr, string)
 
         
 

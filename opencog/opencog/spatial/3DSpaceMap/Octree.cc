@@ -246,8 +246,9 @@ Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
     if (! isInsideABigblock)
     {
         // This unit block is not contained in a bigger block, we can remove it more easily.
-
+		logger().error("isInsideABigblock is false, xyz is %d %d %d\n",x,y,z);
         delete (tree->mAllMyBlocks[x][y][z]);
+		logger().error("delete xyz success\n");
         tree->mAllMyBlocks[x][y][z] = 0;
 
         // check if this sub-octree is empty after this block removed, and check this for every of its parents.
@@ -276,11 +277,16 @@ Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
     {
         // This unit block is contained in a bigger block, we should break the bigger block into smaller blocks first
         // And we must break the blocks recursively to the unit level
+		logger().error("inside big block,xyz %d %d %d, bigblock addr %p,%l\n",x,y,z,(void*)bigBlock,bigBlock);
 
+		if(bigBlock==NULL)
+		{
+			logger().error("bigBlock is NULL!!");
+		}
 				
         int level = bigBlock->getLevel();
         AxisAlignedBox atomBox(_pos);
-
+		logger().error("bigblock call getlevel");
         while (true)
         {
             tree->breakBlockInto8Blocks(x,y,z);
@@ -294,6 +300,7 @@ Handle Octree::removeAnUnitSolidBlock(BlockVector& _pos)
         }
 
         delete tree->mAllMyBlocks[x][y][z];
+		logger().error("in big block delete success\n");
         tree->mAllMyBlocks[x][y][z] = 0;
         return h;
     }

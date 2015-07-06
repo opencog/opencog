@@ -122,17 +122,17 @@ namespace octomap {
 
 
   // tree definition
-  class ColorOcTree : public OccupancyOcTreeBase <ColorOcTreeNode> {
+  class OctomapOcTree : public OccupancyOcTreeBase <ColorOcTreeNode> {
 
   public:
     /// Default constructor, sets resolution of leafs
-    ColorOcTree(double resolution) : OccupancyOcTreeBase<ColorOcTreeNode>(resolution) {};  
+    OctomapOcTree(double resolution) : OccupancyOcTreeBase<ColorOcTreeNode>(resolution) {};  
       
     /// virtual constructor: creates a new object of same type
     /// (Covariant return type requires an up-to-date compiler)
-    ColorOcTree* create() const {return new ColorOcTree(resolution); }
+    OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
 
-    std::string getTreeType() const {return "ColorOcTree";}
+    std::string getTreeType() const {return "OctomapOcTree";}
    
     // set node color at given key or coordinate. Replaces previous color.
     ColorOcTreeNode* setNodeColor(const OcTreeKey& key, const unsigned char& r, 
@@ -326,7 +326,7 @@ namespace octomap {
     class StaticMemberInitializer{
        public:
          StaticMemberInitializer() {
-           ColorOcTree* tree = new ColorOcTree(0.1);
+           OctomapOcTree* tree = new OctomapOcTree(0.1);
            AbstractOcTree::registerTreeType(tree);
          }
     };
