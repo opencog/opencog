@@ -3,6 +3,7 @@
 #include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+#include <opencog/util/Logger.h>
 
 using namespace octomap;
 using namespace opencog;
@@ -10,22 +11,65 @@ using namespace opencog::spatial;
 
 class OctomapOctreeUTest : public CxxTest::TestSuite
 {
-private:
 
 public:
-
+	
+	void testCopyCtor()
+	{
+		OctomapOcTree* testOctree1= new OctomapOcTree(1);
+		BlockVector testpos1(3,4,5);
+		Block3D* testBlock1= new Block3D(1,testpos1,"testmaterial","testcolor");		
+		testOctree1->addSolidBlock(testBlock1);
+		OctomapOcTree* testOctree2 = new OctomapOcTree(*testOctree1);
+		Block3D* testBlock2;
+		TS_ASSERT(testOctree2->checkIsSolid(testpos1,testBlock2));
+		logger().error("testBlock1 addr %p,testBlock2 addr %p",testBlock1,testBlock2);
+		TS_ASSERT(testBlock1!=testBlock2);
+		TS_ASSERT(testBlock1->getPosition()==testBlock2->getPosition());
+		TS_ASSERT(testBlock1->getBlockMaterial()==testBlock2->getBlockMaterial());
+	}
+	
 	void testAddSolidUnitBlock()
 	{
 		OctomapOcTree* testOctree= new OctomapOcTree(1);
-		BlockVector testpos(3,4,5);
-		Block3D* testBlock1= new Block3D(1,testpos,"testmaterial","testcolor");
+		BlockVector testpos1(3,4,5);
+		Block3D* testBlock1= new Block3D(1,testpos1,"testmaterial","testcolor");
 		testOctree->addSolidBlock(testBlock1);
 		Block3D* testBlock2;
-		testOctree->checkIsSolid(testpos,testBlock2);
+		testOctree->checkIsSolid(testpos1,testBlock2);
 		TS_ASSERT(testBlock2->getBlockMaterial()==testBlock1->getBlockMaterial());
 		TS_ASSERT(testBlock2->getPosition()==testBlock1->getPosition());
 
 		delete testOctree;
 	}
 
+	void testRemoveBlock()
+	{
+		OctomapOcTree* testOctree= new OctomapOcTree(1);
+		BlockVector testpos1(3,4,5);
+		BlockVector testpos2(1,2,3);
+		Block3D* testBlock1= new Block3D(1,testpos1,"testmaterial","testcolor");
+		Block3D* testBlock2;
+		testOctree->addSolidBlock(testBlock1);
+		logger().info("Octree size %d",testOctree->size());
+		TS_ASSERT(testOctree->removeAnUnitSolidBlock(testpos1)==true);
+		logger().info("After remove Octree size %d",testOctree->size());
+		TS_ASSERT(testOctree->checkIsSolid(testpos1,testBlock2)==false);
+		//if node not exists it should return false
+		TS_ASSERT(testOctree->removeAnUnitSolidBlock(testpos2)==false);
+	}
+
+	void testgetNeighbour()
+	{
+		OctomapOcTree* testOctree= new OctomapOcTree(1);
+		BlockVector testpos1(3,4,5);
+		Block3D* testBlock1= new Block3D(1,testpos1,"testmaterial","testcolor");
+		testOctree->addSolidBlock(testBlock1);
+		BlockVector testpos2(3,5,5);
+		Block3D* testBlock2= new Block3D(1,testpos2,"testmaterial","testcolor");
+		testOctree->addSolidBlock(testBlock2);
+		Block3D* testBlock3;
+		TS_ASSERT(testOctree->getNeighbourSolidBlockVector(testpos1,testBlock3)==testpos2);
+		TS_ASSERT(testBlock3==testBlock2);
+	}
 };
