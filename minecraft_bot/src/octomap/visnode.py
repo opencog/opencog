@@ -13,13 +13,19 @@ from minecraft_bot.msg import map_block_msg
 from math import sin, cos, radians, pi, floor
 import numpy as np
 from sys import argv
+import time
 
-
-
+# radius of vision
 MAX_DIST = 6
+
+# step size
 D_DIST 	 = 1
-D_PITCH  = 30
-D_YAW 	 = 30
+D_PITCH  = 15
+D_YAW 	 = 15
+
+# angles cover range theta - R_THETA to theta + R_THETA
+R_PITCH = 60
+R_YAW   = 60
 
 block_mats = {}
 
@@ -27,18 +33,18 @@ def initBlockMats():
 
     # this is not a comprehensive list, but includes most common solid blocks
     # probably a better way to do this
-    blocks = [i for i in range(43)]
+    blocks = [i for i in range(43+1)]
     solids = []
-    for i in range(1,5,1):
+    for i in range(1,5+1,1):
             solids.append(i)
     solids.append(7)
-    for i in range(12,17,1):
+    for i in range(12,17+1,1):
             solids.append(i)
     solids.append(19)
-    for i in range(21,25,1):
+    for i in range(21,25+1,1):
             solids.append(i)
     solids.append(35)
-    for i in range(41,43,1):
+    for i in range(41,43+1,1):
             solids.append(i)
     
 
@@ -49,92 +55,102 @@ def initBlockMats():
         block_mats[blockid] = True
 
 
-def isSolid(block):
+def isSolid(blockid):
     
-    print block.blockid
-    if block_mats[block.blockid] == True:
+    #print blockid
+    if block_mats[blockid] == True:
             return True
     
     return False
 
 
-def calcRayStep(x, y, z, pitch, yaw):
+def calcRayStep(coords, pitch, yaw):
     
-    newx = x - D_DIST*sin(radians(yaw))
-    newy = y - D_DIST*sin(radians(pitch))
-    newz = z + D_DIST*cos(radians(yaw))
+    newx = coords[0] - D_DIST*sin(radians(yaw))
+    newy = coords[1] - D_DIST*sin(radians(pitch))
+    newz = coords[2] + D_DIST*cos(radians(yaw))
 
-    return newx, newy, newz
+    return (newx, newy, newz)
 
 
 def getVisibleBlocks(x, y, z, pitch, yaw):
     
+    start = time.time()
     vis_blocks = {}
     
-    cx = x
-    cy = y
-    cz = z
-    cpitch = pitch - 90
-    cyaw = yaw - 90
-    cdist = 0
     
-    #print "pitch: %f, yaw: %f"%(pitch, yaw)
-    while cpitch <= pitch + 90:
-        while cyaw <= yaw + 90:
-            while cdist <= MAX_DIST:
+    cur_coords = (x, y, z)
+    pitch = int(pitch)
+    yaw = int(yaw)
+    
+    for cpitch in np.arange(pitch - R_PITCH, pitch + R_PITCH + 1, D_PITCH):
+        for cyaw in np.arange(yaw - R_YAW, yaw + R_YAW + 1, D_YAW):
+            for cdist in np.arange(0, MAX_DIST + 1, D_DIST):
                 
                 #print ("cx: %f, cy: %f, cz: %f")%(cx, cy, cz)
-                #print ("cdist: %f, cyaw: %f, cpitch: %f")%(cdist, cyaw, cpitch)
-                cx, cy, cz = calcRayStep(cx, cy, cz, cpitch, cyaw)
-                cdist += D_DIST
+                #print ("cdist: %d, cyaw: %d, cpitch: %d")%(cdist, cyaw, cpitch)
+                
+                cur_coords = calcRayStep(cur_coords, cpitch, cyaw)
+                int_coords = tuple(np.floor(cur_coords))
+                
+                #print ("x:%d, y:%d, z:%d"%int_coords)
 
-                block = getBlockData(floor(cx), floor(cy), floor(cz))
-                if (floor(cx), floor(cy), floor(cz)) not in vis_blocks:
-                    if isSolid(block):
-                        #print "solid block not already in list"
-                        vis_blocks[(floor(cx), floor(cy), floor(cz))] = block
+                block = getBlockData(int_coords)
+                bid = block.blockid
+
+                # ignore air first, to avoid useless calculations
+                if (bid == 0):
+                    #print "found air, continuing..."
+                    continue
+                
+                elif int_coords not in vis_blocks:
+                    #print "bid: %d"%bid
+                    #print "new block. adding to list"
+                    vis_blocks[int_coords] = block
+                    
+                    if isSolid(bid):
+                        #print "block is solid, breaking out"
                         break
-                else:
-                    #print "block found in list"
+                
+                elif isSolid(vis_blocks[int_coords].blockid):
+                    #print "bid: %d"%bid
+                    #print "found block: %d already at these coordinates"%vis_blocks[int_coords].blockid
                     break
                 
-            cdist = 0
-            cx = x
-            cy = y
-            cz = z
-            cyaw += D_YAW
-        
-        cyaw = yaw - 90
-        cpitch += D_PITCH
+            cur_coords = (x, y, z)
 
-    #print "list of visible solid blocks:"
-    vis_blocks = [vis_blocks[key] for key in vis_blocks]
-    #print vis_blocks
-    
-    return vis_blocks
+
+    blocks = vis_blocks.items()
+    end = time.time()
+    print "total time: %f"%(end-start)
+
+    return blocks
+
 
 
 # this client waits for block data on request
-def getBlockData(x, y, z):
+def getBlockData(coords):
 
     rospy.wait_for_service('get_block_data')
 
     try:
+        x = coords[0]
+        y = coords[1]
+        z = coords[2]
+
         getBlockFromSrv = rospy.ServiceProxy('get_block_data', get_block_srv)
         response = getBlockFromSrv(x, y, z)
-        #print response.block
         return response.block
     except rospy.ServiceException, e:
         print "service call failed: %s"%e
 
 
 
-# handle to call local function
+# visibility service handler to call local function
 def handleGetVisibleBlocks(req):
 
     return getVisibleBlocks(req.x, req.y, req.z, req.pitch, req.yaw)
-
-
+    
 
 def visibleBlocksServer():
 
