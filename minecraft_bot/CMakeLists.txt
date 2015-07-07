@@ -49,7 +49,8 @@ find_package(octomap
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
-
+   
+   vec3_msg.msg
    movement_msg.msg
    mine_block_msg.msg
    place_block_msg.msg
@@ -70,11 +71,12 @@ add_message_files(
  )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   get_block_srv.srv
+   get_block_multi_srv.srv
+   visible_blocks_srv.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
