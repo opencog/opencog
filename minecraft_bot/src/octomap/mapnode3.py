@@ -9,11 +9,13 @@ Provides a client/server api for Minecraft world data
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
 from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, block_data_msg, map_block_msg
-from minecraft_bot.srv import get_block_srv
+from minecraft_bot.srv import get_block_srv, get_block_multi_srv
 
 from spock.utils import pl_announce, BoundBuffer
 from spock.mcmap import smpmap, mapdata
 from spock.mcp import mcdata
+
+import time
 
 DIMENSION_NETHER    = -0x01
 DIMENSION_OVERWORLD =  0x00
@@ -204,14 +206,34 @@ class MinecraftMap(object):
 # the service
 def getBlock(req):
 
+    start = time.time()
+
     msg = map_block_msg()
     msg.x = req.x
     msg.y = req.y
     msg.z = req.z
     
-    msg.blockid, msg.metadata = world.getBlock(req.x, req.y, req.z)
+    msg.blockid, msg.metadata = world.getBlock(msg.x, msg.y, msg.z)
     print msg
+
+    end = time.time()
+    print"call to getBlock(): %f"%(end-start)
     return msg
+
+def getBlockMulti(req):
+
+    blocks = list()
+    for req_msg in req.coords:
+        msg = map_block_msg()
+        msg.x = req_msg.x
+        msg.y = req_msg.y
+        msg.z = req_msg.z
+        msg.blockid, msg.metadata = world.getBlock(msg.x, msg.y, msg.z)
+        #print msg
+        blocks.append(msg)
+
+    #print type(blocks)
+    return {'blocks': blocks}
 
 
 world = MinecraftMap(DIMENSION_OVERWORLD)
@@ -225,6 +247,7 @@ if __name__ == "__main__":
     rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
 
     srv_block = rospy.Service('get_block_data', get_block_srv, getBlock)
+    srv_block_multi = rospy.Service('get_block_multi', get_block_multi_srv, getBlockMulti)
     #srv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
     #srv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
 
