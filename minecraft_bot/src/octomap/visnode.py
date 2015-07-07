@@ -13,7 +13,7 @@ from minecraft_bot.msg import map_block_msg
 from math import sin, cos, radians, pi, floor
 import numpy as np
 from sys import argv
-import time
+#import time
 
 # radius of vision
 MAX_DIST = 6
@@ -75,7 +75,6 @@ def calcRayStep(coords, pitch, yaw):
 
 def getVisibleBlocks(x, y, z, pitch, yaw):
     
-    start = time.time()
     vis_blocks = {}
     
     
@@ -93,12 +92,9 @@ def getVisibleBlocks(x, y, z, pitch, yaw):
                 cur_coords = calcRayStep(cur_coords, cpitch, cyaw)
                 int_coords = tuple(np.floor(cur_coords))
                 
-                #print ("x:%d, y:%d, z:%d"%int_coords)
-
                 block = getBlockData(int_coords)
                 bid = block.blockid
 
-                # ignore air first, to avoid useless calculations
                 if (bid == 0):
                     #print "found air, continuing..."
                     continue
@@ -121,8 +117,6 @@ def getVisibleBlocks(x, y, z, pitch, yaw):
 
 
     blocks = vis_blocks.items()
-    end = time.time()
-    print "total time: %f"%(end-start)
 
     return blocks
 
