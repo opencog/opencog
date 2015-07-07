@@ -13,14 +13,10 @@ from spock.plugins import DefaultPlugins
 #from spockextras.plugins.MineAndPlace import MineAndPlacePlugin
 #from spockextras.plugins.NewMovement import NewMovementPlugin
 #from spockextras.plugins.NewPhysics import NewPhysicsPlugin
-<<<<<<< HEAD
 from spockextras.plugins.SpockControl import SpockControlPlugin
-#from spockextras.plugins.SendMapData import SendMapDataPlugin
+from spockextras.plugins.Messenger import MessengerPlugin
+from spockextras.plugins.SendMapData import SendMapDataPlugin
 from spockextras.plugins.SendEntityData import SendEntityDataPlugin
-=======
-from spockextras.plugins.helpers.SpockControl import SpockControlPlugin
-from spockextras.plugins.helpers.SendMapData import SendMapDataPlugin
->>>>>>> 528e9ef933f98f0fbdf80ed2664e0513c92c5db2
 
 # connect to localhost server
 settings = {'start': {'username': 'Bot',},'auth': {'authenticated': False,},}
@@ -30,12 +26,9 @@ plugins = DefaultPlugins
 #plugins.append(('NewMovement', NewMovementPlugin))
 #plugins.append(('NewPhysics', NewPhysicsPlugin))
 plugins.append(('SpockControl', SpockControlPlugin))
-<<<<<<< HEAD
-#plugins.append(('SendMapData', SendMapDataPlugin))
-plugins.append(('SendEntityData', SendEntityDataPlugin))
-=======
+plugins.append(('Messenger', MessengerPlugin))
 plugins.append(('SendMapData', SendMapDataPlugin))
->>>>>>> 528e9ef933f98f0fbdf80ed2664e0513c92c5db2
+plugins.append(('SendEntityData', SendEntityDataPlugin))
 
 client = Client(plugins = plugins, settings = settings)
 

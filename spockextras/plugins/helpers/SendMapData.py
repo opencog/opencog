@@ -67,30 +67,21 @@ class SendMapDataPlugin:
     #Chunk Data - Update World state
     def handleChunkData(self, name, packet):
         
-        #print packet
         self.event.emit('ros_chunk_data', packet.data)
 
     
     #Multi Block Change - Update multiple blocks
     def handleBlockChangeMulti(self, name, packet):
         
-        #print "multiple block change:"
-        #print packet
         chunk_x = packet.data['chunk_x']*16
         chunk_z = packet.data['chunk_z']*16
         
         for block in packet.data['blocks']:
-            x = block['x'] + chunk_x
-            z = block['z'] + chunk_z
-            y = block['y']
             self.event.emit('ros_block_update', {
-                'x': x,
-                'y': y,
-                'z': z,
-                'blockid': block['block_data']>>4,
-                'blockdata': block['block_data'] & 0b00001111,
-                'ROStimestamp' : data['ROStimestamp'],
-                'MCtimestamp' : data['MCtimestamp']
+                'x': block['x'] + chunk_x,
+                'y': block['y'],
+                'z': block['z'] + chunk_z,
+                'data': block['block_data']
                 })
 
 	
@@ -103,10 +94,8 @@ class SendMapDataPlugin:
             'x': data['location']['x'],
             'y': data['location']['y'],
             'z': data['location']['z'],
-            'blockid': data['block_data']>>4,
-            'blockdata': data['block_data'] & 0b00001111,
-            'ROStimestamp' : data['ROStimestamp'],
-            'MCtimestamp' : data['MCtimestamp']
+            'data': data['block_data']
+
             })
 
 

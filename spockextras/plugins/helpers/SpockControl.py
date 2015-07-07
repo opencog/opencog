@@ -43,6 +43,7 @@ class SpockControlPlugin:
     def __init__(self, ploader, settings):
         
         self.event = ploader.requires('Event')
+        self.msgr = ploader.requires('Messenger')
         
         # simply load all of the plugins
         #ploader.requires('NewMovement')
@@ -116,12 +117,10 @@ class SpockControlPlugin:
     #    pub_dim.publish(data)
     
 
-    # Need to move message population to the plugin. Too messy to leave it here...
-    # Maybe a function to turn dict into msg
     def sendChunkData(self, name, data):
         
         msg = chunk_data_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
         
         rospy.loginfo("published chunk message: loc: %d, %d", msg.chunk_x, msg.chunk_z)
         self.pub_chunk.publish(msg)
@@ -130,24 +129,24 @@ class SpockControlPlugin:
     def sendChunkBulk(self, name, data):
         
         msg = chunk_bulk_msg()
-                
-        rosutils.setMessage(msg, data)
-        #It seems that we still need to set attribute in the meta data array..
+        
+        self.msgr.setMessage(msg, data)
+
         meta = []
         for i in range(len(data['metadata'])):
             meta.append(chunk_meta_msg())
-            rosutils.setMessage(meta[i], data['metadata'][i])
-        msg.metadata=meta
-
+            self.msgr.setMessage(meta[i], data['metadata'][i])
         
-        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light,msg.ROStimestamp,msg.MCtimestamp)
+        msg.metadata = meta
+        rospy.loginfo("published chunk bulk message, sky: %s, rostime: %s, mctime: %s", msg.sky_light, msg.ROStimestamp, msg.MCtimestamp)
+        
         self.pub_bulk.publish(msg)
     
     
     def sendBlockUpdate(self, name, data):
         
         msg = block_data_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
         
         rospy.loginfo("published block update: id: %d, data, %d loc: %d, %d, %d", 
                 msg.blockid, msg.blockdata, msg.x, msg.y, msg.z)
@@ -164,7 +163,7 @@ class SpockControlPlugin:
         
         print(data)
         msg = entity_msg()
-        rosutils.setMessage(msg, data)
+        self.msgr.setMessage(msg, data)
 
         rospy.loginfo("published entity message: type: %d, uid: %d, loc: %d, %d, %d",
                 msg.type, msg.eid, msg.x, msg.y, msg.z)
