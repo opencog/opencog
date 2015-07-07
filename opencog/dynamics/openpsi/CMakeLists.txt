@@ -6,4 +6,5 @@ ADD_LIBRARY (OpenPsi SHARED
 	PsiActionSelectionAgent
 	PsiRuleUtil
 	PsiModulatorUpdaterAgent
+	PsiFeelingUpdaterAgent
 )
