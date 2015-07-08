@@ -1,0 +1,35 @@
+#include <cxxtest/TestSuite.h>
+
+#include <string>
+
+#include <opencog/atomspace/Handle.h>
+#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
+#include <opencog/spatial/3DSpaceMap/Block3D.h>
+#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+#include <opencog/util/Logger.h>
+
+using namespace std;
+using namespace octomap;
+using namespace opencog;
+using namespace opencog::spatial;
+
+class Octree3DMapManagerUTest : public CxxTest::TestSuite
+{ 
+public:
+
+	void testAddSolidUnitBlock()
+	{
+		string testMapName("testMap");
+		unsigned resolution=1;
+		unsigned floorheight=-255;
+		Octree3DMapManager* testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
+		BlockVector testpos1(7,8,9);
+		Handle testHandle(100);
+		testMap->newaddSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
+		Block3D* testBlock=testMap->getBlockAtLocation(testpos1);
+		TS_ASSERT(testBlock->getPosition()==testpos1);
+		TS_ASSERT((testBlock->getBlockMaterial()).color=="testcolor");
+	}
+
+};
