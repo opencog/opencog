@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -7,11 +8,13 @@ class BaseChooser(object):
 
     def __init__(self, atomspace):
         self.a = atomspace
-        self.last_status = 0
+        self.last_status = blending_status.UNKNOWN_ERROR
+        self.default_config = {}
+        self.make_default_config()
 
-    def __str__(self):
-        return 'BaseChooser'
+    def make_default_config(self):
+        pass
 
     @abstractmethod
-    def atom_choose(self, option):
+    def atom_choose(self, config):
         pass

@@ -7,7 +7,7 @@
 ```python
 from blending.blend import ConceptualBlending
 ConceptualBlending(a).run({
-    'atoms_chooser': 'ChooseRandomInSTIRange'
+    'atoms-chooser': 'ChooseInSTIRange'
 })
 ```
 

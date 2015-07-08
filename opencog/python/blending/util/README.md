@@ -4,3 +4,4 @@
 ## Files
 * blending_util.py: General utils for help blending algorithm.
 * link_copier.py: Copy link to new node.
+* blending_error.py: Manage an error codes.

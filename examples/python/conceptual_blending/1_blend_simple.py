@@ -34,6 +34,8 @@ a.set_tv(l4.h, TruthValue(0.9, 0.8))
 a.set_tv(l5.h, TruthValue(0.1, 0.9))
 
 inst = ConceptualBlending(a)
-inst.run({
-    'atoms_chooser': 'ChooseRandomInSTIRange'
+result = inst.run({
+    'atoms-chooser': 'ChooseInSTIRange'
 })
+
+log.warn(str(result.h) + " " + str(result.name))

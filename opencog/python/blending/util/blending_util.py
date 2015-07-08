@@ -8,11 +8,7 @@ __author__ = 'DongMin Kim'
 Blending Utils.
 """
 
-
-def rand_tv():
-    s = random.uniform(0.5, 0.9)
-    c = random.uniform(0.5, 0.9)
-    return TruthValue(s, c)
+# Empty.
 
 
 """
@@ -39,11 +35,3 @@ class Singleton(
     )
 ):
     pass
-
-
-# http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
-def enum_simulate(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    reverse = dict((value, key) for key, value in enums.iteritems())
-    enums['reverse_mapping'] = reverse
-    return type('Enum', (), enums)
