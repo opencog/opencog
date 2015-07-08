@@ -114,7 +114,7 @@ bool OctomapOcTree::removeAnUnitSolidBlock(const BlockVector& pos,unsigned depth
 	return this->deleteNode(pos.x,pos.y,pos.z,depth);
 }
 
-BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& curPos, Block3D* &neighbourBlock)
+BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& pos, Block3D* &neighbourBlock)
 {
     // check 26 neighbours
 
@@ -124,7 +124,7 @@ BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& curPos, Blo
                 {
                     if (i == 0 && j == 0 && k == 0)
                         continue;
-                    BlockVector nextPos(curPos.x + i, curPos.y + j, curPos.z + k);
+                    BlockVector nextPos(pos.x + i, pos.y + j, pos.z + k);
                     if ( checkIsSolid(nextPos,neighbourBlock))
 						{
 							return nextPos;
@@ -182,6 +182,31 @@ vector<Block3D*> OctomapOcTree::findAllBlocksCombinedWith(BlockVector* pos, bool
 	}
 
     return blockList;
+}
+
+vector<BlockVector> OctomapOcTree::getAllNeighbourSolidBlockVectors(BlockVector& pos)
+{
+    vector<BlockVector> vectorList;
+
+    Block3D* neighbourBlock;
+
+    // check 26 neighbours
+
+	for (int i = -1; i < 2; i ++)
+	{
+		for (int j = -1; j < 2; j ++)
+		{
+			for (int k = -1; k < 2; k ++)
+			{
+				if (i == 0 && j == 0 && k == 0){ continue;}
+
+				BlockVector nextPos(pos.x + i, pos.y + j, pos.z + k);
+				if ( checkIsSolid(nextPos,neighbourBlock))
+				{ vectorList.push_back(nextPos);}
+			}
+		}
+	}
+	return vectorList;
 }
 
 

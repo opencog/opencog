@@ -31,138 +31,137 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OCTOMAP_COLOR_OCTREE_H
-#define OCTOMAP_COLOR_OCTREE_H
+#ifndef OPENCOG_OCTOMAP_OCTREE_H
+#define OPENCOG_OCTOMAP_OCTREE_H
+
 #include <vector>
-
-
 #include <iostream>
 #include <octomap/OcTreeNode.h>
 #include <octomap/OccupancyOcTreeBase.h>
-#include <opencog/atomspace/Handle.h>
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-#include "Octree3DMapManager.h"
 
 
-using namespace opencog;
-using namespace opencog::spatial;
+using namespace octomap;
 
-namespace octomap {
-  
-	class OctomapOcTreeNode : public OcTreeNode
+namespace opencog
+{
+	namespace spatial 
 	{
-	public:
-	OctomapOcTreeNode() : OcTreeNode(), _block(NULL) {}
-		OctomapOcTreeNode(const OctomapOcTreeNode& rhs);
-		~OctomapOcTreeNode(){ delete _block;}
-		OctomapOcTreeNode& operator=(const OctomapOcTreeNode& rhs);
-		// children
-		inline OctomapOcTreeNode* getChild(unsigned int i) 
+  
+		class OctomapOcTreeNode : public OcTreeNode
 		{
-			return static_cast<OctomapOcTreeNode*> (OcTreeNode::getChild(i));
-		}
-		inline const OctomapOcTreeNode* getChild(unsigned int i) const 
-		{
-			return static_cast<const OctomapOcTreeNode*> (OcTreeNode::getChild(i));
-		}
-
-		bool createChild(unsigned int i) 
-		{
-			if (children == NULL) allocChildren();
-			children[i] = new OctomapOcTreeNode();
-			return true;
-		}
-
-		void setBlock(Block3D *const & block)
-		{
-			_block=block;
-		}
-
-		const Block3D* getBlock() const
-		{
-			return _block;
-		}
-
-		Block3D* getBlock()
-		{
-			return _block;
-		}
-
-		void cloneNodeRecur(const OctomapOcTreeNode& rhs);
-	private:
-		Block3D* _block;
-	};
-
-	// tree definition
-	class OctomapOcTree : public OccupancyOcTreeBase <OctomapOcTreeNode> {
-
-	public:
-		/// Default constructor, sets resolution of leafs
-	OctomapOcTree(double resolution) : OccupancyOcTreeBase<OctomapOcTreeNode>(resolution) {}
-		OctomapOcTree(const OctomapOcTree&);
-
-		/// virtual constructor: creates a new object of same type
-		/// (Covariant return type requires an up-to-date compiler)
-		OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
-
-		std::string getTreeType() const {return "OctomapOcTree";}
-   
-		// set node color at given key or coordinate. Replaces previous color.
-		OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, Block3D *const & block);
-		OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,
-										const double& z, Block3D *const & block); 
-
-		OctomapOcTreeNode* setNodeBlock(const point3d& pos, Block3D *const & block);
-
-		// Move the Opencog Octree legacy API here
-
-		// Add a block.This block is not necessary to be a unit block, it can be a bigger block
-		void addSolidBlock(Block3D * block);
-		
-		//  Remove an unit block at a given position from the octree system
-		//  return false if block not exists.
-		bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
-
-		// Check whether this position has been filled by a solid block,
-		// Note that if the block is in the unknown space it'll also return false
-		// pos is input para, block is output para
-		// if solid, return the block in @ block
-		bool checkIsSolid(const BlockVector& pos, Block3D* & block) const;
-
-
-		// find all the blocks combine with the block in pos,
-		// the return list does not contain the block in this pos
-		vector<Block3D*>  findAllBlocksCombinedWith(BlockVector* pos, bool useBlockMaterial = true);
-
-		// get all the existing BlockEntities will combined by this block (if add a block in this pos)
-		// calculate all the 26 neighbours
-		vector<BlockEntity*> getNeighbourEntities(BlockVector& pos);
-
-		// get any a Neighbour Solid BlockVector of curPos
-		// the neighbourBlock will return the block contains this neighbour BlockVector
-		BlockVector getNeighbourSolidBlockVector(BlockVector& curPos , Block3D* &neighbourBlock);
-
-		// return all the neighbour sold BlockVector of curPos
-		vector<BlockVector> getAllNeighbourSolidBlockVectors(BlockVector& curPos);
-    
-	protected:
-
-		/**
-		 * Static member object which ensures that this OcTree's prototype
-		 * ends up in the classIDMapping only once
-		 */
-		class StaticMemberInitializer{
 		public:
-			StaticMemberInitializer() {
-				OctomapOcTree* tree = new OctomapOcTree(0.1);
-				AbstractOcTree::registerTreeType(tree);
+		    OctomapOcTreeNode() : OcTreeNode(), _block(NULL) {}
+			OctomapOcTreeNode(const OctomapOcTreeNode& rhs);
+			~OctomapOcTreeNode(){ delete _block;}
+			OctomapOcTreeNode& operator=(const OctomapOcTreeNode& rhs);
+			// children
+			inline OctomapOcTreeNode* getChild(unsigned int i) 
+			{
+				return static_cast<OctomapOcTreeNode*> (OcTreeNode::getChild(i));
 			}
+			inline const OctomapOcTreeNode* getChild(unsigned int i) const 
+			{
+				return static_cast<const OctomapOcTreeNode*> (OcTreeNode::getChild(i));
+			}
+
+			bool createChild(unsigned int i) 
+			{
+				if (children == NULL) allocChildren();
+				children[i] = new OctomapOcTreeNode();
+				return true;
+			}
+
+			void setBlock(Block3D *const & block)
+			{
+				_block=block;
+			}
+
+			const Block3D* getBlock() const
+			{
+				return _block;
+			}
+
+			Block3D* getBlock()
+			{
+				return _block;
+			}
+
+			void cloneNodeRecur(const OctomapOcTreeNode& rhs);
+		private:
+			Block3D* _block;
 		};
-		// static member to ensure static initialization (only once)
-		static StaticMemberInitializer colorOcTreeMemberInit;
-	};
 
-} // end namespace
+		// tree definition
+		class OctomapOcTree : public OccupancyOcTreeBase <OctomapOcTreeNode> {
+			
+		public:
+			/// Default constructor, sets resolution of leafs
+		OctomapOcTree(double resolution) : OccupancyOcTreeBase<OctomapOcTreeNode>(resolution) {}
+			OctomapOcTree(const OctomapOcTree&);
+			
+			/// virtual constructor: creates a new object of same type
+			/// (Covariant return type requires an up-to-date compiler)
+			OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
+			
+			std::string getTreeType() const {return "OctomapOcTree";}
+   
+			// set node color at given key or coordinate. Replaces previous color.
+			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, Block3D *const & block);
+			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,
+											const double& z, Block3D *const & block); 
 
+			OctomapOcTreeNode* setNodeBlock(const point3d& pos, Block3D *const & block);
+
+			// Move the Opencog Octree legacy API here
+
+			// Add a block.This block is not necessary to be a unit block, it can be a bigger block
+			void addSolidBlock(Block3D * block);
+		
+			//  Remove an unit block at a given position from the octree system
+			//  return false if block not exists.
+			bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
+			
+			// Check whether this position has been filled by a solid block,
+			// Note that if the block is in the unknown space it'll also return false
+			// pos is input para, block is output para
+			// if solid, return the block in @ block
+			bool checkIsSolid(const BlockVector& pos, Block3D* & block) const;
+
+
+			// find all the blocks combine with the block in pos,
+			// the return list does not contain the block in this pos
+			vector<Block3D*>  findAllBlocksCombinedWith(BlockVector* pos, bool useBlockMaterial = true);
+
+			// get all the existing BlockEntities will combined by this block (if add a block in this pos)
+			// calculate all the 26 neighbours
+			vector<BlockEntity*> getNeighbourEntities(BlockVector& pos);
+		
+			// get any a Neighbour Solid BlockVector of curPos
+			// the neighbourBlock will return the block contains this neighbour BlockVector
+			BlockVector getNeighbourSolidBlockVector(BlockVector& pos , Block3D* &neighbourBlock);
+
+			// return all the neighbour sold BlockVector of curPos
+			vector<BlockVector> getAllNeighbourSolidBlockVectors(BlockVector& pos);
+    
+		protected:
+
+			/**
+			 * Static member object which ensures that this OcTree's prototype
+			 * ends up in the classIDMapping only once
+			 */
+			class StaticMemberInitializer{
+			public:
+				StaticMemberInitializer() {
+					OctomapOcTree* tree = new OctomapOcTree(0.1);
+					AbstractOcTree::registerTreeType(tree);
+				}
+			};
+			// static member to ensure static initialization (only once)
+			static StaticMemberInitializer colorOcTreeMemberInit;
+		};
+
+	} // end namespace
+}
 #endif

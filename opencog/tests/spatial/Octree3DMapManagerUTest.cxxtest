@@ -27,9 +27,22 @@ public:
 		BlockVector testpos1(7,8,9);
 		Handle testHandle(100);
 		testMap->addSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
+		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
 		Block3D* testBlock=testMap->getBlockAtLocation(testpos1);
 		TS_ASSERT(testBlock->getPosition()==testpos1);
 		TS_ASSERT((testBlock->getBlockMaterial()).color=="testcolor");
 	}
 
+	void testRemoveUnitBlock()
+	{
+		string testMapName("testMap");
+		unsigned resolution=1;
+		unsigned floorheight=-255;
+		Octree3DMapManager* testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
+		BlockVector testpos1(7,8,9);
+		Handle testHandle(100);
+		testMap->addSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
+		testMap->removeSolidUnitBlock(testHandle);
+		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
+	}
 };

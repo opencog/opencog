@@ -516,11 +516,10 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
 
     Block3D* block;
     // First, check is there a block in this position
-    if (! mRootOctree->checkIsSolid(_pos, block))
+    if (! mOctomapOctree->checkIsSolid(_pos, block))
         return;
 
-
-    Handle atom=mRootOctree->removeAnUnitSolidBlock(_pos);
+    mOctomapOctree->removeAnUnitSolidBlock(_pos);
 
     mAllUnitAtomsToBlocksMap.erase(it);
     mAllUnitBlocksToAtomsMap.erase(itp);
@@ -548,13 +547,13 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
 
         // First get any a neighbour solid pos
         Block3D* neighbourBlock = 0;
-        BlockVector neighbourPos = mRootOctree->getNeighbourSolidBlockVector(_pos, neighbourBlock);
+        BlockVector neighbourPos = mOctomapOctree->getNeighbourSolidBlockVector(_pos, neighbourBlock);
 
         if (neighbourPos == BlockVector::ZERO || neighbourBlock == 0)
             return;
 
         // find from this neighbour BlockVector all the combining blocks
-        vector<Block3D*> neighbourblockList = mRootOctree->findAllBlocksCombinedWith(&neighbourPos);
+        vector<Block3D*> neighbourblockList = mOctomapOctree->findAllBlocksCombinedWith(&neighbourPos);
         neighbourblockList.push_back(neighbourBlock);
 
         if (neighbourblockList.size() == blockList.size())
@@ -575,21 +574,21 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle &blockNode)
             mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
 
             // get all the neighbour solid positions of this removed unit block
-            vector<BlockVector> allNeighbours = mRootOctree->getAllNeighbourSolidBlockVectors(_pos);
+            vector<BlockVector> allNeighbours = mOctomapOctree->getAllNeighbourSolidBlockVectors(_pos);
             vector<BlockVector>::iterator it = allNeighbours.begin();
 
             Block3D* curBlock;
             for (; it != allNeighbours.end(); ++it)
             {
                 // get the block in this position
-                if (! mRootOctree->checkIsSolid((BlockVector&)(*it), curBlock))
+                if (! mOctomapOctree->checkIsSolid((BlockVector&)(*it), curBlock))
                     continue;
 
                 if (curBlock->mBlockEntity != 0)
                     continue;
 
                 // calculate from this block to find all the blocks combine with it
-                vector<Block3D*> newBlockList = mRootOctree->findAllBlocksCombinedWith(&*it);
+                vector<Block3D*> newBlockList = mOctomapOctree->findAllBlocksCombinedWith(&*it);
 
                 // create a new entity for this part of original entity
                 BlockEntity* newEntity = new BlockEntity(this,newBlockList);
@@ -924,7 +923,7 @@ bool Octree3DMapManager::checkIsSolid(int x, int y, int z)
 bool Octree3DMapManager::checkIsSolid(BlockVector& pos)
 {
     Block3D* block;
-    return (mRootOctree->checkIsSolid(pos, block));
+    return (mOctomapOctree->checkIsSolid(pos, block));
 }
 
 
