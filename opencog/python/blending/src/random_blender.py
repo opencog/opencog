@@ -3,15 +3,21 @@ import random
 from opencog.atomspace import TruthValue
 from opencog.type_constructors import types, ConceptNode
 from opencog.logger import *
-from blending.src.base_blender import Blender
+from blending.src.base_blender import BaseBlender
 from blending.util.link_copier import LinkCopier
 
 __author__ = 'DongMin Kim'
 
-class RandomBlender(Blender):
+class RandomBlender(BaseBlender):
     def __init__(self, atomspace):
         super(self.__class__, self).__init__(atomspace)
         self.link_copier_class = LinkCopier(self.a)
+
+    def __str__(self):
+        return 'RandomBlender'
+
+    def get_last_status(self):
+        return self.last_status
 
     # Select atoms randomly and return
     # atom_type = decide the type of atoms to select
@@ -35,8 +41,6 @@ class RandomBlender(Blender):
         return ret
 
     def blend(self):
-        log.warn("Start RandomBlending")
-
         # Select nodes to blending.
         a_nodes = self.__get_random_atom(2)
 
@@ -79,4 +83,3 @@ class RandomBlender(Blender):
         # - Do nothing.
 
         log.warn(str(a_blended_node.h) + " " + str(a_blended_node.name))
-        log.warn("Finish RandomBlending")

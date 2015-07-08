@@ -6,7 +6,7 @@
 * Currently it supports a random blending.
 ```python
 from blending.blend import ConceptualBlending
-ConceptualBlending(a).run()
+ConceptualBlending(a).run("RandomBlender")
 ```
 
 ## Examples
