@@ -98,11 +98,13 @@ class LinkCopier:
     def __add_new_links(self, src_info_cont, link_set, dst_node):
         # Add new link to target node.
         for link_key in link_set:
-            src_link = self.a[src_info_cont.d[link_key]]
-
             src_h_list = link_key.get_src_h_list()
-            src_h_list.insert(link_key.dst_pos_in_outgoing, dst_node)
 
+            if dst_node.h in src_h_list:
+                continue
+
+            src_h_list.insert(link_key.dst_pos_in_outgoing, dst_node)
+            src_link = self.a[src_info_cont.d[link_key]]
             self.a.add_link(
                 src_link.t,
                 src_h_list,

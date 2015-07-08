@@ -1,4 +1,5 @@
 import random
+from blending.util.blending_util import rand_tv
 
 from opencog.atomspace import TruthValue
 from opencog.type_constructors import types, ConceptNode
@@ -56,20 +57,8 @@ class RandomBlender(BaseBlender):
         a_blended_node = ConceptNode(
             str(a_node_0.name) +
             '-' +
-            str(a_node_1.name)
-        )
-
-        # Make the links between source nodes and newly blended node.
-        # TODO: Change to make with proper reason, not make in every blending.
-        self.a.add_link(
-            types.AssociativeLink,
-            [a_node_0, a_blended_node],
-            TruthValue(0.7, 0.6)
-        )
-        self.a.add_link(
-            types.AssociativeLink,
-            [a_node_1, a_blended_node],
-            TruthValue(0.7, 0.6)
+            str(a_node_1.name),
+            rand_tv()
         )
 
         # Make the links between exist nodes and newly blended node.
@@ -77,6 +66,19 @@ class RandomBlender(BaseBlender):
         self.link_copier_class.copy_all_link_to_new_node(
             [a_node_0, a_node_1],
             a_blended_node
+        )
+
+        # Make the links between source nodes and newly blended node.
+        # TODO: Change to make with proper reason, not make in every blending.
+        self.a.add_link(
+            types.AssociativeLink,
+            [a_node_0, a_blended_node],
+            rand_tv()
+        )
+        self.a.add_link(
+            types.AssociativeLink,
+            [a_node_1, a_blended_node],
+            rand_tv()
         )
 
         # Detect and improve conflict links in newly blended node.
