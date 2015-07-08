@@ -32,4 +32,3 @@ a.set_tv(l5.h, TruthValue(0.1, 0.9))
 
 inst = ConceptualBlending(a)
 inst.run("RandomBlender")
-

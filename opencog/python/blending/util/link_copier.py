@@ -8,14 +8,14 @@ class LinkCopier:
         self.a = atomspace
 
     # TODO: Translate to english.
-    # If (A) -> (B) and (C) is new blended node,
+    # If (A) -> (B), and (C) is new blended node,
     # purpose of LinkCopier is link with (A) -> (C).
     # (A) is src_node
     # (C) is dst_node
     # (B) is src_node in LinkCopier context.
-    # (B) is dst_node in LinkSrcInfo context.
+    # (B) is dst_node in EqualLinkKey context.
 
-    class LinkSrcInfoContainer:
+    class EqualLinkContainer:
         def __init__(self, link_list=None, link_dict=None, link_set=None):
             self.link_list = link_list
             self.link_dict = link_dict
@@ -33,62 +33,87 @@ class LinkCopier:
         def s(self):
             return self.link_set
 
-    class LinkSrcInfo:
-        def __init__(self, link_type=None, link_src_handle=None):
+    class EqualLinkKey:
+        def __init__(self, link_type=None):
             self.t = link_type
-            self.src_h = link_src_handle
+            self.src_h_list_str = ''
+            self.dst_pos_in_outgoing = -1
 
-    class LinkInfo:
-        def __init__(self, link_h_value=None, link_tv=None):
-            self.h = link_h_value
-            self.tv = link_tv
+        # It is equal if
+        # (type, outgoing list, self position in outgoing list)
+        # is same.
+        def __key(self):
+            return self.t, self.src_h_list_str, self.dst_pos_in_outgoing
 
-    def __get_link_src_info_dict(self, link_list, dst_node):
-        ret_dict = dict()
+        def __eq__(self, other):
+            if self.__key() == other.__key():
+                return True
+
+            return False
+
+        def __hash__(self):
+            return hash(self.__key())
+
+        def add_src_h(self, src_node):
+            src_node_h_str = str(src_node.h.value())
+            self.src_h_list_str += src_node_h_str + ', '
+
+        def get_src_h_list(self):
+            ret = []
+
+            src_node_h_int_list = self.src_h_list_str.split(', ')
+            # Delete end of string
+            src_node_h_int_list.pop()
+
+            for src_node_h_int in src_node_h_int_list:
+                ret.append(Handle(int(src_node_h_int)))
+
+            return ret
+
+    # TODO: How to check and merge link which has ingoing atoms?
+    def __get_equal_link_dict(self, link_list, dst_node):
+        ret = dict()
         for link in link_list:
+            equal_link_key = self.EqualLinkKey(link.t)
+
             xget_link_src = self.a.xget_outgoing(link.h)
-            for link_src in xget_link_src:
-                if link_src.h != dst_node.h:
-                    link_src_info = self.LinkSrcInfo(
-                        link.t, link_src.h.value()
-                    )
-                    link_info = self.LinkInfo(
-                        link.h, link.tv
-                    )
-                    ret_dict[link_src_info] = link_info
+            for i, link_src in enumerate(xget_link_src):
+                if link_src.h == dst_node.h:
+                    equal_link_key.dst_pos_in_outgoing = i
+                else:
+                    equal_link_key.add_src_h(link_src)
 
-        return ret_dict
+            ret[equal_link_key] = link.h
 
-    def __get_link_src_info_set(self, link_dict):
-        return set(link_dict.keys())
+        return ret
 
     def get_link_src_info_containers(self, dst_node):
         src_link_list = self.a.get_atoms_by_target_atom(types.Link, dst_node)
-        src_link_dict = self.__get_link_src_info_dict(src_link_list, dst_node)
-        src_link_set = self.__get_link_src_info_set(src_link_dict)
+        src_link_dict = self.__get_equal_link_dict(src_link_list, dst_node)
+        src_link_set = set(src_link_dict.keys())
 
-        return self.LinkSrcInfoContainer(
-            src_link_list, src_link_dict, src_link_set
-        )
+        return self.EqualLinkContainer(src_link_list, src_link_dict,
+                                       src_link_set)
 
     def __add_new_links(self, src_info_cont, link_set, dst_node):
         # Add new link to target node.
-        for link_src_info in link_set:
-            src_node = self.a[Handle(link_src_info.src_h)]
-            link_info = src_info_cont.d[link_src_info]
+        for link_key in link_set:
+            src_link = self.a[src_info_cont.d[link_key]]
+
+            src_h_list = link_key.get_src_h_list()
+            src_h_list.insert(link_key.dst_pos_in_outgoing, dst_node)
+
             self.a.add_link(
-                link_src_info.t,
-                [src_node, dst_node],
-                link_info.tv
+                src_link.t,
+                src_h_list,
+                src_link.tv,
             )
 
     def __modify_exist_links(self, src_info_cont, dst_info_cont, link_set):
         # Correct conflict link value in target node.
-        for link_src_info in link_set:
-            src_link_info = src_info_cont.d[link_src_info]
-            dst_link_info = dst_info_cont.d[link_src_info]
-            src_link = self.a[Handle(src_link_info.h)]
-            dst_link = self.a[Handle(dst_link_info.h)]
+        for link_key in link_set:
+            src_link = self.a[src_info_cont.d[link_key]]
+            dst_link = self.a[dst_info_cont.d[link_key]]
 
             # Correct conflict link value in target node.
             self.__correct_strength_of_links(src_link, dst_link)
@@ -109,7 +134,8 @@ class LinkCopier:
         # is just average of old value.
         new_confidence = (found_c + exist_c) / 2
 
-        dst_link.tv = TruthValue(new_strength, new_confidence)
+        tv = TruthValue(new_strength, new_confidence)
+        self.a.set_tv(dst_link.h, tv)
 
     def copy_all_link_to_new_node(self, src_node_list, dst_node):
         # TODO: Optimize dst_info_container update period.
