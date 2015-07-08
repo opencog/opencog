@@ -26,7 +26,7 @@ public:
 		Octree3DMapManager* testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
 		BlockVector testpos1(7,8,9);
 		Handle testHandle(100);
-		testMap->newaddSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
+		testMap->addSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
 		Block3D* testBlock=testMap->getBlockAtLocation(testpos1);
 		TS_ASSERT(testBlock->getPosition()==testpos1);
 		TS_ASSERT((testBlock->getBlockMaterial()).color=="testcolor");

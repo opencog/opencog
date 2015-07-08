@@ -155,8 +155,7 @@ namespace opencog
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
-            void addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,  std::string _materialType = "", std::string _color = "" );
-			void newaddSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,  std::string _materialType = "", std::string _color = "" );
+			void addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,  std::string _materialType = "", std::string _color = "" );
             // return the BlockEntity occupied this position, then the atomspace can update the predicates for this Entity
             // But if this entity is disappear during this process, then will return 0
             void removeSolidUnitBlock(const Handle &blockNode);
@@ -317,8 +316,6 @@ namespace opencog
 
             Block3D* getBlockAtLocation(int x, int y, int z);
 			Block3D* getBlockAtLocation(const BlockVector& pos);
-            Block3D* newgetBlockAtLocation(int x, int y, int z);
-			Block3D* newgetBlockAtLocation(const BlockVector& pos);
             // return the handle of the unit block in this position
             Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
 

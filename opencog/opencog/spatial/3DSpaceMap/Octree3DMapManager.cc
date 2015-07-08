@@ -417,84 +417,8 @@ void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
     }
 }
 
+
 void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom, std::string _materialType, std::string _color)
-{
-    // First, check if this _pos is inside the map boundary
-    if (! mMapBoundingBox.isUnitBlockInsideMe(_pos))
-    {
-        logger().error("addSolidUnitBlock: You want to add a unit block which outside the boundary of the map: at x = %d, y = %d, z= %d ! /n",
-                      _pos.x,_pos.y,_pos.z);
-        return;
-    }
-
-    Block3D* block;
-    // First, check is there already a block in this position
-    if (mRootOctree->checkIsSolid(_pos, block))
-        return;
-
-
-    block = new Block3D(1, _pos, _materialType, _color);
-    mRootOctree->addSolidBlock(block);
-
-    if (_unitBlockAtom != Handle::UNDEFINED)
-    {
-        mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
-        mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
-    }
-    mTotalUnitBlockNum ++;
-
-    // when there is not the first time percept the world,
-    // adding a new block will cause changes to the blockEntitye
-    if (! hasPerceptedMoreThanOneTimes)
-        return;
-
-    if (this->enable_BlockEntity_Segmentation)
-    {
-        // first find all the entities will combined to this new block
-        vector<BlockEntity*> entities = mRootOctree->getNeighbourEntities(_pos);
-
-        if (entities.size() == 0)
-        {
-            //there is not any entity will combine with this block
-            // so make this block as a new entity which only contains one block
-            BlockEntity* entity = new BlockEntity(this,*block);
-            mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
-            return;
-        }
-        else if (entities.size() == 1)
-        {
-            // only one entity combining, so just put this new block into that entity
-            BlockEntity* entity = (BlockEntity*)(entities.front());
-            entity->addBlock(block);
-            updateBlockEntityList.push_back(entity);
-            return;
-        }
-        else
-        {
-            // there are existing more than 1 BlockEntities will combine with this new block
-            // this new block join two or more existing entities together,
-            // we remove these old entities, and add all their blocks to this new big one
-            BlockEntity* entity = new BlockEntity(this,*block);
-
-            vector<BlockEntity*>::iterator iter;
-            for (iter = entities.begin(); iter != entities.end(); ++iter)
-            {
-                // add all the blocks in this old entity to the new big one
-                entity->addBlocks((vector<Block3D*>&)((BlockEntity*)(*iter))->getBlockList());
-
-                BlockEntity* oldEntity = *iter;
-
-                // delete this old entity
-                removeAnEntityFromList(oldEntity);
-                delete oldEntity;
-            }
-            mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
-            return;
-        }
-    }
-}
-
-void Octree3DMapManager::newaddSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom, std::string _materialType, std::string _color)
 {
     // First, check if this _pos is smaller than the max tree size
 	octomap::OcTreeKey key;
@@ -1003,29 +927,16 @@ bool Octree3DMapManager::checkIsSolid(BlockVector& pos)
     return (mRootOctree->checkIsSolid(pos, block));
 }
 
+
 Block3D* Octree3DMapManager::getBlockAtLocation(int x, int y, int z)
 {
     BlockVector pos(x,y,z);
     return getBlockAtLocation(pos);
-}
-
-Block3D* Octree3DMapManager::newgetBlockAtLocation(int x, int y, int z)
-{
-    BlockVector pos(x,y,z);
-    return newgetBlockAtLocation(pos);
 
 }
 
 
 Block3D* Octree3DMapManager::getBlockAtLocation(const BlockVector& pos)
-{
-    Block3D* block;
-    mRootOctree->checkIsSolid(pos, block);
-
-    return block;
-}
-
-Block3D* Octree3DMapManager::newgetBlockAtLocation(const BlockVector& pos)
 {
     Block3D* block;
     mOctomapOctree->checkIsSolid(pos, block);
