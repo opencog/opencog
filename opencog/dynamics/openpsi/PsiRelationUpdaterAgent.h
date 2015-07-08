@@ -29,7 +29,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace opencog { namespace oac {
+namespace opencog {
 
 /**
  * @class
@@ -157,12 +157,13 @@ private:
      *       it would be reset to PSI_NOVELTY_INIT_VALUE next time
      *       the pet encounters the corresponding entity.
      */
-    void updateEntityNovelty(opencog::CogServer * server);
+    /*void updateEntityNovelty(opencog::CogServer * server);
 
     void updateEntityRelation(AtomSpace & atomSpace,
                               Handle petHandle,
                               Procedure::ProcedureInterpreter & procedureInterpreter,
                               const Procedure::ProcedureRepository & procedureRepository);
+      */
 
 public:
 
@@ -174,7 +175,7 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiRelationUpdaterAgent");
+        static const ClassInfo _ci("opencog::PsiRelationUpdaterAgent");
         return _ci;
     }
 
@@ -195,6 +196,6 @@ public:
 
 typedef std::shared_ptr<PsiRelationUpdaterAgent> PsiRelationUpdaterAgentPtr;
 
-} } // namespace opencog::oac
+} // namespace opencog
 
 #endif

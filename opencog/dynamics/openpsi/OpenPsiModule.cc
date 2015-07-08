@@ -45,6 +45,8 @@ OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
                             &modulatorUpdaterFactory);
     _cogserver.registerAgent(PsiFeelingUpdaterAgent::info().id,
                             &feelingUpdaterFactory);
+    _cogserver.registerAgent(PsiRelationUpdaterAgent::info().id,
+                            &feelingUpdaterFactory);
 }
 
 OpenPsiModule::~OpenPsiModule()
@@ -54,6 +56,7 @@ OpenPsiModule::~OpenPsiModule()
     _cogserver.unregisterAgent(PsiActionSelectionAgent::info().id);
     _cogserver.unregisterAgent(PsiModulatorUpdaterAgent::info().id);
     _cogserver.unregisterAgent(PsiFeelingUpdaterAgent::info().id);
+    _cogserver.unregisterAgent(PsiRelationUpdaterAgent::info().id);
 }
 
 

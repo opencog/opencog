@@ -26,11 +26,11 @@
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; DemandSchema/DemandValue is represented as:
-; 
+;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
 ;
-;     SimilarityLink 
+;     SimilarityLink
 ;         NumberNode: "demand_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "demand_schema_name"
@@ -39,8 +39,8 @@
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Each none grounded goal or precondition should have a corresponding 
-; GroundedPredicateNode to check if the goal or precondition has been achieved 
+; Each none grounded goal or precondition should have a corresponding
+; GroundedPredicateNode to check if the goal or precondition has been achieved
 ; or not. They are related via an SimultaneousEquivalenceLink as follows:
 ;
 ; SimultaneousEquivalenceLink
@@ -55,18 +55,18 @@
 ;             ...
 ;
 ; A special case is the DemandGoal, which uses a "fuzzy_within" scheme function
-; to calculate its truth value. While the XxxDemandUpdater is a scheme function 
-; of updating the demand level (not the truth value of it). 
+; to calculate its truth value. While the XxxDemandUpdater is a scheme function
+; of updating the demand level (not the truth value of it).
 ;
-; Take CertaintyDemand as an example, the CertaintyDemandUpdater is responsible 
-; for updating the certainty level of the agent via a bunch of information stored 
-; in AtomSpace, while the truth value of the CertaintyDemandGoal is calculated 
-; via fuzzy_within function, which would evaluate how well the certainty level is 
-; within the suitable range [min_acceptable_value, max_acceptable_value]. 
+; Take CertaintyDemand as an example, the CertaintyDemandUpdater is responsible
+; for updating the certainty level of the agent via a bunch of information stored
+; in AtomSpace, while the truth value of the CertaintyDemandGoal is calculated
+; via fuzzy_within function, which would evaluate how well the certainty level is
+; within the suitable range [min_acceptable_value, max_acceptable_value].
 ;
 ; SimultaneousEquivalenceLink
 ;     EvaluationLink
-;         PredicateNode "XxxDemandGoal" 
+;         PredicateNode "XxxDemandGoal"
 ;     EvaluationLink
 ;         GroundedPredicateNode "fuzzy_within"
 ;         ListLink
@@ -87,10 +87,10 @@
 ;             ...
 ;
 ;         ExecutionLink (truth value indicates whether the action has been done successfully)
-;             action 
+;             action
 ;
 ;     EvaluationLink (truth value indicates how well the goal is satisfied)
-;         goal 
+;         goal
 ;
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -121,12 +121,12 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Handles for pet and its owner, 
+; Handles for pet and its owner,
 ; which is used by add_action, if its action parameters contain 'self', or 'owner'
 ;
 ; Since Scheme shell would never know these Handles automatically,
-; you should call the scheme scripts below, 
-; 
+; you should call the scheme scripts below,
+;
 ;     (set! PET_HANDLE (get_agent_handle "agent_id") )
 ;     (set! OWNER_HANDLE (get_owner_handle "owner_id") )
 ;
@@ -160,7 +160,7 @@
 
                          (if (null? agent_handle)
                              (print_debug_info INFO_TYPE_FAIL "get_agent_handle"
-                                               (string-append "Can not find any agent node named " 
+                                               (string-append "Can not find any agent node named "
                                                                agent_id
                                                )
                              )
@@ -177,7 +177,7 @@
                  );if
              );begin
 
-             (print_debug_info INFO_TYPE_SUCCESS "get_agent_handle" 
+             (print_debug_info INFO_TYPE_SUCCESS "get_agent_handle"
                                (string-append "Found a PetNode named " agent_id)
              )
          );if
@@ -199,7 +199,7 @@
         (if (null? owner_handle)
             (print_debug_info INFO_TYPE_FAIL "get_owner_handle"
                               (string-append "Can not find the owner named " owner_id)
-            )  
+            )
 
             (print_debug_info INFO_TYPE_SUCCESS "get_owner_handle"
                               (string-append "Found the owner named " owner_id)
@@ -208,7 +208,7 @@
 
         owner_handle; return the owner Handle (note: it might be null)
     );let
-);define 
+);define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
@@ -220,15 +220,15 @@
 ;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
-;     SimilarityLink 
+;     SimilarityLink
 ;         NumberNode: "modulator_value"
 ;         ExecutionOutputLink (stv 1.0 1.0)
 ;             GroundedSchemaNode: "modulator_schema_name"
 ;
 
 (define (add_modulator modulator_name default_value)
-    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (cog-new-av 1 1 1) 
-                              (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") ) 
+    (let ( (schema_handle (ExecutionOutputLink (stv 1.0 1.0) (cog-new-av 1 1 1)
+                              (GroundedSchemaNode (string-append (string-trim-both modulator_name) "Updater") )
                           );ExecutionOutputLink
            );schema_handle
          )
@@ -249,7 +249,7 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add a DemandSchema/DemandValue given demand_name and default_value, 
+; Add a DemandSchema/DemandValue given demand_name and default_value,
 ; return the handle to ExecutionOutputLink, which would be used by 'fuzzy_within' function
 ;
 ; The updater of the demand value is a combo script, named after demand_name with suffix "Updater"
@@ -258,9 +258,9 @@
 ;
 ; AtTimeLink (stv 1.0 1.0)
 ;     TimeNode "timestamp"
-;     SimilarityLink 
+;     SimilarityLink
 ;         NumberNode: "demand_value"
-;         ExecutionOutputLink 
+;         ExecutionOutputLink
 ;             GroundedSchemaNode: "demand_schema_name"
 ;
 ; DemandValue is the output of DemandSchema.
@@ -270,8 +270,8 @@
     (let ( (schema_handle (ExecutionOutputLink (cog-new-av 1 1 1)
                               (GroundedSchemaNode (string-append (string-trim-both demand_name) "Updater") )
                           );ExecutionOutputLink
-           );schema_handle    
-         )    
+           );schema_handle
+         )
 
         (AtTimeLink (stv 1.0 1.0)
             (TimeNode "0")
@@ -288,10 +288,10 @@
 );define
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-; 
-; Connect a none grounded goal and a grounded predicate node. 
-; 
-; Each none grounded goal or precondition should have a corresponding 
+;
+; Connect a none grounded goal and a grounded predicate node.
+;
+; Each none grounded goal or precondition should have a corresponding
 ; GroundedPredicateNode to check if the goal or precondition has been achieved or
 ; not. They are related via an SimultaneousEquivalenceLink as follows:
 ;
@@ -311,12 +311,12 @@
     (SimultaneousEquivalenceLink (cog-new-stv 1.0 1.0) (cog-new-av 1 1 1)
         goal_evaluation_link
         goal_truth_value_updater_evaluation_link
-    ) 
+    )
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; This helper function will return a list that contains a bunch of Atoms for combo function arguments. 
+; This helper function will return a list that contains a bunch of Atoms for combo function arguments.
 ;
 ; Example:
 ;
@@ -325,7 +325,7 @@
 ;
 ;     After calling this function, you will get a list containing Handles to corresponding Atoms
 ;
-;         ( PET_HANDLE 
+;         ( PET_HANDLE
 ;           VariableNode "$var_entity"
 ;           NumberNode "40.7"
 ;           OWNER_HANDLE
@@ -340,13 +340,13 @@
               ; Create a corresponding Node for the argument
               (cond
 
-                  ( (cog-atom? argument) 
+                  ( (cog-atom? argument)
                     argument
                   )
 
                   ( (number? argument)
                     (NumberNode (number->string argument) )
-                  )   
+                  )
 
                   ( (equal? (string-contains argument "'") #f)
                     (VariableNode (string-trim-both argument) )
@@ -359,14 +359,14 @@
                   ( (string=? (string-trim-both argument) "'owner'")
                     OWNER_HANDLE
                   )
-                  
+
                   ( else
                       (let* ( (argument (string-trim-both argument) )
                               (argument_length (string-length argument) )
                               (argument (substring argument
                                                    1
                                                    (- argument_length 1)
-                                        ) 
+                                        )
                               ); Strip ' at both ends of argument
                             )
 
@@ -375,7 +375,7 @@
                   );else
 
               );cond
-        
+
         );lambda
 
         arguments
@@ -384,9 +384,9 @@
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
-; Add Goal to AtomSpace. 
+; Add Goal to AtomSpace.
 ;
-; A Goal is an EvaluationLink with a PredicateNode or GroundedSchemaNode, 
+; A Goal is an EvaluationLink with a PredicateNode or GroundedSchemaNode,
 ; which can be represented as below:
 ;
 ; EvaluationLink
@@ -395,7 +395,7 @@
 ;         Node:arguments
 ;         ...
 ;
-; or 
+; or
 ;
 ; EvaluationLink
 ;     GroundedPredicateNode "grounded_goal_name"
@@ -408,7 +408,7 @@
 
 (define (add_goal pred_or_gpn_handle . arguments)
     (EvaluationLink (cog-new-av 1 1 1)
-        pred_or_gpn_handle   
+        pred_or_gpn_handle
 
         (let ( (argument_list (apply parse_arguments arguments) )
              )
@@ -420,9 +420,9 @@
     )
 )
 
-; goal updater is responsible for updating the truth value of ungrounded goal. 
+; goal updater is responsible for updating the truth value of ungrounded goal.
 (define (add_goal_updater gpn_handle . arguments)
-    (add_goal gpn_handle arguments) 
+    (add_goal gpn_handle arguments)
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -437,52 +437,52 @@
 ;     EvaluationLink
 ;         GroundedPredicateNode "gpn_sub_goal_name_2"
 ;             ...
-;     ...        
+;     ...
 ;
-; Technically speaking, there's no distinction between goal and precondition, 
+; Technically speaking, there's no distinction between goal and precondition,
 ; because a goal in one psi rule may serves as the precondition in another
-; rule, vice versa.  
+; rule, vice versa.
 ;
 
 (define (add_precondition pred_or_gpn_handle . arguments)
-    (apply add_goal pred_or_gpn_handle arguments)     
+    (apply add_goal pred_or_gpn_handle arguments)
 )
 
 ; NULL_PRECONDITION is a dummy Precondition that is always satisfied!
-; 
+;
 ; It is used when the Precondition (in another word Contex) is not necessary in a Rule.
 ;
-; Then the cognitive schematic 
+; Then the cognitive schematic
 ;     Contex & Procedure ==> Goal
-; is reduced to 
+; is reduced to
 ;     Procedure ===> Goal
 ;
 ; Do we really need this NULL_PRECONDITION? Who knowns!
 ;
 
-(define NULL_PRECONDITION 
-    (cog-set-tv! 
+(define NULL_PRECONDITION
+    (cog-set-tv!
         (add_goal (PredicateNode "NoPrecondition") )
         (stv 1.0 1.0)
-    )    
+    )
 )
 
 (define NULL_CONTEXT
-    (cog-set-tv! 
+    (cog-set-tv!
         (add_goal (PredicateNode "NoContext") )
         (stv 1.0 1.0)
-    )    
+    )
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ;
 ; Add Action to AtomSpace.
 ;
-; An Action is an ExecutionLink with a schema node, such as GroundedSchemaNode 
+; An Action is an ExecutionLink with a schema node, such as GroundedSchemaNode
 ; or SpeechActSchemaNode
 ;
-; Its Truth Value can only be evaluated by corresponding combo script. 
-; 
+; Its Truth Value can only be evaluated by corresponding combo script.
+;
 ; It can be represented as follows:
 ;
 ; ExecutionLink
@@ -499,13 +499,13 @@
 ;         Node:arguments
 ;         ...
 ;
-; Note: ListLink is required. Even there's no argument, you should also put an 
-;       empty ListLink within ExecutionLink. 
+; Note: ListLink is required. Even there's no argument, you should also put an
+;       empty ListLink within ExecutionLink.
 ;       Othersise, calling
 ;           (query_atom_space_crisp (find_psi_action variables context action) )
-;           in 'opencog/embodiment/action_selection.scm' 
-;       will discard all the actions without ListLink. This weird problem is 
-;       caused by the behaviour of pattern matcher. 
+;           in 'opencog/embodiment/action_selection.scm'
+;       will discard all the actions without ListLink. This weird problem is
+;       caused by the behaviour of pattern matcher.
 ;
 
 (define (add_action schema_handle . arguments)
@@ -523,24 +523,24 @@
     )
 )
 
-; NULL_ACTION is a dummy Action that actually does nothing and its truth value is always ture!
-; 
+; NULL_ACTION is a dummy Action that actually does nothing and its truth value is always true!
+;
 ; It is used when the Action (in another word Procedure) is not necessary in a Rule.
 ;
-; Then the cognitive schematic 
+; Then the cognitive schematic
 ;     Contex & Procedure ==> Goal
-; is reduced to 
+; is reduced to
 ;     Context ===> Goal
 ;
-; For instance, in a Relation Rule, Action may be missing. 
-; When someone attacks you, the Relation between you and the unfriendly guy would probably be Enemy, 
-; without any Action you take. 
+; For instance, in a Relation Rule, Action may be missing.
+; When someone attacks you, the Relation between you and the unfriendly guy would probably be Enemy,
+; without any Action you take.
 ;
 ; Moreover, to some extend, do nothing is actualy do something :)
 ;
 
-(define NULL_ACTION 
-    (cog-set-tv! 
+(define NULL_ACTION
+    (cog-set-tv!
         (add_action (GroundedSchemaNode "DoNothing") )
         (stv 1.0 1.0)
     )
@@ -550,10 +550,10 @@
 ;
 ; Add Rule (an ImplicationLink) to AtomSpace given Handles of Goal, Action and Preconditions
 ;
-; For each Rule, there's only a Goal, an Action and a bunch of Preconditions. 
+; For each Rule, there's only a Goal, an Action and a bunch of Preconditions.
 ; And all these Preconditions should be grouped in an AndLink.
 ; If you want to use OrLink, then just split the Rule into several Rules.
-; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.  
+; For the efficiency and simplicity of the planer (backward chainging), NotLink is forbidden currently.
 ;
 ; 1. Psi Rule is represented as follows:
 ;
@@ -565,7 +565,7 @@
 ;     Goal
 ;
 ; 2. Goal is represented as:
-; 
+;
 ; EvaluationLink
 ;     PredicateNode "goal_name_1"
 ;     ListLink
@@ -591,19 +591,19 @@
 ;         ListLink
 ;             ...
 ;
-; 4. Action is represented as: 
+; 4. Action is represented as:
 ;
 ; ExecutionLink (truth value means if the action has been done successfully)
 ;     GroundedSchemaNode "schema_name_1"
 ;     ListLink
 ;         ...
 ;
-; Note: For each goal or precondition, we can use PredicateNode or GroundedPredicateNode 
-;       within EvaluationLink. The truth value means how well the goal or 
-;       precondition are satisfied. The attention value means the urgency. 
-; 
-;       Each none grounded goal or precondition should have a corresponding 
-;       GroundedPredicateNode to check if the goal or precondition has been 
+; Note: For each goal or precondition, we can use PredicateNode or GroundedPredicateNode
+;       within EvaluationLink. The truth value means how well the goal or
+;       precondition are satisfied. The attention value means the urgency.
+;
+;       Each none grounded goal or precondition should have a corresponding
+;       GroundedPredicateNode to check if the goal or precondition has been
 ;       achieved or not. They are related via an SimultaneousEquivalenceLink
 ;       as follows:
 ;
@@ -623,9 +623,8 @@
         (AndLink
             precondition_and_link
             action_execution_link
-        ) 
+        )
 
         goal_evaluation_link
-    ) 
+    )
 )
-

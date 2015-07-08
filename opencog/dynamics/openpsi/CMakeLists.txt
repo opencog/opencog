@@ -7,4 +7,5 @@ ADD_LIBRARY (OpenPsi SHARED
 	PsiRuleUtil
 	PsiModulatorUpdaterAgent
 	PsiFeelingUpdaterAgent
+	PsiRelationUpdaterAgent
 )

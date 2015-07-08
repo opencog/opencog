@@ -29,12 +29,13 @@
 #include <opencog/dynamics/openpsi/PsiActionSelectionAgent.h>
 #include <opencog/dynamics/openpsi/PsiModulatorUpdaterAgent.h>
 #include <opencog/dynamics/openpsi/PsiFeelingUpdaterAgent.h>
+#include <opencog/dynamics/openpsi/PsiRelationUpdaterAgent.h>
 
 namespace opencog
 {
 
 /**
- * OpenCog Module for OpnePsi
+ * OpenCog Module for OpenPsi
 */
 
 class OpenPsiModule : public Module
@@ -44,6 +45,7 @@ private:
     Factory<PsiActionSelectionAgent, Agent> actionSelectionFactory;
     Factory<PsiModulatorUpdaterAgent, Agent> modulatorUpdaterFactory;
     Factory<PsiFeelingUpdaterAgent, Agent> feelingUpdaterFactory;
+    Factory<PsiRelationUpdaterAgent, Agent> relationUpdaterAgent;
 
 public:
     OpenPsiModule(CogServer&);
