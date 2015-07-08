@@ -1,4 +1,3 @@
-from opencog.atomspace import AtomSpace
 from blending.src.random_blender import RandomBlender
 
 __author__ = 'DongMin Kim'

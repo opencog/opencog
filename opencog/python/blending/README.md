@@ -16,7 +16,8 @@ ConceptualBlending(a).run()
 * See [Development Progress](http://wiki.dong-min.kim/GSoC_2015_-_Conceptual_Blending#Progress)
 
 ## Files
-* blend.py: Main program.
+* blend.py: Conceptual Blending algorithm.
 
 ## Folders
-* src: Blending algorithms.
+* src: Blending sub-algorithms.
+* util: Several utils.
