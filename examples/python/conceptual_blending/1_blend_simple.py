@@ -22,6 +22,9 @@ car = a.add_node(types.ConceptNode, "car")
 man = a.add_node(types.ConceptNode, "man")
 vehicle = a.add_node(types.ConceptNode, "vehicle")
 
+a.set_av(car.h, 19)
+a.set_av(man.h, 18)
+
 """
 Make test links.
 """
@@ -31,4 +34,6 @@ a.set_tv(l4.h, TruthValue(0.9, 0.8))
 a.set_tv(l5.h, TruthValue(0.1, 0.9))
 
 inst = ConceptualBlending(a)
-inst.run("RandomBlender")
+inst.run({
+    'atoms_chooser': 'ChooseRandomInSTIRange'
+})

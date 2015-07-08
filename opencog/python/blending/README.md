@@ -6,7 +6,9 @@
 * Currently it supports a random blending.
 ```python
 from blending.blend import ConceptualBlending
-ConceptualBlending(a).run("RandomBlender")
+ConceptualBlending(a).run({
+    'atoms_chooser': 'ChooseRandomInSTIRange'
+})
 ```
 
 ## Examples
@@ -19,5 +21,5 @@ ConceptualBlending(a).run("RandomBlender")
 * blend.py: Conceptual Blending algorithm.
 
 ## Folders
-* src: Blending sub-algorithms.
+* src/chooser: Atom choosers to use for choose atoms in blender.
 * util: Several utils.
