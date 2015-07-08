@@ -5,8 +5,8 @@
 ## Usage
 * Currently it supports a random blending.
 ```python
-from blending.blend import RandomBlender
-RandomBlender(a).run()
+from blending.blend import ConceptualBlending
+ConceptualBlending(a).run()
 ```
 
 ## Examples
@@ -17,3 +17,6 @@ RandomBlender(a).run()
 
 ## Files
 * blend.py: Main program.
+
+## Folders
+* src: Blending algorithms.

@@ -3,7 +3,7 @@ from opencog.type_constructors import types
 from opencog.utilities import initialize_opencog
 from opencog.logger import log
 
-from blending.blend import RandomBlender
+from blending.blend import ConceptualBlending
 
 __author__ = 'DongMin Kim'
 
@@ -16,5 +16,5 @@ initialize_opencog(a)
 a.add_node(types.ConceptNode, "car")
 a.add_node(types.ConceptNode, "man")
 
-random_blending_inst = RandomBlender(a)
-random_blending_inst.blend()
+inst = ConceptualBlending(a)
+inst.run()
