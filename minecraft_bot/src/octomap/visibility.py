@@ -83,7 +83,6 @@ def createVec3Msg(coords, step, num_steps):
     msg.y = coords[1] + step[1]*num_steps
     msg.z = coords[2] + step[2]*num_steps
 
-    #print "%f, %f, %f"%(msg.x, msg.y, msg.z)
     return msg
 
 
@@ -101,14 +100,10 @@ def getCoordinatesInRange(x, y, z, pitch, yaw):
     ray_steps = [calcRayStep(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
     all_coords = [createVec3Msg((x,y,z), step, num) for step in ray_steps for num in step_range]
     
-    #for item in all_coords:
-    #    print "x %d, y %d, z %d" %(item.x, item.y, item.z)
-
-    #print len(all_coords)
     return all_coords
 
 
-def getVisibleBlocks(coords, blocks):
+def getVisibleBlocks(blocks):
     
     start = time.time()
     vis_blocks = {}
@@ -117,10 +112,6 @@ def getVisibleBlocks(coords, blocks):
     y_jump = (2*R_YAW)/(D_YAW) + 1
     d_jump = MAX_DIST + 1
    
-    print p_jump
-    print y_jump
-    print d_jump
-
     blocks3D = np.reshape(np.array(blocks), (p_jump, y_jump, d_jump))
     
     for y_list in blocks3D:

@@ -27,7 +27,7 @@ def handleGetVisibleBlocks(req):
     
     coords      = vis.getCoordinatesInRange(req.x, req.y, req.z, req.pitch, req.yaw)
     blocks      = getBlockMulti(coords)
-    vis_blocks  = vis.getVisibleBlocks(coords, blocks)
+    vis_blocks  = vis.getVisibleBlocks(blocks)
 
     return {'visible_blocks': vis_blocks}
     
