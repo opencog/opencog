@@ -1,13 +1,22 @@
 ;Check if a query is truth query or wh-query 
 ;--------------------------------------------------------------------------------------------
+(define (QueryCheck querySentence)
+(cog-chase-link 'InheritanceLink 'ConceptNode
+                (car (cog-chase-link 'InterpretationLink 'InterpretationNode
+                        (car (cog-chase-link 'ParseLink 'ParseNode querySentence
+                        ))
+                ))
+        )
+)
+
+
 (define (check_query_type querySentence)
-(cog-name 
-	(car (cog-chase-link 'InheritanceLink 'ConceptNode 
-		(car (cog-chase-link 'InterpretationLink 'InterpretationNode 
-			(car (cog-chase-link 'ParseLink 'ParseNode querySentence				
-			))
-		))
-	))
+(define temp)
+(set! temp (QueryCheck querySentence))
+(cond
+
+                ((equal? '() temp) "I don't know the type")
+                (else (cog-name (car temp)))
 ))
 ;---------------------------------------------------------------------------------------------
 ;Accept user's query and user's id as an input
