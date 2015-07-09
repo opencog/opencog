@@ -5,8 +5,11 @@ __author__ = 'DongMin Kim'
 
 
 class DecideNull(BaseDecider):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    """Not decide, just return chosen atoms.
+    """
+
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def blending_decide_impl(self, chosen_atoms, config_base):
         if chosen_atoms is None or len(chosen_atoms) < 2:

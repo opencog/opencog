@@ -8,6 +8,9 @@ __author__ = 'DongMin Kim'
 
 
 class DecideRandom(BaseDecider):
+    """Decide blending by randomly choosing.
+    """
+
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 

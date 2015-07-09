@@ -11,6 +11,17 @@ __author__ = 'DongMin Kim'
 
 
 class ConnectConflictRandom(BaseConnector):
+    """Choose one link in each of conflict links and connect.
+
+    Attributes:
+        check_type: A link type to check conflict.
+        strength_diff_limit: A limit of difference between links strength value.
+        confidence_above_limit: A threshold of both links confidence value.
+        :type check_type: opencog.type_constructors.types
+        :type strength_diff_limit: float
+        :type confidence_above_limit: float
+    """
+
     # TODO: Currently, this class can handle
     # when the number of decided atom is only 2.
     def __init__(self, a):

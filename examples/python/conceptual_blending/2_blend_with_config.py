@@ -8,15 +8,15 @@ Instantiates blender with a simple dataset stored in an AtomSpace
 and learns a new concept.
 For complete documentation on how to pass additional parameters to
 blender, refer to the documentation at the following link:
-https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md
+https://github.com/opencog/opencog/tree/master/opencog/python/blending/blend-config-format.md
 """
 
 __author__ = 'DongMin Kim'
 
+from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog
 from opencog.type_constructors import *
 
-from opencog.atomspace import AtomSpace
 from blending.blend import ConceptualBlending
 
 """

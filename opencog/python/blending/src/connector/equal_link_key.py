@@ -4,6 +4,28 @@ __author__ = 'DongMin Kim'
 
 
 class EqualLinkKey:
+    """Defines 'EqualLinkKey' concept.
+
+    EqualLinkKey helps to find duplicate links by provide custom unique key.
+
+    Links are same if they have same below:
+    1. type,
+    2. outgoing list(with order),
+    3. position of Node which was request making this key.
+
+    Attributes:
+        h: A Handle of original link.
+        t: A type of original link.
+        tv: A TruthValue of original link.
+        src_h_list_str: A serialized outgoing list in original link.
+        dst_pos_in_outgoing: A Node position which was request making this key.
+        :type h: opencog.atomspace.Handle
+        :type t: opencog.type_constructors.types
+        :type tv: opencog.atomspace.TruthValue
+        :type src_h_list_str: str
+        :type dst_pos_in_outgoing: int
+    """
+
     def __init__(self, link_h=None, link_type=None, truth_value=None):
         self.h = link_h
         self.t = link_type

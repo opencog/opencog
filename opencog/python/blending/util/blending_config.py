@@ -9,6 +9,24 @@ __author__ = 'DongMin Kim'
 
 # noinspection PyTypeChecker,PyMethodParameters
 class BlendConfig(Singleton):
+    """Manages configs of Conceptual Blending.
+
+    It loads & saves config with Nodes in AtomSpace.
+    See 'Conceptual Blending Config Format' (blend-config-format.md) document.
+
+    Attributes:
+        a: An instance of atomspace.
+        config_prefix: A prefix name of config nodes.
+        config_list: A list of config.
+        is_initialized: Displays whether config system was initialized or not.
+        execute_link_factory: An instance of ExecuteLinkFactory.
+        :type a: opencog.atomspace.AtomSpace
+        :type config_prefix: str
+        :type config_list: dict
+        :type is_initialized: bool
+        :type execute_link_factory: ExecuteLinkFactory
+    """
+
     config_prefix = "BLEND"
     config_list = {
         "execute-mode",
@@ -77,7 +95,7 @@ class BlendConfig(Singleton):
         elif isinstance(config, str) or isinstance(config, unicode):
             return cls.a.add_node(types.ConceptNode, config)
         elif config is type(dict):
-            raise DeprecationWarning("Passing config dictionary was deprecated.")
+            raise DeprecationWarning("Passing config dict was deprecated.")
         else:
             return config
 
@@ -183,6 +201,24 @@ class BlendConfig(Singleton):
 
 
 class ExecuteLinkFactory:
+    """Create execute links to help config manage system.
+
+    Make execute links easily with calling create(call_type, config_dict).
+
+    Available call types: PUT, GET, DEL, INHERITANCE
+    Structure of config_dict: {
+        "config_name": config_name,
+        "config_base": config_base,
+        "config": config
+    }
+
+    Attributes:
+        a: An instance of atomspace.
+        config_prefix: A prefix name of config nodes.
+        :type a: opencog.atomspace.AtomSpace
+        :type config_prefix: str
+    """
+
     def __init__(self, a, config_prefix):
         self.a = a
         self.config_prefix = config_prefix

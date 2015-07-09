@@ -7,13 +7,25 @@ __author__ = 'DongMin Kim'
 
 
 class BaseDecider(object):
+    """Base class of blending decider.
+
+    Attributes:
+        a: An instance of atomspace.
+        last_status: A last status of class.
+        ret: The decided atoms.
+        :type a: opencog.atomspace.AtomSpace
+        :type last_status: int
+        :type ret: list[Atom]
+    """
+
     __metaclass__ = ABCMeta
 
     def __init__(self, a):
         self.a = a
         self.last_status = blending_status.UNKNOWN_ERROR
-        self.make_default_config()
         self.ret = None
+
+        self.make_default_config()
 
     def make_default_config(self):
         BlendConfig().update(self.a, "decide-result-atoms-count", "2")

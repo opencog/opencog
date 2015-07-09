@@ -12,6 +12,19 @@ __author__ = 'DongMin Kim'
 
 
 class ConnectConflictAllViable(BaseConnector):
+    """Make 2^k available(viable) new blend atoms if there exists k conflicts.
+
+    Attributes:
+        check_type: A link type to check conflict.
+        strength_diff_limit: A limit of difference between links strength value.
+        confidence_above_limit: A threshold of both links confidence value.
+        viable_atoms_count_threshold: A max count limit of new blend atoms.
+        :type check_type: opencog.type_constructors.types
+        :type strength_diff_limit: float
+        :type confidence_above_limit: float
+        :type viable_atoms_count_threshold: int
+    """
+
     # TODO: Currently, this class can handle
     # when the number of decided atom is only 2.
     def __init__(self, a):

@@ -13,6 +13,38 @@ __author__ = 'DongMin Kim'
 
 
 class ConceptualBlending:
+    """Conceptual Blending class.
+
+    Conceptual Blending is a process that creates new concepts via judiciously
+    combining pieces of old concepts. It makes new concept by blends two or
+    more ConceptNodes into a new one.
+
+    Algorithm procedure:
+    *. Prepare for blend before start blending.
+    1. Choose atoms to blend(can skip if focus atom was given)
+    2. Decide to blend(can skip if focus atom was given)
+    3. Initialize new blend atom
+    4. Connect links to new blend atom from exist atom
+    *. Clean up the blending.
+
+    Attributes:
+        a: An instance of atomspace.
+        last_status: A last status of class.
+        focus_atoms: The atoms to blend.
+        config_base: A Node to save custom config.
+        chosen_atoms: The chosen atoms made by atoms chooser.
+        decided_atoms: The decided atoms made by blending decider.
+        merged_atom: A merged atom made by new atom maker.
+        blended_atoms: The blended atoms made by link connector.
+        :type a: opencog.atomspace.AtomSpace
+        :type last_status: int
+        :type focus_atoms: list[Atom]
+        :type config_base: Node
+        :type chosen_atoms: list[Atom]
+        :type decided_atoms: list[Atom]
+        :type merged_atom: Atom
+        :type blended_atoms: list[Atom]
+    """
 
     def __init__(self, a):
         self.a = a
@@ -57,6 +89,24 @@ class ConceptualBlending:
         self.last_status = blending_status.SUCCESS
 
     def run(self, focus_atoms=None, config_base=None):
+        """Execute conceptual blending algorithm.
+
+        Args:
+            focus_atoms: The atoms to blend.
+            config_base: A Node to save custom config.
+            :param focus_atoms: list[Atom]
+            :param config_base: Atom
+        Returns:
+            The blended atom(s).
+            Example:
+            [(ConceptNode "car-man"),
+             (ConceptNode "man-car"),
+             ...]
+            If a list is empty, then means blender couldn't make a proper
+            blend atom(s) with given atoms.
+            :rtype : list[Atom]
+        """
+
         try:
             self.__prepare(focus_atoms, config_base)
 

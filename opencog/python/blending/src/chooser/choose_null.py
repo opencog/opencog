@@ -5,8 +5,11 @@ __author__ = 'DongMin Kim'
 
 
 class ChooseNull(BaseChooser):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    """Not choose, just return requested atoms.
+    """
+
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def __str__(self):
         return self.__class__.__name__

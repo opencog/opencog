@@ -8,6 +8,12 @@ __author__ = 'DongMin Kim'
 
 
 class DecideBestSTI(BaseDecider):
+    """Decide blending by checking STI value.
+
+    It estimates that the chosen atoms are worth, when they have higher than
+    given threshold value.
+    """
+
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 

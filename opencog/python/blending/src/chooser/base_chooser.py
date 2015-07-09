@@ -7,13 +7,25 @@ __author__ = 'DongMin Kim'
 
 
 class BaseChooser(object):
+    """Base class of atoms chooser.
+
+    Attributes:
+        a: An instance of atomspace.
+        last_status: A last status of class.
+        ret: The chosen atoms.
+        :type a: opencog.atomspace.AtomSpace
+        :type last_status: int
+        :type ret: list[Atom]
+    """
+
     __metaclass__ = ABCMeta
 
     def __init__(self, a):
         self.a = a
         self.last_status = blending_status.UNKNOWN_ERROR
-        self.make_default_config()
         self.ret = []
+
+        self.make_default_config()
 
     def make_default_config(self):
         BlendConfig().update(self.a, "choose-atom-type", "Node")

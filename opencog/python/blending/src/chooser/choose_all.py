@@ -8,8 +8,11 @@ __author__ = 'DongMin Kim'
 
 
 class ChooseAll(BaseChooser):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    """Choose all atoms.
+    """
+
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def make_default_config(self):
         super(self.__class__, self).make_default_config()

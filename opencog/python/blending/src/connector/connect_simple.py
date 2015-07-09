@@ -6,6 +6,9 @@ __author__ = 'DongMin Kim'
 
 
 class ConnectSimple(BaseConnector):
+    """Connect every links.
+    """
+
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 

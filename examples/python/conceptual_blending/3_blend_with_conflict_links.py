@@ -8,15 +8,15 @@ Instantiates blender with a simple dataset stored in an AtomSpace
 and learns a new concept.
 For complete documentation on how to pass additional parameters to
 blender, refer to the documentation at the following link:
-https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md
+https://github.com/opencog/opencog/tree/master/opencog/python/blending/blend-config-format.md
 """
 
 __author__ = 'DongMin Kim'
 
+from opencog.atomspace import AtomSpace
 from opencog.utilities import initialize_opencog
 from opencog.type_constructors import *
 
-from opencog.atomspace import AtomSpace
 from blending.blend import ConceptualBlending
 
 """
@@ -26,7 +26,7 @@ Third Example:
 - Force to start blend, and choose 2 nodes have highest STI value.
 - Make 2^k available(viable) new blend atoms if there exists k conflicts,
   -> If two similarity links strength value have difference above 0.3 and 
-     confidence value both bave above 0.7, blender thinks they conflict to 
+     confidence value both above 0.7, blender thinks they conflict to
      each other.
 """
 print "--------Start third example--------"

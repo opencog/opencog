@@ -8,6 +8,18 @@ __author__ = 'DongMin Kim'
 
 # noinspection PyTypeChecker
 class PyCogExecute(Singleton):
+    """Wrap the scheme's (cog-execute! ) function.
+
+    Since there not exists python binding of cog-execute function, it calls
+    to scheme directly.
+
+    Attributes:
+        a: An instance of atomspace.
+        is_initialized: Displays whether wrapper was initialized or not.
+        :type a: opencog.atomspace.AtomSpace
+        :type is_initialized: bool
+    """
+
     # noinspection PyArgumentList
     def __init__(cls):
         super(PyCogExecute, cls).__init__()

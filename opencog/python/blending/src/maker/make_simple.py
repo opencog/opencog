@@ -7,6 +7,9 @@ __author__ = 'DongMin Kim'
 
 
 class MakeSimple(BaseMaker):
+    """Make new blend atoms from inputs.
+    """
+
     def __init__(self, a):
         super(self.__class__, self).__init__(a)
 

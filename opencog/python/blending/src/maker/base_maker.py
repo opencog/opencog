@@ -7,13 +7,25 @@ __author__ = 'DongMin Kim'
 
 
 class BaseMaker(object):
+    """Base class of new blend atom maker.
+
+    Attributes:
+        a: An instance of atomspace.
+        last_status: A last status of class.
+        ret: A merged atom.
+        :type a: opencog.atomspace.AtomSpace
+        :type last_status: int
+        :type ret: Atom
+    """
+
     __metaclass__ = ABCMeta
 
     def __init__(self, a):
         self.a = a
         self.last_status = blending_status.UNKNOWN_ERROR
-        self.make_default_config()
         self.ret = None
+
+        self.make_default_config()
 
     def make_default_config(self):
         BlendConfig().update(self.a, "make-atom-prefix", "")
