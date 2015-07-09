@@ -5,6 +5,7 @@ from opencog.type_constructors import types, ConceptNode
 from opencog.logger import log
 
 from blending.src.chooser.chooser_finder import ChooserFinder
+from blending.src.decider.decider_finder import DeciderFinder
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status, get_status_str
 from blending.util.link_copier import LinkCopier
@@ -23,8 +24,8 @@ class ConceptualBlending:
         self.focus_atoms = []
         self.link_copier_inst = LinkCopier(self.a)
 
-        self.chooser_finder = ChooserFinder(self.a)
         self.chooser = None
+        self.decider = None
 
         self.chosen_atoms = []
         self.decided_atoms = []
@@ -34,6 +35,7 @@ class ConceptualBlending:
 
     def make_default_config(self):
         BlendConfig().update(self.a, "atoms-chooser", "ChooseInSTIRange")
+        BlendConfig().update(self.a, "blending-decider", "DecideBestSTI")
 
     def __prepare(self, focus_atoms, config_base):
         # Prepare blending.
@@ -58,19 +60,8 @@ class ConceptualBlending:
         self.__make_workers()
 
     def __make_workers(self):
-        self.chooser = self.chooser_finder.get_chooser()
-
-    def blending_decide(self):
-        # Currently, just check number of atoms.
-        if len(self.chosen_atoms) < 2:
-            self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning(get_status_str(self.last_status))
-
-        a_index_list = random.sample(range(0, len(self.chosen_atoms)), 2)
-        self.decided_atoms = [
-            self.chosen_atoms[a_index_list[0]],
-            self.chosen_atoms[a_index_list[1]]
-        ]
+        self.chooser = ChooserFinder(self.a).get_chooser(self.config_base)
+        self.decider = DeciderFinder(self.a).get_decider(self.config_base)
 
     def new_blend_make(self):
         # Make a blended node.
@@ -106,7 +97,8 @@ class ConceptualBlending:
                 self.chooser.atom_choose(self.focus_atoms, self.config_base)
 
             # Decide whether or not to execute blending and prepare.
-            self.blending_decide()
+            self.decided_atoms = \
+                self.decider.blending_decide(self.focus_atoms, self.config_base)
 
             # Initialize the new blend node.
             self.new_blend_make()

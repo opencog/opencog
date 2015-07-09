@@ -30,24 +30,24 @@ InheritanceLink(
 ListLink(
     SchemaNode("BLEND:atoms-chooser"),
     ConceptNode("my-config"),
-    ConceptNode("ChooseInSTIRange")
+    ConceptNode("ChooseAll")
 )
 
 ListLink(
-    SchemaNode("BLEND:choose-sti-min"),
+    SchemaNode("BLEND:blending-decider"),
     ConceptNode("my-config"),
-    ConceptNode("4")
+    ConceptNode("DecideBestSTI")
 )
 
 ListLink(
-    SchemaNode("BLEND:choose-sti-max"),
+    SchemaNode("BLEND:decide-result-atoms-count"),
     ConceptNode("my-config"),
-    ConceptNode("15")
+    ConceptNode("2")
 )
 
 # Start Conceptual Blending.
 result = ConceptualBlending(a).run(
-    [car, man, block],
+    a.get_atoms_by_type(types.Atom),
     ConceptNode("my-config")
 )
 
