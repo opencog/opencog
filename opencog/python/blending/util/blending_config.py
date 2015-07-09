@@ -75,6 +75,8 @@ class BlendConfig(Singleton):
             return cls.a.add_node(types.ConceptNode, cls.name)
         elif isinstance(config, str) or isinstance(config, unicode):
             return cls.a.add_node(types.ConceptNode, config)
+        elif config is type(dict):
+            raise DeprecationWarning("Passing config dictionary was deprecated.")
         else:
             return config
 

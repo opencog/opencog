@@ -1,9 +1,9 @@
 import random
 from blending.src.chooser.chooser_finder import ChooserFinder
+from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status, get_status_str
 from opencog.atomspace import TruthValue
 from opencog.type_constructors import types, ConceptNode
-from opencog.logger import log
 from blending.util.link_copier import LinkCopier
 
 __author__ = 'DongMin Kim'
@@ -13,40 +13,33 @@ class ConceptualBlending:
     def __init__(self, a):
         self.a = a
         self.last_status = blending_status.UNKNOWN_ERROR
-        self.default_config = None
         self.make_default_config()
 
-        self.config = None
+        self.config_base = None
         self.link_copier_inst = LinkCopier(self.a)
 
         self.chooser_finder = ChooserFinder(self.a)
         self.chooser = None
 
-        self.chosen_atoms = None
-        self.decided_atoms = None
-        self.new_blended_atom = None
+        self.chosen_atoms = []
+        self.decided_atoms = []
+        self.blended_atom = None
+        self.merged_atom = None
+        self.blended_atoms = []
 
     def make_default_config(self):
-        self.default_config = {
-            'atoms-chooser': 'ChooseInSTIRange'
-        }
+        BlendConfig().update(self.a, "atoms-chooser", "ChooseAll")
 
     def __prepare(self, config):
         # Prepare blending.
         self.last_status = blending_status.IN_PROCESS
-        self.config = self.decided_atoms if config is None else config
+        self.config_base = self.decided_atoms if config is None else config
         self.__make_workers()
 
     def __make_workers(self):
-        chooser_name = self.config['atoms-chooser']
-        self.chooser = self.chooser_finder.get_chooser(chooser_name)
-        if self.chooser is None:
-            self.last_status = blending_status.PARAMETER_ERROR
-            raise UserWarning(
-                "Can't find " + chooser_name + "\n" +
-                "Available choosers: " + "\n" +
-                str(self.chooser_finder.chooser_list)
-            )
+        self.chooser = self.chooser_finder.get_chooser(
+            BlendConfig().get_str(self.a, "atoms-chooser", self.config_base)
+        )
 
     def blending_decide(self):
         # Currently, just check number of atoms.
@@ -62,7 +55,7 @@ class ConceptualBlending:
 
     def new_blend_make(self):
         # Make a blended node.
-        self.new_blended_atom = ConceptNode(
+        self.merged_atom = ConceptNode(
             str(self.decided_atoms[0].name) + '-' +
             str(self.decided_atoms[1].name),
             TruthValue(
@@ -76,7 +69,7 @@ class ConceptualBlending:
         # Adjust the attribute value of new links.
         self.link_copier_inst.copy_all_link_to_new_node(
             [self.decided_atoms[0], self.decided_atoms[1]],
-            self.new_blended_atom
+            self.merged_atom
         )
 
         # Detect and improve conflict links in newly blended node.
@@ -85,16 +78,11 @@ class ConceptualBlending:
     def __clean_up(self):
         self.last_status = blending_status.SUCCESS
 
-    def run(self, config):
+    def run(self, config=None):
         self.__prepare(config)
 
         # Select nodes to blending.
-        self.chosen_atoms = self.chooser.atom_choose({
-            'choose-atom-type': 'Node',
-            'choose-least-count': '2',
-            'choose-sti-min': '1',
-            'choose-sti-max': 'None'
-        })
+        self.chosen_atoms = self.chooser.atom_choose(self.config_base)
 
         # Decide whether or not to execute blending and prepare.
         self.blending_decide()
@@ -110,4 +98,4 @@ class ConceptualBlending:
         # Sum up blending.
         self.__clean_up()
 
-        return self.new_blended_atom
+        return self.merged_atom

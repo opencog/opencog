@@ -6,9 +6,7 @@
 * Currently it supports a random blending.
 ```python
 from blending.blend import ConceptualBlending
-ConceptualBlending(a).run({
-    'atoms-chooser': 'ChooseInSTIRange'
-})
+ConceptualBlending(a).run(config_base)
 ```
 
 ## Examples

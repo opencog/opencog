@@ -1,3 +1,4 @@
+from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
 from opencog.type_constructors import types
 from blending.src.chooser.base_chooser import BaseChooser
@@ -6,16 +7,13 @@ __author__ = 'DongMin Kim'
 
 
 class ChooseInSTIRange(BaseChooser):
-    def __init__(self, atomspace):
-        super(self.__class__, self).__init__(atomspace)
+    def __init__(self, a):
+        super(self.__class__, self).__init__(a)
 
     def make_default_config(self):
-        self.default_config = {
-            'choose-atom-type': 'Node',
-            'choose-least-count': '2',
-            'choose-sti-min': '1',
-            'choose-sti-max': 'None'
-        }
+        super(self.__class__, self).make_default_config()
+        BlendConfig().update(self.a, "choose-sti-min", "1")
+        BlendConfig().update(self.a, "choose-sti-max", "None")
 
     def __get_atoms_in_sti_range(
             self, atom_type, least_count, sti_min, sti_max
@@ -34,20 +32,22 @@ class ChooseInSTIRange(BaseChooser):
 
         if len(atoms) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            return ret
+            return
 
-        found_atoms = filter(lambda atom: atom.is_a(atom_type), atoms)
-        if len(found_atoms) < least_count:
-            print('Size of requested list is too small.')
-            return ret
+        self.ret = filter(lambda atom: atom.is_a(atom_type), atoms)
+        if len(self.ret) < least_count:
+            self.last_status = blending_status.NOT_ENOUGH_ATOMS
+            return
 
-        return found_atoms
-
-    def __atom_choose_impl(self, config):
-        atom_type = config.get('choose-atom-type')
-        least_count = config.get('choose-least-count')
-        sti_min = config.get('choose-sti-min')
-        sti_max = config.get('choose-sti-max')
+    def atom_choose_impl(self, config_base):
+        atom_type = BlendConfig().get_str(
+            self.a, "choose-atom-type", config_base
+        )
+        least_count = BlendConfig().get_int(
+            self.a, "choose-least-count", config_base
+        )
+        sti_min = BlendConfig().get_str(self.a, "choose-sti-min", config_base)
+        sti_max = BlendConfig().get_str(self.a, "choose-sti-max", config_base)
 
         try:
             atom_type = types.__dict__[atom_type]
@@ -71,9 +71,3 @@ class ChooseInSTIRange(BaseChooser):
         return self.__get_atoms_in_sti_range(
             atom_type, least_count, sti_min, sti_max
         )
-
-    def atom_choose(self, config):
-        if config is None:
-            config = self.default_config
-
-        return self.__atom_choose_impl(config)
