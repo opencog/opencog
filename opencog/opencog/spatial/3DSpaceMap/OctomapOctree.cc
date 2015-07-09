@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <octomap/octomap_types.h>
+#include <octomap/OcTreeKey.h>
 #include <opencog/util/Logger.h>
 
 
@@ -90,6 +91,12 @@ void OctomapOcTree::addSolidBlock(Block3D* block)
 
 	this->updateNode(pos.x,pos.y,pos.z,true);
 	this->setNodeBlock(pos.x,pos.y,pos.z,block);
+}
+
+bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const 
+{
+	OcTreeKey key;
+	return !coordToKeyChecked(pos.x,pos.y,pos.z,key);
 }
 
 bool OctomapOcTree::checkIsSolid(const BlockVector& pos, Block3D* & block) const

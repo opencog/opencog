@@ -322,6 +322,7 @@ AxisAlignedBox& Octree::getChildBoundingBoxByIndex(int x, int y, int z)
     return childBox;
 }
 
+/*DEPRECATED
 bool Octree::checkIsSolid(const BlockVector& _pos, Block3D* & _block3d) const
 {
     Octree* tree = (Octree*)(mOctree3DMapManager->getRootOctree());
@@ -345,6 +346,7 @@ bool Octree::checkIsSolid(const BlockVector& _pos, Block3D* & _block3d) const
     }
 
 }
+*/
 
 Octree* Octree::getParentTreeOfBlock(Block3D* _block, int& x, int& y, int& z, bool& isInsideABigBlock, Block3D*& bigBlock)
 {
@@ -580,6 +582,7 @@ void Octree::breakBlockInto8Blocks(int x, int y, int z)
     delete bigBlock;
 }
 
+/*DEPRECATED
 // we don't contain the begin block in our return list
 vector<BlockEntity*> Octree::getNeighbourEntities(BlockVector& _pos)
 {
@@ -624,8 +627,8 @@ vector<BlockEntity*> Octree::getNeighbourEntities(BlockVector& _pos)
 
     return entities;
 }
-
-
+*/
+/*DEPRECATED
 vector<Block3D*> Octree::findAllBlocksCombinedWith(BlockVector* _pos, bool useBlockMaterial)
 {
     vector<Block3D*> blockList;
@@ -712,7 +715,8 @@ vector<Block3D*> Octree::findAllBlocksCombinedWith(BlockVector* _pos, bool useBl
     return blockList;
 
 }
-
+*/
+/*DEPRECATED
 BlockVector Octree::getNeighbourSolidBlockVector(BlockVector& curPos, Block3D* &neighbourBlock)
 {
     // check 26 neighbours
@@ -739,7 +743,8 @@ BlockVector Octree::getNeighbourSolidBlockVector(BlockVector& curPos, Block3D* &
 
 
 }
-
+*/
+/*DEPRECATED
 vector<BlockVector> Octree::getAllNeighbourSolidBlockVectors(BlockVector& curPos)
 {
     vector<BlockVector> vectorList;
@@ -768,6 +773,7 @@ vector<BlockVector> Octree::getAllNeighbourSolidBlockVectors(BlockVector& curPos
 
         return vectorList;
 }
+*/
 
 Octree* Octree::clone(Octree3DMapManager* newOctree3DMapManager, Octree *parentTree)
 {

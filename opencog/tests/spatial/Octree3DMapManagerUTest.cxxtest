@@ -7,6 +7,8 @@
 #include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+#include <opencog/spatial/3DSpaceMap/Entity3D.h>
+
 #include <opencog/util/Logger.h>
 
 using namespace std;
@@ -14,35 +16,92 @@ using namespace octomap;
 using namespace opencog;
 using namespace opencog::spatial;
 
+bool entityIsObstacle=true;
+bool entityIsSelf=true;
+
 class Octree3DMapManagerUTest : public CxxTest::TestSuite
 { 
+
+	Octree3DMapManager* testMap;
+
 public:
-
-	void testAddSolidUnitBlock()
+	
+	void setUp()
 	{
 		string testMapName("testMap");
 		unsigned resolution=1;
 		unsigned floorheight=-255;
-		Octree3DMapManager* testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
+		testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
+	}
+	void tearDown()
+	{
+		delete testMap;
+		testMap=NULL;
+	}
+	
+	void testAddandRemoveSolidUnitBlock()
+	{
+	
 		BlockVector testpos1(7,8,9);
-		Handle testHandle(100);
-		testMap->addSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
+		Handle testHandle1(100);
+		testMap->addSolidUnitBlock(testpos1,testHandle1,"testmaterial","testcolor");
+
 		Block3D* testBlock=testMap->getBlockAtLocation(testpos1);
+
 		TS_ASSERT(testBlock->getPosition()==testpos1);
-		TS_ASSERT((testBlock->getBlockMaterial()).color=="testcolor");
+		TS_ASSERT(testMap->getBlockAtLocation(testpos1.x,testpos1.y,testpos1.z)==testBlock);
+		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
+		TS_ASSERT(testMap->checkIsSolid(testpos1.x,testpos1.y,testpos1.z)==true);
+		TS_ASSERT(testMap->getObjectLocation(testHandle1)==testpos1);
+		TS_ASSERT(testMap->containsObject(testHandle1)==true);
+		TS_ASSERT(testMap->getUnitBlockHandleFromPosition(testpos1)==testHandle1);
+		TS_ASSERT(testMap->getPositionFromUnitBlockHandle(testHandle1)==testpos1);
+
+        testMap->removeSolidUnitBlock(testHandle1);
+
+		TS_ASSERT(testMap->getBlockAtLocation(testpos1)==NULL);
+		TS_ASSERT(testMap->getBlockAtLocation(testpos1.x,testpos1.y,testpos1.z)==NULL);
+		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
+		TS_ASSERT(testMap->checkIsSolid(testpos1.x,testpos1.y,testpos1.z)==false);
+		TS_ASSERT(testMap->getObjectLocation(testHandle1)==BlockVector::ZERO);
+		TS_ASSERT(testMap->containsObject(testHandle1)==false);
+		TS_ASSERT(testMap->getUnitBlockHandleFromPosition(testpos1)==Handle::UNDEFINED);
+		TS_ASSERT(testMap->getPositionFromUnitBlockHandle(testHandle1)==BlockVector::ZERO);
+
 	}
 
-	void testRemoveUnitBlock()
+	void testAddandRemoveNoneBlockEntity()
 	{
-		string testMapName("testMap");
-		unsigned resolution=1;
-		unsigned floorheight=-255;
-		Octree3DMapManager* testMap= new Octree3DMapManager(testMapName,resolution,floorheight);
-		BlockVector testpos1(7,8,9);
-		Handle testHandle(100);
-		testMap->addSolidUnitBlock(testpos1,testHandle,"testmaterial","testcolor");
-		testMap->removeSolidUnitBlock(testHandle);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
+		BlockVector centerpos1(17,28,39);
+		BlockVector size(1,1,2);
+		BlockVector entitypos1(centerpos1.x,centerpos1.y,centerpos1.z-size.z/2);
+		string entityName="testentity";
+		string entityClass="testentityclass";
+		Handle testHandle1(1000);
+		testMap->addNoneBlockEntity(testHandle1,centerpos1,
+									size.x,size.y,size.z,
+									0,entityName, entityClass,
+									!entityIsSelf,12345678892,
+										!entityIsObstacle);
+		const Entity3D* testEntity=testMap->getEntity(testHandle1);
+
+		TS_ASSERT(testEntity->getEntityClass()==entityClass);
+		TS_ASSERT(testMap->getEntity(entityName)==testEntity);
+		TS_ASSERT(testMap->containsObject(testHandle1)==true);
+		TS_ASSERT(testMap->containsObject(entityName)==true);
+		TS_ASSERT(testMap->getObjectLocation(testHandle1)==entitypos1);
+		TS_ASSERT(testMap->getObjectLocation(entityName)==entitypos1);
+		TS_ASSERT(testMap->getObjectDirection(testHandle1)==BlockVector::X_UNIT);
+		testMap->removeNoneBlockEntity(testHandle1);
+
+		TS_ASSERT(testMap->getEntity(testHandle1)==NULL);
+		TS_ASSERT(testMap->getEntity(entityName)==NULL);
+		TS_ASSERT(testMap->containsObject(testHandle1)==false);
+		TS_ASSERT(testMap->containsObject(entityName)==false);
+		TS_ASSERT(testMap->getObjectLocation(testHandle1)==BlockVector::ZERO);
+		TS_ASSERT(testMap->getObjectLocation(entityName)==BlockVector::ZERO);
+
 	}
+
+
 };

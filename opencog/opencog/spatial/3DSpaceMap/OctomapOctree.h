@@ -122,6 +122,8 @@ namespace opencog
 			//  Remove an unit block at a given position from the octree system
 			//  return false if block not exists.
 			bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
+			//  check if the block is in the unknown space
+			bool checkIsOutOfRange(const BlockVector& pos) const;
 			
 			// Check whether this position has been filled by a solid block,
 			// Note that if the block is in the unknown space it'll also return false

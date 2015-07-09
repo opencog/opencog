@@ -34,8 +34,6 @@
 #include <lib/zmq/zmq.hpp>
 #endif
 
-#include <octomap/OcTreeKey.h>
-
 #include <opencog/atomspace/Handle.h>
 
 #include "Block3DMapUtil.h"
@@ -82,122 +80,129 @@ namespace opencog
         class Octree3DMapManager
         {
         public:
+			Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
+			Octree3DMapManager(const std::string& mapName,const unsigned& resolution, const int floorHeight);
+            ~Octree3DMapManager();
+            // deep clone this octree3DMapManager and return the new instance
+            Octree3DMapManager* clone();
 
+			/**
+			 *  public member functions about Block add/remove/query
+			 */
+
+			void addSolidUnitBlock(
+				BlockVector _pos, 
+				const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,
+				string _materialType = "", string _color = "");
+            void removeSolidUnitBlock(const Handle& blockNode);
+            bool checkIsSolid(double x, double y, double z);
+            bool checkIsSolid(const BlockVector& pos);
+            // check whether people can stand on this position or not, 
+			// which means there is no obstacle or block here
+			// and there is a block under it.
+            bool checkStandable(const BlockVector &pos) const;
+            bool checkStandable(double x, double y, double z) const;
+            Block3D* getBlockAtLocation(double x, double y, double z);
+			Block3D* getBlockAtLocation(const BlockVector& pos);
+            Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
+            BlockVector getPositionFromUnitBlockHandle(const Handle &h);
+            HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
+
+			/**
+			 * public member functions about BlockEntity add/remove/query
+			 */
+
+            // If there is not a blockEntity here, return 0
+            BlockEntity* getBlockEntityInPos(BlockVector& _pos) const;
+            // this should be call only once 
+			// just after perception finishes at the first time in embodiment.
+            void findAllBlockEntitiesOnTheMap();
+            // Given a posititon, find the BlockEntity the posititon belongs to
+            BlockEntity* findAllBlocksInBlockEntity(BlockVector& _pos);
+            BlockEntity* findBlockEntityByHandle(const Handle entityNode) const;
             // to store the blockEntities's node handles just diasppear,
-            // the ~Blockentity() will add its Handel into this list, DO NOT add to this list from other place
+            // the ~Blockentity() will add its Handle into this list, 
+			// DO NOT add to this list from other place
             vector<Handle>  newDisappearBlockEntityList;
-
             // to store the blockEntities just appear
-            // the Blockentity() will add itself into this list, DO NOT add to this list from other place
+            // the Blockentity() will add itself into this list, 
+			// DO NOT add to this list from other place
             vector<BlockEntity*> newAppearBlockEntityList;
-
             // to store the blockentities need to be updated the predicates
             vector<BlockEntity*> updateBlockEntityList;
 
-            // to store the super blockEntities need to be updated the predicates
-            vector<BlockEntity*> updateSuperBlockEntityList;
+			/**
+			 *  public member functions for entity
+			 */
 
-            static const int AccessDistance = 2;
-
-            bool enable_BlockEntity_Segmentation;
-
-            /**
-             * @ min_x and min_y is the start position of this octree space
-             * @_floorHeight: the height of the floor, the z value of  start position
-             * @_offSet: how many unit per edge in this space, indicating the size of the whole space
-             */
-			Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
-			Octree3DMapManager(const std::string& mapName,const unsigned& resolution, const int floorHeight);
-            
-            ~Octree3DMapManager();
-
-            //deep clone this octree3DMapManager and return the new instance
-            // the cloned octree3DMapManager will have the same octress,blocks and entities,
-            // and all these are new instances, shared the same properties and atom handles with the old ones
-            Octree3DMapManager* clone();
-
-            bool hasPerceptedMoreThanOneTimes;
-
-            const map<Handle, BlockVector>& getAllUnitBlockatoms() const {return mAllUnitAtomsToBlocksMap;}
-
-            const map<int,BlockEntity*>& getBlockEntityList() const {return mBlockEntityList;}
-
-            const map<int,BlockEntity*>& getSuperBlockEntityList() const {return mSuperBlockEntityList;}
-
-            const map<Handle, Entity3D*>& getAllNoneBlockEntities() const {return mAllNoneBlockEntities;}
-
-            const map<Handle, Entity3D*>& getAllAvatarList() const {return mAllAvatarList;}
-
-            int getTotalDepthOfOctree() const {return mTotalDepthOfOctree;}
-
-            inline  int   getFloorHeight() const {return mFloorHeight;}
-            inline  int   getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
-            inline  const AxisAlignedBox& getMapBoundingBox() const {return mMapBoundingBox;}
-            inline  std::string  getMapName()const {return mMapName;}
-
-            inline  int   xMin() const{return mMapBoundingBox.nearLeftBottomConer.x;}
-            inline  int   yMin() const{return mMapBoundingBox.nearLeftBottomConer.y;}
-            inline  int   zMin() const{return mMapBoundingBox.nearLeftBottomConer.z;}
-
-            inline  int   xMax() const{return mMapBoundingBox.nearLeftBottomConer.x + mMapBoundingBox.size_x;}
-            inline  int   yMax() const{return mMapBoundingBox.nearLeftBottomConer.y + mMapBoundingBox.size_y;}
-            inline  int   zMax() const{return mMapBoundingBox.nearLeftBottomConer.z + mMapBoundingBox.size_z;}
-
-            inline  int   xDim() const{return mMapBoundingBox.size_x;}
-            inline  int   yDim() const{return mMapBoundingBox.size_y;}
-            inline  int   zDim() const{return mMapBoundingBox.size_z;}
-
-            // currently we consider all the none block entities has no collision, agents can get through them
-            void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,unsigned long timestamp,bool is_obstacle = false);
-
-            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp, bool is_standLocation = false);
+            // currently we consider the none block entity has no collision,
+			// avatar can get through them
+            void addNoneBlockEntity(const Handle &entityNode, 
+									BlockVector _centerPosition,
+                                    int _width, int _lenght, int _height, 
+									double yaw, string _entityName,
+									string _entityClass, bool isSelfObject,
+									unsigned long timestamp,
+									bool is_obstacle = false);
 
             void removeNoneBlockEntity(const Handle &entityNode);
+            const Entity3D* getEntity(const Handle& entityNode) const;
+            const Entity3D* getEntity(const string& entityName) const;
+            bool isAvatarEntity(const Entity3D* entity) const;
 
-			void addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,  std::string _materialType = "", std::string _color = "" );
-            // return the BlockEntity occupied this position, then the atomspace can update the predicates for this Entity
-            // But if this entity is disappear during this process, then will return 0
-            void removeSolidUnitBlock(const Handle &blockNode);
+            void updateNoneBLockEntityLocation(
+				const Handle &entityNode, BlockVector _newpos, 
+				unsigned long timestamp, bool is_standLocation = false);
 
-            // Given a posititon, find all the blocks in the BlockEntity this posititon belongs to.
-            BlockEntity* findAllBlocksInBlockEntity(BlockVector& _pos);
-            inline const Octree* getRootOctree(){return mRootOctree;}
+            template<typename Out>
+                 Out findAllEntities(Out out) const
+            {
+                 std::vector<const char*> objectNameList;
 
-            // get a random near position for building a same blockEnity as the _entity
-            // this position should have enough space to build this new entity,
-            // not to be overlapping other objects in the map.
-            BlockVector getBuildEnityOffsetPos(BlockEntity* _entity) const;
+                 for ( auto it = mAllNoneBlockEntities.begin( ); 
+					   it != mAllNoneBlockEntities.end(); ++it )
+                 {
+					 objectNameList.push_back(getEntityName((Entity3D*)(it->second)).c_str());
 
-            // Return the blockEntity occupies this postiton
-            // If there is not a blockEntity here, return 0
-            BlockEntity* getEntityInPos(BlockVector& _pos) const;
+                 } 
+                 return std::copy(objectNameList.begin(), 
+								  objectNameList.end(), out);
+             }
 
-            // this should be call only once just after the map perception finishes at the first time in the embodiment.
-            void findAllBlockEntitiesOnTheMap();
+            // get the last location this nonBlockEntity appeared
+            BlockVector getLastAppearedLocation(Handle entityHandle);
+            // to record all the history locations / centerPosition 
+            // map <EntityHandle, vector< pair < timestamp, location> >
+            map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
 
-            // just remove this entity from the mBlockEntityList, but not delete it yet
-            void removeAnEntityFromList(BlockEntity* entityToRemove);
+			/**
+			 *  member functions about Object add/remove/query
+			 *  "Object" means the block,entity and blockentity
+			 */
 
-            const Entity3D* getEntity( const Handle entityNode ) const;
+            BlockVector getObjectLocation(const Handle& objNode) const;
+            BlockVector getObjectLocation(const string& objName) const;
+            bool containsObject(const Handle& objectNode) const;
+            bool containsObject(const string& objectname) const;
 
-            const Entity3D* getEntity( std::string entityName) const;
+            // return the Direction of the given object face to.
+            // we just define the direction of block is
+			// BlockVector::X_UNIT direction (1,0,0).
+            // if there is nothing for this handle on this map, 
+			// return BlockVector::Zero
+            BlockVector getObjectDirection(const Handle& objNode) const;
 
-            std::string getEntityName(Entity3D* entity) const;
+			// TODO: now we only count the entities, 
+			// we may need to return all the unit blocks as well
+			template<typename Out>
+				Out getAllObjects(Out out) const
+			{
+                return findAllEntities(out);
+			}
 
-            // return the location of the given object handle. This object can be a block,nonblockentity or blockentity
-            BlockVector getObjectLocation(Handle objNode) const;
-
-            // return the location of the given object name. This object can be a block,nonblockentity or blockentity
-            BlockVector getObjectLocation(std::string objName) const;
-
-            // return the Direction of the given object face to. This object can be a block,nonblockentity or blockentity
-            // Because it make no sense if this object is a block, we just define the directions of all the blocks are all BlockVector::X_UNIT direction (1,0,0)
-            // if there is nothting for this handle on this map, return BlockVector::Zero
-            BlockVector getObjectDirection(Handle objNode) const;
-
-            BlockEntity* findBlockEntityByHandle(const Handle entityNode) const;
-
+			/**
+			 *  member functions about computation about OctomapOctree
+			 */
             /**
              * Find a free point near a given position, at a given distance
              * @param position Given position
@@ -206,22 +211,81 @@ namespace opencog
              * @param toBeStandOn if this is true then agent can stand at that position,which means the point should not be on the sky
              * x
              */
-            BlockVector getNearFreePointAtDistance( const BlockVector& position, int distance, const BlockVector& startDirection, bool toBeStandOn = true ) const;
+            BlockVector getNearFreePointAtDistance( 
+				const BlockVector& position, int distance, 
+				const BlockVector& startDirection, 
+				bool toBeStandOn = true ) const;
 
-            // check whether people can stand on this position or not, which means first there is not any obstacle or block here and there is a block under it.
-            bool checkStandable(const BlockVector &pos) const;
-            bool checkStandable(int x, int y, int z) const;
+			/**
+			 *  member functions about computation which doesn't use SpaceMap
+			 */
 
-            bool containsObject(const Handle objectNode) const;
-            bool containsObject(std::string& objectname) const;
+            // get a random near position 
+			// for building a same blockEnity as the _entity
+            // this position should have enough space to build this new entity,
+            // not to be overlapping other objects in the map.
+            BlockVector getBuildEntityOffsetPos(BlockEntity* _entity) const;
+            double distanceBetween(const Entity3D* entityA,
+								   const Entity3D* entityB) const;
+            double distanceBetween(const BlockVector& posA, 
+								   const BlockVector& posB) const;
+            double distanceBetween(const string& objectNameA, 
+								   const string& objectNameB) const;
+            double distanceBetween(const string& objectName, 
+								   const BlockVector& pos) const;
+            // Threshold to consider an entity next to another
+            inline double getNextDistance() const { return AccessDistance;}
+            bool isTwoPositionsAdjacent(const BlockVector& pos1, 
+										const BlockVector& pos2);
+            /**
+             * Finds the list of spatial relationships 
+			 * that apply to the three entities.
+             * Currently this can only be BETWEEN, 
+			 * which states that A is between B and C
+             *
+             * @param observer The observer entity
+             * @param entityB First reference entity
+             * @param entityC Second reference entity
+             *
+             * @return std::vector<SPATIAL_RELATION> 
+			 *         a vector of all spatial relations
+             *         among entityA (this entity), entityB (first reference) 
+			 *         and entityC (second reference)
+             *
+             */
+            std::set<SPATIAL_RELATION> computeSpatialRelations(
+				const Entity3D* entityA,
+				const Entity3D* entityB,
+				const Entity3D* entityC = 0,
+				const Entity3D* observer = 0) const;
+            std::set<SPATIAL_RELATION> computeSpatialRelations(
+				const string& entityAName,
+				const string& entityBName,
+				const string& entityCName = "",
+				const string& observerName = "") const;
+            std::set<SPATIAL_RELATION> computeSpatialRelations( 
+				const AxisAlignedBox& boundingboxA,
+				const AxisAlignedBox& boundingboxB,
+				const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
+				const Entity3D* observer = 0 ) const;
+            static string spatialRelationToString(SPATIAL_RELATION relation);
 
-            double distanceBetween(const Entity3D* entityA,const Entity3D* entityB) const;
-            double distanceBetween(const BlockVector& posA, const BlockVector& posB) const;
-            double distanceBetween(std::string objectNameA, std::string objectNameB) const;
-            double distanceBetween(std::string objectName, const BlockVector& pos) const;
+			/**
+			 *   other getter/setter and deprecated function/member
+			 */
 
-            static bool isTwoPositionsAdjacent(const BlockVector& pos1, const BlockVector& pos2);
+            bool enable_BlockEntity_Segmentation;
+            bool hasPerceptedMoreThanOneTimes;
 
+            inline int getFloorHeight() const {return mFloorHeight;}
+            inline string getMapName() const {return mMapName;}
+            inline int getAgentHeight() const {return mAgentHeight;}
+            void setAgentHeight(int _height){mAgentHeight = _height;}
+            inline int getTotalDepthOfOctree() const {return mTotalDepthOfOctree;}
+            inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
+			BlockVector getKnownSpaceMinCoord() const;
+			BlockVector getKnownSpaceMaxCoord() const;
+			BlockVector getKnownSpaceDim() const;
 
             /**
              * TODO: Persistence
@@ -230,109 +294,17 @@ namespace opencog
             void load(FILE* fp ){};
 
             static std::string toString( const Octree3DMapManager& map );
-
             static Octree3DMapManager* fromString( const std::string& map );
 
+			/*
+			  Dead interface
 
-            template<typename Out>
-                 Out findAllEntities(Out out) const
-            {
+			  // Note: for non-super blockEntities only
+			  // Find all the neighbour BlockEntities for every blockEntity 
+			  //and describe their adjacent situation
+			  void computeAllAdjacentBlockClusters();
 
-                 // only calculate the non-block entities and block entities, no including the blocks
-                 std::vector<const char*> objectNameList;
-
-                 // non-block entities:
-                 map<Handle, Entity3D*> ::const_iterator it;
-
-                 for ( it = mAllNoneBlockEntities.begin( ); it != mAllNoneBlockEntities.end( ); ++it )
-                 {
-                     objectNameList.push_back(getEntityName((Entity3D*)(it->second)).c_str( ));
-                 } // for
-
-                 return std::copy(objectNameList.begin(), objectNameList.end(), out);
-             }
-
-
-                 // todo: now we only count the entities, we may need to return all the unit blocks as well
-             template<typename Out>
-                     Out getAllObjects(Out out) const
-             {
-                return findAllEntities(out);
-             }
-
-            /*
-             * Threshold to consider an entity next to another
-             * @return Next distance
-             */
-            inline double getNextDistance( void ) const {
-                return 2.0;
-            }
-
-            /**
-             * Finds the list of spatial relationships that apply to the three entities.
-             * Currently this can only be BETWEEN, which states that A is between B and C
-             *
-             * @param observer The observer entity
-             * @param entityB First reference entity
-             * @param entityC Second reference entity
-             *
-             * @return std::vector<SPATIAL_RELATION> a vector of all spatial relations
-             *         among entityA (this entity), entityB (first reference) and entityC
-             *         (second reference)
-             *
-             */
-            std::set<SPATIAL_RELATION> computeSpatialRelations(
-                                                                   const Entity3D* entityA,
-                                                                   const Entity3D* entityB,
-                                                                   const Entity3D* entityC = 0,
-                                                                   const Entity3D* observer = 0) const;
-
-            std::set<SPATIAL_RELATION> computeSpatialRelations(
-                                                                   string entityAName,
-                                                                   string entityBName,
-                                                                   string entityCName = "",
-                                                                   string observerName = ""
-                                                                   ) const;
-
-            std::set<SPATIAL_RELATION> computeSpatialRelations( const AxisAlignedBox& boundingboxA,
-                                                                const AxisAlignedBox& boundingboxB,
-                                                                const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
-                                                                const Entity3D* observer = 0 ) const;
-
-            /**
-             * Return a string description of the relation
-             */
-            static std::string spatialRelationToString( SPATIAL_RELATION relation );
-
-            // Note: for non-super blockEntities only
-            // Find all the neighbour BlockEntities for every blockEntity and describe their adjacent situation
-            void computeAllAdjacentBlockClusters();
-
-            int getAgentHeight(){return mAgentHeight;}
-            void setAgentHeight(int _height){mAgentHeight = _height;}
-
-            bool checkIsSolid(BlockVector& pos);
-            bool checkIsSolid(int x, int y, int z);
-
-            Block3D* getBlockAtLocation(int x, int y, int z);
-			Block3D* getBlockAtLocation(const BlockVector& pos);
-            // return the handle of the unit block in this position
-            Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
-
-            // return the position of this unit block given its handle
-            BlockVector getPositionFromUnitBlockHandle(const Handle &h);
-
-            HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
-
-            bool isAvatarEntity(const Entity3D* entity) const;
-
-            // to recoard all the history locations/ centerPosition for all the nonBlockEntities, the lastest one is push_back
-            // map <EntityHandle, vector< pair < timestamp, location> >
-            map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
-
-            // get the last location this nonBlockEntity appeared
-            BlockVector getLastAppearedLocation(Handle entityHandle);
-
+			 */
         protected:
 
             int mTotalDepthOfOctree;
@@ -347,7 +319,7 @@ namespace opencog
             int             mFloorHeight; // the z of the floor
             int             mAgentHeight;
             int             mTotalUnitBlockNum;
-
+            static const int AccessDistance = 2;
             // it's not the boundingbox for the map, not for the octree,
             // an octree boundingbox is usually a cube, but the map is not necessary to be a cube
             AxisAlignedBox mMapBoundingBox;
@@ -363,6 +335,15 @@ namespace opencog
             map<Handle, Entity3D*> mAllNoneBlockEntities;
             map<Handle, Entity3D*> mAllAvatarList;
             multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
+
+			/**
+			 *    Inner helper function.
+			 */
+
+            // just remove this entity from the mBlockEntityList, but not delete it yet
+            void removeAnEntityFromList(BlockEntity* entityToRemove);
+			//for findEntities template
+			string getEntityName(Entity3D* entity) const;
 
             bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
 
