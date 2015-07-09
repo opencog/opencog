@@ -23,6 +23,7 @@ class DecideRandom(BaseDecider):
             range(0, len(chosen_atoms)), result_atoms_count
         )
 
+        self.ret = []
         for index in random_atom_indexes:
             self.ret.append(chosen_atoms[index])
 

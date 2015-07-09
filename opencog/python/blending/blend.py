@@ -4,10 +4,10 @@ from opencog.logger import log
 from blending.src.chooser.chooser_finder import ChooserFinder
 from blending.src.decider.decider_finder import DeciderFinder
 from blending.src.maker.maker_finder import MakerFinder
+from blending.src.connector.connector_finder import ConnectorFinder
 
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status, get_status_str
-from blending.util.link_copier import LinkCopier
 
 __author__ = 'DongMin Kim'
 
@@ -20,12 +20,7 @@ class ConceptualBlending:
         self.make_default_config()
 
         self.config_base = None
-        self.focus_atoms = []
-        self.link_copier_inst = LinkCopier(self.a)
-
-        self.chooser = None
-        self.decider = None
-        self.maker = None
+        self.focus_atoms = None
 
         self.chosen_atoms = []
         self.decided_atoms = []
@@ -34,9 +29,10 @@ class ConceptualBlending:
         self.blended_atoms = []
 
     def make_default_config(self):
-        BlendConfig().update(self.a, "atoms-chooser", "ChooseInSTIRange")
+        BlendConfig().update(self.a, "atoms-chooser", "ChooseAll")
         BlendConfig().update(self.a, "blending-decider", "DecideBestSTI")
         BlendConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
+        BlendConfig().update(self.a, "link-connector", "ConnectSimple")
 
     def __prepare(self, focus_atoms, config_base):
         # Prepare blending.
@@ -58,24 +54,6 @@ class ConceptualBlending:
             if focus_atoms is None \
             else focus_atoms
 
-        self.__make_workers()
-
-    def __make_workers(self):
-        self.chooser = ChooserFinder(self.a).get_chooser(self.config_base)
-        self.decider = DeciderFinder(self.a).get_decider(self.config_base)
-        self.maker = MakerFinder(self.a).get_maker(self.config_base)
-
-    def link_connect(self):
-        # Make the links between exist nodes and newly blended node.
-        # Adjust the attribute value of new links.
-        self.link_copier_inst.copy_all_link_to_new_node(
-            [self.decided_atoms[0], self.decided_atoms[1]],
-            self.merged_atom
-        )
-
-        # Detect and improve conflict links in newly blended node.
-        # - Do nothing.
-
     def __clean_up(self):
         self.last_status = blending_status.SUCCESS
 
@@ -85,20 +63,29 @@ class ConceptualBlending:
         try:
             # Select nodes to blending.
             self.chosen_atoms = \
-                self.chooser.atom_choose(self.focus_atoms, self.config_base)
+                ChooserFinder(self.a).\
+                get_chooser(self.config_base).\
+                atom_choose(self.focus_atoms, self.config_base)
 
             # Decide whether or not to execute blending and prepare.
             self.decided_atoms = \
-                self.decider.blending_decide(self.chosen_atoms, self.config_base)
+                DeciderFinder(self.a).\
+                get_decider(self.config_base).\
+                blending_decide(self.chosen_atoms, self.config_base)
 
             # Initialize the new blend node.
             self.merged_atom = \
-                self.maker.new_blend_make(self.decided_atoms, self.config_base)
+                MakerFinder(self.a).\
+                get_maker(self.config_base).\
+                new_blend_make(self.decided_atoms, self.config_base)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.
             # Detect and improve conflict links in newly blended node.
-            self.link_connect()
+            self.blended_atoms = \
+                ConnectorFinder(self.a).\
+                get_connector(self.config_base).\
+                link_connect(self.decided_atoms, self.merged_atom, config_base)
 
         except UserWarning as e:
             log.info("Skipping blend, caused by '" + str(e) + "'")
@@ -111,4 +98,4 @@ class ConceptualBlending:
         # Sum up blending.
         self.__clean_up()
 
-        return self.merged_atom
+        return self.blended_atoms

@@ -1,8 +1,8 @@
 # coding=utf-8
-from blending.util.blending_util import get_weighted_tv
 from opencog.type_constructors import *
 
 from blending.src.maker.base_maker import BaseMaker
+from blending.src.connector.connect_util import *
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
 

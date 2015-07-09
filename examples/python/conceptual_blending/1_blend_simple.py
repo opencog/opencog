@@ -1,38 +1,43 @@
-from opencog.atomspace import AtomSpace, TruthValue
-from opencog.type_constructors import types
-from opencog.utilities import initialize_opencog
-from opencog.logger import log
-
-from blending.blend import ConceptualBlending
+#! /usr/bin/env python
+#
+# 1_blend_simple.py
+#
+"""
+Example usage of Conceptual Blending API.
+Instantiates blender with a simple dataset stored in an AtomSpace
+and learns a new concept.
+For complete documentation on how to pass additional parameters to
+blender, refer to the documentation at the following link:
+https://github.com/opencog/opencog/tree/master/opencog/python/blending/doc/blend-config-format.md
+"""
 
 __author__ = 'DongMin Kim'
 
-log.use_stdout()
-log.set_level("WARN")
+from opencog.utilities import initialize_opencog
+from opencog.type_constructors import *
+
+from opencog.atomspace import AtomSpace
+from blending.blend import ConceptualBlending
+
+"""
+First Example
+- Blend with default config.
+"""
+print "--------Start first example--------"
 
 a = AtomSpace()
 initialize_opencog(a)
 
-# Make custom concept network.
-"""
-Make test nodes.
-"""
-# Nodes will be blended:
-car = a.add_node(types.ConceptNode, "car")
-man = a.add_node(types.ConceptNode, "man")
-vehicle = a.add_node(types.ConceptNode, "vehicle")
+# Make example concept network.
+car = ConceptNode("car")
+man = ConceptNode("man")
+a.set_av(car.h, 17)
+a.set_av(man.h, 13)
+print "Source data:\n" + \
+      str(car) + \
+      str(man)
 
-a.set_av(car.h, 19)
-a.set_av(man.h, 18)
-
-"""
-Make test links.
-"""
-l4 = a.add_link(types.SimilarityLink, [car, vehicle])
-l5 = a.add_link(types.SimilarityLink, [man, vehicle])
-a.set_tv(l4.h, TruthValue(0.9, 0.8))
-a.set_tv(l5.h, TruthValue(0.1, 0.9))
-
+# Start Conceptual Blending.
 result = ConceptualBlending(a).run()
 print "Newly blended node: \n" + \
       str(result)

@@ -23,7 +23,8 @@ blending_status = enum_simulate(
     'ERROR_IN_CONNECT_LINKS',
     'ERROR_IN_FINISH_HOOK',
 
-    'NOT_ENOUGH_ATOMS'
+    'NOT_ENOUGH_ATOMS',
+    'TOO_MANY_ATOMS'
 )
 
 
