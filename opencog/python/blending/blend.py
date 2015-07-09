@@ -1,17 +1,16 @@
-import random
-
-from opencog.atomspace import TruthValue
 from opencog.type_constructors import types, ConceptNode
 from opencog.logger import log
 
 from blending.src.chooser.chooser_finder import ChooserFinder
 from blending.src.decider.decider_finder import DeciderFinder
+from blending.src.maker.maker_finder import MakerFinder
+
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status, get_status_str
 from blending.util.link_copier import LinkCopier
 
-
 __author__ = 'DongMin Kim'
+
 
 class ConceptualBlending:
 
@@ -26,6 +25,7 @@ class ConceptualBlending:
 
         self.chooser = None
         self.decider = None
+        self.maker = None
 
         self.chosen_atoms = []
         self.decided_atoms = []
@@ -36,6 +36,7 @@ class ConceptualBlending:
     def make_default_config(self):
         BlendConfig().update(self.a, "atoms-chooser", "ChooseInSTIRange")
         BlendConfig().update(self.a, "blending-decider", "DecideBestSTI")
+        BlendConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
 
     def __prepare(self, focus_atoms, config_base):
         # Prepare blending.
@@ -62,17 +63,7 @@ class ConceptualBlending:
     def __make_workers(self):
         self.chooser = ChooserFinder(self.a).get_chooser(self.config_base)
         self.decider = DeciderFinder(self.a).get_decider(self.config_base)
-
-    def new_blend_make(self):
-        # Make a blended node.
-        self.merged_atom = ConceptNode(
-            str(self.decided_atoms[0].name) + '-' +
-            str(self.decided_atoms[1].name),
-            TruthValue(
-                random.uniform(0.5, 0.9),
-                random.uniform(0.5, 0.9)
-            )
-        )
+        self.maker = MakerFinder(self.a).get_maker(self.config_base)
 
     def link_connect(self):
         # Make the links between exist nodes and newly blended node.
@@ -98,10 +89,11 @@ class ConceptualBlending:
 
             # Decide whether or not to execute blending and prepare.
             self.decided_atoms = \
-                self.decider.blending_decide(self.focus_atoms, self.config_base)
+                self.decider.blending_decide(self.chosen_atoms, self.config_base)
 
             # Initialize the new blend node.
-            self.new_blend_make()
+            self.merged_atom = \
+                self.maker.new_blend_make(self.decided_atoms, self.config_base)
 
             # Make the links between exist nodes and newly blended node.
             # Check the severe conflict links in each node and remove.

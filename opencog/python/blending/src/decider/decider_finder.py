@@ -4,7 +4,6 @@ from blending.src.decider.decide_best_sti import DecideBestSTI
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
 
-
 __author__ = 'DongMin Kim'
 
 

@@ -45,6 +45,18 @@ ListLink(
     ConceptNode("2")
 )
 
+ListLink(
+    SchemaNode("BLEND:new-blend-atom-maker"),
+    ConceptNode("my-config"),
+    ConceptNode("MakeSimple")
+)
+
+ListLink(
+    SchemaNode("BLEND:make-atom-separator"),
+    ConceptNode("my-config"),
+    ConceptNode("&")
+)
+
 # Start Conceptual Blending.
 result = ConceptualBlending(a).run(
     a.get_atoms_by_type(types.Atom),
