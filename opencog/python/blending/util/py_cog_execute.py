@@ -1,5 +1,6 @@
 import opencog.atomspace
 from opencog.scheme_wrapper import *
+
 from blending.util.blending_util import Singleton
 
 __author__ = 'DongMin Kim'

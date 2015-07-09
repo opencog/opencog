@@ -1,5 +1,6 @@
 from opencog.logger import log
 from opencog.type_constructors import *
+
 from blending.util.blending_util import Singleton
 from blending.util.py_cog_execute import PyCogExecute
 
@@ -146,22 +147,19 @@ class BlendConfig(Singleton):
 
         if exist_set is not None:
             ret = None
-            try:
-                if len(exist_set.out) < 1:
-                    ret = None
-                elif len(exist_set.out) == 1:
-                    ret = exist_set.out[0]
-                elif len(exist_set.out) > 1:
-                    ret = exist_set.out[0]
-                    raise UserWarning(
-                        "TODO: Currently, config have to keep in unique." +
-                        "Trying to use first element..." +
-                        str(config_name) + ' in ' +
-                        str(config_base) + ' = ' +
-                        str(exist_set.out)
-                    )
-            except UserWarning as e:
-                log.warn(str(e))
+            if len(exist_set.out) < 1:
+                ret = None
+            elif len(exist_set.out) == 1:
+                ret = exist_set.out[0]
+            elif len(exist_set.out) > 1:
+                ret = exist_set.out[0]
+                log.warn(
+                    "TODO: Currently, config have to keep in unique." +
+                    "Trying to use first element..." +
+                    str(config_name) + ' in ' +
+                    str(config_base) + ' = ' +
+                    str(exist_set.out)
+                )
 
             cls.a.remove(exist_set)
             return ret
@@ -336,7 +334,7 @@ class ExecuteLinkFactory:
         elif call_type == "INHERITANCE":
             return self.__create_inheritance_link(config_dict)
         else:
-            raise AttributeError("Non valid API!")
+            raise UserWarning("Non valid API!")
 
     def clean_up(self, obsolete_dict):
         obsolete_links = obsolete_dict.values()

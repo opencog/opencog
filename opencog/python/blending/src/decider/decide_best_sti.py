@@ -21,7 +21,7 @@ class DecideBestSTI(BaseDecider):
     ):
         if len(chosen_atoms) < result_atoms_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         self.ret = sorted(
             chosen_atoms,
@@ -35,9 +35,7 @@ class DecideBestSTI(BaseDecider):
         self.ret = self.ret[l_index: r_index]
         if len(self.ret) < result_atoms_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning(
-                "Result set doesn't satisfy sti value condition."
-            )
+            return
 
         self.ret.reverse()
         self.ret = self.ret[0:result_atoms_count]
@@ -49,18 +47,8 @@ class DecideBestSTI(BaseDecider):
         sti_min = BlendConfig().get_str(self.a, "decide-sti-min", config_base)
         sti_max = BlendConfig().get_str(self.a, "decide-sti-max", config_base)
 
-        try:
-            result_atoms_count = int(result_atoms_count)
-        except (TypeError, ValueError):
-            result_atoms_count = 2
-        try:
-            sti_min = int(sti_min)
-        except ValueError:
-            sti_min = 1
-        try:
-            sti_max = int(sti_max)
-        except ValueError:
-            sti_max = None
+        sti_min = int(sti_min) if sti_min.isdigit() else 1
+        sti_max = int(sti_max) if sti_max.isdigit() else None
 
         self.__decide_atoms_best_sti(
             chosen_atoms, result_atoms_count, sti_min, sti_max

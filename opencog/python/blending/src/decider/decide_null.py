@@ -11,7 +11,7 @@ class DecideNull(BaseDecider):
     def blending_decide_impl(self, chosen_atoms, config_base):
         if chosen_atoms is None or len(chosen_atoms) < 2:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         # Just return same list.
         self.ret = chosen_atoms

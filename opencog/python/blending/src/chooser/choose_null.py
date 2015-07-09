@@ -14,7 +14,7 @@ class ChooseNull(BaseChooser):
     def atom_choose_impl(self, focus_atoms, config_base):
         if focus_atoms is None or len(focus_atoms) < 2:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         # Just return same list.
         self.ret = focus_atoms

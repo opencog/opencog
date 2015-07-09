@@ -1,19 +1,4 @@
-import random
-from opencog.type_constructors import *
-
 __author__ = 'DongMin Kim'
-
-
-"""
-Blending Utils.
-"""
-
-# Empty.
-
-
-"""
-General Utils.
-"""
 
 
 class _Singleton(type):

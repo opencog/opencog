@@ -25,3 +25,4 @@ class MakerFinder(object):
             return maker(self.a)
         else:
             self.last_status = blending_status.PARAMETER_ERROR
+            raise UserWarning

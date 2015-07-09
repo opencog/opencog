@@ -1,6 +1,5 @@
 from blending.src.connector.connect_simple import ConnectSimple
-from blending.src.connector.connect_conflict_random import \
-    ConnectConflictRandom
+from blending.src.connector.connect_conflict_random import ConnectConflictRandom
 from blending.src.connector.connect_conflict_viable import \
     ConnectConflictAllViable
 from blending.util.blending_config import BlendConfig
@@ -31,3 +30,4 @@ class ConnectorFinder(object):
             return connector(self.a)
         else:
             self.last_status = blending_status.PARAMETER_ERROR
+            raise UserWarning

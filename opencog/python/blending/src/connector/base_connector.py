@@ -1,9 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from opencog.logger import log
-
-from blending.util.blending_config import BlendConfig
-from blending.util.blending_error import blending_status, get_status_str
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -15,7 +12,7 @@ class BaseConnector(object):
         self.a = a
         self.last_status = blending_status.UNKNOWN_ERROR
         self.make_default_config()
-        self.ret = None
+        self.ret = []
 
     def make_default_config(self):
         pass
@@ -27,18 +24,12 @@ class BaseConnector(object):
     def link_connect(self, decided_atoms, merged_atom, config_base):
         self.last_status = blending_status.IN_PROCESS
 
-        try:
-            self.link_connect_impl(decided_atoms, merged_atom, config_base)
-        except UserWarning as e:
-            log.info("Skipping connect, caused by '" + str(e) + "'")
-            log.info(
-                "Last status is '" +
-                get_status_str(self.last_status) +
-                "'"
-            )
-            raise e
+        self.link_connect_impl(decided_atoms, merged_atom, config_base)
 
         if self.last_status == blending_status.IN_PROCESS:
             self.last_status = blending_status.SUCCESS
+        else:
+            self.ret = []
+            raise UserWarning('ERROR_IN_LINK_CONNECTOR')
 
         return self.ret

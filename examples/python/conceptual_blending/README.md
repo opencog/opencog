@@ -14,4 +14,4 @@
       other.
 
 ## See Also
-* [Conceptual Blending Config Format](../../../opencog/python/blending/doc/blend-config-format.md)
+* [Conceptual Blending Config Format](../../../opencog/python/blending/blend-config-format.md)

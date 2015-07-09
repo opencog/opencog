@@ -33,13 +33,13 @@ class ChooseInSTIRange(BaseChooser):
 
         if len(atoms_h_set) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         self.ret = map(lambda atom_h: self.a[Handle(atom_h)], atoms_h_set)
         self.ret = filter(lambda atom: atom.is_a(atom_type), self.ret)
         if len(self.ret) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
     def atom_choose_impl(self, focus_atoms, config_base):
         atom_type = BlendConfig().get_str(
@@ -55,20 +55,13 @@ class ChooseInSTIRange(BaseChooser):
             atom_type = types.__dict__[atom_type]
         except KeyError:
             atom_type = types.Node
-        try:
-            least_count = int(least_count)
-            if least_count < 0:
-                raise ValueError('Least count of atom list is too small.')
-        except (TypeError, ValueError):
-            least_count = 0
-        try:
-            sti_min = int(sti_min)
-        except ValueError:
-            sti_min = 1
-        try:
-            sti_max = int(sti_max)
-        except ValueError:
-            sti_max = None
+
+        if least_count < 0:
+            self.last_status = blending_status.NOT_ENOUGH_ATOMS
+            return
+
+        sti_min = int(sti_min) if sti_min.isdigit() else 1
+        sti_max = int(sti_max) if sti_max.isdigit() else None
 
         self.__get_atoms_in_sti_range(
             focus_atoms, atom_type, least_count, sti_min, sti_max

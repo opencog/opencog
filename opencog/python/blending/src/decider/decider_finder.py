@@ -29,3 +29,4 @@ class DeciderFinder(object):
             return decider(self.a)
         else:
             self.last_status = blending_status.PARAMETER_ERROR
+            raise UserWarning

@@ -17,7 +17,7 @@ class DecideRandom(BaseDecider):
     def __decide_atoms_random(self, chosen_atoms, result_atoms_count):
         if len(chosen_atoms) < result_atoms_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         random_atom_indexes = random.sample(
             range(0, len(chosen_atoms)), result_atoms_count
@@ -31,10 +31,5 @@ class DecideRandom(BaseDecider):
         result_atoms_count = BlendConfig().get_int(
             self.a, "decide-result-atoms-count", config_base
         )
-
-        try:
-            result_atoms_count = int(result_atoms_count)
-        except (TypeError, ValueError):
-            result_atoms_count = 2
 
         self.__decide_atoms_random(chosen_atoms, result_atoms_count)

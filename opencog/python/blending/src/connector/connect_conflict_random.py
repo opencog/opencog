@@ -1,11 +1,11 @@
 import random
-from opencog.atomspace import get_type, get_type_name
-from opencog.logger import log
+from opencog.atomspace import *
 
 from blending.src.connector.base_connector import BaseConnector
 from blending.src.connector.connect_util import *
 import blending.src.connector.equal_link_key as eq_link
 from blending.util.blending_config import BlendConfig
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -57,13 +57,7 @@ class ConnectConflictRandom(BaseConnector):
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
         for merged_atom in self.ret:
-            try:
-                weighted_tv = get_weighted_tv(
-                    self.a.get_incoming(merged_atom.h)
-                )
-            except UserWarning as e:
-                log.info(str(e))
-                weighted_tv = TruthValue()
+            weighted_tv = get_weighted_tv(self.a.get_incoming(merged_atom.h))
             for decided_atom in decided_atoms:
                 self.a.add_link(
                     types.AssociativeLink,
@@ -104,19 +98,10 @@ class ConnectConflictRandom(BaseConnector):
         self.check_type = get_type(check_type_str)
 
         if check_type_str != get_type_name(self.check_type):
-            raise UserWarning("Can't resolve type" + str(check_type_str))
+            self.last_status = blending_status.UNKNOWN_TYPE
+            return
 
-        try:
-            self.strength_diff_limit = \
-                float(strength_diff_threshold)
-            self.confidence_above_limit = \
-                float(confidence_above_threshold)
-        except (TypeError, ValueError):
-            raise UserWarning(
-                "Can't parse threshold value:: "
-                "{strength: {0}, confidence: {1}}".format(
-                    str(strength_diff_threshold),
-                    str(confidence_above_threshold))
-            )
+        self.strength_diff_limit = float(strength_diff_threshold)
+        self.confidence_above_limit = float(confidence_above_threshold)
 
         self.__connect_random_conflict_links(decided_atoms, merged_atom)

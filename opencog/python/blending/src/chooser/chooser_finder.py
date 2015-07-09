@@ -1,3 +1,4 @@
+from blending.src.chooser.choose_null import ChooseNull
 from blending.src.chooser.choose_all import ChooseAll
 from blending.src.chooser.choose_in_sti_range import ChooseInSTIRange
 from blending.util.blending_config import BlendConfig
@@ -12,6 +13,7 @@ class ChooserFinder(object):
         self.last_status = blending_status.UNKNOWN_ERROR
 
         self.choosers = {
+            ChooseNull.__name__: ChooseNull,
             ChooseAll.__name__: ChooseAll,
             ChooseInSTIRange.__name__: ChooseInSTIRange
         }
@@ -27,3 +29,4 @@ class ChooserFinder(object):
             return chooser(self.a)
         else:
             self.last_status = blending_status.PARAMETER_ERROR
+            raise UserWarning

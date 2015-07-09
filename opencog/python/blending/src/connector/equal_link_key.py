@@ -1,4 +1,3 @@
-# coding=utf-8
 from opencog.atomspace import Handle
 
 __author__ = 'DongMin Kim'

@@ -1,9 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
-from opencog.logger import log
-
 from blending.util.blending_config import BlendConfig
-from blending.util.blending_error import blending_status, get_status_str
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -29,18 +27,12 @@ class BaseMaker(object):
     def new_blend_make(self, decided_atoms, config_base):
         self.last_status = blending_status.IN_PROCESS
 
-        try:
-            self.new_blend_make_impl(decided_atoms, config_base)
-        except UserWarning as e:
-            log.info("Skipping make, caused by '" + str(e) + "'")
-            log.info(
-                "Last status is '" +
-                get_status_str(self.last_status) +
-                "'"
-            )
-            raise e
+        self.new_blend_make_impl(decided_atoms, config_base)
 
         if self.last_status == blending_status.IN_PROCESS:
             self.last_status = blending_status.SUCCESS
+        else:
+            self.ret = None
+            raise UserWarning('ERROR_IN_BLEND_ATOM_MAKER')
 
         return self.ret

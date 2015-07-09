@@ -1,4 +1,4 @@
-from opencog.type_constructors import types, ConceptNode
+from opencog.type_constructors import types
 from opencog.logger import log
 
 from blending.src.chooser.chooser_finder import ChooserFinder
@@ -7,7 +7,7 @@ from blending.src.maker.maker_finder import MakerFinder
 from blending.src.connector.connector_finder import ConnectorFinder
 
 from blending.util.blending_config import BlendConfig
-from blending.util.blending_error import blending_status, get_status_str
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -19,12 +19,11 @@ class ConceptualBlending:
         self.last_status = blending_status.UNKNOWN_ERROR
         self.make_default_config()
 
-        self.config_base = None
         self.focus_atoms = None
+        self.config_base = None
 
         self.chosen_atoms = []
         self.decided_atoms = []
-        self.blended_atom = None
         self.merged_atom = None
         self.blended_atoms = []
 
@@ -50,7 +49,7 @@ class ConceptualBlending:
         self.config_base = default_config_base \
             if config_base is None \
             else config_base
-        self.focus_atoms = self.a.get_atoms_by_type(types.Node) \
+        self.focus_atoms = [] \
             if focus_atoms is None \
             else focus_atoms
 
@@ -58,10 +57,10 @@ class ConceptualBlending:
         self.last_status = blending_status.SUCCESS
 
     def run(self, focus_atoms=None, config_base=None):
-        self.__prepare(focus_atoms, config_base)
-
         try:
-            # Select nodes to blending.
+            self.__prepare(focus_atoms, config_base)
+
+            # Choose nodes to blending.
             self.chosen_atoms = \
                 ChooserFinder(self.a).\
                 get_chooser(self.config_base).\
@@ -87,15 +86,10 @@ class ConceptualBlending:
                 get_connector(self.config_base).\
                 link_connect(self.decided_atoms, self.merged_atom, config_base)
 
+            # Sum up blending.
+            self.__clean_up()
         except UserWarning as e:
-            log.info("Skipping blend, caused by '" + str(e) + "'")
-            log.info(
-                "Last status is '" +
-                get_status_str(self.last_status) +
-                "'"
-            )
-
-        # Sum up blending.
-        self.__clean_up()
+            log.info('Skip blending due to: ' + str(e))
+            self.blended_atoms = []
 
         return self.blended_atoms

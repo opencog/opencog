@@ -1,5 +1,7 @@
 from opencog.atomspace import TruthValue
 from opencog.type_constructors import types
+from opencog.logger import log
+
 from blending.src.connector.equal_link_key import link_to_keys
 
 __author__ = 'DongMin Kim'
@@ -158,10 +160,11 @@ def get_inverted_index_value(key_value_pairs):
 
 
 def get_weighted_tv(atoms):
-    if len(atoms) < 2:
-        raise UserWarning(
-            "Weighted TruthValue can't be evaluated with small size."
-        )
+    if len(atoms) < 1:
+        log.info("Weighted TruthValue can't be evaluated with small size.")
+        return TruthValue()
+    elif len(atoms) == 1:
+        return atoms[0].tv
 
     mean_sum = 0
 
@@ -174,9 +177,9 @@ def get_weighted_tv(atoms):
         confidence_sum += atom.tv.confidence
         link_count += 1
 
-    try:
+    if confidence_sum != 0:
         new_strength = weighted_strength_sum / confidence_sum
-    except ZeroDivisionError:
+    else:
         # This is arithmetic mean, maybe given atoms doesn't have TruthValue.
         for atom in atoms:
             mean_sum += atom.tv.mean
@@ -186,4 +189,3 @@ def get_weighted_tv(atoms):
     # average of old value.
     new_confidence = confidence_sum / link_count
     return TruthValue(new_strength, new_confidence)
-

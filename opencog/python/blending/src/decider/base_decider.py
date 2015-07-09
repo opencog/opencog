@@ -1,9 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
-from opencog.logger import log
-
 from blending.util.blending_config import BlendConfig
-from blending.util.blending_error import blending_status, get_status_str
+from blending.util.blending_error import blending_status
 
 __author__ = 'DongMin Kim'
 
@@ -27,18 +25,12 @@ class BaseDecider(object):
     def blending_decide(self, chosen_atoms, config_base):
         self.last_status = blending_status.IN_PROCESS
 
-        try:
-            self.blending_decide_impl(chosen_atoms, config_base)
-        except UserWarning as e:
-            log.info("Skipping decide, caused by '" + str(e) + "'")
-            log.info(
-                "Last status is '" +
-                get_status_str(self.last_status) +
-                "'"
-            )
-            raise e
+        self.blending_decide_impl(chosen_atoms, config_base)
 
         if self.last_status == blending_status.IN_PROCESS:
             self.last_status = blending_status.SUCCESS
+        else:
+            self.ret = []
+            raise UserWarning('ERROR_IN_BLENDING_DECIDER')
 
         return self.ret

@@ -1,5 +1,3 @@
-from opencog.logger import log
-
 from blending.src.connector.base_connector import BaseConnector
 from blending.src.connector.connect_util import *
 import blending.src.connector.equal_link_key as eq_link
@@ -44,13 +42,7 @@ class ConnectSimple(BaseConnector):
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
         for merged_atom in self.ret:
-            try:
-                weighted_tv = get_weighted_tv(
-                    self.a.get_incoming(merged_atom.h)
-                )
-            except UserWarning as e:
-                log.info(str(e))
-                weighted_tv = TruthValue()
+            weighted_tv = get_weighted_tv(self.a.get_incoming(merged_atom.h))
             for decided_atom in decided_atoms:
                 self.a.add_link(
                     types.AssociativeLink,

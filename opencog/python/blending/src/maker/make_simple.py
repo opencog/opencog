@@ -1,6 +1,3 @@
-# coding=utf-8
-from opencog.type_constructors import *
-
 from blending.src.maker.base_maker import BaseMaker
 from blending.src.connector.connect_util import *
 from blending.util.blending_config import BlendConfig
@@ -21,7 +18,7 @@ class MakeSimple(BaseMaker):
     ):
         if len(decided_atoms) < 2:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            raise UserWarning('Size of atom list is too small.')
+            return
 
         new_blend_atom_name = atom_prefix
         for atom in decided_atoms:
