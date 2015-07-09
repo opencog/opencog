@@ -1,10 +1,14 @@
 import random
+
+from opencog.atomspace import TruthValue
+from opencog.type_constructors import types, ConceptNode
+from opencog.logger import log
+
 from blending.src.chooser.chooser_finder import ChooserFinder
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status, get_status_str
-from opencog.atomspace import TruthValue
-from opencog.type_constructors import types, ConceptNode
 from blending.util.link_copier import LinkCopier
+
 
 __author__ = 'DongMin Kim'
 
@@ -16,6 +20,7 @@ class ConceptualBlending:
         self.make_default_config()
 
         self.config_base = None
+        self.focus_atoms = []
         self.link_copier_inst = LinkCopier(self.a)
 
         self.chooser_finder = ChooserFinder(self.a)
@@ -28,18 +33,32 @@ class ConceptualBlending:
         self.blended_atoms = []
 
     def make_default_config(self):
-        BlendConfig().update(self.a, "atoms-chooser", "ChooseAll")
+        BlendConfig().update(self.a, "atoms-chooser", "ChooseInSTIRange")
 
-    def __prepare(self, config):
+    def __prepare(self, focus_atoms, config_base):
         # Prepare blending.
         self.last_status = blending_status.IN_PROCESS
-        self.config_base = self.decided_atoms if config is None else config
+
+        if type(config_base) is list:
+            self.last_status = blending_status.PARAMETER_ERROR
+            raise UserWarning("Config can't be list type.")
+
+        default_config_base = self.a.add_node(
+            types.ConceptNode,
+            BlendConfig.config_prefix
+        )
+
+        self.config_base = default_config_base \
+            if config_base is None \
+            else config_base
+        self.focus_atoms = self.a.get_atoms_by_type(types.Node) \
+            if focus_atoms is None \
+            else focus_atoms
+
         self.__make_workers()
 
     def __make_workers(self):
-        self.chooser = self.chooser_finder.get_chooser(
-            BlendConfig().get_str(self.a, "atoms-chooser", self.config_base)
-        )
+        self.chooser = self.chooser_finder.get_chooser()
 
     def blending_decide(self):
         # Currently, just check number of atoms.
@@ -78,22 +97,32 @@ class ConceptualBlending:
     def __clean_up(self):
         self.last_status = blending_status.SUCCESS
 
-    def run(self, config=None):
-        self.__prepare(config)
+    def run(self, focus_atoms=None, config_base=None):
+        self.__prepare(focus_atoms, config_base)
 
-        # Select nodes to blending.
-        self.chosen_atoms = self.chooser.atom_choose(self.config_base)
+        try:
+            # Select nodes to blending.
+            self.chosen_atoms = \
+                self.chooser.atom_choose(self.focus_atoms, self.config_base)
 
-        # Decide whether or not to execute blending and prepare.
-        self.blending_decide()
+            # Decide whether or not to execute blending and prepare.
+            self.blending_decide()
 
-        # Initialize the new blend node.
-        self.new_blend_make()
+            # Initialize the new blend node.
+            self.new_blend_make()
 
-        # Make the links between exist nodes and newly blended node.
-        # Check the severe conflict links in each node and remove.
-        # Detect and improve conflict links in newly blended node.
-        self.link_connect()
+            # Make the links between exist nodes and newly blended node.
+            # Check the severe conflict links in each node and remove.
+            # Detect and improve conflict links in newly blended node.
+            self.link_connect()
+
+        except UserWarning as e:
+            log.info("Skipping blend, caused by '" + str(e) + "'")
+            log.info(
+                "Last status is '" +
+                get_status_str(self.last_status) +
+                "'"
+            )
 
         # Sum up blending.
         self.__clean_up()

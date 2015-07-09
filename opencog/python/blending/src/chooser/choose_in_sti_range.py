@@ -1,7 +1,9 @@
+from opencog.atomspace import Handle
+from opencog.type_constructors import types
+
+from blending.src.chooser.base_chooser import BaseChooser
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
-from opencog.type_constructors import types
-from blending.src.chooser.base_chooser import BaseChooser
 
 __author__ = 'DongMin Kim'
 
@@ -16,30 +18,30 @@ class ChooseInSTIRange(BaseChooser):
         BlendConfig().update(self.a, "choose-sti-max", "None")
 
     def __get_atoms_in_sti_range(
-            self, atom_type, least_count, sti_min, sti_max
+            self, focus_atoms, atom_type, least_count, sti_min, sti_max
     ):
-        """
-        Choose atoms within proper STI range.
-        :param Type atom_type: type of atoms to choose.
-        :param int least_count: minimum number of atoms to choose.
-        :param float sti_min: min value of sti to choose.
-        :param float sti_max: max value of sti to choose.
-        :return:
-        """
-        ret = []
+        all_atoms = self.a.get_atoms_by_av(sti_min, sti_max)
 
-        atoms = self.a.get_atoms_by_av(sti_min, sti_max)
+        all_atoms_h_set = set(
+            map(lambda atom: atom.handle_uuid(), all_atoms)
+        )
+        focus_atoms_h_set = set(
+            map(lambda atom: atom.handle_uuid(), focus_atoms)
+        )
 
-        if len(atoms) < least_count:
+        atoms_h_set = all_atoms_h_set & focus_atoms_h_set
+
+        if len(atoms_h_set) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            return
+            raise UserWarning('Size of atom list is too small.')
 
-        self.ret = filter(lambda atom: atom.is_a(atom_type), atoms)
+        self.ret = map(lambda atom_h: self.a[Handle(atom_h)], atoms_h_set)
+        self.ret = filter(lambda atom: atom.is_a(atom_type), self.ret)
         if len(self.ret) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            return
+            raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, config_base):
+    def atom_choose_impl(self, focus_atoms, config_base):
         atom_type = BlendConfig().get_str(
             self.a, "choose-atom-type", config_base
         )
@@ -68,6 +70,6 @@ class ChooseInSTIRange(BaseChooser):
         except ValueError:
             sti_max = None
 
-        return self.__get_atoms_in_sti_range(
-            atom_type, least_count, sti_min, sti_max
+        self.__get_atoms_in_sti_range(
+            focus_atoms, atom_type, least_count, sti_min, sti_max
         )

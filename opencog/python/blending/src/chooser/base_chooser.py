@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from opencog.logger import log
 
 from blending.util.blending_config import BlendConfig
-from blending.util.blending_error import blending_status
+from blending.util.blending_error import blending_status, get_status_str
 
 __author__ = 'DongMin Kim'
 
@@ -22,19 +22,19 @@ class BaseChooser(object):
         BlendConfig().update(self.a, "choose-least-count", "2")
 
     @abstractmethod
-    def atom_choose_impl(self, config_base):
+    def atom_choose_impl(self, focus_atoms, config_base):
         raise NotImplementedError("Please implement this method.")
 
-    def atom_choose(self, config_base):
+    def atom_choose(self, focus_atoms, config_base):
         self.last_status = blending_status.IN_PROCESS
 
         try:
-            self.atom_choose_impl(config_base)
+            self.atom_choose_impl(focus_atoms, config_base)
         except UserWarning as e:
             log.info("Skipping choose, caused by '" + str(e) + "'")
             log.info(
                 "Last status is '" +
-                blending_status.reverse_mapping[self.last_status] +
+                get_status_str(self.last_status) +
                 "'"
             )
             raise e

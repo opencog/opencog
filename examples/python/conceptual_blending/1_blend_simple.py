@@ -33,7 +33,6 @@ l5 = a.add_link(types.SimilarityLink, [man, vehicle])
 a.set_tv(l4.h, TruthValue(0.9, 0.8))
 a.set_tv(l5.h, TruthValue(0.1, 0.9))
 
-inst = ConceptualBlending(a)
-result = inst.run()
-
-log.warn(str(result.h) + " " + str(result.name))
+result = ConceptualBlending(a).run()
+print "Newly blended node: \n" + \
+      str(result)

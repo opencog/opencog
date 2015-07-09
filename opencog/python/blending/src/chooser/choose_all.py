@@ -1,10 +1,9 @@
-import random
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
 from opencog.type_constructors import types
 from blending.src.chooser.base_chooser import BaseChooser
-from opencog.logger import log
 __author__ = 'DongMin Kim'
+
 
 class ChooseAll(BaseChooser):
     def __init__(self, atomspace):
@@ -16,18 +15,18 @@ class ChooseAll(BaseChooser):
     # Select atoms randomly and return
     # atom_type = decide the type of atoms to select
     # count = decide the number of atoms to select
-    def __get_atoms_all(self, atom_type, count):
-        ret = []
+    def __get_atoms_all(self, focus_atoms, atom_type, least_count):
+        self.ret = filter(lambda atom: atom.is_a(atom_type), focus_atoms)
 
-        # TODO: change to search all atomspace
-        # (BlendTarget is only useful in development phase)
-        self.ret = self.a.get_atoms_by_type(atom_type)
-
-        if len(self.ret) < count:
+        if len(self.ret) < least_count:
             self.last_status = blending_status.NOT_ENOUGH_ATOMS
-            return
+            raise UserWarning('Size of atom list is too small.')
 
-    def atom_choose_impl(self, config_base):
+    def atom_choose_impl(self, focus_atoms, config_base):
+        focus_atoms = self.a.get_atoms_by_type(types.Atom) \
+            if len(focus_atoms) is 0 \
+            else focus_atoms
+
         atom_type = BlendConfig().get_str(
             self.a, "choose-atom-type", config_base
         )
@@ -46,4 +45,4 @@ class ChooseAll(BaseChooser):
         except (TypeError, ValueError):
             least_count = 0
 
-        self.__get_atoms_all(atom_type, least_count)
+        self.__get_atoms_all(focus_atoms, atom_type, least_count)

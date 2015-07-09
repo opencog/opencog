@@ -36,11 +36,18 @@ ListLink(
 ListLink(
     SchemaNode("BLEND:choose-sti-min"),
     ConceptNode("my-config"),
-    ConceptNode("12")
+    ConceptNode("4")
+)
+
+ListLink(
+    SchemaNode("BLEND:choose-sti-max"),
+    ConceptNode("my-config"),
+    ConceptNode("15")
 )
 
 # Start Conceptual Blending.
 result = ConceptualBlending(a).run(
+    [car, man, block],
     ConceptNode("my-config")
 )
 
