@@ -31,14 +31,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "ros/ros.h"
-#include "sensor_msgs/PointCloud2"
-#include "sensor_msgs/PointField"
+#include "sensor_msgs/PointCloud2.h"
+#include "sensor_msgs/PointField.h"
 #include <sstream>
 
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
 #include <octomap_ros/conversions.h>
 //#include <octomap_msgs/*>
+
+#include "minecraft_bot/visible_blocks_srv.h"
+#include "minecraft_bot/map_block_msg.h"
 
 using namespace std;
 using namespace octomap;
@@ -58,43 +61,70 @@ int main(int argc, char** argv)
 {
 
   	cout << endl;
-  	cout << "generating minecraft map" << endl;
+  	cout << "generating minecraft visibility data" << endl;
  	
 	// create empty tree with resolution 1
   	// no need for higher resolution since all blocks in MC are 1x1 unit
 	OcTree tree (1);
 
-	//initialize the octovis listener
-	
-	ros::init(argc, argv, "octovis_listener");
+	//initialize the octovis listener	
+	ros::init(argc, argv, "octomap_visualization_node");
 	ros::NodeHandle n;
+	ros::ServiceClient vis_client = n.serviceClient<minecraft_bot::visible_blocks_srv>("get_visible_blocks");
+	minecraft_bot::visible_blocks_srv service;
+	service.request.x = -29.2;
+	service.request.y = 14;
+	service.request.z = -41;
+	service.request.pitch = 20.3;
+	service.request.yaw = -92;
 
 	ros::Publisher octo_pub = n.advertise<sensor_msgs::PointCloud2>("octovis_data", 10000);
 	
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(1);
 
-	int count = 0;
-	while (ros:ok())
+	//int count = 0;
 	
-		sensor_msgs::PointField pf;
-		pf.name = "just a name";
-		pf.offset = 0;
-		pf.datatype = FLOAT64;
-		pf.count = 1;
+	while (ros::ok())
+	{	
+		//sensor_msgs::PointField pf;
+		//pf.name = "just a name";
+		//pf.offset = 0;
+		//pf.datatype = FLOAT64;
+		//pf.count = 1;
 
+		if (vis_client.call(service))
+		{
+			cout << "gathering visible blocks";
+			cout << endl;
 
+			minecraft_bot::visible_blocks_srvResponse_<std::allocator<void> >::_visible_blocks_type
+				blocks = service.response.visible_blocks;
 
-		sensor_msgs::PointCloud2 msg;
+			for (int i=0; i < blocks.size(); i++)
+			{
+				float x = blocks[i].x;
+				float y = blocks[i].y;
+				float z = blocks[i].z;
+				cout << "x: " << x << "y: " << y << "z: " << z;
 
-		msg.header = "just a header"
-		msg.height
-		msg.width
-		msg.
+				point3d coords(x, y, z);
+				tree.updateNode(coords, true);
+
+			}
+		}
+				//sensor_msgs::PointCloud2 msg;
+
+		//msg.header = "just a header";
+
+		//msg.height = 1;
+		//msg.width = 1;
+		ros::spinOnce();
+		loop_rate.sleep();
 	}
-
+	
 
   // insert some measurements of occupied cells
-
+/*
   for (int x=-20; x<20; x++) {
     for (int y=-20; y<20; y++) {
       for (int z=-20; z<20; z++) {
@@ -118,6 +148,7 @@ int main(int argc, char** argv)
   query = point3d(1.,1.,1.);
   result = tree.search (query);
   print_query_info(query, result);
+*/
 
   cout << endl;
   tree.writeBinary("minecraft_tree.bt");
