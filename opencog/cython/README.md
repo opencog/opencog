@@ -1,7 +1,7 @@
 Python bindings for OpenCog
 ---------------------------
 
-== Requirements ==
+## Requirements ##
 
 * Python 2.7 - these bindings may work with earlier versions, but they have not been tested at all.
 * Cython 0.14 or later. http://www.cython.org/
@@ -28,13 +28,13 @@ follow a similar pattern:
 
  opencog.rules
 
-== Tutorial ==
+## Tutorial ##
 
 This tutorial is a first look at the Python bindings. It assumes that
 you've got a good grasp on the concept of the AtomSpace and the
 CogServer. Oh, and it helps to know a bit of Python too!
 
-=== Setting up ===
+### Setting up ###
 
 Go through the normal process of [[building OpenCog]]. Then ensure that
 the OpenCog data directory is in your Python `sys.path`. By
@@ -46,7 +46,7 @@ just want to use your build dir you can use something like:
 
  $ export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python:~/src/opencog/build/opencog/cython
 
-=== MindAgents in Python ===
+### MindAgents in Python ###
 
 MindAgents modify the AtomSpace autonomously. Adding and removing atoms,
 updating TruthValues or anything else. The most important part for now is
@@ -54,22 +54,22 @@ the "run" method, which gets called with the CogServer AtomSpace as a parameter
 (In the past, C++ MindAgents would be passed the CogServer itself, but it
 wasn't obvious to me why this is necessary).
 
-<source lang="python">
+```python
 >>> import opencog.cogserver
 >>> from opencog.atomspace import types
 >>> class MyMindAgent(opencog.cogserver.MindAgent):
 ...    def run(self,atomspace):
 ...        atomspace.add_node(types.ConceptNode, "test")
-</source>
+```
 
 This will try, every CogServer cycle, to add the ConceptNode called "test".
 
 ''Warning'': Note the opencog.cogserver.MindAgent is subclassed using the full
 path. If you use:
 
-<source lang="python">
+```python
 >>> from opencog.cogserver import MindAgent # wrong
-</source>
+```
 
 Then you'll get MindAgent showing up in the cogserver too. I'm not currently
 sure why, but supporting this is another improvement to add eventually.
@@ -86,19 +86,19 @@ To actually allow the CogServer to use this MindAgent there are several things t
 Note: Yet another thing to do is allow all modules in the OpenCog Python
 directories to be loaded automatically and scanned for MindAgents.
 
-=== CogServer Requests in Python ===
+### CogServer Requests in Python ###
 
 CogServer Requests are commands that can be issued in the shell or by other
 modules in C++ code. If save the follow to a file myrequest.py:
 
-<source lang="python">
+```python
 import opencog.cogserver
 from opencog.atomspace import types
 class MyRequest(opencog.cogserver.Request):
     def run(self,args,atomspace):
         # args is a list of strings
         atomspace.add_node(types.ConceptNode, args[0])
-</source>
+```
 
 And you telnet to a running CogServer, you can run the request:
 
