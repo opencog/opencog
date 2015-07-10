@@ -131,6 +131,7 @@ void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 
 /*
 // this function does not be used in 3d map
+
 SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle)
 {
     SpaceMap* map;
@@ -553,8 +554,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
-                                     int _xDim, int _yDim, int _zDim, int _floorHeight)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName,unsigned _resolution, int _floorHeight)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
@@ -565,7 +565,7 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, i
         atomspace->set_LTI(spaceMapNode, 1);
         timeser->addTimeInfo(spaceMapNode, timestamp);
 
-        SpaceMap* newSpaceMap = new SpaceMap( _mapName, _xMin,  _yMin, _zMin,  _xDim,  _yDim,  _zDim,  _floorHeight);
+        SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _floorHeight);
 
         // add into the map set
         spaceMaps.insert(map<Handle,SpaceMap*>::value_type(spaceMapNode,newSpaceMap));
@@ -713,7 +713,7 @@ void SpaceServer::findAllBlockEntitiesOnTheMap(Handle spaceMapHandle)
 {
     if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
     {
-        logger().error("SpaceServer::addBlockEntityNodes - Map not found!");
+        logger().error("SpaceServer::findAllBlockEntitiesOntheMap - Map not found!");
         return;	
     }
     SpaceMap* theMap=spaceMaps[spaceMapHandle];
@@ -726,12 +726,12 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
     if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
     {
         logger().error("SpaceServer::addBlockEntityNodes - Map not found!");
-        return;	
+        return;
     }
     SpaceMap* theMap=spaceMaps[spaceMapHandle];
 
     vector<opencog::spatial::BlockEntity*>::iterator it = theMap->newAppearBlockEntityList.begin();
-    opencog::spatial::BlockEntity* entity;
+	opencog::spatial::BlockEntity* entity;
 
 
     for (; it != theMap->newAppearBlockEntityList.end(); ++it)
@@ -741,7 +741,7 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
         atomspace->set_STI(entity->mEntityNode, 10000);
 
         bool addit = true;
-        HandleSeq::const_iterator it;
+		HandleSeq::const_iterator it;
         for (it = toUpdateHandles.begin(); it != toUpdateHandles.end(); ++ it) {
             if ((Handle)(*it) == entity->mEntityNode) { addit = false; break; }
         }
@@ -751,6 +751,7 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
 
     theMap->newAppearBlockEntityList.clear();
 }
+
 
 // add blocklist to an entity
 void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp,Handle spaceMapHandle)

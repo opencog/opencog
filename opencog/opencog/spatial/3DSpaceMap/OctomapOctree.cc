@@ -88,7 +88,8 @@ void OctomapOcTree::addSolidBlock(Block3D* block)
 		logger().error("There has been a block at %f,%f,%f. Can't add solid block.",pos.x,pos.y,pos.z);
 		return;
 	}
-
+	
+	
 	this->updateNode(pos.x,pos.y,pos.z,true);
 	this->setNodeBlock(pos.x,pos.y,pos.z,block);
 }
@@ -133,9 +134,9 @@ BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& pos, Block3
                         continue;
                     BlockVector nextPos(pos.x + i, pos.y + j, pos.z + k);
                     if ( checkIsSolid(nextPos,neighbourBlock))
-						{
-							return nextPos;
-						}
+					{
+						return nextPos;
+					}
                 }
 	
 	return BlockVector::ZERO;

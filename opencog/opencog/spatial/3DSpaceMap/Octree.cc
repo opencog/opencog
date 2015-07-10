@@ -133,7 +133,7 @@ void Octree::addSolidBlock(Block3D * _block, bool byKnownIndexes, int _x, int _y
         }
         else
         {
-            int count = 0;
+            unsigned count = 0;
             while(true)
             {
                 if (count++ > mOctree3DMapManager->getTotalDepthOfOctree())
@@ -352,7 +352,7 @@ Octree* Octree::getParentTreeOfBlock(Block3D* _block, int& x, int& y, int& z, bo
 {
     Octree* tree = this;
 
-    int count = 0;
+    unsigned count = 0;
     while(true)
     {
         if (count++ > mOctree3DMapManager->getTotalDepthOfOctree())

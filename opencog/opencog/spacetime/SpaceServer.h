@@ -127,7 +127,7 @@ public:
      * just get it and set it to be the current map, 
      * not to create a new spaceMap
      */
-    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, unsigned resolution, int _floorHeight);
 
     /**
      * comment@20150520 by YiShan
@@ -215,7 +215,6 @@ public:
      *  add all the newly constructed BlockEntity nodes to the atomspace
      */
     void addBlockEntityNodes(HandleSeq &toUpdateHandles, Handle spaceMapHandle);
-
     /**
      *  add blocklist to an entity
      */

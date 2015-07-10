@@ -38,119 +38,11 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight):
-    mMapName(_mapName), mFloorHeight(_floorHeight)
-{
-    // We now allow the whole space not to be a cube (Because our new Unity Embodiment will use real minecraft maps which are usually not cubes)
-    // Root octree has a depth of 1, everytime it splits, the depth ++
-    // So till the deepest octree every block in it is a unit block
-    // So we can calculate the mTotalDepthOfOctree from the sizes of the edges of the map
-    // how many unit per edge in this space, indicating the size of the whole space
-
-    mTotalDepthOfOctree = 0;
-    int size = 1;
-
-    //default agent height is 1
-    mAgentHeight = 1;
-
-    // get the biggest edge among x, y ,z
-    int offSet = _xDim;
-    if (_yDim > offSet)
-        offSet = _yDim;
-    if (_zDim > offSet)
-        offSet = _zDim;
-
-    while (true)
-		{
-			size *= 2;
-			++ mTotalDepthOfOctree;
-			if (size >= offSet)
-				break;
-		}
-
-    BlockVector rootPoint(_xMin,_yMin,_zMin);
-
-    mRootOctree = new Octree(this, rootPoint);
-
-    mAllUnitAtomsToBlocksMap.clear();
-    mBlockEntityList.clear();
-    mAllNoneBlockEntities.clear();
-    mPosToNoneBlockEntityMap.clear();
-
-    hasPerceptedMoreThanOneTimes = false;
-
-    selfAgentEntity = 0;
-
-    updateBlockEntityList.clear();
-	newDisappearBlockEntityList.clear();
-	newAppearBlockEntityList.clear();
-    nonBlockEntitieshistoryLocations.clear();
-
-    enable_BlockEntity_Segmentation = false;
-
-	//            config().get_bool("ENABLE_BLOCKENTITY_SEGMENTATION");
-
-    int i = 0;
-    i ++;
-
-
-
-    /*
-#ifdef HAVE_ZMQ
-    // set up the zmq socket to communicate with the learning server
-    this->zmqLSContext = new zmq::context_t(1);
-    this->socketLSFromLS = new zmq::socket_t(*zmqLSContext, ZMQ_PULL);
-    this->socketSendToLS = new zmq::socket_t(*zmqLSContext, ZMQ_PUSH);
-    this->toLSIP = config().get("LEARNING_SERVER_PULL_IP");
-    this->toLSPort = config().get("LEARNING_SERVER_PULL_PORT");
-    this->fromLSIP = config().get("LEARNING_SERVER_PUSH_IP");
-    this->fromLSPort = config().get("LEARNING_SERVER_PUSH_PORT");
-    string toLSAddress = "tcp://" + this->toLSIP + ":" + this->toLSPort;
-    string fromLSAddress = "tcp://" + this->fromLSIP + ":" + this->fromLSPort;
-    this->socketSendToLS->connect(toLSAddress.c_str());
-    this->socketLSFromLS->connect(fromLSAddress.c_str());
-#endif // HAVE_ZMQ
-    this->enableStaticsMapLearning = config().get_bool("ENABLE_STATICS_MAP_LEARNING");
-	*/
-}
-
-
 Octree3DMapManager::Octree3DMapManager(const std::string& mapName,const unsigned& resolution, const int floorHeight):
     mMapName(mapName), mFloorHeight(floorHeight)
 {
+
 	mOctomapOctree = new OctomapOcTree(resolution);
-    // We now allow the whole space not to be a cube (Because our new Unity Embodiment will use real minecraft maps which are usually not cubes)
-    // Root octree has a depth of 1, everytime it splits, the depth ++
-    // So till the deepest octree every block in it is a unit block
-    // So we can calculate the mTotalDepthOfOctree from the sizes of the edges of the map
-    // how many unit per edge in this space, indicating the size of the whole space
-	/*
-    mTotalDepthOfOctree = 0;
-    int size = 1;
-
-    //default agent height is 1
-    mAgentHeight = 1;
-
-    // get the biggest edge among x, y ,z
-    int offSet = _xDim;
-    if (_yDim > offSet)
-        offSet = _yDim;
-    if (_zDim > offSet)
-        offSet = _zDim;
-
-    while (true)
-    {
-        size *= 2;
-        ++ mTotalDepthOfOctree;
-        if (size >= offSet)
-            break;
-    }
-
-    BlockVector rootPoint(_xMin,_yMin,_zMin);
-
-    mRootOctree = new Octree(this, rootPoint);
-	*/
-
     mAllUnitAtomsToBlocksMap.clear();
     mBlockEntityList.clear();
     mAllNoneBlockEntities.clear();
@@ -221,7 +113,7 @@ Octree3DMapManager::~Octree3DMapManager()
 Octree3DMapManager* Octree3DMapManager::clone()
 {
 
-    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation, mTotalDepthOfOctree,mMapName, mRootOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,mMapBoundingBox,selfAgentEntity,
+    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity,
                                     mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,nonBlockEntitieshistoryLocations);
     return cloneMap;
 }
@@ -593,9 +485,6 @@ BlockEntity* Octree3DMapManager::findAllBlocksInBlockEntity(BlockVector& _pos)
         vector<Block3D*> blockList = mOctomapOctree->findAllBlocksCombinedWith(&_pos);
         blockList.push_back(block);
         block->mBlockEntity->addBlocks(blockList);
-
-        // entity->SortBlockOrder();
-
         return block->mBlockEntity;
     }
     else
@@ -603,10 +492,8 @@ BlockEntity* Octree3DMapManager::findAllBlocksInBlockEntity(BlockVector& _pos)
         BlockEntity* entity = new BlockEntity(this,*block);
 
         // find all the blocks combine with this block
-         vector<Block3D*> blockList = mOctomapOctree->findAllBlocksCombinedWith(&_pos);
-         entity->addBlocks(blockList);
-        // entity->SortBlockOrder();
-
+		vector<Block3D*> blockList = mOctomapOctree->findAllBlocksCombinedWith(&_pos);
+		entity->addBlocks(blockList);
         mBlockEntityList.insert(map<int,BlockEntity*>::value_type(entity->getEntityID(), entity));
         return entity;
     }
@@ -1158,7 +1045,7 @@ bool Octree3DMapManager::containsObject(const string& objectName) const
      return newMap;
      */
 
-     return new Octree3DMapManager("todo", 0,0,0,128,128,128,98);
+     return new Octree3DMapManager("todo", 1, 0);
  }
 
 
@@ -1356,17 +1243,22 @@ BlockVector Octree3DMapManager::getKnownSpaceDim() const
 
 
  // this constructor is only used for clone
-Octree3DMapManager::Octree3DMapManager(bool _enable_BlockEntity_Segmentation,int _TotalDepthOfOctree,string _MapName, Octree *_RootOctree, int _FloorHeight,
-                 int _AgentHeight,int _TotalUnitBlockNum,AxisAlignedBox &_MapBoundingBox,Entity3D *_selfAgentEntity,
-                 map<Handle, BlockVector> &_AllUnitAtomsToBlocksMap,map<BlockVector, Handle> &_AllUnitBlocksToAtomsMap,map<int, BlockEntity *> &_BlockEntityList,
-                 map<Handle, Entity3D *> &_AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations):
-                enable_BlockEntity_Segmentation(_enable_BlockEntity_Segmentation),mTotalDepthOfOctree(_TotalDepthOfOctree), mMapName(_MapName),mFloorHeight(_FloorHeight),
-                mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum), mMapBoundingBox(_MapBoundingBox), selfAgentEntity(_selfAgentEntity)
+Octree3DMapManager::Octree3DMapManager(
+	bool _enable_BlockEntity_Segmentation,
+	string _MapName, OctomapOcTree *_OctomapOctree, int _FloorHeight,
+	int _AgentHeight,int _TotalUnitBlockNum,Entity3D *_selfAgentEntity,
+	map<Handle, BlockVector> &_AllUnitAtomsToBlocksMap,
+	map<BlockVector, Handle> &_AllUnitBlocksToAtomsMap,
+	map<int, BlockEntity *> &_BlockEntityList,
+	map<Handle, Entity3D *> &_AllNoneBlockEntities,
+	map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations):
+                enable_BlockEntity_Segmentation(_enable_BlockEntity_Segmentation), mMapName(_MapName),mFloorHeight(_FloorHeight),
+                mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum), selfAgentEntity(_selfAgentEntity)
 
  {
     // the clone order should not be change here:
     // should always clone the octree before the entity list
-    mRootOctree = _RootOctree->clone(this);
+	 mOctomapOctree = new OctomapOcTree(*_OctomapOctree);
 
     // copy all unit blocks
     mAllUnitAtomsToBlocksMap = _AllUnitAtomsToBlocksMap;
@@ -1380,8 +1272,6 @@ Octree3DMapManager::Octree3DMapManager(bool _enable_BlockEntity_Segmentation,int
         BlockEntity* clonedEntity = ((BlockEntity*)(iter2->second))->clone(this);
         mBlockEntityList.insert(map<int,BlockEntity*>::value_type(iter2->first, clonedEntity));
     }
-
-    // clone all the SuperBlockEntities TODO
 
     // copy all the NoneBlockEntities and mPosToNoneBlockEntityMap and mAllAvatarList
     mAllNoneBlockEntities.clear();

@@ -80,11 +80,25 @@ namespace opencog
         class Octree3DMapManager
         {
         public:
-			Octree3DMapManager(std::string _mapName,int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
-			Octree3DMapManager(const std::string& mapName,const unsigned& resolution, const int floorHeight);
+			Octree3DMapManager(const string& mapName,const unsigned& resolution, const int floorHeight);
             ~Octree3DMapManager();
             // deep clone this octree3DMapManager and return the new instance
             Octree3DMapManager* clone();
+
+			/**
+			 *   getter/setter
+			 */
+
+			
+            inline int getFloorHeight() const {return mFloorHeight;}
+            inline string getMapName() const {return mMapName;}
+            inline int getAgentHeight() const {return mAgentHeight;}
+            void setAgentHeight(int _height){mAgentHeight = _height;}
+            inline unsigned getTotalDepthOfOctree() const {return mOctomapOctree->getTreeDepth();}
+            inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
+			BlockVector getKnownSpaceMinCoord() const;
+			BlockVector getKnownSpaceMaxCoord() const;
+			BlockVector getKnownSpaceDim() const;
 
 			/**
 			 *  public member functions about Block add/remove/query
@@ -92,7 +106,7 @@ namespace opencog
 
 			void addSolidUnitBlock(
 				BlockVector _pos, 
-				const Handle &_unitBlockAtom = opencog::Handle::UNDEFINED,
+				const Handle &_unitBlockAtom,
 				string _materialType = "", string _color = "");
             void removeSolidUnitBlock(const Handle& blockNode);
             bool checkIsSolid(double x, double y, double z);
@@ -201,8 +215,9 @@ namespace opencog
 			}
 
 			/**
-			 *  member functions about computation about OctomapOctree
+			 *  member functions about computation using OctomapOctree
 			 */
+
             /**
              * Find a free point near a given position, at a given distance
              * @param position Given position
@@ -270,31 +285,23 @@ namespace opencog
 				const Entity3D* observer = 0 ) const;
             static string spatialRelationToString(SPATIAL_RELATION relation);
 
-			/**
-			 *   other getter/setter and deprecated function/member
-			 */
-
-            bool enable_BlockEntity_Segmentation;
-            bool hasPerceptedMoreThanOneTimes;
-
-            inline int getFloorHeight() const {return mFloorHeight;}
-            inline string getMapName() const {return mMapName;}
-            inline int getAgentHeight() const {return mAgentHeight;}
-            void setAgentHeight(int _height){mAgentHeight = _height;}
-            inline int getTotalDepthOfOctree() const {return mTotalDepthOfOctree;}
-            inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
-			BlockVector getKnownSpaceMinCoord() const;
-			BlockVector getKnownSpaceMaxCoord() const;
-			BlockVector getKnownSpaceDim() const;
 
             /**
-             * TODO: Persistence
+             * function for saving file; but not finished
              */
             void save(FILE* fp ){};
             void load(FILE* fp ){};
 
             static std::string toString( const Octree3DMapManager& map );
             static Octree3DMapManager* fromString( const std::string& map );
+
+			/**
+			 *  parameter for old embodiment.
+			 */
+
+            bool enable_BlockEntity_Segmentation;
+            bool hasPerceptedMoreThanOneTimes;
+
 
 			/*
 			  Dead interface
@@ -307,26 +314,20 @@ namespace opencog
 			 */
         protected:
 
-            int mTotalDepthOfOctree;
-
             std::string     mMapName;
 
             Octree*         mRootOctree;
 			OctomapOcTree*  mOctomapOctree;
-            // Root octree has a depth of 1, everytime it splits, the depth ++
-            // So till the deepest octree every block in it is a unit block
 
             int             mFloorHeight; // the z of the floor
             int             mAgentHeight;
             int             mTotalUnitBlockNum;
             static const int AccessDistance = 2;
-            // it's not the boundingbox for the map, not for the octree,
-            // an octree boundingbox is usually a cube, but the map is not necessary to be a cube
-            AxisAlignedBox mMapBoundingBox;
 
             Entity3D* selfAgentEntity;
 
-            // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
+            // We keep these 2 map for quick search. 
+			//Memory consuming: 50k blocks take about 10M RAM for one map
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
             map<BlockVector,Handle> mAllUnitBlocksToAtomsMap;
 
@@ -350,8 +351,8 @@ namespace opencog
             void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
-            Octree3DMapManager(bool _enable_BlockEntity_Segmentation, int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
-                               int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
+            Octree3DMapManager(bool _enable_BlockEntity_Segmentation, string  _MapName,OctomapOcTree* _OctomapOctree, int _FloorHeight, int _AgentHeight,
+                               int _TotalUnitBlockNum,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
                                Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations);
 
