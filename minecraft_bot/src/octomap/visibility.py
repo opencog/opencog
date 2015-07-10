@@ -16,12 +16,12 @@ from sys import argv
 import time
 
 # radius of vision
-MAX_DIST = 6
+MAX_DIST = 10
 
 # step size
-D_DIST 	 = 2
-D_PITCH  = 15
-D_YAW 	 = 15
+D_DIST 	 = 1.
+D_PITCH  = 15.
+D_YAW 	 = 15.
 
 # angles cover range theta - R_THETA to theta + R_THETA
 R_PITCH = 60
@@ -69,56 +69,103 @@ def calcRayStep(pitch, yaw, dist):
     pt = radians(pitch)
     yw = radians(yaw)
 
-    dx = -(dist*cos(pt))*sin(yw)
+    if pt < pi/2 and pt > -pi/2:
+        dx = -(dist*cos(pt))*sin(yw)
+        dz = (dist*cos(pt))*cos(yw)
+    else:
+        dx = (dist*cos(pt))*sin(yw)
+        dz = -(dist*cos(pt))*cos(yw)
+ 
     dy = -dist*sin(pt)
-    dz = (dist*cos(pt))*cos(yw)
-
+    #dz = (dist*cos(pt))*cos(yw)
+    
+    if pitch == 20 and yaw == -127:
+        print dx, dy, dz
+    
     return dx, dy, dz
 
 
 def createVec3Msg(coords, step, num_steps):
     msg = vec3_msg()
+    
+    #print "%f, %f, %f"%(coords[0], coords[1], coords[2])
 
-    msg.x = coords[0] + step[0]*num_steps
-    msg.y = coords[1] + step[1]*num_steps
-    msg.z = coords[2] + step[2]*num_steps
+    msg.x = floor(coords[0] + step[0]*num_steps)
+    msg.y = floor(coords[1] + step[1]*num_steps)
+    msg.z = floor(coords[2] + step[2]*num_steps)
+
+    #print "x %f, y %f, z %f"%(msg.x, msg.y, msg.z)
 
     return msg
 
 
 def getCoordinatesInRange(x, y, z, pitch, yaw):
     
-    all_coords = []
-    pitch = int(pitch)
-    yaw = int(yaw)
+    #all_coords = []
+    #pitch = int(pitch)
+    #yaw = int(yaw)
     
-    pit_range = xrange(pitch - R_PITCH, pitch + R_PITCH + 1, D_PITCH)
-    yaw_range = xrange(yaw - R_YAW, yaw + R_YAW + 1, D_YAW)
-    step_range = xrange(MAX_DIST + 1)
-
+    pit_range = np.arange(pitch - R_PITCH, pitch + R_PITCH + D_PITCH, D_PITCH)
+    yaw_range = np.arange(yaw - R_YAW, yaw + R_YAW + D_YAW, D_YAW)
+    num_steps = np.arange(0, int(MAX_DIST/D_DIST) + D_DIST)
+    
+    #print pit_range
+    #print yaw_range
+    #print num_steps
+    
     # ROS messages only support 1-D arrays...
     ray_steps = [calcRayStep(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
-    all_coords = [createVec3Msg((x,y,z), step, num) for step in ray_steps for num in step_range]
     
+    #print ray_steps
+
+    #params = [(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
+
+    #count = 0
+    #for item in params:
+    #    count+=1
+    #    print count
+    #    print item
+
+    #coords = [(x+step[0]*num, y+step[1]*num, z+step[2]*num) for step in ray_steps for num in num_steps]
+    
+    all_coords = [createVec3Msg((x,y,z), step, num) for step in ray_steps for num in num_steps]
     return all_coords
 
 
 def getVisibleBlocks(blocks):
     
-    start = time.time()
+    #start = time.time()
     vis_blocks = {}
  
-    p_jump = (2*R_PITCH)/(D_PITCH) + 1
-    y_jump = (2*R_YAW)/(D_YAW) + 1
-    d_jump = MAX_DIST + 1
+    p_jump = int((2*R_PITCH)/D_PITCH) + 1
+    y_jump = int((2*R_YAW)/D_YAW) + 1
+    d_jump = int((MAX_DIST)/D_DIST) + 1
    
+    #print p_jump
+    #print y_jump
+    #print d_jump
+    
+    #print len(blocks)
+
     blocks3D = np.reshape(np.array(blocks), (p_jump, y_jump, d_jump))
     
+    #count = 0
+    #for ylist in blocks3D:
+    #    for dlist in ylist:
+    #        print ''
+    #        count+=1
+    #        print count
+    #        for item in dlist:
+    #            print "(%d, %d, %d)"%(item.x, item.y, item.z)
+
     for y_list in blocks3D:
         for d_list in y_list:
+            #print ""
             for block in d_list:
                 
                 xyz = (block.x, block.y, block.z)
+
+                #print xyz
                 bid = block.blockid
 
                 if (bid == 0):
@@ -128,7 +175,6 @@ def getVisibleBlocks(blocks):
                 elif xyz not in vis_blocks:
                     #print "bid: %d"%bid
                     #print "new block. adding to list"
-                    
                     vis_blocks[xyz] = block
                     
                     if isSolid(bid):
@@ -138,12 +184,12 @@ def getVisibleBlocks(blocks):
                 
                 elif isSolid(vis_blocks[xyz].blockid):
                     #print "bid: %d"%bid
-                    #print "found block: %d already at these coordinates"%vis_blocks[coords].blockid
+                    #print "found block: %d already at these coordinates"%vis_blocks[xyz].blockid
                     break
     
     vis_blocks_list = vis_blocks.values()
 
-    end = time.time()
+    #end = time.time()
     print "total: %f"%(end-start)
     
     return vis_blocks_list

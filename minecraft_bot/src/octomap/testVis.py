@@ -26,6 +26,6 @@ def testVisibleBlocksClient(x, y, z, pitch, yaw):
 
 if __name__ == "__main__":
 
-        blocks = testVisibleBlocksClient(-29.2, 14, -39, 20.3, -92)
+        blocks = testVisibleBlocksClient(-29.2, 14, -41, 20.3, -92)
         print blocks
 
