@@ -35,9 +35,9 @@
                        ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query ")
                        ;;(truth_query_process querySentence)
                        (display "I can't process truth query for now"))
-                       ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You made an Interrogative SpeechAct")
+                       ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You made an Interrogative SpeechAct ")
                        (wh_query_process query))
-                       ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")(display "You made a Declarative SpeechAct"))
+                       ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")(display "You made a Declarative SpeechAct "))
                        (else (display "Sorry,I don't know the type"))
          )
 )
@@ -55,9 +55,13 @@
 ; process wh-question using the fuzzy hyper graph Matcher
 ;----------------------------------------------------------------------------------------------
 (define (wh_query_process query)
-    (get-similar-sentences query)
-)
+(define temp)
+(set! temp  (get-similar-sentences query))
+(cond
 
+                ((equal? #f (car temp)) "Sorry, I don't know the answer")
+                (else (car temp))
+))
 ;---------------------------------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward chaining
 ; Example : if the query is "is Matthew a student?"
