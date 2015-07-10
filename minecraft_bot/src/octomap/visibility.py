@@ -77,10 +77,6 @@ def calcRayStep(pitch, yaw, dist):
         dz = -(dist*cos(pt))*cos(yw)
  
     dy = -dist*sin(pt)
-    #dz = (dist*cos(pt))*cos(yw)
-    
-    if pitch == 20 and yaw == -127:
-        print dx, dy, dz
     
     return dx, dy, dz
 
@@ -88,22 +84,17 @@ def calcRayStep(pitch, yaw, dist):
 def createVec3Msg(coords, step, num_steps):
     msg = vec3_msg()
     
-    #print "%f, %f, %f"%(coords[0], coords[1], coords[2])
 
     msg.x = floor(coords[0] + step[0]*num_steps)
     msg.y = floor(coords[1] + step[1]*num_steps)
     msg.z = floor(coords[2] + step[2]*num_steps)
 
-    #print "x %f, y %f, z %f"%(msg.x, msg.y, msg.z)
+    #print "x: %d, y: %d, z: %d"%(msg.x, msg.y, msg.z)
 
     return msg
 
 
 def getCoordinatesInRange(x, y, z, pitch, yaw):
-    
-    #all_coords = []
-    #pitch = int(pitch)
-    #yaw = int(yaw)
     
     pit_range = np.arange(pitch - R_PITCH, pitch + R_PITCH + D_PITCH, D_PITCH)
     yaw_range = np.arange(yaw - R_YAW, yaw + R_YAW + D_YAW, D_YAW)
@@ -115,18 +106,6 @@ def getCoordinatesInRange(x, y, z, pitch, yaw):
     
     # ROS messages only support 1-D arrays...
     ray_steps = [calcRayStep(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
-    
-    #print ray_steps
-
-    #params = [(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
-
-    #count = 0
-    #for item in params:
-    #    count+=1
-    #    print count
-    #    print item
-
-    #coords = [(x+step[0]*num, y+step[1]*num, z+step[2]*num) for step in ray_steps for num in num_steps]
     
     all_coords = [createVec3Msg((x,y,z), step, num) for step in ray_steps for num in num_steps]
     return all_coords
@@ -144,20 +123,9 @@ def getVisibleBlocks(blocks):
     #print p_jump
     #print y_jump
     #print d_jump
-    
-    #print len(blocks)
 
     blocks3D = np.reshape(np.array(blocks), (p_jump, y_jump, d_jump))
     
-    #count = 0
-    #for ylist in blocks3D:
-    #    for dlist in ylist:
-    #        print ''
-    #        count+=1
-    #        print count
-    #        for item in dlist:
-    #            print "(%d, %d, %d)"%(item.x, item.y, item.z)
-
     for y_list in blocks3D:
         for d_list in y_list:
             #print ""
