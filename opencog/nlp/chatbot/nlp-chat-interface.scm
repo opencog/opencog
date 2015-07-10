@@ -32,13 +32,14 @@
         (display query)
         (newline)
         (cond
-                ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query ")
-                ;;(truth_query_process querySentence)
-                (display "I can't process truth query for now"))
-                ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You ask an InterrogativeSpeechAct")
-                (wh_query_process query))
-                (else (display "you made a statement"))
-        )
+                       ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")(display "You ask a Truth Query ")
+                       ;;(truth_query_process querySentence)
+                       (display "I can't process truth query for now"))
+                       ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")(display "You made an Interrogative SpeechAct")
+                       (wh_query_process query))
+                       ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")(display "You made a Declarative SpeechAct"))
+                       (else (display "Sorry,I don't know the type"))
+         )
 )
 ;----------------------------------------------------------------------------------------------
 ;Use backward chaning to process 'yes-or-no' question
