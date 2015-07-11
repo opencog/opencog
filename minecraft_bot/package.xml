@@ -47,6 +47,7 @@
   <build_depend>octomap_ros</build_depend>
   <build_depend>octomap_msgs</build_depend>
   <build_depend>octomap_server</build_depend>
+  <build_depend>sensor_msgs</build_depend>
  
 
   <run_depend>roscpp</run_depend>
@@ -57,6 +58,7 @@
   <run_depend>octomap_ros</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_server</run_depend>
+  <run_depend>sensor_msgs</run_depend>
  
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -49,7 +49,6 @@ find_package(octomap
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
-   
    vec3_msg.msg
    movement_msg.msg
    mine_block_msg.msg
@@ -107,6 +106,7 @@ catkin_package(
   	roscpp
 	rospy
 	std_msgs
+	sensor_msgs
 	message_runtime
   DEPENDS
   	system_lib
@@ -134,6 +134,9 @@ link_libraries(${OCTOMAP_LIBRARIES})
 
 ## Declare a cpp executable
 # add_executable(minecraft_bot_node src/minecraft_bot_node.cpp)
+
+add_executable(octonode src/octomap/octonode.cc)
+target_link_libraries(octonode ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
