@@ -12,6 +12,8 @@ def find_conflict_links(
         duplicate_links_list,
         check_type, strength_diff_limit, confidence_above_limit
 ):
+    # TODO: Currently, this method can handle
+    # when the number of decided atom is only 2.
     conflict_links = []
     non_conflict_links = []
 
@@ -21,33 +23,12 @@ def find_conflict_links(
 
         if not a[link_0.h].is_a(check_type):
             non_conflict_links.append(duplicate_links)
-
-        if abs(link_0.tv.mean - link_1.tv.mean) > strength_diff_limit:
+        elif abs(link_0.tv.mean - link_1.tv.mean) > strength_diff_limit:
             if link_0.tv.confidence > confidence_above_limit:
                 if link_1.tv.confidence > confidence_above_limit:
                     conflict_links.append(duplicate_links)
-
-        """
-        # TODO: Currently, this method can handle
-        # when the number of decided atom is only 2.
-        conflict_links = []
-        non_conflict_links = []
-
-        pair_links = itertools.combinations(duplicate_links, 2)
-        for pair_link in pair_links:
-            link_0 = pair_link[0]
-            link_1 = pair_link[1]
-
-            # TODO: mean is strength?
-            strength_diff = abs(link_0.tv.mean - link_1.tv.mean)
-            if strength_diff > self.strength_diff_limit and \
-               link_0.tv.confidence > self.confidence_above_limit and \
-               link_1.tv.confidence > self.confidence_above_limit:
-                conflict_links.append(pair_link)
-            else:
-                non_conflict_links.append(pair_link)
-        """
-        non_conflict_links.append(duplicate_links)
+        else:
+            non_conflict_links.append(duplicate_links)
 
     return conflict_links, non_conflict_links
 
