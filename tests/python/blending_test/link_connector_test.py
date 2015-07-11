@@ -76,7 +76,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -84,7 +84,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -92,7 +92,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:link-connector"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -157,7 +157,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -165,7 +165,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -173,7 +173,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:link-connector"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -235,7 +235,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have difference value above 0.9 of strength.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"
@@ -292,7 +292,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have difference value above 0.01 of strength.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"
@@ -358,7 +358,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have confidence value above 0.9 both.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-confidence-above-limit"
@@ -415,7 +415,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have confidence value above 0.4 both.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-confidence-above-limit"
@@ -486,7 +486,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -494,7 +494,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -502,7 +502,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:link-connector"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -526,7 +526,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have difference value above 0.9 of strength.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"
@@ -547,7 +547,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have difference value above 0.01 of strength.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"
@@ -571,7 +571,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have confidence value above 0.9 both.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"
@@ -592,7 +592,7 @@ class TestLinkConnector(TestConceptualBlendingBase):
         # Test blender thinks links are conflict
         # if they have confidence value above 0.4 both.
         connect_strength_diff_limit_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:connect-strength-diff-limit"

@@ -187,7 +187,7 @@ class TestConceptualBlendingBase(object):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "default-config"),
@@ -195,7 +195,7 @@ class TestConceptualBlendingBase(object):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "default-config"),
@@ -203,7 +203,7 @@ class TestConceptualBlendingBase(object):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:new-blend-atom-maker"),
                 self.a.add_node(types.ConceptNode, "default-config"),
@@ -211,7 +211,7 @@ class TestConceptualBlendingBase(object):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:link-connector"),
                 self.a.add_node(types.ConceptNode, "default-config"),

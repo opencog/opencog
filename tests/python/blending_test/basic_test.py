@@ -107,7 +107,7 @@ class TestBasicFunctions(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),

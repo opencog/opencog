@@ -49,25 +49,25 @@ InheritanceLink(
     ConceptNode("BLEND")
 )
 
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:atoms-chooser"),
     ConceptNode("my-config"),
     ConceptNode("ChooseInSTIRange")
 )
 
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:choose-sti-min"),
     ConceptNode("my-config"),
     ConceptNode("12")
 )
 
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:blending-decider"),
     ConceptNode("my-config"),
     ConceptNode("DecideRandom")
 )
 
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:decide-result-atoms-count"),
     ConceptNode("my-config"),
     ConceptNode("2")

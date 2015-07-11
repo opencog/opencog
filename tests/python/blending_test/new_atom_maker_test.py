@@ -76,7 +76,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -84,7 +84,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -92,7 +92,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:new-blend-atom-maker"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -108,7 +108,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
 
         # Test blender makes new node with custom name.
         make_atom_prefix_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:make-atom-prefix"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -116,7 +116,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
             ]
         )
         make_atom_separator_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:make-atom-separator"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -124,7 +124,7 @@ class TestNewBlendAtomMaker(TestConceptualBlendingBase):
             ]
         )
         make_atom_postfix_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:make-atom-postfix"),
                 self.a.add_node(types.ConceptNode, "my-config"),

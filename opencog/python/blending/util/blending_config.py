@@ -232,7 +232,7 @@ class ExecuteLinkFactory:
     def __create_put_link(self, config_dict):
         """
         PutLink
-            ListLink
+            ExecutionLink
                 ConceptNode <BLEND:config_name>
                 ConceptNode <Config Base>
                 VariableNode $X
@@ -251,8 +251,8 @@ class ExecuteLinkFactory:
         )
         free_var_list = self.a.add_link(types.VariableList, [free_var])
 
-        list_link = self.a.add_link(
-            types.ListLink,
+        execution_link = self.a.add_link(
+            types.ExecutionLink,
             [
                 self.__get_prefixed_config_name(config_name),
                 config_base,
@@ -260,10 +260,10 @@ class ExecuteLinkFactory:
             ]
         )
 
-        put_link = self.a.add_link(types.PutLink, [list_link, config])
+        put_link = self.a.add_link(types.PutLink, [execution_link, config])
         return dict(
             execute_link=put_link,
-            to_remove_links=[free_var, free_var_list, list_link]
+            to_remove_links=[free_var, free_var_list, execution_link]
         )
 
     def __create_get_link(self, config_dict):
@@ -271,7 +271,7 @@ class ExecuteLinkFactory:
         GetLink
             VariableList
                 VariableNode $X
-            ListLink
+            ExecutionLink
                 ConceptNode <BLEND:config_name>
                 ConceptNode <Config Base>
                 VariableNode $X
@@ -284,8 +284,8 @@ class ExecuteLinkFactory:
         )
         free_var_list = self.a.add_link(types.VariableList, [free_var])
 
-        list_link = self.a.add_link(
-            types.ListLink,
+        execution_link = self.a.add_link(
+            types.ExecutionLink,
             [
                 self.__get_prefixed_config_name(config_name),
                 config_base,
@@ -293,17 +293,17 @@ class ExecuteLinkFactory:
             ]
         )
 
-        get_link = self.a.add_link(types.GetLink, [free_var_list, list_link])
+        get_link = self.a.add_link(types.GetLink, [free_var_list, execution_link])
         return dict(
             execute_link=get_link,
-            to_remove_links=[free_var, free_var_list, list_link, get_link]
+            to_remove_links=[free_var, free_var_list, execution_link, get_link]
         )
 
     def __create_del_link(self, config_dict):
         """
         PutLink
             DeleteLink
-                ListLink
+                ExecutionLink
                     ConceptNode <BLEND:config_name>
                     ConceptNode <Config Base>
                     VariableNode $X
@@ -318,8 +318,8 @@ class ExecuteLinkFactory:
         )
         free_var_list = self.a.add_link(types.VariableList, [free_var])
 
-        list_link = self.a.add_link(
-            types.ListLink,
+        execution_link = self.a.add_link(
+            types.ExecutionLink,
             [
                 self.__get_prefixed_config_name(config_name),
                 config_base,
@@ -327,11 +327,11 @@ class ExecuteLinkFactory:
             ]
         )
 
-        del_link = self.a.add_link(types.DeleteLink, [list_link])
+        del_link = self.a.add_link(types.DeleteLink, [execution_link])
         put_link = self.a.add_link(types.PutLink, [del_link, config])
         return dict(
             execute_link=put_link,
-            to_remove_links=[free_var, free_var_list, list_link, del_link]
+            to_remove_links=[free_var, free_var_list, execution_link, del_link]
         )
 
     def __create_inheritance_link(self, config_dict):
@@ -350,14 +350,14 @@ class ExecuteLinkFactory:
         )
         free_var_list = self.a.add_link(types.VariableList, [free_var])
 
-        list_link = self.a.add_link(
+        execution_link = self.a.add_link(
             types.InheritanceLink, [config_base, free_var]
         )
 
-        get_link = self.a.add_link(types.GetLink, [free_var_list, list_link])
+        get_link = self.a.add_link(types.GetLink, [free_var_list, execution_link])
         return dict(
             execute_link=get_link,
-            to_remove_links=[free_var, free_var_list, list_link]
+            to_remove_links=[free_var, free_var_list, execution_link]
         )
 
     def create(self, call_type, config_dict):

@@ -76,7 +76,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -84,7 +84,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -134,7 +134,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -142,7 +142,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -178,7 +178,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
 
         # Test blender limits count of result nodes correctly.
         decide_result_atoms_count_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:decide-result-atoms-count"
@@ -221,7 +221,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -249,7 +249,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
 
         # Test blender limits count of result nodes correctly.
         decide_result_atoms_count = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode,
                                 "BLEND:decide-result-atoms-count"
@@ -278,7 +278,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
 
         # Test blender limits sti value correctly.
         decide_sti_min_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:decide-sti-min"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -298,7 +298,7 @@ class TestBlendingDecider(TestConceptualBlendingBase):
 
         # Test blender limits sti value correctly.
         decide_sti_max_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:decide-sti-max"),
                 self.a.add_node(types.ConceptNode, "my-config"),

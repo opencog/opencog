@@ -32,7 +32,7 @@ BLEND:link-connector        | Define rules to connect links to new blend atom.
 
 ##### Structure
 ```
-ListLink
+ExecutionLink
     SchemaNode  "algorithm category"
     ConceptNode "my config name"
     ConceptNode "algorithm name to use"
@@ -73,9 +73,8 @@ ConnectConflictRandom | Make new links from whole non-conflict links, and random
 ConnectConflictAllViable | Make 2^k available(viable) new blend atoms if there exists k conflicts.     
 
 ##### Example
-
 ```python
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:atoms-chooser"),
     ConceptNode("my-config"),
     ConceptNode("ChooseInSTIRange")
@@ -86,7 +85,7 @@ ListLink(
 
 ##### Structure
 ```
-ListLink
+ExecutionLink
     SchemaNode  "algorithm name"
     ConceptNode "my config name"
     ConceptNode "value"
@@ -150,14 +149,13 @@ BLEND:connect-confidence-above-limit   | 0.7
 BLEND:connect-viable-atoms-count-limit | 100
 
 ##### Example
-
 ```python
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:choose-sti-min"),
     ConceptNode("my-config"),
     ConceptNode("12")
 )
-ListLink(
+ExecutionLink(
     SchemaNode("BLEND:blending-decider"),
     ConceptNode("my-config"),
     ConceptNode("DecideRandom")

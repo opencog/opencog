@@ -76,7 +76,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -134,7 +134,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -200,7 +200,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node type correctly.
         choose_atom_type_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-atom-type"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -216,7 +216,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node type correctly.
         choose_atom_type_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-atom-type"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -244,7 +244,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender checks node count correctly.
         choose_least_count_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-least-count"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -260,7 +260,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender checks node count correctly.
         choose_least_count_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-least-count"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -287,7 +287,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
             ]
         )
         self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -329,7 +329,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node type correctly.
         choose_atom_type_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-atom-type"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -345,7 +345,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node type correctly.
         choose_atom_type_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-atom-type"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -373,7 +373,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node count correctly.
         choose_least_count_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-least-count"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -389,7 +389,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits node count correctly.
         choose_least_count_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-least-count"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -409,7 +409,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits sti value correctly.
         choose_sti_min_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-sti-min"),
                 self.a.add_node(types.ConceptNode, "my-config"),
@@ -435,7 +435,7 @@ class TestAtomsChooser(TestConceptualBlendingBase):
 
         # Test blender limits sti value correctly.
         choose_sti_max_link = self.a.add_link(
-            types.ListLink,
+            types.ExecutionLink,
             [
                 self.a.add_node(types.SchemaNode, "BLEND:choose-sti-max"),
                 self.a.add_node(types.ConceptNode, "my-config"),
