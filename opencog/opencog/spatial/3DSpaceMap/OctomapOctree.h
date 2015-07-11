@@ -38,6 +38,8 @@
 #include <iostream>
 #include <octomap/OcTreeNode.h>
 #include <octomap/OccupancyOcTreeBase.h>
+
+#include <opencog/atomspace/Handle.h>
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
@@ -52,9 +54,9 @@ namespace opencog
 		class OctomapOcTreeNode : public OcTreeNode
 		{
 		public:
-		    OctomapOcTreeNode() : OcTreeNode(), _block(NULL) {}
+    		OctomapOcTreeNode() : OcTreeNode(), mblockHandle(Handle::UNDEFINED){}
 			OctomapOcTreeNode(const OctomapOcTreeNode& rhs);
-			~OctomapOcTreeNode(){ delete _block;}
+			~OctomapOcTreeNode(){}
 			OctomapOcTreeNode& operator=(const OctomapOcTreeNode& rhs);
 			// children
 			inline OctomapOcTreeNode* getChild(unsigned int i) 
@@ -73,24 +75,24 @@ namespace opencog
 				return true;
 			}
 
-			void setBlock(Block3D *const & block)
+			void setBlock(const Handle& blockHandle)
 			{
-				_block=block;
+				mblockHandle=blockHandle;
 			}
 
-			const Block3D* getBlock() const
+			const Handle getBlock() const
 			{
-				return _block;
+				return mblockHandle;
 			}
 
-			Block3D* getBlock()
+			Handle getBlock()
 			{
-				return _block;
+				return mblockHandle;
 			}
 
 			void cloneNodeRecur(const OctomapOcTreeNode& rhs);
 		private:
-			Block3D* _block;
+			Handle mblockHandle;
 		};
 
 		// tree definition
@@ -108,28 +110,23 @@ namespace opencog
 			std::string getTreeType() const {return "OctomapOcTree";}
    
 			// set node color at given key or coordinate. Replaces previous color.
-			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, Block3D *const & block);
-			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,
-											const double& z, Block3D *const & block); 
-
-			OctomapOcTreeNode* setNodeBlock(const point3d& pos, Block3D *const & block);
+			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& blockHandle);
+			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& blockHandle); 
+			OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & blockHandle);
 
 			// Move the Opencog Octree legacy API here
-
-			// Add a block.This block is not necessary to be a unit block, it can be a bigger block
-			void addSolidBlock(Block3D * block);
-		
+			void addSolidBlock(const Handle& blockHandle);
 			//  Remove an unit block at a given position from the octree system
 			//  return false if block not exists.
 			bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
-			//  check if the block is in the unknown space
+			//  check if the block is out of octree's max size
 			bool checkIsOutOfRange(const BlockVector& pos) const;
 			
 			// Check whether this position has been filled by a solid block,
 			// Note that if the block is in the unknown space it'll also return false
 			// pos is input para, block is output para
 			// if solid, return the block in @ block
-			bool checkIsSolid(const BlockVector& pos, Block3D* & block) const;
+			bool checkIsSolid(const BlockVector& pos, Handle& block) const;
 
 
 			// find all the blocks combine with the block in pos,
@@ -142,7 +139,7 @@ namespace opencog
 		
 			// get any a Neighbour Solid BlockVector of curPos
 			// the neighbourBlock will return the block contains this neighbour BlockVector
-			BlockVector getNeighbourSolidBlockVector(BlockVector& pos , Block3D* &neighbourBlock);
+			BlockVector getNeighbourSolidBlockVector(const BlockVector& pos ,Handle& neighbourBlock);
 
 			// return all the neighbour sold BlockVector of curPos
 			vector<BlockVector> getAllNeighbourSolidBlockVectors(BlockVector& pos);

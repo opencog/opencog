@@ -2,11 +2,12 @@
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
 #include <opencog/util/Logger.h>
-
-
-#include "Block3D.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
 #include "Block3DMapUtil.h"
+#include "AtomSpaceMapUtil.h"
 #include "OctomapOctree.h"
+
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -14,15 +15,7 @@ using namespace octomap;
 
 void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
 {
-	if(rhs._block==NULL)
-	{
-		this->_block=NULL;
-	}
-	else
-	{
-		this->_block = (rhs._block)->clone();
-	}
-
+	mblockHandle=rhs.mblockHandle;
     if (rhs.hasChildren())
 	{
 		for (unsigned i = 0; i<8; ++i)
@@ -50,27 +43,27 @@ OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
 OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
 
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y,
-											   const double& z, Block3D *const & block) 
+											   const double& z, const Handle& blockHandle) 
 {
 	point3d pos(x,y,z);
-	return setNodeBlock(pos, block);
+	return setNodeBlock(pos, blockHandle);
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, Block3D *const & block) 
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& blockHandle) 
 {
 	OcTreeKey key;
 	if (!this->coordToKeyChecked(pos, key)) return NULL;
-	return setNodeBlock(key, block);
+	return setNodeBlock(key, blockHandle);
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, Block3D* const & block)
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& blockHandle)
 {
     OctomapOcTreeNode* n = search(key);
     if (n != NULL) 
 	{
-		n->setBlock(block); 
+		n->setBlock(blockHandle); 
     }
     return n;
 }
@@ -78,20 +71,18 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, Block3D* co
 //assume the block parameter has pointed to an block instance
 //But it seems no way to check if poitner is valid.
 //I think we should use smart pointer here, but that needs lots of refactor work..
-void OctomapOcTree::addSolidBlock(Block3D* block)
+void OctomapOcTree::addSolidBlock(const Handle& blockHandle, const BlockVector& pos)
 {
 	
-	BlockVector pos=block->getPosition();
 	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode!=NULL && blocknode->getBlock()!=NULL)
+	if(blocknode!=NULL && blocknode->getBlock()!=Handle::UNDEFINED)
 	{
 		logger().error("There has been a block at %f,%f,%f. Can't add solid block.",pos.x,pos.y,pos.z);
 		return;
 	}
 	
-	
 	this->updateNode(pos.x,pos.y,pos.z,true);
-	this->setNodeBlock(pos.x,pos.y,pos.z,block);
+	this->setNodeBlock(pos.x,pos.y,pos.z,blockHandle);
 }
 
 bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const 
@@ -100,13 +91,13 @@ bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const
 	return !coordToKeyChecked(pos.x,pos.y,pos.z,key);
 }
 
-bool OctomapOcTree::checkIsSolid(const BlockVector& pos, Block3D* & block) const
+bool OctomapOcTree::checkIsSolid(const BlockVector& pos, Handle& blockHandle) const
 {
 
 	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
 	if(blocknode==NULL || blocknode->getBlock()==NULL)
 	{
-		block=NULL;
+		block=Handle::UNDEFINED;
 		return false;
 	}
 	else
@@ -122,7 +113,7 @@ bool OctomapOcTree::removeAnUnitSolidBlock(const BlockVector& pos,unsigned depth
 	return this->deleteNode(pos.x,pos.y,pos.z,depth);
 }
 
-BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& pos, Block3D* &neighbourBlock)
+BlockVector OctomapOcTree::getNeighbourSolidBlockVector(const BlockVector& pos, Handle& neighbourBlock)
 {
     // check 26 neighbours
 
@@ -142,17 +133,17 @@ BlockVector OctomapOcTree::getNeighbourSolidBlockVector(BlockVector& pos, Block3
 	return BlockVector::ZERO;
 }
 
-vector<Block3D*> OctomapOcTree::findAllBlocksCombinedWith(BlockVector* pos, bool useBlockMaterial)
+HandleSeq OctomapOcTree::findAllBlocksCombinedWith(AtomSpace& atomspace, BlockVector* pos, bool useBlockMaterial)
 {
-    vector<Block3D*> blockList;
+    HandleSeq blockList;
     vector<BlockVector> searchList, searchedList;
     searchList.push_back(*pos);
 
     // check the 26 neighbours unit blockvectors of every block combined
     // by a breadth-first searching
     BlockVector curPos;
-    Block3D* curblock;
-    Block3D* nextBlock;
+    Handle curblock;
+    Handle nextBlock;
 
     while(searchList.size() != 0)
     {
@@ -172,12 +163,12 @@ vector<Block3D*> OctomapOcTree::findAllBlocksCombinedWith(BlockVector* pos, bool
 						if(find(searchedList.cbegin(),searchedList.cend(),nextPos)!=searchedList.cend())
 						{continue;}
 
-                        if (checkIsSolid(nextPos, nextBlock) && ( (!useBlockMaterial) || (nextBlock->getBlockMaterial() == curblock->getBlockMaterial())))
+                        if (checkIsSolid(nextPos, nextBlock) && ( (!useBlockMaterial) || getPredicateValue(atomspace,MATERIAL_PREDICATE,nextblock) == getPredicateValue(atomspace,MATERIAL_PREDICATE,curblock))))
                         {
 							if(find(searchList.cbegin(),searchList.cend(),nextPos)!=searchList.cend())
 							{searchList.push_back(nextPos);}
 
-                            if (nextBlock->mBlockEntity == 0 && find(blockList.cbegin(),blockList.cend(),nextBlock)!=blockList.cend())
+                            if (getBlockEntity(nextBlock) == Handle::UNDEFINED && find(blockList.cbegin(),blockList.cend(),nextBlock)!=blockList.cend())
 							{blockList.push_back(nextBlock);}		
                         }
                         else {searchedList.push_back(nextPos);}
@@ -196,7 +187,7 @@ vector<BlockVector> OctomapOcTree::getAllNeighbourSolidBlockVectors(BlockVector&
 {
     vector<BlockVector> vectorList;
 
-    Block3D* neighbourBlock;
+    Handle neighbourBlock;
 
     // check 26 neighbours
 
@@ -218,13 +209,13 @@ vector<BlockVector> OctomapOcTree::getAllNeighbourSolidBlockVectors(BlockVector&
 }
 
 
-vector<BlockEntity*> OctomapOcTree::getNeighbourEntities(BlockVector& pos)
+HandleSeq OctomapOcTree::getNeighbourEntities(BlockVector& pos,const AtomSpace& atomspace)
 {
-    vector<BlockEntity*> entities;
-    Block3D* beginBlock;
+    HandleSeq entities;
+    Handle beginBlock;
     checkIsSolid(pos, beginBlock);
     // check the 26 neighbours unit blockvectors of every block combined
-    Block3D* block;
+    Handle block;
 
     for (int i = -1; i < 2; i ++)
 	{
@@ -238,11 +229,12 @@ vector<BlockEntity*> OctomapOcTree::getNeighbourEntities(BlockVector& pos)
                 if (checkIsSolid(nextPos, block))
                 {
                     // there is a block in this neighbour pos
-                    if (block == beginBlock) {continue;}
-
                     // we don't contain the begin block in our return list
-					if(find(entities.cbegin(),entities.cend(),block->mBlockEntity)==entities.cend())
-					{entities.push_back(block->mBlockEntity);}
+                    if (block == beginBlock) {continue;}
+					Handle theBlockEntity=getBlockEntity(block);
+					if (theBlockEntity!=Handle::UNDEFINED &&
+						find(entities.cbegin(),entities.cend(),theBlockEntity)==entities.cend())
+					{entities.push_back(theBlockEntity);}
                 }
             }
 		}
