@@ -859,8 +859,8 @@ So, take a tcpdump:
    response from server:
    0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
 
--- so it looks like about every 8-10 packets are replied to failry quick,
-   then there's one that takes 0.025 seconds to reply.... stairsteps in
+-- so it looks like about every 8-10 packets are replied to fairly quick,
+   then there's one that takes 0.025 seconds to reply.... stair-steps in
    response time like this all the way through the capture.
 
 Wild guess:
@@ -940,4 +940,14 @@ writer does:
 am using boost-1.49 on cray
 
 ------------------------------------------
+
+Setup, July 2015
+----------------
+LXC container on gnucash.org
+
+AtomSpace.cc line 303
+
+
+LXC container on fanny
+----------------------
 
