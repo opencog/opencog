@@ -1,0 +1,25 @@
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/spatial/3DSpaceMap/AtomSpaceMapUtil.h>
+
+
+class AtomSpaceMapUtilUTest: public CXXTest::TestSuite
+{
+public:
+	void testGetBlockEntity()
+	{
+		AtomSpace testAtomSpace;
+		Handle testBlock1=testAtomSpace.add_node(STRUCTURE_NODE,"testblock1");
+		Handle testBlock2=testAtomSpace.add_node(STRUCTURE_NODE,"testblock2");
+		Handle testBlockEntity=testAtomSpace.add_node(BLOCK_ENTITY_NODE,"testblock1");
+		Handle ListLink=testAtomSpace.add_node(LIST_LINK,HandleSeq{testBlock1,testBlock2});
+		Handle ComposedOfLink=testAtomSpace.add_link(COMPOSED_OF_LINK,HandleSeq{testBlockEntity,ListLink});
+		TS_ASSERT(getBlockEntity(testBlock1,testAtomSpace)==testBlockEntity);
+	}
+	
+	
+};

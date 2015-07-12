@@ -790,7 +790,7 @@ bool Octree3DMapManager::checkIsSolid(const BlockVector& pos)
 }
 
 
-Block3D* Octree3DMapManager::getBlockAtLocation(double x, double y, double z)
+Handle Octree3DMapManager::getBlockAtLocation(double x, double y, double z)
 {
     BlockVector pos(x,y,z);
     return getBlockAtLocation(pos);
@@ -798,9 +798,9 @@ Block3D* Octree3DMapManager::getBlockAtLocation(double x, double y, double z)
 }
 
 
-Block3D* Octree3DMapManager::getBlockAtLocation(const BlockVector& pos)
+Handle Octree3DMapManager::getBlockAtLocation(const BlockVector& pos)
 {
-    Block3D* block;
+    Handle& block;
     mOctomapOctree->checkIsSolid(pos, block);
 
     return block;
@@ -1048,8 +1048,8 @@ bool Octree3DMapManager::containsObject(const string& objectName) const
      return new Octree3DMapManager("todo", 1, 0);
  }
 
-
-HandleSeq Octree3DMapManager::getAllUnitBlockHandlesOfABlock(Block3D& _block)
+/*
+HandleSeq Octree3DMapManager::getAllUnitBlockHandlesOfABlock(Handle& _block)
 {
     HandleSeq empty;
     HandleSeq handles;
@@ -1058,8 +1058,8 @@ HandleSeq Octree3DMapManager::getAllUnitBlockHandlesOfABlock(Block3D& _block)
     else
         return handles;
 }
-
-// a recursive function
+*/
+/* a recursive function
 bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles)
 {
     if (_blockLevel < 1)
@@ -1082,15 +1082,15 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
                 {
                     BlockVector pos(_nearLeftPos.x + newLevel * i,_nearLeftPos.y + newLevel * j, _nearLeftPos.z + newLevel * k);
                     return (getUnitBlockHandlesOfABlock(pos, newLevel, handles));
-					/* TODO: TNick: my guess is that this was intended to be:
-					if ( !getUnitBlockHandlesOfABlock(pos, newLevel, handles)) )
-					    return false;
-					*/
+					 TODO: TNick: my guess is that this was intended to be:
+					//if ( !getUnitBlockHandlesOfABlock(pos, newLevel, handles)) )
+					//    return false;
+					
                 }
     }
     return true;
 }
-
+*/
 // todo: to be completed
 std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const AxisAlignedBox& boundingboxA,
                                                                         const AxisAlignedBox& boundingboxB,

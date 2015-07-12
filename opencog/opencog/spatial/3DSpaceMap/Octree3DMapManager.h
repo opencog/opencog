@@ -116,11 +116,12 @@ namespace opencog
 			// and there is a block under it.
             bool checkStandable(const BlockVector &pos) const;
             bool checkStandable(double x, double y, double z) const;
-            Block3D* getBlockAtLocation(double x, double y, double z);
-			Block3D* getBlockAtLocation(const BlockVector& pos);
+            Handle getBlockAtLocation(double x, double y, double z);
+			Handle getBlockAtLocation(const BlockVector& pos);
             Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
             BlockVector getPositionFromUnitBlockHandle(const Handle &h);
-            HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
+			//Since we want to save info in atomspace it's not used.
+            //HandleSeq getAllUnitBlockHandlesOfABlock(Handle& _block);
 
 			/**
 			 * public member functions about BlockEntity add/remove/query
