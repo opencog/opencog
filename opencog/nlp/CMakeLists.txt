@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY (chatbot)
 # and should not be built
 # ADD_SUBDIRECTORY (question)
 
+ADD_SUBDIRECTORY (learn)
 ADD_SUBDIRECTORY (relex2logic)
 ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (types)
