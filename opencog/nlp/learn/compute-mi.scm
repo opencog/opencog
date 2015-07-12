@@ -558,8 +558,8 @@
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
-			(delete-hypergraph left-bind-link)
-			(delete-hypergraph right-bind-link)
+			(purge-hypergraph left-bind-link)
+			(purge-hypergraph right-bind-link)
 			; Note that cog-purge only goes one level deep, it does not
 			; recurse; so the below only delete the ListLink at the top.
 			(cog-purge left-list)
@@ -984,7 +984,7 @@
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
-			(delete-hypergraph left-bind-link)
+			(purge-hypergraph left-bind-link)
 			; Note that cog-purge only goes one level deep, it does not
 			; recurse; so the below only delete the ListLink at the top.
 			(cog-purge left-list)

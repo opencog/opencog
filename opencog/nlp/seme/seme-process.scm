@@ -617,7 +617,7 @@
 			; Delete the links to the recently generated triples,
 			; and then delete the triples themselves.
 			(release-result-triples)
-			(for-each delete-hypergraph trip-list)
+			(for-each purge-hypergraph trip-list)
 		)
 
 		; Delete the sentence, its parses, and the word-instances
