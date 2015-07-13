@@ -72,14 +72,14 @@ TimeServer::~TimeServer()
     // disconnect signals
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
-	for(auto it=timeDomainMap.begin();it!=timeDomainMap.end();it++)
+	for(auto it=temporalTableMap.begin();it!=temporalTableMap.end();it++)
 	{
 		delete it->second;
 	}
     //delete table;
 }
 
-void TimeServer::add(Handle h, const Temporal& t, const string timedomain)
+void TimeServer::add(Handle h, const TimeDomain timedomain, const Temporal& t)
 {
     // USED TO SEEK MEMORY LEAK
     //++timeServerEntries;
@@ -90,26 +90,26 @@ void TimeServer::add(Handle h, const Temporal& t, const string timedomain)
     //   cout << "Total unique entrys: " << temporalSet.size() << endl;
     //}
     std::unique_lock<std::mutex> lock(ts_mutex);
-	if(timeDomainMap.find(timedomain)==timeDomainMap.end())
+	if(temporalTableMap.find(timedomain)==temporalTableMap.end())
 	{
-		timeDomainMap[timedomain]=new TemporalTable();
+		temporalTableMap[timedomain]=new TemporalTable();
 	}
-	(timeDomainMap[timedomain])->add(h,t);
+	(temporalTableMap[timedomain])->add(h,t);
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
     }
 }
 
-bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion,const string timedomain)
+bool TimeServer::remove(Handle h,const TimeDomain timedomain, const Temporal& t, TemporalTable::TemporalRelationship criterion)
 {
    
-	if(timeDomainMap.find(timedomain)==timeDomainMap.end())
+	if(temporalTableMap.find(timedomain)==temporalTableMap.end())
 	{
 		logger().error("TimeServer::remove: timedomain %s not found\n", timedomain.c_str());
 	}
 	
     std::unique_lock<std::mutex>  lock(ts_mutex);
-    return (timeDomainMap[timedomain])->remove(h, t, criterion);
+    return (temporalTableMap[timedomain])->remove(h, t, criterion);
 }
 
 octime_t TimeServer::getLatestTimestamp() const
@@ -133,32 +133,32 @@ TimeServer::TimeServer(const TimeServer& other)
 void TimeServer::clear()
 {
     std::unique_lock<std::mutex> lock(ts_mutex);
-	for(auto it=timeDomainMap.begin();it!=timeDomainMap.end();it++)
+	for(auto it=temporalTableMap.begin();it!=temporalTableMap.end();it++)
 	{
 		delete it->second;
 	}
-	timeDomainMap.clear();
+	temporalTableMap.clear();
     init();
 }
 
-Handle TimeServer::addTimeInfo(Handle h, octime_t timestamp, TruthValuePtr tv, const string timedomain)
+Handle TimeServer::addTimeInfo(Handle h,const TimeDomain timedomain, const octime_t& timestamp, TruthValuePtr tv )
 {
     OC_ASSERT(atomspace->is_valid_handle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
     std::string nodeName = Temporal::getTimeNodeName(timestamp);
-    return addTimeInfo(h, nodeName, tv, timedomain);
+    return addTimeInfo(h, timedomain, nodeName, tv);
 }
 
-Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, TruthValuePtr tv, const string timedomain)
+Handle TimeServer::addTimeInfo(Handle h, const TimeDomain timedomain,const Temporal& t, TruthValuePtr tv)
 {
     OC_ASSERT(atomspace->is_valid_handle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
     OC_ASSERT(t != UNDEFINED_TEMPORAL, "TimeServer::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
     this->add(h, t,timedomain);
-    return addTimeInfo(h, t.getTimeNodeName(), tv,timedomain);
+    return addTimeInfo(h, Timedomain, t.getTimeNodeName(), tv);
 }
 
-Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthValuePtr tv,const string timedomain)
+Handle TimeServer::addTimeInfo(Handle h, const TimeDomain timedomain, const std::string& timeNodeName, TruthValuePtr tv)
 {
     DPRINTF("TimeServer::addTimeInfo - start\n");
     Handle timeNode = atomspace->add_node(TIME_NODE, timeNodeName);
@@ -177,16 +177,17 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthV
     return atTimeLink;
 }
 
-bool TimeServer::removeTimeInfo(Handle h, octime_t timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive,const string timedomain)
+bool TimeServer::removeTimeInfo(Handle h,const TimeDomain timedomain, const octime_t& timestamp, TemporalTable::TemporalRelationship criterion, bool removeDisconnectedTimeNodes, bool recursive)
 {
     Temporal t(timestamp);
-    return removeTimeInfo(h, t, criterion, removeDisconnectedTimeNodes, recursive,timedomain);
+    return removeTimeInfo(h, timedomain, timestamp, criterion, removeDisconnectedTimeNodes, recursive);
 }
 
-bool TimeServer::removeTimeInfo(Handle h, const Temporal& t,
+bool TimeServer::removeTimeInfo(Handle h, const TimeDomain timedomain, 
+								const Temporal& t,
 								TemporalTable::TemporalRelationship criterion,
 								bool removeDisconnectedTimeNodes, 
-								bool recursive,const string timedomain)
+								bool recursive)
 {
     DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atom_as_string(h).c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
