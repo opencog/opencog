@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
