@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Batch parsing script for French.
 # Loop over all the files in 'beta-pages', sentence-split them

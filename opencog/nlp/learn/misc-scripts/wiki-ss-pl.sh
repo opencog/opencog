@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Batch parsing script for Polish.
 # Loop over all the files in 'beta-pages', sentence-split them

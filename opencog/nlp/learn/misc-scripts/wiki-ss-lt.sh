@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Batch parsing script for Lithuanian.
 # Loop over all the files in 'beta-pages', sentence-split them
