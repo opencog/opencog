@@ -27,6 +27,8 @@
 
 #include <mutex>
 #include <set>
+#include <map>
+#include <string>
 #include <boost/signals2.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -47,6 +49,19 @@ namespace opencog
  *  @{
  */
 
+//In the real world we may have different time zones.
+//For example, in the game embodiment we may want to
+//save the time in the game and in the real system.
+//For this we add a time domain to mark what time zone the timestamp belong.
+//and we use a map<TimeDomain, TemporalTable*> to save all corresponding tables
+//Also, we change the AtTimeLink structure to:
+//AtTimeLink
+//__TimeNode "12:00:00"
+//__TimeDomainNode "UTC+9"
+//__ConceptNode "Lunch"
+//by adding a TimeDomainNode in the outgoings.
+
+typedef TimeDomain std::string;
 class TimeServerSavable;
 
 /**
@@ -90,12 +105,12 @@ public:
     virtual ~TimeServer();
 
     /**
-     * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object.
+     * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object in the given time domain.
      */
-    void add(Handle, const Temporal&);
+    void add(Handle, const TimeDomain&, const Temporal&);
 
     /**
-     * Gets a list of HandleTemporalPair objects given an Atom Handle.
+     * Gets a list of HandleTemporalPair objects given an Atom Handle and a time domain.
      * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
      * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
      * to restrict the return to only HandleTemporalPair objects whose Temporal
@@ -109,11 +124,17 @@ public:
      *         timeServer->get(back_inserter(ret), Handle::UNDEFINED);
      */
     template<typename OutputIterator> OutputIterator
-    get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
-        TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
+		get(OutputIterator outIt, Handle h, const TimeDomain timedomain,
+			const Temporal& t = UNDEFINED_TEMPORAL,
+			TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
+		if(temporalTableMap.find(timedomain)==temporalTableMap.end())
+		{
+			return outIt;
+		}
+		
         std::unique_lock<std::mutex> lock(ts_mutex);
-        HandleTemporalPairEntry* hte = table->get(h, t, criterion);
+        HandleTemporalPairEntry* hte = temporalTableMap[timedomain]->get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
 
         while (hte) {

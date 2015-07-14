@@ -75,7 +75,7 @@ TimeServer::~TimeServer()
     delete table;
 }
 
-void TimeServer::add(Handle h, const Temporal& t)
+void TimeServer::add(Handle h, const TimeDomain timedomain const Temporal& t)
 {
     // USED TO SEEK MEMORY LEAK
     //++timeServerEntries;
@@ -86,7 +86,12 @@ void TimeServer::add(Handle h, const Temporal& t)
     //   cout << "Total unique entrys: " << temporalSet.size() << endl;
     //}
     std::unique_lock<std::mutex> lock(ts_mutex);
-    table->add(h, t);
+    if(temporalTableMap.find(timedomain)==temporalTableMap.end())
+	{
+		temporalTableMap[timedomain]=new TemporalTable();
+	}
+	(temporalTableMap[timedomain])->add(h,t);
+	
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
     }
