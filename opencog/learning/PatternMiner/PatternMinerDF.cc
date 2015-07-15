@@ -615,7 +615,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
-                relation.isExtendedFromVar = isExtendedFromVar;
+                // relation.isExtendedFromVar = isExtendedFromVar;
 
                 if (parentNode)
                     parentNode->superPatternRelations.push_back(relation);
