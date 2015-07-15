@@ -1,0 +1,187 @@
+/*
+ * opencog/tests/learning/statistics/StatisticsUTest.cxxtest
+ *
+ * Copyright (C) 2015 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by DongMin Kim <kim135797531@naver.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/learning/statistics/DataProvider.h>
+#include <opencog/learning/statistics/Entropy.h>
+#include <opencog/learning/statistics/InteractionInformation.h>
+#include <opencog/learning/statistics/Probability.h>
+#include <opencog/util/Logger.h>
+
+using namespace std;
+using namespace opencog;
+using namespace statistics;
+
+class StatisticsTestSuite : public CxxTest::TestSuite
+{
+private:
+    const int N_GRAMS = 3;
+    const bool ORDERED = true;
+    int test_case[9] = {111, 222, 333, 444, 555, 666, 777, 888, 999};
+    DataProvider<int> *provider;
+
+public:
+    void setUp()
+    {
+        provider = new DataProvider<int>(N_GRAMS, ORDERED);
+    }
+    void tearDown()
+    {
+        delete provider;
+    }
+
+    void test_data_provider()
+    {
+        // Add one data
+        bool is_first_insert;
+        is_first_insert = provider->addOneMetaData(111);
+        TS_ASSERT(is_first_insert)
+
+        // Re-add one data
+        is_first_insert = provider->addOneMetaData(111);
+        TS_ASSERT(!is_first_insert);
+
+        // Add multiple data
+        for (int i = 1; i < 9; i++)
+            provider->addOneMetaData(test_case[i]);
+
+        // Add data's count (n_gram = 2)
+        int arr_2_gram_1[2] = {111, 222};
+        int arr_2_gram_2[2] = {111, 333};
+        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
+        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
+
+        // Add data's count (n_gram = 3)
+        int arr_3_gram_1[3] = {111, 222, 333};
+        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+
+        // Test string vector
+        std::vector<std::string> string_vector =
+                provider->makeStringVectorFromData(2, &test_case[0]);
+
+        /*
+        std::vector<std::string>::iterator it_1 = string_vector.begin();
+        for( ; it_1 != string_vector.end(); ++it_1)
+            logger().info("%s", ((std::string)*it_1).c_str());
+        */
+
+        // Test address vector
+        std::vector<int> address_vector =
+                provider->makeAddressVectorFromData(2, &test_case[0]);
+        /*
+        std::vector<int>::iterator it_2 = address_vector.begin();
+        for( ; it_2 != address_vector.end(); ++it_2)
+            logger().info("%i", (int)*it_2);
+        */
+    }
+
+    void test_probabilities()
+    {
+        // Add multiple data
+        for (int i = 0; i < 9; i++)
+            provider->addOneMetaData(test_case[i]);
+
+        // Add data's count (n_gram = 2)
+        int arr_2_gram_1[2] = {111, 222};
+        int arr_2_gram_2[2] = {111, 333};
+        int arr_3_gram_1[3] = {111, 222, 333};
+        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
+        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
+        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+
+        // Calculate probabilities
+        Probability::calculateProbabilities(provider);
+
+    }
+
+    void test_entropies()
+    {
+        // Add multiple data
+        for (int i = 0; i < 9; i++)
+            provider->addOneMetaData(test_case[i]);
+
+        // Add data's count (n_gram = 2)
+        int arr_2_gram_1[2] = {111, 222};
+        int arr_2_gram_2[2] = {111, 333};
+        int arr_3_gram_1[3] = {111, 222, 333};
+        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
+        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
+        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+
+        // Calculate entropies
+        Probability::calculateProbabilities(provider);
+        Entropy::calculateEntropies(provider);
+    }
+
+    void test_interaction_information()
+    {
+        // Add multiple data
+        for (int i = 0; i < 9; i++)
+            provider->addOneMetaData(test_case[i]);
+
+        // Add data's count (n_gram = 2)
+        int arr_2_gram_1[2] = {111, 222};
+        int arr_2_gram_2[2] = {111, 333};
+        int arr_3_gram_1[3] = {111, 222, 333};
+        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
+        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
+        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+
+        // Calculate interaction information
+        Probability::calculateProbabilities(provider);
+        Entropy::calculateEntropies(provider);
+        InteractionInformation::calculateInteractionInformations(provider);
+    }
+
+private:
+    template<typename T>
+    void print_detail(DataProvider<T> *provider)
+    {
+        logger().info(">All Data Set<");
+        std::set<int>::iterator it_1 = provider->mMetaDataSet.begin();
+        for ( ; it_1 != provider->mMetaDataSet.end(); ++it_1)
+            logger().info("%i, ", (int)*it_1);
+        logger().info("");
+        logger().info(">All Data Set End<");
+
+        logger().info(">Data Map<");
+        for (int i = 0; i <= N_GRAMS; i++){
+            logger().info("%d-gram: ", i);
+            std::map<string, StatisticData> map = provider->mDataMaps[i];
+            std::map<string, StatisticData>::iterator it_2 = map.begin();
+            for ( ; it_2 != map.end(); ++it_2){
+                logger().info("> key: %s", it_2->first.c_str());
+                logger().info("> count: %d", it_2->second.count);
+                logger().info("> probability: %f", it_2->second.probability);
+                logger().info("> entropy: %f", it_2->second.entropy);
+                logger().info("> interactionInformation: %f", it_2->second.interactionInformation);
+                logger().info("> ---");
+            }
+            logger().info("-----");
+        }
+        logger().info(">Data Map End<");
+        logger().info("");
+    }
+};
