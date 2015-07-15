@@ -47,42 +47,42 @@ const char* TimeServerSavable::getId() const
 
 void TimeServerSavable::saveRepository(FILE* fp) const
 {
-	logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
+    logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     //Saves TemporalTable
     size_t size=(timeserver->temporalTableMap).size();
-	fwrite(&size,sizeof(size_t),1,fp);
-	for(auto it=(timeserver->temporalTableMap).begin();it!=(timeserver->temporalTableMap).end();it++)
-	{
-		const string timeDomainName=it->first;
-        char chartimeDomainName[128];
-        memset(chartimeDomainName, '\0',strlen(timeDomainName.c_str()));
-        strcpy(chartimeDomainName,timeDomainName.c_str());
-		logger().error("timeserver save repo timedomain name: %s",chartimeDomainName);
-        fwrite(&chartimeDomainName, 128,1,fp);
-
-		TemporalTableFile ttf;
-		ttf.save(fp,it->second);
-	}
+    fwrite(&size,sizeof(size_t),1,fp);
+    for(auto it=(timeserver->temporalTableMap).begin();it!=(timeserver->temporalTableMap).end();it++)
+    {
+	const string timeDomainName=it->first;
+	char chartimeDomainName[128];
+	memset(chartimeDomainName, '\0',strlen(timeDomainName.c_str()));
+	strcpy(chartimeDomainName,timeDomainName.c_str());
+	logger().error("timeserver save repo timedomain name: %s",chartimeDomainName);
+	fwrite(&chartimeDomainName, 128,1,fp);
+	
+	TemporalTableFile ttf;
+	ttf.save(fp,it->second);
+    }
 }
 
 void TimeServerSavable::loadRepository(FILE* fp, HandMapPtr conv)
 {
-	logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
+    logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
     bool b_read = true;
-	size_t size=0;
+    size_t size=0;
     FREAD_CK(&size, sizeof(size_t), 1, fp);
     // Loads the TemporalTable
-	for(unsigned int i=0;i!=size;i++)
-	{
-		char chartimeDomainName[128];
-        FREAD_CK(&chartimeDomainName, 128, 1, fp);
-		std::string timeDomainName(chartimeDomainName);
-		logger().error("load timeserver repo: timedomainname %s",chartimeDomainName);
-		(timeserver->temporalTableMap)[timeDomainName]=new TemporalTable();
-
-		TemporalTableFile ttf;
-		ttf.load(fp,(timeserver->temporalTableMap)[timeDomainName], conv);
-	}
+    for(unsigned int i=0;i!=size;i++)
+    {
+	char chartimeDomainName[128];
+	FREAD_CK(&chartimeDomainName, 128, 1, fp);
+	std::string timeDomainName(chartimeDomainName);
+	logger().error("load timeserver repo: timedomainname %s",chartimeDomainName);
+	(timeserver->temporalTableMap)[timeDomainName]=new TemporalTable();
+	
+	TemporalTableFile ttf;
+	ttf.load(fp,(timeserver->temporalTableMap)[timeDomainName], conv);
+    }
 	CHECK_FREAD
 }
 
