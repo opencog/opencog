@@ -171,10 +171,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     atomSpace.set_TV(this->hDemandGoal, demand_satisfaction);
 
     // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
-    Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal,
-												 timeDomain,		 
-												 timeStamp,
-												 demand_satisfaction);
+    Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal,timeDomain,timeStamp,demand_satisfaction);
 
 //    // Update the LatestLink
     std::string predicateName = this->demandName + "DemandGoal";
@@ -301,12 +298,10 @@ void PsiDemandUpdaterAgent::run()
     }
 
     // Update Demand Goals
-	string timedomain=timeServer().getTimeDomain();
+    string timedomain=timeServer().getTimeDomain();
     for (Demand & demand : this->demandList) {
         logger().debug("PsiDemandUpdaterAgent::%s - Going to set the updated value to AtomSpace for demand '%s' [cycle = %d]",
                        __FUNCTION__, demand.getDemandName().c_str(), this->cycleCount);
-
-
         demand.updateDemandGoal(atomSpace, timedomain, timeStamp);
     }
 

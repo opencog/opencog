@@ -1497,13 +1497,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
                 AtomSpaceUtil::setupHoldingObject(atomSpace,
                                                   internalAgentId,
                                                   internalTargetId,
-												  timeServer().getTimeDomain(),
+						  timeServer().getTimeDomain(),
                                                   getLatestSimWorldTimestamp());
             } else if (nameStr == "drop") {
                 AtomSpaceUtil::setupHoldingObject(atomSpace,
                                                   internalAgentId,
                                                   string(""),
-												  timeServer().getTimeDomain(),
+						  timeServer().getTimeDomain(),
                                                   getLatestSimWorldTimestamp());
             }
         }
@@ -1599,7 +1599,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
     // Add this action to timelink
     Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, 
-												 timeServer().getTimeDomain(), tsValue);
+						 timeServer().getTimeDomain(), tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
@@ -1616,7 +1616,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         Handle newStateEvalLink =
             AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName,
-												timeServer().getTimeDomain(),
+						timeServer().getTimeDomain(),
                                                 targetNode, newStateValNode,
                                                 tv,Temporal(tsValue));
 
@@ -3493,10 +3493,10 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                             if (param.getName() == "target") {
                                 const Entity& entity = param.getEntityValue();
                                 AtomSpaceUtil::setupHoldingObject(atomSpace,
-																  avatarInterface.getPetId( ),
-																  entity.id,
-																  timeServer().getTimeDomain(),
-																  getLatestSimWorldTimestamp() );
+								  avatarInterface.getPetId( ),
+								  entity.id,
+								  timeServer().getTimeDomain(),
+								  getLatestSimWorldTimestamp() );
                                 avatarInterface.setGrabbedObj(entity.id);
                             }
                         }
@@ -3506,7 +3506,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                              action.getType() == ActionType::NUDGE_TO()) {
                         AtomSpaceUtil::setupHoldingObject(  atomSpace,
                                                             avatarInterface.getPetId( ), "",
-															timeServer().getTimeDomain(),
+							    timeServer().getTimeDomain(),
                                                             getLatestSimWorldTimestamp() );
                         avatarInterface.setGrabbedObj(std::string(""));
                     }

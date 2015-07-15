@@ -217,8 +217,8 @@ void PsiModulatorUpdaterAgent::run()
         modulator.runUpdater(atomSpace);
     }
 
-	TimeServer timeServer(atomSpace);
-	string timedomain=timeServer.getTimeDomain();
+    TimeServer timeServer(atomSpace);
+    string timedomain=timeServer.getTimeDomain();
     // Set the updated value to AtomSpace
     for (Modulator & modulator : this->modulatorList) {
         modulator.updateModulator(atomSpace, timedomain, timeStamp);

@@ -56,8 +56,8 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
 {
     std::list<HandleTemporalPair> retP;
     timeServer().getTimeInfo(std::back_inserter(retP),
-							 trickConceptNode, timeServer().getTimeDomain(), temp,
-							 TemporalTable::EXACT);
+			     trickConceptNode, timeServer().getTimeDomain(), temp,
+			     TemporalTable::EXACT);
     if (!retP.empty()) {
         OC_ASSERT(retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");

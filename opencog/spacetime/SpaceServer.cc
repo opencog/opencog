@@ -521,10 +521,12 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, const std::string timedomain, octime_t timestamp,
-                              int objX, int objY, int objZ,
-                              int objLength, int objWidth, int objHeight,
-			       double objYaw, bool isObstacle,  std::string entityClass, std::string objectName, std::string material)
+bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject,
+			       const std::string timedomain, octime_t timestamp,
+			       int objX, int objY, int objZ,
+			       int objLength, int objWidth, int objHeight,
+			       double objYaw, bool isObstacle,  std::string entityClass,
+			       std::string objectName, std::string material)
 {
     
     if (spaceMapHandle == Handle::UNDEFINED)
@@ -554,7 +556,9 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(const std::string timedomain, octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin,
+Handle SpaceServer::addOrGetSpaceMap(const std::string timedomain,
+				     octime_t timestamp, std::string _mapName,
+				     int _xMin, int _yMin, int _zMin,
                                      int _xDim, int _yDim, int _zDim, int _floorHeight)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);

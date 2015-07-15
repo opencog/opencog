@@ -138,7 +138,7 @@ public:
      * Some member functions having the same problem also have the argument.
      */
     bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, 
-					  bool isSelfObject, const std::string timedomain, octime_t timestamp,
+		      bool isSelfObject, const std::string timedomain, octime_t timestamp,
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
                       double objYaw, bool isObstacle,  
