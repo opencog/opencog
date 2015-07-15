@@ -19,19 +19,12 @@ decorative_rock_subtypes = {'GRANITE', 'DIORITE', 'ANDESITE'}
 
 cobble_subtypes = {'STONE', 'MOSSY_STONE'}
 
-soil_subtypes = {'GRASS', 'DIRT', 'COARSE_DIRT', 'PODZOL'}
+#soil_subtypes = {'GRASS', 'DIRT', 'COARSE_DIRT', 'PODZOL'}
 
 wool_subtypes = {'WHITE', 'ORANGE', 'MAGENTA', 'LIGHT_BLUE', 'YELLOW', 'LIME', 'PINK', 'GRAY', 'LIGHT_GRAY', 'CYAN', 'PURPLE', 'BLUE', 'BROWN', 'GREEN', 'RED', 'BLACK'}
 
-sand_subtypes = {'WHITE', 'RED'}
+#sand_subtypes = {'WHITE', 'RED'}
 
-
-
-
-outfile = open('mc_materials.csv', 'wb')
-
-outfile.write("{:>6s},{:>32s},{:>12s},{:>12s},{:>8s}\n"
-        .format('id', 'name', 'hardness', 'stacksize', 'type'))
 
 mats = {}
 
@@ -45,9 +38,9 @@ for bid in range(198):
             name = name + '_' + partial.strip()
 
 
-    if block.hardness:
-        hardness = block.hardness
-    else: hardness = -1
+    if block.hardness == None:
+        hardness = -1
+    else: hardness = block.hardness
 
 
     if block.material == 'melon' or block.material == 'plant':
@@ -83,24 +76,104 @@ for bid in range(198):
     mats[bid]['hardness'] = hardness
     mats[bid]['type'] = material
 
+# now for fixes, more types, and data reorganization...
+
+
+mats[2]['name'] = 'GRASS'
+
+#cobblestone
+mats[4]['type'] = 'COBBLE'
+mats[48]['type'] = 'COBBLE'
+mats[67]['type'] = 'COBBLE'
+mats[139]['type'] = 'COBBLE'
+
+#sapling
+mats[6]['type'] = 'PLANT'
+
+#water and lava
+mats[8]['type'] = 'FLUID'
+mats[9]['type'] = 'FLUID'
+mats[10]['type'] = 'FLUID'
+mats[11]['type'] = 'FLUID'
+
+#glass
+mats[20]['type'] = 'ROCK'
+mats[102]['type'] = 'ROCK'
+
+#bed
+mats[26]['type'] = 'WOOD'
+
+#tall grass and shrubs
+mats[31]['type'] = 'PLANT'
+mats[31]['name'] = 'SHRUB'
+mats[32]['type'] = 'PLANT'
+mats[32]['name'] = 'DEAD_SHRUB'
+
+#other plants
+mats[37]['type'] = 'PLANT'
+mats[38]['type'] = 'PLANT'
+mats[39]['type'] = 'PLANT'
+mats[40]['type'] = 'PLANT'
+mats[59]['type'] = 'PLANT'
+mats[81]['type'] = 'PLANT'
+mats[83]['type'] = 'PLANT'
+mats[104]['type'] = 'PLANT'
+mats[105]['type'] = 'PLANT'
+mats[111]['type'] = 'PLANT'
+mats[115]['type'] = 'PLANT'
+mats[141]['type'] = 'PLANT'
+mats[142]['type'] = 'PLANT'
+mats[175]['type'] = 'PLANT'
+
+#wood stairs
+mats[134]['type'] = 'WOOD'
+mats[135]['type'] = 'WOOD'
+mats[136]['type'] = 'WOOD'
+mats[162]['type'] = 'WOOD'
+mats[163]['type'] = 'WOOD'
+mats[164]['type'] = 'WOOD'
+
+#gourds
+mats[86]['type'] = 'GOURD'
+mats[91]['type'] = 'GOURD'
+mats[103]['type'] = 'GOURD'
+
+#stone slab
+mats[44]['type'] = 'ROCK'
+
+#beacon
+mats[138]['type'] = 'STONE'
+
+#hay bale
+mats[170]['type'] = 'NONE'
+
+#banners
+mats[176]['type'] = 'WOOD'
+mats[177]['type'] = 'WOOD'
+
+outfile = open('mc_materials.csv', 'wb')
+
+outfile.write("{:>6s},{:>32s},{:>8s},{:>12s},{:>12s}\n"
+        .format('id', 'name', 'type','hardness', 'stacksize'))
+
 for item in mats:
-    print 'name: ' + mats[item]['name']
-    print 'type: ' + mats[item]['type']
-    print 'hardness: ' + str(mats[item]['hardness'])
-    print 'stacksize: ' + str(mats[item]['stacksize'])
-    print 'diggable?: ' + str(mats[item]['diggable'])
-    print '\n'
-    
+    #print 'name: ' + mats[item]['name']
+    #print 'type: ' + mats[item]['type']
+    #print 'hardness: ' + str(mats[item]['hardness'])
+    #print 'stacksize: ' + str(mats[item]['stacksize'])
+    #print 'diggable?: ' + str(mats[item]['diggable'])
+    #print '\n'
+    outfile.write("{:>6d},{:>32s},{:>8s},{:>12.2f},{:>12d}\n"
+            .format(
+                item,
+                mats[item]['name'],
+                mats[item]['type'],
+                mats[item]['hardness'],
+                mats[item]['stacksize']))
+   
    
 
 outfile.close()
 
-"""
-    outfile.write("{:>6d},{:>32s},{:>12.2f},{:>12d},{:>8s}\n"
-            .format(
-                bid,
-                block.display_name,
-                hardness,
-                block.stack_size,
-                material))
-"""
+
+
