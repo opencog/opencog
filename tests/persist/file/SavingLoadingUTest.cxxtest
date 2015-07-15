@@ -126,12 +126,12 @@ public:
         Handle h9 = atomSpace.add_link(LIST_LINK, outgoing);
 
         // Associate some timestamps to existing atoms (to check save/load of TimeServer repository)
-        Handle h15 = ts->addTimeInfo(h1, Temporal(0, 0));
-        Handle h16 = ts->addTimeInfo(h4, Temporal(10, 100));
-        Handle h17 = ts->addTimeInfo(h6, Temporal(0, 0));
-        Handle h18 = ts->addTimeInfo(h9, Temporal(0, 0));
-        Handle h19 = ts->addTimeInfo(h9, Temporal(10, 100));
-        Handle h20 = ts->addTimeInfo(h9, Temporal(0, 10)); // put in inverse order intentionally for testing this case too
+        Handle h15 = ts->addTimeInfo(h1, ts->getTimeDomain(), Temporal(0, 0));
+        Handle h16 = ts->addTimeInfo(h4, ts->getTimeDomain(), Temporal(10, 100));
+        Handle h17 = ts->addTimeInfo(h6, ts->getTimeDomain(), Temporal(0, 0));
+        Handle h18 = ts->addTimeInfo(h9, ts->getTimeDomain(), Temporal(0, 0));
+        Handle h19 = ts->addTimeInfo(h9, ts->getTimeDomain(), Temporal(10, 100));
+        Handle h20 = ts->addTimeInfo(h9, ts->getTimeDomain(), Temporal(0, 10)); // put in inverse order intentionally for testing this case too
 
         Handle h10 = atomSpace.add_node(NUMBER_NODE, "1");
         Handle h11 = atomSpace.add_node(CONCEPT_NODE, "fido");
@@ -245,22 +245,22 @@ public:
 
         // Check TimeServer entries
         vector<HandleTemporalPair> result;
-        ts->getTimeInfo(back_inserter(result), h1);
+        ts->getTimeInfo(back_inserter(result), h1, ts->getTimeDomain());
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        ts->getTimeInfo(back_inserter(result), h4);
+        ts->getTimeInfo(back_inserter(result), h4, ts->getTimeDomain());
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(10, 100));
 
         result.clear();
-        ts->getTimeInfo(back_inserter(result), h6);
+        ts->getTimeInfo(back_inserter(result), h6, ts->getTimeDomain());
         TS_ASSERT(result.size() == 1);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
 
         result.clear();
-        ts->getTimeInfo(back_inserter(result), h9);
+        ts->getTimeInfo(back_inserter(result), h9, ts->getTimeDomain());
         TS_ASSERT(result.size() == 3);
         TS_ASSERT(*(result[0].getTemporal()) == Temporal(0, 0));
         TS_ASSERT(*(result[1].getTemporal()) == Temporal(0, 10));
