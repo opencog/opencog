@@ -251,6 +251,23 @@ Handle TimeServer::getAtTimeLink(const TimeDomain timedomain, const HandleTempor
     return Handle::UNDEFINED;
 }
 
+TimeDomain TimeServer::getTimeDomain() const
+{
+	
+	vector<string> timedomains=getTimeDomains();
+	string timedomain;
+	if(timedomains.empty()){timedomain="DefaultTimeDomain";}
+	else if(timedomains.size()>=1)
+	{
+		if(timedomains.size()>1)
+		{
+			logger().error("TimeServer::getTimeDomain: There's more than one time domain in TimeServer. we will use the first searched timedomain name %s. If you don't want this behavior,just change the code.", timedomains[0].c_str());			
+		}
+		timedomain=timedomains[0];
+	}
+	return timedomain;
+}
+
 vector<TimeDomain> TimeServer::getTimeDomains() const
 {
 	vector<TimeDomain> result;

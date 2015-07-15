@@ -618,8 +618,9 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 // TODO: TEMPORARY PUBLIC METHODS: They should become built-in predicates later.
 bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
 {
+	
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
+		atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, timeServer().getTimeDomain(),sinceTimestamp);
 }
 
 bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
@@ -643,7 +644,8 @@ bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_FAILED_PREDICATE_NAME, 
+			actionId, timeServer().getTimeDomain(),sinceTimestamp);
 }
 
 bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
@@ -667,7 +669,8 @@ bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_TRIED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_TRIED_PREDICATE_NAME, 
+			actionId, timeServer().getTimeDomain(),sinceTimestamp);
 }
 
 bool PAI::isPlanFinished(ActionPlanID planId) const
@@ -1494,11 +1497,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
                 AtomSpaceUtil::setupHoldingObject(atomSpace,
                                                   internalAgentId,
                                                   internalTargetId,
+												  timeServer().getTimeDomain(),
                                                   getLatestSimWorldTimestamp());
             } else if (nameStr == "drop") {
                 AtomSpaceUtil::setupHoldingObject(atomSpace,
                                                   internalAgentId,
                                                   string(""),
+												  timeServer().getTimeDomain(),
                                                   getLatestSimWorldTimestamp());
             }
         }
@@ -1593,7 +1598,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // Add this action to timelink
-    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, 
+												 timeServer().getTimeDomain(), tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
@@ -1610,6 +1616,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         Handle newStateEvalLink =
             AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName,
+												timeServer().getTimeDomain(),
                                                 targetNode, newStateValNode,
                                                 tv,Temporal(tsValue));
 
@@ -1630,7 +1637,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionConcernedHandles.push_back(andLink);
     // Add an AtTimeLink around the AndLink, because Fishgram will ignore the Action ID ConceptNode,
     // and so it won't notice the AtTimeLink created above (which is only connected by having the same ActionID).
-    Handle atTimeLink2 = timeServer().addTimeInfo(andLink, tsValue);
+    Handle atTimeLink2 = timeServer().addTimeInfo(andLink, timeServer().getTimeDomain(), tsValue);
     actionConcernedHandles.push_back(atTimeLink2);
 
     // call the event detector
@@ -2044,7 +2051,7 @@ void PAI::processInstruction(DOMElement * element)
     evalLinkOutgoing.push_back(predicateNode);
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timeServer().getTimeDomain(), tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
     std::vector<std::string> arguments;
@@ -2713,7 +2720,7 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     int floorHeight = getIntAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
     logger().fine("PAI - addSpaceMap: global floor height = %d", floorHeight);
 
-    spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
+    spaceServer().addOrGetSpaceMap(timeServer().getTimeDomain(), timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
 void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
@@ -2915,8 +2922,8 @@ Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& ac
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
                                              evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,
-                                                 TruthValue::TRUE_TV());
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timeServer().getTimeDomain(), 
+												 timestamp, TruthValue::TRUE_TV());
     AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink,
                                                      predicateNode);
 
@@ -2954,7 +2961,7 @@ Vector PAI::addVectorPredicate(Handle objectNode, const std::string& predicateNa
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timeServer().getTimeDomain(),timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Vector result(atof(X), atof(Y), atof(Z));
@@ -2996,7 +3003,7 @@ void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName
     Handle evalLink = addVectorPredicate(objectNode, predicateName, vec);
 
     Handle predNode = atomSpace.get_handle(PREDICATE_NODE, predicateName.c_str());
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timeServer().getTimeDomain(), timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 }
 
@@ -3021,7 +3028,7 @@ void PAI::addRotationPredicate(Handle objectNode, const Rotation& rot, unsigned 
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timeServer().getTimeDomain(), timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 }
 
@@ -3056,7 +3063,7 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
     evalLinkOutgoing.push_back(listLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo( evalLink, timeServer().getTimeDomain(), timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 
     Rotation result(atof(pitch), atof(roll), atof(yaw));
@@ -3082,14 +3089,14 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
                  predicateName.c_str(), (int)propertyValue,
                  atomSpace.get_name(objectNode).c_str());
 
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, timeServer().getTimeDomain(), objectNode, tv, permanent);
 
     // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
     // so we need to add both
     if (propertyValue)
-        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, timeServer().getTimeDomain(), objectNode, trueConceptNode,tv, permanent);
     else
-        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, timeServer().getTimeDomain(), objectNode, falseConceptNode,tv, permanent);
 }
 
 void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)
@@ -3368,7 +3375,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     //     TimeNode "timestamp"
     //     EvaluationLink
     //
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timeServer().getTimeDomain(), timestamp);
 
     // count=1, i.e. one observation of this biological urge
     atomSpace.set_TV(atTimeLink,SimpleTruthValue::createTV((strength_t)level, 1));
@@ -3485,10 +3492,11 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                         for (ActionParameter param : params) {
                             if (param.getName() == "target") {
                                 const Entity& entity = param.getEntityValue();
-                                AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                                    avatarInterface.getPetId( ),
-                                                                    entity.id,
-                                                                    getLatestSimWorldTimestamp() );
+                                AtomSpaceUtil::setupHoldingObject(atomSpace,
+																  avatarInterface.getPetId( ),
+																  entity.id,
+																  timeServer().getTimeDomain(),
+																  getLatestSimWorldTimestamp() );
                                 avatarInterface.setGrabbedObj(entity.id);
                             }
                         }
@@ -3498,6 +3506,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                              action.getType() == ActionType::NUDGE_TO()) {
                         AtomSpaceUtil::setupHoldingObject(  atomSpace,
                                                             avatarInterface.getPetId( ), "",
+															timeServer().getTimeDomain(),
                                                             getLatestSimWorldTimestamp() );
                         avatarInterface.setGrabbedObj(std::string(""));
                     }
@@ -3645,7 +3654,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-	      spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
+	      spaceServer().updateBlockEntitiesProperties(timeServer().getTimeDomain(), timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3750,7 +3759,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp);
+    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(),timeServer().getTimeDomain(), timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
@@ -3887,7 +3896,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 
     // Space server insertion
     // round up these values
-    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timeServer().getTimeDomain(), timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
 				      roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
@@ -3926,7 +3935,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     Handle classHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityClass);
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, timeServer().getTimeDomain(), objectNode,classHandle, tv, true);
 
     // Add the property predicates in atomspace
     addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
@@ -4270,7 +4279,7 @@ void PAI::processExistingStateInfo(DOMElement* element)
     TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     string stateNameStr(stateName);
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, stateNameStr, objectHandle, valueHandle,tv,Temporal(tsValue));
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, stateNameStr, timeServer().getTimeDomain(), objectHandle, valueHandle,tv,Temporal(tsValue));
 
 }
 
@@ -4429,7 +4438,7 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles,spaceServer().getLatestMapHandle());
+        spaceServer().updateBlockEntitiesProperties(timeServer().getTimeDomain(), timestamp,toUpdateHandles,spaceServer().getLatestMapHandle());
 
         int t2 = time(NULL);
 

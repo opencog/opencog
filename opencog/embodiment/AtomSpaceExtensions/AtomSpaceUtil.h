@@ -32,6 +32,8 @@
  * Class with util methods for related to AtomSpace manipulation
  */
 
+#include <string>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/spatial/math/Vector3.h>
@@ -82,6 +84,7 @@ private:
      */
     static Handle addGenericPropertyPred(AtomSpace& atomSpace,
                                          std::string predicateName,
+										 std::string timedomain,
                                          const HandleSeq& ll_out,
                                          TruthValuePtr tv,
                                          bool permanent = false,
@@ -266,6 +269,7 @@ public:
      * be ordered by ther handles not the temporal.
      */
     static void getAllEvaluationLinks(AtomSpace&,
+									  const std::string& timedomain,
                                       std::vector<HandleTemporalPair>& timestamps,
                                       const std::string& predicateNodeName,
                                       const Temporal& temporal = UNDEFINED_TEMPORAL,
@@ -347,6 +351,7 @@ public:
     */
     static Handle addRewardPredicate(AtomSpace& atomSpace,
                                      const char* petID,
+									 const std::string timedomain,
                                      unsigned long timestamp);
 
     /**
@@ -358,6 +363,7 @@ public:
      */
     static Handle addPunishmentPredicate(AtomSpace& atomSpace,
                                          const char* petID,
+										 const std::string timedomain,
                                          unsigned long timestamp);
 
     /**
@@ -377,6 +383,7 @@ public:
     static bool isActionPredicatePresent(AtomSpace& atomSpace,
                                          const char* actionPredicateName,
                                          Handle actionExecLink,
+										 const std::string timedomain,
                                          unsigned long sinceTimestamp);
 
 
@@ -461,6 +468,7 @@ public:
      *                     "to:destinationID: message"
      */
     static bool getHasSaidValueAtTime(AtomSpace &atomSpace,
+									  const std::string timedomain,
                                       unsigned long timestamp,
                                       unsigned long delay,
                                       Handle from_h,
@@ -471,7 +479,7 @@ public:
     /**
      * Return the lastest handle ( with the latest timestamp ) among a handle set
      */
-    static Handle getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles);
+    static Handle getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles, const string timedomain);
 
     /**
      * Return the handle of the latest evaluationlink of the given predicate, with its objects
@@ -615,6 +623,7 @@ public:
      */
     static Handle addPropertyPredicate(AtomSpace& atomSpace,
                                        std::string predicateName,
+									   const std::string& timedomain,
                                        Handle object,
                                        TruthValuePtr tv,
                                        bool permanent = false,
@@ -654,6 +663,7 @@ public:
      */
     static Handle addPropertyPredicate(AtomSpace& atomSpace,
                                        std::string predicateName,
+									   const std::string& timedomain,
                                        Handle a,
                                        Handle b,
                                        TruthValuePtr tv,
@@ -695,6 +705,7 @@ public:
     static void setupHoldingObject( AtomSpace& atomSpace,
                                     const std::string& holderId,
                                     const std::string& objectId,
+									const std::string& timedomain,
                                     unsigned long currentTimestamp );
 
     /**
@@ -750,8 +761,9 @@ public:
      *         if there is no grabbed object
      */
     static Handle getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
-            const std::string& holderId,
-            unsigned long time);
+											   const std::string& holderId,
+											   const std::string& timedomain,
+											   unsigned long time);
 
 
     /**
@@ -766,6 +778,7 @@ public:
      */
     static Handle getIsHoldingLinkAtTime(AtomSpace& atomSpace,
                                          const std::string& holderId,
+										 const std::string& timedomain,
                                          unsigned long time);
 
 
@@ -780,8 +793,9 @@ public:
      * @return The id of the held object. It can be empty "" if there is no held object
      */
     static std::string getHoldingObjectIdAtTime(AtomSpace& atomSpace,
-            const std::string& holderId,
-            unsigned long time);
+												const std::string& holderId,
+												const std::string& timedomain,
+												unsigned long time);
 
     /**
      * Helper function that retrieves the id of the object held by the pet or avatar
@@ -838,9 +852,10 @@ public:
      * Handle::UNDEFINED if there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLink(AtomSpace&,
-            const std::string& agentId,
-            const Temporal& temporal = UNDEFINED_TEMPORAL,
-            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
+											   const std::string& agentId,
+											   const std::string& timedomain,
+											   const Temporal& temporal = UNDEFINED_TEMPORAL,
+											   TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
 
     /**
      * Returns a pointer to the most recent evaluation link. Using an agent id
@@ -856,11 +871,11 @@ public:
      * @return Link evaluation link
      */
     static Handle getMostRecentAgentActionLink( AtomSpace& atomSpace,
-            const std::string& agentId,
-            const std::string& actionName,
-            const Temporal& temporal = UNDEFINED_TEMPORAL,
-            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT
-                                              );
+												const std::string& agentId,
+												const std::string& actionName,
+												const std::string& timedomain,
+												const Temporal& temporal = UNDEFINED_TEMPORAL,
+												TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
 
     /**
      * Get the most recent agent-link, executed in the interval [t1, t2]
@@ -874,7 +889,7 @@ public:
      *                            there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLinkWithinTime(AtomSpace&,
-            const std::string& agentId,
+            const std::string& agentId,const std::string& timedomain,
             unsigned long t1,
             unsigned long t2 );
 
@@ -889,7 +904,7 @@ public:
      *                            there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLinkAfterTime(AtomSpace&,
-            const std::string& agentId,
+            const std::string& agentId,const std::string& timedomain,
             unsigned long timestamp );
 
     /**
@@ -1003,8 +1018,9 @@ public:
      * @return A 3D Vector(x,y,z) indicating the current object velocity
      */
     static spatial::math::Vector3 getMostRecentObjectVelocity(AtomSpace&,
-            const std::string& objectId,
-            unsigned long afterTimestamp = 0 );
+															  const std::string& objectId,
+															  const std::string& timedomain,
+															  unsigned long afterTimestamp = 0 );
 
     /**
      * Return the most recent ExecutionLink for SchemaDone predicates, if any.
@@ -1017,8 +1033,9 @@ public:
      * @return The ExecLink for the most recent schema done or Handle::UNDEFINED
      */
     static Handle getMostRecentPetSchemaExecLink(AtomSpace&,
-            unsigned long timestamp,
-            bool schemaSuccessful);
+												 const std::string& timedomain,
+												 unsigned long timestamp,
+												 bool schemaSuccessful);
 
     /**
      * Given an ExecLink for a SchemaDone predicated, this method will return a formated string

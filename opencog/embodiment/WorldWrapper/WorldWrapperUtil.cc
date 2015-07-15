@@ -1226,11 +1226,12 @@ combo::vertex WorldWrapperUtil::evalPerception(
             } else {
                 Handle from_h = toHandle(atomSpace, def_obj, self_id, owner_id);
                 result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace,
-                         time,
-                         getHasSaidDelay(),
-                         from_h,
-                         Handle::UNDEFINED,
-                         message);
+															  timeServer().getTimeDomain(),
+															  time,
+															  getHasSaidDelay(),
+															  from_h,
+															  Handle::UNDEFINED,
+															  message);
 
                 // cache miss, compute value and cache it
                 if (result) {
@@ -1955,9 +1956,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     //we handle in once the now and isInThePast cases
                     unsigned long delay_past = 30 * PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
-                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,
-                                             std::string(def_obj),
-                                             t_past, time);
+                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,std::string(def_obj),timeServer().getTimeDomain(),t_past, time);
                     // found no previous action inside the timeframe
                     if (agentActionLink == Handle::UNDEFINED) {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
@@ -2076,7 +2075,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             // look for the latest executed action (30 secs frame)
             // TODO is 30 secs enough?
             unsigned long  t = time - (30 * PAIUtils::getTimeFactor());
-            Handle execLink = AtomSpaceUtil::getMostRecentPetSchemaExecLink(atomSpace, t, schemaSuccessful);
+            Handle execLink = AtomSpaceUtil::getMostRecentPetSchemaExecLink(atomSpace, timeServer().getTimeDomain(), t, schemaSuccessful);
 
             // found no executed action in recent past,
             // mark wild card candidates false (if any) and return false

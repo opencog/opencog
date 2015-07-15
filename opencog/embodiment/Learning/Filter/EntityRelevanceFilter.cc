@@ -89,14 +89,14 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
                      "EntityRelevanceFilter - There is no CONCEPT_NODE in AtomSpace for trick '%s'.",
                      trick_name.c_str());
     std::list<HandleTemporalPair> retP;
-    timeServer().getTimeInfo(std::back_inserter(retP), h,
+    timeServer().getTimeInfo(std::back_inserter(retP), h,timeServer().getTimeDomain(),
                                   Temporal(wp.getLatestSimWorldTimestamp()),
                                   TemporalTable::STARTS_BEFORE);
     for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
             ip != retP.end(); ++ip) {
         Temporal temp = *(ip->getTemporal());
         HandleSeq resmh;
-        timeServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
+        timeServer().getMapHandles(back_inserter(resmh), timeServer().getTimeDomain(), temp.getLowerBound(), temp.getUpperBound());
         for (Handle h : resmh) {
             const SpaceServer::SpaceMap& spacemap = spaceServer().getMap(h);
             //then make union of the object of that map with the result
@@ -121,7 +121,7 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
     Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trickName);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        timeServer().getTimeInfo(std::back_inserter(retP), h,
+        timeServer().getTimeInfo(std::back_inserter(retP), h, timeServer().getTimeDomain(),
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -168,7 +168,7 @@ const message_set EntityRelevanceFilter::getMessages(AtomSpace& atomSpace,
 
     std::list<HandleTemporalPair> htp;
     timeServer().getTimeInfo(back_inserter(htp),
-                          Handle::UNDEFINED,
+                          Handle::UNDEFINED, timeServer().getTimeDomain(),
                           t, TemporalTable::STARTS_WITHIN);
     //define template to match
     atom_tree *say_template =  makeVirtualAtom(EVALUATION_LINK,
@@ -234,7 +234,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
     Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trick);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        timeServer().getTimeInfo(std::back_inserter(retP), h,
+        timeServer().getTimeInfo(std::back_inserter(retP), h, timeServer().getTimeDomain(),
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -290,8 +290,8 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(AtomSpace& as,
     //  t = Temporal(t.getLowerBound()+1, t.getUpperBound()-1);
 
     std::list<HandleTemporalPair> htp;
-    timeServer().getTimeInfo(back_inserter(htp),
-                   Handle::UNDEFINED,
+    timeServer().getTimeInfo(back_inserter(htp), 
+                   Handle::UNDEFINED, timeServer().getTimeDomain(),
                    t, TemporalTable::ENDS_WITHIN);
     //define template to match
     atom_tree *no_arg_actionDone =

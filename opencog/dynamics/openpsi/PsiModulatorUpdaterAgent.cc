@@ -75,7 +75,7 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
     return true;
 }
 
-bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace, const octime_t timeStamp)
+bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace, const string timeDomain, const octime_t timeStamp)
 {
     // Update LatestLink containig latest modulator level
     std::string predicateName = this->modulatorName + "Modulator";
@@ -91,7 +91,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 
 //    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv);
     TimeServer timeServer(atomSpace);
-    Handle atTimeLink = timeServer.addTimeInfo(evaluationLink,
+    Handle atTimeLink = timeServer.addTimeInfo(evaluationLink, timeDomain,
         timeStamp, stv);
 
     AtomSpaceUtil::updateLatestModulator(atomSpace, atTimeLink, modulatorPredicateNode);
@@ -217,9 +217,11 @@ void PsiModulatorUpdaterAgent::run()
         modulator.runUpdater(atomSpace);
     }
 
+	TimeServer timeServer(atomSpace);
+	string timedomain=timeServer.getTimeDomain();
     // Set the updated value to AtomSpace
     for (Modulator & modulator : this->modulatorList) {
-        modulator.updateModulator(atomSpace, timeStamp);
+        modulator.updateModulator(atomSpace, timedomain, timeStamp);
     }
 
 #if HAVE_GUILE

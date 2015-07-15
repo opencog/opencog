@@ -384,6 +384,8 @@ public:
         return outIt;
     }
 
+	//For the old code which assume there's only one time domain in the system.
+	TimeDomain getTimeDomain() const;
 	vector<TimeDomain> getTimeDomains() const;
 	bool existTimeDomain(const TimeDomain timedomain) const
 	{return temporalTableMap.find(timedomain)!=temporalTableMap.end();}

@@ -99,18 +99,20 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 
     std::list<HandleTemporalPair> htp_seq;
-    timeServer().getTimeInfo(back_inserter(htp_seq), trick_h);
+	string timedomain=timeServer().getTimeDomain();
+	timeServer().getTimeInfo(back_inserter(htp_seq), trick_h, timedomain);
 
 #ifdef USE_MAP_HANDLE_SET
     // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead)
     // So, for now, we may send duplicate maps, which is inneficient but should not cause any error
     std::set<Handle> mapsToSend;
 #endif
+
     const SpaceServer& spacServer = spaceServer();
     for (HandleTemporalPair htp : htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;
-        timeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
+        timeServer().getMapHandles(back_inserter(sm_seq), timedomain, t.getLowerBound(), t.getUpperBound());
 
         for (Handle sm_h : sm_seq) {
             try {
