@@ -25,25 +25,60 @@
 #ifndef _OPENCOG_STATISTICS_ENTROPY_H
 #define _OPENCOG_STATISTICS_ENTROPY_H
 
+#include <map>
+#include <iterator>
+#include <cmath>
 #include "DataProvider.h"
 
-namespace opencog {
- namespace statistics {
+namespace opencog { namespace statistics {
 
- class Entropy
+class Entropy
+{
+public:
+ template<typename Metadata>
+ inline static void calculateEntropies(DataProvider<Metadata>* data)
  {
- public:
-     template<typename Metadata>
-     static void calculateEntropies(DataProvider<Metadata>* data);
+     std::map<std::string, StatisticData>::iterator it;
 
-     template<typename Metadata>
-     static void calculateProbabilityAndEntropies(DataProvider<Metadata>* data);
-
- };
-
-
-
+     for (int n = 1; n <= data->n_gram; ++n) {
+         for (it = data->mDataMaps[n].begin();
+              it != data->mDataMaps[n].end(); ++it) {
+             StatisticData &pieceData = it->second;
+             pieceData.entropy =
+                     (-1.0f) *
+                     pieceData.probability *
+                     (float) log2(pieceData.probability);
+         }
+     }
  }
-}
+
+/*
+ template<typename Metadata>
+ inline static void calculateProbabilityAndEntropies(DataProvider<Metadata>* data)
+ {
+     std::map<std::string,StatisticData>::iterator it;
+
+     for (int n = 1; n <= data->n_gram; ++n )
+     {
+         for( it = data->mDataMaps[n].begin();
+              it != data->mDataMaps[n].end();
+              ++it )
+         {
+             StatisticData& pieceData = it->second;
+             pieceData.probability =
+                     ((float)(pieceData.count)) /
+                     ((float)(data->mRawDataNumbers[n]));
+             pieceData.entropy =
+                     (-1.0f) *
+                     pieceData.probability *
+                     (float) log2(pieceData.probability);
+         }
+     }
+ }
+ */
+};
+
+} // namespace statistics
+} // namespace opencog
 
 #endif // _OPENCOG_STATISTICS_ENTROPY_H

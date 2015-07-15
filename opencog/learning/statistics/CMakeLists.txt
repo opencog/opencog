@@ -1,4 +1,3 @@
-
 ADD_LIBRARY (statistics SHARED
 	DataProvider
 	Probability
@@ -6,13 +5,20 @@ ADD_LIBRARY (statistics SHARED
 	InteractionInformation
 )
 
-
 TARGET_LINK_LIBRARIES (statistics
 	${COGUTIL_LIBRARY}
 )
 
 INSTALL (TARGETS statistics
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	DataProvider.h
+	Probability.h
+	Entropy.h
+	InteractionInformation.h
+	DESTINATION "include/${PROJECT_NAME}/learning/statistics"
 )
 
 # Install library
