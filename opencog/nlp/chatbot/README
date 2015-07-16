@@ -10,18 +10,15 @@ At this time, the bot is a demo of the OpenCog natural-language
 processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
 OpenCog reasoning, deduction, or anything like that.
 
-To make the chatbot to actually answer the question with a correct answer
-PLN inference should be used and that would be the next implementation step.
+To make the chatbot to actually answer the question with a correct
+answer PLN inference should be used and that would be the next
+implementation step.
 
-However, currently It can answer English-language wh-questions. In order to
-do that it uses a "fuzzy-pattern-matching".The good quality of the
-"fuzzy-pattern-matching" is if there isn't anything in the Atomspace that
-exactly matches the pattern of the Question asked,it heuristically tries to
-return something that approximately matches the pattern.
-
-Currently this is used for demo of the OpenCog NLP pipeline and after we
-hookup the reasoning system it will be used as a backup method when
-reasoning doesn't yield a decent answer.
+The chatbot can currently answer certain simple English-language
+wh-questions.  It does this by using "fuzzy-pattern-matching". This
+works by performing a fuzzy search, comparing the question to sentences
+in the atomspace: if a similar sentence is found, the fuzzy matcher
+will offer that up as an answer.  See below for additional details.
 
 Running the chatbot requires three steps:
 
@@ -65,22 +62,7 @@ Configure and run the chat bridge:
 The chatbot itself is just a simple deamon that bridges text from the
 chat system to the OpenCog server. The cogita chatbot is tailored for
 IRC chat; other chat systems could be supported in a straightforward
-manner.
-
-The IRC chatbot has an assortment of hard-coded config parameters in the
-source code.  See ../irc/CogitaConfig.cc for setable values for the
-name of the chatbot, the irc channel and irc network to join, and the
-bot ID strings, etc.  By default, it connects to the #opencog channel
-on freenode.net.
-
-The bot tries to connect to an opencog server at port 17004. This port
-number is hard-coded in ../irc/whirr-sockets.cc.
-
-After modifying the hard-coded config as desired, start the bot by
-saying "opencog/nlp/irc/cogita". It should then appear on the IRC
-channel. You can then talk to it by addressing it by name, i.e.
-prefacing comments with cog:, cogita: or cogita-bot:
-
+manner.  See the file ../irc/README for details.
 
 Architecture:
 -------------
@@ -102,11 +84,7 @@ The pipeline is as follows:
    do the same. Only after the cog-server closes its socket does cogita
    reply on the IRC channel.
 
-   ../irc/IRC.cc,.h:  C++ class for generic IRC communications.
-   ../irc/go-irc.cc:  the main guts of the cogita server
-   ../irc/whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.
-
-   Note that if the cog-server is busy, then whirr can block for an
+   Note that if the cog-server is busy, then "whirr" can block for an
    indefinitely long time. The person who is chatting will start to
    wonder about the lack of response. This is currently hacked around
    by having the chat processing periodically return to the bridge,
