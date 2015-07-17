@@ -81,7 +81,7 @@ void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const 
 
 Handle OctomapOcTree::getBlock(const BlockVector& pos) const
 {
-	return getBlock(pos, prob_hit_log);
+	return getBlock(pos, occ_prob_thres_log);
 }
 
 Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsThreshold) const
@@ -101,7 +101,7 @@ bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const
 
 bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos) const
 {
-	return checkBlockInPos(block, pos, prob_hit_log);
+	return checkBlockInPos(block, pos, occ_prob_thres_log);
 }
 
 

@@ -1,6 +1,7 @@
 #include <iterator>
 #include <string>
 
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
@@ -25,27 +26,80 @@ namespace opencog
 ===>Yes, there should only be one block entity at one time; But in atomspace there may be multiple blockentitynode have the same block, though they appear in different time..
 */
 	string getPredicate(AtomSpace& atomspace,
-						const string& predicateName,const Handle& blockHandle)throw(opencog::NotFoundException)
+						const string& predicateName,const Handle& blockHandle)
 	{
-		Handle predicateHandle = atomspace.get_handle(PREDICATE_NODE,predicateName);
-		// Create BindLink used by pattern matcher
-		std::vector<Handle> listLinkOutgoings,evaluationLinkOutgoings, bindLinkOutgoings;
+		Handle predicateNode = atomspace.get_handle(PREDICATE_NODE,predicateName);
+		if(predicateNode==Handle::UNDEFINED || 
+		   blockHandle==Handle::UNDEFINED){ return "";}
 
+		Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, "$var_any");
+		HandleSeq predicateListLinkOutgoings;
+		predicateListLinkOutgoings.push_back(blockHandle);
+		predicateListLinkOutgoings.push_back(hVariableNode);
+		Handle predicateListLink = atomspace.add_link(LIST_LINK, predicateListLinkOutgoings);
+		HandleSeq evalLinkOutgoings;
+		evalLinkOutgoings.push_back(predicateNode);
+		evalLinkOutgoings.push_back(predicateListLink);
+		Handle hEvalLink = atomspace.add_link(EVALUATION_LINK, evalLinkOutgoings);
+		HandleSeq bindLinkOutgoings;
+		bindLinkOutgoings.push_back(hVariableNode);
+		bindLinkOutgoings.push_back(hEvalLink);
+		// bindLinkOutgoings.push_back(hVariableNode);
+		Handle hBindLink = atomspace.add_link(BIND_LINK, bindLinkOutgoings);
+
+//            cout<< "hBindLink: \n" << atomspace.atomAsString(hBindLink) << std::endl;
+
+
+    // Run pattern matcher
+		Handle hResultListLink = bindlink(&atomspace, hBindLink);
+			logger().error("reslistltype %s",classserver().getTypeName(atomspace.get_type(hResultListLink)).c_str());
+			logger().error("reslistl %s",atomspace.atom_as_string(hResultListLink).c_str());
+
+		HandleSeq resultSet = atomspace.get_outgoing(hResultListLink);
+
+		atomspace.remove_atom(hResultListLink);
+		atomspace.remove_atom(hVariableNode);
+		atomspace.remove_atom(hEvalLink);
+		atomspace.remove_atom(hListLink);
+		if(resultSet.empty()){return "";}		
+		Handle result=
+		return atomspace.get_name(resultSet[0]);
+
+
+
+
+		
+		// Create BindLink used by pattern matcher
+/*		std::vector<Handle> listLinkOutgoings,evaluationLinkOutgoings, bindLinkOutgoings;
+		
 		Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, "$pred_val");
 		listLinkOutgoings.push_back(hVariableNode);
 		listLinkOutgoings.push_back(blockHandle);
+		logger().error("before add listlink");
 		Handle hListLink = atomspace.add_link(LIST_LINK,listLinkOutgoings);
 		evaluationLinkOutgoings.push_back(predicateHandle);
 		evaluationLinkOutgoings.push_back(hListLink);
+		logger().error("before add evallink");
 		Handle hEvaluationLink = atomspace.add_link(EVALUATION_LINK,evaluationLinkOutgoings);
 		bindLinkOutgoings.push_back(hVariableNode);
 		bindLinkOutgoings.push_back(hEvaluationLink);
+
 		Handle hBindLink = atomspace.add_link(BIND_LINK, bindLinkOutgoings);
 		Handle hResultListLink = bindlink(&atomspace, hBindLink);
-
-		Handle result = (LinkCast(hResultListLink)->getOutgoingSet())[0];
+		HandleSeq results=(LinkCast(hResultListLink)->getOutgoingSet());
+		logger().error("size of results %d", results.size());
+		for(auto h:results)
+		{ 
+			logger().error("restype %s",classserver().getTypeName(atomspace.get_type(h)).c_str());
+			logger().error("res %s",atomspace.get_name(h).c_str());
+		}
+		Handle result = results[0];
+		logger().error("after get outgoingset");
+		logger().error("getpred result %s",atomspace.get_name(result).c_str());
 		atomspace.remove_atom(hResultListLink);
+
 		return atomspace.get_name(result);
+*/
 	}
 }
 /*

@@ -38,37 +38,9 @@
 #include "Octree3DMapManager.h"
 using namespace opencog;
 using namespace opencog::spatial;
-/*
-namespace opencog{
-string getPredicate(AtomSpace& atomspace, const string& predicateName,const Handle& blockHandle)
-throw(opencog::NotFoundException)
-{
-	Handle predicateHandle = atomspace.get_handle(PREDICATE_NODE,predicateName);
-    // Create BindLink used by pattern matcher
-	std::vector<Handle> listLinkOutgoings,evaluationLinkOutgoings, bindLinkOutgoings;
 
-    Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, "$pred_val");
-	listLinkOutgoings.push_back(hVariableNode);
-	listLinkOutgoings.push_back(blockHandle);
-	Handle hListLink = atomspace.add_link(LIST_LINK,listLinkOutgoings);
-	evaluationLinkOutgoings.push_back(predicateHandle);
-	evaluationLinkOutgoings.push_back(hListLink);
-	Handle hEvaluationLink = atomspace.add_link(EVALUATION_LINK,evaluationLinkOutgoings);
-    bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hEvaluationLink);
-    Handle hBindLink = atomspace.add_link(BIND_LINK, bindLinkOutgoings);
-    Handle hResultListLink = bindlink(&atomspace, hBindLink);
-
-    Handle result = (LinkCast(hResultListLink)->getOutgoingSet())[0];
-    atomspace.remove_atom(hResultListLink);
-	return atomspace.get_name(result);
-}
-};
-*/
-
-
-Octree3DMapManager::Octree3DMapManager(AtomSpace& atomspace, const std::string& mapName,const unsigned& resolution, const int floorHeight):
-    mAtomSpace(&atomspace), mMapName(mapName), mFloorHeight(floorHeight)
+Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& mapName,const unsigned& resolution, const int floorHeight, const float agentHeight):
+    mAtomSpace(atomspace), mMapName(mapName), mFloorHeight(floorHeight), mAgentHeight(agentHeight)
 {	
 	mOctomapOctree = new OctomapOcTree(resolution);
     mAllUnitAtomsToBlocksMap.clear();
@@ -77,7 +49,7 @@ Octree3DMapManager::Octree3DMapManager(AtomSpace& atomspace, const std::string& 
     nonBlockEntitieshistoryLocations.clear();
     hasPerceptedMoreThanOneTimes = false;
 
-    selfAgentEntity = 0;
+    selfAgentEntity = Handle::UNDEFINED;
     enable_BlockEntity_Segmentation = false;
 
 }
@@ -104,8 +76,13 @@ Octree3DMapManager::~Octree3DMapManager()
 Octree3DMapManager* Octree3DMapManager::clone()
 {
 
-    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity, mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
+    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
     return cloneMap;
+}
+
+void Octree3DMapManager::setLogOddsOccupiedThreshold(float logOddsOccupancy)
+{
+	mOctomapOctree->setOccupancyThres(logOddsOccupancy);
 }
 
 BlockVector Octree3DMapManager::getKnownSpaceMinCoord() const
@@ -128,40 +105,12 @@ BlockVector Octree3DMapManager::getKnownSpaceDim() const
 }
 
 
-void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom, std::string _materialType, std::string _color)
+void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom)
 {
-    // First, check if this _pos is smaller than the max tree size
+	setUnitBlock(_pos,_unitBlockAtom,mOctomapOctree->getOccupancyThresLog());
 
-    if (mOctomapOctree->checkIsOutOfRange(_pos))
-    {
-        logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
-					   _pos.x,_pos.y,_pos.z);
-        return;
-    }
-
-    Handle blockHandle=mOctomapOctree->getBlock(_pos);
-    // First, check is there already a block in this position
-    if(blockHandle!=Handle::UNDEFINED)
-	{
-		logger().error("Octree3DMapManager::AddSolidUnitBlock: there has been a block at %f %f %f. cannot add this block handle",_pos.x,_pos.y,_pos.z);
-		return;
-	}
-      
-	if(_unitBlockAtom == Handle::UNDEFINED)
-	{
-		logger().error("Octree3DMapManager::AddSolidUnitBlock: handle %u is undefined. cannot add this block handle",_unitBlockAtom.value());
-		return;
-	}
-    blockHandle = _unitBlockAtom;
-    mOctomapOctree->setBlock(blockHandle, _pos, true);
-
-	mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
-	mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
-
-    mTotalUnitBlockNum ++;
-}
 	/*
-	  // Commeny on 20150713 by Yi-Shan,
+	  // Comment on 20150713 by Yi-Shan,
 	  // Because the BlockEntity feature has not designed well, 
 	  // so we comment out all the code related to BlockEntity
 	  // Once we need to use it/decide to do it, maybe we'll need the legacy code.
@@ -208,6 +157,8 @@ void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unit
     }
 	*/
 
+}
+
 
 void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
 {
@@ -219,22 +170,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
     }
 
 	BlockVector pos=it->second;
-    map<BlockVector,Handle>::iterator itp;
-    itp = mAllUnitBlocksToAtomsMap.find(pos);
-    if (itp == mAllUnitBlocksToAtomsMap.end())
-    {
-        logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
-    }
-	
-    if (mOctomapOctree->getBlock(pos)==Handle::UNDEFINED)
-    { 
-		logger().error("Octree3DMapManager::removeSolidUnitBlock: There's no block at %f,%f,%f!/n",pos.x,pos.y,pos.z);
-	}
-
-    mOctomapOctree->setBlock(Handle::UNDEFINED,pos,false);
-    mAllUnitAtomsToBlocksMap.erase(it);
-    mAllUnitBlocksToAtomsMap.erase(itp);
-    mTotalUnitBlockNum--;
+	addSolidUnitBlock(pos,Handle::UNDEFINED);
 }
 
 /*
@@ -306,40 +242,59 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
     }
 */
 
-
-
-bool Octree3DMapManager::checkIsSolid(double x, double y, double z)
+void Octree3DMapManager::setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy)
 {
-    BlockVector pos(x,y,z);
-    return checkIsSolid(pos);
+    if (mOctomapOctree->checkIsOutOfRange(_pos))
+    {
+        logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
+					   _pos.x,_pos.y,_pos.z);
+        return;
+    }
+	Handle oldBlock=mOctomapOctree->getBlock(_pos);
+	if(oldBlock==Handle::UNDEFINED && _unitBlockAtom!=Handle::UNDEFINED)
+	{ 
+		mTotalUnitBlockNum++;
+		mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
+
+	}
+	else if(oldBlock!=Handle::UNDEFINED && _unitBlockAtom==Handle::UNDEFINED)
+	{ 
+		mTotalUnitBlockNum--;
+		mAllUnitAtomsToBlocksMap.erase(oldBlock);		
+	}
+    mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
 
-bool Octree3DMapManager::checkIsSolid(const BlockVector& pos)
+bool Octree3DMapManager::checkIsSolid(const BlockVector& pos) const
 {
     Handle blockHandle=mOctomapOctree->getBlock(pos);
     return (blockHandle!=Handle::UNDEFINED);
 }
 
-bool Octree3DMapManager::checkStandable(double x, double y, double z) const
+bool Octree3DMapManager::checkIsSolid(const BlockVector& pos, float logOddsOccupancy) const
 {
-    BlockVector pos(x,y,z);
-    return checkStandable(pos);
+	Handle blockHandle=mOctomapOctree->getBlock(pos,logOddsOccupancy);
+	return (blockHandle!=Handle::UNDEFINED);
 }
-
 
 bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 {
+	return checkStandable(pos,mOctomapOctree->getOccupancyThresLog());
+}
+
+bool Octree3DMapManager::checkStandable(const BlockVector &pos, float logOddsOccupancy) const
+{
     if (mOctomapOctree->checkIsOutOfRange(pos))
     {
-        logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %d, y = %d, z= %d ! /n",
+        logger().error("checkstandable: You want to add a unit block which outside the limit of the map: at x = %d, y = %d, z= %d ! /n",
 					   pos.x,pos.y,pos.z);
         return false;
     }
 
 
     // check if there is any non-block obstacle in this pos
-    Handle blockHandle=mOctomapOctree->getBlock(pos);
-    if (blockHandle==Handle::UNDEFINED)
+    Handle blockHandle=mOctomapOctree->getBlock(pos,logOddsOccupancy);
+    if (blockHandle!=Handle::UNDEFINED)
         return false;
 
     if (pos.z <= mFloorHeight)
@@ -352,7 +307,7 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
         for (int height = 1; height < mAgentHeight; height ++)
         {
             BlockVector blockAbove(pos.x,pos.y,pos.z + height);
-            if (mOctomapOctree->getBlock(blockAbove)!=Handle::UNDEFINED)
+            if (mOctomapOctree->getBlock(blockAbove,logOddsOccupancy)!=Handle::UNDEFINED)
                 return false;
         }
     }
@@ -363,54 +318,53 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
         return true;
 
     BlockVector under(pos.x,pos.y,pos.z - 1);
-	Handle underBlock=mOctomapOctree->getBlock(under);
+	Handle underBlock=mOctomapOctree->getBlock(under,logOddsOccupancy);
     if (underBlock!=Handle::UNDEFINED)
     {
-        if (getPredicate(*mAtomSpace,"material",blockHandle) == "water")
+        if (getPredicate(*mAtomSpace,"material",underBlock) == "water")
 		{ return false;}
-		else 
-		{ return true;}
+		else { return true;}
+		
     }
 
     return false;
-}
-
-Handle Octree3DMapManager::getBlockAtLocation(double x, double y, double z)
-{
-    BlockVector pos(x,y,z);
-    return getBlockAtLocation(pos);
-
+	
 }
 
 
-Handle Octree3DMapManager::getBlockAtLocation(const BlockVector& pos)
+Handle Octree3DMapManager::getBlock(const BlockVector& pos) const
 {
     return mOctomapOctree->getBlock(pos);
 }
 
-
-// return the handle of the unit block in this position
-Handle Octree3DMapManager::getUnitBlockHandleFromPosition(const BlockVector &pos)
+Handle Octree3DMapManager::getBlock(const BlockVector& pos, float logOddsOccupancy) const
 {
-    map<BlockVector,Handle>::iterator it = mAllUnitBlocksToAtomsMap.find(pos);
-
-    if (it == mAllUnitBlocksToAtomsMap.end())
-        return Handle::UNDEFINED;
-    else
-        return (Handle)(it->second);
-
+    return mOctomapOctree->getBlock(pos,logOddsOccupancy);
 }
 
-// return the position of this unit block given its handle
-BlockVector Octree3DMapManager::getPositionFromUnitBlockHandle(const Handle &h)
+BlockVector Octree3DMapManager::getBlockLocation(const Handle& block) const
 {
-    map<Handle, BlockVector>::iterator it = mAllUnitAtomsToBlocksMap.find(h);
+	return getBlockLocation(block,mOctomapOctree->getOccupancyThresLog());
+}
+BlockVector Octree3DMapManager::getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const
+{
+
+	auto it = mAllUnitAtomsToBlocksMap.find(block);
     if (it == mAllUnitAtomsToBlocksMap.end())
-        return BlockVector::ZERO;
+	{return BlockVector::ZERO;}
     else
-        return (BlockVector)(it->second);
+	{
+		BlockVector result=it->second;		
+		if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold){ return BlockVector::ZERO;}
+		else { return result;} 
+	}
+
 }
 
+float Octree3DMapManager::getBlockLogOddsOccupancy(const BlockVector& pos) const
+{
+	return mOctomapOctree->search(pos.x,pos.y,pos.z)->getLogOdds();
+}
 
 // currently we consider all the none block entities has no collision, agents can get through them
 void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, const BlockVector& pos,bool isSelfObject, const unsigned long timestamp)
@@ -514,6 +468,82 @@ BlockVector Octree3DMapManager::getLastAppearedLocation(const Handle& entityHand
 
 }
 
+Handle Octree3DMapManager::getEntity(const BlockVector& pos) const
+{
+	auto it=mPosToNoneBlockEntityMap.find(pos);
+	if(it==mPosToNoneBlockEntityMap.end()){ return Handle::UNDEFINED;}
+	else { return it->second;}
+}
+
+BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& position, int distance, const BlockVector& startDirection , bool toBeStandOn) const
+{
+    int ztimes = 0;
+    int z ;
+    Handle block;
+
+    while (ztimes <3)
+    {
+        // we'll first search for the grids of the same high, so begin with z = 0,
+        // then search for the lower grids (z = -1), then the higher grids (z = 1)
+        if (ztimes == 0) { z = 0;}
+        else if (ztimes == 1) { z = -1;}
+        else { z = 1;}
+
+        ztimes++;
+
+        // we first search at the startdirection, if cannot find a proper position then go on with the complete search
+        BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
+        if (toBeStandOn)
+        {
+            if(checkStandable(curpos))
+			{ return curpos;}
+        }
+        else
+        {
+            if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+			{ return curpos;}
+        }
+
+        for (int dis = 1;  dis <= distance; dis++)
+        {
+
+            for (int x = 0; x <= dis; x++)
+            {
+                BlockVector curpos(position.x + x, position.y + dis,position.z + z);
+                if (toBeStandOn)
+                {
+                    if (checkStandable(curpos))
+					{ return curpos;}
+                }
+                else
+                {
+                    if (mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+					{ return curpos;}
+                }
+            }
+
+            for (int y = 0; y <= dis; y++)
+            {
+                BlockVector curpos(position.x + dis, position.y + y,position.z + z);
+                if (toBeStandOn)
+                {
+                    if(checkStandable(curpos))
+					{ return curpos;}
+                }
+                else
+                {
+                    if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+					{ return curpos;}
+                }
+            }
+
+        }
+    }
+    return BlockVector::ZERO;
+
+}
+
+
 
 /*
 const Entity3D* Octree3DMapManager::getEntity(const Handle& entityNode ) const
@@ -589,7 +619,7 @@ bool Octree3DMapManager::containsObject(const string& objectName) const
 }
 */
 
-
+/*
 bool Octree3DMapManager::containsObject(const Handle& objectNode) const
 {
 	// there are 3 kinds of object on the map: nonbLockEnitities, blocks, and blockEntities,
@@ -615,7 +645,7 @@ BlockVector Octree3DMapManager::getObjectLocation(const Handle& objNode) const
 	else { return getLastAppearedLocation(objNode);}
 
 }
-
+*/
 
 
 /*
@@ -648,74 +678,6 @@ BlockVector Octree3DMapManager::getObjectDirection(const Handle& objNode) const
 */
 
 
-BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& position, int distance, const BlockVector& startDirection , bool toBeStandOn) const
-{
-    int ztimes = 0;
-    int z ;
-    Handle block;
-
-    while (ztimes <3)
-    {
-        // we'll first search for the grids of the same high, so begin with z = 0,
-        // then search for the lower grids (z = -1), then the higher grids (z = 1)
-        if (ztimes == 0) { z = 0;}
-        else if (ztimes == 1) { z = -1;}
-        else { z = 1;}
-
-        ztimes++;
-
-        // we first search at the startdirection, if cannot find a proper position then go on with the complete search
-        BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
-        if (toBeStandOn)
-        {
-            if(checkStandable(curpos))
-			{ return curpos;}
-        }
-        else
-        {
-            if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
-			{ return curpos;}
-        }
-
-        for (int dis = 1;  dis <= distance; dis++)
-        {
-
-            for (int x = 0; x <= dis; x++)
-            {
-                BlockVector curpos(position.x + x, position.y + dis,position.z + z);
-                if (toBeStandOn)
-                {
-                    if (checkStandable(curpos))
-					{ return curpos;}
-                }
-                else
-                {
-                    if (mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
-					{ return curpos;}
-                }
-            }
-
-            for (int y = 0; y <= dis; y++)
-            {
-                BlockVector curpos(position.x + dis, position.y + y,position.z + z);
-                if (toBeStandOn)
-                {
-                    if(checkStandable(curpos))
-					{ return curpos;}
-                }
-                else
-                {
-                    if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
-					{ return curpos;}
-                }
-            }
-
-        }
-    }
-    return BlockVector::ZERO;
-
-}
-
 
 
 // this constructor is only used for clone
@@ -724,8 +686,8 @@ Octree3DMapManager::Octree3DMapManager(
 	bool _enable_BlockEntity_Segmentation,
 	string _MapName, OctomapOcTree *_OctomapOctree, int _FloorHeight,
 	int _AgentHeight,int _TotalUnitBlockNum,Handle _selfAgentEntity,
+	AtomSpace* _AtomSpace,
 	const map<Handle, BlockVector> &_AllUnitAtomsToBlocksMap,
-	const map<BlockVector, Handle> &_AllUnitBlocksToAtomsMap,
 	const set<Handle> &_AllNoneBlockEntities,
 	const multimap<BlockVector, Handle>& _PosToNoneBlockEntityMap,
 	const set<Handle>& _AllAvatarList,
@@ -738,8 +700,7 @@ Octree3DMapManager::Octree3DMapManager(
 	mOctomapOctree = new OctomapOcTree(*_OctomapOctree);
     // copy all unit blocks
     mAllUnitAtomsToBlocksMap = _AllUnitAtomsToBlocksMap;
-    mAllUnitBlocksToAtomsMap = _AllUnitBlocksToAtomsMap;
-
+	mAtomSpace=_AtomSpace;
     // copy all the NoneBlockEntities and mPosToNoneBlockEntityMap and mAllAvatarList
     mAllNoneBlockEntities.clear();
     mPosToNoneBlockEntityMap.clear();

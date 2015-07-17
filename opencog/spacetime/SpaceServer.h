@@ -127,7 +127,7 @@ public:
      * just get it and set it to be the current map, 
      * not to create a new spaceMap
      */
-    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, int _floorHeight);
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, int _floorHeight, float _agentHeight);
 
     /**
      * comment@20150520 by YiShan

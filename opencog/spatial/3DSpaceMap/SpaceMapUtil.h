@@ -15,8 +15,7 @@ namespace opencog
 	 *    getter functions
 	 */
 	string getPredicate(AtomSpace& atomSpace,
-						const string& predicateName,const Handle& blockHandle)
-		throw(opencog::NotFoundException);
+						const string& predicateName,const Handle& blockHandle);
 
 //	Handle getBlockEntity(const Handle& blockHandle);
 //	HandleSeq getComposedBlocks(const Handle& blockEntityHandle);

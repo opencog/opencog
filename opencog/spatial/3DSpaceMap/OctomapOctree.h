@@ -177,7 +177,7 @@ namespace opencog
 				}
 			};
 			// static member to ensure static initialization (only once)
-			static StaticMemberInitializer colorOcTreeMemberInit;
+			static StaticMemberInitializer octomapOcTreeMemberInit;
 		};
 
 	} // end namespace

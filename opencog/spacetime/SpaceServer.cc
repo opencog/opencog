@@ -550,7 +550,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, int _floorHeight)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, int _floorHeight, float _agentHeight)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
@@ -561,7 +561,7 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
         atomspace->set_LTI(spaceMapNode, 1);
         timeser->addTimeInfo(spaceMapNode, timestamp);
 
-        SpaceMap* newSpaceMap = new SpaceMap(*atomspace, _mapName, _resolution, _floorHeight);
+        SpaceMap* newSpaceMap = new SpaceMap(atomspace, _mapName, _resolution, _floorHeight, _agentHeight);
 
         // add into the map set
         spaceMaps.insert(map<Handle,SpaceMap*>::value_type(spaceMapNode,newSpaceMap));

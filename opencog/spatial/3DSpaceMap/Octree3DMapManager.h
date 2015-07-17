@@ -77,7 +77,7 @@ namespace opencog
         class Octree3DMapManager
         {
         public:
-			Octree3DMapManager(AtomSpace& atomspace, const string& mapName,const unsigned& resolution, const int floorHeight);
+			Octree3DMapManager(AtomSpace* atomspace, const string& mapName,const unsigned& resolution, const int floorHeight, const float agentHeight);
             ~Octree3DMapManager();
             // deep clone this octree3DMapManager and return the new instance
             Octree3DMapManager* clone();
@@ -92,6 +92,10 @@ namespace opencog
             void setAgentHeight(int _height){mAgentHeight = _height;}
             inline unsigned getTotalDepthOfOctree() const {return mOctomapOctree->getTreeDepth();}
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
+			// Note: logOdds(P)=log(P/(1-P))
+			// in octomap api it usually express probabiblity by log odds
+			inline int getLogOddsOccupiedThreshold() const {return mOctomapOctree->getOccupancyThresLog();}
+			void setLogOddsOccupiedThreshold(float logOddsOccupancy);
 			// Threshold to consider an entity next to another
 			inline double getNextDistance() const { return AccessDistance;}
 			BlockVector getKnownSpaceMinCoord() const;
@@ -102,28 +106,34 @@ namespace opencog
 			 *  public member functions about Block add/remove/query
 			 */
 
-			void addSolidUnitBlock(
-				BlockVector _pos, 
-				const Handle &_unitBlockAtom,
-				string _materialType = "", string _color = "");
+			//binary add/remove operation
+			void addSolidUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom);
             void removeSolidUnitBlock(const Handle blockHandle);
-            bool checkIsSolid(double x, double y, double z);
-            bool checkIsSolid(const BlockVector& pos);
+			//probabilistic set occupancy
+			void setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy);
+			//binary query operation
+            bool checkIsSolid(const BlockVector& pos) const;
+			//probabilistic query operation
+            bool checkIsSolid(const BlockVector& pos, float logOddsOccupancy) const;
+
             // check whether people can stand on this position or not, 
 			// which means there is no obstacle or block here
 			// and there is a block under it.
-            bool checkStandable(double x, double y, double z) const;
-            bool checkStandable(const BlockVector &pos) const;
-            Handle getBlockAtLocation(double x, double y, double z);
-			Handle getBlockAtLocation(const BlockVector& pos);
-			// For performance we especially save a map for BlockPosition and
-			// block handle before; not sure if it's necessary after we replace
-			// the old octree with octomap octree.
-            Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
-            BlockVector getPositionFromUnitBlockHandle(const Handle &h);
-			// Since we want to save info in atomspace it's not used.
-            // HandleSeq getAllUnitBlockHandlesOfABlock(Handle& _block);
 
+			// binary
+            bool checkStandable(const BlockVector &pos) const;
+			// probabilistic
+            bool checkStandable(const BlockVector &pos, float logOddsOccupancy) const;
+			// binary
+			Handle getBlock(const BlockVector& pos) const;
+			// probabilistic
+			Handle getBlock(const BlockVector& pos, float logOddsOccupancy) const;
+			// binary
+			BlockVector getBlockLocation(const Handle& block) const;
+			// probabilistic
+			BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
+
+			float getBlockLogOddsOccupancy(const BlockVector& pos) const;
 			/**
 			 *  public member functions for entity
 			 */
@@ -141,8 +151,10 @@ namespace opencog
             void updateNoneBLockEntityLocation(
 				const Handle &entityNode, BlockVector newpos, 
 			    unsigned long timestamp);
-            // get the last location this nonBlockEntity appeared
+			// note that we didn't delete the record 
+			// when calling removeNoneBlockEntity()
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
+			Handle getEntity(const BlockVector& pos) const;
 			/*
             template<typename Out>
 				Out findAllEntities(Out out) const
@@ -164,10 +176,10 @@ namespace opencog
 			 *  member functions about Object add/remove/query
 			 *  "Object" means the block,entity and blockentity
 			 */
+			
+            //BlockVector getObjectLocation(const Handle& objNode) const;
+            //BlockVector getObjectLocation(const string& objName) const;
 
-            BlockVector getObjectLocation(const Handle& objNode) const;
-            BlockVector getObjectLocation(const string& objName) const;
-            bool containsObject(const Handle& objectNode) const;
             //bool containsObject(const string& objectname) const;
             // return the Direction of the given object face to.
             // we just define the direction of block is
@@ -270,10 +282,9 @@ namespace opencog
             static const int AccessDistance = 2;
 
 
-            // We keep these 2 map for quick search. 
+            // We keep the map for quick search position. 
 			//Memory consuming: 50k blocks take about 10M RAM for one map
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
-            map<BlockVector,Handle> mAllUnitBlocksToAtomsMap;
             set<Handle> mAllNoneBlockEntities;
             set<Handle> mAllAvatarList;
             multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
@@ -300,8 +311,8 @@ namespace opencog
 							   string  _MapName,OctomapOcTree* _OctomapOctree,
 							   int _FloorHeight, int _AgentHeight,
 							   int _TotalUnitBlockNum,Handle _selfAgentEntity,
+							   AtomSpace* _AtomSpace,
 							   const map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
-                               const map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,
 							   const set<Handle>& _AllNoneBlockEntities, 
 							   const multimap<BlockVector, Handle>& _PosToNoneBlockEntityMap,
 							   const set<Handle>& _AllAvatarList,
