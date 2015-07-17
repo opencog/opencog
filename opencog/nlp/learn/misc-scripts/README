@@ -14,10 +14,11 @@ A quick overview:
 * wiki-ss-*.sh: the top-level parser script. It pulls wikipedia
   articles, one by one, from the data directory, and submits them
   for parsing and counting.  This script should be manually lanuched
-  in the 'parse' byobu window.  The data directory needs to be
-  manually adjusted here, and also in the ss-one.sh script.
+  in the 'parse' byobu window.  Be sure to open the database in the
+  cogserver, first. The data directory needs to be manually adjusted
+  here, and also in the ss-one.sh script.
 
-* ss-one.sh: the actuall sentence-splitting workhorse. It handles
+* ss-one.sh: the actual sentence-splitting workhorse. It handles
   each wikipedia article, moving the article to a different directory
   when finished with it.  Note that there are hard-coded paths in
   here, pointing to the sentence splitter.
