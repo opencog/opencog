@@ -835,6 +835,58 @@ ABORT: encoding-error
 ERROR: In procedure scm_to_stringn: Error while printing exception.
 
 
+Crash 8
+-------
+[2015-07-17 12:37:57:428] [ERROR] Caught signal 11 (Segmentation fault) on
+thread 140537051608832
+        Stack Trace:
+        2: basic_string.h:539   ~basic_string()
+        3: CogServerMain.cc:79  _Z7sighandi()
+        4: ??:0 killpg()
+        5: ??:0 scm_make_vm()
+        6: ??:0 GC_mark_from()
+        7: ??:0 GC_mark_some()
+        8: ??:0 GC_stopped_mark()
+        9: ??:0 GC_try_to_collect_inner()
+        10: ??:0        GC_collect_or_expand()
+        11: ??:0        GC_allocobj()
+        12: ??:0        GC_generic_malloc_inner()
+        13: ??:0        GC_register_finalizer_inner()
+        14: ??:0        scm_closedir()
+        15: ??:0        scm_i_new_smob()
+        16: smob.h:91   scm_new_smob()
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_1()
+        19: ??:0        scm_vm_engine()
+        20: ??:0        scm_call_3()
+        21: ??:0        scm_vm_engine()
+        22: ??:0        scm_call_1()
+        23: ??:0        scm_vm_engine()
+        24: ??:0        scm_call_3()
+        25: ??:0        scm_vm_engine()
+        26: ??:0        scm_call_4()
+        27: SchemeEval.cc:606     opencog::SchemeEval::do_eval(std::string
+const&)
+        28: SchemeEval.cc:535     opencog::SchemeEval::c_wrap_eval(void*)
+        29: ??:0        scm_at_abort()
+        30: ??:0        scm_vm_engine()
+        31: ??:0        scm_call_4()
+        32: ??:0        scm_at_abort()
+        33: ??:0        scm_c_with_continuation_barrier()
+        34: ??:0        GC_call_with_gc_active()
+        35: ??:0        scm_current_processor_count()
+        36: ??:0        GC_call_with_stack_base()
+        37: ??:0        scm_with_guile()
+        38: SchemeEval.cc:502     opencog::SchemeEval::eval_expr(std::string
+const&)
+        39: basic_string.h:293    std::string::_M_data() const
+        40: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
+>, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
+        41: ??:0        start_thread()
+        42: ??:0        clone()
+
+
 
 Performance
 -----------
@@ -947,7 +999,15 @@ LXC container on gnucash.org
 
 AtomSpace.cc line 303
 
+LXC container on backlot
+------------------------
+nlp-base and nlp-server (currently used by rohit)
+morf-server (currrently used by ainish)
 
 LXC container on fanny
 ----------------------
-
+ssh learn@10.0.3.182
+cd src/learn
+./run-all-servers.sh
+tmux attach
+psql en_pairs
