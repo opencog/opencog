@@ -42,47 +42,56 @@ OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
 OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
 
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y,
-											   const double& z, const Handle& blockHandle) 
+											   const double& z, const Handle& block) 
 {
 	point3d pos(x,y,z);
-	return setNodeBlock(pos, blockHandle);
+	return setNodeBlock(pos, block);
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& blockHandle) 
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& block) 
 {
 	OcTreeKey key;
 	if (!this->coordToKeyChecked(pos, key)) return NULL;
-	return setNodeBlock(key, blockHandle);
+	return setNodeBlock(key, block);
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& blockHandle)
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& block)
 {
     OctomapOcTreeNode* n = search(key);
     if (n != NULL) 
 	{
-		n->setBlock(blockHandle); 
+		n->setBlock(block); 
     }
     return n;
 }
 
-//assume the block parameter has pointed to an block instance
-//But it seems no way to check if poitner is valid.
-//I think we should use smart pointer here, but that needs lots of refactor work..
-void OctomapOcTree::addSolidBlock(const Handle& blockHandle, const BlockVector& pos)
+
+void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied)
 {
-	
-	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode!=NULL && blocknode->getBlock()!=Handle::UNDEFINED)
-	{
-		logger().error("There has been a block at %f,%f,%f. Can't add solid block.",pos.x,pos.y,pos.z);
-		return;
-	}
-	
-	this->updateNode(pos.x,pos.y,pos.z,true);
-	this->setNodeBlock(pos.x,pos.y,pos.z,blockHandle);
+	this->updateNode(pos.x,pos.y,pos.z,isOccupied);
+	this->setNodeBlock(pos.x,pos.y,pos.z,block);
 }
+void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate)
+{
+	this->updateNode(pos.x,pos.y,pos.z,float(logOddsOccupancyUpdate));
+	this->setNodeBlock(pos.x,pos.y,pos.z,block);	
+}
+
+Handle OctomapOcTree::getBlock(const BlockVector& pos) const
+{
+	return getBlock(pos, prob_hit_log);
+}
+
+Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsThreshold) const
+{
+	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
+	if(blocknode==NULL || blocknode->getLogOdds() < logOddsThreshold)
+	{ return Handle::UNDEFINED;}
+	else { return blocknode->getBlock();}
+}
+
 
 bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const 
 {
@@ -90,31 +99,18 @@ bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const
 	return !coordToKeyChecked(pos.x,pos.y,pos.z,key);
 }
 
-bool OctomapOcTree::checkIsSolid(const BlockVector& pos, Handle& blockHandle) const
+bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos) const
 {
-	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode==NULL || blocknode->getBlock()==NULL)
-	{
-		blockHandle=Handle::UNDEFINED;
-		return false;
-	}
-	else
-	{
-		blockHandle=blocknode->getBlock();
-		return true;
-	}
+	return checkBlockInPos(block, pos, prob_hit_log);
 }
 
-bool OctomapOcTree::checkBlockInPos(const BlockVector& pos, const Handle& block) const
+
+bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsThreshold) const
 {
 	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode==NULL || blocknode->getBlock()!=block){ return false;}
+	if(blocknode==NULL || blocknode->getLogOdds()<logOddsThreshold || 
+	   blocknode->getBlock()!=block){ return false;}
 	else{ return true;}
-}
-
-bool OctomapOcTree::removeAnUnitSolidBlock(const BlockVector& pos,unsigned depth)
-{
-	return this->deleteNode(pos.x,pos.y,pos.z,depth);
 }
 
 /*

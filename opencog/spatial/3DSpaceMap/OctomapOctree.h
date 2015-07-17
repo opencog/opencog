@@ -74,9 +74,9 @@ namespace opencog
 				return true;
 			}
 
-			void setBlock(const Handle& blockHandle)
+			void setBlock(const Handle& block)
 			{
-				mblockHandle=blockHandle;
+				mblockHandle=block;
 			}
 
 			const Handle getBlock() const
@@ -109,24 +109,38 @@ namespace opencog
 			std::string getTreeType() const {return "OctomapOcTree";}
    
 			// set node color at given key or coordinate. Replaces previous color.
-			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& blockHandle);
-			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& blockHandle); 
-			OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & blockHandle);
+			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
+			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block); 
+			OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & block);
 
-			// Move the Opencog Octree legacy API here
-			void addSolidBlock(const Handle& blockHandle, const BlockVector& pos);
-			//  Remove an unit block at a given position from the octree system
-			//  return false if block not exists.
-			bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
+
+			// If you want to express binary adding/removing block, use this.
+			void setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied);
+			// add logOddsOccupancyUpdate value to the block log odds value
+			// and set the block handle in pos
+			// Note that you can control the threshold of log odds occupancy by
+			// OctomapOcTree::setOccupancyThres
+			void setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate);
+			
 			//  check if the block is out of octree's max size
 			bool checkIsOutOfRange(const BlockVector& pos) const;
-			
-			// Check whether this position has been filled by a solid block,
-			// If the block is in the unknown space it'll also return false
-			// pos is input para, block is output para
-			// if solid, return the block in @ block
-			bool checkIsSolid(const BlockVector& pos, Handle& block) const;
-			bool checkBlockInPos(const BlockVector& pos, const Handle& block) const;
+
+			//  use prob_hit_log(see octomap doc) as threshold
+			Handle getBlock(const BlockVector& pos) const;			
+			//  get block in pos. If occupancy(log odds) larger than threshold
+			//  It will return the block (including undefined handle) in pos; 
+			//  If smaller than threshold, it'll return Handle::UNDEFINED
+			//  default threshold is the prob_hit_log which is the default 
+			//  octomap log odds threshold.
+			Handle getBlock(const BlockVector& pos, const float logOddsThreshold) const;
+			//  use prob_hit_log(see octomap doc) as threshold
+			bool checkBlockInPos(const Handle& block, const BlockVector& pos) const;
+			//  check the block is in the position,
+			//  Noth that even there's a block in that pos, 
+			//  if the handle is not equal it still return false.
+			bool checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsThreshold) const;
+
+
 /*
 // Comment on 20150713 by Yi-Shan,
 // The following is old public functions about BlockEntity add/remove/query

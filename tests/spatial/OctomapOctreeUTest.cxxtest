@@ -1,0 +1,106 @@
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
+#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+#include <opencog/util/Logger.h>
+
+using namespace octomap;
+using namespace opencog;
+using namespace opencog::spatial;
+
+class OctomapOctreeUTest : public CxxTest::TestSuite
+{
+	
+public:
+
+	AtomSpace as;
+	OctomapOcTree* testOctree;
+	
+	void setUp()
+	{
+		testOctree= new OctomapOcTree(1);
+	}
+	void tearDown()
+	{
+		as.clear();
+		delete testOctree;
+	}
+	void testSetBlockBinaryOccupancy()
+	{
+		// test binary Occupancy
+		BlockVector testpos1(3,4,5);
+		Handle testBlock1= as.add_node(STRUCTURE_NODE,"block123");
+		testOctree->setBlock(testBlock1,testpos1,true);
+		TS_ASSERT(testOctree->checkBlockInPos(testBlock1,testpos1)==true);
+		Handle testBlock2=testOctree->getBlock(testpos1);
+		TS_ASSERT(testBlock2==testBlock1);
+		testOctree->setBlock(testBlock1,testpos1,false);
+		TS_ASSERT(testOctree->getBlock(testpos1)==Handle::UNDEFINED);
+		TS_ASSERT(testOctree->checkBlockInPos(testBlock1,testpos1)==false);
+	}
+
+	void testSetBlockLogOddsOccupancy()
+	{
+		BlockVector testpos1(3,4,5);
+		Handle testBlock1= as.add_node(STRUCTURE_NODE,"block123");
+		testOctree->setBlock(testBlock1,testpos1,true);
+		logger().error("testblock1 log odds %f before",testOctree->search(testpos1.x,testpos1.y,testpos1.z)->getLogOdds());
+		testOctree->setBlock(testBlock1,testpos1,
+							 float(testOctree->getProbHitLog()-testOctree->search(testpos1.x,testpos1.y,testpos1.z)->getLogOdds()-0.1));
+		logger().error("testblock1 log odds %f after",testOctree->search(testpos1.x,testpos1.y,testpos1.z)->getLogOdds());
+		logger().error("prob_hit_log %f",testOctree->getProbHitLog());
+		TS_ASSERT(testOctree->getBlock(testpos1)==Handle::UNDEFINED);
+		TS_ASSERT(testOctree->checkBlockInPos(testBlock1,testpos1)==false);
+
+	}
+
+	void testGetBlockBinaryOccupancy()
+	{
+		BlockVector testpos1(3,4,5);
+		Handle testBlock1= as.add_node(STRUCTURE_NODE,"block123");
+		testOctree->setBlock(testBlock1,testpos1,true);
+		TS_ASSERT(testOctree->getBlock(testpos1)==testBlock1);
+		
+		// check the near block is empty
+		for(int i=0;i!=2;i++)
+		{
+			for(int j=0;j!=2;j++)
+			{
+				for(int k=0;k!=2;k++)
+				{
+					BlockVector pos(i+3,j+4,k+5);
+					if(pos!=testpos1)
+					{ TS_ASSERT(testOctree->getBlock(pos)==Handle::UNDEFINED);}
+				}
+			}
+		}
+	}
+	void testGetBLogOddsnaryOccupancy()
+	{
+		BlockVector testpos1(3,4,5);
+		Handle testBlock1= as.add_node(STRUCTURE_NODE,"block123");
+		testOctree->setBlock(testBlock1,testpos1,true);
+		TS_ASSERT(testOctree->getBlock(testpos1,testOctree->getProbHitLog())==testBlock1);
+		
+		// check the near block is empty
+		for(int i=0;i!=2;i++)
+		{
+			for(int j=0;j!=2;j++)
+			{
+				for(int k=0;k!=2;k++)
+				{
+					BlockVector pos(i+3,j+4,k+5);
+					if(pos!=testpos1)
+					{ TS_ASSERT(testOctree->getBlock(pos,testOctree->getProbHitLog())==Handle::UNDEFINED);}
+				}
+			}
+		}
+		TS_ASSERT((testOctree->getBlock(testpos1,testOctree->search(testpos1.x,testpos1.y,testpos1.z)->getLogOdds()+0.1)==Handle::UNDEFINED))
+
+	}
+
+
+};

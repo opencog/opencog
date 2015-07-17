@@ -139,9 +139,9 @@ void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unit
         return;
     }
 
-    Handle blockHandle;
+    Handle blockHandle=mOctomapOctree->getBlock(_pos);
     // First, check is there already a block in this position
-    if(mOctomapOctree->checkBlockInPos(_pos, _unitBlockAtom))
+    if(blockHandle!=Handle::UNDEFINED)
 	{
 		logger().error("Octree3DMapManager::AddSolidUnitBlock: there has been a block at %f %f %f. cannot add this block handle",_pos.x,_pos.y,_pos.z);
 		return;
@@ -153,7 +153,7 @@ void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unit
 		return;
 	}
     blockHandle = _unitBlockAtom;
-    mOctomapOctree->addSolidBlock(blockHandle, _pos);
+    mOctomapOctree->setBlock(blockHandle, _pos, true);
 
 	mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
 	mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
@@ -226,12 +226,12 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
         logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
     }
 	
-    if (! mOctomapOctree->checkBlockInPos(pos, blockHandle))
+    if (mOctomapOctree->getBlock(pos)==Handle::UNDEFINED)
     { 
 		logger().error("Octree3DMapManager::removeSolidUnitBlock: There's no block at %f,%f,%f!/n",pos.x,pos.y,pos.z);
 	}
 
-    mOctomapOctree->removeAnUnitSolidBlock(pos);
+    mOctomapOctree->setBlock(Handle::UNDEFINED,pos,false);
     mAllUnitAtomsToBlocksMap.erase(it);
     mAllUnitBlocksToAtomsMap.erase(itp);
     mTotalUnitBlockNum--;
@@ -316,8 +316,8 @@ bool Octree3DMapManager::checkIsSolid(double x, double y, double z)
 
 bool Octree3DMapManager::checkIsSolid(const BlockVector& pos)
 {
-    Handle blockHandle;
-    return (mOctomapOctree->checkIsSolid(pos, blockHandle));
+    Handle blockHandle=mOctomapOctree->getBlock(pos);
+    return (blockHandle!=Handle::UNDEFINED);
 }
 
 bool Octree3DMapManager::checkStandable(double x, double y, double z) const
@@ -338,8 +338,8 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 
 
     // check if there is any non-block obstacle in this pos
-    Handle blockHandle;
-    if (mOctomapOctree->checkIsSolid(pos,blockHandle))
+    Handle blockHandle=mOctomapOctree->getBlock(pos);
+    if (blockHandle==Handle::UNDEFINED)
         return false;
 
     if (pos.z <= mFloorHeight)
@@ -352,7 +352,7 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
         for (int height = 1; height < mAgentHeight; height ++)
         {
             BlockVector blockAbove(pos.x,pos.y,pos.z + height);
-            if (mOctomapOctree->checkIsSolid(blockAbove,blockHandle))
+            if (mOctomapOctree->getBlock(blockAbove)!=Handle::UNDEFINED)
                 return false;
         }
     }
@@ -363,7 +363,8 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
         return true;
 
     BlockVector under(pos.x,pos.y,pos.z - 1);
-    if (mOctomapOctree->checkIsSolid(under,blockHandle))
+	Handle underBlock=mOctomapOctree->getBlock(under);
+    if (underBlock!=Handle::UNDEFINED)
     {
         if (getPredicate(*mAtomSpace,"material",blockHandle) == "water")
 		{ return false;}
@@ -384,10 +385,7 @@ Handle Octree3DMapManager::getBlockAtLocation(double x, double y, double z)
 
 Handle Octree3DMapManager::getBlockAtLocation(const BlockVector& pos)
 {
-    Handle blockHandle;
-    mOctomapOctree->checkIsSolid(pos, blockHandle);
-
-    return blockHandle;
+    return mOctomapOctree->getBlock(pos);
 }
 
 
@@ -660,12 +658,9 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
     {
         // we'll first search for the grids of the same high, so begin with z = 0,
         // then search for the lower grids (z = -1), then the higher grids (z = 1)
-        if (ztimes == 0)
-            z = 0;
-        else if (ztimes == 1)
-            z = -1;
-        else
-            z = 1;
+        if (ztimes == 0) { z = 0;}
+        else if (ztimes == 1) { z = -1;}
+        else { z = 1;}
 
         ztimes++;
 
@@ -673,13 +668,13 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
         BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
         if (toBeStandOn)
         {
-            if (checkStandable(curpos))
-                return curpos;
+            if(checkStandable(curpos))
+			{ return curpos;}
         }
         else
         {
-            if (! mOctomapOctree->checkIsSolid(curpos,block))
-                return curpos;
+            if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+			{ return curpos;}
         }
 
         for (int dis = 1;  dis <= distance; dis++)
@@ -691,12 +686,12 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
                 if (toBeStandOn)
                 {
                     if (checkStandable(curpos))
-                        return curpos;
+					{ return curpos;}
                 }
                 else
                 {
-                    if (! mOctomapOctree->checkIsSolid(curpos,block))
-                        return curpos;
+                    if (mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+					{ return curpos;}
                 }
             }
 
@@ -705,13 +700,13 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
                 BlockVector curpos(position.x + dis, position.y + y,position.z + z);
                 if (toBeStandOn)
                 {
-                    if (checkStandable(curpos))
-                        return curpos;
+                    if(checkStandable(curpos))
+					{ return curpos;}
                 }
                 else
                 {
-                    if (! mOctomapOctree->checkIsSolid(curpos,block))
-                        return curpos;
+                    if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
+					{ return curpos;}
                 }
             }
 
@@ -937,6 +932,7 @@ BlockEntity* Octree3DMapManager::getBlockEntityInPos(BlockVector& _pos) const
     Block3D* block;
     // First, check is there already a block in this position
     if (! mOctomapOctree->checkIsSolid(_pos, block))
+
         return 0;
     return (block->mBlockEntity);
 }
