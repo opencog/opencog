@@ -20,7 +20,7 @@
     (define (sentence-node)
         (if (cog-atom? input-sentence)
             (if (equal? 'SentenceNode (cog-type input-sentence))
-                (input-sentence)
+                input-sentence
                 (display "Please input a SentenceNode only")
             )
             (car (nlp-parse input-sentence))
