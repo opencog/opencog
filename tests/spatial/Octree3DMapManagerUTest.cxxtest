@@ -61,8 +61,8 @@ public:
 		BlockVector testpos1(17,28,39);
 		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
 		testMap->addNoneBlockEntity(testHandle1,testpos1,
-									!entityIsSelf, !entityIsAvatar, 
-									12345678892);
+					!entityIsSelf, !entityIsAvatar, 
+					12345678892);
 		Handle testHandle2=testMap->getEntity(testpos1);
 		TS_ASSERT(testHandle1==testHandle2);
 		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
@@ -84,7 +84,7 @@ public:
 			BlockVector testpos1(count,count,count);
 			Handle testHandle1=as.add_node(ENTITY_NODE,countstr);
 			testMap->addNoneBlockEntity(testHandle1,testpos1,
-										!entityIsSelf, !entityIsAvatar, 12345678892);
+						!entityIsSelf, !entityIsAvatar, 12345678892);
 			Handle testHandle2=testMap->getEntity(testpos1);
 			TS_ASSERT(testHandle1==testHandle2);
 			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
