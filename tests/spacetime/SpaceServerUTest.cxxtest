@@ -83,9 +83,9 @@ public:
 
 		logger().error("1/4");
 		testspaceserver->addSpaceInfo(testobjecthandle,testmaphandle,
-												   false,false,
-												   234567,
-												   9,10,11);
+					   false,false,
+					   234567,
+					   9,10,11);
 		logger().error("half");
 		const SpaceServer::SpaceMap& testmap=testspaceserver->getMap(testmaphandle);
 		TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9,10,11)),testobjecthandle)
