@@ -1,29 +1,68 @@
-from libcpp cimport bool
-from libcpp.vector cimport vector
-from cython.operator cimport dereference as deref, preincrement as inc
+from cython.operator cimport dereference as deref
 
-# @todo use the guide here to separate out into a hierarchy
-# http://wiki.cython.org/PackageHierarchy
+from opencog.atomspace cimport AtomSpace,Handle,TruthValue
+from opencog.spatial import Octree3DMapManager as SpaceMap
 
-cdef class SpaceServer:
-    cdef cSpaceServer *spaceserver
-
-    def __init__(self):
-        #self.spaceserver = &spaceserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the CogServer takes care of cleaning up
-        pass
+#TO DEBUG:if we import opencog.spacetime before opencog.atomspace,
+#once we get an undefined handle h1 in python, which UUID is -1
+#then call h.is_undefined() method, it will return false!!
+#After check the uuid of h1 and h1.h.UNDEFINED.value(),the latter becomes 0
+#inside the is_undefined function!!
+#It's strange, but I don't know how to debug this,
+#to prevent this, you can choose import spacetime after the opencog.atomspace
+#(but it will cause spacetime atom types not included in atomspace.types)
+#or you can choose to check if it's undefined by h.value()==-1
 
 
 cdef class TimeServer:
-    cdef cTimeServer *timeserver
+    cdef cTimeServer* ctimeserver
 
-    def __cinit__(self):
-        #self.timeserver = &timeserver
-        pass
+    def __cinit__(self,AtomSpace _a, SpaceServer _ss):
+        self.ctimeserver= new cTimeServer(deref((<AtomSpace>_a).atomspace),_ss.cspaceserver)
 
     def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
-        pass
+        if self.ctimeserver:
+            del self.ctimeserver
+
+    def addTimeInfo(self,Handle h,timestamp, TruthValue tv=TruthValue(1.0,1.0e35)):
+        cdef cHandle cattimelinkhandle = self.ctimeserver.addTimeInfo(deref((<Handle>h).h),timestamp, deref(tv._tvptr()))
+        return Handle(cattimelinkhandle.value())
+
+
+cdef class SpaceServer:
+
+    cdef cSpaceServer *cspaceserver
+    def __cinit__(self,AtomSpace _a):
+        self.cspaceserver= new cSpaceServer(deref((<AtomSpace>_a).atomspace))
+    def __dealloc__(self):
+        if self.cspaceserver:
+            self.cspaceserver.clear()
+            del self.cspaceserver
+
+    def getMap(self,Handle handle):
+        mapinstance=SpaceMap(<long>(&(self.cspaceserver.getMap(deref((<Handle>handle).h)))))
+        return mapinstance
+    
+    def addMap(self,timestamp, mapName, resolution, infloorHeight, agentHeight):
+        cdef string cmapName=mapName.encode('UTF-8')
+        cdef cHandle ch=self.cspaceserver.addOrGetSpaceMap(timestamp, cmapName, resolution, infloorHeight, agentHeight)
+        pyhandle=Handle(ch.value())
+        return pyhandle
+    
+    def addMapInfo(self,Handle objectNode,Handle spacemapNode,
+                   isSelfObject,isAvatarEntity, timestamp,
+                      objX, objY, objZ):
+        cdef bool b=isSelfObject
+        cdef bool ret=self.cspaceserver.addSpaceInfo(deref((<Handle>objectNode).h),deref((<Handle>spacemapNode).h),isSelfObject,isAvatarEntity,timestamp,
+                      objX, objY, objZ)
+        return ret
+
+    
+    def removeMapInfo(self,Handle objectNode,Handle spacemapNode,timestamp):
+        self.cspaceserver.removeSpaceInfo(deref((<Handle>objectNode).h),deref((<Handle>spacemapNode).h),timestamp)
+
+    def clear(self):
+        self.cspaceserver.clear()
+    
+    def setTimeServer(self,TimeServer timeserver):
+        self.cspaceserver.setTimeServer(timeserver.ctimeserver)
