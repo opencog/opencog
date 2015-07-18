@@ -42,14 +42,14 @@ Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& 
     mAtomSpace(atomspace), mMapName(mapName), mFloorHeight(floorHeight), mAgentHeight(agentHeight)
 {	
 	mOctomapOctree = new OctomapOcTree(resolution);
-    mAllUnitAtomsToBlocksMap.clear();
-    mAllNoneBlockEntities.clear();
-    mPosToNoneBlockEntityMap.clear();
-    nonBlockEntitieshistoryLocations.clear();
-    hasPerceptedMoreThanOneTimes = false;
+    	mAllUnitAtomsToBlocksMap.clear();
+    	mAllNoneBlockEntities.clear();
+    	mPosToNoneBlockEntityMap.clear();
+    	nonBlockEntitieshistoryLocations.clear();
+    	hasPerceptedMoreThanOneTimes = false;
 
-    selfAgentEntity = Handle::UNDEFINED;
-    enable_BlockEntity_Segmentation = false;
+    	selfAgentEntity = Handle::UNDEFINED;
+    	enable_BlockEntity_Segmentation = false;
 
 }
 
@@ -74,9 +74,8 @@ Octree3DMapManager::~Octree3DMapManager()
 
 Octree3DMapManager* Octree3DMapManager::clone()
 {
-
-    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
-    return cloneMap;
+    	Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
+    	return cloneMap;
 }
 
 void Octree3DMapManager::setLogOddsOccupiedThreshold(float logOddsOccupancy)
@@ -106,7 +105,6 @@ BlockVector Octree3DMapManager::getKnownSpaceDim() const
 
 void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom)
 {
-	logger().error("in solidunitblock");
 	float occupiedthres=mOctomapOctree->getOccupancyThresLog();
 	setUnitBlock(_pos,_unitBlockAtom,occupiedthres);
 
@@ -115,8 +113,8 @@ void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unit
 	  // Because the BlockEntity feature has not designed well, 
 	  // so we comment out all the code related to BlockEntity
 	  // Once we need to use it/decide to do it, maybe we'll need the legacy code.
-    if (this->enable_BlockEntity_Segmentation)
-    {
+    	if (this->enable_BlockEntity_Segmentation)
+    	{
         // first find all the entities will combined to this new block
         HandleSeq entities = mOctomapOctree->getNeighbourEntities(_pos);
         if (entities.size() == 0)
@@ -163,12 +161,12 @@ void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unit
 
 void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
 {
-    map<Handle, BlockVector>::iterator it;
-    it = mAllUnitAtomsToBlocksMap.find(blockHandle);
-    if (it == mAllUnitAtomsToBlocksMap.end())
-    {
-        logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
-    }
+    	map<Handle, BlockVector>::iterator it;
+    	it = mAllUnitAtomsToBlocksMap.find(blockHandle);
+    	if (it == mAllUnitAtomsToBlocksMap.end())
+    	{
+        	logger().error("Octree3DMapManager::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
+    	}
 
 	BlockVector pos=it->second;
 	addSolidUnitBlock(pos,Handle::UNDEFINED);
@@ -245,13 +243,12 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
 
 void Octree3DMapManager::setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy)
 {
-	logger().error("start set");
-    if (mOctomapOctree->checkIsOutOfRange(_pos))
-    {
-        logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
-					   _pos.x,_pos.y,_pos.z);
-        return;
-    }
+    	if (mOctomapOctree->checkIsOutOfRange(_pos))
+    	{
+        	logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
+				   _pos.x,_pos.y,_pos.z);
+        	return;
+    	}
 	Handle oldBlock=mOctomapOctree->getBlock(_pos);
 	logger().error("middle set");
 	if(oldBlock==Handle::UNDEFINED && _unitBlockAtom!=Handle::UNDEFINED)
@@ -265,14 +262,13 @@ void Octree3DMapManager::setUnitBlock(BlockVector _pos, const Handle& _unitBlock
 		mTotalUnitBlockNum--;
 		mAllUnitAtomsToBlocksMap.erase(oldBlock);		
 	}
-    mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
-	logger().error("end set");
+    	mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
 
 bool Octree3DMapManager::checkIsSolid(const BlockVector& pos) const
 {
-    Handle blockHandle=mOctomapOctree->getBlock(pos);
-    return (blockHandle!=Handle::UNDEFINED);
+    	Handle blockHandle=mOctomapOctree->getBlock(pos);
+    	return (blockHandle!=Handle::UNDEFINED);
 }
 
 bool Octree3DMapManager::checkIsSolid(const BlockVector& pos, float logOddsOccupancy) const
@@ -288,64 +284,64 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 
 bool Octree3DMapManager::checkStandable(const BlockVector &pos, float logOddsOccupancy) const
 {
-    if (mOctomapOctree->checkIsOutOfRange(pos))
-    {
-        logger().error("checkstandable: You want to add a unit block which outside the limit of the map: at x = %d, y = %d, z= %d ! /n",
-					   pos.x,pos.y,pos.z);
-        return false;
-    }
+    	if (mOctomapOctree->checkIsOutOfRange(pos))
+    	{
+        	logger().error("checkstandable: You want to add a unit block which outside the limit of the map: at x = %d, y = %d, z= %d ! /n",
+				   pos.x,pos.y,pos.z);
+        	return false;
+    	}
 
 
-    // check if there is any non-block obstacle in this pos
-    Handle blockHandle=mOctomapOctree->getBlock(pos,logOddsOccupancy);
-    if (blockHandle!=Handle::UNDEFINED)
-        return false;
+    	// check if there is any non-block obstacle in this pos
+    	Handle blockHandle=mOctomapOctree->getBlock(pos,logOddsOccupancy);
+    	if (blockHandle!=Handle::UNDEFINED)
+        	return false;
 
-    if (pos.z <= mFloorHeight)
-        return false;
+    	if (pos.z <= mFloorHeight)
+        	return false;
 
-    // because the agent has a height,
-    // we should check if there are enough room above this pos for this agent to stand on
-    if (mAgentHeight > 1)
-    {
-        for (int height = 1; height < mAgentHeight; height ++)
-        {
-            BlockVector blockAbove(pos.x,pos.y,pos.z + height);
-            if (mOctomapOctree->getBlock(blockAbove,logOddsOccupancy)!=Handle::UNDEFINED)
-                return false;
-        }
-    }
+    	// because the agent has a height,
+    	// we should check if there are enough room above this pos for this agent to stand on
+    	if (mAgentHeight > 1)
+    	{
+        	for (int height = 1; height < mAgentHeight; height ++)
+        	{
+            		BlockVector blockAbove(pos.x,pos.y,pos.z + height);
+            		if (mOctomapOctree->getBlock(blockAbove,logOddsOccupancy)!=Handle::UNDEFINED)
+                	return false;
+        	}
+    	}
 
-    // because there are too many blocks for the whole floor, we don't send these floor blocks to opencog
-    // so we just check if the pos height is just on the floor.
-    if ( (pos.z - mFloorHeight) == 1)
-        return true;
+    	// because there are too many blocks for the whole floor, we don't send these floor blocks to opencog
+    	// so we just check if the pos height is just on the floor.
+    	if ( (pos.z - mFloorHeight) == 1)
+        	return true;
 
-    BlockVector under(pos.x,pos.y,pos.z - 1);
+    	BlockVector under(pos.x,pos.y,pos.z - 1);
 	Handle underBlock=mOctomapOctree->getBlock(under,logOddsOccupancy);
-    if (underBlock!=Handle::UNDEFINED)
-    {
-		//TODO:Judge if this block is standable
-		//if agent can't stand on it (ex.water/lava)return false
-        //if (getPredicate(*mAtomSpace,"material",underBlock) == "water")
-		//{ return false;}
-		return true;
-		
-    }
+    	if (underBlock!=Handle::UNDEFINED)
+    	{
+			//TODO:Judge if this block is standable
+			//if agent can't stand on it (ex.water/lava)return false
+		 //if (getPredicate(*mAtomSpace,"material",underBlock) == "water")
+			//{ return false;}
+			return true;
+			
+    	}	
 
-    return false;
+    	return false;
 	
 }
 
 
 Handle Octree3DMapManager::getBlock(const BlockVector& pos) const
 {
-    return mOctomapOctree->getBlock(pos);
+    	return mOctomapOctree->getBlock(pos);
 }
 
 Handle Octree3DMapManager::getBlock(const BlockVector& pos, float logOddsOccupancy) const
 {
-    return mOctomapOctree->getBlock(pos,logOddsOccupancy);
+    	return mOctomapOctree->getBlock(pos,logOddsOccupancy);
 }
 
 BlockVector Octree3DMapManager::getBlockLocation(const Handle& block) const
@@ -356,9 +352,9 @@ BlockVector Octree3DMapManager::getBlockLocation(const Handle& block, float logO
 {
 
 	auto it = mAllUnitAtomsToBlocksMap.find(block);
-    if (it == mAllUnitAtomsToBlocksMap.end())
+    	if (it == mAllUnitAtomsToBlocksMap.end())
 	{return BlockVector::ZERO;}
-    else
+    	else
 	{
 		BlockVector result=it->second;		
 		if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold){ return BlockVector::ZERO;}
@@ -376,35 +372,32 @@ float Octree3DMapManager::getBlockLogOddsOccupancy(const BlockVector& pos) const
 void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, const BlockVector& pos,bool isSelfObject, bool isAvatarEntity, const unsigned long timestamp)
 {
 	auto it= mAllNoneBlockEntities.find(entityNode);    
-    if (it == mAllNoneBlockEntities.end())
-    {
-        mAllNoneBlockEntities.insert(entityNode);
-        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(pos,entityNode));
-        if (isSelfObject){ selfAgentEntity = entityNode;}
-        if (isAvatarEntity){ mAllAvatarList.insert(entityNode);}
-
+    	if (it == mAllNoneBlockEntities.end())
+    	{
+        	mAllNoneBlockEntities.insert(entityNode);
+        	mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(pos,entityNode));
+        	if (isSelfObject){ selfAgentEntity = entityNode;}
+        	if (isAvatarEntity){ mAllAvatarList.insert(entityNode);}
 		_addNonBlockEntityHistoryLocation(entityNode,pos, timestamp);
-    }
-    else{ updateNoneBLockEntityLocation(entityNode,pos,timestamp);}
+    	}
+    	else{ updateNoneBLockEntityLocation(entityNode,pos,timestamp);}
 }
-
-
 
 void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
 {
-    auto it = nonBlockEntitieshistoryLocations.find(entityHandle);
-    if (it == nonBlockEntitieshistoryLocations.end())
-    {
-        vector< pair< unsigned long,BlockVector> > newVector;
-        newVector.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
-        nonBlockEntitieshistoryLocations.insert(map< Handle, vector< pair<unsigned long,BlockVector> > >::value_type(entityHandle,newVector));
-    }
-    else
-    {
-        vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
-        if (newLocation == (oneEntityHistories.back()).second)
+    	auto it = nonBlockEntitieshistoryLocations.find(entityHandle);
+    	if (it == nonBlockEntitieshistoryLocations.end())
+    	{
+	        vector< pair< unsigned long,BlockVector> > newVector;
+        	newVector.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
+        	nonBlockEntitieshistoryLocations.insert(map< Handle, vector< pair<unsigned long,BlockVector> > >::value_type(entityHandle,newVector));
+    	}
+    	else
+    	{
+        	vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
+        	if (newLocation == (oneEntityHistories.back()).second)
 		{ return;} 
-        else
+        	else
 		{ 
 			oneEntityHistories.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));    
 		}
@@ -414,24 +407,24 @@ void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, 
 
 void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
 {
-    auto it = mAllNoneBlockEntities.find(entityNode);
-    if (it != mAllNoneBlockEntities.end())
-    {
+    	auto it = mAllNoneBlockEntities.find(entityNode);
+    	if (it != mAllNoneBlockEntities.end())
+    	{
 		// delete from mPosToNoneBlockEntityMap first
-        BlockVector pos = getLastAppearedLocation(entityNode);
-        auto biter = mPosToNoneBlockEntityMap.lower_bound(pos);
-        auto eiter = mPosToNoneBlockEntityMap.upper_bound(pos);
-        while(biter != eiter)
-        {
-            if (biter->second == entityNode)
-            {
-                mPosToNoneBlockEntityMap.erase(biter);
-                break;
-            }
-            ++ biter;
-        }
-        mAllNoneBlockEntities.erase(it);
-    }
+        	BlockVector pos = getLastAppearedLocation(entityNode);
+        	auto biter = mPosToNoneBlockEntityMap.lower_bound(pos);
+        	auto eiter = mPosToNoneBlockEntityMap.upper_bound(pos);
+        	while(biter != eiter)
+        	{
+            		if (biter->second == entityNode)
+            		{
+	                	mPosToNoneBlockEntityMap.erase(biter);
+        	        	break;
+            		}
+            		++ biter;
+        	}
+        	mAllNoneBlockEntities.erase(it);
+    	}
 }
 
 void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector newpos, unsigned long timestamp)
@@ -439,38 +432,37 @@ void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode,
 
 	mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(newpos,entityNode));
 
-    if (mAllNoneBlockEntities.find(entityNode) != mAllNoneBlockEntities.end())
-    {
+    	if (mAllNoneBlockEntities.find(entityNode) != mAllNoneBlockEntities.end())
+    	{
 		BlockVector lastpos=getLastAppearedLocation(entityNode);
-        auto biter = mPosToNoneBlockEntityMap.lower_bound(lastpos);
-        auto eiter = mPosToNoneBlockEntityMap.upper_bound(lastpos);
-        while(biter != eiter)
-        {
-            if (biter->second == entityNode)
-            {
-                mPosToNoneBlockEntityMap.erase(biter);
-                break;
-            }
-            ++ biter;
-        }
-    }
+        	auto biter = mPosToNoneBlockEntityMap.lower_bound(lastpos);
+        	auto eiter = mPosToNoneBlockEntityMap.upper_bound(lastpos);
+        	while(biter != eiter)
+        	{
+            		if (biter->second == entityNode)
+            		{
+                		mPosToNoneBlockEntityMap.erase(biter);
+                		break;
+            		}
+            		++ biter;
+        	}
+    	}
 	_addNonBlockEntityHistoryLocation(entityNode,newpos, timestamp);
 }
 
 BlockVector Octree3DMapManager::getLastAppearedLocation(const Handle& entityHandle) const
 {
-    auto it = nonBlockEntitieshistoryLocations.find(entityHandle);
-    if (it == nonBlockEntitieshistoryLocations.end())
-        return BlockVector::ZERO;
-    else
-    {
-        const vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
-        if (oneEntityHistories.size() == 0)
-            return BlockVector::ZERO;
-        else
-            return (oneEntityHistories.back()).second;
-    }
-
+    	auto it = nonBlockEntitieshistoryLocations.find(entityHandle);
+    	if (it == nonBlockEntitieshistoryLocations.end())
+        	return BlockVector::ZERO;
+    	else
+    	{
+        	const vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
+        	if (oneEntityHistories.size() == 0)
+            		return BlockVector::ZERO;
+        	else
+            		return (oneEntityHistories.back()).second;
+    	}
 }
 
 Handle Octree3DMapManager::getEntity(const BlockVector& pos) const
@@ -533,12 +525,12 @@ BlockVector Octree3DMapManager::getNearFreePointAtDistance( const BlockVector& p
                 if (toBeStandOn)
                 {
                     if(checkStandable(curpos))
-					{ return curpos;}
+			{ return curpos;}
                 }
                 else
                 {
                     if(mOctomapOctree->getBlock(curpos)==Handle::UNDEFINED)
-					{ return curpos;}
+			{ return curpos;}
                 }
             }
 
@@ -564,19 +556,19 @@ Octree3DMapManager::Octree3DMapManager(
 	mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum), selfAgentEntity(_selfAgentEntity)
 {
 	// the clone order should not be change here:
-    // should always clone the octree before the entity list
+    	// should always clone the octree before the entity list
 	mOctomapOctree = new OctomapOcTree(*_OctomapOctree);
-    // copy all unit blocks
-    mAllUnitAtomsToBlocksMap = _AllUnitAtomsToBlocksMap;
+    	// copy all unit blocks
+    	mAllUnitAtomsToBlocksMap = _AllUnitAtomsToBlocksMap;
 	mAtomSpace=_AtomSpace;
-    // copy all the NoneBlockEntities and mPosToNoneBlockEntityMap and mAllAvatarList
-    mAllNoneBlockEntities.clear();
-    mPosToNoneBlockEntityMap.clear();
-    mAllAvatarList.clear();
+    	// copy all the NoneBlockEntities and mPosToNoneBlockEntityMap and mAllAvatarList
+    	mAllNoneBlockEntities.clear();
+    	mPosToNoneBlockEntityMap.clear();
+    	mAllAvatarList.clear();
 	mAllNoneBlockEntities=_AllNoneBlockEntities;
 	mPosToNoneBlockEntityMap=_PosToNoneBlockEntityMap;
 	mAllAvatarList=_AllAvatarList;
-    nonBlockEntitieshistoryLocations = _nonBlockEntitieshistoryLocations;
+    	nonBlockEntitieshistoryLocations = _nonBlockEntitieshistoryLocations;
 }
 
 
