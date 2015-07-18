@@ -41,8 +41,8 @@ But something is not finished:
 
 (2) add NonUnitBlok: Now we can only add endpoint block in the SpaceMap. But maybe we will want to directly save a large block(2*2*2,4*4*4...). There's no such api in Octomap to save a large block in Octree. So we have to make our own functions. Maybe that's as same as adding BlockEntity..
 
-(3) fix the codes in embodiment/ and dynamics/: The change of SpaceMap will break the other code using SpaceMap. So far I only fixed the code in spatial/ and spacetime/. 
+(3) fix the codes in embodiment/ and dynamics/: The change of SpaceMap will break the other code using SpaceMap. So far I only fixed the code in spatial/ and spacetime/. Also some calculation utilities in SpaceMap, which are not related to Octree, need to be fixed, too.
 
-(4) add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case. Besides we're not sure the performance of it. Since in real world the scene the amount of info may be very large and dense, it's worthwhile to have a pressure test..
+(5) add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case. Besides we're not sure the performance of it. Since in real world the scene the amount of info may be very large and dense, it's worthwhile to have a pressure test..
 
 
