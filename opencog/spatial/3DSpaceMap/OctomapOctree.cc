@@ -15,7 +15,7 @@ using namespace octomap;
 void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
 {
 	mblockHandle=rhs.mblockHandle;
-    if (rhs.hasChildren())
+	if (rhs.hasChildren())
 	{
 		for (unsigned i = 0; i<8; ++i)
 		{
@@ -59,12 +59,12 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle&
 
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& block)
 {
-    OctomapOcTreeNode* n = search(key);
-    if (n != NULL) 
-	{
+    	OctomapOcTreeNode* n = search(key);
+    	if (n != NULL)
+    	{
 		n->setBlock(block); 
-    }
-    return n;
+    	}	
+    	return n;
 }
 
 
