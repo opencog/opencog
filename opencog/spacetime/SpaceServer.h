@@ -138,7 +138,8 @@ public:
      * Some member functions having the same problem also have the argument.
      */
     bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, 
-		      bool isSelfObject, octime_t timestamp,
+					  bool isSelfObject, bool isAvatarEntity, 
+					  octime_t timestamp,
                       double objX, double objY, double objZ);
 
 

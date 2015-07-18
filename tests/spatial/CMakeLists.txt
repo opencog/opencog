@@ -24,4 +24,5 @@ ADD_CXXTEST(TemporalUTest)
 ADD_CXXTEST(TemporalMapUTest)
 ADD_CXXTEST(TemporalTableUTest)
 ADD_CXXTEST(TimeServerUTest)
-
+ADD_CXXTEST(Octree3DMapManagerUTest)
+ADD_CXXTEST(OctomapOctreeUTest)

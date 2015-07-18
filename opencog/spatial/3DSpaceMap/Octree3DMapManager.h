@@ -51,29 +51,35 @@ namespace opencog
 	/** \addtogroup grp_spatial
 	 *  @{
 	 */
+	
+	//Comment on 20150718 by YiShan
+	//For now the 3DSpaceMap using Octomap as Octree to save block
+	//So we provide the probabilistic feature for each function about block
+	//You can directly use the interface without probability 
+	//as if the occupancy is binary.
+	//The library will control the occupancy probability automatically
+	//But you can use the interface with probability
+	//to control the occupancy of block.
+	//You can also set the occupancy threshold to 
+	//change the judgement of block occupancy.
+
+	//Also, for the generic use of SpaceMap, we abandon the old
+	//Block3D/Entity3D/BlockEntity class.
+	//Since in different use case we want to save different infos.
+	//It's better to save/query all the infos in AtomSpace.
+	//And the SpaceMap should be used for indexing the block handle.
+	
+	//For now there are some parts unfinished
+	//(1) add/remove/query BlockEntity
+	//(2) spatial relation calculation
+	//(We'll move the old function in MapManager to other place because they
+	//are not related to Octree. Just a bunch of helper functions)
+	//(3) add/remove/query nonUnitBlock(Maybe it's the same as BlockEntity..?)
+	
 
     namespace spatial
     {
         class OctomapOcTree;
-        enum SPATIAL_RELATION
-        {
-			LEFT_OF = 0,
-            RIGHT_OF,
-            ABOVE,
-            BELOW,
-            BEHIND,
-            IN_FRONT_OF,
-            BESIDE,
-            NEAR,
-            FAR_,
-            TOUCHING, // touching is only face touching
-            BETWEEN,
-            INSIDE,
-            OUTSIDE,
-
-            TOTAL_RELATIONS
-        };
-
         class Octree3DMapManager
         {
         public:
@@ -109,6 +115,9 @@ namespace opencog
 			//binary add/remove operation
 			void addSolidUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom);
             void removeSolidUnitBlock(const Handle blockHandle);
+			//Note that if you want to add/remove block with probability,
+			//You should use setUnitBlock to control the occupancy probability.
+			//the updateLogOddsOccupancy will be added on the log odds occupancy of block to in/decrease the occupancy
 			//probabilistic set occupancy
 			void setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy);
 			//binary query operation
@@ -119,7 +128,6 @@ namespace opencog
             // check whether people can stand on this position or not, 
 			// which means there is no obstacle or block here
 			// and there is a block under it.
-
 			// binary
             bool checkStandable(const BlockVector &pos) const;
 			// probabilistic
@@ -134,6 +142,7 @@ namespace opencog
 			BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
 
 			float getBlockLogOddsOccupancy(const BlockVector& pos) const;
+
 			/**
 			 *  public member functions for entity
 			 */
@@ -143,11 +152,9 @@ namespace opencog
             void addNoneBlockEntity(const Handle& entityNode, 
 									const BlockVector& pos,
                                     bool isSelfObject,
+									bool isAvatarEntity,
 									const unsigned long timestamp);
             void removeNoneBlockEntity(const Handle &entityNode);
-            //const Entity3D* getEntity(const Handle& entityNode) const;
-            //const Entity3D* getEntity(const string& entityName) const;
-            //bool isAvatarEntity(const Entity3D* entity) const;
             void updateNoneBLockEntityLocation(
 				const Handle &entityNode, BlockVector newpos, 
 			    unsigned long timestamp);
@@ -155,6 +162,13 @@ namespace opencog
 			// when calling removeNoneBlockEntity()
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
 			Handle getEntity(const BlockVector& pos) const;
+
+			//The following is olde interface to get Entity3D
+			//Since now we query the info in atomspace. It's not used.
+
+            //const Entity3D* getEntity(const Handle& entityNode) const;
+            //const Entity3D* getEntity(const string& entityName) const;
+            //bool isAvatarEntity(const Entity3D* entity) const;
 			/*
             template<typename Out>
 				Out findAllEntities(Out out) const
@@ -175,7 +189,12 @@ namespace opencog
 			/**
 			 *  member functions about Object add/remove/query
 			 *  "Object" means the block,entity and blockentity
+			 *  Note that because we will query info in AtomSpace
+			 *  It should be easy to use atom type to know
+			 *  what the handle is (block/entity).
+			 *  so it's redundant to have these unclear "XXXObject" func.
 			 */
+
 			
             //BlockVector getObjectLocation(const Handle& objNode) const;
             //BlockVector getObjectLocation(const string& objName) const;
@@ -197,7 +216,7 @@ namespace opencog
 			}
 			*/
 			/**
-			 *  member functions about computation using OctomapOctree
+			 *  computation using OctomapOctree
 			 */
 
             /**
@@ -212,6 +231,48 @@ namespace opencog
 				const BlockVector& position, int distance, 
 				const BlockVector& startDirection, 
 				bool toBeStandOn = true ) const;
+
+	/**
+	 *    computation which not use OctomapOctree, should be moved
+	 */
+    /*	
+		double distanceBetween(const Entity3D* entityA, const Entity3D* entityB) const;
+		double distanceBetween(const BlockVector& posA, const BlockVector& posB) const;
+		double distanceBetween(const string& objectNameA, const string& objectNameB) const;
+		double distanceBetween(const string& objectName, const BlockVector& pos) const;
+		bool isTwoPositionsAdjacent(const BlockVector& pos1, const BlockVector& pos2) const;
+*/	
+	/**
+	 * Finds the list of spatial relationships 
+	 * that apply to the three entities.
+	 * Currently this can only be BETWEEN, 
+	 * which states that A is between B and C
+	 *
+	 * @param observer The observer entity
+	 * @param entityB First reference entity
+	 * @param entityC Second reference entity
+	 *
+	 * @return std::vector<SPATIAL_RELATION> 
+	 *         a vector of all spatial relations
+	 *         among entityA (this entity), entityB (first reference) 
+	 *         and entityC (second reference)
+	 *
+	 */
+/*
+	std::set<SPATIAL_RELATION> computeSpatialRelations(
+		const Entity3D* entityA,
+		const Entity3D* entityB,
+		const Entity3D* entityC = 0,
+		const Entity3D* observer = 0) const;
+	std::set<SPATIAL_RELATION> computeSpatialRelations( 
+		const AxisAlignedBox& boundingboxA,
+		const AxisAlignedBox& boundingboxB,
+		const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
+		const Entity3D* observer = 0 ) const;
+	static string spatialRelationToString(SPATIAL_RELATION relation);
+*/
+
+
 
             /**
              * function for saving file; but not finished
@@ -318,8 +379,6 @@ namespace opencog
 							   const set<Handle>& _AllAvatarList,
 							   const map<Handle, vector<pair<unsigned long, BlockVector> > >& _nonBlockEntitieshistoryLocations);
 
-			// not used since we save block info in atomspace
-//     bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
         };
     }
 }

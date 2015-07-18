@@ -244,7 +244,7 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
     //    FBG
     if (k == 1) // if  want to access higer position
     {
-        if (mapManager->checkIsSolid(lastPos.x,lastPos.y,lastPos.z + 1)) // if the block on top is solid
+        if (mapManager->checkIsSolid(BlockVector(lastPos.x,lastPos.y,lastPos.z + 1))) // if the block on top is solid
             return false;
     }
 

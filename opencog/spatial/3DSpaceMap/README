@@ -1,0 +1,48 @@
+20150718 by YiShan
+For now we're revising the old 3DSpaceMap. There are some points:
+(1) Replace the old octree with Octomap
+
+As Ben suggested, Octomap has sparse representation and support probabilistic feature. Besides it's more stable than our own Octree. So we will replace the old octree with Octomap Octree.
+
+You can see the Octomap in
+
+http://wiki.ros.org/octomap
+
+in Ubuntu docker you can install it with
+
+`sudo apt-get install ros-indigo-octomap
+
+If you don't install the octomap, the compilation of SpaceMap will fail.
+
+(2) Move the responsibility of querying block/entity info to the atomspace
+
+Because in the future we will need to embody Opencog in different environment(Minecraft/Unity world/real world/...). In different embodiment we will need to save different infos in block/entity. It's difficult to use old Block3D/Entity3D/BlockEntity in all embodiment at the same time. So we decide to move the responsibility of querying block/entity info to atomspace. We just save the handle of block/entity in the 3DSpaceMap. The user will get the block handle by position and use the handle to query info in atomspace.
+
+(3) Revising the old interface
+
+The old Octree3DMapManager class is large, including many member functions which are not related to the core data structure.(ex. distance calculation/ entity spatial relation calculation). We will move them to other place to make Octree3DMapManager smaller. 
+
+Also there are some functions called "getObjectXXX", which receive the handle and get corresponding info. Since we move the querying info to atomspace. It should be easy to know what type the handle is (block/entity) by query the atom type. So we will remove these functions and replace the old code using them.
+
+====
+
+So far(2015,July 17th) we've done something:
+(1) Replace the old octree with OctomapOctree
+
+(2) Replace the Block3D/Entity3D class with handle
+
+(3) Pass the unit test of SpaceServer, Octree3DMapMaanger and OctomapOctree
+
+(4) Remove the old interface
+
+But something is not finished:
+
+(1) add BlockEntity: For now I comment out the functions about BlockEntity. And we need to replace it with handle. Also, as Ben said the function of BlockEntity is not completed, so if we want to have it we will need to add the logic in the SpaceMap.
+
+(2) add NonUnitBlok: Now we can only add endpoint block in the SpaceMap. But maybe we will want to directly save a large block(2*2*2,4*4*4...). There's no such api in Octomap to save a large block in Octree. So we have to make our own functions. Maybe that's as same as adding BlockEntity..
+
+(3) fix the codes in embodiment/ and dynamics/: The change of SpaceMap will break the other code using SpaceMap. So far I only fixed the code in spatial/ and spacetime/. 
+
+(4) add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case. Besides we're not sure the performance of it. Since in real world the scene the amount of info may be very large and dense, it's worthwhile to have a pressure test..
+
+

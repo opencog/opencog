@@ -520,7 +520,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, octime_t timestamp, double objX, double objY, double objZ)
+bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, bool isAvatarEntity, octime_t timestamp, double objX, double objY, double objZ)
 {
     
     if (spaceMapHandle == Handle::UNDEFINED)
@@ -545,7 +545,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     }
     else
     {
-        theSpaceMap->addNoneBlockEntity(objectNode,pos,isSelfObject, timestamp);
+        theSpaceMap->addNoneBlockEntity(objectNode,pos,isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
