@@ -53,9 +53,7 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
-#ifdef HAVE_SQL_STORAGE
 #include <opencog/modules/PersistModule.h>
-#endif /* HAVE_SQL_STORAGE */
 
 #include "CogServer.h"
 #include "BaseServer.h"
@@ -744,7 +742,6 @@ void CogServer::openDatabase(void)
         return;
     }
 
-#ifdef HAVE_SQL_STORAGE
     const std::string &dbname = config()["STORAGE"];
     const std::string &username = config()["STORAGE_USERNAME"];
     const std::string &passwd = config()["STORAGE_PASSWD"];
@@ -769,11 +766,6 @@ void CogServer::openDatabase(void)
 
     logger().info("Preload %s as user %s msg: %s",
         dbname.c_str(), username.c_str(), resp.c_str());
-
-#else /* HAVE_SQL_STORAGE */
-    logger().warn(
-        "Server compiled without database support");
-#endif /* HAVE_SQL_STORAGE */
 }
 
 Logger &CogServer::logger()
