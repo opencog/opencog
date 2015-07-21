@@ -30,10 +30,10 @@ RELEX_OPTS="\
 
 CLASSPATH="-classpath \
 bin:\
+/usr/local/share/java/relex.jar:\
 /usr/local/share/java/opennlp-tools-1.5.0.jar:\
 /usr/local/share/java/maxent-3.0.0.jar:\
 /usr/local/share/java/maxent-2.5.2.jar:\
-/usr/local/share/java/maxent-2.4.0.jar:\
 /usr/local/share/java/trove.jar:\
 /usr/local/share/java/jwnl-1.4rc2.jar:\
 /usr/local/share/java/jwnl.jar:\

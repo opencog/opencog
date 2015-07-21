@@ -16,14 +16,15 @@ fi
 
 
 # Use byobu so that the scroll bars actually work
-byobu new-session -d -n 'cogsrvr' 'cogserver -c opencog-en.conf; $SHELL'
+byobu new-session -d -n 'cntl' '$SHELL'
+byobu new-window -n 'cogsrv' 'cogserver -c opencog-en.conf; $SHELL'
 sleep 2;
 
 # Relex "any" language
 tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 
 # Telnet window
-tmux new-window -n 'telnet' 'rlwrap telnet localhost 17005; $SHELL'
+tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
 tmux new-window -n 'parse' '$SHELL'
