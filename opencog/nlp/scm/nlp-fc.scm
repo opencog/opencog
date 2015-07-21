@@ -5,8 +5,8 @@
   )
 ) 
 
-(define (load-rules-from-file fl)
-)
+;(define (load-rules-from-file fl)
+;)
 
 (define (load-sentences sfile)
   (map-to-relex-parse-atoms (map-sent-nodes-to-parse (nlp-parse-from-file-mod sfile)))
@@ -57,7 +57,7 @@
 )
 
 (define (map-to-relex-parse-atoms parse-node-list)
-  (define mylist '())
+  (define mylist '(SetLink ))
   (for-each (lambda (x)(set! mylist (append mylist (parse-get-relations x))))parse-node-list)
   mylist
 )  
