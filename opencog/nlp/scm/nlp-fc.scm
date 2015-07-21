@@ -1,9 +1,11 @@
 (define (nlp-files-fc sentence-file rules-file)
+  ;rulebase-func r2l-rules
+  (load-scm-from-file rules-file)
   (cog-fc
-  (load-sentences sentence-file)
-  (load-rules-from-file rules-file)
+  (SetLink (load-sentences sentence-file))
+  r2l-rules
   )
-) 
+)
 
 ;(define (load-rules-from-file fl)
 ;)
@@ -57,7 +59,7 @@
 )
 
 (define (map-to-relex-parse-atoms parse-node-list)
-  (define mylist '(SetLink ))
+  (define mylist '())
   (for-each (lambda (x)(set! mylist (append mylist (parse-get-relations x))))parse-node-list)
   mylist
-)  
+)
