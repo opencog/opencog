@@ -17,7 +17,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$qVar")
 				(VariableNode "$a-parse")
@@ -31,30 +31,29 @@
                 			(ListLink
                     			(VariableNode "$noun")
                     			(VariableNode "$qVar")
-                			)					
+                			)
             		)
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howquant-q-rule")
 			(ListLink
 				(VariableNode "$noun")
 			)
 		)
+   )
 	)
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "howquant-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "howquant-q-Rule") howquant-q)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-howquant-q-rule noun)
+ (ListLink
 	(howquantQ-rule (word-inst-get-word-str noun) (cog-name noun)
 	)
+ )
 )
-

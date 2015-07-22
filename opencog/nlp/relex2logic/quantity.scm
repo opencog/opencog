@@ -1,5 +1,5 @@
 ; This is a new rule -- the previous version of relex had an all-rule, but no quantity rule.
-; I am not porting the all-rule, because it seems silly to pick out that one quantifier for 
+; I am not porting the all-rule, because it seems silly to pick out that one quantifier for
 ; its own rule, but none of the others -- some, many, few etc. etc. which also get _quantity
 ; (AN June 2015)
 
@@ -36,6 +36,7 @@
                 )
             )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-quantity-rule")
        	      (ListLink
@@ -43,19 +44,16 @@
        	         (VariableNode "$quant")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "quantity-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "quantity-Rule") quantity)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-quantity-rule noun quant)
+  (ListLink
     (quantity-rule (word-inst-get-word-str noun) (cog-name noun)
               (word-inst-get-word-str quant) (cog-name quant)
     )
+  )
 )
-
-

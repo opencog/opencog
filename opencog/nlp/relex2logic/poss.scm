@@ -35,6 +35,7 @@
                 )
             )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-poss-rule")
        	      (ListLink
@@ -42,19 +43,16 @@
        	         (VariableNode "$poss")
             )
         )
+       )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "poss-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "poss-Rule") poss)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-poss-rule noun poss)
+  (ListLink
     (possessive-rule (word-inst-get-word-str noun) (cog-name noun)
               (word-inst-get-word-str poss) (cog-name poss)
     )
+  )
 )
-
-

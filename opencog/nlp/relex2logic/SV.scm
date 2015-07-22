@@ -1,4 +1,4 @@
-; This rule is for subject-verb sentences, such as 
+; This rule is for subject-verb sentences, such as
 ; "The Lord giveth and the lord taketh away." or "You suck."
 ; (AN June 2015)
 
@@ -35,6 +35,7 @@
 				)
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-sv-rule")
 			(ListLink
@@ -42,19 +43,16 @@
 				(VariableNode "$verb")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "SV-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "SV-Rule") SV)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-sv-rule subj verb)
+ (ListLink
 	(SV-rule (word-inst-get-word-str subj) (cog-name subj)
 		(word-inst-get-word-str verb) (cog-name verb)
 	)
+ )
 )
-

@@ -36,6 +36,7 @@
                 )
             )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-prepadj-rule")
        	      (ListLink
@@ -43,19 +44,17 @@
        	         (VariableNode "$adj")
             )
         )
+      )
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "prepadj-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "prepadj-Rule") prepadj)
-
+;;ToDo: Define prepadj-rule
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-prepadj-rule noun adj)
+  (ListLink
     (prepadj-rule (word-inst-get-word-str noun) (cog-name noun)
               (word-inst-get-word-str adj) (cog-name adj)
     )
+  )
 )
-
-

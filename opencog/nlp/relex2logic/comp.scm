@@ -35,6 +35,7 @@
                 )
             )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-comp-rule")
        	      (ListLink
@@ -42,20 +43,16 @@
        	         (VariableNode "$pred")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "comp-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "comp-Rule") comp)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-comp-rule comp pred)
-    	(complement-rule (word-inst-get-word-str comp) (cog-name comp)
+ (ListLink
+  (complement-rule (word-inst-get-word-str comp) (cog-name comp)
 	(word-inst-get-word-str pred) (cog-name pred)
-              
-    )
+  )
+ )
 )
-
-

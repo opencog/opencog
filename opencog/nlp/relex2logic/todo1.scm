@@ -64,7 +64,7 @@
 	                    (VariableNode "$subj2")
                 	)
 		)
-            )	
+            )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_obj")
                 (ListLink
@@ -80,31 +80,29 @@
                 )
             )
 	)
+       (ListLink
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo1-rule")
             (ListLink
                 (VariableNode "$subj")
                 (VariableNode "$verb1")
                 (VariableNode "$verb2")
-		(VariableNode "$obj")
+		            (VariableNode "$obj")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "todo1-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "todo1-Rule") todo1)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo1-rule subj verb1 verb2 obj)
-    (to-do-rule-1 
+ (ListLink
+  (to-do-rule-1 
 	(word-inst-get-word-str verb1) (cog-name verb1)
 	(word-inst-get-word-str verb2) (cog-name verb2)
 	(word-inst-get-word-str subj) (cog-name subj)
         (word-inst-get-word-str obj) (cog-name obj)
-    )
+  )
+ )
 )
-
-

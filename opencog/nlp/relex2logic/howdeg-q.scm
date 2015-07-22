@@ -17,7 +17,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$qVar")
 				(VariableNode "$a-parse")
@@ -31,29 +31,28 @@
                 			(ListLink
                     			(VariableNode "$pred")
                     			(VariableNode "$qVar")
-                			)					
+                			)
             		)
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")
 			)
 		)
+ (ListLink
 	(ExecutionOutputLink
 		(GroundedSchemaNode "scm: pre-howdeg-q-rule")
 		(ListLink
 			(VariableNode "$pred")
 		)
 	)
+ )
 ))
-
-(InheritanceLink (stv 1 .99) (ConceptNode "howdeg-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "howdeg-q-Rule") howdeg-q)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-howdeg-q-rule pred)
+ (ListLink
 	(howdegQ-rule (word-inst-get-word-str pred) (cog-name pred)
 	)
+ )
 )
-

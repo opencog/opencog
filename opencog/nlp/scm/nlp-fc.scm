@@ -1,14 +1,20 @@
 (define (nlp-files-fc sentence-file rules-file)
   ;rulebase-func r2l-rules
   (load-scm-from-file rules-file)
-  (cog-fc
-  (SetLink (load-sentences sentence-file))
-  r2l-rules
-  )
+(let* ((temp (run-fc sentence-file))
+(temp2 (cog-outgoing-set temp)))
+(cog-delete temp)
+
+  (for-each (lambda (x)(display x))temp2)
+)
 )
 
-;(define (load-rules-from-file fl)
-;)
+(define (run-fc sentence-file)
+  (cog-fc
+    (SetLink (load-sentences sentence-file))
+    r2l-rules
+  )
+)
 
 (define (load-sentences sfile)
   (map-to-relex-parse-atoms (map-sent-nodes-to-parse (nlp-parse-from-file-mod sfile)))

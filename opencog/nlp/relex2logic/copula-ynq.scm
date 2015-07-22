@@ -47,12 +47,13 @@
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")
-			)				
+			)
 			(InheritanceLink
 				(VariableNode "$verb")
 				(DefinedLinguisticConceptNode "truth-query")
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
@@ -60,19 +61,16 @@
 				(VariableNode "$obj")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "copula-ynq-Rule") copula-ynq)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-copula-ynq-rule subj obj)
+ (ListLink
 	(cop-ynQ-rule (word-inst-get-word-str subj) (cog-name subj)
 		(word-inst-get-word-str obj) (cog-name obj)
 	)
+ )
 )
-
