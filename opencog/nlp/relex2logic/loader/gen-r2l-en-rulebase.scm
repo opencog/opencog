@@ -1,6 +1,6 @@
 ;(InheritanceLink (stv 1 1) (ConceptNode "R2L-en-RuleBase") (ConceptNode "RuleBase"))
 (define r2l-rules (ConceptNode "R2L-en-RuleBase"))
-(ExecutionLink (SchemaNode "URE:maximum-iterations") (ConceptNode "R2L-en-RuleBase") (NumberNode "100") )
+(ExecutionLink (SchemaNode "URE:maximum-iterations") (ConceptNode "R2L-en-RuleBase") (NumberNode "60") )
 (MemberLink (stv 1 1) advmod (ConceptNode "R2L-en-RuleBase"))
 (MemberLink (stv 1 1) amod (ConceptNode "R2L-en-RuleBase"))
 (MemberLink (stv 1 1) atTime (ConceptNode "R2L-en-RuleBase"))

@@ -1,71 +1,58 @@
-(define (nlp-files-fc sentence-file rules-file)
-  ;rulebase-func r2l-rules
+(define (nlp-parse-fc sent rules-file)
+  (define mylist '())
+;load rules
   (load-scm-from-file rules-file)
-(let* ((temp (run-fc sentence-file))
-(temp2 (cog-outgoing-set temp)))
-(cog-delete temp)
+; run forward chaining on sentence
+  (let* ((temp (run-fc sent)); temp contains list of cog-fc results and parse node
+        (result1 (car temp));result1 contains Listlink nested 3 times
+        (parse-node (cadr temp))
+        (result2 (cog-outgoing-set result1));result2 contains ListLink nested 2 times
+        (parse-name (cog-name parse-node))
+        )
 
-  (for-each (lambda (x)(display x))temp2)
-)
-)
 
-(define (run-fc sentence-file)
-  (cog-fc
-    (SetLink (load-sentences sentence-file))
-    r2l-rules
+     (for-each (lambda (x)
+                 (let* ((t1 (cog-outgoing-set x));t1 contains ListLink List of results
+                       )
+                       (for-each (lambda (b)
+                                   (let* ((t2 (cog-outgoing-set b)));t2 contains atoms contained in ListLink
+                                    (for-each (lambda(c)
+                                             ;  (display c)
+                                                (set! mylist (append mylist (list c)))
+                                              )
+                                     t2)
+                                   )
+                                 )
+                       t1
+                       )
+                 )
+               )
+      result2)
+
+
+  (ReferenceLink
+    (InterpretationNode (string-append parse-name "_interpretation_$X"))
+    ; The function in the SetLink returns a list of outputs that
+    ; are the results of the evaluation of the relex-to-logic functions,
+    ; on the relex-opencog-outputs.
+  (SetLink (delete-duplicates mylist))
   )
+
+  (InterpretationLink
+    (InterpretationNode (string-append parse-name "_interpretation_$X"))
+    parse-node
+  )
+ )
+#t
 )
 
-(define (load-sentences sfile)
-  (map-to-relex-parse-atoms (map-sent-nodes-to-parse (nlp-parse-from-file-mod sfile)))
-)
-;(parse-get-relations (car(sentence-get-parses (car(nlp-parse "how are you doing")))))
-;(for-each (lambda (x) (display x)) (list "hello" "there"))
-(define (nlp-parse-from-file-mod filepath)
-  (define sent-node-list '())
-    (let*
-        ((cmd-string (string-join (list "cat " filepath) ""))
-        (port (open-input-pipe cmd-string))
-        (line (get-line port))
-        )
-        (while (not (eof-object? line))
-            (if (or (= (string-length line) 0)
-                    (char=? #\; (string-ref (string-trim line) 0))
-                )
-                (set! line (get-line port))
-                (if (string=? "END." line)  ; continuing the tradition of RelEx
-                    (break)
-                    (begin
-                        (catch #t
-                            (lambda ()
-                                (set! sent-node-list (append sent-node-list (nlp-parse line)))
-                            )
-                            (lambda (key . parameters)
-                                (begin
-                                    (display "*** Unable to parse: \"")
-                                    (display line)
-                                    (display "\"\n")
-                                )
-                            )
-                        )
-                        (set! line (get-line port))
-                    )
-                )
-            )
-        )
-        sent-node-list
-        ;(close-pipe port)
-    )
-)
 
-(define (map-sent-nodes-to-parse sent-node-list)
-  (define mylist '())
-  (for-each (lambda (x)(set! mylist (append mylist (sentence-get-parses x))))sent-node-list)
-  mylist
-)
-
-(define (map-to-relex-parse-atoms parse-node-list)
-  (define mylist '())
-  (for-each (lambda (x)(set! mylist (append mylist (parse-get-relations x))))parse-node-list)
-  mylist
+(define (run-fc sent)
+  (define parse-node (car (sentence-get-parses (nlp-parse sent))))
+  (list (cog-fc
+    (SetLink (parse-get-relations parse-node))
+    r2l-rules
+   )
+  parse-node
+  )
 )
