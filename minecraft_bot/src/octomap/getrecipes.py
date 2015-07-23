@@ -2,16 +2,12 @@
 
 
 """
-
-small script to parse the minecraft recipes java file to get all crafting recipes.
+created by Bradley Sheneman
+script to parse the minecraft recipes java file to get all crafting recipes.
 
 """
 
-recipes = []
-
-def getShapedRecipe(line):
-
-    recipe = {}
+def getRecipeName(line):
 
     ni1 = line.find('(', 37, -1) + 1
     ni2 = line.find(')', 37, -1)
@@ -24,55 +20,22 @@ def getShapedRecipe(line):
         ns = namelist[0].find('Items.')
 
     if ns >= 0:
-        recipe['name'] = namelist[0][ns:]
+        name = namelist[0][ns:]
     
     if len(namelist) > 1:
-        recipe['num'] = int(namelist[1])
+        num = int(namelist[1])
     else:
-        recipe['num'] = 1
+        num = 1
+
+    return name, num
+
+
+
+def getObjects(objectstring):
     
-    #if namelist[0].find('Items'):
-    #    ntype = 'item'
-    #elif namelist[0].find('Blocks'):
-    #    ntype = 'block'
-    #else:
-    #    ntype = 'none'
-    
-    #print recipe['name']
-    
-    #recipe['type'] = ntype
-
-    ri1 = line.find('{') + 1
-    ri2 = line.find('}')
-
-    shapelist = [item.strip() for item in line[ri1:ri2].split(",")]
-    #print shapelist
-
-    layers = []
-    for item in shapelist:
-        found = item.find('Character.valueOf')
-        if found < 0:
-            layers.append(item.strip('\"'))
-        else:
-            break
-
-    recipe['shape'] = layers
-    #print layers
-
-    remaining = " ".join(shapelist[len(layers):])
-    #print remaining
-    
-    #print len(remaining)
-    print remaining
-
-   
-    characters = [remaining[i+1]
-            for i in range(len(remaining))
-            if remaining[i] == "\'" and remaining[i+2] == "\'"]
-    #print characters
-
     objects = []
-    substring = remaining
+    substring = objectstring
+    
     while len(substring) > 0:
         founditem = substring.find("Items.")
         foundblock = substring.find("Blocks.")
@@ -103,7 +66,44 @@ def getShapedRecipe(line):
             objects.append(item.strip())
             break
     
-    #print objects
+    return objects
+
+
+
+def getShapedRecipe(line):
+
+    recipe = {}
+    recipe['shape'] = True
+
+    name, num = getRecipeName(line)
+    
+    recipe['name'] = name
+    recipe['num'] = num
+
+    ri1 = line.find('{') + 1
+    ri2 = line.find('}')
+
+    shapelist = [item.strip() for item in line[ri1:ri2].split(",")]
+    #print shapelist
+
+    layers = []
+    for item in shapelist:
+        found = item.find('Character.valueOf')
+        if found < 0:
+            layers.append(item.strip('\"'))
+        else:
+            break
+
+    recipe['shape'] = layers
+
+    remaining = " ".join(shapelist[len(layers):])
+   
+    characters = [remaining[i+1]
+            for i in range(len(remaining))
+            if remaining[i] == "\'" and remaining[i+2] == "\'"]
+
+    objects = getObjects(remaining)
+    
     recipe['mats'] = {}
     for char,obj in zip(characters, objects):
         recipe['mats'][char] = obj
@@ -113,27 +113,56 @@ def getShapedRecipe(line):
 
 
 def getShapelessRecipe(line):
-    pass
+    
+    recipe = {}
+    recipe['shape'] = False
+
+    name, num = getRecipeName(line)
+    
+    recipe['name'] = name
+    recipe['num'] = num
+    
+    ri1 = line.find('{') + 1
+    ri2 = line.find('}')
+    
+    remaining = line[ri1:ri2]
+    #print remaining
+    
+    objects = getObjects(remaining)
+
+    recipe['mats'] = objects
+
+    print recipe
+    return recipe
 
 
-infile = open('mc_recipes.txt', 'rb')
-
-for line in infile:
-    #print line[0:40]    
-    #shaped = False
-    linestring = line.strip()
-
-    if linestring.startswith("this.registerShapedRecipe"):
-        #name, recipe = getShapedRecipe(linestring)
-        getShapedRecipe(linestring)
-        shaped = True
-
-    elif linestring.startswith("this.registerShapelessRecipe"):
-        #name, recipe = getShapelessRecipe(linestring)
-        shaped = False
-
-    #recipes.append((name,recipe))
 
 
-#for item in recipes:
-#    print item
+def getAllRecipes():
+
+    infile = open('mc_recipes.txt', 'rb')
+
+    recipes = []
+    
+    for line in infile:
+        linestring = line.strip()
+
+        if linestring.startswith("this.registerShapedRecipe"):
+            recipe = getShapedRecipe(linestring)
+            recipes.append(recipe)
+        elif linestring.startswith("this.registerShapelessRecipe"):
+            recipe = getShapelessRecipe(linestring)
+            recipes.append(recipe)
+
+    #for recipe in recipes:
+    #    if recipe['shaped']:
+    #        outfile.write("RECIPE: %s\n"%recipe['name'])
+    #        outfile.write("SHAPE: %s\n"%(','.join(recipe['shape'])))
+    
+    infile.close()
+
+
+
+if __name__ == "__main__":
+    getAllRecipes()
+
