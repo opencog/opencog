@@ -9,7 +9,7 @@ single material type, and map to a common list of names
 """
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
-import mcidmap
+import mcidmap_blocks, mcidmap_items
 
 from spock.mcmap import mapdata
 
@@ -44,10 +44,12 @@ idfile = open('mc_ids_names.csv', 'wb')
 namefile = open('mc_names.csv', 'wb')
 conceptfile = open('mc_concepts.csv', 'wb')
 
-idmap = mcidmap.idmap
+blocksmap = mcidmap_blocks.idmap
+itemsmap = mcidmap_items.idmap
+
 concepts = set()
 
-for value in idmap.values():
+for value in blocksmap.values():
     namelist = value.split()
     
     for concept in namelist:
@@ -57,11 +59,11 @@ for concept in sorted(concepts):
     conceptfile.write(concept + '\n')
 
 
-for namestring in sorted(idmap.values()):
+for namestring in sorted(blocksmap.values()):
     namefile.write(get_block_name(namestring) + '\n')
 
-for key in sorted(idmap):
-    idfile.write("%d, %d, %s\n"%(key[0],key[1], get_block_name(idmap[key])))
+for key in sorted(blocksmap):
+    idfile.write("%d, %d, %s\n"%(key[0],key[1], get_block_name(blocksmap[key])))
 
 
 matfile.write("{:>32s},{:>8s},{:>12s},{:>12s}\n"
