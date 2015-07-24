@@ -28,10 +28,9 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include <set>
 #include <vector>
 #include <iterator>
-#include <boost/lexical_cast.hpp>
+#include <algorithm>
 
 namespace opencog { namespace statistics {
 
@@ -64,6 +63,89 @@ public:
     }
 };
 
+template<typename Metadata>
+class MetaDataContainer
+{
+public:
+    MetaDataContainer()
+    {
+        mDataSetWithKey = new std::map<long, Metadata>();
+        mDataSetWithValue = new std::map<Metadata, long>();
+    }
+
+    ~MetaDataContainer()
+    {
+        delete mDataSetWithValue;
+        delete mDataSetWithKey;
+    }
+
+    inline long size()
+    {
+        return mDataSetWithKey->size();
+    }
+
+    inline long getKey(Metadata &meta)
+    {
+        typename std::map<Metadata, long>::iterator it;
+        it = mDataSetWithValue->find(meta);
+        if (it == mDataSetWithValue->end()) {
+            return -1;
+        }
+        return it->second;
+    }
+
+    inline Metadata* getValue(long key)
+    {
+        typename std::map<long, Metadata>::iterator it;
+        it = mDataSetWithKey->find(key);
+        if (it == mDataSetWithKey->end()) {
+            return NULL;
+        }
+        return &(it->second);
+    }
+
+    inline Metadata* find(Metadata &meta)
+    {
+        long key = getKey(meta);
+        return getValue(key);
+    }
+
+    inline bool insert(Metadata &meta)
+    {
+        if(find(meta))
+            return false;
+
+        ++mMetaDataMapIndex;
+        mDataSetWithKey->insert(std::make_pair(mMetaDataMapIndex, meta));
+        mDataSetWithValue->insert(std::make_pair(meta, mMetaDataMapIndex));
+        return true;
+    }
+
+    inline std::string print_meta_data_set()
+    {
+        std::ostringstream stringStream;
+
+        stringStream << "" << std::endl;
+        stringStream << ">All Data Set<" << std::endl;
+
+        typename std::map<long, Metadata>::iterator it;
+        it = mDataSetWithKey->begin();
+        for ( ; it != mDataSetWithKey->end(); ++it)
+            stringStream << it->first << ": " << it->second << " " << std::endl;
+
+        stringStream << ">All Data Set End<" << std::endl;
+        return stringStream.str();
+    }
+
+protected:
+    // Save all the Metadata. Each Metadata is a piece of one-gram data.
+    // It also saves an unique key of Metadata.
+    std::map<long, Metadata> *mDataSetWithKey;
+    std::map<Metadata, long> *mDataSetWithValue;
+
+    long mMetaDataMapIndex = -1;
+};
+
 // The DataProvider construct the raw data sets for statistics module
 // If the Metadata is a class or struct, not a original C++ data type,
 // you should implement the followings in your Metadata class:
@@ -72,20 +154,19 @@ template<typename Metadata>
 class DataProvider
 {
 public:
-
-    // Save all the Metadata. Each Metadata is a piece of one-gram data.
-    std::set<Metadata> mMetaDataSet;
-
     // n-gram data maps:
     int n_gram;
 
+    // Manages all Metadata. Each Metadata is a piece of one-gram data.
+    // It also saves an unique key of Metadata.
+    MetaDataContainer<Metadata> *mDataSet;
+
     // map array, the array size = n_gram + 1 (index starts from 1)
-    // the key is string type, the string contains the address of the Metadata:
-    // for 1-gram, the string is the address toString
-    // for 2-gram, the string is "address1-address2"
-    // for n-gram, the string is "address1-address2-...-addressn"
-    // use - as the separator
-    std::map<std::string, StatisticData> *mDataMaps;
+    // the key is vector<int> type, contains the unique key of the Metadata:
+    // for 1-gram, the vector contains one unique key
+    // for 2-gram, the vector contains [key1, key2]
+    // for n-gram, the vector contains [key1, key2, ..., keyN]
+    std::map<std::vector<long>, StatisticData> *mDataMaps;
 
     // An array to save the total data counts for each n-gram raw data map.
     // The array size = n_gram + 1 (index starts from 1)
@@ -102,7 +183,8 @@ public:
     DataProvider(int _n_gram, bool _isOrderDependent) :
             n_gram(_n_gram), isOrderDependent(_isOrderDependent)
     {
-        mDataMaps = new std::map<std::string, StatisticData>[n_gram + 1];
+        mDataSet = new MetaDataContainer<Metadata>();
+        mDataMaps = new std::map<std::vector<long>, StatisticData>[n_gram + 1];
 
         mRawDataNumbers = new int[n_gram + 1];
         for (int i = 0; i < n_gram + 1; i++)
@@ -113,94 +195,70 @@ public:
     {
         delete[] mDataMaps;
         delete[] mRawDataNumbers;
+        delete mDataSet;
     }
 
     // add one piece of meta data into the mMetaDataSet
     inline bool addOneMetaData(Metadata meta)
     {
-        typename std::set<Metadata>::iterator it;
-        it = mMetaDataSet.find(meta);
-        if (it == mMetaDataSet.end()) {
-            mMetaDataSet.insert(meta);
-            return true;
-        }
-        return false;
+        return this->mDataSet->insert(meta);
     }
 
     // add the count number of one piece of raw data to mDataMaps.
     // if there is already a piece of this raw data in the mDataMaps as a key,
     // just add the countNum.
     // if there is not, add a new pair to mDataMaps.
-    inline void addOneRawDataCount(int _n_gram,
-                                   Metadata *oneRawData,
-                                   int countNum)
+    inline void addOneRawDataCount(std::vector<Metadata> &oneRawData, int countNum)
     {
-        Metadata* rawData[_n_gram];
-        typename std::set<Metadata>::iterator it;
+        std::vector<Metadata> rawData;
 
-        for (int i = 0; i < _n_gram; i++) {
-            it = mMetaDataSet.find(oneRawData[i]);
-            if (it == mMetaDataSet.end()) {
-                it = mMetaDataSet.insert(oneRawData[i]).first;
+        for (long i = 0; i < oneRawData.size(); i++){
+            Metadata* data = mDataSet->find(oneRawData[i]);
+            if(data == NULL) {
+                data = &oneRawData[i];
+                mDataSet->insert(*data);
             }
-            rawData[i] = (Metadata*) &(*it);
+            rawData.push_back(*data);
         }
-
-        _addOneRawDataCount(_n_gram, rawData, countNum);
+        _addOneRawDataCount(rawData, countNum);
     }
 
-    // Note: oneRawData is the array of the raw data
-    inline std::vector<std::string> makeStringVectorFromData (
-            int _n_gram,
-            Metadata *oneRawData)
+    inline std::vector<long> makeKeyFromData(std::vector<Metadata> &oneRawData)
     {
-        unsigned int hex_address = 0;
-        std::vector<std::string> empty;
-        std::vector<std::string> result;
+        return makeKeyFromData(NULL, oneRawData);
+    }
 
-        typename std::set<Metadata>::iterator it;
+    // Note: the address of oneRawData should be the one saved in mMetaDataSet,
+    // not any metadata from outside
+    inline std::vector<long> makeKeyFromData(bool combination_array[],
+                                             std::vector<Metadata> &oneRawData)
+    {
+        // if the is not OrderDependent, we sort the data addresses ascending
+        if (!this->isOrderDependent)
+            std::sort(oneRawData.begin(), oneRawData.end());
 
-        for (int i = 0; i < _n_gram; i++) {
-            it = mMetaDataSet.find(oneRawData[i]);
-            if (it == mMetaDataSet.end()) {
-                return empty;
+        std::vector<long> result;
+
+        for (long i = 0; i < oneRawData.size(); i++)
+            if(combination_array) {
+                if (combination_array[i])
+                    result.push_back(mDataSet->getKey(oneRawData[i]));
+                else
+                    continue;
             }
-
-            Metadata* ret_ptr = (Metadata*) &(*it);
-            std::stringstream ss;
-            ss << std::hex << ret_ptr;
-            ss >> hex_address;
-            result.push_back(boost::lexical_cast<std::string>(hex_address));
-        }
+            else{
+                result.push_back(mDataSet->getKey(oneRawData[i]));
+            }
 
         return result;
     }
 
-    // Note: oneRawData is the array of the raw data
-    inline std::vector<int> makeAddressVectorFromData(
-            int _n_gram,
-            Metadata *oneRawData)
+    // not any metadata from outside
+    inline std::vector<Metadata> makeDataFromKey(std::vector<long> &indexes)
     {
-        unsigned int hex_address = 0;
-        std::vector<int> empty;
-        std::vector<int> result;
-
-        typename std::set<Metadata>::iterator it;
-
-        for (int i = 0; i < _n_gram; i++) {
-            it = mMetaDataSet.find(oneRawData[i]);
-            if (it == mMetaDataSet.end()) {
-                return empty;
-            }
-
-            Metadata* ret_ptr = (Metadata*) &(*it);
-
-            std::stringstream ss;
-            ss << std::hex << ret_ptr;
-            ss >> hex_address;
-            result.push_back(static_cast<int>(hex_address));
-        }
-
+        std::vector<Metadata> result;
+        for (long i = 0; i < indexes.size(); i++)
+            result.push_back(*(mDataSet->getValue(indexes[i])));
         return result;
     }
 
@@ -211,52 +269,52 @@ public:
 
     void saveResultsToFiles(std::string folderName) { }
 
-protected:
-    // Note: the address of oneRawData should be the one saved in mMetaDataSet,
-    // not any metadata from outside
-    inline std::string _makeStringFromData(int _n_gram,
-                                           Metadata* *oneRawData)
+    inline std::string print_data_map()
     {
-        // if the is not OrderDependent, we sort the data addresses ascending
-        if (!this->isOrderDependent)
-            this->sort(_n_gram, oneRawData);
+        std::ostringstream stringStream;
 
-        std::string result = "";
-
-        unsigned int hex_address = 0;
-        for (int i = 0; i < _n_gram; i++) {
-            if (i != 0)
-                result += "-";
-
-            std::stringstream ss;
-            ss << std::hex << oneRawData[i];
-            ss >> hex_address;
-            result +=boost::lexical_cast<std::string>(hex_address);
+        stringStream << "" << std::endl;
+        stringStream << ">Data Map<" << std::endl;
+        for (long i = 0; i <= n_gram; i++){
+            stringStream << i << "-gram: " << std::endl;
+            std::map<std::vector<long>, StatisticData> map = mDataMaps[i];
+            std::map<std::vector<long>, StatisticData>::iterator it_2 = map.begin();
+            for ( ; it_2 != map.end(); ++it_2){
+                stringStream << "> key: ";
+                for (std::vector<long>::const_iterator j = it_2->first.begin(); j != it_2->first.end(); ++j)
+                    stringStream << *j << "-";
+                stringStream << std::endl;
+                stringStream << "> count: " << it_2->second.count << ", " << std::endl;
+                stringStream << "> probability: " << it_2->second.probability << ", " << std::endl;
+                stringStream << "> entropy: " << it_2->second.entropy << ", " << std::endl;
+                stringStream << "> interactionInformation: " << it_2->second.interactionInformation << std::endl;
+                stringStream << "> ---" << std::endl;
+            }
+            stringStream << "-----";
         }
-
-        return result;
+        stringStream << ">Data Map End<" << std::endl;
+        return stringStream.str();
     }
-
+protected:
     // Note: the address of oneRawData should be the one saved in mMetaDataSet,
     // not any metadata from outside
     // add the count number of one piece of raw data to mDataMaps.
     // if there is already a piece of this raw data in the mDataMaps as a key,
     // just add the countNum.
     // if there is not, add a new pair to mDataMaps.
-    inline void _addOneRawDataCount(int _n_gram,
-                                    Metadata* *oneRawData,
+    inline void _addOneRawDataCount(std::vector<Metadata> &oneRawData,
                                     int countNum)
     {
-        std::map<std::string, StatisticData>::iterator it;
-        std::string key = _makeStringFromData(_n_gram, oneRawData);
-        it = mDataMaps[_n_gram].find(key);
+        long n_gram = oneRawData.size();
+        std::map<std::vector<long>, StatisticData>::iterator it;
+        std::vector<long> key = makeKeyFromData(oneRawData);
+        it = mDataMaps[n_gram].find(key);
 
-        if (it == mDataMaps[_n_gram].end()) {
+        if (it == mDataMaps[n_gram].end()) {
             // add new pair to the map
             StatisticData newData(countNum);
-
-            mDataMaps[_n_gram].insert(
-                    std::map<std::string, StatisticData>
+            mDataMaps[n_gram].insert(
+                    std::map<std::vector<long>, StatisticData>
                     ::value_type(key, newData)
             );
         }
@@ -264,19 +322,7 @@ protected:
             // this key already exists in the map, just add the countNum
             (it->second).count += countNum;
         }
-
-        mRawDataNumbers[_n_gram] += countNum;
-    }
-
-    inline void sort(int n, Metadata **oneRawData) {
-        Metadata *tmp;
-        for (int i = 0; i < n; ++i)
-            for (int j = i; j < n - 1; ++j)
-                if (oneRawData[j] > oneRawData[j + 1]) {
-                    tmp = oneRawData[j];
-                    oneRawData[j] = oneRawData[j + 1];
-                    oneRawData[j + 1] = tmp;
-                }
+        mRawDataNumbers[n_gram] += countNum;
     }
 };
 
@@ -284,4 +330,3 @@ protected:
 } // namespace opencog
 
 #endif //_OPENCOG_STATISTICS_DATAPROVIDER_H
-

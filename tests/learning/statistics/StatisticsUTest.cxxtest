@@ -37,151 +37,164 @@ using namespace statistics;
 class StatisticsTestSuite : public CxxTest::TestSuite
 {
 private:
+    const bool DEBUG = false;
+
     const int N_GRAMS = 3;
-    const bool ORDERED = true;
-    int test_case[9] = {111, 222, 333, 444, 555, 666, 777, 888, 999};
-    DataProvider<int> *provider;
+    const bool ORDERED = false;
+    vector<std::string> test_case = {"aaa", "bbb", "ccc", "ddd", "eee", "fff"};
+    DataProvider<std::string> *provider;
+
+    template<typename T>
+    void print_detail(DataProvider<T> *provider)
+    {
+        logger().info(provider->mDataSet->print_meta_data_set());
+        logger().info(provider->print_data_map());
+    }
 
 public:
     void setUp()
     {
-        provider = new DataProvider<int>(N_GRAMS, ORDERED);
+        if(this->DEBUG)
+            logger().setPrintToStdoutFlag(true);
+        provider = new DataProvider<std::string>(N_GRAMS, ORDERED);
     }
     void tearDown()
     {
+        if(this->DEBUG)
+            print_detail(provider);
         delete provider;
     }
 
     void test_data_provider()
     {
+        logger().info("Statistics> test_data_provider");
         // Add one data
         bool is_first_insert;
-        is_first_insert = provider->addOneMetaData(111);
+        is_first_insert = provider->addOneMetaData("aaa");
         TS_ASSERT(is_first_insert)
 
         // Re-add one data
-        is_first_insert = provider->addOneMetaData(111);
+        is_first_insert = provider->addOneMetaData("aaa");
         TS_ASSERT(!is_first_insert);
 
         // Add multiple data
-        for (int i = 1; i < 9; i++)
+        for (unsigned long i = 0; i < test_case.size(); i++)
             provider->addOneMetaData(test_case[i]);
+        TS_ASSERT_EQUALS(provider->mDataSet->size(), 6);
 
         // Add data's count (n_gram = 2)
-        int arr_2_gram_1[2] = {111, 222};
-        int arr_2_gram_2[2] = {111, 333};
-        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
-        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
+        vector<std::string> arr_2_gram_1 = {"aaa", "bbb"};
+        vector<std::string> arr_2_gram_2 = {"aaa", "ccc"};
+        provider->addOneRawDataCount(arr_2_gram_1, 2);
+        provider->addOneRawDataCount(arr_2_gram_2, 1);
 
         // Add data's count (n_gram = 3)
-        int arr_3_gram_1[3] = {111, 222, 333};
-        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+        vector<std::string> arr_3_gram_1 = {"aaa", "bbb", "ccc"};
+        provider->addOneRawDataCount(arr_3_gram_1, 1);
 
-        // Test string vector
-        std::vector<std::string> string_vector =
-                provider->makeStringVectorFromData(2, &test_case[0]);
+        // Test key vector
+        std::vector<long> key_vector_1 = provider->makeKeyFromData(test_case);
+        TS_ASSERT_EQUALS(key_vector_1.size(), 6);
 
-        /*
-        std::vector<std::string>::iterator it_1 = string_vector.begin();
-        for( ; it_1 != string_vector.end(); ++it_1)
-            logger().info("%s", ((std::string)*it_1).c_str());
-        */
+        // Test key vector
+        bool combination_array[6] = {true, false, true, false, true, false};
+        std::vector<long> key_vector_2 = provider->makeKeyFromData(
+                combination_array, test_case);
+        TS_ASSERT_EQUALS(key_vector_2.size(), 3);
 
-        // Test address vector
-        std::vector<int> address_vector =
-                provider->makeAddressVectorFromData(2, &test_case[0]);
-        /*
-        std::vector<int>::iterator it_2 = address_vector.begin();
-        for( ; it_2 != address_vector.end(); ++it_2)
-            logger().info("%i", (int)*it_2);
-        */
+        // Test data vector
+        std::vector<std::string> value_vector =
+                provider->makeDataFromKey(key_vector_1);
+        TS_ASSERT_EQUALS(value_vector.size(), 6);
     }
 
     void test_probabilities()
     {
+        logger().info("Statistics> test_probabilities");
         // Add multiple data
-        for (int i = 0; i < 9; i++)
+        for (unsigned long i = 0; i < test_case.size(); i++)
             provider->addOneMetaData(test_case[i]);
 
         // Add data's count (n_gram = 2)
-        int arr_2_gram_1[2] = {111, 222};
-        int arr_2_gram_2[2] = {111, 333};
-        int arr_3_gram_1[3] = {111, 222, 333};
-        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
-        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
-        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+        vector<std::string> arr_2_gram_1 = {"aaa", "bbb"};
+        vector<std::string> arr_2_gram_2 = {"aaa", "ccc"};
+        vector<std::string> arr_3_gram_1 = {"aaa", "bbb", "ccc"};
+        provider->addOneRawDataCount(arr_2_gram_1, 2);
+        provider->addOneRawDataCount(arr_2_gram_2, 1);
+        provider->addOneRawDataCount(arr_3_gram_1, 1);
 
         // Calculate probabilities
-        Probability::calculateProbabilities(provider);
+        Probability::calculateProbabilities(*provider);
 
+        std::map<std::vector<long>, StatisticData>::iterator it;
+        const std::vector<long> arr_2_gram_1_index = {0, 1};
+        it = provider->mDataMaps[2].find(arr_2_gram_1_index);
+        TS_ASSERT_DELTA(it->second.probability, 0.666, 0.01);
+        const std::vector<long> arr_2_gram_2_index = {0, 2};
+        it = provider->mDataMaps[2].find(arr_2_gram_2_index);
+        TS_ASSERT_DELTA(it->second.probability, 0.333, 0.01);
+        const std::vector<long> arr_3_gram_1_index = {0, 1, 2};
+        it = provider->mDataMaps[3].find(arr_3_gram_1_index);
+        TS_ASSERT_DELTA(it->second.probability, 1.0, 0.01);
     }
 
     void test_entropies()
     {
+        logger().info("Statistics> test_entropies");
         // Add multiple data
-        for (int i = 0; i < 9; i++)
+        for (unsigned long i = 0; i < test_case.size(); i++)
             provider->addOneMetaData(test_case[i]);
 
         // Add data's count (n_gram = 2)
-        int arr_2_gram_1[2] = {111, 222};
-        int arr_2_gram_2[2] = {111, 333};
-        int arr_3_gram_1[3] = {111, 222, 333};
-        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
-        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
-        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+        vector<std::string> arr_2_gram_1 = {"aaa", "bbb"};
+        vector<std::string> arr_2_gram_2 = {"aaa", "ccc"};
+        vector<std::string> arr_3_gram_1 = {"aaa", "bbb", "ccc"};
+        provider->addOneRawDataCount(arr_2_gram_1, 2);
+        provider->addOneRawDataCount(arr_2_gram_2, 1);
+        provider->addOneRawDataCount(arr_3_gram_1, 1);
 
         // Calculate entropies
-        Probability::calculateProbabilities(provider);
-        Entropy::calculateEntropies(provider);
+        Probability::calculateProbabilities(*provider);
+        Entropy::calculateEntropies(*provider);
+
+        std::map<std::vector<long>, StatisticData>::iterator it;
+        const std::vector<long> arr_2_gram_1_index = {0, 1};
+        it = provider->mDataMaps[2].find(arr_2_gram_1_index);
+        TS_ASSERT_DELTA(it->second.entropy, 0.389, 0.01);
+        const std::vector<long> arr_2_gram_2_index = {0, 2};
+        it = provider->mDataMaps[2].find(arr_2_gram_2_index);
+        TS_ASSERT_DELTA(it->second.entropy, 0.528, 0.01);
     }
 
     void test_interaction_information()
     {
+        logger().info("Statistics> test_interaction_information");
         // Add multiple data
-        for (int i = 0; i < 9; i++)
+        for (unsigned long i = 0; i < test_case.size(); i++)
             provider->addOneMetaData(test_case[i]);
 
         // Add data's count (n_gram = 2)
-        int arr_2_gram_1[2] = {111, 222};
-        int arr_2_gram_2[2] = {111, 333};
-        int arr_3_gram_1[3] = {111, 222, 333};
-        provider->addOneRawDataCount(2, arr_2_gram_1, 2);
-        provider->addOneRawDataCount(2, arr_2_gram_2, 1);
-        provider->addOneRawDataCount(3, arr_3_gram_1, 1);
+        vector<std::string> arr_2_gram_1 = {"aaa", "bbb"};
+        vector<std::string> arr_2_gram_2 = {"aaa", "ccc"};
+        vector<std::string> arr_3_gram_1 = {"aaa", "bbb", "ccc"};
+        provider->addOneRawDataCount(arr_2_gram_1, 2);
+        provider->addOneRawDataCount(arr_2_gram_2, 1);
+        provider->addOneRawDataCount(arr_3_gram_1, 1);
 
         // Calculate interaction information
-        Probability::calculateProbabilities(provider);
-        Entropy::calculateEntropies(provider);
-        InteractionInformation::calculateInteractionInformations(provider);
-    }
+        Probability::calculateProbabilities(*provider);
+        Entropy::calculateEntropies(*provider);
+        InteractionInformation::calculateInteractionInformations(*provider);
 
-private:
-    template<typename T>
-    void print_detail(DataProvider<T> *provider)
-    {
-        logger().info(">All Data Set<");
-        std::set<int>::iterator it_1 = provider->mMetaDataSet.begin();
-        for ( ; it_1 != provider->mMetaDataSet.end(); ++it_1)
-            logger().info("%i, ", (int)*it_1);
-        logger().info("");
-        logger().info(">All Data Set End<");
-
-        logger().info(">Data Map<");
-        for (int i = 0; i <= N_GRAMS; i++){
-            logger().info("%d-gram: ", i);
-            std::map<string, StatisticData> map = provider->mDataMaps[i];
-            std::map<string, StatisticData>::iterator it_2 = map.begin();
-            for ( ; it_2 != map.end(); ++it_2){
-                logger().info("> key: %s", it_2->first.c_str());
-                logger().info("> count: %d", it_2->second.count);
-                logger().info("> probability: %f", it_2->second.probability);
-                logger().info("> entropy: %f", it_2->second.entropy);
-                logger().info("> interactionInformation: %f", it_2->second.interactionInformation);
-                logger().info("> ---");
-            }
-            logger().info("-----");
-        }
-        logger().info(">Data Map End<");
-        logger().info("");
+        std::map<std::vector<long>, StatisticData>::iterator it;
+        const std::vector<long> arr_2_gram_1_index = {0, 1};
+        it = provider->mDataMaps[2].find(arr_2_gram_1_index);
+        TS_ASSERT_DELTA(it->second.interactionInformation, -0.389, 0.01);
+        const std::vector<long> arr_2_gram_2_index = {0, 2};
+        it = provider->mDataMaps[2].find(arr_2_gram_2_index);
+        TS_ASSERT_DELTA(it->second.interactionInformation, -0.528, 0.01);
+        const std::vector<long> arr_3_gram_1_index = {0, 1, 2};
+        it = provider->mDataMaps[3].find(arr_3_gram_1_index);
+        TS_ASSERT_DELTA(it->second.interactionInformation, -0.918, 0.01);
     }
 };

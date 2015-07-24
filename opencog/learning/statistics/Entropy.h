@@ -36,13 +36,13 @@ class Entropy
 {
 public:
  template<typename Metadata>
- inline static void calculateEntropies(DataProvider<Metadata>* data)
+ inline static void calculateEntropies(DataProvider<Metadata> &provider)
  {
-     std::map<std::string, StatisticData>::iterator it;
+     std::map<std::vector<long>, StatisticData>::iterator it;
 
-     for (int n = 1; n <= data->n_gram; ++n) {
-         for (it = data->mDataMaps[n].begin();
-              it != data->mDataMaps[n].end(); ++it) {
+     for (long n = 1; n <= provider.n_gram; ++n) {
+         for (it = provider.mDataMaps[n].begin();
+              it != provider.mDataMaps[n].end(); ++it) {
              StatisticData &pieceData = it->second;
              pieceData.entropy =
                      (-1.0f) *
@@ -54,20 +54,20 @@ public:
 
 /*
  template<typename Metadata>
- inline static void calculateProbabilityAndEntropies(DataProvider<Metadata>* data)
+ inline static void calculateProbabilityAndEntropies(DataProvider<Metadata>* provider)
  {
      std::map<std::string,StatisticData>::iterator it;
 
-     for (int n = 1; n <= data->n_gram; ++n )
+     for (int n = 1; n <= provider->n_gram; ++n )
      {
-         for( it = data->mDataMaps[n].begin();
-              it != data->mDataMaps[n].end();
+         for( it = provider->mDataMaps[n].begin();
+              it != provider->mDataMaps[n].end();
               ++it )
          {
              StatisticData& pieceData = it->second;
              pieceData.probability =
                      ((float)(pieceData.count)) /
-                     ((float)(data->mRawDataNumbers[n]));
+                     ((float)(provider->mRawDataNumbers[n]));
              pieceData.entropy =
                      (-1.0f) *
                      pieceData.probability *

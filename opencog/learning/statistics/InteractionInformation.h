@@ -33,53 +33,45 @@
 
 namespace opencog { namespace statistics {
 
- void sortIntVector(std::vector<int> &v, bool isDec = true);
- bool isLastNElementsAllTrue(bool* array, long size, int n);
+ bool isLastNElementsAllTrue(bool* array, long size, long n);
  void generateNextCombination(bool *indexes, long n_max);
- std::string makeKeyStringFromIndexes(
-         std::vector<int> &onePieceOfData, bool* array, long size);
- std::vector<int> makeAddressVectorFromString(
-         std::string str, char splitter = '-');
 
 class InteractionInformation
 {
 public:
  template<typename Metadata>
  inline static float calculateInteractionInformation(
-         std::vector<int> onePieceOfData, DataProvider<Metadata>* data)
+         std::vector<Metadata> &onePieceOfData, DataProvider<Metadata> &provider)
  {
-     if (! data->isOrderDependent)
-         sortIntVector(onePieceOfData);
+     if (!provider.isOrderDependent)
+         std::sort(onePieceOfData.begin(), onePieceOfData.end());
 
      long n_max = onePieceOfData.size();
      bool sign = true;
      float interactionInfo = 0.0f;
      float tmpSum;
-     std::map<std::string,StatisticData>::iterator it;
-     std::string key;
+     std::map<std::vector<long>, StatisticData>::iterator it;
 
      bool indexes[n_max];
 
-     for (int n_gram = 1; n_gram <= n_max; n_gram ++)
+     for (long n_gram = 1; n_gram <= n_max; n_gram ++)
      {
          tmpSum = 0.0f;
 
          // Use the binary method to generate all combinations:
 
          // generate the first combination
-         for (int i = 0; i < n_gram; ++ i)
+         for (long i = 0; i < n_gram; ++ i)
              indexes[i] = true;
 
-         for (int i = n_gram; i < n_max; ++ i)
+         for (long i = n_gram; i < n_max; ++ i)
              indexes[i] = false;
 
          while (true)
          {
-             key = makeKeyStringFromIndexes(onePieceOfData, indexes, n_max);
-
-             it = data->mDataMaps[n_gram].find(key);
-
-             if (it != data->mDataMaps[n_gram].end())
+             std::vector<long> key = provider.makeKeyFromData(indexes, onePieceOfData);
+             it = provider.mDataMaps[n_gram].find(key);
+             if (it != provider.mDataMaps[n_gram].end())
              {
                  StatisticData& pieceData = it->second;
                  tmpSum += pieceData.entropy;
@@ -89,7 +81,6 @@ public:
                  break;
 
              generateNextCombination(indexes, n_max);
-
          }
 
          if (sign)
@@ -105,26 +96,30 @@ public:
 
  template<typename Metadata>
  inline static float calculateInteractionInformation(
-         std::string onePieceOfData, DataProvider<Metadata>* data)
+         std::vector<long> &onePieceOfData, DataProvider<Metadata> &provider)
  {
-     return calculateInteractionInformation(
-             makeAddressVectorFromString(onePieceOfData), data
-     );
+     std::vector<Metadata> data = provider.makeDataFromKey(onePieceOfData);
+     return calculateInteractionInformation(data, provider);
  }
 
  template<typename Metadata>
  inline static void calculateInteractionInformations(
-         DataProvider<Metadata>* data)
+         DataProvider<Metadata> &provider)
  {
-     std::map<std::string,StatisticData>::iterator it;
+     std::map<std::vector<long> ,StatisticData>::iterator it;
 
-     for (int n = 1; n <= data->n_gram; ++n )
+     for (long n = 1; n <= provider.n_gram; ++n )
      {
-         for( it = data->mDataMaps[n].begin(); it != data->mDataMaps[n].end(); ++it)
+         for(it = provider.mDataMaps[n].begin();
+             it != provider.mDataMaps[n].end();
+             ++it)
          {
              StatisticData& pieceData = it->second;
-             pieceData.interactionInformation = calculateInteractionInformation(
-                             (std::string)(it->first), data);
+             std::vector<long> onePieceOfData = (std::vector<long>)it->first;
+             pieceData.interactionInformation =
+                     calculateInteractionInformation(
+                             onePieceOfData, provider
+                     );
          }
 
      }
