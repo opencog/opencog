@@ -40,6 +40,8 @@ namespace opencog
 namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
+#define SURPRISINGNESS_I_TOP_THRESHOLD 0.10
+#define SURPRISINGNESS_II_TOP_THRESHOLD 0.20
 
  struct _non_ordered_pattern
  {
@@ -87,6 +89,7 @@ namespace PatternMining
      map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
      vector < vector<HTreeNode*> > patternsForGram;
+     vector < vector<HTreeNode*> > finalPatternsForGram;
 
      std::thread *threads;
 
@@ -125,6 +128,8 @@ namespace PatternMining
      string interestingness_Evaluation_method;
 
      float atomspaceSizeFloat;
+
+     float surprisingness_II_threshold;
 
      //debug
      unsigned int processedLinkNum;
@@ -297,7 +302,11 @@ namespace PatternMining
 
      bool checkPatternExist(const string& patternKeyStr);
 
-     void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false, int surprisingness = 1);
+     void OutPutFrequentPatternsToFile(unsigned int n_gram);
+
+     void OutPutInterestingPatternsToFile(unsigned int n_gram,  int surprisingness = 0); // surprisingness 1 or 2
+
+     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
 

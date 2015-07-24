@@ -866,32 +866,22 @@ bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
     return (node1->var_num < node2->var_num);
 }
 
-void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern, int surprisingness) // surprisingness 1 or 2
+
+// only used by Surprisingness evaluation mode
+void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
 {
 
     // out put the n_gram patterns to a file
     ofstream resultFile;
-    string fileName;
-    if (is_interesting_pattern)
-    {
-        if (interestingness_Evaluation_method == "Interaction_Information")
-            fileName = "Interaction_Information_" + toString(n_gram) + "gram.scm";
-        else if (surprisingness == 1)
-            fileName = "SurprisingnessI_" + toString(n_gram) + "gram.scm";
-        else
-            fileName = "SurprisingnessII_" + toString(n_gram) + "gram.scm";
-    }
-    else
-        fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
-    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") patterns to file " + fileName << std::endl;
+    string fileName  = "FinalTopPatterns_" + toString(n_gram) + "gram.scm";
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") final top patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
-    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+    vector<HTreeNode*> &patternsForThisGram = finalPatternsForGram[n_gram-1];
 
-    if (is_interesting_pattern)
-        resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
-    else
-        resultFile << "Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
+    resultFile << "Interesting Pattern Mining final results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
@@ -900,19 +890,99 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram, bool is_interesting
 
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
-        if (is_interesting_pattern)
-        {
+        resultFile << ", SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
-            if (interestingness_Evaluation_method == "Interaction_Information")
-                resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
-            else if (interestingness_Evaluation_method == "surprisingness")
-            {
-                if (surprisingness == 1)
-                    resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
-                else
-                    resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
-            }
+        resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+
+        resultFile << endl;
+
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+
+    }
+
+    resultFile.close();
+
+
+}
+
+
+
+void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram)
+{
+
+    // out put the n_gram frequent patterns to a file, in the order of frequency
+    ofstream resultFile;
+    string fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing  (gram = " + toString(n_gram) + ") frequent patterns to file " + fileName << std::endl;
+
+    resultFile.open(fileName.c_str());
+    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+
+    resultFile << "Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count < 2)
+            continue;
+
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << endl;
+
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+//        for (Handle link : htreeNode->pattern)
+//        {
+//            resultFile << atomSpace->atomAsString(link);
+//        }
+    }
+
+    resultFile.close();
+
+
+}
+
+void PatternMiner::OutPutInterestingPatternsToFile(unsigned int n_gram, int surprisingness) // surprisingness 1 or 2, it is default 0 which means Interaction_Information
+{
+
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+    if (interestingness_Evaluation_method == "Interaction_Information")
+        fileName = "Interaction_Information_" + toString(n_gram) + "gram.scm";
+    else if (surprisingness == 1)
+        fileName = "SurprisingnessI_" + toString(n_gram) + "gram.scm";
+    else
+        fileName = "SurprisingnessII_" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") interesting patterns to file " + fileName << std::endl;
+
+    resultFile.open(fileName.c_str());
+    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+
+    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count < 2)
+            continue;
+
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+
+        if (interestingness_Evaluation_method == "Interaction_Information")
+            resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
+        else if (interestingness_Evaluation_method == "surprisingness")
+        {
+            if (surprisingness == 1)
+                resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+            else
+                resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
         }
+
 
         resultFile << endl;
 
@@ -1906,6 +1976,10 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     {
         vector<HTreeNode*> patternVector;
         patternsForGram.push_back(patternVector);
+
+        vector<HTreeNode*> finalPatternVector;
+        finalPatternsForGram.push_back(finalPatternVector);
+
     }
 
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
@@ -1973,7 +2047,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 // Finished mining gram patterns; output to file
                 std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-                OutPutPatternsToFile(gram);
+                OutPutFrequentPatternsToFile(gram);
 
                 std::cout<< std::endl;
             }
@@ -2007,17 +2081,34 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 {
                     // sort by interaction information
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
-                    OutPutPatternsToFile(cur_gram, true);
+                    OutPutInterestingPatternsToFile(cur_gram);
                 }
                 else if (interestingness_Evaluation_method == "surprisingness")
                 {
                     // sort by surprisingness_I first
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
-                    OutPutPatternsToFile(cur_gram, true,1);
+                    OutPutInterestingPatternsToFile(cur_gram,1);
+
+                    vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 
                     // and then sort by surprisingness_II
-                    std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_II);
-                    OutPutPatternsToFile(cur_gram, true,2);
+                    std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+                    OutPutInterestingPatternsToFile(cur_gram,2);
+
+                    // Get the min threshold of surprisingness_II
+                    int threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size());
+                    surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+
+                    // go through the top N patterns of surprisingness_I
+                    int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
+                    for (int p = 0; p < threshold_index_I; p ++)
+                    {
+                        HTreeNode* pNode = curGramPatterns[p];
+                        if (pNode->nII_Surprisingness >= surprisingness_II_threshold )
+                            finalPatternsForGram[cur_gram-1].push_back(pNode);
+                    }
+
+                    OutPutFinalPatternsToFile(cur_gram);
 
                 }
 
