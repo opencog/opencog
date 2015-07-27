@@ -34,10 +34,6 @@
 	)
 )
 
-;(InheritanceLink (stv 1 .99) (ConceptNode "IMPERATIVE-Rule") (ConceptNode "Rule"))
-(InheritanceLink (stv 1 .99) (ConceptNode "imperative-Rule") (ConceptNode "Rule"))
-;(ReferenceLink (stv 1 .99) (ConceptNode "IMPERATIVE-Rule") IMPERATIVE)
-(ReferenceLink (stv 1 .99) (ConceptNode "imperative-Rule") IMPERATIVE)
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-imp-rule int-index)
