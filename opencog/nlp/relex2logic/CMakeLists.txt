@@ -55,6 +55,6 @@ whichsubjSVOQ.scm
 whichsubjSVQ.scm
 why-cop-q.scm
 why-q.scm
-DESTINATION "${DATADIR}//scm/nlp/relex2logic"
+DESTINATION "${DATADIR}/scm/nlp/relex2logic"
 )
 ADD_SUBDIRECTORY (loader)
