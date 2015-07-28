@@ -21,6 +21,6 @@
     (ListLink
         ; This is the default function that each psi-demand must have.
         (GroundedSchemaNode "scm: psi-demand-updater")
-        (VariableNode "Demand")
+        (ConceptNode "OpenPsi: Competence")
     )
 )
