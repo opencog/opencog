@@ -63,6 +63,7 @@ class NewMovementPlugin:
         self.net = ploader.requires('Net')
         self.clinfo = ploader.requires('ClientInfo')
         self.phys = ploader.requires('NewPhysics')
+        self.event = ploader.requires('Event')
         
         self.mvc = NewMovementCore()
         
@@ -87,14 +88,31 @@ class NewMovementPlugin:
         self.mvc.setTarget(data)
 
 
+    # sends out a packet and event on every client tick detailing current position of client
     def clientTick(self, name, data):
         
-        self.net.push_packet('PLAY>Player Position', self.clinfo.position.get_dict())
-    
+        data_dict = self.clinfo.position.get_dict()
+        self.net.push_packet('PLAY>Player Position', data_dict)
+
+        ros_data = {}
+        ros_data['x'] = data_dict['x']
+        ros_data['y'] = data_dict['y']
+        ros_data['z'] = data_dict['z']
+        ros_data['pitch'] = data_dict['pitch']
+        ros_data['yaw'] = data_dict['yaw']
+        
+        self.event.emit('ros_position_update', ros_data)
+        
+
+
+        #print "pos update"
+        #print self.clinfo.position.get_dict()
     
     def handlePosUpdate(self, name, data):
         
         self.net.push_packet('PLAY>Player Position and Look', data.get_dict())
+        #print "pos and look update"
+        #print data.get_dict()
  
     def getAngle(self, x, z):
 
@@ -130,5 +148,5 @@ class NewMovementPlugin:
 	"""
         if (self.mvc.target != None):
             direction = self.getAngle(self.mvc.target.x, self.mvc.target.z)
-            print ("current pos: " + str(self.clinfo.position))
+            #print ("current pos: " + str(self.clinfo.position))
             self.phys.move(direction, self.mvc.speed, self.mvc.jump)

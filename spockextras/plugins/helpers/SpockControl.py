@@ -18,7 +18,7 @@ from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, bl
 from minecraft_bot.msg import entity_msg, entity_exp_meta, entity_global_meta, entity_mob_meta
 from minecraft_bot.msg import entity_movement_meta, entity_object_meta, entity_painting_meta, entity_player_meta 
 
-
+from minecraft_bot.msg import position_msg
 
 
 
@@ -45,9 +45,12 @@ class SpockControlPlugin:
         self.event = ploader.requires('Event')
         self.msgr = ploader.requires('Messenger')
         
+        # the standard Spock plugin. necessary to track position updates
+        ploader.requires('ClientInfo')
+
         # simply load all of the plugins
-        #ploader.requires('NewMovement')
-        #ploader.requires('MineAndPlace')
+        ploader.requires('NewMovement')
+        ploader.requires('MineAndPlace')
         ploader.requires('SendMapData')
         ploader.requires('SendEntityData')
 
@@ -58,6 +61,7 @@ class SpockControlPlugin:
         ploader.reg_event_handler('ros_block_update', self.sendBlockUpdate)
         #ploader.reg_event_handler('ros_world_reset', self.sendWorldReset)
         ploader.reg_event_handler('ros_entity_data', self.sendEntityData)
+        ploader.reg_event_handler('ros_position_update', self.sendPositionUpdate)
         
         self.core = SpockControlCore()
         ploader.provides('SpockControl', self.core)
@@ -71,7 +75,7 @@ class SpockControlPlugin:
 	print("spock control node initialized")
 	
         # subscribe to Spock related data streams from ROS
-	#rospy.Subscriber('movement_data', movement_msg, self.moveTo, queue_size=1)
+	rospy.Subscriber('movement_data', movement_msg, self.moveTo, queue_size=1)
 	#rospy.Subscriber('mine_block_data', mine_block_msg, self.mineBlock, queue_size=1)
 	#rospy.Subscriber('place_block_data', place_block_msg, self.placeBlock, queue_size=1)
 
@@ -82,6 +86,8 @@ class SpockControlPlugin:
         self.pub_bulk =     rospy.Publisher('chunk_bulk', chunk_bulk_msg, queue_size = 1000)
         #self.pub_wstate =    rospy.Publisher('world_state', world_state_msg, queue_size = 1)
         self.pub_entity =   rospy.Publisher('entity_data', entity_msg, queue_size = 100)
+
+        self.pub_clinfo = rospy.Publisher('client_pos_data', position_msg, queue_size = 10)
 
     ### ROS Subscriber callbacks simply pass data along to the Spock event handlers
     def moveTo(self, data):
@@ -148,8 +154,8 @@ class SpockControlPlugin:
         msg = block_data_msg()
         self.msgr.setMessage(msg, data)
         
-        rospy.loginfo("published block update: id: %d, data, %d loc: %d, %d, %d", 
-                msg.blockid, msg.blockdata, msg.x, msg.y, msg.z)
+        rospy.loginfo("published block update: data, %d loc: %d, %d, %d", 
+                msg.data, msg.x, msg.y, msg.z)
         self.pub_block.publish(msg)
     
     
@@ -168,4 +174,15 @@ class SpockControlPlugin:
         rospy.loginfo("published entity message: type: %d, uid: %d, loc: %d, %d, %d",
                 msg.type, msg.eid, msg.x, msg.y, msg.z)
         self.pub_entity.publish(msg)
+
+
+
+    def sendPositionUpdate(self, name, data):
+        print "sending position update"
+        print data
+
+        msg = position_msg()
+        self.msgr.setMessage(msg, data)
+
+        self.pub_clinfo.publish(msg)
 
