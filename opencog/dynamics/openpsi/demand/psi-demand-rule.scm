@@ -21,7 +21,7 @@
                 (VariableNode "Demand")
                 (ConceptNode "OpenPsi: Demand")
             )
-            ; This is equivalent to an in-born drive. When
+            ; This is equivalent to an in-born drive/goal. When
             ; the value goes out of range then urge occurs
             (EvaluationLink
                 (PredicateNode "must_have_value_within")
