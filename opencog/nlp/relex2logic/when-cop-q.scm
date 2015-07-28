@@ -22,7 +22,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$verb")
 				(VariableNode "$a-parse")
@@ -40,38 +40,36 @@
                 			(ListLink
                     			(VariableNode "$verb")
                     			(VariableNode "$qVar")
-                			)			
+                			)
             		)
 			(EvaluationLink
                 			(DefinedLinguisticRelationshipNode "_subj")
                 			(ListLink
                     			(VariableNode "$verb")
                     			(VariableNode "$subj")
-                			)			
+                			)
             		)
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-when-cop-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "when-cop-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "when-cop-q-Rule") when-cop-q)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-when-cop-q-rule subj)
+ (ListLink
 	(whencop-Q-rule (word-inst-get-word-str subj) (cog-name subj)
 	)
+ )
 )
-

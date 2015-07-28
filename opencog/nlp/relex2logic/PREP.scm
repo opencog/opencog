@@ -53,6 +53,7 @@
 				)
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-prep-rule")
 			(ListLink
@@ -61,20 +62,17 @@
 				(VariableNode "$obj")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "PREP-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "PREP-Rule") PREP)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-prep-rule subj prep obj)
+ (ListLink
 	(SVO-rule (word-inst-get-word-str subj) (cog-name subj)
 		(word-inst-get-word-str prep) (cog-name prep)
 		(word-inst-get-word-str obj) (cog-name obj)
 	)
+ )
 )
-

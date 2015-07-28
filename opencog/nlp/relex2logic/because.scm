@@ -1,4 +1,4 @@
-; this rule handles the _%because relation, which mainly handles because-phrases and 
+; this rule handles the _%because relation, which mainly handles because-phrases and
 ; why-questions.
 ; (AN June 2015)
 
@@ -31,31 +31,29 @@
                 (DefinedLinguisticRelationshipNode "_%because")
                 (ListLink
                     (VariableNode "$pred")
-					(VariableNode "$comp")     
+					(VariableNode "$comp")
                 )
             )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-because-rule")
        	      (ListLink
-       	        (VariableNode "$comp")  
-				(VariableNode "$pred")         	         
+       	        (VariableNode "$comp")
+				        (VariableNode "$pred")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "because-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "because-Rule") comp)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-because-rule comp pred)
-    	(because-rule
+ (ListLink
+  (because-rule
 		(word-inst-get-word-str comp) (cog-name comp)
-		(word-inst-get-word-str pred) (cog-name pred)		              
+		(word-inst-get-word-str pred) (cog-name pred)
 	)
+ )
 )
-
-

@@ -1,7 +1,7 @@
-; This rule is for "how of degree questions" such as "How fast can you run?"
+; This is for how-of-quantity questions, such as "How much did that bong cost?"
 ; (AN June 2015)
 
-(define howdeg-q
+(define howquant-q
 	(BindLink
 		(VariableList
 			(TypedVariableLink
@@ -13,47 +13,47 @@
 				(TypeNode "WordInstanceNode")
 			)
 			(TypedVariableLink
-				(VariableNode "$pred")
+				(VariableNode "$noun")
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$qVar")
 				(VariableNode "$a-parse")
 			)
 			(WordInstanceLink
-				(VariableNode "$pred")
+				(VariableNode "$noun")
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%howdeg")
+                			(DefinedLinguisticRelationshipNode "_quantity")
                 			(ListLink
-                    			(VariableNode "$pred")
+                    			(VariableNode "$noun")
                     			(VariableNode "$qVar")
-                			)					
+                			)
             		)
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")
 			)
 		)
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: pre-howdeg-q-rule")
-		(ListLink
-			(VariableNode "$pred")
+   (ListLink
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-howquant-q-rule")
+			(ListLink
+				(VariableNode "$noun")
+			)
 		)
-	)
-))
-
-(InheritanceLink (stv 1 .99) (ConceptNode "howdeg-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "howdeg-q-Rule") howdeg-q)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-howdeg-q-rule pred)
-	(howdegQ-rule (word-inst-get-word-str pred) (cog-name pred)
+   )
 	)
 )
 
+; This is function is not needed. It is added so as not to break the existing
+; r2l pipeline.
+(define (pre-howquant-q-rule noun)
+ (ListLink
+	(howquantQ-rule (word-inst-get-word-str noun) (cog-name noun)
+	)
+ )
+)

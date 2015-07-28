@@ -56,6 +56,7 @@
 				)
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")
 			(ListLink
@@ -64,19 +65,17 @@
 				(VariableNode "$subj")
 			)
 		)
+   )
 	)
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "TOBE-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "TOBE-Rule") SP)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-tobe-rule verb adj subj)
+ (ListLink
 	(to-be-rule (word-inst-get-word-str verb) (cog-name verb)
 		(word-inst-get-word-str adj) (cog-name adj)
 		(word-inst-get-word-str subj) (cog-name subj)
 	)
+ )
 )
-

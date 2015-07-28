@@ -55,6 +55,7 @@
                 (WordNode "be")
             )
         )
+       (ListLink
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-be-inheritance-rule")
             (ListLink
@@ -62,18 +63,16 @@
                 (VariableNode "$Z")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99 ) (ConceptNode "BE-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99 ) (ConceptNode "BE-Rule") be-inheritance)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-be-inheritance-rule subj obj)
+  (ListLink
     (be-inheritance-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str obj) (cog-name obj)
     )
+  )
 )
-
