@@ -35,6 +35,7 @@
 // #include <opencog/embodiment/Learning/LearningSpace/LearningMessage.info.pb.h>
 // #endif
 #include "Octree3DMapManager.h"
+#include "SpaceMapUtil.h"
 using namespace opencog;
 using namespace opencog::spatial;
 
@@ -323,8 +324,8 @@ bool Octree3DMapManager::checkStandable(const BlockVector &pos, float logOddsOcc
     	{
 			//TODO:Judge if this block is standable
 			//if agent can't stand on it (ex.water/lava)return false
-		 //if (getPredicate(*mAtomSpace,"material",underBlock) == "water")
-			//{ return false;}
+		 if (getPredicate(*mAtomSpace,"material",underBlock) == "water")
+			{ return false;}
 			return true;
 			
     	}	

@@ -1,0 +1,35 @@
+#include <cxxtest/TestSuite.h>
+
+#include <cstdlib>
+#include <string>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
+#include <opencog/util/Logger.h>
+
+using namespace std;
+using namespace opencog;
+
+
+class SpaceMapUtilUTest:public CxxTest::TestSuite
+{
+public:
+	void testGetPredicate()
+	{
+		AtomSpace as;
+		Handle testBlock1=as.add_node(STRUCTURE_NODE,"block1");
+		Handle materialNode1=as.add_node(CONCEPT_NODE,"water");
+		Handle materialPredNode=as.add_node(PREDICATE_NODE,"material");
+		HandleSeq seq1;
+		seq1.push_back(testBlock1);
+		seq1.push_back(materialNode1);
+		Handle listLink1=as.add_link(LIST_LINK, seq1);
+		HandleSeq seq2;
+		seq2.push_back(materialPredNode);
+		seq2.push_back(listLink1);
+		Handle EvalLink1=as.add_link(EVALUATION_LINK, seq2);
+		TS_ASSERT(getPredicate(as,"material",testBlock1)=="");
+	}
+};
