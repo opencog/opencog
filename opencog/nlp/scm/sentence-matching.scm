@@ -1,3 +1,12 @@
+; The get-similar-sentences interface
+(define get-similar-sentences
+	(case-lambda
+		((s) (main-search s '()))
+		((s rl) (main-search s rl))
+	)
+)
+
+; The main get-similar-sentences function.
 ; Returns one or more sentences that are structurally similar to the input one.
 ;
 ; For example:
@@ -8,7 +17,7 @@
 ; Possible result: 
 ;    (Pete ate apples .)
 ;
-(define (get-similar-sentences input-sentence)
+(define (main-search input-sentence reject-list)
     ; Make sure it is at least a SetLink before sending it to sureal for sentence generation
     (define (to-sureal a-link) (if (equal? 'SetLink (cog-type a-link)) (sureal a-link) #f))
 
@@ -42,6 +51,7 @@
                             ))
                         ))
                     ))
+                    reject-list
                 ))
             )
         )
