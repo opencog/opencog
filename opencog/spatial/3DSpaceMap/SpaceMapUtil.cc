@@ -41,30 +41,6 @@ namespace opencog
 			logger().error("outgoing %s",atomspace.atom_as_string(outgoing).c_str());
 		}
 		return atomspace.get_name(resultSet[0]);
-		
-
-		/*
-		Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, "$pred_val");
-		HandleSeq predicateListLinkOutgoings;
-		predicateListLinkOutgoings.push_back(blockHandle);
-		predicateListLinkOutgoings.push_back(hVariableNode);
-		Handle predicateListLink = atomspace.add_link(LIST_LINK, predicateListLinkOutgoings);
-		HandleSeq evalLinkOutgoings;
-		evalLinkOutgoings.push_back(predicateNode);
-		evalLinkOutgoings.push_back(predicateListLink);
-		Handle hEvalLink = atomspace.add_link(EVALUATION_LINK, evalLinkOutgoings);
-		HandleSeq bindLinkOutgoings;
-		bindLinkOutgoings.push_back(hVariableNode);
-		bindLinkOutgoings.push_back(hEvalLink);
-		bindLinkOutgoings.push_back(hVariableNode);
-		Handle hBindLink = atomspace.add_link(BIND_LINK, bindLinkOutgoings);
-		Handle hResultListLink = bindlink(&atomspace, hBindLink);
-			logger().error("reslistltype %s",classserver().getTypeName(atomspace.get_type(hResultListLink)).c_str());
-			logger().error("reslistl %s",atomspace.atom_as_string(hResultListLink).c_str());
-		HandleSeq resultSet = (LinkCast(hResultListLink)->getOutgoingSet());
-		if(resultSet.empty()){return "";}
-		return atomspace.get_name(resultSet[0]);
-		*/
 	}
 }
 
