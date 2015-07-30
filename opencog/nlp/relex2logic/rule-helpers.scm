@@ -424,12 +424,11 @@
     (list (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
     (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
     (ImplicationLink  (PredicateNode prep_instance) (PredicateNode prep))
-    (InheritanceLink
-        (SatisfyingSetLink (PredicateNode instance))
-        (SatisfyingSetLink
-            (EvaluationLink(PredicateNode prep_instance)
-                (ListLink (ConceptNode noun_instance)))
-        )
+    (EvaluationLink
+        (PredicateNode prep_instance)
+        (ListLink
+            (PredicateNode instance)
+            (ConceptNode noun_instance))  
 	))
 )
 ;-----------------------------------------------------------------------
