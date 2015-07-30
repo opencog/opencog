@@ -5,8 +5,7 @@ created by Bradley Sheneman
 composes actions and sends them to SendAction.py
 
 Hybrid Spock plugin and ROS node that receives movement commands from ROS and pieces together
-a frame-by-frame action. Has knowledge of what high level actions like "jump" and "sprint"
-are composed of at the low level
+a frame-by-frame action.
 
 
 
@@ -17,43 +16,48 @@ from spock.utils import Vec3
 # from spockextras.plugins.actionutils import Vec5
 
 import math
+import Queue
 
 
 import logging
 logger = logging.getLogger('spock')
 
 
-# receives movement commands from ROS. currently does not have error checking, but will eventually
-# return value of: success, failure, in-progress to the planner node
-
+# receives movement commands from ROS and sends update of current
+# position of client every 'client_tick'
 class NewMovementCore:
+    
+    # holds a queue of action commands. when a position update
+    # is sent by the minecraft server, we do not add to queue
     def __init__(self):
 
-        self.target = None
-    
-    
-    def setTarget(self, data):
+        print "initializing queue"
+        self.targets = Queue.Queue()
+        
+        if self.targets.empty():
+            print "queue is empty"
 
-        # jump might cause weird behavior. bot will continue to 'jump' until it reaches its target
-        # it is supposed to be used as a separate action from moving, but the x, y, z are still there
-        # to allow movement while jumping. requested distance should be no more than it takes to
-        # perform a single jump.
+    # 'add a unit motion to queue'
+    def addTargetMotion(self, data):
         
-        self.jump = bool(data.jump)
-        self.speed = data.speed
+        target = {}
+
+        target['jump'] = bool(data.jump)
+        target['pitch'] = data.pitch
+        target['yaw'] = data.yaw
         
-        x = float(data.x)
-        y = float(data.y)
-        z = float(data.z)
+        target['x'] = float(data.x)
+        target['y'] = float(data.y)
+        target['z'] = float(data.z)
         
-        self.target = Vec3(x=x, y=y, z=z)
-                
-        # print ("target pos: %2f, %2f, %2f") %(
-        #        self.target.x,
-        #        self.target.y,
-        #        self.target.z)
+        self.targets.put(target)
 
 
+    def resetMotion(self):
+
+        self.targets.clear()
+
+               
 
 @pl_announce('NewMovement')
 class NewMovementPlugin:
@@ -62,91 +66,74 @@ class NewMovementPlugin:
         
         self.net = ploader.requires('Net')
         self.clinfo = ploader.requires('ClientInfo')
-        self.phys = ploader.requires('NewPhysics')
         self.event = ploader.requires('Event')
         
-        self.mvc = NewMovementCore()
+        self.core = NewMovementCore()
         
-        ploader.reg_event_handler('ros_moveto', self.rosMoveTo)
-        ploader.reg_event_handler('client_tick', self.clientTick)
-        ploader.reg_event_handler('action_tick', self.actionTick)
-        ploader.reg_event_handler('cl_position_update', self.handlePosUpdate)
+        ploader.reg_event_handler('ros_moveto', self.handleRosRequest)
+        ploader.reg_event_handler('client_tick', self.handleClientTick)
+        ploader.reg_event_handler('action_tick', self.handleActionTick)
+        ploader.reg_event_handler('cl_position_update', self.handlePositionUpdate)
         
-        ploader.provides('NewMovement', self.mvc)    
-        # self.startMovementNode()
+        ploader.provides('NewMovement', self.core)    
     
     
-#     def startMovementNode(self):
-#    
-#        rospy.init_node('movement_listener')
-#        print("movement listener node initialized")
-#
-#        rospy.Subscriber('movement_cmd', movement_msg, self.cac.setTarget)
-
-    def rosMoveTo(self, name, data):
-
-        self.mvc.setTarget(data)
+    def handleRosRequest(self, name, data):
+        
+        print "receiving request for movement"
+        core.targets.addTargetMotion(data)
 
 
-    # sends out a packet and event on every client tick detailing current position of client
-    def clientTick(self, name, data):
+    # on every client tick:
+    # 1) sends packet to server
+    # 2) sends update to ROS
+    def handleClientTick(self, name, data):
         
         data_dict = self.clinfo.position.get_dict()
-        self.net.push_packet('PLAY>Player Position', data_dict)
+        self.net.push_packet('PLAY>Player Position and Look', data_dict)
+        self.event.emit('ros_position_update', data_dict)
+        print "client tick"
 
-        ros_data = {}
-        ros_data['x'] = data_dict['x']
-        ros_data['y'] = data_dict['y']
-        ros_data['z'] = data_dict['z']
-        ros_data['pitch'] = data_dict['pitch']
-        ros_data['yaw'] = data_dict['yaw']
-        
-        self.event.emit('ros_position_update', ros_data)
-        
-
-
-        #print "pos update"
-        #print self.clinfo.position.get_dict()
-    
-    def handlePosUpdate(self, name, data):
-        
-        self.net.push_packet('PLAY>Player Position and Look', data.get_dict())
-        #print "pos and look update"
-        #print data.get_dict()
  
-    def getAngle(self, x, z):
-
-        # from positive x axis (east)
-        # where z is south
-        dx = x - self.clinfo.position.x
-        dz = z - self.clinfo.position.z
+    # called whenever the Minecraft server sends a position update
+    # or when a position change is requested by the external client
+    # currently the client info plugin in Spock handles updating internal state...
+    # it would be better if all changes to state happen in one place.
+    def handlePositionUpdate(self, name, data):
         
-        if dx == 0:
-            angle = math.copysign(180, dz)
-        else:
-            angle = math.degrees(math.atan(dz/dx))
-            if dx < 0:
-                angle += 180
+        print "position update"
+        self.net.push_packet('PLAY>Player Position and Look', data.get_dict())
+   
+    
+    # on every action tick:
+    # 1) attempt next movement in queue
+    def handleActionTick(self, name, data):
         
-        return angle
-
-
-    def actionTick(self, name, data):
-        
+        print "action tick"
         self.doMovement()
 
 
     def doMovement(self):
         
-        # as long as we have not reached our target, update position and calculate new frame
-        # also push the frame to 'actions' queue to make available for the action sender
-        
-        """
-        if (     self.cac.target.x != math.floor(self.clinfo.position.x)
-                and self.cac.target.y != math.floor(self.clinfo.position.y)
-                and self.cac.target.z != math.floor(self.clinfo.position.z)):
-	"""
-        if (self.mvc.target != None):
-            direction = self.getAngle(self.mvc.target.x, self.mvc.target.z)
-            #print ("current pos: " + str(self.clinfo.position))
-            self.phys.move(direction, self.mvc.speed, self.mvc.jump)
+        try:
+            #print "trying to get queue item"
+            pos = self.core.targets.get(False)
+           
+        except Queue.Empty:
+            print "no requested movements"
+        else:
+            print "Moving to x:%f, y:%f, z:%f, pitch:%f, yaw:%f\n"%(
+                    pos['x'],
+                    pos['y'],
+                    pos['z'],
+                    pos['pitch'],
+                    pos['yaw'])
+	    
+            p = self.client_info.position
+	    p.x = pos['x']
+	    p.y = pos['y']
+	    p.z = pos['z']
+	    p.yaw = pos['yaw']
+	    p.pitch = pos['pitch']
+
+	    self.event.emit('cl_position_update', self.client_info.position)

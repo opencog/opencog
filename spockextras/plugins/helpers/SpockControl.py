@@ -44,9 +44,11 @@ class SpockControlPlugin:
         
         self.event = ploader.requires('Event')
         self.msgr = ploader.requires('Messenger')
+        self.net = ploader.requires('Net')
         
         # the standard Spock plugin. necessary to track position updates
-        ploader.requires('ClientInfo')
+        # and any other state changes to the client from the Minecraft server
+        self.clinfo = ploader.requires('ClientInfo')
 
         # simply load all of the plugins
         ploader.requires('NewMovement')
@@ -61,7 +63,14 @@ class SpockControlPlugin:
         ploader.reg_event_handler('ros_block_update', self.sendBlockUpdate)
         #ploader.reg_event_handler('ros_world_reset', self.sendWorldReset)
         ploader.reg_event_handler('ros_entity_data', self.sendEntityData)
-        ploader.reg_event_handler('ros_position_update', self.sendPositionUpdate)
+
+
+        #event handlers for all client related events
+        #ploader.reg_event_handler('cl_login_success', self.sendClientLogin)
+        #ploader.reg_event_handler('cl_join_game', self.sendClientJoinGame)
+        #ploader.reg_event_handler('cl_spawn_update', self.sendClientSpawnUpdate)
+        #ploader.reg_event_handler('cl_health_update', self.sendClientHealthUpdate)
+        ploader.reg_event_handler('ros_position_update', self.sendClientPositionUpdate)
         
         self.core = SpockControlCore()
         ploader.provides('SpockControl', self.core)
@@ -78,6 +87,7 @@ class SpockControlPlugin:
 	rospy.Subscriber('movement_data', movement_msg, self.moveTo, queue_size=1)
 	#rospy.Subscriber('mine_block_data', mine_block_msg, self.mineBlock, queue_size=1)
 	#rospy.Subscriber('place_block_data', place_block_msg, self.placeBlock, queue_size=1)
+        #rospy.Subscriber('look_test', position_msg, self.lookTest, queue_size = 1)
 
         #self.pub_time =      rospy.Publisher('time_data', time_msg, queue_size = 1)
         #self.pub_dim =       rospy.Publisher('dimension_data', dim_msg, queue_size = 1)
@@ -87,7 +97,35 @@ class SpockControlPlugin:
         #self.pub_wstate =    rospy.Publisher('world_state', world_state_msg, queue_size = 1)
         self.pub_entity =   rospy.Publisher('entity_data', entity_msg, queue_size = 100)
 
-        self.pub_clinfo = rospy.Publisher('client_pos_data', position_msg, queue_size = 10)
+        #self.pub_clinfo_login = rospy.Publisher('client_login_data', position_msg, queue_size = 10)
+        #self.pub_clinfo_join = rospy.Publisher('client_join_data', position_msg, queue_size = 10)
+        #self.pub_clinfo_spawn = rospy.Publisher('client_spawn_data', position_msg, queue_size = 10)
+        #self.pub_clinfo_health = rospy.Publisher('client_health_data', position_msg, queue_size = 10)
+        self.pub_clinfo_pos = rospy.Publisher('client_position_data', position_msg, queue_size = 100)
+    
+    def lookTest(self, data):
+    
+        # test to see what happens when we request pitch and yaw change from Minecraft server
+        packet = {}
+        packet['x'] = data.x
+        packet['y'] = data.y
+        packet['z'] = data.z
+        #self.clinfo.position.yaw = data.yaw
+        packet['on_ground'] = True
+        packet['yaw'] = data.yaw
+        packet['pitch'] = data.pitch
+        
+        #everything is relative, for simplicity
+        #packet['flags'] = 0b11111
+        
+        print "sending test packet for look only!"
+        print packet
+    
+        self.net.push_packet('PLAY>Player Position and Look', packet)
+        #self.net.push_packet('PLAY>Player Position', packet)
+
+
+
 
     ### ROS Subscriber callbacks simply pass data along to the Spock event handlers
     def moveTo(self, data):
@@ -176,13 +214,36 @@ class SpockControlPlugin:
         self.pub_entity.publish(msg)
 
 
-
-    def sendPositionUpdate(self, name, data):
-        print "sending position update"
+    def sendClientLogin(self, name, data):
+        
+        print "received client login"
         print data
 
+
+    def sendClientJoinGame(self, name, data):
+
+        print "received client join game"
+        print data
+
+    def sendClientSpawnUpdate(self, name, data):
+        
+        print "received client spawn"
+        print data
+
+
+    def sendClientHealthUpdate(self, name, data):
+        
+        print "received client health update"
+        print data
+
+
+    def sendClientPositionUpdate(self, name, data):
+        
+        print "received client position update"
+        print data
+        
         msg = position_msg()
         self.msgr.setMessage(msg, data)
-
-        self.pub_clinfo.publish(msg)
+        
+        self.pub_clinfo_pos.publish(msg)
 
