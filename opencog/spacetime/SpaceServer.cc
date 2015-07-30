@@ -540,7 +540,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
     {
         // it's a block
-        theSpaceMap->addSolidUnitBlock(pos,objectNode);
+        theSpaceMap->addSolidUnitBlock(objectNode,pos);
 
     }
     else

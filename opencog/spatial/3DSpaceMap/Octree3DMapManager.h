@@ -113,13 +113,13 @@ namespace opencog
 			 */
 
 			//binary add/remove operation
-			void addSolidUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom);
+			void addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos);
             void removeSolidUnitBlock(const Handle blockHandle);
 			//Note that if you want to add/remove block with probability,
 			//You should use setUnitBlock to control the occupancy probability.
 			//the updateLogOddsOccupancy will be added on the log odds occupancy of block to in/decrease the occupancy
 			//probabilistic set occupancy
-			void setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy);
+			void setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy);
 			//binary query operation
             bool checkIsSolid(const BlockVector& pos) const;
 			//probabilistic query operation

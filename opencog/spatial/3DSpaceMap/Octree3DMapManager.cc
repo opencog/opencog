@@ -104,10 +104,10 @@ BlockVector Octree3DMapManager::getKnownSpaceDim() const
 }
 
 
-void Octree3DMapManager::addSolidUnitBlock(BlockVector _pos, const Handle &_unitBlockAtom)
+void Octree3DMapManager::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos)
 {
 	float occupiedthres=mOctomapOctree->getOccupancyThresLog();
-	setUnitBlock(_pos,_unitBlockAtom,occupiedthres);
+	setUnitBlock(_unitBlockAtom,_pos,occupiedthres);
 
 	/*
 	  // Comment on 20150713 by Yi-Shan,
@@ -170,7 +170,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
     	}
 
 	BlockVector pos=it->second;
-	addSolidUnitBlock(pos,Handle::UNDEFINED);
+	addSolidUnitBlock(Handle::UNDEFINED,pos);
 }
 
 /*
@@ -242,7 +242,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
     }
 */
 
-void Octree3DMapManager::setUnitBlock(BlockVector _pos, const Handle& _unitBlockAtom, float updateLogOddsOccupancy)
+void Octree3DMapManager::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy)
 {
     	if (mOctomapOctree->checkIsOutOfRange(_pos))
     	{
@@ -251,7 +251,7 @@ void Octree3DMapManager::setUnitBlock(BlockVector _pos, const Handle& _unitBlock
         	return;
     	}
 	Handle oldBlock=mOctomapOctree->getBlock(_pos);
-	logger().error("middle set");
+
 	if(oldBlock==Handle::UNDEFINED && _unitBlockAtom!=Handle::UNDEFINED)
 	{ 
 		mTotalUnitBlockNum++;
