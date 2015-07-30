@@ -541,6 +541,7 @@ cd build/
 cmake ..
 make -j$(nproc)
 sudo make install
+sudo ldconfig
 cd ../..
 rm -rf master.tar.gz cogutils-master/
 }
@@ -570,6 +571,7 @@ cd build/
 cmake ..
 make -j$(nproc)
 sudo make install
+sudo ldconfig
 cd ../..
 rm -rf master.tar.gz atomspace-master/
 }
