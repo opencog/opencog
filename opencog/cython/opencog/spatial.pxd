@@ -7,8 +7,7 @@ from opencog.atomspace cimport cHandle, cAtomSpace
 cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
     cdef void* PyLong_AsVoidPtr(object)
-    cdef object PyLong_FromVoidPtr(void *p)
-
+    cdef object PyLong_FromVoidPtr(void*)
 
 cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "opencog::spatial":
     cdef cppclass cBlockVector "opencog::spatial::BlockVector":
@@ -21,15 +20,15 @@ cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "openco
 
 cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "opencog::spatial":
     cdef cppclass cOctree3DMapManager "opencog::spatial::Octree3DMapManager":
-        cOctree3DMapManager(cAtomSpace*, string, unsigned, int, float)
+        cOctree3DMapManager(cAtomSpace*, string, float, int, float)
         string getMapName()
         int getFloorHeight() 
         int getAgentHeight()
-        void setAgentHeight(int)
+        void setAgentHeight(float)
         unsigned getTotalDepthOfOctree()
         int getTotalUnitBlockNum()
         float getLogOddsOccupiedThreshold()
-        void setLogOddsOccupiedThreshold(float logOddsOccupancy)
+        void setLogOddsOccupiedThreshold(float)
         double getNextDistance()
         cBlockVector getKnownSpaceMinCoord()
         cBlockVector getKnownSpaceMaxCoord()
@@ -37,16 +36,13 @@ cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "op
         void addSolidUnitBlock(cHandle,cBlockVector)
         void removeSolidUnitBlock(cHandle)
         void setUnitBlock(cHandle,cBlockVector,float)
-        bool checkIsSolid(cBlockVector)
         bool checkIsSolid(cBlockVector,float)
-        bool checkIsStandable(cBlockVector)
-        bool checkIsStandable(cBlockVector,float)
-        cHandle getBlock(cBlockVector)
+        bool checkStandable(cBlockVector,float)
         cHandle getBlock(cBlockVector,float)
-        cBlockVector getBlockLocation(cHandle)
         cBlockVector getBlockLocation(cHandle,float)
         float getBlockLogOddsOccupancy(cBlockVector)
         void addNoneBlockEntity(cHandle,cBlockVector,bool,bool,uint64_t)
         void removeNoneBlockEntity(cHandle)
         void updateNoneBlockEntityLocation(cHandle,cBlockVector,uint64_t)
         cBlockVector getLastAppearedLocation(cHandle)
+        cHandle getEntity(cBlockVector)

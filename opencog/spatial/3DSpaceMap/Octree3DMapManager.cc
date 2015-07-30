@@ -307,9 +307,13 @@ bool Octree3DMapManager::checkStandable(const BlockVector &pos, float logOddsOcc
     	{
         	for (int height = 1; height < mAgentHeight; height ++)
         	{
+				    logger().error("count %f %f %f",pos.x,pos.y,pos.z+height);
             		BlockVector blockAbove(pos.x,pos.y,pos.z + height);
             		if (mOctomapOctree->getBlock(blockAbove,logOddsOccupancy)!=Handle::UNDEFINED)
-                	return false;
+					{ 
+						logger().error("in %f %f %f is not undef",pos.x,pos.y,pos.z+height);
+						return false;
+					}
         	}
     	}
 
@@ -381,7 +385,7 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, const Bloc
         	if (isAvatarEntity){ mAllAvatarList.insert(entityNode);}
 		_addNonBlockEntityHistoryLocation(entityNode,pos, timestamp);
     	}
-    	else{ updateNoneBLockEntityLocation(entityNode,pos,timestamp);}
+    	else{ updateNoneBlockEntityLocation(entityNode,pos,timestamp);}
 }
 
 void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
@@ -428,7 +432,7 @@ void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
     	}
 }
 
-void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector newpos, unsigned long timestamp)
+void Octree3DMapManager::updateNoneBlockEntityLocation(const Handle &entityNode, BlockVector newpos, unsigned long timestamp)
 {
 
 	mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(newpos,entityNode));

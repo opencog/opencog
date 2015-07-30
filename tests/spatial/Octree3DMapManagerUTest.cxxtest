@@ -58,7 +58,9 @@ public:
 		TS_ASSERT(testMap->getBlockLocation(testHandle1)==testpos1);
 
 		testMap->removeSolidUnitBlock(testHandle1);
-		TS_ASSERT(testMap->getBlock(testpos1)==NULL);
+
+		Handle testHandle3=testMap->getBlock(testpos1);
+		TS_ASSERT(testHandle3==Handle::UNDEFINED);
 		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
 		TS_ASSERT(testMap->getBlockLocation(testHandle1)==BlockVector::ZERO);
 	}
@@ -73,63 +75,6 @@ public:
 		TS_ASSERT_EQUALS(Handle::UNDEFINED,testHandle2);
 	}
 
-	void testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork()
-	{
-		BlockVector testpos1(17,28,39);
-		unsigned long timestamp1=12345;
-		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
-		testMap->addNoneBlockEntity(testHandle1,testpos1,
-					!entityIsSelf, !entityIsAvatar, 
-					timestamp1);
-
-		Handle testHandle2=testMap->getEntity(testpos1);
-		TS_ASSERT(testHandle1==testHandle2);
-		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-		testMap->removeNoneBlockEntity(testHandle1);
-		
-		TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
-		//preserve record
-		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-	}
-
-	void testUpdateEntityLocation_MultipleLocation_LastLocationIsPos2()
-	{
-		BlockVector testpos1(17,28,39);
-		unsigned long timestamp1=12345;
-		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
-		testMap->addNoneBlockEntity(testHandle1,testpos1,
-					!entityIsSelf, !entityIsAvatar, 
-					timestamp1);
-		BlockVector testpos2(17,28,40);
-		unsigned long timestamp2=12346;
-		testMap->updateNoneBLockEntityLocation(testHandle1,testpos2,timestamp2);
-		BlockVector lastLocation=testMap->getLastAppearedLocation(testHandle1);
-
-		TS_ASSERT_EQUALS(testpos2,lastLocation);
-	}
-
-	void testAddEntity_PressureTest()
-	{
-		int count=10000;
-		while(count!=0)
-		{
-			char countstr[256];
-			sprintf(countstr,"%d",count);
-			count--;
-			BlockVector testpos1(count,count,count);
-			Handle testHandle1=as.add_node(ENTITY_NODE,countstr);
-			testMap->addNoneBlockEntity(testHandle1,testpos1,
-						!entityIsSelf, !entityIsAvatar, 12345678892);
-			Handle testHandle2=testMap->getEntity(testpos1);
-			TS_ASSERT(testHandle1==testHandle2);
-			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-			testMap->removeNoneBlockEntity(testHandle1);
-			
-			TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
-			//preserve record
-			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);	
-		}
-	}
 	void testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb()
 	{
 		BlockVector testpos1(7,8,9);
@@ -232,7 +177,7 @@ public:
 		TS_ASSERT(testMap->checkStandable(testpos)==false);
 		BlockVector blockpos1(1,2,3);
 		Handle testBlock1=as.add_node(STRUCTURE_NODE,"block1");
-		Handle materialNode1=as.add_node(CONCEPT_NODE,"water");
+		Handle materialNode1=as.add_node(CONCEPT_NODE,"dirt");
 		Handle materialPredNode=as.add_node(PREDICATE_NODE,"material");
 		HandleSeq listLinkOutgoings1;
 		listLinkOutgoings1.push_back(testBlock1);
@@ -247,7 +192,7 @@ public:
 
 		BlockVector blockpos2(1,2,5);
 		Handle testBlock2=as.add_node(STRUCTURE_NODE,"block2");
-		Handle materialNode2=as.add_node(CONCEPT_NODE,"water");
+		Handle materialNode2=as.add_node(CONCEPT_NODE,"dirt");
 		HandleSeq listLinkOutgoings2;
 		listLinkOutgoings2.push_back(testBlock1);
 		listLinkOutgoings2.push_back(materialNode1);
@@ -261,6 +206,65 @@ public:
 		bool standable=testMap->checkStandable(testpos);
 
 		TS_ASSERT_EQUALS(false,standable);
+	}
+
+
+	void testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork()
+	{
+		BlockVector testpos1(17,28,39);
+		unsigned long timestamp1=12345;
+		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
+		testMap->addNoneBlockEntity(testHandle1,testpos1,
+					!entityIsSelf, !entityIsAvatar, 
+					timestamp1);
+
+		Handle testHandle2=testMap->getEntity(testpos1);
+		TS_ASSERT(testHandle1==testHandle2);
+		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
+		testMap->removeNoneBlockEntity(testHandle1);
+		
+		TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
+		//preserve record
+		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
+	}
+
+	void testUpdateEntityLocation_MultipleLocation_LastLocationIsPos2()
+	{
+		BlockVector testpos1(17,28,39);
+		unsigned long timestamp1=12345;
+		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
+		testMap->addNoneBlockEntity(testHandle1,testpos1,
+					!entityIsSelf, !entityIsAvatar, 
+					timestamp1);
+		BlockVector testpos2(17,28,40);
+		unsigned long timestamp2=12346;
+		testMap->updateNoneBlockEntityLocation(testHandle1,testpos2,timestamp2);
+		BlockVector lastLocation=testMap->getLastAppearedLocation(testHandle1);
+
+		TS_ASSERT_EQUALS(testpos2,lastLocation);
+	}
+
+	void testAddEntity_PressureTest()
+	{
+		int count=10000;
+		while(count!=0)
+		{
+			char countstr[256];
+			sprintf(countstr,"%d",count);
+			count--;
+			BlockVector testpos1(count,count,count);
+			Handle testHandle1=as.add_node(ENTITY_NODE,countstr);
+			testMap->addNoneBlockEntity(testHandle1,testpos1,
+						!entityIsSelf, !entityIsAvatar, 12345678892);
+			Handle testHandle2=testMap->getEntity(testpos1);
+			TS_ASSERT(testHandle1==testHandle2);
+			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
+			testMap->removeNoneBlockEntity(testHandle1);
+			
+			TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
+			//preserve record
+			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);	
+		}
 	}
 
 };

@@ -23,32 +23,32 @@ cdef class Octree3DMapManager:
         return newmap
     
     def getFloorHeight(self):
-        return self.octree3dmap.getFloorHeight()
+        return self.coctree3dmap.getFloorHeight()
 
     def getMapName(self):
         cdef string cname=self.coctree3dmap.getMapName()
         return cname.decode('UTF-8')
 
     def getAgentHeight(self):
-        return self.octree3dmap.getAgentHeight()
+        return self.coctree3dmap.getAgentHeight()
 
     def setAgentHeight(self,height):
-        self.octree3dmap.setAgentHeight(height)
+        self.coctree3dmap.setAgentHeight(height)
 
     def getTotalDepthOfOctree(self):
-        return self.octree3dmap.getTotalDepthOfOctree()
+        return self.coctree3dmap.getTotalDepthOfOctree()
 
     def getTotalUnitBlockNum(self):
-        return self.octree3dmap.getTotalUnitBlockNum()
+        return self.coctree3dmap.getTotalUnitBlockNum()
 
     def getLogOddsOccupiedThreshold(self):
-        return self.octree3dmap.getLogOddsOccupiedThreshold()
+        return self.coctree3dmap.getLogOddsOccupiedThreshold()
 
     def setLogOddsOccupiedThreshold(self,logOddsOccupancy):
-        self.octree3dmap.setLogOddsOccupiedThreshold(logOddsOccupancy)
+        self.coctree3dmap.setLogOddsOccupiedThreshold(logOddsOccupancy)
 
     def getNextDistance(self):
-        return self.octree3dmap.getNextDistance()
+        return self.coctree3dmap.getNextDistance()
 
     def getKnownSpaceMinCoord(self):
         cdef cBlockVector cpos=self.coctree3dmap.getKnownSpaceMinCoord()
@@ -75,47 +75,31 @@ cdef class Octree3DMapManager:
         cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])
         self.coctree3dmap.setUnitBlock(deref((<Handle>handle).h),cpos,updateLogOddsOccupancy)
 
-    def checkIsSolid(self,pos):
+    def checkIsSolid(self,pos,logOddsOccupancy=None):
         assert len(pos)==3
         cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])
-        return self.coctree3dmap.checkIsSolid(cpos)
-
-    def checkIsSolid(self,pos,logOddsOccupancy):
-        assert len(pos)==3
-        cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])
+        if logOddsOccupancy is None:
+            logOddsOccupancy=self.coctree3dmap.getLogOddsOccupiedThreshold()
         return self.coctree3dmap.checkIsSolid(cpos,logOddsOccupancy)
 
-    def checkIsStandable(self,pos):
+    def checkStandable(self,pos,logOddsOccupancy=None):
         assert len(pos)==3
         cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])
-        return self.coctree3dmap.checkIsStandable(cpos)
+        if logOddsOccupancy is None:
+            logOddsOccupancy=self.coctree3dmap.getLogOddsOccupiedThreshold()
+        return self.coctree3dmap.checkStandable(cpos,logOddsOccupancy)
 
-    def checkIsStandable(self,pos,logOddsOccupancy):
-        assert len(pos)==3
-        cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])
-        return self.coctree3dmap.checkIsStandable(cpos,logOddsOccupancy)
-
-    def getBlock(self,pos):
+    def getBlock(self,pos,logOddsOccupancy=None):
         assert len(pos)==3
         cdef cBlockVector cvec=cBlockVector(pos[0],pos[1],pos[2])
-        cdef cHandle cblock= self.coctree3dmap.getBlock(cvec)
-        return Handle(cblock.value())
-
-    def getBlock(self,pos,logOddsOccupancy):
-        assert len(pos)==3
-        cdef cBlockVector cvec=cBlockVector(pos[0],pos[1],pos[2])
+        if logOddsOccupancy is None:
+            logOddsOccupancy=self.coctree3dmap.getLogOddsOccupiedThreshold()
         cdef cHandle cblock= self.coctree3dmap.getBlock(cvec,logOddsOccupancy)
         return Handle(cblock.value())
         
-    def getBlockLocation(self,Handle handle):
-        cdef cBlockVector cpos=self.coctree3dmap.getBlockLocation(deref((<Handle>handle).h))
-        #TODO: in BlockVector it returns BlockVector::ZERO, which is (0,0,0)
-        #if there's really one block in the zero point that will fail
-        if (cpos.x,cpos.y,cpos.z)==(0,0,0):
-            return None
-        return (cpos.x,cpos.y,cpos.z)
-
-    def getBlockLocation(self,Handle handle,logOddsOccupancy):
+    def getBlockLocation(self,Handle handle,logOddsOccupancy=None):
+        if logOddsOccupancy is None:
+            logOddsOccupancy=self.coctree3dmap.getLogOddsOccupiedThreshold()
         cdef cBlockVector cpos=self.coctree3dmap.getBlockLocation(deref((<Handle>handle).h),logOddsOccupancy)
         #TODO: in BlockVector it returns BlockVector::ZERO, which is (0,0,0)
         #if there's really one block in the zero point that will fail
@@ -144,5 +128,10 @@ cdef class Octree3DMapManager:
     def getLastAppearedLocation(self,Handle handle):
         cdef cBlockVector cpos=self.coctree3dmap.getLastAppearedLocation(deref((<Handle>handle).h))
         return (cpos.x,cpos.y,cpos.z)
-    
+        
+    def getEntity(self,pos):
+        assert len(pos)==3
+        cdef cBlockVector cpos=cBlockVector(pos[0],pos[1],pos[2])        
+        cdef cHandle cblock=self.coctree3dmap.getEntity(cpos)
+        return Handle(cblock.value())
     

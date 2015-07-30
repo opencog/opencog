@@ -94,13 +94,13 @@ namespace opencog
 			
             inline int getFloorHeight() const {return mFloorHeight;}
             inline string getMapName() const {return mMapName;}
-            inline int getAgentHeight() const {return mAgentHeight;}
-            void setAgentHeight(int _height){mAgentHeight = _height;}
+            inline float getAgentHeight() const {return mAgentHeight;}
+            void setAgentHeight(float _height){mAgentHeight = _height;}
             inline unsigned getTotalDepthOfOctree() const {return mOctomapOctree->getTreeDepth();}
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
 			// Note: logOdds(P)=log(P/(1-P))
 			// in octomap api it usually express probabiblity by log odds
-			inline int getLogOddsOccupiedThreshold() const {return mOctomapOctree->getOccupancyThresLog();}
+			inline float getLogOddsOccupiedThreshold() const {return mOctomapOctree->getOccupancyThresLog();}
 			void setLogOddsOccupiedThreshold(float logOddsOccupancy);
 			// Threshold to consider an entity next to another
 			inline double getNextDistance() const { return AccessDistance;}
@@ -155,7 +155,7 @@ namespace opencog
 									bool isAvatarEntity,
 									const unsigned long timestamp);
             void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBLockEntityLocation(
+            void updateNoneBlockEntityLocation(
 				const Handle &entityNode, BlockVector newpos, 
 			    unsigned long timestamp);
 			// note that we didn't delete the record 
@@ -337,7 +337,7 @@ namespace opencog
 			std::string     mMapName;
 			OctomapOcTree*  mOctomapOctree;
             int             mFloorHeight; // the z of the floor
-            int             mAgentHeight;
+            float             mAgentHeight;
             int             mTotalUnitBlockNum;
             Handle          selfAgentEntity;
             static const int AccessDistance = 2;
