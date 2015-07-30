@@ -922,7 +922,7 @@
 ;
 ; Example: "Which girl likes you?" "What fool said that?"
 ;
-(define (whichsubjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(let ((var_name (choose-var-name)))
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
