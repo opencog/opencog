@@ -49,7 +49,7 @@
 ; -- word-inst-get-disjunct Get the disjunct (LgAnd) used for a word-inst.
 ; -- word-inst-get-source-conn     Get the set of connectors word-inst linked to.
 ; -- relation-get-dependent Get dependent part of a relation.
-; -- delete-sentence        Delete all atoms associated with sentence.
+; -- delete-sentence        Delete all atoms associated with a sentence.
 ; -- delete-sentences       Delete all atoms that occur in sentences.
 ;
 ;
@@ -645,19 +645,54 @@
 ; link-grammar linkages.
 ;
 ; Only the atoms in the atomspace are removed; if any are in the
-; backingstore (database) they are untouched.
+; backingstore (database), they are untouched.
+;
+; Expect SENT to be a SentenceNode; thus the general structure is
+; expected to be:
+;
+;   ParseLink
+;        ParseNode
+;        SentenceNode
+;
+; XXX This currently fails to remove the LgLinkInstanceNode's 
+;
 
 (define (delete-sentence sent)
-	(define (delete-word-instance wi)
+
+	; Purge stuff associated with a single word-instance
+	; Expects wi to be a WordInstanceNode
+	; Note that WordInstances appear in LgLinkInstances:
+	;     EvaluationLink
+	;           LgLinkInstanceNode
+	;           ListLink
+	;               WordInstanceNode
+	;               WordInstanceNode
+	; and so we have to track down the above, too. They also appear
+	; in WordSequenceLinks:
+	;     WordSequenceLink
+	;         WordInstanceNode
+	;         NumberNode 
+
+	(define (purge-word-instance wi)
+		(for-each 
+			(lambda (x) 
+				(if (eq? 'ListLink (cog-type x))
+					(purge-link-instance (cog-incoming-set x)))
+xxxxxxxx
+				)
+			)
+			(cog-incoming-set wi)
+		)
 		(cog-purge-recursive wi)
 	)
 
-	; Delete, recusively, all of the word-instances in the parse.
-	(define (delete-parse parse)
+	; Purge, recusively, all of the word-instances in the parse.
+	; This is expecting 'parse' to be a ParseNode.
+	(define (purge-parse parse)
 		(for-each 
 			(lambda (x) 
 				(if (eq? 'WordInstanceLink (cog-type x))
-					(delete-word-instance (car (cog-outgoing-set x)))
+					(purge-word-instance (car (cog-outgoing-set x)))
 				)
 			)
 			(cog-incoming-set parse)
@@ -665,11 +700,16 @@
 		(cog-purge-recursive parse)
 	)
 
-	; For each parse of the sentence, delete parse
+	; For each parse of the sentence, purge the parse
+	; This is expecting a structure
+	;     ParseLink
+	;         ParseNode     car of the outgoing set
+	;         SentenceNode
 	(for-each 
 		(lambda (x) 
 			(if (eq? 'ParseLink (cog-type x))
-				(delete-parse (car (cog-outgoing-set x)))
+				; The car will be a ParseNode
+				(purge-parse (car (cog-outgoing-set x)))
 			)
 		)
 		(cog-incoming-set sent)
@@ -687,7 +727,7 @@
 ; want to clog up the atomspace with old junk we don't want any more.
 ;
 ; Only the atoms in the atomspace are removed; if any are in the
-; backingstore (database) they are untouched.
+; backingstore (database), they are untouched.
 ;
 ; XXX TODO: In principle, this could be accomplished by lowering the
 ; AttentionValue for the atoms, and letting the ForgettingAgent do its
