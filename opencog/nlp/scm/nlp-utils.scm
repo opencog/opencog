@@ -1,6 +1,8 @@
 ;
 ; nlp-utils.scm
 ;
+;;; Commentary:
+;
 ; Assorted NLP utilities.  Operations include:
 ; -- looping over all sentences in a document
 ; -- looping over all parses of a sentence (map-parses)
@@ -26,7 +28,7 @@
 ; -- interp-get-r2l-outputs Get all R2L outputs in an Interpretation.
 ; -- interp-get-parse       Get the Interpretation of a Parse.
 ; -- word-inst-get-parse    Return the ParseNode associated with word-inst.
-; -- word-inst-get-number   Return the NumberNode associated with word-inst. 
+; -- word-inst-get-number   Return the NumberNode associated with word-inst.
 ; -- word-inst-get-word   Return the WordNode associated with word-inst.
 ; -- word-inst-get-word-str  Return the word string assoc with word-inst.
 ; -- word-inst-get-lemma  Return the lemma of word instance.
@@ -59,9 +61,9 @@
 ; algos to learn new ways of processing. Many/most of the utilities below
 ; could be implemented by using pattern maching. Code that depends on these
 ; utilities should be converted to use pattern matching as soon as reasonable.
-; Code that cannot be converted will eventually (in the distant future ...) 
+; Code that cannot be converted will eventually (in the distant future ...)
 ; become obsolete.
-; 
+;
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ; Copyright (c) 2015 OpenCog Foundation
 ;
@@ -69,22 +71,23 @@
 (use-modules (ice-9 receive))
 
 ; ---------------------------------------------------------------------
-; map-parses   Call proceedure on every parse of the sentence.
-;
-; map-parses proc sent
-; Call proceedure 'proc' on every parse of the sentence 'sent' 
-; 
-; Expected input is a SentenceNode, or possibly a list of SentenceNodes.
-; Each SentenceNode serves as an anchor to all of the parses of a sentence.
-; It is connected via ParseLink's to each of the individual parses of the
-; sentence. This routine backtracks over the ParseNode to find these.
-;
-; The recursion will stop if proc returns something other than #f. This
-; routine returns the last value that stopped the recursion. (In other
-; words, this is not really a map, but something kind-of weird -- XXX
-; this should probably be fixed -- TODO)
-;
 (define (map-parses proc sent-or-list)
+"
+  map-parses   Call proceedure on every parse of the sentence.
+
+  map-parses proc sent
+  Call proceedure 'proc' on every parse of the sentence 'sent'
+
+  Expected input is a SentenceNode, or possibly a list of SentenceNodes.
+  Each SentenceNode serves as an anchor to all of the parses of a sentence.
+  It is connected via ParseLink's to each of the individual parses of the
+  sentence. This routine backtracks over the ParseNode to find these.
+
+  The recursion will stop if proc returns something other than #f. This
+  routine returns the last value that stopped the recursion. (In other
+  words, this is not really a map, but something kind-of weird -- XXX
+  this should probably be fixed -- TODO)
+"
 	(cog-map-chase-links-chk 'ParseLink 'ParseNode
 		proc sent-or-list 'SentenceNode)
 )
@@ -106,8 +109,8 @@
 ; as anchors to all of the word instances in a parse. The word instances
 ; can be found by back-tracking through the WordInstanceLink to the
 ; individual words, which is what this method does.
-; 
-(define (map-word-instances proc parse-or-list) 
+;
+(define (map-word-instances proc parse-or-list)
 	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
 		proc parse-or-list 'ParseNode)
 )
@@ -122,7 +125,7 @@
 ; to a word instance. The WordInstanceNode is connnected via a ReferenceLink
 ; to the actual word node.
 ;
-(define (map-word-node proc word-inst) 
+(define (map-word-node proc word-inst)
 	(cog-map-chase-links-chk 'ReferenceLink 'WordNode
 		proc word-inst 'WordInstanceNode)
 )
@@ -205,7 +208,7 @@
 	; Remove duplicates
 	(delete-duplicates!
 		(concatenate!
-			(map word-inst-get-relations 
+			(map word-inst-get-relations
 				(parse-get-words parse-node)
 			)
 		)
@@ -274,7 +277,7 @@
 )
 
 ; ---------------------------------------------------------------------
-; word-inst-get-word-str  Return the word string assoc with word-inst 
+; word-inst-get-word-str  Return the word string assoc with word-inst
 ;
 ; Return the word string associated with the word-instance
 (define (word-inst-get-word-str word-inst)
@@ -301,7 +304,7 @@
 ; Given a word instance, return a list of attributes for the word.
 ;
 (define (word-inst-get-attr word-inst)
-	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode 
+	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode
 		word-inst
 	)
 )
@@ -310,9 +313,9 @@
 ; word-inst-get-pos    Return part-of-speech (POS) of word instance
 ;
 ; Return the part-of-speech of a word-instance
-; 
+;
 (define (word-inst-get-pos word-inst)
-	(cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode 
+	(cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode
 		word-inst
 	)
 )
@@ -321,7 +324,7 @@
 ; word-inst-match-pos? Does word-inst have POS?
 ;
 ; Return #t is the word-instance has part-of-speech pos else #f
-; "word-inst" must have a PartOfSpeechLink on it; typically its 
+; "word-inst" must have a PartOfSpeechLink on it; typically its
 ; a WordInstanceNode.
 ; "pos" is a string, typically "noun" or "verb".
 ;
@@ -342,7 +345,7 @@
 ; word-inst-is-noun?   Is word instance a noun?
 ;
 ; Return #t is the word-instance is a noun
-; 
+;
 (define (word-inst-is-noun? word-inst)
 	(word-inst-match-pos? word-inst "noun")
 )
@@ -351,7 +354,7 @@
 ; word-inst-is-verb?   Is word instance a verb?
 ;
 ; Return #t is the word-instance is a verb
-; 
+;
 (define (word-inst-is-verb? word-inst)
 	(word-inst-match-pos? word-inst "verb")
 )
@@ -363,7 +366,7 @@
 ; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
 ; _subj(dog,*), _obj(dog,*) etc.
 ;
-; See also word-inst-get-head-relations and 
+; See also word-inst-get-head-relations and
 ; word-inst-get-relex-modifiers below.
 ;
 (define (word-inst-get-relations word-inst)
@@ -380,7 +383,7 @@
 ; --------------------------------------------------------------------
 ; word-inst-get-head-relations  Get relations with word-inst as head
 ;
-; Given a word-instance, return a list of relex relations that 
+; Given a word-instance, return a list of relex relations that
 ; this word-instance is the head-word of. (It is the head-word
 ; if it is first e.g. _amod(head-word, attr-word)
 ;
@@ -396,7 +399,7 @@
 	)
 
 	; Get all relations, and filter them out.
-	(filter! 
+	(filter!
 		(lambda (rel) (head? rel word-inst))
 		(word-inst-get-relations word-inst)
 	)
@@ -406,8 +409,8 @@
 ; word-inst-filter-relex-rels   Get filtered set of RelEx relations
 ;
 ; Given a word-instance and a list of relex relation names, return a
-; list of the relex relations for which this word-instance is the 
-; head-word.  The head-word is the first word in the relation -- 
+; list of the relex relations for which this word-instance is the
+; head-word.  The head-word is the first word in the relation --
 ; for example _amod(head-word, dependent-word)
 
 (define (word-inst-filter-relex-rels word-inst rel-name-list)
@@ -422,7 +425,7 @@
 		(let* ((oset (cog-outgoing-set rel))
 				(head (car (cog-outgoing-set (cadr oset))))
 			)
-			(and 
+			(and
 				(equal? head wrd-inst)
 				(is-modifier? (cog-name (car oset)))
 			)
@@ -430,7 +433,7 @@
 	)
 
 	; Get all relations, and filter them out.
-	(filter! 
+	(filter!
 		(lambda (rel) (head-mod? rel word-inst))
 		(word-inst-get-relations word-inst)
 	)
@@ -439,7 +442,7 @@
 ; --------------------------------------------------------------------
 ; verb-inst-get-relex-rels      Get relations for a verb.
 ;
-; Given a verb word-instance, return a list of relex relations that 
+; Given a verb word-instance, return a list of relex relations that
 ; this word-instance is the head-word of. (It is the head-word
 ; if it is first e.g. _subj(head-word, dependency-word)
 ;
@@ -448,7 +451,7 @@
 	; e.g. _predadj Right now, this is unclear.
 	; Modifiers are documented at:
 	; http://opencog.org/wiki/Binary_relations
-	(word-inst-filter-relex-rels word-inst 
+	(word-inst-filter-relex-rels word-inst
 		(list "_advmod" "_iobj" "_obj" "_subj")
 	)
 )
@@ -456,19 +459,19 @@
 ; --------------------------------------------------------------------
 ; noun-inst-get-relex-modifiers Get relations for a noun.
 ;
-; Given a noun word-instance, return a list of relex modifiers that 
+; Given a noun word-instance, return a list of relex modifiers that
 ; this word-instance is the head-word of. (It is the head-word
 ; if it is first e.g. _amod(head-word, attr-word)
 ;
 ; This very explicitly returns *only* modifiers, and not relations in
-; general. 
+; general.
 ;
 (define (noun-inst-get-relex-modifiers word-inst)
 	; There are a few other modifiers we should probably deal with,
 	; including quantity multiplier, etc. Right now, this is unclear.
 	; Modifiers are documented at:
 	; http://opencog.org/wiki/Binary_relations
-	(word-inst-filter-relex-rels word-inst 
+	(word-inst-filter-relex-rels word-inst
 		(list "_amod" "_appo" "_nn" "_poss" "_%quantity")
 	)
 )
@@ -488,7 +491,7 @@
 		(let* ((oset (cog-outgoing-set rel))
 				(head (car (cog-outgoing-set (cadr oset))))
 			)
-			(and 
+			(and
 				(equal? head wrd-inst)
 				(eq? 'PrepositionalRelationshipNode (cog-type (car oset)))
 			)
@@ -496,7 +499,7 @@
 	)
 
 	; Get all relations, and filter them out.
-	(filter! 
+	(filter!
 		(lambda (rel) (head-prel? rel word-inst))
 		(word-inst-get-prep-relations word-inst)
 	)
@@ -504,7 +507,7 @@
 
 ; ---------------------------------------------------------------------
 ; word-inst-get-subscript-str   Get link-grammar subscript for word-inst
-; 
+;
 ; Given a word instance, return the subscript string for it.
 ; The "subscript string" is the part that follows the period in
 ; the link-grammar dictionary. Thus, for the dictionary entry
@@ -530,7 +533,7 @@
 ; word-inst-get-subscripted-word-str Get LG subscripted word string.
 ;
 ; Given a word instance, return the subscripted word.
-; Here, "subscripted words" are link-grammar dictionary entries, for 
+; Here, "subscripted words" are link-grammar dictionary entries, for
 ; example, "events.n" or "offered.v". Note that not all link-grammar
 ; dictionary entries will have a subscript.
 ;
@@ -553,7 +556,7 @@
 ; ---------------------------------------------------------------------
 ; word-inst-sense-score  Get ranking score for word-inst & word-sense.
 ;
-; Given a word-instance and a word-sense, return the numerical 
+; Given a word-instance and a word-sense, return the numerical
 ; word-sense ranking score. The rank is stored as the "count" part of the
 ; count truth value of the InheritanceLink connecting the two: i.e. in
 ; the structure
@@ -571,7 +574,7 @@
 			(cdr (assoc 'count (cog-tv->alist (cog-tv slink))))
 		)
 	)
-) 
+)
 
 ; ---------------------------------------------------------------------
 ; word-inst-get-disjunct -- Get the disjunct (LgAnd) used for a word-inst.
@@ -621,13 +624,13 @@
 ; --------------------------------------------------------------------
 ; relation-get-dependent Get dependent part of a relation.
 ;
-; Given a relation, return the dependent item in the relation. 
+; Given a relation, return the dependent item in the relation.
 ; That is, given the relation  _rel(head-word, dependent-word)
 ; return the dependent-word.  This does no error checking.
 ;
 (define (relation-get-dependent rel)
 	; cadr because the dependent word is second in the relation.
-	(cadr 
+	(cadr
 		(cog-outgoing-set
 			; cadr because ListLink is second in the EvaluationLink
 			(cadr
@@ -641,7 +644,7 @@
 ; delete-sentence -- delete all atoms associated with a sentence.
 ;
 ; Delete the parses and word-instances associated with the sentence,
-; including LemmaLink's, ReferenceLinks, RelEx relations, and 
+; including LemmaLink's, ReferenceLinks, RelEx relations, and
 ; link-grammar linkages.
 ;
 ; Only the atoms in the atomspace are removed; if any are in the
@@ -654,7 +657,7 @@
 ;        ParseNode
 ;        SentenceNode
 ;
-; XXX This currently fails to remove the LgLinkInstanceNode's 
+; XXX This currently fails to remove the LgLinkInstanceNode's
 ;
 
 (define (delete-sentence sent)
@@ -671,11 +674,11 @@
 	; in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
-	;         NumberNode 
+	;         NumberNode
 
 	(define (purge-word-instance wi)
-		(for-each 
-			(lambda (x) 
+		(for-each
+			(lambda (x)
 				(if (eq? 'ListLink (cog-type x))
 					(purge-link-instance (cog-incoming-set x)))
 xxxxxxxx
@@ -689,8 +692,8 @@ xxxxxxxx
 	; Purge, recusively, all of the word-instances in the parse.
 	; This is expecting 'parse' to be a ParseNode.
 	(define (purge-parse parse)
-		(for-each 
-			(lambda (x) 
+		(for-each
+			(lambda (x)
 				(if (eq? 'WordInstanceLink (cog-type x))
 					(purge-word-instance (car (cog-outgoing-set x)))
 				)
@@ -705,8 +708,8 @@ xxxxxxxx
 	;     ParseLink
 	;         ParseNode     car of the outgoing set
 	;         SentenceNode
-	(for-each 
-		(lambda (x) 
+	(for-each
+		(lambda (x)
 			(if (eq? 'ParseLink (cog-type x))
 				; The car will be a ParseNode
 				(purge-parse (car (cog-outgoing-set x)))
@@ -715,7 +718,7 @@ xxxxxxxx
 		(cog-incoming-set sent)
 	)
 
-	; This delete will fail if there are still incoming links ... 
+	; This delete will fail if there are still incoming links ...
 	; this is intentional. Its up to the caller to cleanup.
 	(cog-purge sent)
 )
@@ -746,14 +749,14 @@ xxxxxxxx
 	; (define (delone atom) (cog-purge atom) #f)
 	(define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
 
-	; Can't delete InheritanceLink, its used to mark wsd completed... 
+	; Can't delete InheritanceLink, its used to mark wsd completed...
 	; (cog-map-type delone 'InheritanceLink)
 	; Can't delete EvaluationLink, these are used elsewhere.
 	; (cog-map-type delone 'EvaluationLink)
 	; Can't delete ListLink, these are used in EvaluationLinks.
 	; (cog-map-type delone 'ListLink)
 	
-	; Part of Speech links are used in the word-sense 
+	; Part of Speech links are used in the word-sense
 	; database, so cannot delete these.
 	; (cog-map-type delone 'PartOfSpeechLink)
 	; Can't delete LemmaLink's; used by the triples processing rules
@@ -777,11 +780,11 @@ xxxxxxxx
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
 
-	; Pointless to delete these, since there should only be 
+	; Pointless to delete these, since there should only be
 	; a few hundred of these, total.
-	; (cog-map-type delit 'LinkGrammarRelationshipNode) 
-	; (cog-map-type delit 'DefinedLinguisticConceptNode) 
-	; (cog-map-type delit 'DefinedLinguisticRelationshipNode) 
+	; (cog-map-type delit 'LinkGrammarRelationshipNode)
+	; (cog-map-type delit 'DefinedLinguisticConceptNode)
+	; (cog-map-type delit 'DefinedLinguisticRelationshipNode)
 
 (system (string-join (list "echo deleted: " (number->string n) )))
 	)
