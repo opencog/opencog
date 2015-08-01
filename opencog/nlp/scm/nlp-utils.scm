@@ -693,29 +693,39 @@
     ParseLink
          ParseNode
          SentenceNode
-
-  XXX This currently fails to remove the LgLinkInstanceNode's
 "
+	; Purge stuff associated with a single LgLinkInstanceNode
+	(define (purge-link-instance li)
+		(cog-purge-recursive li)
+	)
+
 	; Purge stuff associated with a single word-instance
 	; Expects wi to be a WordInstanceNode
+	;
 	; Note that WordInstances appear in LgLinkInstances:
 	;     EvaluationLink
 	;           LgLinkInstanceNode
 	;           ListLink
 	;               WordInstanceNode
 	;               WordInstanceNode
-	; and so we have to track down the above, too. They also appear
-	; in WordSequenceLinks:
+	;
+	; and so we have to track those down and purge them.
+	; They also appear in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
+	; and so we need to get rid of the NumberNodes too.
 
 	(define (purge-word-instance wi)
 		(for-each
 			(lambda (x)
+				; purge the NumberNode
+				(if (eq? 'WordSequenceLink (cog-type x))
+					(cog-purge (cadr (cog-outgoing-set x)))
+				)
 				(if (eq? 'ListLink (cog-type x))
-					(purge-link-instance (cog-incoming-set x)))
-xxxxxxxx
+					(purge-link-instance
+						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
 				)
 			)
 			(cog-incoming-set wi)
@@ -725,6 +735,11 @@ xxxxxxxx
 
 	; Purge, recusively, all of the word-instances in the parse.
 	; This is expecting 'parse' to be a ParseNode.
+	; The following is expected:
+	;      WordInstanceLink
+	;           WordInstanceNode
+	;           ParseNode
+	;
 	(define (purge-parse parse)
 		(for-each
 			(lambda (x)
@@ -782,7 +797,8 @@ xxxxxxxx
 	(define (delit atom) (cog-purge-recursive atom) (set! n (+ n 1)) #f)
 
 	; (define (delone atom) (cog-purge atom) #f)
-	(define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
+	; (define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
+	(define (delone atom) (purge-hypergraph atom) (set! n (+ n 1)) #f)
 
 	; Can't delete InheritanceLink, its used to mark wsd completed...
 	; (cog-map-type delone 'InheritanceLink)
@@ -799,6 +815,7 @@ xxxxxxxx
 
 	(cog-map-type delone 'ParseLink)
 	(cog-map-type delone 'ReferenceLink)
+	(cog-map-type delone 'LgLinkInstanceLink)
 
 	(cog-map-type delone 'CosenseLink)
 
@@ -814,6 +831,7 @@ xxxxxxxx
 	(cog-map-type delit 'SentenceNode)
 	(cog-map-type delit 'ParseNode)
 	(cog-map-type delit 'WordInstanceNode)
+	(cog-map-type delit 'LgLinkInstanceNode)
 
 	; Pointless to delete these, since there should only be
 	; a few hundred of these, total.
