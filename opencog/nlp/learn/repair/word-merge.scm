@@ -106,9 +106,12 @@
 (define (find-pairs wuid)
 "
   find-pairs -- given a uuid of single word, find all word-pairs
-  which contain the word.
+  which contain the word.  The wuid must be the uuid of a WordNode.
+
+  Returns a list of ListLink pairs that contain the WordNode.
 "
 	(define row #f)
+	(define pair-list (list))
 
 	; type=8 is the ListLink
 	(define qry "SELECT * FROM atoms WHERE type=8")
@@ -120,11 +123,68 @@
 		; Extract the outgoing set of the ListLink
 		(let ((outset (cdr (assoc "outgoing" row))))
 			(if (any (lambda (x) (eq? x wuid)) outset)
-				(begin (display "contains ")(display outset)(newline))
+				(begin
+					; (display "contains ")(display outset)(newline)
+					(set! pair-list (cons outset pair-list))
+				)
 			)
 			(set! row (dbi-get_row conxion))
 		)
 	)
+	; Return the list of pairs
+	pair-list
 )
-(find-pairs 6844)
+
+(define (check-for-pair-dupes wuid auid pair-list)
+"
+  check-for-pair-dupes -- look for idential word-pairs
+  Given wuid and a list of pairs containing wuid, replace
+  the wuid by auid, and look for that pair.
+"
+
+	; Replace wuid by auid in the pair
+	(define (replace wuid auid pair)
+		(if (eq? wuid (car pair))
+			(list auid (cadr pair))
+			(list (car pair) auid)
+		)
+	)
+	; Create list of pairs with the alternate pair in it
+	(define alt-list (map (lambda (x) (replace wuid auid x)) pair-list))
+
+	; Given a pair of UUID's, get the uuid of the ListLink that holds it.
+	; Return that UUID, else return zero
+	(define (find-list-link pair)
+		(define luid 0)
+		(define row #f)
+		(define qry (string-append
+			"SELECT * FROM atoms WHERE type=8 AND outgoing="
+			(make-outgoing-str pair)))
+		; (display qry)(newline)
+		(dbi-query conxion qry)
+
+		(set! row (dbi-get_row conxion))
+		(while (not (equal? row #f))
+			(set! luid (cdr (assoc "uuid" row)))
+			(set! row (dbi-get_row conxion))
+		)
+		; (display luid)(newline)
+		luid
+	)
+
+	(define luid-list (map find-list-link pair-list))
+	(define laid-list (map find-list-link alt-list))
+
+	; (display alt-list) (newline)
+	(display "pairs: ") (display (length pair-list))(newline)
+	(display "alt pairs: ") (display (length alt-list))(newline)
+	(display "luids: ") (display (length luid-list))(newline)
+	(display "laids: ") (display (length laid-list))(newline)
+
+)
+
+(define pair-list (find-pairs 6844))
+(display "Found word pairs: ") (display (length pair-list))(newline)
+(check-for-pair-dupes 6844 27942 pair-list)
+; (display lista)
 ; (find-pairs 27942)
