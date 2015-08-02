@@ -64,16 +64,60 @@
 )
 ; --------------------------------------------------------------
 
-(define duplicate-word-list
-	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=73;" "name"))
+;(define duplicate-word-list
+;	(look-for-dupes
+;		"SELECT * FROM atoms WHERE type=73;" "name"))
+;
+;(display "the duplicate word list is: ")
+;(display duplicate-word-list) (newline)
+;
+;(define duplicate-pair-list
+;	(look-for-dupes
+;		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
+;
+;(display "the duplicate pair list is: ")
+;(display duplicate-pair-list) (newline)
+;
+;(define duplicate-eval-list
+;	(look-for-dupes
+;		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
+;
+;(display "the duplicate eval list is: ")
+;(display duplicate-eval-list) (newline)
 
-(display "the duplicate word list is: ")
-(display duplicate-word-list) (newline)
+; ------------------------------------------------
 
-(define duplicate-pair-list
-	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
+(define (make-outgoing-str uuid-list)
+"
+  make-outgoing-str -- Make a string that corresponds to the UUID list
 
-(display "the duplicate pair list is: ")
-(display duplicate-pair-list) (newline)
+  The string is used for forming SQL queries. It has the format, for
+  example, '{123, 456}'
+"
+	(define ostr "'{")
+	(set! ostr (string-concatenate
+		(cons ostr (map
+			; create list of comma-separated ints
+			(lambda (x) (string-append (number->string x) ", "))
+			 uuid-list))))
+	; Wipe out the trailing comma
+	(set! ostr (string-drop-right ostr 2))
+	(set! ostr (string-append ostr "}'"))
+
+	ostr
+)
+
+(define (undup-pair pair)
+"
+  undup-pair Given a pair of duplicate ListLinks, consolidate the two.
+
+  Not only must we clobbr the list links, but also the EvaluationLinks
+  that contain them.
+"
+
+	(define oset (make-outgoing-str pair))
+	(display "duude string is ") (display oset) (newline)
+	; (define
+)
+
+(undup-pair (list 6709 137))
