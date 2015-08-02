@@ -17,29 +17,56 @@
 
 (display conxion) (newline)
 
-; Look for duplicate WordNodes
-; First, get all WordNodes
-(dbi-query conxion
-	; "SELECT * FROM atoms WHERE type=73 LIMIT 10;")
-	"SELECT * FROM atoms WHERE type=73;")
+; --------------------------------------------------------------
+(define (look-for-dupes query colm)
+"
+  look-dor-dupes -- Look for duplicate atoms
+  query should be the SQL query to perform
+  colm should be the string column name; either 'name' or 'outgoing'
 
-(display "WordNode duplicate search connection status: ")
-(display (dbi-get_status conxion)) (newline)
+  returns a list of the duplicate entries found for 'colm'
+"
+	(define word-list (list))
+	(define dupe-list (list))
+	(define word-count 0)
+	(define row #f)
 
-(define word-list (list))
-(define word-count 0)
-(define row #f)
-(set! row (dbi-get_row conxion))
-(while (not (equal? row #f))
-	(let ((word (cdr (assoc "name" row))))
-		(set! word-count (+ word-count 1))
-		(if (member word word-list)
-			(begin (display "oh no! a duplicate!! ") (display word) (newline))
-			(set! word-list (cons word word-list))
+	(dbi-query conxion query)
+
+	(display "Duplicate search connection status: ")
+	(display (dbi-get_status conxion)) (newline)
+
+	; Loop over table rows
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+
+		; Extract the column value
+		(let ((word (cdr (assoc colm row))))
+
+			; Maintain a count, just for the hell of it.
+			(set! word-count (+ word-count 1))
+
+			; Have we seen this item previously?
+			(if (member word word-list)
+				(begin
+					(display "Oh no! Duplicate!! ") (display word) (newline)
+					(set! dupe-list (cons word dupe-list))
+				)
+				(set! word-list (cons word word-list))
+			)
+			; (display word) (newline)
+			(set! row (dbi-get_row conxion))
 		)
-		; (display word) (newline)
-		(set! row (dbi-get_row conxion))
 	)
-)
 
-(display "Word count was ") (display word-count) (newline)
+	(display "Count was ") (display word-count) (newline)
+	(dupe-list)
+)
+; --------------------------------------------------------------
+
+(define duplicate-word-list
+	(look-for-dupes
+		"SELECT * FROM atoms WHERE type=73;" "name"))
+
+(display "the dupe list is")
+(display (list duplicate-word-list))
