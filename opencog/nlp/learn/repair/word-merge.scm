@@ -172,8 +172,48 @@
 		luid
 	)
 
+	; Create parallel lists of UUID's of the ListLinks of the pairs
 	(define luid-list (map find-list-link pair-list))
 	(define laid-list (map find-list-link alt-list))
+
+	; Get the column value on the EvalLink that holds the ListLink UUID
+	(define (get-col colm uuid)
+		(define row #f)
+		(define val 0)
+		(define qry (string-append
+			"SELECT * FROM atoms WHERE type=47 AND outgoing="
+			(make-outgoing-str (list 250 uuid))))
+		; (display qry)(newline)
+		(dbi-query conxion qry)
+
+		(set! row (dbi-get_row conxion))
+		(while (not (equal? row #f))
+			(set! val (cdr (assoc colm row)))
+			(set! row (dbi-get_row conxion))
+		)
+		val
+	)
+
+	; Get the stv-count on the EvalLink that holds the ListLink UUID
+	(define (get-count uuid) (get-col "stv_count" uuid))
+
+	; Get the uuid of the EvalLink that holds the ListLink UUID
+	(define (get-eval-uuid uuid) (get-col "uuid" uuid))
+
+	; Sum the counts
+	(define (sum-counts luid laid)
+		(if (and (< 0 luid) (< 0 laid))
+			(let* (
+				(lcnt (get-count luid))
+				(acnt (get-count laid))
+				(scnt (+ lcnt acnt)))
+				(display "summo cnt ") (display lcnt)
+				(display " ") (display acnt)
+				(display " ") (display scnt) (newline)
+				scnt
+			)
+		)
+	)
 
 	; (display alt-list) (newline)
 	(display "pairs: ") (display (length pair-list))(newline)
