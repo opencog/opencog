@@ -26,7 +26,7 @@
 
   returns a list of the duplicate entries found for 'colm'
 "
-	(define word-list (list))
+	(define word-set (make-hash-table 100123))
 	(define dupe-list (list))
 	(define word-count 0)
 	(define row #f)
@@ -47,12 +47,12 @@
 			(set! word-count (+ word-count 1))
 
 			; Have we seen this item previously?
-			(if (member word word-list)
+			(if (hash-ref word-set word)
 				(begin
 					(display "Oh no! Duplicate!! ") (display word) (newline)
 					(set! dupe-list (cons word dupe-list))
 				)
-				(set! word-list (cons word word-list))
+				(hash-set! word-set word word)
 			)
 			; (display word) (newline)
 			(set! row (dbi-get_row conxion))
