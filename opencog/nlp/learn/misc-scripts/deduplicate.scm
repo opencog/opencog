@@ -60,7 +60,7 @@
 	)
 
 	(display "Count was ") (display word-count) (newline)
-	(dupe-list)
+	dupe-list
 )
 ; --------------------------------------------------------------
 
@@ -68,5 +68,12 @@
 	(look-for-dupes
 		"SELECT * FROM atoms WHERE type=73;" "name"))
 
-(display "the dupe list is")
-(display (list duplicate-word-list))
+(display "the duplicate word list is: ")
+(display duplicate-word-list) (newline)
+
+(define duplicate-pair-list
+	(look-for-dupes
+		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
+
+(display "the duplicate pair list is: ")
+(display duplicate-pair-list) (newline)
