@@ -4,11 +4,13 @@ from libcpp.string cimport string
 from libcpp.map cimport map as cmap
 
 cdef extern from "opencog/learning/statistics/DataProvider.h" namespace "opencog::statistics":
-    cdef struct StatisticData:
+    cdef cppclass StatisticData:
         int count
-        int probability
+        float probability
         float entropy
         float interactionInformation
+        StatisticData(int) except +
+        StatisticData(int, float, float, float) except +
 
     cdef cppclass MetaDataContainer[Metadata]:
         long size()
@@ -27,3 +29,9 @@ cdef extern from "opencog/learning/statistics/DataProvider.h" namespace "opencog
         vector[long] makeKeyFromData(bool[] combination_array, vector[Metadata] &oneRawData)
         vector[Metadata] makeDataFromKey(vector[long] &indexes)
         string print_data_map()
+
+cdef extern from "opencog/learning/statistics/Probability.h" namespace "opencog::statistics::Probability":
+    void calculateProbabilities(DataProvider[long] &provider)
+
+cdef extern from "opencog/learning/statistics/Entropy.h" namespace "opencog::statistics::Entropy":
+    void calculateEntropies(DataProvider[long] &provider)

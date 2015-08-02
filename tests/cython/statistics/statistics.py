@@ -29,7 +29,8 @@ except ImportError:
         "make sure the required dependencies are installed."
     )
 else:
-    from opencog.statistics import PyDataProviderAtom
+    from opencog.statistics import \
+        PyDataProviderAtom, PyProbabilityAtom, PyEntropyAtom
 
 
 # Same with tests/learning/statistics/StatisticsUTest.cxxtest
@@ -87,9 +88,10 @@ class TestStatistics:
         is_first_insert = self.provider.addOneMetaData(self.aaa)
         assert_false(is_first_insert)
 
+        # Add multiple data
         for case in self.test_case:
             self.provider.addOneMetaData(case)
-        assert_equal(self.provider.mDataSetSize, 6)
+        assert_equal(self.provider.mDataSet_size(), 6)
 
         # Add data's count (n_gram = 2)
         arr_2_gram_1 = [self.aaa, self.bbb]
@@ -112,3 +114,57 @@ class TestStatistics:
 
         value_vector = self.provider.makeDataFromKey(self.a, key_vector_1)
         assert_equal(len(value_vector), 6)
+
+    def test_probabilities(self):
+        log.info("Statistics> test_probabilities")
+
+        # Add multiple data
+        for case in self.test_case:
+            self.provider.addOneMetaData(case)
+
+        # Add data's count
+        arr_2_gram_1 = [self.aaa, self.bbb]
+        arr_2_gram_2 = [self.aaa, self.ccc]
+        arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
+        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
+        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
+        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+
+        # Calculate probabilities
+        PyProbabilityAtom().calculateProbabilities(self.provider)
+
+        statistic_data = self.provider.find_in_map(arr_2_gram_1)
+        assert_less_equal(statistic_data.probability, 0.667)
+        assert_greater_equal(statistic_data.probability, 0.665)
+        statistic_data = self.provider.find_in_map(arr_2_gram_2)
+        assert_less_equal(statistic_data.probability, 0.334)
+        assert_greater_equal(statistic_data.probability, 0.332)
+        statistic_data = self.provider.find_in_map(arr_3_gram_1)
+        assert_less_equal(statistic_data.probability, 1.1)
+        assert_greater_equal(statistic_data.probability, 0.9)
+
+    def test_entropies(self):
+        log.info("Statistics> test_entropies")
+
+        # Add multiple data
+        for case in self.test_case:
+            self.provider.addOneMetaData(case)
+
+        # Add data's count
+        arr_2_gram_1 = [self.aaa, self.bbb]
+        arr_2_gram_2 = [self.aaa, self.ccc]
+        arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
+        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
+        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
+        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+
+        # Calculate probabilities
+        PyProbabilityAtom().calculateProbabilities(self.provider)
+        PyEntropyAtom().calculateEntropies(self.provider)
+
+        statistic_data = self.provider.find_in_map(arr_2_gram_1)
+        assert_less_equal(statistic_data.entropy, 0.390)
+        assert_greater_equal(statistic_data.entropy, 0.388)
+        statistic_data = self.provider.find_in_map(arr_2_gram_2)
+        assert_less_equal(statistic_data.entropy, 0.529)
+        assert_greater_equal(statistic_data.entropy, 0.527)

@@ -2,9 +2,50 @@ from cython cimport sizeof
 from libc.stdlib cimport malloc, free
 from libcpp cimport bool
 from libcpp.vector cimport vector
+from libcpp.set cimport set
+from libcpp.map cimport map
 from cython.operator cimport dereference as deref, preincrement as inc
 
 from opencog.atomspace import Handle
+
+cdef class PyStatisticData:
+    """ C++ StatisticData wrapper class.
+    """
+    cdef StatisticData *thisptr
+    def __cinit__(self, _count, _probability=None, _entropy=None,
+                  _interactionInformation=None):
+        if _probability is None:
+            self.thisptr = new StatisticData(_count)
+        else:
+            self.thisptr = new StatisticData(_count, _probability, _entropy,
+                                             _interactionInformation)
+    def __str__(self):
+        return "count: {0:d} " \
+               "probability: {1:f} " \
+               "entropy: {2:f} " \
+               "interactionInformation: {3:f}".format(
+            self.count,
+            self.probability,
+            self.entropy,
+            self.interactionInformation
+        )
+
+    property count:
+        def __get__(self): return self.thisptr.count
+        def __set__(self, count): self.thisptr.count = count
+
+    property probability:
+        def __get__(self): return self.thisptr.probability
+        def __set__(self, probability): self.thisptr.probability = probability
+
+    property entropy:
+        def __get__(self): return self.thisptr.entropy
+        def __set__(self, entropy): self.thisptr.entropy = entropy
+
+    property interactionInformation:
+        def __get__(self): return self.thisptr.interactionInformation
+        def __set__(self, interactionInformation):
+            self.thisptr.interactionInformation = interactionInformation
 
 
 cdef class PyDataProvider:
@@ -57,7 +98,6 @@ cdef class PyDataProvider:
                     bool_array[i] = True
                 else:
                     bool_array[i] = False
-                print str(combination_array[i])
 
             result = self.thisptr.makeKeyFromData(bool_array, v)
             free(bool_array)
@@ -71,11 +111,30 @@ cdef class PyDataProvider:
         cdef vector[long] v
         for item in indexes:
             v.push_back(item)
-
         return self.thisptr.makeDataFromKey(v)
 
     def print_data_map(self):
         return self.thisptr.print_data_map().c_str()
+
+    def mDataSet_size(self):
+        return deref(self.thisptr.mDataSet).size()
+
+    def find_in_map(self,  oneRawData):
+        cdef vector[long] v
+        for item in self.makeKeyFromData(oneRawData):
+            v.push_back(item)
+
+        cdef map[vector[long], StatisticData].iterator it
+        it = self.thisptr.mDataMaps[v.size()].find(v)
+        if it == self.thisptr.mDataMaps[v.size()].end():
+            return None
+        else:
+            return PyStatisticData(
+                int(deref(it).second.count),
+                float(deref(it).second.probability),
+                float(deref(it).second.entropy),
+                float(deref(it).second.interactionInformation)
+            )
 
     property n_gram:
         def __get__(self): return self.thisptr.n_gram
@@ -86,11 +145,33 @@ cdef class PyDataProvider:
         def __set__(self, isOrderDependent):
             self.thisptr.isOrderDependent = isOrderDependent
 
-    property mDataSetSize:
-        def __get__(self): return deref(self.thisptr.mDataSet).size()
+cdef class PyProbability:
+    """ C++ Probability wrapper class.
 
-    property mDataMapsSize:
-        def __get__(self): return deref(self.thisptr.mDataMaps).size()
+    This class wraps the C++ Probability class, but this wrapper class supports
+    only python long type, since cython binding doesn't support the
+    *declaration* of template class now.
+
+    TODO: Change class to support template.
+    """
+    @classmethod
+    def calculateProbabilities(cls, PyDataProvider provider):
+        cdef DataProvider[long] *thisptr = provider.thisptr
+        calculateProbabilities(deref(thisptr))
+
+cdef class PyEntropy:
+    """ C++ Entropy wrapper class.
+
+    This class wraps the C++ Entropy class, but this wrapper class supports
+    only python long type, since cython binding doesn't support the
+    *declaration* of template class now.
+
+    TODO: Change class to support template.
+    """
+    @classmethod
+    def calculateEntropies(cls, PyDataProvider provider):
+        cdef DataProvider[long] *thisptr = provider.thisptr
+        calculateEntropies(deref(thisptr))
 
 
 class PyDataProviderAtom:
@@ -136,6 +217,15 @@ class PyDataProviderAtom:
     def print_data_map(self):
         return self.provider.print_data_map()
 
+    def mDataSet_size(self):
+        return self.provider.mDataSet_size()
+
+    def find_in_map(self, oneRawData):
+        long_vector = list()
+        for atom in oneRawData:
+            long_vector.append(atom.h.value())
+        return self.provider.find_in_map(long_vector)
+
     @property
     def n_gram(self):
         return self.provider.n_gram
@@ -144,10 +234,18 @@ class PyDataProviderAtom:
     def isOrderDependent(self):
         return self.provider.isOrderDependent
 
-    @property
-    def mDataSetSize(self):
-        return self.provider.mDataSetSize
+class PyProbabilityAtom:
+    """ Python Probability class for Atom.
 
-    @property
-    def mDataMapsSize(self):
-        return self.provider.mDataMapsSize
+    This class wraps the Python Probability wrapper class.
+    """
+    def calculateProbabilities(self, provider_atom):
+        PyProbability.calculateProbabilities(provider_atom.provider)
+
+class PyEntropyAtom:
+    """ Python Entropy class for Atom.
+
+    This class wraps the Python Entropy wrapper class.
+    """
+    def calculateEntropies(self, provider_atom):
+        PyEntropy.calculateEntropies(provider_atom.provider)
