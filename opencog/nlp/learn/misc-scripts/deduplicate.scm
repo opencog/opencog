@@ -11,10 +11,23 @@
 (use-modules (dbi dbi))
 
 
-(define my-connect 
-       (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
+(define conxion
+       ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
+       (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
 
+(display conxion) (newline)
 
-(display my-connect) (newline)
+(dbi-query conxion
+	"SELECT * FROM atoms WHERE type=47 and outgoing='{250, 27877}';")
 
+(display conxion) (newline)
 
+(define row #f)
+(set! row (dbi-get_row conxion))
+(display "ahh")
+(display row) (newline)
+(while (not (equal? row #f))
+	(display "wtf")
+	(display row) (newline)
+	(set! row (dbi-get_row conxion))
+)
