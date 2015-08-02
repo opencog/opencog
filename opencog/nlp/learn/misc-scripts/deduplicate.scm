@@ -17,17 +17,29 @@
 
 (display conxion) (newline)
 
+; Look for duplicate WordNodes
+; First, get all WordNodes
 (dbi-query conxion
-	"SELECT * FROM atoms WHERE type=47 and outgoing='{250, 27877}';")
+	; "SELECT * FROM atoms WHERE type=73 LIMIT 10;")
+	"SELECT * FROM atoms WHERE type=73;")
 
-(display conxion) (newline)
+(display "WordNode duplicate search connection status: ")
+(display (dbi-get_status conxion)) (newline)
 
+(define word-list (list))
+(define word-count 0)
 (define row #f)
 (set! row (dbi-get_row conxion))
-(display "ahh")
-(display row) (newline)
 (while (not (equal? row #f))
-	(display "wtf")
-	(display row) (newline)
-	(set! row (dbi-get_row conxion))
+	(let ((word (cdr (assoc "name" row))))
+		(set! word-count (+ word-count 1))
+		(if (member word word-list)
+			(begin (display "oh no! a duplicate!! ") (display word) (newline))
+			(set! word-list (cons word word-list))
+		)
+		; (display word) (newline)
+		(set! row (dbi-get_row conxion))
+	)
 )
+
+(display "Word count was ") (display word-count) (newline)
