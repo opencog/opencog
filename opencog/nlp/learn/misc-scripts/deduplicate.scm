@@ -64,10 +64,10 @@
 )
 ; --------------------------------------------------------------
 
-;(define duplicate-word-list
-;	(look-for-dupes
-;		"SELECT * FROM atoms WHERE type=73;" "name"))
-;
+(define duplicate-word-list
+	(look-for-dupes
+		"SELECT * FROM atoms WHERE type=73;" "name"))
+
 ;(display "the duplicate word list is: ")
 ;(display duplicate-word-list) (newline)
 ;
@@ -77,7 +77,7 @@
 ;
 ;(display "the duplicate pair list is: ")
 ;(display duplicate-pair-list) (newline)
-;
+
 ;(define duplicate-eval-list
 ;	(look-for-dupes
 ;		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
@@ -167,10 +167,21 @@
 	(display "total stv= ") (display count_tot) (newline)
 	(display "uuid= ") (display smallest-uuid) (newline)
 
+	(set! qry (string-concatenate (list
+		"UPDATE atoms SET stv_count="
+		(number->string count_tot)
+		" WHERE uuid="
+		(number->string smallest-uuid))))
+	(display qry) (newline)
+
 	; Do this manually...
 	; UPDATE atoms SET stv_count=5938 WHERE uuid=53650;
 	; DELETE FROM atoms WHERE uuid=430743;
 	; DELETE FROM atoms WHERE uuid=430742;
+	;
+	; UPDATE atoms SET stv_count=3760.0 WHERE uuid=27878;
+	; DELETE FROM atoms WHERE uuid=415559;
+	; DELETE FROM atoms WHERE uuid=415560;
 )
 
 (define (undup-pair pair)
@@ -211,4 +222,5 @@
 	(undup-eval uuid-list)
 )
 
-(undup-pair (list 6709 137))
+; (undup-pair (list 6709 137))
+; (undup-pair (list 24493 101))
