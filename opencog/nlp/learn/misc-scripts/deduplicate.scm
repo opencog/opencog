@@ -107,6 +107,25 @@
 	ostr
 )
 
+(define (undup-eval uuid-list)
+	(define uuid 0)
+	; Loop over the ListLink's
+	(set! uuid (car uuid-list))
+	(set! uuid-list (cdr uuid-list))
+
+	(while (not (equal? uuid 0))
+		(display "duuude uuid is ")(display uuid) (newline)
+
+		(if (not (equal? uuid-list (list)))
+			(begin
+				(set! uuid (car uuid-list))
+				(set! uuid-list (cdr uuid-list))
+			)
+			(set! uuid 0)
+		)
+	)
+)
+
 (define (undup-pair pair)
 "
   undup-pair Given a pair of duplicate ListLinks, consolidate the two.
@@ -115,9 +134,34 @@
   that contain them.
 "
 
-	(define oset (make-outgoing-str pair))
-	(display "duude string is ") (display oset) (newline)
-	; (define
+	(define row #f)
+	(define uuid-list (list))
+
+	; type=8 is the ListLink
+	(define qry (string-append
+		"SELECT * FROM atoms WHERE type=8 and outgoing="
+		(make-outgoing-str pair)))
+
+	(dbi-query conxion qry)
+
+	(display "Duplicate list search status: ")
+	(display (dbi-get_status conxion)) (newline)
+
+	; Loop over table rows
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+
+		; Extract the uuid of the ListLink
+		(let ((uuid (cdr (assoc "uuid" row))))
+
+			(display "ListLink uuid= ") (display uuid) (newline)
+			(set! uuid-list (cons uuid uuid-list))
+			(set! row (dbi-get_row conxion))
+		)
+	)
+
+	; Consolidate duplicate EvaluationLinks
+	(undup-eval uuid-list)
 )
 
 (undup-pair (list 6709 137))
