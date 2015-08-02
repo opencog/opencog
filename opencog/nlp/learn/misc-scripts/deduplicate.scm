@@ -108,14 +108,53 @@
 )
 
 (define (undup-eval uuid-list)
+"
+  undup-eval -- consolidte duplicate EvaluationLinks
+
+  The uuid-list should be a list of integer uuids for the ListLinks
+  that are the duplicates.
+"
+	(define smallest-uuid 2012123123)
+	(define row #f)
+	(define count_tot 0)
+	(define qry "")
 	(define uuid 0)
 	; Loop over the ListLink's
 	(set! uuid (car uuid-list))
 	(set! uuid-list (cdr uuid-list))
 
 	(while (not (equal? uuid 0))
-		(display "duuude uuid is ")(display uuid) (newline)
 
+
+		(set! qry (string-append
+			"SELECT * FROM atoms WHERE type=47 and outgoing="
+			(make-outgoing-str (list 250 uuid)))
+		)
+		(display "Eval qry is ")(display qry) (newline)
+		(dbi-query conxion qry)
+
+		; Loop over table rows
+		(set! row (dbi-get_row conxion))
+		(while (not (equal? row #f))
+
+			; Extract the count of the EvalLink
+			(let (
+				(cnt (cdr (assoc "stv_count" row)))
+				(eid (cdr (assoc "uuid" row))))
+
+				(display "EvalLink uuid= ") (display eid)
+				(display " cnt= ") (display cnt) (newline)
+
+				; Record the smallest UUID
+				(if (< eid smallest-uuid) (set! smallest-uuid eid))
+
+				; Sum the total count.
+				(set! count_tot (+ count_tot cnt))
+				(set! row (dbi-get_row conxion))
+			)
+		)
+
+		; Get the next uuid on the list
 		(if (not (equal? uuid-list (list)))
 			(begin
 				(set! uuid (car uuid-list))
@@ -124,6 +163,14 @@
 			(set! uuid 0)
 		)
 	)
+
+	(display "total stv= ") (display count_tot) (newline)
+	(display "uuid= ") (display smallest-uuid) (newline)
+
+	; Do this manually...
+	; UPDATE atoms SET stv_count=5938 WHERE uuid=53650;
+	; DELETE FROM atoms WHERE uuid=430743;
+	; DELETE FROM atoms WHERE uuid=430742;
 )
 
 (define (undup-pair pair)
