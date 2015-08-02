@@ -9,6 +9,7 @@
 ; anything else.
 
 (use-modules (dbi dbi))
+(use-modules (srfi srfi-1))
 
 
 (define conxion
@@ -41,18 +42,24 @@
 	(while (not (equal? row #f))
 
 		; Extract the column value
-		(let ((word (cdr (assoc colm row))))
+		(let* (
+			(word (cdr (assoc colm row)))
+			(uuid (cdr (assoc "uuid" row)))
+			(wuid (hash-ref word-set word)))
 
 			; Maintain a count, just for the hell of it.
 			(set! word-count (+ word-count 1))
 
 			; Have we seen this item previously?
-			(if (hash-ref word-set word)
+			(if wuid
 				(begin
-					(display "Oh no! Duplicate!! ") (display word) (newline)
+					(display "Oh no! Duplicate!! ") (display word) 
+					(display " prid=") (display wuid)
+					(display " uuid=") (display uuid)
+					(newline)
 					(set! dupe-list (cons word dupe-list))
 				)
-				(hash-set! word-set word word)
+				(hash-set! word-set word uuid)
 			)
 			; (display word) (newline)
 			(set! row (dbi-get_row conxion))
@@ -107,12 +114,16 @@
 	ostr
 )
 
+; ------------------------------------------------
+
 (define (undup-eval uuid-list)
 "
   undup-eval -- consolidte duplicate EvaluationLinks
 
   The uuid-list should be a list of integer uuids for the ListLinks
-  that are the duplicates.
+  that are the duplicates. The proceedure here is semi-manual;
+  the total count is computed, but you have to update the count
+  yourself, and also do the deletions.
 "
 	(define smallest-uuid 2012123123)
 	(define row #f)
@@ -224,3 +235,30 @@
 
 ; (undup-pair (list 6709 137))
 ; (undup-pair (list 24493 101))
+
+; ------------------------------------------------
+(define (find-pairs wuid)
+"
+  find-pairs -- given a uuid of single word, find all word-pairs
+  which contain the word.
+"
+	(define row #f)
+
+	; type=8 is the ListLink
+	(define qry "SELECT * FROM atoms WHERE type=8")
+	(dbi-query conxion qry)
+
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+
+		; Extract the outgoing set of the ListLink
+		(let ((outset (cdr (assoc "outgoing" row))))
+			(if (any (lambda (x) (eq? x wuid)) outset)
+				(begin (display "contains ")(display outset)(newline))
+			)
+			(set! row (dbi-get_row conxion))
+		)
+	)
+)
+(find-pairs 6844)
+; (find-pairs 27942)
