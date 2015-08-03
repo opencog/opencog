@@ -320,15 +320,54 @@
 
 )
 
-;(define (swap-alts 
+(define (swap-alts altid wantid pair-list)
+"
+  swap-alts -- fix up the uuids -- replace altid by wantid in
+  the ListLink that contains the altid.
+"
+	; Replace wuid by auid in the pair
+	(define (replace wuid auid pair)
+		(if (eq? wuid (car pair))
+			(list auid (cadr pair))
+			(list (car pair) auid)
+		)
+	)
+	; The laid-list is the list of ListLinks that contain the
+	; wrong word UUID.
+	(define laid-list (map find-list-link pair-list))
+
+	; Create list of pairs with the fixed pair in it
+	(define fix-list (map (lambda (x) (replace altid wantid x)) pair-list))
+
+	; fixup ListLink laid by inserting fix into it
+	(define (fixup laid fix)
+		(define upd (string-append
+			"UPDATE atoms SET outgoing="
+			(make-outgoing-str fix)
+			" WHERE uuid="
+			(number->string laid)
+			";"))
+		(display upd) (newline)
+		(dbi-query conxion upd)
+		(display (dbi-get_status conxion)) (newline)
+		(flush-query)
+	)
+
+	(map fixup laid-list fix-list)
+)
 
 ;(define pair-list (find-pairs 6844))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
 ;(check-for-pair-dupes 6844 27942 pair-list)
-;(swap-alts 27942)
-(define alt-list (find-pairs 27942))
-(display "Found alt pairs: ") (display (length alt-list))(newline)
+
+;(define alt-list (find-pairs 27942))
+;(display "Found alt pairs: ") (display (length alt-list))(newline)
+;(swap-alts 27942 6844 alt-list)
 
 ;(define pair-list (find-pairs 42673))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
 ;(check-for-pair-dupes 42673 367746 pair-list)
+
+(define alt-list (find-pairs 367746))
+(display "Found alt pairs: ") (display (length alt-list))(newline)
+(swap-alts 367746 42673 alt-list)
