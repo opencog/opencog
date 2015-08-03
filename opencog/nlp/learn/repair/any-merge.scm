@@ -99,6 +99,69 @@
 (define all-list-links (get-all-atoms
 	"SELECT uuid FROM atoms WHERE type=8" "uuid"))
 
-(get-all-evals all-list-links 250)
-(get-all-evals all-list-links 152)
+; (get-all-evals all-list-links 250)
+; (get-all-evals all-list-links 152)
 
+; --------------------------------------------------------------
+(define (relabel-evals alist bad-id good-id)
+"
+  relabel-evals -- Change the oset of all of the EvaluationLinks
+  that use the bad ANY uuid; make it use the good ANY id.
+
+  Returns a list of the changed EvaluationLink entries.
+"
+	(define word-count 0)
+	(define elist (list))
+
+	; Change an EvaluationLink
+	; euid == uuid of the evaluation link
+	; luid == uuid of the ListLink
+	; any-id == uuid to change it to.
+	(define (set-eval euid luid any-id)
+		(define euid 0)
+		(define row #f)
+		(define qry (string-concatenate (list
+			"UPDATE atoms SET outgoing="
+			(make-outgoing-str (list any-id luid))
+			" WHERE uuid="
+			(number->string euid))))
+		; (display qry)(newline)
+		(dbi-query conxion qry)
+		(flush-query)
+	)
+
+	; Change an EvaluationLink from the old bad ANY uuid to the new one
+	; argument is the uuid of the ListLink
+	(define (change-eval uuid)
+		(define euid 0)
+		(define row #f)
+		(define qry (string-concatenate (list
+			"SELECT uuid FROM atoms WHERE type=47 AND outgoing="
+			(make-outgoing-str (list bad-id uuid)))))
+		; (display qry)(newline)
+		(dbi-query conxion qry)
+
+		; Loop over table rows
+		(set! row (dbi-get_row conxion))
+		(while (not (equal? row #f))
+
+			; Extract the column value
+			(set! euid (cdr (assoc "uuid" row)))
+
+			; Maintain a count, just for the hell of it.
+			(set! word-count (+ word-count 1))
+
+			; (display word) (newline)
+			(set! row (dbi-get_row conxion))
+		)
+		(if (< 0 euid)
+			(set-eval euid uuid good-id)
+		)
+	)
+
+	(set! elist (map change-eval alist))
+	(display "Changed uuid count was ") (display word-count) (newline)
+	elist
+)
+
+(relabel-evals all-list-links 250 152)
