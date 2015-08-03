@@ -103,6 +103,16 @@
 )
 
 ; ------------------------------------------------
+
+(define (flush-query)
+	(define row #f)
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! row (dbi-get_row conxion))
+	)
+)
+
+; ------------------------------------------------
 (define (find-pairs wuid)
 "
   find-pairs -- given a uuid of single word, find all word-pairs
@@ -234,14 +244,17 @@
 						(display "(") (display aud) (display ")")
 						(newline)
 						(display upd) (newline)
+						;(dbi-query conxion upd)
+						;(display (dbi-get_status conxion)) (newline)
+						;(flush-query)
 						(display apd) (newline)
+						;(dbi-query conxion apd)
+						;(display (dbi-get_status conxion)) (newline)
+						;(flush-query)
 						(display alt) (newline)
-						(dbi-query conxion upd)
-						(display (dbi-get_status conxion)) (newline)
-						(dbi-query conxion apd)
-						(display (dbi-get_status conxion)) (newline)
-						(dbi-query conxion alt)
-						(display (dbi-get_status conxion)) (newline)
+						;(dbi-query conxion alt)
+						;(display (dbi-get_status conxion)) (newline)
+						;(flush-query)
 						scnt
 					)
 					(begin
@@ -262,7 +275,38 @@
 		)
 	)
 
+	; Bug cleanup
+	(define (bug-cleanup luid laid)
+		(if (< 0 laid)
+;			(let* ((aud (get-eval-uuid laid)))
+;				(if (< 0 aud)
+;					(let* ((apd (string-append
+;								"DELETE FROM atoms WHERE uuid="
+;								(number->string aud)
+;								";")))
+;						(display apd) (newline)
+;						(dbi-query conxion apd)
+;						(display (dbi-get_status conxion)) (newline)
+;						(flush-query)
+;					)
+;				)
+;			)
+			(let ((alt (string-append
+						"DELETE FROM atoms WHERE uuid="
+						(number->string laid)
+						";")))
+				(display alt) (newline)
+				(dbi-query conxion alt)
+				(display (dbi-get_status conxion)) (newline)
+				(flush-query)
+				#t
+			)
+			#f
+		)
+	)
+
 	(define cnt-list (filter-map sum-counts luid-list laid-list))
+	; (define cnt-list (filter-map bug-cleanup luid-list laid-list))
 
 	; (display alt-list) (newline)
 	(display "pairs: ") (display (length pair-list))(newline)
@@ -274,8 +318,10 @@
 
 )
 
-(define pair-list (find-pairs 6844))
+;(define pair-list (find-pairs 6844))
+;(display "Found word pairs: ") (display (length pair-list))(newline)
+;(check-for-pair-dupes 6844 27942 pair-list)
+
+(define pair-list (find-pairs 42673))
 (display "Found word pairs: ") (display (length pair-list))(newline)
-(check-for-pair-dupes 6844 27942 pair-list)
-; (display lista)
-; (find-pairs 27942)
+(check-for-pair-dupes 42673 367746 pair-list)
