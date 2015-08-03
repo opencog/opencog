@@ -14,6 +14,9 @@
 (use-modules (dbi dbi))
 (use-modules (srfi srfi-1))
 
+; debugging ...
+(define do-update #f)
+
 ; The uuid of the ANY LG type.  That is, the uuid of the
 ; LinkGrammarRelationshipNode "ANY"
 (define uuid-of-any 250)
@@ -80,7 +83,9 @@
 
 ; The duplicate-pair-list will consist of word-pairs
 ; (acutally, WordNode uuid-pairs) that appear in more
-; than one ListLink (they should be unique...)
+; than one ListLink.  These should have been unique, but,
+; due to bugs in how the atomspace gets used, they are not.
+;
 (define duplicate-pair-list
 	(look-for-dupes
 		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
@@ -142,9 +147,11 @@
 					(number->string uuid)))
 
 				(display "Delete ")(display qry)(newline)
-				(dbi-query conxion qry)
-				(display (dbi-get_status conxion)) (newline)
-				(flush-query)
+				(if do-update
+					(begin
+						(dbi-query conxion qry)
+						(display (dbi-get_status conxion)) (newline)
+						(flush-query)))
 			)
 		)
 	)
@@ -215,9 +222,10 @@
 		" WHERE uuid="
 		(number->string smallest-evid))))
 	(display qry) (newline)
-	(dbi-query conxion qry)
-	(display (dbi-get_status conxion)) (newline)
-	(flush-query)
+	(if do-update (begin
+		(dbi-query conxion qry)
+		(display (dbi-get_status conxion)) (newline)
+		(flush-query)))
 
 	(delete-atoms eval-list smallest-evid)
 	(delete-atoms luid-list smallest-luid)
@@ -268,9 +276,13 @@
 		)
 	)
 
-	; Consolidate duplicate EvaluationLinks
+	; Sum the counts of the duplicate EvaluationLinks;
+	; delete all but one, and also delete all but one ListLink
 	(undup-eval uuid-list)
 )
 
 ; (undup-pair (list 6709 137))
 ; (undup-pair (list 24493 101))
+
+; Whole-sale de-duplication
+(for-each undup-pair duplicate-pair-list)
