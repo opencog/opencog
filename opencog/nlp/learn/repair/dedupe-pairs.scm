@@ -15,7 +15,7 @@
 (use-modules (srfi srfi-1))
 
 ; debugging ...
-(define do-update #f)
+(define do-update #t)
 
 ; The uuid of the ANY LG type.  That is, the uuid of the
 ; LinkGrammarRelationshipNode "ANY"
@@ -140,6 +140,7 @@
 "
 
 	(define (del-atom uuid)
+		(define qry "")
 		(if (not (eq? uuid except))
 			(begin
 				(set! qry (string-append
@@ -172,6 +173,7 @@
 	(define smallest-luid 2012123123)
 	(define eval-list (list))
 	(define count_tot 0)
+	(define qry "")
 
 	(define (sum-count uuid)
 		(define row #f)
@@ -184,7 +186,8 @@
 		(display "Eval qry is ")(display qry) (newline)
 		(dbi-query conxion qry)
 
-		; Loop over table rows. There should be just one, I guess...
+		; Loop over table rows. There should be either just one,
+		; or zero, I guess... (and that seems to be the case).
 		(set! row (dbi-get_row conxion))
 		(while (not (equal? row #f))
 
@@ -286,3 +289,5 @@
 
 ; Whole-sale de-duplication
 (for-each undup-pair duplicate-pair-list)
+(display "number of dupes: ")
+(display (length duplicate-pair-list))(newline)
