@@ -21,57 +21,6 @@
 (define uuid-of-any 250)
 
 ; --------------------------------------------------------------
-(define (look-for-dupes query colm)
-"
-  look-for-dupes -- Look for duplicate atoms
-  query should be the SQL query to perform
-  colm should be the string column name; either 'name' or 'outgoing'
-
-  Returns a list of the duplicate entries found for 'colm'
-"
-	(define word-set (make-hash-table 100123))
-	(define dupe-list (list))
-	(define word-count 0)
-	(define row #f)
-
-	(dbi-query conxion query)
-
-	(display "Duplicate search connection status: ")
-	(display (dbi-get_status conxion)) (newline)
-
-	; Loop over table rows
-	(set! row (dbi-get_row conxion))
-	(while (not (equal? row #f))
-
-		; Extract the column value
-		(let* (
-			(word (cdr (assoc colm row)))
-			(uuid (cdr (assoc "uuid" row)))
-			(wuid (hash-ref word-set word)))
-
-			; Maintain a count, just for the hell of it.
-			(set! word-count (+ word-count 1))
-
-			; Have we seen this item previously?
-			(if wuid
-				(begin
-					(display "Oh no! Duplicate!! ") (display word) 
-					(display " prid=") (display wuid)
-					(display " uuid=") (display uuid)
-					(newline)
-					(set! dupe-list (cons word dupe-list))
-				)
-				(hash-set! word-set word uuid)
-			)
-			; (display word) (newline)
-			(set! row (dbi-get_row conxion))
-		)
-	)
-
-	(display "Count was ") (display word-count) (newline)
-	dupe-list
-)
-; --------------------------------------------------------------
 
 ; The duplicate-pair-list will consist of word-pairs
 ; (acutally, WordNode uuid-pairs) that appear in more
