@@ -118,7 +118,7 @@ public:
      * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object 
      * in the given time domain.
      */
-    void add(Handle, const Temporal&, const TimeDomain&);
+    void add(Handle h, const Temporal& t, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle and a time domain.
@@ -138,15 +138,15 @@ public:
     template<typename OutputIterator> OutputIterator
         get(OutputIterator outIt, Handle h,
             const Temporal& t = UNDEFINED_TEMPORAL,
-            const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
-            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
+            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT,
+            const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN) const {
 
-        auto temporalTableIter = temporalTableMap.find(timeDomain);
+        auto temporalTableIter = temporalTableMap.find(timeDomain);        
         if (temporalTableIter == temporalTableMap.end()) {
             logger().error("The time domain %s is not in the TimeServer!", timeDomain.c_str());
             return outIt;            
         }
-        
+
         std::unique_lock<std::mutex> lock(ts_mutex);
         HandleTemporalPairEntry* hte = (temporalTableIter->second).get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
@@ -170,7 +170,10 @@ public:
      * See the definition of TemporalRelationship enumeration to see the possible values for it.
      * @return True if any entry corresponding to the given arguments was removed. False, otherwise.
      */
-    bool remove(Handle, const Temporal& = UNDEFINED_TEMPORAL, const TimeDomain& = DEFAULT_TIMEDOMAIN, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
+    bool remove(Handle, 
+                const Temporal& = UNDEFINED_TEMPORAL, 
+                TemporalTable::TemporalRelationship = TemporalTable::EXACT,
+                const TimeDomain& = DEFAULT_TIMEDOMAIN);
 
     /**
      * Get the timestamp of the more recent upper bound of Temporal object 
@@ -270,8 +273,9 @@ public:
      *        mathing pair or any of them were not removed)
      */
     bool removeTimeInfo(Handle h,
-                        const octime_t& timestamp, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
+                        const octime_t& timestamp,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
+                        const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
 
@@ -322,8 +326,8 @@ public:
 
     bool removeTimeInfo(Handle h,
                         const Temporal& t = UNDEFINED_TEMPORAL,
-			const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
+			const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
 
@@ -360,10 +364,10 @@ public:
 		getTimeInfo(OutputIterator outIt,
 			    Handle h,
 			    const Temporal& t = UNDEFINED_TEMPORAL,
-			    const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
-			    TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
+			    TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT,
+                            const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN) const
     {
-        return get(outIt, h, t, timeDomain, criterion);
+        return get(outIt, h, t, criterion, timeDomain);
     }
 
     /**
@@ -387,16 +391,16 @@ public:
 		OutputIterator getMapHandles( OutputIterator outIt, 
                                               octime_t startMoment, 
                                               octime_t endMoment,
-                                              const TimeDomain& timeDomain) const
+                                              const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN) const
     {
 	Temporal t(startMoment, endMoment);
 	std::vector<HandleTemporalPair> pairs;
         Handle spaceMapNode = spaceServer->getLatestMapHandle();
         if (spaceMapNode != Handle::UNDEFINED) {
 	    // Gets the first map before the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, timeDomain, TemporalTable::PREVIOUS_BEFORE_START_OF);
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF, timeDomain);
             // Gets all maps inside the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, timeDomain, TemporalTable::STARTS_WITHIN);
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::STARTS_WITHIN, timeDomain);
             for(unsigned int i = 0; i < pairs.size(); i++) {
 		HandleTemporalPair pair = pairs[i];
                 *(outIt++) = getAtTimeLink(pair, timeDomain);

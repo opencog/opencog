@@ -74,7 +74,7 @@ TimeServer::~TimeServer()
     removedAtomConnection.disconnect();
 }
 
-void TimeServer::add(Handle h, const Temporal& t, const TimeDomain& timeDomain=DEFAULT_TIMEDOMAIN)
+void TimeServer::add(Handle h, const Temporal& t, const TimeDomain& timeDomain)
 {
     // USED TO SEEK MEMORY LEAK
     //++timeServerEntries;
@@ -86,17 +86,15 @@ void TimeServer::add(Handle h, const Temporal& t, const TimeDomain& timeDomain=D
     //
     std::unique_lock<std::mutex> lock(ts_mutex);
 
-    if (temporalTableMap.find(timeDomain) == temporalTableMap.end()) { 
-        temporalTableMap[timeDomain] = TemporalTable();
-    }
-    (temporalTableMap[timeDomain]).add(h,t);
-	
+    temporalTableMap[timeDomain].add(h,t);
+
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
     }
+
 }
 
-bool TimeServer::remove(Handle h, const Temporal& t, const TimeDomain& timeDomain, TemporalTable::TemporalRelationship criterion)
+bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion, const TimeDomain& timeDomain)
 {
     auto temporalTableIter = temporalTableMap.find(timeDomain);
     if (temporalTableIter == temporalTableMap.end()) {
@@ -177,26 +175,26 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const 
 
 bool TimeServer::removeTimeInfo(Handle h, 
                                 const octime_t& timestamp, 
-                                const TimeDomain& timeDomain,
                                 TemporalTable::TemporalRelationship criterion,
+                                const TimeDomain& timeDomain,
                                 bool removeDisconnectedTimeNodes, 
                                 bool recursive)
 {
     Temporal t(timestamp);
-    return removeTimeInfo(h, t, timeDomain, criterion, removeDisconnectedTimeNodes, recursive);
+    return removeTimeInfo(h, t, criterion, timeDomain, removeDisconnectedTimeNodes, recursive);
 }
 
 bool TimeServer::removeTimeInfo(Handle h,
                                 const Temporal& t,
-                                const TimeDomain& timeDomain, 
                                 TemporalTable::TemporalRelationship criterion,
+                                const TimeDomain& timeDomain, 
                                 bool removeDisconnectedTimeNodes, 
                                 bool recursive)
 {
     DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atom_as_string(h).c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
 
     std::list<HandleTemporalPair> existingEntries;
-    get(back_inserter(existingEntries), h, t, timeDomain, criterion);
+    get(back_inserter(existingEntries), h, t, criterion, timeDomain);
     bool result = !existingEntries.empty();
     for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
 		 itr != existingEntries.end(); ++itr) 
@@ -367,6 +365,6 @@ void TimeServer::atomRemoved(AtomPtr atom)
         spaceServer->removeMap(atom->getHandle());
 #endif
     NodePtr nnn(NodeCast(timeNode));
-    remove(timedAtom->getHandle(), Temporal::getFromTimeNodeName(nnn->getName().c_str()), timeDomain);
+    remove(timedAtom->getHandle(), Temporal::getFromTimeNodeName(nnn->getName().c_str()), TemporalTable::EXACT, timeDomain);
 
 }

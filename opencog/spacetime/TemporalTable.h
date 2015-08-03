@@ -60,8 +60,8 @@ public:
      *  - ENDS_BEFORE         => u < l'
      *  - ENDS_WITHIN         => l' <= u <= u'
      *  - ENDS_AFTER          => u > u'
-	 *  - OVERLAPS            => STARTS_WITHIN || ENDS_WITHIN => l' <= u && l <= u' (since l <= u && l' <= u') 
-	 *  - INCLUDES            => l <= l' && u >= u'
+     *  - OVERLAPS            => STARTS_WITHIN || ENDS_WITHIN => l' <= u && l <= u' (since l <= u && l' <= u') 
+     *  - INCLUDES            => l <= l' && u >= u'
      *  - NEXT_AFTER_START_OF => next time T whose l > l'
      *  - NEXT_AFTER_END_OF   => next time T whose l > u'
      *  - PREVIOUS_BEFORE_START_OF => previous time T whose l < l'
