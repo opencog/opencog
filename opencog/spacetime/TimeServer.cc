@@ -71,10 +71,6 @@ TimeServer::~TimeServer()
     // disconnect signals
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
-	for(auto it=temporalTableMap.begin();it!=temporalTableMap.end();it++)
-	{
-		delete it->second;
-	}
 }
 
 void TimeServer::add(Handle h, const TimeDomain timedomain, const Temporal& t)
@@ -86,13 +82,12 @@ void TimeServer::add(Handle h, const TimeDomain timedomain, const Temporal& t)
     //if(temporalSet.find(t) == temporalSet.end()){
     //   temporalSet.insert(t);
     //   cout << "Total unique entrys: " << temporalSet.size() << endl;
-    //}
+    //
     std::unique_lock<std::mutex> lock(ts_mutex);
+
     if(temporalTableMap.find(timedomain)==temporalTableMap.end())
-	{
-		temporalTableMap[timedomain]=new TemporalTable();
-	}
-	(temporalTableMap[timedomain])->add(h,t);
+    { temporalTableMap[timedomain]=TemporalTable();}
+    (temporalTableMap[timedomain]).add(h,t);
 	
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
@@ -101,21 +96,21 @@ void TimeServer::add(Handle h, const TimeDomain timedomain, const Temporal& t)
 
 bool TimeServer::remove(Handle h,const TimeDomain timedomain, const Temporal& t, TemporalTable::TemporalRelationship criterion)
 {
-	   
-	if(temporalTableMap.find(timedomain)==temporalTableMap.end())
+    auto temporalTableIter=temporalTableMap.find(timedomain);
+	if(temporalTableIter==temporalTableMap.end())
 	{
 		logger().error("TimeServer::remove: timedomain %s not found\n", timedomain.c_str());
 		return false;
 	}
 	
 	std::unique_lock<std::mutex>  lock(ts_mutex);
-	return (temporalTableMap[timedomain])->remove(h, t, criterion);
+	return (temporalTableIter->second).remove(h, t, criterion);
 }
 
 octime_t TimeServer::getLatestTimestamp() const
 {
-	std::unique_lock<std::mutex> lock(ts_mutex);
-	return latestTimestamp;
+    std::unique_lock<std::mutex> lock(ts_mutex);
+    return latestTimestamp;
 }
 
 TimeServer& TimeServer::operator=(const TimeServer& other)
@@ -133,10 +128,6 @@ TimeServer::TimeServer(const TimeServer& other)
 void TimeServer::clear()
 {
 	std::unique_lock<std::mutex> lock(ts_mutex);
-	for(auto it=temporalTableMap.begin();it!=temporalTableMap.end();it++)
-	{
-		delete it->second;
-	}
 	temporalTableMap.clear();
 	init();
 }

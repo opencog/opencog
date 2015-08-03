@@ -124,17 +124,19 @@ public:
      *         timeServer->get(back_inserter(ret), Handle::UNDEFINED, "utc+8");
      */
     template<typename OutputIterator> OutputIterator
-		get(OutputIterator outIt, Handle h, const TimeDomain timedomain,
-		    const Temporal& t = UNDEFINED_TEMPORAL,
-		    TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
+        get(OutputIterator outIt, Handle h, const TimeDomain timedomain,
+            const Temporal& t = UNDEFINED_TEMPORAL,
+            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
-		if(temporalTableMap.find(timedomain)==temporalTableMap.end())
-		{
-			return outIt;
-		}
-		
+        auto temporalTableIter=temporalTableMap.find(timedomain);
+        if(temporalTableIter==temporalTableMap.end())
+        {
+            logger().error("The timedomain %s is not in the TimeServer!",timedomain.c_str());
+            return outIt;            
+        }
+        
         std::unique_lock<std::mutex> lock(ts_mutex);
-        HandleTemporalPairEntry* hte = temporalTableMap.find(timedomain)->second->get(h, t, criterion);
+        HandleTemporalPairEntry* hte = (temporalTableIter->second).get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
 
         while (hte) {
@@ -252,7 +254,7 @@ public:
      *        mathing pair or any of them were not removed)
      */
     bool removeTimeInfo(Handle atom,
-						const TimeDomain timedomain, const octime_t& timestamp,
+                        const TimeDomain timedomain, const octime_t& timestamp,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -405,7 +407,7 @@ private:
     /**
      * The temporal table used by this TimeServer
      */
-	map<const TimeDomain, TemporalTable*> temporalTableMap;
+	map<const TimeDomain, TemporalTable> temporalTableMap;
     //TemporalTable* table;
 
     /**
