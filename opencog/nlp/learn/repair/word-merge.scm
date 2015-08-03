@@ -55,7 +55,7 @@
 			; Have we seen this item previously?
 			(if wuid
 				(begin
-					(display "Oh no! Duplicate!! ") (display word) 
+					(display "Oh no! Duplicate!! ") (display word)
 					(display " prid=") (display wuid)
 					(display " uuid=") (display uuid)
 					(newline)
@@ -160,7 +160,7 @@
 		(define qry (string-append
 			"SELECT * FROM atoms WHERE type=8 AND outgoing="
 			(make-outgoing-str pair)))
-		; (display qry)(newline)
+		(display qry)(newline)
 		(dbi-query conxion qry)
 
 		(set! row (dbi-get_row conxion))
@@ -168,7 +168,7 @@
 			(set! luid (cdr (assoc "uuid" row)))
 			(set! row (dbi-get_row conxion))
 		)
-		; (display luid)(newline)
+		(display "ListLink: ")(display luid)(newline)
 		luid
 	)
 
@@ -204,22 +204,54 @@
 	(define (sum-counts luid laid)
 		(if (and (< 0 luid) (< 0 laid))
 			(let* (
-				(lcnt (get-count luid))
-				(acnt (get-count laid))
-				(scnt (+ lcnt acnt)))
-				(display "summo cnt ") (display lcnt)
-				(display " ") (display acnt)
-				(display " ") (display scnt) (newline)
+					(eud (get-eval-uuid luid))
+					(aud (get-eval-uuid laid))
+
+					(lcnt (get-count luid))
+					(acnt (get-count laid))
+					(scnt (+ lcnt acnt))
+					(upd (string-append
+						"UPDATE atoms SET stv_count="
+						(number->string scnt)
+						" WHERE uuid="
+						(number->string eud)))
+					(apd (string-append
+						"DELETE FROM atoms WHERE uuid="
+						(number->string aud)))
+					(alt (string-append
+						"DELETE FROM atoms WHERE uuid="
+						(number->string auid)))
+				)
+				;(display "summo cnt ") (display lcnt)
+				;(display " + ") (display acnt)
+				;(display " = ") (display scnt)
+				;(display " for ") (display luid)
+				;(display "(") (display eud)
+				;(display ") and ") (display auid)
+				;(display "(") (display aud) (display ")")
+				;(newline)
+				;(display upd) (newline)
+				;(display apd) (newline)
+				;(display alt) (newline)
 				scnt
+			)
+			(begin
+				(display "Missing list-alt id for ") (display luid)
+				(newline)
+				#f
 			)
 		)
 	)
+
+	(define cnt-list (filter-map sum-counts luid-list laid-list))
 
 	; (display alt-list) (newline)
 	(display "pairs: ") (display (length pair-list))(newline)
 	(display "alt pairs: ") (display (length alt-list))(newline)
 	(display "luids: ") (display (length luid-list))(newline)
-	(display "laids: ") (display (length laid-list))(newline)
+	(display "laids: ") (display (length
+		(filter (lambda (x) (< 0 x)) laid-list)))(newline)
+	(display "cnts: ") (display (length cnt-list))(newline)
 
 )
 
