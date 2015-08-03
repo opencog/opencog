@@ -214,16 +214,16 @@
 								"UPDATE atoms SET stv_count="
 								(number->string scnt)
 								" WHERE uuid="
-								(number->string eud))
-								";")
+								(number->string eud)
+								";"))
 							(apd (string-append
 								"DELETE FROM atoms WHERE uuid="
-								(number->string aud))
-								";")
+								(number->string aud)
+								";"))
 							(alt (string-append
 								"DELETE FROM atoms WHERE uuid="
-								(number->string laid))
-								";")
+								(number->string laid)
+								";"))
 						)
 						(display "summo cnt ") (display lcnt)
 						(display " + ") (display acnt)
