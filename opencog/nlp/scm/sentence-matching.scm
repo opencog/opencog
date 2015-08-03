@@ -1,13 +1,7 @@
-; The get-similar-sentences interface
-(define get-similar-sentences
-	(case-lambda
-		((s) (main-search s '()))
-		((s rl) (main-search s rl))
-	)
-)
-
-; The main get-similar-sentences function.
-; Returns one or more sentences that are structurally similar to the input one.
+; Calls the fuzzy pattern matcher to find similar sentences from the Atomspace.
+;
+; Accepts either an actual sentence or a SentenceNode as the input.
+; Returns one or more similar sentences.
 ;
 ; For example:
 ;    (get-similar-sentences "What did Pete eat?")
@@ -17,21 +11,38 @@
 ; Possible result: 
 ;    (Pete ate apples .)
 ;
-(define (main-search input-sentence rej-list)
+(define (get-similar-sentences input-sentence)
+    (main-ss (sentence-node input-sentence) '())
+)
+
+; Similar to get-similar-sentence but it's mainly for question answering purpose.
+;
+; Find answers (i.e., similar sentences that share some keyword) from the
+; Atomspace by using the fuzzy pattern matcher. By default, it excludes
+; sentences with TruthQuerySpeechAct and InterrogativeSpeechAct.
+;
+; Accepts either an actual sentence or a SentenceNode as the input. Also accepts
+; an optional argument "exclude" which is a list of atoms that we don't want
+; them to exist in the hypergraphs of the answers. By default they are
+; (ConceptNode "TruthQuerySpeechAct") and (ConceptNode "InterrogativeSpeechAct").
+;
+; Returns one or more sentences -- the answers.
+;
+(define get-answers
+    (case-lambda
+        ((question) (main-ss (sentence-node question) (list (ConceptNode "TruthQuerySpeechAct")
+                                                            (ConceptNode "InterrogativeSpeechAct"))))
+        ((question excludes) (main-ss (sentence-node question) excludes))
+    )
+)
+
+; The main function for finding similar sentences
+; Returns one or more sentences that are similar to the input one and
+; contains no atoms
+;
+(define (main-ss sentence-node excludes)
     ; Generate sentences from each of the R2L-SetLinks
     (define (generate-sentences r2l-setlinks) (if (> (length r2l-setlinks) 0) (map sureal r2l-setlinks) '()))
-
-    ; Check if the input-sentence is an actual sentence or a SentenceNode,
-    ; parse and return the corresponding SentenceNode if it is a sentence
-    (define (sentence-node)
-        (if (cog-atom? input-sentence)
-            (if (equal? 'SentenceNode (cog-type input-sentence))
-                input-sentence
-                (display "Please input a SentenceNode only")
-            )
-            (car (nlp-parse input-sentence))
-        )
-    )
 
     (begin
         ; Delete identical sentences from the return set
@@ -43,16 +54,26 @@
                     ; Get the R2L SetLink of the input sentence
                     (car (cog-chase-link 'ReferenceLink 'SetLink
                         (car (cog-chase-link 'InterpretationLink 'InterpretationNode
-                            (car (cog-chase-link 'ParseLink 'ParseNode
-                                (sentence-node)
-                            ))
+                            (car (cog-chase-link 'ParseLink 'ParseNode sentence-node))
                         ))
                     ))
                     'SetLink
-                    rej-list
+                    excludes
                 ))
             )
         )
+    )
+)
+
+; Check if the input-sentence is an actual sentence or a SentenceNode,
+; parse and return the corresponding SentenceNode if it is a sentence
+(define (sentence-node input)
+    (if (cog-atom? input)
+        (if (equal? 'SentenceNode (cog-type input))
+            input
+            (display "Please input a SentenceNode only")
+        )
+        (car (nlp-parse input))
     )
 )
 
