@@ -31,11 +31,8 @@ class NewMovementCore:
     # is sent by the minecraft server, we do not add to queue
     def __init__(self):
 
-        print "initializing queue"
         self.targets = Queue.Queue()
         
-        if self.targets.empty():
-            print "queue is empty"
 
     # 'add a unit motion to queue'
     def addTargetMotion(self, data):
@@ -54,7 +51,7 @@ class NewMovementCore:
 
 
     def resetMotion(self):
-
+        
         self.targets.clear()
 
                
@@ -80,8 +77,8 @@ class NewMovementPlugin:
     
     def handleRosRequest(self, name, data):
         
-        print "receiving request for movement"
-        core.targets.addTargetMotion(data)
+        #print "receiving request for movement"
+       self.core.addTargetMotion(data)
 
 
     # on every client tick:
@@ -92,7 +89,7 @@ class NewMovementPlugin:
         data_dict = self.clinfo.position.get_dict()
         self.net.push_packet('PLAY>Player Position and Look', data_dict)
         self.event.emit('ros_position_update', data_dict)
-        print "client tick"
+        #print "client tick"
 
  
     # called whenever the Minecraft server sends a position update
@@ -101,7 +98,7 @@ class NewMovementPlugin:
     # it would be better if all changes to state happen in one place.
     def handlePositionUpdate(self, name, data):
         
-        print "position update"
+        #print "position update"
         self.net.push_packet('PLAY>Player Position and Look', data.get_dict())
    
     
@@ -109,7 +106,7 @@ class NewMovementPlugin:
     # 1) attempt next movement in queue
     def handleActionTick(self, name, data):
         
-        print "action tick"
+        #print "action tick"
         self.doMovement()
 
 
@@ -120,20 +117,21 @@ class NewMovementPlugin:
             pos = self.core.targets.get(False)
            
         except Queue.Empty:
-            print "no requested movements"
+            pass
+            #print "no requested movements"
         else:
-            print "Moving to x:%f, y:%f, z:%f, pitch:%f, yaw:%f\n"%(
-                    pos['x'],
-                    pos['y'],
-                    pos['z'],
-                    pos['pitch'],
-                    pos['yaw'])
+            #print "Moving to x:%f, y:%f, z:%f, pitch:%f, yaw:%f\n"%(
+            #        pos['x'],
+            #        pos['y'],
+            #        pos['z'],
+            #        pos['pitch'],
+            #        pos['yaw'])
 	    
-            p = self.client_info.position
+            p = self.clinfo.position
 	    p.x = pos['x']
 	    p.y = pos['y']
 	    p.z = pos['z']
 	    p.yaw = pos['yaw']
 	    p.pitch = pos['pitch']
 
-	    self.event.emit('cl_position_update', self.client_info.position)
+	    self.event.emit('cl_position_update', self.clinfo.position)

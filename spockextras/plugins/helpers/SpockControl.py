@@ -239,8 +239,8 @@ class SpockControlPlugin:
 
     def sendClientPositionUpdate(self, name, data):
         
-        print "received client position update"
-        print data
+        #print "received client position update"
+        #print data
         
         msg = position_msg()
         self.msgr.setMessage(msg, data)
