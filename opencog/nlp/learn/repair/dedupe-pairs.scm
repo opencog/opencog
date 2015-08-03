@@ -14,6 +14,10 @@
 (use-modules (dbi dbi))
 (use-modules (srfi srfi-1))
 
+; The uuid of the ANY LG type.  That is, the uuid of the
+; LinkGrammarRelationshipNode "ANY"
+(define uuid-of-any 250)
+
 
 (define conxion
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
@@ -115,35 +119,65 @@
 
 ; ------------------------------------------------
 
-(define (undup-eval uuid-list)
+(define (flush-query)
+	(define row #f)
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! row (dbi-get_row conxion))
+	)
+)
+
+; ------------------------------------------------
+(define (delete-atoms uuid-list except)
+"
+  delete-atoms -- delete every atom in the uuid-list, except for
+  the except uuid
+"
+
+	(define (del-atom uuid)
+		(if (not (eq? uuid except))
+			(begin
+				(set! qry (string-append
+					"DELETE FROM atoms WHERE uuid="
+					(number->string uuid)))
+
+				(display "Delete ")(display qry)(newline)
+				(dbi-query conxion qry)
+				(display (dbi-get_status conxion)) (newline)
+				(flush-query)
+			)
+		)
+	)
+	; Loop over the list of uuids
+	(for-each del-atom uuid-list)
+)
+
+(define (undup-eval luid-list)
 "
   undup-eval -- consolidate duplicate EvaluationLinks
 
-  The uuid-list should be a list of integer uuids for the ListLinks
+  The luid-list should be a list of integer uuids for the ListLinks
   that are the duplicates. The proceedure here is semi-manual;
   the total count is computed, but you have to update the count
   yourself, and also do the deletions.
 "
-	(define smallest-uuid 2012123123)
-	(define row #f)
+	(define smallest-evid 2012123123)
+	(define smallest-luid 2012123123)
+	(define eval-list (list))
 	(define count_tot 0)
-	(define qry "")
-	(define uuid 0)
-	; Loop over the ListLink's
-	(set! uuid (car uuid-list))
-	(set! uuid-list (cdr uuid-list))
 
-	(while (not (equal? uuid 0))
-
-
+	(define (sum-count uuid)
+		(define row #f)
+		(define qry "")
+		; type=47 is the type of EvaluationLink
 		(set! qry (string-append
 			"SELECT * FROM atoms WHERE type=47 and outgoing="
-			(make-outgoing-str (list 250 uuid)))
+			(make-outgoing-str (list uuid-of-any uuid)))
 		)
 		(display "Eval qry is ")(display qry) (newline)
 		(dbi-query conxion qry)
 
-		; Loop over table rows
+		; Loop over table rows. There should be just one, I guess...
 		(set! row (dbi-get_row conxion))
 		(while (not (equal? row #f))
 
@@ -154,35 +188,39 @@
 
 				(display "EvalLink uuid= ") (display eid)
 				(display " cnt= ") (display cnt) (newline)
+				(set! eval-list (cons eid eval-list))
 
 				; Record the smallest UUID
-				(if (< eid smallest-uuid) (set! smallest-uuid eid))
+				(if (< uuid smallest-luid)
+					(begin
+						(set! smallest-luid uuid)
+						(set! smallest-evid eid)))
 
 				; Sum the total count.
 				(set! count_tot (+ count_tot cnt))
 				(set! row (dbi-get_row conxion))
 			)
 		)
-
-		; Get the next uuid on the list
-		(if (not (equal? uuid-list (list)))
-			(begin
-				(set! uuid (car uuid-list))
-				(set! uuid-list (cdr uuid-list))
-			)
-			(set! uuid 0)
-		)
 	)
 
+	; Loop over the ListLink's
+	(for-each sum-count luid-list)
+
 	(display "total stv= ") (display count_tot) (newline)
-	(display "uuid= ") (display smallest-uuid) (newline)
+	(display "uuid= ") (display smallest-evid) (newline)
 
 	(set! qry (string-concatenate (list
 		"UPDATE atoms SET stv_count="
 		(number->string count_tot)
 		" WHERE uuid="
-		(number->string smallest-uuid))))
+		(number->string smallest-evid))))
 	(display qry) (newline)
+	(dbi-query conxion qry)
+	(display (dbi-get_status conxion)) (newline)
+	(flush-query)
+
+	(delete-atoms eval-list smallest-evid)
+	(delete-atoms luid-list smallest-luid)
 
 	; Do this manually...
 	; UPDATE atoms SET stv_count=5938 WHERE uuid=53650;
@@ -196,10 +234,12 @@
 
 (define (undup-pair pair)
 "
-  undup-pair Given a pair of duplicate ListLinks, consolidate the two.
+  undup-pair Given a pair of UUID's that define a ListLink (well, more
+  than one -- several duplicates), consolidate all of the duplicates.
 
-  Not only must we clobber the list links, but also the EvaluationLinks
-  that contain them.
+  This works by obtaining a list of all of the duplicate UUID's, and
+  then calling 'undup-eval' to consolidate them. The undup-eval
+  sums up the counts, and deletes teh duplicates.
 "
 
 	(define row #f)
