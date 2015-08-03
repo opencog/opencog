@@ -214,31 +214,34 @@
 								"UPDATE atoms SET stv_count="
 								(number->string scnt)
 								" WHERE uuid="
-								(number->string eud)))
+								(number->string eud))
+								";")
 							(apd (string-append
 								"DELETE FROM atoms WHERE uuid="
-								(number->string aud)))
+								(number->string aud))
+								";")
 							(alt (string-append
 								"DELETE FROM atoms WHERE uuid="
-								(number->string auid)))
+								(number->string laid))
+								";")
 						)
 						(display "summo cnt ") (display lcnt)
 						(display " + ") (display acnt)
 						(display " = ") (display scnt)
 						(display " for ") (display luid)
 						(display "(") (display eud)
-						(display ") and ") (display auid)
+						(display ") and ") (display laid)
 						(display "(") (display aud) (display ")")
 						(newline)
 						(display upd) (newline)
 						(display apd) (newline)
 						(display alt) (newline)
-						;(dbi-query conxion upd)
-						;(display (dbi-get_status conxion)) (newline)
-						;(dbi-query conxion apd)
-						;(display (dbi-get_status conxion)) (newline)
-						;(dbi-query conxion alt)
-						;(display (dbi-get_status conxion)) (newline)
+						(dbi-query conxion upd)
+						(display (dbi-get_status conxion)) (newline)
+						(dbi-query conxion apd)
+						(display (dbi-get_status conxion)) (newline)
+						(dbi-query conxion alt)
+						(display (dbi-get_status conxion)) (newline)
 						scnt
 					)
 					(begin
