@@ -34,13 +34,6 @@
 ;(display "the duplicate pair list is: ")
 ;(display duplicate-pair-list) (newline)
 
-;(define duplicate-eval-list
-;	(look-for-dupes
-;		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
-;
-;(display "the duplicate eval list is: ")
-;(display duplicate-eval-list) (newline)
-
 ; ------------------------------------------------
 (define (delete-atoms uuid-list except)
 "
