@@ -11,8 +11,7 @@
 ; This script eliminates duplicate word-pairs only.
 ; It is semi-manual.
 
-(use-modules (dbi dbi))
-(use-modules (srfi srfi-1))
+(load "common.scm")
 
 ; debugging ...
 (define do-update #t)
@@ -20,13 +19,6 @@
 ; The uuid of the ANY LG type.  That is, the uuid of the
 ; LinkGrammarRelationshipNode "ANY"
 (define uuid-of-any 250)
-
-
-(define conxion
-       ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
-       (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
-
-(display conxion) (newline)
 
 ; --------------------------------------------------------------
 (define (look-for-dupes query colm)

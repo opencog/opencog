@@ -10,20 +10,12 @@
 ;
 ; This script focuses on single-words and the pairs they appear in.
 
-(use-modules (dbi dbi))
-(use-modules (srfi srfi-1))
-
-
-(define conxion
-       ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
-       (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
-
-(display conxion) (newline)
+(load "common.scm")
 
 ; --------------------------------------------------------------
 (define (look-for-dupes query colm)
 "
-  look-dor-dupes -- Look for duplicate atoms
+  look-for-dupes -- Look for duplicate atoms
   query should be the SQL query to perform
   colm should be the string column name; either 'name' or 'outgoing'
 

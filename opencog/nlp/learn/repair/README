@@ -7,6 +7,22 @@ anything else.
 
 The scripts are semi-manual.
 
-First apply dedupe-pairs.scm
-Then word-merge.scm
-then dedupe-pairs.scm a second time ...
+First, edit dedupe-pairs.scm and set do-update to #f -- 
+  -- this to make sure everything is working OK.
+Next, edit dedupe-pairs.scm and set do-update to #t --
+  -- this is the actual run.
+
+Then review contents of and run word-merge.scm
+then delete the duplicate WordNodes by hand.
+
+Then run dedupe-pairs.scm a second time ...
+
+Finally, fix the indexes, manually:
+\di
+DROP INDEX linkidx;
+CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
+DROP INDEX nodeidx;
+CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
+
+
+Arghh ... there are two ANY atoms :-(
