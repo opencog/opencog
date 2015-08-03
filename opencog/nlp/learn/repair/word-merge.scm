@@ -203,37 +203,53 @@
 	; Sum the counts
 	(define (sum-counts luid laid)
 		(if (and (< 0 luid) (< 0 laid))
-			(let* (
-					(eud (get-eval-uuid luid))
+			(let* ((eud (get-eval-uuid luid))
 					(aud (get-eval-uuid laid))
-
-					(lcnt (get-count luid))
-					(acnt (get-count laid))
-					(scnt (+ lcnt acnt))
-					(upd (string-append
-						"UPDATE atoms SET stv_count="
-						(number->string scnt)
-						" WHERE uuid="
-						(number->string eud)))
-					(apd (string-append
-						"DELETE FROM atoms WHERE uuid="
-						(number->string aud)))
-					(alt (string-append
-						"DELETE FROM atoms WHERE uuid="
-						(number->string auid)))
 				)
-				;(display "summo cnt ") (display lcnt)
-				;(display " + ") (display acnt)
-				;(display " = ") (display scnt)
-				;(display " for ") (display luid)
-				;(display "(") (display eud)
-				;(display ") and ") (display auid)
-				;(display "(") (display aud) (display ")")
-				;(newline)
-				;(display upd) (newline)
-				;(display apd) (newline)
-				;(display alt) (newline)
-				scnt
+				(if (and (< 0 eud) (< 0 aud))
+					(let* ((lcnt (get-count luid))
+							(acnt (get-count laid))
+							(scnt (+ lcnt acnt))
+							(upd (string-append
+								"UPDATE atoms SET stv_count="
+								(number->string scnt)
+								" WHERE uuid="
+								(number->string eud)))
+							(apd (string-append
+								"DELETE FROM atoms WHERE uuid="
+								(number->string aud)))
+							(alt (string-append
+								"DELETE FROM atoms WHERE uuid="
+								(number->string auid)))
+						)
+						(display "summo cnt ") (display lcnt)
+						(display " + ") (display acnt)
+						(display " = ") (display scnt)
+						(display " for ") (display luid)
+						(display "(") (display eud)
+						(display ") and ") (display auid)
+						(display "(") (display aud) (display ")")
+						(newline)
+						(display upd) (newline)
+						(display apd) (newline)
+						(display alt) (newline)
+						;(dbi-query conxion upd)
+						;(display (dbi-get_status conxion)) (newline)
+						;(dbi-query conxion apd)
+						;(display (dbi-get_status conxion)) (newline)
+						;(dbi-query conxion alt)
+						;(display (dbi-get_status conxion)) (newline)
+						scnt
+					)
+					(begin
+						(display "Missing eval id ") (display eud)
+						(display "(for ")(display luid)
+						(display ") and ") (display aud)
+						(display "(for ")(display laid)
+						(display ")")(newline)
+						#f
+					)
+				)
 			)
 			(begin
 				(display "Missing list-alt id for ") (display luid)
