@@ -71,7 +71,7 @@ namespace opencog
  * skip the TimeDomainNode; since the whole system is single time domain
  */
 typedef std::string TimeDomain;
-
+const TimeDomain DEFAULT_TIMEDOMAIN="Default TimeDomain";
 class TimeServerSavable;
 
 /**
@@ -118,7 +118,7 @@ public:
      * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object 
      * in the given time domain.
      */
-    void add(Handle, const TimeDomain, const Temporal&);
+    void add(Handle, const Temporal&, const TimeDomain&);
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle and a time domain.
@@ -136,13 +136,14 @@ public:
      *         timeServer->get(back_inserter(ret), Handle::UNDEFINED, "game world");
      */
     template<typename OutputIterator> OutputIterator
-        get(OutputIterator outIt, Handle h, const TimeDomain timedomain,
+        get(OutputIterator outIt, Handle h,
             const Temporal& t = UNDEFINED_TEMPORAL,
+            const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
             TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
-        auto temporalTableIter = temporalTableMap.find(timedomain);
-        if(temporalTableIter == temporalTableMap.end()){
-            logger().error("The timedomain %s is not in the TimeServer!", timedomain.c_str());
+        auto temporalTableIter = temporalTableMap.find(timeDomain);
+        if (temporalTableIter == temporalTableMap.end()) {
+            logger().error("The time domain %s is not in the TimeServer!", timeDomain.c_str());
             return outIt;            
         }
         
@@ -169,7 +170,7 @@ public:
      * See the definition of TemporalRelationship enumeration to see the possible values for it.
      * @return True if any entry corresponding to the given arguments was removed. False, otherwise.
      */
-    bool remove(Handle,const TimeDomain, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
+    bool remove(Handle,const TimeDomain& = DEFAULT_TIMEDOMAIN, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
 
     /**
      * Get the timestamp of the more recent upper bound of Temporal object 
@@ -184,14 +185,15 @@ public:
      * and the entry (atom, * timestamp) into the TimeServer of the given AtomSpace.
      *
      * @param atom       the Handle of the atom to be associated to the timestamp
-     * @param timedomain the timedomian which the timestamp belongs to
+     * @param timeDomain the time domain which the timestamp belongs to
      * @param timestamp  The timestamp to be associated to the atom.
      * @param tv         Truth value for the AtTimeLink created (optional)
      *
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
-    Handle addTimeInfo(Handle atom,const TimeDomain timedomain,
+    Handle addTimeInfo(Handle atom,
 		       const octime_t& timestamp,
+                       const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
@@ -200,26 +202,28 @@ public:
      * of the given AtomSpace.
      *
      * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timedomain the timedomian which the timestamp belongs to
+     * @param timeDomain the timedomian which the timestamp belongs to
      * @param t The Temporal object to be associated to the atom.
      * @param tv Truth value for the AtTimeLink created (optional)
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
-    Handle addTimeInfo(Handle atom, const TimeDomain timedomain,
+    Handle addTimeInfo(Handle atom, 
 		       const Temporal& t,
+                       const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
      * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable 
      * and the corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
      * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timedomain the timedomian which the timestamp belongs to
+     * @param timeDomain the timedomian which the timestamp belongs to
      * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
      * @param tv Truth value for the AtTimeLink created (optional)
      * @return the Handle of the AtTimeLink added into the AtomSpace.
      */
-    Handle addTimeInfo(Handle h,const TimeDomain timedomain, 
+    Handle addTimeInfo(Handle h,
 		       const std::string& timeNodeName,
+                       const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN, 
 		       TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
@@ -236,10 +240,10 @@ public:
      * after the removal of an AtTimeLink link (unless the
      * removeDisconnectedTimeNodes argument is explicitly set to false).
      *
-     * @param atom the Handle of the atom to be associated to
+     * @param h the Handle of the atom to be associated to
      *        the timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If it is, a RuntimeException is thrown.
-     * @param timedomain the timedomian which the timestamp belongs to
+     * @param timeDomain the timedomian which the timestamp belongs to
      * @param timestamp The timestamp to be associated to the atom.
      *        This argument cannot be an UNDEFINED_TEMPORAL. If
      *        so, it throws a RuntimeException.
@@ -265,8 +269,8 @@ public:
      *        successfully removed. False, otherwise (i.e., no
      *        mathing pair or any of them were not removed)
      */
-    bool removeTimeInfo(Handle atom,
-                        const TimeDomain timedomain, const octime_t& timestamp,
+    bool removeTimeInfo(Handle h,
+                        const octime_t& timestamp, const TimeDomain timeDomain = DEFAULT_TIMEDOMAIN,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -285,10 +289,10 @@ public:
      *        removeDisconnectedTimeNodes argument is explicitly set to
      *        false).
      *
-     * @param atom the Handle of the atom to be associated to the
+     * @param h the Handle of the atom to be associated to the
      *        timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If so, it throws a RuntimeException.
-     * @param timedomain the timedomain which temporal t belongs to
+     * @param timeDomain the timedomain which temporal t belongs to
      * @param t The Temporal object to be associated to the atom. This
      *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
      *        a RuntimeException.
@@ -316,27 +320,28 @@ public:
      *         pair or any of them were not removed)
      */
 
-    bool removeTimeInfo(Handle atom,
-			const TimeDomain timedomain,
+    bool removeTimeInfo(Handle h,
                         const Temporal& t = UNDEFINED_TEMPORAL,
+			const TimeDomain timeDomain& = DEFAULT_TIMEDOMAIN,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
 
     /**
      * Gets the corresponding AtTimeLink for the given HandleTemporalPair value
-     * @param timedomain the time domain htp belongs to
      * @param the pair (Handle, Temporal) that defines an AtTimeLink instance.
+     * @param timeDomain the time domain htp belongs to
      * @return the Handle of the corresponding AtTimeLink, if it exists.
      */
-    Handle getAtTimeLink(const TimeDomain timedomain, const HandleTemporalPair& htp) const;
+    Handle getAtTimeLink(const HandleTemporalPair& htp, 
+                         const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN) const;
 
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle.
      *
      * @param outIt The outputIterator to
      * @param h The Atom Handle
-     * @param timedomain The time domain which the temporal object belongs to
+     * @param timeDomain The time domain which the temporal object belongs to
      * @param t The temporal object
      * @param c The Temporal pair removal criterion
      *
@@ -354,11 +359,11 @@ public:
     template<typename OutputIterator> OutputIterator
 		getTimeInfo(OutputIterator outIt,
 			    Handle h,
-			    const TimeDomain timedomain,
 			    const Temporal& t = UNDEFINED_TEMPORAL,
+			    const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
 			    TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
     {
-        return get(outIt, h, timedomain, t, criterion);
+        return get(outIt, h, t, timeDomain, criterion);
     }
 
     /**
@@ -366,7 +371,7 @@ public:
      * For getting the SpaceMap of each handle returned,
      * use the spaceServer.getMap(Handle spaceMapHandle) method.
      * @param out  the output iterator where the resulting handles will be added.
-     * @param timedomain the time domain which the time interval belongs to
+     * @param timeDomain the time domain which the time interval belongs to
      * @param startMoment the start of the time interval for searching the maps
      * @param endMoment the end of the time interval for searching the maps
      *
@@ -380,21 +385,21 @@ public:
      */
     template<typename OutputIterator>
 		OutputIterator getMapHandles( OutputIterator outIt, 
-									  const string timedomain,
-									  octime_t startMoment, 
-									  octime_t endMoment) const
+                                              octime_t startMoment, 
+                                              octime_t endMoment,
+                                              const TimeDomain& timeDomain) const
     {
 	Temporal t(startMoment, endMoment);
 	std::vector<HandleTemporalPair> pairs;
         Handle spaceMapNode = spaceServer->getLatestMapHandle();
         if (spaceMapNode != Handle::UNDEFINED) {
 	    // Gets the first map before the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, timedomain, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, timeDomain, TemporalTable::PREVIOUS_BEFORE_START_OF);
             // Gets all maps inside the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, timedomain, t, TemporalTable::STARTS_WITHIN);
+            getTimeInfo(back_inserter(pairs), spaceMapNode, t, timeDomain, TemporalTable::STARTS_WITHIN);
             for(unsigned int i = 0; i < pairs.size(); i++) {
 		HandleTemporalPair pair = pairs[i];
-                *(outIt++) = getAtTimeLink(timedomain, pair);
+                *(outIt++) = getAtTimeLink(pair, timeDomain);
             }
         }
         return outIt;
@@ -403,9 +408,9 @@ public:
     //For the old code which assume there's only one time domain in the system.
     TimeDomain getTimeDomain() const;
     vector<TimeDomain> getTimeDomains() const;
-    bool existTimeDomain(const TimeDomain timedomain) const
+    bool existTimeDomain(const TimeDomain timeDomain) const
     {
-        return temporalTableMap.find(timedomain) != temporalTableMap.end();
+        return temporalTableMap.find(timeDomain) != temporalTableMap.end();
     }
 
 private:
