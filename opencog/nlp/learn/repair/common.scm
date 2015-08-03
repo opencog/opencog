@@ -19,6 +19,38 @@
 
 (display conxion) (newline)
 
+; ------------------------------------------------
+
+(define (make-outgoing-str uuid-list)
+"
+  make-outgoing-str -- Make a string that corresponds to the UUID list
+
+  The string is used for forming SQL queries. It has the format, for
+  example, '{123, 456}'
+"
+	(define ostr "'{")
+	(set! ostr (string-concatenate
+		(cons ostr (map
+			; create list of comma-separated ints
+			(lambda (x) (string-append (number->string x) ", "))
+			 uuid-list))))
+	; Wipe out the trailing comma
+	(set! ostr (string-drop-right ostr 2))
+	(set! ostr (string-append ostr "}'"))
+
+	ostr
+)
+
+; ------------------------------------------------
+
+(define (flush-query)
+	(define row #f)
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! row (dbi-get_row conxion))
+	)
+)
+
 ; --------------------------------------------------------------
 (define (look-for-dupes query colm)
 "
