@@ -49,19 +49,29 @@ namespace opencog
  *  @{
  */
 
-//In the real world we may have different time zones.
-//For example, in the game embodiment we may want to
-//save the time in the game and in the real system.
-//For this we add a time domain to mark what time zone the timestamp belong.
-//and we use a map<TimeDomain, TemporalTable*> to save all corresponding tables
-//Also, we change the AtTimeLink structure to:
-//AtTimeLink
-//__TimeNode "12:00:00"
-//__TimeDomainNode "UTC+9"
-//__ConceptNode "Lunch"
-//by adding a TimeDomainNode in the outgoings.
-
+/**
+ * Add a TimeDomain inside the TimeServer
+ * For example, in the game embodiment we may want to
+ * save the both time in the game world and in the real system.
+ * ex. in Minecraft we need the game world time to judge if the monster will appear
+ * but we also need real system time to do calculation since the tick rate of Minecraft is slow(once per sec)
+ * For this we add a time domain to mark what time domain the timestamp belong.
+ * and we use a map<TimeDomain, TemporalTable> to save all corresponding tables
+ * Also, we change the AtTimeLink structure to:
+ * AtTimeLink
+ * __TimeNode "12:00:00"
+ * __ConceptNode "Lunch"
+ * __TimeDomainNode "GameWorld"
+ * by adding a TimeDomainNode in the outgoings.
+ * If we don't have multiple TimeDomain, TimeServer will set a default time domain.
+ * And the AtTimeLink will be 
+ * AtTimeLink
+ * __TimeNode "12:00:00"
+ * __ConceptNode "Lunch"
+ * skip the TimeDomainNode; since the whole system is single time domain
+ */
 typedef std::string TimeDomain;
+
 class TimeServerSavable;
 
 /**
@@ -95,7 +105,7 @@ public:
     //static int timeServerEntries;
     //static std::set<Temporal> temporalSet;
 
-    // TODO: Why does the it need SPaceServer? Add constructor that takes
+    // TODO: Why does the it need SpaceServer? Add constructor that takes
     // AtomSpace reference.
     TimeServer(AtomSpace& a, SpaceServer* ss);
 
@@ -105,7 +115,8 @@ public:
     virtual ~TimeServer();
 
     /**
-     * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object in the given time domain.
+     * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object 
+     * in the given time domain.
      */
     void add(Handle, const TimeDomain, const Temporal&);
 
@@ -118,20 +129,20 @@ public:
      * be applied with this given Temporal argument.
      * See the definition of TemporalRelationship enumeration to see the possible values for it.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries associated to one time domain in TimeServer:
+     * NOTE: The matched entries are appended to a container 
+     * whose OutputIterator is passed as the first argument.
+     * Example of call to this method, which return all entries associated to time domain in TimeServer:
      *         std::list<HandleTemporalPair> ret;
-     *         timeServer->get(back_inserter(ret), Handle::UNDEFINED, "utc+8");
+     *         timeServer->get(back_inserter(ret), Handle::UNDEFINED, "game world");
      */
     template<typename OutputIterator> OutputIterator
         get(OutputIterator outIt, Handle h, const TimeDomain timedomain,
             const Temporal& t = UNDEFINED_TEMPORAL,
             TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
-        auto temporalTableIter=temporalTableMap.find(timedomain);
-        if(temporalTableIter==temporalTableMap.end())
-        {
-            logger().error("The timedomain %s is not in the TimeServer!",timedomain.c_str());
+        auto temporalTableIter = temporalTableMap.find(timedomain);
+        if(temporalTableIter == temporalTableMap.end()){
+            logger().error("The timedomain %s is not in the TimeServer!", timedomain.c_str());
             return outIt;            
         }
         
@@ -161,7 +172,8 @@ public:
     bool remove(Handle,const TimeDomain, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
 
     /**
-     * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.
+     * Get the timestamp of the more recent upper bound of Temporal object 
+     * already inserted into this TimeServer.
      */
     octime_t getLatestTimestamp() const;
 
@@ -188,7 +200,7 @@ public:
      * of the given AtomSpace.
      *
      * @param atom the Handle of the atom to be associated to the timestamp
-	 * @param timedomain the timedomian which the timestamp belongs to
+     * @param timedomain the timedomian which the timestamp belongs to
      * @param t The Temporal object to be associated to the atom.
      * @param tv Truth value for the AtTimeLink created (optional)
      * @return the Handle of the AtTimeLink added into AtomSpace.
@@ -198,8 +210,8 @@ public:
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
-     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable and the
-     * corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
+     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable 
+     * and the corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
      * @param atom the Handle of the atom to be associated to the timestamp
      * @param timedomain the timedomian which the timestamp belongs to
      * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
@@ -322,13 +334,13 @@ public:
     /**
      * Gets a list of HandleTemporalPair objects given an Atom Handle.
      *
-     * \param outIt The outputIterator to
-     * \param h The Atom Handle
-     * \param timedomain The time domain which the temporal object belongs to
-     * \param t The temporal object
-     * \param c The Temporal pair removal criterion
+     * @param outIt The outputIterator to
+     * @param h The Atom Handle
+     * @param timedomain The time domain which the temporal object belongs to
+     * @param t The temporal object
+     * @param c The Temporal pair removal criterion
      *
-     * \return An OutputIterator list
+     * @return An OutputIterator list
      *
      * @note The matched entries are appended to a container whose
      *       OutputIterator is passed as the first argument. Example
@@ -346,7 +358,7 @@ public:
 			    const Temporal& t = UNDEFINED_TEMPORAL,
 			    TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const
     {
-		return get(outIt, h, timedomain, t, criterion);
+        return get(outIt, h, timedomain, t, criterion);
     }
 
     /**
@@ -392,14 +404,17 @@ public:
     TimeDomain getTimeDomain() const;
     vector<TimeDomain> getTimeDomains() const;
     bool existTimeDomain(const TimeDomain timedomain) const
-    {return temporalTableMap.find(timedomain)!=temporalTableMap.end();}
+    {
+        return temporalTableMap.find(timedomain) != temporalTableMap.end();
+    }
 
 private:
+
     /**
      * signal connections used to keep track of atom removal in the SpaceMap
      */
-	boost::signals2::connection removedAtomConnection;
-	boost::signals2::connection addedAtomConnection;
+    boost::signals2::connection removedAtomConnection;
+    boost::signals2::connection addedAtomConnection;
 
     void atomAdded(Handle);
     void atomRemoved(AtomPtr);
@@ -407,11 +422,10 @@ private:
     /**
      * The temporal table used by this TimeServer
      */
-	map<const TimeDomain, TemporalTable> temporalTableMap;
-    //TemporalTable* table;
+    map<const TimeDomain, TemporalTable> temporalTableMap;
 
     /**
-     * The timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer
+     * The timestamp of the most recent upper bound of Temporal object already inserted into TimeServer.
      */
     octime_t latestTimestamp;
 
