@@ -71,7 +71,7 @@ namespace opencog
  * skip the TimeDomainNode; since the whole system is single time domain
  */
 typedef std::string TimeDomain;
-const TimeDomain DEFAULT_TIMEDOMAIN="Default TimeDomain";
+extern TimeDomain DEFAULT_TIMEDOMAIN;
 class TimeServerSavable;
 
 /**
@@ -170,7 +170,7 @@ public:
      * See the definition of TemporalRelationship enumeration to see the possible values for it.
      * @return True if any entry corresponding to the given arguments was removed. False, otherwise.
      */
-    bool remove(Handle,const TimeDomain& = DEFAULT_TIMEDOMAIN, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
+    bool remove(Handle, const Temporal& = UNDEFINED_TEMPORAL, const TimeDomain& = DEFAULT_TIMEDOMAIN, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
 
     /**
      * Get the timestamp of the more recent upper bound of Temporal object 
@@ -270,7 +270,7 @@ public:
      *        mathing pair or any of them were not removed)
      */
     bool removeTimeInfo(Handle h,
-                        const octime_t& timestamp, const TimeDomain timeDomain = DEFAULT_TIMEDOMAIN,
+                        const octime_t& timestamp, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -322,7 +322,7 @@ public:
 
     bool removeTimeInfo(Handle h,
                         const Temporal& t = UNDEFINED_TEMPORAL,
-			const TimeDomain timeDomain& = DEFAULT_TIMEDOMAIN,
+			const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
@@ -427,7 +427,7 @@ private:
     /**
      * The temporal table used by this TimeServer
      */
-    map<const TimeDomain, TemporalTable> temporalTableMap;
+    map<TimeDomain, TemporalTable> temporalTableMap;
 
     /**
      * The timestamp of the most recent upper bound of Temporal object already inserted into TimeServer.

@@ -37,6 +37,7 @@ using namespace opencog;
 // USED TO SEEK MEMORY LEAK
 //int TimeServer::timeServerEntries = 0;
 //std::set<Temporal> TimeServer::temporalSet;
+TimeDomain opencog::DEFAULT_TIMEDOMAIN ="Default TimeDomain";
 
 void TimeServer::init()
 {
@@ -95,7 +96,7 @@ void TimeServer::add(Handle h, const Temporal& t, const TimeDomain& timeDomain=D
     }
 }
 
-bool TimeServer::remove(Handle h,const TimeDomain& timeDomain, const Temporal& t, TemporalTable::TemporalRelationship criterion)
+bool TimeServer::remove(Handle h, const Temporal& t, const TimeDomain& timeDomain, TemporalTable::TemporalRelationship criterion)
 {
     auto temporalTableIter = temporalTableMap.find(timeDomain);
     if (temporalTableIter == temporalTableMap.end()) {
@@ -223,7 +224,6 @@ bool TimeServer::removeTimeInfo(Handle h,
                           arityOfTimeLink);
             }
 
-            }
             if (atomspace->remove_atom(atTimeLink, recursive)) {
 		DPRINTF("atTimeLink removed from AT successfully\n");
                 if (removeDisconnectedTimeNodes &&
@@ -325,7 +325,7 @@ void TimeServer::atomAdded(Handle h)
             }
         } else {
             logger().warn("TimeServer::atomAdded: Invalid arity for an "
-                          "AtTimeLink: %d (expected: 2 (for default time domain) or 3 (for multiple time domains))\n", arityOfTimeLink;
+                          "AtTimeLink: %d (expected: 2 (for default time domain) or 3 (for multiple time domains))\n", arityOfTimeLink);
         }
     }
 }

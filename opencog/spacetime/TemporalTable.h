@@ -111,7 +111,7 @@ public:
      *
      * NOTE2: The caller must take care of deletion of the HandleTemporalPairEntry object.
      */
-    HandleTemporalPairEntry* get(Handle, const Temporal& = UNDEFINED_TEMPORAL, TemporalRelationship = EXACT);
+    HandleTemporalPairEntry* get(Handle, const Temporal& = UNDEFINED_TEMPORAL, TemporalRelationship = EXACT) const;
 
     /**
      * Removes HandleTemporalPair objects related to a given Atom Handle.
@@ -157,13 +157,13 @@ private:
 
     void addToMaps(Handle h, Temporal* t);
     void updateIndexTable(int numEntries);
-    int getTemporalIndexTablePos(const Temporal&);
+    int getTemporalIndexTablePos(const Temporal&) const;
     int replaceIndexTablePosition(int pos, TemporalEntry* newEntry);
-    TemporalEntry* getPreviousTemporalEntry(const Temporal&);
+    TemporalEntry* getPreviousTemporalEntry(const Temporal&) const;
     void removeFromSortedEntries(const Temporal& t);
-    HandleTemporalPairEntry* get(const Temporal& t, TemporalRelationship criterion = EXACT);
+    HandleTemporalPairEntry* get(const Temporal& t, TemporalRelationship criterion = EXACT) const;
     bool remove(const Temporal& t, TemporalRelationship criterion = EXACT);
-    bool matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished);
+    bool matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished) const;
 
 };
 
