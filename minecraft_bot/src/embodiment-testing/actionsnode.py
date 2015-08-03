@@ -64,19 +64,19 @@ class ClientMover():
         self.z = data.z
         self.pitch = data.pitch
         self.yaw = data.yaw
-        print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
+        #print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
 
 
     # 95% interval of actual desired value
     def inRange(self, first, second):
         
-        print "first %f, second %f\n"%(first, second)
+        #print "first %f, second %f\n"%(first, second)
 
         if (first >= second - abs(second)*0.05) and (first <= second + abs(second)*0.05):
-            print "in range"
+            #print "in range"
             return True
         else:
-            print "not in range"
+            #print "not in range"
             return False
 
 
@@ -103,14 +103,13 @@ class ClientMover():
             c_pitch = client_pos.pitch
             c_yaw = client_pos.yaw
             
-            print "current pose: pitch %f, yaw %f\n"%(c_pitch, c_yaw)
-            print "requested dir: pitch %f, yaw %f\n"%(pitch, yaw)
-            
+            print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw) 
+            print "requested dir: pitch %f, yaw %f"%(pitch, yaw)           
+            print "desired dir: pitch %f, yaw %f\n"%(pitch, yaw)
+
+           
             if self.inRange(c_yaw, yaw) and self.inRange(c_pitch, pitch):
                 return True
-           
-            print "desired: pitch %f, yaw %f\n"%(pitch, yaw)
-
             frames = phy.getLookFrames(self.posToDict(), pitch, yaw)
             
             for frame in frames:
@@ -147,13 +146,12 @@ class ClientMover():
             c_pitch = client_pos.pitch
             c_yaw = client_pos.yaw
             
-            print "current pose: pitch %f, yaw %f\n"%(c_pitch, c_yaw)
-            print "requested dir: pitch %f, yaw %f\n"%(pitch, yaw)
+            print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw)
+            print "requested dir: pitch %f, yaw %f"%(pitch, yaw)
+            print "desired dir: pitch %f, yaw %f\n"%(desired_pitch, desired_yaw)
+
             if self.inRange(c_yaw, desired_yaw) and self.inRange(c_pitch, desired_pitch):
                 return True
-
-           
-            print "desired: pitch %f, yaw %f\n"%(desired_pitch, desired_yaw)
 
             if desired_pitch < -90:
                 desired_pitch = -90
@@ -177,6 +175,7 @@ class ClientMover():
                 msg.pitch = frame['pitch']
                 msg.yaw = frame['yaw']
 
+                print msg
                 self.pub_move.publish(msg)
             
             timer += 0.5
