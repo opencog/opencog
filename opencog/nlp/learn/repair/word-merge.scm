@@ -145,13 +145,34 @@
 	pair-list
 )
 
+(define (find-list-link pair)
+"
+  Given a pair of UUID's, get the uuid of the ListLink that holds it.
+  Return that UUID, else return zero
+"
+	(define luid 0)
+	(define row #f)
+	(define qry (string-append
+		"SELECT * FROM atoms WHERE type=8 AND outgoing="
+		(make-outgoing-str pair)))
+	(display qry)(newline)
+	(dbi-query conxion qry)
+
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! luid (cdr (assoc "uuid" row)))
+		(set! row (dbi-get_row conxion))
+	)
+	(display "ListLink: ")(display luid)(newline)
+	luid
+)
+
 (define (check-for-pair-dupes wuid auid pair-list)
 "
   check-for-pair-dupes -- look for idential word-pairs
   Given wuid and a list of pairs containing wuid, replace
   the wuid by auid, and look for that pair.
 "
-
 	; Replace wuid by auid in the pair
 	(define (replace wuid auid pair)
 		(if (eq? wuid (car pair))
@@ -161,26 +182,6 @@
 	)
 	; Create list of pairs with the alternate pair in it
 	(define alt-list (map (lambda (x) (replace wuid auid x)) pair-list))
-
-	; Given a pair of UUID's, get the uuid of the ListLink that holds it.
-	; Return that UUID, else return zero
-	(define (find-list-link pair)
-		(define luid 0)
-		(define row #f)
-		(define qry (string-append
-			"SELECT * FROM atoms WHERE type=8 AND outgoing="
-			(make-outgoing-str pair)))
-		(display qry)(newline)
-		(dbi-query conxion qry)
-
-		(set! row (dbi-get_row conxion))
-		(while (not (equal? row #f))
-			(set! luid (cdr (assoc "uuid" row)))
-			(set! row (dbi-get_row conxion))
-		)
-		(display "ListLink: ")(display luid)(newline)
-		luid
-	)
 
 	; Create parallel lists of UUID's of the ListLinks of the pairs
 	(define luid-list (map find-list-link pair-list))
@@ -275,8 +276,9 @@
 		)
 	)
 
-	; Bug cleanup
-	(define (bug-cleanup luid laid)
+	; Discard alternates
+	; XXX technically, this is wrong, we should be renaming these...
+	(define (bug-cleanup laid)
 		(if (< 0 laid)
 ;			(let* ((aud (get-eval-uuid laid)))
 ;				(if (< 0 aud)
@@ -306,7 +308,7 @@
 	)
 
 	(define cnt-list (filter-map sum-counts luid-list laid-list))
-	; (define cnt-list (filter-map bug-cleanup luid-list laid-list))
+	; (define cnt-list (filter-map bug-cleanup laid-list))
 
 	; (display alt-list) (newline)
 	(display "pairs: ") (display (length pair-list))(newline)
@@ -318,10 +320,15 @@
 
 )
 
+;(define (swap-alts 
+
 ;(define pair-list (find-pairs 6844))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
 ;(check-for-pair-dupes 6844 27942 pair-list)
+;(swap-alts 27942)
+(define alt-list (find-pairs 27942))
+(display "Found alt pairs: ") (display (length alt-list))(newline)
 
-(define pair-list (find-pairs 42673))
-(display "Found word pairs: ") (display (length pair-list))(newline)
-(check-for-pair-dupes 42673 367746 pair-list)
+;(define pair-list (find-pairs 42673))
+;(display "Found word pairs: ") (display (length pair-list))(newline)
+;(check-for-pair-dupes 42673 367746 pair-list)

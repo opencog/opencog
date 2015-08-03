@@ -6,3 +6,7 @@ on the associated count truth values.  Its up to you to recompute
 anything else.
 
 The scripts are semi-manual.
+
+First apply dedupe-pairs.scm
+Then word-merge.scm
+then dedupe-pairs.scm a second time ...
