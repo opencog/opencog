@@ -99,8 +99,10 @@
 (define all-list-links (get-all-atoms
 	"SELECT uuid FROM atoms WHERE type=8" "uuid"))
 
-; (get-all-evals all-list-links 250)
-; (get-all-evals all-list-links 152)
+(display "Numb of 250-evals: ")
+(display (length (get-all-evals all-list-links 250)))(newline)
+(display "Numb of 152-evals: ")
+(display (length (get-all-evals all-list-links 152)))(newline)
 
 ; --------------------------------------------------------------
 (define (relabel-evals alist bad-id good-id)
@@ -118,7 +120,6 @@
 	; luid == uuid of the ListLink
 	; any-id == uuid to change it to.
 	(define (set-eval euid luid any-id)
-		(define euid 0)
 		(define row #f)
 		(define qry (string-concatenate (list
 			"UPDATE atoms SET outgoing="
@@ -155,8 +156,7 @@
 			(set! row (dbi-get_row conxion))
 		)
 		(if (< 0 euid)
-			(set-eval euid uuid good-id)
-		)
+			(set-eval euid uuid good-id))
 	)
 
 	(set! elist (map change-eval alist))
@@ -164,4 +164,4 @@
 	elist
 )
 
-(relabel-evals all-list-links 250 152)
+; (relabel-evals all-list-links 250 152)
