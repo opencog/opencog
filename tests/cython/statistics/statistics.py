@@ -82,38 +82,38 @@ class TestStatistics:
     def test_data_provider(self):
         log.info("Statistics> test_data_provider")
         # Add one data
-        is_first_insert = self.provider.addOneMetaData(self.aaa)
+        is_first_insert = self.provider.add_one_metadata(self.aaa)
         assert_true(is_first_insert)
 
         # Re-add one data
-        is_first_insert = self.provider.addOneMetaData(self.aaa)
+        is_first_insert = self.provider.add_one_metadata(self.aaa)
         assert_false(is_first_insert)
 
         # Add multiple data
         for case in self.test_case:
-            self.provider.addOneMetaData(case)
-        assert_equal(self.provider.mDataSet_size(), 6)
+            self.provider.add_one_metadata(case)
+        assert_equal(self.provider.dataset_size(), 6)
 
         # Add data's count (n_gram = 2)
         arr_2_gram_1 = [self.aaa, self.bbb]
         arr_2_gram_2 = [self.aaa, self.ccc]
-        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
-        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
+        self.provider.add_one_rawdata_count(arr_2_gram_1, 2)
+        self.provider.add_one_rawdata_count(arr_2_gram_2, 1)
 
         # Add data's count (n_gram = 3)
         arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
-        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+        self.provider.add_one_rawdata_count(arr_3_gram_1, 1)
 
         # Test key vector
-        key_vector_1 = self.provider.makeKeyFromData(self.test_case)
+        key_vector_1 = self.provider.make_key_from_data(self.test_case)
         assert_equal(len(key_vector_1), 6)
 
         combination_array = [True, False, True, False, True, False]
-        key_vector_2 = self.provider.makeKeyFromData(
+        key_vector_2 = self.provider.make_key_from_data(
             self.test_case, combination_array)
         assert_equal(len(key_vector_2), 3)
 
-        value_vector = self.provider.makeDataFromKey(self.a, key_vector_1)
+        value_vector = self.provider.make_data_from_key(self.a, key_vector_1)
         assert_equal(len(value_vector), 6)
 
     def test_probabilities(self):
@@ -121,26 +121,26 @@ class TestStatistics:
 
         # Add multiple data
         for case in self.test_case:
-            self.provider.addOneMetaData(case)
+            self.provider.add_one_metadata(case)
 
         # Add data's count
         arr_2_gram_1 = [self.aaa, self.bbb]
         arr_2_gram_2 = [self.aaa, self.ccc]
         arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
-        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
-        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
-        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+        self.provider.add_one_rawdata_count(arr_2_gram_1, 2)
+        self.provider.add_one_rawdata_count(arr_2_gram_2, 1)
+        self.provider.add_one_rawdata_count(arr_3_gram_1, 1)
 
         # Calculate probabilities
-        PyProbabilityAtom().calculateProbabilities(self.provider)
+        PyProbabilityAtom().calculate_probabilities(self.provider)
 
-        statistic_data = self.provider.find_in_map(arr_2_gram_1)
+        statistic_data = self.provider.datamap_find(arr_2_gram_1)
         assert_less_equal(statistic_data.probability, 0.667)
         assert_greater_equal(statistic_data.probability, 0.665)
-        statistic_data = self.provider.find_in_map(arr_2_gram_2)
+        statistic_data = self.provider.datamap_find(arr_2_gram_2)
         assert_less_equal(statistic_data.probability, 0.334)
         assert_greater_equal(statistic_data.probability, 0.332)
-        statistic_data = self.provider.find_in_map(arr_3_gram_1)
+        statistic_data = self.provider.datamap_find(arr_3_gram_1)
         assert_less_equal(statistic_data.probability, 1.1)
         assert_greater_equal(statistic_data.probability, 0.9)
 
@@ -149,24 +149,24 @@ class TestStatistics:
 
         # Add multiple data
         for case in self.test_case:
-            self.provider.addOneMetaData(case)
+            self.provider.add_one_metadata(case)
 
         # Add data's count
         arr_2_gram_1 = [self.aaa, self.bbb]
         arr_2_gram_2 = [self.aaa, self.ccc]
         arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
-        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
-        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
-        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+        self.provider.add_one_rawdata_count(arr_2_gram_1, 2)
+        self.provider.add_one_rawdata_count(arr_2_gram_2, 1)
+        self.provider.add_one_rawdata_count(arr_3_gram_1, 1)
 
         # Calculate probabilities
-        PyProbabilityAtom().calculateProbabilities(self.provider)
-        PyEntropyAtom().calculateEntropies(self.provider)
+        PyProbabilityAtom().calculate_probabilities(self.provider)
+        PyEntropyAtom().calculate_entropies(self.provider)
 
-        statistic_data = self.provider.find_in_map(arr_2_gram_1)
+        statistic_data = self.provider.datamap_find(arr_2_gram_1)
         assert_less_equal(statistic_data.entropy, 0.390)
         assert_greater_equal(statistic_data.entropy, 0.388)
-        statistic_data = self.provider.find_in_map(arr_2_gram_2)
+        statistic_data = self.provider.datamap_find(arr_2_gram_2)
         assert_less_equal(statistic_data.entropy, 0.529)
         assert_greater_equal(statistic_data.entropy, 0.527)
 
@@ -175,27 +175,27 @@ class TestStatistics:
 
         # Add multiple data
         for case in self.test_case:
-            self.provider.addOneMetaData(case)
+            self.provider.add_one_metadata(case)
 
         # Add data's count
         arr_2_gram_1 = [self.aaa, self.bbb]
         arr_2_gram_2 = [self.aaa, self.ccc]
         arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
-        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
-        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
-        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+        self.provider.add_one_rawdata_count(arr_2_gram_1, 2)
+        self.provider.add_one_rawdata_count(arr_2_gram_2, 1)
+        self.provider.add_one_rawdata_count(arr_3_gram_1, 1)
 
         # Calculate probabilities
-        PyProbabilityAtom().calculateProbabilities(self.provider)
-        PyEntropyAtom().calculateEntropies(self.provider)
-        PyInteractionInformationAtom().calculateInteractionInformations(self.provider)
+        PyProbabilityAtom().calculate_probabilities(self.provider)
+        PyEntropyAtom().calculate_entropies(self.provider)
+        PyInteractionInformationAtom().calculate_interaction_informations(self.provider)
 
-        statistic_data = self.provider.find_in_map(arr_2_gram_1)
-        assert_less_equal(statistic_data.interactionInformation, -0.388)
-        assert_greater_equal(statistic_data.interactionInformation, -0.390)
-        statistic_data = self.provider.find_in_map(arr_2_gram_2)
-        assert_less_equal(statistic_data.interactionInformation, -0.527)
-        assert_greater_equal(statistic_data.interactionInformation, -0.529)
-        statistic_data = self.provider.find_in_map(arr_3_gram_1)
-        assert_less_equal(statistic_data.interactionInformation, -0.917)
-        assert_greater_equal(statistic_data.interactionInformation, -0.919)
+        statistic_data = self.provider.datamap_find(arr_2_gram_1)
+        assert_less_equal(statistic_data.interaction_information, -0.388)
+        assert_greater_equal(statistic_data.interaction_information, -0.390)
+        statistic_data = self.provider.datamap_find(arr_2_gram_2)
+        assert_less_equal(statistic_data.interaction_information, -0.527)
+        assert_greater_equal(statistic_data.interaction_information, -0.529)
+        statistic_data = self.provider.datamap_find(arr_3_gram_1)
+        assert_less_equal(statistic_data.interaction_information, -0.917)
+        assert_greater_equal(statistic_data.interaction_information, -0.919)

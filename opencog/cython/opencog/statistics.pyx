@@ -1,10 +1,11 @@
 from cython cimport sizeof
+from cython.operator cimport dereference as deref, preincrement as inc
+
 from libc.stdlib cimport malloc, free
-from libcpp cimport bool
+from libcpp cimport bool as cppbool
 from libcpp.vector cimport vector
 from libcpp.set cimport set
 from libcpp.map cimport map
-from cython.operator cimport dereference as deref, preincrement as inc
 
 from opencog.atomspace import Handle
 
@@ -12,13 +13,13 @@ cdef class PyStatisticData:
     """ C++ StatisticData wrapper class.
     """
     cdef StatisticData *thisptr
-    def __cinit__(self, _count, _probability=None, _entropy=None,
-                  _interactionInformation=None):
-        if _probability is None:
-            self.thisptr = new StatisticData(_count)
+    def __cinit__(self, count, probability=None, entropy=None,
+                  interaction_information=None):
+        if probability is None:
+            self.thisptr = new StatisticData(count)
         else:
-            self.thisptr = new StatisticData(_count, _probability, _entropy,
-                                             _interactionInformation)
+            self.thisptr = new StatisticData(count, probability, entropy,
+                                             interaction_information)
     def __str__(self):
         return "count: {0:d} " \
                "probability: {1:f} " \
@@ -27,7 +28,7 @@ cdef class PyStatisticData:
             self.count,
             self.probability,
             self.entropy,
-            self.interactionInformation
+            self.interaction_information
         )
 
     property count:
@@ -42,10 +43,10 @@ cdef class PyStatisticData:
         def __get__(self): return self.thisptr.entropy
         def __set__(self, entropy): self.thisptr.entropy = entropy
 
-    property interactionInformation:
+    property interaction_information:
         def __get__(self): return self.thisptr.interactionInformation
-        def __set__(self, interactionInformation):
-            self.thisptr.interactionInformation = interactionInformation
+        def __set__(self, interaction_information):
+            self.thisptr.interactionInformation = interaction_information
 
 
 cdef class PyDataProvider:
@@ -63,32 +64,34 @@ cdef class PyDataProvider:
     """
     cdef DataProvider[long] *thisptr
 
-    def __cinit__(self, _n_gram, _isOrderDependent):
-        self.thisptr = new DataProvider[long](_n_gram, _isOrderDependent)
+    def __cinit__(self, n_gram, is_order_dependent):
+        self.thisptr = new DataProvider[long](n_gram, is_order_dependent)
 
     def __dealloc__(self):
         del self.thisptr
 
-    def addOneMetaData(self, meta_data):
-        return self.thisptr.addOneMetaData(meta_data)
+    def add_one_metadata(self, metadata):
+        return self.thisptr.addOneMetaData(metadata)
 
-    def addOneRawDataCount(self, oneRawData, countNum):
+    def add_one_rawdata_count(self, one_rawdata, count_num):
         cdef vector[long] v
-        for item in oneRawData:
+        for item in one_rawdata:
             v.push_back(item)
-        self.thisptr.addOneRawDataCount(v, countNum)
+        self.thisptr.addOneRawDataCount(v, count_num)
 
-    def makeKeyFromData(self, oneRawData, combination_array=None):
-        cdef bool *bool_array
+    def make_key_from_data(self, one_rawdata, combination_array=None):
+        cdef cppbool *bool_array
         cdef vector[long] v
 
-        for item in oneRawData:
+        for item in one_rawdata:
             v.push_back(item)
 
         if combination_array is None:
             result = self.thisptr.makeKeyFromData(v)
         else:
-            bool_array = <bool *>malloc(len(combination_array)*sizeof(bool))
+            bool_array = <cppbool *>malloc(
+                len(combination_array) * sizeof(cppbool)
+            )
 
             if bool_array is NULL:
                 raise MemoryError()
@@ -107,7 +110,7 @@ cdef class PyDataProvider:
             l.append(item)
         return l
 
-    def makeDataFromKey(self, indexes):
+    def make_data_from_key(self, indexes):
         cdef vector[long] v
         for item in indexes:
             v.push_back(item)
@@ -116,12 +119,12 @@ cdef class PyDataProvider:
     def print_data_map(self):
         return self.thisptr.print_data_map().c_str()
 
-    def mDataSet_size(self):
+    def dataset_size(self):
         return deref(self.thisptr.mDataSet).size()
 
-    def find_in_map(self,  oneRawData):
+    def datamap_find(self,  one_rawdata):
         cdef vector[long] v
-        for item in self.makeKeyFromData(oneRawData):
+        for item in self.make_key_from_data(one_rawdata):
             v.push_back(item)
 
         cdef map[vector[long], StatisticData].iterator it
@@ -140,10 +143,10 @@ cdef class PyDataProvider:
         def __get__(self): return self.thisptr.n_gram
         def __set__(self, n_gram): self.thisptr.n_gram = n_gram
 
-    property isOrderDependent:
+    property is_order_dependent:
         def __get__(self): return self.thisptr.isOrderDependent
-        def __set__(self, isOrderDependent):
-            self.thisptr.isOrderDependent = isOrderDependent
+        def __set__(self, is_order_dependent):
+            self.thisptr.isOrderDependent = is_order_dependent
 
 cdef class PyProbability:
     """ C++ Probability wrapper class.
@@ -155,7 +158,7 @@ cdef class PyProbability:
     TODO: Change class to support template.
     """
     @classmethod
-    def calculateProbabilities(cls, PyDataProvider provider):
+    def calculate_probabilities(cls, PyDataProvider provider):
         cdef DataProvider[long] *thisptr = provider.thisptr
         calculateProbabilities(deref(thisptr))
 
@@ -169,7 +172,7 @@ cdef class PyEntropy:
     TODO: Change class to support template.
     """
     @classmethod
-    def calculateEntropies(cls, PyDataProvider provider):
+    def calculate_entropies(cls, PyDataProvider provider):
         cdef DataProvider[long] *thisptr = provider.thisptr
         calculateEntropies(deref(thisptr))
 
@@ -187,15 +190,16 @@ cdef class PyInteractionInformation:
     same as https://gist.github.com/mattjj/15f28177d68238659386)
     """
     @classmethod
-    def calculateInteractionInformation(cls, onePieceOfData, PyDataProvider provider):
+    def calculate_interaction_information(cls, one_piece_of_data,
+                                          PyDataProvider provider):
         cdef vector[long] v
-        for item in onePieceOfData:
+        for item in one_piece_of_data:
             v.push_back(item)
         cdef DataProvider[long] *thisptr = provider.thisptr
         return calculateInteractionInformation(v, deref(thisptr))
 
     @classmethod
-    def calculateInteractionInformations(cls, PyDataProvider provider):
+    def calculate_interaction_informations(cls, PyDataProvider provider):
         cdef DataProvider[long] *thisptr = provider.thisptr
         calculateInteractionInformations(deref(thisptr))
 
@@ -205,35 +209,36 @@ class PyDataProviderAtom:
 
     This class wraps the Python DataProvider wrapper class.
     """
-    def __init__(self, _n_gram, _isOrderDependent):
-        self.provider = PyDataProvider(_n_gram, _isOrderDependent)
+    def __init__(self, n_gram, is_order_dependent):
+        self.provider = PyDataProvider(n_gram, is_order_dependent)
 
-    def addOneMetaData(self, atom):
-        return self.provider.addOneMetaData(atom.h.value())
+    def add_one_metadata(self, atom):
+        return self.provider.add_one_metadata(atom.h.value())
 
-    def addOneRawDataCount(self, oneRawData, countNum):
+    def add_one_rawdata_count(self, one_rawdata, count_num):
         long_vector = list()
-        for atom in oneRawData:
+        for atom in one_rawdata:
             long_vector.append(atom.h.value())
 
-        self.provider.addOneRawDataCount(long_vector, countNum)
+        self.provider.add_one_rawdata_count(long_vector, count_num)
 
-    def makeKeyFromData(self, oneRawData, combination_array=None):
+    def make_key_from_data(self, one_rawdata, combination_array=None):
         long_vector = list()
-        for atom in oneRawData:
+        for atom in one_rawdata:
             long_vector.append(atom.h.value())
 
         if combination_array is None:
-            return self.provider.makeKeyFromData(long_vector)
+            return self.provider.make_key_from_data(long_vector)
         else:
-            return self.provider.makeKeyFromData(long_vector, combination_array)
+            return self.provider.make_key_from_data(long_vector,
+                                                    combination_array)
 
-    def makeDataFromKey(self, atomspace, indexes):
+    def make_data_from_key(self, atomspace, indexes):
         long_vector = list()
         for index in indexes:
             long_vector.append(index)
 
-        ret_vector = self.provider.makeDataFromKey(long_vector)
+        ret_vector = self.provider.make_data_from_key(long_vector)
         result = list()
         for handle in ret_vector:
             result.append(atomspace[Handle(handle)])
@@ -243,49 +248,50 @@ class PyDataProviderAtom:
     def print_data_map(self):
         return self.provider.print_data_map()
 
-    def mDataSet_size(self):
-        return self.provider.mDataSet_size()
+    def dataset_size(self):
+        return self.provider.dataset_size()
 
-    def find_in_map(self, oneRawData):
+    def datamap_find(self, one_rawdata):
         long_vector = list()
-        for atom in oneRawData:
+        for atom in one_rawdata:
             long_vector.append(atom.h.value())
-        return self.provider.find_in_map(long_vector)
+        return self.provider.datamap_find(long_vector)
 
     @property
     def n_gram(self):
         return self.provider.n_gram
 
     @property
-    def isOrderDependent(self):
-        return self.provider.isOrderDependent
+    def is_order_dependent(self):
+        return self.provider.is_order_dependent
 
 class PyProbabilityAtom:
     """ Python Probability class for Atom.
 
     This class wraps the Python Probability wrapper class.
     """
-    def calculateProbabilities(self, provider_atom):
-        PyProbability.calculateProbabilities(provider_atom.provider)
+    def calculate_probabilities(self, provider_atom):
+        PyProbability.calculate_probabilities(provider_atom.provider)
 
 class PyEntropyAtom:
     """ Python Entropy class for Atom.
 
     This class wraps the Python Entropy wrapper class.
     """
-    def calculateEntropies(self, provider_atom):
-        PyEntropy.calculateEntropies(provider_atom.provider)
+    def calculate_entropies(self, provider_atom):
+        PyEntropy.calculate_entropies(provider_atom.provider)
 
 class PyInteractionInformationAtom:
     """ Python InteractionInformation class for Atom.
 
     This class wraps the Python InteractionInformation wrapper class.
     """
-    def calculateInteractionInformation(self, onePieceOfData, provider_atom):
-        PyInteractionInformation.calculateInteractionInformation(
-            onePieceOfData, provider_atom.provider
+    def calculate_interaction_information(self, one_piece_of_data,
+                                          provider_atom):
+        PyInteractionInformation.calculate_interaction_information(
+            one_piece_of_data, provider_atom.provider
         )
-    def calculateInteractionInformations(self, provider_atom):
-        PyInteractionInformation.calculateInteractionInformations(
+    def calculate_interaction_informations(self, provider_atom):
+        PyInteractionInformation.calculate_interaction_informations(
             provider_atom.provider
         )
