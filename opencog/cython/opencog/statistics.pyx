@@ -173,6 +173,32 @@ cdef class PyEntropy:
         cdef DataProvider[long] *thisptr = provider.thisptr
         calculateEntropies(deref(thisptr))
 
+cdef class PyInteractionInformation:
+    """ C++ InteractionInformation wrapper class.
+
+    This class wraps the C++ InteractionInformation class, but this wrapper
+    class supports only python long type, since cython binding doesn't support
+    the *declaration* of template class now.
+
+    TODO: Change class to support template.
+    TODO: Remove the redundant converting code. Cython can convert 'python list'
+    <-> 'C++ vector' automatically but can't use now since it has bug.
+    (Redefinition error,
+    same as https://gist.github.com/mattjj/15f28177d68238659386)
+    """
+    @classmethod
+    def calculateInteractionInformation(cls, onePieceOfData, PyDataProvider provider):
+        cdef vector[long] v
+        for item in onePieceOfData:
+            v.push_back(item)
+        cdef DataProvider[long] *thisptr = provider.thisptr
+        return calculateInteractionInformation(v, deref(thisptr))
+
+    @classmethod
+    def calculateInteractionInformations(cls, PyDataProvider provider):
+        cdef DataProvider[long] *thisptr = provider.thisptr
+        calculateInteractionInformations(deref(thisptr))
+
 
 class PyDataProviderAtom:
     """ Python DataProvider class for Atom.
@@ -249,3 +275,17 @@ class PyEntropyAtom:
     """
     def calculateEntropies(self, provider_atom):
         PyEntropy.calculateEntropies(provider_atom.provider)
+
+class PyInteractionInformationAtom:
+    """ Python InteractionInformation class for Atom.
+
+    This class wraps the Python InteractionInformation wrapper class.
+    """
+    def calculateInteractionInformation(self, onePieceOfData, provider_atom):
+        PyInteractionInformation.calculateInteractionInformation(
+            onePieceOfData, provider_atom.provider
+        )
+    def calculateInteractionInformations(self, provider_atom):
+        PyInteractionInformation.calculateInteractionInformations(
+            provider_atom.provider
+        )

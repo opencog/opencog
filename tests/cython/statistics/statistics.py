@@ -30,7 +30,8 @@ except ImportError:
     )
 else:
     from opencog.statistics import \
-        PyDataProviderAtom, PyProbabilityAtom, PyEntropyAtom
+        PyDataProviderAtom, PyProbabilityAtom, \
+        PyEntropyAtom, PyInteractionInformationAtom
 
 
 # Same with tests/learning/statistics/StatisticsUTest.cxxtest
@@ -168,3 +169,33 @@ class TestStatistics:
         statistic_data = self.provider.find_in_map(arr_2_gram_2)
         assert_less_equal(statistic_data.entropy, 0.529)
         assert_greater_equal(statistic_data.entropy, 0.527)
+
+    def test_interaction_information(self):
+        log.info("Statistics> test_interaction_information")
+
+        # Add multiple data
+        for case in self.test_case:
+            self.provider.addOneMetaData(case)
+
+        # Add data's count
+        arr_2_gram_1 = [self.aaa, self.bbb]
+        arr_2_gram_2 = [self.aaa, self.ccc]
+        arr_3_gram_1 = [self.aaa, self.bbb, self.ccc]
+        self.provider.addOneRawDataCount(arr_2_gram_1, 2)
+        self.provider.addOneRawDataCount(arr_2_gram_2, 1)
+        self.provider.addOneRawDataCount(arr_3_gram_1, 1)
+
+        # Calculate probabilities
+        PyProbabilityAtom().calculateProbabilities(self.provider)
+        PyEntropyAtom().calculateEntropies(self.provider)
+        PyInteractionInformationAtom().calculateInteractionInformations(self.provider)
+
+        statistic_data = self.provider.find_in_map(arr_2_gram_1)
+        assert_less_equal(statistic_data.interactionInformation, -0.388)
+        assert_greater_equal(statistic_data.interactionInformation, -0.390)
+        statistic_data = self.provider.find_in_map(arr_2_gram_2)
+        assert_less_equal(statistic_data.interactionInformation, -0.527)
+        assert_greater_equal(statistic_data.interactionInformation, -0.529)
+        statistic_data = self.provider.find_in_map(arr_3_gram_1)
+        assert_less_equal(statistic_data.interactionInformation, -0.917)
+        assert_greater_equal(statistic_data.interactionInformation, -0.919)

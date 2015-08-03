@@ -35,3 +35,7 @@ cdef extern from "opencog/learning/statistics/Probability.h" namespace "opencog:
 
 cdef extern from "opencog/learning/statistics/Entropy.h" namespace "opencog::statistics::Entropy":
     void calculateEntropies(DataProvider[long] &provider)
+
+cdef extern from "opencog/learning/statistics/InteractionInformation.h" namespace "opencog::statistics::InteractionInformation":
+    float calculateInteractionInformation(vector[long] &onePieceOfData, DataProvider[long] &provider)
+    void calculateInteractionInformations(DataProvider[long] &provider)
