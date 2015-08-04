@@ -71,7 +71,7 @@ bool PsiDemandUpdaterAgent::Demand::runUpdater(AtomSpace & atomSpace)
     return true;
 }
 
-bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, const string timeDomain, const octime_t timeStamp)
+bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, const octime_t timeStamp)
 {
     // Get the GroundedPredicateNode "fuzzy_within"
     Handle hGroundedPredicateNode = atomSpace.get_outgoing(hFuzzyWithin, 0);
@@ -171,7 +171,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     atomSpace.set_TV(this->hDemandGoal, demand_satisfaction);
 
     // Add AtTimeLink around EvaluationLink of  DemandGoal, which is required by fishgram
-    Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal,timeDomain,timeStamp,demand_satisfaction);
+    Handle atTimeLink = timeServer().addTimeInfo(this->hDemandGoal, timeStamp, DEFAULT_TIMEDOMAIN, demand_satisfaction);
 
 //    // Update the LatestLink
     std::string predicateName = this->demandName + "DemandGoal";
@@ -184,7 +184,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
     Handle evaluationLink = atomSpace.add_link(EVALUATION_LINK, outgoings);
     atomSpace.set_TV(evaluationLink, demand_satisfaction);
 
-    atTimeLink = timeServer().addTimeInfo(evaluationLink, timeDomain, timeStamp, demand_satisfaction);
+    atTimeLink = timeServer().addTimeInfo(evaluationLink, timeStamp, DEFAULT_TIMEDOMAIN, demand_satisfaction);
 
     AtomSpaceUtil::updateLatestDemand(atomSpace, atTimeLink, demandPredicateNode);
 
@@ -298,11 +298,10 @@ void PsiDemandUpdaterAgent::run()
     }
 
     // Update Demand Goals
-    string timedomain=timeServer().getTimeDomain();
     for (Demand & demand : this->demandList) {
         logger().debug("PsiDemandUpdaterAgent::%s - Going to set the updated value to AtomSpace for demand '%s' [cycle = %d]",
                        __FUNCTION__, demand.getDemandName().c_str(), this->cycleCount);
-        demand.updateDemandGoal(atomSpace, timedomain, timeStamp);
+        demand.updateDemandGoal(atomSpace, timeStamp);
     }
 
     hasPsiDemandUpdaterForTheFirstTime = true;

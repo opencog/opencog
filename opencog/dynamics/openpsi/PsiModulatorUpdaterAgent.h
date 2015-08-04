@@ -117,7 +117,7 @@ private:
          *               EvaluationLink (stv denotes the level of the modulator)
          *                   PredicateNode "xxxModulator"
          */
-        bool updateModulator(AtomSpace & atomSpace, const string timeDomain, const octime_t timeStamp);
+        bool updateModulator(AtomSpace & atomSpace, const octime_t timeStamp);
 
     private:
 

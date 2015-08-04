@@ -99,8 +99,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     }
 
     std::list<HandleTemporalPair> htp_seq;
-    string timedomain=timeServer().getTimeDomain();
-    timeServer().getTimeInfo(back_inserter(htp_seq), trick_h, timedomain);
+    timeServer().getTimeInfo(back_inserter(htp_seq), trick_h);
 
 #ifdef USE_MAP_HANDLE_SET
     // TODO: THIS DOES NOT WORK BECAUSE MAPS GETS WRONG ORDER (Suggestion: to use a set of timestamps instead)
@@ -112,7 +111,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     for (HandleTemporalPair htp : htp_seq) {
         Temporal t = *htp.getTemporal();
         HandleSeq sm_seq;
-        timeServer().getMapHandles(back_inserter(sm_seq), timedomain, t.getLowerBound(), t.getUpperBound());
+        timeServer().getMapHandles(back_inserter(sm_seq), t.getLowerBound(), t.getUpperBound());
 
         for (Handle sm_h : sm_seq) {
             try {

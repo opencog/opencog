@@ -129,9 +129,8 @@ Handle AtomSpaceUtil::addLink(AtomSpace& atomSpace,
 
 // TODO: DEPRECATED
 Handle AtomSpaceUtil::addRewardPredicate(AtomSpace& atomSpace,
-										 const char* petId,
-										 const string timedomain,
-										 unsigned long timestamp)
+                                         const char* petId,
+                                         unsigned long timestamp)
 {
     HandleSeq evalLinkOutgoing;
 
@@ -143,16 +142,15 @@ Handle AtomSpaceUtil::addRewardPredicate(AtomSpace& atomSpace,
 
     Handle evalLink = addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    timeServer().addTimeInfo(evalLink, timedomain, timestamp);
+    timeServer().addTimeInfo(evalLink, timestamp);
 
     return evalLink;
 }
 
 // TODO: DEPRECATED
 Handle AtomSpaceUtil::addPunishmentPredicate(AtomSpace& atomSpace,
-											 const char* petId,
-											 const string timedomain,
-											 unsigned long timestamp)
+                                             const char* petId,
+                                             unsigned long timestamp)
 {
     HandleSeq evalLinkOutgoing;
 
@@ -164,16 +162,15 @@ Handle AtomSpaceUtil::addPunishmentPredicate(AtomSpace& atomSpace,
 
     Handle evalLink = addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    timeServer().addTimeInfo(evalLink, timedomain, timestamp);
+    timeServer().addTimeInfo(evalLink, timestamp);
 
     return evalLink;
 }
 
 bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
-											 const char* actionPredicateName,
-											 Handle actionExecLink,
-											 const string timedomain,
-											 unsigned long sinceTimestamp)
+                                             const char* actionPredicateName,
+                                             Handle actionExecLink,
+                                             unsigned long sinceTimestamp)
 {
 
     //cout << "Looking for action predicate '" << actionPredicateName << "' after timestamp '" << sinceTimestamp << "' for action: " << atomSpace.atomAsString(actionExecLink) << endl;
@@ -198,7 +195,6 @@ bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
                 list<HandleTemporalPair> ocurrences;
                 timeServer().getTimeInfo(back_inserter(ocurrences),
 										 evalLink,
-										 timedomain,
 										 Temporal(sinceTimestamp),
 										 TemporalTable::NEXT_AFTER_END_OF);
                 //if (!ocurrences.empty()) {
@@ -384,13 +380,12 @@ bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
 }
 */
 bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
-										  const string timedomain,
-										  unsigned long timestamp,
-										  unsigned long delay,
-										  Handle from_h,
-										  Handle to_h,
-										  const std::string& message,
-										  bool include_to)
+                                          unsigned long timestamp,
+                                          unsigned long delay,
+                                          Handle from_h,
+                                          Handle to_h,
+                                          const std::string& message,
+                                          bool include_to)
 {
     OC_ASSERT(delay < timestamp,
                      "timestamp - delay must be positive");
@@ -398,7 +393,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
     unsigned long tu = timestamp;
     Temporal temp(tl, tu);
     std::list<HandleTemporalPair> ret;
-    timeServer().getTimeInfo(back_inserter(ret), Handle::UNDEFINED, timedomain, temp,
+    timeServer().getTimeInfo(back_inserter(ret), Handle::UNDEFINED, temp,
                           TemporalTable::STARTS_WITHIN);
 
     if (ret.empty()) {
@@ -496,7 +491,7 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
 
 
 
-Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles, const string timedomain)
+Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles)
 {
     if (handles.size() < 1)
         return Handle::UNDEFINED;
@@ -508,7 +503,7 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
 
     for (Handle h : handles)
     {
-        timeServer().getTimeInfo( back_inserter(handleTemporalPairs), h, timedomain);
+        timeServer().getTimeInfo( back_inserter(handleTemporalPairs), h);
     }
 
     std::vector<HandleTemporalPair>::iterator iHandleTemporalPair;
@@ -536,7 +531,6 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
     }
 
     // return the latest handle
-
 
     return iLatestHandleTemporalPair->getHandle();
 }
@@ -621,11 +615,10 @@ throw(opencog::NotFoundException)
     }
 
     // and then get the lastest one
-    string timedomain=timeServer().getTimeDomain();
     if (handleset.size() == 0)
-        return getLatestHandle(atomSpace,evalLinkHandleset,timedomain);
+        return getLatestHandle(atomSpace,evalLinkHandleset);
     else
-        return getLatestHandle(atomSpace,handleset,timedomain);
+        return getLatestHandle(atomSpace,handleset);
 
 }
 
@@ -792,10 +785,9 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
-											 std::string predicateName,
-											 std::string timedomain,
-											 const HandleSeq& ll_out,
-											 TruthValuePtr tv, bool permanent, const Temporal &t)
+									  std::string predicateName,
+									  const HandleSeq& ll_out,
+									  TruthValuePtr tv, bool permanent, const Temporal &t)
 {
     bool predBool = true;
     if (tv->getMean() >= 0.5) {
@@ -845,7 +837,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     // if not undefined temporal then  a time information should be inserted
     // inserted into AtomSpace.
     if (t != UNDEFINED_TEMPORAL) {
-        result = timeServer().addTimeInfo(el, timedomain, t);
+        result = timeServer().addTimeInfo(el, t);
     } else {
         result = el;
     }
@@ -857,8 +849,7 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
         const std::string& predicateNodeName )
 {
     std::vector<HandleTemporalPair> timestamps;
-    string timedomain = timeServer().getTimeDomain();
-    getAllEvaluationLinks( atomSpace, timedomain, timestamps, predicateNodeName );
+    getAllEvaluationLinks( atomSpace, timestamps, predicateNodeName );
 
     if ( timestamps.size() == 0 ) {
         logger().debug(
@@ -1148,8 +1139,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
 
     // An error could occur here, but that should never happen
     Temporal t(latest);
-    string timedomain=ts.getTimeDomain();
-    Handle atTime = ts.getAtTimeLink(timedomain, HandleTemporalPair(evalLink, &t));
+    Handle atTime = ts.getAtTimeLink(HandleTemporalPair(evalLink, &t));
 
     return atomSpace.get_TV(atTime)->getMean();
 }
@@ -1244,11 +1234,9 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
 
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
-    string timedomain=timeServer().getTimeDomain();
 
     for (Handle hSimilarityLink : similarityLinkSet) {
-        timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
-								  hSimilarityLink,timedomain);
+        timeServer().getTimeInfo( back_inserter(handleTemporalPairs), hSimilarityLink);
     }
 
     logger().debug("AtomSpaceUtil::%s - Get %d HandleTemporalPairs of SimilarityLink that holds the modulator updater (ExecutionOutputLink)",
@@ -1399,11 +1387,8 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
-    string timedomain=timeServer().getTimeDomain();
     for (Handle hSimilarityLink : similarityLinkSet) {
-        timeServer().getTimeInfo( back_inserter(handleTemporalPairs),
-								  hSimilarityLink,timedomain
-                                             );
+        timeServer().getTimeInfo(back_inserter(handleTemporalPairs), hSimilarityLink);
     }
 
     logger().debug("AtomSpaceUtil::%s - Get %d HandleTemporalPairs of SimilarityLink that holds the demand updater (ExecutionOutputLink)",
@@ -1527,12 +1512,11 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
 }
 
 void AtomSpaceUtil::getAllEvaluationLinks(AtomSpace& atomSpace,
-										  const string& timedomain,
-										  std::vector<HandleTemporalPair>& timestamps,
-										  const std::string& predicateNodeName,
-										  const Temporal& temporal,
-										  TemporalTable::TemporalRelationship criterion,
-										  bool needSort)
+                                          std::vector<HandleTemporalPair>& timestamps,
+                                          const std::string& predicateNodeName,
+                                          const Temporal& temporal,
+                                          TemporalTable::TemporalRelationship criterion,
+                                          bool needSort)
 {
 
     logger().fine("AtomSpaceUtil - getAllEvaluationLinks - "
@@ -1557,7 +1541,7 @@ targh->getIncomingSetByType(iter, type, sub); }
 
     for ( unsigned int i = 0; i < handles.size(); ++i ) {
         timeServer().getTimeInfo(back_inserter(timestamps),
-								 handles[i], timedomain, temporal, criterion);
+                                 handles[i], temporal, criterion);
     }
 
     if (needSort) {
@@ -1613,22 +1597,19 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
-										   std::string predicateName,
-										   const std::string& timedomain,
-										   Handle object,
-										   TruthValuePtr tv,
-										   bool permanent,
-										   const Temporal &t)
+        std::string predicateName,
+        Handle object,
+	TruthValuePtr tv,
+	bool permanent,
+	const Temporal &t)
 {
     HandleSeq ll_out;
     ll_out.push_back(object);
-    return addGenericPropertyPred(atomSpace, predicateName,timedomain,
-                                  ll_out, tv, permanent, t);
+    return addGenericPropertyPred(atomSpace, predicateName, ll_out, tv, permanent, t);
 }
 
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
         std::string predicateName,
-										   const string& timedomain,
         Handle a,
         Handle b,
         TruthValuePtr tv,
@@ -1640,14 +1621,12 @@ Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
     ll_out.push_back(b);
     return addGenericPropertyPred(atomSpace,
                                   predicateName,
-				  timedomain,
                                   ll_out, tv, false, t);
 }
 
 void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                                         const std::string& holderId,
                                         const std::string& objectId,
-					const std::string& timedomain,
                                         long unsigned currentTimestamp )
 {
 
@@ -1693,7 +1672,7 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                 logger().debug("AtomSpaceUtil - setupHoldingObject: "
                         "new time = '%s'", new_temp.toString().c_str());
                  // Now, it can be forgotten.
-                timeServer().addTimeInfo(isHoldingEvalLink, timedomain, new_temp);
+                timeServer().addTimeInfo(isHoldingEvalLink, new_temp);
             }
         }
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -1715,7 +1694,6 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
         Handle isHoldingAtTimeLink =
             AtomSpaceUtil::addPropertyPredicate( atomSpace,
                                                  IS_HOLDING_PREDICATE_NAME,
-						 timedomain,
                                                  holderHandle,
                                                  objectHandle,
                                                  SimpleTruthValue::createTV( 1.0, 1.0 ),
@@ -1807,8 +1785,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
                 continue;
             } // if
 
-	    string timedomain=timeServer().getTimeDomain();
-            timeServer().getTimeInfo( back_inserter( timestamps ), handles[i], timedomain);
+            timeServer().getTimeInfo( back_inserter( timestamps ), handles[i]);
 
 
         } // if
@@ -1857,15 +1834,13 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
                             PREDICATE_NODE, EVALUATION_LINK, true );
 
 
-    string timedomain=timeServer().getTimeDomain();
     std::vector<HandleTemporalPair> timestamps;
     for ( unsigned int i = 0; i < handles.size(); ++i ) {
         Handle listLink = atomSpace.get_outgoing(handles[i], 1);
         if ( listLink != Handle::UNDEFINED ) {
             // get only holder's eval-links
             if ( atomSpace.get_outgoing(listLink, 0) == holderHandle ) {
-                timeServer().getTimeInfo( back_inserter( timestamps ),
-										  handles[i], timedomain);
+                timeServer().getTimeInfo( back_inserter( timestamps ), handles[i]);
             }
         }
     }
@@ -1884,7 +1859,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
         logger().debug("AtomSpaceUtil - The most recent holded object %ul",
                       timestamps[mostRecentIndex].getTemporal()->getUpperBound() );
 
-        return timeServer().getAtTimeLink(timedomain,timestamps[mostRecentIndex]);
+        return timeServer().getAtTimeLink( timestamps[mostRecentIndex]);
     }
     return Handle::UNDEFINED;
 }
@@ -1928,13 +1903,11 @@ bool AtomSpaceUtil::isHoldingSomething(AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
-						   const std::string& holderId,
-						   const std::string& timedomain,
-						   unsigned long time)
+                                                   const std::string& holderId,
+                                                   unsigned long time)
 {
     Handle isHoldingLink = getIsHoldingLinkAtTime(atomSpace,
 						  holderId,
-						  timedomain,
 						  time);
     if ( isHoldingLink != Handle::UNDEFINED ) {
         Handle listLink = atomSpace.get_outgoing(isHoldingLink, 1);
@@ -1955,7 +1928,6 @@ Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
 
 Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
 					     const std::string& holderId,
-					     const std::string& timedomain,
 					     unsigned long time)
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
@@ -1980,7 +1952,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
                          "AtomSpaceUtil - before '%d' timestamps for isHolding pred for '%s'.",
                          timestamps.size(), holderId.c_str());
 
-            timeServer().getTimeInfo(back_inserter(timestamps), *h_i, timedomain,
+            timeServer().getTimeInfo(back_inserter(timestamps), *h_i,
                                   Temporal(time), TemporalTable::INCLUDES);
 
             logger().debug(
@@ -2013,13 +1985,12 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
 
 std::string AtomSpaceUtil::getHoldingObjectIdAtTime(AtomSpace& as,
 						    const std::string& holderId,
-						    const std::string& timedomain,
 						    unsigned long time)
 {
     Handle holderHandle = getAgentHandle( as, holderId );
     if ( holderHandle == Handle::UNDEFINED ) return "";
 
-    Handle objectHandle = getHoldingObjectHandleAtTime(as, holderId, timedomain, time);
+    Handle objectHandle = getHoldingObjectHandleAtTime(as, holderId, time);
     if ( objectHandle == Handle::UNDEFINED ) return "";
 
     return as.get_name(objectHandle);
@@ -2143,9 +2114,8 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
-						     const string& timedomain,
-						     unsigned long timestamp,
-						     bool schemaSuccessful)
+        unsigned long timestamp,
+	bool schemaSuccessful)
 {
     logger().debug("AtomSpaceUtil - getMostRecentPetSchemaExecLink");
     std::vector<HandleTemporalPair> timestamps;
@@ -2153,14 +2123,12 @@ Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
 
     if (schemaSuccessful) {
         AtomSpaceUtil::getAllEvaluationLinks(atomSpace,
-					     timedomain,
                                              timestamps,
                                              "SchemaDone",
                                              t, TemporalTable::STARTS_AFTER,
                                              true);
     } else {
         AtomSpaceUtil::getAllEvaluationLinks(atomSpace,
-					     timedomain,
                                              timestamps,
                                              "SchemaFailure",
                                              t, TemporalTable::STARTS_AFTER,
@@ -2222,7 +2190,6 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
 
 Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 						   const std::string& agentId,
-						   const std::string& timedomain,
 						   const Temporal& temporal,
 						   TemporalTable::TemporalRelationship criterion)
 {
@@ -2233,7 +2200,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 
     // get eval links for all agents actions done
     std::vector<HandleTemporalPair> timestamps;
-    AtomSpaceUtil::getAllEvaluationLinks( atomSpace, timedomain, timestamps,
+    AtomSpaceUtil::getAllEvaluationLinks( atomSpace, timestamps,
                                           ACTION_DONE_PREDICATE_NAME,
                                           temporal, criterion );
 
@@ -2327,7 +2294,6 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 						    const std::string& agentId,
 						    const std::string& actionName,
-						    const std::string& timedomain,
 						    const Temporal& temporal,
 						    TemporalTable::TemporalRelationship criterion )
 {
@@ -2416,7 +2382,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
             if ( atomSpace.get_type( incomingLinks[j] ) == EVALUATION_LINK &&
                     atomSpace.get_outgoing( incomingLinks[j], 0 ) == predicateNodeHandle ) {
                 timeServer().getTimeInfo( back_inserter(timestamps),
-										  incomingLinks[j], timedomain, temporal, criterion );
+                                          incomingLinks[j], temporal, criterion );
 
                 //filteredHandles.push_back( incomingLinks[j] );
             } // if
@@ -2447,24 +2413,22 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 
 Handle AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(AtomSpace& atomSpace,
 							     const std::string& agentId,
-							     const std::string& timedomain,
 							     unsigned long t1,
 							     unsigned long t2 )
 {
     Temporal t(t1, t2);
     return getMostRecentAgentActionLink(atomSpace,
-                                        agentId,timedomain,
+                                        agentId,
                                         t, TemporalTable::ENDS_WITHIN);
 }
 
 Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime(AtomSpace& atomSpace,
 							    const std::string& agentId,
-							    const std::string& timedomain,
 							    unsigned long timestamp )
 {
     Temporal t(timestamp);
     return getMostRecentAgentActionLink(atomSpace,
-                                        agentId,timedomain,
+                                        agentId,
                                         t, TemporalTable::ENDS_AFTER);
 }
 
@@ -2975,11 +2939,11 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
     return (atomSpace.get_TV(implicationLink)->getMean());
 }
 
-spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity(AtomSpace& atomSpace, const std::string& objectId, const std::string& timedomain,unsigned long afterTimestamp )
+spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity(AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
 {
     // look for a velocity predicate at 2 RuleEngine cycles before the current cycle
     std::vector<HandleTemporalPair> timestamps;
-    getAllEvaluationLinks( atomSpace, timedomain,timestamps,
+    getAllEvaluationLinks( atomSpace, timestamps,
                            AGISIM_VELOCITY_PREDICATE_NAME,
                            Temporal( afterTimestamp ),
                            TemporalTable::ENDS_AFTER, true );

@@ -511,10 +511,9 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         //insert into new_temps all pairs (handle,temporal)
         //that have their starting time within t_grab_range
         timeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
-								 Handle::UNDEFINED,
-								 timeServer().getTimeDomain(),
-								 *ti,
-								 TemporalTable::STARTS_WITHIN);
+                                 Handle::UNDEFINED,
+                                 *ti,
+                                 TemporalTable::STARTS_WITHIN);
 
         for (HandleTemporalPair htp : new_temps) {
             new_perceptions.insert(htp.getHandle());
@@ -560,10 +559,9 @@ bool BehaviorEncoder::update(Temporal start_moment)
     //insert into new_temps all pairs (handle,temporal)
     //that have their starting time within t_grab_range
     timeServer().getTimeInfo(inserter(new_temps, new_temps.begin()),
-							 Handle::UNDEFINED,
-							 timeServer().getTimeDomain(),
-							 t_grab_range,
-							 TemporalTable::STARTS_WITHIN);
+                             Handle::UNDEFINED,
+                             t_grab_range,
+                             TemporalTable::STARTS_WITHIN);
 
     for (HandleTemporalPair htp : new_temps) {
         //printf("new perc %s\n", htp.toString().c_str());

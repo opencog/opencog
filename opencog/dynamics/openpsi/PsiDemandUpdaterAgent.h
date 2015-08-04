@@ -150,7 +150,7 @@ private:
          *                  EvaluationLink (stv denotes the satisfaction level of the demand)
          *                      PredicateNode "xxxDemand"
          */
-        bool updateDemandGoal(AtomSpace & atomSpace, const string timeDomain, const octime_t timeStamp);
+        bool updateDemandGoal(AtomSpace & atomSpace, const octime_t timeStamp);
 
     private:
 

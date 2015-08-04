@@ -56,12 +56,12 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
 {
     std::list<HandleTemporalPair> retP;
     timeServer().getTimeInfo(std::back_inserter(retP),
-			     trickConceptNode, timeServer().getTimeDomain(), temp,
+			     trickConceptNode, temp,
 			     TemporalTable::EXACT);
     if (!retP.empty()) {
         OC_ASSERT(retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
-        Handle h = timeServer().getAtTimeLink(timeServer().getTimeDomain(),*(retP.begin()));
+        Handle h = timeServer().getAtTimeLink(*(retP.begin()));
         OC_ASSERT(h != Handle::UNDEFINED,
                          "Handle h should not be an 'Handle::UNDEFINED'.");
         std::list<Handle> result;
@@ -103,9 +103,8 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
-								 timeServer().getTimeDomain(),
-								 Temporal(wp.getLatestSimWorldTimestamp()),
-								 TemporalTable::PREVIOUS_BEFORE_START_OF);
+                                 Temporal(wp.getLatestSimWorldTimestamp()),
+                                 TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
             OC_ASSERT(retP.size() == 1,
                              "retP std::list should have exactly one 'HandleTemporal Pair'.");
@@ -143,9 +142,8 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
-								 timeServer().getTimeDomain(),
-								 Temporal(wp.getLatestSimWorldTimestamp()),
-								 TemporalTable::STARTS_BEFORE);
+                                 Temporal(wp.getLatestSimWorldTimestamp()),
+                                 TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {
             CompositeBehaviorDescription bd(&wp.getAtomSpace());
             Temporal temp = *(ip->getTemporal());

@@ -590,7 +590,7 @@ addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
 
         }
 
-        timeServer().addTimeInfo(eval, timeServer().getTimeDomain(), timestamp);
+        timeServer().addTimeInfo(eval, timestamp);
 
 //        if (enableCollectActions)
 //            oac::EventDetectionAgent::addAnEvent(eval,timestamp,oac::EVENT_TYPE_SPATIAL_PREDICATE);
