@@ -53,6 +53,11 @@ ssh -L 5555:localhost:5432  example.org
 Working on Rohit's dataset.
 psql simple_pairs
 SELECT Count(*) from atoms; gives 9 230 537 -- that is 9 million or so
+Of these, there are --
+   3 636 569 ListLinks
+   5 453 952 EvaluationLinks
+     139 884 WordNodes
+select count(*) from atoms where type=8;
 
 Find the ANY node:
 61 | LinkGrammarRelationshipNode

@@ -47,7 +47,8 @@
 		)
 	)
 
-	(display "Count was ") (display word-count) (newline)
+	(display "For the query: ")(display query)(newline)
+	(display "The num rows was: ") (display word-count) (newline)
 	alist
 )
 
@@ -91,7 +92,7 @@
 	)
 
 	(set! elist (map get-eval alist))
-	(display "Count was ") (display word-count) (newline)
+	(display "Number of EvaluationLinks: ") (display word-count) (newline)
 	elist
 )
 
@@ -111,7 +112,7 @@
 ;(display (length (get-all-evals all-list-links 152)))(newline)
 
 ; (map count-evlinks (list 152 250))
-(map count-evlinks (list 57 139 140 186 190 270))
+; (map count-evlinks (list 57 139 140 186 190 270))
 
 
 ; --------------------------------------------------------------
@@ -141,11 +142,13 @@
 		(flush-query)
 	)
 
-	; Change an EvaluationLink from the old bad ANY uuid to the new one
-	; argument is the uuid of the ListLink
+	; Change an EvaluationLink from the old bad ANY uuid to the new
+	; one. The argument is the uuid of the ListLink
 	(define (change-eval uuid)
 		(define euid 0)
 		(define row #f)
+
+		; First, get the uuid of the EvaluationLink
 		(define qry (string-concatenate (list
 			"SELECT uuid FROM atoms WHERE type="
 			EvalLinkType
@@ -158,22 +161,37 @@
 		(set! row (dbi-get_row conxion))
 		(while (not (equal? row #f))
 
-			; Extract the column value
+			; Extract the uuid of the EvaluationLink
 			(set! euid (cdr (assoc "uuid" row)))
 
 			; Maintain a count, just for the hell of it.
 			(set! word-count (+ word-count 1))
 
+			; Print status so we don't get bored.
+			(if (eq? 0 (modulo word-count 1000)) (begin
+				(display "Processed ")(display word-count)
+				(display " id-relabels")(newline)))
+
 			; (display word) (newline)
 			(set! row (dbi-get_row conxion))
 		)
+
+		; euid will be zero is the ListLink does not appear with
+		; the bad any-id
 		(if (< 0 euid)
 			(set-eval euid uuid good-id))
 	)
 
 	(set! elist (map change-eval alist))
+	(display "Changed ") (display bad-id)
+	(display " to ") (display good-id)(newline)
 	(display "Changed uuid count was ") (display word-count) (newline)
 	elist
 )
 
 ; (relabel-evals all-list-links 250 152)
+(relabel-evals all-list-links 139 57)
+(relabel-evals all-list-links 140 57)
+(relabel-evals all-list-links 186 57)
+(relabel-evals all-list-links 190 57)
+(relabel-evals all-list-links 270 57)
