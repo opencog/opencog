@@ -14,6 +14,7 @@ then
 	exit 0
 fi
 
+export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 # Use byobu so that the scroll bars actually work
 byobu new-session -d -n 'cntl' '$SHELL'
