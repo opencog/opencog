@@ -35,3 +35,5 @@ select * from atoms where type=89 and name='ANY';
 In this case, run ./any-merge.scm
 and then remove duplicates again with ./eval-dedup.scm
 
+After scrubbing, we may end up with Links that specify children that
+are not in the atomspace. Check for these with ./check-oset.scm
