@@ -78,7 +78,7 @@
 
 (define (check-for-pair-dupes wuid auid pair-list)
 "
-  check-for-pair-dupes -- look for idential word-pairs
+  check-for-pair-dupes -- look for identical word-pairs
   Given wuid and a list of pairs containing wuid, replace
   the wuid by auid, and look for that pair.
 "

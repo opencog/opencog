@@ -14,7 +14,9 @@
 
 ; --------------------------------------------------------------
 
-; look for duplicated EvaluationLinks
+; Look for duplicated EvaluationLinks.
+; The list will consist of a pair of UUID's that identify the
+; duplicate EvaluationLinks
 (define duplicate-eval-list
 	(look-for-dupes
 		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
@@ -22,3 +24,65 @@
 (display "The duplicate eval list has: ")
 (display (length duplicate-eval-list)) (newline)
 
+
+(define (eliminate-eval-dupes oset-list)
+"
+  eliminate-eval-dupes -- look for identical EvaluationLinks
+
+  Given a list of outgoing-sets, sum the count stv, and update
+  the count on one of the dupes, and delete the other dupe.
+"
+	; Sum the counts on the EvalLink
+	(define (sum-counts oset)
+		(define row #f)
+		(define sum 0)
+		(define uuid 0)
+		(define smallest-uuid 2012123123)
+		(define dup-list (list))
+
+		; Find all the EvaluationLinks
+		(define qry (string-append
+			"SELECT * FROM atoms WHERE type=47 AND outgoing="
+			(make-outgoing-str oset)))
+		; (display qry)(newline)
+		(dbi-query conxion qry)
+
+		(set! row (dbi-get_row conxion))
+		(while (not (equal? row #f))
+			; Sum up the count values
+			(set! sum (+ sum (cdr (assoc "stv_count" row))))
+
+			; Find the smallest uuid.
+			(set! uuid (cdr (assoc "uuid" row)))
+			(if (< uuid smallest-uuid)
+				(set! smallest-uuid uuid))
+
+			(set! dup-list (cons uuid dup-list))
+
+			; Get the next row
+			(set! row (dbi-get_row conxion))
+		)
+		(begin
+			(define upd (string-append
+				"UPDATE atoms SET stv_count="
+				(number->string sum)
+				" WHERE uuid="
+				(number->string smallest-uuid)
+				";"))
+			(display upd) (newline)
+			(if do-update (begin
+				(dbi-query conxion upd)
+				(display (dbi-get_status conxion)) (newline)
+				(flush-query)))
+			(delete-atoms dup-list  smallest-uuid)
+		)
+		smallest-uuid
+	)
+
+	(define cnt-list (map sum-counts oset-list))
+
+	(display "oset: ") (display (length oset-list))(newline)
+	(display "cnts: ") (display (length cnt-list))(newline)
+)
+
+(eliminate-eval-dupes duplicate-eval-list)
