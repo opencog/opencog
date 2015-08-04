@@ -2056,7 +2056,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Interesting_Pattern)
         {
-            for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+            for(cur_gram = 2; cur_gram <= MAX_GRAM ; cur_gram ++)
             {
                 cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
                 cur_index = -1;
@@ -2511,11 +2511,14 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
 
         for (Handle neighborNode : allNodes)
         {
+            if (originalAtomSpace->getType(neighborNode) == PREDICATE_NODE)
+                continue;
+
             string content = originalAtomSpace->getName(neighborNode);
             if (isIgnoredContent(content))
                 continue;
 
-            set<Handle> newConnectedLinks;
+            set<Handle> newConnectedLinks;                    
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
             allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -2538,6 +2541,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
         std::cout << keyword << std::endl;
         Handle keywordNode = originalAtomSpace->addNode(opencog::CONCEPT_NODE,keyword);
         set<Handle> newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+
         allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
         topicsStr += "-";
         topicsStr += keyword;
@@ -2560,7 +2564,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     subsetFile.open(fileName.c_str());
 
     // write the first line to enable unicode
-    std::cout <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
+    subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
 
     for (Handle h : allSubsetLinks)
     {

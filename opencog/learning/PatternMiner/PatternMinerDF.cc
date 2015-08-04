@@ -424,7 +424,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 {
                     alreadyExtracted = true;
                     // debug
-                    //cout << "already extracted!" << std::endl;
+                    // cout << "already extracted!" << std::endl;
                 }
 
             }
