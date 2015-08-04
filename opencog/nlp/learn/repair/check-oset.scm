@@ -41,17 +41,16 @@
 	atom-list
 )
 
-(define h3 (get-atoms-of-height 3))
-(display "Number of atoms of height 3: ") (display (length h3))(newline)
-
-(define h2 (get-atoms-of-height 2))
-(display "Number of atoms of height 2: ") (display (length h2))(newline)
-
 ; --------------------------------------------------------------
 
 (define (look-for-orphans uuid-list)
 "
   look-for-orphans -- look for osets that don't have atoms
+
+  Given a list of uuid's that are links, fetch the outgoing set
+  of each link, and then look to see if the atoms in the outgoing
+  set are in the database.  Return a list of the links that have
+  outgoing sets that fail to refer to atoms.
 "
 	(define orphan-list (list))
 
@@ -87,7 +86,7 @@
 
 		; Find the oset
 		(define qry (string-append
-			"SELECT * FROM atoms WHERE uuid="
+			"SELECT outgoing FROM atoms WHERE uuid="
 			(number->string uuid)))
 		; (display qry)(newline)
 		(dbi-query conxion qry)
@@ -108,7 +107,27 @@
 		)
 	)
 
-	(map check-oset uuid-list)
+	(for-each check-oset uuid-list)
+	orphan-list
 )
 
-(look-for-orphans h2)
+; --------------------------------------------------------------
+
+(define h3 (get-atoms-of-height 3))
+(display "Number of atoms of height 3: ") (display (length h3))(newline)
+
+(define h2 (get-atoms-of-height 2))
+(display "Number of atoms of height 2: ") (display (length h2))(newline)
+
+(define o2 (look-for-orphans h2))
+(display "Orphan h2 links: ") (display (length o2))(newline)
+
+; (delete-atoms o2 0)
+
+(define h1 (get-atoms-of-height 1))
+(display "Number of atoms of height 1: ") (display (length h1))(newline)
+
+(define o1 (look-for-orphans h1))
+(display "Orphan h1 links: ") (display (length o1))(newline)
+
+; (delete-atoms o1 0)
