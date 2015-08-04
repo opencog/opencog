@@ -55,7 +55,7 @@ namespace opencog
  * save the both time in the game world and in the real system.
  * ex. in Minecraft we need the game world time to judge if the monster will appear
  * but we also need real system time to do calculation since the tick rate of Minecraft is slow(once per sec)
- * For this we add a time domain to mark what time domain the timestamp belong.
+ * For this we add a time domain to mark what time domain the timestamp belongs to.
  * and we use a map<TimeDomain, TemporalTable> to save all corresponding tables
  * Also, we change the AtTimeLink structure to:
  * AtTimeLink
@@ -63,12 +63,12 @@ namespace opencog
  * __ConceptNode "Lunch"
  * __TimeDomainNode "GameWorld"
  * by adding a TimeDomainNode in the outgoings.
- * If we don't have multiple TimeDomain, TimeServer will set a default time domain.
+ * If we don't set our own TimeDomain when adding time info, TimeServer will set a default time domain.
  * And the AtTimeLink will be 
  * AtTimeLink
  * __TimeNode "12:00:00"
  * __ConceptNode "Lunch"
- * skip the TimeDomainNode; since the whole system is single time domain
+ * skip the TimeDomainNode.
  */
 typedef std::string TimeDomain;
 extern TimeDomain DEFAULT_TIMEDOMAIN;
@@ -143,7 +143,6 @@ public:
 
         auto temporalTableIter = temporalTableMap.find(timeDomain);        
         if (temporalTableIter == temporalTableMap.end()) {
-            logger().error("The time domain %s is not in the TimeServer!", timeDomain.c_str());
             return outIt;            
         }
 
@@ -219,8 +218,8 @@ public:
      * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable 
      * and the corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
      * @param atom the Handle of the atom to be associated to the timestamp
-     * @param timeDomain the timedomian which the timestamp belongs to
      * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
+     * @param timeDomain the time domain which the timestamp belongs to
      * @param tv Truth value for the AtTimeLink created (optional)
      * @return the Handle of the AtTimeLink added into the AtomSpace.
      */
@@ -246,7 +245,6 @@ public:
      * @param h the Handle of the atom to be associated to
      *        the timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If it is, a RuntimeException is thrown.
-     * @param timeDomain the timedomian which the timestamp belongs to
      * @param timestamp The timestamp to be associated to the atom.
      *        This argument cannot be an UNDEFINED_TEMPORAL. If
      *        so, it throws a RuntimeException.
@@ -261,6 +259,7 @@ public:
      *        The default temporal relationship is "exact match".
      *        See the definition of TemporalRelationship enumeration
      *        to see other possible values for it.
+     * @param timeDomain the time domain which the timestamp belongs to
      * @param removeDisconnectedTimeNodes Flag to indicate if any
      *        TimeNode whose incoming set becomes empty after the
      *        removal of the AtTimeLink link must be removed.
@@ -296,14 +295,9 @@ public:
      * @param h the Handle of the atom to be associated to the
      *        timestamp. This argument cannot be an Handle::UNDEFINED.
      *        If so, it throws a RuntimeException.
-     * @param timeDomain the timedomain which temporal t belongs to
      * @param t The Temporal object to be associated to the atom. This
      *        argument cannot be an UNDEFINED_TEMPORAL. If so, it throws
      *        a RuntimeException.
-     * @param removeDisconnectedTimeNode Flag to indicate if the
-     *        TimeNode that corresponds to the given timestamp should
-     *        be removed, if its incoming set becomes empty after the
-     *        removal of the AtTimeLink link.
      * @param the Temporal relationship criteria to be used for this
      *        removal operation, if the given Temporal object argument
      *        is not UNDEFINED_TEMPORAL. This method only removes the
@@ -313,9 +307,11 @@ public:
      *        temporal relationship is "exact match". See the definition
      *        of TemporalRelationship enumeration to see other possible
      *        values for it.
-     * @param removeDisconnectedTimeNodes Flag to indicate if any
-     *        TimeNode whose incoming set becomes empty after the removal
-     *        of the AtTimeLink link must be removed.
+     * @param timeDomain the timedomain which temporal t belongs to
+     * @param removeDisconnectedTimeNode Flag to indicate if the
+     *        TimeNode that corresponds to the given timestamp should
+     *        be removed, if its incoming set becomes empty after the
+     *        removal of the AtTimeLink link.
      * @param recursive Flag to indicate if all atoms in the incoming set
      *        of the AtTimeLink link must be removed recursively.
      *
@@ -345,9 +341,9 @@ public:
      *
      * @param outIt The outputIterator to
      * @param h The Atom Handle
-     * @param timeDomain The time domain which the temporal object belongs to
      * @param t The temporal object
      * @param c The Temporal pair removal criterion
+     * @param timeDomain The time domain which the temporal object belongs to
      *
      * @return An OutputIterator list
      *
@@ -375,9 +371,9 @@ public:
      * For getting the SpaceMap of each handle returned,
      * use the spaceServer.getMap(Handle spaceMapHandle) method.
      * @param out  the output iterator where the resulting handles will be added.
-     * @param timeDomain the time domain which the time interval belongs to
      * @param startMoment the start of the time interval for searching the maps
      * @param endMoment the end of the time interval for searching the maps
+     * @param timeDomain the time domain which the time interval belongs to
      *
      * Example of usage:
      *     HandleSeq result;
@@ -410,7 +406,7 @@ public:
     }
 
     //For the old code which assume there's only one time domain in the system.
-    TimeDomain getTimeDomain() const;
+    //TimeDomain getTimeDomain() const;
     vector<TimeDomain> getTimeDomains() const;
     bool existTimeDomain(const TimeDomain timeDomain) const
     {
