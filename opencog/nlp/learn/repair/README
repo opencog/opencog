@@ -24,11 +24,14 @@ CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
 DROP INDEX nodeidx;
 CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
 
+ALTER TABLE atoms ADD UNIQUE (type, outgoing);
+ALTER TABLE atoms ADD UNIQUE (type, name);
+
 
 Arghh ... there are two ANY atoms :-(
 This can be verified (here, type=89 is LinkGrammarRelationshipNode)
 select * from atoms where type=89 and name='ANY';
 
 In this case, run ./any-merge.scm
-and then remove duplicates again with uhhh ...
+and then remove duplicates again with ./eval-dedup.scm
 
