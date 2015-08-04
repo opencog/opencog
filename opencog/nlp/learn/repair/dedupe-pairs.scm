@@ -13,9 +13,6 @@
 
 (load "common.scm")
 
-; debugging ...
-(define do-update #t)
-
 ; The uuid of the ANY LG type.  That is, the uuid of the
 ; LinkGrammarRelationshipNode "ANY"
 (define uuid-of-any 250)

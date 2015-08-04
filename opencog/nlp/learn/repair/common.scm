@@ -13,6 +13,9 @@
 (use-modules (dbi dbi))
 (use-modules (srfi srfi-1))
 
+; debugging ...
+(define do-update #f)
+
 (define conxion
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
        (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
