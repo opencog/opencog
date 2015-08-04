@@ -887,6 +887,84 @@ std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
         42: ??:0        clone()
 
 
+Crash 9
+-------
+during (do-em-all)
+
+[2015-08-04 02:22:39:319] [ERROR] Caught signal 11 (Segmentation fault)
+on thread 139928482604800
+        Stack Trace:
+        2: basic_string.h:539   ~basic_string()
+        3: CogServerMain.cc:79  _Z7sighandi()
+        4: ??:0 killpg()
+        5: Handle.cc:37
+opencog::Handle::Handle(std::shared_ptr<opencog::Atom> const&)
+        6: shared_ptr_base.h:545        ~__shared_count()
+        7: shared_ptr_base.h:545        ~__shared_count()
+        8: shared_ptr_base.h:545        ~__shared_count()
+        9: shared_ptr_base.h:545        ~__shared_count()
+        10: Handle.h:90   opencog::Handle::operator=(opencog::Handle
+const&)
+        11: shared_ptr_base.h:545       ~__shared_count()
+        12: SchemePrimitive.cc:158
+opencog::PrimitiveEnviron::do_call(scm_unused_struct*,
+scm_unused_struct*)
+        13: ??:0        scm_vm_engine()
+        14: ??:0        scm_call_1()
+        15: ??:0        scm_vm_engine()
+        16: ??:0        scm_call_3()
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_4()
+        19: SchemeEval.cc:606
+opencog::SchemeEval::do_eval(std::string const&)
+        20: SchemeEval.cc:535
+opencog::SchemeEval::c_wrap_eval(void*)
+        21: ??:0        scm_at_abort()
+        22: ??:0        scm_vm_engine()
+        23: ??:0        scm_call_4()
+        24: ??:0        scm_at_abort()
+        25: ??:0        scm_c_with_continuation_barrier()
+        26: ??:0        GC_call_with_gc_active()
+        27: ??:0        scm_current_processor_count()
+        28: ??:0        GC_call_with_stack_base()
+        29: ??:0        scm_with_guile()
+        30: SchemeEval.cc:502
+opencog::SchemeEval::eval_expr(std::string const&)
+        31: basic_string.h:293    std::string::_M_data() const
+        32: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long,
+std::ratio<1l, 1l> >, std::chrono::duration<long, std::ratio<1l,
+1000000000l> >)
+        33: ??:0        start_thread()
+        34: ??:0        clone()
+
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_4()
+        19: SchemeEval.cc:606
+opencog::SchemeEval::do_eval(std::string const&)
+        20: SchemeEval.cc:535
+opencog::SchemeEval::c_wrap_eval(void*)
+        21: ??:0        scm_at_abort()
+        22: ??:0        scm_vm_engine()
+        23: ??:0        scm_call_4()
+        24: ??:0        scm_at_abort()
+        25: ??:0        scm_c_with_continuation_barrier()
+        26: ??:0        GC_call_with_gc_active()
+        27: ??:0        scm_current_processor_count()
+        28: ??:0        GC_call_with_stack_base()
+        29: ??:0        scm_with_guile()
+        30: SchemeEval.cc:502
+opencog::SchemeEval::eval_expr(std::string const&)
+        31: basic_string.h:293    std::string::_M_data() const
+        32: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long,
+std::ratio<1l, 1l> >, std::chrono::duration<long, std::ratio<1l,
+1000000000l> >)
+        33: ??:0        start_thread()
+        34: ??:0        clone()
+
+
+
 
 Performance
 -----------
