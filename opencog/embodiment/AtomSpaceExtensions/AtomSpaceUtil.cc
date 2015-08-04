@@ -211,10 +211,10 @@ bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
 
 bool AtomSpaceUtil::getXYZOFromPositionEvalLink(const AtomSpace& atomspace,
                                                 Handle evalLink,
-                                                double &x,
-                                                double &y,
-                                                double &z,
-                                                Handle &o)
+                                                double& x,
+                                                double& y,
+                                                double& z,
+                                                Handle& o)
 {
     if (atomspace.get_type(evalLink) != EVALUATION_LINK
         ||  atomspace.get_arity(evalLink) != 2)
@@ -241,7 +241,7 @@ bool AtomSpaceUtil::getXYZOFromPositionEvalLink(const AtomSpace& atomspace,
     return true;
 }
 
-Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace &atomSpace)
+Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace& atomSpace)
 {
     return spaceServer().getLatestMapHandle();
 }
@@ -379,7 +379,7 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
   }
   }
 */
-bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
+bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace& atomSpace,
                                           unsigned long timestamp,
                                           unsigned long delay,
                                           Handle from_h,
@@ -491,7 +491,7 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
 
 
 
-Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles)
+Handle AtomSpaceUtil::getLatestHandle(const AtomSpace& atomSpace,HandleSeq& handles)
 {
     if (handles.size() < 1)
         return Handle::UNDEFINED;
@@ -535,7 +535,7 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
     return iLatestHandleTemporalPair->getHandle();
 }
 
-Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace &atomSpace,
+Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace& atomSpace,
                                               std::string predicateName,
                                               Handle a,
                                               Handle b,
@@ -623,7 +623,7 @@ Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace &atomSpace,
 }
 
 
-float AtomSpaceUtil::getPredicateValue(AtomSpace &atomSpace,
+float AtomSpaceUtil::getPredicateValue(AtomSpace& atomSpace,
                                        std::string predicateName,
                                        Handle a,
                                        Handle b)
@@ -669,7 +669,7 @@ float AtomSpaceUtil::getPredicateValue(AtomSpace &atomSpace,
 }
 
 
-bool AtomSpaceUtil::isPredicateTrue(AtomSpace &atomSpace,
+bool AtomSpaceUtil::isPredicateTrue(AtomSpace& atomSpace,
                                     std::string predicateName,
                                     Handle a, Handle b)
 {
@@ -719,7 +719,7 @@ bool AtomSpaceUtil::isPetOwner( AtomSpace& atomSpace,
 
 bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
                                 Handle object,
-                                double& length, double& width, double &height)
+                                double& length, double& width, double& height)
 {
 
     Handle sizePredicate = atomSpace.get_handle(PREDICATE_NODE,
@@ -787,7 +787,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
 Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
                                              std::string predicateName,
                                              const HandleSeq& ll_out,
-                                             TruthValuePtr tv, bool permanent, const Temporal &t)
+                                             TruthValuePtr tv, bool permanent, const Temporal& t)
 {
     bool predBool = true;
     if (tv->getMean() >= 0.5) {
@@ -876,7 +876,7 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
 
     return selectedHandle;
 }
-std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing)
+std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace& atomSpace, Handle hFirstOutgoing)
 {
     // Create BindLink used by pattern matcher
     std::vector<Handle> inheritanceLinkOutgoings, bindLinkOutgoings;
@@ -907,7 +907,7 @@ std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Ha
     return resultSet;
 }
 
-std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace & atomSpace, Handle& hSecondOutgoing)
+std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace& atomSpace, Handle& hSecondOutgoing)
 {
     // Create BindLink used by pattern matcher
     std::vector<Handle> inheritanceLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
@@ -940,7 +940,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace & atomSpa
     return resultSet;
 }
 
-std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, string predicate, HandleSeq &hfirstOutgoings)
+std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace& atomSpace, string predicate, HandleSeq& hfirstOutgoings)
 {
     // Create BindLink used by pattern matcher
     std::vector<Handle> implicationLinkOutgoings, bindLinkOutgoings;
@@ -993,7 +993,7 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
     return resultSet;
 }
 
-std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq &hNonFirstOutgoings)
+std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace& atomSpace, string predicate, HandleSeq& hNonFirstOutgoings)
 {
     // Create BindLink used by pattern matcher
     std::vector<Handle> implicationLinkOutgoings, bindLinkOutgoings;
@@ -1044,7 +1044,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     return resultSet;
 }
 
-Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
+Handle AtomSpaceUtil::getReferenceLink(AtomSpace& atomSpace,
                                        Handle hFirstOutgoing)
 {
     // XXX: This should throw a RunTimeException, but for now will do.
@@ -1103,7 +1103,7 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
     return resultSet[0];
 }
 
-Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
+Handle AtomSpaceUtil::getReference(AtomSpace& atomSpace, Handle hFirstOutgoing)
 {
     // XXX: This should throw a RunTimeException, but for now will do.
     if (hFirstOutgoing == Handle::UNDEFINED)
@@ -1144,8 +1144,8 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
     return atomSpace.get_TV(atTime)->getMean();
 }
 
-float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
-                                              const std::string & modulatorName)
+float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace& atomSpace,
+                                              const std::string& modulatorName)
 
 {
     float errorValue = randGen().randfloat();   // If error happens, return this value anyway.
@@ -1310,8 +1310,8 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     return boost::lexical_cast<float> ( atomSpace.get_name(hNumberNode) );
 }
 
-float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
-                                           const std::string & demandName)
+float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace& atomSpace,
+                                           const std::string& demandName)
 {
     float errorValue = randGen().randfloat();   // If error happens, return this value anyway.
 
@@ -1462,9 +1462,8 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     return boost::lexical_cast<float> ( atomSpace.get_name(hNumberNode) );
 }
 
-Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
-                                                  const std::string & demand
-                                                  )
+Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace& atomSpace,
+                                                  const std::string& demand)
 {
     // Get the PredicateNode
     Handle predicateNode = atomSpace.get_handle(PREDICATE_NODE, demand+"DemandGoal");
@@ -1601,7 +1600,7 @@ Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
                                            Handle object,
                                            TruthValuePtr tv,
                                            bool permanent,
-                                           const Temporal &t)
+                                           const Temporal& t)
 {
     HandleSeq ll_out;
     ll_out.push_back(object);
@@ -2496,9 +2495,9 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
     return "";
 }
 
-Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
-                                                 const std::string & modulator,
-                                                 const std::string & petId)
+Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace& atomSpace,
+                                                 const std::string& modulator,
+                                                 const std::string& petId)
 {
     // Format of Modulator
     //
@@ -2642,10 +2641,10 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     return similarityLink;
 }
 
-bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
-                                              const std::string & demandName,
-                                              Handle & hDemandGoal,
-                                              Handle & hFuzzyWithin)
+bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace& atomSpace,
+                                              const std::string& demandName,
+                                              Handle& hDemandGoal,
+                                              Handle& hFuzzyWithin)
 {
     // Create BindLink used by pattern matcher
 
@@ -3065,8 +3064,8 @@ Handle AtomSpaceUtil::getTimedHandle(AtomSpace& as, Handle atTimeLink)
     return as.get_outgoing(atTimeLink, 2);
 }
 
-void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle> & infoMap,
-                                               AtomSpace & as,
+void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
+                                               AtomSpace& as,
                                                Handle atTimeLink,
                                                Handle key)
 {
@@ -3145,8 +3144,8 @@ void AtomSpaceUtil::updateLatestSchemaPredicate(AtomSpace& as,
                                as, atTimeLink, predicateNode);
 }
 
-void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle & latestSingleInfoHandle,
-                                                  AtomSpace & as,
+void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle,
+                                                  AtomSpace& as,
                                                   Handle atTimeLink)
 {
     if (latestSingleInfoHandle != Handle::UNDEFINED) {
@@ -3157,28 +3156,28 @@ void AtomSpaceUtil::updateGenericLatestSingleInfo(Handle & latestSingleInfoHandl
     latestSingleInfoHandle = addLink(as, LATEST_LINK, hs, true);
 }
 
-void AtomSpaceUtil::updateLatestModulator(AtomSpace & as,
+void AtomSpaceUtil::updateLatestModulator(AtomSpace& as,
                                           Handle atTimeLink,
                                           Handle modulatorPredicateNode)
 {
     updateGenericLatestInfoMap(latestModulators, as, atTimeLink, modulatorPredicateNode);
 }
 
-void AtomSpaceUtil::updateLatestDemand(AtomSpace & as,
+void AtomSpaceUtil::updateLatestDemand(AtomSpace& as,
                                        Handle atTimeLink,
                                        Handle demandPredicateNode)
 {
     updateGenericLatestInfoMap(latestDemands, as, atTimeLink, demandPredicateNode);
 }
 
-void AtomSpaceUtil::updateLatestFeeling(AtomSpace & as,
+void AtomSpaceUtil::updateLatestFeeling(AtomSpace& as,
                                         Handle atTimeLink,
                                         Handle feelingPredicateNode)
 {
     updateGenericLatestInfoMap(latestFeelings, as, atTimeLink, feelingPredicateNode);
 }
 
-void AtomSpaceUtil::updateLatestStimulus(AtomSpace & as,
+void AtomSpaceUtil::updateLatestStimulus(AtomSpace& as,
                                          Handle atTimeLink,
                                          Handle stimulusPredicateNode)
 {
