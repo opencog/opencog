@@ -35,32 +35,6 @@
 ;(display duplicate-pair-list) (newline)
 
 ; ------------------------------------------------
-(define (delete-atoms uuid-list except)
-"
-  delete-atoms -- delete every atom in the uuid-list, except for
-  the except uuid
-"
-
-	(define (del-atom uuid)
-		(define qry "")
-		(if (not (eq? uuid except))
-			(begin
-				(set! qry (string-append
-					"DELETE FROM atoms WHERE uuid="
-					(number->string uuid)))
-
-				(display "Delete ")(display qry)(newline)
-				(if do-update
-					(begin
-						(dbi-query conxion qry)
-						(display (dbi-get_status conxion)) (newline)
-						(flush-query)))
-			)
-		)
-	)
-	; Loop over the list of uuids
-	(for-each del-atom uuid-list)
-)
 
 (define (undup-eval luid-list)
 "
