@@ -101,10 +101,18 @@
 (define all-list-links (get-all-atoms
 	"SELECT uuid FROM atoms WHERE type=8" "uuid"))
 
-(display "Numb of 250-evals: ")
-(display (length (get-all-evals all-list-links 250)))(newline)
-(display "Numb of 152-evals: ")
-(display (length (get-all-evals all-list-links 152)))(newline)
+(define (count-evlinks any-uuid)
+	(display "Numb of ") (display any-uuid) (display " evals: ")
+	(display (length (get-all-evals all-list-links any-uuid)))(newline))
+
+;(display "Numb of 250-evals: ")
+;(display (length (get-all-evals all-list-links 250)))(newline)
+;(display "Numb of 152-evals: ")
+;(display (length (get-all-evals all-list-links 152)))(newline)
+
+; (map count-evlinks (list 152 250))
+(map count-evlinks (list 57 139 140 186 190 270))
+
 
 ; --------------------------------------------------------------
 (define (relabel-evals alist bad-id good-id)

@@ -17,11 +17,13 @@
 (define do-update #f)
 
 ; fix up type codes
-(define EvalLinkType 47)
+; (define EvalLinkType 47)
+(define EvalLinkType (number->string 27))
 
 (define conxion
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
-       (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
+       ; (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
+       (dbi-open "postgresql" "rohit:asdf:simple_pairs:tcp:localhost:5555"))
 
 (display conxion) (newline)
 
