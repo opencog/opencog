@@ -181,7 +181,7 @@ bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
     if (evalListLink != Handle::UNDEFINED) {
         //cout << "Found the ListLink with the ExecLink inside" << endl;
         Handle predicateNode = atomSpace.get_handle(PREDICATE_NODE,
-                               actionPredicateName);
+                                                    actionPredicateName);
         if (predicateNode != Handle::UNDEFINED) {
             //cout << "Found the PredicateNode" << endl;
             HandleSeq evalLinkOutgoing;
@@ -194,9 +194,9 @@ bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
                 //cout << "Found the EvalLink with the PredicateNode and the ListLink in its " << endl;
                 list<HandleTemporalPair> ocurrences;
                 timeServer().getTimeInfo(back_inserter(ocurrences),
-										 evalLink,
-										 Temporal(sinceTimestamp),
-										 TemporalTable::NEXT_AFTER_END_OF);
+                                         evalLink,
+                                         Temporal(sinceTimestamp),
+                                         TemporalTable::NEXT_AFTER_END_OF);
                 //if (!ocurrences.empty()) {
                 //    cout << "Got the following TimeServer entry: " << ocurrences.front().toString() << " for " << atomSpace.atomAsString(evalLink) << endl;
                 //} else {
@@ -210,21 +210,21 @@ bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
 }
 
 bool AtomSpaceUtil::getXYZOFromPositionEvalLink(const AtomSpace& atomspace,
-        Handle evalLink,
-        double &x,
-        double &y,
-        double &z,
-        Handle &o)
+                                                Handle evalLink,
+                                                double &x,
+                                                double &y,
+                                                double &z,
+                                                Handle &o)
 {
     if (atomspace.get_type(evalLink) != EVALUATION_LINK
-            ||  atomspace.get_arity(evalLink) != 2)
+        ||  atomspace.get_arity(evalLink) != 2)
         return false;
 
     Handle eval_pred = atomspace.get_outgoing(evalLink, 0);
     Handle pred_args = atomspace.get_outgoing(evalLink, 1);
 
     if (atomspace.get_name(eval_pred) != AGISIM_POSITION_PREDICATE_NAME
-            ||  atomspace.get_arity(pred_args) != 4)
+        ||  atomspace.get_arity(pred_args) != 4)
         return false;
 
     Handle xh = atomspace.get_outgoing(pred_args, 1);
@@ -247,72 +247,72 @@ Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace &atomSpace)
 }
 
 /*
-Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
-        unsigned long t)
-{
-    Temporal temporal(t);
-    std::vector<HandleTemporalPair> temporalPairs;
+  Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
+  unsigned long t)
+  {
+  Temporal temporal(t);
+  std::vector<HandleTemporalPair> temporalPairs;
 
-    Handle spaceMapNode = atomSpace.getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
+  Handle spaceMapNode = atomSpace.getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
 
-    Handle spaceMapHandle = Handle::UNDEFINED;
+  Handle spaceMapHandle = Handle::UNDEFINED;
 
-    if (spaceMapNode == Handle::UNDEFINED) {
-        return spaceMapHandle;
-    }
+  if (spaceMapNode == Handle::UNDEFINED) {
+  return spaceMapHandle;
+  }
 
-    const SpaceServer& spaceServer = atomSpace.getSpaceServer();
-    TimeServer& timeserver = timeServer();
+  const SpaceServer& spaceServer = atomSpace.getSpaceServer();
+  TimeServer& timeserver = timeServer();
 
-    // get temporal pair for the EXACT timestamp. Only spaceMapNodes are
-    // considered
-    timeserver.getTimeInfo(back_inserter(temporalPairs),
-                          spaceMapNode, temporal,
-                          TemporalTable::EXACT);
-    if (!temporalPairs.empty()) {
+  // get temporal pair for the EXACT timestamp. Only spaceMapNodes are
+  // considered
+  timeserver.getTimeInfo(back_inserter(temporalPairs),
+  spaceMapNode, temporal,
+  TemporalTable::EXACT);
+  if (!temporalPairs.empty()) {
 
-        // found at least one temporalPair. There should be at most one
-        spaceMapHandle = timeserver.getAtTimeLink(temporalPairs[0]);
-        if (!spaceServer.containsMap(spaceMapHandle)) {
-            spaceMapHandle = Handle::UNDEFINED;
-        }
-    }
+  // found at least one temporalPair. There should be at most one
+  spaceMapHandle = timeserver.getAtTimeLink(temporalPairs[0]);
+  if (!spaceServer.containsMap(spaceMapHandle)) {
+  spaceMapHandle = Handle::UNDEFINED;
+  }
+  }
 
-    if (spaceMapHandle == Handle::UNDEFINED) {
-        // found none temporalPair with EXACT timestamp. Now looking for
-        // timestamps before the one used.
-        temporalPairs.clear();
-        timeserver.getTimeInfo(back_inserter(temporalPairs),
-                              spaceMapNode,
-                              temporal,
-                              TemporalTable::PREVIOUS_BEFORE_START_OF);
-        while (!temporalPairs.empty()) {
-            spaceMapHandle = timeserver.getAtTimeLink(temporalPairs[0]);
-            Temporal* nextTemporal = temporalPairs[0].getTemporal();
-            if (spaceServer.containsMap(spaceMapHandle)) {
-                break;
-            } else {
-                spaceMapHandle = Handle::UNDEFINED;
-                temporalPairs.clear();
-                timeserver.getTimeInfo(back_inserter(temporalPairs),
-                                      spaceMapNode,
-                                      *nextTemporal,
-                                      TemporalTable::PREVIOUS_BEFORE_START_OF);
+  if (spaceMapHandle == Handle::UNDEFINED) {
+  // found none temporalPair with EXACT timestamp. Now looking for
+  // timestamps before the one used.
+  temporalPairs.clear();
+  timeserver.getTimeInfo(back_inserter(temporalPairs),
+  spaceMapNode,
+  temporal,
+  TemporalTable::PREVIOUS_BEFORE_START_OF);
+  while (!temporalPairs.empty()) {
+  spaceMapHandle = timeserver.getAtTimeLink(temporalPairs[0]);
+  Temporal* nextTemporal = temporalPairs[0].getTemporal();
+  if (spaceServer.containsMap(spaceMapHandle)) {
+  break;
+  } else {
+  spaceMapHandle = Handle::UNDEFINED;
+  temporalPairs.clear();
+  timeserver.getTimeInfo(back_inserter(temporalPairs),
+  spaceMapNode,
+  *nextTemporal,
+  TemporalTable::PREVIOUS_BEFORE_START_OF);
 
-            }
-        }
-    }
+  }
+  }
+  }
 
-    return spaceMapHandle;
-}
+  return spaceMapHandle;
+  }
 */
 bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
-        const std::string predicate,
-        const SpaceServer::SpaceMap& sm,
-        Handle obj1, Handle obj2)
+                                                const std::string predicate,
+                                                const SpaceServer::SpaceMap& sm,
+                                                Handle obj1, Handle obj2)
 {
     if (!sm.containsObject(obj1) ||
-            !sm.containsObject(obj2) ) {
+        !sm.containsObject(obj2) ) {
         logger().error("AtomSpaceUtil - One or both objects were not present in Space Map");
         return false;
     }
@@ -334,7 +334,7 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
             //    << " MD2 X : " << md2.centerX << " Y : " << md2.centerY
             //    << std::endl;
             double dist =  entity1->getPosition( )
-                            - entity2->getPosition( ) ;
+                - entity2->getPosition( ) ;
             //SpaceServer::SpaceMap::eucDist(obj1Center, obj2Center);
 
             double maxDistance = ( sm.xMax( ) - sm.xMin( ) ) / 50;
@@ -361,23 +361,23 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
     } else return false;
 }
 /*
-bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
-        const std::string& predicate,
-        unsigned long timestamp,
-        Handle obj1, Handle obj2)
-{
-    // get the SpaceMap to do the test
-    Handle spaceMapHandle = getSpaceMapHandleAtTimestamp(atomSpace,
-                            timestamp);
-    if (spaceMapHandle == Handle::UNDEFINED) {
-        return false;
-    } else {
-        const SpaceServer::SpaceMap&
-        sm = atomSpace.getSpaceServer().getMap(spaceMapHandle);
-        return getPredicateValueAtSpaceMap(atomSpace,
-                                           predicate, sm, obj1, obj2);
-    }
-}
+  bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
+  const std::string& predicate,
+  unsigned long timestamp,
+  Handle obj1, Handle obj2)
+  {
+  // get the SpaceMap to do the test
+  Handle spaceMapHandle = getSpaceMapHandleAtTimestamp(atomSpace,
+  timestamp);
+  if (spaceMapHandle == Handle::UNDEFINED) {
+  return false;
+  } else {
+  const SpaceServer::SpaceMap&
+  sm = atomSpace.getSpaceServer().getMap(spaceMapHandle);
+  return getPredicateValueAtSpaceMap(atomSpace,
+  predicate, sm, obj1, obj2);
+  }
+  }
 */
 bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
                                           unsigned long timestamp,
@@ -388,13 +388,13 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
                                           bool include_to)
 {
     OC_ASSERT(delay < timestamp,
-                     "timestamp - delay must be positive");
+              "timestamp - delay must be positive");
     unsigned long tl = timestamp - delay;
     unsigned long tu = timestamp;
     Temporal temp(tl, tu);
     std::list<HandleTemporalPair> ret;
     timeServer().getTimeInfo(back_inserter(ret), Handle::UNDEFINED, temp,
-                          TemporalTable::STARTS_WITHIN);
+                             TemporalTable::STARTS_WITHIN);
 
     if (ret.empty()) {
         return false;
@@ -414,9 +414,9 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
         string atom_message_name;
         if (include_to) {
             OC_ASSERT(atomSpace.is_node(to_h),
-                       "Handle to_h should be a 'Node'.");
+                      "Handle to_h should be a 'Node'.");
             atom_message_name = string("to:") + atomSpace.get_name(to_h)
-                                + string(": ") + message;
+                + string(": ") + message;
         } else atom_message_name = message;
         Handle sentence_h = atomSpace.get_handle(SENTENCE_NODE,
                                                  atom_message_name);
@@ -436,18 +436,18 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
                                                                             makeVirtualAtom(from_h, NULL),
                                                                             makeVirtualAtom(sentence_h, NULL),
                                                                             NULL
-                                                                           ),
+                                                                            ),
                                                             NULL
-                                                           ),
+                                                            ),
                                             NULL
-                                           ),
+                                            ),
                             NULL
-                           );
+                            );
 
         does_fit_template dft(*say_template, &atomSpace, true);
         //iterate over the atom list to see if such a message has been said
         for (std::list<HandleTemporalPair>::const_iterator ret_it = ret.begin();
-                ret_it != ret.end(); ++ret_it) {
+             ret_it != ret.end(); ++ret_it) {
             if (dft(ret_it->getHandle()))
                 return true;
         }
@@ -516,8 +516,8 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
     {
 
         if ( HandleTemporalPairEntry::handleTemporalPairCompare
-                (&*iHandleTemporalPair,
-                 &*iLatestHandleTemporalPair) > 0 ) {
+             (&*iHandleTemporalPair,
+              &*iLatestHandleTemporalPair) > 0 ) {
             iLatestHandleTemporalPair = iHandleTemporalPair;
         }
 
@@ -536,12 +536,12 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
 }
 
 Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace &atomSpace,
-                             std::string predicateName,
-                             Handle a,
-                             Handle b,
-                             Handle c,
-                             bool getPositiveResult)
-throw(opencog::NotFoundException)
+                                              std::string predicateName,
+                                              Handle a,
+                                              Handle b,
+                                              Handle c,
+                                              bool getPositiveResult)
+    throw(opencog::NotFoundException)
 {
     HandleSeq seq0;
     seq0.push_back(a);
@@ -563,12 +563,12 @@ throw(opencog::NotFoundException)
 
     // some EvalLink has just predicate and the first outgoing
     // e.g.:
-//    (EvaluationLink (stv 1 1)
-//       (PredicateNode "is_food")
-//       (ListLink
-//          (ConceptNode "apple")
-//       )
-//    )
+    //    (EvaluationLink (stv 1 1)
+    //       (PredicateNode "is_food")
+    //       (ListLink
+    //          (ConceptNode "apple")
+    //       )
+    //    )
     Handle listLinkHandle = atomSpace.get_handle(LIST_LINK, seq0);
     HandleSeq evalLinkHandleset;
     if (listLinkHandle != Handle::UNDEFINED)
@@ -578,22 +578,22 @@ throw(opencog::NotFoundException)
         seq.push_back(listLinkHandle);
 
         getHandlesByOutgoing(back_inserter(evalLinkHandleset),
-                               atomSpace,
-                               EVALUATION_LINK,
-                               seq, NULL, NULL, 2);
+                             atomSpace,
+                             EVALUATION_LINK,
+                             seq, NULL, NULL, 2);
 
     }
 
     // some EvalLink has its value node blow the first outgoings
     // in this case, need to call pattern matcher to get the value node given the predicate and first outgoings
     // e.g.:
-//    (EvaluationLink (stv 1 1)
-//       (PredicateNode "color")
-//       (ListLink
-//          (ConceptNode "sky")
-//          (ConceptNode "blue")
-//       )
-//    )
+    //    (EvaluationLink (stv 1 1)
+    //       (PredicateNode "color")
+    //       (ListLink
+    //          (ConceptNode "sky")
+    //          (ConceptNode "blue")
+    //       )
+    //    )
 
     if (evalLinkHandleset.size() == 0)
     {
@@ -627,7 +627,7 @@ float AtomSpaceUtil::getPredicateValue(AtomSpace &atomSpace,
                                        std::string predicateName,
                                        Handle a,
                                        Handle b)
-throw(opencog::NotFoundException)
+    throw(opencog::NotFoundException)
 {
 
     HandleSeq seq0;
@@ -643,16 +643,16 @@ throw(opencog::NotFoundException)
                                                   predicateName);
     if (predicateHandle == Handle::UNDEFINED) {
         throw opencog::NotFoundException( TRACE_INFO,
-                  (std::string("AtomSpaceUtil - Predicate not found: ")
-                   + predicateName ).c_str( ) );
+                                          (std::string("AtomSpaceUtil - Predicate not found: ")
+                                           + predicateName ).c_str( ) );
     }
 
     // testing if there is a list link already
     Handle listLinkHandle = atomSpace.get_handle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
         throw opencog::NotFoundException( TRACE_INFO,
-                ( "AtomSpaceUtil - List link not found. "
-                  "predicateName[" + predicateName + "]").c_str( ) );
+                                          ( "AtomSpaceUtil - List link not found. "
+                                            "predicateName[" + predicateName + "]").c_str( ) );
     }
 
     HandleSeq seq;
@@ -662,8 +662,8 @@ throw(opencog::NotFoundException)
     Handle evalLinkHandle = atomSpace.get_handle(EVALUATION_LINK, seq);
     if (evalLinkHandle == Handle::UNDEFINED) {
         throw opencog::NotFoundException(TRACE_INFO,
-               ("AtomSpaceUtil - There is no evaluation link for predicate: "
-                 + predicateName).c_str() );
+                                         ("AtomSpaceUtil - There is no evaluation link for predicate: "
+                                          + predicateName).c_str() );
     }
     return atomSpace.get_mean(evalLinkHandle);
 }
@@ -699,8 +699,8 @@ bool AtomSpaceUtil::isPetOwner( AtomSpace& atomSpace,
     Handle listLinkHandle = atomSpace.get_handle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
         logger().fine("IsFriendly - Obj %s and %s have no ListLink.",
-                     atomSpace.get_name(avatar).c_str(),
-                     atomSpace.get_name(pet).c_str());
+                      atomSpace.get_name(avatar).c_str(),
+                      atomSpace.get_name(pet).c_str());
         return false;
     } // if
 
@@ -723,7 +723,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
 {
 
     Handle sizePredicate = atomSpace.get_handle(PREDICATE_NODE,
-                           SIZE_PREDICATE_NAME);
+                                                SIZE_PREDICATE_NAME);
     if (sizePredicate == Handle::UNDEFINED) {
         logger().fine("AtomSpaceUtil - No size predicate found.");
         return false;
@@ -742,16 +742,16 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
         // getting data from evalLink
         Handle listLink = atomSpace.getOutgoing(evalLink, 1);
         if (atomSpace.getType(listLink) == LIST_LINK
-                && atomSpace.getArity(listLink) == 4) {
+            && atomSpace.getArity(listLink) == 4) {
             // ensure that the size predicate relats to the object
             HandleSeq outgoing = atomSpace.getOutgoing(listLink);
             if (outgoing[0] == object) {
-//TODO: elvys remove logs comment
+                //TODO: elvys remove logs comment
                 length = atof(atomSpace.getName(outgoing[1]).c_str());
                 width = atof(atomSpace.getName(outgoing[2]).c_str());
                 height = atof(atomSpace.getName(outgoing[3]).c_str());
-//                logger().info("AtomSpaceUtil - Obj %s (width: %.2lf length: %.2lf height: %.2lf)",
-//                            atomSpace.getName(object).c_str(), width, length, height);
+                //                logger().info("AtomSpaceUtil - Obj %s (width: %.2lf length: %.2lf height: %.2lf)",
+                //                            atomSpace.getName(object).c_str(), width, length, height);
                 return true;
             }
         }
@@ -762,7 +762,7 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
         AtomPtr a(incomingHandle);
         LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == EVALUATION_LINK &&  incomingLink->getArity() == 2 &&
-                incomingLink->getOutgoingAtom(0) == sizePredicate) {
+            incomingLink->getOutgoingAtom(0) == sizePredicate) {
             Handle targetHandle = incomingLink->getOutgoingAtom(1);
             AtomPtr targetAtom(targetHandle);
             if (targetAtom->getType() == LIST_LINK) {
@@ -778,16 +778,16 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
     }
 #endif
 
-//TODO: elvys remove logs comment
-//    logger().fine("AtomSpaceUtil - No size pred for obj %s found.",
-//                    atomSpace.getName(object).c_str());
+    //TODO: elvys remove logs comment
+    //    logger().fine("AtomSpaceUtil - No size pred for obj %s found.",
+    //                    atomSpace.getName(object).c_str());
     return false;
 }
 
 Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
-									  std::string predicateName,
-									  const HandleSeq& ll_out,
-									  TruthValuePtr tv, bool permanent, const Temporal &t)
+                                             std::string predicateName,
+                                             const HandleSeq& ll_out,
+                                             TruthValuePtr tv, bool permanent, const Temporal &t)
 {
     bool predBool = true;
     if (tv->getMean() >= 0.5) {
@@ -798,7 +798,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     // if predicate handle not defined and TV equals < 0.5 just return
     if (ph == Handle::UNDEFINED && predBool) {
         logger().fine("AtomSpaceUtil - %s not added (no pred handle and TV less than 0.5).",
-                     predicateName.c_str());
+                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
         ph = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
@@ -808,7 +808,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     // if list link handle not defined and TV equals < 0.5 just return
     if (ll == Handle::UNDEFINED && predBool) {
         logger().fine("AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
-                     predicateName.c_str());
+                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
         ll = atomSpace.add_link(LIST_LINK, ll_out);
@@ -823,13 +823,13 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     // if evaluation link handle not defined and TV equals < 0.5 just return
     if (el == Handle::UNDEFINED && predBool) {
         logger().fine("AtomSpaceUtil - %s not added (no EvalLink and TV less than 0.5).",
-                     predicateName.c_str());
+                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
         el = atomSpace.add_link(EVALUATION_LINK, hs2);
         el->setTruthValue(TruthValue::TRUE_TV());
         logger().fine("AtomSpaceUtil - %s added with TV %f.",
-                     predicateName.c_str(), tv->getMean());
+                      predicateName.c_str(), tv->getMean());
     }
     atomSpace.set_TV(el, tv);
 
@@ -846,15 +846,15 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
-        const std::string& predicateNodeName )
+                                                  const std::string& predicateNodeName )
 {
     std::vector<HandleTemporalPair> timestamps;
     getAllEvaluationLinks( atomSpace, timestamps, predicateNodeName );
 
     if ( timestamps.size() == 0 ) {
         logger().debug(
-                     "AtomSpaceUtil - Found no entries for PredicateNode '%s' in TimeServer.",
-                     predicateNodeName.c_str());
+                       "AtomSpaceUtil - Found no entries for PredicateNode '%s' in TimeServer.",
+                       predicateNodeName.c_str());
         return Handle::UNDEFINED;
     }
 
@@ -870,7 +870,7 @@ Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,
     Handle selectedHandle = timestamps[mostRecentIndex].getHandle();
     if ( selectedHandle == Handle::UNDEFINED) {
         logger().debug("AtomSpaceUtil - Timeserver returned NULL handle "
-                "for PredicateNode '%s'", predicateNodeName.c_str());
+                       "for PredicateNode '%s'", predicateNodeName.c_str());
         return Handle::UNDEFINED;
     }
 
@@ -976,7 +976,7 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace.add_link(BIND_LINK, bindLinkOutgoings);
 
-//            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+    //            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
 
     // Run pattern matcher
@@ -1027,7 +1027,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace.add_link(BIND_LINK, bindLinkOutgoings);
 
-//            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+    //            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
 
     // Run pattern matcher
@@ -1078,23 +1078,23 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace,
     atomSpace.remove_atom(hResultListLink);
 
     // Check and return the result
-//    for (Handle hResult : resultSet) {
-//        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl;
-//
-//        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
-//        for (Handle hIncoming : incomingSet) {
-//            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
-//        }
-//
-//        std::cout<<std::endl;
-//    }
+    //    for (Handle hResult : resultSet) {
+    //        std::cout<<"Found a ReferenceLink: "<<atomSpace.atomAsString(hResult)<<std::endl;
+    //
+    //        std::vector<Handle> incomingSet = atomSpace.getIncoming(hResult);
+    //        for (Handle hIncoming : incomingSet) {
+    //            std::cout<<"An incoming: "<< atomSpace.atomAsString(hIncoming)<<std::endl;
+    //        }
+    //
+    //        std::cout<<std::endl;
+    //    }
 
     if ( resultSet.size() != 1 ) {
         logger().warn( "AtomSpaceUtil::%s - The number of ReferenceLink containing '%s' should be exactly 1, but got %d",
                        __FUNCTION__,
                        atomSpace.atom_as_string(hFirstOutgoing).c_str(),
                        resultSet.size()
-                     );
+                       );
 
         return Handle::UNDEFINED;
     }
@@ -1119,8 +1119,8 @@ Handle AtomSpaceUtil::getReference(AtomSpace & atomSpace, Handle hFirstOutgoing)
 }
 
 float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
-        const std::string& petId,
-        const std::string& feeling)
+                                                const std::string& petId,
+                                                const std::string& feeling)
 {
     //! @todo This code was copypasted from PAI::addPhysiologicalFeeling. It should use getHandleSet etc
     Handle feelingNode = atomSpace.add_node(PREDICATE_NODE, feeling);
@@ -1154,9 +1154,9 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     std::string modulatorUpdater = modulatorName + "ModulatorUpdater";
 
     Handle hGroundedSchemaNode = atomSpace.get_handle
-                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
-                                          modulatorUpdater      // Name of the Atom wanted
-                                        );
+        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+          modulatorUpdater      // Name of the Atom wanted
+          );
 
     if ( hGroundedSchemaNode == Handle::UNDEFINED ||
          atomSpace.get_type(hGroundedSchemaNode) != GROUNDED_SCHEMA_NODE ) {
@@ -1165,7 +1165,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
                        __FUNCTION__,
                        modulatorUpdater.c_str(),
                        errorValue
-                     );
+                       );
         return errorValue;
     }
 
@@ -1174,45 +1174,45 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
 
 #define getIncomingSet(iter,h,t,sub) h->getIncomingSetByType(iter,t,sub)
     getIncomingSet
-                  ( back_inserter(executionOutputLinkSet), // return value
-                    hGroundedSchemaNode,      // returned link should contain this node
-                    EXECUTION_OUTPUT_LINK,    // type of the returned link
-                    false                     // subclass is not acceptable,
-                                              // i.e. returned link should be exactly of
-                  );                          // type EXECUTION_OUTPUT_LINK
+        ( back_inserter(executionOutputLinkSet), // return value
+          hGroundedSchemaNode,      // returned link should contain this node
+          EXECUTION_OUTPUT_LINK,    // type of the returned link
+          false                     // subclass is not acceptable,
+          // i.e. returned link should be exactly of
+          );                          // type EXECUTION_OUTPUT_LINK
 
     // Get ExecutionOutputLink
     if (executionOutputLinkSet.size() !=1 ) {
         logger().error("AtomSpaceUtil::%s - Number of ExecutionOutputLink should be exactly 1, but got %d.",
                        executionOutputLinkSet.size(),
                        __FUNCTION__
-                      );
+                       );
         return false;
     }
 
     Handle hExecutionOutputLink = executionOutputLinkSet[0];
 
-//    // Pick up the ExecutionOutputLink containing ListLink
-//    std::vector<Handle>::iterator iExecutionOutputLink;
-//
-//    for(iExecutionOutputLink = executionOutputLinkSet.begin();
-//        iExecutionOutputLink != executionOutputLinkSet.end();
-//        ++ iExecutionOutputLink ) {
-//
-//        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
-//             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
-//           )
-//            break;
-//    }
-//
-//    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
-//        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.",
-//                       __FUNCTION__
-//                      );
-//        return false;
-//    }
-//
-//    Handle hExecutionOutputLink = *iExecutionOutputLink;
+    //    // Pick up the ExecutionOutputLink containing ListLink
+    //    std::vector<Handle>::iterator iExecutionOutputLink;
+    //
+    //    for(iExecutionOutputLink = executionOutputLinkSet.begin();
+    //        iExecutionOutputLink != executionOutputLinkSet.end();
+    //        ++ iExecutionOutputLink ) {
+    //
+    //        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+    //             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+    //           )
+    //            break;
+    //    }
+    //
+    //    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+    //        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.",
+    //                       __FUNCTION__
+    //                      );
+    //        return false;
+    //    }
+    //
+    //    Handle hExecutionOutputLink = *iExecutionOutputLink;
 
     // Get all the SimilarityLink that contains the ExecutionOutputLink
     //
@@ -1230,7 +1230,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds modulator updater (ExecutionOutputLink)",
                    __FUNCTION__,
                    similarityLinkSet.size()
-                  );
+                   );
 
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
@@ -1242,7 +1242,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     logger().debug("AtomSpaceUtil::%s - Get %d HandleTemporalPairs of SimilarityLink that holds the modulator updater (ExecutionOutputLink)",
                    __FUNCTION__,
                    handleTemporalPairs.size()
-                  );
+                   );
 
     // Pick up the HandleTemporalPair with latest temporal (greatest temporal)
     // Note:
@@ -1259,8 +1259,8 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
     while ( iHandleTemporalPair != handleTemporalPairs.end() ) {
 
         if ( HandleTemporalPairEntry::handleTemporalPairCompare
-                (&*iHandleTemporalPair,
-                 &*iLatestHandleTemporalPair) > 0 ) {
+             (&*iHandleTemporalPair,
+              &*iLatestHandleTemporalPair) > 0 ) {
             iLatestHandleTemporalPair = iHandleTemporalPair;
         }
 
@@ -1272,7 +1272,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
                       __FUNCTION__,
                       atomSpace.atom_as_string(hExecutionOutputLink).c_str(),
                       errorValue
-                     );
+                      );
         return errorValue;
     }
 
@@ -1283,7 +1283,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
         logger().warn("AtomSpaceUtil::%s - The arity of SimilarityLink holding the modulator value (NumberNode) and modulator updater (ExecutionOutputLink) should be exactly 2. But Got %d.",
                       __FUNCTION__,
                       atomSpace.get_arity(hLatestSimilarityLink)
-                     );
+                      );
         return errorValue;
     }
 
@@ -1291,7 +1291,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
                    __FUNCTION__,
                    atomSpace.atom_as_string(hLatestSimilarityLink).c_str(),
                    modulatorName.c_str()
-                  );
+                   );
 
     Handle hNumberNode = atomSpace.get_outgoing(hLatestSimilarityLink, 0);
 
@@ -1300,9 +1300,9 @@ float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
 
     if ( atomSpace.get_type(hNumberNode) != NUMBER_NODE ) {
         logger().warn("AtomSpaceUtil::%s - Failed to find the NumberNode containing the latest modulator value. Return random value: %f.",
-                       __FUNCTION__,
-                       errorValue
-                     );
+                      __FUNCTION__,
+                      errorValue
+                      );
         return errorValue;
     }
 
@@ -1319,9 +1319,9 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     std::string demandUpdater = demandName + "DemandUpdater";
 
     Handle hGroundedSchemaNode = atomSpace.get_handle
-                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
-                                          demandUpdater         // Name of the Atom wanted
-                                        );
+        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+          demandUpdater         // Name of the Atom wanted
+          );
 
     if ( hGroundedSchemaNode == Handle::UNDEFINED ||
          atomSpace.get_type(hGroundedSchemaNode) != GROUNDED_SCHEMA_NODE ) {
@@ -1330,7 +1330,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
                        __FUNCTION__,
                        demandUpdater.c_str(),
                        errorValue
-                     );
+                       );
         return errorValue;
     }
 
@@ -1338,12 +1338,12 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     std::vector<Handle> executionOutputLinkSet;
 
     getIncomingSet
-                  ( back_inserter(executionOutputLinkSet), // return value
-                    hGroundedSchemaNode,      // returned link should contain this node
-                    EXECUTION_OUTPUT_LINK,    // type of the returned link
-                    false                     // subclass is not acceptable,
-                                              // i.e. returned link should be exactly of
-                  );                          // type EXECUTION_OUTPUT_LINK
+        ( back_inserter(executionOutputLinkSet), // return value
+          hGroundedSchemaNode,      // returned link should contain this node
+          EXECUTION_OUTPUT_LINK,    // type of the returned link
+          false                     // subclass is not acceptable,
+          // i.e. returned link should be exactly of
+          );                          // type EXECUTION_OUTPUT_LINK
 
     // Pick up the ExecutionOutputLink containing ListLink
     std::vector<Handle>::iterator iExecutionOutputLink;
@@ -1354,14 +1354,14 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
         if ( atomSpace.get_arity(*iExecutionOutputLink) == 2 &&
              atomSpace.get_type( atomSpace.get_outgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
-           )
+             )
             break;
     }
 
     if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
         logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.",
                        __FUNCTION__
-                      );
+                       );
         return false;
     }
 
@@ -1383,7 +1383,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     logger().debug("AtomSpaceUtil::%s - Get %d SimilarityLink that holds demand updater (ExecutionOutputLink)",
                    __FUNCTION__,
                    similarityLinkSet.size()
-                  );
+                   );
 
     // Get all the HandleTemporalPairs of SimilarityLink
     std::vector<HandleTemporalPair> handleTemporalPairs;
@@ -1394,7 +1394,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     logger().debug("AtomSpaceUtil::%s - Get %d HandleTemporalPairs of SimilarityLink that holds the demand updater (ExecutionOutputLink)",
                    __FUNCTION__,
                    handleTemporalPairs.size()
-                  );
+                   );
 
     // Pick up the HandleTemporalPair with latest temporal (greatest temporal)
     // Note:
@@ -1411,8 +1411,8 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
     while ( iHandleTemporalPair != handleTemporalPairs.end() ) {
 
         if ( HandleTemporalPairEntry::handleTemporalPairCompare
-                (&*iHandleTemporalPair,
-                 &*iLatestHandleTemporalPair) > 0 ) {
+             (&*iHandleTemporalPair,
+              &*iLatestHandleTemporalPair) > 0 ) {
             iLatestHandleTemporalPair = iHandleTemporalPair;
         }
 
@@ -1424,7 +1424,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
                       __FUNCTION__,
                       atomSpace.atom_as_string(hExecutionOutputLink).c_str(),
                       errorValue
-                     );
+                      );
         return errorValue;
     }
 
@@ -1435,7 +1435,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
         logger().warn("AtomSpaceUtil::%s - The arity of SimilarityLink holding the demand level (NumberNode) and demand updater (ExecutionOutputLink) should be exactly 2. But Got %d.",
                       __FUNCTION__,
                       atomSpace.get_arity(hLatestSimilarityLink)
-                     );
+                      );
         return errorValue;
     }
 
@@ -1443,7 +1443,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
                    __FUNCTION__,
                    atomSpace.atom_as_string(hLatestSimilarityLink).c_str(),
                    demandName.c_str()
-                  );
+                   );
 
     Handle hNumberNode = atomSpace.get_outgoing(hLatestSimilarityLink, 0);
 
@@ -1452,9 +1452,9 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
     if ( atomSpace.get_type(hNumberNode) != NUMBER_NODE ) {
         logger().warn("AtomSpaceUtil::%s - Failed to find the NumberNode containing the latest demand level. Return random value: %f instead.",
-                       __FUNCTION__,
-                       errorValue
-                     );
+                      __FUNCTION__,
+                      errorValue
+                      );
         return errorValue;
     }
 
@@ -1464,7 +1464,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
 
 Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
                                                   const std::string & demand
-                                                 )
+                                                  )
 {
     // Get the PredicateNode
     Handle predicateNode = atomSpace.get_handle(PREDICATE_NODE, demand+"DemandGoal");
@@ -1473,7 +1473,7 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
         logger().error("AtomSpaceUtil::%s - Failed to get the PredicateNode for demand goal '%s'",
                        __FUNCTION__,
                        demand.c_str()
-                      );
+                       );
         return opencog::Handle::UNDEFINED;
     }
 
@@ -1485,9 +1485,9 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
 
     if ( listLink == opencog::Handle::UNDEFINED ) {
         logger().error("AtomSpaceUtil::%s - Failed to get the ListLink for demand goal '%s'",
-                        __FUNCTION__,
-                        demand.c_str()
-                      );
+                       __FUNCTION__,
+                       demand.c_str()
+                       );
         return opencog::Handle::UNDEFINED;
     }
 
@@ -1503,7 +1503,7 @@ Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace,
         logger().error("AtomSpaceUtil::%s - Failed to get the EvaluationLink for demand goal '%s'",
                        __FUNCTION__,
                        demand.c_str()
-                      );
+                       );
         return opencog::Handle::UNDEFINED;
     }
 
@@ -1520,22 +1520,22 @@ void AtomSpaceUtil::getAllEvaluationLinks(AtomSpace& atomSpace,
 {
 
     logger().fine("AtomSpaceUtil - getAllEvaluationLinks - "
-            "Searching for PredicateNode '%s'.",
-            predicateNodeName.c_str());
+                  "Searching for PredicateNode '%s'.",
+                  predicateNodeName.c_str());
 
-#define getIncSet(iter, name, targ, type, sub) { \
-Handle targh(atomSpace.get_handle(targ, name)); \
-targh->getIncomingSetByType(iter, type, sub); }
+#define getIncSet(iter, name, targ, type, sub) {        \
+        Handle targh(atomSpace.get_handle(targ, name)); \
+        targh->getIncomingSetByType(iter, type, sub); }
     std::vector<Handle> handles;
     getIncSet(back_inserter(handles),
-                           predicateNodeName.c_str(),
-                           PREDICATE_NODE,
-                           EVALUATION_LINK, true);
+              predicateNodeName.c_str(),
+              PREDICATE_NODE,
+              EVALUATION_LINK, true);
 
     if (handles.empty()) {
         logger().debug("AtomSpaceUtil - getAllEvaluationLinks - "
-                "Found no EvaluationLink for PredicateNode '%s'",
-                predicateNodeName.c_str());
+                       "Found no EvaluationLink for PredicateNode '%s'",
+                       predicateNodeName.c_str());
         return;
     }
 
@@ -1554,11 +1554,11 @@ targh->getIncomingSetByType(iter, type, sub); }
 }
 
 Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
-        std::string predicateName,
-        TruthValuePtr tv,
-        Handle object1,
-        Handle object2,
-        Handle object3 )
+                                         std::string predicateName,
+                                         TruthValuePtr tv,
+                                         Handle object1,
+                                         Handle object2,
+                                         Handle object3 )
 {
     HandleSeq listLink;
 
@@ -1578,7 +1578,7 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
                                                     PREDICATE_NODE,
                                                     predicateName,
                                                     true
-                                                   );
+                                                    );
     HandleSeq evalLink;
 
     evalLink.push_back(predicateHandle);
@@ -1590,7 +1590,7 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
                                                    EVALUATION_LINK,
                                                    evalLink,
                                                    true
-                                                  );
+                                                   );
     atomSpace.set_TV(evalLinkHandle, tv);
 
     return evalLinkHandle;
@@ -1609,11 +1609,11 @@ Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
-        std::string predicateName,
-        Handle a,
-        Handle b,
-        TruthValuePtr tv,
-        const Temporal& t)
+                                           std::string predicateName,
+                                           Handle a,
+                                           Handle b,
+                                           TruthValuePtr tv,
+                                           const Temporal& t)
 {
 
     HandleSeq ll_out;
@@ -1652,12 +1652,12 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
     if (objectHandle == Handle::UNDEFINED) {
         // drop operation
         logger().debug("AtomSpaceUtil - The object's handle is undefined. "
-                "Holder dropped the object");
+                       "Holder dropped the object");
         Handle isHoldingOldAtTimeLink = getMostRecentIsHoldingAtTimeLink(atomSpace, holderId);
         if (isHoldingOldAtTimeLink != Handle::UNDEFINED) {
             // Reconfigure the timestamp of the last grabbed object
             Handle isHoldingEvalLink = getTimedHandle(atomSpace,
-                                       isHoldingOldAtTimeLink);
+                                                      isHoldingOldAtTimeLink);
             if ( isHoldingEvalLink != Handle::UNDEFINED ) {
                 Temporal t = getTemporal(atomSpace, isHoldingOldAtTimeLink);
                 // TODO: What if it was not holding anything anymore (this
@@ -1670,8 +1670,8 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                 long unsigned tl = t.getLowerBound();
                 Temporal new_temp(tl, std::max(currentTimestamp - 20, tl));
                 logger().debug("AtomSpaceUtil - setupHoldingObject: "
-                        "new time = '%s'", new_temp.toString().c_str());
-                 // Now, it can be forgotten.
+                               "new time = '%s'", new_temp.toString().c_str());
+                // Now, it can be forgotten.
                 timeServer().addTimeInfo(isHoldingEvalLink, new_temp);
             }
         }
@@ -1684,9 +1684,9 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
         // TODO: What if it is already holding another thing? Shouldn't the old
         // isHoldingatTimeLink be updated?
         logger().debug("AtomSpaceUtil - Now '%s' is holding '%s' at '%ul'",
-                     atomSpace.get_name(holderHandle).c_str(),
-                     atomSpace.get_name(objectHandle).c_str(),
-                     currentTimestamp);
+                       atomSpace.get_name(holderHandle).c_str(),
+                       atomSpace.get_name(objectHandle).c_str(),
+                       currentTimestamp);
         AtomSpaceUtil::setPredicateValue( atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
                                           SimpleTruthValue::createTV( 1.0, 1.0 ),
@@ -1705,7 +1705,7 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getLatestHoldingObjectHandle(AtomSpace& atomSpace,
-        const std::string& holderId )
+                                                   const std::string& holderId )
 {
 
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
@@ -1726,39 +1726,39 @@ Handle AtomSpaceUtil::getLatestHoldingObjectHandle(AtomSpace& atomSpace,
     }
 
     logger().debug("AtomSpaceUtil - There is no isHoldingLink for %s",
-                  holderId.c_str() );
+                   holderId.c_str() );
     return Handle::UNDEFINED;
 }
 
 bool AtomSpaceUtil::isObjectBeingHolded( AtomSpace& atomSpace,
-        const std::string& objectId )
+                                         const std::string& objectId )
 {
     return ( getObjectHolderHandle( atomSpace, objectId ) != Handle::UNDEFINED );
 }
 
 Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
-        const std::string& objectId )
+                                             const std::string& objectId )
 {
     // TODO: try to optimize this method. It is using getHandleSet twice for
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
     classserver().foreachRecursive(
-        [&](Type t)->void {
-            Handle h(atomSpace.get_handle(t, objectId));
-            if (h) handles.push_back(h); }, OBJECT_NODE);
+                                   [&](Type t)->void {
+                                       Handle h(atomSpace.get_handle(t, objectId));
+                                       if (h) handles.push_back(h); }, OBJECT_NODE);
 
     if (handles.size() != 1) {
         logger().debug("AtomSpaceUtil - No agent is holding object[%s]",
-                     objectId.c_str() );
+                       objectId.c_str() );
         return Handle::UNDEFINED;
     }
     Handle holdedObjectHandle = handles[0];
 
     handles.clear( );
     getIncSet( back_inserter(handles),
-                            "isHolding",
-                            PREDICATE_NODE,
-                            EVALUATION_LINK, true );
+               "isHolding",
+               PREDICATE_NODE,
+               EVALUATION_LINK, true );
 
     std::vector<HandleTemporalPair> timestamps;
     for ( unsigned int i = 0; i < handles.size(); ++i ) {
@@ -1779,7 +1779,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
 
             if ( getLatestHoldingObjectHandle(atomSpace,
                                               atomSpace.get_name(holderHandle))
-                    != holdedObjectHandle ) {
+                 != holdedObjectHandle ) {
                 // skip objects that are holding by the same holder of the target object
                 // but arent't the target
                 continue;
@@ -1810,7 +1810,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
 }
 
 std::string AtomSpaceUtil::getObjectHolderId( AtomSpace& atomSpace,
-        const std::string& objectId )
+                                              const std::string& objectId )
 {
     Handle objectHandle = getObjectHolderHandle( atomSpace, objectId );
     if ( objectHandle != Handle::UNDEFINED ) {
@@ -1821,7 +1821,7 @@ std::string AtomSpaceUtil::getObjectHolderId( AtomSpace& atomSpace,
 
 
 Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
-        const std::string& holderId )
+                                                       const std::string& holderId )
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
     if ( holderHandle == Handle::UNDEFINED ) {
@@ -1830,8 +1830,8 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
 
     std::vector<Handle> handles;
     getIncSet( back_inserter(handles),
-                            IS_HOLDING_PREDICATE_NAME,
-                            PREDICATE_NODE, EVALUATION_LINK, true );
+               IS_HOLDING_PREDICATE_NAME,
+               PREDICATE_NODE, EVALUATION_LINK, true );
 
 
     std::vector<HandleTemporalPair> timestamps;
@@ -1857,7 +1857,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
         }
 
         logger().debug("AtomSpaceUtil - The most recent holded object %ul",
-                      timestamps[mostRecentIndex].getTemporal()->getUpperBound() );
+                       timestamps[mostRecentIndex].getTemporal()->getUpperBound() );
 
         return timeServer().getAtTimeLink( timestamps[mostRecentIndex]);
     }
@@ -1865,7 +1865,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getMostRecentIsHoldingLink(AtomSpace& atomSpace,
-        const std::string& holderId )
+                                                 const std::string& holderId )
 {
     Handle h = getMostRecentIsHoldingAtTimeLink(atomSpace, holderId);
     if (h != Handle::UNDEFINED)
@@ -1874,7 +1874,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingLink(AtomSpace& atomSpace,
 }
 
 std::string AtomSpaceUtil::getHoldingObjectId(AtomSpace& atomSpace,
-        const std::string& holderId )
+                                              const std::string& holderId )
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
     if ( holderHandle == Handle::UNDEFINED ) return "";
@@ -1922,7 +1922,7 @@ Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
     }
 
     logger().debug("AtomSpaceUtil - There is no isHoldingLink for %s",
-                  holderId.c_str() );
+                   holderId.c_str() );
     return Handle::UNDEFINED;
 }
 
@@ -1935,29 +1935,29 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
 
     std::vector<Handle> handles;
     getIncSet(back_inserter(handles), IS_HOLDING_PREDICATE_NAME,
-                           PREDICATE_NODE, EVALUATION_LINK, true);
+              PREDICATE_NODE, EVALUATION_LINK, true);
 
     std::vector<HandleTemporalPair> timestamps;
     for (std::vector<Handle>::const_iterator h_i = handles.begin();
-            h_i != handles.end(); ++h_i) {
+         h_i != handles.end(); ++h_i) {
         Handle listLink = atomSpace.get_outgoing(*h_i, 1);
         OC_ASSERT(listLink != Handle::UNDEFINED,
-                "ListLink must be defined");
+                  "ListLink must be defined");
         OC_ASSERT(atomSpace.get_arity(listLink) == 2,
-                "IsHolding predicate must have 2 arguments");
+                  "IsHolding predicate must have 2 arguments");
         // get only holder's eval-links occuring within 'time'
 
         if (atomSpace.get_outgoing(listLink, 0) == holderHandle) {
             logger().debug(
-                         "AtomSpaceUtil - before '%d' timestamps for isHolding pred for '%s'.",
-                         timestamps.size(), holderId.c_str());
+                           "AtomSpaceUtil - before '%d' timestamps for isHolding pred for '%s'.",
+                           timestamps.size(), holderId.c_str());
 
             timeServer().getTimeInfo(back_inserter(timestamps), *h_i,
-                                  Temporal(time), TemporalTable::INCLUDES);
+                                     Temporal(time), TemporalTable::INCLUDES);
 
             logger().debug(
-                         "AtomSpaceUtil - after '%d' timestamps for isHolding pred for '%s'.",
-                         timestamps.size(), holderId.c_str());
+                           "AtomSpaceUtil - after '%d' timestamps for isHolding pred for '%s'.",
+                           timestamps.size(), holderId.c_str());
 
         } // if
     } // for
@@ -1974,7 +1974,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
             s += std::string("at time ") + boost::lexical_cast<std::string>(time);
             s += std::string(" listed as ");
             for (std::vector<HandleTemporalPair>::iterator tsi = timestamps.begin();
-                    tsi != timestamps.end(); ++tsi) {
+                 tsi != timestamps.end(); ++tsi) {
                 s +=  std::string("'") + tsi->toString() + std::string("' ");
             }
             OC_ASSERT(false, s.c_str());
@@ -1997,7 +1997,7 @@ std::string AtomSpaceUtil::getHoldingObjectIdAtTime(AtomSpace& as,
 }
 
 std::string AtomSpaceUtil::getObjectName(AtomSpace& atomSpace,
-                                          Handle object )
+                                         Handle object )
 {
     std::string name("");
 
@@ -2008,10 +2008,10 @@ std::string AtomSpaceUtil::getObjectName(AtomSpace& atomSpace,
         Type types[] = { WORD_NODE, atomSpace.get_type( object ) };
         HandleSeq wrLinks;
         getHandlesByOutgoing( back_inserter(wrLinks),
-                                atomSpace,
-                                WR_LINK,
-                                objectName,
-                                &types[0], NULL, 2);
+                              atomSpace,
+                              WR_LINK,
+                              objectName,
+                              &types[0], NULL, 2);
         if ( wrLinks.size( ) > 0 ) {
             name = atomSpace.get_name( atomSpace.get_outgoing( wrLinks[0], 0 ) );
         } // if
@@ -2021,7 +2021,7 @@ std::string AtomSpaceUtil::getObjectName(AtomSpace& atomSpace,
 }
 
 std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
-        const std::string& objName )
+                                             const std::string& objName )
 {
     std::string result;
     Handle objIdHandle = Handle::UNDEFINED;
@@ -2032,20 +2032,20 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
         outgoing.push_back(Handle::UNDEFINED);
         HandleSeq wrLinks;
         getHandlesByOutgoing(back_inserter(wrLinks),
-                               atomSpace,
-                               WR_LINK, outgoing,
-                               NULL, NULL, 2);
+                             atomSpace,
+                             WR_LINK, outgoing,
+                             NULL, NULL, 2);
         if (!wrLinks.empty()) {
             objIdHandle = atomSpace.get_outgoing(wrLinks[0], 1);
             // TODO: check for multiple answers...
         } else {
             logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                    "Found avatar name '%s' but no avatar id associated to this name.",
-                    objName.c_str());
+                           "Found avatar name '%s' but no avatar id associated to this name.",
+                           objName.c_str());
         }
     } else {
         logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                "didn't find avatar name '%s'", objName.c_str());
+                       "didn't find avatar name '%s'", objName.c_str());
     }
     if (objIdHandle == Handle::UNDEFINED) {
         // try all letters in lowercase
@@ -2059,20 +2059,20 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
             getHandlesByOutgoing(back_inserter(wrLinks),
-                                   atomSpace,
-                                   WR_LINK, outgoing,
-                                   NULL, NULL, 2);
+                                 atomSpace,
+                                 WR_LINK, outgoing,
+                                 NULL, NULL, 2);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.get_outgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
             } else {
                 logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                        "Found avatar name '%s' but no avatar id associated "
-                        "with this name.", lcObjName.c_str());
+                               "Found avatar name '%s' but no avatar id associated "
+                               "with this name.", lcObjName.c_str());
             }
         } else {
             logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                    "didn't find avatar name '%s'", lcObjName.c_str());
+                           "didn't find avatar name '%s'", lcObjName.c_str());
         }
     }
     if (objIdHandle == Handle::UNDEFINED) {
@@ -2088,28 +2088,28 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
             getHandlesByOutgoing(back_inserter(wrLinks),
-                                   atomSpace,
-                                   WR_LINK, outgoing,
-                                   NULL, NULL, 2);
+                                 atomSpace,
+                                 WR_LINK, outgoing,
+                                 NULL, NULL, 2);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.get_outgoing(wrLinks[0], 1);
                 // TODO: check for multiple answers...
             } else {
                 logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                        "Found avatar name '%s' but no avatar id associated to this name.",
-                        firstCapObjName.c_str());
+                               "Found avatar name '%s' but no avatar id associated to this name.",
+                               firstCapObjName.c_str());
             }
         } else {
             logger().debug("AtomSpaceUtil::getObjIdFromName: "
-                    "didn't find avatar name '%s'",
-                    firstCapObjName.c_str());
+                           "didn't find avatar name '%s'",
+                           firstCapObjName.c_str());
         }
     }
     if (objIdHandle != Handle::UNDEFINED) {
         result = atomSpace.get_name(objIdHandle);
     }
     logger().debug("AtomSpaceUtil::getObjIdFromName: returning '%s'",
-                  result.c_str());
+                   result.c_str());
     return result;
 }
 
@@ -2143,7 +2143,7 @@ Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
             if (listLink != Handle::UNDEFINED) {
                 Handle execLink = atomSpace.get_outgoing(listLink, 0);
                 if (execLink != Handle::UNDEFINED
-                        && atomSpace.get_type(execLink) == EXECUTION_LINK) {
+                    && atomSpace.get_type(execLink) == EXECUTION_LINK) {
                     return execLink;
                 }
             }
@@ -2153,7 +2153,7 @@ Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
 }
 
 std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace& atomSpace,
-        Handle execLink)
+                                                                Handle execLink)
 {
 
     if (execLink != Handle::UNDEFINED) {
@@ -2215,7 +2215,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 
         if ( evalLink == Handle::UNDEFINED) {
             logger().error("AtomSpaceUtil - AtomSpace returned undefined "
-                    "handle for evaluation link (agent action done predicate)" );
+                           "handle for evaluation link (agent action done predicate)" );
             continue;
         }
 
@@ -2223,21 +2223,21 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 
         if ( agentActionLink == Handle::UNDEFINED) {
             logger().error("AtomSpaceUtil - Found no agent action for "
-                    "actionDone predicate.");
+                           "actionDone predicate.");
             continue;
         }
 
         Handle agentIdNode = atomSpace.get_outgoing(agentActionLink, 0);
         if (agentIdNode == Handle::UNDEFINED ) {
             logger().error("AtomSpaceUtil - Found no agent name for "
-                    "actionDone predicate" );
+                           "actionDone predicate" );
             continue;
         }
 
         Type inspectedAgentTypeCode = atomSpace.get_type(agentIdNode);
         if ( !classserver().isNode( inspectedAgentTypeCode ) ) {
             logger().fine("AtomSpaceUtil - Skipping non-node handle type: %d",
-                    inspectedAgentTypeCode );
+                          inspectedAgentTypeCode );
             continue;
         }
 
@@ -2245,10 +2245,10 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
 
         if ( inspectedAgentId != agentId ) {
             logger().fine("AtomSpaceUtil - "
-                    "Inspected agent id is [%s; type=%d], but required is %s",
-                     inspectedAgentId.c_str(),
-                     inspectedAgentTypeCode,
-                     agentId.c_str() );
+                          "Inspected agent id is [%s; type=%d], but required is %s",
+                          inspectedAgentId.c_str(),
+                          inspectedAgentTypeCode,
+                          agentId.c_str() );
             // it is the wrong agent, then skip it
             continue;
         }
@@ -2256,16 +2256,16 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
         Handle agentActionNode = atomSpace.get_outgoing(agentActionLink, 1);
         if (agentActionNode == Handle::UNDEFINED) {
             logger().error("AtomSpaceUtil - "
-                    "Found no agent action name for actionDone predicate");
+                           "Found no agent action name for actionDone predicate");
             continue;
         }
 
         logger().fine("AtomSpaceUtil - "
-                "Previous temporal[%lu %lu], Inspected temporal[%lu %lu]",
-                 previousTemporal.getA(),
-                 previousTemporal.getB(),
-                 temporal.getA(),
-                 temporal.getB() );
+                      "Previous temporal[%lu %lu], Inspected temporal[%lu %lu]",
+                      previousTemporal.getA(),
+                      previousTemporal.getB(),
+                      temporal.getA(),
+                      temporal.getB() );
         if ( temporal > previousTemporal ) {
             latestActionDoneLink = agentActionLink;
             previousTemporal = temporal;
@@ -2278,15 +2278,15 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink(AtomSpace& atomSpace,
                 agentType = "an humanoid";
             } else {
                 logger().error(
-                             "AtomSpaceUtil - Invalid agentIdNode type: %i",
-                             inspectedAgentTypeCode );
+                               "AtomSpaceUtil - Invalid agentIdNode type: %i",
+                               inspectedAgentTypeCode );
                 continue;
             }
         }
     }
 
     logger().debug("AtomSpaceUtil::getMostRecentAgentActionLink - "
-            "Agent %s is %s", agentId.c_str(), agentType.c_str() );
+                   "Agent %s is %s", agentId.c_str(), agentType.c_str() );
 
     return latestActionDoneLink;
 }
@@ -2301,26 +2301,26 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
     Handle agentHandle = getAgentHandle( atomSpace, agentId );
     if ( agentHandle == Handle::UNDEFINED ) {
         logger().debug(
-                     "AtomSpaceUtil - Found no agent identified by %s",
-                     agentId.c_str( ) );
+                       "AtomSpaceUtil - Found no agent identified by %s",
+                       agentId.c_str( ) );
         return Handle::UNDEFINED;
     } // if
 
     Handle predicateNodeHandle = atomSpace.get_handle(PREDICATE_NODE,
-                                 ACTION_DONE_PREDICATE_NAME);
+                                                      ACTION_DONE_PREDICATE_NAME);
     if ( predicateNodeHandle == Handle::UNDEFINED ) {
         logger().debug(
-                     "AtomSpaceUtil - Found no predicate node named %s",
-                     ACTION_DONE_PREDICATE_NAME )
-        ;
+                       "AtomSpaceUtil - Found no predicate node named %s",
+                       ACTION_DONE_PREDICATE_NAME )
+            ;
         return Handle::UNDEFINED;
     } // if
 
     Handle actionNodeHandle = atomSpace.get_handle( NODE, actionName );
     if ( actionNodeHandle == Handle::UNDEFINED ) {
         logger().debug(
-                     "AtomSpaceUtil - Found no NODE for action named %s",
-                     actionName.c_str( ) );
+                       "AtomSpaceUtil - Found no NODE for action named %s",
+                       actionName.c_str( ) );
         return Handle::UNDEFINED;
     } // if
 
@@ -2338,7 +2338,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
 
     if ( handles.size( ) == 0 ) {
         logger().debug(
-                     "AtomSpaceUtil - the given agent wasn't executed group_command yet" );
+                       "AtomSpaceUtil - the given agent wasn't executed group_command yet" );
         // there is no group command for the given agent
         return Handle::UNDEFINED;
     } // if
@@ -2349,9 +2349,9 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         AtomPtr a(incomingHandle);
         LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == LIST_LINK &&
-                incomingLink->getArity() == 3 &&
-                incomingLink->getOutgoingAtom(0) == agentHandle &&
-                incomingLink->getOutgoingAtom(1) == actionNodeHandle) {
+            incomingLink->getArity() == 3 &&
+            incomingLink->getOutgoingAtom(0) == agentHandle &&
+            incomingLink->getOutgoingAtom(1) == actionNodeHandle) {
             handles.push_back(incomingHandle);
         }
     }
@@ -2367,20 +2367,20 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
     for ( i = 0; i < handles.size( ); ++i ) {
         HandleSeq incomingLinks = atomSpace.get_incoming(handles[i]);
         logger().debug(
-                     "AtomSpaceUtil - %d incoming links were identified",
-                     incomingLinks.size( ) );
+                       "AtomSpaceUtil - %d incoming links were identified",
+                       incomingLinks.size( ) );
         unsigned int j;
         for ( j = 0; j < incomingLinks.size( ); ++j ) {
             logger().debug(
-                         "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%lu], outgoing0[%lu] predicateNode[%lu]",
-                         j,
-                         classserver().getTypeName( atomSpace.get_type( incomingLinks[j] ) ).c_str( ),
-                         classserver().getTypeName( EVALUATION_LINK ).c_str( ),
-                         atomSpace.get_outgoing( incomingLinks[j], 0 ).value(),
-                         predicateNodeHandle.value(),
-                         atomSpace.get_outgoing( incomingLinks[j], 1 ).value() );
+                           "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%lu], outgoing0[%lu] predicateNode[%lu]",
+                           j,
+                           classserver().getTypeName( atomSpace.get_type( incomingLinks[j] ) ).c_str( ),
+                           classserver().getTypeName( EVALUATION_LINK ).c_str( ),
+                           atomSpace.get_outgoing( incomingLinks[j], 0 ).value(),
+                           predicateNodeHandle.value(),
+                           atomSpace.get_outgoing( incomingLinks[j], 1 ).value() );
             if ( atomSpace.get_type( incomingLinks[j] ) == EVALUATION_LINK &&
-                    atomSpace.get_outgoing( incomingLinks[j], 0 ) == predicateNodeHandle ) {
+                 atomSpace.get_outgoing( incomingLinks[j], 0 ) == predicateNodeHandle ) {
                 timeServer().getTimeInfo( back_inserter(timestamps),
                                           incomingLinks[j], temporal, criterion );
 
@@ -2390,8 +2390,8 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
     } // for
 
     logger().debug(
-                 "AtomSpaceUtil - %d handles (was)were identified after filter",
-                 timestamps.size( ) );
+                   "AtomSpaceUtil - %d handles (was)were identified after filter",
+                   timestamps.size( ) );
 
     Temporal previousTemporal(0);
     Handle mostRecentGroupCommand = Handle::UNDEFINED;
@@ -2405,8 +2405,8 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
     } // for
 
     logger().debug(
-                 "AtomSpaceUtil - handle %s",
-                 ( mostRecentGroupCommand != Handle::UNDEFINED ? "found" : "not found" ) );
+                   "AtomSpaceUtil - handle %s",
+                   ( mostRecentGroupCommand != Handle::UNDEFINED ? "found" : "not found" ) );
     return mostRecentGroupCommand;
 }
 
@@ -2433,28 +2433,28 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLinkAfterTime(AtomSpace& atomSpace
 }
 
 std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace& atomSpace,
-        Handle agentActionLink )
+                                                                 Handle agentActionLink )
 {
     if ( agentActionLink != Handle::UNDEFINED ) {
         try {
             Handle predicateListLink = atomSpace.get_outgoing( agentActionLink,
-                                       1 );
+                                                               1 );
             if ( predicateListLink == Handle::UNDEFINED ) {
                 logger().error(
-                              "AtomSpaceUtil - There is no description for this action" );
+                               "AtomSpaceUtil - There is no description for this action" );
                 return "";
             } // if
 
             if ( atomSpace.get_arity( predicateListLink ) <= 2 ) {
                 logger().error(
-                              "AtomSpaceUtil - There is no parameters on the given action" );
+                               "AtomSpaceUtil - There is no parameters on the given action" );
                 return "";
             } // if
 
             Handle actionParametersLink = atomSpace.get_outgoing( predicateListLink, 2 );
             if ( actionParametersLink == Handle::UNDEFINED ) {
                 logger().error(
-                              "AtomSpaceUtil - There is no parameters on the given action" );
+                               "AtomSpaceUtil - There is no parameters on the given action" );
                 return "";
             } // if
 
@@ -2464,7 +2464,7 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
                 Handle actionParam = atomSpace.get_outgoing(actionParametersLink, i);
                 if ( actionParam == Handle::UNDEFINED) {
                     logger().error(
-                                 "AtomSpaceUtil - Found no param for action" );
+                                   "AtomSpaceUtil - Found no param for action" );
                     return "";
                 } // if
 
@@ -2474,8 +2474,8 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
 
                 Type t = atomSpace.get_type( actionParam );
                 if (  (t == CONCEPT_NODE) //boolean or string
-                        || (t == NUMBER_NODE) // int or float
-                   ) {
+                      || (t == NUMBER_NODE) // int or float
+                      ) {
                     parameters << atomSpace.get_name( actionParam );
                 } else if (t == LIST_LINK) { // rotation or vector
                     parameters << atomSpace.get_name( atomSpace.get_outgoing( actionParam, 0 ) );
@@ -2497,8 +2497,8 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
 }
 
 Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
-                                  const std::string & modulator,
-                                  const std::string & petId)
+                                                 const std::string & modulator,
+                                                 const std::string & petId)
 {
     // Format of Modulator
     //
@@ -2516,7 +2516,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     if (petHandle == Handle::UNDEFINED) {
         logger().error( "AtomSpaceUtil::%s - Found no Pet named '%s'.",
                         __FUNCTION__, petId.c_str()
-                      );
+                        );
         return Handle::UNDEFINED;
     }
 
@@ -2524,14 +2524,14 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     std::string modulatorUpdater = modulator + "ModulatorUpdater";
 
     Handle groundedSchemaNode = atomSpace.get_handle
-                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
-                                          modulatorUpdater      // Name of the Atom wanted
-                                        );
+        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+          modulatorUpdater      // Name of the Atom wanted
+          );
 
     if (groundedSchemaNode == Handle::UNDEFINED) {
         logger().error( "AtomSpaceUtil::%s - Found no GroundSchemaNode named '%s'.",
-                         __FUNCTION__, modulatorUpdater.c_str()
-                      );
+                        __FUNCTION__, modulatorUpdater.c_str()
+                        );
         return Handle::UNDEFINED;
     }
 
@@ -2539,12 +2539,12 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     std::vector<Handle> executionOutputLinkSet;
 
     getIncomingSet
-                  ( back_inserter(executionOutputLinkSet), // return value
-                    groundedSchemaNode,       // returned link should contain this node
-                    EXECUTION_OUTPUT_LINK,    // type of the returned link
-                    false                     // subclass is not acceptable,
-                                              // i.e. returned link should be exactly of
-                  );                          // type EXECUTION_OUTPUT_LINK
+        ( back_inserter(executionOutputLinkSet), // return value
+          groundedSchemaNode,       // returned link should contain this node
+          EXECUTION_OUTPUT_LINK,    // type of the returned link
+          false                     // subclass is not acceptable,
+          // i.e. returned link should be exactly of
+          );                          // type EXECUTION_OUTPUT_LINK
 
 
     // Pick up the ExecutionOutputLink that contains a ListLink holding petHandle
@@ -2556,9 +2556,9 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
 
         // Get Handle to ListLink
         Handle listLink = atomSpace.get_outgoing
-                                    ( *itrHandleSet, // Handle of the Link to be searched
-                                      1              // Index of the Handle in Outgoing set
-                                    );
+            ( *itrHandleSet, // Handle of the Link to be searched
+              1              // Index of the Handle in Outgoing set
+              );
 
         if ( atomSpace.get_type(listLink) == LIST_LINK &&
              atomSpace.get_arity(listLink) == 1 &&
@@ -2569,9 +2569,9 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
     }// for
 
     if ( itrHandleSet == executionOutputLinkSet.end() ) {
-         logger().error(
-             "AtomSpaceUtil::%s - Found no ExecutionOutputLink for '%s' with petId '%s'.",
-              __FUNCTION__, modulatorUpdater.c_str(), petId.c_str()
+        logger().error(
+                       "AtomSpaceUtil::%s - Found no ExecutionOutputLink for '%s' with petId '%s'.",
+                       __FUNCTION__, modulatorUpdater.c_str(), petId.c_str()
                        );
         return Handle::UNDEFINED;
     }
@@ -2586,8 +2586,8 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
           executionOutputLink,              // returned link should contain this link
           SIMILARITY_LINK,                  // type of the returned link
           false                             // subclass is not acceptable, i.e. returned
-        );                                  // link should be exactly of
-                                            // type SIMILARITY_LINK
+          );                                  // link should be exactly of
+    // type SIMILARITY_LINK
 
     if (similarityLinkSet.size() != 1) {
         logger().error( "AtomSpaceUtil::%s - There should be exactly one SimilarityLink to '%s' with petId '%s', found '%d'.",
@@ -2595,7 +2595,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
                         modulatorUpdater.c_str(),
                         petId.c_str(),
                         similarityLinkSet.size()
-                      );
+                        );
 
         return Handle::UNDEFINED;
     }
@@ -2608,7 +2608,7 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
                         modulatorUpdater.c_str(),
                         petId.c_str(),
                         atomSpace.get_arity(similarityLink)
-                      );
+                        );
 
         return Handle::UNDEFINED;
     }
@@ -2631,9 +2631,9 @@ Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,
         if ( atomSpace.get_type(numberNode) != NUMBER_NODE) {
 
             logger().error( "AtomSpaceUtil::%s - Could not find any NumberNode in the outgoing set of SimilarityLink for '%s'",
-                        __FUNCTION__,
-                        modulatorUpdater.c_str()
-                          );
+                            __FUNCTION__,
+                            modulatorUpdater.c_str()
+                            );
 
             return Handle::UNDEFINED;
         }
@@ -2650,27 +2650,27 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     // Create BindLink used by pattern matcher
 
     Handle hVariableListLink = atomSpace.add_link(VARIABLE_LIST,
-        atomSpace.add_link(TYPED_VARIABLE_LINK,
-            atomSpace.add_node(VARIABLE_NODE, "$var_list_link"),
-            atomSpace.add_node(TYPE_NODE, "ListLink")));
+                                                  atomSpace.add_link(TYPED_VARIABLE_LINK,
+                                                                     atomSpace.add_node(VARIABLE_NODE, "$var_list_link"),
+                                                                     atomSpace.add_node(TYPE_NODE, "ListLink")));
 
     Handle hEvaluationLinkDemandGoal = atomSpace.add_link(EVALUATION_LINK,
-         atomSpace.add_node(PREDICATE_NODE, demandName+"DemandGoal"));
+                                                          atomSpace.add_node(PREDICATE_NODE, demandName+"DemandGoal"));
 
     Handle hEvaluationLinkFuzzyWithin = atomSpace.add_link(EVALUATION_LINK,
-        // Must quote the GPN, else the pattern matcher tries to evaluate it!
-        atomSpace.add_link(QUOTE_LINK,
-                           atomSpace.add_node(GROUNDED_PREDICATE_NODE, "fuzzy_within")),
-        atomSpace.add_node(VARIABLE_NODE, "$var_list_link"));
+                                                           // Must quote the GPN, else the pattern matcher tries to evaluate it!
+                                                           atomSpace.add_link(QUOTE_LINK,
+                                                                              atomSpace.add_node(GROUNDED_PREDICATE_NODE, "fuzzy_within")),
+                                                           atomSpace.add_node(VARIABLE_NODE, "$var_list_link"));
 
     Handle hImplicationLink = atomSpace.add_link(IMPLICATION_LINK,
-        atomSpace.add_link(SIMULTANEOUS_EQUIVALENCE_LINK,
-            hEvaluationLinkDemandGoal, hEvaluationLinkFuzzyWithin),
-        atomSpace.add_link(LIST_LINK,
-            hEvaluationLinkDemandGoal, hEvaluationLinkFuzzyWithin));
+                                                 atomSpace.add_link(SIMULTANEOUS_EQUIVALENCE_LINK,
+                                                                    hEvaluationLinkDemandGoal, hEvaluationLinkFuzzyWithin),
+                                                 atomSpace.add_link(LIST_LINK,
+                                                                    hEvaluationLinkDemandGoal, hEvaluationLinkFuzzyWithin));
 
     Handle hBindLink = atomSpace.add_link(BIND_LINK,
-       hVariableListLink, hImplicationLink);
+                                          hVariableListLink, hImplicationLink);
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(&atomSpace, hBindLink);
@@ -2684,17 +2684,17 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     atomSpace.remove_atom(hResultListLink);
 
     // Check and return the result
-//    for (Handle hResult : resultSet) {
-//        std::cout<<atomSpace.atomAsString(hResult)<<std::endl;
-//    }
+    //    for (Handle hResult : resultSet) {
+    //        std::cout<<atomSpace.atomAsString(hResult)<<std::endl;
+    //    }
 
     if ( resultSet.size() != 1 ) {
         logger().error( "AtomSpaceUtil::%s - The number of SimultaneousEquivalenceLink containing '%s' and '%s' should be exactly 1, but got %d",
-                       __FUNCTION__,
-                       atomSpace.atom_as_string(hEvaluationLinkDemandGoal).c_str(),
-                       atomSpace.atom_as_string(hEvaluationLinkFuzzyWithin).c_str(),
-                       resultSet.size()
-                      );
+                        __FUNCTION__,
+                        atomSpace.atom_as_string(hEvaluationLinkDemandGoal).c_str(),
+                        atomSpace.atom_as_string(hEvaluationLinkFuzzyWithin).c_str(),
+                        resultSet.size()
+                        );
 
         return false;
     }
@@ -2709,196 +2709,196 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
 
 
 
-/**
-    // Get the Handle to GroundSchemaNode
-    std::string demandUpdater = demandName + "DemandUpdater";
+    /**
+     // Get the Handle to GroundSchemaNode
+     std::string demandUpdater = demandName + "DemandUpdater";
 
-    Handle hGroundedSchemaNode = atomSpace.getHandle
-                                        ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
-                                          demandUpdater         // Name of the Atom wanted
-                                        );
+     Handle hGroundedSchemaNode = atomSpace.getHandle
+     ( GROUNDED_SCHEMA_NODE, // Type of the Atom wanted
+     demandUpdater         // Name of the Atom wanted
+     );
 
-    if ( hGroundedSchemaNode == Handle::UNDEFINED ||
-         atomSpace.getType(hGroundedSchemaNode) != GROUNDED_SCHEMA_NODE ) {
+     if ( hGroundedSchemaNode == Handle::UNDEFINED ||
+     atomSpace.getType(hGroundedSchemaNode) != GROUNDED_SCHEMA_NODE ) {
 
-        logger().error( "AtomSpaceUtil::%s - Found no GroundSchemaNode named '%s'.",
-                         __FUNCTION__,
-                         demandUpdater.c_str()
-                      );
-        return false;
-    }
+     logger().error( "AtomSpaceUtil::%s - Found no GroundSchemaNode named '%s'.",
+     __FUNCTION__,
+     demandUpdater.c_str()
+     );
+     return false;
+     }
 
-    // Get the  HandleSet to ExecutionOutputLink
-    std::vector<Handle> executionOutputLinkSet;
+     // Get the  HandleSet to ExecutionOutputLink
+     std::vector<Handle> executionOutputLinkSet;
 
-    getIncomingSet
-                  ( back_inserter(executionOutputLinkSet), // return value
-                    hGroundedSchemaNode,      // returned link should contain this node
-                    EXECUTION_OUTPUT_LINK,    // type of the returned link
-                    false                     // subclass is not acceptable,
-                                              // i.e. returned link should be exactly of
-                  );                          // type EXECUTION_OUTPUT_LINK
+     getIncomingSet
+     ( back_inserter(executionOutputLinkSet), // return value
+     hGroundedSchemaNode,      // returned link should contain this node
+     EXECUTION_OUTPUT_LINK,    // type of the returned link
+     false                     // subclass is not acceptable,
+     // i.e. returned link should be exactly of
+     );                          // type EXECUTION_OUTPUT_LINK
 
-    // Pick up the ExecutionOutputLink containing ListLink
-    std::vector<Handle>::iterator iExecutionOutputLink;
+     // Pick up the ExecutionOutputLink containing ListLink
+     std::vector<Handle>::iterator iExecutionOutputLink;
 
-    for(iExecutionOutputLink = executionOutputLinkSet.begin();
-        iExecutionOutputLink != executionOutputLinkSet.end();
-        ++ iExecutionOutputLink ) {
+     for(iExecutionOutputLink = executionOutputLinkSet.begin();
+     iExecutionOutputLink != executionOutputLinkSet.end();
+     ++ iExecutionOutputLink ) {
 
-        if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
-             atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
-           )
-            break;
-    }
+     if ( atomSpace.getArity(*iExecutionOutputLink) == 2 &&
+     atomSpace.getType( atomSpace.getOutgoing(*iExecutionOutputLink, 1) ) == LIST_LINK
+     )
+     break;
+     }
 
-    if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
-        logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.",
-                       __FUNCTION__
-                      );
-        return false;
-    }
+     if ( iExecutionOutputLink == executionOutputLinkSet.end() ) {
+     logger().error("AtomSpaceUtil::%s - Failed to find a ExecutionOutputLink that takes ListLink as its second outgoing.",
+     __FUNCTION__
+     );
+     return false;
+     }
 
-    Handle hExecutionOutputLink = *iExecutionOutputLink;
+     Handle hExecutionOutputLink = *iExecutionOutputLink;
 
-    // Get the Handle to ListLink that contains ExecutionOutputLink
-    std::vector<Handle> listLinkSet;
+     // Get the Handle to ListLink that contains ExecutionOutputLink
+     std::vector<Handle> listLinkSet;
 
-    getIncomingSet
-        ( back_inserter(listLinkSet), // return value
-          hExecutionOutputLink,       // returned link should contain this link
-          LIST_LINK,                  // type of the returned link
-          false                       // subclass is not acceptable, i.e. returned
-        );                            // link should be exactly of type LIST_LINK
+     getIncomingSet
+     ( back_inserter(listLinkSet), // return value
+     hExecutionOutputLink,       // returned link should contain this link
+     LIST_LINK,                  // type of the returned link
+     false                       // subclass is not acceptable, i.e. returned
+     );                            // link should be exactly of type LIST_LINK
 
-    // Pick up the ListLink that contains two NumberNodes and the ExecutionOutputLink above
-    std::vector<Handle>::iterator iListLink;
+     // Pick up the ListLink that contains two NumberNodes and the ExecutionOutputLink above
+     std::vector<Handle>::iterator iListLink;
 
-    for (iListLink = listLinkSet.begin(); iListLink != listLinkSet.end(); iListLink ++) {
+     for (iListLink = listLinkSet.begin(); iListLink != listLinkSet.end(); iListLink ++) {
 
-        if ( atomSpace.getType(*iListLink) == LIST_LINK &&
-             atomSpace.getArity(*iListLink) == 3 &&
-             atomSpace.getType( atomSpace.getOutgoing(*iListLink, 0) ) == NUMBER_NODE &&
-             atomSpace.getType( atomSpace.getOutgoing(*iListLink, 1) ) == NUMBER_NODE
-           )
-            break;
-    }
+     if ( atomSpace.getType(*iListLink) == LIST_LINK &&
+     atomSpace.getArity(*iListLink) == 3 &&
+     atomSpace.getType( atomSpace.getOutgoing(*iListLink, 0) ) == NUMBER_NODE &&
+     atomSpace.getType( atomSpace.getOutgoing(*iListLink, 1) ) == NUMBER_NODE
+     )
+     break;
+     }
 
-    if ( iListLink == listLinkSet.end() ) {
-        logger().error("AtomSpaceUtil::%s - Failed to find a ListLink that contains two NumberNodes and the ExecutionOutputLink: '%s'",
-                       __FUNCTION__,
-                       atomSpace.atomAsString(hExecutionOutputLink).c_str()
-                      );
-        return false;
-    }
+     if ( iListLink == listLinkSet.end() ) {
+     logger().error("AtomSpaceUtil::%s - Failed to find a ListLink that contains two NumberNodes and the ExecutionOutputLink: '%s'",
+     __FUNCTION__,
+     atomSpace.atomAsString(hExecutionOutputLink).c_str()
+     );
+     return false;
+     }
 
-    Handle hListLink = *iListLink;
+     Handle hListLink = *iListLink;
 
-    // Get GroundedPredicateNode ("fuzzy_within")
-    Handle hGroundedPredicateNode = atomSpace.getHandle(GROUNDED_PREDICATE_NODE, "fuzzy_within");
+     // Get GroundedPredicateNode ("fuzzy_within")
+     Handle hGroundedPredicateNode = atomSpace.getHandle(GROUNDED_PREDICATE_NODE, "fuzzy_within");
 
-    if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED ||
-         atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE ) {
+     if ( hGroundedPredicateNode == opencog::Handle::UNDEFINED ||
+     atomSpace.getType(hGroundedPredicateNode) != GROUNDED_PREDICATE_NODE ) {
 
-        logger().error("AtomSpaceUtil::%s - Failed to get GROUNDED_PREDICATE_NODE named 'fuzzy_within'",
-                       __FUNCTION__
-                      );
+     logger().error("AtomSpaceUtil::%s - Failed to get GROUNDED_PREDICATE_NODE named 'fuzzy_within'",
+     __FUNCTION__
+     );
 
-        return false;
-    }
+     return false;
+     }
 
-    // Get the EvaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink above
-    std::vector<Handle> evaluationLinkOutgoing;
+     // Get the EvaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink above
+     std::vector<Handle> evaluationLinkOutgoing;
 
-    evaluationLinkOutgoing.push_back(hGroundedPredicateNode);
-    evaluationLinkOutgoing.push_back(hListLink);
+     evaluationLinkOutgoing.push_back(hGroundedPredicateNode);
+     evaluationLinkOutgoing.push_back(hListLink);
 
-    hFuzzyWithin = atomSpace.getHandle(EVALUATION_LINK, evaluationLinkOutgoing);
+     hFuzzyWithin = atomSpace.getHandle(EVALUATION_LINK, evaluationLinkOutgoing);
 
-    if ( hFuzzyWithin == opencog::Handle::UNDEFINED ) {
-        logger().error("AtomSpaceUtil::%s - Failed to get EvaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink",
-                       __FUNCTION__
-                      );
-        return false;
-    }
+     if ( hFuzzyWithin == opencog::Handle::UNDEFINED ) {
+     logger().error("AtomSpaceUtil::%s - Failed to get EvaluationLink that contains both FuzzyWithin GroundedPredicateNode and ListLink",
+     __FUNCTION__
+     );
+     return false;
+     }
 
-    // Get the Handle to PredicateNode
-    std::string demandGoal = demandName + "DemandGoal";
+     // Get the Handle to PredicateNode
+     std::string demandGoal = demandName + "DemandGoal";
 
-    Handle hPredicateNode = atomSpace.getHandle(PREDICATE_NODE, demandGoal);
+     Handle hPredicateNode = atomSpace.getHandle(PREDICATE_NODE, demandGoal);
 
-    if ( hPredicateNode == Handle::UNDEFINED ||
-         atomSpace.getType(hPredicateNode) != PREDICATE_NODE ) {
+     if ( hPredicateNode == Handle::UNDEFINED ||
+     atomSpace.getType(hPredicateNode) != PREDICATE_NODE ) {
 
-        logger().error( "AtomSpaceUtil::%s - Found no PredicateNode named '%s'.",
-                         __FUNCTION__,
-                         demandGoal.c_str()
-                      );
-        return false;
-    }
+     logger().error( "AtomSpaceUtil::%s - Found no PredicateNode named '%s'.",
+     __FUNCTION__,
+     demandGoal.c_str()
+     );
+     return false;
+     }
 
-    // Get the HandleSet to EvaluationLink that contains the PredicateNode above
-    std::vector<Handle> evaluationLinkSet;
+     // Get the HandleSet to EvaluationLink that contains the PredicateNode above
+     std::vector<Handle> evaluationLinkSet;
 
-    getIncomingSet
-        ( back_inserter(evaluationLinkSet), // return value
-          hPredicateNode,                             // returned link should contain this link
-          EVALUATION_LINK,                            // type of the returned link
-          false                                       // subclass is not acceptable, i.e. returned
-        );                                            // link should be exactly of type EVALUATION_LINK
+     getIncomingSet
+     ( back_inserter(evaluationLinkSet), // return value
+     hPredicateNode,                             // returned link should contain this link
+     EVALUATION_LINK,                            // type of the returned link
+     false                                       // subclass is not acceptable, i.e. returned
+     );                                            // link should be exactly of type EVALUATION_LINK
 
-    // Pick up the EvaluationLink that is grouped with hFuzzyWithin inside an SimultaneousEquivalenceLink
-    std::vector<Handle>::iterator iEvaluationLink;
-    std::vector<Handle> simultaneousEquivalenceLinkOutgoing;
+     // Pick up the EvaluationLink that is grouped with hFuzzyWithin inside an SimultaneousEquivalenceLink
+     std::vector<Handle>::iterator iEvaluationLink;
+     std::vector<Handle> simultaneousEquivalenceLinkOutgoing;
 
-    for ( iEvaluationLink = evaluationLinkSet.begin();
-          iEvaluationLink != evaluationLinkSet.end();
-          iEvaluationLink ++ ) {
-        simultaneousEquivalenceLinkOutgoing.clear();
-        simultaneousEquivalenceLinkOutgoing.push_back(*iEvaluationLink);
-        simultaneousEquivalenceLinkOutgoing.push_back(hFuzzyWithin);
+     for ( iEvaluationLink = evaluationLinkSet.begin();
+     iEvaluationLink != evaluationLinkSet.end();
+     iEvaluationLink ++ ) {
+     simultaneousEquivalenceLinkOutgoing.clear();
+     simultaneousEquivalenceLinkOutgoing.push_back(*iEvaluationLink);
+     simultaneousEquivalenceLinkOutgoing.push_back(hFuzzyWithin);
 
-        Handle hSimultaneousEquivalenceLink = atomSpace.getHandle( SIMULTANEOUS_EQUIVALENCE_LINK,
-                                                                  simultaneousEquivalenceLinkOutgoing);
+     Handle hSimultaneousEquivalenceLink = atomSpace.getHandle( SIMULTANEOUS_EQUIVALENCE_LINK,
+     simultaneousEquivalenceLinkOutgoing);
 
-        if ( hSimultaneousEquivalenceLink != opencog::Handle::UNDEFINED )
-            break;
-    }
+     if ( hSimultaneousEquivalenceLink != opencog::Handle::UNDEFINED )
+     break;
+     }
 
-    if ( iEvaluationLink == evaluationLinkSet.end() ) {
-        logger().error("AtomSpaceUtil::%s - Failed to get EvaluationLink that is grouped with '%s' inside an SimultaneousEquivalenceLink",
-                       __FUNCTION__,
-                       atomSpace.atomAsString(hFuzzyWithin).c_str()
-                      );
-        return false;
-    }
+     if ( iEvaluationLink == evaluationLinkSet.end() ) {
+     logger().error("AtomSpaceUtil::%s - Failed to get EvaluationLink that is grouped with '%s' inside an SimultaneousEquivalenceLink",
+     __FUNCTION__,
+     atomSpace.atomAsString(hFuzzyWithin).c_str()
+     );
+     return false;
+     }
 
-    hDemandGoal = *iEvaluationLink;
+     hDemandGoal = *iEvaluationLink;
 
-    return true;
-*/
+     return true;
+    */
 }
 
 Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
-        const std::string& rule)
+                                             const std::string& rule)
 {
 
     Handle rulePhraseNode = atomSpace.get_handle(PHRASE_NODE, rule);
     if (rulePhraseNode == Handle::UNDEFINED) {
         logger().error(
-                     "AtomSpaceUtil - Found no PhraseNode for rule '%s'.",
-                     rule.c_str());
+                       "AtomSpaceUtil - Found no PhraseNode for rule '%s'.",
+                       rule.c_str());
         return Handle::UNDEFINED;
     }
 
     std::vector<Handle> ruleReferenceLink;
     getIncomingSet(back_inserter(ruleReferenceLink),
-                           rulePhraseNode, REFERENCE_LINK, false);
+                   rulePhraseNode, REFERENCE_LINK, false);
     if (ruleReferenceLink.size() != 1) {
         logger().error(
-                     "AtomSpaceUtil - There should be exactly one ReferenceLink to rule '%s', found '%d'.",
-                     rule.c_str(),
-                     ruleReferenceLink.size());
+                       "AtomSpaceUtil - There should be exactly one ReferenceLink to rule '%s', found '%d'.",
+                       rule.c_str(),
+                       ruleReferenceLink.size());
         return Handle::UNDEFINED;
     }
 
@@ -2906,8 +2906,8 @@ Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
     Handle implicationLink = atomSpace.get_outgoing(ruleReferenceLink[0], 1);
     if (atomSpace.get_type(implicationLink) != IMPLICATION_LINK) {
         logger().error(
-                     "AtomSpaceUtil - Outgoing atom index [1] should be an ImplicationLink. Got '%s'.",
-                     classserver().getTypeName(atomSpace.get_type(implicationLink)).c_str());
+                       "AtomSpaceUtil - Outgoing atom index [1] should be an ImplicationLink. Got '%s'.",
+                       classserver().getTypeName(atomSpace.get_type(implicationLink)).c_str());
         return Handle::UNDEFINED;
     }
 
@@ -2915,23 +2915,23 @@ Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
 }
 
 float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
-        const std::string& rule,
-        const std::string& agentModeName )
+                                                    const std::string& rule,
+                                                    const std::string& agentModeName )
 {
 
     Handle implicationLink = AtomSpaceUtil::getRuleImplicationLink(atomSpace,
-                             rule);
+                                                                   rule);
     if (implicationLink == Handle::UNDEFINED) {
         logger().error(
-                     "AtomSpaceUtil - Found no ImplicationLink for rule '%s'.",
-                     rule.c_str());
+                       "AtomSpaceUtil - Found no ImplicationLink for rule '%s'.",
+                       rule.c_str());
         return (-1.0f);
     }
     Handle agentModeNode = atomSpace.get_handle( CONCEPT_NODE, agentModeName );
     if ( agentModeNode == Handle::UNDEFINED ) {
         logger().error(
-                     "AtomSpaceUtil - Found no Handle for the given agent mode '%s'.",
-                     agentModeName.c_str());
+                       "AtomSpaceUtil - Found no Handle for the given agent mode '%s'.",
+                       agentModeName.c_str());
         return (-1.0f);
     } // if
 
@@ -2953,11 +2953,11 @@ spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity(AtomSpace& ato
     for (i = timestamps.size() - 1; i > 0; --i) {
         Handle evalLink = timestamps[i].getHandle( );
         if ( evalLink != Handle::UNDEFINED
-                && atomSpace.get_outgoing(evalLink, 1) != Handle::UNDEFINED ) {
+             && atomSpace.get_outgoing(evalLink, 1) != Handle::UNDEFINED ) {
             Handle listLink = atomSpace.get_outgoing(evalLink, 1);
             Handle currentHandle = atomSpace.get_outgoing(listLink, 0);
             if ( currentHandle == Handle::UNDEFINED
-                    || atomSpace.get_name(currentHandle) != objectId ) {
+                 || atomSpace.get_name(currentHandle) != objectId ) {
                 continue;
             } // if
             // a velocity node was found to the given target
@@ -2975,7 +2975,7 @@ Handle AtomSpaceUtil::getObjectHandle( AtomSpace& atomSpace,
 {
     // concept node objects
     if (objectId == "food_bowl" || objectId == "water_bowl"
-            || objectId == "pet_home") {
+        || objectId == "pet_home") {
         // TODO: The concept nodes may not be present inside AtomSpace
         // if pet/agent do not perceive
         // any of these objects in the world.
@@ -3009,17 +3009,17 @@ Handle AtomSpaceUtil::getAgentHandle( AtomSpace& atomSpace,
     Handle agentHandle = atomSpace.get_handle( PET_NODE, agentId );
     if ( agentHandle != Handle::UNDEFINED ) {
         logger().debug(
-                      "AtomSpaceUtil - Agent is a pet" );
+                       "AtomSpaceUtil - Agent is a pet" );
     } else {
         agentHandle = atomSpace.get_handle( AVATAR_NODE, agentId );
         if ( agentHandle != Handle::UNDEFINED ) {
             logger().debug(
-                          "AtomSpaceUtil - Agent is an avatar" );
+                           "AtomSpaceUtil - Agent is an avatar" );
         } else {
             agentHandle = atomSpace.get_handle( HUMANOID_NODE, agentId );
             if ( agentHandle != Handle::UNDEFINED ) {
                 logger().debug(
-                              "AtomSpaceUtil - Agent is an humanoid" );
+                               "AtomSpaceUtil - Agent is an humanoid" );
             } // if
         } // if
     } // if
@@ -3043,14 +3043,14 @@ Handle AtomSpaceUtil::getEntityHandle( AtomSpace& atomSpace,
 Temporal AtomSpaceUtil::getTemporal(AtomSpace& as, Handle atTimeLink)
 {
     OC_ASSERT(atTimeLink != Handle::UNDEFINED,
-            "No HandleTemporalPair correspond to Handle::UNDEFINED");
+              "No HandleTemporalPair correspond to Handle::UNDEFINED");
     OC_ASSERT(as.get_type(atTimeLink) == AT_TIME_LINK,
-            "The Atom %s must be an atTimeLink",
-            as.atom_as_string(atTimeLink).c_str());
+              "The Atom %s must be an atTimeLink",
+              as.atom_as_string(atTimeLink).c_str());
     Handle timeNode = as.get_outgoing(atTimeLink, 0);
     OC_ASSERT(as.get_type(timeNode) == TIME_NODE,
-            "The Atom %s must be a TimeNode",
-            as.atom_as_string(timeNode).c_str());
+              "The Atom %s must be a TimeNode",
+              as.atom_as_string(timeNode).c_str());
 
     return Temporal::getFromTimeNodeName(as.get_name(timeNode).c_str());
 }
@@ -3058,9 +3058,9 @@ Temporal AtomSpaceUtil::getTemporal(AtomSpace& as, Handle atTimeLink)
 Handle AtomSpaceUtil::getTimedHandle(AtomSpace& as, Handle atTimeLink)
 {
     OC_ASSERT(atTimeLink != Handle::UNDEFINED,
-            "No HandleTemporalPair correspond to Handle::UNDEFINED");
+              "No HandleTemporalPair correspond to Handle::UNDEFINED");
     OC_ASSERT(as.get_type(atTimeLink) == AT_TIME_LINK,
-            "The Atom %s must be an atTimeLink", as.atom_as_string(atTimeLink).c_str());
+              "The Atom %s must be an atTimeLink", as.atom_as_string(atTimeLink).c_str());
 
     return as.get_outgoing(atTimeLink, 2);
 }
@@ -3096,7 +3096,7 @@ void AtomSpaceUtil::updateLatestPhysiologicalFeeling(AtomSpace& as,
                                as,
                                atTimeLink,
                                predicateNode
-                              );
+                               );
 }
 
 void AtomSpaceUtil::updateLatestAvatarSayActionDone(AtomSpace& as,
@@ -3116,8 +3116,8 @@ void AtomSpaceUtil::updateLatestAvatarActionDone(AtomSpace& as,
 }
 
 void AtomSpaceUtil::updateLatestAvatarActionPredicate(AtomSpace& as,
-                                                   Handle atTimeLink,
-                                                   Handle predicateNode)
+                                                      Handle atTimeLink,
+                                                      Handle predicateNode)
 {
     updateGenericLatestInfoMap(latestAvatarActionPredicate,
                                as, atTimeLink, predicateNode);
@@ -3303,7 +3303,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
             // only add a new element if it wasn't yet defined (overloading)
             if ( frameElements.find( elementNameParts[1] ) == frameElements.end( ) ) {
                 frameElements.insert( std::map<std::string, Handle>::value_type(
-                elementNameParts[1], frameElementsHandles[i] ) );
+                                                                                elementNameParts[1], frameElementsHandles[i] ) );
             } // if
         } // for
 
@@ -3312,8 +3312,8 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
         if (!frameElements.empty()) {
 
             Handle frameInstance = addNode(atomSpace,
-                                                 PREDICATE_NODE,
-                                                 frameInstanceName, true);
+                                           PREDICATE_NODE,
+                                           frameInstanceName, true);
 
             HandleSeq frameInstanceInheritance;
             frameInstanceInheritance.push_back( frameInstance );
@@ -3394,10 +3394,10 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                         AtomPtr a(incomingHandle);
                         LinkPtr incomingLink(LinkCast(a));
                         if (incomingLink->getArity() == 2 &&
-                           ((incomingLink->getType() == INHERITANCE_LINK &&
-                             incomingLink->getOutgoingAtom(0) == frameElementInstance) ||
-                            (incomingLink->getType() == FRAME_ELEMENT_LINK &&
-                             incomingLink->getOutgoingAtom(1) == frameElementInstance))) {
+                            ((incomingLink->getType() == INHERITANCE_LINK &&
+                              incomingLink->getOutgoingAtom(0) == frameElementInstance) ||
+                             (incomingLink->getType() == FRAME_ELEMENT_LINK &&
+                              incomingLink->getOutgoingAtom(1) == frameElementInstance))) {
                             atomSpace.remove_atom(incomingHandle);
                         }
                     }
@@ -3461,10 +3461,10 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
     Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
     HandleSeq inheritanceLinks;
     getHandlesByOutgoing( back_inserter( inheritanceLinks ),
-                            atomSpace,
-                            INHERITANCE_LINK,
-                            inheritanceLink,
-                            &inheritanceLinkTypes[0], NULL, 2);
+                          atomSpace,
+                          INHERITANCE_LINK,
+                          inheritanceLink,
+                          &inheritanceLinkTypes[0], NULL, 2);
 
     // if it is a frame instance, retrieve the frame name
     if ( inheritanceLinks.size() > 0 ) {
@@ -3478,7 +3478,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
         logger().debug("AtomSpaceUtil::%s - The given handle (%s) isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE",
                        __FUNCTION__,
                        frameInstanceName.c_str()
-                      );
+                       );
 
         return frameElementNameValueMap;
     }
@@ -3524,9 +3524,9 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
 
         HandleSeq evaluationLinks;
         getHandlesByOutgoing( back_inserter( evaluationLinks ),
-                                atomSpace,
-                                EVALUATION_LINK,
-                                elementValue, NULL, NULL, 2);
+                              atomSpace,
+                              EVALUATION_LINK,
+                              elementValue, NULL, NULL, 2);
 
         // store (frame element name, frame element instance value) pair
         if ( evaluationLinks.size() > 0 ) {
@@ -3535,7 +3535,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
                                 __FUNCTION__,
                                 frameElementInstanceName.str().c_str(),
                                 evaluationLinks.size()
-                              );
+                                );
             }
 
             frameElementNameValueMap[ frameElementNameSplited[1] ] = atomSpace.get_outgoing( evaluationLinks[0], 1 );
@@ -3557,8 +3557,8 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
 
     if ( frame == Handle::UNDEFINED ) {
         logger().error(
-                     "AtomSpaceUtil::%s - Invalid given frame name '%s'.",
-                     __FUNCTION__, frameName.c_str());
+                       "AtomSpaceUtil::%s - Invalid given frame name '%s'.",
+                       __FUNCTION__, frameName.c_str());
         return instances;
     } // if
 
@@ -3569,10 +3569,10 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
     HandleSeq evalLinks;
     Type evalLinkTypes[] = {PREDICATE_NODE, atomSpace.get_type( aElementValue ) };
     getHandlesByOutgoing( back_inserter( evalLinks ),
-                            atomSpace,
-                            EVALUATION_LINK,
-                            evalLink,
-                            &evalLinkTypes[0], NULL, 2);
+                          atomSpace,
+                          EVALUATION_LINK,
+                          evalLink,
+                          &evalLinkTypes[0], NULL, 2);
 
     // now check if the predicate nodes belongs to a specific frame instance
     unsigned int i;
@@ -3597,10 +3597,10 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
                 HandleSeq frameElementLinks;
                 Type frameElementLinkTypes[] = { PREDICATE_NODE, PREDICATE_NODE };
                 getHandlesByOutgoing( back_inserter( frameElementLinks ),
-                                        atomSpace,
-                                        FRAME_ELEMENT_LINK,
-                                        frameElementLink,
-                                        &frameElementLinkTypes[0], NULL, 2);
+                                      atomSpace,
+                                      FRAME_ELEMENT_LINK,
+                                      frameElementLink,
+                                      &frameElementLinkTypes[0], NULL, 2);
                 // finally check if the upper predicate node inherits from
                 // the correct frame node
                 unsigned int k;
@@ -3654,13 +3654,13 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
             // ok it is a frame instance
             if ( inheritanceLinks.size( ) > 1 ) {
                 logger().error(
-                   "AtomSpaceUtil::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );
+                               "AtomSpaceUtil::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );
             } // if
             frameName = atomSpace.get_name( atomSpace.get_outgoing( inheritanceLinks[0], 1 ) );
             atomSpace.remove_atom( inheritanceLinks[0] );
         } else {
             logger().debug(
-                "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE.", __FUNCTION__ );
+                           "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE.", __FUNCTION__ );
             return;
         } // else
 #else
@@ -3683,7 +3683,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         }
         if (!found) {
             logger().debug(
-                "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherit from a DEFINED_FRAME_NODE.", __FUNCTION__ );
+                           "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherit from a DEFINED_FRAME_NODE.", __FUNCTION__ );
             return;
         }
 #endif
@@ -3754,8 +3754,8 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         }
         if (inheritanceLink == Handle::UNDEFINED) {
             logger().error( "AtomSpaceUtil::%s - Invalid frame instance. "
-                    "It has a predicate node linked by a InheritanceLink "
-                    "that isn't a DefinedFrameElementNode", __FUNCTION__ );
+                            "It has a predicate node linked by a InheritanceLink "
+                            "that isn't a DefinedFrameElementNode", __FUNCTION__ );
             return;
         }
 #endif
@@ -3771,7 +3771,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
                                 evaluation, NULL, NULL, 2, EVALUATION_LINK, false );
         if ( values.size( ) != 1 ) {
             logger().error( "AtomSpaceUtil::%s - Invalid number of element value. "
-                    "It should be just one but was %d.", __FUNCTION__, values.size() );
+                            "It should be just one but was %d.", __FUNCTION__, values.size() );
             return;
         }
 #else
