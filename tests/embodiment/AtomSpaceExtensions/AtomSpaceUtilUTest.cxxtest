@@ -79,8 +79,7 @@ public:
     void testAddRewardPredicate() {
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace = srv.getAtomSpace();
-		string timedomain("realtime");
-        Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", timedomain, 1000);
+        Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
         TS_ASSERT(timeNode != Handle::UNDEFINED);
@@ -94,11 +93,8 @@ public:
         evalLinkOutgoing.push_back(listLink);
         Handle evalLink2 = atomSpace.get_handle(EVALUATION_LINK, evalLinkOutgoing);
         TS_ASSERT(evalLink2 == evalLink);
-		Handle timeDomainNode = atomSpace.get_handle(TIME_DOMAIN_NODE, timedomain);
-		TS_ASSERT(timeDomainNode!=Handle::UNDEFINED);
         HandleSeq atTimeLinkOutgoing;
         atTimeLinkOutgoing.push_back(timeNode);
-		atTimeLinkOutgoing.push_back(timeDomainNode);
         atTimeLinkOutgoing.push_back(evalLink);
 		
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
@@ -107,8 +103,7 @@ public:
     void testAddPunishmentPredicate() {
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace = srv.getAtomSpace();
-		string timedomain("realtime");
-        Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", timedomain, 1000);
+        Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
         TS_ASSERT(timeNode != Handle::UNDEFINED);
@@ -122,11 +117,8 @@ public:
         evalLinkOutgoing.push_back(listLink);
         Handle evalLink2 = atomSpace.get_handle(EVALUATION_LINK, evalLinkOutgoing);
         TS_ASSERT(evalLink2 == evalLink);
-		Handle timeDomainNode = atomSpace.get_handle(TIME_DOMAIN_NODE, timedomain);
-		TS_ASSERT(timeDomainNode!=Handle::UNDEFINED);
         HandleSeq atTimeLinkOutgoing;
         atTimeLinkOutgoing.push_back(timeNode);
-		atTimeLinkOutgoing.push_back(timeDomainNode);
         atTimeLinkOutgoing.push_back(evalLink);
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
     }
@@ -135,7 +127,6 @@ public:
         SpaceTimeCogServer srv;
         AtomSpace& atomSpace(srv.getAtomSpace());
         TimeServer& timeServer = srv.getTimeServer();
-		string timedomain("realtime");
         HandleSeq execListLinkOutgoing;
         execListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "arg1"));
         execListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "arg2"));
@@ -145,12 +136,12 @@ public:
         execLinkOutgoing.push_back(execListLink);
         Handle execLink = AtomSpaceUtil::addLink(atomSpace, EXECUTION_LINK, execLinkOutgoing);
 
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink,timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, ULONG_MAX));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, ULONG_MAX));
 
         HandleSeq triedEvalListLinkOutgoing;
         triedEvalListLinkOutgoing.push_back(execLink);
@@ -160,12 +151,12 @@ public:
         triedEvalLinkOutgoing.push_back(triedEvalListLink);
         Handle triedEvalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, triedEvalLinkOutgoing);
 
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, ULONG_MAX));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, ULONG_MAX));
 
         HandleSeq doneEvalListLinkOutgoing;
         doneEvalListLinkOutgoing.push_back(execLink);
@@ -175,60 +166,60 @@ public:
         doneEvalLinkOutgoing.push_back(doneEvalListLink);
         Handle doneEvalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, doneEvalLinkOutgoing);
 
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        timeServer.addTimeInfo(triedEvalLink, timedomain, 10);
+        timeServer.addTimeInfo(triedEvalLink, 10);
 
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        timeServer.addTimeInfo(triedEvalLink, timedomain, 101);
+        timeServer.addTimeInfo(triedEvalLink, 101);
 
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        timeServer.addTimeInfo(doneEvalLink, timedomain, 150);
+        timeServer.addTimeInfo(doneEvalLink, 150);
 
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        timeServer.addTimeInfo(doneEvalLink, timedomain, 201);
+        timeServer.addTimeInfo(doneEvalLink, 201);
 
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        timeServer.addTimeInfo(triedEvalLink, timedomain, ULONG_MAX);
+        timeServer.addTimeInfo(triedEvalLink, ULONG_MAX);
 
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 100));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, 200));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 0));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 100));
-        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 200));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 0));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
+        TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, timedomain, ULONG_MAX));
-        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, timedomain, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, ULONG_MAX));
+        TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, ULONG_MAX));
     }
 
 };
