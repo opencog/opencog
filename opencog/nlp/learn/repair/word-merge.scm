@@ -101,7 +101,9 @@
 		(define row #f)
 		(define val 0)
 		(define qry (string-append
-			"SELECT * FROM atoms WHERE type=47 AND outgoing="
+			"SELECT * FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str (list 250 uuid))))
 		; (display qry)(newline)
 		(dbi-query conxion qry)

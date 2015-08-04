@@ -19,7 +19,8 @@
 ; duplicate EvaluationLinks
 (define duplicate-eval-list
 	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
+		(string-concatenate
+		"SELECT * FROM atoms WHERE type=" EvalLinkType ";") "outgoing"))
 
 (display "The duplicate eval list has: ")
 (display (length duplicate-eval-list)) (newline)
@@ -42,7 +43,9 @@
 
 		; Find all the EvaluationLinks
 		(define qry (string-append
-			"SELECT * FROM atoms WHERE type=47 AND outgoing="
+			"SELECT * FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str oset)))
 		; (display qry)(newline)
 		(dbi-query conxion qry)

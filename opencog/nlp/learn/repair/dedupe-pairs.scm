@@ -20,7 +20,7 @@
 ; --------------------------------------------------------------
 
 ; The duplicate-pair-list will consist of word-pairs
-; (acutally, WordNode uuid-pairs) that appear in more
+; (actually, WordNode uuid-pairs) that appear in more
 ; than one ListLink.  These should have been unique, but,
 ; due to bugs in how the atomspace gets used, they are not.
 ;
@@ -53,7 +53,9 @@
 		(define qry "")
 		; type=47 is the type of EvaluationLink
 		(set! qry (string-append
-			"SELECT * FROM atoms WHERE type=47 and outgoing="
+			"SELECT * FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str (list uuid-of-any uuid)))
 		)
 		(display "Eval qry is ")(display qry) (newline)

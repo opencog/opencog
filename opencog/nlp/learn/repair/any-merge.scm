@@ -67,7 +67,9 @@
 		(define euid 0)
 		(define row #f)
 		(define qry (string-concatenate (list
-			"SELECT uuid FROM atoms WHERE type=47 AND outgoing="
+			"SELECT uuid FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str (list anyid uuid)))))
 		; (display qry)(newline)
 		(dbi-query conxion qry)
@@ -137,7 +139,9 @@
 		(define euid 0)
 		(define row #f)
 		(define qry (string-concatenate (list
-			"SELECT uuid FROM atoms WHERE type=47 AND outgoing="
+			"SELECT uuid FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str (list bad-id uuid)))))
 		; (display qry)(newline)
 		(dbi-query conxion qry)

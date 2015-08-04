@@ -1,15 +1,28 @@
 Atomspace deduplication repair scripts
+--------------------------------------
 
 Due to bugs, the SQL backend can end up with multiple copies of
 atoms. This script will find them, merge them, and sum the counts
 on the associated count truth values.  Its up to you to recompute
 anything else.
 
-The scripts are semi-manual.
+The scripts are semi-manual. A lot of manual fiddling is required.
 
-First, edit dedupe-pairs.scm and set do-update to #f -- 
-  -- this to make sure everything is working OK.
-Next, edit dedupe-pairs.scm and set do-update to #t --
+First check for multiple ANY atoms:
+  select * from typecodes where typename='LinkGrammarRelationshipNode';
+
+reports that type=89 is LinkGrammarRelationshipNode)
+Then see how many:
+   select * from atoms where type=89 and name='ANY';
+
+If more than one, start with ./any-merge.scm
+
+
+First, edit common.scm and set do-update to #f -- 
+  -- this will avoid clobbering your data.
+  -- tehn run ./dedupe-pairs.scm and see what happens..
+
+Next, edit common.scm and set do-update to #t --
   -- this is the actual run.
 
 Then review contents of and run word-merge.scm
@@ -28,12 +41,22 @@ ALTER TABLE atoms ADD UNIQUE (type, outgoing);
 ALTER TABLE atoms ADD UNIQUE (type, name);
 
 
-Arghh ... there are two ANY atoms :-(
-This can be verified (here, type=89 is LinkGrammarRelationshipNode)
-select * from atoms where type=89 and name='ANY';
-
-In this case, run ./any-merge.scm
 and then remove duplicates again with ./eval-dedup.scm
 
 After scrubbing, we may end up with Links that specify children that
 are not in the atomspace. Check for these with ./check-oset.scm
+
+Notes
+-----
+Working on Rohits dataset.
+psql simple_pairs
+SELECT Count(*) from atoms; gives 9 230 537 -- that is 9 million or so
+
+Find the ANY node:
+61 | LinkGrammarRelationshipNode
+select * from atoms where type=61;
+
+arghhh. There are 6 of these...
+
+  27 | EvaluationLink
+

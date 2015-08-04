@@ -14,7 +14,10 @@
 (use-modules (srfi srfi-1))
 
 ; debugging ...
-(define do-update #t)
+(define do-update #f)
+
+; fix up type codes
+(define EvalLinkType 47)
 
 (define conxion
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
