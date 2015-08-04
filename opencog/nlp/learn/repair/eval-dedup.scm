@@ -62,13 +62,12 @@
 			; Get the next row
 			(set! row (dbi-get_row conxion))
 		)
-		(begin
-			(define upd (string-append
+		(let ((upd (string-append
 				"UPDATE atoms SET stv_count="
 				(number->string sum)
 				" WHERE uuid="
 				(number->string smallest-uuid)
-				";"))
+				";")))
 			(display upd) (newline)
 			(if do-update (begin
 				(dbi-query conxion upd)
