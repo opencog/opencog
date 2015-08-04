@@ -1597,11 +1597,11 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
-        std::string predicateName,
-        Handle object,
-	TruthValuePtr tv,
-	bool permanent,
-	const Temporal &t)
+                                           std::string predicateName,
+                                           Handle object,
+                                           TruthValuePtr tv,
+                                           bool permanent,
+                                           const Temporal &t)
 {
     HandleSeq ll_out;
     ll_out.push_back(object);
@@ -2114,8 +2114,8 @@ std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
 }
 
 Handle AtomSpaceUtil::getMostRecentPetSchemaExecLink(AtomSpace& atomSpace,
-        unsigned long timestamp,
-	bool schemaSuccessful)
+                                                     unsigned long timestamp,
+                                                     bool schemaSuccessful)
 {
     logger().debug("AtomSpaceUtil - getMostRecentPetSchemaExecLink");
     std::vector<HandleTemporalPair> timestamps;

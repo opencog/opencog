@@ -290,7 +290,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(AtomSpace& as,
     //  t = Temporal(t.getLowerBound()+1, t.getUpperBound()-1);
 
     std::list<HandleTemporalPair> htp;
-    timeServer().getTimeInfo(back_inserter(htp), 
+    timeServer().getTimeInfo(back_inserter(htp),
                    Handle::UNDEFINED,
                    t, TemporalTable::ENDS_WITHIN);
     //define template to match

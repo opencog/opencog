@@ -544,7 +544,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     opencog::spatial::BlockVector pos(objX, objY, objZ);
     SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
 
-    if (entityClass == "block"){
+    if (entityClass == "block") {
         // it's a block
         theSpaceMap->addSolidUnitBlock(pos,objectNode, material);
     }
