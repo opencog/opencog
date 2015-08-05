@@ -103,16 +103,23 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
     HandleSeq qTargetConns = m_as->get_outgoing(m_eval->eval_h(scmCode));
 
-    HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
     HandleSeq qDisjuncts;
-
-    auto insertHelper = [&](const Handle& h)
+    auto iter = m_disjuncts.find(hPatWordNode);
+    if (iter == m_disjuncts.end())
     {
-        HandleSeq q = m_as->get_outgoing(h);
-        qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
-    };
+        HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
 
-    std::for_each(qOr.begin(), qOr.end(), insertHelper);
+        auto insertHelper = [&](const Handle& h)
+        {
+            HandleSeq q = m_as->get_outgoing(h);
+            qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+        };
+
+        std::for_each(qOr.begin(), qOr.end(), insertHelper);
+
+        m_disjuncts.insert({hPatWordNode, qDisjuncts});
+    }
+    else qDisjuncts = iter->second;
 
     logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPat->toShortString().c_str());
 
