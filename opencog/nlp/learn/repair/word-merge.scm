@@ -67,11 +67,18 @@
 	luid
 )
 
-(define (check-for-pair-dupes wuid auid pair-list)
+(define (sum-up-eval-counts wuid auid pair-list)
 "
-  check-for-pair-dupes -- look for identical word-pairs
-  Given wuid and a list of pairs containing wuid, replace
-  the wuid by auid, and look for that pair.
+  sum-up-eval-counts -- look for identical word-pairs
+  wuid -- uuid of a word node
+  auid -- uuid of another word node (holding same word)
+  pair-list -- list of uuid-pairs, one of which is wuid.
+
+  Given a list of pairs containing wuid, find the ListLinks
+  correspodning tio them.  Also: find the ListLinks that hold
+  the corresponding auid.  Then find the EvaluationLinks that
+  correspond to these, sum up the count TV's on them and then
+  delete the ListLink and EvalLink that correspond to auid.
 "
 	; Replace wuid by auid in the pair
 	(define (replace wuid auid pair)
@@ -114,8 +121,16 @@
 	(define (get-eval-uuid uuid) (get-col "uuid" uuid))
 
 	; Sum the counts
+	; Given: luid the uuid of a ListLink containing a word pair,
+	;        laid the uuid of a ListLink containing alternative word-pair
+	; Then: the EvaluationLinks holding luid, laid are found,
+	; the stv_counts on them are sumed,
+	; the count on the evlink holding luid is updated
+	; the laid and the evlink holding laid are deleted.
 	(define (sum-counts luid laid)
 		(if (and (< 0 luid) (< 0 laid))
+			; eud contains uuid of EvaluationLink holding luid
+			; aud ... etc.. holdings laid
 			(let* ((eud (get-eval-uuid luid))
 					(aud (get-eval-uuid laid))
 				)
@@ -219,7 +234,6 @@
 	(display "laids: ") (display (length
 		(filter (lambda (x) (< 0 x)) laid-list)))(newline)
 	(display "cnts: ") (display (length cnt-list))(newline)
-
 )
 
 (define (swap-alts altid wantid pair-list)
@@ -260,7 +274,7 @@
 
 ;(define pair-list (find-pairs 6844))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
-;(check-for-pair-dupes 6844 27942 pair-list)
+;(sum-up-eval-counts 6844 27942 pair-list)
 
 ;(define alt-list (find-pairs 27942))
 ;(display "Found alt pairs: ") (display (length alt-list))(newline)
@@ -268,7 +282,7 @@
 
 ;(define pair-list (find-pairs 42673))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
-;(check-for-pair-dupes 42673 367746 pair-list)
+;(sum-up-eval-counts 42673 367746 pair-list)
 
 ;(define alt-list (find-pairs 367746))
 ;(display "Found alt pairs: ") (display (length alt-list))(newline)
@@ -276,7 +290,7 @@
 
 ;(define pair-list (find-pairs 28019))
 ;(display "Found word pairs: ") (display (length pair-list))(newline)
-;(check-for-pair-dupes 28019 270920 pair-list)
+;(sum-up-eval-counts 28019 270920 pair-list)
 
 ;(define alt-list (find-pairs 270920))
 ;(display "Found alt pairs: ") (display (length alt-list))(newline)

@@ -141,6 +141,14 @@ So, run ./eval-dedup.scm
 The duplicate eval list size: 1817384
 
 argh.
-killed about 415805 in re1, re2 and 1094637 in re3
+ about 415805 in re1, re2 and 1094637 in re3
+
+
+
+; wipe out laids
+(filter-map sum-counts luid-list laid-list)
+
+todo== sum the word counts too.
+
 
 
