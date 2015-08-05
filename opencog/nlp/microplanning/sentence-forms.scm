@@ -42,5 +42,15 @@
 			)
 		)
 	)
+	
+	(InheritanceLink
+		(ConceptNode "ImperativeUtterance")
+		(OrLink
+			(EvaluationLink
+				(PredicateNode "MicroplanningVerbMarker")
+				(VariableNode "MicroplanningWildcardMarker")
+			)
+		)
+	)
 )
 
