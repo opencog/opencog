@@ -288,11 +288,20 @@
   Given a word (string), get the UUID's of all WordNodes holding
   that word. Return these as a list.
 "
+	; If word has a single-quote in it, then escape it!
+	(define (escape-quote word)
+		(define qk (string-index word #\'))
+		(if qk
+			(string-replace word "''" qk (+ qk 1))
+			word
+		)
+	)
+
 	(define row #f)
 	(define wuid-list (list))
 	(define qry (string-append
 		"SELECT uuid FROM atoms WHERE type=" WordNodeType
-			" AND name='" word "';"))
+			" AND name='" (escape-quote word) "';"))
 	(display qry)(newline)
 	(dbi-query conxion qry)
 
