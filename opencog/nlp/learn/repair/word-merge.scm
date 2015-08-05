@@ -55,7 +55,7 @@
 	(define qry (string-append
 		"SELECT * FROM atoms WHERE type=8 AND outgoing="
 		(make-outgoing-str pair)))
-	(display qry)(newline)
+	; (display qry)(newline)
 	(dbi-query conxion qry)
 
 	(set! row (dbi-get_row conxion))
@@ -63,7 +63,7 @@
 		(set! luid (cdr (assoc "uuid" row)))
 		(set! row (dbi-get_row conxion))
 	)
-	(display "ListLink: ")(display luid)(newline)
+	; (display "ListLink: ")(display luid)(newline)
 	luid
 )
 
@@ -272,7 +272,7 @@
 			";"))
 		;(display upd) (newline)
 		(dbi-query conxion upd)
-		(display (dbi-get_status conxion)) (newline)
+		;(display (dbi-get_status conxion)) (newline)
 		(flush-query)
 	)
 
@@ -308,20 +308,22 @@
 ;(swap-alts 270920 28019 alt-list)
 ; --------------------------------------------------------------
 
+(define (escape-quote word)
+"
+  If word has a single-quote in it, then escape it!
+"
+	(define qk (string-index word #\'))
+	(if qk
+		(string-replace word "''" qk (+ qk 1))
+		word
+	)
+)
+
 (define (get-word-uuids word)
 "
   Given a word (string), get the UUID's of all WordNodes holding
   that word. Return these as a list.
 "
-	; If word has a single-quote in it, then escape it!
-	(define (escape-quote word)
-		(define qk (string-index word #\'))
-		(if qk
-			(string-replace word "''" qk (+ qk 1))
-			word
-		)
-	)
-
 	(define row #f)
 	(define wuid-list (list))
 	(define qry (string-append
@@ -340,6 +342,29 @@
 	wuid-list
 )
 
+(define (sum-word-counts word)
+"
+  Given a word (string), sum up the stv-count of all WordNodes holding
+  that word. Return the sum
+"
+	(define row #f)
+	(define sum 0)
+	(define qry (string-append
+		"SELECT uuid,stv_count FROM atoms WHERE type=" WordNodeType
+			" AND name='" (escape-quote word) "';"))
+	(display qry)(newline)
+	(dbi-query conxion qry)
+
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! sum (+ (cdr (assoc "stv_count" row)) sum))
+		(set! row (dbi-get_row conxion))
+	)
+	(display "Word ")(display word)
+	(display " has sum ")(display sum) (newline)
+	sum
+)
+
 ; --------------------------------------------------------------
 
 (define duplicate-word-list
@@ -349,13 +374,17 @@
 
 (display "The duplicate word list is: ")
 (display duplicate-word-list) (newline)
+(flush-output-port (current-output-port))
 
 ;(define dup-wuid-lists
 ;	(map get-word-uuids duplicate-word-list))
 
 (define (dedupe-word word)
 "
-  Deduplicate the word.
+  Deduplicate the word. This sums up counts on the EvaluationLinks
+  that contain the duplicted words. It also relabels the ListLinks
+  that use the wrong word uid.  Basically it does everything except
+  to sum up the WordNodes themselves.
 "
 	; First, get a list of the uuid's associated with the word.
 	(define wuid-list (get-word-uuids word))
@@ -381,7 +410,7 @@
 	; Fixup ListLinks holding the bad WordNode.
 	; This sums and removes duplicates, and relabels the rest.
 	; This is the final, mster routine.
-	(define (fix-bad bad)
+	(define (fixup-bad bad)
 		(define alt-list (list))
 		; First, remove duplicates
 		(sum-up-eval-counts smallest-wuid bad wuid-word-pairs)
@@ -403,4 +432,51 @@
 	(for-each fixup-bad bad-wuid-list)
 )
 
-(map dedupe-word duplicate-word-list)
+;(for-each dedupe-word duplicate-word-list)
+
+; --------------------------------------------------------------
+; Finally, sum up the word-counts.
+
+(define (sum-word-counts word)
+"
+  sum-word-counts -- Given the (string) word, find all WordNodes that
+  hold this word, sum up the counts on all of them, assign the count to
+  the one with the smallest uuid, and delete the rest.
+"
+	; First, get a list of the uuid's associated with the word.
+	(define wuid-list (get-word-uuids word))
+
+	; Next, find the smallest uuid in that list
+	(define (get-smallest-uuid uuid-list)
+		(define sma 6123456123123)
+		(for-each (lambda (x) (if (< x sma) (set! sma x))) uuid-list)
+		(display "smallest wuid is ")(display sma)(newline)
+		sma
+	)
+	(define smallest-wuid (get-smallest-uuid wuid-list))
+
+	; Next, remove the smallest uuid from the list  ...
+	(define bad-wuid-list
+		(remove (lambda (x) (eq? x smallest-wuid)) wuid-list))
+
+	; Next, sum up the counts
+	(define sum-of-counts (sum-word-counts word))
+
+	; Next, update the master count
+	(define upd (string-append
+		"UPDATE atoms SET stv_count="
+		(number->string sum-of-counts)
+		" WHERE uuid="
+		(number->string smallest-wuid)
+		";"))
+
+	(display upd)
+	(dbi-query conxion upd)
+	(display (dbi-get_status conxion)) (newline)
+	(flush-query)
+
+	; Now, delete the bad words.
+	(delete-atoms bad-wuid-list 0 #t)
+)
+
+(for-each sum-word-counts duplicte-word-list)

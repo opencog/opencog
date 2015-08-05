@@ -120,7 +120,7 @@
 )
 
 ; ------------------------------------------------
-(define (delete-atoms uuid-list except)
+(define (delete-atoms uuid-list except #:optional do-prt)
 "
   delete-atoms -- delete every atom in the uuid-list, except for
   the except uuid
@@ -134,11 +134,13 @@
 					"DELETE FROM atoms WHERE uuid="
 					(number->string uuid)))
 
-				; (display "Delete ")(display qry)(newline)
+				(if do-prt (begin
+					(display "Delete ")(display qry)(newline)))
 				(if do-update
 					(begin
 						(dbi-query conxion qry)
-						;(display (dbi-get_status conxion)) (newline)
+						(if do-prt (begin
+							(display (dbi-get_status conxion)) (newline)))
 						(flush-query)))
 			)
 		)
