@@ -339,5 +339,41 @@
 (display "The duplicate word list is: ")
 (display duplicate-word-list) (newline)
 
-(define dup-wuid-lists
-	(map get-word-uuids duplicate-word-list))
+;(define dup-wuid-lists
+;	(map get-word-uuids duplicate-word-list))
+
+(define (dedupe-word word)
+"
+  Deduplicate the word.
+"
+	; First, get a list of the uuid's associated with the word.
+	(define wuid-list (get-word-uuids word))
+
+	; Next, find the smallest uuid in that list
+	(define (get-smallest-uuid uuid-list)
+		(define sma 6123456123123)
+		(for-each (lambda (x) (if (< x sma) (set! sma x))) uuid-list)
+		(display "smallest wuid is ")(display sma)(newline)
+		sma
+	)
+	(define smallest-wuid (get-smallest-uuid wuid-list))
+
+	; Next, remove the smallest uuid from the list  ...
+	(define bad-wuid-list
+		(remove (lambda (x) (eq? x smallest-wuid)) wuid-list))
+
+	; Next, walk over the bad-wuid-list, and dupe each of these,
+	; one at a time, to the smallest wuid.  This is done at the
+	; the end; here we build a routine that does just one at a time.
+
+	; Get a list of all word-pairs that have the smallest-wuid in it.
+	; This is a list of uuid-pairs; these uuid-pairs occur in some
+	; ListLink somewhere.
+	(define wuid-word-pairs (find-pairs smallest-wuid))
+
+	(display "Number of word-pairs: ")
+	(display (length wuid-word-pairs))(newline) (newline)
+	(flush-output-port (current-output-port))
+)
+
+(map dedupe-word duplicate-word-list)
