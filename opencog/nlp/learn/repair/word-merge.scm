@@ -153,41 +153,41 @@
 								(number->string laid)
 								";"))
 						)
-						(display "summo cnt ") (display lcnt)
-						(display " + ") (display acnt)
-						(display " = ") (display scnt)
-						(display " for ") (display luid)
-						(display "(") (display eud)
-						(display ") and ") (display laid)
-						(display "(") (display aud) (display ")")
-						(newline)
-						(display upd) (newline)
+						;(display "summo cnt ") (display lcnt)
+						;(display " + ") (display acnt)
+						;(display " = ") (display scnt)
+						;(display " for ") (display luid)
+						;(display "(") (display eud)
+						;(display ") and ") (display laid)
+						;(display "(") (display aud) (display ")")
+						;(newline)
+						;(display upd) (newline)
 						(dbi-query conxion upd)
-						(display (dbi-get_status conxion)) (newline)
+						;(display (dbi-get_status conxion)) (newline)
 						(flush-query)
-						(display apd) (newline)
+						;(display apd) (newline)
 						(dbi-query conxion apd)
-						(display (dbi-get_status conxion)) (newline)
+						;(display (dbi-get_status conxion)) (newline)
 						(flush-query)
-						(display alt) (newline)
+						;(display alt) (newline)
 						(dbi-query conxion alt)
-						(display (dbi-get_status conxion)) (newline)
+						;(display (dbi-get_status conxion)) (newline)
 						(flush-query)
 						scnt
 					)
-					(begin
-						(display "Missing eval id ") (display eud)
-						(display "(for ")(display luid)
-						(display ") and ") (display aud)
-						(display "(for ")(display laid)
-						(display ")")(newline)
+					;(begin
+					;	(display "Missing eval id ") (display eud)
+					;	(display "(for ")(display luid)
+					;	(display ") and ") (display aud)
+					;	(display "(for ")(display laid)
+					;	(display ")")(newline)
 						#f
-					)
+					;)
 				)
 			)
 			(begin
-				(display "Missing list-alt id for ") (display luid)
-				(newline)
+				;(display "Missing list-alt id for ") (display luid)
+				;(newline)
 				#f
 			)
 		)
@@ -228,18 +228,25 @@
 	; (define cnt-list (filter-map bug-cleanup laid-list))
 
 	; (display alt-list) (newline)
-	(display "pairs: ") (display (length pair-list))(newline)
-	(display "alt pairs: ") (display (length alt-list))(newline)
-	(display "luids: ") (display (length luid-list))(newline)
-	(display "laids: ") (display (length
+	(display "num of word-pairs: ") (display (length pair-list))(newline)
+	(display "num of alt-pairs: ") (display (length alt-list))(newline)
+	(display "num luids (ListLinks): ") (display (length luid-list))(newline)
+	(display "num of laids (listLinks holding alts): ") (display (length
 		(filter (lambda (x) (< 0 x)) laid-list)))(newline)
-	(display "cnts: ") (display (length cnt-list))(newline)
+	(display "num actually fixed up: ") (display (length cnt-list))(newline)
 )
 
 (define (swap-alts altid wantid pair-list)
 "
   swap-alts -- fix up the uuids -- replace altid by wantid in
-  the ListLink that contains the altid.
+  the ListLink that contains the altid.  This modifies the
+  ListLink; it usually should not create any duplicates, as
+  long as the pair-list was previously de-duped. However, for
+  multiple lists, this may be violated :-(
+
+  altid is the uuid of the unwanted WordNode
+  wantid is the uuid of the correct WordNode
+  pair-list is the list of uuid-pairs, one of which is altid.
 "
 	; Replace wuid by auid in the pair
 	(define (replace wuid auid pair)
@@ -263,13 +270,17 @@
 			" WHERE uuid="
 			(number->string laid)
 			";"))
-		(display upd) (newline)
+		;(display upd) (newline)
 		(dbi-query conxion upd)
 		(display (dbi-get_status conxion)) (newline)
 		(flush-query)
 	)
 
-	(map fixup laid-list fix-list)
+	(for-each fixup laid-list fix-list)
+
+	(display "Num of relabeled ListLinks: ")
+	(display (length laid-list)) (newline)
+	(flush-output-port (current-output-port))
 )
 
 ;(define pair-list (find-pairs 6844))
@@ -362,18 +373,34 @@
 	(define bad-wuid-list
 		(remove (lambda (x) (eq? x smallest-wuid)) wuid-list))
 
-	; Next, walk over the bad-wuid-list, and dupe each of these,
-	; one at a time, to the smallest wuid.  This is done at the
-	; the end; here we build a routine that does just one at a time.
-
 	; Get a list of all word-pairs that have the smallest-wuid in it.
 	; This is a list of uuid-pairs; these uuid-pairs occur in some
 	; ListLink somewhere.
 	(define wuid-word-pairs (find-pairs smallest-wuid))
 
+	; Fixup ListLinks holding the bad WordNode.
+	; This sums and removes duplicates, and relabels the rest.
+	; This is the final, mster routine.
+	(define (fix-bad bad)
+		(define alt-list (list))
+		; First, remove duplicates
+		(sum-up-eval-counts smallest-wuid bad wuid-word-pairs)
+		; Next, relabel the rest
+		(set! alt-list (find-pairs bad))
+		(display "Need to relabel bad pairs: ")
+		(display (length alt-list))(newline)
+		(swap-alts bad smallest-wuid alt-list)
+		(flush-output-port (current-output-port))
+	)
+
 	(display "Number of word-pairs: ")
 	(display (length wuid-word-pairs))(newline) (newline)
 	(flush-output-port (current-output-port))
+
+	; Next, walk over the bad-wuid-list, and dupe each of these,
+	; one at a time, to the smallest wuid.
+	(display "The bad wuids: ")(display bad-wuid-list)(newline)
+	(for-each fixup-bad bad-wuid-list)
 )
 
 (map dedupe-word duplicate-word-list)

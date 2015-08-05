@@ -56,10 +56,17 @@ Working on Rohit's dataset.
 psql simple_pairs
 SELECT Count(*) from atoms; gives 9 230 537 -- that is 9 million or so
 Of these, there are --
-   3 636 569 ListLinks
-   5 453 952 EvaluationLinks
-     139 884 WordNodes
+   3 636 569 ListLinks          type=8
+   5 453 952 EvaluationLinks    type=27
+     139 884 WordNodes          type=45
 select count(*) from atoms where type=8;
+
+----
+After first dupe elimination:
+   3 636 568 ListLinks        (one less)
+   3 601 161 EvaluationLinks  (1852791 less) (about right ...)
+
+---
 
 Find the ANY node:
 61 | LinkGrammarRelationshipNode
@@ -143,12 +150,13 @@ The duplicate eval list size: 1817384
 argh.
  about 415805 in re1, re2 and 1094637 in re3
 
+----------
+Noew run ./word-merge.scm
 
 
-; wipe out laids
-(filter-map sum-counts luid-list laid-list)
 
-todo== sum the word counts too.
+todo==
+-- sum the word counts too.
 
 
 
