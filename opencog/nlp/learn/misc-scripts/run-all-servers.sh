@@ -28,6 +28,7 @@ tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
+# ./wiki-ss-en.sh
 tmux new-window -n 'parse' '$SHELL'
 
 # Spare

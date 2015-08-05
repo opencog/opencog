@@ -170,7 +170,9 @@
 			; Print status so we don't get bored.
 			(if (eq? 0 (modulo word-count 1000)) (begin
 				(display "Processed ")(display word-count)
-				(display " id-relabels")(newline)))
+				(display " id-relabels")(newline))
+				(flush-output-port (current-output-port))
+			)
 
 			; (display word) (newline)
 			(set! row (dbi-get_row conxion))
@@ -183,15 +185,71 @@
 	)
 
 	(set! elist (map change-eval alist))
-	(display "Changed ") (display bad-id)
+	(display "Relabel ANY uuid ") (display bad-id)
 	(display " to ") (display good-id)(newline)
-	(display "Changed uuid count was ") (display word-count) (newline)
+	(display "Relabeled uuid count was ") (display word-count) (newline)
+	(flush-output-port (current-output-port))
 	elist
 )
 
 ; (relabel-evals all-list-links 250 152)
-(relabel-evals all-list-links 139 57)
-(relabel-evals all-list-links 140 57)
-(relabel-evals all-list-links 186 57)
-(relabel-evals all-list-links 190 57)
-(relabel-evals all-list-links 270 57)
+
+;(relabel-evals all-list-links 139 57)
+;(relabel-evals all-list-links 140 57)
+;(relabel-evals all-list-links 186 57)
+;(relabel-evals all-list-links 190 57)
+;(relabel-evals all-list-links 270 57)
+
+; -----------------------------------------------
+
+(define (get-all-non-any-evals any-id)
+"
+  get-all-non-any-evals -- look for all EvalLinks that do NOT
+  hold the desired ANY node.  At this point in the game, there
+  should not be any of these. But there are. WTF. Oh, it was
+  a bad conversion of int8 to long long in guile-dbi.
+"
+	(define bad-list (list))
+	(define euid 0)
+	(define luid 0)
+	(define oset (list))
+	(define row #f)
+	(define qry (string-concatenate (list
+		"SELECT uuid,outgoing FROM atoms WHERE type="
+		EvalLinkType)))
+	(display qry)(newline)
+	(dbi-query conxion qry)
+
+	; Loop over table rows
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+
+		; Extract the column value
+		(set! euid (cdr (assoc "uuid" row)))
+		(set! oset (cdr (assoc "outgoing" row)))
+		(set! luid (cadr oset))
+
+		(if (not (eq? (car oset) any-id)) (begin
+			(set! bad-list (cons luid bad-list))
+			;(display "Its bad: ")(display euid)
+			;(display " any: ")(display (car oset))(newline)
+			;(flush-output-port (current-output-port))
+		))
+
+		; (display word) (newline)
+		(set! row (dbi-get_row conxion))
+	)
+
+	; Return the list of bad EvaluationLinks
+	bad-list
+)
+
+(define bad-list (get-all-non-any-evals 57))
+(display "Number of bad evals: ") (display (length bad-list))(newline)
+
+(relabel-evals bad-list 139 57)
+(relabel-evals bad-list 140 57)
+(relabel-evals bad-list 186 57)
+(relabel-evals bad-list 190 57)
+(relabel-evals bad-list 270 57)
+

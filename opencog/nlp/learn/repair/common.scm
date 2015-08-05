@@ -12,6 +12,7 @@
 
 (use-modules (dbi dbi))
 (use-modules (srfi srfi-1))
+(use-modules (rnrs io ports))
 
 ; debugging ...
 (define do-update #f)

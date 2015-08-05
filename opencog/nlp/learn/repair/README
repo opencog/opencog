@@ -18,7 +18,7 @@ Then see how many:
 If more than one, start with ./any-merge.scm
 
 
-First, edit common.scm and set do-update to #f -- 
+First, edit common.scm and set do-update to #f --
   -- this will avoid clobbering your data.
   -- tehn run ./dedupe-pairs.scm and see what happens..
 
@@ -65,6 +65,64 @@ select * from atoms where type=61;
 
 arghhh. There are 6 of these...
 (map count-evlinks (list 57 139 140 186 190 270))
+
+These are being handled at the rate of 100 per second.
+so 5.5M 55K seconds == 15 hours!!! ouch.
+
+Relabel any uuid 139 to 57
+Changed uuid count was 833348
+Changed 140 to 57
+Changed uuid count was 623716
+Changed 186 to 57
+Changed uuid count was 1769698
+Changed 190 to 57
+Changed uuid count was 492974
+Changed 270 to 57
+Changed uuid count was 573087
+
+real	349m46.696s
+user	46m10.172s
+sys	22m34.208s
+
+argh do it again:
+Relabel ANY uuid 139 to 57
+Relabeled uuid count was 101662
+
+
+
+
+select uuid,stv_count from atoms where type=61;
+ uuid | stv_count
+------+-----------
+  186 | 221385260
+   57 |  64865342
+  139 |  64780936
+  270 |  38383732
+  140 |  47758052
+  190 |  20589354
+(6 rows)
+
+select sum(stv_count) from atoms where type=61;
+    sum
+-----------
+ 457762676
+
+UPDATE atoms SET stv_count=457762676 WHERE uuid=57;
+DELETE FROM atoms WHERE uuid=186;
+DELETE FROM atoms WHERE uuid=139;
+DELETE FROM atoms WHERE uuid=270;
+DELETE FROM atoms WHERE uuid=140;
+DELETE FROM atoms WHERE uuid=190;
+
+
+
+ 2229068226 | {140,2229068225}
+ 2229068256 | {140,167321273}
+ 2229068262 | {140,2229068261}
+ 2229068264 | {140,2229068263}
+
+
+
 
 
   27 | EvaluationLink
