@@ -21,6 +21,13 @@
 ; (define EvalLinkType "47")
 (define EvalLinkType (number->string 27))
 
+(define WordNodeType (number->string 45))
+
+; The uuid of the ANY LG type.  That is, the uuid of the
+; LinkGrammarRelationshipNode "ANY"
+; (define uuid-of-any 152)
+(define uuid-of-any 57)
+
 (define conxion
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:tcp:localhost:5432"))
        ; (dbi-open "postgresql" "linas:asdf:en_pairs:socket:/var/run/postgresql"))
@@ -127,11 +134,11 @@
 					"DELETE FROM atoms WHERE uuid="
 					(number->string uuid)))
 
-				(display "Delete ")(display qry)(newline)
+				; (display "Delete ")(display qry)(newline)
 				(if do-update
 					(begin
 						(dbi-query conxion qry)
-						(display (dbi-get_status conxion)) (newline)
+						;(display (dbi-get_status conxion)) (newline)
 						(flush-query)))
 			)
 		)

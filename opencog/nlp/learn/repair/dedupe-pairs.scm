@@ -13,11 +13,6 @@
 
 (load "common.scm")
 
-; The uuid of the ANY LG type.  That is, the uuid of the
-; LinkGrammarRelationshipNode "ANY"
-; (define uuid-of-any 152)
-(define uuid-of-any 57)
-
 ; --------------------------------------------------------------
 
 ; The duplicate-pair-list will consist of word-pairs

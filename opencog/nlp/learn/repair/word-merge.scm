@@ -12,15 +12,6 @@
 
 (load "common.scm")
 
-; --------------------------------------------------------------
-
-(define duplicate-word-list
-	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=73;" "name"))
-
-(display "the duplicate word list is: ")
-(display duplicate-word-list) (newline)
-
 ; ------------------------------------------------
 (define (find-pairs wuid)
 "
@@ -104,7 +95,7 @@
 			"SELECT * FROM atoms WHERE type="
 			EvalLinkType
 			" AND outgoing="
-			(make-outgoing-str (list 250 uuid))))
+			(make-outgoing-str (list uuid-of-any uuid))))
 		; (display qry)(newline)
 		(dbi-query conxion qry)
 
@@ -283,10 +274,47 @@
 ;(display "Found alt pairs: ") (display (length alt-list))(newline)
 ;(swap-alts 367746 42673 alt-list)
 
-(define pair-list (find-pairs 28019))
-(display "Found word pairs: ") (display (length pair-list))(newline)
-(check-for-pair-dupes 28019 270920 pair-list)
+;(define pair-list (find-pairs 28019))
+;(display "Found word pairs: ") (display (length pair-list))(newline)
+;(check-for-pair-dupes 28019 270920 pair-list)
 
-(define alt-list (find-pairs 270920))
-(display "Found alt pairs: ") (display (length alt-list))(newline)
-(swap-alts 270920 28019 alt-list)
+;(define alt-list (find-pairs 270920))
+;(display "Found alt pairs: ") (display (length alt-list))(newline)
+;(swap-alts 270920 28019 alt-list)
+; --------------------------------------------------------------
+
+(define (get-word-uuids word)
+"
+  Given a word (string), get the UUID's of all WordNodes holding
+  that word. Return these as a list.
+"
+	(define row #f)
+	(define wuid-list (list))
+	(define qry (string-append
+		"SELECT uuid FROM atoms WHERE type=" WordNodeType
+			" AND name='" word "';"))
+	(display qry)(newline)
+	(dbi-query conxion qry)
+
+	(set! row (dbi-get_row conxion))
+	(while (not (equal? row #f))
+		(set! wuid-list (cons (cdr (assoc "uuid" row)) wuid-list))
+		(set! row (dbi-get_row conxion))
+	)
+	(display "Word ")(display word)
+	(display " has uuids ")(display wuid-list) (newline)
+	wuid-list
+)
+
+; --------------------------------------------------------------
+
+(define duplicate-word-list
+	(look-for-dupes (string-append
+		"SELECT uuid, name FROM atoms WHERE type="
+		WordNodeType) "name"))
+
+(display "The duplicate word list is: ")
+(display duplicate-word-list) (newline)
+
+(define dup-wuid-lists
+	(map get-word-uuids duplicate-word-list))

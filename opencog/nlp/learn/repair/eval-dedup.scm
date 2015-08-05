@@ -74,10 +74,10 @@
 				" WHERE uuid="
 				(number->string smallest-uuid)
 				";")))
-			(display upd) (newline)
+			; (display upd) (newline)
 			(if do-update (begin
 				(dbi-query conxion upd)
-				(display (dbi-get_status conxion)) (newline)
+				; (display (dbi-get_status conxion)) (newline)
 				(flush-query)))
 			(delete-atoms dup-list  smallest-uuid)
 		)
