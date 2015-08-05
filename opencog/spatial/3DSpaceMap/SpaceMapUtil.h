@@ -1,11 +1,20 @@
+#ifndef _SPATIAL_SPACEMAPUTIL_H
+#define _SPATIAL_SPACEMAPUTIL_H
+
 #include <string>
+#include <set>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
+#include "Octree3DMapManager.h"
+#include "Block3DMapUtil.h"
 
 using namespace std;
 
 namespace opencog
 {
+    namespace spatial
+    {
+
 	/**
 	 *    PredicateNames
 	 */
@@ -13,7 +22,7 @@ namespace opencog
 
         enum SPATIAL_RELATION
         {
-			LEFT_OF = 0,
+            LEFT_OF = 0,
             RIGHT_OF,
             ABOVE,
             BELOW,
@@ -30,31 +39,42 @@ namespace opencog
             TOTAL_RELATIONS
         };
 
+        vector<string> getPredicate(AtomSpace& atomspace, const string& predicateName, const HandleSeq& handles, const unsigned& numberOfPredicateValue);
+		
+	/**
+	 *    spatial computation utility, used in Inquery. 
+	 *    For polymorphism design in Inquery, we overload the distanceBetween.
+	 */
 
 	/**
-	 *    getter functions
+	 * Find a free point near a given position, at a given distance
+	 * @param position Given position
+	 * @param distance Maximum distance from the given position to search the free point
+	 * @param startDirection Vector that points to the direction of the first rayTrace
+	 * @param toBeStandOn if this is true then agent can stand at that position,which means the point should not be on the sky
+	 * 
 	 */
-	string getPredicate(AtomSpace& atomSpace,
-						const string& predicateName,const Handle& blockHandle);
 
-//	Handle getBlockEntity(const Handle& blockHandle);
-//	HandleSeq getComposedBlocks(const Handle& blockEntityHandle);
-	
-	/**
-	 *    spatial computation utility
-	 */
-/*	
-	double distanceBetween(const Entity3D* entityA,
-						   const Entity3D* entityB) const;
-	double distanceBetween(const BlockVector& posA, 
-						   const BlockVector& posB) const;
-	double distanceBetween(const string& objectNameA, 
-						   const string& objectNameB) const;
-	double distanceBetween(const string& objectName, 
-						   const BlockVector& pos) const;
+	BlockVector getNearFreePointAtDistance(const Octree3DMapManager& spaceMap,
+                                               const BlockVector& position, 
+                                               int distance, 
+                                               const BlockVector& startDirection,
+                                               bool toBeStandOn);
+	double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const Handle& objectA,
+                               const Handle& objectB);
+	double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const BlockVector& posA, 
+                               const BlockVector& posB);
+	double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const Handle& objectA, 
+                               const BlockVector& posB);
 	bool isTwoPositionsAdjacent(const BlockVector& pos1, 
-								const BlockVector& pos2) const;
-*/	
+                                    const BlockVector& pos2);
+        AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
+                                      const Octree3DMapManager& spaceMap,
+                                      const Handle& entity);
+
 	/**
 	 * Finds the list of spatial relationships 
 	 * that apply to the three entities.
@@ -71,17 +91,24 @@ namespace opencog
 	 *         and entityC (second reference)
 	 *
 	 */
-/*
-	std::set<SPATIAL_RELATION> computeSpatialRelations(
-		const Entity3D* entityA,
-		const Entity3D* entityB,
-		const Entity3D* entityC = 0,
-		const Entity3D* observer = 0) const;
-	std::set<SPATIAL_RELATION> computeSpatialRelations( 
-		const AxisAlignedBox& boundingboxA,
-		const AxisAlignedBox& boundingboxB,
-		const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
-		const Entity3D* observer = 0 ) const;
-	static string spatialRelationToString(SPATIAL_RELATION relation);
-*/
+        
+        set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
+                                                      const Octree3DMapManager& spaceMap,
+                                                      const Handle& entityA,
+                                                      const Handle& entityB,
+                                                      const Handle& entityC = Handle::UNDEFINED,
+                                                      const Handle& observer = Handle::UNDEFINED);
+        set<SPATIAL_RELATION> computeSpatialRelations(const AxisAlignedBox& boundingboxA,
+                                                      const AxisAlignedBox& boundingboxB,
+                                                      const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
+                                                      const Handle& observer = Handle::UNDEFINED);
+        
+	string spatialRelationToString(SPATIAL_RELATION relation);
+
+        //	Handle getBlockEntity(const Handle& blockHandle);
+        //	HandleSeq getComposedBlocks(const Handle& blockEntityHandle);
+
+    }
 }
+
+#endif
