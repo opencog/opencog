@@ -17,13 +17,15 @@ Then see how many:
 
 If more than one, start with ./any-merge.scm
 
-
-First, edit common.scm and set do-update to #f --
+Next, edit common.scm and set do-update to #f --
   -- this will avoid clobbering your data.
-  -- tehn run ./dedupe-pairs.scm and see what happens..
+  -- then run ./dedupe-pairs.scm and see what happens..
+  -- dedupe-pairs looks for duplicate ListLinks.
 
 Next, edit common.scm and set do-update to #t --
   -- this is the actual run.
+
+Next run ./eval-dedupe.scm
 
 Then review contents of and run word-merge.scm
 then delete the duplicate WordNodes by hand.
@@ -85,8 +87,19 @@ user	46m10.172s
 sys	22m34.208s
 
 argh do it again:
+Number of bad evals: 588291
 Relabel ANY uuid 139 to 57
 Relabeled uuid count was 101662
+Relabel ANY uuid 140 to 57
+Relabeled uuid count was 311786
+Relabel ANY uuid 186 to 57
+Relabeled uuid count was 39714
+elabel ANY uuid 190 to 57
+Relabeled uuid count was 62779
+Relabel ANY uuid 270 to 57
+Relabeled uuid count was 72350
+
+
 
 
 
@@ -115,15 +128,16 @@ DELETE FROM atoms WHERE uuid=140;
 DELETE FROM atoms WHERE uuid=190;
 
 
+./dedupe says only one!! duplicate EvalLink!?
+select * from atoms where outgoing='{125,131}';
+15138
+15945
+DELETE FROM atoms WHERE uuid=15945;
 
- 2229068226 | {140,2229068225}
- 2229068256 | {140,167321273}
- 2229068262 | {140,2229068261}
- 2229068264 | {140,2229068263}
+select uuid,type,stv_count,outgoing from atoms where outgoing='{57,15138}';
+So -- only one ListLink, but lots of Duplicated Evals for that
+ListLink...
+So, run ./eval-dedup.scm
+The duplicate eval list size: 1817384
 
-
-
-
-
-  27 | EvaluationLink
 

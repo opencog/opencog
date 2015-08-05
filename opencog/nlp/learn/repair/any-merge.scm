@@ -247,9 +247,8 @@
 (define bad-list (get-all-non-any-evals 57))
 (display "Number of bad evals: ") (display (length bad-list))(newline)
 
-(relabel-evals bad-list 139 57)
-(relabel-evals bad-list 140 57)
-(relabel-evals bad-list 186 57)
-(relabel-evals bad-list 190 57)
-(relabel-evals bad-list 270 57)
-
+;(relabel-evals bad-list 139 57)
+;(relabel-evals bad-list 140 57)
+;(relabel-evals bad-list 186 57)
+;(relabel-evals bad-list 190 57)
+;(relabel-evals bad-list 270 57)

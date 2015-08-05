@@ -15,7 +15,8 @@
 
 ; The uuid of the ANY LG type.  That is, the uuid of the
 ; LinkGrammarRelationshipNode "ANY"
-(define uuid-of-any 250)
+; (define uuid-of-any 152)
+(define uuid-of-any 57)
 
 ; --------------------------------------------------------------
 
@@ -26,10 +27,12 @@
 ;
 (define duplicate-pair-list
 	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
+		"SELECT uuid,outgoing FROM atoms WHERE type=8;" "outgoing"))
 
-;(display "the duplicate pair list is: ")
-;(display duplicate-pair-list) (newline)
+(display "the duplicate pair list is: ")
+(display duplicate-pair-list) (newline)
+(display "Number of dupes: ")
+(display (length duplicate-pair-list))(newline)
 
 ; ------------------------------------------------
 
@@ -38,9 +41,10 @@
   undup-eval -- consolidate duplicate EvaluationLinks
 
   The luid-list should be a list of integer uuids for the ListLinks
-  that are the duplicates. The proceedure here is semi-manual;
-  the total count is computed, but you have to update the count
-  yourself, and also do the deletions.
+  that are the duplicates. The proceedure here is fully automatic;
+  the total count is computed, the count on the EvalLink with the
+  smallest uuid is updted, the other EvalLinks and the other ListLinks
+  are automatically deleted.
 "
 	(define smallest-evid 2012123123)
 	(define smallest-luid 2012123123)
@@ -107,15 +111,6 @@
 
 	(delete-atoms eval-list smallest-evid)
 	(delete-atoms luid-list smallest-luid)
-
-	; Do this manually...
-	; UPDATE atoms SET stv_count=5938 WHERE uuid=53650;
-	; DELETE FROM atoms WHERE uuid=430743;
-	; DELETE FROM atoms WHERE uuid=430742;
-	;
-	; UPDATE atoms SET stv_count=3760.0 WHERE uuid=27878;
-	; DELETE FROM atoms WHERE uuid=415559;
-	; DELETE FROM atoms WHERE uuid=415560;
 )
 
 (define (undup-pair pair)
@@ -125,7 +120,7 @@
 
   This works by obtaining a list of all of the duplicate UUID's, and
   then calling 'undup-eval' to consolidate them. The undup-eval
-  sums up the counts, and deletes teh duplicates.
+  sums up the counts, and deletes the duplicates.
 "
 
 	(define row #f)
@@ -163,6 +158,6 @@
 ; (undup-pair (list 24493 101))
 
 ; Whole-sale de-duplication
-(for-each undup-pair duplicate-pair-list)
+; (for-each undup-pair duplicate-pair-list)
 (display "number of dupes: ")
 (display (length duplicate-pair-list))(newline)

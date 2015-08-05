@@ -15,10 +15,10 @@
 (use-modules (rnrs io ports))
 
 ; debugging ...
-(define do-update #f)
+(define do-update #t)
 
 ; fix up type codes
-; (define EvalLinkType 47)
+; (define EvalLinkType "47")
 (define EvalLinkType (number->string 27))
 
 (define conxion
