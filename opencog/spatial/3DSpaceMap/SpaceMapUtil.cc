@@ -2,7 +2,7 @@
 #include <string>
 #include <set>
 
-#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+//#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -30,7 +30,7 @@ namespace opencog
             for(auto handle : handles) {
                 predicateListLinkOutgoings.push_back(handle);
             }
-            for(int i=0; i != numberOfPredicateValue ; i++) {
+            for(unsigned i=0; i != numberOfPredicateValue ; i++) {
                 string hVariableNodeName = "$pred_val" + std::to_string(i);
                 Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, hVariableNodeName);
                 predicateListLinkOutgoings.push_back(hVariableNode);
@@ -45,17 +45,25 @@ namespace opencog
             Handle getLink = atomspace.add_link(GET_LINK,getLinkOutgoing);
             Handle resultSetLink = satisfying_set(&atomspace,getLink);
             logger().error("the get link result %s",atomspace.atom_as_string(resultSetLink).c_str());
-            HandleSeq resultListLinkSet = (LinkCast(resultSetLink)->getOutgoingSet());
-            if(resultListLinkSet.empty()) {
-                return result;
-            }
-            HandleSeq resultListLinkOutgoings = LinkCast(resultListLinkSet[0])->getOutgoingSet();
-            for(auto predicateValueNode : resultListLinkOutgoings) {
-                result.push_back(NodeCast(predicateValueNode)->getName());
+            if(numberOfPredicateValue == 1){
+                HandleSeq resultNodeSet = (LinkCast(resultSetLink)->getOutgoingSet());
+                if(resultNodeSet.empty()) {
+                    return result;
+                }
+                result.push_back(NodeCast(resultNodeSet[0])->getName());
+            } else {
+                //more than one predicate value, ex.size
+                HandleSeq resultListLinkSet = (LinkCast(resultSetLink)->getOutgoingSet());
+                if(resultListLinkSet.empty()) {
+                    return result;
+                }
+                HandleSeq resultListLinkOutgoings = LinkCast(resultListLinkSet[0])->getOutgoingSet();
+                for(auto predicateValueNode : resultListLinkOutgoings) {
+                    result.push_back(NodeCast(predicateValueNode)->getName());
+                }
             }
             return result;
         }
-
         
         BlockVector getNearFreePointAtDistance( const Octree3DMapManager& spaceMap, const BlockVector& position, int distance, const BlockVector& startDirection , bool toBeStandOn) 
         {
@@ -63,40 +71,40 @@ namespace opencog
             int z ;
             Handle block;
             
-            while (ztimes <3)
-            {
+            while (ztimes <3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)
-                if (ztimes == 0) { z = 0;}
-                else if (ztimes == 1) { z = -1;}
-                else { z = 1;}
-                
+                if (ztimes == 0) {
+                    z = 0;
+                } else if(ztimes == 1) {
+                    z = -1;
+                } else { 
+                    z = 1;
+                }                
                 ztimes++;
 		
                 // we first search at the startdirection, if cannot find a proper position then go on with the complete search
                 BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
-                if (toBeStandOn)
-                {
-                    if(spaceMap.checkStandable(curpos))
-                    { return curpos;}
+                if (toBeStandOn) {
+                    if(spaceMap.checkStandable(curpos)) {
+                        return curpos;
+                    }
                 }
-                else
-                {
-                    if(spaceMap.getBlock(curpos)==Handle::UNDEFINED)
-                    { return curpos;}
+                else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
+                    return curpos;
                 }
-		
-                for (int dis = 1;  dis <= distance; dis++) {
+                		
+                for (int dis = 1; dis <= distance; dis++) {
+
                     for (int x = 0; x <= dis; x++) {
                         BlockVector curpos(position.x + x, position.y + dis,position.z + z);
                         if(toBeStandOn) {
                             if(spaceMap.checkStandable(curpos)){
                                 return curpos;
                             }
-                        } else if(spaceMap.getBlock(curpos)==Handle::UNDEFINED) { 
+                        } else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) { 
                                 return curpos;
                             }
-                        }
                     }
 			
                     for (int y = 0; y <= dis; y++) {
@@ -105,14 +113,12 @@ namespace opencog
                             if(spaceMap.checkStandable(curpos)) {
                                 return curpos;
                             }
-                        } else {
-                            if(spaceMap.getBlock(curpos)==Handle::UNDEFINED) {
+                        } else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
                                 return curpos;
-                            }
                         }
                     }
                 }
-            }
+            }            
             return BlockVector::ZERO;
         }
 		

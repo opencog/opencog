@@ -154,8 +154,7 @@ namespace opencog
                                     bool isAvatarEntity,
                                     const unsigned long timestamp);
             void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBlockEntityLocation(
-                                               const Handle &entityNode, BlockVector newpos, 
+            void updateNoneBlockEntityLocation(const Handle &entityNode, BlockVector newpos, 
                                                unsigned long timestamp);
             // note that we didn't delete the record 
             // when calling removeNoneBlockEntity()
@@ -214,38 +213,6 @@ namespace opencog
               return findAllEntities(out);
               }
             */
-
-            /**
-             * Finds the list of spatial relationships 
-             * that apply to the three entities.
-             * Currently this can only be BETWEEN, 
-             * which states that A is between B and C
-             *
-             * @param observer The observer entity
-             * @param entityB First reference entity
-             * @param entityC Second reference entity
-             *
-             * @return std::vector<SPATIAL_RELATION> 
-             *         a vector of all spatial relations
-             *         among entityA (this entity), entityB (first reference) 
-             *         and entityC (second reference)
-             *
-             */
-            /*
-              std::set<SPATIAL_RELATION> computeSpatialRelations(
-              const Entity3D* entityA,
-              const Entity3D* entityB,
-              const Entity3D* entityC = 0,
-              const Entity3D* observer = 0) const;
-              std::set<SPATIAL_RELATION> computeSpatialRelations( 
-              const AxisAlignedBox& boundingboxA,
-              const AxisAlignedBox& boundingboxB,
-              const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
-              const Entity3D* observer = 0 ) const;
-              static string spatialRelationToString(SPATIAL_RELATION relation);
-            */
-
-
 
             /**
              * function for saving file; but not finished
@@ -310,7 +277,7 @@ namespace opencog
             std::string     mMapName;
             OctomapOcTree*  mOctomapOctree;
             int             mFloorHeight; // the z of the floor
-            float             mAgentHeight;
+            float           mAgentHeight;
             int             mTotalUnitBlockNum;
             Handle          selfAgentEntity;
 

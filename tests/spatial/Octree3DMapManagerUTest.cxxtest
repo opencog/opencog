@@ -22,249 +22,250 @@ class Octree3DMapManagerUTest : public CxxTest::TestSuite
 { 
 
 public:
-	Octree3DMapManager* testMap;
-	AtomSpace as;
+    Octree3DMapManager* testMap;
+    AtomSpace as;
 
-	void setUp()
-	{
-		string testMapName("testMap");
-		unsigned resolution=1;
-		int floorheight=-255;
-		float agentheight=1.6;
-		testMap = new Octree3DMapManager(&as,testMapName,resolution,floorheight,agentheight);
-	}
-	void tearDown()
-   	{
-		delete testMap;
-		testMap=NULL;
-		as.clear();
-	}
+    void setUp()
+    {
+        string testMapName("testMap");
+        unsigned resolution = 1;
+        int floorheight = -255;
+        float agentheight = 1.6;
+        testMap = new Octree3DMapManager(&as, testMapName,
+                                         resolution, floorheight, agentheight);
+    }
+    void tearDown()
+    {
+        delete testMap;
+        testMap = NULL;
+        as.clear();
+    }
 
-	void testGetBlock_NoBlockAdded_ReturnUndefinedHandle()
-	{
-		BlockVector testpos1(7,8,9);
-		Handle testHandle=testMap->getBlock(testpos1);
-		TS_ASSERT_EQUALS(Handle::UNDEFINED,testHandle);
-	}
+    void testGetBlock_NoBlockAdded_ReturnUndefinedHandle()
+    {
+        BlockVector testpos1(7,8,9);
+        Handle testHandle = testMap->getBlock(testpos1);
+        TS_ASSERT_EQUALS(Handle::UNDEFINED, testHandle);
+    }
 	
-	void testBinaryAddandRemove_NormalUnitBlock_AllGetFunctionWork()
-	{			
-		BlockVector testpos1(7,8,9);
-		Handle testHandle1(100);
-		testMap->addSolidUnitBlock(testHandle1,testpos1);
-		Handle testHandle2=testMap->getBlock(testpos1);
-		TS_ASSERT(testHandle2==testHandle1);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1)==testpos1);
+    void testBinaryAddandRemove_NormalUnitBlock_AllGetFunctionWork()
+    {			
+        BlockVector testpos1(7,8,9);
+        Handle testHandle1(100);
+        testMap->addSolidUnitBlock(testHandle1, testpos1);
+        Handle testHandle2 = testMap->getBlock(testpos1);
+        TS_ASSERT(testHandle2 == testHandle1);
+        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
 
-		testMap->removeSolidUnitBlock(testHandle1);
+        testMap->removeSolidUnitBlock(testHandle1);
 
-		Handle testHandle3=testMap->getBlock(testpos1);
-		TS_ASSERT(testHandle3==Handle::UNDEFINED);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1)==BlockVector::ZERO);
-	}
+        Handle testHandle3 = testMap->getBlock(testpos1);
+        TS_ASSERT(testHandle3 == Handle::UNDEFINED);
+        TS_ASSERT(testMap->checkIsSolid(testpos1) == false);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1) == BlockVector::ZERO);
+    }
 
-	void testAddSolidUnitBlock__PositionOverBorder__GetBlockFailed()
-	{
-		unsigned border=32768;
-		BlockVector testpos1(border,8,9);
-		Handle testHandle1(100);
-		testMap->addSolidUnitBlock(testHandle1,testpos1);
-		Handle testHandle2=testMap->getBlock(testpos1);
-		TS_ASSERT_EQUALS(Handle::UNDEFINED,testHandle2);
-	}
+    void testAddSolidUnitBlock__PositionOverBorder__GetBlockFailed()
+    {
+        unsigned border = 32768;
+        BlockVector testpos1(border, 8, 9);
+        Handle testHandle1(100);
+        testMap->addSolidUnitBlock(testHandle1, testpos1);
+        Handle testHandle2 = testMap->getBlock(testpos1);
+        TS_ASSERT_EQUALS(Handle::UNDEFINED, testHandle2);
+    }
 
-	void testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb()
-	{
-		BlockVector testpos1(7,8,9);
-		Handle testHandle1(100);
-		float logOddThreshold=testMap->getLogOddsOccupiedThreshold();
+    void testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb()
+    {
+        BlockVector testpos1(7,8,9);
+        Handle testHandle1(100);
+        float logOddThreshold = testMap->getLogOddsOccupiedThreshold();
 
-		testMap->setUnitBlock(testHandle1,testpos1,logOddThreshold);
+        testMap->setUnitBlock(testHandle1, testpos1, logOddThreshold);
 		
-		logger().error("threshold %f",logOddThreshold);
-		logger().error("block occupancy %f",testMap->getBlockLogOddsOccupancy(testpos1));
+        logger().error("threshold %f", logOddThreshold);
+        logger().error("block occupancy %f", testMap->getBlockLogOddsOccupancy(testpos1));
 
         //test binary getBlock
-		TS_ASSERT(testMap->getBlock(testpos1)==testHandle1);
-		// test prob getBlock
-		TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold)==testHandle1);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
-		// test prob checkIsSolid
-		TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold)==true);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1)==testpos1);
-		// test prob getblocklocation
-		TS_ASSERT(testMap->getBlockLocation(testHandle1,logOddThreshold)==testpos1);
-		//change the occupancy so it's small enough to make getter find nothing
-		testMap->setUnitBlock(testHandle1,testpos1,-0.1);
+        TS_ASSERT(testMap->getBlock(testpos1) == testHandle1);
+        // test prob getBlock
+        TS_ASSERT(testMap->getBlock(testpos1, logOddThreshold) == testHandle1);
+        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
+        // test prob checkIsSolid
+        TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold) == true);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
+        // test prob getblocklocation
+        TS_ASSERT(testMap->getBlockLocation(testHandle1,logOddThreshold) == testpos1);
 
-		TS_ASSERT(testMap->getBlock(testpos1)==Handle::UNDEFINED);
-		TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold)==Handle::UNDEFINED);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==false);
-		TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold)==false);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1)==BlockVector::ZERO);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1,logOddThreshold)==BlockVector::ZERO);
+        //change the occupancy so it's small enough to make getter find nothing
+        testMap->setUnitBlock(testHandle1, testpos1, -0.1);
+
+        TS_ASSERT(testMap->getBlock(testpos1) == Handle::UNDEFINED);
+        TS_ASSERT(testMap->getBlock(testpos1, logOddThreshold) == Handle::UNDEFINED);
+        TS_ASSERT(testMap->checkIsSolid(testpos1) == false);
+        TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold) == false);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1) == BlockVector::ZERO);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1, logOddThreshold) == BlockVector::ZERO);
 		
-		//change the threshold, so the occupancy is large enough to find it
-		testMap->setLogOddsOccupiedThreshold(-0.2);
-		logOddThreshold=testMap->getLogOddsOccupiedThreshold();
+        //change the threshold, so the occupancy is large enough to find it
+        testMap->setLogOddsOccupiedThreshold(-0.2);
+        logOddThreshold = testMap->getLogOddsOccupiedThreshold();
 
-		TS_ASSERT(testMap->getBlock(testpos1)!=Handle::UNDEFINED);
-		TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold)!=Handle::UNDEFINED);
-		TS_ASSERT(testMap->checkIsSolid(testpos1)==true);
-		TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold)==true);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1)==testpos1);
-		TS_ASSERT(testMap->getBlockLocation(testHandle1,logOddThreshold)==testpos1);
-				
-	}
+        TS_ASSERT(testMap->getBlock(testpos1) != Handle::UNDEFINED);
+        TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold) != Handle::UNDEFINED);
+        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
+        TS_ASSERT(testMap->checkIsSolid(testpos1, logOddThreshold) == true);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
+        TS_ASSERT(testMap->getBlockLocation(testHandle1, logOddThreshold) == testpos1);
+    }
 	
-	void testStandable_NormalBlock_Standable()
-	{
-		//case1: single block
-		BlockVector testpos(1,2,4);
-		BlockVector blockpos1(1,2,3);
-		TS_ASSERT(testMap->checkStandable(testpos)==false);
-		Handle testBlock1=as.add_node(STRUCTURE_NODE,"block1");
-		Handle materialNode1=as.add_node(CONCEPT_NODE,"dirt");
-		Handle materialPredNode=as.add_node(PREDICATE_NODE,"material");
-		HandleSeq listLinkOutgoings;
-		listLinkOutgoings.push_back(testBlock1);
-		listLinkOutgoings.push_back(materialNode1);
-		Handle listLink1=as.add_link(LIST_LINK, listLinkOutgoings);
-		HandleSeq evalLinkOutgoings;
-		evalLinkOutgoings.push_back(materialPredNode);
-		evalLinkOutgoings.push_back(listLink1);
-		Handle EvalLink1=as.add_link(EVALUATION_LINK, evalLinkOutgoings);
-		testMap->addSolidUnitBlock(testBlock1,blockpos1);
+    void testStandable_NormalBlock_Standable()
+    {
+        //case1: single block
+        BlockVector testpos(1, 2, 4);
+        BlockVector blockpos1(1, 2, 3);
+        TS_ASSERT(testMap->checkStandable(testpos) == false);
+        Handle testBlock1 = as.add_node(STRUCTURE_NODE, "block1");
+        Handle materialNode1 = as.add_node(CONCEPT_NODE, "dirt");
+        Handle materialPredNode = as.add_node(PREDICATE_NODE, "material");
+        HandleSeq listLinkOutgoings;
+        listLinkOutgoings.push_back(testBlock1);
+        listLinkOutgoings.push_back(materialNode1);
+        Handle listLink1 = as.add_link(LIST_LINK, listLinkOutgoings);
+        HandleSeq evalLinkOutgoings;
+        evalLinkOutgoings.push_back(materialPredNode);
+        evalLinkOutgoings.push_back(listLink1);
+        Handle EvalLink1 = as.add_link(EVALUATION_LINK, evalLinkOutgoings);
+        testMap->addSolidUnitBlock(testBlock1, blockpos1);
 
-		bool standable=testMap->checkStandable(testpos);
+        bool standable = testMap->checkStandable(testpos);
 
-		TS_ASSERT_EQUALS(true,standable);
-	}
+        TS_ASSERT_EQUALS(true, standable);
+    }
 
 	
-	void testStandable_WaterBlock_Unstandable()
-	{
-		//case2: single block which is water, cannot stand on water
-		BlockVector testpos(1,2,4);
-		BlockVector blockpos1(1,2,3);
-		TS_ASSERT(testMap->checkStandable(testpos)==false);
-		Handle testBlock1=as.add_node(STRUCTURE_NODE,"block1");
-		Handle materialNode1=as.add_node(CONCEPT_NODE,"water");
-		Handle materialPredNode=as.add_node(PREDICATE_NODE,"material");
-		HandleSeq listLinkOutgoings;
-		listLinkOutgoings.push_back(testBlock1);
-		listLinkOutgoings.push_back(materialNode1);
-		Handle listLink1=as.add_link(LIST_LINK, listLinkOutgoings);
-		HandleSeq evalLinkOutgoings;
-		evalLinkOutgoings.push_back(materialPredNode);
-		evalLinkOutgoings.push_back(listLink1);
-		Handle EvalLink1=as.add_link(EVALUATION_LINK, evalLinkOutgoings);
-		testMap->addSolidUnitBlock(testBlock1,blockpos1);
+    void testStandable_WaterBlock_Unstandable()
+    {
+        //case2: single block which is water, cannot stand on water
+        BlockVector testpos(1, 2, 4);
+        BlockVector blockpos1(1, 2, 3);
+        TS_ASSERT(testMap->checkStandable(testpos) == false);
+        Handle testBlock1 = as.add_node(STRUCTURE_NODE, "block1");
+        Handle materialNode1 = as.add_node(CONCEPT_NODE, "water");
+        Handle materialPredNode = as.add_node(PREDICATE_NODE, "material");
+        HandleSeq listLinkOutgoings;
+        listLinkOutgoings.push_back(testBlock1);
+        listLinkOutgoings.push_back(materialNode1);
+        Handle listLink1 = as.add_link(LIST_LINK, listLinkOutgoings);
+        HandleSeq evalLinkOutgoings;
+        evalLinkOutgoings.push_back(materialPredNode);
+        evalLinkOutgoings.push_back(listLink1);
+        Handle EvalLink1 = as.add_link(EVALUATION_LINK, evalLinkOutgoings);
+        testMap->addSolidUnitBlock(testBlock1, blockpos1);
 		
-		bool standable=testMap->checkStandable(testpos);
+        bool standable = testMap->checkStandable(testpos);
 
-		TS_ASSERT_EQUALS(false,standable);
-	}
+        TS_ASSERT_EQUALS(false, standable);
+    }
 	
-	void testStandable_TwoNearBlock_Unstandable()
-	{
-		// case3: two block which z coord is close ( ditance < agentHeight)
-		// so it's not standable
-		BlockVector testpos(1,2,4);
+    void testStandable_TwoNearBlock_Unstandable()
+    {
+        // case3: two block which z coord is close ( ditance < agentHeight)
+        // so it's not standable
+        BlockVector testpos(1, 2, 4);
 		
-		TS_ASSERT(testMap->checkStandable(testpos)==false);
-		BlockVector blockpos1(1,2,3);
-		Handle testBlock1=as.add_node(STRUCTURE_NODE,"block1");
-		Handle materialNode1=as.add_node(CONCEPT_NODE,"dirt");
-		Handle materialPredNode=as.add_node(PREDICATE_NODE,"material");
-		HandleSeq listLinkOutgoings1;
-		listLinkOutgoings1.push_back(testBlock1);
-		listLinkOutgoings1.push_back(materialNode1);
-		Handle listLink1=as.add_link(LIST_LINK, listLinkOutgoings1);
-		HandleSeq evalLinkOutgoings1;
-		evalLinkOutgoings1.push_back(materialPredNode);
-		evalLinkOutgoings1.push_back(listLink1);
-		Handle EvalLink1=as.add_link(EVALUATION_LINK, evalLinkOutgoings1);
+        TS_ASSERT(testMap->checkStandable(testpos) == false);
+        BlockVector blockpos1(1, 2, 3);
+        Handle testBlock1 = as.add_node(STRUCTURE_NODE, "block1");
+        Handle materialNode1 = as.add_node(CONCEPT_NODE, "dirt");
+        Handle materialPredNode = as.add_node(PREDICATE_NODE, "material");
+        HandleSeq listLinkOutgoings1;
+        listLinkOutgoings1.push_back(testBlock1);
+        listLinkOutgoings1.push_back(materialNode1);
+        Handle listLink1 = as.add_link(LIST_LINK, listLinkOutgoings1);
+        HandleSeq evalLinkOutgoings1;
+        evalLinkOutgoings1.push_back(materialPredNode);
+        evalLinkOutgoings1.push_back(listLink1);
+        Handle EvalLink1 = as.add_link(EVALUATION_LINK, evalLinkOutgoings1);
 		
-		testMap->addSolidUnitBlock(testBlock1,blockpos1);
+        testMap->addSolidUnitBlock(testBlock1, blockpos1);
 
-		BlockVector blockpos2(1,2,5);
-		Handle testBlock2=as.add_node(STRUCTURE_NODE,"block2");
-		Handle materialNode2=as.add_node(CONCEPT_NODE,"dirt");
-		HandleSeq listLinkOutgoings2;
-		listLinkOutgoings2.push_back(testBlock1);
-		listLinkOutgoings2.push_back(materialNode1);
-		Handle listLink2=as.add_link(LIST_LINK, listLinkOutgoings2);
-		HandleSeq evalLinkOutgoings2;
-		evalLinkOutgoings2.push_back(materialPredNode);
-		evalLinkOutgoings2.push_back(listLink2);
-		Handle EvalLink2=as.add_link(EVALUATION_LINK, evalLinkOutgoings2);
-		testMap->addSolidUnitBlock(testBlock2,blockpos2);
+        BlockVector blockpos2(1, 2, 5);
+        Handle testBlock2 = as.add_node(STRUCTURE_NODE, "block2");
+        Handle materialNode2 = as.add_node(CONCEPT_NODE, "dirt");
+        HandleSeq listLinkOutgoings2;
+        listLinkOutgoings2.push_back(testBlock1);
+        listLinkOutgoings2.push_back(materialNode1);
+        Handle listLink2 = as.add_link(LIST_LINK, listLinkOutgoings2);
+        HandleSeq evalLinkOutgoings2;
+        evalLinkOutgoings2.push_back(materialPredNode);
+        evalLinkOutgoings2.push_back(listLink2);
+        Handle EvalLink2 = as.add_link(EVALUATION_LINK, evalLinkOutgoings2);
+        testMap->addSolidUnitBlock(testBlock2, blockpos2);
 
-		bool standable=testMap->checkStandable(testpos);
+        bool standable = testMap->checkStandable(testpos);
 
-		TS_ASSERT_EQUALS(false,standable);
-	}
+        TS_ASSERT_EQUALS(false,standable);
+    }
 
 
-	void testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork()
-	{
-		BlockVector testpos1(17,28,39);
-		unsigned long timestamp1=12345;
-		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
-		testMap->addNoneBlockEntity(testHandle1,testpos1,
-					!entityIsSelf, !entityIsAvatar, 
-					timestamp1);
+    void testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork()
+    {
+        BlockVector testpos1(17, 28, 39);
+        unsigned long timestamp1 = 12345;
+        Handle testHandle1 = as.add_node(ENTITY_NODE, "entity");
+        testMap->addNoneBlockEntity(testHandle1, testpos1,
+                                    !entityIsSelf, !entityIsAvatar, 
+                                    timestamp1);
 
-		Handle testHandle2=testMap->getEntity(testpos1);
-		TS_ASSERT(testHandle1==testHandle2);
-		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-		testMap->removeNoneBlockEntity(testHandle1);
+        Handle testHandle2 = testMap->getEntity(testpos1);
+        TS_ASSERT(testHandle1 == testHandle2);
+        TS_ASSERT(testMap->getLastAppearedLocation(testHandle1) == testpos1);
+        testMap->removeNoneBlockEntity(testHandle1);
 		
-		TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
-		//preserve record
-		TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-	}
+        TS_ASSERT(testMap->getEntity(testpos1) == Handle::UNDEFINED);
+        //preserve record
+        TS_ASSERT(testMap->getLastAppearedLocation(testHandle1) == testpos1);
+    }
 
-	void testUpdateEntityLocation_MultipleLocation_LastLocationIsPos2()
-	{
-		BlockVector testpos1(17,28,39);
-		unsigned long timestamp1=12345;
-		Handle testHandle1=as.add_node(ENTITY_NODE,"entity");
-		testMap->addNoneBlockEntity(testHandle1,testpos1,
-					!entityIsSelf, !entityIsAvatar, 
-					timestamp1);
-		BlockVector testpos2(17,28,40);
-		unsigned long timestamp2=12346;
-		testMap->updateNoneBlockEntityLocation(testHandle1,testpos2,timestamp2);
-		BlockVector lastLocation=testMap->getLastAppearedLocation(testHandle1);
+    void testUpdateEntityLocation_MultipleLocation_LastLocationIsPos2()
+    {
+        BlockVector testpos1(17, 28, 39);
+        unsigned long timestamp1 = 12345;
+        Handle testHandle1 = as.add_node(ENTITY_NODE, "entity");
+        testMap->addNoneBlockEntity(testHandle1, testpos1,
+                                    !entityIsSelf, !entityIsAvatar, 
+                                    timestamp1);
+        BlockVector testpos2(17, 28, 40);
+        unsigned long timestamp2 = 12346;
+        testMap->updateNoneBlockEntityLocation(testHandle1, testpos2, timestamp2);
+        BlockVector lastLocation = testMap->getLastAppearedLocation(testHandle1);
 
-		TS_ASSERT_EQUALS(testpos2,lastLocation);
-	}
+        TS_ASSERT_EQUALS(testpos2, lastLocation);
+    }
 
-	void testAddEntity_PressureTest()
-	{
-		int count=10000;
-		while(count!=0)
-		{
-			char countstr[256];
-			sprintf(countstr,"%d",count);
-			count--;
-			BlockVector testpos1(count,count,count);
-			Handle testHandle1=as.add_node(ENTITY_NODE,countstr);
-			testMap->addNoneBlockEntity(testHandle1,testpos1,
-						!entityIsSelf, !entityIsAvatar, 12345678892);
-			Handle testHandle2=testMap->getEntity(testpos1);
-			TS_ASSERT(testHandle1==testHandle2);
-			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);
-			testMap->removeNoneBlockEntity(testHandle1);
+    void testAddEntity_PressureTest()
+    {
+        int count = 10000;
+        while(count != 0)
+        {
+            char countstr[256];
+            sprintf(countstr, "%d", count);
+            count --;
+            BlockVector testpos1(count, count, count);
+            Handle testHandle1 = as.add_node(ENTITY_NODE, countstr);
+            testMap->addNoneBlockEntity(testHandle1, testpos1,
+                                        !entityIsSelf, !entityIsAvatar, 12345678892);
+            Handle testHandle2 = testMap->getEntity(testpos1);
+            TS_ASSERT(testHandle1 == testHandle2);
+            TS_ASSERT(testMap->getLastAppearedLocation(testHandle1) == testpos1);
+            testMap->removeNoneBlockEntity(testHandle1);
 			
-			TS_ASSERT(testMap->getEntity(testpos1)==Handle::UNDEFINED);
-			//preserve record
-			TS_ASSERT(testMap->getLastAppearedLocation(testHandle1)==testpos1);	
-		}
-	}
+            TS_ASSERT(testMap->getEntity(testpos1) == Handle::UNDEFINED);
+            //preserve record
+            TS_ASSERT(testMap->getLastAppearedLocation(testHandle1) == testpos1);	
+        }
+    }
 
 };

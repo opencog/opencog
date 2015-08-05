@@ -29,7 +29,6 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
-#include <opencog/spacetime/Temporal.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -48,51 +47,43 @@ class SpaceServerUTest : public CxxTest::TestSuite
 {
 public:
 
-	AtomSpace testatomspace;
-	SpaceServer* testspaceserver;
-	TimeServer* testtimeserver;		
+    AtomSpace testatomspace;
+    SpaceServer* testspaceserver;
+    TimeServer* testtimeserver;		
 
-	void setUp()
-	{
-		testspaceserver=new SpaceServer(testatomspace);
-		testtimeserver=new TimeServer(testatomspace, testspaceserver);
-	}
+    void setUp()
+    {
+        testspaceserver = new SpaceServer(testatomspace);
+        testtimeserver = new TimeServer(testatomspace, testspaceserver);
+    }
 
-	void tearDown()
-	{
-		delete testtimeserver;
-		delete testspaceserver;
-		testatomspace.clear();
-	}
-	void test_addOrGetSpaceMap()
-	{
+    void tearDown()
+    {
+        delete testtimeserver;
+        delete testspaceserver;
+        testatomspace.clear();
+    }
+    void test_addOrGetSpaceMap()
+    {
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
 
-  		Handle testmaphandle=testspaceserver->addOrGetSpaceMap(123456,"testmap",1,-255,2);
-		
-		TS_ASSERT(testatomspace.is_valid_handle(testmaphandle));
-		TS_ASSERT_EQUALS(testatomspace.get_node(SPACE_MAP_NODE,"testmap"),
-						 testmaphandle);
-	}
+        TS_ASSERT(testatomspace.is_valid_handle(testmaphandle));
+        TS_ASSERT_EQUALS(testatomspace.get_node(SPACE_MAP_NODE, "testmap"), testmaphandle);
+    }
 
-	void test_addAndRemoveSpaceInfo()
-	{
-		logger().error("start");
-  		Handle testmaphandle=testspaceserver->addOrGetSpaceMap(123456,"testmap",1,-255,2);
+    void test_addAndRemoveSpaceInfo()
+    {
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
+        Handle testobjecthandle = testatomspace.add_node(STRUCTURE_NODE, "testobj444");
 
-		Handle testobjecthandle=testatomspace.add_node(STRUCTURE_NODE,"testobj444");
-
-		logger().error("1/4");
-		testspaceserver->addSpaceInfo(testobjecthandle,testmaphandle,
-					   false,false,
-					   234567,
-					   9,10,11);
-		logger().error("half");
-		const SpaceServer::SpaceMap& testmap=testspaceserver->getMap(testmaphandle);
-		TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9,10,11)),testobjecthandle)
-		testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);
-		TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9,10,11)),Handle::UNDEFINED);
-		logger().error("end");		
-	}
-
+        testspaceserver->addSpaceInfo(testobjecthandle, testmaphandle,
+                                      false, false,
+                                      234567,
+                                      9, 10, 11);
+        const SpaceServer::SpaceMap& testmap = testspaceserver->getMap(testmaphandle);
+        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), testobjecthandle);
+        testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);
+        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), Handle::UNDEFINED);
+    }
 };
 

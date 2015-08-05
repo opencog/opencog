@@ -30,7 +30,7 @@ ADD_LIBRARY(SpaceMap SHARED
   MovableEntity.cc
   Block.cc
 
-   3DSpaceMap/SpaceMapUtil.cc
+  3DSpaceMap/SpaceMapUtil.cc
   3DSpaceMap/Block3DMapUtil.cc
   #3DSpaceMap/Block3D.cc
   #3DSpaceMap/Octree.cc
@@ -46,10 +46,13 @@ ADD_LIBRARY(SpaceMap SHARED
 
 ADD_DEPENDENCIES(SpaceMap
   opencog_atom_types
+  spacetime_atom_types
+  spacetime-types
 )
 
 TARGET_LINK_LIBRARIES(SpaceMap
   server
+  spacetime-types
   ${ATOMSPACE_query_LIBRARY}
   ${ATOMSPACE_LIBRARY}
   ${Boost_THREAD_LIBRARY}
