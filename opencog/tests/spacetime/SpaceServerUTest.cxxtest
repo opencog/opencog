@@ -1,0 +1,89 @@
+/*
+ * tests/spatial/MathUTest.cxxtest
+ *
+ * Copyright (C) 2002-2009 Novamente LLC
+ * All Rights Reserved
+ * Author(s): YiShan Chen
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cxxtest/TestSuite.h>
+#include <string>
+#include <sstream>
+#include <iostream>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/spacetime/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+
+using namespace std;
+
+using namespace opencog;
+using namespace opencog::spatial;
+
+/*
+ * DataClass
+ */
+
+
+class SpaceServerUTest : public CxxTest::TestSuite
+{
+public:
+
+    AtomSpace testatomspace;
+    SpaceServer* testspaceserver;
+    TimeServer* testtimeserver;		
+
+    void setUp()
+    {
+        testspaceserver = new SpaceServer(testatomspace);
+        testtimeserver = new TimeServer(testatomspace, testspaceserver);
+    }
+
+    void tearDown()
+    {
+        delete testtimeserver;
+        delete testspaceserver;
+        testatomspace.clear();
+    }
+    void test_addOrGetSpaceMap()
+    {
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
+
+        TS_ASSERT(testatomspace.is_valid_handle(testmaphandle));
+        TS_ASSERT_EQUALS(testatomspace.get_node(SPACE_MAP_NODE, "testmap"), testmaphandle);
+    }
+
+    void test_addAndRemoveSpaceInfo()
+    {
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
+        Handle testobjecthandle = testatomspace.add_node(STRUCTURE_NODE, "testobj444");
+
+        testspaceserver->addSpaceInfo(testobjecthandle, testmaphandle,
+                                      false, false,
+                                      234567,
+                                      9, 10, 11);
+        const SpaceServer::SpaceMap& testmap = testspaceserver->getMap(testmaphandle);
+        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), testobjecthandle);
+        testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);
+        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), Handle::UNDEFINED);
+    }
+};
+
