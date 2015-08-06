@@ -10,5 +10,5 @@ dependencies:
 
 test:
     override:
-        - docker run -v $PWD:/opencog opencog/opencog-dev:cli /bin/sh -c "cd /opencog && /tmp/octool -cabet":
+        - docker run -v $PWD:/opencog opencog/opencog-dev:cli /bin/sh -c "cd /opencog && /tmp/octool -bet":
             parallel: true
