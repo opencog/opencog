@@ -234,6 +234,7 @@
 	(display "num of laids (listLinks holding alts): ") (display (length
 		(filter (lambda (x) (< 0 x)) laid-list)))(newline)
 	(display "num actually fixed up: ") (display (length cnt-list))(newline)
+	(newline)
 )
 
 (define (swap-alts altid wantid pair-list)
@@ -280,6 +281,7 @@
 
 	(display "Num of relabeled ListLinks: ")
 	(display (length laid-list)) (newline)
+	(newline)
 	(flush-output-port (current-output-port))
 )
 
@@ -426,7 +428,7 @@
 	(display (length wuid-word-pairs))(newline) (newline)
 	(flush-output-port (current-output-port))
 
-	; Next, walk over the bad-wuid-list, and dupe each of these,
+	; Finally, walk over the bad-wuid-list, and dupe each of these,
 	; one at a time, to the smallest wuid.
 	(display "The bad wuids: ")(display bad-wuid-list)(newline)
 	(for-each fixup-bad bad-wuid-list)

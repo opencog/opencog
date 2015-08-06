@@ -120,7 +120,7 @@
 )
 
 ; ------------------------------------------------
-(define (delete-atoms uuid-list except #:optional do-prt)
+(define* (delete-atoms uuid-list except #:optional do-prt)
 "
   delete-atoms -- delete every atom in the uuid-list, except for
   the except uuid
