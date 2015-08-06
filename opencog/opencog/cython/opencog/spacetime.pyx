@@ -24,9 +24,8 @@ cdef class TimeServer:
         if self.ctimeserver:
             del self.ctimeserver
 
-    def addTimeInfo(self,Handle h,timestamp, TruthValue tv=TruthValue(1.0,1.0e35), timeDomain="DefalutTimeDomain"):
-        cdef string ctimeDomain=timeDomain.encode('UTF-8')
-        cdef cHandle cattimelinkhandle = self.ctimeserver.addTimeInfo(deref((<Handle>h).h),timestamp, deref(tv._tvptr()),ctimeDomain)
+    def addTimeInfo(self,Handle h,timestamp, TruthValue tv=TruthValue(1.0,1.0e35)):
+        cdef cHandle cattimelinkhandle = self.ctimeserver.addTimeInfo(deref((<Handle>h).h),timestamp, deref(tv._tvptr()))
         return Handle(cattimelinkhandle.value())
 
 
@@ -44,37 +43,26 @@ cdef class SpaceServer:
         mapinstance=SpaceMap(<long>(&(self.cspaceserver.getMap(deref((<Handle>handle).h)))))
         return mapinstance
     
-    def addMap(self,timestamp, mapName,
-               x,y,z,
-               dimx,dimy,dimz, infloorHeight):
+    def addMap(self,timestamp, mapName, resolution, infloorHeight, agentHeight):
         cdef string cmapName=mapName.encode('UTF-8')
-        cdef cHandle ch=self.cspaceserver.addOrGetSpaceMap(timestamp, cmapName,
-                                                           x,y,z,
-                                                           dimx,dimy,dimz,infloorHeight)
+        cdef cHandle ch=self.cspaceserver.addOrGetSpaceMap(timestamp, cmapName, resolution, infloorHeight, agentHeight)
         pyhandle=Handle(ch.value())
         return pyhandle
     
-    def addMapInfo(self,Handle objectNode,Handle spacemapNode,isSelfObject,timestamp,
-                      objX, objY, objZ,
-                      objLength, objWidth, objHeight,
-                      objYaw,entityClass, objectName, material):
+    def addMapInfo(self,Handle objectNode,Handle spacemapNode,
+                   isSelfObject,isAvatarEntity, timestamp,
+                      objX, objY, objZ):
         cdef bool b=isSelfObject
-        cdef bool ret=self.cspaceserver.addSpaceInfo(deref((<Handle>objectNode).h),deref((<Handle>spacemapNode).h),isSelfObject,timestamp,
-                      objX, objY, objZ,
-                      objLength, objWidth, objHeight,
-                      objYaw,entityClass, objectName, material)
+        cdef bool ret=self.cspaceserver.addSpaceInfo(deref((<Handle>objectNode).h),deref((<Handle>spacemapNode).h),isSelfObject,isAvatarEntity,timestamp,
+                      objX, objY, objZ)
         return ret
 
     
     def removeMapInfo(self,Handle objectNode,Handle spacemapNode,timestamp):
         self.cspaceserver.removeSpaceInfo(deref((<Handle>objectNode).h),deref((<Handle>spacemapNode).h),timestamp)
-    
 
     def clear(self):
         self.cspaceserver.clear()
     
     def setTimeServer(self,TimeServer timeserver):
         self.cspaceserver.setTimeServer(timeserver.ctimeserver)
-    
-
-    

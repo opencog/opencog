@@ -99,7 +99,10 @@ void SpaceServer::atomRemoved(AtomPtr atom)
 {
     Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
-      removeSpaceInfo(atom->getHandle(),curSpaceMapHandle);
+        std::vector< std::string> timeDomains=timeser->getTimeDomains();
+        for(auto timeDomain: timeDomains){ 
+            removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
+        }
     }
 }
 
@@ -131,9 +134,9 @@ void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 
 /*
 // this function does not be used in 3d map
-
 SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle)
 {
+
     SpaceMap* map;
     HandleToSpaceMap::iterator itr = spaceMaps.find(spaceMapHandle);
 
@@ -501,7 +504,6 @@ Handle SpaceServer::getSpaceMapNode(std::string _mapName)
     } else {
         if (atomspace->get_LTI(result)->get_result() < 1) {
             atomspace->set_LTI(result, 1);
-
         }
     }
     return result;
@@ -521,19 +523,15 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, octime_t timestamp,
-                              int objX, int objY, int objZ,
-                              int objLength, int objWidth, int objHeight,
-							   double objYaw, std::string entityClass, std::string objectName, std::string material)
+bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, bool isAvatarEntity, octime_t timestamp, double objX, double objY, double objZ, const TimeDomain& timeDomain)
 {
     
-    if (spaceMapHandle == Handle::UNDEFINED)
-    {
+    if (spaceMapHandle == Handle::UNDEFINED){
         logger().error("SpaceServer::addSpaceInfo - No space map now!");
         return false;
     }
 
-    timeser->addTimeInfo(spaceMapHandle, timestamp);
+    timeser->addTimeInfo(spaceMapHandle, timestamp,  timeDomain);
 
     // we should distinguish to add a block or other object
     // because when adding a block, maybe cause some change in the terrain and structures
@@ -541,38 +539,35 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     opencog::spatial::BlockVector pos(objX, objY, objZ);
     SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
 
-    if (entityClass == "block")
+    if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
     {
         // it's a block
-        theSpaceMap->addSolidUnitBlock(pos,objectNode, material);
+        theSpaceMap->addSolidUnitBlock(objectNode,pos);
 
     }
     else
     {
-        theSpaceMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass,isSelfObject, true);
+        theSpaceMap->addNoneBlockEntity(objectNode,pos,isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName,unsigned _resolution, int _floorHeight)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, int _floorHeight, float _agentHeight, const TimeDomain& timeDomain)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
     // There is not a space map node for this map in the atomspace, so create a new one
-    if (spaceMapNode == Handle::UNDEFINED)
-    {
+    if (spaceMapNode == Handle::UNDEFINED) {
         spaceMapNode = atomspace->add_node(SPACE_MAP_NODE,_mapName);
         atomspace->set_LTI(spaceMapNode, 1);
-        timeser->addTimeInfo(spaceMapNode, timestamp);
+        timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
 
-        SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _floorHeight);
+        SpaceMap* newSpaceMap = new SpaceMap(atomspace, _mapName, _resolution, _floorHeight, _agentHeight);
 
         // add into the map set
         spaceMaps.insert(map<Handle,SpaceMap*>::value_type(spaceMapNode,newSpaceMap));
         curMap = newSpaceMap;
-    }
-    else
-    {
+    } else {
         curMap = spaceMaps[spaceMapNode];
     }
 
@@ -580,30 +575,26 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName,un
     return spaceMapNode;
 }
 
-void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp)
+void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp, const TimeDomain& timeDomain)
 {
-    if (spaceMapHandle == Handle::UNDEFINED)
-    {
+    if (spaceMapHandle == Handle::UNDEFINED) {
         logger().error("SpaceServer::removeSpaceInfo - Undefined SpaceMap!");
         return;
     }
-    if (spaceMaps.find(spaceMapHandle) == spaceMaps.end())
-    {
+    if (spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
         logger().error("SpaceServer::removeSpaceInfo - No space map now!");
         return;	
     }
 
-    if (timestamp != 0)
-        timeser->addTimeInfo(spaceMapHandle, timestamp);
+    if (timestamp != 0){
+        timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
+    }
 
     SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
     
-    if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
-    {
+    if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
         theSpaceMap->removeSolidUnitBlock(objectNode);
-    }
-    else
-    {
+    } else {
         theSpaceMap->removeNoneBlockEntity(objectNode);
     }
 
@@ -665,7 +656,6 @@ std::string SpaceServer::getMapIdString(Handle mapHandle) const
     // So, just get the name of the TimeNode as its string representation
     // return atomspace->get_name(atomspace->get_outgoing(mapHandle, 0))->get_result();
 
-
     return atomspace->get_name(mapHandle);
 }    
 
@@ -708,12 +698,11 @@ void SpaceServer::markCurMapPerceptedForFirstTime()
     if (curMap)
         curMap->hasPerceptedMoreThanOneTimes = true;
 }
-
+/*
 void SpaceServer::findAllBlockEntitiesOnTheMap(Handle spaceMapHandle)
 {
-    if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
-    {
-        logger().error("SpaceServer::findAllBlockEntitiesOntheMap - Map not found!");
+    if (spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
+        logger().error("SpaceServer::addBlockEntityNodes - Map not found!");
         return;	
     }
     SpaceMap* theMap=spaceMaps[spaceMapHandle];
@@ -726,24 +715,25 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
     if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
     {
         logger().error("SpaceServer::addBlockEntityNodes - Map not found!");
-        return;
+        return;	
     }
     SpaceMap* theMap=spaceMaps[spaceMapHandle];
 
     vector<opencog::spatial::BlockEntity*>::iterator it = theMap->newAppearBlockEntityList.begin();
-	opencog::spatial::BlockEntity* entity;
+    opencog::spatial::BlockEntity* entity;
 
 
-    for (; it != theMap->newAppearBlockEntityList.end(); ++it)
-    {
+    for (; it != theMap->newAppearBlockEntityList.end(); ++it) {
         entity = (opencog::spatial::BlockEntity*)(*it);
         entity->mEntityNode = atomspace->add_node(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
         atomspace->set_STI(entity->mEntityNode, 10000);
 
         bool addit = true;
-		HandleSeq::const_iterator it;
+        HandleSeq::const_iterator it;
         for (it = toUpdateHandles.begin(); it != toUpdateHandles.end(); ++ it) {
-            if ((Handle)(*it) == entity->mEntityNode) { addit = false; break; }
+            if ((Handle)(*it) == entity->mEntityNode) { 
+                addit = false; break; 
+            }
         }
         if (addit)
             toUpdateHandles.push_back(entity->mEntityNode);
@@ -754,7 +744,7 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles,Handle spaceMap
 
 
 // add blocklist to an entity
-void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp,Handle spaceMapHandle)
+void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timestamp, Handle spaceMapHandle, const TimeDomain& timeDomain)
 {
 
     //  Add every block a eval link that it's part of this block entity:
@@ -770,8 +760,7 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
     //       )
     //    )
 
-    if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
-    {
+    if(spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
         logger().error("SpaceServer::addBlockListPredicatetoEntity - Map not found!");
         return;	
     }
@@ -779,19 +768,17 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
 
     vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
     vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
-    for (; it != blocks.end(); ++it)
-    {
+    for (; it != blocks.end(); ++it) {
         opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
         HandleSeq unitBlockNodes = theMap->getAllUnitBlockHandlesOfABlock(*b);
-        for (Handle blockNode : unitBlockNodes)
-        {
+        for (Handle blockNode : unitBlockNodes) {
             TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
             Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);
-            timeser->addTimeInfo(evalLink,timeStamp);
+            timeser->addTimeInfo(evalLink, timestamp, timeDomain);
         }
     }
-
-    /*
+	
+    
     //    (AtTimeLink (stv 1 1)
     //       (TimeNode "15818205490")
     //       (EvaluationLink (stv 1 0.0012484394)
@@ -806,29 +793,29 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
     //          )
     //       )
     //    )
-    HandleSeq blocklist;
-    vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
-    vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
-    for (; it != blocks.end(); ++it)
-    {
-        opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
-        HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
-        blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
-    }
+    //HandleSeq blocklist;
+    //vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
+    //vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
+    //for (; it != blocks.end(); ++it)
+    //{
+    //    opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
+    //    HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
+    //    blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
+    //}
 
-    Handle blocklistLink = atomspace->add_link(LIST_LINK, blocklist);
+    //Handle blocklistLink = atomspace->add_link(LIST_LINK, blocklist);
 
-    SimpleTruthValue tv(1.0, 1.0);
-    Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
+    //SimpleTruthValue tv(1.0, 1.0);
+    //Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
 
-    timeser->addTimeInfo(evalLink,timeStamp);
-    */
+    //timeser->addTimeInfo(evalLink,timeStamp);
+    
 
 }
 
-void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, octime_t timestamp, Handle spaceMapHandle)
+void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, octime_t timestamp, Handle spaceMapHandle, const TimeDomain& timeDomain)
 {
-    addBlocksListPredicateToEntity(_entity, timestamp, spaceMapHandle);
+    addBlocksListPredicateToEntity(_entity, timestamp, spaceMapHandle, timeDomain);
 
     // add the primary properties
 
@@ -841,30 +828,29 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
     int x = _entity->getWidth();
     numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(x).c_str() );
     evalLink = addPropertyPredicate( "width", _entity->mEntityNode, numberNode,tv);
-    timeser->addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink, timestamp, timeDomain);
 
     // add length: the y extent
     int y = _entity->getHeight();
     numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(y).c_str() );
     evalLink = addPropertyPredicate("length", _entity->mEntityNode, numberNode,tv);
-    timeser->addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink, timestamp, timeDomain);
 
     // add height: how tall it's, the z extent
     int z = _entity->getHeight();
     numberNode = atomspace->add_node(NUMBER_NODE,  opencog::toString(z).c_str() );
     evalLink = addPropertyPredicate("height", _entity->mEntityNode, numberNode,tv);
-    timeser->addTimeInfo(evalLink,timestamp);
+    timeser->addTimeInfo(evalLink, timestamp, timeDomain);
 
 
     // todo: add secondary properties
 
 }
 
-void SpaceServer::updateBlockEntitiesProperties(octime_t timestamp,HandleSeq &toUpdateHandles, Handle spaceMapHandle)
+void SpaceServer::updateBlockEntitiesProperties(octime_t timestamp,HandleSeq &toUpdateHandles, Handle spaceMapHandle, const TimeDomain& timeDomain )
 {
 
-    if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
-    {
+    if (spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
         logger().error("SpaceServer::updateBlockEntitiesProperties - Map not found!");
         return;	
     }
@@ -872,16 +858,16 @@ void SpaceServer::updateBlockEntitiesProperties(octime_t timestamp,HandleSeq &to
 
     vector<opencog::spatial::BlockEntity*>::iterator it = theMap->updateBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
-    for (; it != theMap->updateBlockEntityList.end(); ++it)
-    {
+    for (; it != theMap->updateBlockEntityList.end(); ++it) {
         entity = (opencog::spatial::BlockEntity*)(*it);
-        updateBlockEntityProperties(entity, timestamp, spaceMapHandle);
+        updateBlockEntityProperties(entity, timestamp, spaceMapHandle, timeDomain);
         toUpdateHandles.push_back(entity->mEntityNode);
     }
 
     theMap->updateBlockEntityList.clear();
 
 }
+*/
 
 Handle SpaceServer::addPropertyPredicate(
         std::string predicateName,

@@ -11,9 +11,7 @@ cdef extern from "opencog/spacetime/Temporal.h":
 cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
     cdef cppclass cTimeServer "opencog::TimeServer":
         cTimeServer(cAtomSpace& a, cSpaceServer* ss)
-        cHandle addTimeInfo(cHandle, octime_t, tv_ptr, string)
-
-        
+        cHandle addTimeInfo(cHandle, octime_t, tv_ptr)        
 
 cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
 
@@ -22,13 +20,9 @@ cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         cSpaceServer(cAtomSpace&)
         const cSpaceMap& getMap(cHandle)
-        cHandle addOrGetSpaceMap(octime_t timestamp, string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight)
-        bool addSpaceInfo(cHandle objectNode, cHandle spaceMapHandle, bool isSelfObject, octime_t timestamp,
-                      int objX, int objY, int objZ,
-                      int objLength, int objWidth, int objHeight,
-                      double objYaw, string entityClass, string objectName, string material)
+        cHandle addOrGetSpaceMap(octime_t timestamp, string _mapName, unsigned , int, float)
+        bool addSpaceInfo(cHandle objectNode, cHandle spaceMapHandle, bool isSelfObject, bool isAvatarEntity, octime_t timestamp,
+                      int objX, int objY, int objZ)
         void removeSpaceInfo(cHandle objectNode, cHandle spaceMapHandle, octime_t timestamp)
         void clear()
         void setTimeServer(cTimeServer*)
-
-
