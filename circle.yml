@@ -1,0 +1,14 @@
+machine:
+    services:
+        - docker
+
+dependencies:
+    override:
+        - docker info
+        - docker pull opencog/opencog-deps
+        - docker images opencog/opencog-deps
+
+test:
+    override:
+        - docker run --rm -v $PWD:/opencog opencog/opencog-deps /bin/sh -c "cd /opencog && /tmp/octool -cabet":
+            parallel: true
