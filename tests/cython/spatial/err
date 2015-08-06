@@ -1,0 +1,39 @@
+EERROR: Error in search: [32768 8 9] is out of OcTree bounds!
+.E.E.E....
+======================================================================
+ERROR: testAddEntity_PressureTest (test_Octree3DMap.TestMap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/opencog/src/myrepo/opencog/tests/cython/spatial/test_Octree3DMap.py", line 213, in testAddEntity_PressureTest
+    testHandle2=self._testmap.getEntity(testpos1)
+AttributeError: 'opencog.spatial.Octree3DMapManager' object has no attribute 'getEntity'
+
+======================================================================
+ERROR: testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork (test_Octree3DMap.TestMap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/opencog/src/myrepo/opencog/tests/cython/spatial/test_Octree3DMap.py", line 172, in testAddandRemoveNoneBlockEntity_NormalEntity_AllGetFunctionsWork
+    testHandle2=self._testmap.getEntity(testpos1)
+AttributeError: 'opencog.spatial.Octree3DMapManager' object has no attribute 'getEntity'
+
+======================================================================
+ERROR: testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb (test_Octree3DMap.TestMap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/opencog/src/myrepo/opencog/tests/cython/spatial/test_Octree3DMap.py", line 51, in testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb
+    logOddThreshold=self._testmap.getLogOddsOccupiedThreshold()
+  File "spatial.pyx", line 45, in opencog.spatial.Octree3DMapManager.getLogOddsOccupiedThreshold (/home/opencog/src/myrepo/opencog/build/opencog/cython/opencog/spatial.cpp:1817)
+AttributeError: 'opencog.spatial.Octree3DMapManager' object has no attribute 'octree3dmap'
+
+======================================================================
+ERROR: testStandable_TwoNearBlock_Unstandable (test_Octree3DMap.TestMap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/opencog/src/myrepo/opencog/tests/cython/spatial/test_Octree3DMap.py", line 140, in testStandable_TwoNearBlock_Unstandable
+    [materialPredNode,listLink]).h
+NameError: global name 'listLink' is not defined
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.515s
+
+FAILED (errors=4)

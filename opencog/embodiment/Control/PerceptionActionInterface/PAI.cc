@@ -618,8 +618,9 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 // TODO: TEMPORARY PUBLIC METHODS: They should become built-in predicates later.
 bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
 {
+	
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
+		atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
 bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
@@ -643,7 +644,8 @@ bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_FAILED_PREDICATE_NAME, 
+			actionId, sinceTimestamp);
 }
 
 bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
@@ -667,7 +669,8 @@ bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_TRIED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_TRIED_PREDICATE_NAME, 
+			actionId, sinceTimestamp);
 }
 
 bool PAI::isPlanFinished(ActionPlanID planId) const
@@ -1593,7 +1596,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // Add this action to timelink
-    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, 
+                                                 tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
@@ -2915,8 +2919,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& ac
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
                                              evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,
-                                                 TruthValue::TRUE_TV());
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
     AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink,
                                                      predicateNode);
 
@@ -3485,10 +3488,10 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                         for (ActionParameter param : params) {
                             if (param.getName() == "target") {
                                 const Entity& entity = param.getEntityValue();
-                                AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                                    avatarInterface.getPetId( ),
-                                                                    entity.id,
-                                                                    getLatestSimWorldTimestamp() );
+                                AtomSpaceUtil::setupHoldingObject(atomSpace,
+								  avatarInterface.getPetId( ),
+								  entity.id,
+								  getLatestSimWorldTimestamp() );
                                 avatarInterface.setGrabbedObj(entity.id);
                             }
                         }
@@ -3750,7 +3753,7 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp);
+    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(),timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 

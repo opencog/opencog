@@ -293,8 +293,8 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 //in time interval of the SpaceMap
                 std::list<HandleTemporalPair> htp;
                 timeServer().getTimeInfo(back_inserter(htp),
-                                       Handle::UNDEFINED,
-                                       Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
+					 Handle::UNDEFINED,
+					 Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 
                 pre_it head_child_it = head_it.begin();
                 Handle action_done_h = _atomSpace.get_handle(PREDICATE_NODE,

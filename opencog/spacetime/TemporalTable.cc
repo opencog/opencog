@@ -137,7 +137,7 @@ void TemporalTable::add(Handle h, const Temporal& t)
     DPRINTF("Affer adding => sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
 }
 
-HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, TemporalRelationship criterion)
+HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, TemporalRelationship criterion) const
 {
     DPRINTF("TemporalTable::getHandle(h, t = %s, criterion = %s\n", t.toString().c_str(), getTemporalRelationshipStr(criterion));
 
@@ -184,7 +184,7 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
     return result;
 }
 
-HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion)
+HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion) const
 {
     DPRINTF("TemporalTable::get(%s, %d)\n", t.toString().c_str(), criterion);
 
@@ -766,7 +766,7 @@ void TemporalTable::updateIndexTable(int numEntries)
 }
 
 
-int TemporalTable::getTemporalIndexTablePos(const Temporal& t)
+int TemporalTable::getTemporalIndexTablePos(const Temporal& t) const
 {
     DPRINTF("TemporalTable::getTemporalIndexTablePos - init.\n");
 
@@ -790,7 +790,7 @@ int TemporalTable::getTemporalIndexTablePos(const Temporal& t)
     return up;
 }
 
-TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t)
+TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t) const
 {
     DPRINTF("TemporalTable::getPreviousTemporalEntry init\n");
 
@@ -809,7 +809,7 @@ TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t)
     }
 }
 
-bool TemporalTable::matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished)
+bool TemporalTable::matchesTimeCriterion(const Temporal& time, const Temporal& t, TemporalRelationship criterion, bool& searchFinished) const
 {
     bool matches = false;
     switch (criterion) {

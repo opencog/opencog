@@ -121,7 +121,7 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
     Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, trickName);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
-        timeServer().getTimeInfo(std::back_inserter(retP), h,
+        timeServer().getTimeInfo(std::back_inserter(retP), h, 
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::const_iterator ip = retP.begin();
@@ -168,7 +168,7 @@ const message_set EntityRelevanceFilter::getMessages(AtomSpace& atomSpace,
 
     std::list<HandleTemporalPair> htp;
     timeServer().getTimeInfo(back_inserter(htp),
-                          Handle::UNDEFINED,
+                          Handle::UNDEFINED, 
                           t, TemporalTable::STARTS_WITHIN);
     //define template to match
     atom_tree *say_template =  makeVirtualAtom(EVALUATION_LINK,

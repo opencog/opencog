@@ -63,7 +63,8 @@ namespace opencog
 class AtomSpace;
 class TimeServer;
 class SpaceServerSavable;
-
+typedef std::string TimeDomain;
+extern TimeDomain DEFAULT_TIMEDOMAIN;
 /**
  * New SpaceServer for 3D map, using Octree3DMapManager, not using LocalSpaceMap2D anymore.
  * The biggest change in orgnization is every Map handle match one map for a scene (such as a room)
@@ -83,7 +84,6 @@ public:
     typedef spatial::BlockVector SpaceMapPoint;
     typedef spatial::Octree3DMapManager SpaceMap;
     typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
-
 
     explicit SpaceServer(AtomSpace&);
     virtual ~SpaceServer();
@@ -127,7 +127,7 @@ public:
      * just get it and set it to be the current map, 
      * not to create a new spaceMap
      */
-    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN );
 
     /**
      * comment@20150520 by YiShan
@@ -142,10 +142,11 @@ public:
                       int objX, int objY, int objZ,
                       int objLength, int objWidth, int objHeight,
                       double objYaw, bool isObstacle,  
-		      std::string entityClass, std::string objectName, std::string material = "");
+		      std::string entityClass, std::string objectName, std::string material = "",  
+                      const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
 
-    void removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp = 0);
+    void removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp = 0, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * SpaceServerContainer virtual methods:
@@ -219,15 +220,15 @@ public:
     /**
      *  add blocklist to an entity
      */
-    void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle);
+    void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * add properties predicate link to an entity node when there is a change
      * this including addBlocksListPredicateToEntity
      */
-    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle);
+    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
-    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle);
+    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
 
 
