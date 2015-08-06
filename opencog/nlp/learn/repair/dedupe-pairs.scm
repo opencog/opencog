@@ -28,6 +28,7 @@
 (display duplicate-pair-list) (newline)
 (display "Number of dupes: ")
 (display (length duplicate-pair-list))(newline)
+(flush-output-port (current-output-port))
 
 ; ------------------------------------------------
 
@@ -147,6 +148,7 @@
 	; Sum the counts of the duplicate EvaluationLinks;
 	; delete all but one, and also delete all but one ListLink
 	(undup-eval uuid-list)
+	(flush-output-port (current-output-port))
 )
 
 ; (undup-pair (list 6709 137))

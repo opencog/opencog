@@ -25,6 +25,7 @@
 
 (display "The duplicate eval list size: ")
 (display (length duplicate-eval-list)) (newline)
+(flush-output-port (current-output-port))
 
 
 (define (eliminate-eval-dupes oset-list)

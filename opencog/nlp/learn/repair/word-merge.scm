@@ -439,7 +439,7 @@
 ; --------------------------------------------------------------
 ; Finally, sum up the word-counts.
 
-(define (sum-word-counts word)
+(define (dedupe-sum-word-counts word)
 "
   sum-word-counts -- Given the (string) word, find all WordNodes that
   hold this word, sum up the counts on all of them, assign the count to
@@ -472,7 +472,7 @@
 		(number->string smallest-wuid)
 		";"))
 
-	(display upd)
+	(display upd)(newline)
 	(dbi-query conxion upd)
 	(display (dbi-get_status conxion)) (newline)
 	(flush-query)
@@ -481,4 +481,4 @@
 	(delete-atoms bad-wuid-list 0 #t)
 )
 
-(for-each sum-word-counts duplicte-word-list)
+(for-each dedupe-sum-word-counts duplicate-word-list)

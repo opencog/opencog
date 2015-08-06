@@ -65,8 +65,18 @@ select count(*) from atoms where type=8;
 After first dupe elimination:
    3 636 568 ListLinks        (one less)
    3 601 161 EvaluationLinks  (1852791 less) (about right ...)
-
 ---
+
+After word-dedupe:
+   3 389 455 ListLinks
+   3 354 048 EvalLinks
+     139 839 WordNodes
+----
+
+After list dedupe:
+   3 354 804 ListLinks
+   3 328 118 EvalLinks
+
 
 Find the ANY node:
 61 | LinkGrammarRelationshipNode
@@ -151,12 +161,9 @@ argh.
  about 415805 in re1, re2 and 1094637 in re3
 
 ----------
-Noew run ./word-merge.scm
+Now run ./word-merge.scm
 
-
-
-todo==
 -- sum the word counts too.
+Done.
 
-
-
+Finally, run dedupe-pairs.scm
