@@ -20,7 +20,7 @@ To use the script follow the following steps
 
 1. wget -O octool https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg
 2. chmod 755 octool
-3. ./octool -rdcv     # install dependencies
+3. ./octool -rdpcv     # install dependencies
 4. ./octool -b        # build the code
 5. ./octool -e        # build examples
 6. ./octool -t        # build tests
