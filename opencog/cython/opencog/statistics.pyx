@@ -13,7 +13,7 @@ cdef class PyStatisticData:
     """ C++ StatisticData wrapper class.
     """
     cdef StatisticData *thisptr
-    def __cinit__(self, count, probability=None, entropy=None,
+    def __cinit__(self, unsigned int count, probability=None, entropy=None,
                   interaction_information=None):
         if probability is None:
             self.thisptr = new StatisticData(count)
