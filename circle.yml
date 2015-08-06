@@ -3,12 +3,12 @@ machine:
         - docker
 
 dependencies:
-    override:
+    override:  # opencog/opencog-dev:cli is used to speed up builds
         - docker info
-        - docker pull opencog/opencog-deps
-        - docker images opencog/opencog-deps
+        - docker pull opencog/opencog-dev:cli
+        - docker images opencog/opencog-dev:cli
 
 test:
     override:
-        - docker run --rm -v $PWD:/opencog opencog/opencog-deps /bin/sh -c "cd /opencog && /tmp/octool -cabet":
+        - docker run --rm -v $PWD:/opencog opencog/opencog-dev:cli /bin/sh -c "cd /opencog && /tmp/octool -cabet":
             parallel: true
