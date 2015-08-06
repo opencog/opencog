@@ -19,10 +19,13 @@
 ; duplicate EvaluationLinks
 (define duplicate-eval-list
 	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=47;" "outgoing"))
+		(string-append
+			"SELECT uuid,outgoing FROM atoms WHERE type= " EvalLinkType ";")
+		"outgoing"))
 
-(display "The duplicate eval list has: ")
+(display "The duplicate eval list size: ")
 (display (length duplicate-eval-list)) (newline)
+(flush-output-port (current-output-port))
 
 
 (define (eliminate-eval-dupes oset-list)
@@ -32,6 +35,8 @@
   Given a list of outgoing-sets, sum the count stv, and update
   the count on one of the dupes, and delete the other dupe.
 "
+	(define num-done 0)
+
 	; Sum the counts on the EvalLink
 	(define (sum-counts oset)
 		(define row #f)
@@ -42,7 +47,9 @@
 
 		; Find all the EvaluationLinks
 		(define qry (string-append
-			"SELECT * FROM atoms WHERE type=47 AND outgoing="
+			"SELECT * FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str oset)))
 		; (display qry)(newline)
 		(dbi-query conxion qry)
@@ -68,13 +75,22 @@
 				" WHERE uuid="
 				(number->string smallest-uuid)
 				";")))
-			(display upd) (newline)
+			; (display upd) (newline)
 			(if do-update (begin
 				(dbi-query conxion upd)
-				(display (dbi-get_status conxion)) (newline)
+				; (display (dbi-get_status conxion)) (newline)
 				(flush-query)))
 			(delete-atoms dup-list  smallest-uuid)
 		)
+
+		; Print status so we don't get bored.
+		(set! num-done (+ num-done 1))
+		(if (eq? 0 (modulo num-done 1000)) (begin
+			(display "Processed ")(display num-done)
+			(display " eval-dedupes")(newline))
+			(flush-output-port (current-output-port))
+		)
+
 		smallest-uuid
 	)
 

@@ -13,23 +13,22 @@
 
 (load "common.scm")
 
-; The uuid of the ANY LG type.  That is, the uuid of the
-; LinkGrammarRelationshipNode "ANY"
-(define uuid-of-any 250)
-
 ; --------------------------------------------------------------
 
 ; The duplicate-pair-list will consist of word-pairs
-; (acutally, WordNode uuid-pairs) that appear in more
+; (actually, WordNode uuid-pairs) that appear in more
 ; than one ListLink.  These should have been unique, but,
 ; due to bugs in how the atomspace gets used, they are not.
 ;
 (define duplicate-pair-list
 	(look-for-dupes
-		"SELECT * FROM atoms WHERE type=8;" "outgoing"))
+		"SELECT uuid,outgoing FROM atoms WHERE type=8;" "outgoing"))
 
-;(display "the duplicate pair list is: ")
-;(display duplicate-pair-list) (newline)
+(display "the duplicate pair list is: ")
+(display duplicate-pair-list) (newline)
+(display "Number of dupes: ")
+(display (length duplicate-pair-list))(newline)
+(flush-output-port (current-output-port))
 
 ; ------------------------------------------------
 
@@ -38,9 +37,10 @@
   undup-eval -- consolidate duplicate EvaluationLinks
 
   The luid-list should be a list of integer uuids for the ListLinks
-  that are the duplicates. The proceedure here is semi-manual;
-  the total count is computed, but you have to update the count
-  yourself, and also do the deletions.
+  that are the duplicates. The proceedure here is fully automatic;
+  the total count is computed, the count on the EvalLink with the
+  smallest uuid is updted, the other EvalLinks and the other ListLinks
+  are automatically deleted.
 "
 	(define smallest-evid 2012123123)
 	(define smallest-luid 2012123123)
@@ -53,7 +53,9 @@
 		(define qry "")
 		; type=47 is the type of EvaluationLink
 		(set! qry (string-append
-			"SELECT * FROM atoms WHERE type=47 and outgoing="
+			"SELECT * FROM atoms WHERE type="
+			EvalLinkType
+			" AND outgoing="
 			(make-outgoing-str (list uuid-of-any uuid)))
 		)
 		(display "Eval qry is ")(display qry) (newline)
@@ -105,15 +107,6 @@
 
 	(delete-atoms eval-list smallest-evid)
 	(delete-atoms luid-list smallest-luid)
-
-	; Do this manually...
-	; UPDATE atoms SET stv_count=5938 WHERE uuid=53650;
-	; DELETE FROM atoms WHERE uuid=430743;
-	; DELETE FROM atoms WHERE uuid=430742;
-	;
-	; UPDATE atoms SET stv_count=3760.0 WHERE uuid=27878;
-	; DELETE FROM atoms WHERE uuid=415559;
-	; DELETE FROM atoms WHERE uuid=415560;
 )
 
 (define (undup-pair pair)
@@ -123,7 +116,7 @@
 
   This works by obtaining a list of all of the duplicate UUID's, and
   then calling 'undup-eval' to consolidate them. The undup-eval
-  sums up the counts, and deletes teh duplicates.
+  sums up the counts, and deletes the duplicates.
 "
 
 	(define row #f)
@@ -155,12 +148,13 @@
 	; Sum the counts of the duplicate EvaluationLinks;
 	; delete all but one, and also delete all but one ListLink
 	(undup-eval uuid-list)
+	(flush-output-port (current-output-port))
 )
 
 ; (undup-pair (list 6709 137))
 ; (undup-pair (list 24493 101))
 
 ; Whole-sale de-duplication
-(for-each undup-pair duplicate-pair-list)
+; (for-each undup-pair duplicate-pair-list)
 (display "number of dupes: ")
 (display (length duplicate-pair-list))(newline)
