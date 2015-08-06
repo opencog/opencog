@@ -9,7 +9,8 @@
 				(VariableNode "$verb")
 				(TypeNode "WordInstanceNode")
 			)
-			(TypedvariableNode
+			;(TypedVariableNode
+      (TypedVariableLink
 				(VariableNode "$interpretation-index")
 				(TypeNode "InterpretationNode")
 			)
@@ -33,14 +34,10 @@
 	)
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "IMPERATIVE-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "IMPERATIVE-Rule") IMPERATIVE)
-
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-imp-rule int-index)
-	(IMPERATIVE-rule int-index)
+	;(IMPERATIVE-rule int-index)
+  (imperative-rule int-index)
 	)
 )
-

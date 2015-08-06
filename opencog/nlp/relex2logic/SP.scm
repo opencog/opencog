@@ -36,6 +36,7 @@
 				)
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-sp-rule")
 			(ListLink
@@ -43,19 +44,16 @@
 				(VariableNode "$predadj")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "SP-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "SP-Rule") SP)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-sp-rule subj predadj)
+ (ListLink
 	(SV-rule (word-inst-get-word-str subj) (cog-name subj)
 		(word-inst-get-word-str predadj) (cog-name predadj)
 	)
+ )
 )
-

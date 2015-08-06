@@ -96,6 +96,7 @@ public:
         HandleSeq atTimeLinkOutgoing;
         atTimeLinkOutgoing.push_back(timeNode);
         atTimeLinkOutgoing.push_back(evalLink);
+		
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, atTimeLinkOutgoing) != Handle::UNDEFINED);
     }
 

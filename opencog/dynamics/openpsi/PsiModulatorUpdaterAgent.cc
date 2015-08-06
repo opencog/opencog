@@ -91,8 +91,8 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 
 //    Handle evaluationLink = AtomSpaceUtil::setPredicateValue(atomSpace, predicateName, stv);
     TimeServer timeServer(atomSpace);
-    Handle atTimeLink = timeServer.addTimeInfo(evaluationLink,
-        timeStamp, stv);
+    Handle atTimeLink = timeServer.addTimeInfo(evaluationLink, 
+                                               timeStamp, DEFAULT_TIMEDOMAIN, stv);
 
     AtomSpaceUtil::updateLatestModulator(atomSpace, atTimeLink, modulatorPredicateNode);
 
@@ -217,6 +217,7 @@ void PsiModulatorUpdaterAgent::run()
         modulator.runUpdater(atomSpace);
     }
 
+    TimeServer timeServer(atomSpace);
     // Set the updated value to AtomSpace
     for (Modulator & modulator : this->modulatorList) {
         modulator.updateModulator(atomSpace, timeStamp);

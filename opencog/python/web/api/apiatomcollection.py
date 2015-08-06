@@ -2,6 +2,7 @@ __author__ = 'Cosmo Harrigan'
 
 from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
+import opencog.cogserver
 from opencog.atomspace import Handle, Atom
 from mappers import *
 from flask.ext.restful.utils import cors
@@ -50,6 +51,7 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument('limit', type=int, location='args')
 
         super(AtomCollectionAPI, self).__init__()
+        self.atomspace = opencog.cogserver.get_server_atomspace()
 
     # Set CORS headers to allow cross-origin access
     # (https://github.com/twilio/flask-restful/pull/131):
@@ -261,6 +263,13 @@ class AtomCollectionAPI(Resource):
 	]
     )
     def get(self, id=""):
+        retval = jsonify({'error':'Internal error'})
+        try:
+           retval = self._get(id=id)
+        except Exception,e:
+           retval = jsonify({'error':str(e)})
+        return retval
+    def _get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
         """

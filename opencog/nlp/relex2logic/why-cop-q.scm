@@ -1,4 +1,4 @@
-; This is for why-questions with the verb to-be, such as 
+; This is for why-questions with the verb to-be, such as
 ; "Why are you such a scmhuck?"
 ; (AN June 2015)
 
@@ -23,7 +23,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$verb")
 				(VariableNode "$a-parse")
@@ -41,16 +41,16 @@
                 			(ListLink
                     			(VariableNode "$verb")
                     			(VariableNode "$qVar")
-                			)			
+                			)
             		)
 			(ChoiceLink
-				(AndLink					
+				(AndLink
 					(EvaluationLink
             	    				(DefinedLinguisticRelationshipNode "_subj")
             	    				(ListLink
             	        				(VariableNode "$verb")
             	        				(VariableNode "$subj")
-            	    				)			
+            	    				)
             				)
 					(LemmaLink
 						(VariableNode "$verb")
@@ -73,24 +73,22 @@
 				)
 			)
 		)
+   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-why-cop-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
+   )
 	)
 )
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "why-cop-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "why-cop-q-Rule") why-cop-q)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-why-cop-q-rule subj)
+ (ListLink
 	(whycop-Q-rule (word-inst-get-word-str subj) (cog-name subj)
 	)
+ )
 )
-

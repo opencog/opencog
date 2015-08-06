@@ -106,6 +106,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
     // So, for now, we may send duplicate maps, which is inneficient but should not cause any error
     std::set<Handle> mapsToSend;
 #endif
+
     const SpaceServer& spacServer = spaceServer();
     for (HandleTemporalPair htp : htp_seq) {
         Temporal t = *htp.getTemporal();

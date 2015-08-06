@@ -38,6 +38,7 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
+	PersistModule
 	nlp-types
 	${ATOMSPACE_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}

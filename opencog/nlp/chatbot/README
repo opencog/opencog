@@ -8,20 +8,17 @@ A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
 At this time, the bot is a demo of the OpenCog natural-language
 processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
-OpenCog reasoning, deduction, or anything like that.  
+OpenCog reasoning, deduction, or anything like that.
 
-To make the chatbot to actually answer the question with a correct answer
-PLN inference should be used and that would be the next implementation step.
+To make the chatbot to actually answer the question with a correct
+answer PLN inference should be used and that would be the next
+implementation step.
 
-However, currently It can answer English-language wh-questions. In order to 
-do that it uses a "fuzzy-pattern-matching".The good quality of the
-"fuzzy-pattern-matching" is if there isn't anything in the Atomspace that
-exactly matches the pattern of the Question asked,it heuristically tries to 
-return something that approximately matches the pattern.
-
-Currently this is used for demo of the OpenCog NLP pipeline and after we
-hookup the reasoning system it will be used as a backup method when 
-reasoning doesn't yield a decent answer.
+The chatbot can currently answer certain simple English-language
+wh-questions.  It does this by using "fuzzy-pattern-matching". This
+works by performing a fuzzy search, comparing the question to sentences
+in the atomspace: if a similar sentence is found, the fuzzy matcher
+will offer that up as an answer.  See below for additional details.
 
 Running the chatbot requires three steps:
 
@@ -38,10 +35,10 @@ compile RelEx first, by installing java and ant, and saying "ant" to
 build RelEx).
 
 The parse server listens on port 4444: it will read plain-text input and
-generates parsed text in OpenCog format. It uses RelEx2Logic rules 
-for mapping the output of RelEx into a style of OpenCog Atom representation 
-which will be  used for automated reasoning by PLN. The speech act of the 
-input sentence will be tagged by R2L. 
+generates parsed text in OpenCog format. It uses RelEx2Logic rules
+for mapping the output of RelEx into a style of OpenCog Atom representation
+which will be  used for automated reasoning by PLN. The speech act of the
+input sentence will be tagged by R2L.
 
 The chatbot needs this server to process the input text.
 
@@ -65,26 +62,12 @@ Configure and run the chat bridge:
 The chatbot itself is just a simple deamon that bridges text from the
 chat system to the OpenCog server. The cogita chatbot is tailored for
 IRC chat; other chat systems could be supported in a straightforward
-manner.
-
-The IRC chatbot has an assortment of hard-coded config parameters in the
-source code.  See CogitaConfig.cc for setable values for the name of the
-chatbot, the irc channel and irc network to join, and the bot ID strings,
-etc.  By default, it connects to the #opencog channel on freenode.net.
-
-The bot tries to connect to an opencog server at port 17004. This port
-number is hard-coded in whirr-sockets.cc.
-
-After modifying the hard-coded config as desired, start the bot by
-saying "opencog/nlp/chatbot/cogita". It should then appear on the IRC
-channel. You can then talk to it by addressing it by name, i.e.
-prefacing comments with cog:, cogita: or cogita-bot:
-
+manner.  See the file ../irc/README for details.
 
 Architecture:
 -------------
-The current architecture makes use of several servers interconnected by 
-TCP/IP sockets to perform NLP processing.  
+The current architecture makes use of several servers interconnected by
+TCP/IP sockets to perform NLP processing.
 
 The pipeline is as follows:
 
@@ -93,19 +76,15 @@ The pipeline is as follows:
    forwards the resulting plain-text to OpenCog. This is done by
    issuing one simple scheme expression to OpenCog, via the OpenCog
    command-line interface/scheme shell on port 17004. The expression
-   is ''(process_query user query)'', where the ''user'' is
-   the user's IRC nick, and ''query'' is what the user entered.  The
+   is ''(process_query user text)'', where the ''user'' is
+   the user's IRC nick, and ''text'' is what the user entered.  The
    return value from this command is sent back to the IRC channel.
    Communications is stateless and blocking: cogita closes the socket
    to indicate end-of-messsage, and expects that the cog server will
    do the same. Only after the cog-server closes its socket does cogita
    reply on the IRC channel.
 
-   IRC.cc,.h:  C++ class for generic IRC communications.
-   go-irc.cc:  the main guts of the cogita server
-   whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.
-
-   Note that if the cog-server is busy, then whirr can block for an
+   Note that if the cog-server is busy, then "whirr" can block for an
    indefinitely long time. The person who is chatting will start to
    wonder about the lack of response. This is currently hacked around
    by having the chat processing periodically return to the bridge,
@@ -123,41 +102,43 @@ The pipeline is as follows:
    completed its parse and returned its results.
 
    The newly parsed sentence will be sent to a scheme function called
-   ''check_query_type''.This function will identify the speech act type of 
-   the sentence then the next appropriate processing functions will
-   be called. For instance currently  ''(wh_query_process query)'' will be 
-   invoked if the speech act tag is 'InterrogativeSpeechAct'  
+   ''check_query_type''.This function will identify the speech act type
+   of the sentence then the next appropriate processing functions will
+   be called. For instance currently  ''(wh_query_process query)'' will
+   be invoked if the speech act tag is 'InterrogativeSpeechAct'
 
-3) Question-Answering. Currently The bot can recognize speech act type of 
-   the utterance. specifically it identifies 'InterrogativeSpeechAct' ,
+3) Question-Answering. Currently The bot can recognize speech act type
+   of the utterance. specifically it identifies 'InterrogativeSpeechAct',
    'TruthQuerySpeechAct and 'DeclarativeSpeechAct'
 
-   The bot can answer wh-questions ('InterrogativeSpeechAct') by using the 
-   fuzzy-pattern-matcher. Therefore we need to put some sentence related to 
-   the question in the atomspace before we ask the question.
+   The bot can answer some simple wh-questions ('InterrogativeSpeechAct')
+   by using the fuzzy-pattern-matcher. Sentences ("facts") pertaining
+   to the question must first be present in the atomspace, of course.
 
-4) Relex2Logic replaces the old Semantic triples code. The current 
-   fuzzy-pattern-matcher uses the R2L output. Also PLN will use r2l output
-   for reasoning.
+4) Relex2Logic replaces the old "semantic triples" code (in the
+   ../old-chatbot directory). The current fuzzy-pattern-matcher uses
+   the R2L output. Also PLN will use r2l output for reasoning.
 
 5) Sureal and Microplanning is  used for Natural Language Generation.
 
-6) OpenPsi(not hookup)- will be used to make the chatbot to generate Goal
-   plus context oriented utterance. Here,different speech act schema will be
-   coded and those speech act will be triggered based on the Goal and context  
+6) OpenPsi (not hooked up yet) will be used to make the chatbot to
+   generate a speech-act goal plus context for utterances. Here,
+   different speech act schema will be triggered based on the goal
+   and context.
 
-7) Reasoning (not hookup). PLN,the core reasoning engine will be used.
+7) Reasoning (not hooked up). PLN, the core reasoning engine will be
+   used.
 
-8) Anaphora resolution(not hookup) will be used  to resolve the  pronouns 
+8) Anaphora resolution (not hooked up) will be used to resolve pronouns
+   and other references
 
-9) Word-sense disambiguation (not hookup)
+9) Word-sense disambiguation (not hooked up)
    http://wiki.opencog.org/w/Word_sense_disambiguation
 
 
 Examples:
 ---------
-Currently ,the following dialog is working.
-
+Currently, the following dialog is working.
 
 
  <Mr. x> hello
@@ -189,7 +170,7 @@ Currently ,the following dialog is working.
  <cogita-bot> Hello Mr. x, you said: "What is the color of the book?
  <cogita-bot> You made an Interrogative SpeechAct the color of the book is red .
 
- <Mr. x> John Kennedy died. 
+ <Mr. x> John Kennedy died.
  <cogita-bot> Hello Mr. x, you said: "John Kennedy died.
  <cogita-bot> You made a Declarative SpeechAct
  <Mr. x> who died?
@@ -206,10 +187,10 @@ Currently ,the following dialog is working.
 
 ToDo:
 -----
-* Implement the truth-query processing after the issue on the backward 
+* Implement the truth-query processing after the issue on the backward
   chaining is fixed
 
-* Write different  speech  act schema's as it is described on the 
+* Write different  speech  act schema's as it is described on the
   "dialog system" paper
 
 * Create an object holding the name of the user, the chat connection,
@@ -228,12 +209,10 @@ References
 
 http://en.wikipedia.org/wiki/MultiNet
 
-“Initial OpenCog Based Dialogue System Design Document” 
+“Initial OpenCog Based Dialogue System Design Document”
 an ongoing thesis by Ruiting Lian
 
 Initial draft: April 2009 Linas Vepstas
 Updated: September 2009 Linas Vepstas
 Updated: April 2010  Vamsi Krishna Davuluri
 Updated: July 2015 Rodas Solomon
- 
-

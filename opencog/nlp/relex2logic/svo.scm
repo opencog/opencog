@@ -1,5 +1,5 @@
-; This the rule for subject-verb-object sentences, such as 
-; "Johnny ate the dog." 
+; This the rule for subject-verb-object sentences, such as
+; "Johnny ate the dog."
 ; (AN June 2015)
 
 (define svo
@@ -53,6 +53,7 @@
 				(DefinedLinguisticRelationshipNode "_iobj")
             )
 		)
+       (ListLink
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-svo-rule")
             (ListLink
@@ -61,20 +62,20 @@
                 (VariableNode "$Z")
             )
         )
+)
     )
 )
 
-(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
+;;(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
 
-(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
+;;(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-svo-rule subj verb obj)
+(ListLink
     (SVO-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str verb) (cog-name verb)
               (word-inst-get-word-str obj) (cog-name obj)
-    )
+    ))
 )
-
-
