@@ -72,8 +72,184 @@
 
 \begin_body
 
-\begin_layout Standard
+\begin_layout Title
 Rule Chaining and Parsing
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+July 2015
+\end_layout
+
+\begin_layout Abstract
+Some notes about reduction, states, rule engines, backward and forward chaining,
+ parsing and Markov networks.
+ These are all inter-related topics, but not obviously so, thus these notes.
+ In particular, a functional probabilistic chainer is of central importance
+ for OpenCog, so a clear exposition is needed if forward proress is to be
+ made.
+\end_layout
+
+\begin_layout Abstract
+The notes here are informal and just a rough draft, based on points of confusion
+ that have occured on the OpenCog mailing list.
+\end_layout
+
+\begin_layout Section*
+Intro
+\end_layout
+
+\begin_layout Standard
+The general sketch of the inter-relations are as follows.
+ When we talk about a rule system in OpenCog, and the idea of applying rules,
+ we actually are talking about an 
+\begin_inset Quotes eld
+\end_inset
+
+abstract reduction system
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is nicely defined in Chapter 2 of Baader & Nipkow, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Term Rewriting and All That
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ (This book provides important background knowledge needed for a proper
+ design of the URE).
+ An important concept is that of confluence: two different streams of rules
+ are 
+\emph on
+confluent
+\emph default
+ if they result in the same final form.
+ The idea of confluence is often illustrated with a diamond:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename Diamond.eps
+	lyxscale 70
+	height 15theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the initial contents of the atomspace is represented by 'x'; after
+ applying rule 'ra', the contents of the atomspace is represented by 'y1',
+ and so on.
+ The idea of confluence here is that applyng rule 'ra' followed by rule
+ 'rc' leads to the same state as applying rule 'rb', followed by rule 'rd':
+ in both cases, one ends up at 'z'.
+ What about the situation before then? The atomspace represented by 'y1'
+ has different atoms in it than that represented by 'y2'; how should one
+ deal with that? Should we actually have two different atomspaces at this
+ point? Or can we invent a notation that allows both y1 and y2 to co-exist,
+ while making it clear that they are mutually-exclusive possibilities? At
+ this time, we do not yet have a clear, well-documented, commonly-agreed-upon
+ format for representing y1 and y2 simultaneously.
+ I beleive that it is possible to represent y1 and y2 simulataneously, by
+ using ContextLinks, by saying something like 
+\begin_inset Quotes eld
+\end_inset
+
+In the context of x after applying ra, the following holds true: 'y1'
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Details are TBD.
+\end_layout
+
+\begin_layout Standard
+Just to be clear: context is critical.
+ The position 'x' could correspond to the statement 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he has the ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and 'ra' could be an anaphora resolution rule that suggests that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ while 'rb' suggests that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Both deductions cannot be right at the same time, yet there must be a way
+ of representing both at the same time in the atomspace.
+\end_layout
+
+\begin_layout Section*
+Reduction and Confluence
+\end_layout
+
+\begin_layout Standard
+See Chapter 
 \end_layout
 
 \end_body
