@@ -41,8 +41,7 @@ OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
 
 OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y,
-											   const double& z, const Handle& block) 
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y, const double& z, const Handle& block) 
 {
 	point3d pos(x,y,z);
 	return setNodeBlock(pos, block);
@@ -70,8 +69,16 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handl
 
 void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied)
 {
-	this->updateNode(pos.x,pos.y,pos.z,isOccupied);
-	this->setNodeBlock(pos.x,pos.y,pos.z,block);
+        OctomapOcTreeNode* blockNode;
+        if(isOccupied)
+        {
+            blockNode = this->updateNode(pos.x,pos.y,pos.z,prob_hit_log);            
+        }
+        else
+        {
+            blockNode = this->updateNode(pos.x,pos.y,pos.z,-prob_hit_log-0.1f);
+        }
+	blockNode->setBlock(block);
 }
 void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate)
 {

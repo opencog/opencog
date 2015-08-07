@@ -55,14 +55,12 @@ public:
         testMap->addSolidUnitBlock(testHandle1, testpos1);
         Handle testHandle2 = testMap->getBlock(testpos1);
         TS_ASSERT(testHandle2 == testHandle1);
-        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
         TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
 
         testMap->removeSolidUnitBlock(testHandle1);
 
         Handle testHandle3 = testMap->getBlock(testpos1);
         TS_ASSERT(testHandle3 == Handle::UNDEFINED);
-        TS_ASSERT(testMap->checkIsSolid(testpos1) == false);
         TS_ASSERT(testMap->getBlockLocation(testHandle1) == BlockVector::ZERO);
     }
 
@@ -91,9 +89,6 @@ public:
         TS_ASSERT(testMap->getBlock(testpos1) == testHandle1);
         // test prob getBlock
         TS_ASSERT(testMap->getBlock(testpos1, logOddThreshold) == testHandle1);
-        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
-        // test prob checkIsSolid
-        TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold) == true);
         TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
         // test prob getblocklocation
         TS_ASSERT(testMap->getBlockLocation(testHandle1,logOddThreshold) == testpos1);
@@ -103,8 +98,6 @@ public:
 
         TS_ASSERT(testMap->getBlock(testpos1) == Handle::UNDEFINED);
         TS_ASSERT(testMap->getBlock(testpos1, logOddThreshold) == Handle::UNDEFINED);
-        TS_ASSERT(testMap->checkIsSolid(testpos1) == false);
-        TS_ASSERT(testMap->checkIsSolid(testpos1,logOddThreshold) == false);
         TS_ASSERT(testMap->getBlockLocation(testHandle1) == BlockVector::ZERO);
         TS_ASSERT(testMap->getBlockLocation(testHandle1, logOddThreshold) == BlockVector::ZERO);
 		
@@ -114,8 +107,6 @@ public:
 
         TS_ASSERT(testMap->getBlock(testpos1) != Handle::UNDEFINED);
         TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold) != Handle::UNDEFINED);
-        TS_ASSERT(testMap->checkIsSolid(testpos1) == true);
-        TS_ASSERT(testMap->checkIsSolid(testpos1, logOddThreshold) == true);
         TS_ASSERT(testMap->getBlockLocation(testHandle1) == testpos1);
         TS_ASSERT(testMap->getBlockLocation(testHandle1, logOddThreshold) == testpos1);
     }
