@@ -103,39 +103,14 @@ Intro
 \end_layout
 
 \begin_layout Standard
-The general sketch of the inter-relations are as follows.
- When we talk about a rule system in OpenCog, and the idea of applying rules,
- we actually are talking about an 
-\begin_inset Quotes eld
-\end_inset
+The goal of this set of notes is to talk about the overall design of the
+ OpenCog forward and backwards chainers, the URE (universal rule engine)
+ and to highlight some unresolved issues.
+\end_layout
 
-abstract reduction system
-\begin_inset Quotes erd
-\end_inset
-
-.
- This is nicely defined in Chapter 2 of Baader & Nipkow, 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-Term Rewriting and All That
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
-.
- (This book provides important background knowledge needed for a proper
- design of the URE).
- An important concept is that of confluence: two different streams of rules
- are 
-\emph on
-confluent
-\emph default
- if they result in the same final form.
- The idea of confluence is often illustrated with a diamond:
+\begin_layout Standard
+Consider the problem of forward-chaining, as it is commonly envisioned.
+ Its shown in the graph below:
 \end_layout
 
 \begin_layout Standard
@@ -154,32 +129,22 @@ confluent
 Here, the initial contents of the atomspace is represented by 'x'; after
  applying rule 'ra', the contents of the atomspace is represented by 'y1',
  and so on.
- The idea of confluence here is that applyng rule 'ra' followed by rule
- 'rc' leads to the same state as applying rule 'rb', followed by rule 'rd':
- in both cases, one ends up at 'z'.
- What about the situation before then? The atomspace represented by 'y1'
- has different atoms in it than that represented by 'y2'; how should one
- deal with that? Should we actually have two different atomspaces at this
- point? Or can we invent a notation that allows both y1 and y2 to co-exist,
- while making it clear that they are mutually-exclusive possibilities? At
- this time, we do not yet have a clear, well-documented, commonly-agreed-upon
- format for representing y1 and y2 simultaneously.
- I beleive that it is possible to represent y1 and y2 simulataneously, by
- using ContextLinks, by saying something like 
-\begin_inset Quotes eld
-\end_inset
+ Applying rule 'rb' to the initial state 'x' results in a 
+\emph on
+different
+\emph default
+ atomspace 'y2', 
+\emph on
+i.e.
 
-In the context of x after applying ra, the following holds true: 'y1'
-\begin_inset Quotes erd
-\end_inset
-
-.
- Details are TBD.
+\emph default
+ an atomspace with different contents.
 \end_layout
 
 \begin_layout Standard
-Just to be clear: context is critical.
- The position 'x' could correspond to the statement 
+The differences can be mutually exclusive.
+ Consider this example: The position 'x' could correspond to the statements
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -191,7 +156,44 @@ he has the ball.
 \begin_inset Quotes erd
 \end_inset
 
-, and 'ra' could be an anaphora resolution rule that suggests that 
+, together with the statements 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael is a male.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen is a male.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Based on this, the rule 'ra' could be an anaphora resolution rule that
+ takes, as pre-requeists, the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ refers to males, and suggests as output, that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -215,7 +217,9 @@ Natnael
 \begin_inset Quotes erd
 \end_inset
 
- while 'rb' suggests that 
+.
+ Similarly, 'rb' is the same rule, but applied to different data, and thus
+ suggests that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -240,16 +244,238 @@ Amen
 \end_inset
 
 .
- Both deductions cannot be right at the same time, yet there must be a way
- of representing both at the same time in the atomspace.
-\end_layout
+ Clearly, both statements cannot be true at the same time.
+ Thus, in effect, the 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Section*
-Reduction and Confluence
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ splits into two: in one universe, “
+\emph on
+he
+\emph default
+” is “
+\emph on
+Natnael”
+\emph default
+, and in the other 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is also useful to conclude that in universe 'y1', the association “
+\emph on
+he
+\emph default
+” is “
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ has a truth-value of 100% true and 90% confident.
+ Thus, the truth of the statements in y1 and y2 are mutually exclusive.
+ At this point, though, we are not sure which 
+\begin_inset Quotes eld
+\end_inset
+
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ is correct.
+ Thus, it is reasonable to assign each universe a probability of 50%.
 \end_layout
 
 \begin_layout Standard
-See Chapter 
+There is a set of unresolved issues in the above example.
+ These are:
+\end_layout
+
+\begin_layout Itemize
+What is the right way of representing the state in 'y1' and 'y2' in the
+ atomspace, simulataneously?
+\end_layout
+
+\begin_layout Itemize
+What is the right way for assigning truth values to 'y1' and 'y2'?
+\end_layout
+
+\begin_layout Standard
+There has been the general suggestion that ContextLinks can be used to solve
+ the first issue, but the details have not been specified, and there is
+ no general agreed-upon format, yet.
+\end_layout
+
+\begin_layout Standard
+There is a third issue shown in the diagram: a confluent diamond.
+ That is, after applying rule 'ra' and then 'rd', one ends up with the same
+ 
+\begin_inset Quotes eld
+\end_inset
+
+facts
+\begin_inset Quotes erd
+\end_inset
+
+ 'z2' as one would by applying 'rb' then 're'.
+ (For example, this could happen if 'ra'='re' aand 'rb'='rd', and 'ra' and
+ 'rb' commute.) How can one 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ that both cases end with the same 'z2'? As a practical matter, how does
+ one identify, in the code, that one ended up in the same spot? As another
+ important related issue: what should the probability of 
+\begin_inset Quotes eld
+\end_inset
+
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ 'z2' be? Should it be the sum of the probabilities of taking paths (ra,rd)
+ and (rb,re)? Should it be something else? (Does PLN have something to say
+ about this?)
+\end_layout
+
+\begin_layout Section*
+Markov Nets, Parsing
+\end_layout
+
+\begin_layout Standard
+In the above example, we start with the state 'x' and finish with multiple
+ mutually-exclusive 
+\begin_inset Quotes eld
+\end_inset
+
+universes
+\begin_inset Quotes erd
+\end_inset
+
+ 'z1', 'z2' and 'z3'.
+ Ideally, we want to assign probabilities to each of these universes, in
+ such a way that only one is likely, and the others are not.
+ That is, in 'z1', we have that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ holds true, but we also had additional evidence, via rule 'rc' that perhaps
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is actually 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, for example, if a sentence arrived that said 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+and then Amen threw the ball
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this cae, we want to lower the probability of universe 'z1' to a very
+ low value, while raising the probability of the universe 'z3' to a very
+ high value (since 'z3' is the one where Amen has the ball).
+\end_layout
+
+\begin_layout Section*
+References
+\end_layout
+
+\begin_layout Standard
+See the following:
+\end_layout
+
+\begin_layout Itemize
+Baader & Nipkow, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Term Rewriting and All That
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Cambridge 1998 -- Provides a good introduction to abstract rewriting systems,
+ and the concepts of reduction, unification, and some very basic proof theory.
 \end_layout
 
 \end_body
