@@ -63,3 +63,7 @@
             (<= sSAB sSnAB)
             (stv 0 (min cSAB cSnAB))
             (stv (- sSAB sSnAB) (min cSAB cSnAB)))))
+
+; Name the rule
+(define pln-rule-attraction-name (Node "pln-rule-attraction"))
+(DefineLink pln-rule-attraction-name pln-rule-attraction)

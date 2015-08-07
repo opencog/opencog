@@ -40,3 +40,7 @@
       ((sOAB (cog-stv-strength OAB))
        (cOAB (cog-stv-confidence OAB)))
     (stv sOAB cOAB)))
+
+; Name the rule
+(define pln-rule-or-transformation-name (Node "pln-rule-or-transformation"))
+(DefineLink pln-rule-or-transformation-name pln-rule-or-transformation)

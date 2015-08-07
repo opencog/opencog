@@ -253,3 +253,10 @@
 (define (pln-formula-context Context Relation)
     (cog-set-tv! Context (cog-tv Relation)))
 
+
+; Name the rule
+(define pln-rule-contextualize-inheritance-name
+  (Node "pln-rule-contextualize-inheritance"))
+(DefineLink
+  pln-rule-contextualize-inheritance-name
+  pln-rule-contextualize-inheritance)

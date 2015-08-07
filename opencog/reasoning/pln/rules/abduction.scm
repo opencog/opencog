@@ -73,3 +73,7 @@
                     		(cog-stv-confidence BC))))) ; Confidence
 
 ; =============================================================================
+
+; Name that rule
+(define pln-rule-abduction-name (Node "pln-rule-abduction"))
+(DefineLink pln-rule-abduction-name pln-rule-abduction)

@@ -55,3 +55,7 @@
             (and (>= sCA 0.5) (>= sCB 0.5))
             (stv 1 1)
             (stv 0 1))))
+
+; Name the rule
+(define pln-rule-and-evaluation-name (Node "pln-rule-and-evaluation"))
+(DefineLink pln-rule-and-evaluation-name pln-rule-and-evaluation)

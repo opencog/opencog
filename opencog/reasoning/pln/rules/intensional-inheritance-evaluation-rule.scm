@@ -58,3 +58,10 @@
                 (< sCB 0.5)
                 (stv 1 0)
                 (stv 1 1)))))
+
+; Name the rule
+(define pln-rule-intensional-inheritance-evaluation-name
+  (Node "pln-rule-intensional-inheritance-evaluation"))
+(DefineLink
+  pln-rule-intensional-inheritance-evaluation-name
+  pln-rule-intensional-inheritance-evaluation)

@@ -50,3 +50,7 @@
         CAB (cog-tv SACBC)))
 
 		
+
+; Name the rule
+(define pln-rule-and-to-context-name (Node "pln-rule-and-to-context"))
+(DefineLink pln-rule-and-to-context-name pln-rule-and-to-context)

@@ -50,3 +50,10 @@
 ;            (*
 ;                p
 ;                (log p)))))
+
+; Name the rule
+(define pln-rule-context-free-to-sensitive-name
+  (Node "pln-rule-context-free-to-sensitive"))
+(DefineLink
+  pln-rule-context-free-to-sensitive-name
+  pln-rule-context-free-to-sensitive)

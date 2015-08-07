@@ -35,3 +35,10 @@
       ((sNNA (cog-stv-strength NNA))
        (cNNA (cog-stv-confidence NNA)))
     (stv (- 1 sNNA) cNNA)))
+
+; Name the rule
+(define pln-rule-not-simplification-name
+  (Node "pln-rule-not-simplification"))
+(DefineLink
+  pln-rule-not-simplification-name
+  pln-rule-not-simplification)

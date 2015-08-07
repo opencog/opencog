@@ -58,3 +58,7 @@
                 (< sCB 0.5)
                 (stv 1 0)
                 (stv 1 1)))))
+
+; Name the rule
+(define pln-rule-subset-evaluation-name (Node "pln-rule-subset-evaluation"))
+(DefineLink pln-rule-subset-evaluation-name pln-rule-subset-evaluation)
