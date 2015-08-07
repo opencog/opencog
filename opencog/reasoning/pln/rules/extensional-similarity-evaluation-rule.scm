@@ -58,3 +58,9 @@
                 (and (>= sCA 0.5) (>= sCB 0.5))
                 (stv 1 1)
                 (stv 0 1)))))
+
+; Name the rule
+(define pln-rule-extensional-similarity-evaluation-name
+  (Node "pln-rule-extensional-similarity-evaluation"))
+(DefineLink pln-rule-extensional-similarity-evaluation-name
+  pln-rule-extensional-similarity-evaluation)

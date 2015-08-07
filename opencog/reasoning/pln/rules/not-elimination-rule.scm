@@ -32,3 +32,7 @@
       ((sNA (cog-stv-strength NA))
        (cNA (cog-stv-confidence NA)))
     (stv (- 1 sNA) cAB )))
+
+; Name the rule
+(define pln-rule-not-elimination-name (Node "pln-rule-not-elimination"))
+(DefineLink pln-rule-not-elimination-name pln-rule-not-elimination)

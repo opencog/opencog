@@ -60,3 +60,7 @@
 
 (define (pln-formula-implication-and-side-effect-free ACD AB BCD)
     (stv 1 1))
+
+; Name the rule
+(define pln-rule-implication-and-name (Node "pln-rule-implication-and"))
+(DefineLink pln-rule-implication-and-name pln-rule-implication-and)

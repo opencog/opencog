@@ -55,3 +55,7 @@
 ; TODO: Complete this formulas by adding P(NOT(A) implies B)
 
 ; =============================================================================
+
+; Name the rule
+(define pln-rule-modus-ponens-name (Node "pln-rule-modus-ponens"))
+(DefineLink pln-rule-modus-ponens-name pln-rule-modus-ponens)

@@ -59,3 +59,10 @@
             (stv 0 (min cAB cBA))
             (stv (- sAB sBA) (min cAB cBA)))))
 
+
+; Name the rule
+(define pln-rule-ontological-inheritance-name
+  (Node "pln-rule-ontological-inheritance"))
+(DefineLink
+  pln-rule-ontological-inheritance-name
+  pln-rule-ontological-inheritance)

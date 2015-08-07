@@ -40,3 +40,10 @@
 (define (pln-formula-equivalence-transofrmation AII EV)
     (cog-set-tv!
         AII (cog-tv EV)))
+
+; Name the rule
+(define pln-rule-equivalence-transformation-name
+  (Node "pln-rule-equivalence-transformation"))
+(DefineLink
+  pln-rule-equivalence-transformation-name
+  pln-rule-equivalence-transformation)

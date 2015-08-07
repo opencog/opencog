@@ -37,3 +37,7 @@
        (cA (cog-stv-confidence A))
        (cB (cog-stv-confidence B)))
     (stv (- (+ sA sB) (* sA sB)) (min cA cB))))
+
+; Name the rule
+(define pln-rule-or-name (Node "pln-rule-or"))
+(DefineLink pln-rule-or-name pln-rule-or)

@@ -235,3 +235,22 @@
 ;		'())) 
 
 ; =============================================================================
+
+; Name the rule
+(define pln-rule-evaluation-to-member-0-name
+  (Node "pln-rule-evaluation-to-member-0"))
+(DefineLink
+  pln-rule-evaluation-to-member-0-name
+  pln-rule-evaluation-to-member-0)
+
+(define pln-rule-evaluation-to-member-1-name
+  (Node "pln-rule-evaluation-to-member-1"))
+(DefineLink
+  pln-rule-evaluation-to-member-1-name
+  pln-rule-evaluation-to-member-1)
+
+(define pln-rule-evaluation-to-member-2-name
+  (Node "pln-rule-evaluation-to-member-2"))
+(DefineLink
+  pln-rule-evaluation-to-member-2-name
+  pln-rule-evaluation-to-member-2)
