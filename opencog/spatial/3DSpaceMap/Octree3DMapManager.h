@@ -95,7 +95,7 @@ namespace opencog
             inline int getFloorHeight() const {return mFloorHeight;}
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}
-            void setAgentHeight(float _height){mAgentHeight = _height;}
+            void setAgentHeight(float _height){ mAgentHeight = _height;}
             inline unsigned getTotalDepthOfOctree() const {return mOctomapOctree->getTreeDepth();}
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
             // Note: logOdds(P)=log(P/(1-P))
@@ -119,10 +119,6 @@ namespace opencog
             //the updateLogOddsOccupancy will be added on the log odds occupancy of block to in/decrease the occupancy
             //probabilistic set occupancy
             void setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy);
-            //binary query operation
-            bool checkIsSolid(const BlockVector& pos) const;
-            //probabilistic query operation
-            bool checkIsSolid(const BlockVector& pos, float logOddsOccupancy) const;
 
             // check whether people can stand on this position or not, 
             // which means there is no obstacle or block here
@@ -280,7 +276,6 @@ namespace opencog
             float           mAgentHeight;
             int             mTotalUnitBlockNum;
             Handle          selfAgentEntity;
-
             // We keep the map for quick search position. 
             //Memory consuming: 50k blocks take about 10M RAM for one map
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;

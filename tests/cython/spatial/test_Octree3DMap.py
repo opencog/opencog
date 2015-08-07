@@ -34,13 +34,11 @@ class TestMap(unittest.TestCase):
         self.testmap.add_solid_unit_block(test_handle1, test_pos1)
         test_handle2 = self.testmap.get_block(test_pos1)
         self.assertEqual(test_handle1, test_handle2)
-        self.assertTrue(self.testmap.check_is_solid(test_pos1))
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1))
 
         self.testmap.remove_solid_unit_block(test_handle1)
         test_handle3 = self.testmap.get_block(test_pos1)
         self.assertTrue(test_handle3.is_undefined())
-        self.assertFalse(self.testmap.check_is_solid(test_pos1))
         self.assertIsNone(self.testmap.get_block_location(test_handle1))
 
     def testAddSolidUnitBlock__PositionOverBorder__GetBlockFailed(self):
@@ -60,14 +58,9 @@ class TestMap(unittest.TestCase):
 
         self.testmap.set_unit_block(test_handle1, test_pos1, log_odds_threshold)
 
-        #test binary get_block
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1))
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1, log_odds_threshold))
-        self.assertTrue(self.testmap.check_is_solid(test_pos1))
-        # test prob check_is_solid
-        self.assertTrue(self.testmap.check_is_solid(test_pos1, log_odds_threshold))
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1))
-        #test get_block_location
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1,
                                                                     log_odds_threshold))
 
@@ -76,8 +69,6 @@ class TestMap(unittest.TestCase):
 
         self.assertTrue(self.testmap.get_block(test_pos1).is_undefined())
         self.assertTrue(self.testmap.get_block(test_pos1, log_odds_threshold).is_undefined())
-        self.assertFalse(self.testmap.check_is_solid(test_pos1))
-        self.assertFalse(self.testmap.check_is_solid(test_pos1, log_odds_threshold))
         self.assertIsNone(self.testmap.get_block_location(test_handle1))
         self.assertIsNone(self.testmap.get_block_location(test_handle1,log_odds_threshold))
 
@@ -87,8 +78,6 @@ class TestMap(unittest.TestCase):
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1))
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1, log_odds_threshold))
 
-        self.assertTrue(self.testmap.check_is_solid(test_pos1))
-        self.assertTrue(self.testmap.check_is_solid(test_pos1, log_odds_threshold))
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1))
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1,
                                                                     log_odds_threshold))

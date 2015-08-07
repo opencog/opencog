@@ -213,21 +213,24 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
             if (i != 0)
             {
                 BlockVector neighbour1(lastPos.x + i,lastPos.y,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour1))
+                Handle neighbourblock1 = mapManager->getBlock(neighbour1);
+                if ( neighbourblock1 != Handle::UNDEFINED)
                     return false;
             }
 
             if (j != 0)
             {
                 BlockVector neighbour2(lastPos.x,lastPos.y + j,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour2))
+                Handle neighbourblock2 = mapManager->getBlock(neighbour2);
+                if ( neighbourblock2 != Handle::UNDEFINED)
                     return false;
             }
 
             if ( (i != 0) && (j != 0))
             {
                 BlockVector neighbour3(lastPos.x + i,lastPos.y + j,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour3))
+                Handle neighbourblock3 = mapManager->getBlock(neighbour3);
+                if ( neighbourblock3 != Handle::UNDEFINED)
                     return false;
             }
         }
@@ -244,7 +247,8 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
     //    FBG
     if (k == 1) // if  want to access higer position
     {
-        if (mapManager->checkIsSolid(BlockVector(lastPos.x,lastPos.y,lastPos.z + 1))) // if the block on top is solid
+        Handle block = mapManager->getBlock(BlockVector(lastPos.x,lastPos.y,lastPos.z + 1));
+        if ( block != Handle::UNDEFINED)
             return false;
     }
 
@@ -254,17 +258,18 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
         for (int h = 0; h < mapManager->getAgentHeight(); h++)
         {
             BlockVector neighbour1(lastPos.x + i,lastPos.y,lastPos.z + h + k );
-            if (mapManager->checkIsSolid(neighbour1))
+            Handle neighbourblock1 = mapManager->getBlock(neighbour1);
+            if ( neighbourblock1 != Handle::UNDEFINED)
                 return false;
 
             BlockVector neighbour2(lastPos.x,lastPos.y + j,lastPos.z + h + k );
-            if (mapManager->checkIsSolid(neighbour2))
+            Handle neighbourblock2 = mapManager->getBlock(neighbour2);
+            if ( neighbourblock2 != Handle::UNDEFINED) 
                 return false;
         }
 
         return true;
     }
-
 
     return true;
 }

@@ -76,13 +76,6 @@ cdef class Octree3DMapManager:
         self.c_octree_map.setUnitBlock(deref((<Handle>handle).h), c_pos,
                                        update_log_odds_occupancy)
 
-    def check_is_solid(self, pos, log_odds_occupancy = None):
-        assert len(pos) == 3
-        cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        if log_odds_occupancy is None:
-            log_odds_occupancy = self.c_octree_map.getLogOddsOccupiedThreshold()
-        return self.c_octree_map.checkIsSolid(c_pos, log_odds_occupancy)
-
     def check_standable(self, pos, log_odds_occupancy = None):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])

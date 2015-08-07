@@ -41,15 +41,16 @@ using namespace opencog::spatial;
 
 Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& mapName,const unsigned& resolution, const int floorHeight, const float agentHeight):
     mAtomSpace(atomspace), mMapName(mapName), mFloorHeight(floorHeight), mAgentHeight(agentHeight)
-{	
+{   
+
     mOctomapOctree = new OctomapOcTree(resolution);
     mAllUnitAtomsToBlocksMap.clear();
     mAllNoneBlockEntities.clear();
     mPosToNoneBlockEntityMap.clear();
     nonBlockEntitieshistoryLocations.clear();
-    hasPerceptedMoreThanOneTimes = false;
 
     selfAgentEntity = Handle::UNDEFINED;
+    hasPerceptedMoreThanOneTimes = false;
     enable_BlockEntity_Segmentation = false;
 
     /*
@@ -167,7 +168,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
     }
 
     BlockVector pos = it->second;
-    addSolidUnitBlock(Handle::UNDEFINED,pos);
+    addSolidUnitBlock(Handle::UNDEFINED, pos);
 }
 
 /*
@@ -260,18 +261,6 @@ void Octree3DMapManager::setUnitBlock(const Handle& _unitBlockAtom, BlockVector 
         mAllUnitAtomsToBlocksMap.erase(oldBlock);		
     }
     mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
-}
-
-bool Octree3DMapManager::checkIsSolid(const BlockVector& pos) const
-{
-    Handle blockHandle = mOctomapOctree->getBlock(pos);
-    return (blockHandle != Handle::UNDEFINED);
-}
-
-bool Octree3DMapManager::checkIsSolid(const BlockVector& pos, float logOddsOccupancy) const
-{
-    Handle blockHandle = mOctomapOctree->getBlock(pos,logOddsOccupancy);
-    return (blockHandle != Handle::UNDEFINED);
 }
 
 bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
