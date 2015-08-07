@@ -97,12 +97,118 @@ Easier said than done.
 \end_layout
 
 \begin_layout Subsection*
-Notes on Mutual Information
+Notes on Lexical Attraction, Mutual Information
 \end_layout
 
 \begin_layout Standard
+The goal here is to clarify some of the formulas used by Deniz Yuret in
+ his PhD thesis 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Discovery of Linguistic Relations Using Lexical Attraction
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, MIT 1998 (http://www2.denizyuret.com/pub/yuretphd.pdf).
+ These formulas are vitally important, because they provide a strong tool
+ when working with text; this has been shown by Yuret in his thesis, as
+ well as by many others, as well as by my own practical exprience with using
+ them.
+\end_layout
+
+\begin_layout Standard
+Possibly the most useful formula is the one in the middle off page 40.
+ By the time that we get to it, the terms 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+ are being used interchangably.
+ This formula states the 
+\begin_inset Formula $MI(x,y)$
+\end_inset
+
+ for two words 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+; yet it is manifestly not symmetric in 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+, since 
+\begin_inset Formula $x$
+\end_inset
+
+ is the word on the left, and 
+\begin_inset Formula $y$
+\end_inset
+
+ is the word on the right.
+ By constrast, textbook (wikipedia) definitions of MI are symmetric in thier
+ variables.
+ Below I try to dis-entangle the resulting confusion a bit, and give a more
+ correct derivation of the formula.
+ The key is to observe that the formula contains an implicit pair-wise relations
+hip between two words.
+ If this implicit relationship is made explicit, then the confusion evaporates.
+ It also opens the door to talking about the MI of more complex relationships,
+ not just pair-wise ones.
+ 
+\end_layout
+
+\begin_layout Standard
+Being able to correctly write down the MI for complex relationships is important
+ for NLP: relationstionships can be labelled by types (subject, object)
+ and by word classes (noun, verb), and have various dependency constraints
+ between them.
+ Thus, we need to be able to talk both about a labelled directed graph,
+ and the entropy or mutual information contained in it's various sub-graphs.
+\end_layout
+
+\begin_layout Standard
+In defense of Yuret, he does say, on page 22, that 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction is the likelihood of a syntactic relation.
+\begin_inset Quotes erd
+\end_inset
+
+ However, the relation starts becoming implicit by eqn 12 on page 29.
+\end_layout
+
+\begin_layout Subsubsection*
 Definitions.
- Let 
+ 
+\end_layout
+
+\begin_layout Standard
+Let 
 \begin_inset Formula $P(R(w_{l},w_{r}))$
 \end_inset
 
@@ -119,7 +225,11 @@ Definitions.
 \end_inset
 
 .
- Typically, its a (link-grammar) linkage of type 
+ Typically, 
+\begin_inset Formula $R$
+\end_inset
+
+ can be a (link-grammar) linkage of type 
 \begin_inset Formula $t$
 \end_inset
 
@@ -131,7 +241,7 @@ Definitions.
 \begin_inset Formula $w_{r}$
 \end_inset
 
- on the right; however, 
+ on the right; however, for this discussion, 
 \begin_inset Formula $R$
 \end_inset
 
@@ -139,22 +249,45 @@ Definitions.
 \end_layout
 
 \begin_layout Standard
-The simplest model has only one type 
+The simplest dependency grammar language model has only one type 
 \begin_inset Formula $t$
 \end_inset
 
-, the ANY type, and assigns equal probabilities to all words.
- But we know all words are not equi-probable, so let 
-\begin_inset Formula $P(w)$
+, the ANY type.
+ This is the type that Yuret uses: it makes no distinction at all between
+ subject, object relations (i.e.
+ the depdencies are unlabelled), and it does not make a head-dependent distincti
+on (all dependencies are bi-directional).
+ Thus, in what follows, we do the same: initially, the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- be the probability of observing word 
-\begin_inset Formula $w$
+ is simply the statement that the words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ are connected by an unlabelled, un-directed edge.
+ What 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ does capture is that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}$
 \end_inset
 
 .
- We know from experiece this is a Zipfian distribution.
- We are then interested in the conditional probability 
+\end_layout
+
+\begin_layout Standard
+We are then interested in the conditional probability 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
 \end_inset
 
@@ -170,7 +303,17 @@ The simplest model has only one type
 \begin_inset Formula $R=R(w_{l},w_{r})$
 \end_inset
 
-, given that the two individual words were observed.
+, given that the two individual words were observed (in no particular order).
+ Let 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ be the probability of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ (we know from experiece this is a Zipfian distribution; this does not matter
+ in what follows).
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
@@ -268,7 +411,8 @@ In practice, then, for word-pairs, one has that
 \begin_inset Formula $P(R|w_{l})$
 \end_inset
 
- is almost equal to 1, but not quite.
+ is almost equal to 1, but not quite (this is based on actual measurements
+ for English, and should hold true for most languages).
  Inserting this into the above gives 
 \begin_inset Formula 
 \[
@@ -286,7 +430,15 @@ Re-ordering this gives
 \end_inset
 
 The right hand side above is recognizable from Yuret's work; he defines
- the mutual information as 
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+ as 
 \begin_inset Formula 
 \begin{equation}
 \mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:Yuret's MI}
