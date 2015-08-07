@@ -200,6 +200,7 @@ lexical attraction is the likelihood of a syntactic relation.
 \end_inset
 
  However, the relation starts becoming implicit by eqn 12 on page 29.
+ An unexplained leap is then made from eqn 12 to the formula on page 40.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -446,21 +447,76 @@ lexical attraction
 
 \end_inset
 
-so that large positive MI is associated with words that occur together only
- with themselves (e.g.
+so that large positive MI is associated with words that rarely seen one
+ without the other (e.g.
  '
 \emph on
 Northern Ireland
 \emph default
-' from his examples.) So, on the right, we have that 
+' from his examples.) Note the absence of a minus sign in the above! See
+ below for an explanation.
+ Large-MI word pairs occur when 
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
- is usually very small, and that 
+ is roughly comparable to 
 \begin_inset Formula $P(w,*)\approx P(*,w)\approx P(w)$
 \end_inset
 
- subject to the inequality given before.
+.
+ 
+\end_layout
+
+\begin_layout Standard
+It is worth reviewing Yuret's example, at this point.
+ He looks at the word pair 'Northern Ireland' and states (based on a particular
+ corpus that was analyzed) that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Northern'})=12.60$
+\end_inset
+
+ and that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Ireland'})=14.65$
+\end_inset
+
+ and finally that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
+\end_inset
+
+.
+ What these numbers mean is that although either word alone occurs at a
+ rate of roughtly once in ten-thousand words, the word-pair together occurs
+ at the rate of one in thirty-thousand or so: the word pair occurs almost
+ as often as either word alone.
+ Thus, the resulting MI is very large: 
+\begin_inset Formula $\mbox{MI}=-16.13+12.60+14.65=11.12$
+\end_inset
+
+.
+ The choice of sign in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yuret's MI"
+
+\end_inset
+
+ is such that word that co-occur have a large positive value.
+ In practice, the distribution of the MI for word-pairs runs from about
+ -15 to about +35, and, when ranked accoring to MI, the probabilites form
+ a rounded mountain-peak, two-sided, each side being linear (Zipfian) with
+ the peak at about MI=4 or 6.
+ (See my other notes for a graph.)
+\end_layout
+
+\begin_layout Standard
+Observationally, we have  that 
+\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
+\end_inset
+
+, and thus must conclude that 
+\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+\end_inset
+
+ is 'large'; much larger than (unconditional) word-pair frequencies.
  
 \end_layout
 
@@ -472,25 +528,29 @@ reference "eq:basic pair"
 
 \end_inset
 
- is a stranger to me.
- First, we have observationally seen that 
-\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
+ is a stranger to me; I have not seen any version of it in the literature.
+ It is 'nicer' than Yuret's definition, because it is manifestly symmetric
+ in 
+\begin_inset Formula $w_{l}$
 \end_inset
 
-, and thus must conclude that 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+ and 
+\begin_inset Formula $w_{r}$
 \end_inset
 
- is 'large'; much larger than (unconditional) word-pair frequencies.
- Anyway, as an equation, its kind-of nicer, since it clearly isolates the
- role of the relation, since, by defintion, we have 
+; that is, 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
 \end_inset
 
- so that it functions like a real conditional probability, rather than this
- implicit-word-order thingy that Yuret uses.
- The Yuret notation is very convenient, but sometimes obscures things.
- OK, I think I'm done with that.
+ by construction.
+ This symmetry is essentialy for making contact with the 'standard' definitions
+ of MI, which are always provided in a symmetric fashion.
+ It also helps make clear the role of a relationship; the 'standard' definitions
+ of mutual information simply talk about the MI of two random variables,
+ without any reference to any information that we might already have about
+ them, namely, that they can be involved in different relationships with
+ respect to each other or with respect to an ambient environment.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
