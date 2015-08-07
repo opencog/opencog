@@ -369,7 +369,7 @@ universe
 \end_layout
 
 \begin_layout Section*
-Markov Nets, Parsing
+Markov Nets 
 \end_layout
 
 \begin_layout Standard
@@ -450,6 +450,75 @@ and then Amen threw the ball
  In this cae, we want to lower the probability of universe 'z1' to a very
  low value, while raising the probability of the universe 'z3' to a very
  high value (since 'z3' is the one where Amen has the ball).
+\end_layout
+
+\begin_layout Standard
+This implies that the distribution of probabilites between these 
+\begin_inset Quotes eld
+\end_inset
+
+aternate universes
+\begin_inset Quotes erd
+\end_inset
+
+ must be Markovian.
+ If the intial probability of the univers 'x' is 100%, then the sume of
+ the probabilities on 'y1' and 'y2' must also be 100%, and likewise, the
+ sume of 'z1', 'z2' and 'z3' must sum to 100%.
+ (I am abusing the term 'Markovian' somewhat; the precise definition is
+ different, but for the current purposes, its OK.)
+\end_layout
+
+\begin_layout Section*
+Parsing, Learning.
+\end_layout
+
+\begin_layout Standard
+I don't think we are ready, yet, with the current state of the URE code
+ in OpenCog, to deal correctly with the learning of rules, but it is appropriate
+ to start a conversation.
+ So, in the above example, we assumed some a-priori probabilities: for the
+ first pass, of who has the ball, a 50-50 split was assumed.
+ The later rules, 'rc', 'rd' etc.
+ were also assumed to impart fixed a-priori probabilities.
+ 
+\end_layout
+
+\begin_layout Standard
+But what if, for some reason, we don't have the a-priori probabilities for
+ these 'state-transition' rules? If, instead, we know that we start in state
+ 'x' and we know with 100% probability that the real world finishes in state
+ 'z1', then there several algorithms for estimating the transition probabilites
+ in moving down the graph.
+ One of these is the forward-backward algorithm.
+ This tends to be cpu-time-consuming, so there is another, simplified but
+ sometimes less accurate one, the Viterbi algorithm.
+\end_layout
+
+\begin_layout Standard
+One reason that the a-priori probabilities are not known is because we are
+ attempting to learn the state-transition rules from scratch.
+ Thus, for example, we could generate some random rule 'rx', stick it in
+ the list of rules that the URE is applying, and watch it generate garbage
+ as a result.
+ Does this garbage actually correspond to observed reality, or is it indeed,
+ junk lacking predictive power? This can, in principle, be answered by applying
+ forward-backward, or Viterbi, to estimate the transition probability of
+ rule 'rx'.
+ If this probability is small or zero, then 'rx' is a useless or false rule.
+ If it is high, then 'rx' is a valuable 'rule of thumb' tha can be applied
+ during deduction; it should be kept and added to the rule-set.
+\end_layout
+
+\begin_layout Section*
+Details
+\end_layout
+
+\begin_layout Standard
+Much of what is talked about here should go onto wiki pages.
+ In particular, details and notation for a lot of this needs to be worked
+ out.
+ Right now, it was eaaier to create a PDF.
 \end_layout
 
 \begin_layout Section*
