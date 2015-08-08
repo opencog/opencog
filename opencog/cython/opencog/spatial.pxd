@@ -32,12 +32,16 @@ cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "op
         cBlockVector getKnownSpaceMinCoord()
         cBlockVector getKnownSpaceMaxCoord()
         cBlockVector getKnownSpaceDim()
+
         void addSolidUnitBlock(cHandle, cBlockVector)
         void removeSolidUnitBlock(cHandle)
         void setUnitBlock(cHandle, cBlockVector, float)
         cHandle getBlock(cBlockVector, float)
         cBlockVector getBlockLocation(cHandle, float)
         float getBlockLogOddsOccupancy(cBlockVector)
+        
+        bool checkStandable(cBlockVector,float)
+
         void addNoneBlockEntity(cHandle, cBlockVector, bool, bool, uint64_t)
         void removeNoneBlockEntity(cHandle)
         void updateNoneBlockEntityLocation(cHandle, cBlockVector, uint64_t)
