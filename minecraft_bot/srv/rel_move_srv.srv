@@ -1,0 +1,5 @@
+float32 yaw
+float32 dist
+bool jump
+---
+bool state

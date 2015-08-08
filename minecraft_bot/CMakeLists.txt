@@ -50,6 +50,7 @@ find_package(octomap
 add_message_files(
    FILES
    vec3_msg.msg
+   position_msg.msg
    movement_msg.msg
    mine_block_msg.msg
    place_block_msg.msg
@@ -72,6 +73,8 @@ add_message_files(
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
+   look_srv.srv
+   rel_move_srv.srv
    get_block_srv.srv
    get_block_multi_srv.srv
    visible_blocks_srv.srv
