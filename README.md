@@ -35,37 +35,70 @@ You also need a python API to connect with Minecraft server, the Spock:
 
 ####Spock https://github.com/SpockBotMC/SpockBot
 
-Besides the above package, I haven't pull all of my work in opencog side into the opencog master repository. 
-So you have to add these files in src/opencog/ as the following procedure:
+Besides the above package, I haven't pull all of my work in opencog side into the opencog master repository. So you have to add all the files in opencog/ manually.
 
-(2015-06-30)We are changing the TimeServer.* to make it enable to save multiple timedomain (ex.ROS time/Minecraft World time..) at the same time. That's not finished so don't put them into opencog/spacetime now.
+Because for now(2015-08-07) the SpaceMap breaks the old embodiment, so it will fail to build the whole opencog. To make this Minecraft embodiment work, we only need to build these libs:
 
-1.put the CMakeList,spacetime.pyx/pxd, spatial.pyx/pxd, in opencog/opencog/cython/opencog. These are the cython binding of Space/Time Server and SpaceMap.
+*cogserver
+*spacetime
+*spacetime-types
+*SpaceMap
+*spacetime-cython
+*spatial-cython
 
-2.put the Octree.h and Octree.cc in opencog/opencog/spatial/3DSpaceMap. It's a small fix for a bug in Octree.
+So, after adding files under your opencog directory, build it by following procedure (assume the working directory is opencog/):
 
-3.put the atom_types.script in opencog/opencog/spacetime. We add AtLocationLink in this file.
-
-4.build the opencog
+    mkdir build
+    cmake ..
+    cd build
+    cd opencog/server
+    make
+    cd ../spatial
+    make
+    cd ../spacetime
+    make
+    cd ../cython/opencog
+    make
 
 ##step to run##
 
 1. start roscore and Minecraft Server
 
-2. start cogserver, remember put the src/ path in the PYTHON_EXTENSION_DIRS variable in the opencog.conf so we can import those python file we need; Besides you have to execute cogserver under your opencog/build/ directory or the cogshell will fail to load the commands.
+2. start cogserver, remember put the minecraft_bot/src/ in the PYTHON_EXTENSION_DIRS variable in the lib/opencog.conf so we can import those python file we need; Besides you have to execute cogserver under your opencog/build/ directory or the cogshell will fail to load the commands.
 
 3. run 
 
-   `echo -e 'py\n' | cat - opencog_intializer.py | netcat localhost 17001` 
+   `echo -e 'py\n' | cat - opencog_initializer.py | netcat localhost 17001` 
 
 (Thanks to Linas' netcat module!)to start the ROS node and intialize perception manager in cogserver.
 
-4. Follow instructions in minecraft_bot to start ROS and initialize Spock.
+4. Follow instructions in minecraft_bot to start ROS nodes and initialize Spock.
 
-5. Then you can connect with cogserver by:
+5. Connect with cogserver by:
 
    `rlwrap telnet localhost 17001`
 
-Now you should see the block atoms in the cogserver. You can also check them by using pyshell/guile shell.
+6. For now(2015-08-07) you can use the py shell in cogserver to get visible block atoms manually by following python code:
 
+    #you have to input the position and look of bot
+    vis_block_srv_response = getVisBlocksFromSrv(x,y,z,yaw,pitch)
+    pm.processMapMessage(vis_block_srv_response.visible_blocks)
+
+7. Return to the cogshell, and use 
+   'list -a
+   You will see the visible block atoms and associated predicate nodes.
+
+##TODO##
+
+1. Use the idmap in minecraft_bot/src/embodiment-testing/ to replace the block id in perception manager. So we can have a useful atom name.
+
+2. Pass every message to Opencog with the ROS/Minecraft timestamp to record the timestamp in atomspace/TimeServer correctly.
+
+3. Make Opencog get visible block automatically. Not sure if it's better to use a MindAgent which updates block info in each cycle or just use a loop.
+
+4. Make a [behavior tree](http://wiki.opencog.org/w/Behavior_tree) to test the pipeline from perception to action. 
+
+5. add a void block handle in SpaceMap to distinguish the "unknown" block and the "air" block. (For example, if we only use Handle::UNDEFINED to express all non-void block, what does it mean when we get a undefined handle from spaceMap::get_block(position)? Does it mean (1) we've known there's no block in this position? or (2) we haven't record block in this position and we don't know if there's a block in the embodied environment?) To distinguish it, I guess it's better to use different block handle to distinguish void and unknown block.
+
+6. write a script for starting all of the things(ROS nodes/Spock/cogserver/Minecraft server)
 

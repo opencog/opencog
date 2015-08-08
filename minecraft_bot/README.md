@@ -9,10 +9,11 @@ The catkin (ROS) package for running the Minecraft bot
 
 2. Run catkin_make
 
-3. Start mapnode.py. It will start a ROS node to receive primary blocks messages, save them and send block information to opencog. So far we just send the whole world to opencog. And in the future we will add more information(Entity/players...) and visibility calculation in the ROS node.
+3. Start embodiment-testing/visnode.py. It will start a ROS node to calculate what's visible for the bot and provide ROS service for Opencog. Opencog can use the service to get visible blocks. It needs the mapnode.py to get blocks in calculation.
+
+3. Start embodiment-testing/mapnode3.py. It will start a ROS node to receive primary blocks messages, save them and provide block information service for visnode.py.
 
 4. Start any of the testbot.py files to initialize the Spock bot and test custom plugins. It will start Spock and a ROS node (SpockControl.py). This node will only be responsible for receiving Minecraft packets and sending raw environment data to the map node.
-
 
 All source for our custom SpockBot plugins are in spockextras/plugins/helpers. ROS nodes are all in this directory.
 
