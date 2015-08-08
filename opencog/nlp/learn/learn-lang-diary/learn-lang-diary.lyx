@@ -97,7 +97,7 @@ Easier said than done.
 \end_layout
 
 \begin_layout Subsection*
-Notes on Lexical Attraction, Mutual Information
+Lexical Attraction, Mutual Information, Interaction Information
 \end_layout
 
 \begin_layout Standard
@@ -174,18 +174,19 @@ lexical attraction
  Below I try to dis-entangle the resulting confusion a bit, and give a more
  correct derivation of the formula.
  The key is to observe that the formula contains an implicit pair-wise relations
-hip between two words.
+hip between two words, and that there are actually three variables: two
+ words, and thier relationship.
  If this implicit relationship is made explicit, then the confusion evaporates.
- It also opens the door to talking about the MI of more complex relationships,
- not just pair-wise ones.
+ It also opens the door to talking about the MI (or interaction information
+ II) of more complex relationships, not just pair-wise ones.
  
 \end_layout
 
 \begin_layout Standard
-Being able to correctly write down the MI for complex relationships is important
- for NLP: relationstionships can be labelled by types (subject, object)
- and by word classes (noun, verb), and have various dependency constraints
- between them.
+Being able to correctly write down the MI and the II for complex relationships
+ is important for NLP: relationstionships can be labelled by types (subject,
+ object) and by word classes (noun, verb), and have various dependency constrain
+ts between them.
  Thus, we need to be able to talk both about a labelled directed graph,
  and the entropy or mutual information contained in it's various sub-graphs.
 \end_layout
@@ -201,6 +202,7 @@ lexical attraction is the likelihood of a syntactic relation.
 
  However, the relation starts becoming implicit by eqn 12 on page 29.
  An unexplained leap is then made from eqn 12 to the formula on page 40.
+ The below gets fairly pedantic; this seems unavoidable to avoid confusion.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -242,11 +244,24 @@ Let
 \begin_inset Formula $w_{r}$
 \end_inset
 
- on the right; however, for this discussion, 
+ on the right; implicitly, both 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence.
+ The goal of this discussion is to enable relations 
 \begin_inset Formula $R$
 \end_inset
 
- can be more general than that.
+ that are more general; for now, though, 
+\begin_inset Formula $R$
+\end_inset
+
+ is a word-pair occuring in a single sentence.
 \end_layout
 
 \begin_layout Standard
@@ -304,7 +319,8 @@ We are then interested in the conditional probability
 \begin_inset Formula $R=R(w_{l},w_{r})$
 \end_inset
 
-, given that the two individual words were observed (in no particular order).
+, given that the two individual words were observed in a sentance (in no
+ particular order).
  Let 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -313,20 +329,21 @@ We are then interested in the conditional probability
 \begin_inset Formula $w$
 \end_inset
 
- (we know from experiece this is a Zipfian distribution; this does not matter
- in what follows).
+ in a sentance (with multiplicity).
+ We know from experiece this is a Zipfian distribution; this does not matter
+ in what follows.
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
-P(R)=P(R|w_{l},w_{r})P(w_{l})P(w_{r})
+P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
 \]
 
 \end_inset
 
-Or that 
+or that 
 \begin_inset Formula 
 \[
-P(R|w_{l},w_{r})=\frac{P(R)}{P(w_{l})P(w_{r})}
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l},w_{r})}
 \]
 
 \end_inset
@@ -338,6 +355,123 @@ Here, the relation
  encompasses several facts: that one word is to the left of the other, and
  that they are connected by a certain link-type, as well as capturing other
  'ambient' information, perhaps such as other nearby words.
+ The expression 
+\begin_inset Formula $P(R,w_{l},w_{r})$
+\end_inset
+
+ is the probability of observing both the words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ in a sentance, as well as observing that they are related as 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ in the sentence.
+ Clearly, 
+\begin_inset Formula $R$
+\end_inset
+
+ cannot occur if 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ don't, but the converse is not true: the words can appear in a sentence,
+ but fail to be related by 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ The probability 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is interesting, because it's definition is not enirely unambigous: we can
+ define it as the probability of observing both words in the same sentence,
+ or we can define it as the probability of observing both words, independently
+ of one-another.
+ This is a bit confusing, ansd is worth thinking about.
+ To observe two words in the same sentence, we could say that they obey
+ the relationship 
+\begin_inset Formula $S(w_{l},w_{r})$
+\end_inset
+
+ and so one must ponder the probability 
+\begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+.
+ But this is not what we want, in the end; we are interested in 
+\begin_inset Formula $R$
+\end_inset
+
+ and not 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ The relationship 
+\begin_inset Formula $R$
+\end_inset
+
+ includes 
+\begin_inset Formula $S$
+\end_inset
+
+ as a component: two words can only be related by 
+\begin_inset Formula $R$
+\end_inset
+
+ only if they are already related by 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ Thus, the only unambiguous definition for 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is that the two words really are un-related; i.e.
+ that we define that 
+\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
+\end_inset
+
+.
+ This is important: we don't 
+\begin_inset Quotes eld
+\end_inset
+
+assume
+\begin_inset Quotes erd
+\end_inset
+
+ independence, we define it.
+ The goal is to capture the dependence as a part of the relation 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ Thus, we conclude with the conditional probability:
+\begin_inset Formula 
+\[
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Notation
 \end_layout
 
 \begin_layout Standard
@@ -508,7 +642,7 @@ reference "eq:Yuret's MI"
 \end_layout
 
 \begin_layout Standard
-Observationally, we have  that 
+Observationally, we have that 
 \begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
 \end_inset
 
