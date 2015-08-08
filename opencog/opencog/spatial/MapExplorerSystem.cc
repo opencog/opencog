@@ -22,7 +22,6 @@
  */
 
 #include <opencog/spatial/MapExplorer.h>
-#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -43,14 +42,13 @@ MapExplorer::MapExplorer( Octree3DMapManager* map, unsigned int screenWidth,
              halfScreenWidth( screenWidth/2), halfScreenHeight(screenHeight/2),
              fullScreen( fullScreen ), running(false), screen(NULL), 
              leftRightDirection(0), upDownDirection(0),
+             cameraTranslation(-((map->xMax( )-map->xMin())/2+map->xMin()),
+                 -((map->yMax( )-map->yMin( ))/2+map->yMin()), -50 ),
+
              turbo(false), yRot(0), zRot(0),floorTextureCheckerId(0),
              floorTextureOccupancyId(0), floorTextureChecker(NULL), 
              floorTextureOccupancy(NULL),  service(NULL)
 {
-	BlockVector min=map->getKnownSpaceMinCoord();
-	BlockVector max=map->getKnownSpaceMaxCoord();
-	cameraTranslation=math::Vector3(-((max.x-min.x)/2+min.x),
-					  -((max.y-min.y)/2+min.y), -50 );
 
     if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) {
         throw opencog::RuntimeException( TRACE_INFO, "MapExplorer - Unable to "
@@ -219,17 +217,14 @@ bool MapExplorer::update( long elapsedTime )
         glColor4f( 1.0, 1.0, 1.0, 1.0 );
         // draw ground
         glBegin( GL_QUADS );
-		BlockVector min=map->getKnownSpaceMinCoord();
-		BlockVector max=map->getKnownSpaceMaxCoord();
-
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f( min.x, min.y, 0 ); // bottom left
-		glTexCoord2f(0.0, 1.0);
-		glVertex3f( max.x, min.y, 0 ); // bottom right
-		glTexCoord2f(1.0, 1.0);
-		glVertex3f( max.x, max.y, 0 ); // top right
-		glTexCoord2f(1.0, 0.0);
-		glVertex3f( min.x, max.y, 0 ); // top left        
+           glTexCoord2f(0.0, 0.0);
+           glVertex3f( map->xMin( ), map->yMin( ), 0 ); // bottom left
+           glTexCoord2f(0.0, 1.0);
+           glVertex3f( map->xMax( ), map->yMin( ), 0 ); // bottom right
+           glTexCoord2f(1.0, 1.0);
+           glVertex3f( map->xMax( ), map->yMax( ), 0 ); // top right
+           glTexCoord2f(1.0, 0.0);
+           glVertex3f( map->xMin( ), map->yMax( ), 0 ); // top left        
         glEnd( );
         glFlush();    
         glDisable( GL_TEXTURE_2D );
@@ -415,11 +410,10 @@ void MapExplorer::generateFloorTextures( void )
         delete [] this->floorTextureOccupancy;
     } // if
 
-	BlockVector dim=this->map->getKnownSpaceMinCoord();
     this->floorTextureChecker = 
-        new unsigned char[((unsigned)dim.x)*((unsigned)dim.y)*4];
+        new unsigned char[this->map->xDim( )*this->map->yDim( )*4];
     this->floorTextureOccupancy = 
-        new unsigned char[((unsigned)dim.x)*((unsigned)dim.y)*4];
+        new unsigned char[this->map->xDim( )*this->map->yDim( )*4];
     
     // create procedural textures of a checker and the occupancy grid to 
     // put on the ground
@@ -429,9 +423,9 @@ void MapExplorer::generateFloorTextures( void )
     bool colState = false;
     unsigned char* cursorChecker = floorTextureChecker;
     unsigned char* cursorOccupancy = floorTextureOccupancy;
-    for (i = 0; i < (unsigned int)dim.x; ++i) {
+    for (i = 0; i < (unsigned int)this->map->xDim( ); ++i) {
         rowState = (i%checkerGranularity) == 0 ? !rowState : rowState;
-        for (j = 0; j < (unsigned int)dim.y; ++j) {
+        for (j = 0; j < (unsigned int)this->map->yDim( ); ++j) {
             colState = (j%checkerGranularity) == 0 ? !colState : colState;                
             {
                 int c =  this->map->checkStandable( i, j ,z) ? 128 : 255;
@@ -462,8 +456,8 @@ void MapExplorer::generateFloorTextures( void )
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dim.x, 
-                     dim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->map->xDim( ), 
+                     this->map->yDim( ), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
                      floorTextureChecker );    
 
         glGenTextures( 1, &this->floorTextureOccupancyId );
@@ -473,8 +467,8 @@ void MapExplorer::generateFloorTextures( void )
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dim.x, 
-                     dim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->map->xDim( ), 
+                     this->map->yDim( ), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
                      floorTextureOccupancy );
 
         this->floorTextureId = occupancyActive ? floorTextureOccupancyId : floorTextureCheckerId;     

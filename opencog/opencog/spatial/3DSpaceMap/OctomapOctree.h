@@ -40,7 +40,6 @@
 #include <octomap/OccupancyOcTreeBase.h>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 
@@ -50,11 +49,11 @@ namespace opencog
 {
 	namespace spatial 
 	{
-  
+		  
 		class OctomapOcTreeNode : public OcTreeNode
 		{
 		public:
-    		OctomapOcTreeNode() : OcTreeNode(), mblockHandle(Handle::UNDEFINED){}
+		OctomapOcTreeNode() : OcTreeNode(), mblockHandle(Handle::UNDEFINED){}
 			OctomapOcTreeNode(const OctomapOcTreeNode& rhs);
 			~OctomapOcTreeNode(){}
 			OctomapOcTreeNode& operator=(const OctomapOcTreeNode& rhs);
@@ -75,9 +74,9 @@ namespace opencog
 				return true;
 			}
 
-			void setBlock(const Handle& blockHandle)
+			void setBlock(const Handle& block)
 			{
-				mblockHandle=blockHandle;
+				mblockHandle=block;
 			}
 
 			const Handle getBlock() const
@@ -110,24 +109,44 @@ namespace opencog
 			std::string getTreeType() const {return "OctomapOcTree";}
    
 			// set node color at given key or coordinate. Replaces previous color.
-			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& blockHandle);
-			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& blockHandle); 
-			OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & blockHandle);
+			OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
+			OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block); 
+			OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & block);
 
-			// Move the Opencog Octree legacy API here
-			void addSolidBlock(const Handle& blockHandle);
-			//  Remove an unit block at a given position from the octree system
-			//  return false if block not exists.
-			bool removeAnUnitSolidBlock(const BlockVector& pos, unsigned depth=0);
+
+			// If you want to express binary adding/removing block, use this.
+			void setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied);
+			// add logOddsOccupancyUpdate value to the block log odds value
+			// and set the block handle in pos
+			// Note that you can control the threshold of log odds occupancy by
+			// OctomapOcTree::setOccupancyThres
+			void setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate);
+			
 			//  check if the block is out of octree's max size
 			bool checkIsOutOfRange(const BlockVector& pos) const;
-			
-			// Check whether this position has been filled by a solid block,
-			// Note that if the block is in the unknown space it'll also return false
-			// pos is input para, block is output para
-			// if solid, return the block in @ block
-			bool checkIsSolid(const BlockVector& pos, Handle& block) const;
 
+			//  use prob_hit_log(see octomap doc) as threshold
+			Handle getBlock(const BlockVector& pos) const;			
+			//  get block in pos. If occupancy(log odds) larger than threshold
+			//  It will return the block (including undefined handle) in pos; 
+			//  If smaller than threshold, it'll return Handle::UNDEFINED
+			//  default threshold is the prob_hit_log which is the default 
+			//  octomap log odds threshold.
+			Handle getBlock(const BlockVector& pos, const float logOddsThreshold) const;
+			//  use prob_hit_log(see octomap doc) as threshold
+			bool checkBlockInPos(const Handle& block, const BlockVector& pos) const;
+			//  check the block is in the position,
+			//  Noth that even there's a block in that pos, 
+			//  if the handle is not equal it still return false.
+			bool checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsThreshold) const;
+
+
+/*
+// Comment on 20150713 by Yi-Shan,
+// The following is old public functions about BlockEntity add/remove/query
+// Because the BlockEntity feature has not designed well, 
+// so we comment out all the code related to BlockEntity
+// Once we need to use it/decide to do it, maybe we'll need the legacy code.
 
 			// find all the blocks combine with the block in pos,
 			// the return list does not contain the block in this pos
@@ -136,14 +155,14 @@ namespace opencog
 			// get all the existing BlockEntities will combined by this block (if add a block in this pos)
 			// calculate all the 26 neighbours
 			vector<BlockEntity*> getNeighbourEntities(BlockVector& pos);
-		
+			
 			// get any a Neighbour Solid BlockVector of curPos
 			// the neighbourBlock will return the block contains this neighbour BlockVector
 			BlockVector getNeighbourSolidBlockVector(const BlockVector& pos ,Handle& neighbourBlock);
 
 			// return all the neighbour sold BlockVector of curPos
 			vector<BlockVector> getAllNeighbourSolidBlockVectors(BlockVector& pos);
-    
+*/    
 		protected:
 
 			/**
@@ -158,7 +177,7 @@ namespace opencog
 				}
 			};
 			// static member to ensure static initialization (only once)
-			static StaticMemberInitializer colorOcTreeMemberInit;
+			static StaticMemberInitializer octomapOcTreeMemberInit;
 		};
 
 	} // end namespace
