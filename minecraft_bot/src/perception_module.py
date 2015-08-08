@@ -3,8 +3,14 @@
 from opencog.atomspace import AtomSpace,Handle,TruthValue,types,get_refreshed_types
 from opencog.spacetime import SpaceServer,TimeServer
 #update spacetime types imported
-types=get_refreshed_types()
+types = get_refreshed_types()
 from atomspace_util import addPredicate,addLocation
+
+default_map_timestamp = 0
+default_map_name = "MCmap"
+default_map_resolution = 1
+default_map_agent_height = 1
+default_map_floor_height = -255
 
 class PerceptionManager:
 
@@ -13,20 +19,19 @@ class PerceptionManager:
         self._spaceserver = spaceserver
         self._timeserver = timeserver
 
-        #TODO:For now the border of map is defined by Brad's flat world size,from(x,z)=(-100,-100) to (0,0)
-        #But actually it should receive these borders argument from ROS to initialize the SpaceMap
-        self._spaceserver.addMap(123456,"MCWorld",
-                                 -100,-100,-100,
-                                 200,200,200,-100)
+        #TODO: we should receive map initialization info from ROS node.
+        self._spaceserver.add_map(default_map_timestamp, default_map_name, default_map_resolution, default_map_agent_height, default_map_floor_height)
 
-    def buildBlockNodes(self,block,maphandle):
+    def build_block_nodes(self,block,maphandle):
 
-        #hack to make static object No. variable in class method
-        if not hasattr(self.buildBlockNodes.__func__,"objNo"):
-            self.buildBlockNodes.__func__.objNo=0            
-        #Note: in 3DSpaceMap using structure node to represent block.
-        objnode=self._atomspace.add_node(types.StructureNode,"obj%s"%(self.buildBlockNodes.__func__.objNo))
-        self.buildBlockNodes.__func__.objNo+=1
+        # hack to make static object No. variable in class method
+        if not hasattr(self.build_block_nodes.__func__,"objNo"):
+            self.build_block_nodes.__func__.objNo=0
+        # Note: in 3DSpaceMap using structure node to represent block,
+        # entity node to represent entity
+
+        objnode=self._atomspace.add_node(types.StructureNode,"obj%s"%(self.build_block_nodes.__func__.objNo))
+        self.build_block_nodes.__func__.objNo+=1
         updatedevallinks=[]
 
         locationlink=addLocation(self._atomspace,objnode,maphandle,
@@ -63,8 +68,8 @@ class PerceptionManager:
         heightnode=self._atomspace.add_node(types.NumberNode,str(entity.height))
         sizelink=addPredicate(self._atomspace,"size",
                               [entitynode,
-                               lengthnode,widthnode,heightnode])               
-        updatedevallinks.append(sizelink)        
+                               lengthnode,widthnode,heightnode])
+        updatedevallinks.append(sizelink)
 
         v_xnode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_x))
         v_ynode=self._atomspace.add_node(types.NumberNode,str(entity.velocity_y))
@@ -77,7 +82,7 @@ class PerceptionManager:
         return entitynode,updatedevallinks
 
     def updateEntityNode(self,entitynode,entity,maphandle):
-        
+
         updatedevallinks=[]
 
         locationlink=addLocation(self._atomspace,entitynode,maphandle,
@@ -98,133 +103,107 @@ class PerceptionManager:
                                    v_xnode,v_ynode,v_znode])
         updatedevallinks.append(velocitylink)
 
-                
         return updatedevallinks
-        
-
-    def processANewWorld(self,data):
-        #TODO:For now the border of map is defined by Brad's flat world size,from(x,z)=(-100,-100) to (0,0)
-        #But actually it should receive these borders argument from ROS to initialize the SpaceMap
-        self._spaceserver.addMap(data.timestamp,"MCWorld",
-                                 -100,-100,-100,
-                                 100,100,100,-100)
 
     def processBlockMessage(self,block):
-            #TODO:the unit measurement of timestamp in game is per sec
-    #Need a more accurate timestamp
-    #->ROS node will send two time:one is time in game world and one is time in ROS timer
+
         try:
-            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,block.scene)[0]).h
+            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,default_map_name)[0]).h
         except IndexError:
-            return 
-        
-        curscenemap=self._spaceserver.getMap(maphandle)        
-        blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
-        #Check if it's undefined, note that we don't use the is_undefined()
-        #see the bug info in spacetime.pyx
-        if blockhandle.value() != -1:
-            blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
-            if blockinfo.getMaterial()==str(block.blockid):
-                return
-            else:
-                print blockinfo.getMaterial(),str(block.blockid)
-                print (block.x,block.y,block.z)
-                self._spaceserver.removeMapInfo(blockhandle,maphandle,block.ROStimestamp)
-                #TODO: add a predicate to mark block is disappeared->This predicate should be added later in PredicateUpdater
-        if block.blockid==0:
             return
-        blocknode,updatedatoms=self.buildBlockNodes(block,maphandle)
-        self._spaceserver.addMapInfo(blocknode.h,maphandle,False,block.ROStimestamp,
-                                     block.x,block.y,block.z,
-                                     1,1,1,0,
-                                     'block',blocknode.name,str(block.blockid))
-        self._timeserver.addTimeInfo(blocknode.h,block.ROStimestamp,TruthValue(1.0,1.0e35),"ROStimestamp")
-        self._timeserver.addTimeInfo(blocknode.h,block.MCtimestamp,TruthValue(1.0,1.0e35),"MCtimestamp")
+
+        curscenemap=self._spaceserver.get_map(maphandle)
+        old_block_handle=curscenemap.get_block(block.x,block.y,block.z)
+        updatedatoms = []
+        if block.blockid != 0:
+            blocknode,updatedatoms = self.build_block_nodes(block,maphandle)
+        else:
+            blocknode = Handle(-1)
+        self._spaceserver.add_map_info(blocknode.h,maphandle,False, False,
+                                       block.ROStimestamp,
+                                       block.x,block.y,block.z)
+        # ROS node will send two time:one is time in game world and one is time in ROS timer
+        self._timeserver.add_time_info(blocknode.h, block.ROStimestamp, "ROS")
+        self._timeserver.add_time_info(blocknode.h, block.MCtimestamp, "MC")
         for link in updatedatoms:
-            self._timeserver.addTimeInfo(link.h,block.ROStimestamp,TruthValue(1.0,1.0e35),"ROStimestamp")
-            self._timeserver.addTimeInfo(link.h,block.MCtimestamp,TruthValue(1.0,1.0e35),"MCtimestamp")
+            self._timeserver.add_time_info(link.h, block.ROStimestamp, "ROS")
+            self._timeserver.add_time_info(link.h, block.MCtimestamp, "MC")
 
     def processMapMessage(self,data):
-        
-    #TODO:the unit measurement of timestamp in game is per sec
-    #Need a more accurate timestamp
-    #->ROS node will send two time:one is time in game world and one is time in ROS timer
+
         try:
-            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,data.scene)[0]).h
-        except IndexError:
-            return 
-
-        curscenemap=self._spaceserver.getMap(maphandle)
-        for block in data.blocks:
-            blockhandle=curscenemap.getUnitBlockHandleFromLocation((block.x,block.y,block.z))
-            #Check if it's undefined, note that we don't use the is_undefined()
-            #see the bug info in spacetime.pyx
-            if blockhandle.value() != -1:
-                blockinfo=curscenemap.getBlockAtLocation((block.x,block.y,block.z))
-                if blockinfo.getMaterial()==str(block.blockid):
-                    continue
-                else:
-                    self._spaceserver.removeMapInfo(blockhandle,maphandle,data.timestamp)
-                    #TODO: add a predicate to mark block is disappeared->This predicate should be added later in PredicateUpdater
-
-            blocknode,updatedatoms=self.buildBlockNodes(block,maphandle)
-            self._spaceserver.addMapInfo(blocknode.h,maphandle,False,data.timestamp,
-                                         block.x,block.y,block.z,
-                                         1,1,1,0,
-                                         'block',blocknode.name,str(block.blockid))
-            self._timeserver.addTimeInfo(blocknode.h,data.timestamp)
-            for link in updatedatoms:
-                self._timeserver.addTimeInfo(link.h,data.timestamp)
-
-    def processMobMessage(self,data):
-        
-        try:
-            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,data.scene)[0]).h
+            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,default_map_name)[0]).h
         except IndexError:
             return
 
-        curscenemap=self._spaceserver.getMap(maphandle)
+        curscenemap=self._spaceserver.get_map(maphandle)
+
+        for block in data:
+            old_block_handle=curscenemap.get_block((block.x,block.y,block.z))
+            updatedatoms = []
+            if block.blockid != 0:
+                blocknode,updatedatoms = self.build_block_nodes(block,maphandle)
+            else:
+                blocknode = Handle(-1)
+            self._spaceserver.add_map_info(blocknode.h,maphandle,False, False,
+                                           block.ROStimestamp,
+                                           block.x,block.y,block.z)
+            # ROS node will send two time:one is time in game world and one is time in ROS timer
+            self._timeserver.add_time_info(blocknode.h,block.ROStimestamp, "ROS")
+            self._timeserver.add_time_info(blocknode.h,block.MCtimestamp, "MC")
+            for link in updatedatoms:
+                self._timeserver.add_time_info(link.h,block.ROStimestamp, "ROS")
+                self._timeserver.add_time_info(link.h,block.MCtimestamp, "MC")
+
+    def processMobMessage(self,data):
+
+        try:
+            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,default_map_name)[0]).h
+        except IndexError:
+            return
+
+        curscenemap=self._spaceserver.get_map(maphandle)
 
         for mob in data.mobs:
-        
+
             try:
                 mobnode=(self._atomspace.get_atoms_by_name(types.ObjectNode,str(mob.eid))[0])
                 allupdatedatoms=self.updateEntityNode(mobnode,mob,maphandle)
             except IndexError:
                 mobnode,allupdatedatoms=self.buildEntityNode(mob,maphandle)
-                self._timeserver.addTimeInfo(mobnode.h,data.timestamp)            
-            self._spaceserver.addMapInfo(mobnode.h,maphandle,False,data.timestamp,
+                self._timeserver.add_time_info(mobnode.h,data.timestamp)
+            self._spaceserver.add_map_info(mobnode.h,maphandle,False,data.timestamp,
                                        mob.x,mob.y,mob.z,
                                        mob.length,mob.width,mob.height,mob.head_yaw,
                                        'mob',mobnode.name,str(mob.mob_type))
             for atom in allupdatedatoms:
-                self._timeserver.addTimeInfo(atom.h,data.timestamp)
+                self._timeserver.add_time_info(atom.h,data.timestamp)
 
 
     """
     def processPlayerPosMessage(self,data):
-    
+
         try:
-            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,data.scene)[0]).h
+            maphandle=(self._atomspace.get_atoms_by_name(types.SpaceMapNode,default_map_name)[0]).h
         except IndexError:
             return
-            
-        curscenemap=self._spaceserver.getMap(maphandle)
-        
+
+        curscenemap=self._spaceserver.get_map(maphandle)
+
         try:
             playernode=self._atomspace.get_atoms_by_name(types.ObjectNode,"myself")[0]
             allupdatedatoms=self.updatePlayerNode(playernode,data,maphandle)
-            self._timeserver.addTimeInfo(atlocationlink.h,data.timestamp)
+            self._timeserver.add_time_info(atlocationlink.h,data.timestamp)
 
         except IndexError:
             playernode,allupdatedatoms=self.buildPlayerNode(data,maphandle)
-            self._timeserver.addTimeInfo(playernode.h,data.timestamp)            
-        self._spaceserver.addMapInfo(playernode.h,maphandle,True,data.timestamp,
+            self._timeserver.add_time_info(playernode.h,data.timestamp)
+        self._spaceserver.add_map_info(playernode.h,maphandle,True,data.timestamp,
                           data.x,data.y,data.z,
                           data.length,data.width,data.height,data.yaw,
                           'player',"myself","player")
         for atom in allupdatedatoms:
-            self._timeserver.addTimeInfo(atom.h,data.timestamp)
+            self._timeserver.add_time_info(atom.h,data.timestamp)
     """
 
 #    def remove(self):
