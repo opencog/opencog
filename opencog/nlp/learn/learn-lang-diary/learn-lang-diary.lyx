@@ -206,8 +206,7 @@ lexical attraction is the likelihood of a syntactic relation.
 \end_layout
 
 \begin_layout Subsubsection*
-Definitions.
- 
+Definitions 
 \end_layout
 
 \begin_layout Standard
@@ -478,7 +477,7 @@ Notation
 We need to harmonize here a little bit with the Deniz Yuret concepts and
  notation.
  He defines a probability 
-\begin_inset Formula $P(w_{l},w_{r})$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
 \end_inset
 
  of seeing the ordered pair; that is, the relation 
@@ -487,54 +486,86 @@ We need to harmonize here a little bit with the Deniz Yuret concepts and
 
  is implicit.
  To make it explicit, we should write: 
-\begin_inset Formula $P(w_{l},w_{r})=P(R(w_{l},w_{r}))$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r}))$
 \end_inset
 
  to indicate the relation explicitly, and to note that the order of the
  positions in the relation matter.
+ To avoid confusion, the cursive 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ is used instead of the roman 
+\begin_inset Formula $P$
+\end_inset
+
+.
  Yuret also uses the notation 
-\begin_inset Formula $P(w_{l},*)$
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
 \end_inset
 
  and 
-\begin_inset Formula $P(*,w_{r})$
+\begin_inset Formula $\mathcal{P}(*,w_{r})$
 \end_inset
 
  for wild-card summations, defined as 
 \begin_inset Formula 
 \[
-P(w_{l},*)=\sum_{w_{r}}P(w_{l},w_{r})\qquad\mbox{and}\qquad P(*,w_{r})=\sum_{w_{l}}P(w_{l},w_{r})
+\mathcal{P}(w_{l},*)=\sum_{w_{r}}\mathcal{P}(w_{l},w_{r})\qquad\mbox{and}\qquad\mathcal{P}(*,w_{r})=\sum_{w_{l}}\mathcal{P}(w_{l},w_{r})
 \]
 
 \end_inset
 
-In practical use, one quickly observes that 
-\begin_inset Formula $P(w_{l},*)$
+It is tempting to conflate 
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
 \end_inset
 
- is almost equal to 
+ with 
 \begin_inset Formula $P(w_{l})$
 \end_inset
 
- but not quite, since 
-\begin_inset Formula $P(w_{l},*)$
+ but that would be wrong; not every possible word can occur on the 
+\begin_inset Formula $w_{r}$
 \end_inset
 
- is the probability of seeing 
-\begin_inset Formula $w_{l}$
+ position.
+ This suggests a different but tempting error, that 
+\begin_inset Formula $\mathcal{P}(w_{l},*)\le P(w_{l})$
 \end_inset
 
- within the certain relationship or pattern, which must be less than the
- prior probability of observing 
-\begin_inset Formula $w_{l}$
+.
+ This is also not the case! This comes from the fact that the frequentist
+ definitions of the two are incompatible: the denominators are not the same.
+ Viz, 
+\begin_inset Formula 
+\[
+\mathcal{P}(w_{l},w_{r})=\frac{N(w_{l},w_{r})}{N(*,*)}
+\]
+
 \end_inset
 
- in general.
- Thus, one has 
-\begin_inset Formula $P(w_{l},*)\le P(w_{l})$
+ while 
+\begin_inset Formula 
+\[
+P(w)=\frac{N(w)}{N(*)}
+\]
+
 \end_inset
 
-, which can be viewed as a conditional probability:
+so that the former is normalized by the number of times 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ the pairs have been observed, while the later is normalized by the number
+ of times that singletons have been observed.
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
 P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})\le P(w_{l})
