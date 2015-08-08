@@ -41,6 +41,7 @@ OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
 
 OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
 
+
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y, const double& z, const Handle& block) 
 {
 	point3d pos(x,y,z);

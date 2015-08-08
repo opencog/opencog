@@ -258,8 +258,6 @@ namespace opencog
             // to store the blockentities need to be updated the predicates
             vector<BlockEntity*> updateBlockEntityList;
             */
-
-
             /*
               Dead interface
               // Note: for non-super blockEntities only
@@ -276,6 +274,7 @@ namespace opencog
             float           mAgentHeight;
             int             mTotalUnitBlockNum;
             Handle          selfAgentEntity;
+
             // We keep the map for quick search position. 
             //Memory consuming: 50k blocks take about 10M RAM for one map
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
