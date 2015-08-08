@@ -389,7 +389,36 @@ Here, the relation
 \end_inset
 
 .
- The probability 
+ For this reason, it is 
+\begin_inset Quotes eld
+\end_inset
+
+safe
+\begin_inset Quotes erd
+\end_inset
+
+ to use the notational short-hand 
+\begin_inset Formula $P(R)=P(R(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+; nothing is thrown out, because 
+\begin_inset Formula $R$
+\end_inset
+
+ already depends on 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The probability 
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
@@ -466,11 +495,25 @@ P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
 
 \end_inset
 
+This is the probability of observing the relationship 
+\begin_inset Formula $R$
+\end_inset
 
+ given that the individual parts of the relationship have been observed.
 \end_layout
 
 \begin_layout Subsubsection*
-Notation
+Frequentism
+\end_layout
+
+\begin_layout Standard
+In order for the above to be manipulable in practice, we need to provide
+ a definition for the probabilities, and, for this, the definiton can only
+ be frequentist.
+\end_layout
+
+\begin_layout Subsubsection*
+Yuret Notation
 \end_layout
 
 \begin_layout Standard
