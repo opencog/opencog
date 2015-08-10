@@ -17,16 +17,28 @@
 ; A higher activation would lead to few details and less schematic depth.
 ;
 
+; This replaces what was done by the different StimulusUpdaterAgent
+; If the factor is < 1 then the modulator values will continuesely decrease.
+; XXX: What is the criteria for choosing the default factor value??
+(define (stimulate latest-modulator-value factor)
+    (+ 0.5
+        (*
+            (- latest-modulator-value 0.5)
+            factor
+        )
+    )
+)
+
 (define (ActivationModulatorUpdater)
 ;    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
 ;           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
 ;    )
     (let ((competence (tv-mean (cog-tv (ConceptNode "OpenPsi: Competence"))))
            (energy (tv-mean (cog-tv (ConceptNode "OpenPsi: Energy"))))
-           (stimulus (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation"))))
+           (latest-value (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation"))))
            )
 
-         (+  ;(* 2 stimulus)
+         (+  (* 2 (stimulate latest-value 0.95))
              (* (/ competence (+ competence 0.5) )
                 (/ energy (+ 0.05 energy) )
              )
@@ -39,12 +51,13 @@
 ; A low resolution level tends to miss differences, then the agent would get a better overview
 
 (define (ResolutionModulatorUpdater)
-    (let ( (stimulus (get_predicate_truth_value_mean "ResolutionStimulus"))
+    (let ((latest-value (tv-mean (cog-tv (ConceptNode "OpenPsi: Resolution"))))
+          (activation (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation"))))
          )
 
-        (+  (* 2 stimulus)
+        (+  (* 2 (stimulate latest-value 0.9))
             (- 1
-               (expt (get_predicate_truth_value_mean "ActivationModulator") 0.5)
+               (expt activation 0.5)
             )
         )
     )
@@ -63,15 +76,15 @@
 ;    (* (expt (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 0.5)
 ;       (expt (get_truth_value_mean (cog-tv IntegrityDemandGoal)) 2)
 ;    )
-    (let ( (certainty (get_truth_value_mean (cog-tv CertaintyDemandGoal)) )
-           (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
-
-           (stimulus (get_predicate_truth_value_mean "SecuringThresholdStimulus"))
+    (let ( (certainty (tv-mean (cog-tv (ConceptNode "OpenPsi: Certainty"))))
+           (integrity (tv-mean (cog-tv (ConceptNode "OpenPsi: Integrity"))))
+           (latest-value (tv-mean (cog-tv
+                (ConceptNode "OpenPsi: SecuringThreshold"))))
          )
 ;         (* (/ certainty (+ certainty 0.05) )
 ;            (expt integrity 3)
 ;         )
-         (+  (* 2 stimulus)
+         (+  (* 2 (stimulate latest-value 0.93))
              (expt integrity 3)
          )
     )
@@ -101,11 +114,12 @@
 ;         )
 ;    )
 
-    (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
-           (stimulus (get_predicate_truth_value_mean "SelectionThresholdStimulus"))
+    (let ( (competence (tv-mean (cog-tv (ConceptNode "OpenPsi: Competence"))))
+           (latest-value (tv-mean (cog-tv
+                (ConceptNode "OpenPsi: SelectionThreshold"))))
          )
 
-         (+  (* 2 stimulus)
+         (+  (* 2 (stimulate latest-value 0.95))
              (fuzzy_equal competence 1 15)
          )
     )
