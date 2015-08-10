@@ -50,6 +50,9 @@
     )
 )
 
+; Rule Name
+(DefineLink (Node "psi-demand-updater-rule") psi-demand-updater-rule)
+
 (define (psi-demand-updater demand min-value max-value)
     (let ((current-value (tv-mean (cog-tv  demand)))
           (min-value (string->number (cog-name min_acceptable_value)))

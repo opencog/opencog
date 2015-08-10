@@ -31,6 +31,9 @@
     )
 )
 
+; Rule Name
+(DefineLink (Node "psi-modulator-updater-rule") psi-modulator-updater-rule)
+
 (define (psi-modulator-updater modulator)
     (let ((modulator-name (cog-name  modulator)))
          (cond
