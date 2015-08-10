@@ -17,6 +17,14 @@ To start this, you should have installed:
 
 After installing ROS you have to create a workspace and move this repository into the new workspace.
 
+####Octomap http://wiki.ros.org/octomap
+
+In ubuntu you can directly install Octomap by:
+
+`sudo apt-get install ros-XXX-octomap
+
+(XXX depends on your ROS distribution)
+
 ####Opencog https://github.com/opencog/opencog
 
 For installing Opencog you also have to install 
