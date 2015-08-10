@@ -53,10 +53,10 @@
 ; Rule Name
 (DefineLink (Node "psi-demand-updater-rule") psi-demand-updater-rule)
 
-(define (psi-demand-updater demand min-value max-value)
+(define (psi-demand-updater demand min-acceptable-value max-acceptable-value)
     (let ((current-value (tv-mean (cog-tv  demand)))
-          (min-value (string->number (cog-name min_acceptable_value)))
-          (max-value (string->number (cog-name max_acceptable_value)))
+          (min-value (string->number (cog-name min-acceptable-value)))
+          (max-value (string->number (cog-name max-acceptable-value)))
          )
          ; TODO:
          ;1. check the 'fuzzy_within' equations, it seems too have small effect.
@@ -64,7 +64,7 @@
          ;   different characters controled are likely have different
          ;   personality.
          (cog-set-tv! demand
-             (fuzzy_within current-value min-value max-value 100)
+             (stv (fuzzy_within current-value min-value max-value 100) 1)
          )
      )
      #t
