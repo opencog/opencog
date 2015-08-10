@@ -1010,6 +1010,12 @@ string to output locale" 84 #f #f)'.
 
 (define x "\u0106i\u0107olina\n")
 
+%default-port-encoding is a fluid ....
+make fluid with default ...
+make dynamic state (with parent ....)
+
+Solution! (setlocale LC_ALL "") every time a new thread is created.
+
 
 
 
