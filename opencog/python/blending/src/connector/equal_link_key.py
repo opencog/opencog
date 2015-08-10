@@ -84,7 +84,6 @@ def link_to_keys(a, original_links, dst_atom):
 
 
 def key_to_link(a, link_key, dst_atom, tv):
-    # TODO: Change to make with proper reason, not make in every blending.
     src_list = link_key.get_src_list(a)
 
     # To avoid self-pointing

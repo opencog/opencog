@@ -2,6 +2,8 @@ from blending.src.connector.connect_simple import ConnectSimple
 from blending.src.connector.connect_conflict_random import ConnectConflictRandom
 from blending.src.connector.connect_conflict_viable import \
     ConnectConflictAllViable
+# from blending.src.connector.connect_conflict_interaction_information import \
+#    ConnectConflictInteractionInformation
 from blending.util.blending_config import BlendConfig
 from blending.util.blending_error import blending_status
 
@@ -27,7 +29,9 @@ class ConnectorFinder(object):
         self.connectors = {
             ConnectSimple.__name__: ConnectSimple,
             ConnectConflictRandom.__name__: ConnectConflictRandom,
-            ConnectConflictAllViable.__name__: ConnectConflictAllViable
+            ConnectConflictAllViable.__name__: ConnectConflictAllViable,
+            # ConnectConflictInteractionInformation.__name__:
+            #    ConnectConflictInteractionInformation
         }
 
     def get_connector(self, config_base):

@@ -122,7 +122,7 @@ cdef class PyDataProvider:
     def dataset_size(self):
         return deref(self.thisptr.mDataSet).size()
 
-    def datamap_find(self,  one_rawdata):
+    def datamap_find(self, one_rawdata):
         cdef vector[long] v
         for item in self.make_key_from_data(one_rawdata):
             v.push_back(item)

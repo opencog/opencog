@@ -68,10 +68,15 @@ a.set_av(person.h, 12)
 Make test links.
 """
 # A. Not duplicated link.
+# TODO: We should use an InheritanceLink rather than a MemberLink
+# to express something in the some class. A case in below is just example
+# to show how to blending algorithm works.
 l1 = MemberLink(car, metal)
 a.set_tv(l1.h, TruthValue(0.6, 0.8))
 
 # B. Duplicated, not conflicted link.
+# TODO: We should use an InheritanceLink rather than a SimilarityLink
+# to express something has some property.
 l2 = SimilarityLink(car, move)
 l3 = SimilarityLink(man, move)
 a.set_tv(l2.h, TruthValue(0.9, 0.8))
