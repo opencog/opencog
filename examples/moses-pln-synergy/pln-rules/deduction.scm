@@ -100,3 +100,7 @@
 
 
 ; =============================================================================
+
+; Name the rule
+(define pln-rule-deduction-name (Node "pln-rule-deduction"))
+(DefineLink pln-rule-deduction-name pln-rule-deduction)
