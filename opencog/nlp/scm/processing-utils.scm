@@ -64,6 +64,9 @@
 			; (connect s AF_INET (inet-aton relex-server-host) relex-server-port)
 			(connect s AF_INET (inet-pton AF_INET relex-server-host) relex-server-port)
 
+			; An explicit port-encoding is needed by guile-2.0.9
+			(set-port-encoding! s "utf-8")
+
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
 			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
