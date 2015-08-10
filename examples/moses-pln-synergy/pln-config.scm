@@ -44,9 +44,6 @@
 ; Load the rules (use load for relative path w.r.t. to that file)
 (define rule-files (list "pln-rules/deduction.scm"
                          "pln-rules/modus-ponens.scm"
-                         "pln-rules/and.scm"
-                         "pln-rules/or.scm"
-                         "pln-rules/not.scm"
                          "pln-rules/implication-or.scm"
                          "pln-rules/equivalence-transformation-rule.scm"
                          "pln-rules/hack.scm"
