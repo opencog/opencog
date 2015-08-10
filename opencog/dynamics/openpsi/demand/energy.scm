@@ -15,7 +15,11 @@
     )
 )
 
-; actions that can act on the psi-demand Energy-
+; Actions that can affect the psi-demand Energy-
+; There could be multiple actions, which one is choosen to be run is determined
+; by the action selection agent, with the exception of 'psi-demand-updater',
+; that is always running.
+; For an action to be included it should be able to manipulate the demand-value
 (EvaluationLink
     (PredicateNode "Psi: acts-on")
     (ListLink

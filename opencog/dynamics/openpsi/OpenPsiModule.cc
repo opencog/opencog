@@ -37,26 +37,11 @@ DECLARE_MODULE(OpenPsiModule);
 OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
 {
     logger().info("[OpenPsiModule] Entering constructor");
-    _cogserver.registerAgent(PsiDemandUpdaterAgent::info().id,
-                            &demandUpdaterFactory);
-    _cogserver.registerAgent(PsiActionSelectionAgent::info().id,
-                            &actionSelectionFactory);
-    _cogserver.registerAgent(PsiModulatorUpdaterAgent::info().id,
-                            &modulatorUpdaterFactory);
-    _cogserver.registerAgent(PsiFeelingUpdaterAgent::info().id,
-                            &feelingUpdaterFactory);
-    _cogserver.registerAgent(PsiRelationUpdaterAgent::info().id,
-                            &feelingUpdaterFactory);
 }
 
 OpenPsiModule::~OpenPsiModule()
 {
     logger().info("[OpenPsiModule] Entering destructor");
-    _cogserver.unregisterAgent(PsiDemandUpdaterAgent::info().id);
-    _cogserver.unregisterAgent(PsiActionSelectionAgent::info().id);
-    _cogserver.unregisterAgent(PsiModulatorUpdaterAgent::info().id);
-    _cogserver.unregisterAgent(PsiFeelingUpdaterAgent::info().id);
-    _cogserver.unregisterAgent(PsiRelationUpdaterAgent::info().id);
 }
 
 
