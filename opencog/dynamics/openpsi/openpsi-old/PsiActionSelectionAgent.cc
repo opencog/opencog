@@ -101,7 +101,7 @@ void PsiActionSelectionAgent::initDemandGoalList()
         outgoings = { atomspace.add_node(PREDICATE_NODE, demandPredicateName) };
 
         this->psi_demand_goal_list.push_back(atomspace.add_link(EVALUATION_LINK,
-                                                                outgoings));
+                                                               outgoings));
 
     }// for
 
@@ -145,7 +145,7 @@ bool PsiActionSelectionAgent::getPlan()
           atomspace.add_link(LIST_LINK, HandleSeq()) };
 
     Handle hPlanSuccessEvaluationLink = atomspace.add_link(EVALUATION_LINK,
-                                                           tempOutgoingSet);
+                                                          tempOutgoingSet);
     if ( atomspace.get_TV(hPlanSuccessEvaluationLink)->getMean() < 0.9 )
         return false;
 
@@ -153,7 +153,7 @@ bool PsiActionSelectionAgent::getPlan()
     Handle hSelectedDemandGoal =
         AtomSpaceUtil::getReference(atomspace,
                                     atomspace.get_handle(CONCEPT_NODE,
-                                                         "plan_selected_demand_goal"
+                                                        "plan_selected_demand_goal"
                                                        )
                                    );
 
@@ -399,7 +399,7 @@ void PsiActionSelectionAgent::run()
             logger().debug("PsiActionSelectionAgent::%s - "
                            "Switch the Demand Goal to: %s [ cycle = %d ].",
                            __FUNCTION__,
-                           atomspace.getName(atomspace.getOutgoing(selectedDemandGoal, 0)
+                           atomspace.getName(atomspace.get_outgoing(selectedDemandGoal, 0)
                                              ).c_str(),
                            this->cycleCount);
 

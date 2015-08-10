@@ -7,7 +7,6 @@ ADD_LIBRARY (oac SHARED
 	ProcedureInterpreterAgent
 	EntityExperienceAgent
 	EventDetectionAgent
-	StimulusUpdaterAgent
 	SleepAgent
 	MockOpcHCTest
 	HCTestAgent
