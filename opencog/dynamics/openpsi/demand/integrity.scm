@@ -5,7 +5,6 @@
     (ConceptNode "OpenPsi: Demand")
 )
 
-; The
 (EvaluationLink
     (PredicateNode "must_have_value_within")
     (ListLink
@@ -15,7 +14,12 @@
     )
 )
 
-; actions that can act on the psi-demand Competence.
+; actions that can affect on the psi-demand Competence.
+; XXX: Why have mutlitple scheme functions that act on a demand without defining
+; a rule. -> This is just part of the psi module atomese api.
+; TODO: Should this be changed to ExecutionLink that specify the input of the
+; GSN using SignatureLink? that way the rule defining functions could extract
+; the patterns to search for.
 (EvaluationLink
     (PredicateNode "Psi: acts-on")
     (ListLink

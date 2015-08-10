@@ -5,7 +5,6 @@
     (ConceptNode "OpenPsi: Demand")
 )
 
-; The
 (EvaluationLink
     (PredicateNode "must_have_value_within")
     (ListLink

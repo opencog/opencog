@@ -3,7 +3,7 @@
 (ExecutionLink
     (SchemaNode "URE:maximum-iterations")
     (ConceptNode "OpenPsi: active-schema-pool")
-    (NumberNode "100")
+    (NumberNode "10")
 )
 
 ; Reminder : 1. When ure has the capability to forward chain over only a subset
@@ -14,17 +14,19 @@
 ; with it's own pool another. Then there will be a need for a central action
 ; selection that ensures that the invidual action-selectors associated with each
 ; pool don't choose an action that is in conflict with that found in another.
-; The relations between actions could be hard coded or learnt. 
+; The relations between actions could be hard coded or learnt.
+;            3. A rule could be defined to affect a single demand/modulator
+; value. For e.g. a rule that tries
 
 ; The action-selection-agent/planner will choose the rules that are member of
 ; the active schema pool for execution with the exception of the
 ; psi-demand-updater-rule & psi-modulator-updater-rule
 (MemberLink (stv 1 1)
-    psi-demand-updater-rule
+    (Node "psi-demand-updater-rule")
     (ConceptNode "OpenPsi: active-schema-pool")
 )
 
 (MemberLink (stv 1 1)
-    psi-modulator-updater-rule
+    (Node "psi-modulator-updater-rule")
     (ConceptNode "OpenPsi: active-schema-pool")
 )
