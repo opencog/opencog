@@ -806,7 +806,7 @@ on thread 47155674880320
 
 Irritation 4
 ------------
-Occasionally see this: 
+Occasionally see this:
 
 In ice-9/boot-9.scm:
  157: 6 [catch #t #<catch-closure 294a63c0> ...]
@@ -933,7 +933,7 @@ prints garbage
 (set-port-encoding! sss "utf-8")
 does not fix it.
 (use-modules (rnrs bytevectors))
-(send sss (string->utf8 "Hòa Phú Phú Tân")) does not work
+(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
 
 
 Ahhh ... (string->utf8 "Småland") prints
@@ -949,7 +949,7 @@ cogserver linked to guile-2.0.9 is broken
 Yayyy!
 
 
-Boo ... 
+Boo ...
 submit-one: Phú Mỹ.
 (observe-text \"Phú M\u1ef9.\")
 
@@ -974,8 +974,41 @@ Hồ Chí Minh
 
 (setlocale LC_ALL "")
 
+(set-port-encoding! (current-input-port) "utf-8")
+(display "Ćićolina\n")
+(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
+(define x "Thủ Dầu Một\n")  as above
+(define x "Småland\n") ... works!!
+(define x "Hòa Phú Phú Tân\n")  ... works  !!!
+(define x "x\u0106i\u0107olina\\n") works
 
+Ć is U+0106  c4 86
+ć is U+0107  c4 87
 
+what is bizarre is that the above is exactly inverted for
+the guile-2.1 shell:
+sending the  "working" ones sends garbage, sending the failing ones goes through.
+(ditto for just simply printing....)
+
+both define/display seem to work fine in the guile-2.0.9 shell...
+and define/display seem to work well for the cogserver-2.1 shell. WTF.
+so is it due to a shared-library mis-match?  Caching of compiled files?
+
+(display "SmålandSmåland\n")
+(display "Ćićolina\n")
+(display "Thủ Dầu Một\n")
+(display "Hòa Phú Phú Tân\n")
+
+Avoiding preload of all scheme does not fix it.
+Clearling the guile compiler cache does not fix it.
+
+[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
+
+ERROR: In procedure call-with-input-string:
+ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
+string to output locale" 84 #f #f)'.
+
+(define x "\u0106i\u0107olina\n")
 
 
 
