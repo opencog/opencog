@@ -21,7 +21,9 @@ $ moses \
 ## Load the models and the background knowledge in guile
 
 `moses-model.scm` is actually provided containing the model (with
-indentation + confidence).
+indentation + confidence). The confidence over the model is completely
+made up, but it doesn't matter, we just want to convey the idea that
+the use of background knowledge can improve that confidence.
 
 ```
 $ guile

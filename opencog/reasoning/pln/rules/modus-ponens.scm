@@ -48,7 +48,7 @@
                 (*
                     (cog-stv-strength AB)
                     sA)
-                (+                        ; Confidence
+                (min                      ; Confidence
                     (cog-stv-confidence AB)
                     cA))))
 
