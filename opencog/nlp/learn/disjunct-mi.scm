@@ -219,3 +219,4 @@
 ;Do this for all disjuncts
 (define (do-em-all-disjuncts disjunct-list)
 	(map (lambda (x) (get-mi x disjunct-list)) disjunct-list))
+
