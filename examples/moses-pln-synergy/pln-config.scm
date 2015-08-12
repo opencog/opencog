@@ -43,10 +43,7 @@
 
 ; Load the rules (use load for relative path w.r.t. to that file)
 (define rule-files (list "pln-rules/deduction.scm"
-                         "pln-rules/modus-ponens.scm"
-                         "pln-rules/and.scm"
-                         "pln-rules/or.scm"
-                         "pln-rules/not.scm"
+                         "../../opencog/reasoning/pln/rules/modus-ponens.scm"
                          "pln-rules/implication-or.scm"
                          "pln-rules/equivalence-transformation-rule.scm"
                          "pln-rules/hack.scm"
@@ -59,9 +56,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list (list pln-rule-deduction 1)
-                    (list pln-rule-modus-ponens 1)
-                    (list pln-rule-equivalence-transformation 1)
+(define rules (list (list pln-rule-deduction-name 1)
+                    (list pln-rule-modus-ponens-name 1)
+                    (list pln-rule-equivalence-transformation-name 1)
               )
 )
 

@@ -23,6 +23,9 @@
   )
 )
 
+(define pln-rule-equivalence-hack-name (Node "pln-rule-equivalence-hack"))
+(DefineLink pln-rule-equivalence-hack-name pln-rule-equivalence-hack)
+
 (define pln-rule-eliminate-neutral-element-hack
   (BindLink
      (ImplicationLink
@@ -71,6 +74,12 @@
   )
 )
 
+(define pln-rule-eliminate-neutral-element-hack-name
+  (Node "pln-rule-eliminate-neutral-element-hack"))
+(DefineLink
+  pln-rule-eliminate-neutral-element-hack-name
+  pln-rule-eliminate-neutral-element-hack)
+
 (define pln-rule-eliminate-dangling-junctor-hack
   (BindLink
      (ImplicationLink
@@ -110,6 +119,12 @@
   )
 )
 
+(define pln-rule-eliminate-dangling-junctor-hack-name
+  (Node "pln-rule-eliminate-dangling-junctor-hack"))
+(DefineLink
+  pln-rule-eliminate-dangling-junctor-hack-name
+  pln-rule-eliminate-dangling-junctor-hack)
+
 (define pln-rule-and-hack
 (BindLink
    (AndLink
@@ -146,6 +161,12 @@
    )
 )
 )
+
+(define pln-rule-and-hack-name
+  (Node "pln-rule-and-hack"))
+(DefineLink
+  pln-rule-and-hack-name
+  pln-rule-and-hack)
 
 (define pln-rule-for-all-hack
   (BindLink
@@ -209,6 +230,12 @@
   )
 )
 
+(define pln-rule-for-all-hack-name
+  (Node "pln-rule-for-all-hack"))
+(DefineLink
+  pln-rule-for-all-hack-name
+  pln-rule-for-all-hack)
+
 (define pln-rule-average-hack
   (BindLink
      (AverageLink
@@ -236,3 +263,9 @@
      )
   )
 )
+
+(define pln-rule-average-hack-name
+  (Node "pln-rule-average-hack"))
+(DefineLink
+  pln-rule-average-hack-name
+  pln-rule-average-hack)

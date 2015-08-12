@@ -105,3 +105,7 @@
     (stv (/ (+ CinterA CinterB (* CinterA CinterB sA sB -1))
             (+ sA sB (* sA sB -1)))
          (min cAC cBC))))
+
+; Name the rule
+(define pln-rule-implication-or-name (Node "pln-rule-implication-or"))
+(DefineLink pln-rule-implication-or-name pln-rule-implication-or)
