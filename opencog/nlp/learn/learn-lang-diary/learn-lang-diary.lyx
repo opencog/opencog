@@ -510,6 +510,23 @@ Frequentism
 In order for the above to be manipulable in practice, we need to provide
  a definition for the probabilities, and, for this, the definiton can only
  be frequentist.
+ The frequency 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ of observing a word 
+\begin_inset Formula $w$
+\end_inset
+
+ is obvious: 
+\begin_inset Formula 
+\[
+P(w)=\frac{N(w)}{N(*)}
+\]
+
+\end_inset
+
+where 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -529,11 +546,13 @@ We need to harmonize here a little bit with the Deniz Yuret concepts and
 
  is implicit.
  To make it explicit, we should write: 
-\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r}))$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))$
 \end_inset
 
  to indicate the relation explicitly, and to note that the order of the
  positions in the relation matter.
+ The right-hand side is the conditional probability of seeing a given word
+ pair, conditioned on seeing any word pair.
  To avoid confusion, the cursive 
 \begin_inset Formula $\mathcal{P}$
 \end_inset
@@ -572,7 +591,7 @@ It is tempting to conflate
 \end_inset
 
  position.
- This suggests a different but tempting error, that 
+ This suggests a different, but tempting, error, that 
 \begin_inset Formula $\mathcal{P}(w_{l},*)\le P(w_{l})$
 \end_inset
 
@@ -601,6 +620,21 @@ so that the former is normalized by the number of times
 
  the pairs have been observed, while the later is normalized by the number
  of times that singletons have been observed.
+ The incompatible normalizations can be understood as conditional probabilities:
+\begin_inset Formula 
+\[
+\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))=\frac{P(R(w_{l},w_{r}))}{P(R(*,*))}
+\]
+
+\end_inset
+
+That is, the Yuret probability of seeing a given word pair is actually the
+ conditional probability of seeing that pair, conditioned on seeing 
+\emph on
+any
+\emph default
+ word pair.
+ There's a chronic problem hidden here, though, 
 \end_layout
 
 \begin_layout Standard
@@ -1611,7 +1645,16 @@ key "Liu2008"
 \end_inset
 
 .
- 
+ Haitao Liu 
+\begin_inset Quotes eld
+\end_inset
+
+Dependency distance as a metric of language comprehension difficulty
+\begin_inset Quotes erd
+\end_inset
+
+, 2008, Journal of Cognitive Science, v9.2 pp 159-191 http://www.lingviko.net/JCS.pd
+f 
 \end_layout
 
 \begin_layout Itemize
@@ -1631,6 +1674,19 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
  CSLI Publications, Stanford, CA.
  Distributed by University of Chicago Press.
  
+\end_layout
+
+\begin_layout Itemize
+Dependency-length minimzation is universal: Richard Futrell1, Kyle Mahowald,
+ and Edward Gibson, 
+\begin_inset Quotes eld
+\end_inset
+
+Large-scale evidence of dependency length minimization in 37 languages
+\begin_inset Quotes erd
+\end_inset
+
+ (2015), doi: 10.1073/pnas.1502134112
 \end_layout
 
 \begin_layout Standard
