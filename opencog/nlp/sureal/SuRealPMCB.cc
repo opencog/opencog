@@ -139,6 +139,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         HandleSeq qN1 = get_neighbors(hLeftWordInst1, false, true, WORD_SEQUENCE_LINK);
         HandleSeq qN2 = get_neighbors(hLeftWordInst2, false, true, WORD_SEQUENCE_LINK);
 
+        // get the NumberNode and compare their word sequences
         return NodeCast(qN1[0])->getName() > NodeCast(qN2[0])->getName();
     };
 
@@ -154,6 +155,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         HandleSeq qN1 = get_neighbors(hRightWordInst1, false, true, WORD_SEQUENCE_LINK);
         HandleSeq qN2 = get_neighbors(hRightWordInst2, false, true, WORD_SEQUENCE_LINK);
 
+        // get the NumberNode and compare their word sequences
         return NodeCast(qN1[0])->getName() < NodeCast(qN2[0])->getName();
     };
 
@@ -163,7 +165,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     // sort the qLGInstsRight in word sequence order
     std::sort(qLGInstsRight.begin(), qLGInstsRight.end(), sortRightWords);
 
-    // get the LG connectors for the qLGInstsLeft
+    // get the LG connectors for those in the qLGInstsLeft
     for (Handle& hLGListLink : qLGInstsLeft)
     {
         HandleSeq qN = get_neighbors(hLGListLink, true, true, EVALUATION_LINK);
@@ -173,12 +175,12 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         {
             HandleSeq qLGConns = get_neighbors(*it, true, true, LG_LINK_INSTANCE_LINK);
 
-            // get the first LG connector for those in the qLGInstsLeft
+            // get the first LG connector
             qTargetConns.push_back(qLGConns[0]);
         }
     }
 
-    // get the LG connectors for the qLGInstsRight
+    // get the LG connectors for those in the qLGInstsRight
     for (Handle& hLGListLink : qLGInstsRight)
     {
         HandleSeq qN = get_neighbors(hLGListLink, true, true, EVALUATION_LINK);
@@ -188,7 +190,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         {
             HandleSeq qLGConns = get_neighbors(*it, true, true, LG_LINK_INSTANCE_LINK);
 
-            // get the second LG connector for those in the qLGInstsRight
+            // get the second LG connector
             qTargetConns.push_back(qLGConns[1]);
         }
     }
@@ -197,7 +199,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     HandleSeq qDisjuncts;
 
     // check if we got the disjuncts of the hPatWordNode already, otherwise
-    // store them in a map so that we don't need to find them again and again
+    // store them in a map so that we only need to do this disjuncts-getting procedure once
     auto iter = m_disjuncts.find(hPatWordNode);
     if (iter == m_disjuncts.end())
     {
