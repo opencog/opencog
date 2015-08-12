@@ -73,7 +73,7 @@ private:
 
     size_t m_thoroughness;   // max no. of results being returned
 
-    std::unordered_map<Handle, HandleSeq> m_disjuncts;
+    std::unordered_map<Handle, HandleSeq> m_disjuncts;   // store the disjuncts of nodes in the pattern
 
     struct CandHandle
     {

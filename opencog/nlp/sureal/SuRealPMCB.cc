@@ -99,11 +99,105 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hSolnWordInst == Handle::UNDEFINED)
         return false;
 
-    // get the source connectors for the solution
-    std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
-    HandleSeq qTargetConns = m_as->get_outgoing(m_eval->eval_h(scmCode));
+    // the source connectors for the solution
+    HandleSeq qTargetConns;
 
+    // get all the ListLinks connecting to hSolnWordInst
+    HandleSeq qSolnListLinks;
+    hSolnWordInst->getIncomingSetByType(back_inserter(qSolnListLinks), LIST_LINK);
+
+    // helper for checking if a ListLink has a LgLinkInstanceNode as a neighbor
+    auto hasNoLgLinkInstanceNode = [](Handle& h)
+    {
+        HandleSeq qN = get_neighbors(h, true, false, EVALUATION_LINK);
+        return not std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == LG_LINK_INSTANCE_NODE; });
+    };
+
+    // remove any ListLink that doesn't have a LgLinkInstanceNode as a neighbor
+    qSolnListLinks.erase(std::remove_if(qSolnListLinks.begin(), qSolnListLinks.end(), hasNoLgLinkInstanceNode), qSolnListLinks.end());
+
+    HandleSeq qLGInstsLeft;
+    HandleSeq qLGInstsRight;
+    for (Handle& hSolnListLink : qSolnListLinks)
+    {
+        HandleSeq qOS = LinkCast(hSolnListLink)->getOutgoingSet();
+
+        // divide them into two groups, assuming there are only two WordInstanceNodes in the ListLink
+        if (qOS[0] == hSolnWordInst) qLGInstsRight.push_back(hSolnListLink);
+        if (qOS[1] == hSolnWordInst) qLGInstsLeft.push_back(hSolnListLink);
+    }
+
+    // helper for sorting links in reverse word sequence order
+    auto sortLeftWords = [](const Handle& h1, const Handle& h2)
+    {
+        HandleSeq qOS1 = LinkCast(h1)->getOutgoingSet();
+        HandleSeq qOS2 = LinkCast(h2)->getOutgoingSet();
+
+        Handle& hLeftWordInst1 = qOS1[0];
+        Handle& hLeftWordInst2 = qOS2[0];
+
+        HandleSeq qN1 = get_neighbors(hLeftWordInst1, false, true, WORD_SEQUENCE_LINK);
+        HandleSeq qN2 = get_neighbors(hLeftWordInst2, false, true, WORD_SEQUENCE_LINK);
+
+        return NodeCast(qN1[0])->getName() > NodeCast(qN2[0])->getName();
+    };
+
+    // helper for sorting links in word sequence order
+    auto sortRightWords = [](const Handle& h1, const Handle& h2)
+    {
+        HandleSeq qOS1 = LinkCast(h1)->getOutgoingSet();
+        HandleSeq qOS2 = LinkCast(h2)->getOutgoingSet();
+
+        Handle& hRightWordInst1 = qOS1[1];
+        Handle& hRightWordInst2 = qOS2[1];
+
+        HandleSeq qN1 = get_neighbors(hRightWordInst1, false, true, WORD_SEQUENCE_LINK);
+        HandleSeq qN2 = get_neighbors(hRightWordInst2, false, true, WORD_SEQUENCE_LINK);
+
+        return NodeCast(qN1[0])->getName() < NodeCast(qN2[0])->getName();
+    };
+
+    // sort the qLGInstsLeft in reverse word sequence order
+    std::sort(qLGInstsLeft.begin(), qLGInstsLeft.end(), sortLeftWords);
+
+    // sort the qLGInstsRight in word sequence order
+    std::sort(qLGInstsRight.begin(), qLGInstsRight.end(), sortRightWords);
+
+    // get the LG connectors for the qLGInstsLeft
+    for (Handle& hLGListLink : qLGInstsLeft)
+    {
+        HandleSeq qN = get_neighbors(hLGListLink, true, true, EVALUATION_LINK);
+
+        auto it = std::find_if(qN.begin(), qN.end(), [](Handle& h){ return h->getType() == LG_LINK_INSTANCE_NODE; });
+        if (it != qN.end())
+        {
+            HandleSeq qLGConns = get_neighbors(*it, true, true, LG_LINK_INSTANCE_LINK);
+
+            // get the first LG connector for those in the qLGInstsLeft
+            qTargetConns.push_back(qLGConns[0]);
+        }
+    }
+
+    // get the LG connectors for the qLGInstsRight
+    for (Handle& hLGListLink : qLGInstsRight)
+    {
+        HandleSeq qN = get_neighbors(hLGListLink, true, true, EVALUATION_LINK);
+
+        auto it = std::find_if(qN.begin(), qN.end(), [](Handle& h){ return h->getType() == LG_LINK_INSTANCE_NODE; });
+        if (it != qN.end())
+        {
+            HandleSeq qLGConns = get_neighbors(*it, true, true, LG_LINK_INSTANCE_LINK);
+
+            // get the second LG connector for those in the qLGInstsRight
+            qTargetConns.push_back(qLGConns[1]);
+        }
+    }
+
+    // disjuncts of the hPatWordNode
     HandleSeq qDisjuncts;
+
+    // check if we got the disjuncts of the hPatWordNode already, otherwise
+    // store them in a map so that we don't need to find them again and again
     auto iter = m_disjuncts.find(hPatWordNode);
     if (iter == m_disjuncts.end())
     {
