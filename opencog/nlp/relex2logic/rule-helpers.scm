@@ -118,6 +118,10 @@
 	(list (InheritanceLink interpretation_index (ConceptNode "DeclarativeSpeechAct"))
 	)
 )
+(define (exclamatory-rule interpretation_index)
+	(list (InheritanceLink interpretation_index (ConceptNode "ExclamatorySpeechAct"))
+	)
+)
 ;
 ; =========================================================================================
 ; Predicate-Argument templates
