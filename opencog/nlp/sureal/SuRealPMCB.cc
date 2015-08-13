@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -46,7 +45,6 @@ SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thor
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars),
-    m_eval(SchemeEval::get_evaluator(pAS)),
     m_thoroughness(thoroughness)
 {
 

@@ -27,7 +27,6 @@
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
-#include <opencog/guile/SchemeEval.h>
 
 
 namespace opencog
@@ -68,8 +67,6 @@ private:
 
     AtomSpace* m_as;
     std::set<Handle> m_vars;   // store nodes that are variables
-
-    SchemeEval* m_eval;
 
     size_t m_thoroughness;   // max no. of results being returned
 
