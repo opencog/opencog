@@ -46,11 +46,8 @@
 
 ;This function creates decoded disjuncts for all the disjuncts of a given word
 (define (create-decoded-disjuncts-for-all-disjuncts wordnode)
-	(define word-sign-pairs (map get-decoded-disjunct (get-disjunct-from-word wordnode)))
-	(map (lambda (x) 
-			(get-decoded-disjunct 
-				(get-disjunct-from-word (car x))))
-				word-sign-pairs))
+	(define all-disjuncts-of-word (get-disjunct-from-word wordnode))
+	(map get-decoded-disjunct all-disjuncts-of-word))
 
 ;This function will create decoded disjuncts for all words connected to a
 ;given disjunct
