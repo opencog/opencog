@@ -108,3 +108,13 @@
          (T4 (/ (* (+ 1 (/ sA sB)) (sAB)) (+ 1 sAB))))
         (invert (- (+ (invert (+ (* T1 T2) (* (negate T1) (/ (- sC (* sB T2)) (negate sB)))))
                       (invert (+ (* T3 T4) (* (negate T3) (/ (- sC (* sB T4)) (negate sB)))))) 1))))
+
+; =============================================================================
+; PreciseModusPonens formula
+;
+; Returns the strength value of the precise modus ponens rule
+; -----------------------------------------------------------------------------
+
+(define (precise-modus-ponens-formula sA sAB snotAB)
+    (+ (* sAB sA) (* snotAB (negate sA))))
+
