@@ -44,6 +44,9 @@ cdef class Octree3DMapManager:
     def get_total_unit_block_num(self):
         return self.c_octree_map.getTotalUnitBlockNum()
 
+    def get_self_agent_entity(self):
+        return Handle(self.c_octree_map.getSelfAgentEntity().value())
+
     def get_log_odds_occupied_threshold(self):
         return self.c_octree_map.getLogOddsOccupiedThreshold()
 

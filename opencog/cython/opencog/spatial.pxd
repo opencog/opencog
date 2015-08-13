@@ -27,6 +27,7 @@ cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "op
         void setAgentHeight(float)
         unsigned getTotalDepthOfOctree()
         int getTotalUnitBlockNum()
+        cHandle getSelfAgentEntity()
         float getLogOddsOccupiedThreshold()
         void setLogOddsOccupiedThreshold(float)
         cBlockVector getKnownSpaceMinCoord()

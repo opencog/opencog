@@ -41,7 +41,7 @@ using namespace opencog::spatial;
 
 Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& mapName,const unsigned& resolution, const int floorHeight, const float agentHeight):
     mAtomSpace(atomspace), mMapName(mapName), mFloorHeight(floorHeight), mAgentHeight(agentHeight)
-{   
+{
 
     mOctomapOctree = new OctomapOcTree(resolution);
     mAllUnitAtomsToBlocksMap.clear();
@@ -49,16 +49,16 @@ Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& 
     mPosToNoneBlockEntityMap.clear();
     nonBlockEntitieshistoryLocations.clear();
 
-    selfAgentEntity = Handle::UNDEFINED;
+    mSelfAgentEntity = Handle::UNDEFINED;
     hasPerceptedMoreThanOneTimes = false;
     enable_BlockEntity_Segmentation = false;
 
     /*
     // Comment on 20150713 by Yi-Shan,
-    // Because the BlockEntity feature has not designed well, 
+    // Because the BlockEntity feature has not designed well,
     // so we comment out all the code related to BlockEntity
     // Once we need to use it/decide to do it, maybe we'll need the legacy code.
-    mBlockEntityList.clear();    
+    mBlockEntityList.clear();
     updateBlockEntityList.clear();
     newDisappearBlockEntityList.clear();
     newAppearBlockEntityList.clear();
@@ -74,7 +74,7 @@ Octree3DMapManager::~Octree3DMapManager()
 
 Octree3DMapManager* Octree3DMapManager::clone()
 {
-    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,selfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
+    Octree3DMapManager* cloneMap = new Octree3DMapManager(enable_BlockEntity_Segmentation,mMapName, mOctomapOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,mSelfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, nonBlockEntitieshistoryLocations);
     return cloneMap;
 }
 
@@ -105,12 +105,12 @@ BlockVector Octree3DMapManager::getKnownSpaceDim() const
 
 void Octree3DMapManager::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos)
 {
-    float occupiedthres=mOctomapOctree->getOccupancyThresLog();
+    float occupiedthres = mOctomapOctree->getOccupancyThresLog();
     setUnitBlock(_unitBlockAtom,_pos,occupiedthres);
 
     /*
     // Comment on 20150713 by Yi-Shan,
-    // Because the BlockEntity feature has not designed well, 
+    // Because the BlockEntity feature has not designed well,
     // so we comment out all the code related to BlockEntity
     // Once we need to use it/decide to do it, maybe we'll need the legacy code.
     if(this->enable_BlockEntity_Segmentation)
@@ -146,7 +146,7 @@ void Octree3DMapManager::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVe
     entity->addBlocks((vector<Block3D*>&)((BlockEntity*)(*iter))->getBlockList());
     BlockEntity* oldEntity = *iter;
     // delete this old entity
-				
+
     removeAnEntityFromList(oldEntity);
     delete oldEntity;
     }
@@ -173,7 +173,7 @@ void Octree3DMapManager::removeSolidUnitBlock(const Handle blockHandle)
 
 /*
 // Comment on 20150713 by Yi-Shan,
-// Because the BlockEntity feature has not designed well, 
+// Because the BlockEntity feature has not designed well,
 // so we comment out all the code related to BlockEntity
 // Once we need to use it/decide to do it, maybe we'll need the legacy code.
   BlockEntity* myEntity = block->mBlockEntity;
@@ -250,15 +250,15 @@ void Octree3DMapManager::setUnitBlock(const Handle& _unitBlockAtom, BlockVector 
     Handle oldBlock = mOctomapOctree->getBlock(_pos);
 
     if(oldBlock == Handle::UNDEFINED && _unitBlockAtom != Handle::UNDEFINED)
-    { 
+    {
         mTotalUnitBlockNum++;
         mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
 
     }
     else if(oldBlock != Handle::UNDEFINED && _unitBlockAtom == Handle::UNDEFINED)
-    { 
+    {
         mTotalUnitBlockNum--;
-        mAllUnitAtomsToBlocksMap.erase(oldBlock);		
+        mAllUnitAtomsToBlocksMap.erase(oldBlock);
     }
     mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
@@ -320,8 +320,8 @@ bool Octree3DMapManager::checkStandable(const BlockVector &pos, float logOddsOcc
             return false;
         } else {
             return true;
-        }			
-    }	
+        }
+    }
 
     return false;
 }
@@ -347,12 +347,12 @@ BlockVector Octree3DMapManager::getBlockLocation(const Handle& block, float logO
     if(it == mAllUnitAtomsToBlocksMap.end()) {
         return BlockVector::ZERO;
     } else {
-        BlockVector result=it->second;		
+        BlockVector result=it->second;
         if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold){
             return BlockVector::ZERO;
         } else {
             return result;
-        } 
+        }
     }
 }
 
@@ -368,7 +368,7 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, const Bloc
     if(it == mAllNoneBlockEntities.end()) {
         mAllNoneBlockEntities.insert(entityNode);
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(pos,entityNode));
-        if(isSelfObject){ selfAgentEntity = entityNode;}
+        if(isSelfObject){ mSelfAgentEntity = entityNode;}
         if(isAvatarEntity){ mAllAvatarList.insert(entityNode);}
         _addNonBlockEntityHistoryLocation(entityNode,pos, timestamp);
     }
@@ -388,7 +388,7 @@ void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, 
         if(newLocation == (oneEntityHistories.back()).second){
             return;
         } else {
-            oneEntityHistories.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));    
+            oneEntityHistories.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
         }
     }
 }
@@ -460,10 +460,10 @@ Handle Octree3DMapManager::getEntity(const BlockVector& pos) const
 // this constructor is only used for clone
 
 Octree3DMapManager::Octree3DMapManager(bool _enable_BlockEntity_Segmentation,
-                                       string _MapName, OctomapOcTree* _OctomapOctree, 
+                                       string _MapName, OctomapOcTree* _OctomapOctree,
                                        int _FloorHeight,
                                        int _AgentHeight,int _TotalUnitBlockNum,
-                                       Handle _selfAgentEntity,
+                                       Handle _mSelfAgentEntity,
                                        AtomSpace* _AtomSpace,
                                        const map<Handle, BlockVector> &_AllUnitAtomsToBlocksMap,
                                        const set<Handle>& _AllNoneBlockEntities,
@@ -471,7 +471,7 @@ Octree3DMapManager::Octree3DMapManager(bool _enable_BlockEntity_Segmentation,
                                        const set<Handle>& _AllAvatarList,
                                        const map<Handle, vector<pair<unsigned long, BlockVector> > >& _nonBlockEntitieshistoryLocations):
 enable_BlockEntity_Segmentation(_enable_BlockEntity_Segmentation), mMapName(_MapName),mFloorHeight(_FloorHeight),
-    mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum), selfAgentEntity(_selfAgentEntity)
+    mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum), mSelfAgentEntity(_mSelfAgentEntity)
 {
     // the clone order should not be change here:
     // should always clone the octree before the entity list
@@ -532,7 +532,7 @@ std::string Octree3DMapManager::toString( const Octree3DMapManager& map )
 // TODO:
 
 Octree3DMapManager* Octree3DMapManager::fromString( const std::string& map )
-{	
+{
     return NULL;
 
     /*
@@ -595,9 +595,9 @@ Octree3DMapManager* Octree3DMapManager::fromString( const std::string& map )
   }
 */
 /*
-	    
+
 // Comment on 20150713 by Yi-Shan,
-// Because the BlockEntity feature has not designed well, 
+// Because the BlockEntity feature has not designed well,
 // so we comment out all the code related to BlockEntity
 // Once we need to use it/decide to do it, maybe we'll need the legacy code.
 else
@@ -607,7 +607,7 @@ Entity3D* entity = findBlockEntityByHandle(entityNode);
 if(entity)
 return entity;
 }
-	
+
 return 0;
 
 }
@@ -623,7 +623,7 @@ return 0;
   if(e->getEntityName() == entityName)
   return e;
   }
-   
+
   for (auto it2 = mBlockEntityList.begin( ); it2 != mBlockEntityList.end( ); ++it2 )
   {
   if(((BlockEntity*)(it2->second))->getEntityName() == entityName)
@@ -793,7 +793,7 @@ return 0;
    TODO: TNick: my guess is that this was intended to be:
    //if( !getUnitBlockHandlesOfABlock(pos, newLevel, handles)) )
    //    return false;
-					 
+
    }
    }
    return true;
@@ -803,7 +803,7 @@ return 0;
 
 /*
 // Comment on 20150713 by Yi-Shan,
-// Because the BlockEntity feature has not designed well, 
+// Because the BlockEntity feature has not designed well,
 // so we comment out all the code related to BlockEntity
 // Once we need to use it/decide to do it, maybe we'll need the legacy code.
 // Return the blockEntity occupies this postiton
@@ -875,7 +875,7 @@ return entity;
 }
 BlockEntity* Octree3DMapManager::findBlockEntityByHandle(const Handle entityNode) const
 {
-for (auto iter = mBlockEntityList.begin(); 
+for (auto iter = mBlockEntityList.begin();
 iter != mBlockEntityList.end(); ++iter)
 {
 if(((BlockEntity*)(iter->second))->mEntityNode == entityNode)
