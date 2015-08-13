@@ -14,6 +14,7 @@
 export BLENDIR="../hr/blender_api"
 export OCBHAVE="../opencog/ros-behavior-scripting/"
 export PYTHONPATH=$PYTHONPATH:`pwd`/$OCBHAVE/src
+export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 # Without this, some ros messages seem to run astray.
 export ROS_IP=127.0.0.1
@@ -39,9 +40,9 @@ tmux new-window -n 'cog' 'cogserver -c $OCBHAVE/scripts/opencog.conf; $SHELL'
 cd $OCBHAVE/src
 # Load data into the CogServer
 sleep 5
-# echo -e "py\n" | cat - ros_commo.py |netcat localhost 17001
-echo -e "py\n" | cat - atomic.py |netcat localhost 17001
-cat universal-fsm.scm |netcat localhost 17001
+# echo -e "py\n" | cat - ros_commo.py |netcat localhost 17002
+echo -e "py\n" | cat - atomic.py |netcat localhost 17002
+cat universal-fsm.scm |netcat localhost 17002
 sleep 5
 
 # Run the new face-tracker.
@@ -49,7 +50,7 @@ sleep 5
 tmux new-window -n 'fce' '../face_track/main.py; $SHELL'
 
 # Telnet shell
-tmux new-window -n 'tel' 'rlwrap telnet localhost 17001; $SHELL'
+tmux new-window -n 'tel' 'rlwrap telnet localhost 17002; $SHELL'
 
 # Fix the annoying byobu display
 echo "tmux_left=\"session\"" > $HOME/.byobu/status
