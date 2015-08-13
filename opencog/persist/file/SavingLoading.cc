@@ -67,7 +67,6 @@ void SavingLoading::save(const char *fileName,
                          AtomSpace& atomSpace,
                          SpaceServer& spacs,
                          TimeServer& tims)
-    throw (IOException)
 {
     logger().info("Saving OpenCog instance");
 
@@ -248,7 +247,6 @@ void SavingLoading::load(const char *fileName,
                          AtomSpace& atomSpace,
                          SpaceServer& spacs,
                          TimeServer& tims)
-    throw (RuntimeException, IOException, InconsistenceException)
 {
     clearRepositories();
 
@@ -670,7 +668,7 @@ void SavingLoading::printProgress(const char *s, int n)
     }
 }
 
-void SavingLoading::addSavableRepository(SavableRepository *repository) throw (RuntimeException)
+void SavingLoading::addSavableRepository(SavableRepository *repository)
 {
     const char* id = repository->getId();
 
@@ -701,7 +699,7 @@ void SavingLoading::saveRepositories(FILE *f)
     }
 }
 
-void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv) throw (RuntimeException)
+void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv)
 {
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;
