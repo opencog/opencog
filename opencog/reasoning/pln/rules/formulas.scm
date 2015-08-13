@@ -76,3 +76,35 @@
 		(else
 			(cons (car l) (find-replace (cdr l) old new)))))
 
+; =============================================================================
+; Invert formula
+;
+; Inverts the input
+; -----------------------------------------------------------------------------
+
+(define (invert a)
+    (/ 1.0 a))
+
+; =============================================================================
+; Negate formula
+;
+; Negates the probability
+; -----------------------------------------------------------------------------
+
+(define (negate a)
+    (- 1 a))
+
+; =============================================================================
+; Transitive Similarity Formula
+;
+; Returns the strength value of the transitive similarity rule
+; -----------------------------------------------------------------------------
+
+(define (transitive-similarity-formula sA sB sC sAB sBC )
+    (let
+        ((T1 (/ (* (+ 1 (/ sB sA)) (sAB)) (+ 1 sAB)))
+         (T2 (/ (* (+ 1 (/ sC sB)) (sBC)) (+ 1 sBC)))
+         (T3 (/ (* (+ 1 (/ sB sC)) (sBC)) (+ 1 sBC)))
+         (T4 (/ (* (+ 1 (/ sA sB)) (sAB)) (+ 1 sAB))))
+        (invert (- (+ (invert (+ (* T1 T2) (* (negate T1) (/ (- sC (* sB T2)) (negate sB)))))
+                      (invert (+ (* T3 T4) (* (negate T3) (/ (- sC (* sB T4)) (negate sB)))))) 1))))
