@@ -51,7 +51,7 @@ void Request::setRequestResult(RequestResult* rr)
         _requestResult = rr;
         _mimeType = _requestResult->mimeType();
     } else if (NULL == rr) {
-        if (_requestResult) _requestResult->put();  // dec use count we are doe with it.
+        if (_requestResult) _requestResult->put();  // dec use count; we are done with it.
         _requestResult = NULL;  // used by exit/quit commands to not send any result.
     } else
         throw RuntimeException(TRACE_INFO,
