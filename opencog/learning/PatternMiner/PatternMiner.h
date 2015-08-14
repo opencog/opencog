@@ -40,7 +40,7 @@ namespace opencog
 namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
-#define SURPRISINGNESS_I_TOP_THRESHOLD 0.10
+#define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 
  struct _non_ordered_pattern

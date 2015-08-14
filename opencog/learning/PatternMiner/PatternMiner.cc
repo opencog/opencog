@@ -1706,9 +1706,9 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
 {
 
-    // debug
-    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
-        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
+//    // debug
+//    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
+//        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
 
     if (HNode->count < 2)
     {
@@ -1718,27 +1718,27 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         return;
     }
 
-     std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
-    for (Handle link : HNode->pattern)
-    {
-        std::cout << _fromAtomSpace->atomAsString(link);
-    }
-     std::cout << "count of this pattern = " << HNode->count << std::endl;
-     std::cout << std::endl;
+//    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
+//    for (Handle link : HNode->pattern)
+//    {
+//        std::cout << _fromAtomSpace->atomAsString(link);
+//    }
+//     std::cout << "count of this pattern = " << HNode->count << std::endl;
+//     std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
-    int comcount = 0;
+    // int comcount = 0;
 
     float p = ((float)HNode->count)/atomspaceSizeFloat;
     float min_diff = 999999999.9f;
-    cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
+    // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
         int com_i = 0;
-        std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
+        // std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
         float total_p = 1.0f;
 
         bool containsComponentDisconnected = false;
@@ -1754,26 +1754,26 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
-            std::cout<< "Subpattern: " << subPatternKey;
+            // std::cout<< "Subpattern: " << subPatternKey;
 
             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
             HandleSeqSeq splittedSubPattern;
             if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
             {
-                std::cout<< " is disconnected! skip it \n" ;
+                // std::cout<< " is disconnected! skip it \n" ;
                 containsComponentDisconnected = true;
                 break;
             }
             else
             {
-                std::cout<< " is connected!" ;
+                // std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
-                cout << ", count = " << component_count;
+                // cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
-                cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
+                // cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
                 total_p *= p_i;
-                std::cout << std::endl;
+                // std::cout << std::endl;
             }
 
             com_i ++;
@@ -1784,13 +1784,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             continue;
 
 
-        cout << "\n ---- total_p = " << total_p << " ----\n" ;
+        // cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
         float diff = total_p - p;
         if (diff < 0)
             diff = - diff;
 
-        cout << "diff  = total_p - p " << diff << " \n" ;
+        // cout << "diff  = total_p - p " << diff << " \n" ;
 
         diff = diff / total_p;
 
@@ -1798,7 +1798,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             min_diff = diff;
 
 
-        cout << "diff / total_p = " << diff << " \n" ;
+        // cout << "diff / total_p = " << diff << " \n" ;
 
     }
 
@@ -2120,10 +2120,10 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
                     // go through the top N patterns of surprisingness_I
                     int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
-                    for (int p = 0; p < threshold_index_I; p ++)
+                    for (int p = 0; p <= threshold_index_I; p ++)
                     {
-                        HTreeNode* pNode = curGramPatterns[p];
-                        if ( (pNode->nII_Surprisingness - surprisingness_II_threshold) >= FLOAT_MIN_DIFF )
+                        HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+                        if (pNode->nII_Surprisingness >= surprisingness_II_threshold )
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
 
