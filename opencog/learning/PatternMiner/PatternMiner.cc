@@ -1114,15 +1114,32 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 // Each HandleSeq in HandleSeqSeq oneOfEachSeqShouldBeVars is a list of nodes that connect two links in inputLinks,
 // at least one node in a HandleSeq should be variable, which means two connected links in inputLinks should be connected by at least a variable
 // leaves are those nodes that are not connected to any other links in inputLinks, they should be
-void PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace)
+// some will be filter out in this phrase, return true to filter out
+bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace)
 {
     if(inputLinks.size() < 2)
-        return;
+        return false;
 
     set<Handle> allNodesInEachLink[inputLinks.size()];
+
+    set<Handle> all2ndOutgoingsOfInherlinks;
+
+
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
         extractAllNodesInLink(inputLinks[i],allNodesInEachLink[i], _atomSpace);
+
+        if (enable_filter_not_inheritant_from_same_var)
+        {
+            if (_atomSpace->getType(inputLinks[i]) == INHERITANCE_LINK)
+            {
+                Handle secondOutgoing = _atomSpace->getOutgoing(inputLinks[i], 1);
+                if (all2ndOutgoingsOfInherlinks.find(secondOutgoing) == all2ndOutgoingsOfInherlinks.end())
+                    all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
+                else
+                    return true;
+            }
+        }
     }
 
     if (enable_filter_links_should_connect_by_vars)
@@ -1194,6 +1211,7 @@ void PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         }
     }
 
+    return false;
 
 }
 
@@ -1959,6 +1977,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
     enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
+    enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
 
     if (enable_filter_node_types_should_not_be_vars)
     {
@@ -2056,7 +2075,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Interesting_Pattern)
         {
-            for(cur_gram = 2; cur_gram <= MAX_GRAM ; cur_gram ++)
+            for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
             {
                 cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
                 cur_index = -1;
@@ -2104,7 +2123,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     for (int p = 0; p < threshold_index_I; p ++)
                     {
                         HTreeNode* pNode = curGramPatterns[p];
-                        if (pNode->nII_Surprisingness >= surprisingness_II_threshold )
+                        if ( (pNode->nII_Surprisingness - surprisingness_II_threshold) >= FLOAT_MIN_DIFF )
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
 

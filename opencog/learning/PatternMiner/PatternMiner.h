@@ -41,7 +41,7 @@ namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.10
-#define SURPRISINGNESS_II_TOP_THRESHOLD 0.20
+#define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 
  struct _non_ordered_pattern
  {
@@ -112,6 +112,7 @@ namespace PatternMining
      bool enable_filter_leaves_should_not_be_vars;
      bool enable_filter_links_should_connect_by_vars;
      bool enable_filter_node_types_should_not_be_vars;
+     bool enable_filter_not_inheritant_from_same_var;
      vector<Type> node_types_should_not_be_vars;
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
@@ -293,7 +294,7 @@ namespace PatternMining
      void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
                                             AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
-     void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
+     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars,AtomSpace* _atomSpace);
 
 
  public:

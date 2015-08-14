@@ -275,7 +275,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
 HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars,
-                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
+                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -341,7 +341,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             }
         }
     }
-
 
     if (! skip)
     {
@@ -529,7 +528,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
     //               atomSpace->atomAsString(inputLinks[0]).c_str() );
 
-    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+    if( filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace) )
+        return; //already been filter out in this phrase
 
 //    // debug
     string lastGramLinksStr = "";
@@ -915,7 +915,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
     HandleSeqSeq oneOfEachSeqShouldBeVars;
     HandleSeq leaves, shouldNotBeVars;
 
-    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+    if (filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace))
+        return; // already been filter out in this phrase
 
     // var_num is the number of variables
     for (int var_num = 1;var_num < n_limit; ++ var_num)
@@ -1002,6 +1003,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                     }
                 }
             }
+
 
 
             if (! skip)
