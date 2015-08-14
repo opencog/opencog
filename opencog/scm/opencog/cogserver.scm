@@ -10,11 +10,13 @@
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
 
 ; config path name is optional.
-(define* (start-cogserver #:key config-path)
-	(if (not config-path)
-		(c-start-cogserver "")
-		(c-start-cogserver config-path)
-	)
+(define* (start-cogserver #:optional (config-path ""))
+"
+  start-cogserver [config-file]
+
+  Start the cogserver, optionally specifying the config file to use.
+"
+	(c-start-cogserver config-path)
 )
 
 (export start-cogserver)
