@@ -41,7 +41,7 @@
             (VariableNode "$D")
             (VariableNode "$E"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-induction")
+            (GroundedSchemaNode "scm: pln-formula-abduction")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -49,7 +49,7 @@
                 (VariableNode "$D")
                 (VariableNode "$E")))))
 
-(define (pln-formula-induction A B C AB CB)
+(define (pln-formula-abduction A B C AB CB)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))

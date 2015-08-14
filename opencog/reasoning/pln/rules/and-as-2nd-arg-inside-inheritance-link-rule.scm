@@ -80,6 +80,4 @@
                     (cog-stv-confidence C)
                     (cog-stv-confidence AB)
                     (cog-stv-confidence AC))))))
-        
-))))
 
