@@ -15,8 +15,17 @@
   start-cogserver [config-file]
 
   Start the cogserver, optionally specifying the config file to use.
+  To stop the cogserver, just say stop-cogserver.
 "
 	(c-start-cogserver config-path)
 )
+
+; Add documentation for stopping the thing.
+(set-procedure-property! stop-server 'documentation
+"
+  stop-cogserver
+
+  Stop the cogserver.
+")
 
 (export start-cogserver)
