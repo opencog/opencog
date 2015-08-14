@@ -65,3 +65,7 @@ Chat interfaces:
      https://bitbucket.org/webrtc/codelab
      http://www.html5rocks.com/en/tutorials/webrtc/basics/
    * screensharing w/ webrtc
+
+
+Random debugging notes
+----------------------

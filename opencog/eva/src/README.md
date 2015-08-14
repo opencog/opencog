@@ -12,10 +12,19 @@ This is a pre-prototype.  But still:
 Running
 =======
 
+* At the bash prompt:
+```
+export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
+```
+Failure to do this will result in the message:
+```
+ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not found"
+```
+
 * Start guile, then from th guile prompt:
 ```
 (use-modules (opencog cogserver))
-(start-cogserver)
+(start-cogserver "../scripts/opencog.conf")
 ```
 Then load the python code:
 ```
