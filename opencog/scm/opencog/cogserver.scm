@@ -20,12 +20,21 @@
 	(c-start-cogserver config-path)
 )
 
-; Add documentation for stopping the thing.
-(set-procedure-property! stop-server 'documentation
+; to stop the repl server..
+(use-modules (system repl server))
+
+; Similar to above
+(define (stop-cogserver)
 "
   stop-cogserver
 
   Stop the cogserver.
-")
+"
+	; The start-cogserver also starts a repl shell on port 18001
+	; so we stop that, here ...
+	(stop-server-and-clients!)
+	(c-stop-cogserver)
+)
 
 (export start-cogserver)
+(export stop-cogserver)
