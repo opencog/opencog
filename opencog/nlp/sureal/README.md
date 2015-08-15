@@ -65,9 +65,6 @@ the style
 are generated.  They contain all the information of the LG connectors used for
 a particalar word of a particalar sentence.
 
-See the scheme function `word-inst-get-source-conn` to see how the information
-can be extracted.
-
 Given a new `SetLink` as input, SuReal matches each atom in the link to the
 structure inside the old sentences.  In addition, for each node that it
 matches, it check the word corresponding to the node and see if its LG disjuncts

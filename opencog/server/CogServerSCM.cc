@@ -41,8 +41,8 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    void start_server(const std::string&);
-    void stop_server(void);
+    const std::string& start_server(const std::string&);
+    const std::string& stop_server(void);
 
     CogServer* srvr = NULL;
     std::thread * main_loop = NULL;
@@ -105,7 +105,7 @@ void CogServerSCM::init_in_module(void* data)
 void CogServerSCM::init()
 {
     define_scheme_primitive("c-start-cogserver", &CogServerSCM::start_server, this, "cogserver");
-    define_scheme_primitive("stop-cogserver", &CogServerSCM::stop_server, this, "cogserver");
+    define_scheme_primitive("c-stop-cogserver", &CogServerSCM::stop_server, this, "cogserver");
 }
 
 extern "C" {
@@ -117,10 +117,11 @@ void opencog_cogserver_init(void)
 
 // --------------------------------------------------------------
 
-void CogServerSCM::start_server(const std::string& cfg)
+const std::string& CogServerSCM::start_server(const std::string& cfg)
 {
-    // singleton instance
-    if (srvr) return;
+    static std::string rc;
+    // Singleton instance
+    if (srvr) { rc = "CogServer already running!"; return rc; }
 
     // The default config file is installed from
     // $SRCDIR/lib/cogserver.conf and is copied to
@@ -145,21 +146,25 @@ void CogServerSCM::start_server(const std::string& cfg)
     // Enable the network server and run the server's main loop
     srvr->enableNetworkServer();
     main_loop = new std::thread(&CogServer::serverLoop, srvr);
+    rc = "Started CogServer";
+    return rc;
 }
 
-void CogServerSCM::stop_server(void)
+const std::string& CogServerSCM::stop_server(void)
 {
+    static std::string rc;
     // delete singleton instance
-    if (NULL == srvr) return;
+    if (NULL == srvr) { rc = "CogServer not running"; return rc;}
 
     // This is probably not thread-safe...
     srvr->stop();
     main_loop->join();
 
-    // I suspect this does not close the listen socket correctly.
-    // XXX this all needs to be fixed.
     srvr->disableNetworkServer();
     delete main_loop;
     delete srvr;
     srvr = NULL;
+
+    rc = "Stopped CogServer";
+    return rc;
 }
