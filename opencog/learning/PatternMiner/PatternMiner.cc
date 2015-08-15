@@ -1149,7 +1149,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
         if (enable_filter_not_same_var_from_same_predicate || enable_filter_not_all_first_outgoing_const)
         {
-            // filter: Any two EvaluationLinks with the same predicate should not share the same secondary outgoing nodes
+            // this filter: Any two EvaluationLinks with the same predicate should not share the same secondary outgoing nodes
             if (_atomSpace->getType(inputLinks[i]) == EVALUATION_LINK)
             {
                 HandleSeq outgoings = _atomSpace->getOutgoing(inputLinks[i]);
@@ -1178,6 +1178,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                     }
                 }
 
+                // this filter: at least one of all the 1st outgoings of Evaluationlinks should be var
                 if (enable_filter_not_all_first_outgoing_const)
                 {
                     if (outgoings2.size() > 1)
