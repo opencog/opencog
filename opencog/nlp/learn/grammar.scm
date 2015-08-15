@@ -11,10 +11,10 @@
 (define (get-decoded-disjunct disjunct)
 	(define (create-actual-decoded-disjunct word-sign-list)
 		(define disjunct-outset (cog-outgoing-set disjunct))
-		(LgWordCset
-			(WordNode (cog-name (car disjunct-outset)))
-			(LgAnd
-				(decoded-connectors word-sign-list))))
+		(cog-atom-incr (LgWordCset
+					(WordNode (cog-name (car disjunct-outset)))
+					(LgAnd
+						(decoded-connectors word-sign-list))) 1))
 	(define (decoded-connectors word-sign-list)
 		(define (helper-function word-sign)
 			(DecodedConnector
@@ -73,11 +73,18 @@
 		(cons word sign))
 	(if (equal? "-" sign)
 		(if (equal? "+" (get-sign-mst-connector (car in-set)))
-			(helper-function "+" (cog-incoming-set (car in-set)))
-			(helper-function "-" (cog-incoming-set (car in-set))))
+			(helper-function "-" (cog-incoming-set (car in-set)))
+			(helper-function "+" (cog-incoming-set (cadr in-set))))
 		(if (equal? "+" sign)
 			(if (equal? "-" (get-sign-mst-connector (cadr in-set)))
 				(helper-function "+" (cog-incoming-set (cadr in-set)))
-				(helper-function "-" (cog-incoming-set (cadr in-set))))
+				(helper-function "-" (cog-incoming-set (car in-set))))
 			'())))
+
+;This function uses all the above functions to create decoded disjuncts for all
+;the disjuncts of a given wordnode as well as all the words connected to it.
+(define (create-em-all-decoded-disjuncts wordnode)
+	(define decoded-disjunct-of-word (create-decoded-disjuncts-for-all-disjuncts wordnode))
+	(define disjuncts-of-the-wordnode (get-disjunct-from-word wordnode))
+	(map create-decoded-disjuncts-for-all-connected-words disjuncts-of-the-wordnode))
 
