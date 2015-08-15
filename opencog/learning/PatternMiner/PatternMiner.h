@@ -113,6 +113,7 @@ namespace PatternMining
      bool enable_filter_links_should_connect_by_vars;
      bool enable_filter_not_inheritant_from_same_var;
      bool enable_filter_not_same_var_from_same_predicate;
+     bool enable_filter_not_all_first_outgoing_const;
      bool enable_filter_node_types_should_not_be_vars;
      vector<Type> node_types_should_not_be_vars;
 

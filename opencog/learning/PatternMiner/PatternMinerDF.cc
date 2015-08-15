@@ -299,7 +299,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
     }
 
-    if ((! skip) && enable_filter_links_should_connect_by_vars)
+    if ((! skip) && (enable_filter_links_should_connect_by_vars || enable_filter_not_all_first_outgoing_const))
     {
 
         // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
@@ -949,7 +949,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 index ++;
             }
 
-            if (enable_filter_links_should_connect_by_vars)
+            if (enable_filter_links_should_connect_by_vars || enable_filter_not_all_first_outgoing_const)
             {
 
                 // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
