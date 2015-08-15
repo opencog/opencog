@@ -1124,6 +1124,9 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
     set<Handle> all2ndOutgoingsOfInherlinks;
 
+    // map<predicate, set<value> >
+    map<Handle, set<Handle> > predicateToValueOfEvalLinks;
+
 
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
@@ -1131,6 +1134,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
         if (enable_filter_not_inheritant_from_same_var)
         {
+            // filter: Any two InheritanceLinks should not share their secondary outgoing nodes
             if (_atomSpace->getType(inputLinks[i]) == INHERITANCE_LINK)
             {
                 Handle secondOutgoing = _atomSpace->getOutgoing(inputLinks[i], 1);
@@ -1138,6 +1142,36 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                     all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
                 else
                     return true;
+            }
+        }
+
+        if (enable_filter_not_same_var_from_same_predicate)
+        {
+            // filter: Any two EvaluationLinks with the same predicate should not share the same secondary outgoing nodes
+            if (_atomSpace->getType(inputLinks[i]) == EVALUATION_LINK)
+            {
+                HandleSeq outgoings = _atomSpace->getOutgoing(inputLinks[i]);
+                Handle predicateNode = outgoings[0];
+
+                // value node is the last node of the list link
+                HandleSeq outgoings2 = _atomSpace->getOutgoing(outgoings[1]);
+                Handle valueNode = outgoings2[outgoings2.size() - 1];
+
+                map<Handle, set<Handle> >::iterator it = predicateToValueOfEvalLinks.find(predicateNode);
+                if (it != predicateToValueOfEvalLinks.end())
+                {
+                    set<Handle>& values = (it->second);
+                    if (values.find(valueNode) != values.end())
+                        return true;
+                    else
+                        values.insert(valueNode);
+                }
+                else
+                {
+                    set<Handle> newValues;
+                    newValues.insert(valueNode);
+                    predicateToValueOfEvalLinks.insert(std::pair<Handle, set<Handle> >(predicateNode,newValues));
+                }
             }
         }
     }
@@ -1978,6 +2012,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
     enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
     enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
+    enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
 
     if (enable_filter_node_types_should_not_be_vars)
     {
