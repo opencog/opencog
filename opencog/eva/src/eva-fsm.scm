@@ -154,12 +154,16 @@
 
 (cog-bind wtf)
 
-(define (hoy) (display "hoy hoy hoy wrape em up\n"))
-(define stuff
+(define look-left
 	(EvaluationLink
 		(GroundedPredicateNode "py: do_look_left")
 		(ListLink)))
-(cog-evaluate! stuff)
+(define look-right
+	(EvaluationLink
+		(GroundedPredicateNode "py: do_look_right")
+		(ListLink)))
+(cog-evaluate! look-left)
+(cog-evaluate! look-right)
 
 
 |#

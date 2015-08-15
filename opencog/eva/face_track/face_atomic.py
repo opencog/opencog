@@ -29,7 +29,7 @@ class FaceAtomic:
 
 	def __init__(self):
 		self.hostname = "localhost"
-		self.port = 17001
+		self.port = 17002
 
 	# Add a face to the atomspace.
 	def add_face_to_atomspace(self, faceid):

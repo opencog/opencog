@@ -8,6 +8,13 @@ This is a pre-prototype.  But still:
   + pi_vision subsystem.  It calls methods in `face_atomic.py` to
   poke face-ids (ID numbers) into the atomspace.
 
+  A new face (for example, faceid 123) is indicated with this message:
+  ```
+   (EvaluationLink (PredicateNode "visible face")
+             (ListLink (NumberNode "123")))
+  ```
+  See `face_track/README.md` for details.
+
 
 Running
 =======
@@ -28,7 +35,7 @@ ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not
 ```
 Then load the python code:
 ```
-echo -e "py\n" | cat - atomic.py |netcat localhost 17001
+echo -e "py\n" | cat - atomic.py |netcat localhost 17002
 ```
 Then back at the guile prompt:
 ```
@@ -46,7 +53,7 @@ Cython modules are installed here:
 
 Get to the cogserver prompt like this:
 ```
-rlwrap telnet localhost 17001
+rlwrap telnet localhost 17002
 ```
 and then enter the python interpreter by saying `py`, or the scheme
 interpreter by saying `scm`.
@@ -62,6 +69,9 @@ Face tracking debug
 Print all visible faces in the atomspace:
 
 ```
-rlwrap telnet localhost 17001
+rlwrap telnet localhost 17002
 (cog-incoming-set (PredicateNode "visible face"))
+(cog-bind chk-room-empty)
+(cog-bind chk-room-non-empty)
+(show-room-state)
 ```

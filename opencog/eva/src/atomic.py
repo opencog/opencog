@@ -33,7 +33,7 @@ set_type_ctor_atomspace(atomspace)
 # The ROS layer.
 evl = EvaControl()
 
-# Global functions, beause that's what PythonEval expects.
+# Global functions, because that's what PythonEval expects.
 # The must return a TruthValue, since EvaluationLinks
 # expect TruthValues.
 def do_look_left():
