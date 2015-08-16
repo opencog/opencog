@@ -48,13 +48,14 @@ import visibility as vis
 # returns as many frames as necessary to go the requested distance
 # in a straight line, and at the requested speed
 # frames frequency determined by the frequency of 'action_tick' event in Spock
-def getMovementFramesInPolar(pos, direction, dist, speed, jump):
+def getMovementFrames(pos, direction, dist, speed, jump):
 
     d_dist = motions[speed]
     frames = []
     traveled = 0.
     temp_pos = copy.copy(pos)
-    dx, dy, dz = vis.calcRayStep(0, direction, d_dist)/dist
+    dx, dy, dz = vis.calcRayStep(0, direction, d_dist)
+
     while traveled < dist:
         frame = {}
         
@@ -85,7 +86,7 @@ def getMovementFramesInPolar(pos, direction, dist, speed, jump):
 
     return frames
 
-
+"""
 def getMovementFramesInXYZ(cur_pos, dest_pos, speed, jump):
 
     d_dist = motions[speed]
@@ -126,7 +127,7 @@ def getMovementFramesInXYZ(cur_pos, dest_pos, speed, jump):
         
 
     return frames
-
+"""
 
 # currently only one frame returned, may need higher resolution
 def getLookFrames(pos, pitch, yaw):

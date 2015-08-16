@@ -93,9 +93,11 @@ class ClientMover():
                 'on_ground':self.on_ground
                 }
 
-    def getDesiredYaw(self, desired_x, desired_z):
-        l = self.x - desired_x
-        w = self.z - desired_z
+
+    def getDesiredYaw(self, x_0, z_0, x_1, z_1):
+        
+        l = x_0 - x_1
+        w = z_0 - z_1
         c = sqrt( l*l + w*w )
         alpha1 = -asin(l/c)/pi * 180
         alpha2 =  acos(w/c)/pi * 180
@@ -103,29 +105,27 @@ class ClientMover():
             return 180 - alpha1
         else:
             return alpha1
-            
+
+
     def handleLook(self, pitch, yaw):
         
         # as long as we have not reached our target, update position and calculate new frame
-        
-        #yaw = req.yaw
-        #pitch = req.pitch
-
         timer = 0.
         while timer < 3:
-            c_pitch = self.pitch
-            c_yaw = self.yaw
+            #c_pitch = self.pitch
+            #c_yaw = self.yaw
             
             #print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw) 
             #print "requested dir: pitch %f, yaw %f"%(pitch, yaw)           
             #print "desired dir: pitch %f, yaw %f\n"%(pitch, yaw)
 
            
-            if self.inRange(c_yaw, yaw) and self.inRange(c_pitch, pitch):
+            if self.inRange(self.yaw, yaw) and self.inRange(self.pitch, pitch):
                 return True
+            
             frames = phy.getLookFrames(self.posToDict(), pitch, yaw)
 
-            print 'handle look middle'
+            #print 'handle look middle'
             for frame in frames:
                 msg = movement_msg()
                 msg.x = frame['x']
@@ -142,22 +142,6 @@ class ClientMover():
         # if we have not reached correct position in 3 seconds
         return False
 
-    def handleMove(self, x, y, z, jump):
-
-        pos_dict = {'x': x, 'y': y, 'z': z}
-        speed = 1
-        frames = phy.getMovementFramesInXYZ(self.posToDict(), pos_dict, speed, jump)
-        for frame in frames:
-            msg = movement_msg()
-            msg.x = frame['x']
-            msg.y = frame['y']
-            msg.z = frame['z']
-            msg.pitch = frame['pitch']
-            msg.yaw = frame['yaw']
-            msg.jump = jump
-            print "abs_move_msg", msg
-            self.pub_move.publish(msg)
-        return True
 
     def handleRelativeLook(self, pitch, yaw):
         
@@ -165,21 +149,25 @@ class ClientMover():
 
         #yaw = req.yaw
         #pitch = req.pitch
-        desired_pitch = self.pitch - pitch
-        desired_yaw = self.yaw + yaw
+        pos = posToDict()
+
+        # these need to be constant for a given call to this function
+        desired_pitch = pos['pitch'] - pitch
+        desired_yaw = pos['yaw'] + yaw
  
         timer = 0.
         while timer < 3:
-            c_pitch = self.pitch
-            c_yaw = self.yaw
+            #c_pitch = self.pitch
+            #c_yaw = self.yaw
             
-            print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw)
-            print "requested dir: pitch %f, yaw %f"%(pitch, yaw)
-            print "desired dir: pitch %f, yaw %f\n"%(desired_pitch, desired_yaw)
+            #print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw)
+            #print "requested dir: pitch %f, yaw %f"%(pitch, yaw)
+            #print "desired dir: pitch %f, yaw %f\n"%(desired_pitch, desired_yaw)
 
-            if self.inRange(c_yaw, desired_yaw) and self.inRange(c_pitch, desired_pitch):
+            if self.inRange(self.yaw, desired_yaw) and self.inRange(self.pitch, desired_pitch):
                 return True
 
+            # can probably extract this functionality
             if desired_pitch < -90:
                 desired_pitch = -90
             elif desired_pitch > 90:
@@ -192,7 +180,7 @@ class ClientMover():
                 while desired_yaw < -180:
                     desired_yaw += 360
             
-            frames = phy.getLookFrames(self.posToDict(), desired_pitch, desired_yaw)
+            frames = phy.getLookFrames(pos, desired_pitch, desired_yaw)
             
             for frame in frames:
                 msg = movement_msg()
@@ -211,15 +199,37 @@ class ClientMover():
         # if we have not reached correct position in 3 seconds
         return False
 
+    def handleMove(self, x, z, jump):
+
+        #pos_dict = {'x': x, 'y': y, 'z': z}
+        speed = 1
+        
+        pos = self.posToDict()
+        direction = getDesiredYaw(pos['x'], pos['z'], x, z)
+        dist = sqrt( (x - pos['x'])**2 + (z - pos['z'])**2 )
+        frames = phy.getMovementFrames(pos, direction, dist, speed, jump)
+        
+        #frames = phy.getMovementFramesInXYZ(self.posToDict(), pos_dict, speed, jump)
+        for frame in frames:
+            msg = movement_msg()
+            msg.x = frame['x']
+            msg.y = frame['y']
+            msg.z = frame['z']
+            msg.pitch = frame['pitch']
+            msg.yaw = frame['yaw']
+            msg.jump = jump
+            #print "abs_move_msg", msg
+            self.pub_move.publish(msg)
+        return True
+
+
     # jump is either True or False
-    def handleRelativeMove(self, yaw, dist, jump):
+    def handleRelativeMove(self, direction, dist, jump):
         #print 'handle RelativeMove', yaw, dist, jump
-        abs_yaw = self.yaw
-        abs_x = self.x
-        abs_y = self.y
-        abs_z = self.z
-        #print "abs xyz",abs_x, abs_y, abs_z
-        desired_yaw = abs_yaw + yaw
+        
+        speed = 1
+        pos = posToDict()       
+        desired_yaw = direction
 
         if desired_yaw > 180:
             while desired_yaw > 180:
@@ -228,26 +238,20 @@ class ClientMover():
             while desired_yaw < -180:
                 desired_yaw += 360
         
-        # calculate change in x, y, z desired using pitch of zero (no movement in y dir)
-        # this will work the same for jumps, but dist will be small
-        dx, dy, dz = vis.calcRayStep(0, desired_yaw, dist)
+        frames = phy.getMovementFrames(pos, direction, dist, speed, jump)
         #print "dx,dy,dz", dx, dy, dz
-        desired_x = abs_x + dx
-        desired_y = abs_y + dy
-        desired_z = abs_z + dz
-
-        msg = movement_msg()
-        msg.x = desired_x
-        msg.y = desired_y
-        msg.z = desired_z
-        msg.pitch = 0
-        msg.yaw = desired_yaw
-        msg.jump = jump
-        msg.speed = 1
-
-        #print "move_msg", msg
-        self.pub_move.publish(msg)
+        for frame in frames:
+            msg = movement_msg()
+            msg.x = frame['x']
+            msg.y = frame['y']
+            msg.z = frame['z']
+            msg.pitch = frame['pitch']
+            msg.yaw = frame['yaw']
+            msg.jump = jump
+            #print "abs_move_msg", msg
+            self.pub_move.publish(msg)
         return True
+
 
 def handleAbsoluteLook(req):
 
