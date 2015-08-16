@@ -1115,7 +1115,7 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 // at least one node in a HandleSeq should be variable, which means two connected links in inputLinks should be connected by at least a variable
 // leaves are those nodes that are not connected to any other links in inputLinks, they should be
 // some will be filter out in this phrase, return true to filter out
-bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace)
+bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars, AtomSpace* _atomSpace)
 {
     if(inputLinks.size() < 2)
         return false;
@@ -1147,7 +1147,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
             }
         }
 
-        if (enable_filter_not_same_var_from_same_predicate || enable_filter_not_all_first_outgoing_const)
+        if (enable_filter_not_same_var_from_same_predicate || enable_filter_not_all_first_outgoing_const|| enable_filter_first_outgoing_evallink_should_be_var)
         {
             // this filter: Any two EvaluationLinks with the same predicate should not share the same secondary outgoing nodes
             if (_atomSpace->getType(inputLinks[i]) == EVALUATION_LINK)
@@ -1179,7 +1179,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                 }
 
                 // this filter: at least one of all the 1st outgoings of Evaluationlinks should be var
-                if (enable_filter_not_all_first_outgoing_const)
+                if ( enable_filter_first_outgoing_evallink_should_be_var || enable_filter_not_all_first_outgoing_const)
                 {
                     if (outgoings2.size() > 1)
                     {
@@ -1187,15 +1187,24 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                             all1stOutgoingsOfEvalLinks.insert(outgoings2[0]);
                     }
                 }
+
             }
         }
     }
 
-    if ((enable_filter_not_all_first_outgoing_const) && (all1stOutgoingsOfEvalLinks.size() > 0))
+    if (all1stOutgoingsOfEvalLinks.size() > 0)
     {
-        vector<Handle> all1stOutgoingsOfEvalLinksSeq(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end());
-        oneOfEachSeqShouldBeVars.push_back(all1stOutgoingsOfEvalLinksSeq);
+        // this filter: all the first outgoing nodes of all evaluation links should be variables
+        if (enable_filter_first_outgoing_evallink_should_be_var)
+            std::copy(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end(), std::back_inserter(shouldBeVars));
+        else if ((enable_filter_not_all_first_outgoing_const) )
+        {
+            // if enable_filter_first_outgoing_evallink_should_be_var is true, there is no need to enable this filter below
+            vector<Handle> all1stOutgoingsOfEvalLinksSeq(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end());
+            oneOfEachSeqShouldBeVars.push_back(all1stOutgoingsOfEvalLinksSeq);
+        }
     }
+
 
     if (enable_filter_links_should_connect_by_vars)
     {
@@ -2043,7 +2052,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
     enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
     enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
-
+    enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
     if (enable_filter_node_types_should_not_be_vars)
     {
         string node_types_str = config().get("node_types_should_not_be_vars");

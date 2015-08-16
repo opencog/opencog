@@ -114,6 +114,7 @@ namespace PatternMining
      bool enable_filter_not_inheritant_from_same_var;
      bool enable_filter_not_same_var_from_same_predicate;
      bool enable_filter_not_all_first_outgoing_const;
+     bool enable_filter_first_outgoing_evallink_should_be_var;
      bool enable_filter_node_types_should_not_be_vars;
      vector<Type> node_types_should_not_be_vars;
 
@@ -226,7 +227,7 @@ namespace PatternMining
      bool containsLoopVariable(HandleSeq& inputPattern);
 
      HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                       HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
+                                                       HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -298,7 +299,7 @@ namespace PatternMining
      void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
                                             AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
-     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars,AtomSpace* _atomSpace);
+     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
 
  public:
