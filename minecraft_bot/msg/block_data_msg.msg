@@ -1,5 +1,4 @@
-uint8 blockid
-uint8 blockdata
+uint8 data
 int32 x
 int32 y
 int32 z
