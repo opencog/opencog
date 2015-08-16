@@ -8,13 +8,15 @@ to this server one action at a time
 
 """
 
+from math import pi, acos, asin, sqrt
+
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
 #from minecraft_bot.srv import visible_blocks_srv, get_block_multi_srv
 #from minecraft_bot.msg import map_block_msg, vec3_msg
 
 from minecraft_bot.msg import position_msg, movement_msg
-from minecraft_bot.srv import look_srv, rel_move_srv
+from minecraft_bot.srv import look_srv, rel_move_srv, abs_move_srv
 import visibility as vis
 import mcphysics as phy
 
@@ -64,7 +66,7 @@ class ClientMover():
         self.z = data.z
         self.pitch = data.pitch
         self.yaw = data.yaw
-        #print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
+        print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
 
 
     # 95% interval of actual desired value
@@ -90,7 +92,18 @@ class ClientMover():
                 'yaw':self.yaw,
                 'on_ground':self.on_ground
                 }
-    
+
+    def getDesiredYaw(self, desired_x, desired_z):
+        l = self.x - desired_x
+        w = self.z - desired_z
+        c = sqrt( l*l + w*w )
+        alpha1 = -asin(l/c)/pi * 180
+        alpha2 =  acos(w/c)/pi * 180
+        if alpha2 > 90:
+            return 180 - alpha1
+        else:
+            return alpha1
+            
     def handleLook(self, pitch, yaw):
         
         # as long as we have not reached our target, update position and calculate new frame
@@ -100,18 +113,19 @@ class ClientMover():
 
         timer = 0.
         while timer < 3:
-            c_pitch = client_pos.pitch
-            c_yaw = client_pos.yaw
+            c_pitch = self.pitch
+            c_yaw = self.yaw
             
-            print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw) 
-            print "requested dir: pitch %f, yaw %f"%(pitch, yaw)           
-            print "desired dir: pitch %f, yaw %f\n"%(pitch, yaw)
+            #print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw) 
+            #print "requested dir: pitch %f, yaw %f"%(pitch, yaw)           
+            #print "desired dir: pitch %f, yaw %f\n"%(pitch, yaw)
 
            
             if self.inRange(c_yaw, yaw) and self.inRange(c_pitch, pitch):
                 return True
             frames = phy.getLookFrames(self.posToDict(), pitch, yaw)
-            
+
+            print 'handle look middle'
             for frame in frames:
                 msg = movement_msg()
                 msg.x = frame['x']
@@ -128,23 +142,36 @@ class ClientMover():
         # if we have not reached correct position in 3 seconds
         return False
 
+    def handleMove(self, x, y, z, jump):
 
-      
-
+        pos_dict = {'x': x, 'y': y, 'z': z}
+        speed = 1
+        frames = phy.getMovementFramesInXYZ(self.posToDict(), pos_dict, speed, jump)
+        for frame in frames:
+            msg = movement_msg()
+            msg.x = frame['x']
+            msg.y = frame['y']
+            msg.z = frame['z']
+            msg.pitch = frame['pitch']
+            msg.yaw = frame['yaw']
+            msg.jump = jump
+            print "abs_move_msg", msg
+            self.pub_move.publish(msg)
+        return True
 
     def handleRelativeLook(self, pitch, yaw):
         
         # as long as we have not reached our target, update position and calculate new frame
-        
+
         #yaw = req.yaw
         #pitch = req.pitch
-        desired_pitch = client_pos.pitch - pitch
-        desired_yaw = client_pos.yaw + yaw
+        desired_pitch = self.pitch - pitch
+        desired_yaw = self.yaw + yaw
  
         timer = 0.
         while timer < 3:
-            c_pitch = client_pos.pitch
-            c_yaw = client_pos.yaw
+            c_pitch = self.pitch
+            c_yaw = self.yaw
             
             print "current pose: pitch %f, yaw %f"%(c_pitch, c_yaw)
             print "requested dir: pitch %f, yaw %f"%(pitch, yaw)
@@ -186,12 +213,12 @@ class ClientMover():
 
     # jump is either True or False
     def handleRelativeMove(self, yaw, dist, jump):
-        
-        abs_yaw = client_pos.yaw
-        abs_x = client_pos.x
-        abs_y = client_pos.y
-        abs_z = client_pos.z
-
+        #print 'handle RelativeMove', yaw, dist, jump
+        abs_yaw = self.yaw
+        abs_x = self.x
+        abs_y = self.y
+        abs_z = self.z
+        #print "abs xyz",abs_x, abs_y, abs_z
         desired_yaw = abs_yaw + yaw
 
         if desired_yaw > 180:
@@ -204,10 +231,10 @@ class ClientMover():
         # calculate change in x, y, z desired using pitch of zero (no movement in y dir)
         # this will work the same for jumps, but dist will be small
         dx, dy, dz = vis.calcRayStep(0, desired_yaw, dist)
-       
+        #print "dx,dy,dz", dx, dy, dz
         desired_x = abs_x + dx
-        desired_y = abs_x + dy
-        desired_z = abs_x + dz
+        desired_y = abs_y + dy
+        desired_z = abs_z + dz
 
         msg = movement_msg()
         msg.x = desired_x
@@ -218,18 +245,21 @@ class ClientMover():
         msg.jump = jump
         msg.speed = 1
 
-        print msg
-        pub_move.publish(msg)
+        #print "move_msg", msg
+        self.pub_move.publish(msg)
+        return True
 
 def handleAbsoluteLook(req):
 
+    print 'handleabslook'
     result = client_pos.handleLook(req.pitch, req.yaw)
     return result
 
 
 def handleAbsoluteMove(req):
-
+    print 'handleabsmove'
     result = client_pos.handleMove(req.x, req.y, req.z, req.jump)
+    print 'absmove result'
     return result
 
 
@@ -241,7 +271,6 @@ def handleRelativeLook(req):
 
 
 def handleRelativeMove(req):
-
     result = client_pos.handleRelativeMove(req.yaw, req.dist, req.jump)
     return result
 
@@ -251,7 +280,7 @@ client_pos = ClientMover()
 def actionServer():
 
 
-    #clientpos = ClientMover()
+    clientpos = ClientMover()
 
 
     #vis.initBlockMats()
@@ -262,11 +291,13 @@ def actionServer():
     
     # look handles changes in head position
     # move handles changes in body location and jump commands
+    while clientpos.x == None:
+        rospy.sleep(1.)
     rel_look_srvc = rospy.Service('set_relative_look', look_srv, handleRelativeLook)
     rel_move_srvc = rospy.Service('set_relative_move', rel_move_srv, handleRelativeMove)
     
     abs_look_srvc = rospy.Service('set_look', look_srv, handleAbsoluteLook)
-    abs_move_srvc = rospy.Service('set_move', rel_move_srv, handleAbsoluteMove)
+    abs_move_srvc = rospy.Service('set_move', abs_move_srv, handleAbsoluteMove)
 
 
     print("action server initialized")

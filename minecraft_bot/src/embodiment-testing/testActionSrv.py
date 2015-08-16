@@ -6,7 +6,7 @@ small script to test the action server
 
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
-from minecraft_bot.srv import look_srv, rel_move_srv
+from minecraft_bot.srv import look_srv, rel_move_srv, abs_move_srv
 #from minecraft_bot.msg import map_block_msg
 
 
@@ -21,6 +21,16 @@ def testRelativeLookClient(pitch, yaw):
     except rospy.ServiceException, e:
         print "service call failed: %s"%e
 
+def testRelativeMoveClient(yaw, dist, jump):
+
+    rospy.wait_for_service('set_relative_move')
+
+    try:
+        setRelativeMove = rospy.ServiceProxy('set_relative_move', rel_move_srv)
+        response = setRelativeMove(yaw, dist, jump)
+        return response.state
+    except rospy.ServiceException, e:
+        print "service call failed: %s"%e
 
 
 def testLookClient(pitch, yaw):
@@ -34,7 +44,42 @@ def testLookClient(pitch, yaw):
     except rospy.ServiceException, e:
         print "service call failed: %s"%e
 
+def testMoveClient(x, y, z, jump):
 
+    rospy.wait_for_service('set_move')
+
+    try:
+        setMove = rospy.ServiceProxy('set_move', abs_move_srv)
+        response = setMove(x, y, z, jump)
+        return response.state
+    except rospy.ServiceException, e:
+        print "service call failed: %s"%e
+
+def testMove():
+
+    while not rospy.is_shutdown():
+        move_steps = [
+            (-14, 4, 1120.5, False),
+            (-18, 4, 1120.5, False),
+            (-18, 4, 1115.5, False),
+            (-14, 4, 1115.5, False)]
+        for step in move_steps:
+            response = testMoveClient(*step)
+            print "service move respond with %s"%response
+            rospy.sleep(3.)
+
+def testRelativeMove():
+
+    while not rospy.is_shutdown():
+        move_steps = [
+            (0,3,True),
+            (90,3,False),
+            (90,3,True),
+            (0,3,False)]
+        for step in move_steps:
+            response = testRelativeMoveClient(*step)
+            print "service rel_move respond with %s"%response
+            rospy.sleep(3.)
 
 def testRelativeLook():
         
@@ -64,4 +109,5 @@ def resetLook():
 if __name__ == "__main__":
 
     resetLook()
-    testRelativeLook()
+    testMove()
+    #testRelativeLook()
