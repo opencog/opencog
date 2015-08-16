@@ -191,12 +191,13 @@ cdef class PyInteractionInformation:
     """
     @classmethod
     def calculate_interaction_information(cls, one_piece_of_data,
-                                          PyDataProvider provider):
+                                          PyDataProvider provider,
+                                          n_max_limit=-1):
         cdef vector[long] v
         for item in one_piece_of_data:
             v.push_back(item)
         cdef DataProvider[long] *thisptr = provider.thisptr
-        return calculateInteractionInformation(v, deref(thisptr))
+        return calculateInteractionInformation(v, deref(thisptr), n_max_limit)
 
     @classmethod
     def calculate_interaction_informations(cls, PyDataProvider provider):
@@ -287,9 +288,13 @@ class PyInteractionInformationAtom:
     This class wraps the Python InteractionInformation wrapper class.
     """
     def calculate_interaction_information(self, one_piece_of_data,
-                                          provider_atom):
-        PyInteractionInformation.calculate_interaction_information(
-            one_piece_of_data, provider_atom.provider
+                                          provider_atom, n_max_limit=-1):
+        long_vector = list()
+        for atom in one_piece_of_data:
+            long_vector.append(atom.h.value())
+
+        return PyInteractionInformation.calculate_interaction_information(
+            long_vector, provider_atom.provider, n_max_limit
         )
     def calculate_interaction_informations(self, provider_atom):
         PyInteractionInformation.calculate_interaction_informations(

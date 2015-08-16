@@ -56,7 +56,8 @@ cdef extern from "opencog/learning/statistics/InteractionInformation.h" \
     # noinspection PyPep8Naming
     # Interface of C++ template method in InteractionInformation class.
     float calculateInteractionInformation(vector[long] &onePieceOfData,
-                                          DataProvider[long] &provider)
+                                          DataProvider[long] &provider,
+                                          long n_max_limit)
     # noinspection PyPep8Naming
     # Interface of C++ template method in InteractionInformation class.
     void calculateInteractionInformations(DataProvider[long] &provider)
