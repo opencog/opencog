@@ -75,3 +75,20 @@ cdef class SpaceServer:
 
     def set_time_server(self,TimeServer time_server):
         self.c_space_server.setTimeServer(time_server.c_time_server)
+
+class SpaceTimeAndAtomSpace:
+    """
+    A static instance for global space/time server and atomspace for embodiment
+    """
+    atomspace_instance = AtomSpace()
+    space_server_instance = SpaceServer(atomspace_instance)
+    time_server_instance = TimeServer(atomspace_instance, space_server_instance)
+    space_server_instance.set_time_server(time_server_instance)
+    def get_space_server(self):
+        return SpaceTimeAndAtomSpace.space_server_instance
+
+    def get_time_server(self):
+        return SpaceTimeAndAtomSpace.time_server_instance
+
+    def get_atomspace(self):
+        return SpaceTimeAndAtomSpace.atomspace_instance
