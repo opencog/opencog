@@ -60,7 +60,7 @@ class ConceptNetWriter:
                 )
             )
             self.__write_space(pre_space)
-            if pre_space == 0:
+            if pre_space == 4:
                 self.output_file.write(')\n\n')
             else:
                 self.output_file.write(')')
@@ -117,6 +117,6 @@ class ConceptNetWriter:
         if self.output_file_type == "scm":
             self.__write_scm_file(output_atom)
         elif self.output_file_type == "py":
-            self.__write_py_file(output_atom, pre_space)
+            self.__write_py_file(output_atom, pre_space+4)
         else:
             raise ValueError()
