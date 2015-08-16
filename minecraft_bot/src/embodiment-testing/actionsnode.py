@@ -222,7 +222,7 @@ class ClientMover():
             msg.pitch = frame['pitch']
             msg.yaw = frame['yaw']
             msg.jump = jump
-            #print "abs_move_msg", msg
+            print "abs_move_msg", msg
             self.pub_move.publish(msg)
         return True
 

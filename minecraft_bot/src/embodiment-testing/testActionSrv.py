@@ -59,10 +59,10 @@ def testMove():
 
     while not rospy.is_shutdown():
         move_steps = [
-            (-14, -33, False),
-            (-18, -35, False),
-            (-18, -30, False),
-            (-14, -38, False)]
+            (-14, -33, True),
+            (-18, -35, True),
+            (-18, -30, True),
+            (-14, -38, True)]
         
         for step in move_steps:
             response = testMoveClient(*step)

@@ -62,25 +62,28 @@ def getMovementFrames(pos, direction, dist, speed, jump):
         # in this case, direction should be a correct yaw in 'Minecraft terms'
         temp_pos['x'] += dx
         temp_pos['z'] += dz
-        frame['x'] = temp_pos['x']
-        frame['z'] = temp_pos['z']
+        #frame['x'] = temp_pos['x']
+        #frame['z'] = temp_pos['z']
 
         if jump:
             if temp_pos['on_ground']:
-                frame['on_ground'] = False
-                temp_pos['y'] += PLAYER_JMP_ACC
-                frame['y'] = temp_pos['y']
+                temp_pos['on_ground'] = False
+                temp_pos['y'] += 1.35
             else:
-                frame['on_ground'] = True
-                frame['y'] = temp_pos['y']
-            jump = False
+                #temp_pos['on_ground'] = True
+                if temp_pos['y'] <= pos['y']:
+                    temp_pos['on_ground'] = True
+                    jump = False
+                else:
+                    temp_pos['y'] -= 0.08
+                    if temp_pos['y'] < pos['y']:
+                        temp_pos['y'] = pos['y']
+            #jump = False
         else:
-            frame['on_ground'] = pos['on_ground']
-            frame['y'] = temp_pos['y']
-
-        frame['pitch'] = temp_pos['pitch']
-        frame['yaw'] = temp_pos['yaw']
+            temp_pos['on_ground'] = pos['on_ground']
+            temp_pos['y'] = pos['y']
         
+        frame = copy.copy(temp_pos)
         frames.append(frame)
         traveled += d_dist
 
