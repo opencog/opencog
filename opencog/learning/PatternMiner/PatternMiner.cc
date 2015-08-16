@@ -2181,8 +2181,29 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
                     // Get the min threshold of surprisingness_II
-                    int threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
-                    surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+                    int threshold_index_II;
+                    threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
+                    int looptimes = 0;
+                    while (true)
+                    {
+
+                        surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+                        if (surprisingness_II_threshold <= 0.00000f)
+                        {
+                            if (++ looptimes > 8)
+                            {
+                                surprisingness_II_threshold = 0.00000f;
+                                break;
+                            }
+
+                            threshold_index_II = ((float)threshold_index_II) * SURPRISINGNESS_II_TOP_THRESHOLD;
+                        }
+                        else
+                            break;
+                    }
+
+
+                    cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
 
                     // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
                     int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
@@ -2191,9 +2212,12 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                         HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
 
                         // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
-                        if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness >= surprisingness_II_threshold ) )
+                        if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
+
+                    // sort by frequency
+                    std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
                     OutPutFinalPatternsToFile(cur_gram);
 
