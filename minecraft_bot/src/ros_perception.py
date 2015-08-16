@@ -18,7 +18,7 @@ class ROSPerceptionInterface:
         for topic in subscribed_msg_dict:
             print topic
             print _ros_handle_dict
-            print _ros_handle_dict[topic]
+            #print _ros_handle_dict[topic]
             print subscribed_msg_dict
             try:
                 rospy.Subscriber(topic, subscribed_msg_dict[topic], _ros_handle_dict[topic])

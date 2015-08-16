@@ -45,12 +45,13 @@ class PerceptionManager:
         cur_pos = cur_map.get_last_appeared_location(self_entity_handle)
         cur_look = get_most_recent_pred_val(self._atomspace, self._time_server,
                                             "look", self_entity_handle, 2)
-        new_blocks = self._receiver.get_visible_blocks(cur_pos[0], cur_pos[1], cur_pos[2],
+        print "x,y,z,yaw,pitch",cur_pos[0], cur_pos[1], cur_pos[2],cur_look[0], cur_look[1]
+        new_blocks = self._receiver.get_visible_blocks(cur_pos[0], cur_pos[1]+1.5, cur_pos[2],
                                                        cur_look[0], cur_look[1])
         self.process_blocks_message(new_blocks)
 
     def handle_self_pos_message(self, data):
-        print 'handle_self_pos_message'
+        #print 'handle_self_pos_message'
         map_handle, cur_map = self._get_map()
         old_self_handle = cur_map.get_self_agent_entity()
         self_node, updated_eval_links = self._build_self_pos_node(data, map_handle)
@@ -65,8 +66,8 @@ class PerceptionManager:
         for link in updated_eval_links:
             self._time_server.add_time_info(link.h, timestamp, "ROS")
             self._time_server.add_time_info(link.h, timestamp, "MC")
-        print self_node
-        print self._atomspace.get_incoming(self_node.h)
+        #print self_node
+        #print self._atomspace.get_incoming(self_node.h)
 
     def process_blocks_message(self, data):
         print 'process block msg'
