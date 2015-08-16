@@ -945,7 +945,7 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram)
 
 }
 
-void PatternMiner::OutPutInterestingPatternsToFile(unsigned int n_gram, int surprisingness) // surprisingness 1 or 2, it is default 0 which means Interaction_Information
+void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness) // surprisingness 1 or 2, it is default 0 which means Interaction_Information
 {
 
     // out put the n_gram patterns to a file
@@ -962,7 +962,7 @@ void PatternMiner::OutPutInterestingPatternsToFile(unsigned int n_gram, int surp
     std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") interesting patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
-    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+
 
     resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
@@ -1955,7 +1955,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 //        // debug
 //        cout << "Min Surprisingness_II  = " << minSurprisingness_II;
 
-        HNode->nII_Surprisingness = minSurprisingness_II/p;
+        if (HNode->superPatternRelations.size() > 0)
+            HNode->nII_Surprisingness = minSurprisingness_II/p;
+        else
+        {
+            HNode->nII_Surprisingness = -1.0f;
+            num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
+        }
     }
 
 
@@ -2139,6 +2145,7 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
                 cur_index = -1;
                 threads = new thread[THREAD_NUM];
+                num_of_patterns_without_superpattern_cur_gram = 0;
 
                 for (unsigned int i = 0; i < THREAD_NUM; ++ i)
                 {
@@ -2159,30 +2166,32 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                 {
                     // sort by interaction information
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
-                    OutPutInterestingPatternsToFile(cur_gram);
+                    OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
                 }
                 else if (interestingness_Evaluation_method == "surprisingness")
                 {
                     // sort by surprisingness_I first
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
-                    OutPutInterestingPatternsToFile(cur_gram,1);
+                    OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
                     vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 
                     // and then sort by surprisingness_II
                     std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
-                    OutPutInterestingPatternsToFile(cur_gram,2);
+                    OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
                     // Get the min threshold of surprisingness_II
-                    int threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size());
+                    int threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
                     surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
 
-                    // go through the top N patterns of surprisingness_I
+                    // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
                     int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
                     for (int p = 0; p <= threshold_index_I; p ++)
                     {
                         HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
-                        if (pNode->nII_Surprisingness >= surprisingness_II_threshold )
+
+                        // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
+                        if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness >= surprisingness_II_threshold ) )
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
 

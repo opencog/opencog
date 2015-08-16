@@ -117,6 +117,8 @@ namespace PatternMining
      bool enable_filter_node_types_should_not_be_vars;
      vector<Type> node_types_should_not_be_vars;
 
+     unsigned int num_of_patterns_without_superpattern_cur_gram;
+
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
@@ -307,7 +309,7 @@ namespace PatternMining
 
      void OutPutFrequentPatternsToFile(unsigned int n_gram);
 
-     void OutPutInterestingPatternsToFile(unsigned int n_gram,  int surprisingness = 0); // surprisingness 1 or 2
+     void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
 
      void OutPutFinalPatternsToFile(unsigned int n_gram);
 

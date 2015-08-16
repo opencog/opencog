@@ -530,7 +530,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interesting pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutInterestingPatternsToFile(cur_gram, true);
+            OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1],cur_gram, true);
         }
 
 
