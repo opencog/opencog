@@ -25,7 +25,8 @@ blending_status = enum_simulate(
 
     'NOT_ENOUGH_ATOMS',
     'TOO_MANY_ATOMS',
-    'UNKNOWN_TYPE'
+    'UNKNOWN_TYPE',
+    'EMPTY_RESULT'
 )
 
 

@@ -380,3 +380,4 @@ class ExecuteLinkFactory:
                 obsolete_links.remove(link)
             else:
                 self.a.remove(link)
+                del link
