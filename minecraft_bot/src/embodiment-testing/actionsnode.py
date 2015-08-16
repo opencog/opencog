@@ -66,7 +66,7 @@ class ClientMover():
         self.z = data.z
         self.pitch = data.pitch
         self.yaw = data.yaw
-        print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
+        #print "current pos: x %f, y %f, z%f, pitch %f, yaw %f "%(self.x, self.y, self.z, self.pitch, self.yaw)
 
 
     # 95% interval of actual desired value
@@ -96,8 +96,8 @@ class ClientMover():
 
     def getDesiredYaw(self, x_0, z_0, x_1, z_1):
         
-        l = x_0 - x_1
-        w = z_0 - z_1
+        l = x_1 - x_0
+        w = z_1 - z_0
         c = sqrt( l*l + w*w )
         alpha1 = -asin(l/c)/pi * 180
         alpha2 =  acos(w/c)/pi * 180
@@ -205,10 +205,14 @@ class ClientMover():
         speed = 1
         
         pos = self.posToDict()
-        direction = getDesiredYaw(pos['x'], pos['z'], x, z)
+        direction = self.getDesiredYaw(pos['x'], pos['z'], x, z)
         dist = sqrt( (x - pos['x'])**2 + (z - pos['z'])**2 )
         frames = phy.getMovementFrames(pos, direction, dist, speed, jump)
         
+        print "current pos: x %f, z %f"%(pos['x'], pos['z'])
+        print "requested pos: x %f, z %f"%(x, z)
+        print "calculated dir: %f, dist: %f"%(direction, dist)
+
         #frames = phy.getMovementFramesInXYZ(self.posToDict(), pos_dict, speed, jump)
         for frame in frames:
             msg = movement_msg()
@@ -262,7 +266,7 @@ def handleAbsoluteLook(req):
 
 def handleAbsoluteMove(req):
     print 'handleabsmove'
-    result = client_pos.handleMove(req.x, req.y, req.z, req.jump)
+    result = client_pos.handleMove(req.x, req.z, req.jump)
     print 'absmove result'
     return result
 
@@ -307,6 +311,9 @@ def actionServer():
     print("action server initialized")
     
     rospy.spin()
+
+
+
 if __name__ == "__main__":
 
     #print "current position"

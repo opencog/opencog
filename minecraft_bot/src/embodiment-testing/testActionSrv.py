@@ -44,13 +44,13 @@ def testLookClient(pitch, yaw):
     except rospy.ServiceException, e:
         print "service call failed: %s"%e
 
-def testMoveClient(x, y, z, jump):
+def testMoveClient(x, z, jump):
 
     rospy.wait_for_service('set_move')
 
     try:
         setMove = rospy.ServiceProxy('set_move', abs_move_srv)
-        response = setMove(x, y, z, jump)
+        response = setMove(x, z, jump)
         return response.state
     except rospy.ServiceException, e:
         print "service call failed: %s"%e
@@ -59,14 +59,15 @@ def testMove():
 
     while not rospy.is_shutdown():
         move_steps = [
-            (-14, 4, 1120.5, False),
-            (-18, 4, 1120.5, False),
-            (-18, 4, 1115.5, False),
-            (-14, 4, 1115.5, False)]
+            (-14, -33, False),
+            (-18, -35, False),
+            (-18, -30, False),
+            (-14, -38, False)]
+        
         for step in move_steps:
             response = testMoveClient(*step)
             print "service move respond with %s"%response
-            rospy.sleep(3.)
+            rospy.sleep(10.)
 
 def testRelativeMove():
 
