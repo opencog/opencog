@@ -149,7 +149,7 @@ class ClientMover():
 
         #yaw = req.yaw
         #pitch = req.pitch
-        pos = posToDict()
+        pos = self.posToDict()
 
         # these need to be constant for a given call to this function
         desired_pitch = pos['pitch'] - pitch
@@ -232,7 +232,7 @@ class ClientMover():
         #print 'handle RelativeMove', yaw, dist, jump
         
         speed = 1
-        pos = posToDict()       
+        pos = self.posToDict()       
         desired_yaw = direction
 
         if desired_yaw > 180:
@@ -252,7 +252,7 @@ class ClientMover():
             msg.pitch = frame['pitch']
             msg.yaw = frame['yaw']
             msg.jump = jump
-            #print "abs_move_msg", msg
+            print "rel_move_msg", msg
             self.pub_move.publish(msg)
         return True
 
