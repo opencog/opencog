@@ -40,9 +40,12 @@
          (snotAB 0.2)
          (cnotAB 1))
         (cond
-            [(and
-                (= (gar AB) A))
-             (cog-set-tv! (gdr AB) (stv (precise-modus-ponens-formula sA sAB snotAB) (min (min cAB cnotAB) cA)))
+            [(= (gar AB) A)
+             (cog-set-tv! 
+                (gdr AB) 
+                (stv 
+                    (precise-modus-ponens-formula sA sAB snotAB) 
+                    (min (min cAB cnotAB) cA)))
             ]
          )
     )
