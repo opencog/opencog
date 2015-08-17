@@ -136,3 +136,21 @@ cdef class Octree3DMapManager:
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
         cdef cHandle c_handle = self.c_octree_map.getEntity(c_pos)
         return Handle(c_handle.value())
+
+def get_near_free_point(Octree3DMapManager octree_map, dest,
+                        dist, first_direction, bool to_be_stand):
+    cdef cOctree3DMapManager* c_octree_map = octree_map.c_octree_map
+    assert len(dest) == 3
+    cdef cBlockVector c_dest = cBlockVector(dest[0], dest[1], dest[2])
+    assert len(first_direction) == 3
+    cdef cBlockVector c_first_direction = cBlockVector(first_direction[0],
+                                                       first_direction[1],
+                                                       first_direction[2])
+
+    cdef cBlockVector c_pos = getNearFreePointAtDistance(deref(c_octree_map),
+                                                         c_dest,
+                                                         dist, c_first_direction,
+                                                         to_be_stand)
+    if (c_pos.x, c_pos.y, c_pos.z) == (0,0,0):
+        return None
+    return (c_pos.x, c_pos.y, c_pos.z)
