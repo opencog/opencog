@@ -1,7 +1,9 @@
+import math
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
 from minecraft_bot.srv import look_srv, rel_move_srv, abs_move_srv
 from opencog.spacetime import SpaceTimeAndAtomSpace
+from opencog.spatial import get_near_free_point
 from opencog.atomspace import types, TruthValue
 from opencog.type_constructors import *
 rospy.wait_for_service('set_relative_look')
@@ -29,20 +31,34 @@ def is_attractive(atom):
         print 'boring'
         return TruthValue(0,1)
 
-def move_toward(block_atom):
+def move_toward_block(block_atom):
     print 'move toward atom', block_atom
-    jump = True
+    jump = False
     map_handle = (atomspace.get_atoms_by_name(
         types.SpaceMapNode, "MCmap")[0]).h
     cur_map = space_server.get_map(map_handle)
     block_pos = cur_map.get_block_location(block_atom.h)
-    response = _ros_set_move(block_pos[0], block_pos[1], block_pos[2], jump)
-    if response == True:
-        print 'move success'
+    dest = get_near_free_point(cur_map, block_pos, 2, (1,0,0), True)
+    if dest == None:
+        print 'get_no_free_point'
+    print 'block_pos, dest', block_pos, dest
+    self_handle = cur_map.get_self_agent_entity()
+    self_pos = cur_map.get_last_appeared_location(self_handle)
+    if (math.floor(self_pos[0]) == dest[0]
+        and math.floor(self_pos[1]) == dest[1]
+        and math.floor(self_pos[2]) == dest[2]):
+        print 'has arrived there'
         return TruthValue(1,1)
     else:
-        print 'move fail'
-        return TruthValue(0,1)        
+        #TODO: In Minecraft the up/down direction is y coord
+        # but we should swap y and z in ros node, not here..
+        response = _ros_set_move(block_pos[0], block_pos[1], jump)
+        if response == True:
+            print 'move success'
+            return TruthValue(1,1)
+        else:
+            print 'move fail'
+            return TruthValue(0,1)
 
 def set_look(yaw_atom, pitch_atom):
     yaw = float(yaw_atom.name)
@@ -66,7 +82,7 @@ def set_relative_move(yaw_atom, dist_atom, jump_atom):
     print 'set_rel_move'
     yaw = float(yaw_atom.name)
     dist = float(dist_atom.name)
-    jump = True if jump_atom.tv.mean > 0.5 else False
+    jump = False
     response = _ros_set_relative_move(yaw, dist, jump)
     print 'set_rel_move: yaw, dist, jump, res', yaw, dist, jump, response
     if response == True:

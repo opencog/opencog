@@ -5,6 +5,12 @@ from minecraft_bot.srv import visible_blocks_srv
 
 subscribed_msg_dict = {"client_position_data" : position_msg}
 
+def swap_y_and_z(coord):
+    temp_y = coord.y
+    coord.y = coord.z
+    coord.z = temp_y
+    return coord
+
 class ROSPerceptionInterface:
     
     def __init__(self, _ros_handle_dict):
@@ -26,5 +32,11 @@ class ROSPerceptionInterface:
                 print "ROSPerceptionProcessor.__init__: %s: topic %s is not in the handle_dict" %(e,topic)
         
     def get_visible_blocks(self, x, y, z, yaw, pitch):
-        return self._get_visible_blocks(x, y, z, yaw, pitch).visible_blocks
+        # TODO: In Minecraft the up/down direction is y coord
+        # but we should swap y and z in ros node, not here..
+        blocks = self._get_visible_blocks(x, z, y, yaw, pitch).visible_blocks
+        swapped_blocks = { block: swap_y_and_z(block) for block in blocks }
+        return swapped_blocks
+            
+            
         

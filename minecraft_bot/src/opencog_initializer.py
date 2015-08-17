@@ -25,5 +25,5 @@ ag = ActionGenerator(spacetime.get_atomspace(),
 while not rospy.is_shutdown():
     pm.update_perception()
     ag.generate_action()
-
+    rospy.sleep(1)
 

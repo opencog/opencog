@@ -34,7 +34,7 @@ class ActionGenerator:
                                       )
                                   ),
                                   EvaluationLink(
-                                      GroundedPredicateNode("py: move_toward"),
+                                      GroundedPredicateNode("py: move_toward_block"),
                                       ListLink(
                                           VariableNode("$block")
 
@@ -45,29 +45,26 @@ class ActionGenerator:
                           ).h
                       )
         print "action_gen: result", Atom(result, self.atomspace)
-        """
+        
         if self.atomspace.get_outgoing(result) == []:
             #TODO: fix the multiple atomspace bug 
             #between execute_atom and bindlink
             print "action_gen: no result, random walk."
             
-            bindlink(self.atomspace,                          
-                     BindLink(
-                         VariableNode("$x"),
-                         AndLink(
-                             VariableNode("$x"),
+            satisfaction_link(self.atomspace,                          
+                     SatisfactionLink(
+                         SequentialAndLink(
                              EvaluationLink(
                                  GroundedPredicateNode("py: set_relative_move"),
                                  ListLink(
-                                     NumberNode("30"),
+                                     NumberNode("90"),
                                      NumberNode("2"),
                                      ConceptNode("jump")
                                  )
                              )
                          )
                      ).h)
-            print "after bindlink"        
             print "action_gen: random walk end"
-        """
+        
                     
                 

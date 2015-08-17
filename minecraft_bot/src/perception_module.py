@@ -52,6 +52,12 @@ class PerceptionManager:
 
     def handle_self_pos_message(self, data):
         #print 'handle_self_pos_message'
+        #TODO: In Minecraft the up/down direction is y coord
+        # but we should swap y and z in ros node, not here..
+        temp_y = data.y
+        data.y = data.z
+        data.z = temp_y
+
         map_handle, cur_map = self._get_map()
         old_self_handle = cur_map.get_self_agent_entity()
         self_node, updated_eval_links = self._build_self_pos_node(data, map_handle)

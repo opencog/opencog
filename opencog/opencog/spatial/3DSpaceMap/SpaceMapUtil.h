@@ -57,7 +57,7 @@ namespace opencog
 
 	BlockVector getNearFreePointAtDistance(const Octree3DMapManager& spaceMap,
                                                const BlockVector& position, 
-                                               int distance, 
+                                               int distance,
                                                const BlockVector& startDirection,
                                                bool toBeStandOn);
 	double distanceBetween(const Octree3DMapManager& spaceMap,
