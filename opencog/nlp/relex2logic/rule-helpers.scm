@@ -949,7 +949,7 @@
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(ImplicationLink (PredicateNode obj_instance) (PredicateNode obj_concept))
+			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 			(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
 			(InheritanceLink (VariableNode var_name) (ConceptNode iobj_instance))
 			(SatisfyingSetLink
