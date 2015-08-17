@@ -67,6 +67,7 @@ namespace opencog
         
         BlockVector getNearFreePointAtDistance( const Octree3DMapManager& spaceMap, const BlockVector& position, int distance, const BlockVector& startDirection , bool toBeStandOn) 
         {
+            logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
             int z ;
             Handle block;
@@ -85,36 +86,38 @@ namespace opencog
 		
                 // we first search at the startdirection, if cannot find a proper position then go on with the complete search
                 BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
+                logger().error("getNearFreePoint: current pos %f, %f, %f", curpos.x, curpos.y, curpos.z);
                 if (toBeStandOn) {
                     if(spaceMap.checkStandable(curpos)) {
+                        logger().error("getNearFreePoint: standable");
                         return curpos;
                     }
                 }
-                else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
+                else {
+                    if(spaceMap.getBlock(curpos) == Handle::UNDEFINED)
                     return curpos;
                 }
-                		
-                for (int dis = 1; dis <= distance; dis++) {
+                logger().error("getNearFreePoint: not standable");
 
-                    for (int x = 0; x <= dis; x++) {
-                        BlockVector curpos(position.x + x, position.y + dis,position.z + z);
-                        if(toBeStandOn) {
-                            if(spaceMap.checkStandable(curpos)){
-                                return curpos;
+                for (int dis = 1; dis <= distance; dis++) {
+                    for (int x = -dis; x <= dis; x++) {
+                        for(int y = -dis; y <= dis; y++) {
+                            BlockVector curpos(position.x + x, position.y + y, position.z + z);
+                            logger().error("getNearFreePoint: current pos %f, %f, %f", curpos.x, curpos.y, curpos.z);
+                            if(curpos == position) {
+                                continue;
                             }
-                        } else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) { 
-                                return curpos;
+                            if(toBeStandOn) {
+                                if(spaceMap.checkStandable(curpos)){
+                                    logger().error("getNearFreePoint: standable");
+                                    return curpos;
+                                }
+                            } else {
+                                if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) { 
+                                    return curpos;
+                                }
                             }
-                    }
-			
-                    for (int y = 0; y <= dis; y++) {
-                        BlockVector curpos(position.x + dis, position.y + y,position.z + z);
-                        if (toBeStandOn) {
-                            if(spaceMap.checkStandable(curpos)) {
-                                return curpos;
-                            }
-                        } else if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
-                                return curpos;
+                            logger().error("getNearFreePoint: not standable");
                         }
                     }
                 }
