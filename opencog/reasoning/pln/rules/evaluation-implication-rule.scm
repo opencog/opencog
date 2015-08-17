@@ -67,7 +67,7 @@
                 (cog-stv-strength AB)
                 (cog-stv-strength AC))
             (*
-                0.9
+                (* 0.9 0.9)
                 (min
                     (cog-stv-confidence B)
                     (cog-stv-confidence A)
