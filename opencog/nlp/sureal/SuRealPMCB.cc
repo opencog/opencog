@@ -140,9 +140,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         Handle& hPatNode = qAllPatNodes[i];
         Handle& hSolnNode = qAllSolnNodes[i];
 
-        // move on if the pattern node is a variable (which is handled in the
-        // variable_match callback by the way)
-        if (m_vars.find(hPatNode) != m_vars.end())
+        // move on if the pattern node is a VariableNode or an InperpretationNode
+        if (hPatNode->getType() == VARIABLE_NODE || hPatNode->getType() == INTERPRETATION_NODE)
             continue;
 
         // get the corresponding WordNode of the pattern node
@@ -165,7 +164,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
         // sometimes when the pattern node is not a variable, it may match to
-        // a solution node that does not correspond to a WordInstanceNode,
+        // a solution node that does not have a corresponding WordInstanceNode,
         // so we should accept it here, e.g. (PredicateNode "possession")
         if (hSolnWordInst == Handle::UNDEFINED)
             continue;
