@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -46,7 +45,6 @@ SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thor
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars),
-    m_eval(SchemeEval::get_evaluator(pAS)),
     m_thoroughness(thoroughness)
 {
 
@@ -99,20 +97,110 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hSolnWordInst == Handle::UNDEFINED)
         return false;
 
-    // get the source connectors for the solution
-    std::string scmCode = "(ListLink (word-inst-get-source-conn " + SchemeSmob::to_string(hSolnWordInst) + "))";
-    HandleSeq qTargetConns = m_as->get_outgoing(m_eval->eval_h(scmCode));
+    // the source connectors for the solution
+    HandleSeq qTargetConns;
 
-    HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
-    HandleSeq qDisjuncts;
+    HandleSeq qSolnEvalLinks = get_predicates(hSolnWordInst, LG_LINK_INSTANCE_NODE);
 
-    auto insertHelper = [&](const Handle& h)
+    HandleSeq qLGInstsLeft;
+    HandleSeq qLGInstsRight;
+    for (Handle& hSolnEvalLink : qSolnEvalLinks)
     {
-        HandleSeq q = m_as->get_outgoing(h);
-        qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+        HandleSeq qOS = LinkCast(hSolnEvalLink)->getOutgoingSet();
+        HandleSeq qWordInsts = LinkCast(qOS[1])->getOutgoingSet();
+
+        // divide them into two groups, assuming there are only two WordInstanceNodes in the ListLink
+        if (qWordInsts[0] == hSolnWordInst) qLGInstsRight.push_back(hSolnEvalLink);
+        if (qWordInsts[1] == hSolnWordInst) qLGInstsLeft.push_back(hSolnEvalLink);
+    }
+
+    // helper for sorting EvaluationLinks in reverse word sequence order
+    auto sortLeftInsts = [](const Handle& h1, const Handle& h2)
+    {
+        // get the ListLinks from the EvaluationLinks
+        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
+        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+
+        // get the first WordInstanceNodes from the ListLinks
+        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[0];
+        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
+
+        // get the NumberNodes from the WordSequenceLinks
+        Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
+        Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+
+        // compare their word sequences
+        return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
     };
 
-    std::for_each(qOr.begin(), qOr.end(), insertHelper);
+    // helper for sorting EvaluationLinks in word sequence order
+    auto sortRightInsts = [](const Handle& h1, const Handle& h2)
+    {
+        // get the ListLinks from the EvaluationLinks
+        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
+        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+
+        // get the second WordInstanceNodes from the ListLinks
+        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[1];
+        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
+
+        // get the NumberNodes from the WordSequenceLinks
+        Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
+        Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+
+        // compare their word sequences
+        return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
+    };
+
+    // sort the qLGInstsLeft in reverse word sequence order
+    std::sort(qLGInstsLeft.begin(), qLGInstsLeft.end(), sortLeftInsts);
+
+    // sort the qLGInstsRight in word sequence order
+    std::sort(qLGInstsRight.begin(), qLGInstsRight.end(), sortRightInsts);
+
+    // get the LG connectors for those in the qLGInstsLeft
+    for (Handle& hEvalLink : qLGInstsLeft)
+    {
+        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+
+        HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+
+        // get the first LG connector
+        qTargetConns.push_back(qLGConns[0]);
+    }
+
+    // get the LG connectors for those in the qLGInstsRight
+    for (Handle& hEvalLink : qLGInstsRight)
+    {
+        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+
+        HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+
+        // get the second LG connector
+        qTargetConns.push_back(qLGConns[1]);
+    }
+
+    // disjuncts of the hPatWordNode
+    HandleSeq qDisjuncts;
+
+    // check if we got the disjuncts of the hPatWordNode already, otherwise
+    // store them in a map so that we only need to do this disjuncts-getting procedure once
+    auto iter = m_disjuncts.find(hPatWordNode);
+    if (iter == m_disjuncts.end())
+    {
+        HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+
+        auto insertHelper = [&](const Handle& h)
+        {
+            HandleSeq q = m_as->get_outgoing(h);
+            qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+        };
+
+        std::for_each(qOr.begin(), qOr.end(), insertHelper);
+
+        m_disjuncts.insert({hPatWordNode, qDisjuncts});
+    }
+    else qDisjuncts = iter->second;
 
     logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPat->toShortString().c_str());
 

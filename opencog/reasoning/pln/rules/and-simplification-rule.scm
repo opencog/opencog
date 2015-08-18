@@ -49,3 +49,7 @@
       ((sAABC (cog-stv-strength AABC))
        (cAABC (cog-stv-confidence AABC)))
     (stv sAABC cAABC)))
+
+; Name the rule
+(define pln-rule-and-simplification-name (Node "pln-rule-and-simplification"))
+(DefineLink pln-rule-and-simplification-name pln-rule-and-simplification)

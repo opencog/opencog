@@ -38,3 +38,7 @@
        (cA (cog-stv-confidence A))
        (cB (cog-stv-confidence B)))
     (stv (* sA sB) (min cA cB))))
+
+; Name the rule
+(define pln-rule-and-name (Node "pln-rule-and"))
+(DefineLink pln-rule-and-name pln-rule-and)

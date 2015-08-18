@@ -419,6 +419,18 @@
 	(InheritanceLink  (SatisfyingSetLink (PredicateNode instance)) (ConceptNode adv_instance))
 	)
 )
+
+(define (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
+    (list (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
+    (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
+    (ImplicationLink  (PredicateNode prep_instance) (PredicateNode prep))
+    (EvaluationLink
+        (PredicateNode prep_instance)
+        (ListLink
+            (PredicateNode instance)
+            (ConceptNode noun_instance))  
+	))
+)
 ;-----------------------------------------------------------------------
 ; prepositional phrase rule
 ;-----------------------------------------------------------------------
@@ -937,7 +949,7 @@
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(ImplicationLink (PredicateNode obj_instance) (PredicateNode obj_concept))
+			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 			(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
 			(InheritanceLink (VariableNode var_name) (ConceptNode iobj_instance))
 			(SatisfyingSetLink

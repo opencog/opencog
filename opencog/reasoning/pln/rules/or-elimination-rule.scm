@@ -45,3 +45,7 @@
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB)))
     (stv (/ sAB 2) 1)))
+
+; Name the rule
+(define pln-rule-or-elimination-name (Node "pln-rule-or-elimination"))
+(DefineLink pln-rule-or-elimination-name pln-rule-or-elimination)

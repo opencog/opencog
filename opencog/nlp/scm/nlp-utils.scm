@@ -49,7 +49,6 @@
 ; -- word-inst-get-senses   Get word senses associated with word.
 ; -- word-inst-sense-score  Get ranking score for word-inst & word-sense.
 ; -- word-inst-get-disjunct Get the disjunct (LgAnd) used for a word-inst.
-; -- word-inst-get-source-conn     Get the set of connectors word-inst linked to.
 ; -- relation-get-dependent Get dependent part of a relation.
 ; -- delete-sentence        Delete all atoms associated with a sentence.
 ; -- delete-sentences       Delete all atoms that occur in sentences.
@@ -614,45 +613,6 @@
   word-inst-get-disjunct -- Get the disjunct (LgAnd) used for a word-inst.
 "
 	(car (cog-chase-link 'LgWordCset 'LgAnd word-inst))
-)
-
-; ---------------------------------------------------------------------
-(define (word-inst-get-source-conn word-inst)
-"
-  word-inst-get-source-conn -- Get the set of connectors word-inst linked to.
-
-  The returned set will be a list instead of as a disjunct, because
-  such a set is not really a disjunct (the order of - & + are reversed)
-  but instead is a 1-to-1 matching of the connectors in the disjunct
-  word-inst used.
-"
-	(define (great-helper l1 l2)
-		(define w1-seq (word-inst-get-number (gadr l1)))
-		(define w2-seq (word-inst-get-number (gadr l2)))
-		(> (string->number (cog-name w1-seq)) (string->number (cog-name w2-seq)))
-	)
-	(define (less-helper l1 l2)
-		(define w1-seq (word-inst-get-number (gddr l1)))
-		(define w2-seq (word-inst-get-number (gddr l2)))
-		(< (string->number (cog-name w1-seq)) (string->number (cog-name w2-seq)))
-	)
-	; Get the left & right LgLinkInstanceNode predicates
-	(receive (lg-insts-left lg-insts-right)
-	         (partition (lambda (l) (equal? (gddr l) word-inst))
-	                    (cog-get-pred word-inst 'LgLinkInstanceNode))
-		; Sort links on the left in reverse word sequence order, so
-		; closer words will be ordered first
-		; sort links on the right in word sequence order, so closer
-		; words will be ordered first
-		(let ((lg-insts-left-sort (sort lg-insts-left great-helper))
-		      (lg-insts-right-sort (sort lg-insts-right less-helper))
-		      (get-inst-link (lambda (l) (car (cog-filter 'LgLinkInstanceLink (cog-incoming-set (gar l)))))))
-			(append
-				(map (lambda (l) (cadr (cog-outgoing-set (get-inst-link l)))) lg-insts-left-sort)
-				(map (lambda (l) (caddr (cog-outgoing-set (get-inst-link l)))) lg-insts-right-sort)				
-			)
-		)
-	)
 )
 
 ; --------------------------------------------------------------------

@@ -26,9 +26,9 @@
 #include <opencog/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-class PsiFeelingUpdaterAgentUTest; 
+class PsiFeelingUpdaterAgentUTest;
 
-namespace opencog { namespace oac {
+namespace opencog {
 
 /**
  * @class
@@ -44,25 +44,26 @@ namespace opencog { namespace oac {
  */
 class PsiFeelingUpdaterAgent : public opencog::Agent
 {
-    friend class::PsiFeelingUpdaterAgentUTest; 
+    friend class::PsiFeelingUpdaterAgentUTest;
 
 private:
 
     /**
-     *  Helper class that stores meta data of a feeling 
+     *  Helper class that stores meta data of a feeling
      */
     class FeelingMeta
     {
     public:
 
         std::string updaterName; // The schema name that updates the feeling
-        Handle evaluationLink;   // Handle to EvaluationLink that holds the feeling 
-        double updatedValue;     // The updated value after calling the feeling updater  
+        Handle evaluationLink;   // Handle to EvaluationLink that holds the feeling
+        double updatedValue;     // The updated value after calling the feeling updater
         bool bUpdated;           // Indicate if the value of the Feeling has been updated
 
-        void init (const std::string & updaterName, Handle evaluationLink) {
+        inline void init (const std::string & updaterName,
+                          Handle evaluationLink) {
             this->updaterName = updaterName;
-            this->evaluationLink = evaluationLink; 
+            this->evaluationLink = evaluationLink;
             this->updatedValue = 0;
             this->bUpdated = false;
         }
@@ -72,17 +73,7 @@ private:
 
     bool bInitialized;         // Indicate whether this mind agent has been Initialized
 
-    std::map <std::string, FeelingMeta> feelingMetaMap;  // Feeling - Meta data map 
-
-#ifdef HAVE_ZMQ    
-    std::string publishEndPoint; // Publish all the messages to this end point
-    zmq::socket_t * publisher;   // ZeroMQ publisher
-
-    /**
-     * Publish updated modulator values via ZeroMQ
-     */
-    void publishUpdatedValue(Plaza & plaza, zmq::socket_t & publisher, const unsigned long timeStamp);
-#endif    
+    std::map <std::string, FeelingMeta> feelingMetaMap;  // Feeling - Meta data map
 
     /**
      * Initialize feelingMetaMap etc.
@@ -90,12 +81,12 @@ private:
     void init();
 
     /**
-     * Get corresponding EvaluationLink of the feeling 
+     * Get corresponding EvaluationLink of the feeling
      */
-    Handle getFeelingEvaluationLink(opencog::CogServer * server, const std::string feelingName, Handle petHandle); 
+    Handle getFeelingEvaluationLink(opencog::CogServer * server, const std::string feelingName, Handle petHandle);
 
     /**
-     * Run updaters (combo scripts)
+     * Run updaters that update the values of the feelings
      */
     void runUpdaters();
 
@@ -103,11 +94,6 @@ private:
      * Set updated values to AtomSpace
      */
     void setUpdatedValues();
-
-    /**
-     * Send updated values to the virtual world where the pet lives
-     */
-    void sendUpdatedValues(); 
 
 public:
 
@@ -119,14 +105,14 @@ public:
     }
 
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalAvatarController::PsiFeelingUpdaterAgent");
+        static const ClassInfo _ci("opencog::PsiFeelingUpdaterAgent");
         return _ci;
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
 
-    // After calling this function, the Agent will invoke its "init" method firstly 
+    // After calling this function, the Agent will invoke its "init" method firstly
     // in "run" function during its next cycle
     void forceInitNextCycle() {
         this->bInitialized = false;
@@ -136,6 +122,6 @@ public:
 
 typedef std::shared_ptr<PsiFeelingUpdaterAgent> PsiFeelingUpdaterAgentPtr;
 
-} } // namespace opencog::oac
+} // namespace opencog
 
 #endif

@@ -59,7 +59,7 @@
 ;--------------------------------------------------------------------
 (define (wh_query_process query)
     (define temp)
-    (set! temp  (get-similar-sentences query))
+    (set! temp  (get-answers query))
     (cond
         ((equal? #f (car temp)) "Sorry, I don't know the answer")
         (else (car temp))

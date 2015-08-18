@@ -25,23 +25,17 @@
 #define _OPENCOG_DYNAMICS_OPENPSI_H
 
 #include <opencog/server/Module.h>
-#include <opencog/dynamics/openpsi/PsiDemandUpdaterAgent.h>
-#include <opencog/dynamics/openpsi/PsiActionSelectionAgent.h>
-#include <opencog/dynamics/openpsi/PsiModulatorUpdaterAgent.h>
 
 namespace opencog
 {
 
 /**
- * OpenCog Module for OpnePsi
+ * OpenCog Module for OpenPsi
 */
 
 class OpenPsiModule : public Module
 {
 private:
-    Factory<PsiDemandUpdaterAgent, Agent> demandUpdaterFactory;
-    Factory<PsiActionSelectionAgent, Agent> actionSelectionFactory;
-    Factory<PsiModulatorUpdaterAgent, Agent> modulatorUpdaterFactory;
 
 public:
     OpenPsiModule(CogServer&);

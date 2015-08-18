@@ -806,7 +806,7 @@ on thread 47155674880320
 
 Irritation 4
 ------------
-Occasionally see this: 
+Occasionally see this:
 
 In ice-9/boot-9.scm:
  157: 6 [catch #t #<catch-closure 294a63c0> ...]
@@ -885,6 +885,138 @@ std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
 >, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
         41: ??:0        start_thread()
         42: ??:0        clone()
+
+
+Garbage 9
+---------
+submit-one: The town has an area of 88 km², population (2003) is 158,000, and is
+located 20 km north of downtown Hồ Chí Minh City, on the left bank of the Saigon River,
+upstream from Hồ Chí Minh City.
+duuude before nectcat open 27
+opencog-en> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 195d220> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 195d220>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 195d0e0> ...]
+   ?: 5 [apply-smob/1 #<catch-closure 1959f00>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 1959dc0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 1959dc0>]
+   ?: 2 [call-with-input-string "(observe-text \"Although this town is an
+administratively separate town, it is considered as part of the H\u1ed3 Chí Minh City
+Metropolitan Area since this town is bordered by H\u1ed3 Chí Minh City\u2019s urban
+area.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 1addf40 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error
+...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 1959d80> encoding-error ...]
+
+
+/bin/bash ./ss-one.sh en beta-pages/T/Thủ Dầu Một lo
+
+
+So -- looks like netcat is sending correct text, but by the time
+observe-text gets it, it has been garbled. Why?
+Well, nlp/scm/processing-utils.scm prints it ungarbled.
+
+OK, so this fails:
+(define sss (socket PF_INET SOCK_STREAM 0))
+(connect sss AF_INET (inet-pton AF_INET "127.0.0.1") 7777)
+(display "SmålandSmåland" sss)
+
+prints garbage
+
+(set-port-encoding! sss "utf-8")
+does not fix it.
+(use-modules (rnrs bytevectors))
+(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
+
+
+Ahhh ... (string->utf8 "Småland") prints
+#vu8(83 109 63 108 97 110 100)
+which is what netcat receives
+
+å should be c3 a5  U+00E5
+
+guile-git is broken
+guile-2.0.9 shell works great.
+cogserver linked to guile-2.0.9 is broken
+... but is fixed by using (set-port-encoding! sss "utf-8")
+Yayyy!
+
+
+Boo ...
+submit-one: Phú Mỹ.
+(observe-text \"Phú M\u1ef9.\")
+
+ditto for Phú Thọ.
+Chánh Nghĩa.
+Hiệp Thành
+Thủ Dầu Một
+Hồ Chí Minh
+
+(relex-parse "Ćićolina\n")
+(x-sock-io "Ćićolina\n")
+(x-sock-io "Thủ Dầu Một\n")
+
+(define (x-sock-io sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "10.70.70.2") 7777)
+      (set-port-encoding! s "utf-8")
+
+      (display sent-txt s)
+      (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+      (close-port s)))
+
+(setlocale LC_ALL "")
+
+(set-port-encoding! (current-input-port) "utf-8")
+(display "Ćićolina\n")
+(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
+(define x "Thủ Dầu Một\n")  as above
+(define x "Småland\n") ... works!!
+(define x "Hòa Phú Phú Tân\n")  ... works  !!!
+(define x "x\u0106i\u0107olina\\n") works
+
+Ć is U+0106  c4 86
+ć is U+0107  c4 87
+
+what is bizarre is that the above is exactly inverted for
+the guile-2.1 shell:
+sending the  "working" ones sends garbage, sending the failing ones goes through.
+(ditto for just simply printing....)
+
+both define/display seem to work fine in the guile-2.0.9 shell...
+and define/display seem to work well for the cogserver-2.1 shell. WTF.
+so is it due to a shared-library mis-match?  Caching of compiled files?
+
+(display "SmålandSmåland\n")
+(display "Ćićolina\n")
+(display "Thủ Dầu Một\n")
+(display "Hòa Phú Phú Tân\n")
+
+Avoiding preload of all scheme does not fix it.
+Clearling the guile compiler cache does not fix it.
+
+[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
+
+ERROR: In procedure call-with-input-string:
+ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
+string to output locale" 84 #f #f)'.
+
+(define x "\u0106i\u0107olina\n")
+
+%default-port-encoding is a fluid ....
+make fluid with default ...
+make dynamic state (with parent ....)
+
+Solution! (setlocale LC_ALL "") every time a new thread is created.
+
+
 
 
 

@@ -75,3 +75,8 @@
 					(cog-outgoing-set (gdddr BXDC)) 
 					(VariableNode "$X") 
 					(gar BXDC))))))
+
+
+; Name the rule
+(define pln-rule-member-to-evaluation-name (Node "pln-rule-member-to-evaluation"))
+(DefineLink pln-rule-member-to-evaluation-name pln-rule-member-to-evaluation)

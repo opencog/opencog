@@ -14,6 +14,7 @@ then
 	exit 0
 fi
 
+export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 # Use byobu so that the scroll bars actually work
 byobu new-session -d -n 'cntl' '$SHELL'
@@ -27,6 +28,7 @@ tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 tmux new-window -n 'telnt' 'rlwrap telnet localhost 17005; $SHELL'
 
 # Parse
+# ./wiki-ss-en.sh
 tmux new-window -n 'parse' '$SHELL'
 
 # Spare

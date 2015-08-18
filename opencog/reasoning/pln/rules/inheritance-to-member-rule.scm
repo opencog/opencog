@@ -54,3 +54,10 @@
 		(* (cog-stv-confidence IBC) 0.9)))
 
 ; =============================================================================
+
+; Name the rule
+(define pln-rule-inheritance-to-member-name
+  (Node "pln-rule-inheritance-to-member"))
+(DefineLink
+  pln-rule-inheritance-to-member-name
+  pln-rule-inheritance-to-member)

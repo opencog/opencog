@@ -3,14 +3,38 @@
 ;
 (define-module (opencog cogserver))
 
+
+; Hack LD path, but argh, this doesn't work!
+; (setenv "LD_LIBRARY_PATH" "/usr/local/lib/opencog/modules")
+
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
 
 ; config path name is optional.
-(define* (start-cogserver #:key config-path)
-	(if (not config-path)
-		(c-start-cogserver "")
-		(c-start-cogserver config-path)
-	)
+(define* (start-cogserver #:optional (config-path ""))
+"
+  start-cogserver [config-file]
+
+  Start the cogserver, optionally specifying the config file to use.
+  To stop the cogserver, just say stop-cogserver.
+"
+	(c-start-cogserver config-path)
+)
+
+; to stop the repl server..
+(use-modules (system repl server))
+
+; Similar to above
+(define (stop-cogserver)
+"
+  stop-cogserver
+
+  Stop the cogserver.
+"
+	; The start-cogserver also starts a repl shell on port 18001
+	; so we stop that, here ...
+	(stop-server-and-clients!)
+	(c-stop-cogserver)
 )
 
 (export start-cogserver)
+(export stop-cogserver)
