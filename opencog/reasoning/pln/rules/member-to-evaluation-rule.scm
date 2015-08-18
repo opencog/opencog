@@ -30,14 +30,17 @@
 			(VariableNode "$B")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode")))
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
-				(VariableNode "$X")
+				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
-					(VariableNode "$X"))))
+					(VariableNode "$X-M2E"))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
 			(ListLink
@@ -47,10 +50,10 @@
 				(MemberLink
 					(VariableNode "$B")
 					(SatisfyingSetLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
-							(VariableNode "$X"))))))))
+							(VariableNode "$X-M2E"))))))))
 
 ; Has ListLink, 1 argument in EvaluationLink
 (define pln-rule-member-to-evaluation-1
@@ -59,15 +62,18 @@
 			(VariableNode "$B")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode")))
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
-				(VariableNode "$X")
+				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
-						(VariableNode "$X")))))
+						(VariableNode "$X-M2E")))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
 			(ListLink
@@ -78,11 +84,11 @@
 				(MemberLink
 					(VariableNode "$B")
 					(SatisfyingSetLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
-								(VariableNode "$X")))))))))
+								(VariableNode "$X-M2E")))))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 1st argument in MemberLink
 (define pln-rule-member-to-evaluation-2-1
@@ -92,15 +98,18 @@
 			(VariableNode "$C")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode")))
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
-				(VariableNode "$X")
+				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(VariableNode "$C")))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
@@ -113,11 +122,11 @@
 				(MemberLink
 					(VariableNode "$B")
 					(SatisfyingSetLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
-								(VariableNode "$X")
+								(VariableNode "$X-M2E")
 								(VariableNode "$C")))))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 2nd argument in MemberLink
@@ -128,16 +137,19 @@
 			(VariableNode "$C")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode")))
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
 		(MemberLink
 			(VariableNode "$C")
 			(SatisfyingSetLink
-				(VariableNode "$X")
+				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
 					(ListLink
 						(VariableNode "$B")
-						(VariableNode "$X")))))
+						(VariableNode "$X-M2E")))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
 			(ListLink
@@ -149,12 +161,12 @@
 				(MemberLink
 					(VariableNode "$C")
 					(SatisfyingSetLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
 							(ListLink
 								(VariableNode "$B")
-								(VariableNode "$X")))))))))
+								(VariableNode "$X-M2E")))))))))
 
 
 
