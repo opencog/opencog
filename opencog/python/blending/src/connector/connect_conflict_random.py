@@ -39,30 +39,20 @@ class ConnectConflictRandom(BaseConnector):
     def __prepare_blended_atoms(self, conflict_links, merged_atom):
         self.ret = [merged_atom]
 
-    def __connect_conflict_links(self, conflict_links):
-        # 1. Choose one link randomly in each conflict link set.
-        for merged_atom in self.ret:
-            for links in conflict_links:
-                link_key = random.choice(links)
-                eq_link.key_to_link(self.a, link_key, merged_atom, link_key.tv)
-
-    def __connect_non_conflict_links(self, non_conflict_links):
-        # 2. Others, evaluate the weighted average of truth value between
-        # the duplicate links.
-        for merged_atom in self.ret:
-            for links in non_conflict_links:
-                # array elements are same except original node information.
-                link_key_sample = links[0]
-                eq_link.key_to_link(
-                    self.a, link_key_sample, merged_atom, get_weighted_tv(links)
-                )
-
-    def __connect_non_duplicate_links(self, non_duplicate_links):
-        # Just copy.
-        for merged_atom in self.ret:
-            for links in non_duplicate_links:
-                for link in links:
-                    eq_link.key_to_link(self.a, link, merged_atom, link.tv)
+    def __connect_links(self, conflict_link_cases, non_conflict_links,
+                        non_duplicate_links):
+        for i, merged_atom in enumerate(self.ret):
+            # 1. Choose one link randomly in each conflict link set.
+            for conflict_link_case in conflict_link_cases:
+                link = random.choice(conflict_link_case)
+                eq_link.key_to_link(self.a, link, merged_atom, link.tv)
+            # 2. Others, connect link with weighted average of truth value
+            # between the duplicate links.
+            for link in non_conflict_links:
+                eq_link.key_to_link(self.a, link, merged_atom, link.tv)
+            # 3. Just copy.
+            for link in non_duplicate_links:
+                eq_link.key_to_link(self.a, link, merged_atom, link.tv)
 
     def __connect_to_blended_atoms(self, decided_atoms):
         # Make the links between source nodes and newly blended node.
@@ -86,13 +76,12 @@ class ConnectConflictRandom(BaseConnector):
                 self.strength_diff_limit,
                 self.confidence_above_limit
             )
+        conflict_link_cases = make_conflict_link_cases(conflict_links)
 
         self.__prepare_blended_atoms(conflict_links, merged_atom)
-
-        self.__connect_conflict_links(conflict_links)
-        self.__connect_non_conflict_links(non_conflict_links)
-        self.__connect_non_duplicate_links(non_duplicate_links)
-
+        self.__connect_links(
+            conflict_link_cases, non_conflict_links, non_duplicate_links
+        )
         self.__connect_to_blended_atoms(decided_atoms)
 
     def link_connect_impl(self, decided_atoms, merged_atom, config_base):

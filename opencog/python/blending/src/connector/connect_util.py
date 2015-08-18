@@ -1,8 +1,13 @@
+import itertools
+from copy import copy
+
 from opencog.atomspace import TruthValue
 from opencog.type_constructors import types
 from opencog.logger import log
 
 from blending.src.connector.equal_link_key import link_to_keys
+from blending.util.py_cog_execute import PyCogExecute
+from blending.util.blending_config import BlendConfig
 
 __author__ = 'DongMin Kim'
 
@@ -21,14 +26,16 @@ def find_conflict_links(
         link_0 = duplicate_links[0]
         link_1 = duplicate_links[1]
 
-        if not a[link_0.h].is_a(check_type):
-            non_conflict_links.append(duplicate_links)
-        elif abs(link_0.tv.mean - link_1.tv.mean) > strength_diff_limit:
+        if (a[link_0.h].is_a(check_type) is False) or \
+                (abs(link_0.tv.mean - link_1.tv.mean) < strength_diff_limit):
+            # array elements are same except original node information.
+            link_key_sample = copy(link_0)
+            link_key_sample.tv = get_weighted_tv(duplicate_links)
+            non_conflict_links.append(link_key_sample)
+        else:
             if link_0.tv.confidence > confidence_above_limit:
                 if link_1.tv.confidence > confidence_above_limit:
                     conflict_links.append(duplicate_links)
-        else:
-            non_conflict_links.append(duplicate_links)
 
     return conflict_links, non_conflict_links
 
@@ -73,9 +80,71 @@ def find_duplicate_links(a, decided_atoms):
 
     for item in inverted_links_index.itervalues():
         duplicate_links.append(item) if len(item) > 1 \
-            else non_duplicate_links.append(item)
+            else non_duplicate_links.extend(item)
 
     return duplicate_links, non_duplicate_links
+
+
+def find_related_links(
+        a,
+        decided_atoms,
+        inter_info_strength_above_limit
+):
+    # Evaluate inheritance relation,
+    # and copy all link in each inheritance node.
+    related_node_target_links = list()
+
+    obsolete_dict = dict()
+    free_var = a.add_node(types.VariableNode, "$")
+
+    for decided_atom in decided_atoms:
+        inheritance_link = a.add_link(
+            types.InheritanceLink, [free_var, decided_atom]
+        )
+        get_link = a.add_link(types.GetLink, [inheritance_link])
+        inheritance_node_set = PyCogExecute().execute(a, get_link)
+
+        for related_node in inheritance_node_set.out:
+            target_links = filter(
+                lambda link:
+                    (link.tv.mean > inter_info_strength_above_limit),
+                a.get_atoms_by_target_atom(types.Link, related_node)
+            )
+            related_node_target_links.append(
+                link_to_keys(a, target_links, related_node)
+            )
+
+        # Mark links as garbage.
+        obsolete_dict[decided_atom.name + "inh_set"] = inheritance_node_set
+        obsolete_dict[decided_atom.name + "get_link"] = get_link
+        obsolete_dict[decided_atom.name + "inh_link"] = inheritance_link
+
+    obsolete_dict["free_var"] = free_var
+    BlendConfig().execute_link_factory.clean_up(obsolete_dict)
+
+    return related_node_target_links
+
+
+def make_conflict_link_cases(conflict_links):
+    # TODO: Convert to return 'iterator'. Currently it returns 'list' that has
+    # all case of link, makes algorithm very slow.
+
+    # Prepare cartesian product iterator.
+    # if number of conflict_links is 3, this iterator produces:
+    # (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), ... (1, 1, 1)
+    cartesian_binary_iterator = \
+        itertools.product([0, 1], repeat=len(conflict_links))
+
+    # Insert each viable atoms to return list.
+    conflict_link_cases = list()
+    for i, viable_case_binary in enumerate(cartesian_binary_iterator):
+        viable_links = list()
+        for j, selector in enumerate(viable_case_binary):
+            viable_links.append(conflict_links[j][selector])
+        if len(viable_links) > 0:
+            conflict_link_cases.append(viable_links)
+
+    return conflict_link_cases
 
 
 def get_inverted_index_key(key_value_pairs):
