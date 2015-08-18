@@ -1,5 +1,10 @@
 (define openpsi-active-schema-pool (ConceptNode "OpenPsi: active-schema-pool"))
 
+(InheritanceLink  ; Defining a rule base
+    (ConceptNode "OpenPsi: active-schema-pool")
+	(ConceptNode "URE")
+)
+
 (ExecutionLink
     (SchemaNode "URE:maximum-iterations")
     (ConceptNode "OpenPsi: active-schema-pool")

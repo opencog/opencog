@@ -981,3 +981,28 @@
                   )
         )
   )
+
+; Returns a list containging the atoms defining the demands.
+(define (psi-get-demands)
+    (let* ((psi-demand (ConceptNode "OpenPsi: Demand"))
+          (inheritance-list (cog-incoming-set psi-demand))
+         )
+         (remove!
+             (lambda (x) (equal? (cog-type x) 'VariableNode))
+             (par-map cog-get-partner inheritance-list
+                 (make-list (length inheritance-list) psi-demand))
+         )
+    )
+)
+; Returns a list containging the atoms defining the modulators.
+(define (psi-get-modulators)
+    (let* ((psi-modulator (ConceptNode "OpenPsi: Modulator"))
+          (inheritance-list (cog-incoming-set psi-modulator))
+         )
+         (remove!
+             (lambda (x) (equal? (cog-type x) 'VariableNode))
+             (par-map cog-get-partner inheritance-list
+                 (make-list (length inheritance-list) psi-modulator))
+         )
+    )
+)

@@ -1,6 +1,6 @@
 /*
- * @file opencog/dynamics/openpsi/OpenPsiModule.h
- * @author Amen Belayneh <amenbelayneh@gmail.com> June 2015
+ * @file opencog/dynamics/openpsi/OpenPsiAgent.h
+ * @author Amen Belayneh <amenbelayneh@gmail.com> August 2015
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -21,33 +21,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DYNAMICS_OPENPSI_H
-#define _OPENCOG_DYNAMICS_OPENPSI_H
+#ifndef _OPENCOG_DYNAMICS_OPENPSIAGENT_H
+#define _OPENCOG_DYNAMICS_OPENPSIAGENT_H
 
-#include <opencog/server/Module.h>
-#include <opencog/dynamics/openpsi/OpenPsiAgent.h>
+#include <opencog/server/Agent.h>
 
 namespace opencog
 {
 
 /**
- * OpenCog Module for OpenPsi
+ * OpenCog Agent for OpenPsi
 */
 
-class OpenPsiModule : public Module
+class OpenPsiAgent : public Agent
 {
-private:
-    Factory<OpenPsiAgent, Agent> openPsiAgentFactory;
-
 public:
-    OpenPsiModule(CogServer&);
-    virtual ~OpenPsiModule();
-    virtual void init();
-    virtual const char * id(void);
+    OpenPsiAgent(CogServer&);
+    virtual ~OpenPsiAgent();
+    virtual void run();
 
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::OpenPsiAgent");
+        return _ci;
+    }
 
 }; // class
 
 } // namespace
 
-#endif // _OPENCOG_DYNAMICS_OPENPSI_H
+#endif // _OPENCOG_DYNAMICS_OPENPSIAGENT_H
