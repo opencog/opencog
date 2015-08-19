@@ -70,7 +70,8 @@ Config name           | Description
 --------------------- | -----------
 ConnectSimple         | Make new links from whole links in target atoms to the new blend atom.
 ConnectConflictRandom | Make new links from whole non-conflict links, and randomly choose one link in each conflict links set.
-ConnectConflictAllViable | Make 2^k available(viable) new blend atoms if there exists k conflicts.     
+ConnectConflictAllViable | Make 2^k available(viable) new blend atoms if there exists k conflicts.
+ConnectConflictInteractionInformation | Make new links from chosen link set which has largest interaction information and connect. 
 
 ##### Example
 ```python
@@ -147,6 +148,16 @@ BLEND:connect-check-type               | SimilarityLink
 BLEND:connect-strength-diff-limit      | 0.3
 BLEND:connect-confidence-above-limit   | 0.7
 BLEND:connect-viable-atoms-count-limit | 100
+
+#### ConnectConflictInteractionInformation
+Config name                                   | Example
+--------------------------------------------- | -------
+BLEND:connect-check-type                      | SimilarityLink
+BLEND:connect-strength-diff-limit             | 0.3
+BLEND:connect-confidence-above-limit          | 0.7
+BLEND:connect-data-n-gram-limit               | 10 (or None)
+BLEND:connect-evaluate-n-gram-limit           | 5 (or None)
+BLEND:connect-inter-info-strength-above-limit | 0.5
 
 ##### Example
 ```python

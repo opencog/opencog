@@ -94,17 +94,29 @@ def find_related_links(
     # and copy all link in each inheritance node.
     related_node_target_links = list()
 
-    obsolete_dict = dict()
     free_var = a.add_node(types.VariableNode, "$")
 
     for decided_atom in decided_atoms:
         inheritance_link = a.add_link(
             types.InheritanceLink, [free_var, decided_atom]
         )
+        """
+        GetLink
+            InheritanceLink
+                VariableNode $
+                ConceptNode <Decided Atom>
+        """
         get_link = a.add_link(types.GetLink, [inheritance_link])
+        """
+        SetLink
+            ConceptNode <Related node 1>
+            ConceptNode <Related node 2>
+            ...
+            ConceptNode <Related node N>
+        """
         inheritance_node_set = PyCogExecute().execute(a, get_link)
-
         for related_node in inheritance_node_set.out:
+            # Manually throw away the links have low strength.
             target_links = filter(
                 lambda link:
                     (link.tv.mean > inter_info_strength_above_limit),
@@ -113,15 +125,13 @@ def find_related_links(
             related_node_target_links.append(
                 link_to_keys(a, target_links, related_node)
             )
+        # Delete temp links.
+        BlendConfig().execute_link_factory.clean_up(inheritance_node_set)
+        BlendConfig().execute_link_factory.clean_up(get_link)
+        BlendConfig().execute_link_factory.clean_up(inheritance_link)
 
-        # Mark links as garbage.
-        obsolete_dict[decided_atom.name + "inh_set"] = inheritance_node_set
-        obsolete_dict[decided_atom.name + "get_link"] = get_link
-        obsolete_dict[decided_atom.name + "inh_link"] = inheritance_link
-
-    obsolete_dict["free_var"] = free_var
-    BlendConfig().execute_link_factory.clean_up(obsolete_dict)
-
+    # Delete temp links.
+    BlendConfig().execute_link_factory.clean_up(free_var)
     return related_node_target_links
 
 

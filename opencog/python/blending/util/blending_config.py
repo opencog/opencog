@@ -373,11 +373,18 @@ class ExecuteLinkFactory:
             raise UserWarning("Non valid API!")
 
     def clean_up(self, obsolete_dict):
-        obsolete_links = obsolete_dict.values()
+        if isinstance(obsolete_dict, dict):
+            obsolete_links = obsolete_dict.values()
+        elif isinstance(obsolete_dict, list):
+            obsolete_links = obsolete_dict
+        else:
+            obsolete_links = [obsolete_dict]
         for link in obsolete_links:
             if isinstance(link, list):
                 obsolete_links.extend(link)
                 obsolete_links.remove(link)
             else:
                 self.a.remove(link)
+                obsolete_links.remove(link)
                 del link
+        del obsolete_dict
