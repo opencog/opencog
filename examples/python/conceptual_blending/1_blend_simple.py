@@ -22,6 +22,16 @@ from blending.blend import ConceptualBlending
 """
 First Example
 - Blend with default config.
+
+Output dump:
+--------Start first example--------
+Source data:
+(ConceptNode "car") ; [2]
+(ConceptNode "man") ; [3]
+
+Newly blended node:
+[(ConceptNode "car-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [307]
+]
 """
 print "--------Start first example--------"
 

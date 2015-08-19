@@ -12,6 +12,10 @@
     * If two similarity links strength value have difference above 0.3 and 
       confidence value both above 0.7, blender thinks they conflict to each 
       other.
+* 4_blend_with_information_interaction.py: Simple 'bat-man' example using 
+  Interaction Information theory to make new blend.
+  * Choose one link set which has largest interaction information, and connect
+    them to new blend.
 
 ## See Also
 * [Conceptual Blending Config Format](../../../opencog/python/blending/blend-config-format.md)

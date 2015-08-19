@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# 4_blend_with_information_interaction_theory.py
+# 4_blend_with_information_interaction.py
 #
 """
 Example usage of Conceptual Blending API.
@@ -26,6 +26,101 @@ Fourth Example:
 - Give focus atom manually.
 - Choose one link set which has largest interaction information, and connect
   them to new blend.
+
+- Typical 'bat'
+  -> has claws
+  -> has sonar
+  -> eats flies
+  -> lives in cave
+  -> subclass of 'winged'
+  -> subclass of 'nocturnal'
+
+- Typical 'man'
+  -> eats steak
+  -> subclass of 'two-legged'
+  -> subclass of 'fingered'
+
+- Subset of 'bat'
+  -> funnel_eared megabats vesper
+  -> night_stalker(Eats steak)
+  -> zubat(Pokemon)
+- Subset of 'man'
+  -> scientist police programmer
+  -> ancients(Lives in cave)
+  -> vegetarian(Don't eats steak)
+
+Output dump:
+--------Start fourth example--------
+ConnectConflictInteractionInformation: Calculating probabilities (Total: 10)
+ConnectConflictInteractionInformation:PROB:: 1/10 (10.0%)
+ConnectConflictInteractionInformation:PROB:: 4/10 (40.0%)
+ConnectConflictInteractionInformation:PROB:: 7/10 (70.0%)
+ConnectConflictInteractionInformation: Calculating interaction information (Total: 64)
+ConnectConflictInteractionInformation:II:: 1/64 (1.5625%)
+ConnectConflictInteractionInformation:II:: 17/64 (26.5625%)
+ConnectConflictInteractionInformation:II:: 33/64 (51.5625%)
+ConnectConflictInteractionInformation:II:: 49/64 (76.5625%)
+[Selected]: claws, sonar, steak, flies, nocturnal, cave, : 0.845025718212
+claws, sonar, steak, nocturnal, cave, : 0.792551755905
+claws, steak, flies, nocturnal, cave, : 0.792551755905
+claws, sonar, steak, flies, cave, : 0.792369544506
+sonar, steak, flies, nocturnal, cave, : 0.78641974926
+claws, sonar, steak, flies, nocturnal, : 0.754736423492
+claws, sonar, steak, cave, : 0.739895641804
+claws, steak, flies, cave, : 0.739895522594
+
+sonar, steak, flies, cave, : 0.733763515949
+claws, steak, nocturnal, cave, : 0.715546965599
+# For example, an entity that
+#  -> (lives in cave) AND
+#     (eat steak) AND (eat files) AND
+#     (has sonar)
+# is more surprising than the entity that
+#  -> (lives in cave) AND
+#     (eat steak) AND
+#     (has claws) AND
+#     (nocturnal)
+
+sonar, steak, nocturnal, cave, : 0.709414958954
+steak, flies, nocturnal, cave, : 0.709414958954
+claws, sonar, steak, flies, : 0.702080190182
+claws, sonar, flies, nocturnal, cave, : 0.699828565121
+claws, sonar, steak, nocturnal, : 0.677731633186
+
+Newly blended node:
+(ConceptNode "bat-man") ; [472]
+
+Links in new blended node:
+[(ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "claws" (av 0 0 0) (stv 1.000000 0.000000)) ; [16]
+) ; [677]
+, (ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "nocturnal" (av 0 0 0) (stv 1.000000 0.000000)) ; [32]
+) ; [695]
+, (ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "cave" (av 0 0 0) (stv 1.000000 0.000000)) ; [26]
+) ; [675]
+, (ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "steak" (av 0 0 0) (stv 1.000000 0.000000)) ; [4]
+) ; [686]
+, (ListLink (av 0 0 0) (stv 0.300000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "gameboy" (av 0 0 0) (stv 1.000000 0.000000)) ; [29]
+) ; [688]
+, (ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "sonar" (av 0 0 0) (stv 1.000000 0.000000)) ; [19]
+) ; [676]
+, (ListLink (av 0 0 0) (stv 0.700000 0.800000)
+  (ConceptNode "bat-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [472]
+  (ConceptNode "flies" (av 0 0 0) (stv 1.000000 0.000000)) ; [11]
+) ; [679]
+]
+
 """
 print "--------Start fourth example--------"
 
@@ -57,7 +152,7 @@ InheritanceLink(bat, ConceptNode("big"), low_tv)
 InheritanceLink(bat, ConceptNode("popular"), low_tv)
 EvaluationLink(ListLink(bat, ConceptNode("cave"), high_tv))
 EvaluationLink(ListLink(bat, ConceptNode("gameboy"), low_tv))
-EvaluationLink(ListLink(man, ConceptNode("nocturnal"), high_tv))
+EvaluationLink(ListLink(bat, ConceptNode("nocturnal"), high_tv))
 
 EvaluationLink(ListLink(man, ConceptNode("steak"), high_tv))
 InheritanceLink(man, ConceptNode("two-legged"), high_tv)

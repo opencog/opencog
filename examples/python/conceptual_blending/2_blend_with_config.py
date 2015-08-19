@@ -25,6 +25,19 @@ Second Example:
 - Give focus atom manually.
 - Atoms that have STI value above 12 will be considered to blend.
 - Force to start blend, and choose 2 nodes randomly.
+
+Output dump:
+--------Start second example--------
+Source data:
+[(ConceptNode "car" (av 17 0 0) (stv 1.000000 0.000000)) ; [2]
+, (ConceptNode "man" (av 13 0 0) (stv 1.000000 0.000000)) ; [3]
+, (ConceptNode "block" (av 5 0 0) (stv 1.000000 0.000000)) ; [4]
+, (ConceptNode "build" (av 5 0 0) (stv 1.000000 0.000000)) ; [5]
+]
+
+Newly blended node:
+[(ConceptNode "man-car" (av 0 0 0) (stv 1.000000 0.000000)) ; [389]
+]
 """
 print "--------Start second example--------"
 a = AtomSpace()
