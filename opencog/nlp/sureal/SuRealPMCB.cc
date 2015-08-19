@@ -163,9 +163,11 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         std::string sSoln = m_as->get_name(hSolnNode);
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
-        // sometimes when the pattern node is not a variable, it may match to
-        // a solution node that does not have a corresponding WordInstanceNode,
-        // so we should accept it here, e.g. (PredicateNode "possession")
+        // if the node is a variable, it would have matched to a node with
+        // corresponding WordInstanceNode by variable match
+        // if the node is not a variable, then the standard node_match would
+        // have made it matched to itself, so let's move on and check the rest
+        // of the ndoes
         if (hSolnWordInst == Handle::UNDEFINED)
             continue;
 
