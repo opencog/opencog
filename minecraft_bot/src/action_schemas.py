@@ -6,6 +6,7 @@ from opencog.spacetime import SpaceTimeAndAtomSpace
 from opencog.spatial import get_near_free_point
 from opencog.atomspace import types, TruthValue
 from opencog.type_constructors import *
+
 rospy.wait_for_service('set_relative_look')
 rospy.wait_for_service('set_look')
 rospy.wait_for_service('set_relative_move')
@@ -53,7 +54,9 @@ def move_toward_block(block_atom):
         #TODO: In Minecraft the up/down direction is y coord
         # but we should swap y and z in ros node, not here..
         response = _ros_set_move(block_pos[0], block_pos[1], jump)
-        if response == True:
+        rospy.sleep(1)
+        print 'action_schemas: abs_move response', response
+        if response.state:
             print 'move success'
             return TruthValue(1,1)
         else:
