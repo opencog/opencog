@@ -42,3 +42,7 @@
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB)))
     (stv sAB cAB)))
+
+; Name the rule
+(define pln-rule-and-transformation-name (Node "pln-rule-and-transformation"))
+(DefineLink pln-rule-and-transformation-name pln-rule-and-transformation)

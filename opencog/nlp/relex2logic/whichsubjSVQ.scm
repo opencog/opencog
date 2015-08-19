@@ -26,7 +26,7 @@
             (TypedVariableLink
                 (VariableNode "$qVar")
                 (TypeNode "WordInstanceNode")
-            )		
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -44,7 +44,7 @@
                     (VariableNode "$subj")
                 )
             )
-		(AbsentLink            
+		(AbsentLink
 			(EvaluationLink
         	        	(DefinedLinguisticRelationshipNode "_obj")
         	       		 (ListLink
@@ -65,6 +65,7 @@
 				(DefinedLinguisticConceptNode "which")
 			)
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-whichsubjSVQ-rule")
        	      (ListLink
@@ -73,19 +74,16 @@
 
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "whichsubjSVQ-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "whichsubjSVQ-Rule") whichsubjSVQ)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-whichsubjSVQ-rule subj verb)
+  (ListLink
     (whichsubjSVQ-rule (word-inst-get-word-str subj) (cog-name subj)
               (word-inst-get-word-str verb) (cog-name verb)
     )
+  )
 )
-
-

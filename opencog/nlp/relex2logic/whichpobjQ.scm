@@ -1,4 +1,4 @@
-; This rule is for which-prepositional objects, as in 
+; This rule is for which-prepositional objects, as in
 ; "Which box are the drugs in?" or "In which way does this make sense?"
 ; (AN June 2015)
 
@@ -24,11 +24,11 @@
             (TypedVariableLink
                 (VariableNode "$qVar")
                 (TypeNode "WordInstanceNode")
-            )	
+            )
 	(TypedVariableLink
                 (VariableNode "$be")
                 (TypeNode "WordInstanceNode")
-            )		
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -78,6 +78,7 @@
 			(DefinedLinguisticConceptNode "which")
 		)
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-whichpobjQ-rule")
        	      (ListLink
@@ -86,20 +87,17 @@
        	         (VariableNode "$pobj")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "whichpobjQ-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "whichpobjQ-Rule") whichpobjQ)
-
+;;ToDo: define whichpobjQ
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-whichpobjQ-rule subj prep pobj)
+  (ListLink
     (whichpobjQ-rule (word-inst-get-word-str pobj) (cog-name pobj)
               (word-inst-get-word-str prep) (cog-name prep)
               (word-inst-get-word-str subj) (cog-name subj)
     )
+  )
 )
-
-

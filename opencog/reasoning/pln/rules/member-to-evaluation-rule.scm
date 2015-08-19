@@ -1,4 +1,6 @@
 ; ============================================================================= 
+; TODO generalize MemberToEvaluationRule that works with any length argument
+;
 ; MemberToEvaluationRule
 ;
 ; MemberLink 
@@ -17,61 +19,174 @@
 ;       B 
 ;       C
 ;
-; -----------------------------------------------------------------------------
-; The position of X is not fixed in the evaluation link. Basically, the rule
-; replaces X in the evaluation link with B.
-; NOTE:- This rule can create issues with backward chaining since the new link
-;        is created in the trailing function.
+
 
 (include "formulas.scm")
 
-(define pln-rule-member-to-evaluation
+; No ListLink, 1 argument in EvaluationLink
+(define pln-rule-member-to-evaluation-0
+	(BindLink
+		(VariableList
+			(VariableNode "$B")
+   			(TypedVariableLink
+    				(VariableNode "$D")
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
+		(MemberLink
+			(VariableNode "$B")
+			(SatisfyingSetLink
+				(VariableNode "$X-M2E")
+				(EvaluationLink
+					(VariableNode "$D")
+					(VariableNode "$X-M2E"))))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(ListLink
+				(EvaluationLink
+					(VariableNode "$D")
+					(VariableNode "$B"))
+				(MemberLink
+					(VariableNode "$B")
+					(SatisfyingSetLink
+						(VariableNode "$X-M2E")
+						(EvaluationLink
+							(VariableNode "$D")
+							(VariableNode "$X-M2E"))))))))
+
+; Has ListLink, 1 argument in EvaluationLink
+(define pln-rule-member-to-evaluation-1
+	(BindLink
+		(VariableList
+			(VariableNode "$B")
+   			(TypedVariableLink
+    				(VariableNode "$D")
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
+		(MemberLink
+			(VariableNode "$B")
+			(SatisfyingSetLink
+				(VariableNode "$X-M2E")
+				(EvaluationLink
+					(VariableNode "$D")
+					(ListLink
+						(VariableNode "$X-M2E")))))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(ListLink
+				(EvaluationLink
+					(VariableNode "$D")
+					(ListLink
+						(VariableNode "$B")))
+				(MemberLink
+					(VariableNode "$B")
+					(SatisfyingSetLink
+						(VariableNode "$X-M2E")
+						(EvaluationLink
+							(VariableNode "$D")
+							(ListLink
+								(VariableNode "$X-M2E")))))))))
+
+; Has ListLink, 2 arguments in EvaluationLink, 1st argument in MemberLink
+(define pln-rule-member-to-evaluation-2-1
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
 			(VariableNode "$C")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode")))
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
-				(VariableNode "$X")
+				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
-					(VariableNode "$C"))))
+					(ListLink
+						(VariableNode "$X-M2E")
+						(VariableNode "$C")))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
 			(ListLink
+				(EvaluationLink
+					(VariableNode "$D")
+					(ListLink
+						(VariableNode "$B")
+						(VariableNode "$C")))
 				(MemberLink
 					(VariableNode "$B")
 					(SatisfyingSetLink
-						(VariableNode "$X")
+						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
-							(VariableNode "$C"))))))))
+							(ListLink
+								(VariableNode "$X-M2E")
+								(VariableNode "$C")))))))))
+
+; Has ListLink, 2 arguments in EvaluationLink, 2nd argument in MemberLink
+(define pln-rule-member-to-evaluation-2-2
+	(BindLink
+		(VariableList
+			(VariableNode "$B")
+			(VariableNode "$C")
+   			(TypedVariableLink
+    				(VariableNode "$D")
+    				(TypeNode "PredicateNode"))
+    			(TypedVariableLink
+    				(VariableNode "$X-M2E")
+    				(TypeNode "VariableNode")))
+		(MemberLink
+			(VariableNode "$C")
+			(SatisfyingSetLink
+				(VariableNode "$X-M2E")
+				(EvaluationLink
+					(VariableNode "$D")
+					(ListLink
+						(VariableNode "$B")
+						(VariableNode "$X-M2E")))))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(ListLink
+				(EvaluationLink
+					(VariableNode "$D")
+					(ListLink
+						(VariableNode "$B")
+						(VariableNode "$C")))
+				(MemberLink
+					(VariableNode "$C")
+					(SatisfyingSetLink
+						(VariableNode "$X-M2E")
+						(EvaluationLink
+							(VariableNode "$D")
+							(ListLink
+								(VariableNode "$B")
+								(VariableNode "$X-M2E")))))))))
+
+
 
 ; -----------------------------------------------------------------------------
 ; Member To Evaluation Formula
-;
-; The formula checks if the argumentset of the evaluation link is n-ary or 
-; unary. If it is unary, the first condition is satisfied and an evaluation
-; link is created with the predicatenode and variable B. If the evaluation link
-; is n-ary, find-replace function is called which replaces variable X in the 
-; link element's list with variable B.
 ; -----------------------------------------------------------------------------
 
+(define (pln-formula-member-to-evaluation EVAL MEM)
+	(cog-set-tv! EVAL (cog-tv MEM)))
 
 
-(define (pln-formula-member-to-evaluation BXDC)
-	(if (= (cog-arity (gdddr BXDC)) 0)
-		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
-			(gaddr BXDC)
-			(gar BXDC))
-		(EvaluationLink (stv (cog-stv-strength BXDC) (cog-stv-confidence BXDC))
-			(gaddr BXDC)
-			(ListLink
-				(find-replace 
-					(cog-outgoing-set (gdddr BXDC)) 
-					(VariableNode "$X") 
-					(gar BXDC))))))
+; Name the rule
+(define pln-rule-member-to-evaluation-0-name (Node "pln-rule-member-to-evaluation-0"))
+(DefineLink pln-rule-member-to-evaluation-0-name pln-rule-member-to-evaluation-0)
+
+(define pln-rule-member-to-evaluation-1-name (Node "pln-rule-member-to-evaluation-1"))
+(DefineLink pln-rule-member-to-evaluation-1-name pln-rule-member-to-evaluation-1)
+
+(define pln-rule-member-to-evaluation-2-1-name (Node "pln-rule-member-to-evaluation-2-1"))
+(DefineLink pln-rule-member-to-evaluation-2-1-name pln-rule-member-to-evaluation-2-1)
+
+(define pln-rule-member-to-evaluation-2-2-name (Node "pln-rule-member-to-evaluation-2-2"))
+(DefineLink pln-rule-member-to-evaluation-2-2-name pln-rule-member-to-evaluation-2-2)

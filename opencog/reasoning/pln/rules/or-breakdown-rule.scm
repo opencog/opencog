@@ -43,3 +43,7 @@
        (sA (cog-stv-strength A))
        (cA (cog-stv-confidence A)))
     (stv (/ sAB (- 1 sA)) (min cAB cA))))
+
+; Name the rule
+(define pln-rule-or-breakdown-name (Node "pln-rule-or-breakdown"))
+(DefineLink pln-rule-or-breakdown-name pln-rule-or-breakdown)

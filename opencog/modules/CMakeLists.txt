@@ -24,33 +24,6 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
-# ----------------------------------------
-IF (TBB_FOUND)
-	INCLUDE_DIRECTORIES (
-		${TBB_INCLUDE_DIR}
-	)
-
-	LINK_DIRECTORIES(
-		${TBB_INCLUDE_DIR}
-		${TBB_LIBRARY_DIRS}
-	)
-
-	ADD_LIBRARY(plnmodule SHARED
-		PLNModule
-	)
-
-	TARGET_LINK_LIBRARIES(plnmodule
-		${ATOMSPACE_LIBRARIES}
-		server
-		tbb
-	)
-
-	INSTALL (TARGETS plnmodule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-	)
-ENDIF (TBB_FOUND)
-
-# ----------------------------------------
 # Build the query (pattern-matching) cogserver module
 ADD_LIBRARY(QueryModule SHARED
 	QueryModule.cc
@@ -70,7 +43,7 @@ ADD_LIBRARY (PersistModule SHARED
 )
 
 TARGET_LINK_LIBRARIES(PersistModule
-	server  # needed for definition of _ZTIN7opencog7RequestE
+	# server  # needed for definition of _ZTIN7opencog7RequestE
 	${ATOMSPACE_LIBRARIES}
 )
 

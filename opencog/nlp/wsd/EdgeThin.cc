@@ -58,7 +58,7 @@ bool EdgeThin::prune_sense(const Handle& sense_h, const Handle& sense_link_h)
 	// If incoming set of this sense link is empty, remove it entirely.
 	if (sense_link_h->getIncomingSetSize() == 0)
 	{
-		atom_space->removeAtom(sense_link_h, false);
+		atom_space->remove_atom(sense_link_h, false);
 		prune_count ++;
 		return true;
 	}
@@ -195,7 +195,7 @@ bool EdgeThin::delete_sim(const Handle& h)
 	printf("slink: %s ## %s <<-->> %s ## %s delete\n", vsw, vfw, vss, vfs); 
 #endif
 
-	atom_space->removeAtom(h, false);
+	atom_space->remove_atom(h, false);
 	edge_count ++;
 	return true;
 }
@@ -259,7 +259,7 @@ bool EdgeThin::thin_word(const Handle& word_h)
 	for (it=sense_list.begin(); it != sense_list.end(); ++it)
 	{
 		Handle sense_h = *it;
-		atom_space->removeAtom(sense_h, false);
+		atom_space->remove_atom(sense_h, false);
 	}
 
 	return false;

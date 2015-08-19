@@ -53,9 +53,7 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
-#ifdef HAVE_SQL_STORAGE
 #include <opencog/modules/PersistModule.h>
-#endif /* HAVE_SQL_STORAGE */
 
 #include "CogServer.h"
 #include "BaseServer.h"
@@ -311,7 +309,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
-    atoms_start = atomSpace->getSize();
+    atoms_start = atomSpace->get_size();
 
     logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
                    agent->classinfo().id.c_str(),  this->cycleCount);
@@ -321,7 +319,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
-    atoms_end = atomSpace->getSize();
+    atoms_end = atomSpace->get_size();
 
     time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
                 (timer_start.tv_sec*1000000  + timer_start.tv_usec);
@@ -744,7 +742,6 @@ void CogServer::openDatabase(void)
         return;
     }
 
-#ifdef HAVE_SQL_STORAGE
     const std::string &dbname = config()["STORAGE"];
     const std::string &username = config()["STORAGE_USERNAME"];
     const std::string &passwd = config()["STORAGE_PASSWD"];
@@ -769,11 +766,6 @@ void CogServer::openDatabase(void)
 
     logger().info("Preload %s as user %s msg: %s",
         dbname.c_str(), username.c_str(), resp.c_str());
-
-#else /* HAVE_SQL_STORAGE */
-    logger().warn(
-        "Server compiled without database support");
-#endif /* HAVE_SQL_STORAGE */
 }
 
 Logger &CogServer::logger()

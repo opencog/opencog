@@ -40,7 +40,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
     seq0.push_back(object);
 
     // testing if there is a predicate already
-    Handle predicateHandle = atomSpace.getHandle(PREDICATE_NODE, predicateName);
+    Handle predicateHandle = atomSpace.get_handle(PREDICATE_NODE, predicateName);
     if (predicateHandle == Handle::UNDEFINED) {
         logger().fine("BasicPredUpdater - Predicate '%s' not found.",
                      predicateName.c_str());
@@ -48,20 +48,20 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
     }
 
     // testing if there is a list link already
-    Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
+    Handle listLinkHandle = atomSpace.get_handle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
         logger().fine("BasicPredUpdater - Obj %s has no ListLink.",
-                     atomSpace.getName(object).c_str());
+                     atomSpace.get_name(object).c_str());
         return Handle::UNDEFINED;
     }
 
-    return atomSpace.getHandle(EVALUATION_LINK, predicateHandle, listLinkHandle);
+    return atomSpace.get_handle(EVALUATION_LINK, predicateHandle, listLinkHandle);
 }
 
 Handle BasicPredicateUpdater::getHandle(std::string objName)
 {
     HandleSeq objHandle;
-    atomSpace.getHandlesByName(back_inserter(objHandle), objName, OBJECT_NODE, true);
+    atomSpace.get_handles_by_name(back_inserter(objHandle), objName, OBJECT_NODE, true);
 
     // found no handle - ERROR
     if (objHandle.size() < 1) {
@@ -79,8 +79,8 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
         unsigned int i;
         for ( i = 0; i < objHandle.size( ); ++i ) {
             logger().warn("BasicPredUpdater - id = %s handle = %i",
-                           atomSpace.getName(objHandle[i]).c_str( ), 
-                           atomSpace.getType(objHandle[i]) 
+                           atomSpace.get_name(objHandle[i]).c_str( ), 
+                           atomSpace.get_type(objHandle[i]) 
                          );
         } // for
     }

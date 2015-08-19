@@ -50,7 +50,7 @@ public:
     std::string toString(AtomSpace& a) const {
         std::string str = std::string("{") +
                           (handle == Handle::UNDEFINED ? std::string("Handle::UNDEFINED") :
-                          a.atomAsString(handle))
+                          a.atom_as_string(handle))
                           + std::string(",") + temporal.toString() + std::string("}");
         return str;
     }

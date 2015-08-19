@@ -24,24 +24,22 @@
    		(DefinedLinguisticConceptNode "negative")
 	    )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-neg-rule")
        	      (ListLink
        	         (VariableNode "$pred")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "neg-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "neg-Rule") neg)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-neg-rule pred)
-    	(negative-rule (word-inst-get-word-str pred) (cog-name pred)   
+   (ListLink
+    (negative-rule (word-inst-get-word-str pred) (cog-name pred)   
     )
+   )
 )
-
-

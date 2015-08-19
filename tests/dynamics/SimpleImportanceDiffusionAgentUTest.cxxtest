@@ -96,47 +96,47 @@ public:
         load_scm_files_from_config(*as);    
 
         // Initial conditions        
-        TS_ASSERT(as->getSTI(Handle(2)) == 1000);
-        TS_ASSERT(as->getSTI(Handle(3)) == 0);
-        TS_ASSERT(as->getSTI(Handle(4)) == 0);
-        TS_ASSERT(as->getSTI(Handle(5)) == 0);
+        TS_ASSERT(as->get_STI(Handle(2)) == 1000);
+        TS_ASSERT(as->get_STI(Handle(3)) == 0);
+        TS_ASSERT(as->get_STI(Handle(4)) == 0);
+        TS_ASSERT(as->get_STI(Handle(5)) == 0);
 
         // Timestep #1
         cogserver().runLoopStep();
-        TS_ASSERT(as->getSTI(Handle(2)) == 400);
-        TS_ASSERT(as->getSTI(Handle(3)) == 0);
-        TS_ASSERT(as->getSTI(Handle(4)) == 0);
-        TS_ASSERT(as->getSTI(Handle(5)) == 600);
+        TS_ASSERT(as->get_STI(Handle(2)) == 400);
+        TS_ASSERT(as->get_STI(Handle(3)) == 0);
+        TS_ASSERT(as->get_STI(Handle(4)) == 0);
+        TS_ASSERT(as->get_STI(Handle(5)) == 600);
         
         // Timestep #2
         cogserver().runLoopStep();
-        TS_ASSERT(as->getSTI(Handle(2)) == 340);
-        TS_ASSERT(as->getSTI(Handle(3)) == 0);
-        TS_ASSERT(as->getSTI(Handle(4)) == 180);
-        TS_ASSERT(as->getSTI(Handle(5)) == 480);
+        TS_ASSERT(as->get_STI(Handle(2)) == 340);
+        TS_ASSERT(as->get_STI(Handle(3)) == 0);
+        TS_ASSERT(as->get_STI(Handle(4)) == 180);
+        TS_ASSERT(as->get_STI(Handle(5)) == 480);
         
         // Timestep #3
         cogserver().runLoopStep();
-        TS_ASSERT(as->getSTI(Handle(2)) == 280);
-        TS_ASSERT(as->getSTI(Handle(3)) == 54);
-        TS_ASSERT(as->getSTI(Handle(4)) == 216);
-        TS_ASSERT(as->getSTI(Handle(5)) == 450);
+        TS_ASSERT(as->get_STI(Handle(2)) == 280);
+        TS_ASSERT(as->get_STI(Handle(3)) == 54);
+        TS_ASSERT(as->get_STI(Handle(4)) == 216);
+        TS_ASSERT(as->get_STI(Handle(5)) == 450);
         
         // Timestep #4
         cogserver().runLoopStep();
-        TS_ASSERT(as->getSTI(Handle(2)) == 247);
-        TS_ASSERT(as->getSTI(Handle(3)) == 87);
-        TS_ASSERT(as->getSTI(Handle(4)) == 253);
-        TS_ASSERT(as->getSTI(Handle(5)) == 413);
+        TS_ASSERT(as->get_STI(Handle(2)) == 247);
+        TS_ASSERT(as->get_STI(Handle(3)) == 87);
+        TS_ASSERT(as->get_STI(Handle(4)) == 253);
+        TS_ASSERT(as->get_STI(Handle(5)) == 413);
         
         // Timestep #5
         cogserver().runLoopStep();
-        TS_ASSERT(as->getSTI(Handle(2)) == 223);
-        TS_ASSERT(as->getSTI(Handle(3)) == 111);
-        TS_ASSERT(as->getSTI(Handle(4)) == 277);
-        TS_ASSERT(as->getSTI(Handle(5)) == 389);
+        TS_ASSERT(as->get_STI(Handle(2)) == 223);
+        TS_ASSERT(as->get_STI(Handle(3)) == 111);
+        TS_ASSERT(as->get_STI(Handle(4)) == 277);
+        TS_ASSERT(as->get_STI(Handle(5)) == 389);
         
         // Confirm that no new atoms were added
-        TS_ASSERT(as->getSize() == 4);
+        TS_ASSERT(as->get_size() == 4);
     }
 };

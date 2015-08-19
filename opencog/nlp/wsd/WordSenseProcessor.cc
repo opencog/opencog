@@ -77,7 +77,7 @@ void * WordSenseProcessor::thread_start(void *data)
 
 void WordSenseProcessor::work_thread(void)
 {
-	completion_handle = atom_space->addNode(ANCHOR_NODE, "#WSD_completed");
+	completion_handle = atom_space->add_node(ANCHOR_NODE, "#WSD_completed");
 
 	while (1)
 	{
@@ -98,7 +98,7 @@ void WordSenseProcessor::work_thread(void)
 		std::vector<Handle> out;
 		out.push_back(h);
 		out.push_back(completion_handle);
-		atom_space->addLink(INHERITANCE_LINK, out);
+		atom_space->add_link(INHERITANCE_LINK, out);
 	}
 }
 
@@ -130,7 +130,7 @@ bool WordSenseProcessor::do_document(const Handle& h)
 {
 	// Obtain the handle which indicates that the WSD processing of a
  	// document has started.
-	start_handle = atom_space->addNode(ANCHOR_NODE, "#WSD_started");
+	start_handle = atom_space->add_node(ANCHOR_NODE, "#WSD_started");
 
 	// Look to see if the document is associated with the
 	// start indicator.
@@ -146,7 +146,7 @@ bool WordSenseProcessor::do_document(const Handle& h)
 	std::vector<Handle> out;
 	out.push_back(h);
 	out.push_back(start_handle);
-	atom_space->addLink(INHERITANCE_LINK, out);
+	atom_space->add_link(INHERITANCE_LINK, out);
 
 	// Now queue the document for actual processing.
 	pthread_mutex_lock(&queue_lock);

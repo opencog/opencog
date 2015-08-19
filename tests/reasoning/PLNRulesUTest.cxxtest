@@ -93,7 +93,7 @@ void PLNRulesUTest::test_deduction()
     
     // To start with, it should only know that men are humans
     results = eval.eval_h("(cog-bind find-humans)");
-    TS_ASSERT_EQUALS(1, as.getArity(results));
+    TS_ASSERT_EQUALS(1, as.get_arity(results));
     
     // Apply the deduction rule
     eval.eval_h("(cog-bind pln-rule-deduction)");
@@ -101,7 +101,7 @@ void PLNRulesUTest::test_deduction()
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
     results = eval.eval_h("(cog-bind find-humans)");
-    TS_ASSERT_EQUALS(4, as.getArity(results));
+    TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
 /*
@@ -123,7 +123,7 @@ void PLNRulesUTest::test_and()
     Handle results = eval.eval_h("(cog-bind-af pln-rule-and)");
 
     // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
-    TS_ASSERT_EQUALS(4, as.getArity(results));
+    TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
 /*
@@ -143,5 +143,5 @@ void PLNRulesUTest::test_not()
     Handle results = eval.eval_h("(cog-bind-af pln-rule-not)");
 
     // It should contain 2 groundings, not(A), not(B)
-    TS_ASSERT_EQUALS(2, as.getArity(results));
+    TS_ASSERT_EQUALS(2, as.get_arity(results));
 }

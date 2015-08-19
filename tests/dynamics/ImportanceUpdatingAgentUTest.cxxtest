@@ -50,24 +50,24 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
     TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
-    Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf);
+    Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
     h1->setTruthValue(tv1);
     buf[baseNameLength] = '2';
-    Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf);
+    Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
     h2->setTruthValue(tv2);
     buf[baseNameLength] = '3';
-    Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf);
+    Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
     h3->setTruthValue(tv3);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
     outgoing1.push_back(h3);
-    Handle l1 = atomSpace->addLink(LIST_LINK, outgoing1);
+    Handle l1 = atomSpace->add_link(LIST_LINK, outgoing1);
     l1->setTruthValue(tv1);
     HandleSeq outgoing2;
     outgoing2.push_back(h1);
     outgoing2.push_back(l1);
-    Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2);
+    Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
     l2->setTruthValue(tv2);
 
     testAtoms.push_back(h1);
@@ -125,10 +125,10 @@ public:
     
         AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->get_STI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_STI_funds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->get_LTI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_LTI_funds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoise() {
@@ -138,10 +138,10 @@ public:
 
        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->get_STI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_STI_funds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->get_LTI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_LTI_funds(), agent->acceptableLobeLTIRange[1]);
 	}
 
 	void testNoLinks() {
@@ -155,10 +155,10 @@ public:
 
        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getSTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getLTIFunds());
-	    TS_ASSERT_LESS_THAN_EQUALS(as->getLTIFunds(), agent->acceptableLobeLTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->get_STI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_STI_funds(), agent->acceptableLobeSTIRange[1]);
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->get_LTI_funds());
+	    TS_ASSERT_LESS_THAN_EQUALS(as->get_LTI_funds(), agent->acceptableLobeLTIRange[1]);
 	}
 
     /// @todo check changing function parameters correct alters the

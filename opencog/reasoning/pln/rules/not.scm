@@ -43,3 +43,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (PredicateNode "A" (stv 0.2 1))
+
+; Name the rule
+(define pln-rule-not-name (Node "pln-rule-not"))
+(DefineLink pln-rule-not-name pln-rule-not)

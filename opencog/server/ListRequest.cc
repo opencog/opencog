@@ -74,7 +74,7 @@ bool ListRequest::execute()
             if (it == _parameters.end()) return syntaxError();
             UUID uuid = strtol(it->c_str(), NULL, 0);
             handle = Handle(uuid);
-            if (!as.isValidHandle(handle)) {
+            if (!as.is_valid_handle(handle)) {
                 _error << "Error: Invalid handle" << std::endl;
                 sendError();
                 return false;
@@ -114,14 +114,14 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        as.getHandlesByName
+        as.get_handles_by_name
             (std::back_inserter(_handles), name.c_str(), type, subtypes);
     } else if (name != "") {     // filter by name
-        as.getHandlesByName(std::back_inserter(_handles), name.c_str(), ATOM, true);
+        as.get_handles_by_name(std::back_inserter(_handles), name.c_str(), ATOM, true);
     } else if (type != NOTYPE) { // filter by type
-        as.getHandlesByType(std::back_inserter(_handles), type, subtypes);
+        as.get_handles_by_type(std::back_inserter(_handles), type, subtypes);
     } else {
-        as.getHandlesByType(back_inserter(_handles), ATOM, true);
+        as.get_handles_by_type(back_inserter(_handles), ATOM, true);
     }
 
     // Remove the bottom handles
@@ -139,7 +139,7 @@ void ListRequest::sendOutput()
     if (_mimeType == "text/plain") {
         AtomSpace& as = _cogserver.getAtomSpace();
         for (Handle& h : _handles) {
-            oss << as.atomAsString(h) << std::endl;
+            oss << as.atom_as_string(h) << std::endl;
         }
     } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
             _mimeType.c_str());

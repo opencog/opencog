@@ -19,7 +19,7 @@
 				(TypeNode "WordInstanceNode")
 			)
 		)
-		(AndLink	
+		(AndLink
 			(WordInstanceLink
 				(VariableNode "$verb")
 				(VariableNode "$a-parse")
@@ -33,7 +33,7 @@
                 			(ListLink
                     			(VariableNode "$verb")
                     			(VariableNode "$qVar")
-                			)					
+                			)
             		)
 			(AbsentLink
 				(LemmaLink
@@ -42,23 +42,21 @@
 				)
 			)
 		)
+ (ListLink
 	(ExecutionOutputLink
 		(GroundedSchemaNode "scm: pre-when-q-rule")
 		(ListLink
 			(VariableNode "$verb")
 		)
 	)
+ )
 ))
-
-
-(InheritanceLink (stv 1 .99) (ConceptNode "when-q-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "when-q-Rule") when-q)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-when-q-rule verb)
+ (ListLink
 	(when-rule (word-inst-get-word-str verb) (cog-name verb)
 	)
+ )
 )
-

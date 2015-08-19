@@ -90,17 +90,17 @@ void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(float percent)
  */
 void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
     HandleSeq resultSet;
-    as->getHandlesByName(back_inserter(resultSet), "CONFIG-DiffusionPercent");
+    as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
     if (resultSet.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = resultSet.front();
-        resultSet = as->getIncoming(h);
+        resultSet = as->get_incoming(h);
         h = resultSet.front();
-        resultSet = as->getOutgoing(h);
+        resultSet = as->get_outgoing(h);
         h = resultSet.back();
-        resultSet = as->getOutgoing(h);
+        resultSet = as->get_outgoing(h);
         h = resultSet.front();
-        float value = std::atof(as->getName(h).c_str());
+        float value = std::atof(as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -182,7 +182,7 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
     for (Handle atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(as->getSTI(atomSource))) {
+        if (spreadDecider->spreadDecision(as->get_STI(atomSource))) {
 #ifdef DEBUG
             std::cout << "Calling diffuseAtom." << std::endl;
 #endif
@@ -302,8 +302,8 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
 void SimpleImportanceDiffusionAgent::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    as->setSTI(event.source, as->getSTI(event.source) - event.amount);
-    as->setSTI(event.target, as->getSTI(event.target) + event.amount);
+    as->set_STI(event.source, as->get_STI(event.source) - event.amount);
+    as->set_STI(event.target, as->get_STI(event.target) + event.amount);
     
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source 
@@ -334,7 +334,7 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
 {
     // Retrieve the atoms in the AttentionalFocus
     HandleSeq resultSet;
-    as->getHandleSetInAttentionalFocus(back_inserter(resultSet));
+    as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
 
 #ifdef DEBUG      
     std::cout << "Calculating diffusionSourceVector." << std::endl;
@@ -347,7 +347,7 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        { 
-                           Type type = as->getType(h);
+                           Type type = as->get_type(h);
 
 #ifdef DEBUG                           
                            std::cout << "Checking atom of type: " << 
@@ -395,10 +395,10 @@ HandleSeq SimpleImportanceDiffusionAgent::incidentAtoms(Handle h)
     HandleSeq resultSet;
     
     // Add the incoming set
-    resultSet = as->getIncoming(h);
+    resultSet = as->get_incoming(h);
     
     // Calculate and append the outgoing set
-    HandleSeq outgoing = as->getOutgoing(h);
+    HandleSeq outgoing = as->get_outgoing(h);
     resultSet.insert(resultSet.end(), outgoing.begin(), outgoing.end());
     
     return resultSet;
@@ -474,7 +474,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        Handle link = as->getHandle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
         
         // Calculate the discounted diffusion amount based on the link
         // attributes
@@ -590,7 +590,7 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(as->getSTI(h) * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(as->get_STI(h) * maxSpreadPercentage);
     
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing
@@ -615,8 +615,8 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
 float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
         Handle h)
 {
-    strength_t strength = as->getMean(h);
-    confidence_t confidence = as->getConfidence(h);
+    strength_t strength = as->get_mean(h);
+    confidence_t confidence = as->get_confidence(h);
     
     return strength * confidence;
 }

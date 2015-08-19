@@ -23,24 +23,22 @@
    		(DefinedLinguisticConceptNode "definite")
 	    )
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-definite-rule")
        	      (ListLink
        	         (VariableNode "$noun")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "definite-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "definite-Rule") definite)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-definite-rule pred)
-    	(definite-rule (word-inst-get-word-str noun) (cog-name noun)   
+  (ListLink
+    	(definite-rule (word-inst-get-word-str noun) (cog-name noun)
     )
+  )
 )
-
-

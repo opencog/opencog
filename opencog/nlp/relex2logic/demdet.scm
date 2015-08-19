@@ -37,6 +37,7 @@
 		)
 
         )
+       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-demdet-rule")
        	      (ListLink
@@ -44,20 +45,19 @@
        	         (VariableNode "$noun")
             )
         )
+      )
     )
 )
-
-(InheritanceLink (stv 1 .99) (ConceptNode "demdet-Rule") (ConceptNode "Rule"))
-
-(ReferenceLink (stv 1 .99) (ConceptNode "demdet-Rule") demdet)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
+
+;;ToDo: define demdet-rule
 (define (pre-demdet-rule demdet noun)
-    	(demdet-rule (word-inst-get-word-str noun) (cog-name noun)
+ (ListLink
+  (demdet-rule (word-inst-get-word-str noun) (cog-name noun)
 	(word-inst-get-word-str demdet) (cog-name demdet)
-              
-    )
+
+  )
+ )
 )
-
-

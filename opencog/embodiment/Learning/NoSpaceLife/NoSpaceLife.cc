@@ -136,14 +136,14 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
     Handle h;
 
     //add the subject of the action to create
-    hs.push_back(_atomSpace.addNode(PET_NODE, _pet_id));
+    hs.push_back(_atomSpace.add_node(PET_NODE, _pet_id));
 
     //add the action
     if (a == get_instance(id::random_step))
         a = choose_random_step();
     std::stringstream ss;
     ss << a;
-    hs.push_back(_atomSpace.addNode(NODE, ss.str()));
+    hs.push_back(_atomSpace.add_node(NODE, ss.str()));
 
     //add the arguments
     int arg_index = 0;
@@ -168,7 +168,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
         }
         //contin case
         else if (is_contin(*sib)) {
-            arg_h = _atomSpace.addNode(NUMBER_NODE,
+            arg_h = _atomSpace.add_node(NUMBER_NODE,
                                        boost::lexical_cast<std::string>(get_contin(*sib)));
         } else {
             OC_ASSERT(false,
@@ -181,13 +181,13 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
     //Create the output of the EvalLink
     HandleSeq eo;
     //add predicatNode:"behaved"
-    h = _atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
+    h = _atomSpace.add_node(PREDICATE_NODE, BEHAVED_STR);
     eo.push_back(h);
     //create and add listLink with hs to eo
-    h = _atomSpace.addLink(LIST_LINK, hs);
+    h = _atomSpace.add_link(LIST_LINK, hs);
     eo.push_back(h);
     //create the EvaluationLink
-    h = _atomSpace.addLink(EVALUATION_LINK, eo);
+    h = _atomSpace.add_link(EVALUATION_LINK, eo);
     //fill the elementary BD
     Temporal t(start_time, end_time);
     ebd.handle = h;
@@ -231,22 +231,22 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
             Handle h = *hs.getSet().begin();
             //check that it matches Behavior Description atom structure
             OC_ASSERT(h != Handle::UNDEFINED);
-            OC_ASSERT(_atomSpace.getType(h) == EVALUATION_LINK);
-            OC_ASSERT(_atomSpace.getArity(h) == 2, "An EvaluationLink must have only 2 arguments");
+            OC_ASSERT(_atomSpace.get_type(h) == EVALUATION_LINK);
+            OC_ASSERT(_atomSpace.get_arity(h) == 2, "An EvaluationLink must have only 2 arguments");
 
-            Handle list_h = _atomSpace.getOutgoing(h, 1);
-            OC_ASSERT(_atomSpace.getType(list_h) == LIST_LINK);
+            Handle list_h = _atomSpace.get_outgoing(h, 1);
+            OC_ASSERT(_atomSpace.get_type(list_h) == LIST_LINK);
             //check if the equivalent argument exists
             //and can correspond to a random operator
-            if (arg_index < _atomSpace.getArity(list_h) - 2) {
-                Handle arg_h = _atomSpace.getOutgoing(list_h, arg_index + 2);
+            if (arg_index < _atomSpace.get_arity(list_h) - 2) {
+                Handle arg_h = _atomSpace.get_outgoing(list_h, arg_index + 2);
                 OC_ASSERT(arg_h != Handle::UNDEFINED);
-                OC_ASSERT(_atomSpace.getType(arg_h),
+                OC_ASSERT(_atomSpace.get_type(arg_h),
                                  "arg_h must be a Node");
                 //convert to self or owner if name is _avatar_id or _owner_id
                 //(avatarName corresponds to self because the puts itself under its
                 //skin
-                do_id = WorldWrapperUtil::atom_name_to_definite_object(_atomSpace.getName(arg_h), _avatar_id, _owner_id);
+                do_id = WorldWrapperUtil::atom_name_to_definite_object(_atomSpace.get_name(arg_h), _avatar_id, _owner_id);
                 //depending on the random operator check if the object belongs to
                 //the set
                 if (io == get_instance(id::random_object))

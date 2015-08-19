@@ -76,7 +76,7 @@ bool is_atom_tree_template_of::is_atom_tree_template_it(const atom_tree& tr1,
     } else {
         h1_TempOf_h2 = classserver().isA(
                 (h2_ptr != NULL) ?
-                    as->getType(*h2_ptr) : *t2_ptr,
+                    as->get_type(*h2_ptr) : *t2_ptr,
                 *t1_ptr);
     }
 
@@ -139,7 +139,7 @@ void does_fit_template::expandHandletree(bool fullVirtual, atom_tree& ret,
         const opencog::AtomSpace* as) const
 {
     Handle *h_ptr = boost::get<Handle>(&(*ret_top));
-    Type T = (h_ptr != NULL) ? as->getType(*h_ptr) : boost::get<Type>(*ret_top);
+    Type T = (h_ptr != NULL) ? as->get_type(*h_ptr) : boost::get<Type>(*ret_top);
 
     /// If link then we keep expanding
     if (classserver().isA(T, LINK)) {
@@ -147,7 +147,7 @@ void does_fit_template::expandHandletree(bool fullVirtual, atom_tree& ret,
             *ret_top = Vertex(T);
 
         if (h_ptr != NULL) {
-            HandleSeq _hs = as->getOutgoing(*h_ptr);
+            HandleSeq _hs = as->get_outgoing(*h_ptr);
             for (HandleSeq::iterator child_h = _hs.begin(); child_h != _hs.end(); ++child_h) {
                 //for (Handle child_h : _hs) {
                 atom_tree_it next_i = ret.append_child(ret_top, *child_h);

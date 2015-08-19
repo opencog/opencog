@@ -60,3 +60,10 @@
                 (< sCB 0.5)
                 (stv 1 0)
                 (stv 1 1)))))
+
+; Name the rule
+(define pln-rule-negated-subset-evaluation-name
+  (Node "pln-rule-negated-subset-evaluation"))
+(DefineLink
+  pln-rule-negated-subset-evaluation-name
+  pln-rule-negated-subset-evaluation)

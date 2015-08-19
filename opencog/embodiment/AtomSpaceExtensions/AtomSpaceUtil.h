@@ -32,6 +32,8 @@
  * Class with util methods for related to AtomSpace manipulation
  */
 
+#include <string>
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/spatial/math/Vector3.h>
@@ -122,13 +124,13 @@ private:
      *             TimeNode
      *             EvaluationLink
      */
-    static void updateGenericLatestInfoMap(HandleToHandleMap & infoMap,
-                                           AtomSpace & as,
+    static void updateGenericLatestInfoMap(HandleToHandleMap& infoMap,
+                                           AtomSpace& as,
                                            Handle atTimeLink,
                                            Handle key);
 
-    static void updateGenericLatestSingleInfo(Handle & latestSingleInfoHandle,
-                                              AtomSpace & as,
+    static void updateGenericLatestSingleInfo(Handle& latestSingleInfoHandle,
+                                              AtomSpace& as,
                                               Handle atTimeLink);
 
 public:
@@ -143,12 +145,12 @@ public:
      *     firstOutgoing
      *     secondOutgoing
      */
-    static Handle getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgoing); 
+    static Handle getReferenceLink(AtomSpace& atomSpace, Handle hFirstOutgoing); 
 
     /**
      * Return the second outgoing of a ReferenceLink given the first outgoing
      */
-    static Handle getReference(AtomSpace & atomSpace, Handle hFirstOutgoing); 
+    static Handle getReference(AtomSpace& atomSpace, Handle hFirstOutgoing); 
 
     /**
      * Return the InheritanceLink list given its first outgoing
@@ -157,7 +159,7 @@ public:
      *     firstOutgoing
      *     secondOutgoing
      */
-    static std::vector<Handle> getInheritanceLinks(AtomSpace & atomSpace,
+    static std::vector<Handle> getInheritanceLinks(AtomSpace& atomSpace,
                                                    Handle hFirstOutgoing);
 
    /**
@@ -170,12 +172,13 @@ public:
      * @param feelingName name of the feeling wanted
      * @return The current level of a given feeling
      */
-    static float getCurrentPetFeelingLevel( AtomSpace& atomSpace,
-                                            const std::string& petId,
-                                            const std::string& feelingName );
+    static float getCurrentPetFeelingLevel(AtomSpace& atomSpace,
+                                           const std::string& petId,
+                                           const std::string& feelingName );
 
     /**
      * Returns the current level of the given Modulator.
+
      *
      * If the Modulator does not exist on AtomSpace or some problem
      * occurs when invoked, this method will return a random value in
@@ -196,8 +199,8 @@ public:
      *         ExecutionOutputLink
      *             GroundSchemaNode: modulatorUpdater
      */ 
-    static float getCurrentModulatorLevel(AtomSpace & atomSpace, 
-                                          const std::string & modulatorName);
+    static float getCurrentModulatorLevel(AtomSpace& atomSpace, 
+                                          const std::string& modulatorName);
     /**
      * Returns the current level of the given Demand.
      *
@@ -210,8 +213,8 @@ public:
      *
      * @return float    The current level of a given Demand
      */ 
-    static float getCurrentDemandLevel(AtomSpace & atomSpace, 
-                                       const std::string & demandName);
+    static float getCurrentDemandLevel(AtomSpace& atomSpace, 
+                                       const std::string& demandName);
 
     /**
      * Get the handle to Demand Goal (EvaluationLink)
@@ -222,9 +225,8 @@ public:
      * @return Handle   The Handle to Demand Goal (EvaluationLink), or
      *                  Handle::UNDEFINED if fails
      */
-    static Handle getDemandGoalEvaluationLink(AtomSpace & atomSpace, 
-                                              const std::string & demand 
-                                             );
+    static Handle getDemandGoalEvaluationLink(AtomSpace& atomSpace, 
+                                              const std::string& demand);
 
     /**
      * Returns a pointer to the most recent evaluation link. With the
@@ -237,16 +239,21 @@ public:
      * @param predicateNodeName The name of the predicate node of the Evaluation link
      * @return Link evaluation link
      */
-    static Handle getMostRecentEvaluationLink(AtomSpace&,
-            const std::string& predicateNodeName );
+    static Handle getMostRecentEvaluationLink(AtomSpace& atomSpace,
+                                              const std::string& predicateNodeName );
 
     // get all the nodes from InheritanceLinks, given the SecondOutgoing
-    static std::vector<Handle> getNodesByInheritanceLink(AtomSpace &atomSpace, Handle &hSecondOutgoing);
+    static std::vector<Handle> getNodesByInheritanceLink(AtomSpace& atomSpace, 
+                                                         Handle& hSecondOutgoing);
 
     // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
-    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq& hNonFirstOutgoings);
+    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace& atomSpace, 
+                                                        string predicate,
+                                                        HandleSeq& hNonFirstOutgoings);
 
-    static std::vector<Handle> getEvaluationLinks(AtomSpace &atomSpace, string predicate, HandleSeq &hfirstOutgoings);
+    static std::vector<Handle> getEvaluationLinks(AtomSpace&atomSpace, 
+                                                  string predicate,
+                                                  HandleSeq &hfirstOutgoings);
 
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate
@@ -297,12 +304,12 @@ public:
      * timestamped) or Handle::UNDEFINED, if predicate is false but it is not
      * represented in AtomSpace. On failure, return Handle::UNDEFINED.
      */
-    static Handle setPredicateValue( AtomSpace& atomSpace,
-                                     std::string predicateName,
-                                     TruthValuePtr tv,
-                                     Handle object1 = Handle::UNDEFINED,
-                                     Handle object2 = Handle::UNDEFINED,
-                                     Handle object3 = Handle::UNDEFINED );
+    static Handle setPredicateValue(AtomSpace& atomSpace,
+                                    std::string predicateName,
+                                    TruthValuePtr tv,
+                                    Handle object1 = Handle::UNDEFINED,
+                                    Handle object2 = Handle::UNDEFINED,
+                                    Handle object3 = Handle::UNDEFINED);
 
 
     const static double highLongTermImportance;
@@ -394,10 +401,10 @@ public:
      */
     static bool getXYZOFromPositionEvalLink(const AtomSpace& atomSpace,
                                             Handle evalLink,
-                                            double &x,
-                                            double &y,
-                                            double &z,
-                                            Handle &o);
+                                            double& x,
+                                            double& y,
+                                            double& z,
+                                            Handle& o);
 
 //    /**
 //     * Gets the spaceMapHandle which is either stamped at time t or
@@ -408,10 +415,10 @@ public:
 //     * @param t  The timestamp to look at
 //     * @return The spaceMapHandle at time t or if none the first one before t
 //     */
-//    static Handle getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
+//    static Handle getSpaceMapHandleAtTimestamp(const AtomSpace& atomSpace,
 //            unsigned long t);
 
-    static Handle getCurrentSpaceMapHandle(const AtomSpace &atomSpace);
+    static Handle getCurrentSpaceMapHandle(const AtomSpace& atomSpace);
 
     /**
      * Gets the value of the predicate at a spaceMap in the past. Based
@@ -460,7 +467,7 @@ public:
      *                     reconstituted according to the following format
      *                     "to:destinationID: message"
      */
-    static bool getHasSaidValueAtTime(AtomSpace &atomSpace,
+    static bool getHasSaidValueAtTime(AtomSpace& atomSpace,
                                       unsigned long timestamp,
                                       unsigned long delay,
                                       Handle from_h,
@@ -471,7 +478,8 @@ public:
     /**
      * Return the lastest handle ( with the latest timestamp ) among a handle set
      */
-    static Handle getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles);
+    static Handle getLatestHandle(const AtomSpace& atomSpace,
+                                  HandleSeq& handles);
 
     /**
      * Return the handle of the latest evaluationlink of the given predicate, with its objects
@@ -483,11 +491,11 @@ public:
      *        not informed then a unary predicate is assumed
      * @param getPositiveResult: try to get the EvaluationLink with truth value >= 0.5 if any, if not, return the one < 0.5. vice versa
      */
-    static Handle getLatestEvaluationLink(AtomSpace &atomSpace,
-                                 std::string predicateName,
-                                 Handle a,
-                                 Handle b = Handle::UNDEFINED,
-                                 Handle c = Handle::UNDEFINED, bool getPositiveResult = true) throw(opencog::NotFoundException);
+    static Handle getLatestEvaluationLink(AtomSpace& atomSpace,
+                                          std::string predicateName,
+                                          Handle a,
+                                          Handle b = Handle::UNDEFINED,
+                                          Handle c = Handle::UNDEFINED, bool getPositiveResult = true) throw(opencog::NotFoundException);
 
     /**
      * Return the handle of the value node the given predicate, with its objects
@@ -498,11 +506,11 @@ public:
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
      */
-    static Handle getPredicateValueNode(const AtomSpace &atomSpace,
-                                 std::string predicateName,
-                                 Handle a,
-                                 Handle b = Handle::UNDEFINED,
-                                 Handle c = Handle::UNDEFINED);
+    static Handle getPredicateValueNode(const AtomSpace& atomSpace,
+                                        std::string predicateName,
+                                        Handle a,
+                                        Handle b = Handle::UNDEFINED,
+                                        Handle c = Handle::UNDEFINED);
 
     /**
      * Return the mean value of the given predicate, with its objects
@@ -539,7 +547,7 @@ public:
      * @param avatar The handle of the avatar
      * @param avatar The handle of the pet
      */
-    static bool isPetOwner( AtomSpace& atomSpace,
+    static bool isPetOwner(AtomSpace& atomSpace,
                             Handle avatar, Handle pet );
 
 
@@ -584,7 +592,7 @@ public:
      */
     static bool getSizeInfo(AtomSpace& atomSpace,
                             Handle object, double& length,
-                            double& width, double &height);
+                            double& width, double& height);
 
     /**
      * Add a property predicate into the AtomSpace for the given node.
@@ -618,7 +626,7 @@ public:
                                        Handle object,
                                        TruthValuePtr tv,
                                        bool permanent = false,
-                                       const Temporal &t = UNDEFINED_TEMPORAL);
+                                       const Temporal& t = UNDEFINED_TEMPORAL);
 
     /**
      * Add a property predicate (basically position predicates such as near,
@@ -692,10 +700,10 @@ public:
      * @param objectId The id of the held object. If empty "", it will be a drop action
      * @param currentTimestamp Timestamp corresponding to 'now'
      */
-    static void setupHoldingObject( AtomSpace& atomSpace,
-                                    const std::string& holderId,
-                                    const std::string& objectId,
-                                    unsigned long currentTimestamp );
+    static void setupHoldingObject(AtomSpace& atomSpace,
+                                   const std::string& holderId,
+                                   const std::string& objectId,
+                                   unsigned long currentTimestamp );
 
     /**
      * Retrieve the latest held, by an holderId, object's handle
@@ -706,14 +714,14 @@ public:
      *         if there is no grabbed object
      */
     static Handle getLatestHoldingObjectHandle(AtomSpace& atomSpace,
-            const std::string& holderId );
+                                               const std::string& holderId );
 
-    static bool isObjectBeingHolded( AtomSpace& atomSpace,
-                                     const std::string& objectId );
-    static Handle getObjectHolderHandle( AtomSpace& atomSpace,
+    static bool isObjectBeingHolded(AtomSpace& atomSpace,
+                                    const std::string& objectId );
+    static Handle getObjectHolderHandle(AtomSpace& atomSpace,
+                                        const std::string& objectId );
+    static std::string getObjectHolderId(AtomSpace& atomSpace,
                                          const std::string& objectId );
-    static std::string getObjectHolderId( AtomSpace& atomSpace,
-                                          const std::string& objectId );
 
     /**
      * Retrieve the most recent atTimeLink that points to a 'isHolding'
@@ -725,7 +733,7 @@ public:
      * Link. It can be Handle::UNDEFINED if there is no isHolding EvaluationLink
      */
     static Handle getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
-            const std::string& holderId);
+                                                   const std::string& holderId);
 
     /**
      * Retrieve the most recent 'isHolding' Eval Link, used by a given holder
@@ -736,7 +744,7 @@ public:
      *         if there is no isHolding eval link
      */
     static Handle getMostRecentIsHoldingLink(AtomSpace& atomSpace,
-            const std::string& holderId );
+                                             const std::string& holderId );
 
 
     /**
@@ -750,8 +758,8 @@ public:
      *         if there is no grabbed object
      */
     static Handle getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
-            const std::string& holderId,
-            unsigned long time);
+					       const std::string& holderId,
+					       unsigned long time);
 
 
     /**
@@ -780,8 +788,8 @@ public:
      * @return The id of the held object. It can be empty "" if there is no held object
      */
     static std::string getHoldingObjectIdAtTime(AtomSpace& atomSpace,
-            const std::string& holderId,
-            unsigned long time);
+						const std::string& holderId,
+						unsigned long time);
 
     /**
      * Helper function that retrieves the id of the object held by the pet or avatar
@@ -822,8 +830,8 @@ public:
      * Given the name of an object, whose letters  may be all in upercase, gets its id.
      * @return the id of the object, if it exists, or an empty string, otherwise.
      */
-    static std::string getObjIdFromName( AtomSpace& atomSpace,
-                                         const std::string& objectName );
+    static std::string getObjIdFromName(AtomSpace& atomSpace,
+                                        const std::string& objectName );
 
     /**
      * Get the most recent agent-link, possibly according to temporal relationship
@@ -838,9 +846,9 @@ public:
      * Handle::UNDEFINED if there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLink(AtomSpace&,
-            const std::string& agentId,
-            const Temporal& temporal = UNDEFINED_TEMPORAL,
-            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
+					       const std::string& agentId,
+					       const Temporal& temporal = UNDEFINED_TEMPORAL,
+					       TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
 
     /**
      * Returns a pointer to the most recent evaluation link. Using an agent id
@@ -855,12 +863,11 @@ public:
      * @param criterion Time comparation criterion used on TimeServer search
      * @return Link evaluation link
      */
-    static Handle getMostRecentAgentActionLink( AtomSpace& atomSpace,
-            const std::string& agentId,
-            const std::string& actionName,
-            const Temporal& temporal = UNDEFINED_TEMPORAL,
-            TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT
-                                              );
+    static Handle getMostRecentAgentActionLink(AtomSpace& atomSpace,
+                                               const std::string& agentId,
+                                               const std::string& actionName,
+                                               const Temporal& temporal = UNDEFINED_TEMPORAL,
+                                               TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT);
 
     /**
      * Get the most recent agent-link, executed in the interval [t1, t2]
@@ -873,10 +880,10 @@ public:
      * @return a handle that points to the latest agent action link or Handle::UNDEFINED if
      *                            there is no action link for the given agentid
      */
-    static Handle getMostRecentAgentActionLinkWithinTime(AtomSpace&,
-            const std::string& agentId,
-            unsigned long t1,
-            unsigned long t2 );
+    static Handle getMostRecentAgentActionLinkWithinTime(AtomSpace& atomSpace,
+                                                         const std::string& agentId,
+                                                         unsigned long t1,
+                                                         unsigned long t2 );
 
     /**
      * Get the most recent agent-link, executed after a given timestamp
@@ -889,8 +896,8 @@ public:
      *                            there is no action link for the given agentid
      */
     static Handle getMostRecentAgentActionLinkAfterTime(AtomSpace&,
-            const std::string& agentId,
-            unsigned long timestamp );
+                                                        const std::string& agentId,
+                                                        unsigned long timestamp );
 
     /**
      * Given an agentActionLink, this method will return a formated string
@@ -900,8 +907,8 @@ public:
      * @param agentActionLink An handle that points to and agent-action link
      * @return a formated string with the action parameters
      */
-    static std::string convertAgentActionParametersToString( const AtomSpace& atomSpace,
-            Handle agentActionLink );
+    static std::string convertAgentActionParametersToString(const AtomSpace& atomSpace,
+                                                            Handle agentActionLink );
 
     /**
      * Return the ImplicationLink handle referenced by a given rule.
@@ -925,9 +932,9 @@ public:
      *         ListLink 
      *             PET_HANDLE
      */
-    static Handle getModulatorSimilarityLink(AtomSpace & atomSpace,
-                                             const std::string & modulator, 
-                                             const std::string & petId);
+    static Handle getModulatorSimilarityLink(AtomSpace& atomSpace,
+                                             const std::string& modulator, 
+                                             const std::string& petId);
 
     /**
      * Return the Handle of SimilarityLink that holds DemandUpdater
@@ -952,9 +959,9 @@ public:
      *                     PET_HANDLE
      *
      */
-    static Handle getDemandSimultaneousEquivalenceLink (const AtomSpace & atomSpace, 
-                                                        const std::string & demand, 
-                                                        const std::string & petId);
+    static Handle getDemandSimultaneousEquivalenceLink(const AtomSpace& atomSpace, 
+                                                       const std::string& demand, 
+                                                       const std::string& petId);
 
      /**
      * Return the EvaluationLinks (both DemandGoal and FUzzyWithin) of specific demand
@@ -975,10 +982,10 @@ public:
      *             GroundedSchemaNode: "demand_schema_name"
      *
      */
-    static bool getDemandEvaluationLinks (AtomSpace & atomSpace, 
-                                          const std::string & demandName, 
-                                          Handle & hDemandGoal, 
-                                          Handle & hFuzzyWithin);
+    static bool getDemandEvaluationLinks(AtomSpace& atomSpace, 
+                                         const std::string& demandName, 
+                                         Handle& hDemandGoal, 
+                                         Handle& hFuzzyWithin);
 
            
     /**
@@ -992,8 +999,8 @@ public:
      * @return The ImplicationLink strength or -1 if an error occurs.
      */
     static float getRuleImplicationLinkStrength(AtomSpace& atomSpace,
-            const std::string& rule,
-            const std::string& agentModeName );
+                                                const std::string& rule,
+                                                const std::string& agentModeName );
 
     /**
      * Return a vector containing the latest velocity coords of a given moving object
@@ -1003,8 +1010,8 @@ public:
      * @return A 3D Vector(x,y,z) indicating the current object velocity
      */
     static spatial::math::Vector3 getMostRecentObjectVelocity(AtomSpace&,
-            const std::string& objectId,
-            unsigned long afterTimestamp = 0 );
+							      const std::string& objectId,
+							      unsigned long afterTimestamp = 0 );
 
     /**
      * Return the most recent ExecutionLink for SchemaDone predicates, if any.
@@ -1017,8 +1024,8 @@ public:
      * @return The ExecLink for the most recent schema done or Handle::UNDEFINED
      */
     static Handle getMostRecentPetSchemaExecLink(AtomSpace&,
-            unsigned long timestamp,
-            bool schemaSuccessful);
+						 unsigned long timestamp,
+						 bool schemaSuccessful);
 
     /**
      * Given an ExecLink for a SchemaDone predicated, this method will return a formated string
@@ -1029,7 +1036,7 @@ public:
      * @return a formated string with the action parameters
      */
     static std::string convertPetExecLinkParametersToString(const AtomSpace& atomSpace,
-            Handle execLink);
+                                                            Handle execLink);
 
 
     /**
@@ -1041,7 +1048,8 @@ public:
      * @param objectID The object's ID
      * @return The object's handle. UNDEFINE_HANDLE if the agent's doesn't exists
      */
-    static Handle getObjectHandle ( AtomSpace& atomSpace, const std::string& objectID );
+    static Handle getObjectHandle(AtomSpace& atomSpace, 
+                                  const std::string& objectID );
 
 
     /**
@@ -1051,7 +1059,8 @@ public:
      * @param agentID The agent's ID
      * @return The agent's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
-    static Handle getAgentHandle( AtomSpace& atomSpace, const std::string& agentID );
+    static Handle getAgentHandle(AtomSpace& atomSpace,
+                                 const std::string& agentID );
 
     /**
      * Return the entity handle using its agentID, it can be an object or an avatar
@@ -1060,8 +1069,8 @@ public:
      * @param entityId The entity's ID
      * @return The object's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
-    static Handle getEntityHandle( AtomSpace& atomSpace,
-                                   const std::string& entityId );
+    static Handle getEntityHandle(AtomSpace& atomSpace,
+                                  const std::string& entityId);
 
     /**
      * Return the Temporal pointed by a given AtTimeLink
@@ -1071,7 +1080,8 @@ public:
      * @param atTimeLink the Handle of the given AtTimeLink
      * @return a new Temporal object pointed by atTimeLink
      */
-    static Temporal getTemporal(AtomSpace& as, Handle atTimeLink);
+    static Temporal getTemporal(AtomSpace& as, 
+                                Handle atTimeLink);
 
     /**
      * Return the Handle pointed by a given AtTimeLink
@@ -1081,7 +1091,8 @@ public:
      * @param atTimeLink the Handle of the given AtTimeLink
      * @return the Handle pointed by atTimeLink (second outgoing Atom)
      */
-    static Handle getTimedHandle(AtomSpace& as, Handle atTimeLink);
+    static Handle getTimedHandle(AtomSpace& as, 
+                                 Handle atTimeLink);
 
     static void updateLatestAgentActionDone(AtomSpace& as,
                                             Handle atTimeLink,
@@ -1100,8 +1111,8 @@ public:
                                              Handle avatarNode);
 
     static void updateLatestAvatarActionPredicate(AtomSpace& as,
-                                               Handle atTimeLink,
-                                               Handle predicateNode);
+                                                  Handle atTimeLink,
+                                                  Handle predicateNode);
 
     static void updateLatestSpatialPredicate(AtomSpace& as,
                                              Handle atTimeLink,
@@ -1115,19 +1126,19 @@ public:
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
                                              Handle atTimeLink);
 
-    static void updateLatestModulator(AtomSpace & as, 
+    static void updateLatestModulator(AtomSpace& as, 
                                       Handle atTimeLink, 
                                       Handle modulatorPredicateNode); 
 
-    static void updateLatestDemand(AtomSpace & as, 
+    static void updateLatestDemand(AtomSpace& as, 
                                    Handle atTimeLink, 
                                    Handle demandPredicateNode); 
 
-    static void updateLatestFeeling(AtomSpace & as, 
+    static void updateLatestFeeling(AtomSpace& as, 
                                     Handle atTimeLink, 
                                     Handle feelingPredicateNode); 
     
-    static void updateLatestStimulus(AtomSpace & as, 
+    static void updateLatestStimulus(AtomSpace& as, 
                                      Handle atTimeLink, 
                                      Handle stimulusPredicateNode);
 
@@ -1144,9 +1155,9 @@ public:
      *
      * @note this function will also return the frame elements of parent frames.
      */
-    static Handle getFrameElements( AtomSpace& atomSpace, 
-                                    const std::string& frameName, 
-                                    HandleSeq& frameElementsHandles );
+    static Handle getFrameElements(AtomSpace& atomSpace, 
+                                   const std::string& frameName, 
+                                   HandleSeq& frameElementsHandles );
 
     /**
      * Creates a representation of a specific predicate instance
@@ -1213,13 +1224,12 @@ public:
      *
      * @return The Frame instance handle
      */
-    static Handle setPredicateFrameFromHandles(
-            AtomSpace& atomSpace, 
-            const std::string& frameName, 
-            const std::string& frameInstanceName, 
-            const std::map<std::string, Handle>& frameElementsValuesHandles, 
-            TruthValuePtr truthValue,
-            bool permanent = true );
+    static Handle setPredicateFrameFromHandles(AtomSpace& atomSpace, 
+                                               const std::string& frameName, 
+                                               const std::string& frameInstanceName, 
+                                               const std::map<std::string, Handle>& frameElementsValuesHandles, 
+                                               TruthValuePtr truthValue,
+                                               bool permanent = true);
 
     /**
      * Given a frame instance (PredicateNode handle) this method returns all the
@@ -1257,7 +1267,7 @@ public:
      *       would return a std::map<std::string, Handle> holding the pair
      *       ( "Entity", (WordInstanceNode "ball@8631fad6-f29d-4b15-905c-8594fa1d27d3") )
      */
-    static std::map<std::string, Handle> getFrameElementInstanceNameValues (
+    static std::map<std::string, Handle> getFrameElementInstanceNameValues(
             AtomSpace& atomSpace, Handle frameInstancePredicateNode );
 
     /**
@@ -1272,7 +1282,7 @@ public:
      *
      * @return A handleSeq containing all the matched predicateNodes
      */
-    static HandleSeq retrieveFrameInstancesUsingAnElementValue (
+    static HandleSeq retrieveFrameInstancesUsingAnElementValue(
             AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
 
     /**
@@ -1282,7 +1292,7 @@ public:
      * @param atomSpace The AtomSpace reference
      * @param frameInstance Handle of the PredicateNode which represents the frame instance
      */
-    static void deleteFrameInstance( AtomSpace& atomSpace, Handle frameInstance );
+    static void deleteFrameInstance(AtomSpace& atomSpace, Handle frameInstance);
 
 };
 

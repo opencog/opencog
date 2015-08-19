@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
@@ -9,6 +9,8 @@
 # Example usage:
 #    ./ss-one.sh en Barbara localhost 17001
 #
+# Two directories must exist before using this script: the $splitdir,
+# below, and $subdir
 
 # Set up assorted constants needed to run.
 lang=$1
@@ -46,7 +48,7 @@ rest=`echo $filename | cut -d \/ -f 2-6`
 echo "Processing file $rest"
 
 # Sentence split the article itself
-cat "$filename" | $splitter -l $lang >  "$splitdir/$rest" 
+cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
 
 # Submit the split article
 cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport

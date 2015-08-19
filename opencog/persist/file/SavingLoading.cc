@@ -67,7 +67,6 @@ void SavingLoading::save(const char *fileName,
                          AtomSpace& atomSpace,
                          SpaceServer& spacs,
                          TimeServer& tims)
-    throw (IOException)
 {
     logger().info("Saving OpenCog instance");
 
@@ -80,7 +79,7 @@ void SavingLoading::save(const char *fileName,
                           "SavingLoading - Unable to open file '%s' for writing", fileName);
     }
 
-    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.get_atomtable());
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -248,14 +247,13 @@ void SavingLoading::load(const char *fileName,
                          AtomSpace& atomSpace,
                          SpaceServer& spacs,
                          TimeServer& tims)
-    throw (RuntimeException, IOException, InconsistenceException)
 {
     clearRepositories();
 
     logger().fine("Starting Memory load");
 
     // sanity check
-    if (atomSpace.getSize() > 0) {
+    if (atomSpace.get_size() > 0) {
         throw RuntimeException(TRACE_INFO,
             "SavingLoading - Can only load binary image from disk into an empty atom table.");
     }
@@ -291,7 +289,7 @@ void SavingLoading::load(const char *fileName,
     processed = 0;
     total = atomCount;
 
-    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.get_atomtable());
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);
@@ -670,7 +668,7 @@ void SavingLoading::printProgress(const char *s, int n)
     }
 }
 
-void SavingLoading::addSavableRepository(SavableRepository *repository) throw (RuntimeException)
+void SavingLoading::addSavableRepository(SavableRepository *repository)
 {
     const char* id = repository->getId();
 
@@ -701,7 +699,7 @@ void SavingLoading::saveRepositories(FILE *f)
     }
 }
 
-void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv) throw (RuntimeException)
+void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv)
 {
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;
