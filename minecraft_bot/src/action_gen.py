@@ -1,6 +1,6 @@
 from opencog.atomspace import types, TruthValue
 from opencog.type_constructors import *
-from opencog.bindlink import bindlink, satisfaction_link
+from opencog.bindlink import bindlink, evaluate_atom
 from opencog.atomspace import Atom
 class ActionGenerator:
 
@@ -28,13 +28,13 @@ class ActionGenerator:
                                       )
                                   ),
                                   EvaluationLink(
-                                      GroundedPredicateNode("py: is_attractive"),
+                                      GroundedPredicateNode("py: action_schemas.is_attractive"),
                                       ListLink(
                                           VariableNode("$block")
                                       )
                                   ),
                                   EvaluationLink(
-                                      GroundedPredicateNode("py: move_toward_block"),
+                                      GroundedPredicateNode("py: action_schemas.move_toward_block"),
                                       ListLink(
                                           VariableNode("$block")
 
@@ -51,11 +51,9 @@ class ActionGenerator:
             #between execute_atom and bindlink
             print "action_gen: no result, random walk."
             
-            satisfaction_link(self.atomspace,                          
-                     SatisfactionLink(
-                         SequentialAndLink(
+            evaluate_atom(self.atomspace,
                              EvaluationLink(
-                                 GroundedPredicateNode("py: set_relative_move"),
+                                 GroundedPredicateNode("py: action_schemas.set_relative_move"),
                                  ListLink(
                                      NumberNode("90"),
                                      NumberNode("2"),
@@ -63,7 +61,6 @@ class ActionGenerator:
                                  )
                              )
                          )
-                     ).h)
             print "action_gen: random walk end"
         
                     
