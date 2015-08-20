@@ -9,6 +9,7 @@ from opencog.atomspace import AtomSpace, types
 from opencog.type_constructors import set_type_ctor_atomspace
 from opencog.utilities import initialize_opencog, finalize_opencog
 from perception_module import PerceptionManager
+from attention_module import AttentionController
 from action_gen import ActionGenerator
 #import actions #import schema
 
@@ -27,10 +28,11 @@ pm = PerceptionManager(spacetime.get_atomspace(),
 ag = ActionGenerator(spacetime.get_atomspace(),
                      spacetime.get_space_server(),
                      spacetime.get_time_server())
+ac = AttentionController(spacetime.get_atomspace())
 
 while not rospy.is_shutdown():
     pm.update_perception()
+    ac.control_av_in_atomspace()
     ag.generate_action()
-    #am.update_attention()
     rospy.sleep(2)
 

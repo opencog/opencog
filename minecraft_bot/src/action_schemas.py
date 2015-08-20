@@ -1,3 +1,7 @@
+"""
+action schemas called by Grounded Predicate/Schema Node
+"""
+
 import math
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
@@ -25,7 +29,8 @@ except rospy.ServiceException, e:
 
 def is_attractive(atom):
     print 'is_attractive'
-    if atomspace.get_av(atom.h) > 1:
+    sti = atom.av['sti']
+    if sti > 1:
         print 'attractive!'
         return TruthValue(1,1)
     else:
