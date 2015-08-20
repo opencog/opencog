@@ -83,13 +83,10 @@ class PerceptionManager:
             old_block_handle = cur_map.get_block((block.x, block.y, block.z))
             updated_eval_links = []
             if old_block_handle.is_undefined():
-                print 'old block is undef'
                 blocknode, updated_eval_links = self._build_block_nodes(block, map_handle)
             else:
-                print 'old block not undef'
                 old_block_type_node = get_predicate(self._atomspace, "material",
-                                                    Atom(old_block_handle, self._atomspace),
-                                                    1)
+                                                    Atom(old_block_handle, self._atomspace), 1)
                 old_block_type = self._atomspace.get_name(old_block_type_node.h)
                 if old_block_type == str(block.blockid):
                     continue
@@ -98,6 +95,10 @@ class PerceptionManager:
                 else:
                     blocknode, updated_eval_links = self._build_block_nodes(block,
                                                                             map_handle)
+                #TODO: not sure if we should add disappeared predicate here,
+                #It looks reasonable but make the code more messy..
+                disappeared_link = add_predicate(self._atomspace, "disappeared", Atom(old_block_handle, self._atomspace))
+                updated_eval_links.append(disappeared_link)
             self._space_server.add_map_info(blocknode.h, map_handle, False, False,
                                             block.ROStimestamp,
                                             block.x, block.y, block.z)
@@ -108,7 +109,7 @@ class PerceptionManager:
                 self._time_server.add_time_info(link.h,block.ROStimestamp, "ROS")
                 self._time_server.add_time_info(link.h,block.MCtimestamp, "MC")
             print blocknode
-            print self._atomspace.get_incoming(blocknode.h)
+            print updated_eval_links
 
     def _build_self_pos_node(self, client, map_handle):
         #TODO: for now because we only input self client so we define node name as "self"
@@ -153,8 +154,11 @@ class PerceptionManager:
         material_link = add_predicate(self._atomspace, "material",
                                       obj_node, type_node)
         updated_eval_links.append(material_link)
-        
-        print "perception_module: new eval links", updated_eval_links
+
+        new_appeared_link = add_predicate(self._atomspace, "new_block",
+                                           obj_node)
+        updated_eval_links.append(new_appeared_link)
+
         return obj_node, updated_eval_links
 
     def _build_entity_node(self, entity, map_handle):
