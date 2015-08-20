@@ -1,13 +1,18 @@
 from opencog.atomspace import types, get_refreshed_types
-from opencog.type_constructors import *
 from opencog.bindlink import bindlink
 types=get_refreshed_types()
 from opencog.atomspace import Atom
 #helper function for adding predicate
-def add_predicate(atomspace,predicatestr,atomlist):
+def add_predicate(atomspace,predicatestr,*atoms):
+    if len(atoms) == 1:
+        target_atom = atoms[0]
+    elif len(atoms) > 1:
+        target_atom = atomspace.add_link(types.ListLink, atoms)
+    else:
+        raise RuntimeError('atomspace_util.add_predicate: atom list is empty!')
     return atomspace.add_link(types.EvaluationLink,[
         atomspace.add_node(types.PredicateNode,predicatestr),
-        atomspace.add_link(types.ListLink,atomlist)])
+        target_atom])
 
 def add_location(atomspace,targetnode,maphandle,pos):
     return atomspace.add_link(types.AtLocationLink,[
@@ -26,11 +31,7 @@ def get_predicate(atomspace, predicate_name, target_node, num_of_val):
             var_nodes.append(VariableNode(str(i)))
         var = VariableList(*var_nodes)
     else:
-        print 'get_predicate: num_of_val < 1, error'
         return None
-
-    print "get_predicate: var", var
-    
     result_set = bindlink(atomspace, 
                           BindLink(
                               var,
@@ -44,8 +45,6 @@ def get_predicate(atomspace, predicate_name, target_node, num_of_val):
                               var
                           ).h
                       )
-    print "get predicate:", Atom(result_set, atomspace)
-    print Atom(result_set,atomspace)
     try:
         result_set_out = Atom(result_set, atomspace).out[0]
         if atomspace.get_type(result_set_out.h) == types.ListLink:
@@ -59,4 +58,4 @@ def get_predicate(atomspace, predicate_name, target_node, num_of_val):
         
 
 def get_most_recent_pred_val(atomspace, time_server, predicate_name, target_node, num_of_val):
-    return [45]*num_of_val
+    return [0]*num_of_val

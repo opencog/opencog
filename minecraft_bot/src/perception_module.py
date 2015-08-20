@@ -83,8 +83,10 @@ class PerceptionManager:
             old_block_handle = cur_map.get_block((block.x, block.y, block.z))
             updated_eval_links = []
             if old_block_handle.is_undefined():
+                print 'old block is undef'
                 blocknode, updated_eval_links = self._build_block_nodes(block, map_handle)
             else:
+                print 'old block not undef'
                 old_block_type_node = get_predicate(self._atomspace, "material",
                                                     Atom(old_block_handle, self._atomspace),
                                                     1)
@@ -120,13 +122,13 @@ class PerceptionManager:
 
         type_node = self._atomspace.add_node(types.ConceptNode, "client")
         type_link = add_predicate(self._atomspace, "clienttype",
-                                  [client_node, type_node])
+                                  client_node, type_node)
         updated_eval_links.append(type_link)
 
         yaw_node = self._atomspace.add_node(types.NumberNode, str(client.yaw))
         pitch_node = self._atomspace.add_node(types.NumberNode, str(client.pitch))
         look_link = add_predicate(self._atomspace, "look",
-                                [client_node, yaw_node, pitch_node])
+                                  client_node, yaw_node, pitch_node)
         updated_eval_links.append(look_link)
         return client_node, updated_eval_links        
 
@@ -149,8 +151,10 @@ class PerceptionManager:
 
         type_node = self._atomspace.add_node(types.ConceptNode, str(block.blockid))
         material_link = add_predicate(self._atomspace, "material",
-                                      [obj_node, type_node])
+                                      obj_node, type_node)
         updated_eval_links.append(material_link)
+        
+        print "perception_module: new eval links", updated_eval_links
         return obj_node, updated_eval_links
 
     def _build_entity_node(self, entity, map_handle):
@@ -163,31 +167,28 @@ class PerceptionManager:
 
         type_node = self._atomspace.add_node(types.ConceptNode, str(entity.mob_type))
         type_link = add_predicate(self._atomspace, "entitytype",
-                                  [entity_node, type_node])
+                                  entity_node, type_node)
         updated_eval_links.append(type_link)
 
         yaw_node = self._atomspace.add_node(types.NumberNode, str(entity.head_yaw))
         pitch_node = self._atomspace.add_node(types.NumberNode, str(entity.head_pitch))
         look_link = add_predicate(self._atomspace, "look",
-                                  [entity_node, yaw_node, pitch_node])
+                                  entity_node, yaw_node, pitch_node)
         updated_eval_links.append(look_link)
 
         length_node = self._atomspace.add_node(types.NumberNode, str(entity.length))
         width_node = self._atomspace.add_node(types.NumberNode, str(entity.width))
         height_node = self._atomspace.add_node(types.NumberNode, str(entity.height))
         sizelink = add_predicate(self._atomspace, "size",
-                                 [entity_node,
-                                  length_node, width_node, height_node])
+                                 entity_node, length_node, width_node, height_node)
         updated_eval_links.append(sizelink)
 
         v_x_node = self._atomspace.add_node(types.NumberNode, str(entity.velocity_x))
         v_y_node = self._atomspace.add_node(types.NumberNode, str(entity.velocity_y))
         v_z_node = self._atomspace.add_node(types.NumberNode, str(entity.velocity_z))
         velocitylink = add_predicate(self._atomspace, "velocity",
-                                     [entity_node,
-                                      v_x_node, v_y_node, v_z_node])
+                                     entity_node, v_x_node, v_y_node, v_z_node)
         updated_eval_links.append(velocitylink)
-
         return entity_node, updated_eval_links
 
 
