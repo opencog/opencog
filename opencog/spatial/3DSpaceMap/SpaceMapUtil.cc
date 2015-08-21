@@ -1,8 +1,7 @@
 #include <iterator>
 #include <string>
 #include <set>
-
-//#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <limits.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -12,40 +11,46 @@
 #include <opencog/util/Logger.h>
 #include "SpaceMapUtil.h"
 
+// used for distanceBetween()
+#define DOUBLE_MAX numeric_limits<double>::max()
+
 using namespace std;
 
 namespace opencog
 {
     namespace spatial
     {
-        vector<string> getPredicate(AtomSpace& atomspace, const string& predicateName, const HandleSeq& handles, const unsigned& numberOfPredicateValue)
+        vector<string> getPredicate(AtomSpace& atomSpace,
+                                    const string& predicateName,
+                                    const HandleSeq& handles,
+                                    const unsigned& numberOfPredicateValue)
         {
             vector<string> result;
-            Handle predicateNode = atomspace.get_handle(PREDICATE_NODE,predicateName);
-            if(predicateNode == Handle::UNDEFINED){
+            Handle predicateNode = atomSpace.get_handle(PREDICATE_NODE,predicateName);
+            if (predicateNode == Handle::UNDEFINED) {
                 return result;
             }
 
             HandleSeq predicateListLinkOutgoings;
-            for(auto handle : handles) {
+            for (auto handle : handles) {
                 predicateListLinkOutgoings.push_back(handle);
             }
-            for(unsigned i=0; i != numberOfPredicateValue ; i++) {
+            for(unsigned i = 0; i != numberOfPredicateValue ; i++) {
                 string hVariableNodeName = "$pred_val" + std::to_string(i);
-                Handle hVariableNode = atomspace.add_node(VARIABLE_NODE, hVariableNodeName);
+                Handle hVariableNode = atomSpace.add_node(VARIABLE_NODE, hVariableNodeName);
                 predicateListLinkOutgoings.push_back(hVariableNode);
             }
-            Handle predicateListLink = atomspace.add_link(LIST_LINK, predicateListLinkOutgoings);
+            Handle predicateListLink = atomSpace.add_link(LIST_LINK, predicateListLinkOutgoings);
             HandleSeq evalLinkOutgoings;
             evalLinkOutgoings.push_back(predicateNode);
             evalLinkOutgoings.push_back(predicateListLink);
-            Handle hEvalLink = atomspace.add_link(EVALUATION_LINK, evalLinkOutgoings);
+            Handle hEvalLink = atomSpace.add_link(EVALUATION_LINK, evalLinkOutgoings);
             HandleSeq getLinkOutgoing;
             getLinkOutgoing.push_back(hEvalLink);
-            Handle getLink = atomspace.add_link(GET_LINK,getLinkOutgoing);
-            Handle resultSetLink = satisfying_set(&atomspace,getLink);
-            logger().error("the get link result %s",atomspace.atom_as_string(resultSetLink).c_str());
-            if(numberOfPredicateValue == 1){
+            Handle getLink = atomSpace.add_link(GET_LINK, getLinkOutgoing);
+            Handle resultSetLink = satisfying_set(&atomSpace, getLink);
+            logger().error("the get link result %s",atomSpace.atom_as_string(resultSetLink).c_str());
+            if (numberOfPredicateValue == 1) {
                 HandleSeq resultNodeSet = (LinkCast(resultSetLink)->getOutgoingSet());
                 if(resultNodeSet.empty()) {
                     return result;
@@ -64,101 +69,120 @@ namespace opencog
             }
             return result;
         }
-        
-        BlockVector getNearFreePointAtDistance( const Octree3DMapManager& spaceMap, const BlockVector& position, int distance, const BlockVector& startDirection , bool toBeStandOn) 
+
+        BlockVector getNearFreePointAtDistance(const Octree3DMapManager& spaceMap,
+                                               const BlockVector& position,
+                                               int distance,
+                                               const BlockVector& startDirection,
+                                               bool toBeStandOn)
         {
             logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
             int z ;
-            Handle block;
-            
-            while (ztimes <3) {
+
+            while (ztimes < 3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)
                 if (ztimes == 0) {
                     z = 0;
                 } else if(ztimes == 1) {
                     z = -1;
-                } else { 
+                } else {
                     z = 1;
-                }                
+                }
                 ztimes++;
-		
-                // we first search at the startdirection, if cannot find a proper position then go on with the complete search
+
+                // we first search at the start direction,
+                // if cannot find a proper position then go on with the complete search
                 BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
-                logger().error("getNearFreePoint: current pos %f, %f, %f", curpos.x, curpos.y, curpos.z);
                 if (toBeStandOn) {
-                    if(spaceMap.checkStandable(curpos)) {
-                        logger().error("getNearFreePoint: standable");
+                    if (spaceMap.checkStandable(curpos)) {
                         return curpos;
                     }
                 }
                 else {
-                    if(spaceMap.getBlock(curpos) == Handle::UNDEFINED)
-                    return curpos;
+                    if (spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
+                        return curpos;
+                    }
                 }
-                logger().error("getNearFreePoint: not standable");
 
                 for (int dis = 1; dis <= distance; dis++) {
                     for (int x = -dis; x <= dis; x++) {
                         for(int y = -dis; y <= dis; y++) {
                             BlockVector curpos(position.x + x, position.y + y, position.z + z);
-                            logger().error("getNearFreePoint: current pos %f, %f, %f", curpos.x, curpos.y, curpos.z);
-                            if(curpos == position) {
+                            if (curpos == position) {
                                 continue;
                             }
-                            if(toBeStandOn) {
-                                if(spaceMap.checkStandable(curpos)){
-                                    logger().error("getNearFreePoint: standable");
+                            if (toBeStandOn) {
+                                if (spaceMap.checkStandable(curpos)){
                                     return curpos;
                                 }
                             } else {
-                                if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) { 
+                                if(spaceMap.getBlock(curpos) == Handle::UNDEFINED) {
                                     return curpos;
                                 }
                             }
-                            logger().error("getNearFreePoint: not standable");
                         }
                     }
                 }
-            }            
+            }
             return BlockVector::ZERO;
         }
-		
-		
-        double distanceBetween(const Octree3DMapManager& spaceMap,const Handle& objectA,const Handle& objectB)
+
+        double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const Handle& objectA,
+                               const Handle& objectB)
         {
-            BlockVector posA,posB;
-			
-            Type typeA=objectA->getType();
-            if(typeA==ENTITY_NODE){ posA=spaceMap.getLastAppearedLocation(objectA);}
-            else if(typeA==STRUCTURE_NODE){ posA=spaceMap.getBlockLocation(objectA);}
-			
-            Type typeB=objectB->getType();
-            if(typeA==ENTITY_NODE){ posB=spaceMap.getLastAppearedLocation(objectB);}
-            else if(typeB==STRUCTURE_NODE){ posB=spaceMap.getBlockLocation(objectB);}
-			
-            if(posA==BlockVector::ZERO || posB==BlockVector::ZERO)
-            { return DOUBLE_MAX;}
-            else 
-            { return posA-posB;}
+            BlockVector posA, posB;
+
+            Type typeA = objectA->getType();
+            if (typeA == ENTITY_NODE) {
+                posA = spaceMap.getLastAppearedLocation(objectA);
+            }
+            else if (typeA==STRUCTURE_NODE) {
+                posA = spaceMap.getBlockLocation(objectA);
+            }
+            Type typeB = objectB->getType();
+            if (typeB == ENTITY_NODE) {
+                posB = spaceMap.getLastAppearedLocation(objectB);
+            }
+            else if (typeB == STRUCTURE_NODE) {
+                posB = spaceMap.getBlockLocation(objectB);
+            }
+
+            if (posA == BlockVector::ZERO || posB == BlockVector::ZERO) {
+                return DOUBLE_MAX;
+            }
+            else {
+                return posA - posB;
+            }
         }
-		
-        double distanceBetween(const Octree3DMapManager& spaceMap, const BlockVector& posA, const BlockVector& posB)
+
+        double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const BlockVector& posA,
+                               const BlockVector& posB)
         {
             return (posA - posB);
         }
-		
-        double distanceBetween(const Octree3DMapManager& spaceMap, const Handle& objectA, const BlockVector& posB) 
+
+        double distanceBetween(const Octree3DMapManager& spaceMap,
+                               const Handle& objectA,
+                               const BlockVector& posB)
         {
             BlockVector posA;
-            Type typeA=objectA->getType();
-            if(typeA==STRUCTURE_NODE){ posA=spaceMap.getBlockLocation(objectA);}
-            else if(typeA==ENTITY_NODE){ posA=spaceMap.getLastAppearedLocation(objectA);}
-            
-            if(posA==BlockVector::ZERO){ return DOUBLE_MAX;}
-            return (posA - posB);
+            Type typeA = objectA->getType();
+            if (typeA == STRUCTURE_NODE) {
+                posA = spaceMap.getBlockLocation(objectA);
+            }
+            else if (typeA==ENTITY_NODE) {
+                posA = spaceMap.getLastAppearedLocation(objectA);
+            }
 
+            if (posA == BlockVector::ZERO) {
+                return DOUBLE_MAX;
+            }
+
+            return (posA - posB);
         }
 
         bool isTwoPositionsAdjacent(const BlockVector &pos1, const BlockVector &pos2)
@@ -169,70 +193,67 @@ namespace opencog
             if (( d_x >=-1) && (d_x <= 1) &&
                 ( d_y >=-1) && (d_y <= 1) &&
                 ( d_z >=-1) && (d_z <= 1)) {
-                if ((d_x == 0) && (d_y == 0)){
+                if ((d_x == 0) && (d_y == 0)) {
                     // the position just above or under is considered not accessable
                     return false;
                 } else {
                     return true;
                 }
             }
-			
+
             return false;
         }
 
-        
+
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
                                       const Octree3DMapManager& spaceMap,
                                       const Handle& entity)
         {
             BlockVector nearLeftPos = spaceMap.getLastAppearedLocation(entity);
-            vector<string> sizeStrings = getPredicate(atomSpace, "size", 
+            vector<string> sizeStrings = getPredicate(atomSpace, "size",
                                                       HandleSeq({entity}), 3);
             double length = std::stof(sizeStrings[0]);
             double width = std::stof(sizeStrings[1]);
             double height = std::stof(sizeStrings[2]);
-            
+
             return AxisAlignedBox(nearLeftPos, length, width, height);
         }
-        
 
-        
-        std::set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                           const Octree3DMapManager& spaceMap,
-                                                           const Handle& entityA,
-                                                           const Handle& entityB,
-                                                           const Handle& entityC,
-                                                           const Handle& observer)
+        set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
+                                                      const Octree3DMapManager& spaceMap,
+                                                      const Handle& entityA,
+                                                      const Handle& entityB,
+                                                      const Handle& entityC,
+                                                      const Handle& observer)
         {
             AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityA);
             AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityB);
-            AxisAlignedBox boxC = (entityC == Handle::UNDEFINED) 
+            AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
                 : getBoundingBox(atomSpace, spaceMap, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 
-        
-        std::set<SPATIAL_RELATION> computeSpatialRelations(const AxisAlignedBox& boundingboxA,
-                                                           const AxisAlignedBox& boundingboxB,
-                                                           const AxisAlignedBox& boundingboxC,
-                                                           const Handle& observer)
+        set<SPATIAL_RELATION> computeSpatialRelations(const AxisAlignedBox& boundingboxA,
+                                                      const AxisAlignedBox& boundingboxB,
+                                                      const AxisAlignedBox& boundingboxC,
+                                                      const Handle& observer)
         {
-            std::set<SPATIAL_RELATION> spatialRelations;
-            
+            set<SPATIAL_RELATION> spatialRelations;
+
             if (boundingboxC != AxisAlignedBox::ZERO) {
                 // todo: compute if A is between B and C
                 return spatialRelations;
             }
-            
+
             if (boundingboxA.isFaceTouching(boundingboxB)) {
                 spatialRelations.insert(TOUCHING);
             }
-            
+
             if (boundingboxA.nearLeftBottomConer.z >= boundingboxB.nearLeftBottomConer.z + boundingboxB.size_z) {
                 spatialRelations.insert(ABOVE);
             }
-            
+
             if (boundingboxB.nearLeftBottomConer.z >= boundingboxA.nearLeftBottomConer.z + boundingboxA.size_z) {
                 spatialRelations.insert(BELOW);
             }
@@ -249,9 +270,7 @@ namespace opencog
             return spatialRelations;
         }
 
-
-
-        std::string spatialRelationToString( SPATIAL_RELATION relation ) 
+        string spatialRelationToString(SPATIAL_RELATION relation)
         {
             switch( relation ) {
             case LEFT_OF: return "left_of";
@@ -272,10 +291,15 @@ namespace opencog
                 return " invalid relation ";
             }
         }
-        
+
+        /**
+         * Following is BlockEntity utilities
+         * Currently it's unused until we remaked the BlockEntity well
+         */
+
         /*
           The link structure of ComposedOfLink:
-   
+
           ComposedOfLink
           BlockEntityNode "entityA"
           ListLink
@@ -284,7 +308,7 @@ namespace opencog
           ...
           In the foloowing block entity query we assume one block only belongs to one block entity. But maybe we will have block belongs to multiple block entity.
           ===>Yes, there should only be one block entity at one time; But in atomspace there may be multiple blockentitynode have the same block, though they appear in different time..
-        
+
 
 
           Handle getBlockEntity(const Handle& blockHandle, const AtomSpace& atomspace)
@@ -305,7 +329,7 @@ namespace opencog
           if(blockEntities.empty()){ return Handle::UNDEFINED;}
           else
           {
-		
+
           }
 
           }
@@ -331,4 +355,3 @@ namespace opencog
           */
     }
 }
-

@@ -14,117 +14,129 @@ using namespace octomap;
 
 void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
 {
-	mblockHandle=rhs.mblockHandle;
-	if (rhs.hasChildren())
-	{
-		for (unsigned i = 0; i<8; ++i)
-		{
-			if (rhs.children[i])
-			{
-				(static_cast<OctomapOcTreeNode*>(this->children[i]))->cloneNodeRecur(*(static_cast<OctomapOcTreeNode*>(rhs.children[i])));
-			}
-		}
-	}
-	
+    mblockHandle=rhs.mblockHandle;
+    if (rhs.hasChildren()) {
+        for (unsigned i = 0; i<8; ++i) {
+            if (rhs.children[i]) {
+                (static_cast<OctomapOcTreeNode*>(this->children[i]))->cloneNodeRecur(*(static_cast<OctomapOcTreeNode*>(rhs.children[i])));
+            }
+        }
+    }
+
 }
 
 OctomapOcTreeNode::OctomapOcTreeNode(const OctomapOcTreeNode& rhs): OcTreeNode(rhs)
 {
-	this->cloneNodeRecur(rhs);
+    this->cloneNodeRecur(rhs);
 }
 
 OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
 {
-	this->cloneNodeRecur(rhs);
-	return *this;
+    this->cloneNodeRecur(rhs);
+    return *this;
 }
 
-OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
+OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):
+    OccupancyOcTreeBase <OctomapOcTreeNode>(rhs){}
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x, const double& y, const double& z, const Handle& block) 
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x,
+                                               const double& y,
+                                               const double& z,
+                                               const Handle& block)
 {
-	point3d pos(x,y,z);
-	return setNodeBlock(pos, block);
+    point3d pos(x, y, z);
+    return setNodeBlock(pos, block);
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& block) 
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& block)
 {
-	OcTreeKey key;
-	if (!this->coordToKeyChecked(pos, key)) return NULL;
-	return setNodeBlock(key, block);
+    OcTreeKey key;
+    if (!this->coordToKeyChecked(pos, key)) {
+        return NULL;
+    }
+    return setNodeBlock(key, block);
 }
 
 
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& block)
 {
-    	OctomapOcTreeNode* n = search(key);
-    	if (n != NULL)
-    	{
-		n->setBlock(block); 
-    	}	
-    	return n;
+    OctomapOcTreeNode* n = search(key);
+    if (n != NULL) {
+        n->setBlock(block);
+    }
+    return n;
 }
 
 
-void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied)
+void OctomapOcTree::setBlock(const Handle& block,
+                             const BlockVector& pos,
+                             const bool isOccupied)
 {
-        OctomapOcTreeNode* blockNode;
-        if(isOccupied)
-        {
-            blockNode = this->updateNode(pos.x,pos.y,pos.z,prob_hit_log);            
-        }
-        else
-        {
-            blockNode = this->updateNode(pos.x,pos.y,pos.z,-prob_hit_log-0.1f);
-        }
-	blockNode->setBlock(block);
+    OctomapOcTreeNode* blockNode;
+    if (isOccupied) {
+        blockNode = this->updateNode(pos.x, pos.y, pos.z, prob_hit_log);
+    } else {
+        blockNode = this->updateNode(pos.x, pos.y, pos.z, -prob_hit_log-0.1f);
+    }
+    blockNode->setBlock(block);
 }
-void OctomapOcTree::setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate)
+void OctomapOcTree::setBlock(const Handle& block,
+                             const BlockVector& pos,
+                             const float logOddsOccupancyUpdate)
 {
-	this->updateNode(pos.x,pos.y,pos.z,float(logOddsOccupancyUpdate));
-	this->setNodeBlock(pos.x,pos.y,pos.z,block);	
+    this->updateNode(pos.x, pos.y, pos.z, float(logOddsOccupancyUpdate));
+    this->setNodeBlock(pos.x, pos.y, pos.z, block);
 }
 
 Handle OctomapOcTree::getBlock(const BlockVector& pos) const
 {
-	return getBlock(pos, occ_prob_thres_log);
+    return getBlock(pos, occ_prob_thres_log);
 }
 
 Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsThreshold) const
 {
-	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode==NULL || blocknode->getLogOdds() < logOddsThreshold)
-	{ return Handle::UNDEFINED;}
-	else { return blocknode->getBlock();}
+    OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
+    if (blocknode == NULL ||
+        blocknode->getLogOdds() < logOddsThreshold) {
+        return Handle::UNDEFINED;
+    } else {
+        return blocknode->getBlock();
+    }
 }
 
 
-bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const 
+bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const
 {
-	OcTreeKey key;
-	return !coordToKeyChecked(pos.x,pos.y,pos.z,key);
+    OcTreeKey key;
+    return !coordToKeyChecked(pos.x, pos.y, pos.z, key);
 }
 
 bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos) const
 {
-	return checkBlockInPos(block, pos, occ_prob_thres_log);
+    return checkBlockInPos(block, pos, occ_prob_thres_log);
 }
 
 
-bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsThreshold) const
+bool OctomapOcTree::checkBlockInPos(const Handle& block,
+                                    const BlockVector& pos,
+                                    const float logOddsThreshold) const
 {
-	OctomapOcTreeNode* blocknode=this->search(pos.x,pos.y,pos.z);
-	if(blocknode==NULL || blocknode->getLogOdds()<logOddsThreshold || 
-	   blocknode->getBlock()!=block){ return false;}
-	else{ return true;}
+    OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
+    if (blocknode == NULL ||
+        blocknode->getLogOdds() < logOddsThreshold ||
+        blocknode->getBlock() != block) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /*
 
 // Comment on 20150713 by Yi-Shan,
 // The following is old public functions about BlockEntity add/remove/query
-// Because the BlockEntity feature has not designed well, 
+// Because the BlockEntity feature has not designed well,
 // so we comment out all the code related to BlockEntity
 // Once we need to use it/decide to do it, maybe we'll need the legacy code.
 
@@ -145,7 +157,7 @@ BlockVector OctomapOcTree::getNeighbourSolidBlockVector(const BlockVector& pos, 
 					return nextPos;
 				}
 			}
-	
+
 	return BlockVector::ZERO;
 }
 
@@ -179,8 +191,8 @@ HandleSeq OctomapOcTree::findAllBlocksCombinedWith(AtomSpace& atomspace, BlockVe
 						if(find(searchedList.cbegin(),searchedList.cend(),nextPos)!=searchedList.cend())
 						{continue;}
 
-                        if (checkIsSolid(nextPos, nextBlock) && 
-							((!useBlockMaterial) || 
+                        if (checkIsSolid(nextPos, nextBlock) &&
+							((!useBlockMaterial) ||
 							 getPredicateValue(atomspace,MATERIAL_PREDICATE,nextblock) == getPredicateValue(atomspace,MATERIAL_PREDICATE,curblock)))
 						{
 							if(find(searchList.cbegin(),searchList.cend(),nextPos)!=searchList.cend())
@@ -197,7 +209,7 @@ HandleSeq OctomapOcTree::findAllBlocksCombinedWith(AtomSpace& atomspace, BlockVe
 		searchedList.push_back(curPos);
 		searchList.erase(searchList.begin());
 	}
-	
+
 	return blockList;
 }
 

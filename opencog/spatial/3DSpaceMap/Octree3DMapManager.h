@@ -28,7 +28,6 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <limits.h>
 
 #ifdef HAVE_ZMQ
 #include <lib/zmq/zmq.hpp>
@@ -42,7 +41,7 @@
 
 using namespace std;
 
-#define DOUBLE_MAX numeric_limits<double>::max()
+
 
 
 
