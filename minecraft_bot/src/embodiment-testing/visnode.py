@@ -30,11 +30,12 @@ def handleGetVisibleBlocks(req):
     vis_blocks  = vis.getVisibleBlocks(blocks)
 
     block_pub.publish(vis_blocks)
+    #rospy.loginfo(vis_blocks)
     #return {'visible_blocks': vis_blocks}
     
 
 
-
+"""
 def visibleBlocksServer():
 
     vis.initBlockMats()
@@ -47,7 +48,7 @@ def visibleBlocksServer():
     print("usage: call getVisibleBlocks() with args: (x, y, z, pitch, yaw)")
     
     rospy.spin()
-
+"""
 
 def visibleBlocksNode():
 

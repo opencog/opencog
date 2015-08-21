@@ -37,6 +37,7 @@ class ClientMover():
         
         rospy.Subscriber('client_position_data', position_msg, self.handlePosUpdate)
         self.pub_move = rospy.Publisher('movement_data', movement_msg, queue_size = 10)
+        self.pub_pos = rospy.Publisher('camera_position_data', position_msg, queue_size = 100)
 
 
     def handleLogin(self, data):
@@ -57,6 +58,23 @@ class ClientMover():
     def handleHealth(self, data):
 
         pass
+
+    
+
+    def cameraTick(self):
+
+        msg = position_msg()
+        pos = self.posToDict()
+        
+        msg.x = pos['x']
+        msg.y = pos['y']
+        msg.z = pos['z']
+        msg.pitch = pos['pitch']
+        msg.yaw = pos['yaw']
+        
+        self.pub_pos.publish(msg)
+
+
 
 
     def handlePosUpdate(self, data):
@@ -149,7 +167,7 @@ class ClientMover():
 
         #yaw = req.yaw
         #pitch = req.pitch
-        pos = self.posToDict()
+        pos = posToDict()
 
         # these need to be constant for a given call to this function
         desired_pitch = pos['pitch'] - pitch
@@ -232,7 +250,7 @@ class ClientMover():
         #print 'handle RelativeMove', yaw, dist, jump
         
         speed = 1
-        pos = self.posToDict()       
+        pos = posToDict()       
         desired_yaw = direction
 
         if desired_yaw > 180:
@@ -252,7 +270,7 @@ class ClientMover():
             msg.pitch = frame['pitch']
             msg.yaw = frame['yaw']
             msg.jump = jump
-            print "rel_move_msg", msg
+            #print "abs_move_msg", msg
             self.pub_move.publish(msg)
         return True
 
@@ -301,6 +319,7 @@ def actionServer():
     # move handles changes in body location and jump commands
     while clientpos.x == None:
         rospy.sleep(1.)
+
     rel_look_srvc = rospy.Service('set_relative_look', look_srv, handleRelativeLook)
     rel_move_srvc = rospy.Service('set_relative_move', rel_move_srv, handleRelativeMove)
     
@@ -310,7 +329,10 @@ def actionServer():
 
     print("action server initialized")
     
-    rospy.spin()
+    while not rospy.is_shutdown():
+        client_pos.cameraTick()
+        #print "sending position coords"
+        rospy.sleep(0.03)
 
 
 
