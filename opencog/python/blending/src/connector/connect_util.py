@@ -12,9 +12,26 @@ from blending.util.blending_config import BlendConfig
 __author__ = 'DongMin Kim'
 
 
+def is_conflict_link(
+        a, link_0, link_1,
+        check_type, strength_diff_limit, confidence_above_limit
+):
+    # TODO: Currently, this method can handle
+    # when the number of decided atom is only 2.
+    if a[link_0.h].is_a(check_type) is False:
+        return False
+    if abs(link_0.tv.mean - link_1.tv.mean) < strength_diff_limit:
+        return False
+    if link_0.tv.confidence < confidence_above_limit:
+        return False
+    if link_1.tv.confidence < confidence_above_limit:
+        return False
+
+    return True
+
+
 def find_conflict_links(
-        a,
-        duplicate_links_list,
+        a, duplicate_links_list,
         check_type, strength_diff_limit, confidence_above_limit
 ):
     # TODO: Currently, this method can handle
@@ -26,16 +43,25 @@ def find_conflict_links(
         link_0 = duplicate_links[0]
         link_1 = duplicate_links[1]
 
-        if (a[link_0.h].is_a(check_type) is False) or \
-                (abs(link_0.tv.mean - link_1.tv.mean) < strength_diff_limit):
+        if is_conflict_link(
+                a, link_0, link_1,
+                check_type, strength_diff_limit, confidence_above_limit
+        ):
+            # TODO: Currently, this method checks if only two atom have exactly
+            # same link, except TruthValue. Find the unveiled conflicts
+            # via PLN would be great.
+            # e.g. Conflict:
+            # InheritanceLink(car alive)<0>,
+            # InheritanceLink(man alive)<1>
+            # Unveiled Conflict:
+            # InheritanceLink(car non-living)<1>,
+            # InheritanceLink(man alive)<1>
+            conflict_links.append(duplicate_links)
+        else:
             # array elements are same except original node information.
             link_key_sample = copy(link_0)
             link_key_sample.tv = get_weighted_tv(duplicate_links)
             non_conflict_links.append(link_key_sample)
-        else:
-            if link_0.tv.confidence > confidence_above_limit:
-                if link_1.tv.confidence > confidence_above_limit:
-                    conflict_links.append(duplicate_links)
 
     return conflict_links, non_conflict_links
 
@@ -94,28 +120,9 @@ def find_related_links(
     # and copy all link in each inheritance node.
     related_node_target_links = list()
 
-    free_var = a.add_node(types.VariableNode, "$")
-
     for decided_atom in decided_atoms:
-        inheritance_link = a.add_link(
-            types.InheritanceLink, [free_var, decided_atom]
-        )
-        """
-        GetLink
-            InheritanceLink
-                VariableNode $
-                ConceptNode <Decided Atom>
-        """
-        get_link = a.add_link(types.GetLink, [inheritance_link])
-        """
-        SetLink
-            ConceptNode <Related node 1>
-            ConceptNode <Related node 2>
-            ...
-            ConceptNode <Related node N>
-        """
-        inheritance_node_set = PyCogExecute().execute(a, get_link)
-        for related_node in inheritance_node_set.out:
+        inheritance_node_set = find_inheritance_nodes(a, decided_atom)
+        for related_node in inheritance_node_set:
             # Manually throw away the links have low strength.
             target_links = filter(
                 lambda link:
@@ -125,14 +132,40 @@ def find_related_links(
             related_node_target_links.append(
                 link_to_keys(a, target_links, related_node)
             )
-        # Delete temp links.
-        BlendConfig().execute_link_factory.clean_up(inheritance_node_set)
-        BlendConfig().execute_link_factory.clean_up(get_link)
-        BlendConfig().execute_link_factory.clean_up(inheritance_link)
+
+    return related_node_target_links
+
+
+def find_inheritance_nodes(a, decided_atom):
+    free_var = a.add_node(types.VariableNode, "$")
+
+    inheritance_link = a.add_link(
+        types.InheritanceLink, [free_var, decided_atom]
+    )
+    """
+    GetLink
+        InheritanceLink
+            VariableNode $
+            ConceptNode <Decided Atom>
+    """
+    get_link = a.add_link(types.GetLink, [inheritance_link])
+    """
+    SetLink
+        ConceptNode <Related node 1>
+        ConceptNode <Related node 2>
+        ...
+        ConceptNode <Related node N>
+    """
+    inheritance_node_set = PyCogExecute().execute(a, get_link)
+
+    ret = inheritance_node_set.out
 
     # Delete temp links.
+    BlendConfig().execute_link_factory.clean_up(inheritance_node_set)
+    BlendConfig().execute_link_factory.clean_up(get_link)
+    BlendConfig().execute_link_factory.clean_up(inheritance_link)
     BlendConfig().execute_link_factory.clean_up(free_var)
-    return related_node_target_links
+    return ret
 
 
 def make_conflict_link_cases(conflict_links):

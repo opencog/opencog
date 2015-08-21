@@ -179,6 +179,7 @@ class ConnectConflictInteractionInformation(BaseConnector):
 
     def __evaluate_interaction_information(
             self,
+            decided_atoms,
             conflict_link_cases,
             non_conflict_link_cases,
             non_duplicate_link_cases,
@@ -188,6 +189,10 @@ class ConnectConflictInteractionInformation(BaseConnector):
         for each available conflict link cases.
         """
         result_list = list()
+
+        inheritance_nodes = list()
+        for decided_atom in decided_atoms:
+            inheritance_nodes += find_inheritance_nodes(self.a, decided_atom)
 
         # TODO: To prevent freeze during interaction information generation,
         # user can limit the max value of calculation.
@@ -220,7 +225,7 @@ class ConnectConflictInteractionInformation(BaseConnector):
                     filter(lambda x:
                            # TODO: Currently connector excludes
                            # an InheritanceLink to get valuable(funny) result.
-                           (x.t != types.InheritanceLink) and
+                           self.a[x.h].out[0] not in inheritance_nodes and
                            # Manually throw away the links have low strength.
                            (x.tv.mean > self.inter_info_strength_above_limit),
                            merged_links
@@ -236,6 +241,7 @@ class ConnectConflictInteractionInformation(BaseConnector):
                 self.provider,
                 max_repeat_length
             )
+
             result_list.append({
                 "merged_links": merged_links,
                 "filtered_merged_links": filtered_merged_links,
@@ -252,21 +258,8 @@ class ConnectConflictInteractionInformation(BaseConnector):
             reverse=True
         )
 
-        # To print(debug) interaction information value.
-        for i, result in enumerate(result_list):
-            name = ""
-
-            # Prints only top 15 results.
-            if i >= 15:
-                break
-            elif i == 0:
-                name += "[Selected]: "
-
-            for nodes in map(lambda x: x.out, result['filtered_merged_links']):
-                for node in nodes:
-                    if node.name != self.ret[0].name:
-                        name += node.name + ", "
-            log.debug(name + ": " + str(result['interaction_information']))
+        self.__make_result_log(result_list, reverse=False)
+        # self.__make_result_log(result_list, reverse=True)
 
         return result_list[0]['merged_links']
 
@@ -315,6 +308,7 @@ class ConnectConflictInteractionInformation(BaseConnector):
         )
         best_interaction_information_link = \
             self.__evaluate_interaction_information(
+                decided_atoms,
                 conflict_link_cases,
                 non_conflict_links,
                 non_duplicate_links,
@@ -366,6 +360,7 @@ class ConnectConflictInteractionInformation(BaseConnector):
             decided_atoms, merged_atom
         )
 
+    # To print(debug) progress of evaluating.
     def __print_progress(
             self, msg, current_ratio, current_count, total, step=10
     ):
@@ -376,3 +371,18 @@ class ConnectConflictInteractionInformation(BaseConnector):
                 " (" + str(100 * current_count / float(total)) + "%)"
             )
         return current_ratio
+
+    # To print(debug) interaction information value.
+    def __make_result_log(self, result_list, reverse):
+        if reverse:
+            result_list = reversed(result_list)
+
+        for i, result in enumerate(result_list):
+            name = ""
+            # Prints only top 5 results.
+            if i < 15:
+                for link in result['filtered_merged_links']:
+                    for node in link.out:
+                        if node.t == types.ConceptNode and node != self.ret[0]:
+                            name += node.name + ", "
+                log.debug(name + ": " + str(result['interaction_information']))
