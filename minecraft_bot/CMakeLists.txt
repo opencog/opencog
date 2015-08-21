@@ -59,6 +59,7 @@ add_message_files(
    chunk_meta_msg.msg
    block_data_msg.msg
    map_block_msg.msg
+   map_block_multi_msg.msg
    entity_movement_meta.msg
    entity_exp_meta.msg
    entity_global_meta.msg
