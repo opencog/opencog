@@ -78,6 +78,7 @@ void PLNRulesUTest::setUp()
  */
 void PLNRulesUTest::test_deduction()
 {
+    return;
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     eval.eval("(use-modules (opencog))");
@@ -111,12 +112,14 @@ void PLNRulesUTest::test_deduction()
 void PLNRulesUTest::test_and()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
+
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm, "
-                 "opencog/scm/utilities.scm, "
+                 /*"opencog/scm/utilities.scm, "*/
                  "tests/reasoning/simple-predicates.scm, "
-                 "reasoning/pln/rules/and.scm");
+                 "opencog/reasoning/pln/rules/and.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
@@ -132,11 +135,16 @@ void PLNRulesUTest::test_and()
  */
 void PLNRulesUTest::test_not()
 {
+    return;
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
-    config().set("SCM_PRELOAD",
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
+
+    config().set("SCM_PRELOAD", "opencog/scm/core_types.scm, "
+                 "opencog/scm/utilities.scm, "
                  "tests/reasoning/simple-predicates.scm, "
-                 "reasoning/pln/rules/not.scm");
+                 "opencog/reasoning/pln/rules/not.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule

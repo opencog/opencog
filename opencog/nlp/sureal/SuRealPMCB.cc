@@ -61,12 +61,6 @@ SuRealPMCB::~SuRealPMCB()
  * in SuReal will not just be VariableNode, but any nodes with an actual word
  * (eg. (PredicateNode "runs"), (ConceptNode "dog@1324-12213"), etc).
  *
- * For each variable and its potential solution, the corresponding WordNode
- * will be located.  Then we find the source LG connectors used to match to the
- * the solution WordNode, and check each disjuncts of the variable WordNode to
- * see if any of them can match the source.  If so, then the solution WordNode
- * can be replaced by the variable WordNode.
- *
  * @param hPat    the variable, a node extracted from the original query
  * @param hSoln   the potential mapping
  * @return        false if solution is rejected, true if accepted
@@ -83,12 +77,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
         return true;
 
-    std::string sPat = m_as->get_name(hPat);
-    std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
     std::string sSoln = m_as->get_name(hSoln);
-
-    // get the WordNode associated with the word (extracted from "word@1234" convention)
-    Handle hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
 
     // get the corresponding WordInstanceNode for hSoln
     Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
@@ -97,180 +86,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     if (hSolnWordInst == Handle::UNDEFINED)
         return false;
 
-    // the source connectors for the solution
-    HandleSeq qTargetConns;
-
-    HandleSeq qSolnEvalLinks = get_predicates(hSolnWordInst, LG_LINK_INSTANCE_NODE);
-
-    HandleSeq qLGInstsLeft;
-    HandleSeq qLGInstsRight;
-    for (Handle& hSolnEvalLink : qSolnEvalLinks)
-    {
-        HandleSeq qOS = LinkCast(hSolnEvalLink)->getOutgoingSet();
-        HandleSeq qWordInsts = LinkCast(qOS[1])->getOutgoingSet();
-
-        // divide them into two groups, assuming there are only two WordInstanceNodes in the ListLink
-        if (qWordInsts[0] == hSolnWordInst) qLGInstsRight.push_back(hSolnEvalLink);
-        if (qWordInsts[1] == hSolnWordInst) qLGInstsLeft.push_back(hSolnEvalLink);
-    }
-
-    // helper for sorting EvaluationLinks in reverse word sequence order
-    auto sortLeftInsts = [](const Handle& h1, const Handle& h2)
-    {
-        // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
-        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
-
-        // get the first WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[0];
-        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
-
-        // get the NumberNodes from the WordSequenceLinks
-        Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-        Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
-
-        // compare their word sequences
-        return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
-    };
-
-    // helper for sorting EvaluationLinks in word sequence order
-    auto sortRightInsts = [](const Handle& h1, const Handle& h2)
-    {
-        // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
-        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
-
-        // get the second WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[1];
-        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
-
-        // get the NumberNodes from the WordSequenceLinks
-        Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-        Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
-
-        // compare their word sequences
-        return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
-    };
-
-    // sort the qLGInstsLeft in reverse word sequence order
-    std::sort(qLGInstsLeft.begin(), qLGInstsLeft.end(), sortLeftInsts);
-
-    // sort the qLGInstsRight in word sequence order
-    std::sort(qLGInstsRight.begin(), qLGInstsRight.end(), sortRightInsts);
-
-    // get the LG connectors for those in the qLGInstsLeft
-    for (Handle& hEvalLink : qLGInstsLeft)
-    {
-        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
-
-        HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
-
-        // get the first LG connector
-        qTargetConns.push_back(qLGConns[0]);
-    }
-
-    // get the LG connectors for those in the qLGInstsRight
-    for (Handle& hEvalLink : qLGInstsRight)
-    {
-        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
-
-        HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
-
-        // get the second LG connector
-        qTargetConns.push_back(qLGConns[1]);
-    }
-
-    // disjuncts of the hPatWordNode
-    HandleSeq qDisjuncts;
-
-    // check if we got the disjuncts of the hPatWordNode already, otherwise
-    // store them in a map so that we only need to do this disjuncts-getting procedure once
-    auto iter = m_disjuncts.find(hPatWordNode);
-    if (iter == m_disjuncts.end())
-    {
-        HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
-
-        auto insertHelper = [&](const Handle& h)
-        {
-            HandleSeq q = m_as->get_outgoing(h);
-            qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
-        };
-
-        std::for_each(qOr.begin(), qOr.end(), insertHelper);
-
-        m_disjuncts.insert({hPatWordNode, qDisjuncts});
-    }
-    else qDisjuncts = iter->second;
-
-    logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPat->toShortString().c_str());
-
-    // for each disjunct, get its outgoing set, and match 1-to-1 with qTargetConns
-    auto matchHelper = [&](const Handle& hDisjunct)
-    {
-        std::list<Handle> sourceConns;
-        std::list<Handle> targetConns(qTargetConns.begin(), qTargetConns.end());
-
-        // check if hDisjunct is LgAnd or just a lone connector
-        if (hDisjunct->getType() == LG_AND)
-        {
-            HandleSeq q = m_as->get_outgoing(hDisjunct);
-            sourceConns = std::list<Handle>(q.begin(), q.end());
-        }
-        else
-        {
-            sourceConns.push_back(hDisjunct);
-        }
-
-        Handle hMultiConn = Handle::UNDEFINED;
-
-        // loop thru all connectors on both list
-        while (not sourceConns.empty() && not targetConns.empty())
-        {
-            bool bResult;
-
-            if (hMultiConn != Handle::UNDEFINED)
-                bResult = lg_conn_linkable(hMultiConn, targetConns.front());
-            else
-                bResult = lg_conn_linkable(sourceConns.front(), targetConns.front());
-
-            // if the two connectors cannot be linked
-            if (not bResult)
-            {
-                // don't pop anything if we were retrying a multi-connector
-                if (hMultiConn != Handle::UNDEFINED)
-                {
-                    hMultiConn = Handle::UNDEFINED;
-                    continue;
-                }
-
-                return false;
-            }
-
-            // pop only the target connector if we were repeating a multi-conn
-            if (hMultiConn != Handle::UNDEFINED)
-            {
-                targetConns.pop_front();
-                continue;
-            }
-
-            // dumb hacky way of checking of the connector is a multi-connector
-            if (m_as->get_outgoing(sourceConns.front()).size() == 3)
-                hMultiConn = sourceConns.front();
-
-            sourceConns.pop_front();
-            targetConns.pop_front();
-        }
-
-        // check if both source and target are used up
-        if (not sourceConns.empty() or not targetConns.empty())
-            return false;
-
-        logger().debug("[SuReal] " + hDisjunct->toShortString() + " passed!");
-
-        return true;
-    };
-
-    return std::any_of(qDisjuncts.begin(), qDisjuncts.end(), matchHelper);
+    return true;
 }
 
 /**
@@ -280,6 +96,11 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
  * InterpretationNode.  The reason of doing it here instead of earlier in
  * link_match() is because it is possible a SetLink is used for other purpose
  * as part of R2L's output.
+ *
+ * For each accepted SetLink, we look at its nodes one by one, find the source
+ * LG connectors used to match to the pattern WordNode, and check each disjuncts
+ * of the solution WordNode to see if any of them can match the source.
+ * If so, then the solution WordNode can be replaced by the pattern WordNode.
  *
  * @param pattrn_link_h   the matched clause, extracted from the input SetLink
  * @param grnd_link_h     the corresponding grounding to be checked
@@ -302,7 +123,233 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     };
 
     // reject match (ie. return false) if there is no InterpretationNode
-    return std::any_of(qISet.begin(), qISet.end(), hasInterpretation);
+    if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation))
+        return false;
+
+    // get all the nodes from the pattern and the potential solution
+    HandleSeq qAllPatNodes = get_all_nodes(pattrn_link_h);
+    HandleSeq qAllSolnNodes = get_all_nodes(grnd_link_h);
+
+    // just in case if their sizes are not the same, reject the match
+    if (qAllPatNodes.size() != qAllSolnNodes.size())
+        return false;
+
+    // compare the disjuncts for each of the nodes
+    for (size_t i = 0; i < qAllPatNodes.size(); i++)
+    {
+        Handle& hPatNode = qAllPatNodes[i];
+        Handle& hSolnNode = qAllSolnNodes[i];
+
+        // move on if the pattern node is a VariableNode or an InperpretationNode
+        if (hPatNode->getType() == VARIABLE_NODE || hPatNode->getType() == INTERPRETATION_NODE)
+            continue;
+
+        // get the corresponding WordNode of the pattern node
+        Handle hPatWordNode;
+        auto it = m_words.find(hPatNode);
+        if (it == m_words.end())
+        {
+            std::string sPat = m_as->get_name(hPatNode);
+            std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
+
+            // get the WordNode associated with the word (extracted from "word@1234" convention)
+            hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
+
+            m_words.insert({hPatNode, hPatWordNode});
+        }
+        else hPatWordNode = it->second;
+
+        // get the corresponding WordInstanceNode of the solution node
+        std::string sSoln = m_as->get_name(hSolnNode);
+        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
+
+        // if the node is a variable, it would have matched to a node with
+        // corresponding WordInstanceNode by variable match
+        // if the node is not a variable, then the standard node_match would
+        // have made it matched to itself, so let's move on and check the rest
+        // of the ndoes
+        if (hSolnWordInst == Handle::UNDEFINED)
+            continue;
+
+        // the source connectors for the solution
+        HandleSeq qTargetConns;
+
+        HandleSeq qSolnEvalLinks = get_predicates(hSolnWordInst, LG_LINK_INSTANCE_NODE);
+
+        HandleSeq qLGInstsLeft;
+        HandleSeq qLGInstsRight;
+        for (Handle& hSolnEvalLink : qSolnEvalLinks)
+        {
+            HandleSeq qOS = LinkCast(hSolnEvalLink)->getOutgoingSet();
+            HandleSeq qWordInsts = LinkCast(qOS[1])->getOutgoingSet();
+
+            // divide them into two groups, assuming there are only two WordInstanceNodes in the ListLink
+            if (qWordInsts[0] == hSolnWordInst) qLGInstsRight.push_back(hSolnEvalLink);
+            if (qWordInsts[1] == hSolnWordInst) qLGInstsLeft.push_back(hSolnEvalLink);
+        }
+
+        // helper for sorting EvaluationLinks in reverse word sequence order
+        auto sortLeftInsts = [](const Handle& h1, const Handle& h2)
+        {
+            // get the ListLinks from the EvaluationLinks
+            const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
+            const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+
+            // get the first WordInstanceNodes from the ListLinks
+            const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[0];
+            const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
+
+            // get the NumberNodes from the WordSequenceLinks
+            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+
+            // compare their word sequences
+            return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
+        };
+
+        // helper for sorting EvaluationLinks in word sequence order
+        auto sortRightInsts = [](const Handle& h1, const Handle& h2)
+        {
+            // get the ListLinks from the EvaluationLinks
+            const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
+            const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+
+            // get the second WordInstanceNodes from the ListLinks
+            const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[1];
+            const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
+
+            // get the NumberNodes from the WordSequenceLinks
+            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+
+            // compare their word sequences
+            return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
+        };
+
+        // sort the qLGInstsLeft in reverse word sequence order
+        std::sort(qLGInstsLeft.begin(), qLGInstsLeft.end(), sortLeftInsts);
+
+        // sort the qLGInstsRight in word sequence order
+        std::sort(qLGInstsRight.begin(), qLGInstsRight.end(), sortRightInsts);
+
+        // get the LG connectors for those in the qLGInstsLeft
+        for (Handle& hEvalLink : qLGInstsLeft)
+        {
+            const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+
+            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+
+            // get the first LG connector
+            qTargetConns.push_back(qLGConns[0]);
+        }
+
+        // get the LG connectors for those in the qLGInstsRight
+        for (Handle& hEvalLink : qLGInstsRight)
+        {
+            const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+
+            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+
+            // get the second LG connector
+            qTargetConns.push_back(qLGConns[1]);
+        }
+
+        // disjuncts of the hPatWordNode
+        HandleSeq qDisjuncts;
+
+        // check if we got the disjuncts of the hPatWordNode already, otherwise
+        // store them in a map so that we only need to do this disjuncts-getting procedure once
+        auto iter = m_disjuncts.find(hPatWordNode);
+        if (iter == m_disjuncts.end())
+        {
+            HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+
+            auto insertHelper = [&](const Handle& h)
+            {
+                HandleSeq q = m_as->get_outgoing(h);
+                qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+            };
+
+            std::for_each(qOr.begin(), qOr.end(), insertHelper);
+
+            m_disjuncts.insert({hPatWordNode, qDisjuncts});
+        }
+        else qDisjuncts = iter->second;
+
+        logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPatWordNode->toShortString().c_str());
+
+        // for each disjunct, get its outgoing set, and match 1-to-1 with qTargetConns
+        auto matchHelper = [&](const Handle& hDisjunct)
+        {
+            std::list<Handle> sourceConns;
+            std::list<Handle> targetConns(qTargetConns.begin(), qTargetConns.end());
+
+            // check if hDisjunct is LgAnd or just a lone connector
+            if (hDisjunct->getType() == LG_AND)
+            {
+                HandleSeq q = m_as->get_outgoing(hDisjunct);
+                sourceConns = std::list<Handle>(q.begin(), q.end());
+            }
+            else
+            {
+                sourceConns.push_back(hDisjunct);
+            }
+
+            Handle hMultiConn = Handle::UNDEFINED;
+
+            // loop thru all connectors on both list
+            while (not sourceConns.empty() && not targetConns.empty())
+            {
+                bool bResult;
+
+                if (hMultiConn != Handle::UNDEFINED)
+                    bResult = lg_conn_linkable(hMultiConn, targetConns.front());
+                else
+                    bResult = lg_conn_linkable(sourceConns.front(), targetConns.front());
+
+                // if the two connectors cannot be linked
+                if (not bResult)
+                {
+                    // don't pop anything if we were retrying a multi-connector
+                    if (hMultiConn != Handle::UNDEFINED)
+                    {
+                        hMultiConn = Handle::UNDEFINED;
+                        continue;
+                    }
+
+                    return false;
+                }
+
+                // pop only the target connector if we were repeating a multi-conn
+                if (hMultiConn != Handle::UNDEFINED)
+                {
+                    targetConns.pop_front();
+                    continue;
+                }
+
+                // dumb hacky way of checking of the connector is a multi-connector
+                if (m_as->get_outgoing(sourceConns.front()).size() == 3)
+                    hMultiConn = sourceConns.front();
+
+                sourceConns.pop_front();
+                targetConns.pop_front();
+            }
+
+            // check if both source and target are used up
+            if (not sourceConns.empty() or not targetConns.empty())
+                return false;
+
+            logger().debug("[SuReal] " + hDisjunct->toShortString() + " passed!");
+
+            return true;
+        };
+
+        // reject if the disjuncts do not match
+        if (not std::any_of(qDisjuncts.begin(), qDisjuncts.end(), matchHelper))
+            return false;
+    }
+
+    return true;
 }
 
 /**

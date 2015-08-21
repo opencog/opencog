@@ -72,6 +72,8 @@ private:
 
     std::unordered_map<Handle, HandleSeq> m_disjuncts;   // store the disjuncts of nodes in the pattern
 
+    std::unordered_map<Handle, Handle> m_words;   // store the corresponding WordNodes of the nodes in the pattern
+
     struct CandHandle
     {
         Handle handle;

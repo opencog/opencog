@@ -15,7 +15,6 @@
 (define pln-rule-not
   (BindLink
     (VariableList
-      (VariableNode "$A")
       (TypedVariableLink
        (VariableNode "$A")
        (TypeNode "PredicateNode")))

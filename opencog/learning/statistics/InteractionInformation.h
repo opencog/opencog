@@ -95,7 +95,7 @@ public:
  }
 
  template<typename Metadata>
- inline static float calculateInteractionInformation(
+ inline static float calculateInteractionInformationFromKey(
          std::vector<long> &onePieceOfData, DataProvider<Metadata> &provider)
  {
      std::vector<Metadata> data = provider.makeDataFromKey(onePieceOfData);
@@ -117,7 +117,7 @@ public:
              StatisticData& pieceData = it->second;
              std::vector<long> onePieceOfData = (std::vector<long>)it->first;
              pieceData.interactionInformation =
-                     calculateInteractionInformation(
+                     calculateInteractionInformationFromKey(
                              onePieceOfData, provider
                      );
          }

@@ -226,6 +226,34 @@ IF (HAVE_MOSES)
 		DESTINATION "${DATADIR}/python/opencog")
 ENDIF (HAVE_MOSES)
 
+IF (HAVE_STATISTICS)
+	CYTHON_ADD_MODULE_PYX(statistics
+		"../../learning/statistics/DataProvider.h"
+		"../../learning/statistics/Probability.h"
+		"../../learning/statistics/Entropy.h"
+		"../../learning/statistics/InteractionInformation.h"
+	)
+
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "statistics.cpp")
+
+	# opencog.statistics Python bindings
+	ADD_LIBRARY(statistics_cython SHARED
+		statistics.cpp
+	)
+
+	TARGET_LINK_LIBRARIES(statistics_cython
+		statistics
+		${PYTHON_LIBRARIES}
+	)
+
+	SET_TARGET_PROPERTIES(statistics_cython PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME statistics)
+
+	INSTALL (TARGETS statistics_cython
+		DESTINATION "${DATADIR}/python/opencog")
+ENDIF (HAVE_STATISTICS)
+
 INSTALL (FILES
 	__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
