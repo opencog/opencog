@@ -260,6 +260,7 @@ foreach $af (sort @aimlFiles)
 						print FOUT "TEMPWRD,$w\n";
 					}
 				}
+				print FOUT "TEMPATOMICEND,0\n";
 			}
 			else
 			{
@@ -297,9 +298,8 @@ while($line =<FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code = "";
-		$code .= "PatternLink\n";
-		$code .= "   SequentailAndLink\n";
+		$code .= "(PatternLink\n";
+		$code .= "   (SequentialAndLink\n";
 	}
 	if ($cmd eq "PATH")
 	{
@@ -310,7 +310,8 @@ while($line =<FIN>)
 
 	if ($cmd eq "CATEND")
 	{
-	
+	    $code .= ")\n";     # close category section
+		
 		if ($overwrite)
 		{
 			# overwrite in a hash space indexed by the current path
@@ -330,114 +331,127 @@ while($line =<FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "      WordSequenceLink\n";
+		$code .= "      (WordSequenceLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
-		$code .= "         WordNode \"$arg\"\n";
+		$code .= "         (WordNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         WordNode \"*\"\n";
+		$code .= "         (WordNode \"*\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "         WordNode \"_\"\n";
+		$code .= "         (WordNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "         BOTVARNode \"$arg\"\n";
+		$code .= "         (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "         ConceptNode \"$arg\"\n";
+		$code .= "         (ConceptNode \"$arg\")\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         VariableNode \"\$eol\"\n";
+		$code .= "         (VariableNode \"\$eol\")\n";
+		$code .= "      )\n";
 	}
 
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$code .= "      ListLink\n";
-		$code .= "         AnchorNode \"\#topic\"\n";
+		$code .= "      (ListLink\n";
+		$code .= "         (AnchorNode \"\#topic\")\n";
 	}
 	if ($cmd eq "TOPICWRD")
 	{
-		$code .= "         WordNode \"$arg\"\n";
+		$code .= "         (WordNode \"$arg\")\n";
 	}
 	if ($cmd eq "TOPICSTAR")
 	{
-		$code .= "         WordNode \"*\"\n";
+		$code .= "         (WordNode \"*\")\n";
 	}
 	if ($cmd eq "TOPICUSTAR")
 	{
-		$code .= "         WordNode \"_\"\n";
+		$code .= "         (WordNode \"_\")\n";
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$code .= "         BOTVARNode \"$arg\"\n";
+		$code .= "         (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
-		$code .= "         ConceptNode \"$arg\"\n";
+		$code .= "         (ConceptNode \"$arg\")\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
-		$code .= "         VariableNode \"\$topic\"\n";
+		$code .= "         (VariableNode \"\$topic\")\n";
+		$code .= "      )\n";
 	}
 	
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$code .= "      ListLink\n";
-		$code .= "         AnchorNode \"\#that\"\n";
+		$code .= "      (ListLink\n";
+		$code .= "         (AnchorNode \"\#that\")\n";
 	}
 	if ($cmd eq "THATWRD")
 	{
-		$code .= "         WordNode \"$arg\"\n";
+		$code .= "         (WordNode \"$arg\")\n";
 	}
 	if ($cmd eq "THATSTAR")
 	{
-		$code .= "         WordNode \"*\"\n";
+		$code .= "         (WordNode \"*\")\n";
 	}
 	if ($cmd eq "THATUSTAR")
 	{
-		$code .= "         WordNode \"_\"\n";
+		$code .= "         (WordNode \"_\")\n";
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$code .= "         BOTVARNode \"$arg\"\n";
+		$code .= "         (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "THATSET")
 	{
-		$code .= "         ConceptNode \"$arg\"\n";
+		$code .= "         (ConceptNode \"$arg\")\n";
 	}
 	if ($cmd eq "THATEND")
 	{
-		$code .= "         VariableNode \"\$that\"\n";
+		$code .= "         (VariableNode \"\$that\")\n";
+		$code .= "      )\n";
 	}	
 	
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
+	    $code .= "     )\n";  # close pattern section
 		# just raw AIML code
-		$code .= "      PutLink\n";
-		$code .= "         AnchorNode \"\#reply\"\n";
-		$code .= "         AIMLCODENode \"$arg\"\n";
+		$code .= "    (PutLink\n";
+		$code .= "       (AnchorNode \"\#reply\")\n";
+		$code .= "       (AIMLCODENode \"$arg\")\n";
+		$code .= "     )\n";
+		
 	}	
 	if ($cmd eq "TEMPATOMIC")
 	{
+	    $code .= "    )\n";  # close pattern section
 		# the AIML code was just a list of words so just setup for a word sequence
-		$code .= "      PutLink\n";
-		$code .= "         AnchorNode \"\#reply\"\n";
-		$code .= "         WordSequenceLink\n";
+		$code .= "    (PutLink\n";
+		$code .= "       (AnchorNode \"\#reply\")\n";
+		$code .= "       (WordSequenceLink\n";
 	}	
 	if ($cmd eq "TEMPWRD")
 	{
 		#just another word in the reply chain
-		$code .= "            WordNode \"$arg\"\n";
+		$code .= "            (WordNode \"$arg\")\n";
+	}	
+	if ($cmd eq "TEMPATOMICEND")
+	{
+		#just another word in the reply chain
+		$code .= "        )\n";
+		$code .= "    )\n";
 	}	
 	
 	
@@ -457,7 +471,7 @@ close(FOUT);
 exit;
 =for comment 
 
-orinal AIML :
+original AIML :
 
 <category>
  <pattern>Hello</pattern>
@@ -473,7 +487,7 @@ has implied fields of <topic>*</topic>  and <that>*</that>:
  <template> Hi there. </template> 
 </category>
 
-which is translates an an intermediate sequence of 
+which is translates to an intermediate sequence of 
 
 CATBEGIN,0
 PAT,Hello
@@ -511,5 +525,36 @@ PatternLink
             WordNode "Hi"
             WordNode "there"
 ```
+
+Or in more scheme-ish format 
+
+(PatternLink
+   (SequentialAndLink
+      (WordSequenceLink
+         (WordNode "Hello")
+         (VariableNode "$eol")
+      )
+      (ListLink
+         (AnchorNode "#topic")
+         (WordNode "*")
+         (VariableNode "$topic")
+      )
+      (ListLink
+         (AnchorNode "#that")
+         (WordNode "*")
+         (VariableNode "$that")
+      )
+    )
+    (PutLink
+       (AnchorNode "#reply")
+       (WordSequenceLink
+            (WordNode "Hi")
+            (WordNode "there.")
+        )
+    )
+)
+
+
+
 =end comment
 
