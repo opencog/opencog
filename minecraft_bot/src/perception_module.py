@@ -1,11 +1,11 @@
-#! /usr/bin/env python
+# perception_module.py
+#! /usr/bin/env python2.7 python2 python
 
 from opencog.atomspace import AtomSpace,Handle,TruthValue,types,get_refreshed_types
 from opencog.type_constructors import *
 from opencog.cogserver_type_constructors import *
 from opencog.spacetime import SpaceServer,TimeServer
-#update spacetime types imported
-types = get_refreshed_types()
+types = get_refreshed_types() #update spacetime types imported
 from opencog.atomspace import Atom
 from atomspace_util import add_predicate, add_location
 from atomspace_util import get_predicate, get_most_recent_pred_val
@@ -17,10 +17,17 @@ default_map_resolution = 1
 default_map_agent_height = 1
 default_map_floor_height = -255
 
+def swap_y_and_z(coord):
+    temp_y = coord.y
+    coord.y = coord.z
+    coord.z = temp_y
+    return coord
+
 class PerceptionManager:
 
     def __init__(self, atomspace, space_server,time_server):
-        self._handle_dict = {"client_position_data": self.handle_self_pos_message}
+        self._handle_dict = {"client_position_data": self.handle_self_pos_message,
+                             "camera_vis_data" : self.handle_vision_message}
         self._receiver = ROSPerceptionInterface(self._handle_dict)
         self._atomspace = atomspace
         self._space_server = space_server
@@ -39,47 +46,14 @@ class PerceptionManager:
             return None, None
         return map_handle, self._space_server.get_map(map_handle)
 
-    def update_perception(self):
-        map_handle, cur_map = self._get_map()
-        self_entity_handle = cur_map.get_self_agent_entity()
-        cur_pos = cur_map.get_last_appeared_location(self_entity_handle)
-        cur_look = get_most_recent_pred_val(self._atomspace, self._time_server,
-                                            "look", self_entity_handle, 2)
-        print "x,y,z,yaw,pitch",cur_pos[0], cur_pos[1], cur_pos[2],cur_look[0], cur_look[1]
-        new_blocks = self._receiver.get_visible_blocks(cur_pos[0], cur_pos[1]+1.5, cur_pos[2],
-                                                       cur_look[0], cur_look[1])
-        self.process_blocks_message(new_blocks)
-
-    def handle_self_pos_message(self, data):
-        #print 'handle_self_pos_message'
+    def handle_vision_message(self,data):
+        print "handle_visiion_message"
         #TODO: In Minecraft the up/down direction is y coord
         # but we should swap y and z in ros node, not here..
-        temp_y = data.y
-        data.y = data.z
-        data.z = temp_y
-
+        for block in data.blocks:
+            swap_y_and_z(block)
         map_handle, cur_map = self._get_map()
-        old_self_handle = cur_map.get_self_agent_entity()
-        self_node, updated_eval_links = self._build_self_pos_node(data, map_handle)
-        #TODO: pass timestamp in message
-        timestamp = 0
-        self._space_server.add_map_info(self_node.h, map_handle,
-                                        True, True, timestamp,
-                                        data.x, data.y, data.z, "ROS")
-        if old_self_handle.is_undefined():
-            self._time_server.add_time_info(self_node.h, timestamp, "ROS")
-            self._time_server.add_time_info(self_node.h, timestamp, "MC")
-        for link in updated_eval_links:
-            self._time_server.add_time_info(link.h, timestamp, "ROS")
-            self._time_server.add_time_info(link.h, timestamp, "MC")
-        #print self_node
-        #print self._atomspace.get_incoming(self_node.h)
-
-    def process_blocks_message(self, data):
-        print 'process block msg'
-        print data
-        map_handle, cur_map = self._get_map()
-        for block in data:
+        for block in data.blocks:
             old_block_handle = cur_map.get_block((block.x, block.y, block.z))
             updated_eval_links = []
             if old_block_handle.is_undefined():
@@ -108,8 +82,32 @@ class PerceptionManager:
             for link in updated_eval_links:
                 self._time_server.add_time_info(link.h,block.ROStimestamp, "ROS")
                 self._time_server.add_time_info(link.h,block.MCtimestamp, "MC")
-            print blocknode
-            print updated_eval_links
+            #print blocknode
+            #print updated_eval_links
+        print "handle_vision_message end"
+
+    def handle_self_pos_message(self, data):
+        print 'handle_self_pos_message'
+        #TODO: In Minecraft the up/down direction is y coord
+        # but we should swap y and z in ros node, not here..
+        swap_y_and_z(data)
+        map_handle, cur_map = self._get_map()
+        old_self_handle = cur_map.get_self_agent_entity()
+        self_node, updated_eval_links = self._build_self_pos_node(data, map_handle)
+        #TODO: pass timestamp in message
+        timestamp = 0
+        self._space_server.add_map_info(self_node.h, map_handle,
+                                        True, True, timestamp,
+                                        data.x, data.y, data.z, "ROS")
+        if old_self_handle.is_undefined():
+            self._time_server.add_time_info(self_node.h, timestamp, "ROS")
+            self._time_server.add_time_info(self_node.h, timestamp, "MC")
+        for link in updated_eval_links:
+            self._time_server.add_time_info(link.h, timestamp, "ROS")
+            self._time_server.add_time_info(link.h, timestamp, "MC")
+        #print self_node
+        #print self._atomspace.get_incoming(self_node.h)
+        print "handle_self_pos_message_end"
 
     def _build_self_pos_node(self, client, map_handle):
         #TODO: for now because we only input self client so we define node name as "self"
@@ -194,5 +192,3 @@ class PerceptionManager:
                                      entity_node, v_x_node, v_y_node, v_z_node)
         updated_eval_links.append(velocitylink)
         return entity_node, updated_eval_links
-
-
