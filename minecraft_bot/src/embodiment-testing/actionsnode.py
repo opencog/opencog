@@ -332,7 +332,7 @@ def actionServer():
     while not rospy.is_shutdown():
         client_pos.cameraTick()
         #print "sending position coords"
-        rospy.sleep(0.03)
+        rospy.sleep(0.1)
 
 
 
