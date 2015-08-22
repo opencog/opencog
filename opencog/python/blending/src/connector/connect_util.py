@@ -16,6 +16,26 @@ def is_conflict_link(
         a, link_0, link_1,
         check_type, strength_diff_limit, confidence_above_limit
 ):
+    """Check the links if conflict or not.
+
+    Args:
+        a: An instance of AtomSpace.
+        link_0: First link to find conflict or not.
+        link_1: Second link to find conflict or not.
+        check_type: A link type to check conflict.
+        strength_diff_limit: A limit of difference between links strength value.
+        confidence_above_limit: A threshold of both links confidence value.
+        :param a: opencog.atomspace.AtomSpace
+        :param link_0: Link
+        :param link_1: Link
+        :param check_type: int
+        :param strength_diff_limit: float
+        :param confidence_above_limit: float
+    Returns:
+        If two link conflicts to each other, then returns True.
+        If not, returns False.
+        :rtype : bool
+    """
     # TODO: Currently, this method can handle
     # when the number of decided atom is only 2.
     if a[link_0.h].is_a(check_type) is False:
@@ -34,6 +54,25 @@ def find_conflict_links(
         a, duplicate_links_list,
         check_type, strength_diff_limit, confidence_above_limit
 ):
+    """Find the conflicted, non-conflicted links from
+    duplicated link tuples list.
+
+    Args:
+        a: An instance of AtomSpace.
+        duplicate_links_list: Duplicated links list.
+        check_type: A link type to check conflict.
+        strength_diff_limit: A limit of difference between links strength value.
+        confidence_above_limit: A threshold of both links confidence value.
+        :param a: opencog.atomspace.AtomSpace
+        :param duplicate_links_list: list[Link]
+        :param check_type: int
+        :param strength_diff_limit: float
+        :param confidence_above_limit: float
+    Returns:
+        conflict_links: Conflicted link tuples list.
+        non_conflict_links: Non-conflicted links list.
+        :rtype : (list[list[EqualLinkKey]], list[EqualLinkKey])
+    """
     # TODO: Currently, this method can handle
     # when the number of decided atom is only 2.
     conflict_links = []
@@ -67,6 +106,18 @@ def find_conflict_links(
 
 
 def find_duplicate_links(a, decided_atoms):
+    """Find the duplicated, non-duplicated links from decided atoms list.
+
+    Args:
+        a: An instance of AtomSpace.
+        decided_atoms: The source atoms to make new atom.
+        :param a: opencog.atomspace.AtomSpace
+        :param decided_atoms: list[Atom]
+    Returns:
+        duplicate_links: Duplicated link tuples list.
+        non_duplicate_links: Non-duplicated links list.
+        :rtype : (list[list[EqualLinkKey]], list[EqualLinkKey])
+    """
     # ex) atom_link_pairs =
     # {
     #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
@@ -116,6 +167,22 @@ def find_related_links(
         decided_atoms,
         inter_info_strength_above_limit
 ):
+    """Find the all related links from decided atoms list.
+
+    It estimates that related links are all of links in inherited nodes.
+
+    Args:
+        a: An instance of AtomSpace.
+        decided_atoms: The source atoms to make new atom.
+        inter_info_strength_above_limit: A max value of strength in TruthValue
+        during interaction information generation.
+        :param a: opencog.atomspace.AtomSpace
+        :param decided_atoms: list[Atom]
+        :param inter_info_strength_above_limit: float
+    Returns:
+        related_node_target_links: Target link tuples in related node list.
+        :rtype : list[list[EqualLinkKey]]
+    """
     # Evaluate inheritance relation,
     # and copy all link in each inheritance node.
     related_node_target_links = list()
@@ -136,11 +203,22 @@ def find_related_links(
     return related_node_target_links
 
 
-def find_inheritance_nodes(a, decided_atom):
+def find_inheritance_nodes(a, decided_atoms):
+    """Find the inheritance nodes from decided atoms list.
+
+    Args:
+        a: An instance of AtomSpace.
+        decided_atoms: The source atoms to make new atom.
+        :param a: opencog.atomspace.AtomSpace
+        :param decided_atoms: list[Atom]
+    Returns:
+        ret: Nodes inherited to decided_atoms.
+        :rtype : list[Atom]
+    """
     free_var = a.add_node(types.VariableNode, "$")
 
     inheritance_link = a.add_link(
-        types.InheritanceLink, [free_var, decided_atom]
+        types.InheritanceLink, [free_var, decided_atoms]
     )
     """
     GetLink
@@ -161,14 +239,24 @@ def find_inheritance_nodes(a, decided_atom):
     ret = inheritance_node_set.out
 
     # Delete temp links.
-    BlendConfig().execute_link_factory.clean_up(inheritance_node_set)
-    BlendConfig().execute_link_factory.clean_up(get_link)
-    BlendConfig().execute_link_factory.clean_up(inheritance_link)
-    BlendConfig().execute_link_factory.clean_up(free_var)
+    BlendConfig().exe_factory.clean_up(inheritance_node_set)
+    BlendConfig().exe_factory.clean_up(get_link)
+    BlendConfig().exe_factory.clean_up(inheritance_link)
+    BlendConfig().exe_factory.clean_up(free_var)
     return ret
 
 
 def make_conflict_link_cases(conflict_links):
+    """Make the conflict link cases(count:2^k),
+    from conflict link tuples list(count:k).
+
+    Args:
+        conflict_links: Conflicted link tuples list.
+        :param conflict_links: list[list[EqualLinkKey]]
+    Returns:
+        conflict_link_cases: All available conflicted link tuples list cases.
+        :rtype: list[EqualLinkKey]
+    """
     # TODO: Convert to return 'iterator'. Currently it returns 'list' that has
     # all case of link, makes algorithm very slow.
 
@@ -191,19 +279,28 @@ def make_conflict_link_cases(conflict_links):
 
 
 def get_inverted_index_key(key_value_pairs):
-    # ex) input =
-    # {
-    #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
-    #   <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
-    # }
-    # ex) output =
-    # {
-    #   <type=a>: [<a1>, <a2>]
-    #   <type=b>: [<a1>]
-    #   <type=c>: [<a1>]
-    #   <type=x>: [<a2>]
-    #   <type=y>: [<a2>]
-    # }
+    """Get the key of inverted index.
+
+    Input =
+    {
+      <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
+      <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
+    }
+    Output =
+    {
+      <type=a>: [<a1>, <a2>]
+      <type=b>: [<a1>]
+      <type=c>: [<a1>]
+      <type=x>: [<a2>]
+      <type=y>: [<a2>]
+
+    Args:
+        key_value_pairs: A list of key-value pairs.
+        :param key_value_pairs: dict[Handle, list[EqualLinkKey]
+    Returns:
+        inverted_index: A dict includes the key of inverted index.
+        :rtype: dict[EqualLinkKey, list[Handle]]
+    """
     inverted_index = {}
 
     all_values = []
@@ -222,19 +319,29 @@ def get_inverted_index_key(key_value_pairs):
 
 
 def get_inverted_index_value(key_value_pairs):
-    # ex) input =
-    # {
-    #   <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
-    #   <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
-    # }
-    # ex) output =
-    # {
-    #   <type=a>: [<l1, type=a>, <l4, type=a>]
-    #   <type=b>: [<l2, type=b>]
-    #   <type=c>: [<l3, type=c>]
-    #   <type=x>: [<l5, type=x>]
-    #   <type=y>: [<l6, type=y>]
-    # }
+    """Get the value of inverted index.
+
+    ex) Input =
+    {
+      <a1>: [<l1, type=a>, <l2, type=b>, <l3, type=c>]
+      <a2>: [<l4, type=a>, <l5, type=x>, <l6, type=y>]
+    }
+    ex) output =
+    {
+      <type=a>: [<l1, type=a>, <l4, type=a>]
+      <type=b>: [<l2, type=b>]
+      <type=c>: [<l3, type=c>]
+      <type=x>: [<l5, type=x>]
+      <type=y>: [<l6, type=y>]
+    }
+
+    Args:
+        key_value_pairs: A list of key-value pairs.
+        :param key_value_pairs: dict[Handle, list[EqualLinkKey]
+    Returns:
+        inverted_index: A dict includes the key of inverted index.
+        :rtype: dict[EqualLinkKey, list[EqualLinkKey]]
+    """
     inverted_index = {}
 
     all_values = []
@@ -253,6 +360,26 @@ def get_inverted_index_value(key_value_pairs):
 
 
 def get_weighted_tv(atoms):
+    """Calculate the weighted average of TruthValue of atoms list.
+
+    T1 ... Tk = TruthValue in source atoms
+    A = new TruthValue
+
+    strength of A = sA
+    confidence of A = cA
+
+    sA = revision of T1...Tk = (sT1*cT1 + ... + sTk*cTk) / (cT1 + ... + cTk)
+    cA = (cT1 + ... + cTk) / k
+
+    See: https://groups.google.com/forum/#!topic/opencog/fa5c4yE8YdU
+
+    Args:
+        atoms: A list of atom to calculate the weighted average of TruthValue.
+        :param atoms: list[Atom]
+    Returns:
+        An weighted average of TruthValue.
+        :rtype: TruthValue
+    """
     if len(atoms) < 1:
         log.info("Weighted TruthValue can't be evaluated with small size.")
         return TruthValue()
