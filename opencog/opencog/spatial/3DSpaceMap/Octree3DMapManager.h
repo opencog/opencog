@@ -28,7 +28,6 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <limits.h>
 
 #ifdef HAVE_ZMQ
 #include <lib/zmq/zmq.hpp>
@@ -42,7 +41,7 @@
 
 using namespace std;
 
-#define DOUBLE_MAX numeric_limits<double>::max()
+
 
 
 
@@ -98,6 +97,7 @@ namespace opencog
             void setAgentHeight(float _height){ mAgentHeight = _height;}
             inline unsigned getTotalDepthOfOctree() const {return mOctomapOctree->getTreeDepth();}
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
+            inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
             // Note: logOdds(P)=log(P/(1-P))
             // in octomap api it usually express probabiblity by log odds
             inline float getLogOddsOccupiedThreshold() const {return mOctomapOctree->getOccupancyThresLog();}
@@ -150,7 +150,7 @@ namespace opencog
                                     bool isAvatarEntity,
                                     const unsigned long timestamp);
             void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBlockEntityLocation(const Handle &entityNode, BlockVector newpos, 
+            void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, 
                                                unsigned long timestamp);
             // note that we didn't delete the record 
             // when calling removeNoneBlockEntity()
@@ -258,6 +258,8 @@ namespace opencog
             // to store the blockentities need to be updated the predicates
             vector<BlockEntity*> updateBlockEntityList;
             */
+
+
             /*
               Dead interface
               // Note: for non-super blockEntities only
@@ -273,8 +275,7 @@ namespace opencog
             int             mFloorHeight; // the z of the floor
             float           mAgentHeight;
             int             mTotalUnitBlockNum;
-            Handle          selfAgentEntity;
-
+            Handle          mSelfAgentEntity;
             // We keep the map for quick search position. 
             //Memory consuming: 50k blocks take about 10M RAM for one map
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
@@ -303,7 +304,7 @@ namespace opencog
             Octree3DMapManager(bool _enable_BlockEntity_Segmentation, 
                                string  _MapName,OctomapOcTree* _OctomapOctree,
                                int _FloorHeight, int _AgentHeight,
-                               int _TotalUnitBlockNum,Handle _selfAgentEntity,
+                               int _TotalUnitBlockNum,Handle _mSelfAgentEntity,
                                AtomSpace* _AtomSpace,
                                const map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                const set<Handle>& _AllNoneBlockEntities, 
