@@ -11,8 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-find_package(octomap
-)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -115,10 +113,6 @@ catkin_package(
 	message_runtime
   DEPENDS
   	system_lib
-  	octomap
-	octomap_ros
-	octomap_msgs
-	octomap_server
 )
 ###########
 ## Build ##
@@ -127,11 +121,6 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${OCTOMAP_INCLUDE_DIRS}
-)
-link_libraries(${OCTOMAP_LIBRARIES})
 ## Declare a cpp library
 # add_library(minecraft_bot
 #   src/${PROJECT_NAME}/minecraft_bot.cpp
@@ -139,10 +128,6 @@ link_libraries(${OCTOMAP_LIBRARIES})
 
 ## Declare a cpp executable
 # add_executable(minecraft_bot_node src/minecraft_bot_node.cpp)
-
-add_executable(octonode src/octomap/octonode.cc)
-target_link_libraries(octonode ${catkin_LIBRARIES})
-
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(minecraft_bot_node minecraft_bot_generate_messages_cpp)
@@ -165,6 +150,14 @@ target_link_libraries(octonode ${catkin_LIBRARIES})
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+catkin_install_python(
+	PROGRAMS
+		src/mc_vis_utils.py
+		src/mc_physics_utils.py
+	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+	)
+
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS minecraft_bot minecraft_bot_node
