@@ -33,7 +33,7 @@ class MinecraftMap(object):
         self.columns = {}        
    
 
-    def handleUnpackBulk(self, data):
+    def handle_unpack_bulk(self, data):
         
         #print "unpacking bulk"        
         skylight = data.sky_light
@@ -58,7 +58,7 @@ class MinecraftMap(object):
 
 
 
-    def handleUnpackChunk(self, data):
+    def handle_unpack_chunk(self, data):
         
         chunk_x = data.chunk_x
         chunk_z = data.chunk_z
@@ -66,12 +66,12 @@ class MinecraftMap(object):
         continuous = data.continuous
         bbuff = BoundBuffer(data.data)
         
-        if self.dimension == DIMENSION_OVERWORLD:
+        if self.dimension == DIMENSION_OVERWOLD:
             skylight = True
         else:
             skylight = False
         
-        key = (chunk_x, chunk_z)
+        key = (x_chunk, z_chunk)
         
         if key not in self.columns:
             self.columns[key] = smpmap.ChunkColumn()
@@ -82,7 +82,7 @@ class MinecraftMap(object):
         #print "light: %d, buffer:"%skylight
         #print bbuff
     
-    def handleUnpackBlock(self, data):
+    def handle_unpack_block(self, data):
         
         #becomes (chunk number, offset in chunk)
         x, rx = divmod(data.x, 16)
@@ -110,7 +110,7 @@ class MinecraftMap(object):
 
 
     # note, returns block ID and meta in the same byte (data) for consistency
-    def getBlock(self, x, y, z):
+    def get_block(self, x, y, z):
         
         x, y, z = int(x), int(y), int(z)
         x, rx = divmod(x, 16)
@@ -131,7 +131,7 @@ class MinecraftMap(object):
         return data >> 4, data&0x0F
 
 
-    def getLight(self, x, y, z):
+    def get_light(self, x, y, z):
         
         x, rx = divmod(x, 16)
         y, ry = divmod(y, 16)
@@ -150,7 +150,7 @@ class MinecraftMap(object):
     
     
     # y is just a dummy variable, for consistency of the API
-    def getBiome(self, x, y, z):
+    def get_biome(self, x, y, z):
         
         x, rx = divmod(x, 16)
         z, rz = divmod(z, 16)
@@ -161,7 +161,7 @@ class MinecraftMap(object):
         return self.columns[(x,z)].biome.get(rx, rz)
 
 
-    def setLight(self, x, y, z, light_block = None, light_sky = None):
+    def set_light(self, x, y, z, light_block = None, light_sky = None):
         
         x, rx = divmod(x, 16)
         y, ry = divmod(y, 16)
@@ -189,7 +189,7 @@ class MinecraftMap(object):
             chunk.light_sky.set(rx, ry, rz, light_sky&0xF)
 
 
-    def setBiome(self, x, z, data):
+    def set_biome(self, x, z, data):
         
         x, rx = divmod(x, 16)
         z, rz = divmod(z, 16)
@@ -204,23 +204,23 @@ class MinecraftMap(object):
 
 
 # the service
-def getBlock(req):
+def get_block(req):
 
-    start = time.time()
+    #start = time.time()
 
     msg = map_block_msg()
     msg.x = req.x
     msg.y = req.y
     msg.z = req.z
     
-    msg.blockid, msg.metadata = world.getBlock(msg.x, msg.y, msg.z)
-    print msg
+    msg.blockid, msg.metadata = world.get_block(msg.x, msg.y, msg.z)
+    #print msg
 
-    end = time.time()
-    print"call to getBlock(): %f"%(end-start)
+    #end = time.time()
+    #print"call to getBlock(): %f"%(end-start)
     return msg
 
-def getBlockMulti(req):
+def get_block_multi(req):
 
     blocks = list()
     for req_msg in req.coords:
@@ -228,7 +228,7 @@ def getBlockMulti(req):
         msg.x = req_msg.x
         msg.y = req_msg.y
         msg.z = req_msg.z
-        msg.blockid, msg.metadata = world.getBlock(msg.x, msg.y, msg.z)
+        msg.blockid, msg.metadata = world.get_block(msg.x, msg.y, msg.z)
         #print msg
         blocks.append(msg)
 
@@ -242,14 +242,28 @@ if __name__ == "__main__":
 
     rospy.init_node('minecraft_map_server')
 
-    rospy.Subscriber('chunk_data', chunk_data_msg, world.handleUnpackChunk)
-    rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handleUnpackBulk)
-    rospy.Subscriber('block_data', block_data_msg, world.handleUnpackBlock)
+    rospy.Subscriber('chunk_data', chunk_data_msg, world.handle_unpack_chunk)
+    rospy.Subscriber('chunk_bulk', chunk_bulk_msg, world.handle_unpack_bulk)
+    rospy.Subscriber('block_data', block_data_msg, world.handle_unpack_block)
 
-    srv_block = rospy.Service('get_block_data', get_block_srv, getBlock)
-    srv_block_multi = rospy.Service('get_block_multi', get_block_multi_srv, getBlockMulti)
+    srv_block = rospy.Service('get_block_data', get_block_srv, get_block)
+    srv_block_multi = rospy.Service('get_block_multi', get_block_multi_srv, get_block_multi)
     #srv_light = rospy.Service('get_light_data', light_data_msg, world.getLight)
     #srv_biome = rospy.Service('get_biome_data', biome_data_msg, world.getBiome)
 
     rospy.spin()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
