@@ -13,7 +13,7 @@ The catkin (ROS) package for running the Minecraft bot
 
 4. Start embodiment-testing/visnode.py. It will start a ROS node to calculate what's visible for the bot and publish ROS message for Opencog.
 
-5. Start embodiment-testing/mapnode3.py. It will start a ROS node to receive primary blocks messages, save them and provide block information service for visnode.py.
+5. Start embodiment-testing/mapnode.py. It will start a ROS node to receive primary blocks messages, save them and provide block information service for visnode.py.
 
 6. Start any of the testbot.py files to initialize the Spock bot and test custom plugins. It will start Spock and a ROS node (SpockControl.py). This node will only be responsible for receiving Minecraft packets and sending raw environment data to the map node.
 
