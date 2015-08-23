@@ -2,7 +2,7 @@
 
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
-import visibility as vis
+import mc_vis_utils as vis
 from minecraft_bot.srv import visible_blocks_srv, get_block_multi_srv
 from minecraft_bot.msg import map_block_msg, position_msg, map_block_multi_msg
 

@@ -16,8 +16,8 @@ import rospy
 from minecraft_bot.msg import position_msg, movement_msg
 from minecraft_bot.srv import look_srv, rel_move_srv, abs_move_srv
 
-import visibility as vis
-import mcphysics as phy
+import mc_vis_utils as vis
+import mc_physics_utils as phy
 
 
 class ClientMover():
