@@ -20,7 +20,7 @@ Now(20150823) ROS indigo distro is OK and recommended for Minecraft embodiment. 
 
 Install instruction of ROS indigo is [here](http://wiki.ros.org/indigo/Installation/Ubuntu).
 
-After installing ROS you have to create a workspace ([tutorial](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)) and install the minecraft_bot package as the instruction in [official tutorial](http://wiki.ros.org/catkin/Tutorials/CreatingPackage) and [minecraft_bot/README](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot).
+After installing ROS you have to create a workspace ([tutorial](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)) and install the minecraft_bot package by the instruction in [official tutorial](http://wiki.ros.org/catkin/Tutorials/CreatingPackage) and [minecraft_bot/README](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot).
 
 ####Octomap http://wiki.ros.org/octomap
 
@@ -67,17 +67,19 @@ A python API to connect with Minecraft server.
 
 1. add the following PYTHONPATH:
 
-    /usr/local/share/opencog/python
-    /your_opencog/build/opencog/cython/
-    /your_opencog-to-minecraft/
+    `/usr/local/share/opencog/python`
+
+    `/your_opencog/build/opencog/cython/`
+
+    `/your_opencog-to-minecraft/`
 
    and setup the ROS environment variables:
 
-    source /where_you_create_catkin_ws/devel/setup.bash
+    `source /where_you_create_catkin_ws/devel/setup.bash`
 
 2. Start roscore and Minecraft Server.
 
-3. Follow instructions in minecraft_bot to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
+3. Follow instructions in [minecraft_bot](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot) to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
 
 4. Start the opencog_initializer.py.
 
