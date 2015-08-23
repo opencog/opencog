@@ -257,7 +257,7 @@ def action_server():
     # continue to send visible blocks until shutdown
     while not rospy.is_shutdown():
         client_pos.camera_tick()
-        rospy.sleep(0.03)
+        rospy.sleep(0.1)
 
 
 

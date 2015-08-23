@@ -66,12 +66,12 @@ class MinecraftMap(object):
         continuous = data.continuous
         bbuff = BoundBuffer(data.data)
         
-        if self.dimension == DIMENSION_OVERWOLD:
+        if self.dimension == DIMENSION_OVERWORLD:
             skylight = True
         else:
             skylight = False
         
-        key = (x_chunk, z_chunk)
+        key = (chunk_x, chunk_z)
         
         if key not in self.columns:
             self.columns[key] = smpmap.ChunkColumn()
