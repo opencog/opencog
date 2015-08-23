@@ -1,8 +1,9 @@
 from opencog.atomspace import types, get_refreshed_types
 from opencog.bindlink import bindlink
+from opencog.type_constructors import *
 types=get_refreshed_types()
 from opencog.atomspace import Atom
-#helper function for adding predicate
+
 def add_predicate(atomspace,predicatestr,*atoms):
     if len(atoms) == 1:
         target_atom = atoms[0]
@@ -21,7 +22,7 @@ def add_location(atomspace,targetnode,maphandle,pos):
             atomspace.add_node(types.NumberNode,str(pos[0])),
             atomspace.add_node(types.NumberNode,str(pos[1])),
             atomspace.add_node(types.NumberNode,str(pos[2]))])])
-#TODO
+
 def get_predicate(atomspace, predicate_name, target_node, num_of_val):
     if num_of_val == 1:
         var = VariableNode("$x")
@@ -54,8 +55,7 @@ def get_predicate(atomspace, predicate_name, target_node, num_of_val):
             return result_set_out
     except IndexError, e:
         print "get predicate err: get no result %s" % e
-        return None
-        
-
+        return None        
+#TODO
 def get_most_recent_pred_val(atomspace, time_server, predicate_name, target_node, num_of_val):
     return [0]*num_of_val
