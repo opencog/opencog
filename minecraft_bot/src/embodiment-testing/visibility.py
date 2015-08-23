@@ -29,7 +29,7 @@ R_YAW   = 60
 
 block_mats = {}
 
-def initBlockMats():
+def init_block_mats():
 
     # this is not a comprehensive list, but includes most common solid blocks
     # probably a better way to do this
@@ -55,7 +55,7 @@ def initBlockMats():
         block_mats[blockid] = True
 
 
-def isSolid(blockid):
+def is_solid(blockid):
     
     #print blockid
     if block_mats[blockid] == True:
@@ -64,7 +64,7 @@ def isSolid(blockid):
     return False
 
    
-def calcRayStep(pitch, yaw, dist):
+def calc_ray_step(pitch, yaw, dist):
     
     pt = radians(pitch)
     yw = radians(yaw)
@@ -81,7 +81,7 @@ def calcRayStep(pitch, yaw, dist):
     return dx, dy, dz
 
 
-def createVec3Msg(coords, step, num_steps):
+def create_vec3_msg(coords, step, num_steps):
     msg = vec3_msg()
     
 
@@ -94,20 +94,20 @@ def createVec3Msg(coords, step, num_steps):
     return msg
 
 
-def getCoordinatesInRange(x, y, z, pitch, yaw):
+def get_coordinates_in_range(x, y, z, pitch, yaw):
     
     pit_range = np.arange(pitch - R_PITCH, pitch + R_PITCH + D_PITCH, D_PITCH)
     yaw_range = np.arange(yaw - R_YAW, yaw + R_YAW + D_YAW, D_YAW)
     num_steps = np.arange(0, int(MAX_DIST/D_DIST) + D_DIST)
     
     # ROS messages only support 1-D arrays...
-    ray_steps = [calcRayStep(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
+    ray_steps = [calc_ray_step(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
     
-    all_coords = [createVec3Msg((x,y,z), step, num) for step in ray_steps for num in num_steps]
+    all_coords = [create_vec3_msg((x,y,z), step, num) for step in ray_steps for num in num_steps]
     return all_coords
 
 
-def getVisibleBlocks(blocks):
+def get_visible_blocks(blocks):
     
     #start = time.time()
     vis_blocks = {}
@@ -137,12 +137,12 @@ def getVisibleBlocks(blocks):
                     #print "new block. adding to list"
                     vis_blocks[xyz] = block
                     
-                    if isSolid(bid):
+                    if is_solid(bid):
                         #print "block is solid, breaking out"
                         break
 
                 
-                elif isSolid(vis_blocks[xyz].blockid):
+                elif is_solid(vis_blocks[xyz].blockid):
                     #print "bid: %d"%bid
                     #print "found block: %d already at these coordinates"%vis_blocks[xyz].blockid
                     break
