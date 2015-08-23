@@ -158,7 +158,7 @@ def getVisibleBlocks(blocks):
     vis_blocks_list = vis_blocks.values()
 
     #end = time.time()
-    print "total: %f"%(end-start)
+    #print "total: %f"%(end-start)
     
     return vis_blocks_list
 

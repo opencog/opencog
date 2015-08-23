@@ -76,6 +76,7 @@ add_message_files(
    FILES
    look_srv.srv
    rel_move_srv.srv
+   abs_move_srv.srv
    get_block_srv.srv
    get_block_multi_srv.srv
    visible_blocks_srv.srv
