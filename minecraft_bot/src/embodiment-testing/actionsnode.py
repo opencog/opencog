@@ -100,7 +100,7 @@ class ClientMover():
             if self.inRange(self.yaw, yaw) and self.inRange(self.pitch, pitch):
                 return True
             
-            frames = phy.getLookFrames(self.pos_to_dict(), pitch, yaw)
+            frames = phy.get_look_frames(self.pos_to_dict(), pitch, yaw)
 
             for frame in frames:
                 msg = movement_msg()
@@ -142,7 +142,7 @@ class ClientMover():
                 while desired_yaw < -180:
                     desired_yaw += 360
             
-            frames = phy.getLookFrames(pos, desired_pitch, desired_yaw)
+            frames = phy.get_look_frames(pos, desired_pitch, desired_yaw)
             
             for frame in frames:
                 msg = movement_msg()
@@ -167,7 +167,7 @@ class ClientMover():
         pos = self.pos_to_dict()
         direction = self.get_desired_yaw(pos['x'], pos['z'], x, z)
         dist = sqrt( (x - pos['x'])**2 + (z - pos['z'])**2 )
-        frames = phy.getMovementFrames(pos, direction, dist, speed, jump)
+        frames = phy.get_movement_frames(pos, direction, dist, speed, jump)
         
         for frame in frames:
             msg = movement_msg()
@@ -195,7 +195,7 @@ class ClientMover():
             while desired_yaw < -180:
                 desired_yaw += 360
         
-        frames = phy.getMovementFrames(pos, direction, dist, speed, jump)
+        frames = phy.get_movement_frames(pos, direction, dist, speed, jump)
         
         #print "dx,dy,dz", dx, dy, dz
         for frame in frames:

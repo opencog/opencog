@@ -2,8 +2,8 @@
 created by Bradley Sheneman
 
 uses constants defined by SpockBot physics.py
-changed the walk, sprint, jump functions to a single getMovementFrames() function for code clarity
-added getLookFrames() function to allow for changing head position without moving
+changed the walk, sprint, jump functions to a single get_movement_frames() function for code clarity
+added get_look_frames() function to allow for changing head position without moving
 
 more importantly, it allows for single movements that are composites of
 different motions (e.g. jump while walking northeast)
@@ -48,13 +48,13 @@ import visibility as vis
 # returns as many frames as necessary to go the requested distance
 # in a straight line, and at the requested speed
 # frames frequency determined by the frequency of 'action_tick' event in Spock
-def getMovementFrames(pos, direction, dist, speed, jump):
+def get_movement_frames(pos, direction, dist, speed, jump):
 
     d_dist = motions[speed]
     frames = []
     traveled = 0.
     temp_pos = copy.copy(pos)
-    dx, dy, dz = vis.calcRayStep(0, direction, d_dist)
+    dx, dy, dz = vis.calc_ray_step(0, direction, d_dist)
 
     while traveled < dist:
         frame = {}
@@ -62,15 +62,11 @@ def getMovementFrames(pos, direction, dist, speed, jump):
         # in this case, direction should be a correct yaw in 'Minecraft terms'
         temp_pos['x'] += dx
         temp_pos['z'] += dz
-        #frame['x'] = temp_pos['x']
-        #frame['z'] = temp_pos['z']
-
         if jump:
             if temp_pos['on_ground']:
                 temp_pos['on_ground'] = False
                 temp_pos['y'] += 1.35
             else:
-                #temp_pos['on_ground'] = True
                 if temp_pos['y'] <= pos['y']:
                     temp_pos['on_ground'] = True
                     jump = False
@@ -78,7 +74,6 @@ def getMovementFrames(pos, direction, dist, speed, jump):
                     temp_pos['y'] -= 0.08
                     if temp_pos['y'] < pos['y']:
                         temp_pos['y'] = pos['y']
-            #jump = False
         else:
             temp_pos['on_ground'] = pos['on_ground']
             temp_pos['y'] = pos['y']
@@ -88,52 +83,10 @@ def getMovementFrames(pos, direction, dist, speed, jump):
         traveled += d_dist
 
     return frames
+   traveled += d_dist
 
-"""
-def getMovementFramesInXYZ(cur_pos, dest_pos, speed, jump):
 
-    d_dist = motions[speed]
-    frames = []
-    traveled = 0.
-    temp_pos = copy.copy(cur_pos)
-    dist = math.sqrt((dest_pos['x'] - cur_pos['x'])**2 + 
-                     (dest_pos['y'] - cur_pos['y'])**2 +
-                     (dest_pos['z'] - cur_pos['z'])**2 )
-    dx = d_dist * float(dest_pos['x'] - cur_pos['x'])/dist
-    dy = d_dist * float(dest_pos['y'] - cur_pos['y'])/dist
-    dz = d_dist * float(dest_pos['z'] - cur_pos['z'])/dist
-
-    while traveled < dist:
-        frame = {}
-        temp_pos['x'] += dx
-        temp_pos['z'] += dz
-        frame['x'] = temp_pos['x']
-        frame['z'] = temp_pos['z']
-        if jump:
-            if temp_pos['on_ground']:
-                frame['on_ground'] = False
-                temp_pos['y'] += PLAYER_JMP_ACC
-                frame['y'] = temp_pos['y']
-            else:
-                frame['on_ground'] = True
-                frame['y'] = temp_pos['y']
-            jump = False
-        else:
-            frame['on_ground'] = temp_pos['on_ground']
-            frame['y'] = temp_pos['y']
-
-        frame['pitch'] = temp_pos['pitch']
-        frame['yaw'] = temp_pos['yaw']
-        
-        frames.append(frame)
-        traveled += d_dist
-        
-
-    return frames
-"""
-
-# currently only one frame returned, may need higher resolution
-def getLookFrames(pos, pitch, yaw):
+def get_look_frames(pos, pitch, yaw):
     
     frames = []
     
@@ -146,7 +99,4 @@ def getLookFrames(pos, pitch, yaw):
     frames.append(frame)
 
     return frames
-
-
-
 
