@@ -1,5 +1,5 @@
 uint16 blockid
-uint16 meta
+uint16 metadata
 uint8 blocklight
 uint8 skylight
 int32 x
