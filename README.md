@@ -6,11 +6,11 @@ For now this repository are mainly made and managed by [LucidBlue](https://githu
 
 ##prerequisite##
 
-To start this, you should have installed:
-
 ####ROS http://www.ros.org/
 
-After installing ROS you have to create a workspace and move the repo into the new workspace.
+Now(20150823) ROS indigo distro is OK and recommended for Minecraft embodiment. Not sure if other distro will work or not.
+Install instruction of ROS indigo is [here](http://wiki.ros.org/indigo/Installation/Ubuntu).
+After installing ROS you have to create a workspace ([tutorial](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) and install the minecraft_bot package as the instruction in [minecraft_bot/README](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot).
 
 ####Octomap http://wiki.ros.org/octomap
 
@@ -22,21 +22,19 @@ In ubuntu you can directly install Octomap by:
 
 ####Opencog https://github.com/opencog/opencog
 
-Before installing Opencog you have to install
+Before installing Opencog you have to install atomspace and cogutils.
 
 ####atomspace https://github.com/opencog/atomspace
 
-and
-
 ####cogutils https://github.com/opencog/cogutils
-
-To run the MineCraft server:
 
 ####Minecraft server(official) https://minecraft.net/download
 
-A python API to connect with Minecraft server, Spock:
+Install instuction of Minecraft server is [here](http://minecraft.gamepedia.com/Tutorials/Setting_up_a_server)
 
 ####Spock https://github.com/SpockBotMC/SpockBot
+
+A python API to connect with Minecraft server.
 
 Besides the above package, There are some code in Opencog side has not been pulled into Opencog master repository. So you have to add all the files in opencog/ manually.
 
