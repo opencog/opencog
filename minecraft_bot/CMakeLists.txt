@@ -165,10 +165,7 @@ target_link_libraries(octonode ${catkin_LIBRARIES})
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
-catkin_install_python(
-	PROGRAMS src/rosutils.py
-	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-	)
+
 ## Mark executables and/or libraries for installation
 # install(TARGETS minecraft_bot minecraft_bot_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
