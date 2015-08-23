@@ -1,0 +1,5 @@
+float32 x
+float32 z
+bool jump
+---
+bool state
