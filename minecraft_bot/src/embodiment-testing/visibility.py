@@ -100,10 +100,6 @@ def getCoordinatesInRange(x, y, z, pitch, yaw):
     yaw_range = np.arange(yaw - R_YAW, yaw + R_YAW + D_YAW, D_YAW)
     num_steps = np.arange(0, int(MAX_DIST/D_DIST) + D_DIST)
     
-    #print pit_range
-    #print yaw_range
-    #print num_steps
-    
     # ROS messages only support 1-D arrays...
     ray_steps = [calcRayStep(pt, yw, D_DIST) for pt in pit_range for yw in yaw_range]
     
@@ -119,10 +115,6 @@ def getVisibleBlocks(blocks):
     p_jump = int((2*R_PITCH)/D_PITCH) + 1
     y_jump = int((2*R_YAW)/D_YAW) + 1
     d_jump = int((MAX_DIST)/D_DIST) + 1
-   
-    #print p_jump
-    #print y_jump
-    #print d_jump
 
     blocks3D = np.reshape(np.array(blocks), (p_jump, y_jump, d_jump))
     
@@ -161,25 +153,5 @@ def getVisibleBlocks(blocks):
     #print "total: %f"%(end-start)
     
     return vis_blocks_list
-
-
-"""
-# client waits for block data on request
-def getBlockData(coords):
-
-    rospy.wait_for_service('get_block_data')
-
-    try:
-        x = coords[0]
-        y = coords[1]
-        z = coords[2]
-
-        getBlockFromSrv = rospy.ServiceProxy('get_block_data', get_block_srv)
-        response = getBlockFromSrv(x, y, z)
-        return response.block
-    
-    except rospy.ServiceException, e:
-        print "service call failed: %s"%e
-"""
 
 
