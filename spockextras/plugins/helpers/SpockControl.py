@@ -11,7 +11,6 @@ currently the ROS message is passed along unmodified. this may need to change la
 
 import roslib; roslib.load_manifest('minecraft_bot')
 import rospy
-import rosutils
 from minecraft_bot.msg import movement_msg, place_block_msg, mine_block_msg
 from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, block_data_msg
 

@@ -10,18 +10,13 @@ a frame-by-frame action.
 
 
 """
-from spock.utils import pl_announce
-from spock.mcp import mcdata
-from spock.utils import Vec3
-# from spockextras.plugins.actionutils import Vec5
-
 import math
 import Queue
-
-
 import logging
 logger = logging.getLogger('spock')
 
+from spock.utils import pl_announce
+from spock.mcp import mcdata
 
 # receives movement commands from ROS and sends update of current
 # position of client every 'client_tick'
