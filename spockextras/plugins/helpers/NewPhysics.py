@@ -59,9 +59,9 @@ motions = { 1: PLAYER_WLK_ACC,
 PLAYER_JMP_ACC    = 0.45
 
 import math
-from spock.utils import pl_announce
 from spock.mcmap import mapdata
-from spock.utils import BoundingBox, Vec3
+from spock.utils import pl_announce, BoundingBox
+from spock.vector import Vector3
 
 import logging
 logger = logging.getLogger('spock')
@@ -87,14 +87,15 @@ class NewPhysicsCore:
                 self.pos.on_ground = False
                 y = PLAYER_JMP_ACC
         
-        self.vec.add_vector(x=x, y=y, z=z)
+        #self.vec.add_vector(x=x, y=y, z=z)
+        self.vec += Vector3(x,y,z)
 
 
 
 @pl_announce('NewPhysics')
 class NewPhysicsPlugin:
 	def __init__(self, ploader, settings):
-		self.vec = Vec3(0.0, 0.0, 0.0)
+		self.vec = Vector3(0.0, 0.0, 0.0)
 		self.playerbb = BoundingBox(0.8, 1.8)
 		self.world = ploader.requires('World')
 		self.event = ploader.requires('Event')
@@ -111,7 +112,7 @@ class NewPhysicsPlugin:
 
 	
         def check_collision(self):
-		cb = Vec3(math.floor(self.pos.x), math.floor(self.pos.y), math.floor(self.pos.z))
+		cb = Vector3(math.floor(self.pos.x), math.floor(self.pos.y), math.floor(self.pos.z))
 		if self.block_collision(cb, y=2): #we check +2 because above my head
 			self.vec.y = 0
 		if self.block_collision(cb, y=-1): #we check below feet
@@ -120,7 +121,8 @@ class NewPhysicsPlugin:
 			self.pos.y = cb.y
 		else:
 			self.pos.on_ground = False
-			self.vec.add_vector(y = -PLAYER_ENTITY_GAV)
+			#self.vec.add_vector(y = -PLAYER_ENTITY_GAV)
+                        self.vec += Vector3(0, -PLAYER_ENTITY_GAV, 0)
 			self.apply_vertical_drag()
 		#feet or head collide with x
 		if self.block_collision(cb, x=1) or self.block_collision(cb, x=-1) or self.block_collision(cb, y=1, x=1) or self.block_collision(cb, y=1, x=-1):
@@ -141,11 +143,11 @@ class NewPhysicsPlugin:
 		#possibly we want to use the centers of blocks as the starting points for bounding boxes instead of 0,0,0
 		#this might make thinks easier when we get to more complex shapes that are in the center of a block aka fences but more complicated for the player
 		#uncenter the player position and bump it up a little down to prevent colliding in the floor
-		pos1 = Vec3(self.pos.x-self.playerbb.w/2, self.pos.y-0.2, self.pos.z-self.playerbb.d/2)
+		pos1 = Vector3(self.pos.x-self.playerbb.w/2, self.pos.y-0.2, self.pos.z-self.playerbb.d/2)
 		bb1 = self.playerbb
 		bb2 = block.bounding_box
 		if bb2 != None:
-			pos2 = Vec3(cb.x+x+bb2.x, cb.y+y+bb2.y, cb.z+z+bb2.z)
+			pos2 = Vector3(cb.x+x+bb2.x, cb.y+y+bb2.y, cb.z+z+bb2.z)
 			if ((pos1.x + bb1.w) >= (pos2.x) and (pos1.x) <= (pos2.x + bb2.w)) and \
 				((pos1.y + bb1.h) >= (pos2.y) and (pos1.y) <= (pos2.y + bb2.h)) and \
 				((pos1.z + bb1.d) >= (pos2.z) and (pos1.z) <= (pos2.z + bb2.d)):
