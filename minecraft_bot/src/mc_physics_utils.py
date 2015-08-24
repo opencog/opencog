@@ -43,7 +43,7 @@ PLAYER_JMP_ACC    = 0.45
 
 import math
 import copy
-import visibility as vis
+import mc_vis_utils as vis
 
 # returns as many frames as necessary to go the requested distance
 # in a straight line, and at the requested speed
@@ -83,7 +83,6 @@ def get_movement_frames(pos, direction, dist, speed, jump):
         traveled += d_dist
 
     return frames
-   traveled += d_dist
 
 
 def get_look_frames(pos, pitch, yaw):

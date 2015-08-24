@@ -31,7 +31,7 @@ def handle_get_visible_blocks(req):
 
 def visible_blocks_node():
 
-    vis.initBlockMats()
+    vis.init_block_mats()
     
     rospy.init_node('visibility_node')
     rospy.Subscriber('camera_position_data', position_msg, handle_get_visible_blocks)
