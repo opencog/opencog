@@ -65,6 +65,8 @@ A python API to connect with Minecraft server.
 
 ##Step to run##
 
+It's recommended to use `tmux or `screen to run multiple ROS nodes in multiple terminal if you use Opencog docker container.
+
 1. add the following PYTHONPATH:
 
     `/usr/local/share/opencog/python`
@@ -73,11 +75,12 @@ A python API to connect with Minecraft server.
 
     `/your_opencog-to-minecraft/`
 
-   and setup the ROS environment variables:
+   and setup the ROS environment:
 
+    `roscore &`
     `source /where_you_create_catkin_ws/devel/setup.bash`
 
-2. Start roscore and Minecraft Server.
+2. Start Minecraft Server.
 
 3. Follow instructions in [minecraft_bot](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot) to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
 
