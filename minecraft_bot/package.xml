@@ -43,23 +43,12 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>octomap</build_depend>
-  <build_depend>octomap_ros</build_depend>
-  <build_depend>octomap_msgs</build_depend>
-  <build_depend>octomap_server</build_depend>
-  <build_depend>sensor_msgs</build_depend>
  
 
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>octomap</run_depend>
-  <run_depend>octomap_ros</run_depend>
-  <run_depend>octomap_msgs</run_depend>
-  <run_depend>octomap_server</run_depend>
-  <run_depend>sensor_msgs</run_depend>
- 
+  <run_depend>message_runtime</run_depend> 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -109,7 +109,6 @@ catkin_package(
   	roscpp
 	rospy
 	std_msgs
-	sensor_msgs
 	message_runtime
   DEPENDS
   	system_lib
