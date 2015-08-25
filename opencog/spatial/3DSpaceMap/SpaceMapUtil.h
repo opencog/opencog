@@ -184,15 +184,6 @@ namespace opencog
          */
 
 	string spatialRelationToString(SPATIAL_RELATION relation);
-
-        /**
-         * BlockEntity utilities
-         * Because BlockEntity class is not used now (but may be done in the future)
-         * So keep them here and comment out them
-         */
-
-        //	Handle getBlockEntity(const Handle& blockHandle);
-        //	HandleSeq getComposedBlocks(const Handle& blockEntityHandle);
     }
 }
 
