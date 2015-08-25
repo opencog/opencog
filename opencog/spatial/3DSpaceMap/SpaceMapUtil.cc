@@ -70,7 +70,7 @@ namespace opencog
             return result;
         }
 
-        BlockVector getNearFreePointAtDistance(const Octree3DMapManager& spaceMap,
+        BlockVector getNearFreePointAtDistance(const OctomapOcTree& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
@@ -129,7 +129,7 @@ namespace opencog
             return BlockVector::ZERO;
         }
 
-        double distanceBetween(const Octree3DMapManager& spaceMap,
+        double distanceBetween(const OctomapOcTree& spaceMap,
                                const Handle& objectA,
                                const Handle& objectB)
         {
@@ -158,14 +158,14 @@ namespace opencog
             }
         }
 
-        double distanceBetween(const Octree3DMapManager& spaceMap,
+        double distanceBetween(const OctomapOcTree& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB)
         {
             return (posA - posB);
         }
 
-        double distanceBetween(const Octree3DMapManager& spaceMap,
+        double distanceBetween(const OctomapOcTree& spaceMap,
                                const Handle& objectA,
                                const BlockVector& posB)
         {
@@ -206,7 +206,7 @@ namespace opencog
 
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const Octree3DMapManager& spaceMap,
+                                      const OctomapOcTree& spaceMap,
                                       const Handle& entity)
         {
             BlockVector nearLeftPos = spaceMap.getLastAppearedLocation(entity);
@@ -220,7 +220,7 @@ namespace opencog
         }
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const Octree3DMapManager& spaceMap,
+                                                      const OctomapOcTree& spaceMap,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,

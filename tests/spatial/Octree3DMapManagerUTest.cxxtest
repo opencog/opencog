@@ -6,8 +6,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
-#include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 #include <opencog/util/Logger.h>
@@ -22,7 +21,7 @@ class Octree3DMapManagerUTest : public CxxTest::TestSuite
 { 
 
 public:
-    Octree3DMapManager* testMap;
+    OctomapOcTree* testMap;
     AtomSpace as;
 
     void setUp()
@@ -31,8 +30,8 @@ public:
         unsigned resolution = 1;
         int floorheight = -255;
         float agentheight = 1.6;
-        testMap = new Octree3DMapManager(&as, testMapName,
-                                         resolution, floorheight, agentheight);
+        testMap = new OctomapOcTree(&as, testMapName,
+                                    resolution, floorheight, agentheight);
     }
     void tearDown()
     {

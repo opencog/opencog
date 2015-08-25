@@ -692,12 +692,13 @@ Handle SpaceServer::mapFromString(const std::string& stringMap)
     return Handle::UNDEFINED;
 
 }
-
+/*
 void SpaceServer::markCurMapPerceptedForFirstTime()
 {
     if (curMap)
         curMap->hasPerceptedMoreThanOneTimes = true;
 }
+*/
 /*
 void SpaceServer::findAllBlockEntitiesOnTheMap(Handle spaceMapHandle)
 {

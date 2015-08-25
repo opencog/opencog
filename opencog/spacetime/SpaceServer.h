@@ -48,7 +48,7 @@
 #include <opencog/atomspace/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/BlockEntity.h>
 
 #include "SpaceServerContainer.h"
@@ -82,7 +82,7 @@ class SpaceServer
 public:
 
     typedef spatial::BlockVector SpaceMapPoint;
-    typedef spatial::Octree3DMapManager SpaceMap;
+    typedef spatial::OctomapOcTree SpaceMap;
     typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
 
     explicit SpaceServer(AtomSpace&);
@@ -203,7 +203,7 @@ public:
     SpaceServer& operator=(const SpaceServer&)=delete;
     SpaceServer(const SpaceServer&)=delete;
 
-    void markCurMapPerceptedForFirstTime();
+    //void markCurMapPerceptedForFirstTime();
 
 	//
 	// Comment on 20150716 by Yi-Shan,

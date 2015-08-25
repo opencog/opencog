@@ -3,7 +3,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/spatial/3DSpaceMap/OctomapOctree.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/util/Logger.h>
 
@@ -11,7 +11,7 @@ using namespace octomap;
 using namespace opencog;
 using namespace opencog::spatial;
 
-class OctomapOctreeUTest : public CxxTest::TestSuite
+class OctomapOcTreeUTest : public CxxTest::TestSuite
 {
 	
 public:
@@ -21,7 +21,7 @@ public:
 	
 	void setUp()
 	{
-		testOctree= new OctomapOcTree(1);
+            testOctree = new OctomapOcTree(&as,"",1,0,2);
 	}
 	void tearDown()
 	{

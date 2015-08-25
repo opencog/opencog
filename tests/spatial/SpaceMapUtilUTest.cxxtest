@@ -6,7 +6,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/util/Logger.h>
@@ -48,7 +48,7 @@ public:
     void testGetBoundingBox_CommonUseCase_GetCorrectBox()
     {
         AtomSpace as;
-        Octree3DMapManager spaceMap(&as,"testmap",1,-255,1);
+        OctomapOcTree spaceMap(&as,"testmap",1,-255,1);
         Handle entity = as.add_node(ENTITY_NODE,"block1");
         //prepare entity location
         BlockVector entityPos(12,13,14);

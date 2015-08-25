@@ -39,7 +39,7 @@ ADD_LIBRARY(SpaceMap SHARED
   #3DSpaceMap/BlockEntity.cc
   3DSpaceMap/StructGraph.cc
   3DSpaceMap/Pathfinder3D.cc
-  3DSpaceMap/OctomapOctree.cc
+  3DSpaceMap/OctomapOcTree.cc
 
 #  MapExplorerServer.cc
 )
@@ -181,7 +181,7 @@ INSTALL (FILES
 #  3DSpaceMap/Entity3D.h
 #  3DSpaceMap/BlockEntity.h
   3DSpaceMap/Pathfinder3D.h
-  3DSpaceMap/OctomapOctree.h
+  3DSpaceMap/OctomapOcTree.h
   DESTINATION "include/${PROJECT_NAME}/spatial/3DSpaceMap"
 )
 

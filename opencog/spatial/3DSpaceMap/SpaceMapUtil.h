@@ -5,7 +5,7 @@
 #include <set>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
-#include "Octree3DMapManager.h"
+#include "OctomapOcTree.h"
 #include "Block3DMapUtil.h"
 
 using namespace std;
@@ -56,7 +56,7 @@ namespace opencog
          *        which means the point should not be on the sky
 	 */
 
-	BlockVector getNearFreePointAtDistance(const Octree3DMapManager& spaceMap,
+	BlockVector getNearFreePointAtDistance(const OctomapOcTree& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
@@ -73,13 +73,13 @@ namespace opencog
          *       DOUBLE_MAX may make user confused..
 	 */
 
-	double distanceBetween(const Octree3DMapManager& spaceMap,
+	double distanceBetween(const OctomapOcTree& spaceMap,
                                const Handle& objectA,
                                const Handle& objectB);
-	double distanceBetween(const Octree3DMapManager& spaceMap,
+	double distanceBetween(const OctomapOcTree& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB);
-	double distanceBetween(const Octree3DMapManager& spaceMap,
+	double distanceBetween(const OctomapOcTree& spaceMap,
                                const Handle& objectA,
                                const BlockVector& posB);
 
@@ -115,7 +115,7 @@ namespace opencog
 	 */
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const Octree3DMapManager& spaceMap,
+                                      const OctomapOcTree& spaceMap,
                                       const Handle& entity);
         /**
          * spatial relation enumeration for expressing state of relation
@@ -167,7 +167,7 @@ namespace opencog
 	 */
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const Octree3DMapManager& spaceMap,
+                                                      const OctomapOcTree& spaceMap,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC = Handle::UNDEFINED,

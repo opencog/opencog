@@ -25,7 +25,7 @@
 #define _SPATIAL_PATHFINDER3D_H
 
 #include "Block3DMapUtil.h"
-#include "Octree3DMapManager.h"
+#include "OctomapOcTree.h"
 #include <vector>
 
 using namespace std;
@@ -37,17 +37,17 @@ namespace opencog
 
     namespace spatial
     {
-        class Octree3DMapManager;
+        class OctomapOcTree;
 
         class Pathfinder3D
         {
         public:
             // When getNearestPos is true,return the nearestPos as well, which would possibably useful when it cannot find a path,at least it find the nearest location to the target;
             // The bestPos is calculated by the A* heuristics which consider the cost of moving and the distance to the target, heuristic = (target - pos)*1.41421356f + (begin - pos)
-            static bool AStar3DPathFinder(Octree3DMapManager* mapManager, const BlockVector& begin, const BlockVector& target,
+            static bool AStar3DPathFinder(OctomapOcTree* mapManager, const BlockVector& begin, const BlockVector& target,
                                           vector<BlockVector>& path, BlockVector& nearestPos,BlockVector& bestPos, bool getNearestPos = false, bool getBestPos = false, bool tryOptimal = false);
             static double calculateCostByDistance(const BlockVector& begin,const BlockVector& target,const BlockVector& pos,float &nearestDis,BlockVector& nearestPos,float& bestHeuristic, BlockVector& bestPos);
-            static bool checkNeighbourAccessable(Octree3DMapManager *mapManager, BlockVector& lastPos, int i, int j, int k);
+            static bool checkNeighbourAccessable(OctomapOcTree *mapManager, BlockVector& lastPos, int i, int j, int k);
         };
     }
 /** @}*/
