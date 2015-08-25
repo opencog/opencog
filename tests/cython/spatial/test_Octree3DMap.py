@@ -1,6 +1,6 @@
 import unittest
 import opencog.spacetime #for import spacetime types
-from opencog.spatial import Octree3DMapManager
+from opencog.spatial import OctomapOcTree
 from opencog.atomspace import AtomSpace,Handle,types
 
 class TestMap(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestMap(unittest.TestCase):
         resolution = 1
         floor_height = -255
         agent_height = 1.6
-        self.testmap = Octree3DMapManager.init_new_map(self.atomspace, "testmap", resolution,
+        self.testmap = OctomapOcTree.init_new_map(self.atomspace, "testmap", resolution,
                                                        floor_height, agent_height)
 
     def tearDown(self):

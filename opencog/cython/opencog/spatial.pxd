@@ -18,9 +18,9 @@ cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "openco
         double z
 
 
-cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "opencog::spatial":
-    cdef cppclass cOctree3DMapManager "opencog::spatial::Octree3DMapManager":
-        cOctree3DMapManager(cAtomSpace*, string, float, int, float)
+cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog::spatial":
+    cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
+        cOctomapOcTree(cAtomSpace*, string, float, int, float)
         string getMapName()
         int getFloorHeight()
         int getAgentHeight()
@@ -50,4 +50,4 @@ cdef extern from "opencog/spatial/3DSpaceMap/Octree3DMapManager.h" namespace "op
         cHandle getEntity(cBlockVector)
 
 cdef extern from "opencog/spatial/3DSpaceMap/SpaceMapUtil.h" namespace "opencog::spatial":
-    cBlockVector getNearFreePointAtDistance(cOctree3DMapManager, cBlockVector, int, cBlockVector, bool)
+    cBlockVector getNearFreePointAtDistance(cOctomapOcTree, cBlockVector, int, cBlockVector, bool)

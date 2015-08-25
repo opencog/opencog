@@ -1,14 +1,14 @@
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.atomspace cimport Handle, AtomSpace
 
-cdef class Octree3DMapManager:
-    cdef cOctree3DMapManager* c_octree_map
+cdef class OctomapOcTree:
+    cdef cOctomapOcTree* c_octree_map
 
     def __cinit__(self):
         pass
 
     def __init__(self, long addr):
-        self.c_octree_map = <cOctree3DMapManager*> PyLong_AsVoidPtr(addr)
+        self.c_octree_map = <cOctomapOcTree*> PyLong_AsVoidPtr(addr)
 
     def __dealloc__(self):
         #spaceserver will handle this
@@ -17,10 +17,10 @@ cdef class Octree3DMapManager:
     @classmethod
     def init_new_map(cls, AtomSpace atomspace, map_name,
                      resolution, floor_height, agent_height):
-        cdef cOctree3DMapManager* cspmap = new cOctree3DMapManager(atomspace.atomspace,
-                                                                   map_name, resolution,
-                                                                   floor_height,
-                                                                   agent_height)
+        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(atomspace.atomspace,
+                                                         map_name, resolution,
+                                                         floor_height,
+                                                         agent_height)
 
         newmap = cls(PyLong_FromVoidPtr(cspmap))
         return newmap
@@ -137,9 +137,9 @@ cdef class Octree3DMapManager:
         cdef cHandle c_handle = self.c_octree_map.getEntity(c_pos)
         return Handle(c_handle.value())
 
-def get_near_free_point(Octree3DMapManager octree_map, dest,
+def get_near_free_point(OctomapOcTree octree_map, dest,
                         dist, first_direction, bool to_be_stand):
-    cdef cOctree3DMapManager* c_octree_map = octree_map.c_octree_map
+    cdef cOctomapOcTree* c_octree_map = octree_map.c_octree_map
     assert len(dest) == 3
     cdef cBlockVector c_dest = cBlockVector(dest[0], dest[1], dest[2])
     assert len(first_direction) == 3

@@ -1,7 +1,7 @@
 from cython.operator cimport dereference as deref
 
 from opencog.atomspace cimport AtomSpace, Handle, TruthValue
-from opencog.spatial import Octree3DMapManager as SpaceMap
+from opencog.spatial import OctomapOcTree as SpaceMap
 
 cdef class TimeServer:
     cdef cTimeServer* c_time_server
