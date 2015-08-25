@@ -54,7 +54,7 @@ class TestMap(unittest.TestCase):
     def testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb(self):
         test_pos1 = (7, 8, 9)
         test_handle1 = Handle(100)
-        log_odds_threshold = self.testmap.get_log_odds_occupied_threshold()
+        log_odds_threshold = self.testmap.get_occupancy_thres_log()
 
         self.testmap.set_unit_block(test_handle1, test_pos1, log_odds_threshold)
 
@@ -63,7 +63,7 @@ class TestMap(unittest.TestCase):
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1))
         self.assertEqual(test_pos1, self.testmap.get_block_location(test_handle1,
                                                                     log_odds_threshold))
-
+        self.assertEqual(log_odds_threshold, self.testmap.search(test_pos1).get_log_odds())
         #change the occupancy so it's small enough to make getter find nothing
         self.testmap.set_unit_block(test_handle1, test_pos1, -0.1)
 
@@ -73,8 +73,8 @@ class TestMap(unittest.TestCase):
         self.assertIsNone(self.testmap.get_block_location(test_handle1,log_odds_threshold))
 
         #change the threshold, so the occupancy is large enough to find it
-        self.testmap.set_log_odds_occupied_threshold(-0.2)
-        log_odds_threshold = self.testmap.get_log_odds_occupied_threshold()
+        self.testmap.set_occupancy_thres(-0.2)
+        log_odds_threshold = self.testmap.get_occupancy_thres_log()
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1))
         self.assertEqual(test_handle1, self.testmap.get_block(test_pos1, log_odds_threshold))
 

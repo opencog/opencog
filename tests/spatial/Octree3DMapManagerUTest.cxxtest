@@ -77,12 +77,12 @@ public:
     {
         BlockVector testpos1(7,8,9);
         Handle testHandle1(100);
-        float logOddThreshold = testMap->getLogOddsOccupiedThreshold();
+        float logOddThreshold = testMap->getOccupancyThresLog();
 
         testMap->setUnitBlock(testHandle1, testpos1, logOddThreshold);
 		
         logger().error("threshold %f", logOddThreshold);
-        logger().error("block occupancy %f", testMap->getBlockLogOddsOccupancy(testpos1));
+        logger().error("block occupancy %f", testMap->search(testpos1.x, testpos1.y, testpos1.z)->getLogOdds());
 
         //test binary getBlock
         TS_ASSERT(testMap->getBlock(testpos1) == testHandle1);
@@ -101,8 +101,8 @@ public:
         TS_ASSERT(testMap->getBlockLocation(testHandle1, logOddThreshold) == BlockVector::ZERO);
 		
         //change the threshold, so the occupancy is large enough to find it
-        testMap->setLogOddsOccupiedThreshold(-0.2);
-        logOddThreshold = testMap->getLogOddsOccupiedThreshold();
+        testMap->setOccupancyThres(-0.2);
+        logOddThreshold = testMap->getOccupancyThresLog();
 
         TS_ASSERT(testMap->getBlock(testpos1) != Handle::UNDEFINED);
         TS_ASSERT(testMap->getBlock(testpos1,logOddThreshold) != Handle::UNDEFINED);

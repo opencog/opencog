@@ -19,27 +19,34 @@ cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "openco
 
 
 cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog::spatial":
+
+    cdef cppclass cOctomapOcTreeNode "opencog::spatial::OctomapOcTreeNode":
+        float getLogOdds()
+
     cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
         cOctomapOcTree(cAtomSpace*, string, float, int, float)
+
+        #OctomapOcTree Inherited Interface
+
+        float getOccupancyThresLog()
+        void setOccupancyThres(float)
+
+        cOctomapOcTreeNode* search(float, float, float)
+
+        #Refactoring: Octree3DMapManager Interface
+
         string getMapName()
         int getFloorHeight()
         int getAgentHeight()
         void setAgentHeight(float)
-        unsigned getTotalDepthOfOctree()
         int getTotalUnitBlockNum()
         cHandle getSelfAgentEntity()
-        float getLogOddsOccupiedThreshold()
-        void setLogOddsOccupiedThreshold(float)
-        cBlockVector getKnownSpaceMinCoord()
-        cBlockVector getKnownSpaceMaxCoord()
-        cBlockVector getKnownSpaceDim()
 
         void addSolidUnitBlock(cHandle, cBlockVector)
         void removeSolidUnitBlock(cHandle)
         void setUnitBlock(cHandle, cBlockVector, float)
         cHandle getBlock(cBlockVector, float)
         cBlockVector getBlockLocation(cHandle, float)
-        float getBlockLogOddsOccupancy(cBlockVector)
         
         bool checkStandable(cBlockVector,float)
 

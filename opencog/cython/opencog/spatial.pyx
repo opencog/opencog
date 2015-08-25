@@ -1,6 +1,22 @@
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.atomspace cimport Handle, AtomSpace
 
+cdef class OctomapOcTreeNode:
+    cdef cOctomapOcTreeNode* c_node
+
+    def __cinit__(self):
+        pass
+
+    def __init__(self, long addr):
+        self.c_node = <cOctomapOcTreeNode*> PyLong_AsVoidPtr(addr)
+
+    def __dealloc__(self):
+        #OctomapOcTree will handle this
+        pass
+
+    def get_log_odds(self):
+        return self.c_node.getLogOdds()
+
 cdef class OctomapOcTree:
     cdef cOctomapOcTree* c_octree_map
 
@@ -11,7 +27,7 @@ cdef class OctomapOcTree:
         self.c_octree_map = <cOctomapOcTree*> PyLong_AsVoidPtr(addr)
 
     def __dealloc__(self):
-        #spaceserver will handle this
+        #SpaceServer will handle this
         pass
 
     @classmethod
@@ -24,6 +40,16 @@ cdef class OctomapOcTree:
 
         newmap = cls(PyLong_FromVoidPtr(cspmap))
         return newmap
+
+    def get_occupancy_thres_log(self):
+        return self.c_octree_map.getOccupancyThresLog()
+    
+    def set_occupancy_thres(self,prob):
+        self.c_octree_map.setOccupancyThres(prob)
+
+    def search(self, pos):
+        cdef cOctomapOcTreeNode* c_node = self.c_octree_map.search(pos[0], pos[1], pos[2])
+        return OctomapOcTreeNode(PyLong_FromVoidPtr(c_node))
 
     def get_floor_height(self):
         return self.c_octree_map.getFloorHeight()
@@ -38,32 +64,11 @@ cdef class OctomapOcTree:
     def set_agent_height(self,height):
         self.c_octree_map.setAgentHeight(height)
 
-    def get_total_depth_of_octree(self):
-        return self.c_octree_map.getTotalDepthOfOctree()
-
     def get_total_unit_block_num(self):
         return self.c_octree_map.getTotalUnitBlockNum()
 
     def get_self_agent_entity(self):
         return Handle(self.c_octree_map.getSelfAgentEntity().value())
-
-    def get_log_odds_occupied_threshold(self):
-        return self.c_octree_map.getLogOddsOccupiedThreshold()
-
-    def set_log_odds_occupied_threshold(self,log_odds_occupancy):
-        self.c_octree_map.setLogOddsOccupiedThreshold(log_odds_occupancy)
-
-    def get_known_space_min_coord(self):
-        cdef cBlockVector c_pos = self.c_octree_map.getKnownSpaceMinCoord()
-        return (c_pos.x, c_pos.y, c_pos.z)
-
-    def get_known_space_max_coord(self):
-        cdef cBlockVector c_pos = self.c_octree_map.getKnownSpaceMaxCoord()
-        return (c_pos.x, c_pos.y, c_pos.z)
-
-    def get_known_space_dim(self):
-        cdef cBlockVector c_dim = self.c_octree_map.getKnownSpaceDim()
-        return (c_dim.x, c_dim.y, c_dim.z)
 
     def add_solid_unit_block(self, Handle handle, pos):
         assert len(pos) == 3
@@ -83,20 +88,20 @@ cdef class OctomapOcTree:
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
         if log_odds_occupancy is None:
-            log_odds_occupancy = self.c_octree_map.getLogOddsOccupiedThreshold()
+            log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
         return self.c_octree_map.checkStandable(c_pos, log_odds_occupancy)
 
     def get_block(self, pos, log_odds_occupancy = None):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
         if log_odds_occupancy is None:
-            log_odds_occupancy = self.c_octree_map.getLogOddsOccupiedThreshold()
+            log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
         cdef cHandle cblock = self.c_octree_map.getBlock(c_pos, log_odds_occupancy)
         return Handle(cblock.value())
 
     def get_block_location(self, Handle handle, log_odds_occupancy = None):
         if log_odds_occupancy is None:
-            log_odds_occupancy = self.c_octree_map.getLogOddsOccupiedThreshold()
+            log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
         cdef cHandle c_handle = deref((<Handle>handle).h)
         cdef cBlockVector c_pos = self.c_octree_map.getBlockLocation(c_handle,
                                                                      log_odds_occupancy)
@@ -105,11 +110,6 @@ cdef class OctomapOcTree:
         if (c_pos.x, c_pos.y, c_pos.z) == (0,0,0):
             return None
         return (c_pos.x, c_pos.y, c_pos.z)
-
-    def get_block_log_odds_occupancy(self, pos):
-        assert len(pos) == 3
-        cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        return self.c_octree_map.getBlockLogOddsOccupancy(c_pos)
 
     def add_none_block_entity(self, Handle handle, pos, isSelfObject, isAvatarEntity, timestamp):
         assert len(pos) == 3

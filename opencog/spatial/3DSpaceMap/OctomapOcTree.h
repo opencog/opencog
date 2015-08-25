@@ -197,17 +197,9 @@ namespace opencog
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}
             void setAgentHeight(float _height){ mAgentHeight = _height;}
-            inline unsigned getTotalDepthOfOctree() const {return getTreeDepth();}
+            
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
             inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
-            // Note: logOdds(P)=log(P/(1-P))
-            // in octomap api it usually express probabiblity by log odds
-            inline float getLogOddsOccupiedThreshold() const {return getOccupancyThresLog();}
-            void setLogOddsOccupiedThreshold(float logOddsOccupancy);
-
-            BlockVector getKnownSpaceMinCoord() const;
-            BlockVector getKnownSpaceMaxCoord() const;
-            BlockVector getKnownSpaceDim() const;
 
             /**
              *  public member functions about Block add/remove/query
@@ -237,8 +229,6 @@ namespace opencog
             BlockVector getBlockLocation(const Handle& block) const;
             // probabilistic
             BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
-
-            float getBlockLogOddsOccupancy(const BlockVector& pos) const;
 
             /**
              *  public member functions for entity

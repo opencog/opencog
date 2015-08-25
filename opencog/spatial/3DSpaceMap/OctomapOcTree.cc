@@ -177,35 +177,11 @@ OctomapOcTree* OctomapOcTree::clone()
     return cloneMap;
 }
 
-void OctomapOcTree::setLogOddsOccupiedThreshold(float logOddsOccupancy)
-{
-    this->setOccupancyThres(logOddsOccupancy);
-}
-
-BlockVector OctomapOcTree::getKnownSpaceMinCoord() const
-{
-    BlockVector coord;
-    this->getMetricMin(coord.x,coord.y,coord.z);
-    return coord;
-}
-BlockVector OctomapOcTree::getKnownSpaceMaxCoord() const
-{
-    BlockVector coord;
-    this->getMetricMax(coord.x,coord.y,coord.z);
-    return coord;
-}
-BlockVector OctomapOcTree::getKnownSpaceDim() const
-{
-    BlockVector dim;
-    this->getMetricSize(dim.x,dim.y,dim.z);
-    return dim;
-}
-
 
 void OctomapOcTree::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos)
 {
     float occupiedthres = this->getOccupancyThresLog();
-    setUnitBlock(_unitBlockAtom,_pos,occupiedthres);
+    setUnitBlock(_unitBlockAtom,_pos, occupiedthres);
 }
 
 
@@ -319,17 +295,12 @@ BlockVector OctomapOcTree::getBlockLocation(const Handle& block, float logOddsOc
         return BlockVector::ZERO;
     } else {
         BlockVector result=it->second;
-        if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold) {
+        if(search(result.x, result.y, result.z)->getLogOdds() < logOddsOccupancyThreshold) {
             return BlockVector::ZERO;
         } else {
             return result;
         }
     }
-}
-
-float OctomapOcTree::getBlockLogOddsOccupancy(const BlockVector& pos) const
-{
-    return this->search(pos.x,pos.y,pos.z)->getLogOdds();
 }
 
 // currently we consider all the none block entities has no collision, agents can get through them
