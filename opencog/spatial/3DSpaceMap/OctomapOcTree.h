@@ -266,7 +266,8 @@ namespace opencog
             int             mTotalUnitBlockNum;
             Handle          mSelfAgentEntity;
             // We keep the map for quick search position. 
-            //Memory consuming: 50k blocks take about 10M RAM for one map
+            // Memory consuming: 50k blocks take about 10M RAM for one map
+            // Time consuming: 2e-5 sec for 10k blocks; if using bindlink to get position cost 2e-3 sec
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
             set<Handle> mAllNoneBlockEntities;
             set<Handle> mAllAvatarList;
