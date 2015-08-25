@@ -50,8 +50,8 @@ Octree3DMapManager::Octree3DMapManager(AtomSpace* atomspace, const std::string& 
     nonBlockEntitieshistoryLocations.clear();
 
     mSelfAgentEntity = Handle::UNDEFINED;
-    hasPerceptedMoreThanOneTimes = false;
-    enable_BlockEntity_Segmentation = false;
+    //hasPerceptedMoreThanOneTimes = false;
+    //enable_BlockEntity_Segmentation = false;
 
     /*
     // Comment on 20150713 by Yi-Shan,
@@ -348,7 +348,7 @@ BlockVector Octree3DMapManager::getBlockLocation(const Handle& block, float logO
         return BlockVector::ZERO;
     } else {
         BlockVector result=it->second;
-        if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold){
+        if(getBlockLogOddsOccupancy(result)<logOddsOccupancyThreshold) {
             return BlockVector::ZERO;
         } else {
             return result;

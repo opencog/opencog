@@ -157,116 +157,14 @@ namespace opencog
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
             Handle getEntity(const BlockVector& pos) const;
 
-            //The following is olde interface to get Entity3D
-            //Since now we query the info in atomspace. It's not used.
-
-            //const Entity3D* getEntity(const Handle& entityNode) const;
-            //const Entity3D* getEntity(const string& entityName) const;
-            //bool isAvatarEntity(const Entity3D* entity) const;
-            /*
-              template<typename Out>
-              Out findAllEntities(Out out) const
-              {
-              std::vector<const char*> objectNameList;
-
-              for ( auto it = mAllNoneBlockEntities.begin( ); 
-              it != mAllNoneBlockEntities.end(); ++it )
-              {
-              objectNameList.push_back(getEntityName((Entity3D*)(it->second)).c_str());
-
-              } 
-              return std::copy(objectNameList.begin(), 
-              objectNameList.end(), out);
-              }
-            */
-
-            /**
-             *  member functions about Object add/remove/query
-             *  "Object" means the block,entity and blockentity
-             *  Note that because we will query info in AtomSpace
-             *  It should be easy to use atom type to know
-             *  what the handle is (block/entity).
-             *  so it's redundant to have these unclear "XXXObject" func.
-             */
-
-			
-            //BlockVector getObjectLocation(const Handle& objNode) const;
-            //BlockVector getObjectLocation(const string& objName) const;
-
-            //bool containsObject(const string& objectname) const;
-            // return the Direction of the given object face to.
-            // we just define the direction of block is
-            // BlockVector::X_UNIT direction (1,0,0).
-            // if there is nothing for this handle on this map, 
-            // return BlockVector::Zero
-            //BlockVector getObjectDirection(const Handle& objNode) const;
-            // TODO: now we only count the entities, 
-            // we may need to return all the unit blocks as well
-            /*
-              template<typename Out>
-              Out getAllObjects(Out out) const
-              {
-              return findAllEntities(out);
-              }
-            */
-
             /**
              * function for saving file; but not finished
              */
             void save(FILE* fp ){};
             void load(FILE* fp ){};
-            static std::string toString( const Octree3DMapManager& map );
-            static Octree3DMapManager* fromString( const std::string& map );
+            static std::string toString( const Octree3DMapManager& map ){return string("");}
+            static Octree3DMapManager* fromString( const std::string& map ){return NULL;}
 
-            /**
-             *  parameter for old embodiment.
-             */
-
-            bool enable_BlockEntity_Segmentation;
-            bool hasPerceptedMoreThanOneTimes;
-
-            /*
-            // Comment on 20150713 by Yi-Shan,
-            // The following is old public functions about BlockEntity add/remove/query
-            // Because the BlockEntity feature has not been designed well, 
-            // so we comment out all the code related to BlockEntity
-            // Once we need to use it/decide to do it, maybe we'll need the legacy code.
-
-            // If there is not a blockEntity here, return 0
-            BlockEntity* getBlockEntityInPos(BlockVector& _pos) const;
-            // this should be call only once 
-            // just after perception finishes at the first time in embodiment.
-            void findAllBlockEntitiesOnTheMap();
-            // Given a posititon, find the BlockEntity the posititon belongs to
-            BlockEntity* findAllBlocksInBlockEntity(BlockVector& _pos);
-            //Since we want to save info in atomspace it's not used.
-            //BlockEntity* findBlockEntityByHandle(const Handle entityNode) const;
-            // for building a same blockEnity as the _entity
-            // this position should have enough space to build this new entity,
-            // not to be overlapping other objects in the map.
-            BlockVector getBuildEntityOffsetPos(BlockEntity* _entity) const;
-            // just remove this entity from the mBlockEntityList, but not delete it yet
-            void removeAnEntityFromList(BlockEntity* entityToRemove);
-            // to store the blockEntities's node handles just diasppear,
-            // the ~Blockentity() will add its Handle into this list, 
-            // DO NOT add to this list from other place
-            vector<Handle>  newDisappearBlockEntityList;
-            // to store the blockEntities just appear
-            // the Blockentity() will add itself into this list, 
-            // DO NOT add to this list from other place
-            vector<BlockEntity*> newAppearBlockEntityList;
-            // to store the blockentities need to be updated the predicates
-            vector<BlockEntity*> updateBlockEntityList;
-            */
-
-
-            /*
-              Dead interface
-              // Note: for non-super blockEntities only
-              // Find all the neighbour BlockEntities for every blockEntity 
-              //and describe their adjacent situation
-              void computeAllAdjacentBlockClusters();
-            */
         protected:
 
             AtomSpace*      mAtomSpace;
@@ -282,22 +180,12 @@ namespace opencog
             set<Handle> mAllNoneBlockEntities;
             set<Handle> mAllAvatarList;
             multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
-            // to record all the history locations / centerPosition 
-            // map <EntityHandle, vector< pair < timestamp, location> >
             map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
-
-            // Comment on 20150713 by Yi-Shan,
-            // Because the BlockEntity feature has not designed well, 
-            // so we comment out all the code related to BlockEntity
-            // Once we need to use it/decide to do it, maybe we'll need the legacy code.
-            //map<Handle, BlockEntity*> mBlockEntityList;
 
             /**
              *    Inner helper function.
              */
 
-            //for findEntities template
-            //string getEntityName(Entity3D* entity) const;
             void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
