@@ -42,9 +42,11 @@
 ;;;;;;;;;;;;;;;;
 
 ; Load the rules (use load for relative path w.r.t. to that file)
+(define config-dir (dirname (current-filename)))
+(define (prepend-config-dir fp) (string-append config-dir "/" fp))
 (define rule-files (list "rules/deduction.scm"
                          "rules/modus-ponens.scm"))
-(for-each load rule-files)
+(for-each (lambda (fp) (load (prepend-config-dir fp))) rule-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to PLN ;;
