@@ -113,11 +113,20 @@ class BlendConfig(Singleton):
         if config_name is None:
             raise ValueError("Config name was not given.")
         elif isinstance(config_name, str):
-            return cls.a.add_node(types.SchemaNode, cls.config_prefix_name + ':' + config_name)
+            return cls.a.add_node(
+                types.SchemaNode,
+                cls.config_prefix_name + ':' + config_name
+            )
         elif isinstance(config_name, unicode):
-            return cls.a.add_node(types.SchemaNode, cls.config_prefix_name + ':' + config_name)
+            return cls.a.add_node(
+                types.SchemaNode,
+                cls.config_prefix_name + ':' + config_name
+            )
         elif cls.config_prefix_name not in config_name.name:
-            return cls.a.add_node(types.SchemaNode, cls.config_prefix_name + ':' + config_name.name)
+            return cls.a.add_node(
+                types.SchemaNode,
+                cls.config_prefix_name + ':' + config_name.name
+            )
         else:
             return config_name
 
@@ -345,7 +354,9 @@ class ExecuteLinkFactory:
             types.ExecutionLink, [config_name, config_base, free_var]
         )
 
-        put_link = self.a.add_link(types.PutLink, [execution_link, config_value])
+        put_link = self.a.add_link(
+            types.PutLink, [execution_link, config_value]
+        )
         return dict(
             execute_link=put_link,
             to_remove_links=[free_var, free_var_list, execution_link]
@@ -384,7 +395,9 @@ class ExecuteLinkFactory:
             types.ExecutionLink, [config_name, config_base, free_var]
         )
 
-        get_link = self.a.add_link(types.GetLink, [free_var_list, execution_link])
+        get_link = self.a.add_link(
+            types.GetLink, [free_var_list, execution_link]
+        )
         return dict(
             execute_link=get_link,
             to_remove_links=[free_var, free_var_list, execution_link, get_link]
@@ -462,7 +475,9 @@ class ExecuteLinkFactory:
             types.InheritanceLink, [config_base, free_var]
         )
 
-        get_link = self.a.add_link(types.GetLink, [free_var_list, execution_link])
+        get_link = self.a.add_link(
+            types.GetLink, [free_var_list, execution_link]
+        )
         return dict(
             execute_link=get_link,
             to_remove_links=[free_var, free_var_list, execution_link]

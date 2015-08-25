@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# 3_blend_with_conflict_links.py
+# blend_with_conflict_links.py
 #
 """
 Example usage of Conceptual Blending API.

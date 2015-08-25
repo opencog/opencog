@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# 4_blend_with_information_interaction.py
+# blend_with_information_interaction.py
 #
 """
 Example usage of Conceptual Blending API.

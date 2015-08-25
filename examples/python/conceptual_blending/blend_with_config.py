@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# 2_blend_with_config.py
+# blend_with_config.py
 #
 """
 Example usage of Conceptual Blending API.
