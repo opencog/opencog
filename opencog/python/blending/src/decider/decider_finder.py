@@ -8,15 +8,18 @@ __author__ = 'DongMin Kim'
 
 
 class DeciderFinder(object):
-    """Provide decider instance for user.
+    """Provider class to make blending decider instance.
+
+    This provider will made the instance of blending decider, and returns them
+    to the blender.
 
     Attributes:
-        a: An instance of atomspace.
+        a: An instance of AtomSpace.
         last_status: A last status of class.
         deciders: An available blending decider list.
         :type a: opencog.atomspace.AtomSpace
         :type last_status: int
-        :type deciders: dict[abc.ABCMeta]
+        :type deciders: dict[BaseDecider]
     """
 
     def __init__(self, a):
@@ -30,6 +33,17 @@ class DeciderFinder(object):
         }
 
     def get_decider(self, config_base):
+        """Provider method for blending decider.
+
+        Args:
+            config_base: A Node to save custom config.
+            :param config_base: Atom
+        Returns:
+            The instance of blending decider.
+            :rtype : BaseDecider
+        Raises:
+            UserWarning: Can't find the blending decider with given name.
+        """
         self.last_status = blending_status.IN_PROCESS
 
         decider = self.deciders.get(

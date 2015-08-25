@@ -13,7 +13,7 @@ cdef class PyStatisticData:
     """ C++ StatisticData wrapper class.
     """
     cdef StatisticData *thisptr
-    def __cinit__(self, count, probability=None, entropy=None,
+    def __cinit__(self, unsigned int count, probability=None, entropy=None,
                   interaction_information=None):
         if probability is None:
             self.thisptr = new StatisticData(count)
@@ -122,7 +122,7 @@ cdef class PyDataProvider:
     def dataset_size(self):
         return deref(self.thisptr.mDataSet).size()
 
-    def datamap_find(self,  one_rawdata):
+    def datamap_find(self, one_rawdata):
         cdef vector[long] v
         for item in self.make_key_from_data(one_rawdata):
             v.push_back(item)
@@ -191,12 +191,13 @@ cdef class PyInteractionInformation:
     """
     @classmethod
     def calculate_interaction_information(cls, one_piece_of_data,
-                                          PyDataProvider provider):
+                                          PyDataProvider provider,
+                                          n_max_limit=-1):
         cdef vector[long] v
         for item in one_piece_of_data:
             v.push_back(item)
         cdef DataProvider[long] *thisptr = provider.thisptr
-        return calculateInteractionInformation(v, deref(thisptr))
+        return calculateInteractionInformation(v, deref(thisptr), n_max_limit)
 
     @classmethod
     def calculate_interaction_informations(cls, PyDataProvider provider):
@@ -287,9 +288,13 @@ class PyInteractionInformationAtom:
     This class wraps the Python InteractionInformation wrapper class.
     """
     def calculate_interaction_information(self, one_piece_of_data,
-                                          provider_atom):
-        PyInteractionInformation.calculate_interaction_information(
-            one_piece_of_data, provider_atom.provider
+                                          provider_atom, n_max_limit=-1):
+        long_vector = list()
+        for atom in one_piece_of_data:
+            long_vector.append(atom.h.value())
+
+        return PyInteractionInformation.calculate_interaction_information(
+            long_vector, provider_atom.provider, n_max_limit
         )
     def calculate_interaction_informations(self, provider_atom):
         PyInteractionInformation.calculate_interaction_informations(

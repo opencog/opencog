@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# 3_blend_with_conflict_links.py
+# blend_with_conflict_links.py
 #
 """
 Example usage of Conceptual Blending API.
@@ -28,6 +28,43 @@ Third Example:
   -> If two similarity links strength value have difference above 0.3 and 
      confidence value both above 0.7, blender thinks they conflict to
      each other.
+
+Output dump:
+--------Start third example--------
+Source data:
+[(ConceptNode "car" (av 19 0 0) (stv 1.000000 0.000000)) ; [2]
+, (ConceptNode "man" (av 18 0 0) (stv 1.000000 0.000000)) ; [3]
+, (ConceptNode "move" (av 2 0 0) (stv 1.000000 0.000000)) ; [5]
+]
+
+Newly blended nodes:
+[(ConceptNode "car-man" (av 0 0 0) (stv 1.000000 0.000000)) ; [433]
+, (ConceptNode "car-man-1" (av 0 0 0) (stv 1.000000 0.000000)) ; [536]
+, (ConceptNode "car-man-2" (av 0 0 0) (stv 1.000000 0.000000)) ; [537]
+, (ConceptNode "car-man-3" (av 0 0 0) (stv 1.000000 0.000000)) ; [538]
+]
+
+Detail information of selected conflict links:
+-----
+(ConceptNode "car-man") ; [433]
+
+vehicle=> SimilarityLink (stv 0.100000 0.900000)
+person=> SimilarityLink (stv 0.800000 0.900000)
+-----
+(ConceptNode "car-man-1") ; [536]
+
+vehicle=> SimilarityLink (stv 0.100000 0.900000)
+person=> SimilarityLink (stv 0.800000 0.900000)
+-----
+(ConceptNode "car-man-2") ; [537]
+
+vehicle=> SimilarityLink (stv 0.100000 0.900000)
+person=> SimilarityLink (stv 0.800000 0.900000)
+-----
+(ConceptNode "car-man-3") ; [538]
+
+vehicle=> SimilarityLink (stv 0.100000 0.900000)
+person=> SimilarityLink (stv 0.800000 0.900000)
 """
 print "--------Start third example--------"
 a = AtomSpace()
@@ -68,10 +105,15 @@ a.set_av(person.h, 12)
 Make test links.
 """
 # A. Not duplicated link.
+# TODO: We should use an InheritanceLink rather than a MemberLink
+# to express something in the some class. A case in below is just example
+# to show how to blending algorithm works.
 l1 = MemberLink(car, metal)
 a.set_tv(l1.h, TruthValue(0.6, 0.8))
 
 # B. Duplicated, not conflicted link.
+# TODO: We should use an InheritanceLink rather than a SimilarityLink
+# to express something has some property.
 l2 = SimilarityLink(car, move)
 l3 = SimilarityLink(man, move)
 a.set_tv(l2.h, TruthValue(0.9, 0.8))

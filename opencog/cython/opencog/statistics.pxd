@@ -1,3 +1,4 @@
+from libc.stdint cimport uint64_t
 from libcpp cimport bool as cppbool
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -8,12 +9,13 @@ cdef extern from "opencog/learning/statistics/DataProvider.h" \
     # noinspection PyPep8Naming
     # Interface of C++ StatisticData struct.
     cdef cppclass StatisticData:
-        int count
+        uint64_t count
         float probability
         float entropy
         float interactionInformation
-        StatisticData(int) except +
-        StatisticData(int, float, float, float) except +
+        StatisticData(unsigned int) except +
+        StatisticData(uint64_t) except +
+        StatisticData(uint64_t, float, float, float) except +
 
     # Interface of C++ MetaDataContainer class.
     cdef cppclass MetaDataContainer[Metadata]:
@@ -29,7 +31,8 @@ cdef extern from "opencog/learning/statistics/DataProvider.h" \
 
         DataProvider(int, cppbool) except +
         bint addOneMetaData(Metadata)
-        void addOneRawDataCount(vector[Metadata] &oneRawData, int countNum)
+        void addOneRawDataCount(vector[Metadata] &oneRawData,
+                                unsigned int countNum)
         vector[long] makeKeyFromData(vector[Metadata] &oneRawData)
         vector[long] makeKeyFromData(cppbool[] combination_array,
                                      vector[Metadata] &oneRawData)
@@ -53,7 +56,8 @@ cdef extern from "opencog/learning/statistics/InteractionInformation.h" \
     # noinspection PyPep8Naming
     # Interface of C++ template method in InteractionInformation class.
     float calculateInteractionInformation(vector[long] &onePieceOfData,
-                                          DataProvider[long] &provider)
+                                          DataProvider[long] &provider,
+                                          long n_max_limit)
     # noinspection PyPep8Naming
     # Interface of C++ template method in InteractionInformation class.
     void calculateInteractionInformations(DataProvider[long] &provider)

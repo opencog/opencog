@@ -7,15 +7,18 @@ __author__ = 'DongMin Kim'
 
 
 class BaseMaker(object):
-    """Base class of new blend atom maker.
+    """Abstract class to provide 'new_blend_make()' interface.
+
+    The blender will call the method 'new_blend_make()', and this method will
+    call the method 'new_blend_make_impl()' in the derived class.
 
     Attributes:
-        a: An instance of atomspace.
+        a: An instance of AtomSpace.
         last_status: A last status of class.
-        ret: A merged atom.
+        ret: Newly made atom.
         :type a: opencog.atomspace.AtomSpace
         :type last_status: int
-        :type ret: Atom
+        :type ret: list[Atom]
     """
 
     __metaclass__ = ABCMeta
@@ -28,15 +31,41 @@ class BaseMaker(object):
         self.make_default_config()
 
     def make_default_config(self):
+        """Initialize a default config for this class."""
         BlendConfig().update(self.a, "make-atom-prefix", "")
         BlendConfig().update(self.a, "make-atom-separator", "-")
         BlendConfig().update(self.a, "make-atom-postfix", "")
 
     @abstractmethod
     def new_blend_make_impl(self, decided_atoms, config_base):
+        """Abstract factory method for derived class.
+
+        Args:
+            decided_atoms: The source atoms to make new atom.
+            config_base: A Node to save custom config.
+            :param decided_atoms: list[Atom]
+            :param config_base: Atom
+        Raises:
+            NotImplementedError: Someone tried to call the abstract method.
+        """
         raise NotImplementedError("Please implement this method.")
 
     def new_blend_make(self, decided_atoms, config_base):
+        """Wrapper method to control exception in derived class.
+
+        Args:
+            decided_atoms: The source atoms to make new atom.
+            config_base: A Node to save custom config.
+            :param decided_atoms: list[Atom]
+            :param config_base: Atom
+        Returns:
+            Newly made atom.
+            Example:
+            (ConceptNode "atom-1-atom-3")
+            :rtype : Atom
+        Raises:
+            UserWarning: An error occurred in making the new atom.
+        """
         self.last_status = blending_status.IN_PROCESS
 
         self.new_blend_make_impl(decided_atoms, config_base)

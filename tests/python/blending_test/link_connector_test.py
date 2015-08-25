@@ -609,3 +609,81 @@ class TestLinkConnector(TestConceptualBlendingBase):
         )
         self.a.remove(connect_strength_diff_limit_link)
         assert_equal(len(result), 4)
+
+    """
+    2.4.4. ConnectConflictInteractionInformation tests.
+    """
+
+    def __default_connect_conflict_interaction_information(self):
+        self.a.add_link(
+            types.InheritanceLink,
+            [
+                self.a.add_node(types.ConceptNode, "my-config"),
+                self.a.add_node(types.ConceptNode, "default-config")
+            ]
+        )
+        self.a.add_link(
+            types.ExecutionLink,
+            [
+                self.a.add_node(types.SchemaNode, "BLEND:atoms-chooser"),
+                self.a.add_node(types.ConceptNode, "my-config"),
+                self.a.add_node(types.ConceptNode, "ChooseNull")
+            ]
+        )
+        self.a.add_link(
+            types.ExecutionLink,
+            [
+                self.a.add_node(types.SchemaNode, "BLEND:blending-decider"),
+                self.a.add_node(types.ConceptNode, "my-config"),
+                self.a.add_node(types.ConceptNode, "DecideNull")
+            ]
+        )
+        self.a.add_link(
+            types.ExecutionLink,
+            [
+                self.a.add_node(types.SchemaNode, "BLEND:link-connector"),
+                self.a.add_node(types.ConceptNode, "my-config"),
+                self.a.add_node(types.ConceptNode,
+                                "ConnectConflictInteractionInformation"
+                                )
+            ]
+        )
+        self.a.add_link(
+            types.ExecutionLink,
+            [
+                self.a.add_node(types.SchemaNode, "BLEND:connect-check-type"),
+                self.a.add_node(types.ConceptNode, "my-config"),
+                self.a.add_node(types.ConceptNode, "SimilarityLink")
+            ]
+        )
+
+    def test_connect_conflict_interaction_information(self):
+        self.__default_connect_conflict_interaction_information()
+
+        # Test blender makes only one new blend node.
+        result = self.blender.run(
+            [
+                self.a.add_node(types.ConceptNode, "car"),
+                self.a.add_node(types.ConceptNode, "man")
+            ],
+            self.a.add_node(types.ConceptNode, "my-config")
+        )
+        assert_equal(len(result), 1)
+
+        # Test blender makes new blend node correctly.
+        blended_node = result[0]
+
+        # In this test case, interaction information algorithm says
+        # a link set includes 'move, metal, person, vehicle' is most surprising.
+        #
+        # [Selected]: move, metal, person, vehicle, : 0.643179893494
+        # move, metal, person, : 0.488187074661
+        # move, metal, vehicle, : 0.4154522717
+        # move, metal, : 0.0
+        dst_nodes_name = list()
+        for link in blended_node.incoming:
+            dst_nodes_name.extend(map(lambda atom: atom.name, link.out))
+        assert_in("move", dst_nodes_name)
+        assert_in("metal", dst_nodes_name)
+        assert_in("person", dst_nodes_name)
+        assert_in("vehicle", dst_nodes_name)
