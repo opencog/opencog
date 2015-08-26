@@ -79,7 +79,6 @@ void PLNRulesUTest::setUp()
  */
 void PLNRulesUTest::test_deduction()
 {
-    return;
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     eval.eval("(use-modules (opencog))");
@@ -103,6 +102,8 @@ void PLNRulesUTest::test_deduction()
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
     results = eval.eval_h("(cog-bind find-humans)");
+
+    // 4 in total, nan, Peirce, Einstein, Socrates
     TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
