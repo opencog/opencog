@@ -28,10 +28,8 @@ public:
     {
         string testMapName("testMap");
         unsigned resolution = 1;
-        int floorheight = -255;
         float agentheight = 1.6;
-        testMap = new OctomapOcTree(&as, testMapName,
-                                    resolution, floorheight, agentheight);
+        testMap = new OctomapOcTree(testMapName, resolution, agentheight);
     }
     void tearDown()
     {

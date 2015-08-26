@@ -48,7 +48,7 @@ public:
     void testGetBoundingBox_CommonUseCase_GetCorrectBox()
     {
         AtomSpace as;
-        OctomapOcTree spaceMap(&as,"testmap",1,-255,1);
+        OctomapOcTree spaceMap("testmap",1,1);
         Handle entity = as.add_node(ENTITY_NODE,"block1");
         //prepare entity location
         BlockVector entityPos(12,13,14);
@@ -82,7 +82,7 @@ public:
     {
         //case1: single block
         AtomSpace as;
-        OctomapOcTree spaceMap(&as,"testmap",1,-255,1);
+        OctomapOcTree spaceMap("testmap",1,1);
 
         BlockVector testpos(1, 2, 4);
         BlockVector blockpos1(1, 2, 3);
@@ -110,7 +110,7 @@ public:
     {
         //case2: single block which is water, cannot stand on water
         AtomSpace as;
-        OctomapOcTree spaceMap(&as,"testmap",1,-255,1);
+        OctomapOcTree spaceMap("testmap",1,1);
 
         BlockVector testpos(1, 2, 4);
         BlockVector blockpos1(1, 2, 3);
@@ -135,10 +135,11 @@ public:
 	
     void testStandable_TwoNearBlock_Unstandable()
     {
-        // case3: two block which z coord is close ( ditance < agentHeight)
+        // case3: two block which z coord is close ( distance < agentHeight)
         // so it's not standable
         AtomSpace as;
-        OctomapOcTree spaceMap(&as,"testmap",1,-255,2);
+        // make agent height be 2, higher than distance
+        OctomapOcTree spaceMap("testmap",1,2);
         BlockVector testpos(1, 2, 4);
 		
         TS_ASSERT(checkStandable(as,spaceMap,testpos) == false);

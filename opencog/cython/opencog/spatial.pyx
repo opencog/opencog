@@ -31,12 +31,8 @@ cdef class OctomapOcTree:
         pass
 
     @classmethod
-    def init_new_map(cls, AtomSpace atomspace, map_name,
-                     resolution, floor_height, agent_height):
-        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(atomspace.atomspace,
-                                                         map_name, resolution,
-                                                         floor_height,
-                                                         agent_height)
+    def init_new_map(cls, map_name, resolution, agent_height):
+        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(map_name, resolution, agent_height)
 
         newmap = cls(PyLong_FromVoidPtr(cspmap))
         return newmap
@@ -50,9 +46,6 @@ cdef class OctomapOcTree:
     def search(self, pos):
         cdef cOctomapOcTreeNode* c_node = self.c_octree_map.search(pos[0], pos[1], pos[2])
         return OctomapOcTreeNode(PyLong_FromVoidPtr(c_node))
-
-    def get_floor_height(self):
-        return self.c_octree_map.getFloorHeight()
 
     def get_map_name(self):
         cdef string c_map_name = self.c_octree_map.getMapName()

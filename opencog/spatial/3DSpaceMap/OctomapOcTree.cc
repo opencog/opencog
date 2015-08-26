@@ -160,9 +160,9 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block,
 
 
 
-OctomapOcTree::OctomapOcTree(AtomSpace* atomspace, const std::string& mapName,const double resolution, const int floorHeight, const float agentHeight):
+OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution, const float agentHeight):
     OccupancyOcTreeBase<OctomapOcTreeNode>(resolution),
-    mAtomSpace(atomspace), mMapName(mapName), mFloorHeight(floorHeight), mAgentHeight(agentHeight), mSelfAgentEntity(Handle::UNDEFINED)
+    mMapName(mapName), mAgentHeight(agentHeight), mSelfAgentEntity(Handle::UNDEFINED)
 {
     mAllUnitAtomsToBlocksMap.clear();
     mAllNoneBlockEntities.clear();
@@ -173,7 +173,6 @@ OctomapOcTree::OctomapOcTree(AtomSpace* atomspace, const std::string& mapName,co
 OctomapOcTree* OctomapOcTree::clone()
 {
     OctomapOcTree* cloneMap = new OctomapOcTree(*this);
-    //OctomapOcTree* cloneMap = new OctomapOcTree(mMapName, mFloorHeight,mAgentHeight, mTotalUnitBlockNum, mSelfAgentEntity, mAtomSpace, mAllUnitAtomsToBlocksMap, mAllNoneBlockEntities, mPosToNoneBlockEntityMap, mAllAvatarList, mNoneBlockEntitieshistoryLocations);
     return cloneMap;
 }
 
@@ -341,8 +340,8 @@ Handle OctomapOcTree::getEntity(const BlockVector& pos) const
 
 OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):
     OccupancyOcTreeBase <OctomapOcTreeNode>(rhs),
-    mAtomSpace(rhs.mAtomSpace), mMapName(rhs.mMapName),
-    mFloorHeight(rhs.mFloorHeight), mAgentHeight(rhs.mAgentHeight),
+    mMapName(rhs.mMapName),
+    mAgentHeight(rhs.mAgentHeight),
     mSelfAgentEntity(rhs.mSelfAgentEntity), mAllUnitAtomsToBlocksMap(rhs.mAllUnitAtomsToBlocksMap),
     mAllNoneBlockEntities(rhs.mAllNoneBlockEntities), mAllAvatarList(rhs.mAllAvatarList),
     mPosToNoneBlockEntityMap(rhs.mPosToNoneBlockEntityMap), mNoneBlockEntitieshistoryLocations(rhs.mNoneBlockEntitieshistoryLocations)

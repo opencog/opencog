@@ -14,17 +14,17 @@ class TestSpaceServer:
         del self._atomspace
 
     def test_addMap(self):
-        handle = self.space_server.add_map(123456, "testmap", 1, 0, 1)
+        handle = self.space_server.add_map(123456, "testmap", 1, 1)
         assert self._atomspace.get_name(handle) == "testmap"
     
     def test_getMap(self):
-        handle = self.space_server.add_map(123456, "testmap", 1, 0, 1)
+        handle = self.space_server.add_map(123456, "testmap", 1, 1)
         mapinstance = self.space_server.get_map(handle)
         assert mapinstance.get_map_name() == "testmap"
 
     
     def test_addAndRemoveMapInfo(self):
-        map_handle = self.space_server.add_map(123456,"testmap",1,0,1)
+        map_handle = self.space_server.add_map(123456, "testmap", 1, 1)
         obj_node = self._atomspace.add_node(types.StructureNode,"object111")
         assert self.space_server.add_map_info(obj_node.h, map_handle,
                                              False, False, 123456, 4, 5, 6) == True

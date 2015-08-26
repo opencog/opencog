@@ -65,7 +65,7 @@ public:
     }
     void test_addOrGetSpaceMap()
     {
-        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, 2);
 
         TS_ASSERT(testatomspace.is_valid_handle(testmaphandle));
         TS_ASSERT_EQUALS(testatomspace.get_node(SPACE_MAP_NODE, "testmap"), testmaphandle);
@@ -73,7 +73,7 @@ public:
 
     void test_addAndRemoveSpaceInfo()
     {
-        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, -255, 2);
+        Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1, 2);
         Handle testobjecthandle = testatomspace.add_node(STRUCTURE_NODE, "testobj444");
 
         testspaceserver->addSpaceInfo(testobjecthandle, testmaphandle,
