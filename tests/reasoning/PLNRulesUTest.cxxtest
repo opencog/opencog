@@ -56,7 +56,7 @@ public:
     void test_deduction();
     void test_and_construction();
     void test_or_construction();
-    void test_not();
+    void test_not_construction();
 };
 
 void PLNRulesUTest::tearDown()
@@ -157,12 +157,11 @@ void PLNRulesUTest::test_or_construction()
 }
 
 /*
- * Tests the not rule (pln-rule-not) defined in:
- * opencog/reasoning/pln/rules/not.scm
+ * Tests the not rule (pln-rule-not-construction) defined in:
+ * opencog/reasoning/pln/rules/not-construction-rule.scm
  */
-void PLNRulesUTest::test_not()
+void PLNRulesUTest::test_not_construction()
 {
-    return;
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     eval.eval("(use-modules (opencog))");
@@ -171,11 +170,11 @@ void PLNRulesUTest::test_not()
     config().set("SCM_PRELOAD", "opencog/scm/core_types.scm, "
                  "opencog/scm/utilities.scm, "
                  "tests/reasoning/simple-predicates.scm, "
-                 "opencog/reasoning/pln/rules/not.scm");
+                 "opencog/reasoning/pln/rules/not-construction-rule.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-not)");
+    Handle results = eval.eval_h("(cog-bind-af pln-rule-not-construction)");
 
     // It should contain 2 groundings, not(A), not(B)
     TS_ASSERT_EQUALS(2, as.get_arity(results));
