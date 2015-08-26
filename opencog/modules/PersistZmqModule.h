@@ -49,7 +49,7 @@ private:
        false, false)
 
     DECLARE_CMD_REQUEST(PersistZmqModule, "zmq-load", do_load,
-       "Load contents of SQL database",
+       "Load contents of ZeroMQ persistence",
        "Usage: zmq-load\n\n"
        "Load the contents of the currently open ZeroMQ persistence to the\n"
        "atomtable. A database must have been previously opened. The load\n"

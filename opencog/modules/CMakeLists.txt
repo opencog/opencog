@@ -54,21 +54,21 @@ INSTALL (TARGETS PersistModule
 # ----------------------------------------
 # The ZeroMQ persistence module
 
-IF (HAVE_ZMQ)
+IF (HAVE_ZMQ AND HAVE_PROTOBUF)
 	
 	ADD_LIBRARY (PersistZmqModule SHARED
 		PersistZmqModule.cc
 	)
 	
 	TARGET_LINK_LIBRARIES(PersistZmqModule
-		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_LIBRARIES} ${PROTOBUF_LIBRARY}
 	)
 	
 	INSTALL (TARGETS PersistZmqModule
 		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 	)
 	
-ENDIF (HAVE_ZMQ)
+ENDIF (HAVE_ZMQ AND HAVE_PROTOBUF)
 
 # ----------------------------------------
 # Build the RuleEngine cogserver module
