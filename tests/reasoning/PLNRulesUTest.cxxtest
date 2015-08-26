@@ -54,7 +54,8 @@ public:
     void tearDown();
 
     void test_deduction();
-    void test_and();
+    void test_and_construction();
+    void test_or_construction();
     void test_not();
 };
 
@@ -111,7 +112,7 @@ void PLNRulesUTest::test_deduction()
  * Tests the and rule (pln-rule-and-construction) defined in:
  * opencog/reasoning/pln/rules/and-construction-rule.scm
  */
-void PLNRulesUTest::test_and()
+void PLNRulesUTest::test_and_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     eval.eval("(use-modules (opencog))");
@@ -127,7 +128,31 @@ void PLNRulesUTest::test_and()
     // Apply the and rule
     Handle results = eval.eval_h("(cog-bind-af pln-rule-and-construction)");
 
-    // It should contain 1 groundings, (A, B)
+    // It should contain 1 groundings, and(A, B)
+    TS_ASSERT_EQUALS(1, as.get_arity(results));
+}
+
+/*
+ * Tests the and rule (pln-rule-or-construction) defined in:
+ * opencog/reasoning/pln/rules/or-construction-rule.scm
+ */
+void PLNRulesUTest::test_or_construction()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
+
+    config().set("SCM_PRELOAD",
+                 "opencog/scm/core_types.scm, "
+                 /*"opencog/scm/utilities.scm, "*/
+                 "tests/reasoning/simple-predicates.scm, "
+                 "opencog/reasoning/pln/rules/or-construction-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle results = eval.eval_h("(cog-bind-af pln-rule-or-construction)");
+
+    // It should contain 1 groundings, or(A, B)
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
