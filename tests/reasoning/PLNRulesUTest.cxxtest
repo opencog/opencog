@@ -106,8 +106,8 @@ void PLNRulesUTest::test_deduction()
 }
 
 /*
- * Tests the and rule (pln-rule-and) defined in:
- * opencog/reasoning/pln/rules/and.scm
+ * Tests the and rule (pln-rule-and-construction) defined in:
+ * opencog/reasoning/pln/rules/and-construction-rule.scm
  */
 void PLNRulesUTest::test_and()
 {
@@ -119,14 +119,14 @@ void PLNRulesUTest::test_and()
                  "opencog/scm/core_types.scm, "
                  /*"opencog/scm/utilities.scm, "*/
                  "tests/reasoning/simple-predicates.scm, "
-                 "opencog/reasoning/pln/rules/and.scm");
+                 "opencog/reasoning/pln/rules/and-construction-rule.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-and)");
+    Handle results = eval.eval_h("(cog-bind-af pln-rule-and-construction)");
 
-    // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
-    TS_ASSERT_EQUALS(4, as.get_arity(results));
+    // It should contain 1 groundings, (A, B)
+    TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
 /*
