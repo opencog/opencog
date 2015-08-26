@@ -1,5 +1,6 @@
 ; =====================================================================
-; OrRule
+; OrConstructionRule
+; (http://wiki.opencog.org/w/OrConstructionRule TODO)
 ;
 ; For now A and B can be predicates or concepts. Note that the rule
 ; will not try to prevent mixing predicates and concepts (we need a

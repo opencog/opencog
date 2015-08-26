@@ -1,6 +1,6 @@
 ; =====================================================================
-; AndRule
-; (http://wiki.opencog.org/w/AndRule TODO)
+; AndConstructionRule
+; (http://wiki.opencog.org/w/AndConstructionRule TODO)
 ;
 ; For now A and B can be predicates or concepts. Note that the rule
 ; will not try to prevent mixing predicates and concepts (we need a
