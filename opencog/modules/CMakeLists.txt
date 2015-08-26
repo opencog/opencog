@@ -36,7 +36,7 @@ INSTALL (TARGETS QueryModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 )
 # ----------------------------------------
-# The SQL persistance module
+# The SQL persistence module
 
 ADD_LIBRARY (PersistModule SHARED
 	PersistModule.cc
@@ -50,6 +50,25 @@ TARGET_LINK_LIBRARIES(PersistModule
 INSTALL (TARGETS PersistModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 )
+
+# ----------------------------------------
+# The ZeroMQ persistence module
+
+IF (HAVE_ZMQ)
+	
+	ADD_LIBRARY (PersistZmqModule SHARED
+		PersistZmqModule.cc
+	)
+	
+	TARGET_LINK_LIBRARIES(PersistZmqModule
+		${ATOMSPACE_LIBRARIES}
+	)
+	
+	INSTALL (TARGETS PersistZmqModule
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	)
+	
+ENDIF (HAVE_ZMQ)
 
 # ----------------------------------------
 # Build the RuleEngine cogserver module
