@@ -92,11 +92,14 @@ std::string PersistZmqModule::do_load(Request *dummy, std::list<std::string> arg
 
 std::string PersistZmqModule::do_open(Request *dummy, std::list<std::string> args)
 {
-	if (args.size() != 3)
-		return "zmq-open: Error: invalid command syntax\n"
-		       "Usage: zmq-open <network_address>\n";
-
-	std::string networkAddress = args.front(); args.pop_front();
+	std::string networkAddress;
+	if (args.size() >= 1) {
+		networkAddress = args.front(); args.pop_front();
+	} else {
+//		return "zmq-open: Error: invalid command syntax\n"
+//		       "Usage: zmq-open <network_address>\n";
+		networkAddress = "tcp://127.0.0.1:5555";
+	}
 
 	try
 	{
