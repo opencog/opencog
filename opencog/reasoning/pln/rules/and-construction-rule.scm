@@ -57,9 +57,9 @@
        (cB (cog-stv-confidence B)))
     (stv (* sA sB) (min cA cB))))
 
-;; ; Name the rule
-;; (define pln-rule-and-construction-name
-;;   (Node "pln-rule-and-construction"))
-;; (DefineLink
-;;    pln-rule-and-construction-name
-;;    pln-rule-and-construction)
+; Name the rule
+(define pln-rule-and-construction-name
+  (Node "pln-rule-and-construction"))
+(DefineLink
+   pln-rule-and-construction-name
+   pln-rule-and-construction)
