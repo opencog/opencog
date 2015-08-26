@@ -128,7 +128,7 @@ public:
      * not to create a new spaceMap
      */
 
-    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, int _floorHeight, float _agentHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, float _agentHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * comment@20150520 by YiShan

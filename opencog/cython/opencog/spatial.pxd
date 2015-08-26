@@ -24,7 +24,7 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         float getLogOdds()
 
     cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
-        cOctomapOcTree(cAtomSpace*, string, float, int, float)
+        cOctomapOcTree(string, float, float)
 
         #OctomapOcTree Inherited Interface
 
@@ -40,7 +40,6 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         #Refactoring: Octree3DMapManager Interface
 
         string getMapName()
-        int getFloorHeight()
         int getAgentHeight()
         void setAgentHeight(float)
         int getTotalUnitBlockNum()

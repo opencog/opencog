@@ -8,10 +8,8 @@ class TestMap(unittest.TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
         resolution = 1
-        floor_height = -255
         agent_height = 1.6
-        self.testmap = OctomapOcTree.init_new_map(self.atomspace, "testmap", resolution,
-                                                       floor_height, agent_height)
+        self.testmap = OctomapOcTree.init_new_map("testmap", resolution, agent_height)
 
     def tearDown(self):
         del self.testmap

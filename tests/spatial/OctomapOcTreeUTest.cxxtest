@@ -21,7 +21,7 @@ public:
 	
 	void setUp()
 	{
-            testOctree = new OctomapOcTree(&as,"",1,0,2);
+            testOctree = new OctomapOcTree("",1,2);
 	}
 	void tearDown()
 	{

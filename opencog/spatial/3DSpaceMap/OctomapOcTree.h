@@ -51,7 +51,6 @@
 #include <lib/zmq/zmq.hpp>
 #endif
 
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "Block3DMapUtil.h"
 
@@ -115,7 +114,7 @@ namespace opencog
 
         public:
             /// Default constructor, sets resolution of leafs
-            OctomapOcTree(AtomSpace* atomspace, const std::string& mapName, const double resolution, const int floorHeight, const float agentHeight);
+            OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
 
             /// virtual constructor: creates a new object of same type
             /// (Covariant return type requires an up-to-date compiler)
@@ -193,7 +192,6 @@ namespace opencog
              *   getter/setter
              */
 			
-            inline int getFloorHeight() const {return mFloorHeight;}
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}
             void setAgentHeight(float _height){ mAgentHeight = _height;}
@@ -248,9 +246,7 @@ namespace opencog
 
         protected:
 
-            AtomSpace*      mAtomSpace;
             std::string     mMapName;
-            int             mFloorHeight; // the z of the floor
             float           mAgentHeight;
             int             mTotalUnitBlockNum;
             Handle          mSelfAgentEntity;
