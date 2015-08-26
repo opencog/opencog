@@ -21,16 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Pathfinder3D.h"
+
 #include <set>
 #include <map>
 #include <iterator>
 #include <algorithm>
-
+#include "SpaceMapUtil.h"
+#include "Pathfinder3D.h"
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(OctomapOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
+bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OctomapOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
                                      BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos, bool tryOptimal)
 {
     BlockVector end = target;
@@ -44,7 +45,7 @@ bool Pathfinder3D::AStar3DPathFinder(OctomapOcTree *mapManager,  const BlockVect
     bool nostandable = false;
 
     // check if the begin and target pos standable first
-    if ((! mapManager->checkStandable(begin)) || (! mapManager->checkStandable(target)))
+    if ((! checkStandable(*atomSpace, *mapManager, begin)) || (! checkStandable(*atomSpace, *mapManager, target)))
     {
         nostandable = true;
         if ((! getNearestPos) && (! getBestPos))
@@ -98,7 +99,7 @@ bool Pathfinder3D::AStar3DPathFinder(OctomapOcTree *mapManager,  const BlockVect
                     }
 
                     // check if standable
-                    if (! mapManager->checkStandable(curPos))
+                    if (! checkStandable(*atomSpace, *mapManager, curPos))
                     {
                         searchedList.insert(curPos);
                         continue;
@@ -164,7 +165,7 @@ bool Pathfinder3D::AStar3DPathFinder(OctomapOcTree *mapManager,  const BlockVect
         // switch the start and end point
         vector<BlockVector> inversePath;
         BlockVector inearestPos,ibestPos;
-        AStar3DPathFinder(mapManager, target, begin, inversePath, inearestPos,ibestPos);
+        AStar3DPathFinder(atomSpace, mapManager, target, begin, inversePath, inearestPos,ibestPos);
         if (inversePath.size() < path.size())
         {
             path = inversePath;

@@ -70,7 +70,64 @@ namespace opencog
             return result;
         }
 
-        BlockVector getNearFreePointAtDistance(const OctomapOcTree& spaceMap,
+
+        bool checkStandable(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos)
+        {
+            return checkStandableWithProb(atomSpace, spaceMap, pos, spaceMap.getOccupancyThresLog());
+        }
+
+        bool checkStandableWithProb(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy)
+        {
+            if (spaceMap.checkIsOutOfRange(pos)) {
+                logger().error("checkstandable: You want to check a pos which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
+                       pos.x,pos.y,pos.z);
+                return false;
+            }
+            
+            // check if there is any non-block obstacle in this pos
+            Handle blockHandle = spaceMap.getBlock(pos,logOddsOccupancy);
+            if (blockHandle != Handle::UNDEFINED) {
+                return false;
+            }
+            // because the agent has a height,
+            // we should check if there are enough room above this pos for this agent to stand on
+            float agentHeight = spaceMap.getAgentHeight();
+            if (agentHeight > 1) {
+                for (int height = 1; height < agentHeight; height ++) {
+                    BlockVector blockAbove(pos.x, pos.y, pos.z + height);
+                    if (spaceMap.getBlock(blockAbove, logOddsOccupancy) != Handle::UNDEFINED) {
+                        return false;
+                    }
+                }
+            }
+
+            BlockVector under(pos.x, pos.y, pos.z - 1);
+            Handle underBlock = spaceMap.getBlock(under, logOddsOccupancy);
+            if (underBlock != Handle::UNDEFINED) {
+                //TODO:Judge if this block is standable
+                //if agent can't stand on it (ex.water/lava)return false
+                HandleSeq blocks;
+                blocks.push_back(underBlock);
+                vector<string> materialPredicates = getPredicate(atomSpace, "material", blocks, 1);
+                if (materialPredicates.empty()) {
+                    logger().error("checkStandable - underBlock is not undefined but no material predicate!");
+                    return false;
+                }
+                string materialOfUnderBlock = materialPredicates[0];
+                if(materialOfUnderBlock == "water") {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+
+
+        BlockVector getNearFreePointAtDistance(AtomSpace& atomSpace,
+                                               const OctomapOcTree& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
@@ -78,8 +135,8 @@ namespace opencog
         {
             logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
-            int z ;
-
+            int z = 0;
+            
             while (ztimes < 3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)
@@ -96,7 +153,7 @@ namespace opencog
                 // if cannot find a proper position then go on with the complete search
                 BlockVector curpos(position.x + startDirection.x, position.y + startDirection.y, position.z + z);
                 if (toBeStandOn) {
-                    if (spaceMap.checkStandable(curpos)) {
+                    if (checkStandable(atomSpace, spaceMap, curpos)) {
                         return curpos;
                     }
                 }
@@ -114,7 +171,7 @@ namespace opencog
                                 continue;
                             }
                             if (toBeStandOn) {
-                                if (spaceMap.checkStandable(curpos)){
+                                if (checkStandable(atomSpace, spaceMap, curpos)) {
                                     return curpos;
                                 }
                             } else {

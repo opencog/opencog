@@ -1,6 +1,6 @@
 import unittest
 import opencog.spacetime #for import spacetime types
-from opencog.spatial import OctomapOcTree
+from opencog.spatial import *
 from opencog.atomspace import AtomSpace,Handle,types
 
 class TestMap(unittest.TestCase):
@@ -86,7 +86,7 @@ class TestMap(unittest.TestCase):
         #case1: single block
         test_pos = (1, 2, 4)
         block_pos = (1, 2, 3)
-        self.assertFalse(self.testmap.check_standable(test_pos))
+        self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node = self.atomspace.add_node(types.ConceptNode, "dirt").h
         material_pred_node = self.atomspace.add_node(types.PredicateNode, "material").h
@@ -95,7 +95,7 @@ class TestMap(unittest.TestCase):
                                             [material_pred_node,list_link]).h
         self.testmap.add_solid_unit_block(test_block, block_pos)
 
-        standable = self.testmap.check_standable(test_pos)
+        standable = check_standable(self.atomspace, self.testmap, test_pos)
 
         self.assertTrue(standable)
 
@@ -103,7 +103,7 @@ class TestMap(unittest.TestCase):
         #case2: single block which is water, cannot stand on water
         test_pos = (1, 2, 4)
         block_pos = (1, 2, 3)
-        self.assertFalse(self.testmap.check_standable(test_pos))
+        self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node = self.atomspace.add_node(types.ConceptNode, "water").h
         material_pred_node = self.atomspace.add_node(types.PredicateNode, "material").h
@@ -112,7 +112,7 @@ class TestMap(unittest.TestCase):
                                           [material_pred_node,list_link]).h
         self.testmap.add_solid_unit_block(test_block, block_pos)
 
-        standable = self.testmap.check_standable(test_pos)
+        standable = check_standable(self.atomspace, self.testmap, test_pos)
 
         self.assertFalse(standable)
 
@@ -122,7 +122,7 @@ class TestMap(unittest.TestCase):
         # so it's not standable
         test_pos = (1, 2, 4)
         block_pos1 = (1, 2, 3)
-        self.assertFalse(self.testmap.check_standable(test_pos))
+        self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block1 = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node1 = self.atomspace.add_node(types.ConceptNode, "dirt").h
         material_pred_node = self.atomspace.add_node(types.PredicateNode,"material").h
@@ -141,7 +141,7 @@ class TestMap(unittest.TestCase):
         self.testmap.add_solid_unit_block(testBlock2, blockpos2)
         self.assertFalse(self.testmap.get_block(blockpos2).is_undefined())
         self.assertFalse(self.testmap.get_block(block_pos1).is_undefined())
-        standable = self.testmap.check_standable(test_pos)
+        standable = check_standable(self.atomspace, self.testmap, test_pos)
 
         self.assertFalse(standable)
 

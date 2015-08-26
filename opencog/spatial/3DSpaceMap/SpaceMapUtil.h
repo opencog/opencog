@@ -46,17 +46,22 @@ namespace opencog
                                     const HandleSeq& handles,
                                     const unsigned& numberOfPredicateValue);
 
+        bool checkStandable(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos);
+        bool checkStandableWithProb(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy);
+
 	/**
 	 * Find a free point near a given position, at a given distance
+         * @param atomSpace Given atomSpace
          * @param spaceMap Given spaceMap
-	 * @param position Given position
+	 * @param position Given start position
 	 * @param distance Maximum distance from the given position to search the free point
 	 * @param startDirection Vector that points to the direction of the first rayTrace
 	 * @param toBeStandOn if this is true then agent can stand at that position,
          *        which means the point should not be on the sky
 	 */
 
-	BlockVector getNearFreePointAtDistance(const OctomapOcTree& spaceMap,
+	BlockVector getNearFreePointAtDistance(AtomSpace& atomSpace,
+                                               const OctomapOcTree& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,

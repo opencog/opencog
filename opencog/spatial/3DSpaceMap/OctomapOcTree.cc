@@ -221,73 +221,11 @@ void OctomapOcTree::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos,
     this->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
 
-bool OctomapOcTree::checkStandable(const BlockVector& pos) const
-{
-    return checkStandable(pos,this->getOccupancyThresLog());
-}
-
-bool OctomapOcTree::checkStandable(const BlockVector &pos, float logOddsOccupancy) const
-{
-    if(this->checkIsOutOfRange(pos))
-    {
-        logger().error("checkstandable: You want to add a unit block which outside the limit of the map: at x = %d, y = %d, z= %d ! /n",
-                       pos.x,pos.y,pos.z);
-        return false;
-    }
-
-
-    // check if there is any non-block obstacle in this pos
-    Handle blockHandle = this->getBlock(pos,logOddsOccupancy);
-    if(blockHandle != Handle::UNDEFINED) {
-        return false;
-    }
-    if(pos.z <= mFloorHeight) {
-        return false;
-    }
-    // because the agent has a height,
-    // we should check if there are enough room above this pos for this agent to stand on
-    if(mAgentHeight > 1) {
-        for (int height = 1; height < mAgentHeight; height ++) {
-            BlockVector blockAbove(pos.x, pos.y, pos.z + height);
-            if(this->getBlock(blockAbove, logOddsOccupancy) != Handle::UNDEFINED){
-                logger().error("in %f %f %f is not undef", pos.x, pos.y, pos.z + height);
-                return false;
-            }
-        }
-    }
-
-    // because there are too many blocks for the whole floor, we don't send these floor blocks to opencog
-    // so we just check if the pos height is just on the floor.
-    if( (pos.z - mFloorHeight) == 1) {
-        return true;
-    }
-    BlockVector under(pos.x, pos.y, pos.z - 1);
-    Handle underBlock = this->getBlock(under, logOddsOccupancy);
-    if(underBlock != Handle::UNDEFINED) {
-        //TODO:Judge if this block is standable
-        //if agent can't stand on it (ex.water/lava)return false
-        HandleSeq blocks;
-        blocks.push_back(underBlock);
-        vector<string> materialPredicates = getPredicate(*mAtomSpace, "material", blocks, 1);
-        if(materialPredicates.empty()){
-            logger().error("checkStandable - underBlock is not undefined but no material predicate!");
-            return false;
-        }
-        string materialOfUnderBlock = materialPredicates[0];
-        if(materialOfUnderBlock == "water") {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 BlockVector OctomapOcTree::getBlockLocation(const Handle& block) const
 {
     return getBlockLocation(block, this->getOccupancyThresLog());
 }
+
 BlockVector OctomapOcTree::getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const
 {
     auto it = mAllUnitAtomsToBlocksMap.find(block);
