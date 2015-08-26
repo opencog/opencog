@@ -84,13 +84,6 @@ cdef class OctomapOcTree:
         self.c_octree_map.setUnitBlock(deref((<Handle>handle).h), c_pos,
                                        update_log_odds_occupancy)
 
-    def check_standable(self, pos, log_odds_occupancy = None):
-        assert len(pos) == 3
-        cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        if log_odds_occupancy is None:
-            log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
-        return self.c_octree_map.checkStandable(c_pos, log_odds_occupancy)
-
     def get_block(self, pos, log_odds_occupancy = None):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
@@ -137,8 +130,16 @@ cdef class OctomapOcTree:
         cdef cHandle c_handle = self.c_octree_map.getEntity(c_pos)
         return Handle(c_handle.value())
 
-def get_near_free_point(OctomapOcTree octree_map, dest,
+def check_standable(AtomSpace atomspace, OctomapOcTree space_map, pos, log_odds_occupancy = None):
+    assert len(pos) == 3
+    cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
+    if log_odds_occupancy is None:
+        log_odds_occupancy = space_map.c_octree_map.getOccupancyThresLog()
+    return checkStandableWithProb(deref(atomspace.atomspace), deref(space_map.c_octree_map), c_pos, log_odds_occupancy)
+
+def get_near_free_point(AtomSpace atomspace, OctomapOcTree octree_map, dest,
                         dist, first_direction, bool to_be_stand):
+    cdef cAtomSpace* c_atomspace = atomspace.atomspace
     cdef cOctomapOcTree* c_octree_map = octree_map.c_octree_map
     assert len(dest) == 3
     cdef cBlockVector c_dest = cBlockVector(dest[0], dest[1], dest[2])
@@ -147,7 +148,8 @@ def get_near_free_point(OctomapOcTree octree_map, dest,
                                                        first_direction[1],
                                                        first_direction[2])
 
-    cdef cBlockVector c_pos = getNearFreePointAtDistance(deref(c_octree_map),
+    cdef cBlockVector c_pos = getNearFreePointAtDistance(deref(c_atomspace),
+                                                         deref(c_octree_map),
                                                          c_dest,
                                                          dist, c_first_direction,
                                                          to_be_stand)

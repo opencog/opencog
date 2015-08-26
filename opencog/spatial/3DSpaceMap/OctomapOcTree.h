@@ -214,17 +214,6 @@ namespace opencog
             //probabilistic set occupancy
             void setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy);
 
-            // check whether people can stand on this position or not, 
-            // which means there is no obstacle or block here
-            // and there is a block under it.
-            // binary
-            bool checkStandable(const BlockVector &pos) const;
-            // probabilistic
-            bool checkStandable(const BlockVector &pos, float logOddsOccupancy) const;
-            // binary
-            //Handle getBlock(const BlockVector& pos) const;
-            // probabilistic
-            //Handle getBlock(const BlockVector& pos, float logOddsOccupancy) const;
             // binary
             BlockVector getBlockLocation(const Handle& block) const;
             // probabilistic

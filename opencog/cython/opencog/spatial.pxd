@@ -33,6 +33,10 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
 
         cOctomapOcTreeNode* search(float, float, float)
 
+        #OctomapOcTree Interface
+
+        cHandle getBlock(cBlockVector, float)
+
         #Refactoring: Octree3DMapManager Interface
 
         string getMapName()
@@ -45,10 +49,7 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         void addSolidUnitBlock(cHandle, cBlockVector)
         void removeSolidUnitBlock(cHandle)
         void setUnitBlock(cHandle, cBlockVector, float)
-        cHandle getBlock(cBlockVector, float)
         cBlockVector getBlockLocation(cHandle, float)
-        
-        bool checkStandable(cBlockVector,float)
 
         void addNoneBlockEntity(cHandle, cBlockVector, bool, bool, uint64_t)
         void removeNoneBlockEntity(cHandle)
@@ -57,4 +58,6 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         cHandle getEntity(cBlockVector)
 
 cdef extern from "opencog/spatial/3DSpaceMap/SpaceMapUtil.h" namespace "opencog::spatial":
-    cBlockVector getNearFreePointAtDistance(cOctomapOcTree, cBlockVector, int, cBlockVector, bool)
+    bool checkStandableWithProb(cAtomSpace, cOctomapOcTree, cBlockVector, float)
+    cBlockVector getNearFreePointAtDistance(cAtomSpace, cOctomapOcTree, cBlockVector, int, cBlockVector, bool)
+    
