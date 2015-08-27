@@ -110,7 +110,7 @@ std::string PersistZmqModule::do_open(Request *dummy, std::list<std::string> arg
 		return std::string(ex.what()) + "\n";
 	}
 
-	std::string rc = "Opened \"" + networkAddress + "\n";
+	std::string rc = "Opened \"" + networkAddress + "\"\n";
 	return rc;
 }
 
