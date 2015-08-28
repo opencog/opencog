@@ -106,14 +106,13 @@ namespace opencog
             /// Default constructor, sets resolution of leafs
             OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
             ~OctomapOcTree(){}
-            // deep clone this octree3DMapManager and return the new instance
 
             /// virtual constructor: creates a new object of same type
             /// (Covariant return type requires an up-to-date compiler)
             OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
 
             std::string getTreeType() const {return "OctomapOcTree";}
-
+            // deep clone this octree3DMapManager and return the new instance
             OctomapOcTree* clone();
 
             inline string getMapName() const {return mMapName;}

@@ -83,7 +83,6 @@ namespace opencog
                        pos.x,pos.y,pos.z);
                 return false;
             }
-
             // check if there is any non-block obstacle in this pos
             Handle blockHandle = spaceMap.getBlock(pos,logOddsOccupancy);
             if (blockHandle != Handle::UNDEFINED) {
@@ -114,13 +113,13 @@ namespace opencog
                     return false;
                 }
                 string materialOfUnderBlock = materialPredicates[0];
+
                 if (materialOfUnderBlock == "water") {
                     return false;
                 } else {
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -136,7 +135,6 @@ namespace opencog
             logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
             int z = 0;
-
             while (ztimes < 3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)

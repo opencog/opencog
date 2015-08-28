@@ -200,7 +200,6 @@ void OctomapOcTree::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos,
         mTotalUnitBlockNum--;
         mAllUnitAtomsToBlocksMap.erase(oldBlock);
     }
-
     this->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
 

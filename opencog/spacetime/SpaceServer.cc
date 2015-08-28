@@ -253,6 +253,7 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
         timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
 
         SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _agentHeight);
+
         EntityManager* newEntityManager = new EntityManager();
         // add into the map set
         scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityManager*>(newSpaceMap, newEntityManager)));
