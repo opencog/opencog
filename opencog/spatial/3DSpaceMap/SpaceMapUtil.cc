@@ -83,7 +83,7 @@ namespace opencog
                        pos.x,pos.y,pos.z);
                 return false;
             }
-            
+
             // check if there is any non-block obstacle in this pos
             Handle blockHandle = spaceMap.getBlock(pos,logOddsOccupancy);
             if (blockHandle != Handle::UNDEFINED) {
@@ -120,7 +120,7 @@ namespace opencog
                     return true;
                 }
             }
-            
+
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace opencog
             logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
             int z = 0;
-            
+
             while (ztimes < 3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)
@@ -187,6 +187,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const Handle& objectB)
         {
@@ -194,14 +195,14 @@ namespace opencog
 
             Type typeA = objectA->getType();
             if (typeA == ENTITY_NODE) {
-                posA = spaceMap.getLastAppearedLocation(objectA);
+                posA = entityManager.getLastAppearedLocation(objectA);
             }
             else if (typeA==STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             }
             Type typeB = objectB->getType();
             if (typeB == ENTITY_NODE) {
-                posB = spaceMap.getLastAppearedLocation(objectB);
+                posB = entityManager.getLastAppearedLocation(objectB);
             }
             else if (typeB == STRUCTURE_NODE) {
                 posB = spaceMap.getBlockLocation(objectB);
@@ -223,6 +224,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const BlockVector& posB)
         {
@@ -232,7 +234,7 @@ namespace opencog
                 posA = spaceMap.getBlockLocation(objectA);
             }
             else if (typeA==ENTITY_NODE) {
-                posA = spaceMap.getLastAppearedLocation(objectA);
+                posA = entityManager.getLastAppearedLocation(objectA);
             }
 
             if (posA == BlockVector::ZERO) {
@@ -264,9 +266,10 @@ namespace opencog
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
                                       const OctomapOcTree& spaceMap,
+                                      const EntityManager& entityManager,
                                       const Handle& entity)
         {
-            BlockVector nearLeftPos = spaceMap.getLastAppearedLocation(entity);
+            BlockVector nearLeftPos = entityManager.getLastAppearedLocation(entity);
             vector<string> sizeStrings = getPredicate(atomSpace, "size",
                                                       HandleSeq({entity}), 3);
             double length = std::stof(sizeStrings[0]);
@@ -278,16 +281,17 @@ namespace opencog
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
                                                       const OctomapOcTree& spaceMap,
+                                                      const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,
                                                       const Handle& observer)
         {
-            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityA);
-            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityB);
+            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityManager, entityA);
+            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityManager, entityB);
             AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
-                : getBoundingBox(atomSpace, spaceMap, entityC);
+                : getBoundingBox(atomSpace, spaceMap, entityManager, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 

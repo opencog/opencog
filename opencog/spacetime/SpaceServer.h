@@ -50,6 +50,7 @@
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/BlockEntity.h>
+#include <opencog/spatial/3DSpaceMap/EntityManager.h>
 
 #include "SpaceServerContainer.h"
 #include "Temporal.h"
@@ -83,7 +84,7 @@ public:
 
     typedef spatial::BlockVector SpaceMapPoint;
     typedef spatial::OctomapOcTree SpaceMap;
-    typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
+    typedef std::map<Handle, pair<SpaceMap*, EntityManager*> > HandleToScenes;
 
     explicit SpaceServer(AtomSpace&);
     virtual ~SpaceServer();
@@ -96,6 +97,17 @@ public:
      */
     const SpaceMap& getMap(Handle spaceMapHandle) const
         throw (opencog::RuntimeException, std::bad_exception);
+
+    /**
+     * Gets a const reference to a specific EntityManager for make queries
+     * @throws RuntimeException if the given Handle is not a valid
+     *        SpaceMap handle or if there is no EntityManager for that node
+     *         in SpaceServer
+     */
+    const EntityManager& getEntityManager(Handle spaceMapHandle) const
+        throw (opencog::RuntimeException, std::bad_exception);
+
+
     /**
      * Checks if this SpaceServer contains a map with the given handle
      **/
@@ -266,7 +278,7 @@ private:
      * associated to an Atom handle, which is associated to a
      * specific zone map.
      */
-    HandleToSpaceMap spaceMaps;
+    HandleToScenes scenes;
 
     /**
      * comment@20150520 by YiShan
@@ -287,7 +299,6 @@ private:
      * Current agent height
      */
     unsigned int agentHeight;
-
 
     /** 
      * comment@20150520 by YiShan

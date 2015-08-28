@@ -116,12 +116,12 @@ void SpaceServer::setAgentRadius(unsigned int _radius)
 
 void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 {
-    if(spaceMaps.find(spaceMapHandle) == spaceMaps.end())
+    if(scenes.find(spaceMapHandle) == scenes.end())
     {
         logger().error("SpaceServer::setAgentHeight - Map not found!");
         return;	
     }
-    SpaceMap* theMap=spaceMaps[spaceMapHandle];
+    SpaceMap* theMap = scenes[spaceMapHandle].first;
 
     if (agentHeight != _height) {
         agentHeight = _height;
@@ -320,7 +320,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
     return false;
 }
 
-void SpaceServer::add(Handle spaceMapHandle, SpaceMap * map)
+void SpaceServer::add(Handle spaceMapHandle, SpaceMap* map)
 {
 
     logger().info("SpaceServer - New map (%s) added",
@@ -348,20 +348,40 @@ const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
             ATOM_AS_STRING(spaceMapHandle)
             : "Handle::UNDEFINED");
 
-    HandleToSpaceMap::const_iterator itr = spaceMaps.find(spaceMapHandle);
+    HandleToScenes::const_iterator itr = scenes.find(spaceMapHandle);
 
-    if (itr == spaceMaps.end()) {
+    if (itr == scenes.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
                 "SpaceServer - Found no SpaceMap associate with handle: '%s'.",
                 ATOM_AS_STRING(spaceMapHandle));
     }
 
-    return *(itr->second);
+    return *((itr->second).first);
 }
+
+const EntityManager& SpaceServer::getEntityManager(Handle spaceMapHandle) const
+    throw (opencog::RuntimeException, std::bad_exception)
+{
+    logger().fine("SpaceServer::getEntityManager() for mapHandle = %s",
+            spaceMapHandle != Handle::UNDEFINED ?
+            ATOM_AS_STRING(spaceMapHandle)
+            : "Handle::UNDEFINED");
+
+    HandleToScenes::const_iterator itr = scenes.find(spaceMapHandle);
+
+    if (itr == scenes.end()) {
+        throw opencog::RuntimeException(TRACE_INFO,
+                "SpaceServer - Found no EntityManager associate with handle: '%s'.",
+                ATOM_AS_STRING(spaceMapHandle));
+    }
+
+    return *((itr->second).second);
+}
+
 
 const bool SpaceServer::containsMap(Handle spaceMapHandle) const
 {
-    return (spaceMaps.find(spaceMapHandle) != spaceMaps.end());
+    return (scenes.find(spaceMapHandle) != scenes.end());
 }
 
 const bool SpaceServer::isLatestMapValid() const
@@ -419,8 +439,8 @@ Handle SpaceServer::getNextMapHandle(Handle spaceMapHandle) const
 */
 void SpaceServer::removeMap(Handle spaceMapHandle)
 {
-    HandleToSpaceMap::iterator itr = spaceMaps.find(spaceMapHandle);
-    if (itr != spaceMaps.end()) {
+    HandleToScenes::iterator itr = scenes.find(spaceMapHandle);
+    if (itr != scenes.end()) {
     /*    std::vector<Handle>::iterator itr_map =
             std::find(sortedMapHandles.begin(), sortedMapHandles.end(), spaceMapHandle);
         if (*itr_map == spaceMapHandle) {
@@ -435,8 +455,9 @@ void SpaceServer::removeMap(Handle spaceMapHandle)
                     spaceMaps.size(), sortedMapHandles.size());
         }
 */
-        delete itr->second;
-        spaceMaps.erase(itr);
+        delete (itr->second).first;
+        delete (itr->second).second;
+        scenes.erase(itr);
 
     }
 }
@@ -470,15 +491,16 @@ void SpaceServer::removeObject(const std::string& objectId)
 */
 unsigned int SpaceServer::getSpaceMapsSize() const
 {
-    return spaceMaps.size();
+    return scenes.size();
 }
 
 void SpaceServer::clear()
 {
-    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); ++itr) {
-        delete itr->second;
+    for (HandleToScenes::iterator itr = scenes.begin(); itr != scenes.end(); ++itr) {
+        delete (itr->second).first;
+        delete (itr->second).second;
     }
-    spaceMaps.clear();
+    scenes.clear();
 }
 
 SpaceServer::SpaceMap* SpaceServer::cloneTheLatestSpaceMap() const
@@ -488,10 +510,10 @@ SpaceServer::SpaceMap* SpaceServer::cloneTheLatestSpaceMap() const
 
 SpaceServer::SpaceMap* SpaceServer::cloneSpaceMap(Handle spaceMapHandle) const
 {
-    HandleToSpaceMap::const_iterator itr = spaceMaps.find(spaceMapHandle);
-    return (itr==spaceMaps.end()) 
-      ? (itr->second)->clone()
-      : nullptr;
+    HandleToScenes::const_iterator itr = scenes.find(spaceMapHandle);
+    return (itr == scenes.end()) 
+        ? ((itr->second).first)->clone()
+        : nullptr;
 }
 
 /*
@@ -531,23 +553,21 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
         return false;
     }
 
-    timeser->addTimeInfo(spaceMapHandle, timestamp,  timeDomain);
+    timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
 
     // we should distinguish to add a block or other object
     // because when adding a block, maybe cause some change in the terrain and structures
 
     opencog::spatial::BlockVector pos(objX, objY, objZ);
-    SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
 
-    if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
-    {
+
+    if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
         // it's a block
+        SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
         theSpaceMap->addSolidUnitBlock(objectNode,pos);
-
-    }
-    else
-    {
-        theSpaceMap->addNoneBlockEntity(objectNode,pos,isSelfObject, isAvatarEntity, timestamp);
+    } else {
+        EntityManager* entityManager = scenes[spaceMapHandle].second;
+        entityManager->addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
@@ -563,12 +583,12 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
         timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
 
         SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _agentHeight);
-
+        EntityManager* newEntityManager = new EntityManager();
         // add into the map set
-        spaceMaps.insert(map<Handle,SpaceMap*>::value_type(spaceMapNode,newSpaceMap));
+        scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityManager*>(newSpaceMap, newEntityManager)));
         curMap = newSpaceMap;
     } else {
-        curMap = spaceMaps[spaceMapNode];
+        curMap = scenes[spaceMapNode].first;
     }
 
     curSpaceMapHandle = spaceMapNode;
@@ -581,7 +601,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         logger().error("SpaceServer::removeSpaceInfo - Undefined SpaceMap!");
         return;
     }
-    if (spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
+    if (scenes.find(spaceMapHandle) == scenes.end()) {
         logger().error("SpaceServer::removeSpaceInfo - No space map now!");
         return;	
     }
@@ -590,12 +610,13 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
     }
 
-    SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
-    
+
     if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
+        SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
         theSpaceMap->removeSolidUnitBlock(objectNode);
     } else {
-        theSpaceMap->removeNoneBlockEntity(objectNode);
+        EntityManager* entityManager = scenes[spaceMapHandle].second;
+        entityManager->removeNoneBlockEntity(objectNode);
     }
 
     logger().debug("%s(%s)\n", __FUNCTION__, atomspace->get_name(objectNode).c_str());

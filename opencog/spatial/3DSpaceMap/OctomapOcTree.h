@@ -197,7 +197,6 @@ namespace opencog
             void setAgentHeight(float _height){ mAgentHeight = _height;}
             
             inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
-            inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
 
             /**
              *  public member functions about Block add/remove/query
@@ -217,24 +216,6 @@ namespace opencog
             // probabilistic
             BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
 
-            /**
-             *  public member functions for entity
-             */
-			
-            // currently we consider the none block entity has no collision,
-            // avatar can get through them
-            void addNoneBlockEntity(const Handle& entityNode, 
-                                    const BlockVector& pos,
-                                    bool isSelfObject,
-                                    bool isAvatarEntity,
-                                    const unsigned long timestamp);
-            void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, 
-                                               unsigned long timestamp);
-            // note that we didn't delete the record 
-            // when calling removeNoneBlockEntity()
-            BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
-            Handle getEntity(const BlockVector& pos) const;
 
             /**
              * function for save/load map in persist/, but haven't implemented yet. Keep it to make code compiled.
@@ -249,36 +230,14 @@ namespace opencog
             std::string     mMapName;
             float           mAgentHeight;
             int             mTotalUnitBlockNum;
-            Handle          mSelfAgentEntity;
+
             // We keep the map for quick search position. 
             // Memory consuming: 50k blocks take about 10M RAM for one map
             // Time consuming: 2e-5 sec for 10k blocks; if using bindlink to get position cost 2e-3 sec
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
-            set<Handle> mAllNoneBlockEntities;
-            set<Handle> mAllAvatarList;
-            multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
-            map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;
-
-            /**
-             *    Inner helper function.
-             */
-
-            void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
             OctomapOcTree(const OctomapOcTree&);
-            /*
-            OctomapOctree(string_MapName,
-                          int _FloorHeight, int _AgentHeight,
-                          int _TotalUnitBlockNum,Handle _mSelfAgentEntity,
-                          AtomSpace* _AtomSpace,
-                          const map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
-                          const set<Handle>& _AllNoneBlockEntities, 
-                          const multimap<BlockVector, Handle>& _PosToNoneBlockEntityMap,
-                          const set<Handle>& _AllAvatarList,
-                          const map<Handle, vector<pair<unsigned long, BlockVector> > >& _nonBlockEntitieshistoryLocations);
-            */
-
         };
         /************
               Working Now to move the interface of Octree3DMapManger!!

@@ -10,6 +10,7 @@ cdef extern from "Python.h":
     cdef object PyLong_FromVoidPtr(void*)
 
 cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "opencog::spatial":
+
     cdef cppclass cBlockVector "opencog::spatial::BlockVector":
         cBlockVector()
         cBlockVector(double, double, double)
@@ -43,13 +44,18 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         int getAgentHeight()
         void setAgentHeight(float)
         int getTotalUnitBlockNum()
-        cHandle getSelfAgentEntity()
 
         void addSolidUnitBlock(cHandle, cBlockVector)
         void removeSolidUnitBlock(cHandle)
         void setUnitBlock(cHandle, cBlockVector, float)
         cBlockVector getBlockLocation(cHandle, float)
 
+
+cdef extern from "opencog/spatial/3DSpaceMap/EntityManager.h" namespace "opencog::spatial":
+
+    cdef cppclass cEntityManager "opencog::spatial::EntityManager":
+        cEntityManager()
+        cHandle getSelfAgentEntity()
         void addNoneBlockEntity(cHandle, cBlockVector, bool, bool, uint64_t)
         void removeNoneBlockEntity(cHandle)
         void updateNoneBlockEntityLocation(cHandle, cBlockVector, uint64_t)
