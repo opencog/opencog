@@ -24,15 +24,15 @@ namespace opencog
             inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
             // currently we consider the none block entity has no collision,
             // avatar can get through them
-            void addNoneBlockEntity(const Handle& entityNode, 
+            void addNoneBlockEntity(const Handle& entityNode,
                                     const BlockVector& pos,
                                     bool isSelfObject,
                                     bool isAvatarEntity,
                                     const unsigned long timestamp);
-            void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, 
+            void removeNoneBlockEntity(const Handle& entityNode);
+            void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos,
                                                unsigned long timestamp);
-            // note that we didn't delete the record 
+            // note that we didn't delete the record
             // when calling removeNoneBlockEntity()
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
             Handle getEntity(const BlockVector& pos) const;
@@ -43,7 +43,7 @@ namespace opencog
             set<Handle> mAllNoneBlockEntities;
             set<Handle> mAllAvatarList;
             multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
-            map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;            
+            map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;
             void _addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp);
             EntityManager(const EntityManager& rhs);
         };

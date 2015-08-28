@@ -34,7 +34,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 #include <opencog/spacetime/atom_types.h>
@@ -90,7 +89,7 @@ void SpaceServer::atomRemoved(AtomPtr atom)
     Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
         std::vector<std::string> timeDomains = timeser->getTimeDomains();
-        for(auto timeDomain: timeDomains) {
+        for (auto timeDomain: timeDomains) {
             removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
         }
     }
@@ -106,7 +105,7 @@ void SpaceServer::setAgentRadius(unsigned int _radius)
 
 void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 {
-    if(scenes.find(spaceMapHandle) == scenes.end()) {
+    if (scenes.find(spaceMapHandle) == scenes.end()) {
         logger().error("SpaceServer::setAgentHeight - Map not found!");
         return;
     }
@@ -167,7 +166,7 @@ const bool SpaceServer::containsMap(Handle spaceMapHandle) const
 
 const bool SpaceServer::isLatestMapValid() const
 {
-    return ((curSpaceMapHandle != Handle::UNDEFINED)&&(curMap != 0));
+    return ((curSpaceMapHandle != Handle::UNDEFINED) && (curMap != 0));
 }
 
 SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
@@ -235,7 +234,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
         // it's a block
         SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
-        theSpaceMap->addSolidUnitBlock(objectNode,pos);
+        theSpaceMap->addSolidUnitBlock(objectNode, pos);
     } else {
         EntityManager* entityManager = scenes[spaceMapHandle].second;
         entityManager->addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
@@ -322,7 +321,6 @@ std::string SpaceServer::mapToString(Handle mapHandle) const
 
     std::stringstream stringMap;
     stringMap.precision(25);
-
     stringMap << getMapIdString(mapHandle);
     // see localspacemap toString
 

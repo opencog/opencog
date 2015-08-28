@@ -38,7 +38,8 @@ void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
     if (rhs.hasChildren()) {
         for (unsigned i = 0; i<8; ++i) {
             if (rhs.children[i]) {
-                (static_cast<OctomapOcTreeNode*>(this->children[i]))->cloneNodeRecur(*(static_cast<OctomapOcTreeNode*>(rhs.children[i])));
+                OctomapOcTreeNode* thisChild = static_cast<OctomapOcTreeNode*>(this->children[i]);
+                thisChild->cloneNodeRecur(*(static_cast<OctomapOcTreeNode*>(rhs.children[i])));
             }
         }
     }
@@ -149,17 +150,11 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block,
     }
 }
 
-
-        /************
-              Working Now to move the interface of Octree3DMapManger!!
-        *************/
-
-
 OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution, const float agentHeight):
     OccupancyOcTreeBase<OctomapOcTreeNode>(resolution),
     mMapName(mapName), mAgentHeight(agentHeight)
 {
-    
+
 }
 
 OctomapOcTree* OctomapOcTree::clone()
@@ -191,24 +186,21 @@ void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 
 void OctomapOcTree::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy)
 {
-    if(this->checkIsOutOfRange(_pos)) {
+    if (this->checkIsOutOfRange(_pos)) {
         logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
                        _pos.x,_pos.y,_pos.z);
         return;
     }
     Handle oldBlock = this->getBlock(_pos);
 
-    if(oldBlock == Handle::UNDEFINED && _unitBlockAtom != Handle::UNDEFINED)
-    {
+    if (oldBlock == Handle::UNDEFINED && _unitBlockAtom != Handle::UNDEFINED) {
         mTotalUnitBlockNum++;
         mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
-
-    }
-    else if(oldBlock != Handle::UNDEFINED && _unitBlockAtom == Handle::UNDEFINED)
-    {
+    } else if (oldBlock != Handle::UNDEFINED && _unitBlockAtom == Handle::UNDEFINED) {
         mTotalUnitBlockNum--;
         mAllUnitAtomsToBlocksMap.erase(oldBlock);
     }
+
     this->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }
 
@@ -241,9 +233,5 @@ OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):
     mAgentHeight(rhs.mAgentHeight),
     mAllUnitAtomsToBlocksMap(rhs.mAllUnitAtomsToBlocksMap)
 {
-    
-}
-        /************
-              Working Now to move the interface of Octree3DMapManger!!
-        *************/
 
+}
