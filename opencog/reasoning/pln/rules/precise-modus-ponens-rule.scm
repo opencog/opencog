@@ -12,38 +12,98 @@
 ;   A
 ; |-
 ;   B
+; Due to pattern matching issues, currently the file has been divided into 3 
+; parts, each pertaining to different links. The rules are :-
+;       pln-rule-precise-modus-ponens-inheritance
+;       pln-rule-precise-modus-ponens-implication
+;       pln-rule-precise-modus-ponens-subset
 ;
+
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-precise-modus-ponens
+(define pln-rule-precise-modus-ponens-inheritance
     (BindLink
         (VariableList
             (VariableNode "$A")
-            (TypedVariableLink
-                (VariableNode "$C")
-                (TypeChoice
-                    (TypeNode "InheritanceLink")
-                    (TypeNode "ImplicationLink")
-                    (TypeNode "SubsetLink")))
-            (TypedVariableLink
-                (VariableNode "$D")
-                (TypeChoice
-                    (TypeNode "InheritanceLink")
-                    (TypeNode "ImplicationLink")
-                    (TypeNode "SubsetLink"))))
+            (VariableNode "$B"))
         (AndLink
             (VariableNode "$A")
-            (VariableNode "$C")
-            (VariableNode "$D"))
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (InheritanceLink
+                (NotLink
+                    (VariableNode "$A"))
+                (VariableNode "$B")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
             (ListLink
                 (VariableNode "$A")
-                (VariableNode "$C")
-                (VariableNode "$D")))))
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (InheritanceLink
+                    (NotLink
+                        (VariableNode "$A"))
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
 
-(define (pln-formula-precise-modus-ponens A AB notAB)
+(define pln-rule-precise-modus-ponens-implication
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B"))
+        (AndLink
+            (VariableNode "$A")
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (ImplicationLink
+                (NotLink
+                    (VariableNode "$A"))
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
+            (ListLink
+                (VariableNode "$A")
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (ImplicationLink
+                    (NotLink
+                        (VariableNode "$A"))
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
+
+(define pln-rule-precise-modus-ponens-subset
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B"))
+        (AndLink
+            (VariableNode "$A")
+            (SubsetLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (SubsetLink
+                (NotLink
+                    (VariableNode "$A"))
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
+            (ListLink
+                (VariableNode "$A")
+                (SubsetLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (SubsetLink
+                    (NotLink
+                        (VariableNode "$A"))
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
+
+(define (pln-formula-precise-modus-ponens A AB notAB B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -51,16 +111,8 @@
          (cAB (cog-stv-confidence AB))
          (snotAB (cog-stv-strength notAB))
          (cnotAB (cog-stv-confidence notAB)))
-        (cond
-            [(and
-                (= (gar AB) A)
-                (= (gar (gar notAB)) A)
-                (= (gdr notAB) (gdr AB))
-                (not (= (gar AB) (gdr AB)))
-                (= (cog-type (gar notAB)) 'NotLink)
-                (= (cog-type AB) (cog-type notAB)))
-             (cog-set-tv! (gdr AB) (stv (precise-modus-ponens-formula sA sAB snotAB) (min (min cAB cnotAB) cA)))
-            ]
-         )
-    )
-)
+        (cog-set-tv!
+            B
+            (stv 
+                (precise-modus-ponens-formula sA sAB snotAB) 
+                (min (min cAB cnotAB) cA)))))

@@ -13,43 +13,113 @@
 ;   B
 ;   C
 ;
+; Due to pattern matching issues, currently the file has been divided into 3 
+; parts, each pertaining to different links. The rules are :-
+;       pln-rule-induction-inheritance
+;       pln-rule-induction-implication
+;       pln-rule-induction-subset
+;
+
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-induction
+(define pln-rule-induction-inheritance
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
-            (VariableNode "$C")
-            (TypedVariableLink
-                (VariableNode "$D")
-                (TypeChoice
-                    (TypeNode "InheritanceLink")
-                    (TypeNode "ImplicationLink")
-                    (TypeNode "SubsetLink")))
-            (TypedVariableLink
-                (VariableNode "$E")
-                (TypeChoice
-                    (TypeNode "InheritanceLink")
-                    (TypeNode "ImplicationLink")
-                    (TypeNode "SubsetLink"))))
+            (VariableNode "$C"))
         (AndLink
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C")
-            (VariableNode "$D")
-            (VariableNode "$E"))
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$C")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-induction")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
                 (VariableNode "$C")
-                (VariableNode "$D")
-                (VariableNode "$E")))))
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
+                (InheritanceLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
+    
+(define pln-rule-induction-implication
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (AndLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C")
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-induction")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+                (VariableNode "$C")
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
+                (ImplicationLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
 
-(define (pln-formula-induction A B C AB AC)
+(define pln-rule-induction-subset
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (AndLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C")
+            (SubsetLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (SubsetLink
+                (VariableNode "$A")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-induction")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+                (VariableNode "$C")
+                (SubsetLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (SubsetLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))
+                (SubsetLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))))))
+
+(define (pln-formula-induction A B C AB AC BC)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -61,17 +131,8 @@
          (cAB (cog-stv-confidence AB))
          (sAC (cog-stv-strength AC))
          (cAC (cog-stv-confidence AC)))
-        (cond
-            [(and
-                (= (gar AB) A)
-                (= (gdr AB) B)
-                (= (gar AC) A)
-                (= (gdr AC) C)
-                (not (= (gdr AB) (gdr AC)))
-                (= (cog-type AB) (cog-type AC)))
-             ((cog-type AB) (stv (simple-deduction-formula sB sA sC (inversion-formulat sAB sA sB) sAC) (min cAB cAC))
-                B C)
-            ]
-         )
-    )
-)
+        (cog-set-tv!
+            BC
+            (stv 
+                (simple-deduction-formula sB sA sC (inversion-formulat sAB sA sB) sAC) 
+                (min cAB cAC)))))

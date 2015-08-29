@@ -13,43 +13,112 @@
 ;   A
 ;   C
 ;
+; Due to issues in pattern matching in backward chaining, the files has been
+; split into three rules for seperate link types. The 3 rules are
+;           pln-rule-transitive-similarity-similarity
+;           pln-rule-transitive-similarity-extensional-similarity
+;           pln-rule-transitive-similarity-intensional-similarity
+;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-transitive-similarity
+(define pln-rule-transitive-similarity-similarity
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
-            (VariableNode "$C")
-            (TypedVariableLink
-                (VariableNode "$D")
-                (TypeChoice
-                    (TypeNode "SimilarityLink")
-                    (TypeNode "ExtensionalSimilartiyLink")
-                    (TypeNode "IntensionalSimilarityLink")))
-            (TypedVariableLink
-                (VariableNode "$E")
-                (TypeChoice
-                    (TypeNode "SimilarityLink")
-                    (TypeNode "ExtensionalSimilarityLink")
-                    (TypeNode "IntensionalSimilarityLink"))))
+            (VariableNode "$C"))
         (AndLink
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C")
-            (VariableNode "$D")
-            (VariableNode "$E"))
+            (SimilarityLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (SimilarityLink
+                (VariableNode "$B")
+                (VariableNode "$C")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
                 (VariableNode "$C")
-                (VariableNode "$D")
-                (VariableNode "$E")))))
+                (SimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (SimilarityLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))
+                (SimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))))
 
-(define (pln-formula-transitive-similarity A B C AB BC)
+(define pln-rule-transitive-similarity-extensional-similarity
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (AndLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C")
+            (ExtensionalSimilarityLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (ExtensionalSimilarityLink
+                (VariableNode "$B")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+                (VariableNode "$C")
+                (ExtensionalSimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (ExtensionalSimilarityLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))
+                (ExtensionalSimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))))
+
+(define pln-rule-transitive-similarity-intensional-similarity
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
+        (AndLink
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C")
+            (IntensionalSimilarityLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (IntensionalSimilarityLink
+                (VariableNode "$B")
+                (VariableNode "$C")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
+            (ListLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+                (VariableNode "$C")
+                (IntensionalSimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (IntensionalSimilarityLink
+                    (VariableNode "$B")
+                    (VariableNode "$C"))
+                (IntensionalSimilarityLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))))
+
+(define (pln-formula-transitive-similarity A B C AB BC AC)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -61,17 +130,8 @@
          (cAB (cog-stv-confidence AB))
          (sBC (cog-stv-strength BC))
          (cBC (cog-stv-confidence BC)))
-        (cond
-            [(and
-                (= (gar AB) A)
-                (= (gdr AB) B)
-                (= (gar BC) B)
-                (= (gdr BC) C)
-                (not (= (gar AB) (gdr BC)))
-                (= (cog-type AB) (cog-type BC)))
-             ((cog-type AB) (stv (transitive-similarity-formula sA sB sC sAB sBC) (min cAB cBC))
-                A C)
-            ]
-         )
-    )
-)
+        (cog-set-tv!
+            AC 
+            (stv 
+                (transitive-similarity-formula sA sB sC sAB sBC) 
+                (min cAB cBC)))))

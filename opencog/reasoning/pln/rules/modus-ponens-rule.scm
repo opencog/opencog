@@ -8,30 +8,74 @@
 ;   A
 ; |-
 ;   B
+; Due to pattern matching issues, currently the file has been divided into 3 
+; parts, each pertaining to different links. The rules are :-
+;       pln-rule-modus-ponens-inheritance
+;       pln-rule-modus-ponens-implication
+;       pln-rule-modus-ponens-subset
+;
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-modus-ponens
+(define pln-rule-modus-ponens-inheritance
     (BindLink
         (VariableList
             (VariableNode "$A")
-            (TypedVariableLink
-                (VariableNode "$C")
-                (TypeChoice
-                    (TypeNode "InheritanceLink")
-                    (TypeNode "ImplicationLink")
-                    (TypeNode "SubsetLink"))))
+            (VariableNode "$B"))
         (AndLink
             (VariableNode "$A")
-            (VariableNode "$C"))
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-modus-ponens")
             (ListLink
                 (VariableNode "$A")
-                (VariableNode "$C")))))
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
 
-(define (pln-formula-modus-ponens A AB)
+(define pln-rule-modus-ponens-implication
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B"))
+        (AndLink
+            (VariableNode "$A")
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-modus-ponens")
+            (ListLink
+                (VariableNode "$A")
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
+
+(define pln-rule-modus-ponens-subset
+    (BindLink
+        (VariableList
+            (VariableNode "$A")
+            (VariableNode "$B"))
+        (AndLink
+            (VariableNode "$A")
+            (SubsetLink
+                (VariableNode "$A")
+                (VariableNode "$B")))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-formula-modus-ponens")
+            (ListLink
+                (VariableNode "$A")
+                (SubsetLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
+
+(define (pln-formula-modus-ponens A AB B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -39,15 +83,9 @@
          (cAB (cog-stv-confidence AB))
          (snotAB 0.2)
          (cnotAB 1))
-        (cond
-            [(= (gar AB) A)
-             (cog-set-tv! 
-                (gdr AB) 
-                (stv 
-                    (precise-modus-ponens-formula sA sAB snotAB) 
-                    (min (min cAB cnotAB) cA)))
-            ]
-         )
-    )
-)
+        (cog-set-tv!
+            B
+            (stv 
+                (precise-modus-ponens-formula sA sAB snotAB) 
+                (min (min cAB cnotAB) cA)))))
 
