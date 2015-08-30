@@ -86,27 +86,6 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handl
     return n;
 }
 
-
-void OctomapOcTree::setBlock(const Handle& block,
-                             const BlockVector& pos,
-                             const bool isOccupied)
-{
-    OctomapOcTreeNode* blockNode;
-    if (isOccupied) {
-        blockNode = this->updateNode(pos.x, pos.y, pos.z, prob_hit_log);
-    } else {
-        blockNode = this->updateNode(pos.x, pos.y, pos.z, -prob_hit_log-0.1f);
-    }
-    blockNode->setBlock(block);
-}
-void OctomapOcTree::setBlock(const Handle& block,
-                             const BlockVector& pos,
-                             const float logOddsOccupancyUpdate)
-{
-    this->updateNode(pos.x, pos.y, pos.z, float(logOddsOccupancyUpdate));
-    this->setNodeBlock(pos.x, pos.y, pos.z, block);
-}
-
 Handle OctomapOcTree::getBlock(const BlockVector& pos) const
 {
     return getBlock(pos, occ_prob_thres_log);
@@ -166,21 +145,30 @@ OctomapOcTree* OctomapOcTree::clone()
 
 void OctomapOcTree::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos)
 {
-    float occupiedthres = this->getOccupancyThresLog();
-    setUnitBlock(_unitBlockAtom,_pos, occupiedthres);
+    setUnitBlock(_unitBlockAtom, _pos, getOccupancyThresLog());
 }
 
 
 void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 {
-    map<Handle, BlockVector>::iterator it;
-    it = mAllUnitAtomsToBlocksMap.find(blockHandle);
-    if(it == mAllUnitAtomsToBlocksMap.end()) {
+    auto it = mAllUnitAtomsToBlocksMap.find(blockHandle);
+    if ( it == mAllUnitAtomsToBlocksMap.end()) {
         logger().error("OctomapOcTree::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
     }
 
     BlockVector pos = it->second;
-    addSolidUnitBlock(Handle::UNDEFINED, pos);
+    float curLogOdds = search(pos.x, pos.y, pos.z)->getLogOdds();
+    float thres = getOccupancyThresLog();
+    if (thres > curLogOdds) {
+        // the occupancy of the block is smaller than threshold, so we've regard it as freespace.
+        return;
+    } else {
+        // reduce its log odds to thres - prob_miss_log, so we can regard it as freespace.
+        float updatedLogOdds = thres - curLogOdds - prob_miss_log;
+        setUnitBlock(Handle::UNDEFINED, pos, updateLogOdds);
+    }
+
+
 }
 
 
@@ -200,7 +188,8 @@ void OctomapOcTree::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos,
         mTotalUnitBlockNum--;
         mAllUnitAtomsToBlocksMap.erase(oldBlock);
     }
-    this->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
+    this->updateNode(pos.x, pos.y, pos.z, float(logOddsOccupancyUpdate));
+    this->setNodeBlock(pos.x, pos.y, pos.z, block);
 }
 
 BlockVector OctomapOcTree::getBlockLocation(const Handle& block) const

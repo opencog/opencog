@@ -103,12 +103,12 @@ namespace opencog
         class OctomapOcTree : public OccupancyOcTreeBase <OctomapOcTreeNode> {
 
         public:
-            /// Default constructor, sets resolution of leafs
+            // Default constructor, sets resolution of leafs
             OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
             ~OctomapOcTree(){}
 
-            /// virtual constructor: creates a new object of same type
-            /// (Covariant return type requires an up-to-date compiler)
+            // virtual constructor: creates a new object of same type
+            // (Covariant return type requires an up-to-date compiler)
             OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
 
             std::string getTreeType() const {return "OctomapOcTree";}
@@ -140,16 +140,6 @@ namespace opencog
             OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
-
-            // If you want to express binary adding/removing block, use this.
-            // @isOccupied
-            void setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied);
-
-            // add logOddsOccupancyUpdate value to the block log odds value
-            // and set the block handle in pos
-            // Note that you can control the threshold of log odds occupancy by
-            // OctomapOcTree::setOccupancyThres
-            void setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate);
 
             //  check if the block is out of octree's max size
             bool checkIsOutOfRange(const BlockVector& pos) const;
@@ -183,7 +173,6 @@ namespace opencog
              * ends up in the classIDMapping only once
              */
 
-            /***temp constructor for compiled***/
         OctomapOcTree(double resolution): OccupancyOcTreeBase<OctomapOcTreeNode>(resolution){}
             class StaticMemberInitializer{
             public:
