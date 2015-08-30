@@ -177,12 +177,14 @@
 				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 				(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-				(EvaluationLink
-					(PredicateNode verb_instance)
-					(ListLink
-						(VariableNode var_name)
-						(ConceptNode obj_instance)
-						(ConceptNode iobj_instance)
+				(BindLink (VariableNode var_name)
+					(EvaluationLink
+						(PredicateNode verb_instance)
+						(ListLink
+							(VariableNode var_name)
+							(ConceptNode obj_instance)
+							(ConceptNode iobj_instance)
+						)
 					)
 				)
 			)
@@ -193,12 +195,14 @@
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 					(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-					(EvaluationLink
-						(PredicateNode verb_instance)
-						(ListLink
-							(ConceptNode subj_instance)
-							(VariableNode var_name)
-							(ConceptNode iobj_instance)
+					(BindLink (VariableNode var_name)
+						(EvaluationLink
+							(PredicateNode verb_instance)
+							(ListLink
+								(ConceptNode subj_instance)
+								(VariableNode var_name)
+								(ConceptNode iobj_instance)
+							)
 						)
 					)
 				)
@@ -210,12 +214,14 @@
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 					(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-					(EvaluationLink
-						(PredicateNode verb_instance)
-						(ListLink
-							(ConceptNode subj_instance)
-							(ConceptNode obj_instance)
-							(VariableNode var_name)
+					(BindLink (VariableNode var_name)
+						(EvaluationLink
+							(PredicateNode verb_instance)
+							(ListLink
+								(ConceptNode subj_instance)
+								(ConceptNode obj_instance)
+								(VariableNode var_name)
+							)
 						)
 					)
 				)
