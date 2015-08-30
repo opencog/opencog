@@ -85,6 +85,14 @@
 		)
 	)
 )
+; -----------------------------------------------------------------------
+; Connect WordInstanceNode With ConceptNode
+(define (r2l-wordinst-concept inst-name)
+	(ReferenceLink
+		(ConceptNode inst-name)
+		(WordInstanceNode inst-name)
+	)
+)
 
 ; =========================================================================================
 ; Actual helper functions for creating OpenCog atoms
@@ -326,6 +334,7 @@
 			)
 		)
 		(else (list
+			(r2l-wordinst-concept subj_instance)
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(EvaluationLink
