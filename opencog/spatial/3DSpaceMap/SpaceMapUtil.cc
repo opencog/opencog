@@ -35,7 +35,7 @@ namespace opencog
             for (auto handle : handles) {
                 predicateListLinkOutgoings.push_back(handle);
             }
-            for(unsigned i = 0; i != numberOfPredicateValue ; i++) {
+            for (unsigned i = 0; i != numberOfPredicateValue ; i++) {
                 string hVariableNodeName = "$pred_val" + std::to_string(i);
                 Handle hVariableNode = atomSpace.add_node(VARIABLE_NODE, hVariableNodeName);
                 predicateListLinkOutgoings.push_back(hVariableNode);
@@ -49,21 +49,21 @@ namespace opencog
             getLinkOutgoing.push_back(hEvalLink);
             Handle getLink = atomSpace.add_link(GET_LINK, getLinkOutgoing);
             Handle resultSetLink = satisfying_set(&atomSpace, getLink);
-            logger().error("the get link result %s",atomSpace.atom_as_string(resultSetLink).c_str());
+
             if (numberOfPredicateValue == 1) {
                 HandleSeq resultNodeSet = (LinkCast(resultSetLink)->getOutgoingSet());
-                if(resultNodeSet.empty()) {
+                if (resultNodeSet.empty()) {
                     return result;
                 }
                 result.push_back(NodeCast(resultNodeSet[0])->getName());
             } else {
                 //more than one predicate value, ex.size
                 HandleSeq resultListLinkSet = (LinkCast(resultSetLink)->getOutgoingSet());
-                if(resultListLinkSet.empty()) {
+                if (resultListLinkSet.empty()) {
                     return result;
                 }
                 HandleSeq resultListLinkOutgoings = LinkCast(resultListLinkSet[0])->getOutgoingSet();
-                for(auto predicateValueNode : resultListLinkOutgoings) {
+                for (auto predicateValueNode : resultListLinkOutgoings) {
                     result.push_back(NodeCast(predicateValueNode)->getName());
                 }
             }
@@ -83,7 +83,6 @@ namespace opencog
                        pos.x,pos.y,pos.z);
                 return false;
             }
-            
             // check if there is any non-block obstacle in this pos
             Handle blockHandle = spaceMap.getBlock(pos,logOddsOccupancy);
             if (blockHandle != Handle::UNDEFINED) {
@@ -114,13 +113,13 @@ namespace opencog
                     return false;
                 }
                 string materialOfUnderBlock = materialPredicates[0];
-                if(materialOfUnderBlock == "water") {
+
+                if (materialOfUnderBlock == "water") {
                     return false;
                 } else {
                     return true;
                 }
             }
-            
             return false;
         }
 
@@ -136,13 +135,12 @@ namespace opencog
             logger().error("getNearFreePoint: dest %f, %f, %f, dist %d", position.x, position.y, position.z, distance);
             int ztimes = 0;
             int z = 0;
-            
             while (ztimes < 3) {
                 // we'll first search for the grids of the same high, so begin with z = 0,
                 // then search for the lower grids (z = -1), then the higher grids (z = 1)
                 if (ztimes == 0) {
                     z = 0;
-                } else if(ztimes == 1) {
+                } else if (ztimes == 1) {
                     z = -1;
                 } else {
                     z = 1;
@@ -187,6 +185,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const Handle& objectB)
         {
@@ -194,23 +193,20 @@ namespace opencog
 
             Type typeA = objectA->getType();
             if (typeA == ENTITY_NODE) {
-                posA = spaceMap.getLastAppearedLocation(objectA);
-            }
-            else if (typeA==STRUCTURE_NODE) {
+                posA = entityManager.getLastAppearedLocation(objectA);
+            } else if (typeA==STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             }
             Type typeB = objectB->getType();
             if (typeB == ENTITY_NODE) {
-                posB = spaceMap.getLastAppearedLocation(objectB);
-            }
-            else if (typeB == STRUCTURE_NODE) {
+                posB = entityManager.getLastAppearedLocation(objectB);
+            } else if (typeB == STRUCTURE_NODE) {
                 posB = spaceMap.getBlockLocation(objectB);
             }
 
             if (posA == BlockVector::ZERO || posB == BlockVector::ZERO) {
                 return DOUBLE_MAX;
-            }
-            else {
+            } else {
                 return posA - posB;
             }
         }
@@ -223,6 +219,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const BlockVector& posB)
         {
@@ -230,9 +227,8 @@ namespace opencog
             Type typeA = objectA->getType();
             if (typeA == STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
-            }
-            else if (typeA==ENTITY_NODE) {
-                posA = spaceMap.getLastAppearedLocation(objectA);
+            } else if (typeA==ENTITY_NODE) {
+                posA = entityManager.getLastAppearedLocation(objectA);
             }
 
             if (posA == BlockVector::ZERO) {
@@ -264,9 +260,10 @@ namespace opencog
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
                                       const OctomapOcTree& spaceMap,
+                                      const EntityManager& entityManager,
                                       const Handle& entity)
         {
-            BlockVector nearLeftPos = spaceMap.getLastAppearedLocation(entity);
+            BlockVector nearLeftPos = entityManager.getLastAppearedLocation(entity);
             vector<string> sizeStrings = getPredicate(atomSpace, "size",
                                                       HandleSeq({entity}), 3);
             double length = std::stof(sizeStrings[0]);
@@ -278,16 +275,17 @@ namespace opencog
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
                                                       const OctomapOcTree& spaceMap,
+                                                      const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,
                                                       const Handle& observer)
         {
-            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityA);
-            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityB);
+            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityManager, entityA);
+            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityManager, entityB);
             AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
-                : getBoundingBox(atomSpace, spaceMap, entityC);
+                : getBoundingBox(atomSpace, spaceMap, entityManager, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 

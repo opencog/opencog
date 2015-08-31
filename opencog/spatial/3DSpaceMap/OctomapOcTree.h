@@ -34,6 +34,18 @@
 #ifndef OPENCOG_OCTOMAP_OCTREE_H
 #define OPENCOG_OCTOMAP_OCTREE_H
 
+// OctomapOcTree
+// It's a class inheriting the OcTree in octomap
+// We just add the block handle in each node and add some helper functions
+// Note: When there's no OctreeNode in given position,
+// it means that we don't know anything about that position.
+// When we can get a OctreeNode, it means that we have known the block.
+// And we judge if one block is existing by
+// checking its occupancy log odds are larger than the occupancy log odds threshold.
+// If the occupancy log odds of node < thres, we regard it as freespace
+// else, It's a block in the space.
+
+
 #include <vector>
 #include <iostream>
 #include <octomap/OcTreeNode.h>
@@ -42,19 +54,8 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
-/***Working now to move header in Octree3dmapmanager!!***/
-
 #include <map>
-#include <set>
 
-#ifdef HAVE_ZMQ
-#include <lib/zmq/zmq.hpp>
-#endif
-
-
-#include "Block3DMapUtil.h"
-
-/***Working now to move header in Octree3dmanager!!***/
 using namespace std;
 using namespace octomap;
 
@@ -113,29 +114,43 @@ namespace opencog
         class OctomapOcTree : public OccupancyOcTreeBase <OctomapOcTreeNode> {
 
         public:
-            /// Default constructor, sets resolution of leafs
+            // Default constructor, sets resolution of leafs
             OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
+            ~OctomapOcTree(){}
 
-            /// virtual constructor: creates a new object of same type
-            /// (Covariant return type requires an up-to-date compiler)
+            // virtual constructor: creates a new object of same type
+            // (Covariant return type requires an up-to-date compiler)
             OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
 
             std::string getTreeType() const {return "OctomapOcTree";}
+            // deep clone this octree3DMapManager and return the new instance
+            OctomapOcTree* clone();
+
+            inline string getMapName() const {return mMapName;}
+            inline float getAgentHeight() const {return mAgentHeight;}
+            void setAgentHeight(float _height){ mAgentHeight = _height;}
+
+            inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
+
+            //binary add/remove operation
+            void addSolidUnitBlock(const Handle& block, BlockVector pos);
+            void removeSolidUnitBlock(const Handle blockHandle);
+            //Note that if you want to add/remove block with probability,
+            //You should use setUnitBlock to control the occupancy probability.
+            //the updateLogOddsOccupancy will be added on the log odds occupancy of block to in/decrease the occupancy
+            //probabilistic set occupancy, e.g. new occupied log
+            void setUnitBlock(const Handle& block, BlockVector pos, float updateLogOddsOccupancy);
+
+            // binary
+            BlockVector getBlockLocation(const Handle& block) const;
+            // probabilistic
+            BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
+
 
             // set node block handle at given key or coordinate. Replaces previous block handle.
             OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
-            OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle & block);
-
-            // If you want to express binary adding/removing block, use this.
-            // @isOccupied
-            void setBlock(const Handle& block, const BlockVector& pos, const bool isOccupied);
-
-            // add logOddsOccupancyUpdate value to the block log odds value
-            // and set the block handle in pos
-            // Note that you can control the threshold of log odds occupancy by
-            // OctomapOcTree::setOccupancyThres
-            void setBlock(const Handle& block, const BlockVector& pos, const float logOddsOccupancyUpdate);
+            OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
 
             //  check if the block is out of octree's max size
             bool checkIsOutOfRange(const BlockVector& pos) const;
@@ -147,13 +162,20 @@ namespace opencog
             //  If smaller than threshold, it'll return Handle::UNDEFINED
             //  default threshold is the prob_hit_log which is the default
             //  octomap log odds threshold.
-            Handle getBlock(const BlockVector& pos, const float logOddsThreshold) const;
+            Handle getBlock(const BlockVector& pos, const float logOddsOccupancyThreshold) const;
             //  use occ_prob_thres_log(see octomap doc) as threshold
             bool checkBlockInPos(const Handle& block, const BlockVector& pos) const;
             //  check the block is in the position,
             //  Noth that even there's a block in that pos,
             //  if the handle is not equal it still return false.
-            bool checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsThreshold) const;
+            bool checkBlockInPos(const Handle& block, const BlockVector& pos, const float logOddsOccupancyThreshold) const;
+
+
+            // functions for save/load map in persist/, but haven't implemented yet. Keep it to make code compiled.
+            void save(FILE* fp ){};
+            void load(FILE* fp ){};
+            static std::string toString(const OctomapOcTree& map ){return string("");}
+            static OctomapOcTree* fromString(const std::string& map ){return NULL;}
 
         protected:
 
@@ -162,7 +184,6 @@ namespace opencog
              * ends up in the classIDMapping only once
              */
 
-            /***temp constructor for compiled***/
         OctomapOcTree(double resolution): OccupancyOcTreeBase<OctomapOcTreeNode>(resolution){}
             class StaticMemberInitializer{
             public:
@@ -174,115 +195,18 @@ namespace opencog
             // static member to ensure static initialization (only once)
             static StaticMemberInitializer octomapOcTreeMemberInit;
 
+            std::string mMapName;
+            float mAgentHeight;
+            int mTotalUnitBlockNum;
 
-
-
-
-            /************
-              Working Now to move the interface of Octree3DMapManger!!
-            *************/
-
-        public:
-            
-            ~OctomapOcTree(){}
-            // deep clone this octree3DMapManager and return the new instance
-            OctomapOcTree* clone();
-
-            /**
-             *   getter/setter
-             */
-			
-            inline string getMapName() const {return mMapName;}
-            inline float getAgentHeight() const {return mAgentHeight;}
-            void setAgentHeight(float _height){ mAgentHeight = _height;}
-            
-            inline int getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
-            inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
-
-            /**
-             *  public member functions about Block add/remove/query
-             */
-
-            //binary add/remove operation
-            void addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos);
-            void removeSolidUnitBlock(const Handle blockHandle);
-            //Note that if you want to add/remove block with probability,
-            //You should use setUnitBlock to control the occupancy probability.
-            //the updateLogOddsOccupancy will be added on the log odds occupancy of block to in/decrease the occupancy
-            //probabilistic set occupancy
-            void setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy);
-
-            // binary
-            BlockVector getBlockLocation(const Handle& block) const;
-            // probabilistic
-            BlockVector getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const;
-
-            /**
-             *  public member functions for entity
-             */
-			
-            // currently we consider the none block entity has no collision,
-            // avatar can get through them
-            void addNoneBlockEntity(const Handle& entityNode, 
-                                    const BlockVector& pos,
-                                    bool isSelfObject,
-                                    bool isAvatarEntity,
-                                    const unsigned long timestamp);
-            void removeNoneBlockEntity(const Handle &entityNode);
-            void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, 
-                                               unsigned long timestamp);
-            // note that we didn't delete the record 
-            // when calling removeNoneBlockEntity()
-            BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
-            Handle getEntity(const BlockVector& pos) const;
-
-            /**
-             * function for save/load map in persist/, but haven't implemented yet. Keep it to make code compiled.
-             */
-            void save(FILE* fp ){};
-            void load(FILE* fp ){};
-            static std::string toString( const OctomapOcTree& map ){return string("");}
-            static OctomapOcTree* fromString( const std::string& map ){return NULL;}
-
-        protected:
-
-            std::string     mMapName;
-            float           mAgentHeight;
-            int             mTotalUnitBlockNum;
-            Handle          mSelfAgentEntity;
-            // We keep the map for quick search position. 
+            // We keep the map for quick search position.
             // Memory consuming: 50k blocks take about 10M RAM for one map
             // Time consuming: 2e-5 sec for 10k blocks; if using bindlink to get position cost 2e-3 sec
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
-            set<Handle> mAllNoneBlockEntities;
-            set<Handle> mAllAvatarList;
-            multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
-            map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;
-
-            /**
-             *    Inner helper function.
-             */
-
-            void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
             OctomapOcTree(const OctomapOcTree&);
-            /*
-            OctomapOctree(string_MapName,
-                          int _FloorHeight, int _AgentHeight,
-                          int _TotalUnitBlockNum,Handle _mSelfAgentEntity,
-                          AtomSpace* _AtomSpace,
-                          const map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
-                          const set<Handle>& _AllNoneBlockEntities, 
-                          const multimap<BlockVector, Handle>& _PosToNoneBlockEntityMap,
-                          const set<Handle>& _AllAvatarList,
-                          const map<Handle, vector<pair<unsigned long, BlockVector> > >& _nonBlockEntitieshistoryLocations);
-            */
-
         };
-        /************
-              Working Now to move the interface of Octree3DMapManger!!
-        *************/
 
     } // end namespace
 }

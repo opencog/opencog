@@ -7,6 +7,7 @@
 #include <opencog/atomspace/Handle.h>
 #include "OctomapOcTree.h"
 #include "Block3DMapUtil.h"
+#include "EntityManager.h"
 
 using namespace std;
 
@@ -46,6 +47,10 @@ namespace opencog
                                     const HandleSeq& handles,
                                     const unsigned& numberOfPredicateValue);
 
+        /**
+         * Check if given position in given spaceMap is standable
+         */
+
         bool checkStandable(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos);
         bool checkStandableWithProb(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy);
 
@@ -79,12 +84,14 @@ namespace opencog
 	 */
 
 	double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const Handle& objectB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const BlockVector& posB);
 
@@ -121,6 +128,7 @@ namespace opencog
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
                                       const OctomapOcTree& spaceMap,
+                                      const EntityManager& entityManager,
                                       const Handle& entity);
         /**
          * spatial relation enumeration for expressing state of relation
@@ -173,6 +181,7 @@ namespace opencog
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
                                                       const OctomapOcTree& spaceMap,
+                                                      const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC = Handle::UNDEFINED,
