@@ -39,7 +39,7 @@ cdef class OctomapOcTree:
 
     def get_occupancy_thres_log(self):
         return self.c_octree_map.getOccupancyThresLog()
-    
+
     def set_occupancy_thres(self,prob):
         self.c_octree_map.setOccupancyThres(prob)
 

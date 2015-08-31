@@ -47,6 +47,10 @@ namespace opencog
                                     const HandleSeq& handles,
                                     const unsigned& numberOfPredicateValue);
 
+        /**
+         * Check if given position in given spaceMap is standable
+         */
+
         bool checkStandable(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos);
         bool checkStandableWithProb(AtomSpace& atomSpace, const OctomapOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy);
 

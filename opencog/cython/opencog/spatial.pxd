@@ -65,4 +65,3 @@ cdef extern from "opencog/spatial/3DSpaceMap/EntityManager.h" namespace "opencog
 cdef extern from "opencog/spatial/3DSpaceMap/SpaceMapUtil.h" namespace "opencog::spatial":
     bool checkStandableWithProb(cAtomSpace, cOctomapOcTree, cBlockVector, float)
     cBlockVector getNearFreePointAtDistance(cAtomSpace, cOctomapOcTree, cBlockVector, int, cBlockVector, bool)
-    

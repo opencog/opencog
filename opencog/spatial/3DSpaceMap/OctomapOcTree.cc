@@ -91,11 +91,11 @@ Handle OctomapOcTree::getBlock(const BlockVector& pos) const
     return getBlock(pos, occ_prob_thres_log);
 }
 
-Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsThreshold) const
+Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsOccupancyThreshold) const
 {
     OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
     if (blocknode == NULL ||
-        blocknode->getLogOdds() < logOddsThreshold) {
+        blocknode->getLogOdds() < logOddsOccupancyThreshold) {
         return Handle::UNDEFINED;
     } else {
         return blocknode->getBlock();
@@ -117,11 +117,11 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos)
 
 bool OctomapOcTree::checkBlockInPos(const Handle& block,
                                     const BlockVector& pos,
-                                    const float logOddsThreshold) const
+                                    const float logOddsOccupancyThreshold) const
 {
     OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
     if (blocknode == NULL ||
-        blocknode->getLogOdds() < logOddsThreshold ||
+        blocknode->getLogOdds() < logOddsOccupancyThreshold ||
         blocknode->getBlock() != block) {
         return false;
     } else {
@@ -143,9 +143,9 @@ OctomapOcTree* OctomapOcTree::clone()
 }
 
 
-void OctomapOcTree::addSolidUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos)
+void OctomapOcTree::addSolidUnitBlock(const Handle& block, BlockVector pos)
 {
-    setUnitBlock(_unitBlockAtom, _pos, getOccupancyThresLog());
+    setUnitBlock(block, pos, getOccupancyThresLog());
 }
 
 
@@ -165,30 +165,30 @@ void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
     } else {
         // reduce its log odds to thres - prob_miss_log, so we can regard it as freespace.
         float updatedLogOdds = thres - curLogOdds - prob_miss_log;
-        setUnitBlock(Handle::UNDEFINED, pos, updateLogOdds);
+        setUnitBlock(Handle::UNDEFINED, pos, updatedLogOdds);
     }
 
 
 }
 
 
-void OctomapOcTree::setUnitBlock(const Handle& _unitBlockAtom, BlockVector _pos, float updateLogOddsOccupancy)
+void OctomapOcTree::setUnitBlock(const Handle& block, BlockVector pos, float updateLogOddsOccupancy)
 {
-    if (this->checkIsOutOfRange(_pos)) {
+    if (this->checkIsOutOfRange(pos)) {
         logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
-                       _pos.x,_pos.y,_pos.z);
+                       pos.x,pos.y,pos.z);
         return;
     }
-    Handle oldBlock = this->getBlock(_pos);
+    Handle oldBlock = this->getBlock(pos);
 
-    if (oldBlock == Handle::UNDEFINED && _unitBlockAtom != Handle::UNDEFINED) {
+    if (oldBlock == Handle::UNDEFINED && block != Handle::UNDEFINED) {
         mTotalUnitBlockNum++;
-        mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
-    } else if (oldBlock != Handle::UNDEFINED && _unitBlockAtom == Handle::UNDEFINED) {
+        mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(block, pos));
+    } else if (oldBlock != Handle::UNDEFINED && block == Handle::UNDEFINED) {
         mTotalUnitBlockNum--;
         mAllUnitAtomsToBlocksMap.erase(oldBlock);
     }
-    this->updateNode(pos.x, pos.y, pos.z, float(logOddsOccupancyUpdate));
+    this->updateNode(pos.x, pos.y, pos.z, float(updateLogOddsOccupancy));
     this->setNodeBlock(pos.x, pos.y, pos.z, block);
 }
 
