@@ -80,6 +80,10 @@ It's recommended to use `tmux or `screen to run multiple ROS nodes in multiple t
     `roscore &`
     `source /where_you_create_catkin_ws/devel/setup.bash`
 
+   and set up your path to action schema, in opencog_python_eval.conf:
+   
+   `PYTHON_PRELOAD_FUNCTIONS = /path/to/your/minecraft_obt/src/action_schemas.py`
+
 2. Start Minecraft Server.
 
 3. Follow instructions in [minecraft_bot](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot) to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
