@@ -13,9 +13,9 @@
 
     <xsd:annotation>
         <xsd:documentation>
-        There are quite a few options available for defining an Entity's Class
-        type, but the six categories below represent fundemental classifications
-        that may be embellished at a later date.
+            There are quite a few options available for defining an Entity's Class
+            type, but the six categories below represent fundemental classifications
+            that may be embellished at a later date.
         </xsd:documentation>
     </xsd:annotation>
     <xsd:simpleType name="EntityDataType">
@@ -32,7 +32,7 @@
 
     <xsd:annotation>
         <xsd:documentation>
-        list of acceptable data types
+            list of acceptable data types
         </xsd:documentation>
     </xsd:annotation>
     <xsd:simpleType name="DataTypeType">
@@ -100,8 +100,8 @@
 
     <xsd:annotation>
         <xsd:documentation>
-        Simple x,y,z coordinate, also designated as a special type since a vector
-        coordinate isn't a default Java data type, but it is an LSL type.
+            Simple x,y,z coordinate, also designated as a special type since a vector
+            coordinate isn't a default Java data type, but it is an LSL type.
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="VectorDataType">
@@ -113,15 +113,15 @@
 
     <xsd:annotation>
         <xsd:documentation>
-        Another special type for LSL but in this case the attributes
-        are specifically 0 to 360 degrees since we're trying to define
-        a rotation about an fixed point. We're using Euclidian rotation
-        representations rather than Quarternions since they're conceptually
-        easier to work with.
+            Another special type for LSL but in this case the attributes
+            are specifically 0 to 360 degrees since we're trying to define
+            a rotation about an fixed point. We're using Euclidian rotation
+            representations rather than Quarternions since they're conceptually
+            easier to work with.
 
-        pitch corresponds to rotations about the x-axis
-        roll corresponds to rotations about the y-axis
-        yaw corresponds to rotations about the z-axis
+            pitch corresponds to rotations about the x-axis
+            roll corresponds to rotations about the y-axis
+            yaw corresponds to rotations about the z-axis
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="RotationDataType">
@@ -145,7 +145,7 @@
     <xsd:complexType name="BaseActionType" abstract="true">
         <xsd:sequence>
             <!--<xsd:element name="param" type="common:BaseParameterType"
-                            minOccurs="0" maxOccurs="unbounded"/>-->
+                minOccurs="0" maxOccurs="unbounded"/>-->
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" use="required"/>
     </xsd:complexType>

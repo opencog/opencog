@@ -1,5 +1,4 @@
 import opencog.cogserver
-from opencog.atomspace import types
 
 class TestRunExceptionAgent(opencog.cogserver.MindAgent):
 
@@ -8,5 +7,3 @@ class TestRunExceptionAgent(opencog.cogserver.MindAgent):
 
     def run(self,atomspace):
         raise IndexError("This is a test exception")
-
-

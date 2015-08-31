@@ -24,13 +24,14 @@
 //just for debug and profiling
 #include <time.h>
 
+#include <moses/comboreduct/type_checker/type_tree.h>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/lru_cache.h>
 
 #include <opencog/atomspace/atom_types.h>
-#include <opencog/comboreduct/type_checker/type_tree.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
 
@@ -292,11 +293,11 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                 //in time interval of the SpaceMap
                 std::list<HandleTemporalPair> htp;
                 timeServer().getTimeInfo(back_inserter(htp),
-                                       Handle::UNDEFINED,
-                                       Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
+					 Handle::UNDEFINED,
+					 Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 
                 pre_it head_child_it = head_it.begin();
-                Handle action_done_h = _atomSpace.getHandle(PREDICATE_NODE,
+                Handle action_done_h = _atomSpace.get_handle(PREDICATE_NODE,
                                        ACTION_DONE_PREDICATE_NAME);
                 Handle agent_h =
                     WorldWrapperUtil::toHandle(_atomSpace, get_definite_object(*head_child_it),

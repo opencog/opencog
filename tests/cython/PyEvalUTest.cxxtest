@@ -4,7 +4,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/RequestResult.h>
 #include <opencog/util/Config.h>
-#include <opencog/cython/PyMindAgent.h>
+#include <opencog/modules/python/PyMindAgent.h>
 
 using std::string;
 

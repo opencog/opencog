@@ -53,6 +53,8 @@ protected:
 public:
     PythonShell(void);
     virtual ~PythonShell();
+    virtual void eval(const std::string &, ConsoleSocket *);
+    virtual void socketClosed(void);
 };
 
 /** @}*/

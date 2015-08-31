@@ -24,7 +24,7 @@
 #ifndef _NOSPACELIFEWORLDWRAPPER_H
 #define _NOSPACELIFEWORLDWRAPPER_H
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 #include "WorldWrapper.h"
 #include <opencog/embodiment/Learning/NoSpaceLife/NoSpaceLife.h>

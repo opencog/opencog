@@ -44,7 +44,7 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                    const std::string& name,
                                    const Temporal& temp)
 {
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, name);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, name);
     if (h != Handle::UNDEFINED)
         retrieveExemplar(bd, wp, h, temp);
 }
@@ -56,8 +56,8 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
 {
     std::list<HandleTemporalPair> retP;
     timeServer().getTimeInfo(std::back_inserter(retP),
-                                  trickConceptNode, temp,
-                                  TemporalTable::EXACT);
+			     trickConceptNode, temp,
+			     TemporalTable::EXACT);
     if (!retP.empty()) {
         OC_ASSERT(retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
@@ -78,17 +78,17 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                   types, NULL, 2);
         for (std::list<Handle>::iterator ih = result.begin(); ih != result.end(); ++ih) {
 
-            OC_ASSERT((*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,
+            OC_ASSERT((*ih) != Handle::UNDEFINED && wp.getAtomSpace().get_arity(*ih) == 2,
                              "Handle should not be an 'Handle::UNDEFINED' and should have arity 2.");
 
-            Handle h_at_time = wp.getAtomSpace().getOutgoing(*ih, 0);
-            OC_ASSERT(h_at_time != Handle::UNDEFINED && wp.getAtomSpace().getType(h_at_time) == AT_TIME_LINK,
+            Handle h_at_time = wp.getAtomSpace().get_outgoing(*ih, 0);
+            OC_ASSERT(h_at_time != Handle::UNDEFINED && wp.getAtomSpace().get_type(h_at_time) == AT_TIME_LINK,
                              "Handle h_at_time should not be an 'Handle::UNDEFINED' and should be an 'AT_TIME_LINK'.");
 
-            OC_ASSERT(wp.getAtomSpace().getArity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
+            OC_ASSERT(wp.getAtomSpace().get_arity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
 
-            Temporal t = Temporal::getFromTimeNodeName(wp.getAtomSpace().getName(wp.getAtomSpace().getOutgoing(h_at_time, 0)).c_str());
-            Handle h_bd = wp.getAtomSpace().getOutgoing(h_at_time, 1);
+            Temporal t = Temporal::getFromTimeNodeName(wp.getAtomSpace().get_name(wp.getAtomSpace().get_outgoing(h_at_time, 0)).c_str());
+            Handle h_bd = wp.getAtomSpace().get_outgoing(h_at_time, 1);
             bd.addPredicate(h_bd, t);
         }
     }
@@ -99,12 +99,12 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
                                        const WorldProvider& wp,
                                        const std::string& tn)
 {
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
-                                      Temporal(wp.getLatestSimWorldTimestamp()),
-                                      TemporalTable::PREVIOUS_BEFORE_START_OF);
+                                 Temporal(wp.getLatestSimWorldTimestamp()),
+                                 TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
             OC_ASSERT(retP.size() == 1,
                              "retP std::list should have exactly one 'HandleTemporal Pair'.");
@@ -138,12 +138,12 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
                                        const WorldProvider& wp,
                                        const std::string& tn)
 {
-    Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, tn);
+    Handle h = wp.getAtomSpace().get_handle(CONCEPT_NODE, tn);
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         timeServer().getTimeInfo(std::back_inserter(retP), h,
-                                      Temporal(wp.getLatestSimWorldTimestamp()),
-                                      TemporalTable::STARTS_BEFORE);
+                                 Temporal(wp.getLatestSimWorldTimestamp()),
+                                 TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {
             CompositeBehaviorDescription bd(&wp.getAtomSpace());
             Temporal temp = *(ip->getTemporal());

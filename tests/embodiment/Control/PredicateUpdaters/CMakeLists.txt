@@ -5,7 +5,7 @@ IF(0)
 
 ADD_CXXTEST(PredicatesUpdaterUTest)
 TARGET_LINK_LIBRARIES(PredicatesUpdaterUTest 
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	server
 	PredicateUpdaters 
 	PAI 

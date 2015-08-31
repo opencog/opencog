@@ -5,16 +5,8 @@ ADD_LIBRARY (oac SHARED
 	PetMessageSender
 	PVPActionPlanSender
 	ProcedureInterpreterAgent
-	ActionSelectionAgent
 	EntityExperienceAgent
-	PsiModulatorUpdaterAgent
-	PsiDemandUpdaterAgent
-	PsiActionSelectionAgent
-	PsiRelationUpdaterAgent
-	PsiFeelingUpdaterAgent
 	EventDetectionAgent
-	PsiRuleUtil
-	StimulusUpdaterAgent
 	SleepAgent
 	MockOpcHCTest
 	HCTestAgent
@@ -52,16 +44,15 @@ TARGET_LINK_LIBRARIES (oac
 	SpaceMap
 	json_spirit
 	PatternMiner
-	atomspace
+	${ATOMSPACE_LIBRARIES}
 )
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES (oac
-		PythonEval
 		PythonModule
 		${PYTHON_LIBRARIES}
 	)
-ENDIF (HAVE_CYTHON)	
+ENDIF (HAVE_CYTHON)
 
 
 IF (HAVE_ZMQ)
@@ -77,7 +68,7 @@ TARGET_LINK_LIBRARIES (OACTester
 	AvatarComboVocabulary
 	AtomSpaceExtensions
 	ImaginaryLife
-	atomspace
+	${ATOMSPACE_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
 
@@ -87,7 +78,7 @@ TARGET_LINK_LIBRARIES (oac-exec
 	comboreduct
 	AvatarComboVocabulary
 	ImaginaryLife
-	${Boost_THREAD_LIBRARY} 
+	${Boost_THREAD_LIBRARY}
 	${ZMQ_LIBRARIES}
 )
 SET_TARGET_PROPERTIES(oac-exec PROPERTIES OUTPUT_NAME "oac")
@@ -104,4 +95,3 @@ TARGET_LINK_LIBRARIES (opcHcTester
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES (opcHcTester LearningServerMessages ${PROTOBUF_LIBRARY})
 ENDIF (HAVE_PROTOBUF)
-

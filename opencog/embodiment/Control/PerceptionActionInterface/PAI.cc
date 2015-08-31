@@ -58,7 +58,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -119,14 +119,16 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 #define XSD_NAMESPACE "http://www.opencog.org/brain"
 #define XSD_FILE_NAME "BrainProxyAxon.xsd"
 
-    if (fileExists(XSD_FILE_NAME))  {
+    if (fileExists(XSD_FILE_NAME)) {
         schemaLocation += XSD_NAMESPACE " " XSD_FILE_NAME;
     } else if (fileExists(PVP_XSD_FILE_PATH)) {
         schemaLocation += XSD_NAMESPACE " " PVP_XSD_FILE_PATH;
     }
     if (schemaLocation.size() > 0) {
-        logger().info("PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
-        // The line bellow replace the path for the XSD file so that it does not need to be in the current directory...
+        logger().info("PAI - Setting the schemaLocation to: %s\n",
+                      schemaLocation.c_str());
+        // The line bellow replace the path for the XSD file so that
+        // it does not need to be in the current directory...
         parser->setExternalSchemaLocation(schemaLocation.c_str());
     }
 #endif
@@ -179,16 +181,16 @@ ActionPlanID PAI::createActionPlan()
     // Get the planning result
     std::string demandName;
 
-    Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
-                                                 "plan_selected_demand_goal");
+    Handle hPlanSelDemGoal = atomSpace.get_handle(CONCEPT_NODE,
+                                                  "plan_selected_demand_goal");
     if (hPlanSelDemGoal != Handle::UNDEFINED) {
         Handle hDemandEvaluationLink =
             AtomSpaceUtil::getReference(atomSpace, hPlanSelDemGoal);
 
         if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
             Handle hDemandPredicateNode =
-                atomSpace.getOutgoing(hDemandEvaluationLink, 0);
-            demandName = atomSpace.getName(hDemandPredicateNode);
+                atomSpace.get_outgoing(hDemandEvaluationLink, 0);
+            demandName = atomSpace.get_name(hDemandPredicateNode);
             demandName = demandName.substr(0, demandName.rfind("DemandGoal"));
         }
     }
@@ -534,7 +536,7 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId) const
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 {
     logger().debug("PAI - processPVPMessage atomSpace.size=%d",
-                   atomSpace.getSize() );
+                   atomSpace.get_size() );
 
     if (logPVPMessage) {
         logger().info(" PAI - Processing PVP message:\n%s\n", pvpMsg.c_str());
@@ -616,8 +618,9 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 // TODO: TEMPORARY PUBLIC METHODS: They should become built-in predicates later.
 bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
 {
+	
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
+		atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
 bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
@@ -641,7 +644,8 @@ bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_FAILED_PREDICATE_NAME, 
+			actionId, sinceTimestamp);
 }
 
 bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
@@ -665,7 +669,8 @@ bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_TRIED_PREDICATE_NAME, actionId, sinceTimestamp);
+            atomSpace, ACTION_TRIED_PREDICATE_NAME, 
+			actionId, sinceTimestamp);
 }
 
 bool PAI::isPlanFinished(ActionPlanID planId) const
@@ -691,10 +696,15 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     DOMNodeList * list;
 
-    // TODO: Check if there is a specific order of XML elements that should be followed
-    // For now, MapInfo is processed first since it's supposed to inform SL object types.
-    // And Instructions are processed later so that all relevant perceptions
-    // are already processed when the owner asks for anything...
+    // TODO: Check if there is a specific order of XML elements that
+    // should be followed
+    //
+    // For now, MapInfo is processed first since it's supposed to
+    // inform SL object types.
+    //
+    // And Instructions are processed later so that all relevant
+    // perceptions are already processed when the owner asks for
+    // anything...
 
     // getting <map-info> elements from the XML message
     XMLString::transcode(MAP_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -709,10 +719,12 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
 #endif
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processMapInfo((DOMElement *)list->item(i), toUpdateHandles, useProtoBuf);
+        processMapInfo((DOMElement *)list->item(i), toUpdateHandles,
+                       useProtoBuf);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d map-infos done", list->getLength());
+        logger().debug("PAI - Processing %d map-infos done",
+                       list->getLength());
 
 #ifdef HAVE_PROTOBUF
     // getting <terrain-info> elements from the XML message
@@ -723,7 +735,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
+        logger().debug("PAI - Processing %d terrain-infos done",
+                       list->getLength());
 #endif
 
     // getting <avatar-signal> elements from the XML message
@@ -734,7 +747,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAvatarSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d avatar-signals done", list->getLength());
+        logger().debug("PAI - Processing %d avatar-signals done",
+                       list->getLength());
 
     // getting <agent-signal> elements from the XML message
     XMLString::transcode(AGENT_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -744,7 +758,8 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processAgentSignal((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-signal done", list->getLength());
+        logger().debug("PAI - Processing %d agent-signal done",
+                       list->getLength());
 
     // getting <instructions> elements from the XML message
     XMLString::transcode(INSTRUCTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -754,17 +769,20 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
         processInstruction((DOMElement *)list->item(i));
     }
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d instructions done", list->getLength());
+        logger().debug("PAI - Processing %d instructions done",
+                       list->getLength());
 
     // getting <agent-sensor-info> elements from the XML message
-    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((DOMElement *)list->item(i));
     } // for
     if (list->getLength() > 0)
-        logger().debug("PAI - Processing %d agent-sensor-infos done", list->getLength());
+        logger().debug("PAI - Processing %d agent-sensor-infos done",
+                       list->getLength());
 
     // getting <state-info> elements from the XML message
     XMLString::transcode(STATE_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1057,7 +1075,7 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,
         resultHandle = AtomSpaceUtil::addNode(atomSpace,
                                               getSLObjectNodeType(entityType),
                                               internalEntityId.c_str());
-        if (atomSpace.getType(resultHandle) == OBJECT_NODE)
+        if (atomSpace.get_type(resultHandle) == OBJECT_NODE)
         {
             std::vector<Handle> inheritanceResults =
                 AtomSpaceUtil::getInheritanceLinks(atomSpace,resultHandle);
@@ -1312,7 +1330,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     // Fishgram
     //std::vector<Handle> actionFrameElements;
 
-    if (atomSpace.getType(agentNode) == OBJECT_NODE)
+    if (atomSpace.get_type(agentNode) == OBJECT_NODE)
     {
         std::vector<Handle> inheritanceResults =
             AtomSpaceUtil::getInheritanceLinks(atomSpace,agentNode);
@@ -1578,7 +1596,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // Add this action to timelink
-    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
+    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, 
+                                                 tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
 
@@ -1923,24 +1942,30 @@ void PAI::processInstruction(DOMElement * element)
                           );
         }
 
-        // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent
-        // and dialog_system.scm will continue processing it.
-        scheme_return_value = evaluator->eval(parsedSentenceText);
+        // Put the newly parsed sentence into AtomSpace, then
+        // PsiActionSelectionAgent and dialog_system.scm will continue
+        // processing it.
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
         if ( evaluator->eval_error() ) {
-            logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace",
-                           __FUNCTION__
-                          );
+            logger().error("PAI::%s - Failed to put the parsed result from"
+                           " RelexServer to AtomSpace", 
+                           __FUNCTION__);
         }
         delete evaluator;
     }
 #endif
 
     // Add the perceptions into AtomSpace
-    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
+    Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE,
+                                                  ACTION_DONE_PREDICATE_NAME,
+                                                  true);
+    Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace,
+                                                  GROUNDED_SCHEMA_NODE,
+                                                  SAY_SCHEMA_NAME, true);
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
     if (agentNode == Handle::UNDEFINED) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE,
+                                           internalAvatarId);
     }
 
     string sentence = "to:";
@@ -1949,7 +1974,8 @@ void PAI::processInstruction(DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-    Handle sentenceNode = AtomSpaceUtil::addNode( atomSpace, SENTENCE_NODE, sentence.c_str() );
+    Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE,
+                                                 sentence.c_str());
 
     if ( avatarInterface.getPetId( ) == internalPetId ) {
         AtomSpaceUtil::setPredicateValue( atomSpace,
@@ -1976,15 +2002,15 @@ void PAI::processInstruction(DOMElement * element)
         logger().debug( "PAI::%s - Connecting sentences to its respective owners",
                         __FUNCTION__ );
 
-        Handle anchorNode = atomSpace.getHandle( ANCHOR_NODE, "# New Parsed Sentence");
-        HandleSeq incomingSet = atomSpace.getIncoming(anchorNode);
+        Handle anchorNode = atomSpace.get_handle( ANCHOR_NODE, "# New Parsed Sentence");
+        HandleSeq incomingSet = atomSpace.get_incoming(anchorNode);
         unsigned int i;
         bool linkFound = false;
         for( i = 0; !linkFound && i < incomingSet.size( ); ++i ) {
-            if ( atomSpace.getType( incomingSet[i] ) == LIST_LINK ) {
+            if ( atomSpace.get_type( incomingSet[i] ) == LIST_LINK ) {
                 logger().debug( "PAI::%s - LIST_LINK found, now inspect it to identify the sentences",
                                 __FUNCTION__);
-                HandleSeq outgoingSet = atomSpace.getOutgoing( incomingSet[i] );
+                HandleSeq outgoingSet = atomSpace.get_outgoing( incomingSet[i] );
                 if ( outgoingSet.size( ) == 0 || outgoingSet[0] != anchorNode ) {
                     logger().debug( "PAI::%s - Wrong LIST_LINK arity[%d]",
                                     __FUNCTION__, outgoingSet.size() );
@@ -1994,13 +2020,13 @@ void PAI::processInstruction(DOMElement * element)
                 linkFound = true;
                 unsigned int j;
                 for( j = 1; j < outgoingSet.size( ); ++j ) {
-                    if ( atomSpace.getType( outgoingSet[j] ) == SENTENCE_NODE ) {
+                    if ( atomSpace.get_type( outgoingSet[j] ) == SENTENCE_NODE ) {
                         sentenceOwner[1] = outgoingSet[j];
                         Handle sentenceOwnerLink =
                             AtomSpaceUtil::addLink(atomSpace, LIST_LINK, sentenceOwner );
-                        atomSpace.setTV( sentenceOwnerLink, TruthValue::TRUE_TV( ) );
+                        atomSpace.set_TV( sentenceOwnerLink, TruthValue::TRUE_TV( ) );
                         logger().debug( "PAI::%s - Sentence found. now connecting[%s]",
-                                        __FUNCTION__, atomSpace.getName( sentenceOwner[1] ).c_str( ) );
+                                        __FUNCTION__, atomSpace.get_name( sentenceOwner[1] ).c_str( ) );
 
                     } // if
                 } // for
@@ -2500,7 +2526,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             // check if the object to be removed is marked as grabbed in
             // AvatarInterface. If so grabbed status should be unset.
             if (avatarInterface.hasGrabbedObj() &&
-                    avatarInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
+                    avatarInterface.getGrabbedObj() == atomSpace.get_name(objectNode)) {
                 avatarInterface.setGrabbedObj(std::string(""));
             }
         } else {
@@ -2546,16 +2572,16 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             if ( material.length() > 0 ){
                 printf("Material found: %s\n",material.c_str());
 
-                Handle materialWordNode = atomSpace.addNode( WORD_NODE, material );
-                Handle materialConceptNode = atomSpace.addNode( CONCEPT_NODE, material );
+                Handle materialWordNode = atomSpace.add_node( WORD_NODE, material );
+                Handle materialConceptNode = atomSpace.add_node( CONCEPT_NODE, material );
 
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(materialConceptNode);
                 referenceLinkOutgoing.push_back(materialWordNode);
 
                 {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ) );
-                    atomSpace.setLTI( referenceLink, 1 );
+                    Handle referenceLink = atomSpace.add_link( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ) );
+                    atomSpace.set_LTI( referenceLink, 1 );
                 }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "material",
@@ -2565,14 +2591,14 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
              //texture property
             if ( texture.length() ){
                 printf("Texture found: %s\n",texture.c_str());
-                Handle textureWordNode = atomSpace.addNode( WORD_NODE, texture);
-                Handle textureConceptNode = atomSpace.addNode( CONCEPT_NODE, texture);
+                Handle textureWordNode = atomSpace.add_node( WORD_NODE, texture);
+                Handle textureConceptNode = atomSpace.add_node( CONCEPT_NODE, texture);
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(textureConceptNode);
                 referenceLinkOutgoing.push_back(textureWordNode);
                 {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
+                    Handle referenceLink = atomSpace.add_link( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.set_LTI( referenceLink, 1 );
                 }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "texture",
@@ -2583,14 +2609,14 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             std::map<std::string, float>::const_iterator it;
             for (it = colors.begin(); it != colors.end(); it++) {
                 printf("Color property found: %s (%f)\n", it->first.c_str(), it->second);
-                Handle colorWordNode = atomSpace.addNode( WORD_NODE, it->first);
-                Handle colorConceptNode = atomSpace.addNode( CONCEPT_NODE, it->first);
+                Handle colorWordNode = atomSpace.add_node( WORD_NODE, it->first);
+                Handle colorConceptNode = atomSpace.add_node( CONCEPT_NODE, it->first);
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(colorConceptNode);
                 referenceLinkOutgoing.push_back(colorWordNode);
                 {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
+                    Handle referenceLink = atomSpace.add_link( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.set_LTI( referenceLink, 1 );
                 }
 
                 SimpleTruthValue tv( it->second, 1.0 );
@@ -2694,7 +2720,8 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
 }
 
-void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool useProtoBuf)
+void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
+                         bool useProtoBuf)
 {
     if (!useProtoBuf) {
         // Use the old parser to handle XML document.
@@ -2713,7 +2740,8 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
         return;
     }
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
     bool isFirstPerceptWorld;
@@ -2740,8 +2768,9 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles, bool u
 
         MapInfoSeq mapinfoSeq;
         mapinfoSeq.ParseFromArray((void*)binary, length);
-        logger().debug("PAI - processMapInfo recieved mapinfos information: %s", mapinfoSeq.DebugString().c_str());
-
+        logger().debug("PAI - processMapInfo recieved mapinfos information: %s",
+                       mapinfoSeq.DebugString().c_str());
+        
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);
@@ -2876,7 +2905,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action
 Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
-    logger().debug("PAI - execLink = %s \n", atomSpace.atomAsString(execLink).c_str());
+    logger().debug("PAI - execLink = %s \n", atomSpace.atom_as_string(execLink).c_str());
 
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(execLink);
@@ -2890,8 +2919,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& ac
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
                                              evalLinkOutgoing);
 
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,
-                                                 TruthValue::TRUE_TV());
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
     AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink,
                                                      predicateNode);
 
@@ -2970,7 +2998,7 @@ void PAI::addVectorPredicate(Handle objectNode, const std::string& predicateName
 {
     Handle evalLink = addVectorPredicate(objectNode, predicateName, vec);
 
-    Handle predNode = atomSpace.getHandle(PREDICATE_NODE, predicateName.c_str());
+    Handle predNode = atomSpace.get_handle(PREDICATE_NODE, predicateName.c_str());
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
     AtomSpaceUtil::updateLatestSpatialPredicate(atomSpace, atTimeLink, predNode, objectNode);
 }
@@ -3055,7 +3083,7 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
 
     logger().fine("PAI - Adding predName: %s, value: %d, obj: %s",
                  predicateName.c_str(), (int)propertyValue,
-                 atomSpace.getName(objectNode).c_str());
+                 atomSpace.get_name(objectNode).c_str());
 
     AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
 
@@ -3071,18 +3099,18 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
 {
     if (inheritanceValue) {
         logger().debug("PAI - Inheritance: %s => %s",
-                     atomSpace.getName(subNodeHandle).c_str(),
+                     atomSpace.get_name(subNodeHandle).c_str(),
                      conceptNodeName.c_str());
 
         Handle conceptNodeHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, conceptNodeName.c_str(), true);
-        atomSpace.setLTI(subNodeHandle, 1);
+        atomSpace.set_LTI(subNodeHandle, 1);
 
         HandleSeq seq;
         seq.push_back(subNodeHandle);
         seq.push_back(conceptNodeHandle);
 
         Handle link = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, seq, true);
-        atomSpace.setTV(link, SimpleTruthValue::createTV(1.0, 1.0));
+        atomSpace.set_TV(link, SimpleTruthValue::createTV(1.0, 1.0));
     }
 }
 
@@ -3137,7 +3165,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
                              double length, double width, double height, bool isTerrainObject,bool isFirstTimePercept)
 {
 
-    bool isSelfObject = (avatarInterface.getPetId() == atomSpace.getName(objectNode));
+    bool isSelfObject = (avatarInterface.getPetId() == atomSpace.get_name(objectNode));
 
     // Position predicate
     Vector position = addVectorPredicate(objectNode, AGISIM_POSITION_PREDICATE_NAME, timestamp, positionElement);
@@ -3151,7 +3179,6 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
     // Size predicate
     if (length > 0 && width > 0 && height > 0) {
         Handle predNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, SIZE_PREDICATE_NAME, true);
-
         Handle lengthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(length).c_str());
         Handle widthNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(width).c_str());
         Handle heightNode = AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, opencog::toString(height).c_str());
@@ -3185,7 +3212,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         // For now, assume any object's size does not change in time.
         logger().warn("PAI - addSpacePredicates(): No size information available in mapinfo.");
 
-        Handle predNode = atomSpace.getHandle( PREDICATE_NODE, SIZE_PREDICATE_NAME);
+        Handle predNode = atomSpace.get_handle( PREDICATE_NODE, SIZE_PREDICATE_NAME);
         if (predNode != Handle::UNDEFINED) {
             HandleSeq sizeEvalLinks;
             HandleSeq outgoing;
@@ -3193,22 +3220,22 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
             outgoing.push_back(Handle::UNDEFINED);
             atomSpace.getHandleSet(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
             for (Handle evalLink : sizeEvalLinks) {
-                Handle listLink = atomSpace.getOutgoing(evalLink, 1);
-                if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
-                    if (atomSpace.getOutgoing(listLink, 0) == objectNode) {
+                Handle listLink = atomSpace.get_outgoing(evalLink, 1);
+                if (atomSpace.get_type(listLink) == LIST_LINK && atomSpace.get_arity(listLink) == 4) {
+                    if (atomSpace.get_outgoing(listLink, 0) == objectNode) {
                         // Found size info for the SL object
                         // TODO: Check for latest (more recent) EvalLink("size",...) from multiple ones, for sizable SL objects,
                         // if any, in the future
-                        length = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str());
-                        width = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 2)).c_str());
-                        height = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 3)).c_str());
+                        length = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 1)).c_str());
+                        width = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 2)).c_str());
+                        height = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 3)).c_str());
                     }
                 }
             }
             logger().warn("PAI - addSpacePredicates(): Got last size information available.");
         }
         if (length <= 0 || width <= 0 || height <= 0) {
-            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
+            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.get_name(objectNode).c_str());
             if (length < 0) length = 0;
             if (width < 0) width = 0;
             if (height < 0) height = 0;
@@ -3220,7 +3247,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
 
     if (!isTerrainObject) {
         Handle petHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
-        std::string objectName = atomSpace.getName( objectNode );
+        std::string objectName = atomSpace.get_name( objectNode );
         bool isAgent = AtomSpaceUtil::getAgentHandle( atomSpace, objectName ) != Handle::UNDEFINED;
         double pet_length, pet_width, pet_height;
 
@@ -3235,9 +3262,10 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         entityClass = "block";
     }
 
-    return spaceServer().addSpaceInfo(objectNode, timestamp, (int)position.x, (int)position.y, (int)position.z,
-                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept);
+    return spaceServer().addSpaceInfo(objectNode, spaceServer().getLatestMapHandle(), timestamp, (int)position.x, (int)position.y, (int)position.z,
+                                                   (int)length, (int)width, (int)height, rotation.yaw, isObstacle, entityClass, isFirstTimePercept,);
 }
+
 */
 void PAI::addSemanticStructure(Handle objectNode,
         const std::string& entityId,
@@ -3252,24 +3280,24 @@ void PAI::addSemanticStructure(Handle objectNode,
     typeName[0] = std::toupper(typeName[0]);
 
     // Add semantic structure into atomspace, used for language comprehension.
-    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId);
+    Handle objSemeNode = atomSpace.add_node(SEME_NODE, entityId);
     objSemeNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
-    Handle objWordNode = atomSpace.addNode(WORD_NODE, entityClass);
-    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass);
+    Handle objWordNode = atomSpace.add_node(WORD_NODE, entityClass);
+    Handle objClassNode = atomSpace.add_node(CONCEPT_NODE, entityClass);
     objClassNode->setTruthValue(SimpleTruthValue::createTV(1, 1));
 
     // Create the inheritance link
-    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName);
+    Handle objectType = atomSpace.add_node(CONCEPT_NODE, typeName);
     objectType->setTruthValue(SimpleTruthValue::createTV(1, 1));
-    Handle link = atomSpace.addLink(INHERITANCE_LINK,
+    Handle link = atomSpace.add_link(INHERITANCE_LINK,
         objSemeNode, objectType);
     link->setTruthValue(SimpleTruthValue::createTV(1, 1));
-    atomSpace.setLTI(link, 1);
+    atomSpace.set_LTI(link, 1);
 
     Handle referenceLink =
-        atomSpace.addLink(REFERENCE_LINK, objClassNode, objSemeNode);
+        atomSpace.add_link(REFERENCE_LINK, objClassNode, objSemeNode);
     referenceLink->setTruthValue(TruthValue::TRUE_TV());
-    atomSpace.setLTI(referenceLink, 1);
+    atomSpace.set_LTI(referenceLink, 1);
 
     // Create a frame for representing this object
     std::map<std::string, Handle> elements;
@@ -3284,34 +3312,34 @@ void PAI::addSemanticStructure(Handle objectNode,
     // It should use the (ConceptNode "Accessory"), as defined above (and only that).
     // Useful for inference and frequent subgraph mining
     {
-        Handle link = atomSpace.addLink(INHERITANCE_LINK,
+        Handle link = atomSpace.add_link(INHERITANCE_LINK,
                objectNode, objectType);
         link->setTruthValue(SimpleTruthValue::createTV(1, 1));
-        atomSpace.setLTI(link, 1);
+        atomSpace.set_LTI(link, 1);
     }
 
     // JaredW: Add e.g. (InheritanceLink (AccessoryNode "id_315840") (ConceptNode "ball"))
     {
-        Handle link = atomSpace.addLink(INHERITANCE_LINK,
+        Handle link = atomSpace.add_link(INHERITANCE_LINK,
                 objectNode, objClassNode);
         link->setTruthValue(SimpleTruthValue::createTV(1, 1));
-        atomSpace.setLTI(link, 1);
+        atomSpace.set_LTI(link, 1);
     }
 
     // connect the acessory node to the seme node
     {
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK,
           objectNode, objSemeNode);
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
     }
 
     // connect the seme node to the word node
     {
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK,
            objSemeNode, objWordNode);
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
     }
 }
 
@@ -3335,7 +3363,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     HandleSeq dummy;dummy.push_back(agentNode);
     evalLinkOutgoing.push_back(AtomSpaceUtil::addLink(atomSpace, LIST_LINK, dummy));
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-    atomSpace.setSTI(evalLink, sti);
+    atomSpace.set_STI(evalLink, sti);
 
     // Time stamp the EvaluationLink
     //
@@ -3346,8 +3374,8 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
 
     // count=1, i.e. one observation of this biological urge
-    atomSpace.setTV(atTimeLink,SimpleTruthValue::createTV((strength_t)level, 1));
-    atomSpace.setSTI(atTimeLink, sti);
+    atomSpace.set_TV(atTimeLink,SimpleTruthValue::createTV((strength_t)level, 1));
+    atomSpace.set_STI(atTimeLink, sti);
 
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
 
@@ -3366,10 +3394,10 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
                                      "Low";
 
         std::map<std::string, Handle> elements;
-        elements["Experiencer"] = atomSpace.addNode( SEME_NODE, avatarInterface.getPetId() );
-        elements["State"] = atomSpace.addNode( CONCEPT_NODE, frameName );
-        elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
-        elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( level ) );
+        elements["Experiencer"] = atomSpace.add_node( SEME_NODE, avatarInterface.getPetId() );
+        elements["State"] = atomSpace.add_node( CONCEPT_NODE, frameName );
+        elements["Degree"] = atomSpace.add_node( CONCEPT_NODE, degree );
+        elements["Value"] = atomSpace.add_node( NUMBER_NODE, boost::lexical_cast<std::string>( level ) );
 
         AtomSpaceUtil::setPredicateFrameFromHandles( atomSpace,
                                                      "#Biological_urge",
@@ -3378,7 +3406,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
                                                      SimpleTruthValue::createTV( (level < 0.5) ? 0.0 : level, 1.0 )
                                                     );
     } else {
-        Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE, frameInstanceName);
+        Handle predicateNode = atomSpace.get_handle(PREDICATE_NODE, frameInstanceName);
         if ( predicateNode != Handle::UNDEFINED ) {
             AtomSpaceUtil::deleteFrameInstance(atomSpace, feelingNode);
         } // if
@@ -3400,7 +3428,7 @@ Handle PAI::addOwnershipRelation(const Handle owner, const Handle owned, bool is
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing, isPetObject);
 
     // set predicate evaluation true
-    atomSpace.setTV(evalLink, SimpleTruthValue::createTV(1.0f, 0.0f));
+    atomSpace.set_TV(evalLink, SimpleTruthValue::createTV(1.0f, 0.0f));
 
     // No time info for now - UNCOMMENT if ownership needs time info
     //atomSpace.addTimeInfo( evalLink, timestamp);
@@ -3460,10 +3488,10 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                         for (ActionParameter param : params) {
                             if (param.getName() == "target") {
                                 const Entity& entity = param.getEntityValue();
-                                AtomSpaceUtil::setupHoldingObject(  atomSpace,
-                                                                    avatarInterface.getPetId( ),
-                                                                    entity.id,
-                                                                    getLatestSimWorldTimestamp() );
+                                AtomSpaceUtil::setupHoldingObject(atomSpace,
+								  avatarInterface.getPetId( ),
+								  entity.id,
+								  getLatestSimWorldTimestamp() );
                                 avatarInterface.setGrabbedObj(entity.id);
                             }
                         }
@@ -3492,7 +3520,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
                 break;
             }
             ActionID actionHandle = planToActionIdsMaps[planId][seqNumber];
-            OC_ASSERT(atomSpace.isValidHandle(actionHandle),
+            OC_ASSERT(atomSpace.is_valid_handle(actionHandle),
                       "No valid action handle associated with "
                       "planId = %s, seqNumber = %u",
                       planId.c_str(), seqNumber);
@@ -3574,7 +3602,8 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
     XMLString::transcode(TERRAIN_DATA_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     DOMNodeList* dataList = element->getElementsByTagName(tag);
 
-    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag, PAIUtils::MAX_TAG_LENGTH);
+    XMLString::transcode(IS_FIRST_TIME_PERCEPT_WORLD, tag,
+                         PAIUtils::MAX_TAG_LENGTH);
     char* isFirstPercept = XMLString::transcode(element->getAttribute(tag));
     string isFirstPerceptStr(isFirstPercept);
 
@@ -3615,11 +3644,11 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes(toUpdateHandles);
+	      spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
+	      spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3720,18 +3749,18 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
     std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
     std::string entityType = mapinfo.type();
     Type nodeType = getSLObjectNodeType(entityType.c_str());
-    Handle objectNode = atomSpace.getHandle(nodeType, internalEntityId);
+    Handle objectNode = atomSpace.get_handle(nodeType, internalEntityId);
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    spaceServer().removeSpaceInfo(objectNode, timestamp);
+    spaceServer().removeSpaceInfo(objectNode, spaceServer().getLatestMapHandle(),timestamp);
 
     addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
     // check if the object to be removed is marked as grabbed in
     // AvatarInterface. If so grabbed status should be unset.
     if (avatarInterface.hasGrabbedObj() &&
-            avatarInterface.getGrabbedObj() == atomSpace.getName(objectNode)) {
+            avatarInterface.getGrabbedObj() == atomSpace.get_name(objectNode)) {
         avatarInterface.setGrabbedObj(std::string(""));
     }
 
@@ -3763,7 +3792,7 @@ int roundDoubleToInt(double x)
 
 bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool isSelfObject, unsigned long timestamp,bool isFirstTimePercept)
 {
-    std::string objectName = atomSpace.getName(objectNode);
+    std::string objectName = atomSpace.get_name(objectNode);
 
     // Position predicate
     Vector position(mapinfo.position().x(), mapinfo.position().y(), mapinfo.position().z());
@@ -3789,14 +3818,14 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
         if (isSelfObject) {
             unsigned int agentRadius = sqrt(length * length + width * width) / 2;
             spaceServer().setAgentRadius(agentRadius);
-            spaceServer().setAgentHeight(roundDoubleToInt(height) );
+            spaceServer().setAgentHeight(roundDoubleToInt(height), spaceServer().getLatestMapHandle());
         }
     } else {
         // Get the length, width and height of the object
         // For now, assume any object's size does not change in time.
         logger().warn("PAI - addSpacePredicates(): No size information available in mapinfo.");
 
-        Handle predNode = atomSpace.getHandle(PREDICATE_NODE, SIZE_PREDICATE_NAME);
+        Handle predNode = atomSpace.get_handle(PREDICATE_NODE, SIZE_PREDICATE_NAME);
         if (predNode != Handle::UNDEFINED) {
             HandleSeq sizeEvalLinks;
             HandleSeq outgoing;
@@ -3806,15 +3835,15 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
                  atomSpace,
                  EVALUATION_LINK, outgoing, NULL, NULL, 2);
             for (Handle evalLink : sizeEvalLinks) {
-                Handle listLink = atomSpace.getOutgoing(evalLink, 1);
-                if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
-                    if (atomSpace.getOutgoing(listLink, 0) == objectNode) {
+                Handle listLink = atomSpace.get_outgoing(evalLink, 1);
+                if (atomSpace.get_type(listLink) == LIST_LINK && atomSpace.get_arity(listLink) == 4) {
+                    if (atomSpace.get_outgoing(listLink, 0) == objectNode) {
                         // Found size info for the SL object
                         // TODO: Check for latest (more recent) EvalLink("size",...) from multiple ones, for sizable SL objects,
                         // if any, in the future
-                        length = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str());
-                        width = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 2)).c_str());
-                        height = atof(atomSpace.getName(atomSpace.getOutgoing(listLink, 3)).c_str());
+                        length = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 1)).c_str());
+                        width = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 2)).c_str());
+                        height = atof(atomSpace.get_name(atomSpace.get_outgoing(listLink, 3)).c_str());
                     }
                 }
             }
@@ -3822,7 +3851,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
         }
 
         if (length <= 0 || width <= 0 || height <= 0) {
-            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
+            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.get_name(objectNode).c_str());
             if (length < 0) length = 0;
             if (width < 0) width = 0;
             if (height < 0) height = 0;
@@ -3861,8 +3890,8 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 
     // Space server insertion
     // round up these values
-    return spaceServer().addSpaceInfo(objectNode,isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
-                                    roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
+    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
+				      roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
 
 }
 
@@ -3936,13 +3965,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     if (holder != NULL_ATTRIBUTE)
     {
         // Add a reference link
-        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+        Handle holderConceptNode = atomSpace.add_node(AVATAR_NODE, holder);
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK,
             holderConceptNode,
-            atomSpace.addNode(WORD_NODE, holder));
+            atomSpace.add_node(WORD_NODE, holder));
 
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
@@ -3952,17 +3981,17 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     if (material != NULL_ATTRIBUTE){
        // printf("Material found: %s\n",material.c_str());
 
-        Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
-        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
+        Handle materialWordNode = atomSpace.add_node(WORD_NODE, material);
+        Handle materialConceptNode = atomSpace.add_node(CONCEPT_NODE, material);
 
         HandleSeq referenceLinkOutgoing;
         referenceLinkOutgoing.push_back(materialConceptNode);
         referenceLinkOutgoing.push_back(materialWordNode);
 
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing);
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK, referenceLinkOutgoing);
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
@@ -3972,14 +4001,14 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     if (color_name != NULL_ATTRIBUTE){
        // printf("color_name found: %s\n",color_name.c_str());
 
-        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
-        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
+        Handle colorNameWordNode = atomSpace.add_node(WORD_NODE, color_name);
+        Handle colorNameConceptNode = atomSpace.add_node(CONCEPT_NODE, color_name);
 
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK,
             colorNameConceptNode, colorNameWordNode);
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorNameConceptNode);
@@ -3988,14 +4017,14 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     // Add texture property predicate
     if (texture != NULL_ATTRIBUTE) {
         printf("Texture found: %s\n", texture.c_str());
-        Handle textureWordNode = atomSpace.addNode(WORD_NODE, texture);
-        Handle textureConceptNode = atomSpace.addNode(CONCEPT_NODE, texture);
+        Handle textureWordNode = atomSpace.add_node(WORD_NODE, texture);
+        Handle textureConceptNode = atomSpace.add_node(CONCEPT_NODE, texture);
 
         // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+        Handle referenceLink = atomSpace.add_link(REFERENCE_LINK,
             textureConceptNode, textureWordNode);
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+        atomSpace.set_LTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
                                           SimpleTruthValue::createTV(1.0f, 1.0f), objectNode, textureConceptNode);
@@ -4006,14 +4035,14 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     std::map<std::string, float>::const_iterator it;
     for (it = colors.begin(); it != colors.end(); it++) {
         printf("Color property found: %s (%f)\n", it->first.c_str(), it->second);
-        Handle colorWordNode = atomSpace.addNode(WORD_NODE, it->first);
-        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, it->first);
+        Handle colorWordNode = atomSpace.add_node(WORD_NODE, it->first);
+        Handle colorConceptNode = atomSpace.add_node(CONCEPT_NODE, it->first);
         HandleSeq referenceLinkOutgoing;
         referenceLinkOutgoing.push_back(colorConceptNode);
         referenceLinkOutgoing.push_back(colorWordNode);
         {
-            Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
-            atomSpace.setLTI(referenceLink, 1);
+            Handle referenceLink = atomSpace.add_link(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+            atomSpace.set_LTI(referenceLink, 1);
         }
 
         SimpleTruthValue tv(it->second, 1.0);
@@ -4114,7 +4143,7 @@ bool PAI::isObjectAnObstacle(Handle objectNode, const std::string& entityClass, 
     }
 
     Handle avatarHandle = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId());
-    std::string objectName = atomSpace.getName(objectNode);
+    std::string objectName = atomSpace.get_name(objectNode);
     double height = mapinfo.height();
     bool isSelfObject = (avatarHandle == objectNode);
     bool isAgent = AtomSpaceUtil::getAgentHandle(atomSpace, objectName) != Handle::UNDEFINED;
@@ -4138,8 +4167,8 @@ double PAI::getAvatarWeight(Handle avatarNode)
     // Create BindLink used by pattern matcher
     HandleSeq predicateListLinkOutgoing,evalLinkOutgoing, implicationLinkOutgoings, bindLinkOutgoings;
 
-    Handle weightPredicateNode = atomSpace.getHandle(PREDICATE_NODE, AVATAR_WEIGHT);
-    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any"); // the weithgt value number node
+    Handle weightPredicateNode = atomSpace.get_handle(PREDICATE_NODE, AVATAR_WEIGHT);
+    Handle hVariableNode = atomSpace.add_node(VARIABLE_NODE, "$var_any"); // the weithgt value number node
     predicateListLinkOutgoing.push_back(avatarNode);
     predicateListLinkOutgoing.push_back(hVariableNode);
 
@@ -4148,12 +4177,9 @@ double PAI::getAvatarWeight(Handle avatarNode)
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    implicationLinkOutgoings.push_back(evalLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-
     bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    bindLinkOutgoings.push_back(evalLink);
+    Handle hBindLink = atomSpace.add_link(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(&atomSpace, hBindLink);
@@ -4163,14 +4189,14 @@ double PAI::getAvatarWeight(Handle avatarNode)
     //       may fail to remove the ReferenceLink when necessary.
     //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here),
     //       which would make cog-delete scheme function fail.
-    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
-    atomSpace.removeAtom(hResultListLink);
+    std::vector<Handle> resultSet = atomSpace.get_outgoing(hResultListLink);
+    atomSpace.remove_atom(hResultListLink);
 
     // Check and return the result
     // currently, the weight of avatar is const, so there should be only one result
     for (Handle hResult : resultSet)
     {
-        std::string weightStr = atomSpace.getName(hResult);
+        std::string weightStr = atomSpace.get_name(hResult);
         return atof(weightStr.c_str()); // return the first one
 
     }
@@ -4399,14 +4425,14 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
     {
         printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
-        spaceServer().findAllBlockEntitiesOnTheMap();
+        spaceServer().findAllBlockEntitiesOnTheMap(spaceServer().getLatestMapHandle());
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes(toUpdateHandles);
+        spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles,spaceServer().getLatestMapHandle());
 
         int t2 = time(NULL);
 
@@ -4510,7 +4536,7 @@ void PAI::processBlockStructureSignal(DOMElement* element)
 
 std::string PAI::getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH)
 {
-    Type objectType = atomSpace.getType(objectH);
+    Type objectType = atomSpace.get_type(objectH);
 
     if (objectType == OBJECT_NODE)
         return ORDINARY_OBJECT_TYPE;

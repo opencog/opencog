@@ -68,21 +68,21 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     //    they are not moveable
     if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) and
         AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) and
-        atomSpace.getType(object) == ACCESSORY_NODE and
+        atomSpace.get_type(object) == ACCESSORY_NODE and
         not AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object))
     {
         tv = SimpleTruthValue::createTV(1.0, 1.0);
 
-        std::string objectName = atomSpace.getName( object );
-        std::string agentName = atomSpace.getName( pet );
+        std::string objectName = atomSpace.get_name( object );
+        std::string agentName = atomSpace.get_name( pet );
 
-        Handle isSmallPredicate = atomSpace.getHandle( 
+        Handle isSmallPredicate = atomSpace.get_handle( 
             PREDICATE_NODE, agentName + "_" + objectName + "_is_small" );
 
         if ( isSmallPredicate != Handle::UNDEFINED ) {
 
             Handle comparison = 
-                atomSpace.getHandle( DEFINED_FRAME_NODE, "#Evaluative_comparison" );
+                atomSpace.get_handle( DEFINED_FRAME_NODE, "#Evaluative_comparison" );
             OC_ASSERT(comparison != Handle::UNDEFINED,
                       "#Evaluative_comparison wasn't defined yet. Please load the predicates-frames.scm file" );
 
@@ -90,11 +90,11 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             isSmallFrame.push_back( isSmallPredicate );
             isSmallFrame.push_back( comparison );
 
-            Handle isSmallLink = atomSpace.getHandle( INHERITANCE_LINK, isSmallFrame );
+            Handle isSmallLink = atomSpace.get_handle( INHERITANCE_LINK, isSmallFrame );
             OC_ASSERT(isSmallLink != Handle::UNDEFINED,
                       "is_small frame wasn't defined for the object '%s'", objectName.c_str( ) );
 
-            Handle objectSemeNode =  atomSpace.getHandle( SEME_NODE, objectName );
+            Handle objectSemeNode =  atomSpace.get_handle( SEME_NODE, objectName );
             OC_ASSERT(objectSemeNode != Handle::UNDEFINED,
                       "A SemeNode wasn't yet defined for the object '%s'",
                       objectName.c_str( ) );
@@ -120,13 +120,13 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             isPickupable.push_back( parentHandles[0] ); // is_movable
             isPickupable.push_back( isSmallLink ); // is_small
         
-            atomSpace.addLink( EVALUATION_LINK, isPickupable );
+            atomSpace.add_link( EVALUATION_LINK, isPickupable );
         } // if
 
     }
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_pickupable", tv, object);
     
     logger().debug("IsPickupablePredicateUpdater - Is element %s pickupable: %s",
-                 atomSpace.getName(object).c_str(),
+                 atomSpace.get_name(object).c_str(),
                  ( tv->getMean( ) ? "t" : "f" ) );
 }

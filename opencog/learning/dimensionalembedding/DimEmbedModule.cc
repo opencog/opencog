@@ -199,9 +199,9 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if (!fanin) as->incVLTI(h);//We don't want pivot atoms to be forgotten...
+    if (!fanin) as->inc_VLTI(h);//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
-    as->getHandlesByType(std::back_inserter(nodes), NODE, true);
+    as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
 
     std::map<Handle,double> distMap;
 
@@ -240,18 +240,18 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         pQueue.erase(--erase_it);
 
         if (distMap[u]==0) { break;}
-        HandleSeq newLinks = as->getIncoming(u);
+        HandleSeq newLinks = as->get_incoming(u);
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
-            if (!classserver().isA(as->getType(*it),linkType)) continue;
-            TruthValuePtr linkTV = as->getTV(*it);
-            HandleSeq newNodes = as->getOutgoing(*it);
+            if (!classserver().isA(as->get_type(*it),linkType)) continue;
+            TruthValuePtr linkTV = as->get_TV(*it);
+            HandleSeq newNodes = as->get_outgoing(*it);
             HandleSeq::iterator it2=newNodes.begin();
             //if !fanin, we're following the "outward" links, so it's only a
             //valid link if u is the source
-            if (!symmetric && !fanin && !as->isSource(u,*it)) continue;
+            if (!symmetric && !fanin && !as->is_source(u,*it)) continue;
             if (!symmetric && fanin) {
-                if (as->isSource(u,*it)) {
+                if (as->is_source(u,*it)) {
                     continue;
                 }
                 else {
@@ -261,7 +261,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
                 }
             }
             for (;it2!=newNodes.end(); ++it2) {
-                if (!as->isNode(*it2)) continue;
+                if (!as->is_node(*it2)) continue;
                 double alt =
                     distMap[u] * linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
@@ -337,7 +337,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
     dimensionMap[linkType]=numDimensions;
     //const HandleSeq& pivots = getPivots(linkType);
     HandleSeq nodes;//candidates for new pivots
-    as->getHandlesByType(std::back_inserter(nodes), NODE, true);
+    as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
     if (nodes.empty()) return;
     if (nodes.size() < (size_t) numDimensions) numDimensions = nodes.size();
 
@@ -350,7 +350,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
         if (!symmetric && !fanin && (nodes.empty() || i==numDimensions-1)) {
             fanin=true;
             nodes.clear();
-            as->getHandlesByType(std::back_inserter(nodes), NODE, true);
+            as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
             i=-1;
         }
 
@@ -585,7 +585,7 @@ void DimEmbedModule::clearEmbedding(Type linkType)
 
     HandleSeq pivots  = pivotsMap[linkType];
     for (HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
-        if (as->isValidHandle(*it)) as->decVLTI(*it);
+        if (as->is_valid_handle(*it)) as->dec_VLTI(*it);
     }
     if (symmetric) {
         atomMaps.erase(linkType);
@@ -610,8 +610,8 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
 
     oss << "PIVOTS:" << std::endl;
     for (HandleSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
-        if (as->isValidHandle(*it)) {
-            oss << as->atomAsString(*it,true) << std::endl;
+        if (as->is_valid_handle(*it)) {
+            oss << as->atom_as_string(*it,true) << std::endl;
         } else {
             oss << "[PIVOT'S BEEN DELETED]" << std::endl;
         }
@@ -619,8 +619,8 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     oss << "Node Embeddings:" << std::endl;
     AtomEmbedding::const_iterator it;
     for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
-        if (as->isValidHandle(it->first)) {
-            oss << as->atomAsString(it->first,true) << " : (";
+        if (as->is_valid_handle(it->first)) {
+            oss << as->atom_as_string(it->first,true) << " : (";
         } else {
             oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
@@ -646,8 +646,8 @@ void DimEmbedModule::printEmbedding()
         AtomEmbedding atomEmbedding=mit->second;
         AtomEmbedding::const_iterator it;
         for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
-            if (as->isValidHandle(it->first)) {
-                oss << as->atomAsString(it->first,true) << " : (";
+            if (as->is_valid_handle(it->first)) {
+                oss << as->atom_as_string(it->first,true) << " : (";
             } else {
                 oss << "[NODE'S BEEN DELETED. handle=";
                 oss << it->first << "] : (";
@@ -840,7 +840,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
     for (pQueue_t::iterator it = clusters.begin();it!=clusters.end();++it) {
         const HandleSeq& cluster = it->second.first;
         const std::vector<double>& centroid = it->second.second;
-        Handle newNode = addPrefixedNode(*as, CONCEPT_NODE, "cluster_");
+        Handle newNode = add_prefixed_node(*as, CONCEPT_NODE, "cluster_");
         std::vector<double> strNumer(0,numDims);
         std::vector<double> strDenom(0,numDims);
         //Connect newNode to each handle in its cluster and each pivot
@@ -852,7 +852,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double strength = sqrt(std::pow(2.0, -dist));
             TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                                 SimpleTruthValue::confidenceToCount(strength)));
-            Handle hi = as->addLink(INHERITANCE_LINK, *it2, newNode);
+            Handle hi = as->add_link(INHERITANCE_LINK, *it2, newNode);
             hi->merge(tv);
 
             for (int i=0; i<numDims; ++i) {
@@ -866,7 +866,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
             TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
                                 SimpleTruthValue::confidenceToCount(attrStrength)));
-            Handle hi = as->addLink(l, newNode, pivots[i]);
+            Handle hi = as->add_link(l, newNode, pivots[i]);
             hi->merge(tv);
         }
     }
@@ -939,7 +939,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    if (!as->isNode(n1) || !as->isNode(n2))
+    if (!as->is_node(n1) || !as->is_node(n2))
         throw InvalidParamException(TRACE_INFO,
                                     "blendNodes requires two nodes.");
     if (!isEmbedded(l)) {
@@ -969,14 +969,14 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double dist2 = p2.distance(cTree.kNearestNeighbors(p2,1)[0]);
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
-    std::string prefix("blend_"+as->getName(n1)+"_"+as->getName(n2)+"_");
-    Handle newNode = addPrefixedNode(*as, n1->getType(), prefix);
+    std::string prefix("blend_"+as->get_name(n1)+"_"+as->get_name(n2)+"_");
+    Handle newNode = add_prefixed_node(*as, n1->getType(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
         TruthValuePtr tv(SimpleTruthValue::createTV(strength,
                             SimpleTruthValue::confidenceToCount(strength)));
-        Handle hi = as->addLink(l, newNode, pivots[i]);
+        Handle hi = as->add_link(l, newNode, pivots[i]);
         hi->merge(tv);
     }
     return newNode;

@@ -102,7 +102,7 @@ float StorkeyAgent::h(int i, int j, w_t& w)
     float h_sum = 0.0f;
     for (int k=0; k < n; k++) {
         if (k == i || k == j) continue;
-        h_sum += ( w[i][k] * a.getNormalisedSTI(hs.hGrid[k],false) );
+        h_sum += ( w[i][k] * a.get_normalised_STI(hs.hGrid[k],false) );
     }
     return h_sum;
 }
@@ -114,7 +114,7 @@ float StorkeyAgent::h(int i, w_t& w)
     int n = w.size();
     float h_sum = 0.0f;
     for (int k=0; k < n; k++) {
-        h_sum += ( w[i][k] * a.getNormalisedSTI(hs.hGrid[k],false) );
+        h_sum += ( w[i][k] * a.get_normalised_STI(hs.hGrid[k],false) );
     }
     return h_sum;
 }
@@ -143,13 +143,13 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
             HandleSeq outgoing;
             outgoing.push_back(iHandle);
             outgoing.push_back(jHandle);
-            Handle heb = a.getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
+            Handle heb = a.get_handle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
-                iRow[j] = a.getTV(heb)->getMean();
+                iRow[j] = a.get_TV(heb)->getMean();
             } else {
-                heb = a.getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
+                heb = a.get_handle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED)
-                    iRow[j] = -(a.getTV(heb)->getMean());
+                    iRow[j] = -(a.get_TV(heb)->getMean());
                 else {
                     iRow[j] = 0.0f;
                 }
@@ -200,21 +200,21 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
             outgoing.push_back(iHandle);
             outgoing.push_back(jHandle);
 
-            Handle heb = a.getHandle(SYMMETRIC_HEBBIAN_LINK,outgoing);
+            Handle heb = a.get_handle(SYMMETRIC_HEBBIAN_LINK,outgoing);
             if (heb != Handle::UNDEFINED) {
                 if (w[i][j] < 0.0f) {
-                    a.removeAtom(heb, true);
-                    a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing)->merge(
+                    a.remove_atom(heb, true);
+                    a.add_link(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing)->merge(
                             SimpleTruthValue::createTV(-w[i][j],100));
                 } else {
                     setMean(heb, w[i][j]);
                 }
             } else {
-                heb = a.getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
+                heb = a.get_handle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
                 if (heb != Handle::UNDEFINED) {
                     if (w[i][j] > 0.0f) {
-                        a.removeAtom(heb, true);
-                        a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing)->merge(
+                        a.remove_atom(heb, true);
+                        a.add_link(SYMMETRIC_HEBBIAN_LINK, outgoing)->merge(
                                 SimpleTruthValue::createTV(w[i][j],100));
                     } else {
                         setMean(heb, -w[i][j]);
@@ -263,11 +263,11 @@ void StorkeyAgent::storkeyUpdate()
             cout << " hGrid[j] = " << a.getNormalisedSTI(hs.hGrid[j],false);
             cout << " h_i = " << h(i,currentWeights);
             cout << " h_j = " << h(j,currentWeights) << endl; */
-            val += (1.0f/n) * a.getNormalisedSTI(hs.hGrid[i],false) *
-                a.getNormalisedSTI(hs.hGrid[j],false);
-            val -= (1.0f/n) * a.getNormalisedSTI(hs.hGrid[i],false) *
+            val += (1.0f/n) * a.get_normalised_STI(hs.hGrid[i],false) *
+                a.get_normalised_STI(hs.hGrid[j],false);
+            val -= (1.0f/n) * a.get_normalised_STI(hs.hGrid[i],false) *
                 h(j,currentWeights);
-            val -= (1.0f/n) * a.getNormalisedSTI(hs.hGrid[j],false) *
+            val -= (1.0f/n) * a.get_normalised_STI(hs.hGrid[j],false) *
                 h(i,currentWeights);
 //            cout << " after val = " << val << endl;
             iRow.push_back(val);

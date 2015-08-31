@@ -59,7 +59,7 @@ class ViterbiUTest: public CxxTest::TestSuite
 			// Load the required data
 			config().set("MODULES",
 				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/query/libQueryModule.so");
+				"opencog/modules/libQueryModule.so");
 
 			cogserver().loadModules();
 
@@ -90,7 +90,9 @@ void ViterbiUTest::setUp(void)
 	// XXX TODO these should be loaded by the parser itself,
 	// and not by the test-case.
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/core_types.scm, "
+		"opencog/scm/opencog.scm, "
+		"opencog/scm/opencog/query.scm, "
 		"opencog/nlp/types/nlp_types.scm, "
 		"opencog/nlp/viterbi/viterbi_types.scm, "
 		"opencog/nlp/viterbi/parse.scm");

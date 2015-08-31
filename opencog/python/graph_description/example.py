@@ -13,12 +13,12 @@ __author__ = 'Cosmo Harrigan'
 atomspace = AtomSpace()
 __init__(atomspace)
 
-data = ["opencog/atomspace/core_types.scm",
+data = ["opencog/scm/core_types.scm",
         "opencog/scm/utilities.scm",
-        "opencog/python/pln/examples/tuffy/smokes/smokes.scm"]
+        "opencog/python/pln_old/examples/tuffy/smokes/smokes.scm"]
 
 # Optionally, you could also include this file for a larger graph sample:
-#   "opencog/python/pln/examples/tuffy/smokes/extra-data.scm"
+#   "opencog/python/pln_old/examples/tuffy/smokes/extra-data.scm"
 
 for item in data:
     load_scm(atomspace, item)

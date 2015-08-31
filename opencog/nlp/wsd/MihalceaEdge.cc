@@ -269,7 +269,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 	out.push_back(first_sense_link);
 	out.push_back(second_sense_link);
 
-	atom_space->addLink(COSENSE_LINK, out)->setTruthValue(stv);
+	atom_space->add_link(COSENSE_LINK, out)->setTruthValue(stv);
 	edge_count ++;
 
 #ifdef LINK_DEBUG

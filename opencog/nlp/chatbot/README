@@ -4,149 +4,79 @@
                 Linas Vepstas <linasvepstas@gmail.com>
                           August 2009
 
-XXX Important parts of the chatbot are being worked on, and so the  
-chatbot might be broken in small or large ways.  I beleive that the
-following revisions should mostly work: 3150, 3470.
-XXX
-
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
-At this time, the bot is a demo of the OpenCog natural-language 
+At this time, the bot is a demo of the OpenCog natural-language
 processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
-OpenCog reasoning, deduction, or anything like that.  The chatbot 
-is as dumb as a rock, as thick as a brick; it possesses no intelligence
-whatsoever.
+OpenCog reasoning, deduction, or anything like that.
 
-It can, however, answer simple English-language questions. It does so
-by comparing the syntactical structure of the question to previously
-entered sentences.  Thus, for example, if the chatbot is told that 
-"John threw a rock", and then asked "Who threw a rock?", direct 
-comparison allows it to equate "Who" -> "John".  The comparisons are
-done on the syntactic structure (dependency parse) of the sentence:
-that is, the parsed form of the sentences and questions are compared.
-This allows for some sophistication: the system can correctly answer
-"What did John throw?" for the above input, because dependency parsing
-will correctly identify "throw" as the head verb of the sentence.
+To make the chatbot to actually answer the question with a correct
+answer PLN inference should be used and that would be the next
+implementation step.
 
-Since OpenCog can save its contents to a database, it can "remember" 
-a large number of assertions that have been previously entered, and 
-answer questions about those.  Currently, a pre-parsed copy of the 
-MIT ConceptNet can be loaded into OpenCog.
-
-Please note: this is meant to be a DEMO of the NLP pipeline, and litle
-more. It is up to you to do something with it!  Also: it is subject to 
-change at any time, as I am likely to twiddle, tweak and change it about.
-(Adding reasoning is a difficult but important priority).
+The chatbot can currently answer certain simple English-language
+wh-questions.  It does this by using "fuzzy-pattern-matching". This
+works by performing a fuzzy search, comparing the question to sentences
+in the atomspace: if a similar sentence is found, the fuzzy matcher
+will offer that up as an answer.  See below for additional details.
 
 Running the chatbot requires three steps:
-1) Setting up your opencog.conf.
-2) Running the parser server.
-3) Running the opencog server.
-4) Running the chat-to-opencog bridge.
 
-Set up opencog.conf:
---------------------
-The chatbot requires some additional Scheme modules to be loaded into
-opencog before starting the OpenCog Server. Furthermore, these modules
-are to be loaded in a particular order so that there won't be any
-dependency violations.
-Here is the proper order as of this time:
-
-SCM_PRELOAD           = atomspace/core_types.scm, 
-                        nlp/types/nlp_types.scm,
-                        scm/persistence.scm,
-                        scm/utilities.scm,
-                        scm/file-utils.scm, 
-                        scm/debug.scm,
-                        nlp/scm/type-definitions.scm, 
-                        nlp/scm/config.scm, 
-                        nlp/scm/file-utils.scm,
-                        nlp/scm/nlp-utils.scm,
-                        nlp/scm/disjunct-list.scm,
-                        nlp/scm/processing-utils.scm,
-                        nlp/triples/rule-tools.scm,
-                        nlp/triples/prep-rules.scm,
-                        nlp/triples/triples-pipeline.scm,
-                        nlp/seme/seme-process.scm,
-                        nlp/triples/deduction.scm,
-                        nlp/chatbot/chat-interface.scm,
-                        nlp/triples/rules.scm,
-                        nlp/triples/question-pipeline.scm,
-                        reasoning/pln/scm/pln-rules.scm
+1) Running the parser server.
+2) Running the opencog server.
+3) Running the chat-to-opencog bridge.
 
 Run the parser server:
 ----------------------
-The chatbot requires the English parser daemon to be running.  The 
+The chatbot requires the English parser daemon to be running.  The
 parser is available in the newer versions of RelEx, and is started by
 running ./opencog-server.sh from the main RelEx directory. (You must
 compile RelEx first, by installing java and ant, and saying "ant" to
 build RelEx).
 
-The parse server listens on port 4444: it will read plain-text input, 
-and generates parsed text in opencog format.  The chatbot needs this
-server to process text.
+The parse server listens on port 4444: it will read plain-text input and
+generates parsed text in OpenCog format. It uses RelEx2Logic rules
+for mapping the output of RelEx into a style of OpenCog Atom representation
+which will be  used for automated reasoning by PLN. The speech act of the
+input sentence will be tagged by R2L.
 
-There is a simple "sniff-test" that can be used to verify that the 
+The chatbot needs this server to process the input text.
+
+There is a simple "sniff-test" that can be used to verify that the
 server is running: try "telnet localhost 4444" to connect to the server,
 then type in an English sentence, then hit return. It should respond
 with a verbose parse of the sentence.
 
 Run the OpenCog server:
 -----------------------
-The chatbot requires an opencog server running on port 17004. This 
-server needs to be appropriately configured and loaded with assorted 
+The chatbot requires an opencog server running on port 17004. This
+server needs to be appropriately configured and loaded with assorted
 databases, code, etc.
 
-This is most easily done by starting the cogserver using the 
+This is most easily done by starting the cog server using the
 "lib/opencog-chatbot.conf" configuration file, which sets the correct
-port, silences the opencog prompt, and loads the needed scheme files.
+port, silences the OpenCog prompt, and loads the needed scheme files.
 
-To enable the common-sense database (described in step 5), you must
-first create and populate the database. This can be done from scratch,
-or by using a database dump, obtained from 
-
-       http://gnucash.org/linas/nlp/data/conceptnet/
-
-The database should be created and populated, as described in 
-opencog/nlp/triples/README.  The config file "lib/opencog-chatbot.conf"
-needs to be edited, and the database name and login credentials updated.
-
-
-Configure and run the chat bridge: 
+Configure and run the chat bridge:
 ----------------------------------
 The chatbot itself is just a simple deamon that bridges text from the
 chat system to the OpenCog server. The cogita chatbot is tailored for
 IRC chat; other chat systems could be supported in a straightforward
-manner. 
-
-The IRC chatbot has an assortment of hard-coded config parameters in the
-source code.  See CogitaConfig.cc for setable values for the name of the 
-chatbot, the irc channel and irc network to join, and the bot ID strings,
-etc.  By default, it connects to the #opencog channel on freenode.net.
-
-The bot tries to connect to an opencog server at port 17004. This port 
-number is hard-coded in whirr-sockets.cc.
-
-After modifying the hard-coded config as desired, start the bot by 
-saying "opencog/nlp/chatbot/cogita". It should then appear on the IRC
-channel. You can then talk to it by addressing it by name, i.e. 
-prefacing comments with cog:, cogita: or cogita-bot:
-
+manner.  See the file ../irc/README for details.
 
 Architecture:
 -------------
-The current architecture makes use of several servers interconnected
-by TCP/IP sockets to perform NLP processing.  The infrastructure is
-currently very minimalistic, and is just barely enough to get the job
-done. All modifications require tampering the source code. The pipeline
-is as follows:
+The current architecture makes use of several servers interconnected by
+TCP/IP sockets to perform NLP processing.
 
-1) IRC I/O, performed by cogita, which acts as a intermediary between
-   IRC and OpenCog.  It listens for input on an IRC channel, and 
-   forwards the resulting plain-text to opencog. This is done by
-   issuing one simple scheme expression to opencog, via the opencog
-   command-line interface/scheme shell on port 17004. The expression 
-   is ''(say-id-english usernick text)'', where the ''usernick'' is 
+The pipeline is as follows:
+
+1) IRC I/O, performed by cogita, acts as an intermediary between
+   IRC and OpenCog.  It listens for input on an IRC channel, and
+   forwards the resulting plain-text to OpenCog. This is done by
+   issuing one simple scheme expression to OpenCog, via the OpenCog
+   command-line interface/scheme shell on port 17004. The expression
+   is ''(process_query user text)'', where the ''user'' is
    the user's IRC nick, and ''text'' is what the user entered.  The
    return value from this command is sent back to the IRC channel.
    Communications is stateless and blocking: cogita closes the socket
@@ -154,194 +84,120 @@ is as follows:
    do the same. Only after the cog-server closes its socket does cogita
    reply on the IRC channel.
 
-   IRC.cc,.h:  C++ class for generic IRC communications.
-   go-irc.cc:  the main guts of the cogita server
-   whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.  
-
-   Note that if the cog-server is busy, then whirr can block for an
-   indefinitely long time. The person who is chatting will start to 
+   Note that if the cog-server is busy, then "whirr" can block for an
+   indefinitely long time. The person who is chatting will start to
    wonder about the lack of response. This is currently hacked around
    by having the chat processing periodically return to the bridge,
    and then resume again. A proper architecture remains unimplemented.
 
-2) Parsing of english text by RelEx. The very first thing that the 
-   ''say-id-english'' routine does is to send the input text to RelEx
+2) Parsing of English text by RelEx. The very first thing that the
+   ''process_query'' routine does is to send the input text to RelEx
    for parsing.  This is done by sending the plain-text via a socket
    to a listening RelEx server; the server responds with the parsed
-   text, in the form of a hypergraph of atoms expressed in scheme. 
-   The hypergraph is then loaded into the opencog atomspace, and is
-   ready for processing. 
+   text, in the form of a hypergraph of atoms expressed in scheme.
+   The hypergraph is then loaded into the OpenCog atomspace, and is
+   ready for processing.
 
    I/O to parser is stateless: RelEx will close the socket after it has
-   completed its parse and returned its results. 
+   completed its parse and returned its results.
 
-2a) Data flow.  Each newly parsed sentence is attached, via a ListLink, 
-   to an AnchorNode "# New Parsed Sentence".  Later processing stages 
-   use the same mechanism, of linking to AnchorNode's, to pass data to 
-   each other.
+   The newly parsed sentence will be sent to a scheme function called
+   ''check_query_type''.This function will identify the speech act type
+   of the sentence then the next appropriate processing functions will
+   be called. For instance currently  ''(wh_query_process query)'' will
+   be invoked if the speech act tag is 'InterrogativeSpeechAct'
 
-3) Question-Answering. The bot can recognize some simple questions and
-   answer them. This is done by a very simple form of pattern-matching
-   on RelEx output. Thus, for example, the dependency parse of "John
-   threw the ball" results in "_subj(throw,John) _obj(throw,ball)".
-   The question "Who threw a ball?" results in "_subj(throw,who) 
-   _obj(throw,ball)". By taking "who" to mean "an unknown variable", 
-   it is straight-forward to pattern-match the statement to the question,
-   and determine that "who" corresponds to "John".
+3) Question-Answering. Currently The bot can recognize speech act type
+   of the utterance. specifically it identifies 'InterrogativeSpeechAct',
+   'TruthQuerySpeechAct and 'DeclarativeSpeechAct'
 
-	Currently, three types of questions are handled: simple SVO or 
-   Subject-Verb-Object queries, which can be pattern matched as above.
-   A second type are SVO truth-query questions ("Did X verb Y?").
-   A third type involves statements with prepostions, which are turned
-   into "triples", as described below. Question-answering patterns are
-   located in nlp/triples/question.scm.
+   The bot can answer some simple wh-questions ('InterrogativeSpeechAct')
+   by using the fuzzy-pattern-matcher. Sentences ("facts") pertaining
+   to the question must first be present in the atomspace, of course.
 
-4) Semantic triples. The scope of questions that can be answered can be
-   slightly broadened by converting them into a normalized form, here
-   refered to as a "semantic triple." An example would be the 
-   prepositional phrase "color_of(sky,blue)", a form that is shared by
-   both the statement and question "The color of the sky is blue" and
-   "What is the color of the sky?" even though the RelEx dependency 
-   parses of the statement and the question are quite different.
-   
-   Code to extract and create such triples is in the nlp/triples 
-   directory; overall operation is explained in triples/README. 
-   The question, now in "triple" form, can then be pattern-matched
-   to a database of existing triples (including those learned from 
-   earlier in the conversation).  This pattern matching is done via
-   the "question-rule" patterns, also found in the triples directory.
+4) Relex2Logic replaces the old "semantic triples" code (in the
+   ../old-chatbot directory). The current fuzzy-pattern-matcher uses
+   the R2L output. Also PLN will use r2l output for reasoning.
 
-   This code is triggered and run only if the process in step-3 above
-   failed to find an answer.  However, triples are extracted for all 
-   new statements, in case they are needed for question-answering later.
+5) Sureal and Microplanning is  used for Natural Language Generation.
 
-5) Common sense database. The semantic-triple format allows a 
-   repository of common-sense triples to be created, and questions 
-   to be answered from such previously-read input. A dataset of
-   common-sense assertions, written in English, is available from the
-   MIT ConceptNet project. It contains sentences such as 
-   "Baseball is a sport."  This dataset may be loaded into OpenCog by 
-   following the instructions in nlp/triples/README.  Alternately, 
-   SQL dumps, suitable for immediate use, can be downloaded from 
+6) OpenPsi (not hooked up yet) will be used to make the chatbot to
+   generate a speech-act goal plus context for utterances. Here,
+   different speech act schema will be triggered based on the goal
+   and context.
 
-       http://gnucash.org/linas/nlp/data/conceptnet/
+7) Reasoning (not hooked up). PLN, the core reasoning engine will be
+   used.
 
-   If the database has been opened, then the same code as described in 
-   the previous step, above, will look for answers to questions there.
+8) Anaphora resolution (not hooked up) will be used to resolve pronouns
+   and other references
 
-   XXX As of Sept 2009, that database is no longer functional, due to 
-   changes in the hypergraph representation of prepositions. XXX
-   
-6) Frames.  (Not hooked up) Additional context can be provided by 
-   frame-net-like frames. There's code in RelEx for this, its not
-   hooked up.  Some basic work for "seme promotion", which is similar
-   to framing, has been done.
-    
-7) Reasoning (not implemented). In principle, reasoning could be done.
-   Right now, there is no infrastructure for this, aside from the core
-   reasoning engine, PLN itself.  All details for how to go about doing
-   this are yet to be fleshed out.
+9) Word-sense disambiguation (not hooked up)
+   http://wiki.opencog.org/w/Word_sense_disambiguation
 
-8) NLgen/NLGen2 (not yet hooked up). Natural language output.
-   Code at https://launchpad.net/nlgen 
-   Overview at http://www.opencog.org/wiki/SegSim
-
-
-Note that steps 3,4,5,6,7 very very crudely echo the kind of design
-discussed in [Katz05].
 
 Examples:
 ---------
-The following dialog works, or has worked, at various times in the past.
-Because the infrastructure is in development, any given snapshot may be
-broken.
-
-<me>         Fred threw a red ball
-<me>         John threw a green ball.
-<me>         Mary threw a blue rock
-<me>         who threw a ball?
-<cogita-bot> SVO pattern match found: John Fred
-<me>         who threw a red ball?
-<cogita-bot> SVO pattern match found: Fred
-<me>         What did Fred throw?
-<cogita-bot> SVO pattern match found: red ball
-
-<me>         Did Fred throw a ball?
-<cogita-bot> Truth query determined: Yes, verb was: throw
-
-<me>         Did Fred throw a red ball?
-<cogita-bot> Truth query determined: Yes, verb was: throw
-<me>         Did Fred throw a green ball?
-<cogita-bot> Truth query determined: No, not that I know of. 
-
-<me>         The color of the book is red.
-<me>         What is the color of the book?
-<cogita-bot> Triples abstraction found: red
-
-<me>         the cat sat on the mat
-<me>         what did the cat sit on?
-<cogita-bot> Triples abstraction found: mat
-
-<me>         John and Berd turned into monsters
-<me>         who turned into monsters?
-<cogita-bot> Triples abstraction found: John Berd Berd John
-
-<me>         John made fun of Sarah.
-<me>         Who made fun of Sarah?
-<cogita-bot> SVO pattern match found: John
-
-Some things that don't work:
-"Did Fred throw a round ball?" -- doesn't know that balls are round.
-
-Untested, probably won't work:
- * truth-query w/ preps: Is Berlin the capital of Germany?
- * Do questions (What did Mike do? Mike threw a rock)
- * Who died?    (John Kennedy died)
- * Did John die?
- * John is dead?
- * Who is Kennedy?
- * What is yarn?
- * When questions.
- * Where questions.
- * Why questions.
- * How questions
- * How-much questions (how-tall, how-safe etc)
- * Which questions
-
- * The red ball is under the couch. Where is the red ball?
-   The RelEx coding is correct, the output is not.
+Currently, the following dialog is working.
 
 
-Notes about the data flow:
---------------------------
-Currently, much of the data flow is done by looking for things attached
-to AnchorNode's, mangling them, and attaching other results to other 
-AnchorNode's. Some of this is currently done in scheme code, and some of
-this is done by pattern matching.
+ <Mr. x> hello
+ <cogita-bot> Hello Mr. x, you said: "hello
+ <cogita-bot> Sorry,I don't know the type
 
-A long-term goal is to use pattern-matching for *all* processing, and 
-*not* use any scheme code for this.  This is kind of an important point:
-in order to fully leverage the "learning" capabilities within opencog,
-we will want to have all processing done within opencog.  However, for 
-right now, scheme glue code will continue to be used in various ways.
+ <Mr. x> Tom eats apples.
+ <cogita-bot> Hello Mr. x, you said: "Tom eats apples.
+ <cogita-bot> You made a Declarative SpeechAct
+ <Mr. x> What does Tom eat?
+ <cogita-bot> Hello Mr. x, you said: "What does Tom eat?
+ <cogita-bot> You made an Interrogative SpeechAct Tom eats apples .
 
-One such example: there's scheme code to take a list of SentenceNodes
-(from recent parsed sentences) get thier corresponding ParseNode's,
-and attach them to a different anchor. This *could* be done by pattern
-matching, instead of scheme code ... and it would be quite easy, and 
-probably reasonably fast.
+ <Mr. x> John threw a green ball.
+ <cogita-bot> Hello Mr. x, you said: "John threw a green ball.
+ <cogita-bot> You made a Declarative SpeechAct
+ <Mr. x> who threw a ball?
+ <cogita-bot> Hello Mr. x, you said: "who threw a ball?
+ <cogita-bot> You made an Interrogative SpeechAct John threw a green ball .
+
+ <Mr. x> Did Fred throw a ball?
+ <cogita-bot> Hello Mr. x, you said: "Did Fred throw a ball?
+ <cogita-bot> You ask a Truth Query I can't process truth query for now
+
+ <Mr. x> The color of the book is red.
+ <cogita-bot> Hello Mr. x, you said: "The color of the book is red.
+ <cogita-bot> You made a Declarative SpeechAct
+ <Mr. x> What is the color of the book?
+ <cogita-bot> Hello Mr. x, you said: "What is the color of the book?
+ <cogita-bot> You made an Interrogative SpeechAct the color of the book is red .
+
+ <Mr. x> John Kennedy died.
+ <cogita-bot> Hello Mr. x, you said: "John Kennedy died.
+ <cogita-bot> You made a Declarative SpeechAct
+ <Mr. x> who died?
+ <cogita-bot> Hello Mr. x, you said: "who died?
+ <cogita-bot> You made an Interrogative SpeechAct John Kennedy die
+
+  <Mr. x> The red ball is under the couch.
+ <cogita-bot> Hello Mr. x, you said: "The red ball is under the couch.
+ <cogita-bot> You made a Declarative SpeechAct
+ <Mr. x> Where is the red ball?
+ <cogita-bot> Hello Mr. x, you said: "Where is the red ball?
+ <cogita-bot> You made an Interrogative SpeechAct the red ball is under the couch .
 
 
 ToDo:
 -----
-* Syntax pattern matching only looks at the first parse. The other
-  parses should be considered.
+* Implement the truth-query processing after the issue on the backward
+  chaining is fixed
 
-* Do the "what color is the book" question in nlp/question/README
+* Write different  speech  act schema's as it is described on the
+  "dialog system" paper
 
-* Create an object holding the name of the user, the chat connection, 
-  and the 'pseudo-continuation' of the chat status.
+* Create an object holding the name of the user, the chat connection,
+  and the 'pseudo-continuation' of the chat status: Create a dialog node
+  for each dialog and an utterance node for each utterance.
 
+* Integrate the components described in the architecture part
 
 References
 ==========
@@ -353,6 +209,10 @@ References
 
 http://en.wikipedia.org/wiki/MultiNet
 
+“Initial OpenCog Based Dialogue System Design Document”
+an ongoing thesis by Ruiting Lian
+
 Initial draft: April 2009 Linas Vepstas
 Updated: September 2009 Linas Vepstas
 Updated: April 2010  Vamsi Krishna Davuluri
+Updated: July 2015 Rodas Solomon

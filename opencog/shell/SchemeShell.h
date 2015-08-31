@@ -40,7 +40,7 @@ class SchemeShell : public GenericShell
 {
 	friend class SchemeShellModule; // needs to call set_socket()
 	protected:
-		void set_socket(ConsoleSocket *);
+		void thread_init();
 
 	public:
 		SchemeShell(void);

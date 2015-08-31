@@ -115,7 +115,7 @@ Handle WorldWrapperUtil::toHandle(AtomSpace& as,
     if (h == Handle::UNDEFINED) {
         //Nil: I add this case because apparently some object have type NODE
         HandleSeq tmp;
-        as.getHandlesByName(std::back_inserter(tmp), id, OBJECT_NODE);
+        as.get_handles_by_name(std::back_inserter(tmp), id, OBJECT_NODE);
         //unique id assumption
         OC_ASSERT(tmp.size() <= 1);
         return tmp.empty() ? Handle::UNDEFINED : tmp.front();
@@ -141,7 +141,7 @@ std::string WorldWrapperUtil::lookupInheritanceLink(
         return id::null_obj;
 
     // return the first element of the outgoing set of the inheritance link
-    return as.getName(as.getOutgoing(res[randGen().randint(res.size())],0));
+    return as.get_name(as.get_outgoing(res[randGen().randint(res.size())],0));
 }
 
 std::string WorldWrapperUtil::lookupExecLink(
@@ -158,7 +158,7 @@ std::string WorldWrapperUtil::lookupExecLink(
                     NULL, 3, true);
     if (res.empty())
         return id::null_obj;
-    return (as.getName(res[randGen().randint(res.size())]));
+    return (as.get_name(res[randGen().randint(res.size())]));
 }
 
 pre_it WorldWrapperUtil::maketree(string str, std::string h)
@@ -215,7 +215,7 @@ Handle WorldWrapperUtil::rec_lookup(AtomSpace& as, pre_it it,
 
     OC_ASSERT(tmp.size() <= 1); //need to assume that PredicateNode names are unique
     */
-    Handle lhs = as.getHandle( PREDICATE_NODE, obj );
+    Handle lhs = as.get_handle( PREDICATE_NODE, obj );
     if (lhs == Handle::UNDEFINED ) {
         logger().debug(
                      "WWUtil - rec_lookup found no predicate node for '%s'.",
@@ -233,10 +233,10 @@ Handle WorldWrapperUtil::rec_lookup(AtomSpace& as, pre_it it,
         }
     }
 
-    Handle rhs = as.getHandle(LIST_LINK, children);
+    Handle rhs = as.get_handle(LIST_LINK, children);
     HandleSeq args{lhs, rhs};
     return (rhs != Handle::UNDEFINED ?
-            as.getHandle(EVALUATION_LINK, args) : Handle::UNDEFINED);
+            as.get_handle(EVALUATION_LINK, args) : Handle::UNDEFINED);
 }
 
 Handle WorldWrapperUtil::selfHandle(AtomSpace& as,
@@ -255,7 +255,7 @@ Handle WorldWrapperUtil::ownerHandle(AtomSpace& as,
 Handle WorldWrapperUtil::getAvatarHandle(AtomSpace& as,
         const string& avatar_id)
 {
-    return as.getHandle(AVATAR_NODE, avatar_id);
+    return as.get_handle(AVATAR_NODE, avatar_id);
 }
 
 bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
@@ -819,7 +819,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         Predicate pred(name, argument);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
-        Handle handle = atomSpace.getHandle(OBJECT_NODE,
+        Handle handle = atomSpace.get_handle(OBJECT_NODE,
                                             def_obj);
 
         bool result;
@@ -874,7 +874,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     result = (data > meanTruthThreshold);
 
                 } else {
-                    result = classserver().isA(atomSpace.getType(toHandle(atomSpace,
+                    result = classserver().isA(atomSpace.get_type(toHandle(atomSpace,
                                                                           def_obj,
                                                                           self_id,
                                                                           owner_id)),
@@ -938,10 +938,10 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     // for the time being all nodes that are no avatar or structure
                     // are considered objects
                     result =
-                        !classserver().isA(atomSpace.getType(obj_handle),
+                        !classserver().isA(atomSpace.get_type(obj_handle),
                                                 AVATAR_NODE)
                         &&
-                        !classserver().isA(atomSpace.getType(obj_handle),
+                        !classserver().isA(atomSpace.get_type(obj_handle),
                                                 STRUCTURE_NODE);
 
                     // cache miss, compute value and cache it
@@ -1225,12 +1225,12 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
             } else {
                 Handle from_h = toHandle(atomSpace, def_obj, self_id, owner_id);
-                result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace,
-                         time,
-                         getHasSaidDelay(),
-                         from_h,
-                         Handle::UNDEFINED,
-                         message);
+                result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace, 
+                                                              time,
+                                                              getHasSaidDelay(),
+                                                              from_h,
+                                                              Handle::UNDEFINED,
+                                                              message);
 
                 // cache miss, compute value and cache it
                 if (result) {
@@ -1422,7 +1422,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         float repetition = WorldWrapperUtil::cache.find(time, pred);
 
         if (repetition == CACHE_MISS) {
-            Handle handle = atomSpace.getHandle(CONCEPT_NODE,
+            Handle handle = atomSpace.get_handle(CONCEPT_NODE,
                                                 "currentActionRepetition");
             OC_ASSERT(handle != Handle::UNDEFINED,
                              "WWUtil - There should be a ConceptNode for currentActionRepetition");
@@ -1438,15 +1438,15 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
             } else {
 
-                handle = atomSpace.getOutgoing(result[0], 1);
-                if (atomSpace.getType(handle) != NUMBER_NODE) { // error
+                handle = atomSpace.get_outgoing(result[0], 1);
+                if (atomSpace.get_type(handle) != NUMBER_NODE) { // error
                     logger().warn(
                                  "WWUtil - Outgoing atom[1] should be a NumberNode.");
                     repetition = 0.0f;
 
                 } else {
 
-                    repetition = atof(atomSpace.getName(handle).c_str());
+                    repetition = atof(atomSpace.get_name(handle).c_str());
                 }
             }
 
@@ -1486,7 +1486,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             OC_ASSERT(
                              agentHandle != Handle::UNDEFINED,
                              "WWUtil - is_agent_state invalid agentHandle");
-            Handle stateNodeHandle = atomSpace.getHandle( NUMBER_NODE, stateNumber );
+            Handle stateNodeHandle = atomSpace.get_handle( NUMBER_NODE, stateNumber );
             if (stateNodeHandle != Handle::UNDEFINED) {
                 state =
                     AtomSpaceUtil::isPredicateTrue(atomSpace,
@@ -1617,7 +1617,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         return id::logical_false;
 
                     } else {
-                        float tv = atomSpace.getMean(h);
+                        float tv = atomSpace.get_mean(h);
                         WorldWrapperUtil::cache.add(time, pred, tv);
 
                         return combo::bool_to_vertex
@@ -1673,7 +1673,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                                                   self_id, owner_id);
 
                             if (h != Handle::UNDEFINED) {
-                                float tv = atomSpace.getMean(h);
+                                float tv = atomSpace.get_mean(h);
                                 WorldWrapperUtil::cache.add(time, pred, tv);
 
                                 result = WorldWrapperUtil::evaluateLogicalOperation(operation, tv, value);
@@ -1806,22 +1806,22 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         continue;
                     } // if
 
-                    if ( atomSpace.getArity( agentActionLink ) <= 2 ) {
+                    if ( atomSpace.get_arity( agentActionLink ) <= 2 ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - group_command should have have more than one parameters" );
                     } // if
 
-                    Handle actionParametersLink = atomSpace.getOutgoing(agentActionLink, 2);
+                    Handle actionParametersLink = atomSpace.get_outgoing(agentActionLink, 2);
                     if ( actionParametersLink == Handle::UNDEFINED ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command an action EvalLink should has a listLink" );
                     } // if
 
-                    Handle groupCommandParametersLink = atomSpace.getOutgoing( actionParametersLink, 2 );
+                    Handle groupCommandParametersLink = atomSpace.get_outgoing( actionParametersLink, 2 );
                     if ( actionParametersLink == Handle::UNDEFINED ) {
                         throw opencog::InvalidParamException(TRACE_INFO, "WWUtil - is_last_group_command an action Parameters ListLink should has three params" );
                     } // if
 
                     std::vector<std::string> actionParams;
-                    std::string actionParamName = atomSpace.getName( groupCommandParametersLink );
+                    std::string actionParamName = atomSpace.get_name( groupCommandParametersLink );
                     boost::split( actionParams, actionParamName, boost::is_any_of( ";" ) );
                     unsigned int i;
                     for (std::string param : actionParams) {
@@ -1955,9 +1955,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     //we handle in once the now and isInThePast cases
                     unsigned long delay_past = 30 * PAIUtils::getTimeFactor();
                     unsigned long t_past = (delay_past < time ? time - delay_past : 0);
-                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,
-                                             std::string(def_obj),
-                                             t_past, time);
+                    Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLinkWithinTime(atomSpace,std::string(def_obj), t_past, time);
                     // found no previous action inside the timeframe
                     if (agentActionLink == Handle::UNDEFINED) {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
@@ -1971,7 +1969,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     //      << " IS_LAST_AGENT_ACTION TARGET : " << action_name << std::endl;
 
                     // action found isn't the one we are looking for
-                    if (atomSpace.getName(atomSpace.getOutgoing(agentActionLink, 1)) != action_name) {
+                    if (atomSpace.get_name(atomSpace.get_outgoing(agentActionLink, 1)) != action_name) {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                         if (is_wild_card(vo2)) {
                             vu.setVariableState(def_obj, false);
@@ -2096,16 +2094,16 @@ combo::vertex WorldWrapperUtil::evalPerception(
                 return combo::bool_to_vertex(false);
             }
 
-            Handle groundedPred = atomSpace.getOutgoing(execLink, 0);
+            Handle groundedPred = atomSpace.get_outgoing(execLink, 0);
             if (groundedPred != Handle::UNDEFINED) {
 
                 // last executed action not the one we are looking for
-                if (atomSpace.getName(groundedPred) != action_name) {
+                if (atomSpace.get_name(groundedPred) != action_name) {
 
                     logger().debug(
                                  "WWUtil - Last action found '%s',"
                                  " needed '%s'.",
-                                 atomSpace.getName(groundedPred).c_str(),
+                                 atomSpace.get_name(groundedPred).c_str(),
                                  action_name.c_str());
 
                     if (has_wild_card) {
@@ -2521,7 +2519,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
             if (h != Handle::UNDEFINED) {
-                float tv = atomSpace.getMean(h);
+                float tv = atomSpace.get_mean(h);
                 WorldWrapperUtil::cache.add(time, pred, tv);
 
             } else {
@@ -2529,7 +2527,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
             }
 
             //closed-world-assumption
-            return combo::bool_to_vertex((h != Handle::UNDEFINED && atomSpace.getMean(h) > meanTruthThreshold));
+            return combo::bool_to_vertex((h != Handle::UNDEFINED && atomSpace.get_mean(h) > meanTruthThreshold));
         }
 
         // eval wild card
@@ -2579,14 +2577,14 @@ combo::vertex WorldWrapperUtil::evalPerception(
                     Handle h = rec_lookup(atomSpace, tmp_it, self_id, owner_id);
 
                     if (h != Handle::UNDEFINED) {
-                        float tv =  atomSpace.getMean(h);
+                        float tv =  atomSpace.get_mean(h);
                         WorldWrapperUtil::cache.add(time, pred, tv);
                     } else {
                         WorldWrapperUtil::cache.add(time, pred, 0.0f);
                     }
 
                     result = (h != Handle::UNDEFINED
-                              && (atomSpace.getMean(h) > meanTruthThreshold));
+                              && (atomSpace.get_mean(h) > meanTruthThreshold));
                 }
 
                 vu.setVariableState(def_obj, result);
@@ -2677,7 +2675,7 @@ WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
                                  const AtomSpace& atomSpace,
                                  Handle h) throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
 {
-    std::string handleName = atomSpace.getName(h);
+    std::string handleName = atomSpace.get_name(h);
 
     if (!sm.containsObject(h)) {
         throw opencog::InvalidParamException(TRACE_INFO,
@@ -2876,7 +2874,7 @@ float WorldWrapperUtil::getDemandGoalTruthValue(AtomSpace & atomSpace,
             if ( hDemandGoal == opencog::Handle::UNDEFINED ) 
                 value = randGen().randfloat();
             else
-                value = atomSpace.getMean(hDemandGoal); 
+                value = atomSpace.get_mean(hDemandGoal); 
             return value; },
         time, Predicate(demand, std::vector<std::string>()));
 
@@ -2931,7 +2929,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(
         float value = -1.0f;
         Handle h = rec_lookup(atomSpace, it, self_id, owner_id);
         if (h != Handle::UNDEFINED) {
-            value = atomSpace.getMean(h);
+            value = atomSpace.get_mean(h);
         }
         return value;
     };

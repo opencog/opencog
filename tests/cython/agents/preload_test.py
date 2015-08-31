@@ -1,5 +1,4 @@
 import opencog.cogserver
-from opencog.atomspace import types
 
 print "Preloaded " + __name__
 

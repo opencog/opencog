@@ -78,11 +78,11 @@ std::string PredicateHandleSet::toString(AtomSpace &atomspace) const
         //printing the atom name instead of its string representation
         //is kept for compatibility reason
         std::string str;
-        if (atomspace.isNode(*it)) {
-            const std::string an = atomspace.getName(*it);
+        if (atomspace.is_node(*it)) {
+            const std::string an = atomspace.get_name(*it);
             str = an;
         } else {
-            str = atomspace.atomAsString((*it));
+            str = atomspace.atom_as_string((*it));
         }
         answer.append(str);
         ++it;

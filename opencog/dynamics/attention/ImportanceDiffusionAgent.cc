@@ -145,12 +145,12 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         std::vector<Handle> targets;
         std::vector<Handle>::iterator targetItr;
         Handle linkHandle = *hi;
-        float val = a->getTV(linkHandle)->toFloat();
+        float val = a->get_TV(linkHandle)->toFloat();
         if (val == 0.0f) {
             continue;
         }
 
-        targets = a->getOutgoing(linkHandle);
+        targets = a->get_outgoing(linkHandle);
 
         for (targetItr = targets.begin(); targetItr != targets.end();
                 ++targetItr) {
@@ -158,7 +158,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
                 diffusionAtomsMap[*targetItr] = totalDiffusionAtoms;
 #ifdef DEBUG
                 log->fine("%s = %d",
-                        a->atomAsString(*targetItr).c_str(),
+                        a->atom_as_string(*targetItr).c_str(),
                         totalDiffusionAtoms);
 #endif
                 totalDiffusionAtoms++;
@@ -188,9 +188,9 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
 // For some reason I thought linearising -ve and +ve separately might
 // be a good idea, but this messes up the conservation of STI
 //      (*stiVector)((*i).second) = a->getNormalisedSTI(dAtom,false)+1.0f)/2.0f);
-        (*stiVector)((*i).second) = a->getNormalisedZeroToOneSTI(dAtom,false);
+        (*stiVector)((*i).second) = a->get_normalised_zero_to_one_STI(dAtom,false);
 #ifdef DEBUG
-        totalSTI += a->getSTI(dAtom);
+        totalSTI += a->get_STI(dAtom);
 #endif
     }
     
@@ -228,12 +228,12 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int targetIndex;
         Type type;
 
-        float val = a->getTV(*hi)->toFloat();
+        float val = a->get_TV(*hi)->toFloat();
         if (val == 0.0f) continue;
         //val *= diffuseTemperature;
-        type = a->getType(*hi); 
+        type = a->get_type(*hi); 
 
-        targets = a->getOutgoing(*hi);
+        targets = a->get_outgoing(*hi);
         if (classserver().isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 
@@ -248,7 +248,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
 #endif
             sourceHandle = (*sourcePosItr).first;
             // If source atom isn't within diffusionThreshold, then skip
-            if (!spreadDecider->spreadDecision(a->getSTI(sourceHandle))) {
+            if (!spreadDecider->spreadDecision(a->get_STI(sourceHandle))) {
                 continue;
             }
             sourceIndex = (*sourcePosItr).second;
@@ -285,7 +285,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                 Handle sourceHandle;
                 sourceHandle = (*sourceItr);
                 // If source atom isn't within diffusionThreshold, then skip
-                if (!spreadDecider->spreadDecision(a->getSTI(sourceHandle))) {
+                if (!spreadDecider->spreadDecision(a->get_STI(sourceHandle))) {
                     continue;
                 }
                 for (targetItr = targets.begin(); targetItr != targets.end();
@@ -358,9 +358,9 @@ void ImportanceDiffusionAgent::spreadImportance()
 
     // Get all HebbianLinks
     if (allLinksSpread) {
-      a->getHandlesByType(out_hi, LINK, true);
+      a->get_handles_by_type(out_hi, LINK, true);
     } else {
-      a->getHandlesByType(out_hi, HEBBIAN_LINK, true);
+      a->get_handles_by_type(out_hi, HEBBIAN_LINK, true);
     }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);
@@ -390,7 +390,7 @@ void ImportanceDiffusionAgent::spreadImportance()
 
     if (log->isFineEnabled()) {
         float normAF;
-        normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
+        normAF = (a->get_attentional_focus_boundary() - a->get_min_STI(false)) / (float) ( a->get_max_STI(false) - a->get_min_STI(false) );
         log->fine("Result (AF at %.3f)\n",normAF);
         printVector(&result,normAF);
 //        printVector(result,0.5f);
@@ -408,7 +408,7 @@ void ImportanceDiffusionAgent::spreadImportance()
         double val = result((*i).second);
         setScaledSTI(dAtom,val);
 #ifdef DEBUG
-        totalSTI_After += a->getSTI(dAtom);
+        totalSTI_After += a->get_STI(dAtom);
 #endif
     }
 #if 0 //def DEBUG
@@ -432,7 +432,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
 {
     AttentionValue::sti_t val;
 
-    val = (AttentionValue::sti_t) (a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) )));
+    val = (AttentionValue::sti_t) (a->get_min_STI(false) + (scaledSTI * ( a->get_max_STI(false) - a->get_min_STI(false) )));
 /*
     AtomSpace *a = _cogserver.getAtomSpace();
     float af = a->getAttentionalFocusBoundary();
@@ -443,7 +443,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
         val = af + (scaledSTI * (a->getMaxSTI(false) - af ));
     }
 */
-    a->setSTI(h,val);
+    a->set_STI(h,val);
     
 }
 
@@ -495,9 +495,9 @@ double HyperbolicDecider::function(AttentionValue::sti_t s)
 {
     AtomSpace& a = _cogserver.getAtomSpace();
     // Convert boundary from -1..1 to 0..1
-    float af = a.getAttentionalFocusBoundary();
-    float minSTI = a.getMinSTI(false);
-    float maxSTI = a.getMaxSTI(false);
+    float af = a.get_attentional_focus_boundary();
+    float minSTI = a.get_min_STI(false);
+    float maxSTI = a.get_max_STI(false);
     float norm_b = focusBoundary > 0.0f ?
         af + (focusBoundary * (maxSTI - af)) :
         af + (focusBoundary * (af - minSTI ));
@@ -524,10 +524,10 @@ void StepDecider::setFocusBoundary(float b)
 {
     AtomSpace& a = _cogserver.getAtomSpace();
     // Convert to an exact STI amount
-    float af = a.getAttentionalFocusBoundary();
+    float af = a.get_attentional_focus_boundary();
     focusBoundary = (b > 0.0f)?
-        (int) (af + (b * (a.getMaxSTI(false) - af))) :
-        (int) (af + (b * (af - a.getMinSTI(false))));
+        (int) (af + (b * (a.get_max_STI(false) - af))) :
+        (int) (af + (b * (af - a.get_min_STI(false))));
 
 }
 

@@ -1,12 +1,34 @@
-from opencog.atomspace cimport cHandle, cHandleSeq
 
-# basic wrapping for std::string conversion
+# Basic wrapping for std::string conversion
 cdef extern from "<string>" namespace "std":
     cdef cppclass string:
         string()
         string(char *)
         char * c_str()
         int size()
+
+# Handle
+ctypedef public long UUID
+
+cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+    cdef cppclass cHandle "opencog::Handle":
+        cHandle()
+        cHandle(UUID)
+        UUID value()
+        bint operator==(cHandle h)
+        bint operator!=(cHandle h)
+        bint operator<(cHandle h)
+        bint operator>(cHandle h)
+        bint operator<=(cHandle h)
+        bint operator>=(cHandle h)
+        cHandle UNDEFINED
+# HandleSeq
+    cdef cppclass cHandleSeq "opencog::HandleSeq"
+
+# AtomSpaces
+from opencog.atomspace cimport cAtomSpace
+cdef extern from "opencog/server/BaseServer.h" namespace "opencog":
+    cAtomSpace* server_atomspace()
 
 # ideally we'd import these typedefs instead of defining them here but I don't
 # know how to do that with Cython
@@ -36,4 +58,3 @@ cdef extern from "opencog/server/Request.h" namespace "opencog":
 
 cdef class Request:
     cdef cRequest *c_obj
-

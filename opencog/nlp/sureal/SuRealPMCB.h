@@ -26,7 +26,7 @@
 
 
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/InitiateSearchCB.h>
 
 
 namespace opencog
@@ -40,28 +40,45 @@ namespace nlp
  * Override the neccessary callbacks to do special handling of variables
  * and LG dictionary checks.
  */
-class SuRealPMCB : public DefaultPatternMatchCB
+class SuRealPMCB :
+    public InitiateSearchCB,
+    public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars);
+    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, size_t thoroughness);
     ~SuRealPMCB();
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
     virtual bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h);
     virtual bool grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln);
-    virtual bool initiate_search(PatternMatchEngine* pPME,
-                                const std::set<Handle>& vars,
-                                const HandleSeq& clauses);
+    virtual bool initiate_search(PatternMatchEngine*);
+    virtual void set_pattern(const Variables& vars,
+                             const Pattern& pat)
+    {
+        InitiateSearchCB::set_pattern(vars, pat);
+        DefaultPatternMatchCB::set_pattern(vars, pat);
+    }
 
     std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;   // store the PM results
 
 private:
     virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 
+    AtomSpace* m_as;
     std::set<Handle> m_vars;   // store nodes that are variables
 
-    SchemeEval* m_eval;
+    size_t m_thoroughness;   // max no. of results being returned
+
+    std::unordered_map<Handle, HandleSeq> m_disjuncts;   // store the disjuncts of nodes in the pattern
+
+    std::unordered_map<Handle, Handle> m_words;   // store the corresponding WordNodes of the nodes in the pattern
+
+    struct CandHandle
+    {
+        Handle handle;
+        size_t r2lSetLinkSize;
+    };
 };
 
 }

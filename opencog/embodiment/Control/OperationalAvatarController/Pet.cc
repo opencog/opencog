@@ -147,25 +147,25 @@ void Pet::initTraitsAndFeelings()
 
     // feelings
     TruthValuePtr tv = SimpleTruthValue::createTV(0.5f, 0.0f);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("fear"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("pride"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("love"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("hate"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("anger"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("gratitude"), tv, petHandle), 1);
 
     tv = SimpleTruthValue::createTV(0.51f, 0.0f);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("happiness"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("sadness"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+    atomSpace->set_LTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("excitement"), tv, petHandle), 1);
 }
 
@@ -229,7 +229,7 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 
     if (this->exemplarAvatarId != "") {
         std::vector<Handle> exemplarAvatarSet;
-        atomSpace->getHandlesByName(back_inserter(exemplarAvatarSet),
+        atomSpace->get_handles_by_name(back_inserter(exemplarAvatarSet),
                 this->exemplarAvatarId, OBJECT_NODE, true);
 
         if (exemplarAvatarSet.size() != 1) {
@@ -501,11 +501,11 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement,
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestLearningSession(atomSpace, atTimeLink);
 
-    Handle learningConceptNode = atomSpace->addNode(CONCEPT_NODE, "trick");
+    Handle learningConceptNode = atomSpace->add_node(CONCEPT_NODE, "trick");
     HandleSeq inhLinkHS;
     inhLinkHS.push_back(trickConceptNode);
     inhLinkHS.push_back(learningConceptNode);
-    atomSpace->addLink(INHERITANCE_LINK, inhLinkHS);
+    atomSpace->add_link(INHERITANCE_LINK, inhLinkHS);
 
     //sender->sendCommand(config().get("STOP_LEARNING_CMD"),
     //      commandStatement.front());
@@ -631,7 +631,7 @@ void Pet::executeBehaviorEncoder()
 
     // TODO: the command parameters:
     // (commandStatement[1], commandStatement[2], ...)  are beging ignored
-    Handle trickConceptNode = atomSpace->addNode(CONCEPT_NODE,
+    Handle trickConceptNode = atomSpace->add_node(CONCEPT_NODE,
             learningSchema.front());
     Handle trickExemplarAtTimeLink = timeServer().addTimeInfo(trickConceptNode,
             exemplarTimeInterval);
@@ -644,11 +644,11 @@ void Pet::executeBehaviorEncoder()
             trickExemplarAtTimeLink, 1);
 
     // Adds the inheritance link as Ari asked
-    Handle exemplarConceptNode = atomSpace->addNode(CONCEPT_NODE, "exemplar");
+    Handle exemplarConceptNode = atomSpace->add_node(CONCEPT_NODE, "exemplar");
     HandleSeq inhLinkHS;
     inhLinkHS.push_back(trickConceptNode);
     inhLinkHS.push_back(exemplarConceptNode);
-    atomSpace->addLink(INHERITANCE_LINK, inhLinkHS);
+    atomSpace->add_link(INHERITANCE_LINK, inhLinkHS);
 
     //Note from Nil : I comment the POSITION tracker for now because
     //hillclimbing does not deal with positions anyway
@@ -656,7 +656,7 @@ void Pet::executeBehaviorEncoder()
     /*
       atom_tree *positionTemplate =
           makeVirtualAtom(EVALUATION_LINK,
-              makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME), NULL),
+              makeVirtualAtom(atomSpace->add_node(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME), NULL),
               makeVirtualAtom(LIST_LINK,
                   makeVirtualAtom(AVATAR_NODE, NULL),
                   NULL
@@ -669,11 +669,11 @@ void Pet::executeBehaviorEncoder()
     // action tracker
     atom_tree *actionTemplate =
         makeVirtualAtom(EVALUATION_LINK,
-            makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE,
+            makeVirtualAtom(atomSpace->add_node(PREDICATE_NODE,
                     ACTION_DONE_PREDICATE_NAME), NULL),
             makeVirtualAtom(LIST_LINK,
                     makeVirtualAtom(
-                        atomSpace->addNode(AVATAR_NODE, exemplarAvatarId),
+                        atomSpace->add_node(AVATAR_NODE, exemplarAvatarId),
                         NULL),
                     NULL),
             NULL);
@@ -891,8 +891,8 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
             // for that is implemented.
             logger().debug("Pet - Removing map handle (%s) from AtomSpace. "
                     "Map already removed from SpaceServer.",
-                     atomSpace->atomAsString(mapHandle).c_str());
-            atomSpace->removeAtom(mapHandle, true);
+                     atomSpace->atom_as_string(mapHandle).c_str());
+            atomSpace->remove_atom(mapHandle, true);
         }
     }
     */
@@ -905,9 +905,9 @@ bool Pet::isNear(const Handle& objectHandle)
 
 Handle Pet::getMyHandle() const
 {
-    Handle h = atomSpace->getHandle( PET_NODE, petId );
+    Handle h = atomSpace->get_handle( PET_NODE, petId );
     if ( h == Handle::UNDEFINED ) {
-        h = atomSpace->getHandle( HUMANOID_NODE, petId );
+        h = atomSpace->get_handle( HUMANOID_NODE, petId );
     } // if
     return h;
 }
@@ -946,11 +946,11 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 */
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
-    atomSpace->getHandlesByType(back_inserter(highLTIObjects), OBJECT_NODE, true);
+    atomSpace->get_handles_by_type(back_inserter(highLTIObjects), OBJECT_NODE, true);
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
-        AttentionValuePtr attentionValue = atomSpace->getAV(*it);
+        AttentionValuePtr attentionValue = atomSpace->get_AV(*it);
         if (attentionValue->getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else ++it;
@@ -967,11 +967,11 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
             Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
     for (HandleTemporalPair event : everyEventThatHappened) {
         Handle eventAtTime = timeServer().getAtTimeLink(event);
-        if (atomSpace->getArity(eventAtTime) >= 2) {
-            Handle evaluationLink = atomSpace->getOutgoing(eventAtTime, 1);
-            if (atomSpace->getType(evaluationLink) == EVALUATION_LINK) {
-                if (atomSpace->getName(
-                            atomSpace->getOutgoing(evaluationLink, 0))
+        if (atomSpace->get_arity(eventAtTime) >= 2) {
+            Handle evaluationLink = atomSpace->get_outgoing(eventAtTime, 1);
+            if (atomSpace->get_type(evaluationLink) == EVALUATION_LINK) {
+                if (atomSpace->get_name(
+                            atomSpace->get_outgoing(evaluationLink, 0))
                         == ACTION_DONE_PREDICATE_NAME) {
                     actionsDone.push_back(evaluationLink);
                 }
@@ -985,7 +985,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
     logger().debug("Pet::getAllActionsDoneInATrickAtTime");
 
     HandleSeq patternToSearchLearningSession;
-    Handle conceptNode = atomSpace->getHandle(CONCEPT_NODE, "learningSession");
+    Handle conceptNode = atomSpace->get_handle(CONCEPT_NODE, "learningSession");
     if (conceptNode != Handle::UNDEFINED) {
         patternToSearchLearningSession.push_back(conceptNode);
         // get the handles of all trick
@@ -996,7 +996,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                 patternToSearchLearningSession, NULL, NULL, 2,
                 true);
         for (Handle learningSessionHandle : learningSessionHandles) {
-            if (atomSpace->getArity(learningSessionHandle) > 1)  {
+            if (atomSpace->get_arity(learningSessionHandle) > 1)  {
                 std::vector<HandleTemporalPair> learningSessionIntervals;
                 // Get temporal info for all the Handles that pertain to this
                 // trick
@@ -1018,8 +1018,8 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                     for (HandleTemporalPair action : actionsInLearningSession) {
                         Handle evaluationLink = timeServer().getAtTimeLink(action);
                         Handle predicateNode =
-                            atomSpace->getOutgoing(evaluationLink)[1];
-                        if (atomSpace->getName(predicateNode) ==
+                            atomSpace->get_outgoing(evaluationLink)[1];
+                        if (atomSpace->get_name(predicateNode) ==
                                 ACTION_DONE_PREDICATE_NAME) {
                             actionsDone.push_back(evaluationLink);
                         }

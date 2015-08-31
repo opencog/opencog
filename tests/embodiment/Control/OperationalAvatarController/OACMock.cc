@@ -35,7 +35,7 @@ void OACMock::setConfig()
     agentType = "pet";  
     agentTrait = "Maxie"; 
 
-// XXX FIXME: Something in the network element cod is broken, and this
+// XXX FIXME: Something in the network element code is broken, and this
 // test doesn't work with port 16326. It does work with port 16312.
 // There needs to be another, distinct unit test that checks that
 // the port numbers work as expected, and make sense.
@@ -62,6 +62,7 @@ void OACMock::setConfig()
     // XXX FIXME: at this time, we need to specify explicit paths to
     // to the modules that need to be loaded. I don't know why.
     config().set("MODULES", "opencog/query/libquery.so, "
+                            "opencog/query/libQueryModule.so, "
                             "opencog/server/libbuiltinreqs.so, "
                             "opencog/shell/libscheme-shell.so, "
                             "opencog/persist/sql/libpersist.so");

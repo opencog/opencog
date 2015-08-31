@@ -29,7 +29,13 @@ class PsiActionSelectionAgentUTest: public CxxTest::TestSuite {
 
 private:
     
-    OACMock oacMock; 
+    OACMock oacMock;
+	const string PsiUTest_dir = string(PROJECT_SOURCE_DIR)
+		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold/";
+	const string physiological_state_xml = PsiUTest_dir
+		+ "physiological_state.xml";
+	const string dog_park_map_xml = PsiUTest_dir
+		+ "dog_park_map.xml";
 
 public:
 
@@ -66,6 +72,7 @@ public:
         config().set("PSI_ACTION_SELECTION_ENABLED", "true"); 
         config().set("PSI_RELATION_UPDATER_ENABLED", "false"); 
         config().set("PSI_FEELING_UPDATER_ENABLED", "false"); 
+        config().set("OCPLANNING_AGENT_ENABLED", "false");
         config().set("IMPORTANCE_DECAY_ENABLED", "false"); 
         config().set("ACTION_SELECTION_ENABLED", "false"); 
         config().set("COMBO_INTERPRETER_ENABLED", "false"); 
@@ -80,8 +87,9 @@ public:
         config().set("IMPORTANCE_SPREADING_ENABLED", "false");
         config().set("IMPORTANCE_UPDATING_ENABLED", "false");
         config().set("IMPORTANCE_SPREADING_ENABLED", "false");
+        config().set("ENABLE_UNITY_CONNECTOR", "true");
 
-        oacMock.createOAC(); 
+        oacMock.createOAC();
 
         Message * p_message; 
 
@@ -89,8 +97,8 @@ public:
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
                                                   STRING,
-                                                  "physiological_state.xml"
-                                                 ); 
+                                                  physiological_state_xml.c_str()
+                                                 );
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 
@@ -99,8 +107,8 @@ public:
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
                                                   STRING,
-                                                  "dog_park_map.xml"
-                                                 ); 
+                                                  dog_park_map_xml.c_str()
+                                                 );
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 
@@ -133,9 +141,11 @@ public:
         AtomSpace & atomSpace = oac.getAtomSpace();
 
         std::string demand_names = config().get("PSI_DEMANDS");
-        int demand_num = std::count(demand_names.begin(), demand_names.end(), ',') + 1;  
+        int demand_num =
+	        std::count(demand_names.begin(), demand_names.end(), ',') + 1;  
 
-        Handle hConceptNode = atomSpace.getHandle(CONCEPT_NODE, "psi_demand_goal_list"); 
+        Handle hConceptNode = atomSpace.getHandle(CONCEPT_NODE,
+                                                  "psi_demand_goal_list");
         TS_ASSERT_DIFFERS(hConceptNode, opencog::Handle::UNDEFINED); 
 
         std::vector<Handle> referenceLinkSet;
@@ -162,27 +172,44 @@ public:
         OAC & oac = oacMock.getOAC(); 
         AtomSpace & atomSpace = oac.getAtomSpace();
 
-        /*
-        SchemeEval & evaluator = SchemeEval::instance();    
+        SchemeEval evaluator(&atomSpace);
         std::string scheme_expression, scheme_return_value;
+
+        std::cout << "AtomSpace before planning" << std::endl
+                  << atomSpace;
 
         scheme_expression = "( do_planning )";
 
         // Run the Procedure that do planning
-        scheme_return_value = evaluator.eval(scheme_expression);
-        TS_ASSERT( !evaluator.eval_error() ); 
-        */
+        try {
+	        scheme_return_value = evaluator.eval(scheme_expression);
+	        std::cout << "scheme_return_value =" << std::endl
+	                  << scheme_return_value << std::endl;
+	        TS_ASSERT(!evaluator.eval_error());
+        } catch(...) {
+	        // TODO this doesn't work, it doesn't catch the
+	        // opencog::RuntimeException thrown by the AtomTable
+	        //
+	        // Attempting to insert link with invalid outgoing members
+	        // (/home/nilg/OpenCog/opencog/opencog/atomspace/AtomTable.cc:544)
+	        //
+	        std::cout << "I caught it!!!" << std::endl;
+        }
+
+        std::cout << "AtomSpace after planning" << std::endl
+                  << atomSpace;
 
         // give it an agent first.
         //oac.
         
         // Get the plan stored in AtomSpace
-        oac.psiActionSelectionAgent->plan_action_list.clear(); 
-        oac.psiActionSelectionAgent->temp_action_list.clear(); 
+        oac.psiActionSelectionAgent->plan_action_list.clear();
+        oac.psiActionSelectionAgent->temp_action_list.clear();
 
-        oac.psiActionSelectionAgent->getPlan(atomSpace); 
-        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_selected_demand_goal, opencog::Handle::UNDEFINED);  
-        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_action_list.size(), 0);  
-        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->temp_action_list.size(), 0);  
+        oac.psiActionSelectionAgent->getPlan();
+        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_selected_demand_goal,
+                          opencog::Handle::UNDEFINED);
+        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->plan_action_list.size(), 0);
+        TS_ASSERT_DIFFERS(oac.psiActionSelectionAgent->temp_action_list.size(), 0);
     }
 };

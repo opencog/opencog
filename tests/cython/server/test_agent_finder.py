@@ -17,4 +17,3 @@ class HelperTest(TestCase):
         x = find_subclasses(test_agent, opencog.cogserver.MindAgent)
         self.assertEqual(len(x), 1)
         self.assertEqual(x[0][0], 'TestAgent')
-

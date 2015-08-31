@@ -136,9 +136,9 @@ void EventResponder::ActionParametersprocess(std::string actionName, Handle inst
 
          // the handle is an EVALUATION_LINK
          evalLink = (Handle)(*iter);
-         assert(atomSpace.getType(evalLink) == EVALUATION_LINK );
-         predicateNode = atomSpace.getOutgoing( evalLink, 0);
-         paraName = atomSpace.getName(predicateNode);
+         assert(atomSpace.get_type(evalLink) == EVALUATION_LINK );
+         predicateNode = atomSpace.get_outgoing( evalLink, 0);
+         paraName = atomSpace.get_name(predicateNode);
          int index = paraName.find_first_of(":");
          assert(index != -1);
          parakind = paraName.substr(index + 1, paraName.size() - index - 1);
@@ -175,10 +175,10 @@ void EventResponder::ActionParametersprocess(std::string actionName, Handle inst
 Handle EventResponder::processForce(std::string actionName, Handle actorNode, Handle targetNode, Handle evalLink)
 {
     // get the force value
-    Handle listLink = atomSpace.getOutgoing( evalLink, 1);
-    Handle forceNode = atomSpace.getOutgoing(listLink,1);
+    Handle listLink = atomSpace.get_outgoing( evalLink, 1);
+    Handle forceNode = atomSpace.get_outgoing(listLink,1);
 
-    std::string forceStr = atomSpace.getName( forceNode);
+    std::string forceStr = atomSpace.get_name( forceNode);
     double force = atof(forceStr.c_str());
 
     // it's a touch action

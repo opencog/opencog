@@ -36,7 +36,9 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
+#endif
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/Agent.h>
@@ -51,9 +53,7 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
-#ifdef HAVE_SQL_STORAGE
-#include <opencog/persist/sql/PersistModule.h>
-#endif /* HAVE_SQL_STORAGE */
+#include <opencog/modules/PersistModule.h>
 
 #include "CogServer.h"
 #include "BaseServer.h"
@@ -140,8 +140,8 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
-    SchemeEval* se = new SchemeEval(atomSpace);
-    delete se;
+    SchemeEval::init_scheme();
+    SchemeEval::set_scheme_as(atomSpace);
 #endif // HAVE_GUILE
 #ifdef HAVE_CYTHON
     // Initialize Python.
@@ -309,7 +309,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
-    atoms_start = atomSpace->getSize();
+    atoms_start = atomSpace->get_size();
 
     logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
                    agent->classinfo().id.c_str(),  this->cycleCount);
@@ -319,7 +319,7 @@ void CogServer::runAgent(AgentPtr agent)
 
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
-    atoms_end = atomSpace->getSize();
+    atoms_end = atomSpace->get_size();
 
     time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
                 (timer_start.tv_sec*1000000  + timer_start.tv_usec);
@@ -516,7 +516,8 @@ bool CogServer::loadModule(const std::string& filename)
     dlerror();
 
     // search for id function
-    Module::IdFunction* id_func = (Module::IdFunction*) dlsym(dynLibrary, Module::id_function_name());
+    Module::IdFunction* id_func =
+	    (Module::IdFunction*) dlsym(dynLibrary, Module::id_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_id\": %s (module %s)", dlsymError, filename.c_str());
@@ -531,14 +532,16 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // search for 'load' & 'unload' symbols
-    Module::LoadFunction* load_func = (Module::LoadFunction*) dlsym(dynLibrary, Module::load_function_name());
+    Module::LoadFunction* load_func =
+	    (Module::LoadFunction*) dlsym(dynLibrary, Module::load_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_load\": %s", dlsymError);
         return false;
     }
 
-    Module::UnloadFunction* unload_func = (Module::UnloadFunction*) dlsym(dynLibrary, Module::unload_function_name());
+    Module::UnloadFunction* unload_func =
+	    (Module::UnloadFunction*) dlsym(dynLibrary, Module::unload_function_name());
     dlsymError = dlerror();
     if (dlsymError) {
         logger().error("Unable to find symbol \"opencog_module_unload\": %s", dlsymError);
@@ -674,10 +677,16 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(std::vector<std::string> module_paths)
 {
-    if (module_paths.empty())
-        module_paths = DEFAULT_MODULE_PATHS;
+    if (module_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            module_paths.push_back(p);
+            module_paths.push_back(p + "/opencog");
+        }
+    }
 
     // Load modules specified in the config file
+    bool load_failure = false;
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
     for (const std::string& module : modules) {
@@ -696,16 +705,27 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
         }
         if (!rc)
         {
-            logger().warn("Failed to load %s", module.c_str());
+            logger().warn("Failed to load cogserver module %s", module.c_str());
+				load_failure = true;
         }
+    }
+    if (load_failure) {
+        for (auto p : module_paths)
+            logger().warn("Searched for module at %s", p.c_str());
     }
 }
 
 void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 {
 #ifdef HAVE_GUILE
-    if (module_paths.empty())
-        module_paths = DEFAULT_MODULE_PATHS;
+    if (module_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            module_paths.push_back(p);
+            module_paths.push_back(p + "/opencog");
+        }
+    }
+
 
     load_scm_files_from_config(*atomSpace, module_paths);
 #else /* HAVE_GUILE */
@@ -722,7 +742,6 @@ void CogServer::openDatabase(void)
         return;
     }
 
-#ifdef HAVE_SQL_STORAGE
     const std::string &dbname = config()["STORAGE"];
     const std::string &username = config()["STORAGE_USERNAME"];
     const std::string &passwd = config()["STORAGE_PASSWD"];
@@ -747,11 +766,6 @@ void CogServer::openDatabase(void)
 
     logger().info("Preload %s as user %s msg: %s",
         dbname.c_str(), username.c_str(), resp.c_str());
-
-#else /* HAVE_SQL_STORAGE */
-    logger().warn(
-        "Server compiled without database support");
-#endif /* HAVE_SQL_STORAGE */
 }
 
 Logger &CogServer::logger()

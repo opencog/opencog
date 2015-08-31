@@ -30,6 +30,12 @@ class PsiDemandUpdaterAgentUTest: public CxxTest::TestSuite
 private:
     
     OACMock oacMock; 
+	const string PsiUTest_dir = string(PROJECT_SOURCE_DIR)
+		+ "/tests/embodiment/Control/OperationalAvatarController/Scaffold/";
+	const string physiological_state_xml = PsiUTest_dir
+		+ "physiological_state.xml";
+	const string dog_park_map_xml = PsiUTest_dir
+		+ "dog_park_map.xml";
 
 public:
 
@@ -75,6 +81,7 @@ public:
         config().set("ENTITY_EXPERIENCE_ENABLED", "false"); 
         config().set("FISHGRAM_ENABLED", "false");
         config().set("MONITOR_CHANGES_ENABLED", "false"); 
+        config().set("ENABLE_UNITY_CONNECTOR", "true");
 
         oacMock.createOAC(); 
 
@@ -84,8 +91,8 @@ public:
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
                                                   STRING,
-                                                  "physiological_state.xml"
-                                                 ); 
+                                                  physiological_state_xml.c_str()
+                                                 );
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 
@@ -94,8 +101,8 @@ public:
         p_message = oacMock.createMessageFromFile(config().get("PROXY_ID"),
                                                   oacMock.getAgentBrainId(), 
                                                   STRING,
-                                                  "dog_park_map.xml"
-                                                 ); 
+                                                  dog_park_map_xml.c_str()
+                                                 );
 
         oacMock.getOAC().processNextMessage(p_message); 
         delete p_message; 

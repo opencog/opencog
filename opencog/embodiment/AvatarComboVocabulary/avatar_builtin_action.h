@@ -26,7 +26,7 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/combo/builtin_action.h>
+#include <moses/comboreduct/combo/builtin_action.h>
 
 #include "avatar_operator.h"
 

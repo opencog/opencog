@@ -1,12 +1,15 @@
 
 # Build C++ code in assorted NLP subdirectories
 
-ADD_SUBDIRECTORY (chatbot)
+ADD_SUBDIRECTORY (irc)
 
 # The code in the question dir is now deprecated,
 # and should not be built
 # ADD_SUBDIRECTORY (question)
 
+ADD_SUBDIRECTORY (learn)
+ADD_SUBDIRECTORY (relex2logic)
+ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (types)
 ADD_SUBDIRECTORY (wsd)
 

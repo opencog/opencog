@@ -27,6 +27,7 @@
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
+#include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
@@ -46,6 +47,7 @@ class AttentionModule : public Module
 private:
     Factory<ForgettingAgent, Agent>          forgettingFactory;
     Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
+    Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
     Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
 #ifdef HAVE_GSL
     Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;

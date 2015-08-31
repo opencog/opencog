@@ -25,21 +25,33 @@
 #ifndef _OPENCOG_STATISTICS_PROBABILITY_H
 #define _OPENCOG_STATISTICS_PROBABILITY_H
 
+#include <map>
+#include <iterator>
 #include "DataProvider.h"
 
-namespace opencog {
- namespace statistics {
+namespace opencog { namespace statistics {
 
- class Probability
+class Probability
+{
+public:
+ template<typename Metadata>
+ inline static void calculateProbabilities(DataProvider<Metadata> &provider)
  {
- public:
-     template<typename Metadata>
-     static void calculateProbabilities(DataProvider<Metadata>* data);
+     std::map<std::vector<long>, StatisticData>::iterator it;
 
- };
-
-
+     for (long n = 1; n <= provider.n_gram; ++n) {
+         for (it = provider.mDataMaps[n].begin();
+              it != provider.mDataMaps[n].end(); ++it) {
+             StatisticData &pieceData = it->second;
+             pieceData.probability =
+                     pieceData.count /
+                     (static_cast<float> (provider.mRawDataNumbers[n]));
+         }
+     }
  }
-}
+};
+
+} // namespace statistics
+} // namespace opencog
 
 #endif // _OPENCOG_STATISTICS_PROBABILITY_H

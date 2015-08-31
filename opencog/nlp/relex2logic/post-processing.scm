@@ -231,7 +231,7 @@
 			(if (cog-link? atom)
 				(rebuild-with-x atom)
 				(if (equal? atom word)
-					(VariableNode "$X" df-node-stv)
+					(VariableNode "$X")
 					atom
 				)
 			)
@@ -245,17 +245,17 @@
 	(define final-links (map rebuild-with-x clean-links))
 	(define results-list
 		(list
-			(ForAllLink df-link-stv
-				(VariableNode "$X" df-node-stv)
-				(ImplicationLink df-link-stv
-					(InheritanceLink df-link-stv
-						(VariableNode "$X" df-node-stv)
+			(ForAllLink
+				(VariableNode "$X")
+				(ImplicationLink
+					(InheritanceLink
+						(VariableNode "$X")
 						word
 					)
 					; new rebuilt links
 					(if (= (length final-links) 1)
 						final-links
-						(AndLink df-link-stv final-links)
+						(AndLink final-links)
 					)
 				)
 			)
@@ -370,11 +370,11 @@
 				)
 			     ))
 				(if (equal? 'PredicateNode (cog-type old-atom))
-					(ImplicationLink df-link-stv
+					(ImplicationLink
 						(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
 						abstract-node
 					)
-					(InheritanceLink df-link-stv
+					(InheritanceLink
 						(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
 						abstract-node
 					)

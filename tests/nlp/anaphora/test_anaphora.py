@@ -23,7 +23,7 @@ class AnaphoraUnitTester(TestCase):
         self.atomspace= AtomSpace()
         __init__(self.atomspace)
         data=["opencog/scm/config.scm",
-              "opencog/atomspace/core_types.scm",
+              "opencog/scm/core_types.scm",
               "spacetime/spacetime_types.scm",
               "opencog/nlp/types/nlp_types.scm",
               "opencog/dynamics/attention/attention_types.scm",

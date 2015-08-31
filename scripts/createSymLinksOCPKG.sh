@@ -132,7 +132,7 @@ if ! [ -z $GITROOT ]; then
 		echo "Creating symbolic links..."
 		ln -s $BUILDROOT/opencog/spacetime/spacetime_types.scm bin/opencog/spacetime/spacetime_types.scm
 
-		ln -s $BUILDROOT/opencog/atomspace/core_types.scm bin/opencog/atomspace/core_types.scm
+		ln -s $BUILDROOT/opencog/scm/core_types.scm bin/opencog/scm/core_types.scm
 
 		ln -s $BUILDROOT/opencog/server/cogserver bin/opencog/server/cogserver
 		ln -s $BUILDROOT/opencog/server/libbuiltinreqs.so bin/opencog/server/libbuiltinreqs.so

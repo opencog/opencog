@@ -71,6 +71,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
 	ELSE (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -fPIC")
+		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
@@ -128,15 +129,27 @@ ENDIF (WIN32)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# Look for binutils-dev. Needed for pretty stack printing.
-FIND_PACKAGE(BFD)
-IF (BFD_FOUND)
-	MESSAGE(STATUS "Binutils found.")
-	ADD_DEFINITIONS(-DHAVE_BFD)
-	SET(HAVE_BFD 1)
-ELSE (BFD_FOUND)
-	MESSAGE(STATUS "Binutils-dev missing: No pretty stack-trace printing.")
-ENDIF (BFD_FOUND)
+# Check for cogutils first, then check for atomspace
+# Cogutils
+FIND_PACKAGE(CogUtil 2.0.1 REQUIRED)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+	SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
+# AtomSpace
+FIND_PACKAGE(AtomSpace 5.0.3 REQUIRED)
+IF (ATOMSPACE_FOUND)
+	MESSAGE(STATUS "AtomSpace found.")
+	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
+	SET(HAVE_ATOMSPACE 1)
+ELSE (ATOMSPACE_FOUND)
+	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed for everything!")
+ENDIF (ATOMSPACE_FOUND)
+
 
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
@@ -207,16 +220,6 @@ ELSE (GHC_FOUND)
 	MESSAGE(STATUS "${GHC_DIR_MESSAGE}")
 ENDIF (GHC_FOUND)
 
-# Gnu Scientific Library
-FIND_PACKAGE(GSL)
-IF (GSL_FOUND)
-	MESSAGE(STATUS "GSL found.")
-	ADD_DEFINITIONS(-DHAVE_GSL)
-	SET(HAVE_GSL 1)
-ELSE (GSL_FOUND)
-	MESSAGE(STATUS "GSL missing: needed for the AtomSpace.")
-ENDIF (GSL_FOUND)
-
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
@@ -243,38 +246,6 @@ ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 
-# Hypertable library, for atomspace persistence
-FIND_PACKAGE(HyperTable)
-IF (HYPERTABLE_FOUND)
-	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
-	SET(HAVE_HYPERTABLE 1)
-	MESSAGE(STATUS "Hypertable was found.")
-
-	# Don't bother looking for SIGAR unlesss hyperable was found.
-	FIND_PACKAGE(SIGAR)
-	IF (SIGAR_FOUND)
-	ELSE (SIGAR_FOUND)
-		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
-	ENDIF (SIGAR_FOUND)
-
-ELSE (HYPERTABLE_FOUND)
-	# The FindHypertable.cmake file already prints a message.
-	# MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\n   To over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS\n   are set.")
-	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
-
-ENDIF (HYPERTABLE_FOUND)
-
-# Look for libiberty-dev. Needed for pretty stack printing.
-FIND_PACKAGE(Iberty)
-IF (IBERTY_FOUND)
-	MESSAGE(STATUS "Libiberty found.")
-	ADD_DEFINITIONS(-DHAVE_IBERTY)
-	SET(HAVE_IBERTY 1)
-ELSE (IBERTY_FOUND)
-	MESSAGE(STATUS "Libiberty-dev missing: No pretty stack-trace printing.")
-ENDIF (IBERTY_FOUND)
-
-
 # Lapack is needed for BLOPEX
 FIND_PACKAGE(LAPACK)
 IF (LAPACK_FOUND)
@@ -297,17 +268,18 @@ ELSE (LINK_GRAMMAR_FOUND)
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
-# MPI is needed for MOSES on compute clusters.
-FIND_PACKAGE(MPI)
+# MOSES needed for embodiment learning...
+FIND_PACKAGE(MOSES)
 
-IF (MPI_FOUND)
-	ADD_DEFINITIONS(-DHAVE_MPI)
-	SET(HAVE_MPI 1)
-	MESSAGE(STATUS "MPI was found.")
-	INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
-ELSE (MPI_FOUND)
-	MESSAGE(STATUS "MPI missing: needed for MPI-MOSES.")
-ENDIF (MPI_FOUND)
+IF (MOSES_FOUND)
+	MESSAGE(STATUS "MOSES was found.")
+	ADD_DEFINITIONS(-DHAVE_MOSES)
+	SET(HAVE_MOSES 1)
+	SET(HAVE_COMBOREDUCT 1)
+	SET(HAVE_FEATURE_SELECTION 1)
+ELSE (MOSES_FOUND)
+	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
+ENDIF (MOSES_FOUND)
 
 
 # OpenGL needed for visualization...
@@ -431,33 +403,6 @@ ELSE (TCL_TCLSH)
 	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
 ENDIF (TCL_TCLSH)
 
-# Enable the hypergraph persistence module, if unixodbc is found.
-# In principle, iODBC could be used; however, iODBC is buggy when
-# used with UTF8/unicode node names, and fails miserably. Thus,
-# only UnixODBC is supported at this time.
-#
-# FIND_PACKAGE(IODBC QUIET)
-# IF (IODBC_FOUND)
-# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-# 	SET(ODBC_FOUND 1)
-# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
-# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-# ENDIF (IODBC_FOUND)
-
-FIND_PACKAGE(UnixODBC QUIET)
-IF (UnixODBC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-	SET(HAVE_SQL_STORAGE 1)
-	SET(ODBC_FOUND 1)
-	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
-	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-	SET(ODBC_DIR_MESSAGE "UnixODBC was found.")
-ELSE (UnixODBC_FOUND)
-	SET(ODBC_FOUND 0)
-	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
-ENDIF (UnixODBC_FOUND)
-MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
-
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -508,17 +453,13 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 # Decide what to build, based on the packages found.
 
 IF(Boost_FOUND)
-	SET(HAVE_UTIL 1)
-	SET(HAVE_COMBOREDUCT 1)
-	SET(HAVE_MOSES 1)
-	SET(HAVE_FEATURE_SELECTION 1)
 ENDIF(Boost_FOUND)
 
-IF(GSL_FOUND AND HAVE_UTIL)
-	SET(HAVE_ATOMSPACE 1)
+IF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 	SET(HAVE_ATTENTION 1)
 	SET(HAVE_DIMEMBED 1)
-ENDIF(GSL_FOUND AND HAVE_UTIL)
+	SET(HAVE_STATISTICS 1)
+ENDIF(HAVE_ATOMSPACE AND HAVE_COGUTIL)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 	SET(HAVE_SPATIAL_TOOLS 1)
@@ -532,10 +473,6 @@ ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
 IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
-
-IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
-	SET(HAVE_PERSIST 1)
-ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
 
 IF(XERCESC_VERSION_OK)
 	SET(HAVE_EMBODIMENT 1)
@@ -642,6 +579,10 @@ IF (CXXTEST_FOUND)
 	)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
+		#      ../reasoning/RuleEngine/RuleUTest
+		#      ../reasoning/RuleEngine/ForwardChainerUTest
+		#      ../nlp/sureal/SuRealUTest
+		#      ../nlp/microplanning/MicroplanningUTest
 		WORKING_DIRECTORY tests/query
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running pattern matcher tests..."
@@ -754,28 +695,20 @@ FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # Show a summary of what we got
-SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
-SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Feature selection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
+SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
-SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
-SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
-SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
-SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD AND HAVE_IBERTY)
+SUMMARY_ADD("TBB" "Intel TBB for multithreading" HAVE_TBB)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
-SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_SHOW()

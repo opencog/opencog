@@ -276,7 +276,7 @@ std::string CompositeBehaviorDescription::toString() const
     std::string answer = "{";
     for (unsigned int i = 0; i < entries.size(); i++) {
         answer.append("(");
-        answer.append(atomspace->atomAsString(entries[i].handle));
+        answer.append(atomspace->atom_as_string(entries[i].handle));
         answer.append(",");
         answer.append(entries[i].temporal.toString());
         answer.append(")");
@@ -319,7 +319,7 @@ std::string CompositeBehaviorDescription::toStringHandles()
     std::string answer = "{";
     for (unsigned int i = 0; i < entries.size(); i++) {
         answer.append("(");
-        answer.append(atomspace->getName(entries[i].handle));
+        answer.append(atomspace->get_name(entries[i].handle));
         answer.append(",");
         answer.append(entries[i].temporal.toString());
         answer.append(")");
@@ -355,8 +355,8 @@ std::string CompositeBehaviorDescription::toStringTimeline(
         std::vector<std::string> names;
         for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); ++it) {
             //the assert below is here to insure that the atom is a node
-            OC_ASSERT(atomspace->isNode(*it));
-            names.push_back(atomspace->getName(*it));
+            OC_ASSERT(atomspace->is_node(*it));
+            names.push_back(atomspace->get_name(*it));
         }
         std::sort(names.begin(), names.end());
         for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it) {

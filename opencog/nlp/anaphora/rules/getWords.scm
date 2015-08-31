@@ -12,17 +12,15 @@
                 (TypeNode "ParseNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (WordInstanceLink
-                    (VariableNode "$target")
-                    (VariableNode "$parse node")
-                )
-            )
-            (ListLink
-                (AnchorNode "CurrentResult")
+        (AndLink
+            (WordInstanceLink
                 (VariableNode "$target")
+                (VariableNode "$parse node")
             )
+        )
+        (ListLink
+            (AnchorNode "CurrentResult")
+            (VariableNode "$target")
         )
     )
 )

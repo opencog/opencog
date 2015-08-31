@@ -27,9 +27,9 @@
 #include <exception>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/variable_unifier.h>
-#include <opencog/comboreduct/combo/definite_object.h>
+#include <moses/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/variable_unifier.h>
+#include <moses/comboreduct/combo/definite_object.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>

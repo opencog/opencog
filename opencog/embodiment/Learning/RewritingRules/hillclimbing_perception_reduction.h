@@ -24,7 +24,7 @@
 #ifndef _HILLCLIMBING_PERCEPTION_REDUCTION_H
 #define _HILLCLIMBING_PERCEPTION_REDUCTION_H
 
-#include <opencog/comboreduct/reduct/reduct.h>
+#include <moses/comboreduct/reduct/reduct.h>
 
 namespace opencog { namespace reduct
 {

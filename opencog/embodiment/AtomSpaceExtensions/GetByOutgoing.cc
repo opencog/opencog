@@ -58,15 +58,15 @@ UnorderedHandleSet getHandlesByOutgoingSet(
         DPRINTF("special case arity=%d\n", arity);
         bool hasAllHandles = true;
         for (Arity i = 0; hasAllHandles && i < arity; i++) {
-            hasAllHandles = as.isValidHandle(handles[i]);
+            hasAllHandles = as.is_valid_handle(handles[i]);
         }
         DPRINTF("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
             DPRINTF("building link for lookup: type = %d, handles.size() = %zu\n", type, handles.size());
-            Handle h(as.getHandle(type, handles));
+            Handle h(as.get_handle(type, handles));
 
             UnorderedHandleSet result;
-            if (as.isValidHandle(h)) {
+            if (as.is_valid_handle(h)) {
                 result.insert(h);
             }
             DPRINTF("Returning HandleSet by using atom hash_set!\n");
@@ -76,7 +76,7 @@ UnorderedHandleSet getHandlesByOutgoingSet(
 
     if (classserver().isA(type, LINK) && (arity == 0)) {
         UnorderedHandleSet uhs;
-        as.getHandlesByType(inserter(uhs), type, subclass);
+        as.get_handles_by_type(inserter(uhs), type, subclass);
 
         UnorderedHandleSet result;
         std::copy_if(uhs.begin(), uhs.end(), inserter(result),
@@ -97,7 +97,7 @@ UnorderedHandleSet getHandlesByOutgoingSet(
     // builds a set for each element in the outgoing set. Empty sets are
     // counted to be removed a posteriori
     for (Arity i = 0; i < arity; i++) {
-        if ((!handles.empty()) && as.isValidHandle(handles[i])) {
+        if ((!handles.empty()) && as.is_valid_handle(handles[i])) {
             Handle h(handles[i]);
             HandleSeq hs;
             h->getIncomingSet(back_inserter(hs));
@@ -119,7 +119,7 @@ UnorderedHandleSet getHandlesByOutgoingSet(
             bool sub = subclasses == NULL ? false : subclasses[i];
 
             HandleSeq targets;
-            as.getHandlesByType(back_inserter(targets), types[i], sub);
+            as.get_handles_by_type(back_inserter(targets), types[i], sub);
             for (Handle h: targets) {
                 h->getIncomingSetByType(inserter(sets[i]), type, subclass);
             }

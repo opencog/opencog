@@ -237,8 +237,11 @@ void StateNode::calculateNodesDepth()
 
 SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNode)
 {
-    // sort all the rule nodes in current planning network, in the order of from left to right (from starting to goal / from backward to forward)
-    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
+    // Sort all the rule nodes in current planning network, in the
+    // order of from left to right (from starting to goal / from
+    // backward to forward)
+    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),
+         compareRuleNodeDepth);
     RuleNode* clostestRuleNode = 0;
 
     if (stateNode->backwardRuleNode)
@@ -247,22 +250,21 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
     }
     else
     {
-        // get the most closest rule node to the input stateNode in its backward side,
-        // because only the back ward node will affect the input state node
+        // Get the closest rule node to the input stateNode in its
+        // backward side, because only the backward node will affect
+        // the input state node
 
-        vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
-
-        for (; it != allRuleNodeInThisPlan.end(); ++ it)
+        for (RuleNode* rnode : allRuleNodeInThisPlan)
         {
-            RuleNode* rnode = (RuleNode*)(*it);
-
             StateNode* snode = rnode->getLastForwardStateNode();
 
             if (snode == stateNode)
                 continue;
 
             if ((*snode) < (*stateNode))
-                break; // the node with a lower depth is more closed to the goal, so it won't affect the input state node
+                break; // the node with a lower depth is more closed
+                       // to the goal, so it won't affect the input
+                       // state node
 
             clostestRuleNode = rnode;
         }
@@ -273,14 +275,11 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
 
     SpaceServer::SpaceMap *iSpaceMap = curMap->clone();
 
-    // execute the all the actions in current planning network to change the imaginary space map in the order in allRuleNodeInThisPlan,
-    // till the clostestRuleNode
-    vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
-
-    for (; it != allRuleNodeInThisPlan.end(); ++ it)
+    // Execute the all the actions in current planning network to
+    // change the imaginary space map in the order in
+    // allRuleNodeInThisPlan, till the clostestRuleNode
+    for (RuleNode* rnode : allRuleNodeInThisPlan)
     {
-        RuleNode* rnode = (RuleNode*)(*it);
-
         executeActionInImaginarySpaceMap(rnode,iSpaceMap);
 
         if (rnode == clostestRuleNode)
@@ -294,8 +293,12 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
 // @ bool &found: return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
 // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,
-                                                       bool ifCheckSameRuleNode, StateNode* curSNode)
+bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState,
+                                                       bool &found,
+                                                       StateNode *&satstateNode,
+                                                       RuleNode *forwardRuleNode,
+                                                       bool ifCheckSameRuleNode,
+                                                       StateNode* curSNode)
 {
     //   if curSNode is 0, it means it has no backward links yet, so only check in startStateNodes.
     //   if curSNode is not 0, check temporaryStateNodes first , if cannot find in temporaryStateNodes, check in startStateNodes.
@@ -625,10 +628,10 @@ ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog
     vector<State*> goal,knownStates;
 
     // the goal handle is like: [EvaluationLink <EnergyDemandGoal> 0.999857 0.00124844]
-    Handle goal_predicate = this->atomSpace->getOutgoing(goalHandle,0);
+    Handle goal_predicate = this->atomSpace->get_outgoing(goalHandle,0);
     OC_ASSERT( (goal_predicate != Handle::UNDEFINED), "OCPlanner::doPlanningForPsiDemandingGoal: The current goal is Handle::UNDEFINED!");
 
-    string goalname = this->atomSpace->getName(goal_predicate);
+    string goalname = this->atomSpace->get_name(goal_predicate);
     std::cout<< "OCPLANNER_DEBUG:Goalgame: "<< goalname.c_str() << std::endl;
 
     State* goalState = new State(goalname,ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
@@ -1007,7 +1010,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
 //                        if (curSNode->hypotheticalLink != Handle::UNDEFINED)
 //                        {
-//                           atomSpace->removeAtom(curSNode->hypotheticalLink);
+//                           atomSpace->remove_atom(curSNode->hypotheticalLink);
 //                           curSNode->hypotheticalLink = Handle::UNDEFINED;
 //                        }
 
@@ -1726,12 +1729,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 void OCPlanner::cleanUpEverythingAfterPlanning()
 {
     // delete all rule nodes
-    vector<RuleNode*>::iterator planRuleNodeIt;
-    for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
+    for (RuleNode* rn : allRuleNodeInThisPlan)
     {
-         RuleNode* rn = *planRuleNodeIt;
-         if (rn)
-             delete rn;
+        if (rn)
+            delete rn;
     }
 
     // delete all the state nodes, remove their hypotheticalLinks from Atomspace at the same time if any
@@ -1745,8 +1746,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
 //                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
-                atomSpace->removeAtom(sn->hypotheticalLink);
+//                    << atomSpace->atom_as_string(sn->hypotheticalLink).c_str() << std::endl;
+                atomSpace->remove_atom(sn->hypotheticalLink);
             }
 
             delete sn;
@@ -1762,8 +1763,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
 //                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
-                atomSpace->removeAtom(sn->hypotheticalLink);
+//                    << atomSpace->atom_as_string(sn->hypotheticalLink).c_str() << std::endl;
+                atomSpace->remove_atom(sn->hypotheticalLink);
             }
 
             delete sn;
@@ -1794,8 +1795,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
 //                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
-                atomSpace->removeAtom(sn->hypotheticalLink);
+//                    << atomSpace->atom_as_string(sn->hypotheticalLink).c_str() << std::endl;
+                atomSpace->remove_atom(sn->hypotheticalLink);
             }
 
             delete sn;
@@ -1811,8 +1812,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
 //                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
-                atomSpace->removeAtom(sn->hypotheticalLink);
+//                    << atomSpace->atom_as_string(sn->hypotheticalLink).c_str() << std::endl;
+                atomSpace->remove_atom(sn->hypotheticalLink);
             }
 
             delete sn;
@@ -2423,7 +2424,7 @@ void OCPlanner::addHypotheticalLinkForStateNode(StateNode *stateNode)
     stateNode->hypotheticalLink = hEvalLink;
 
 //    static int count = 1;
-//    cout <<std::endl << "Added HypotheticalLink " << count++ << std::endl << atomSpace->atomAsString(hEvalLink).c_str() << std::endl;
+//    cout <<std::endl << "Added HypotheticalLink " << count++ << std::endl << atomSpace->atom_as_string(hEvalLink).c_str() << std::endl;
 
 }
 
@@ -2591,9 +2592,9 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
             if (forwardForwardSN->hypotheticalLink != Handle::UNDEFINED)
             {
 //               cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                   << atomSpace->atomAsString(forwardForwardSN->hypotheticalLink).c_str() << std::endl;
+//                   << atomSpace->atom_as_string(forwardForwardSN->hypotheticalLink).c_str() << std::endl;
 
-               atomSpace->removeAtom(forwardForwardSN->hypotheticalLink);
+               atomSpace->remove_atom(forwardForwardSN->hypotheticalLink);
                forwardForwardSN->hypotheticalLink = Handle::UNDEFINED;
 
             }
@@ -2615,9 +2616,9 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
         if (forwardStateNode->hypotheticalLink != Handle::UNDEFINED)
         {
 //            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
+//                << atomSpace->atom_as_string(forwardStateNode->hypotheticalLink).c_str() << std::endl;
 
-           atomSpace->removeAtom(forwardStateNode->hypotheticalLink);
+           atomSpace->remove_atom(forwardStateNode->hypotheticalLink);
         }
         delete forwardStateNode;
     }
@@ -2635,9 +2636,9 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
         if (curSNode->hypotheticalLink != Handle::UNDEFINED)
         {
 //            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-//                << atomSpace->atomAsString(curSNode->hypotheticalLink).c_str() << std::endl;
+//                << atomSpace->atom_as_string(curSNode->hypotheticalLink).c_str() << std::endl;
 
-            atomSpace->removeAtom(curSNode->hypotheticalLink);
+            atomSpace->remove_atom(curSNode->hypotheticalLink);
 
             curSNode->hypotheticalLink = Handle::UNDEFINED;
         }
@@ -3283,7 +3284,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
                 for (Handle listH : candidateListHandles)
                 {
-                    HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
+                    HandleSeq candidateHandlesInOneGroup = atomSpace->get_outgoing(listH);
                     ParamGroundedMapInARule oneGroupCandidate;
                     int index = 0;
 
@@ -3313,7 +3314,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                         tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
                     }
 
-                    atomSpace->removeAtom(listH);
+                    atomSpace->remove_atom(listH);
 
                 }
 

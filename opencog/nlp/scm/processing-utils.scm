@@ -64,6 +64,9 @@
 			; (connect s AF_INET (inet-aton relex-server-host) relex-server-port)
 			(connect s AF_INET (inet-pton AF_INET relex-server-host) relex-server-port)
 
+			; An explicit port-encoding is needed by guile-2.0.9
+			(set-port-encoding! s "utf-8")
+
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
 			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
@@ -311,8 +314,6 @@
 				       ; multiple instances in a sentence.  Since there is no clean way
 				       ; to get to the abstracted node from an instanced node yet, such
 				       ; repeatition are ignored for now
-				       ; XXX FIXME R2L's rule-helpers are reseting the TV to stv everytime,
-				       ; that need to be removed before this code work
 				       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
 					(par-map
 						(lambda (n)
@@ -364,7 +365,18 @@
                 (if (string=? "END." line)  ; continuing the tradition of RelEx
                     (break)
                     (begin
-                        (nlp-parse line)
+                        (catch #t
+                            (lambda ()
+                                (nlp-parse line)
+                            )
+                            (lambda (key . parameters)
+                                (begin
+                                    (display "*** Unable to parse: \"")
+                                    (display line)
+                                    (display "\"\n")
+                                )
+                            )
+                        )
                         (set! line (get-line port))
                     )
                 )

@@ -22,11 +22,13 @@ ADD_DEPENDENCIES(Procedure
 
 ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
 TARGET_LINK_LIBRARIES (combo_shell_stdio
-	oac
+	# OAC is deprecated.  If you are working on refactoring some of the code
+	# you can uncomment.
+	#oac
 	Procedure
 	WorldWrapper
 	AvatarComboVocabulary
-	cogutil
+	${COGUTIL_LIBRARY}
 )
 IF (HAVE_PROTOBUF)
    TARGET_LINK_LIBRARIES(combo_shell_stdio
@@ -51,4 +53,3 @@ IF (HAVE_PROTOBUF)
 		${PROTOBUF_LIBRARY}
 	)
 ENDIF (HAVE_PROTOBUF)
-

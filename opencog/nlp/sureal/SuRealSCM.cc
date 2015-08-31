@@ -21,10 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -96,7 +97,7 @@ void SuRealSCM::init()
  * @return    a list of the form returned by sureal_get_mapping, but spanning
  *            multiple InterpretationNode
  */
-HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
+HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, int thoroughness)
 {
 #ifdef HAVE_GUILE
     // only accept SetLink
@@ -112,12 +113,12 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // It is possible to keep the clauses in a SetLink and override the PM's
     // link_match() callback to skip SetLink's arity check , but that would
     // be assuming R2L will never use SetLink for other purposes.
-    HandleSeq qClauses = pAS->getOutgoing(h);
+    HandleSeq qClauses = pAS->get_outgoing(h);
 
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = getAllUniqueNodes(h);
+    UnorderedHandleSet allNodes = get_all_unique_nodes(h);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher
@@ -133,16 +134,16 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
         }
 
-        std::string sName = pAS->getName(n);
+        std::string sName = pAS->get_name(n);
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
-        Handle hWordNode = pAS->getHandle(WORD_NODE, sWord);
+        Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
 
         // no WordNode found
         if (hWordNode == Handle::UNDEFINED)
             continue;
 
         // if no LG dictionary entry
-        if (getNeighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+        if (get_neighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
             continue;
 
         sVars.insert(n);
@@ -166,9 +167,9 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars);
-        SatisfactionLinkPtr slp(createSatisfactionLink(qVars, qClause));
-        slp->satisfy(&pmcb);
+        SuRealPMCB pmcb(pAS, qVars, thoroughness);
+        PatternLinkPtr slp(createPatternLink(qVars, qClause));
+        slp->satisfy(pmcb);
 
         // no pattern matcher result
         if (pmcb.m_results.empty())
@@ -261,14 +262,14 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     auto itprComp = [&pAS](const Handle& hi, const Handle& hj)
     {
         // get the corresponding SetLink
-        HandleSeq qi = getNeighbors(hi, false, true, REFERENCE_LINK, false);
-        HandleSeq qj = getNeighbors(hj, false, true, REFERENCE_LINK, false);
+        HandleSeq qi = get_neighbors(hi, false, true, REFERENCE_LINK, false);
+        HandleSeq qj = get_neighbors(hj, false, true, REFERENCE_LINK, false);
         qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
         qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return pAS->getArity(qi[0]) < pAS->getArity(qj[0]);
+        return pAS->get_arity(qi[0]) < pAS->get_arity(qj[0]);
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);

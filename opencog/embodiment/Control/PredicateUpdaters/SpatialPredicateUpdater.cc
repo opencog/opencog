@@ -62,8 +62,7 @@ SpatialPredicateUpdater::~SpatialPredicateUpdater()
 
 void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
                                      Handle pet, 
-                                     unsigned long timestamp
-                                    )
+                                     unsigned long timestamp)
 {
     static bool hasDoneFirstTimeUPdate = false;
     if (objects.size() == 0)

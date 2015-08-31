@@ -1,0 +1,174 @@
+/*
+ * tests/spatial/MathUTest.cxxtest
+ *
+ * Copyright (C) 2002-2009 Novamente LLC
+ * All Rights Reserved
+ * Author(s): YiShan Chen
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cxxtest/TestSuite.h>
+#include <string>
+#include <sstream>
+#include <iostream>
+
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+
+#include <opencog/spacetime/Temporal.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/spacetime/TimeServer.h>
+#include <opencog/spacetime/SpaceServer.h>
+
+using namespace std;
+
+using namespace opencog;
+using namespace opencog::spatial;
+
+/*
+ * DataClass
+ */
+
+class MapData
+{
+public:
+	MapData(octime_t _time,std::string _name,int _xmin,int _ymin,int _zmin,int _xdim,int _ydim,int _zdim,int _floorheight)
+		:timestamp(_time),mapName(_name),
+		 xMin(_xmin),yMin(_ymin),zMin(_zmin),
+		 xDim(_xdim),yDim(_ydim),zDim(_zdim),
+		 floorHeight(_floorheight){}
+	
+	octime_t timestamp;
+	std::string mapName; 
+	int xMin; 
+	int yMin; 
+	int zMin;
+	int xDim;
+	int yDim;
+	int zDim;
+	int floorHeight;
+};	
+
+
+class TestServer
+{
+public:
+
+	TestServer()
+	{
+		
+		testspaceserver=new SpaceServer(testatomspace);
+		testtimeserver=new TimeServer(testatomspace,testspaceserver);
+		MapData testmapdata(123456,"testmap777",0,0,0,255,255,255,0);
+		Handle testmaphandle=testspaceserver->addOrGetSpaceMap(testmapdata.timestamp,testmapdata.mapName,
+															  testmapdata.xMin,testmapdata.yMin,
+															  testmapdata.zMin,testmapdata.xDim,
+															  testmapdata.yDim,testmapdata.zDim,
+															  testmapdata.floorHeight);
+
+	}
+	
+	AtomSpace testatomspace;
+	SpaceServer* testspaceserver;
+	TimeServer* testtimeserver;		
+
+};
+
+
+class SpaceServerUTest : public CxxTest::TestSuite
+{
+public:
+
+
+	void test_addOrGetSpaceMap()
+	{
+		TestServer testserver;
+		MapData testmapdata=MapData(123456,"testmap777",0,0,0,255,255,255,0);
+
+
+  		Handle testmaphandle=(testserver.testspaceserver)->addOrGetSpaceMap(testmapdata.timestamp,testmapdata.mapName,
+											testmapdata.xMin,testmapdata.yMin,
+									testmapdata.zMin,testmapdata.xDim,
+									testmapdata.yDim,testmapdata.zDim,
+									testmapdata.floorHeight);
+		
+		TS_ASSERT(testserver.testatomspace.isValidHandle(testmaphandle));
+		TS_ASSERT_EQUALS(testserver.testatomspace.getNode(SPACE_MAP_NODE,testmapdata.mapName),
+						 testmaphandle);
+	}
+	void test_getMap()
+	{
+		TestServer testserver;
+		MapData testmapdata=MapData(123456,"testmap777",0,0,0,255,255,255,0);
+  		Handle testmaphandle=(testserver.testspaceserver)->addOrGetSpaceMap(testmapdata.timestamp,testmapdata.mapName,
+											testmapdata.xMin,testmapdata.yMin,
+									testmapdata.zMin,testmapdata.xDim,
+									testmapdata.yDim,testmapdata.zDim,
+									testmapdata.floorHeight);
+
+
+		const SpaceServer::SpaceMap& testmap=(testserver.testspaceserver)->getMap(testmaphandle);
+		TS_ASSERT_EQUALS(testmap.getMapName(),testmapdata.mapName);
+	}
+
+	void test_addSpaceInfo()
+	{
+		TestServer testserver;
+		MapData testmapdata=MapData(123456,"testmap777",0,0,0,255,255,255,0);
+  		Handle testmaphandle=(testserver.testspaceserver)->addOrGetSpaceMap(testmapdata.timestamp,testmapdata.mapName,
+											testmapdata.xMin,testmapdata.yMin,
+									testmapdata.zMin,testmapdata.xDim,
+									testmapdata.yDim,testmapdata.zDim,
+									testmapdata.floorHeight);
+		Handle testobjecthandle=testserver.testatomspace.addNode(STRUCTURE_NODE,"testobj444");
+
+
+		(testserver.testspaceserver)->addSpaceInfo(testobjecthandle,testmaphandle,
+												0,234567,
+												9,10,11,
+												1,1,1,
+												0,false,
+												"block","testobj444","testobj");
+		const SpaceServer::SpaceMap& testmap=(testserver.testspaceserver)->getMap(testmaphandle);
+		TS_ASSERT_EQUALS(testmap.getObjectLocation(testobjecthandle),BlockVector(9,10,11))
+		
+	}
+
+	void test_removeSpaceInfo()
+	{
+		TestServer testserver;
+		MapData testmapdata=MapData(123456,"testmap777",0,0,0,255,255,255,0);
+  		Handle testmaphandle=(testserver.testspaceserver)->addOrGetSpaceMap(testmapdata.timestamp,testmapdata.mapName,
+											testmapdata.xMin,testmapdata.yMin,
+									testmapdata.zMin,testmapdata.xDim,
+									testmapdata.yDim,testmapdata.zDim,
+									testmapdata.floorHeight);
+		Handle testobjecthandle=testserver.testatomspace.addNode(STRUCTURE_NODE,"testobj444");
+		(testserver.testspaceserver)->addSpaceInfo(testobjecthandle,testmaphandle,
+												0,234567,
+												9,10,11,
+												1,1,1,
+												0,false,
+												"block","testobj444","testobj");
+
+
+		(testserver.testspaceserver)->removeSpaceInfo(testobjecthandle,testmaphandle);
+		const SpaceServer::SpaceMap& testmap=(testserver.testspaceserver)->getMap(testmaphandle);
+		TS_ASSERT_EQUALS(testmap.getObjectLocation(testobjecthandle),BlockVector::ZERO);
+	}
+};
+

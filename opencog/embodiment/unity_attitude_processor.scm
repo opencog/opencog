@@ -106,21 +106,9 @@
                 (VariableNode "$var_target")
             )
 
-            (ImplicationLink 
-                ; Pattern
-                (AtTimeLink
-                    (TimeNode (number->string timestamp))
-                    (EvaluationLink
-                        (PredicateNode "attitude_towards")
-                        (ListLink
-                            PET_HANDLE
-                            (VariableNode "$var_target")
-                            (VariableNode "$var_attitude")
-                        )
-                    )
-                )
-
-                ; Result
+            ; Pattern
+            (AtTimeLink
+                (TimeNode (number->string timestamp))
                 (EvaluationLink
                     (PredicateNode "attitude_towards")
                     (ListLink
@@ -129,7 +117,17 @@
                         (VariableNode "$var_attitude")
                     )
                 )
-            ); ImplicationLink
+            )
+
+            ; Result
+            (EvaluationLink
+                (PredicateNode "attitude_towards")
+                (ListLink
+                    PET_HANDLE
+                    (VariableNode "$var_target")
+                    (VariableNode "$var_attitude")
+                )
+            )
         ); BindLink
     ); cog-bind
 )

@@ -806,7 +806,7 @@ on thread 47155674880320
 
 Irritation 4
 ------------
-Occasionally see this: 
+Occasionally see this:
 
 In ice-9/boot-9.scm:
  157: 6 [catch #t #<catch-closure 294a63c0> ...]
@@ -835,6 +835,190 @@ ABORT: encoding-error
 ERROR: In procedure scm_to_stringn: Error while printing exception.
 
 
+Crash 8
+-------
+[2015-07-17 12:37:57:428] [ERROR] Caught signal 11 (Segmentation fault) on
+thread 140537051608832
+        Stack Trace:
+        2: basic_string.h:539   ~basic_string()
+        3: CogServerMain.cc:79  _Z7sighandi()
+        4: ??:0 killpg()
+        5: ??:0 scm_make_vm()
+        6: ??:0 GC_mark_from()
+        7: ??:0 GC_mark_some()
+        8: ??:0 GC_stopped_mark()
+        9: ??:0 GC_try_to_collect_inner()
+        10: ??:0        GC_collect_or_expand()
+        11: ??:0        GC_allocobj()
+        12: ??:0        GC_generic_malloc_inner()
+        13: ??:0        GC_register_finalizer_inner()
+        14: ??:0        scm_closedir()
+        15: ??:0        scm_i_new_smob()
+        16: smob.h:91   scm_new_smob()
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_1()
+        19: ??:0        scm_vm_engine()
+        20: ??:0        scm_call_3()
+        21: ??:0        scm_vm_engine()
+        22: ??:0        scm_call_1()
+        23: ??:0        scm_vm_engine()
+        24: ??:0        scm_call_3()
+        25: ??:0        scm_vm_engine()
+        26: ??:0        scm_call_4()
+        27: SchemeEval.cc:606     opencog::SchemeEval::do_eval(std::string
+const&)
+        28: SchemeEval.cc:535     opencog::SchemeEval::c_wrap_eval(void*)
+        29: ??:0        scm_at_abort()
+        30: ??:0        scm_vm_engine()
+        31: ??:0        scm_call_4()
+        32: ??:0        scm_at_abort()
+        33: ??:0        scm_c_with_continuation_barrier()
+        34: ??:0        GC_call_with_gc_active()
+        35: ??:0        scm_current_processor_count()
+        36: ??:0        GC_call_with_stack_base()
+        37: ??:0        scm_with_guile()
+        38: SchemeEval.cc:502     opencog::SchemeEval::eval_expr(std::string
+const&)
+        39: basic_string.h:293    std::string::_M_data() const
+        40: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
+>, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
+        41: ??:0        start_thread()
+        42: ??:0        clone()
+
+
+Garbage 9
+---------
+submit-one: The town has an area of 88 km², population (2003) is 158,000, and is
+located 20 km north of downtown Hồ Chí Minh City, on the left bank of the Saigon River,
+upstream from Hồ Chí Minh City.
+duuude before nectcat open 27
+opencog-en> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 195d220> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 195d220>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 195d0e0> ...]
+   ?: 5 [apply-smob/1 #<catch-closure 1959f00>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 1959dc0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 1959dc0>]
+   ?: 2 [call-with-input-string "(observe-text \"Although this town is an
+administratively separate town, it is considered as part of the H\u1ed3 Chí Minh City
+Metropolitan Area since this town is bordered by H\u1ed3 Chí Minh City\u2019s urban
+area.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 1addf40 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error
+...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 1959d80> encoding-error ...]
+
+
+/bin/bash ./ss-one.sh en beta-pages/T/Thủ Dầu Một lo
+
+
+So -- looks like netcat is sending correct text, but by the time
+observe-text gets it, it has been garbled. Why?
+Well, nlp/scm/processing-utils.scm prints it ungarbled.
+
+OK, so this fails:
+(define sss (socket PF_INET SOCK_STREAM 0))
+(connect sss AF_INET (inet-pton AF_INET "127.0.0.1") 7777)
+(display "SmålandSmåland" sss)
+
+prints garbage
+
+(set-port-encoding! sss "utf-8")
+does not fix it.
+(use-modules (rnrs bytevectors))
+(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
+
+
+Ahhh ... (string->utf8 "Småland") prints
+#vu8(83 109 63 108 97 110 100)
+which is what netcat receives
+
+å should be c3 a5  U+00E5
+
+guile-git is broken
+guile-2.0.9 shell works great.
+cogserver linked to guile-2.0.9 is broken
+... but is fixed by using (set-port-encoding! sss "utf-8")
+Yayyy!
+
+
+Boo ...
+submit-one: Phú Mỹ.
+(observe-text \"Phú M\u1ef9.\")
+
+ditto for Phú Thọ.
+Chánh Nghĩa.
+Hiệp Thành
+Thủ Dầu Một
+Hồ Chí Minh
+
+(relex-parse "Ćićolina\n")
+(x-sock-io "Ćićolina\n")
+(x-sock-io "Thủ Dầu Một\n")
+
+(define (x-sock-io sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "10.70.70.2") 7777)
+      (set-port-encoding! s "utf-8")
+
+      (display sent-txt s)
+      (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+      (close-port s)))
+
+(setlocale LC_ALL "")
+
+(set-port-encoding! (current-input-port) "utf-8")
+(display "Ćićolina\n")
+(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
+(define x "Thủ Dầu Một\n")  as above
+(define x "Småland\n") ... works!!
+(define x "Hòa Phú Phú Tân\n")  ... works  !!!
+(define x "x\u0106i\u0107olina\\n") works
+
+Ć is U+0106  c4 86
+ć is U+0107  c4 87
+
+what is bizarre is that the above is exactly inverted for
+the guile-2.1 shell:
+sending the  "working" ones sends garbage, sending the failing ones goes through.
+(ditto for just simply printing....)
+
+both define/display seem to work fine in the guile-2.0.9 shell...
+and define/display seem to work well for the cogserver-2.1 shell. WTF.
+so is it due to a shared-library mis-match?  Caching of compiled files?
+
+(display "SmålandSmåland\n")
+(display "Ćićolina\n")
+(display "Thủ Dầu Một\n")
+(display "Hòa Phú Phú Tân\n")
+
+Avoiding preload of all scheme does not fix it.
+Clearling the guile compiler cache does not fix it.
+
+[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
+
+ERROR: In procedure call-with-input-string:
+ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
+string to output locale" 84 #f #f)'.
+
+(define x "\u0106i\u0107olina\n")
+
+%default-port-encoding is a fluid ....
+make fluid with default ...
+make dynamic state (with parent ....)
+
+Solution! (setlocale LC_ALL "") every time a new thread is created.
+
+
+
+
 
 Performance
 -----------
@@ -859,8 +1043,8 @@ So, take a tcpdump:
    response from server:
    0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
 
--- so it looks like about every 8-10 packets are replied to failry quick,
-   then there's one that takes 0.025 seconds to reply.... stairsteps in
+-- so it looks like about every 8-10 packets are replied to fairly quick,
+   then there's one that takes 0.025 seconds to reply.... stair-steps in
    response time like this all the way through the capture.
 
 Wild guess:
@@ -941,3 +1125,21 @@ am using boost-1.49 on cray
 
 ------------------------------------------
 
+Setup, July 2015
+----------------
+LXC container on gnucash.org
+
+AtomSpace.cc line 303
+
+LXC container on backlot
+------------------------
+nlp-base and nlp-server (currently used by rohit)
+morf-server (currrently used by ainish)
+
+LXC container on fanny
+----------------------
+ssh learn@10.0.3.182
+cd src/learn
+./run-all-servers.sh
+tmux attach
+psql en_pairs

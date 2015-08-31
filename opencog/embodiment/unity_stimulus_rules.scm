@@ -137,16 +137,14 @@
         (BindLink
             (VariableNode "$var_prototype")
 
-            (ImplicationLink 
-                ; Pattern
-                (InheritanceLink
-                    stimulus_handle
-                    (VariableNode "$var_prototype")
-                )
-
-                ; Result
+            ; Pattern
+            (InheritanceLink
+                stimulus_handle
                 (VariableNode "$var_prototype")
             )
+
+            ; Result
+            (VariableNode "$var_prototype")
         )
     )
 )
@@ -295,10 +293,8 @@
                                              (query_atom_space
                                                  (BindLink
                                                      variables
-                                                     (ImplicationLink
-                                                        new_preconditions
-                                                        response
-                                                     )
+                                                     new_preconditions
+                                                     response
                                                  )
                                              )
                                          )
@@ -334,27 +330,25 @@
         (BindLink
             (VariableNode "$var_attitude")
 
-            (ImplicationLink 
-                ; Pattern
-                (EvaluationLink
-                    (PredicateNode "attitude_towards")
-                    (ListLink
-                        PET_HANDLE
-                        agent_handle
-                        (VariableNode "$var_attitude")
-                    )
+            ; Pattern
+            (EvaluationLink
+                (PredicateNode "attitude_towards")
+                (ListLink
+                    PET_HANDLE
+                    agent_handle
+                    (VariableNode "$var_attitude")
                 )
+            )
 
-                ; Result
-                (EvaluationLink
-                    (PredicateNode "attitude_towards")
-                    (ListLink
-                        PET_HANDLE
-                        agent_handle
-                        (VariableNode "$var_attitude")
-                    )
+            ; Result
+            (EvaluationLink
+                (PredicateNode "attitude_towards")
+                (ListLink
+                    PET_HANDLE
+                    agent_handle
+                    (VariableNode "$var_attitude")
                 )
-            );ImplicationLink
+            )
         );BindLink
     )
 )
@@ -370,33 +364,31 @@
                 (VariableNode "$var_attitude")
             )
 
-            (ImplicationLink 
-                ; Pattern
-                (AtTimeLink
-                    (VariableNode "$var_time_node")
-                    (EvaluationLink
-                        (PredicateNode "attitude_towards")
-                        (ListLink
-                            PET_HANDLE
-                            agent_handle
-                            (VariableNode "$var_attitude")
-                        )
+            ; Pattern
+            (AtTimeLink
+                (VariableNode "$var_time_node")
+                (EvaluationLink
+                    (PredicateNode "attitude_towards")
+                    (ListLink
+                        PET_HANDLE
+                        agent_handle
+                        (VariableNode "$var_attitude")
                     )
                 )
+            )
 
-                ; Result
-                (AtTimeLink
-                    (VariableNode "$var_time_node")
-                    (EvaluationLink
-                        (PredicateNode "attitude_towards")
-                        (ListLink
-                            PET_HANDLE
-                            agent_handle
-                            (VariableNode "$var_attitude")
-                        )
+            ; Result
+            (AtTimeLink
+                (VariableNode "$var_time_node")
+                (EvaluationLink
+                    (PredicateNode "attitude_towards")
+                    (ListLink
+                        PET_HANDLE
+                        agent_handle
+                        (VariableNode "$var_attitude")
                     )
                 )
-            );ImplicationLink
+            )
         );BindLink
     )
 )
@@ -470,19 +462,17 @@
                     ; Variables
                     (VariableNode "$var_any")
 
-                    (ImplicationLink
-                        ; Query pattern
-                        (EvaluationLink
-                            (PredicateNode action_attribute)
-                            (ListLink
-                                action_handle
-                                (VariableNode "$var_any")
-                            )
+                    ; Query pattern
+                    (EvaluationLink
+                        (PredicateNode action_attribute)
+                        (ListLink
+                            action_handle
+                            (VariableNode "$var_any")
                         )
-                        
-                        ; Query result
-                        (VariableNode "$var_any")
                     )
+                    
+                    ; Query result
+                    (VariableNode "$var_any")
                 );BindLink
             );cog-bind
         )

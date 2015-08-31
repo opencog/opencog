@@ -17,18 +17,8 @@ ADD_DEPENDENCIES (lg-dict
 
 TARGET_LINK_LIBRARIES (lg-dict
 	nlp-types
-	smob
+	${ATOMSPACE_smob_LIBRARY}
 	${LINK_GRAMMAR_LIBRARY}
 )
 
-ADD_LIBRARY (LGDictModule SHARED
-	LGDictModule
-)
-
-TARGET_LINK_LIBRARIES (LGDictModule lg-dict server)
-
-IF (WIN32)
-   INSTALL (TARGETS lg-dict DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ELSEIF (CYGWIN)
-   INSTALL (TARGETS lg-dict DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ENDIF ()
+INSTALL (TARGETS lg-dict DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

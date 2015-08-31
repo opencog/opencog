@@ -29,7 +29,7 @@
 #include "avatar_action_symbol.h"
 #include "avatar_indefinite_object.h"
 
-#include <opencog/comboreduct/combo/vertex.h>
+#include <moses/comboreduct/combo/vertex.h>
 
 namespace opencog { namespace combo {
 
