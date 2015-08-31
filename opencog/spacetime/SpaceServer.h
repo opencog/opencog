@@ -24,6 +24,14 @@
 #define _OPENCOG_SPACESERVER_H
 
 /**
+ *
+ * Comment on 20150831 by @YiShan
+ * Currently we seperate the entity operation in old SpaceMap to EntityManager class
+ * This makes SpaceServer a little messy. But it's good for readibility of SpaceMap.
+ */
+ 
+
+/**
  * SpaceServer.h
  * This class is used to associate spatial information (coordinates)
  * to atom handles (representing entities) at a given timestamp.
