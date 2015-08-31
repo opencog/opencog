@@ -1,13 +1,13 @@
-;recomended way
-;1.
-(define (load-r2l-rules rules-file)
-    (load-scm-from-file rules-file)
+; This loads all the rules into the cogserver shell. This assumes that the
+; cogserver is started from in-source build directory.
+(define (load-r2l-rulebase)
+    (load-scm-from-file "../opencog/nlp/relex2logic/loader/load-rules.scm")
+    (load-scm-from-file
+        "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")
 )
-;then call nlp-fc
+
 (define (nlp-fc sent)
   (define mylist '())
-;load rules
-;  (load-scm-from-file rules-file)
 ; run forward chaining on sentence
   (let* ((temp (run-fc sent)); temp contains list of cog-fc results and parse node
         (result1 (car temp));result1 contains Listlink nested 3 times
