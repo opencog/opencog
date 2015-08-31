@@ -1,32 +1,15 @@
 #include <algorithm>
+#include <iterator>
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
-#include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
-#include "Block3DMapUtil.h"
-#include "OctomapOcTree.h"
-
-/***Working now to move Octreemanager!!!***/
-#include <algorithm>
-#include <iterator>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-
-// #ifdef HAVE_PROTOBUF
-// #include <opencog/embodiment/Learning/LearningSpace/LearningMessage.info.pb.h>
-// #endif
-#include "Octree3DMapManager.h"
+#include "Block3DMapUtil.h"
+#include "OctomapOcTree.h"
 #include "SpaceMapUtil.h"
-using namespace opencog;
-using namespace opencog::spatial;
-
-/***Working now to move Octreemanager!!!***/
-
 
 using namespace opencog;
 using namespace opencog::spatial;

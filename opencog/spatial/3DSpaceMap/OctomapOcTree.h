@@ -55,7 +55,6 @@
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 #include <map>
-#include <set>
 
 using namespace std;
 using namespace octomap;

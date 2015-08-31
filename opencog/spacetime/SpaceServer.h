@@ -49,7 +49,6 @@
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
-#include <opencog/spatial/3DSpaceMap/BlockEntity.h>
 #include <opencog/spatial/3DSpaceMap/EntityManager.h>
 
 #include "SpaceServerContainer.h"
