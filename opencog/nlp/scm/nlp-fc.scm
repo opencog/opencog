@@ -16,7 +16,6 @@
         (parse-name (cog-name parse-node))
         )
 
-
      (for-each (lambda (x)
                  (let* ((t1 (cog-outgoing-set x));t1 contains ListLink List of results
                        )
@@ -35,7 +34,6 @@
                )
       result2)
 
-
   (ReferenceLink
     (InterpretationNode (string-append parse-name "_interpretation_$X"))
     ; The function in the SetLink returns a list of outputs that
@@ -47,6 +45,14 @@
   (InterpretationLink
     (InterpretationNode (string-append parse-name "_interpretation_$X"))
     parse-node
+  )
+
+  (AtTimeLink
+      ; FIXME: maybe opencog's internal time octime should be used. Will do for
+      ; now assuming a single instance deals with a single conversation.
+      (TimeNode (number->string (current-time)))
+      (InterpretationNode (string-append parse-name "_interpretation_$X"))
+      (TimeDomainNode "Dialogue-System")
   )
  )
 #t
