@@ -1,8 +1,20 @@
 __author__ = 'DongMin Kim'
 
 
-# http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
 def enum_simulate(*sequential, **named):
+    """Simulate an enum in Python.
+
+    See detail in:
+    http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python
+
+    Args:
+        sequential: An list of enum key.
+        named: An list of name, if user specified.
+        :param sequential: tuple[str]
+        :param named: dict
+    Returns:
+        :rtype : type
+    """
     enums = dict(zip(sequential, range(len(sequential))), **named)
     reverse = dict((value, key) for key, value in enums.iteritems())
     enums['reverse_mapping'] = reverse
@@ -25,7 +37,8 @@ blending_status = enum_simulate(
 
     'NOT_ENOUGH_ATOMS',
     'TOO_MANY_ATOMS',
-    'UNKNOWN_TYPE'
+    'UNKNOWN_TYPE',
+    'EMPTY_RESULT'
 )
 
 

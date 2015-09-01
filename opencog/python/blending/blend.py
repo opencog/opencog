@@ -24,11 +24,11 @@ class ConceptualBlending:
     1. Choose atoms to blend(can skip if focus atom was given)
     2. Decide to blend(can skip if focus atom was given)
     3. Initialize new blend atom
-    4. Connect links to new blend atom from exist atom
+    4. Connect links to new blend atom from exist atoms
     *. Clean up the blending.
 
     Attributes:
-        a: An instance of atomspace.
+        a: An instance of AtomSpace.
         last_status: A last status of class.
         focus_atoms: The atoms to blend.
         config_base: A Node to save custom config.
@@ -60,13 +60,21 @@ class ConceptualBlending:
         self.blended_atoms = []
 
     def make_default_config(self):
+        """Initialize a default config for this class."""
         BlendConfig().update(self.a, "atoms-chooser", "ChooseAll")
         BlendConfig().update(self.a, "blending-decider", "DecideBestSTI")
         BlendConfig().update(self.a, "new-blend-atom-maker", "MakeSimple")
         BlendConfig().update(self.a, "link-connector", "ConnectSimple")
 
     def __prepare(self, focus_atoms, config_base):
-        # Prepare blending.
+        """Prepare a blending.
+
+        Args:
+            focus_atoms: The atoms to blend.
+            config_base: A Node to save custom config.
+            :param focus_atoms: list[Atom]
+            :param config_base: Atom
+        """
         self.last_status = blending_status.IN_PROCESS
 
         if type(config_base) is list:
@@ -75,7 +83,7 @@ class ConceptualBlending:
 
         default_config_base = self.a.add_node(
             types.ConceptNode,
-            BlendConfig.config_prefix
+            BlendConfig().config_prefix_name
         )
 
         self.config_base = default_config_base \
@@ -86,10 +94,11 @@ class ConceptualBlending:
             else focus_atoms
 
     def __clean_up(self):
+        """Clean up blending."""
         self.last_status = blending_status.SUCCESS
 
     def run(self, focus_atoms=None, config_base=None):
-        """Execute conceptual blending algorithm.
+        """Execute a conceptual blending algorithm.
 
         Args:
             focus_atoms: The atoms to blend.
@@ -142,4 +151,5 @@ class ConceptualBlending:
             log.info('Skip blending due to: ' + str(e))
             self.blended_atoms = []
 
+        # Returns the blended atom(s).
         return self.blended_atoms

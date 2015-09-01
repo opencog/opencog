@@ -30,10 +30,7 @@
 			(VariableNode "$B")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode"))
-    			(TypedVariableLink
-    				(VariableNode "$X-M2E")
-    				(TypeNode "VariableNode")))
+    				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
@@ -62,10 +59,7 @@
 			(VariableNode "$B")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode"))
-    			(TypedVariableLink
-    				(VariableNode "$X-M2E")
-    				(TypeNode "VariableNode")))
+    				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
@@ -98,10 +92,7 @@
 			(VariableNode "$C")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode"))
-    			(TypedVariableLink
-    				(VariableNode "$X-M2E")
-    				(TypeNode "VariableNode")))
+    				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
 			(SatisfyingSetLink
@@ -137,10 +128,7 @@
 			(VariableNode "$C")
    			(TypedVariableLink
     				(VariableNode "$D")
-    				(TypeNode "PredicateNode"))
-    			(TypedVariableLink
-    				(VariableNode "$X-M2E")
-    				(TypeNode "VariableNode")))
+    				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$C")
 			(SatisfyingSetLink

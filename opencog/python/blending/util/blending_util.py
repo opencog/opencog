@@ -3,8 +3,9 @@ __author__ = 'DongMin Kim'
 
 class _Singleton(type):
     """Simulates singleton class in Python.
-    See 'Creating a singleton in python' in stack overflow:
-    (http://stackoverflow.com/questions/6760685/creating-a-singleton-in-python)
+
+    See detail in:
+    http://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
     """
 
     _instances = {}
