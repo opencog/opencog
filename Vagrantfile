@@ -31,9 +31,7 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "cogbox"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
   config.vm.provision "shell", inline: "wget http://raw.github.com/opencog/ocpkg/master/ocpkg -O /tmp/octool  && chmod +rx /tmp/octool"
-  # Hakell dependencies are not installed for now. If you want to install them,
-  # use /tmp/octool -sv
-  config.vm.provision "shell", inline: "/tmp/octool -rdpcalv"
+  config.vm.provision "shell", inline: "/tmp/octool -rdpscalv"
 
   # Port forwarding for REST API
   config.vm.network "forwarded_port", guest: 5000, host: 5000
