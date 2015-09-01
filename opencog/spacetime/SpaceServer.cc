@@ -57,6 +57,7 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
 
     curSpaceMapHandle = Handle::UNDEFINED;
     curMap = NULL;
+    curEntityManager = NULL;
 
     // connect signals
     removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
@@ -175,6 +176,11 @@ SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
     return *curMap;
 }
 
+SpaceServer::EntityManager& SpaceServer::getLatestEntityManager() const
+{
+    return *curEntityManager;
+}
+
 Handle SpaceServer::getLatestMapHandle() const
 {
     return curSpaceMapHandle;
@@ -242,7 +248,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, float _agentHeight, const TimeDomain& timeDomain)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, const TimeDomain& timeDomain)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
@@ -252,14 +258,16 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
         atomspace->set_LTI(spaceMapNode, 1);
         timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
 
-        SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _agentHeight);
+        SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution);
 
         EntityManager* newEntityManager = new EntityManager();
         // add into the map set
         scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityManager*>(newSpaceMap, newEntityManager)));
         curMap = newSpaceMap;
+        curEntityManager = newEntityManager;
     } else {
         curMap = scenes[spaceMapNode].first;
+        curEntityManager = scenes[spaceMapNode].second;
     }
 
     curSpaceMapHandle = spaceMapNode;

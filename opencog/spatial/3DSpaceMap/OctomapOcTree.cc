@@ -112,11 +112,12 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block,
     }
 }
 
-OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution, const float agentHeight):
+OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution):
     OccupancyOcTreeBase<OctomapOcTreeNode>(resolution),
-    mMapName(mapName), mAgentHeight(agentHeight)
+    mMapName(mapName)
 {
-
+    //set default agent height as 1
+    mAgentHeight = 1;
 }
 
 OctomapOcTree* OctomapOcTree::clone()

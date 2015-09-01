@@ -115,7 +115,7 @@ namespace opencog
 
         public:
             // Default constructor, sets resolution of leafs
-            OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
+            OctomapOcTree(const std::string& mapName, const double resolution);
             ~OctomapOcTree(){}
 
             // virtual constructor: creates a new object of same type

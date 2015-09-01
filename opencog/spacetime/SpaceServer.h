@@ -89,6 +89,7 @@ namespace opencog
 
     public:
 
+        typedef spatial::EntityManager EntityManager;
         typedef spatial::BlockVector SpaceMapPoint;
         typedef spatial::OctomapOcTree SpaceMap;
         typedef std::map<Handle, pair<SpaceMap*, EntityManager*> > HandleToScenes;
@@ -126,6 +127,8 @@ namespace opencog
         SpaceMap& getLatestMap() const
             throw (opencog::AssertionException, std::bad_exception);
 
+        SpaceServer::EntityManager& getLatestEntityManager() const;
+
         /**
          * Gets the Handle of the latest map (== the map for current scene)  in this SpaceServer
          */
@@ -146,7 +149,7 @@ namespace opencog
          * not to create a new spaceMap
          */
 
-        Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, float _agentHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
+        Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
         /**
          * comment@20150520 by YiShan
@@ -253,6 +256,7 @@ namespace opencog
          * To be compatible to the old code we still preserve these two members.
          */
         SpaceMap* curMap;
+        EntityManager* curEntityManager;
         Handle curSpaceMapHandle;
 
         /**

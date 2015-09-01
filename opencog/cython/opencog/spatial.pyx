@@ -31,8 +31,8 @@ cdef class OctomapOcTree:
         pass
 
     @classmethod
-    def init_new_map(cls, map_name, resolution, agent_height):
-        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(map_name, resolution, agent_height)
+    def init_new_map(cls, map_name, resolution):
+        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(map_name, resolution)
 
         newmap = cls(PyLong_FromVoidPtr(cspmap))
         return newmap
