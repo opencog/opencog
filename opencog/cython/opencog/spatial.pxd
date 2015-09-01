@@ -25,7 +25,7 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         float getLogOdds()
 
     cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
-        cOctomapOcTree(string, float, float)
+        cOctomapOcTree(string, double, float)
 
         #OctomapOcTree Inherited Interface
 

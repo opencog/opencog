@@ -21,7 +21,7 @@ cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         cSpaceServer(cAtomSpace&)
         const cSpaceMap& getMap(cHandle)
-        cHandle addOrGetSpaceMap(octime_t, string, unsigned, float, string)
+        cHandle addOrGetSpaceMap(octime_t, string, double, float, string)
         bool addSpaceInfo(cHandle, cHandle, bool, bool, octime_t, int, int, int, string)
         void removeSpaceInfo(cHandle, cHandle, octime_t, string)
         void clear()
