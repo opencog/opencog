@@ -52,10 +52,10 @@
         ) results)
 
         ; Sort the speech acts according to their orders
-        (sort speech-acts
+        (set! speech-acts (sort speech-acts
             (lambda (x y) (< (cdr (assoc (cog-name (cadr (cog-outgoing-set x))) speech-act-orders))
                              (cdr (assoc (cog-name (cadr (cog-outgoing-set y))) speech-act-orders))))
-        )
+        ))
 
         ; Construct a ReferenceLink as the output
         (ReferenceLink
