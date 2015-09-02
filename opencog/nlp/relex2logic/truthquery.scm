@@ -40,10 +40,7 @@
 )
 
 (define (pre-tq-rule int-index)
-    (begin
-        (display "truth query !!!\n")
-        (ListLink
-            (truth-query-rule int-index)
-        )
+    (ListLink
+        (truth-query-rule int-index)
     )
 )

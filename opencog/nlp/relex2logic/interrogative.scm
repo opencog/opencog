@@ -40,10 +40,7 @@
 )
 
 (define (pre-interr-rule int-index)
-    (begin
-        (display "interrogative !!!\n")
-        (ListLink
-            (interrogative-rule int-index)
-        )
+    (ListLink
+        (interrogative-rule int-index)
     )
 )

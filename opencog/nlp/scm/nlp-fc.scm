@@ -6,8 +6,12 @@
         "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")
 )
 
+(define (load-speech-act-orders)
+    (load-scm-from-file "../opencog/nlp/relex2logic/speech-act-orders.scm")
+)
+
+; Run forward chaining on the sentence
 (define (nlp-fc sent)
-    ; run forward chaining on sentence
     (let* ((parse-node (car (sentence-get-parses (nlp-parse sent))))
            (interp-node (gen-interp-node (cog-name parse-node)))
            (interp-link (gen-interp-link interp-node parse-node))
@@ -15,41 +19,43 @@
            (speech-acts '())
            (result-contents '()))
 
-        (for-each
-            (lambda (ri)
-                (let ((s1 (cog-outgoing-set ri)))
-                    (for-each
-                        (lambda (x)
-                            (let ((s2 (cog-outgoing-set x)))
-                                (for-each
-                                    ;(lambda(y) (set! result-contents (append result-contents (list y))))
-                                    (lambda(y)
-                                        (if (equal? (cog-type y) 'InheritanceLink)
-                                            ; Store the InheritanceLink separately if it is related to speech acts
-                                            ; Assumming it is in the form of:
-                                            ;    (InheritanceLink (InterpretationNode "sentence@123") (ConceptNode "SomeSpeechAct"))
-                                            (if (and (equal? (car (cog-outgoing-set y)) interp-node)
-                                                     (equal? (string-contains "SpeechAct" (cog-name (cadr (cog-outgoing-set y))))))
-                                                (set! speech-acts (append speech-acts (list y)))
-                                            )
-
-                                            ; Store everything else in the result-contents
-                                            (set! result-contents (append result-contents (list y)))
-                                        )
-                                    )
-                                    s2
+        (for-each (lambda (r)
+            (let ((s1 (cog-outgoing-set r)))
+                (for-each (lambda (x)
+                    (let ((s2 (cog-outgoing-set x)))
+                        (for-each (lambda(y)
+                            (if (equal? (cog-type y) 'InheritanceLink)
+                                ; Extract the speech-act-InheritanceLinks.
+                                ; Assumming it is in the form of:
+                                ;    (InheritanceLink
+                                ;        (InterpretationNode "sentence@123")
+                                ;        (ConceptNode "SomeSpeechAct")
+                                ;    )
+                                (if (and (equal? (car (cog-outgoing-set y)) interp-node)
+                                         (not (equal?
+                                             (string-contains
+                                                 (cog-name (cadr (cog-outgoing-set y)))
+                                                 "SpeechAct"
+                                             )
+                                         '#f))
+                                     )
+                                    (set! speech-acts (append speech-acts (list y)))
                                 )
+
+                                ; Store everything else in the result-contents
+                                (set! result-contents (append result-contents (list y)))
                             )
-                        )
-                        s1
+                        ) s2)
                     )
-                )
+                ) s1)
             )
-            results
-        )
+        ) results)
 
         ; Sort the speech acts according to their orders
-        (sort speech-acts (lambda (x y) (< (cdr (assoc (get-speech-act-name x) speech-act-orders)) (cdr (assoc (get-speech-act-name y) speech-act-orders)))))
+        (sort speech-acts
+            (lambda (x y) (< (cdr (assoc (cog-name (cadr (cog-outgoing-set x))) speech-act-orders))
+                             (cdr (assoc (cog-name (cadr (cog-outgoing-set y))) speech-act-orders))))
+        )
 
         ; Construct a ReferenceLink as the output
         (ReferenceLink
@@ -60,7 +66,10 @@
             ; on the relex-opencog-outputs.
             (SetLink
                 (delete-duplicates result-contents)
-                (car speech-acts)
+                (if (>= (length speech-acts) 1)
+                    (car speech-acts)
+                    '()
+                )
             )
         )
 
@@ -73,7 +82,7 @@
         )
 
         ; Delete any extra speech acts that might have been generated
-        (map cog-delete-recursive (cdr speech-acts))
+        (if (> (length speech-acts) 1) (map cog-delete-recursive (cdr speech-acts)))
     )
     #t
 )
@@ -94,17 +103,4 @@
         (SetLink (parse-get-relex-outputs parse-node) interp-link)
         r2l-rules
     ))
-)
-
-(define speech-act-orders
-    '(
-        ("InterrogativeSpeechAct" . 1)
-        ("TruthQuerySpeechAct" . 2)
-        ("ImperativeSpeechAct" . 2)
-        ("DeclarativeSpeechAct" . 3)
-    )
-)
-
-(define (get-speech-act-name inheritance-link)
-    (cog-name (cadr (cog-outgoing-set inheritance-link)))
 )

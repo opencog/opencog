@@ -40,10 +40,7 @@
 )
 
 (define (pre-imp-rule int-index)
-    (begin
-        (display "imperative !!!\n")
-        (ListLink
-            (imperative-rule int-index)
-        )
+    (ListLink
+        (imperative-rule int-index)
     )
 )

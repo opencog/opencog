@@ -235,16 +235,9 @@
            (word-inst-nodes (parse-get-words parse-node))
            (relex-relations (concatenate (map word-inst-get-relations word-inst-nodes)))
            (word-incoming-set (concatenate (map cog-incoming-set word-inst-nodes)))
-           (eval-lglin-links (concatenate (map
-                                (lambda(x) (cog-get-pred x 'LgLinkInstanceNode))
-                                word-inst-nodes)))
-           (eval-lgrn-links (concatenate (map
-                                (lambda(x) (cog-get-pred x 'LinkGrammarRelationshipNode))
-                                word-inst-nodes)))
-           (lg-incoming-set (concatenate (map
-                                cog-incoming-set (map
-                                (lambda(x) (car (cog-outgoing-set x)))
-                                eval-lglin-links)))))
+           (eval-lglin-links (concatenate (map (lambda(x) (cog-get-pred x 'LgLinkInstanceNode)) word-inst-nodes)))
+           (eval-lgrn-links (concatenate (map (lambda(x) (cog-get-pred x 'LinkGrammarRelationshipNode)) word-inst-nodes)))
+           (lg-incoming-set (concatenate (map cog-incoming-set (map (lambda(x) (car (cog-outgoing-set x))) eval-lglin-links)))))
 
         (delete-duplicates!
             (append
@@ -840,4 +833,3 @@
 )
 
 ; =============================================================
-

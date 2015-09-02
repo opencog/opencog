@@ -44,10 +44,7 @@
 )
 
 (define (pre-decl-rule int-index)
-    (begin
-        (display "declarative !!!\n")
-        (ListLink
-            (declarative-rule int-index)
-        )
+    (ListLink
+        (declarative-rule int-index)
     )
 )
