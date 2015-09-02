@@ -994,6 +994,7 @@
          )
     )
 )
+
 ; Returns a list containging the atoms defining the modulators.
 (define (psi-get-modulators)
     (let* ((psi-modulator (ConceptNode "OpenPsi: Modulator"))
@@ -1004,5 +1005,78 @@
              (par-map cog-get-partner inheritance-list
                  (make-list (length inheritance-list) psi-modulator))
          )
+    )
+)
+
+; --------------------------------------------------------------
+(define (define-psi-demand  demand-name default-value min-value max-value)
+"
+  Define an OpenPsi demand. By default an in-born drive/action that aims to
+  maintain the goal of keeping the demand-value within the given range is
+  defined.
+
+  demand-name:
+    - The name of the demand that is created.
+
+  default-value:
+    - The initial demand-value of the demand.
+
+  min-value:
+    - The minimum acceptable demand-value. On going lower tha
+
+  max-value:
+    - The maximum acceptable demand-value.
+
+"
+    (let ((demand (string-append "OpenPsi: " demand-name)))
+        (InheritanceLink
+            (ConceptNode demand (stv default-value 1))
+            (ConceptNode "OpenPsi: Demand")
+        )
+
+        ; This is the goal of the demand
+        (EvaluationLink
+            (PredicateNode "must_have_value_within")
+            (ListLink
+                (ConceptNode demand)
+                (NumberNode min-value)
+                (NumberNode max-value)
+            )
+        )
+
+        ; This specifies the default action that each psi-demand must have.
+        (EvaluationLink
+            (PredicateNode "Psi: acts-on")
+            (ListLink
+                (GroundedSchemaNode "scm: psi-demand-updater")
+                (ConceptNode demand)
+            )
+        )
+    )
+)
+
+(define (define-psi-action gsn demand-name)
+; --------------------------------------------------------------
+"
+  It associates an action to a OpenPsi-demand
+
+  gsn:
+    - A valid GroundedSchemaNode. Since there is no type checking done, be
+      be sure that it is properly defined.
+
+  demand-name:
+    - The name of the demand that is affected by the execution of the function
+      associated with the GroundedSchemaNode.
+"
+    (EvaluationLink
+        (PredicateNode "Psi: acts-on")
+        (ListLink
+            (if (equal? (cog-type gsn) 'GroundedSchemaNode)
+                gsn
+                (error (string-append "pass GroundedSchemaNode as the 1st "
+                     "argument in define-psi-action"))
+            )
+            (ConceptNode (string-append "OpenPsi: " demand-name))
+        )
     )
 )
