@@ -1029,27 +1029,29 @@
 
 "
     (let ((demand (string-append "OpenPsi: " demand-name)))
-        (InheritanceLink
-            (ConceptNode demand (stv default-value 1))
-            (ConceptNode "OpenPsi: Demand")
-        )
-
-        ; This is the goal of the demand
-        (EvaluationLink
-            (PredicateNode "must_have_value_within")
-            (ListLink
-                (ConceptNode demand)
-                (NumberNode min-value)
-                (NumberNode max-value)
+        (list
+            (InheritanceLink
+                (ConceptNode demand (stv default-value 1))
+                (ConceptNode "OpenPsi: Demand")
             )
-        )
 
-        ; This specifies the default action that each psi-demand must have.
-        (EvaluationLink
-            (PredicateNode "Psi: acts-on")
-            (ListLink
-                (GroundedSchemaNode "scm: psi-demand-updater")
-                (ConceptNode demand)
+            ; This is the goal of the demand
+            (EvaluationLink
+                (PredicateNode "must_have_value_within")
+                (ListLink
+                    (ConceptNode demand)
+                    (NumberNode min-value)
+                    (NumberNode max-value)
+                )
+            )
+
+            ; This specifies the default action that each psi-demand must have.
+            (EvaluationLink
+                (PredicateNode "Psi: acts-on")
+                (ListLink
+                    (GroundedSchemaNode "scm: psi-demand-updater")
+                    (ConceptNode demand)
+                )
             )
         )
     )
