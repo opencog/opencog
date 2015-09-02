@@ -608,12 +608,14 @@
 	)
 )
 (define (negative-rule verb instance)
-	(list (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
+	(list (r2l-wordinst-Predicate instance)
+	 (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
 (define (definite-rule word word_instance)
-    (list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
-    (EvaluationLink
+	(list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
+	(r2l-wordinst-concept word_instance)
+	(EvaluationLink
         (PredicateNode "definite")
         (ListLink
 	        (ConceptNode word_instance)
@@ -625,6 +627,7 @@
 (define (maybe-rule word word_instance)
 	(list
 		(ImplicationLink (PredicateNode word_instance) (PredicateNode word))
+		(r2l-wordinst-Predicate word_instance)
 		(EvaluationLink
 			(PredicateNode "maybemarker")
 			(ListLink
