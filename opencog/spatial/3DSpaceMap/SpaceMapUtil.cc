@@ -9,6 +9,8 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include <opencog/spatial/math/Quaternion.h>
+#include <opencog/spatial/math/Vector3.h>
 #include "SpaceMapUtil.h"
 
 // used for distanceBetween()
@@ -325,26 +327,61 @@ namespace opencog
             return spatialRelations;
         }
 
-        string spatialRelationToString(SPATIAL_RELATION relation)
+        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityManager& entityManager, Handle entity, const string& rotationPredicateName, int yawNodePosition)
         {
-            switch( relation ) {
-            case LEFT_OF: return "left_of";
-            case RIGHT_OF: return "right_of";
-            case ABOVE: return "above";
-            case BELOW: return "below";
-            case BEHIND: return "behind";
-            case IN_FRONT_OF: return "in_front_of";
-            case BESIDE: return "beside";
-            case NEAR: return "near";
-            case FAR_: return "far";
-            case TOUCHING: return "touching";
-            case BETWEEN: return "between";
-            case INSIDE: return "inside";
-            case OUTSIDE: return "outside";
-            default:
-            case TOTAL_RELATIONS:
-                return " invalid relation ";
+            if (!entityManager.containsEntity(entity)) {
+                return BlockVector::ZERO;
+            } else {
+                //get yaw
+                std::vector<std::string> rotationStrs = getPredicate(atomSpace, rotationPredicateName, HandleSeq{entity}, 3);
+                if (rotationStrs.empty()) {
+                    return BlockVector::ZERO;
+                }
+
+                double yaw = std::stod(rotationStrs[yawNodePosition]);
+                spatial::math::Quaternion orientation = spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, yaw);
+                spatial::math::Vector3 mathVec = orientation.rotate( spatial::math::Vector3::X_UNIT );
+                int x = 1, y = 1;
+                if (mathVec.x < 0) {
+                    x = -1;
+                }
+
+                if (mathVec.y < 0) {
+                    y = -1;
+                }
+
+                // calculate the tan of the angle
+                double tan = mathVec.y / mathVec.x;
+                if (tan < 0) {
+                    tan *= -1.0f;
+                }
+
+                // For the sake of simplification, we only have 8 kinds of direction:
+                // (x = 1, y = 0):    -pai/8 <= a < pai/8
+                // (x = 1, y = 1):     pai/8 <= a < pai*3/8
+                // (x = 0, y = 1):   pai*3/8 <= a < pai*5/8
+                // (x = -1, y = 1):  pai*5/8 <= a < pai*7/8
+                // (x = -1, y = 0):  pai*7/8 <= a < -pai*7/8
+                // (x = -1, y = -1):-pai*7/8 <= a < -pai*5/8
+                // (x = 0, y = -1): -pai*5/8 <= a < -pai*3/8
+                // (x = 1, y = -1): -pai*5/8 <= a < -pai/8
+
+                // tan(pai/8) = 0.41414356f
+                // tan(pai*3/8) = 2.41421356f
+
+                if (tan < 0.41414356f) {
+                    // x >> y, so |x| -> 1, y -> 0
+                    y = 0;
+                } else if (tan > 2.41421356f) {
+                    // x <<y , so x -> 0, |y| -> 1
+                    x = 0;
+                }
+                // else x approximate to y, so |x| -> 1, |y| -> 1
+                return BlockVector(x,y,0);
+
             }
+
         }
+
     }
 }

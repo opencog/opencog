@@ -15,6 +15,7 @@ namespace opencog
 {
     namespace spatial
     {
+        const double AccessDistance = 2.0;
         /**
          * Get predicate value of given predicate name and argument handles
          * It will search the following pattern:
@@ -47,6 +48,7 @@ namespace opencog
                                     const HandleSeq& handles,
                                     const unsigned& numberOfPredicateValue);
 
+
         /**
          * Check if given position in given spaceMap is standable
          */
@@ -70,7 +72,7 @@ namespace opencog
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
-                                               bool toBeStandOn);
+                                               bool toBeStandOn=true);
 	/**
 	 * Calculate distance between 2 given block/entity handles or positions
 	 * For polymorphism design in Inquery, we overload the distanceBetween.
@@ -151,7 +153,7 @@ namespace opencog
             INSIDE,
             OUTSIDE,
 
-            TOTAL_RELATIONS
+            TOTAL_RELATIONS,
         };
 
 	/**
@@ -198,6 +200,27 @@ namespace opencog
          */
 
 	string spatialRelationToString(SPATIAL_RELATION relation);
+
+        /** For old interface
+         * For the sake of simplification, we only have 8 kinds of direction:
+         * (x = 1, y = 0):    -pai/8 <= a < pai/8
+         * (x = 1, y = 1):     pai/8 <= a < pai*3/8
+         * (x = 0, y = 1):   pai*3/8 <= a < pai*5/8
+         * (x = -1, y = 1):  pai*5/8 <= a < pai*7/8
+         * (x = -1, y = 0):  pai*7/8 <= a < -pai*7/8
+         * (x = -1, y = -1):-pai*7/8 <= a < -pai*5/8
+         * (x = 0, y = -1): -pai*5/8 <= a < -pai*3/8
+         * (x = 1, y = -1): -pai*5/8 <= a < -pai/8
+         * And we assume in the AtomSpace we express rotation of entity as
+         * EvaluationLink
+         *   PredicateNode "$rotationPredicateName"
+         *   ListLink
+         *     ObjectNode entity
+         *     NumberNode pitch
+         *     NumberNode roll
+         *     NumberNode yaw
+         */
+        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityManager& entitymanager, Handle entity, const string& rotationPredicateName, int yawNodePosition);
     }
 }
 

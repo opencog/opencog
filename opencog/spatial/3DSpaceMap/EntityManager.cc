@@ -82,6 +82,11 @@ void EntityManager::removeNoneBlockEntity(const Handle& entityNode)
     }
 }
 
+bool EntityManager::containsEntity(const Handle& entityNode) const
+{
+    return mAllNoneBlockEntities.find(entityNode) != mAllNoneBlockEntities.end();
+}
+
 void EntityManager::updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, unsigned long timestamp)
 {
     mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(newpos, entityNode));
