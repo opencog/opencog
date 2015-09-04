@@ -26,4 +26,8 @@ ADD_CXXTEST(TemporalTableUTest)
 ADD_CXXTEST(TimeServerUTest)
 ADD_CXXTEST(OctomapOcTreeUTest)
 ADD_CXXTEST(SpaceMapUtilUTest)
+TARGET_LINK_LIBRARIES(SpaceMapUtilUTest
+  SpaceMapUtil
+)
+
 ADD_CXXTEST(EntityManagerUTest)

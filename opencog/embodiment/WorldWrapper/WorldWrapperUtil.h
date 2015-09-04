@@ -278,7 +278,7 @@ public:
     /**
      * check localspacemap for a Handle
      */
-    static bool inSpaceMap(const SpaceServer::SpaceMap& sm,
+    static bool inSpaceMap(const SpaceServer::EntityManager& em,
                            AtomSpace& as,
                            const std::string& self_id,
                            const std::string& owner_id,
@@ -340,7 +340,7 @@ public:
     /**
      * lookup location in the current localspacemap
      */
-    static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::SpaceMap& sm,
+    static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::EntityManager& sm,
             const AtomSpace& as,
             Handle h);
 /*
@@ -354,8 +354,8 @@ public:
 //            const std::string& handleName)
 //    throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);
 
-    static double getOrientation(const SpaceServer::SpaceMap& sm,
-                                 const AtomSpace& as,
+    static double getOrientation(const SpaceServer::EntityManager& em,
+                                 AtomSpace& as,
                                  Handle h)
     throw (opencog::InvalidParamException,
            opencog::AssertionException,

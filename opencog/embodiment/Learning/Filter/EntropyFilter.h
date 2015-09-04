@@ -226,8 +226,8 @@ private:
      * if the object has moved between SpaceMap pre_sm and sm.
      */
     inline void setIsMoving(const definite_object& obj,
-                            const SpaceServer::SpaceMap* pre_sm,
-                            const SpaceServer::SpaceMap& sm);
+                            const SpaceServer::EntityManager* pre_sm,
+                            const SpaceServer::EntityManager& sm);
 
     //look up the cache isMoving if obj is moving
     inline bool getIsMoving(const definite_object& obj);

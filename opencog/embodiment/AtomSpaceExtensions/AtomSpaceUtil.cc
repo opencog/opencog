@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <stack>
 
 #include <boost/algorithm/string.hpp>
@@ -50,6 +51,8 @@
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/GetByOutgoing.h>
+
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
@@ -308,33 +311,41 @@ Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace& atomSpace)
 */
 bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
                                                 const std::string predicate,
-                                                const SpaceServer::SpaceMap& sm,
+                                                const SpaceServer::EntityManager& em,
                                                 Handle obj1, Handle obj2)
 {
-    if (!sm.containsObject(obj1) ||
-        !sm.containsObject(obj2) ) {
-        logger().error("AtomSpaceUtil - One or both objects were not present in Space Map");
+    
+    auto relationSet = spatial::computeSpatialRelations(atomSpace, em, obj1, obj2);
+    for (auto relation : relationSet) {
+        if(spatial::spatialRelationToString(relation) == predicate) {
+            return true;
+        }
+    }
+    return false;
+    /*
+    if (pos1 == SpaceServer::SpaceMapPoint::ZERO ||
+        pos2 == SpaceServer::SpaceMapPoint::ZERO ) {
+        logger().error("AtomSpaceUtil - One or both objects were not present in current scene");
         return false;
     }
-
+    
     if (predicate == "near") {
 
         try {
             //const SpaceServer::ObjectMetadata&
             //    md1 = sm.getMetaData(atomSpace.getName(obj1));
-            const spatial::Entity3D* entity1 = sm.getEntity( obj1 );
+            //const spatial::Entity3D* entity1 = sm.getEntity( obj1 );
             //SpaceServer::SpaceMapPoint obj1Center( entity1.getPosition( ).x, entity1.getPosition( ).y );
             //const SpaceServer::ObjectMetadata&
             //    md2 = sm.getMetaData(atomSpace.getName(obj2));
 
-            const spatial::Entity3D* entity2 = sm.getEntity( obj2);
+            //const spatial::Entity3D* entity2 = sm.getEntity( obj2);
             //SpaceServer::SpaceMapPoint obj2Center( entity2.getPosition( ).x, entity2.getPosition( ).y );
 
             //std::cout << "MD1 X : " << md1.centerX << " Y : " << md1.centerY
             //    << " MD2 X : " << md2.centerX << " Y : " << md2.centerY
             //    << std::endl;
-            double dist =  entity1->getPosition( )
-                - entity2->getPosition( ) ;
+            double dist = std::abs(pos1 - pos2)
             //SpaceServer::SpaceMap::eucDist(obj1Center, obj2Center);
 
             double maxDistance = ( sm.xMax( ) - sm.xMin( ) ) / 50;
@@ -359,6 +370,7 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
         // need 3D info
         return false;
     } else return false;
+    */
 }
 /*
   bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
@@ -457,13 +469,14 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace& atomSpace,
 
 
 bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
-                                        const SpaceServer::SpaceMap& sm1,
-                                        const SpaceServer::SpaceMap& sm2,
+                                        const SpaceServer::EntityManager& em1,
+                                        const SpaceServer::EntityManager& em2,
                                         Handle obj)
 {
+    
     //const std::string& obj_str = atomSpace.getName(obj);
-    bool insm1 = sm1.containsObject(obj);
-    bool insm2 = sm2.containsObject(obj);
+    bool insm1 = em1.containsEntity(obj);
+    bool insm2 = em2.containsEntity(obj);
     //we consider that :
     //1)if the object appears or disappears from the spaceMaps it has moved.
     //2)if it is in neither those spaceMap it hasn't
@@ -471,13 +484,17 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
         //check if has moved
         //const SpaceServer::ObjectMetadata& md1 = sm1.getMetaData(obj_str);
         //const SpaceServer::ObjectMetadata& md2 = sm2.getMetaData(obj_str);
-        const spatial::Entity3D* entity1 = sm1.getEntity( obj );
-        const spatial::Entity3D* entity2 = sm2.getEntity( obj );
+        //const spatial::Entity3D* entity1 = sm1.getEntity( obj );
+        //const spatial::Entity3D* entity2 = sm2.getEntity( obj );
         //return md1==md2;
-        return ( entity1 == entity2 );
-    } else if (!insm1 && !insm2)
+        //return ( entity1 == entity2 );
+        return true;
+    } else if (!insm1 && !insm2) {
         return false; //case 2)
-    else return true; //case 1)
+    } else {
+        return true; //case 1)
+    }
+
 }
 
 bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,

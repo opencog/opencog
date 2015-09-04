@@ -36,10 +36,12 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/spacetime/atom_types.h>
 
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Pathfinder3D.h>
 #include <opencog/spatial/AStarController.h>
 #include <opencog/spatial/AStar3DController.h>
 #include <opencog/spatial/TangentBug.h>
+#include <opencog/spatial/math/Quaternion.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -108,7 +110,8 @@ throw (ComboException, AssertionException, std::bad_exception)
     planID = pai.createActionPlan();
 
     AtomSpace& as = pai.getAtomSpace();
-    const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
+    //const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
+    const SpaceServer::EntityManager& em = spaceServer().getLatestEntityManager();
     // treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
         OC_ASSERT(++sib_it(from) == to); // there is only one compound action
@@ -178,7 +181,7 @@ throw (ComboException, AssertionException, std::bad_exception)
                 } // if
                 Handle targetHandle = toHandle( target );
 
-                if (sm.containsObject(targetHandle))
+                if (em.containsEntity(targetHandle))
                 {
                     if (!build_goto_plan(targetHandle, Handle::UNDEFINED, walkSpeed ))
                     {
@@ -260,7 +263,7 @@ throw (ComboException, AssertionException, std::bad_exception)
                 target = pai.getAvatarInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
             } // if
 
-            if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), target)) {
+            if (!WorldWrapperUtil::inSpaceMap(em, as, selfName(), ownerName(), target)) {
                 //can't find the target
                 logger().error("PAIWorldWrapper - gobehind_obj: target[%s] not found.",
                              target.c_str() );
@@ -291,9 +294,9 @@ throw (ComboException, AssertionException, std::bad_exception)
             OC_ASSERT(is_contin(*++(++it.begin())));
 
             //and just goto it, if we can find the args on the map
-            if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
+            if (!WorldWrapperUtil::inSpaceMap(em, as, selfName(), ownerName(),
                                               *it.begin()) ||
-                    !WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
+                    !WorldWrapperUtil::inSpaceMap(em, as, selfName(), ownerName(),
                                                   *++it.begin())) {
                 logger().error(
                              "PAIWorldWrapper - Go behind: args not found.");
@@ -320,7 +323,7 @@ throw (ComboException, AssertionException, std::bad_exception)
                 Handle obj = toHandle(get_definite_object(*it.begin()));
                 OC_ASSERT(obj != Handle::UNDEFINED);
                 //first goto the obj to follow, if we can find it
-                if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
+                if (!WorldWrapperUtil::inSpaceMap(em, as, selfName(), ownerName(),
                                                   *it.begin())) {
                     logger().error(
                                  "PAIWorldWrapper - Follow: obj not found.");
@@ -675,17 +678,18 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
 bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceServer::SpaceMap& sm,const SpaceServer::SpaceMapPoint& startPoint,
                                                   const SpaceServer::SpaceMapPoint& endPoint, opencog::pai::ActionPlanID _planID, bool includingLastStep, float customSpeed )
 {
+    AtomSpace& atomSpace = pai.getAtomSpace();
     std::vector<SpaceServer::SpaceMapPoint> actions;
 
     SpaceServer::SpaceMapPoint nearestPos,bestPos;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos,bestPos,false,false,true))
+    if (spatial::Pathfinder3D::AStar3DPathFinder(&atomSpace, &sm,startPoint,endPoint,actions,nearestPos,bestPos,false,false,true))
     {
-        printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
+        printf("Pathfinding successfully! From (%f,%f,%f) to (%f, %f, %f)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
     }
     else
     {
-        printf("Pathfinding failed! From (%d,%d,%d) to (%d, %d, %d), the nearest accessable postion is (%d,%d,%d)",
+        printf("Pathfinding failed! From (%f,%f,%f) to (%f, %f, %f), the nearest accessable postion is (%f,%f,%f)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z,nearestPos.x,nearestPos.y,nearestPos.z);
     }
 
@@ -758,10 +762,11 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 {
     AtomSpace& atomSpace = pai.getAtomSpace();
     const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
+    const SpaceServer::EntityManager& entityManager = spaceServer().getLatestEntityManager();
     std::string goalName = atomSpace.get_name(goalHandle);
 
     OC_ASSERT(goalHandle != Handle::UNDEFINED);
-    OC_ASSERT(spaceMap.containsObject(goalHandle));
+    OC_ASSERT(entityManager.containsEntity(goalHandle));
 
     SpaceServer::SpaceMapPoint startPoint;
     SpaceServer::SpaceMapPoint endPoint;
@@ -770,27 +775,26 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 
 //    double targetAltitude = 0.0;
 
-    startPoint = WorldWrapperUtil::getLocation(spaceMap, atomSpace,
+    startPoint = WorldWrapperUtil::getLocation(entityManager, atomSpace,
                  WorldWrapperUtil::selfHandle(atomSpace, selfName()));
 
     if ( goBehind != Handle::UNDEFINED )
     {
-        targetCenterPosition = spaceMap.getObjectLocation(goBehind);
-        direction = spaceMap.getObjectDirection(goBehind);
-
-        // because it's to go behind, just get the opposite direction;
+        targetCenterPosition = entityManager.getLastAppearedLocation(goBehind);
+        direction = getEntityDirection(atomSpace, entityManager, goBehind, AGISIM_ROTATION_PREDICATE_NAME, 2);
         direction.x *= -1;
         direction.y *= -1;
     }
     else
     {
-        targetCenterPosition = spaceMap.getObjectLocation(goalHandle);
-        direction = spaceMap.getObjectDirection(goalHandle);
+        targetCenterPosition = entityManager.getLastAppearedLocation(goBehind);
+        direction = getEntityDirection(atomSpace, entityManager, goalHandle, AGISIM_ROTATION_PREDICATE_NAME, 2);
+        //direction = spaceMap.getObjectDirection(goalHandle);
     }
 
     if (targetCenterPosition != spatial::BlockVector::ZERO)
     {
-        endPoint = spaceMap.getNearFreePointAtDistance(targetCenterPosition, SpaceServer::SpaceMap::AccessDistance, direction );
+        endPoint = getNearFreePointAtDistance(atomSpace, spaceMap, targetCenterPosition, spatial::AccessDistance, direction );
     }else
     {
         endPoint = spatial::BlockVector::ZERO;
@@ -803,8 +807,8 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
         return false;
     }
 
-    logger().fine("PAIWorldWrapper - Pet position: (%d, %d, %d). "
-            "Goal position: (%d, %d, %d) - %s.",
+    logger().fine("PAIWorldWrapper - Pet position: (%f, %f, %f). "
+            "Goal position: (%f, %f, %f) - %s.",
             startPoint.x, startPoint.y,  startPoint.z, endPoint.x,
             endPoint.y, endPoint.z, goalName.c_str());
     // register seeking object
@@ -828,6 +832,7 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
 {
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
+    const SpaceServer::EntityManager& em = spaceServer().getLatestEntityManager();
     static const std::map<avatar_builtin_action_enum, ActionType> actions2types =
         { {id::drink, ActionType::DRINK()},
           {id::eat, ActionType::EAT()},
@@ -1001,7 +1006,7 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     build_step:
         //now compute a step in which direction the pet is going
         {
-            SpaceServer::SpaceMapPoint petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(as, selfName()));
+            SpaceServer::SpaceMapPoint petLoc = WorldWrapperUtil::getLocation(em, as, WorldWrapperUtil::selfHandle(as, selfName()));
 
             //double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
             double stepSize = 1.0; // The unit length in a block world.
@@ -1011,7 +1016,7 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
             // if not moving to an illegal position, then no problem, go
             // to computer position
             SpaceServer::SpaceMapPoint pos((int)x, (int)y,petLoc.z);
-            if (!sm.checkStandable(pos)) {
+            if (!checkStandable(as, sm, pos)) {
                 action.addParameter(ActionParameter("target",
                                                     ActionParamType::VECTOR(),
                                                     Vector(x, y, 0.0)));
@@ -1036,7 +1041,7 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
         //we need to compute the obj's position and pass it as and arg to
         //tristan's jumpToward(vector) function
     {
-        SpaceServer::SpaceMapPoint p = WorldWrapperUtil::getLocation(sm, as, toHandle(get_definite_object(*from.begin())));
+        SpaceServer::SpaceMapPoint p = WorldWrapperUtil::getLocation(em, as, toHandle(get_definite_object(*from.begin())));
         action.addParameter(ActionParameter("position",
                                             ActionParamType::VECTOR(),
                                             Vector(p.x, p.y, p.z)));
@@ -1095,7 +1100,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
         float rotationAngle = 0;
         try {
             //const spatial::Object& agentObject = sm.getObject( selfName( ) );
-            const spatial::Entity3D* agentEntity = sm.getEntity( toHandle(selfName( )) );
             //rotationAngle = agentObject.metaData.yaw;
 
             //const spatial::Object& targetObject = sm.getObject( targetObjectName );
@@ -1109,15 +1113,14 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
                 parser >> targetPosition.y;
                 parser >> targetPosition.z;
             } else {
-                const spatial::Entity3D* targetEntity = sm.getEntity(toHandle(targetObjectName));
-                targetPosition = targetEntity->getPosition( );
+                targetPosition = em.getLastAppearedLocation(toHandle(targetObjectName));
             } // else
 
             //spatial::math::Vector2 agentPosition( agentObject.metaData.centerX, agentObject.metaData.centerY );
             //spatial::math::Vector2 targetPosition( targetObject.metaData.centerX, targetObject.metaData.centerY );
 
             //spatial::math::Vector2 agentDirection( cos( agentObject.metaData.yaw ), sin( agentObject.metaData.yaw ) );
-            spatial::math::Vector3 targetDirection = targetPosition -  agentEntity->getPosition( );
+            spatial::math::Vector3 targetDirection = targetPosition - em.getLastAppearedLocation(toHandle(selfName( )));
 
             rotationAngle = atan2f(targetDirection.y, targetDirection.x);
 
@@ -1241,15 +1244,17 @@ string PAIWorldWrapper::ownerName()
 **/
 double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (ComboException, AssertionException, std::bad_exception)
 {
-    const AtomSpace& as = pai.getAtomSpace();
+    AtomSpace& as = pai.getAtomSpace();
     //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
     Handle atTimeLink = spaceServer().getLatestMapHandle();
     OC_ASSERT(atTimeLink != Handle::UNDEFINED);
-    const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
+    //const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
+    const SpaceServer::EntityManager& em = spaceServer().getLatestEntityManager();
 
-    if (sm.containsObject(slobj)) {
+    if (em.containsEntity(slobj)) {
         //return the yaw
-        double result = sm.getEntity(slobj)->getYaw();
+        std::vector<std::string> rotationStrs = getPredicate(as, AGISIM_ROTATION_PREDICATE_NAME, HandleSeq{slobj}, 3);
+        double result = std::stod(rotationStrs[1]);
         logger().debug("getAngleFacing(%s) => %f", as.get_name(slobj).c_str(), result);
         return result;
     }

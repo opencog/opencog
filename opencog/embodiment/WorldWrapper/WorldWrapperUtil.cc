@@ -36,6 +36,7 @@
 
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceTime.h>
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
@@ -258,7 +259,7 @@ Handle WorldWrapperUtil::getAvatarHandle(AtomSpace& as,
     return as.get_handle(AVATAR_NODE, avatar_id);
 }
 
-bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
+bool WorldWrapperUtil::inSpaceMap(const SpaceServer::EntityManager& em,
                                   AtomSpace& as,
                                   const string& self_id,
                                   const string& owner_id,
@@ -271,8 +272,8 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
               "WorldWrapperUtil - Null handle for definite objetc %s.",
               get_definite_object(v).c_str());
 
-    return sm.containsObject(toHandle(as, get_definite_object(v),
-                                        self_id, owner_id));
+    return em.containsEntity(toHandle(as, get_definite_object(v),
+                                      self_id, owner_id));
 }
 
 vertex WorldWrapperUtil::evalIndefiniteObject(
@@ -736,8 +737,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
     } else if (p == get_instance(id::exists)) {
         OC_ASSERT(it.number_of_children() == 1);
         OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exist");
-        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
-        return combo::bool_to_vertex(inSpaceMap(sm, atomSpace, self_id, owner_id,
+        const SpaceServer::EntityManager& em = spaceServer().getEntityManager(smh);
+        return combo::bool_to_vertex(inSpaceMap(em, atomSpace, self_id, owner_id,
                                                 *it.begin()));
     }
 
@@ -828,7 +829,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         } else {
 
                 // if the definite object exists inside the latest map it exists
-                bool isExist = spaceServer().getLatestMap( ).containsObject(handle);
+                bool isExist = spaceServer().getLatestEntityManager().containsEntity(handle);
                 if (isExist)
                 result = true;
                 else
@@ -1152,12 +1153,12 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         stringstream ss;
                         ss << get_instance(pe);
 
-                        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
-
+                        //const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
+                        const SpaceServer::EntityManager& em = spaceServer().getEntityManager(smh);
                         bool result =
                             AtomSpaceUtil::getPredicateValueAtSpaceMap(atomSpace,
                                     ss.str(),
-                                    sm,
+                                    em,
                                     h1,
                                     h2);
 
@@ -2642,15 +2643,11 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
 */
 
 SpaceServer::SpaceMapPoint
-WorldWrapperUtil::getLocation(const SpaceServer::SpaceMap& sm,
+WorldWrapperUtil::getLocation(const SpaceServer::EntityManager& em,
                               const AtomSpace& atomSpace,
                               Handle h)
 {
-    const spatial::Entity3D* entity = sm.getEntity( h );
-    if (entity == 0)
-        return SpaceServer::SpaceMapPoint::ZERO;
-
-    return SpaceServer::SpaceMapPoint(entity->getPosition());
+    return SpaceServer::SpaceMapPoint(em.getLastAppearedLocation(h));
 }
 /*
 double
@@ -2671,19 +2668,21 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
 }
 */
 double
-WorldWrapperUtil::getOrientation(const SpaceServer::SpaceMap& sm,
-                                 const AtomSpace& atomSpace,
+WorldWrapperUtil::getOrientation(const SpaceServer::EntityManager& em,
+                                 AtomSpace& atomSpace,
                                  Handle h) throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
 {
     std::string handleName = atomSpace.get_name(h);
 
-    if (!sm.containsObject(h)) {
+    if (!em.containsEntity(h)) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "WorldWrapperUtil - Space map does not contain '%s'.", handleName.c_str());
     }
 
+    std::vector<std::string> rotationStrs = getPredicate(atomSpace, AGISIM_ROTATION_PREDICATE_NAME, HandleSeq{h}, 3);
+    double yaw = std::stod(rotationStrs[1]);
     //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
-    return sm.getEntity( h )->getYaw();
+    return yaw;
     //return md.yaw;
 }
 

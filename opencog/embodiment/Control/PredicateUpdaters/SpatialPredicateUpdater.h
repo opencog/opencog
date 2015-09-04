@@ -31,7 +31,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
+#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include "BasicPredicateUpdater.h"
@@ -112,16 +113,16 @@ private:
     }; // class SpatialRelationCache
 
     // compute all the relationships between all objects
-    void computeRelationshipsBetweenAllObjects(const SpaceServer::SpaceMap & spaceMap,
-                                               vector<const Entity3D *> &allEntities,
+    void computeRelationshipsBetweenAllObjects(const SpaceServer::EntityManager & entityManager,
+                                               vector<Handle> &allEntities,
                                                Handle observer,
                                                unsigned long timestamp);
 
     // compute only the relationships between objects and avatar , which means every piece here descrips a relationship between an object and an avatar
-    void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::SpaceMap & spaceMap,
-                                                      std::set<const spatial::Entity3D*>& avatars,
-                                                      std::vector<const spatial::Entity3D*>& nonblockEntities,
-                                                      std::vector<const spatial::Entity3D*>& blockEntities,
+    void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::EntityManager & entityManager,
+                                                      std::set<Handle>& avatars,
+                                                      std::vector<Handle>& nonblockEntities,
+                                                      //std::vector<Handle>& blockEntities,
                                                       Handle observer,
                                                       unsigned long timestamp);
 

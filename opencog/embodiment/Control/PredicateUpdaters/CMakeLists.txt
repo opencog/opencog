@@ -21,6 +21,7 @@ SET(CMAKE_BUILD_TYPE Debug)
 
 TARGET_LINK_LIBRARIES (PredicateUpdaters
 	AtomSpaceExtensions
+        SpaceMapUtil
 	${PROJECT_LIBRARIES}
 )
 

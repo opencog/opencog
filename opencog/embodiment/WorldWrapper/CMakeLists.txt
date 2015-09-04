@@ -14,6 +14,8 @@ TARGET_LINK_LIBRARIES(WorldWrapper
 	TangentBug
 	AStar
 	HPASearch
+        SpaceMapUtil
+        PathFinder3D
 	MessagingSystem
 	AvatarComboVocabulary
 )

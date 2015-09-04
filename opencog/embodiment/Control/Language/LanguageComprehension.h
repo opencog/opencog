@@ -32,7 +32,7 @@
 #include <opencog/embodiment/Control/Language/OutputRelex.h>
 #include <opencog/embodiment/Control/Language/FramesToRelexRuleEngine.h>
 #include <opencog/embodiment/Control/Language/NLGenClient.h>
-
+#include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/guile/SchemeEval.h>
 
 class LanguageComprehensionUTest; 
@@ -157,9 +157,9 @@ private:
     static void createFrameInstancesFromRelations( AtomSpace & atomSpace,
                                                    HandleSeq & resultingFrames,
                                                    const std::set<spatial::SPATIAL_RELATION> & relations,
-                                                   const std::string& objectA, 
-                                                   const std::string& objectB, 
-                                                   const std::string& objectC
+                                                   const Handle& objectA, 
+                                                   const Handle& objectB, 
+                                                   const Handle& objectC
                                                  );
 
 #ifdef HAVE_GUILE

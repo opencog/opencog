@@ -166,7 +166,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     timeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::STARTS_WITHIN);
 
-    const SpaceServer::SpaceMap* pre_sm = NULL; //previous spaceMap
+    const SpaceServer::EntityManager* pre_sm = NULL; //previous spaceMap
     //used for isMoving
     //for each spaceMap update _perceptToTime
     for (std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
@@ -175,7 +175,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         Handle smh = timeServer().getAtTimeLink(*htp_it);
         OC_ASSERT(smh != Handle::UNDEFINED,
                          "There must be a spaceMap for that handle");
-        const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
+        const SpaceServer::EntityManager& sm = spaceServer().getEntityManager(smh);
         //determine lower and upper boundary of that spaceMap
         //if the space map started before the exemplar start time
         //ltl is the exemplar start time instead
@@ -465,16 +465,16 @@ inline void EntropyFilter::setIsMoving(const definite_object& obj, bool val)
 }
 
 inline void EntropyFilter::setIsMoving(const definite_object& obj,
-                                       const SpaceServer::SpaceMap* pre_sm,
-                                       const SpaceServer::SpaceMap& sm)
+                                       const SpaceServer::EntityManager* pre_em,
+                                       const SpaceServer::EntityManager& em)
 {
-    if (pre_sm == NULL)
+    if (pre_em == NULL)
         setIsMoving(obj, true);
     else {
         Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace, obj,
                                                   _self_id, _owner_id);
         setIsMoving(obj, AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
-                                                            *pre_sm, sm,
+                                                            *pre_em, em,
                                                             obj_h));
     }
 }

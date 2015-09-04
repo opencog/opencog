@@ -13,5 +13,6 @@ ADD_DEPENDENCIES(Language embodiment_atom_types)
 TARGET_LINK_LIBRARIES (Language
 	${ATOMSPACE_LIBRARY}
 	embodiment-types
+        SpaceMapUtil
 )
 

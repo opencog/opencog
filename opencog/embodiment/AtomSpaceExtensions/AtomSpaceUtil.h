@@ -433,7 +433,7 @@ public:
      */
     static bool getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
                                             const std::string predicate,
-                                            const SpaceServer::SpaceMap& sm,
+                                            const SpaceServer::EntityManager& em,
                                             Handle obj1, Handle obj2);
 
 //    /**
@@ -555,13 +555,13 @@ public:
      * Return true iff obj has changed its location between sm1 and sm2
      *
      * @param atomSpace The atomSpace to look at
-     * @param sm1 the spaceMap before
-     * @param sm2 the spaceMap after
+     * @param sm1 the EntityManager(Scene) before
+     * @param sm2 the EntityManager(Scene) after
      * @param the object to look at
      */
     static bool isMovingBtwSpaceMap(const AtomSpace& atomSpace,
-                                    const SpaceServer::SpaceMap& sm1,
-                                    const SpaceServer::SpaceMap& sm2,
+                                    const SpaceServer::EntityManager& em1,
+                                    const SpaceServer::EntityManager& em2,
                                     Handle obj);
 
     /**

@@ -29,13 +29,14 @@ IF (HAVE_EMBODIMENT)
 		makeVirtualAtom
 		CompareAtomTreeTemplate
 		GetByOutgoing
-      Intersect
+                Intersect
 	)
 
 	TARGET_LINK_LIBRARIES (AtomSpaceExtensions
 		embodiment-types
 		${ATOMSPACE_query_LIBRARY}
 		spacetime
+                SpaceMapUtil
 		${ATOMSPACE_LIBRARY}
 	)
 

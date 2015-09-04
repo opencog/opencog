@@ -2692,6 +2692,7 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
         // got a unknown map name
         mapName = "unknown-map-name" + opencog::toString(++unknownMapNameCount);
     }
+    /*
     // the size of x side in this map
     int offsetx = getIntAttribute(element, GLOBAL_POS_OFFSET_X_ATTRIBUTE);
 
@@ -2716,8 +2717,12 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     // gets the global floor height
     int floorHeight = getIntAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
     logger().fine("PAI - addSpaceMap: global floor height = %d", floorHeight);
+    */
+    
+    //Because there is no data for resolution of block, set resolution as 1, 
+    double resolution = 1.0;
 
-    spaceServer().addOrGetSpaceMap(timestamp, mapName, xMin, yMin, zMin, offsetx, offsety, offsetz, floorHeight);
+    spaceServer().addOrGetSpaceMap(timestamp, mapName, resolution);
 }
 
 void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
@@ -3643,15 +3648,19 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 
             if (!isFirstPerceptTerrian)
             {
+                /*
+                  Currently (20150920) we haven't implemented BlockEntity in new SpaceMap...
+
                 // maybe it has created new BlockEntities, add them to the atomspace
 	      spaceServer().addBlockEntityNodes(toUpdateHandles,spaceServer().getLatestMapHandle());
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
 	      spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles,spaceServer().getLatestMapHandle());
-            }
-            if (isFirstPerceptTerrian)
+                */
+            } else {
                 blockNum ++;
+            }
         }
 
         delete(binary);
@@ -3884,14 +3893,13 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
     // Entity class
     std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
     // Check if it is an obstacle
-    bool isObstacle = isObjectAnObstacle(objectNode, entityClass, mapinfo);
-
+    //bool isObstacle = isObjectAnObstacle(objectNode, entityClass, mapinfo);
+    bool isAvatar = atomSpace.get_type(objectNode) == AVATAR_NODE;
     std::string material = getStringProperty(getPropertyMap(mapinfo), MATERIAL_ATTRIBUTE);
 
     // Space server insertion
     // round up these values
-    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z),
-				      roundDoubleToInt(length), roundDoubleToInt(width), roundDoubleToInt(height), rotation.yaw, isObstacle, entityClass,objectName,material);
+    return spaceServer().addSpaceInfo(objectNode,spaceServer().getLatestMapHandle(), isSelfObject, isAvatar, timestamp, roundDoubleToInt(position.x), roundDoubleToInt(position.y), roundDoubleToInt(position.z));
 
 }
 
@@ -4419,12 +4427,13 @@ Handle PAI::getParmValueHanleFromXMLDoc(DOMElement* paramElement)
 
 void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles)
 {
-    unsigned long timestamp = getTimestampFromElement(element);
+    //unsigned long timestamp = getTimestampFromElement(element);
     // if it's the first time percept this world, then we should find out all the possible existing block-entities
     if (isFirstPerceptTerrian)
     {
         printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
+        /*  Currently (20150920) we haven't implemented BlockEntity in new SpaceMap...
         spaceServer().findAllBlockEntitiesOnTheMap(spaceServer().getLatestMapHandle());
 
         // maybe it has created new BlockEntities, add them to the atomspace
@@ -4437,15 +4446,18 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
         int t2 = time(NULL);
 
         spaceServer().markCurMapPerceptedForFirstTime();
-
+        */
+        int t2 = time(NULL);
         isFirstPerceptTerrian = false;
         printf("Initial perception of the non-terrain entities is complete! Finish time: %d. Total time: %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
+
     }
 
 }
 
 void PAI::processBlockStructureSignal(DOMElement* element)
 {
+    /* Currently (20150920) we haven't implemented BlockEntity in new SpaceMap...
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     XMLString::transcode(RECOGNIZE_STRUCTURE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -4531,7 +4543,7 @@ void PAI::processBlockStructureSignal(DOMElement* element)
         }
 
     }
-
+    */
 }
 
 std::string PAI::getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH)
