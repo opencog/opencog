@@ -87,6 +87,11 @@ bool EntityManager::containsEntity(const Handle& entityNode) const
     return mAllNoneBlockEntities.find(entityNode) != mAllNoneBlockEntities.end();
 }
 
+bool EntityManager::isAvatarEntity(const Handle& entityNode) const
+{
+    return mAllAvatarList.find(entityNode) != mAllAvatarList.end();
+}
+
 void EntityManager::updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, unsigned long timestamp)
 {
     mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(newpos, entityNode));

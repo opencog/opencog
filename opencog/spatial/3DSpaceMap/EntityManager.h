@@ -33,13 +33,15 @@ namespace opencog
                                     const unsigned long timestamp);
             void removeNoneBlockEntity(const Handle& entityNode);
             bool containsEntity(const Handle& entityNode) const;
+            bool isAvatarEntity(const Handle& entityNode) const;
             void updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos,
                                                unsigned long timestamp);
             // note that we didn't delete the record
             // when calling removeNoneBlockEntity()
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
             Handle getEntity(const BlockVector& pos) const;
-            
+            const set<Handle>& getAllAvatarList() const{return mAllAvatarList;};
+
             template<typename Out>
                 Out findAllEntities(Out out) const
             {
