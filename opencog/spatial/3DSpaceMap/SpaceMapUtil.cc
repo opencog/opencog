@@ -1,12 +1,6 @@
-#include <iterator>
-#include <string>
-#include <set>
 #include <limits.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Handle.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <opencog/spatial/math/Quaternion.h>

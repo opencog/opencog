@@ -1,15 +1,10 @@
 #include <algorithm>
-#include <iterator>
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/util/Config.h>
+//#include <opencog/atomspace/Handle.h>
 #include <opencog/util/Logger.h>
-#include "Block3DMapUtil.h"
+//#include "Block3DMapUtil.h"
 #include "OctomapOcTree.h"
-#include "SpaceMapUtil.h"
 
 using namespace opencog;
 using namespace opencog::spatial;

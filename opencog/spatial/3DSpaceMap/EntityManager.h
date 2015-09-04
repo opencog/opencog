@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
+#include "Block3DMapUtil.h"
 
 using namespace opencog;
 using namespace opencog::spatial;

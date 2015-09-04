@@ -45,16 +45,12 @@
 // If the occupancy log odds of node < thres, we regard it as freespace
 // else, It's a block in the space.
 
-
+#include <map>
 #include <vector>
-#include <iostream>
 #include <octomap/OcTreeNode.h>
 #include <octomap/OccupancyOcTreeBase.h>
-
 #include <opencog/atomspace/Handle.h>
-#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-
-#include <map>
+#include "Block3DMapUtil.h"
 
 using namespace std;
 using namespace octomap;
