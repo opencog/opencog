@@ -36,7 +36,7 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-definite-rule pred)
+(define (pre-definite-rule noun)
   (ListLink
     	(definite-rule (word-inst-get-word-str noun) (cog-name noun)
     )
