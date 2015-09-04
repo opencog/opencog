@@ -265,7 +265,7 @@ bool Pathfinder3D::checkNeighbourAccessable(OctomapOcTree *mapManager, BlockVect
 
             BlockVector neighbour2(lastPos.x,lastPos.y + j,lastPos.z + h + k );
             Handle neighbourblock2 = mapManager->getBlock(neighbour2);
-            if ( neighbourblock2 != Handle::UNDEFINED) 
+            if ( neighbourblock2 != Handle::UNDEFINED)
                 return false;
         }
 

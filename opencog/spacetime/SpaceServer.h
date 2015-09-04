@@ -29,7 +29,7 @@
  * Currently we seperate the entity operation in old SpaceMap to EntityManager class
  * This makes SpaceServer a little messy. But it's good for readibility of SpaceMap.
  */
- 
+
 
 /**
  * SpaceServer.h

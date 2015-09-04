@@ -100,10 +100,10 @@ private:
     static HandleToHandleMap latestAvatarActionDone;
     static HandleToHandleMap latestAvatarActionPredicate;
 
-    static HandleToHandleMap latestModulators; 
-    static HandleToHandleMap latestDemands; 
-    static HandleToHandleMap latestFeelings; 
-    static HandleToHandleMap latestStimulus; 
+    static HandleToHandleMap latestModulators;
+    static HandleToHandleMap latestDemands;
+    static HandleToHandleMap latestFeelings;
+    static HandleToHandleMap latestStimulus;
 
     static std::map<Handle, HandleToHandleMap > latestSpatialPredicate;
     static HandleToHandleMap latestSchemaPredicate;
@@ -145,12 +145,12 @@ public:
      *     firstOutgoing
      *     secondOutgoing
      */
-    static Handle getReferenceLink(AtomSpace& atomSpace, Handle hFirstOutgoing); 
+    static Handle getReferenceLink(AtomSpace& atomSpace, Handle hFirstOutgoing);
 
     /**
      * Return the second outgoing of a ReferenceLink given the first outgoing
      */
-    static Handle getReference(AtomSpace& atomSpace, Handle hFirstOutgoing); 
+    static Handle getReference(AtomSpace& atomSpace, Handle hFirstOutgoing);
 
     /**
      * Return the InheritanceLink list given its first outgoing
@@ -198,8 +198,8 @@ public:
      *         NumberNode: "modulator_value"
      *         ExecutionOutputLink
      *             GroundSchemaNode: modulatorUpdater
-     */ 
-    static float getCurrentModulatorLevel(AtomSpace& atomSpace, 
+     */
+    static float getCurrentModulatorLevel(AtomSpace& atomSpace,
                                           const std::string& modulatorName);
     /**
      * Returns the current level of the given Demand.
@@ -212,20 +212,20 @@ public:
      * @param demand    Name of the Demand wanted
      *
      * @return float    The current level of a given Demand
-     */ 
-    static float getCurrentDemandLevel(AtomSpace& atomSpace, 
+     */
+    static float getCurrentDemandLevel(AtomSpace& atomSpace,
                                        const std::string& demandName);
 
     /**
      * Get the handle to Demand Goal (EvaluationLink)
      *
      * @param atomSpace The AtomSpace
-     * @param demand    Name of the Demand 
+     * @param demand    Name of the Demand
      *
      * @return Handle   The Handle to Demand Goal (EvaluationLink), or
      *                  Handle::UNDEFINED if fails
      */
-    static Handle getDemandGoalEvaluationLink(AtomSpace& atomSpace, 
+    static Handle getDemandGoalEvaluationLink(AtomSpace& atomSpace,
                                               const std::string& demand);
 
     /**
@@ -243,15 +243,15 @@ public:
                                               const std::string& predicateNodeName );
 
     // get all the nodes from InheritanceLinks, given the SecondOutgoing
-    static std::vector<Handle> getNodesByInheritanceLink(AtomSpace& atomSpace, 
+    static std::vector<Handle> getNodesByInheritanceLink(AtomSpace& atomSpace,
                                                          Handle& hSecondOutgoing);
 
     // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
-    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace& atomSpace, 
+    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace& atomSpace,
                                                         string predicate,
                                                         HandleSeq& hNonFirstOutgoings);
 
-    static std::vector<Handle> getEvaluationLinks(AtomSpace&atomSpace, 
+    static std::vector<Handle> getEvaluationLinks(AtomSpace&atomSpace,
                                                   string predicate,
                                                   HandleSeq &hfirstOutgoings);
 
@@ -565,7 +565,7 @@ public:
                                     Handle obj);
 
     /**
-     * Return true iff obj has changed its location between sm 
+     * Return true iff obj has changed its location between sm
      * and the previous spaceMap
      *
      * @param atomSpace The atomSpace to look at
@@ -825,7 +825,7 @@ public:
      * @return the name of the object if it exists, or an empty string, otherwise.
      */
     static std::string getObjectName(AtomSpace&, Handle object);
-    
+
     /**
      * Given the name of an object, whose letters  may be all in upercase, gets its id.
      * @return the id of the object, if it exists, or an empty string, otherwise.
@@ -919,7 +919,7 @@ public:
      */
     static Handle getRuleImplicationLink(AtomSpace& atomSpace,
                                          const std::string& rule);
-    
+
     /**
      * Return the Handle of SimilarityLink that holds ModulatorUpdater
      *
@@ -929,11 +929,11 @@ public:
      *     NumberNode: "modulator_value"
      *     ExecutionOutputLink
      *         GroundSchemaNode: modulatorUpdater
-     *         ListLink 
+     *         ListLink
      *             PET_HANDLE
      */
     static Handle getModulatorSimilarityLink(AtomSpace& atomSpace,
-                                             const std::string& modulator, 
+                                             const std::string& modulator,
                                              const std::string& petId);
 
     /**
@@ -943,7 +943,7 @@ public:
      *
      * SimultaneousEquivalenceLink
      * EvaluationLink
-     *     PredicateNode: "demand_name_goal" 
+     *     PredicateNode: "demand_name_goal"
      *                    (SimpleTruthValue indicates how well the demand is satisfied)
      *                    (ShortTermInportance indicates the urgency of the demand)
      * EvaluationLink
@@ -959,8 +959,8 @@ public:
      *                     PET_HANDLE
      *
      */
-    static Handle getDemandSimultaneousEquivalenceLink(const AtomSpace& atomSpace, 
-                                                       const std::string& demand, 
+    static Handle getDemandSimultaneousEquivalenceLink(const AtomSpace& atomSpace,
+                                                       const std::string& demand,
                                                        const std::string& petId);
 
      /**
@@ -970,7 +970,7 @@ public:
      *
      * SimultaneousEquivalenceLink
      * EvaluationLink
-     *     PredicateNode: "demand_name_goal" 
+     *     PredicateNode: "demand_name_goal"
      *                    (SimpleTruthValue indicates how well the demand is satisfied)
      *                    (ShortTermInportance indicates the urgency of the demand)
      * EvaluationLink
@@ -982,12 +982,12 @@ public:
      *             GroundedSchemaNode: "demand_schema_name"
      *
      */
-    static bool getDemandEvaluationLinks(AtomSpace& atomSpace, 
-                                         const std::string& demandName, 
-                                         Handle& hDemandGoal, 
+    static bool getDemandEvaluationLinks(AtomSpace& atomSpace,
+                                         const std::string& demandName,
+                                         Handle& hDemandGoal,
                                          Handle& hFuzzyWithin);
 
-           
+
     /**
      * Return the schema strength for the given rule. This strength is stored as
      * the truth value of the ImplicationLink between the rule precondition and
@@ -1048,7 +1048,7 @@ public:
      * @param objectID The object's ID
      * @return The object's handle. UNDEFINE_HANDLE if the agent's doesn't exists
      */
-    static Handle getObjectHandle(AtomSpace& atomSpace, 
+    static Handle getObjectHandle(AtomSpace& atomSpace,
                                   const std::string& objectID );
 
 
@@ -1080,7 +1080,7 @@ public:
      * @param atTimeLink the Handle of the given AtTimeLink
      * @return a new Temporal object pointed by atTimeLink
      */
-    static Temporal getTemporal(AtomSpace& as, 
+    static Temporal getTemporal(AtomSpace& as,
                                 Handle atTimeLink);
 
     /**
@@ -1091,7 +1091,7 @@ public:
      * @param atTimeLink the Handle of the given AtTimeLink
      * @return the Handle pointed by atTimeLink (second outgoing Atom)
      */
-    static Handle getTimedHandle(AtomSpace& as, 
+    static Handle getTimedHandle(AtomSpace& as,
                                  Handle atTimeLink);
 
     static void updateLatestAgentActionDone(AtomSpace& as,
@@ -1126,25 +1126,25 @@ public:
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
                                              Handle atTimeLink);
 
-    static void updateLatestModulator(AtomSpace& as, 
-                                      Handle atTimeLink, 
-                                      Handle modulatorPredicateNode); 
+    static void updateLatestModulator(AtomSpace& as,
+                                      Handle atTimeLink,
+                                      Handle modulatorPredicateNode);
 
-    static void updateLatestDemand(AtomSpace& as, 
-                                   Handle atTimeLink, 
-                                   Handle demandPredicateNode); 
+    static void updateLatestDemand(AtomSpace& as,
+                                   Handle atTimeLink,
+                                   Handle demandPredicateNode);
 
-    static void updateLatestFeeling(AtomSpace& as, 
-                                    Handle atTimeLink, 
-                                    Handle feelingPredicateNode); 
-    
-    static void updateLatestStimulus(AtomSpace& as, 
-                                     Handle atTimeLink, 
+    static void updateLatestFeeling(AtomSpace& as,
+                                    Handle atTimeLink,
+                                    Handle feelingPredicateNode);
+
+    static void updateLatestStimulus(AtomSpace& as,
+                                     Handle atTimeLink,
                                      Handle stimulusPredicateNode);
 
     /**
-     * Retrieve the handles of all Frame Elements (DefinedFrameElementNodes) 
-     * given frame name. 
+     * Retrieve the handles of all Frame Elements (DefinedFrameElementNodes)
+     * given frame name.
      *
      * @param AtomSpace the agent atomSpace
      * @param frameName the name of the FrameNet Frame
@@ -1155,14 +1155,14 @@ public:
      *
      * @note this function will also return the frame elements of parent frames.
      */
-    static Handle getFrameElements(AtomSpace& atomSpace, 
-                                   const std::string& frameName, 
+    static Handle getFrameElements(AtomSpace& atomSpace,
+                                   const std::string& frameName,
                                    HandleSeq& frameElementsHandles );
 
     /**
      * Creates a representation of a specific predicate instance
-     * in Framenet(http://framenet.icsi.berkeley.edu/) Frames format. 
-     * This method uses a previous definition of the Frame structure 
+     * in Framenet(http://framenet.icsi.berkeley.edu/) Frames format.
+     * This method uses a previous definition of the Frame structure
      * to set the given frame elements values.
      *
      * i.e. suppose you want to create a Frame corresponding to the
@@ -1176,39 +1176,39 @@ public:
      * InheritanceLink
      *    DefinedFrameNode "#Locative_relation"
      *    PredicateNode "is_near"
-     *  
+     *
      * InheritanceLink
      *    DefinedFrameElementNode "#Locative_relation:Figure"
      *    PredicateNode "is_near_Figure"
-     *  
+     *
      * InheritanceLink
      *    DefinedFrameElementNode "#Locative_relation:Ground"
      *    PredicateNode "is_near_Ground"
-     *  
+     *
      * InheritanceLink
      *    DefinedFrameElementNode "#Locative_relation:Relation_type"
      *    PredicateNode "is_near_Relation_type"
-     *  
+     *
      * FrameElementLink
      *    PredicateNode "is_near"
      *    PredicateNode "is_near_Figure"
-     *  
+     *
      * FrameElementLink
      *    PredicateNode "is_near"
      *    PredicateNode "is_near_Ground"
-     *  
+     *
      * FrameElementLink
      *    PredicateNode "is_near"
      *    PredicateNode "is_near_Relation_type"
-     *  
+     *
      * EvaluationLink
      *    PredicateNode "is_near_Figure"
      *    SemeNode "object1"
-     *  
+     *
      * EvaluationLink
      *    PredicateNode "is_near_Ground"
      *    SemeNode "object2"
-     *  
+     *
      * EvaluationLink
      *    PredicateNode "is_near_Relation_type"
      *    ConceptNode "is_near"
@@ -1217,17 +1217,17 @@ public:
      * @param atomSpace The AtomSpace reference where the Frame will be create into
      * @param frameName The name of the Frame that will be instantiated
      * @param predicateName The name of the frame instance
-     * @param frameElementsValuesHandles The map of the elements and its values that will be 
-     *                                   used to set the frame instance elements     
+     * @param frameElementsValuesHandles The map of the elements and its values that will be
+     *                                   used to set the frame instance elements
      * @param truthValue The truthValue that will be set as the frame instance TV
      * @param permanent If true set the LTI of the frame atoms to 1, 0 otherwise
      *
      * @return The Frame instance handle
      */
-    static Handle setPredicateFrameFromHandles(AtomSpace& atomSpace, 
-                                               const std::string& frameName, 
-                                               const std::string& frameInstanceName, 
-                                               const std::map<std::string, Handle>& frameElementsValuesHandles, 
+    static Handle setPredicateFrameFromHandles(AtomSpace& atomSpace,
+                                               const std::string& frameName,
+                                               const std::string& frameInstanceName,
+                                               const std::map<std::string, Handle>& frameElementsValuesHandles,
                                                TruthValuePtr truthValue,
                                                bool permanent = true);
 
@@ -1241,27 +1241,27 @@ public:
      *
      * @return A Map containing the names and values of all the frame instance elements
      *
-     * @note Below is an example. If the atomspace contains the info below, 
+     * @note Below is an example. If the atomspace contains the info below,
      *
      *       red@xxx_Color is an instance of Frame #Color
-     *       (InheritanceLink (stv 1 1) 
+     *       (InheritanceLink (stv 1 1)
      *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color")
      *           (DefinedFrameNode "#Color")
      *       )
      *
-     *       red@xxx_Color_Entity belongs to Frame instance red@xxx_Color   
+     *       red@xxx_Color_Entity belongs to Frame instance red@xxx_Color
      *       (FrameElementLink (stv 1 1)
      *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color")
      *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color_Entity")
-     *       )  
+     *       )
      *
      *       word ball@xxx is the value of (or stands for) the FrameElement instance red@xxx_Color_Entity
      *       (EvaluationLink (stv 1 1)
      *           (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color_Entity")
-     *           (WordInstanceNode "ball@8631fad6-f29d-4b15-905c-8594fa1d27d3") 
-     *       ) 
-     *      
-     *       then calling 
+     *           (WordInstanceNode "ball@8631fad6-f29d-4b15-905c-8594fa1d27d3")
+     *       )
+     *
+     *       then calling
      *       getFrameElementInstanceNameValues( (PredicateNode "red@701fe254-80e7-4329-80b4-8f865b665843_Color") )
      *
      *       would return a std::map<std::string, Handle> holding the pair

@@ -314,7 +314,7 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
                                                 const SpaceServer::EntityManager& em,
                                                 Handle obj1, Handle obj2)
 {
-    
+
     auto relationSet = spatial::computeSpatialRelations(atomSpace, em, obj1, obj2);
     for (auto relation : relationSet) {
         if(spatial::spatialRelationToString(relation) == predicate) {
@@ -328,7 +328,7 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
         logger().error("AtomSpaceUtil - One or both objects were not present in current scene");
         return false;
     }
-    
+
     if (predicate == "near") {
 
         try {
@@ -473,7 +473,7 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
                                         const SpaceServer::EntityManager& em2,
                                         Handle obj)
 {
-    
+
     //const std::string& obj_str = atomSpace.getName(obj);
     bool insm1 = em1.containsEntity(obj);
     bool insm2 = em2.containsEntity(obj);

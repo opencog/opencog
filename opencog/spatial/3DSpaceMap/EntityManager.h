@@ -48,7 +48,7 @@ namespace opencog
                 // only calculate the non-block entities and block entities, no including the blocks
                 std::vector<Handle> EntityList;
 
-                for ( auto it = mAllNoneBlockEntities.begin(); 
+                for ( auto it = mAllNoneBlockEntities.begin();
                       it != mAllNoneBlockEntities.end(); ++it ) {
                     EntityList.push_back(*it);
                 } // for

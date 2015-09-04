@@ -223,10 +223,10 @@ Handle WorldWrapperUtil::rec_lookup(AtomSpace& as, pre_it it,
                      obj.c_str());
         return Handle::UNDEFINED;
     }
-    
+
     //link lookup
-    
-    HandleSeq children;	
+
+    HandleSeq children;
     for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
         children.push_back(rec_lookup(as, pre_it(sib), self_id, owner_id));
         if (children.back() == Handle::UNDEFINED) {
@@ -1226,7 +1226,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
             } else {
                 Handle from_h = toHandle(atomSpace, def_obj, self_id, owner_id);
-                result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace, 
+                result = AtomSpaceUtil::getHasSaidValueAtTime(atomSpace,
                                                               time,
                                                               getHasSaidDelay(),
                                                               from_h,
@@ -2180,7 +2180,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         }
         break;
 
-    // Modulators        
+    // Modulators
     case id::get_activation_modulator:
         logger().debug("WorldWrapperUtil::%s - id::get_activation_modulator", __FUNCTION__);
         return WorldWrapperUtil::getModulator(atomSpace, ACTIVATION_MODULATOR_NAME, time);
@@ -2188,7 +2188,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_resolution_modulator:
        logger().debug("WorldWrapperUtil::%s - id::get_resolution_modulator", __FUNCTION__);
-       return WorldWrapperUtil::getModulator( atomSpace, 
+       return WorldWrapperUtil::getModulator( atomSpace,
                                               RESOLUTION_MODULATOR_NAME,
                                               time
                                              );
@@ -2196,7 +2196,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_securing_threshold_modulator:
       logger().debug("WorldWrapperUtil::%s - id::get_securing_threshold_modulator", __FUNCTION__);
-      return WorldWrapperUtil::getModulator( atomSpace, 
+      return WorldWrapperUtil::getModulator( atomSpace,
                                              SECURING_THRESHOLD_MODULATOR_NAME,
                                              time
                                            );
@@ -2206,17 +2206,17 @@ combo::vertex WorldWrapperUtil::evalPerception(
      logger().debug( "WorldWrapperUtil::%s - id::get_selection_threshold_modulator",
                      __FUNCTION__
                    );
-     return WorldWrapperUtil::getModulator( atomSpace, 
+     return WorldWrapperUtil::getModulator( atomSpace,
                                             SELECTION_THRESHOLD_MODULATOR_NAME,
                                             time
                                           );
 
         break;
 
-    // Demands    
+    // Demands
     case id::get_energy_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_energy_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             ENERGY_DEMAND_NAME,
                                             time
                                           );
@@ -2224,7 +2224,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_water_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_water_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             WATER_DEMAND_NAME,
                                             time
                                           );
@@ -2232,7 +2232,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_integrity_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             INTEGRITY_DEMAND_NAME,
                                             time
                                           );
@@ -2240,15 +2240,15 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_affiliation_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             AFFILIATION_DEMAND_NAME,
                                             time
                                           );
         break;
-        
+
     case id::get_certainty_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             CERTAINTY_DEMAND_NAME,
                                             time
                                           );
@@ -2256,7 +2256,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
      case id::get_competence_demand:
         logger().debug("WorldWrapperUtil::%s - id::get_competence_demand", __FUNCTION__);
-        return WorldWrapperUtil::getDemand( atomSpace, 
+        return WorldWrapperUtil::getDemand( atomSpace,
                                             COMPETENCE_DEMAND_NAME,
                                             time
                                           );
@@ -2264,58 +2264,58 @@ combo::vertex WorldWrapperUtil::evalPerception(
 
     case id::get_current_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_current_demand_goal_truth_value", __FUNCTION__);
-        return WorldWrapperUtil::getDemandGoalTruthValue(atomSpace, 
-                                                          "CurrentDemandGoal", 
-                                                          self_id, 
+        return WorldWrapperUtil::getDemandGoalTruthValue(atomSpace,
+                                                          "CurrentDemandGoal",
+                                                          self_id,
                                                           time
                                                         );
         break;
 
     case id::get_previous_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_previous_demand_goal_truth_value", __FUNCTION__);
-        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          "PreviousDemandGoal", 
-                                                          self_id, 
+        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace,
+                                                          "PreviousDemandGoal",
+                                                          self_id,
                                                           time
                                                         );
         break;
 
     case id::get_integrity_demand_goal_truth_value:
-        logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand_goal_truth_value", __FUNCTION__); 
-        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
+        logger().debug("WorldWrapperUtil::%s - id::get_integrity_demand_goal_truth_value", __FUNCTION__);
+        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace,
                                                           INTEGRITY_DEMAND_NAME,
-                                                          self_id, 
-                                                          time 
+                                                          self_id,
+                                                          time
                                                         );
-        break; 
+        break;
 
     case id::get_affiliation_demand_goal_truth_value:
-        logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand_goal_truth_value", __FUNCTION__); 
-        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
-                                                          AFFILIATION_DEMAND_NAME, 
-                                                          self_id, 
+        logger().debug("WorldWrapperUtil::%s - id::get_affiliation_demand_goal_truth_value", __FUNCTION__);
+        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace,
+                                                          AFFILIATION_DEMAND_NAME,
+                                                          self_id,
                                                           time
                                                         );
         break;
 
     case id::get_certainty_demand_goal_truth_value:
         logger().debug("WorldWrapperUtil::%s - id::get_certainty_demand_goal_truth_value", __FUNCTION__);
-        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
+        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace,
                                                           CERTAINTY_DEMAND_NAME,
-                                                          self_id, 
+                                                          self_id,
                                                           time
                                                         );
-        break;  
+        break;
 
     case id::get_competence_demand_goal_truth_value:
-        logger().debug("WorldWrapperUtil::%s - id::get_competence_demand_goal_truth_value", __FUNCTION__); 
-        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace, 
+        logger().debug("WorldWrapperUtil::%s - id::get_competence_demand_goal_truth_value", __FUNCTION__);
+        return WorldWrapperUtil::getDemandGoalTruthValue( atomSpace,
                                                           COMPETENCE_DEMAND_NAME,
-                                                          self_id, 
+                                                          self_id,
                                                           time
                                                         );
-        break; 
-   
+        break;
+
         // -------------- pet traits perceptions
         //case id::is_aggressive:
     case id::get_aggressiveness:
@@ -2841,7 +2841,7 @@ float WorldWrapperUtil::getModulator(AtomSpace & atomSpace,
                                                            modulatorName); },
         time, Predicate(modulatorName, std::vector<std::string>()));
 
-    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar is '%f'", 
+    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar is '%f'",
                    __FUNCTION__, modulatorName.c_str(), value);
 
     return value;
@@ -2856,7 +2856,7 @@ float WorldWrapperUtil::getDemand(AtomSpace & atomSpace,
                                                         demandName); },
         time, Predicate(demandName, std::vector<std::string>()));
 
-    logger().debug("WorldWrapperUtil::%s - current '%s' level is '%f'.", 
+    logger().debug("WorldWrapperUtil::%s - current '%s' level is '%f'.",
                    __FUNCTION__, demandName.c_str(), value);
 
     return value;
@@ -2870,14 +2870,14 @@ float WorldWrapperUtil::getDemandGoalTruthValue(AtomSpace & atomSpace,
     float value = WorldWrapperUtil::cache.call([&]() {
             Handle hDemandGoal =
                 AtomSpaceUtil::getDemandGoalEvaluationLink(atomSpace, demand);
-            if ( hDemandGoal == opencog::Handle::UNDEFINED ) 
+            if ( hDemandGoal == opencog::Handle::UNDEFINED )
                 value = randGen().randfloat();
             else
-                value = atomSpace.get_mean(hDemandGoal); 
+                value = atomSpace.get_mean(hDemandGoal);
             return value; },
         time, Predicate(demand, std::vector<std::string>()));
 
-    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar with id '%s' is '%f'.", 
+    logger().debug("WorldWrapperUtil::%s - '%s' for the avatar with id '%s' is '%f'.",
                    __FUNCTION__, demand.c_str(), self_id.c_str(), value);
 
     return value;

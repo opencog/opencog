@@ -618,7 +618,7 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 // TODO: TEMPORARY PUBLIC METHODS: They should become built-in predicates later.
 bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
 {
-	
+
     return AtomSpaceUtil::isActionPredicatePresent(
 		atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
 }
@@ -644,7 +644,7 @@ bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_FAILED_PREDICATE_NAME, 
+            atomSpace, ACTION_FAILED_PREDICATE_NAME,
 			actionId, sinceTimestamp);
 }
 
@@ -669,7 +669,7 @@ bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
-            atomSpace, ACTION_TRIED_PREDICATE_NAME, 
+            atomSpace, ACTION_TRIED_PREDICATE_NAME,
 			actionId, sinceTimestamp);
 }
 
@@ -1596,7 +1596,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // Add this action to timelink
-    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, 
+    Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode,
                                                  tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
     actionConcernedHandles.push_back(atTimeLink);
@@ -1625,7 +1625,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     else
         eventTYpe = oac::EVENT_TYPE_ACTION;
 	OC_UNUSED(eventTYpe);
-	
+
     // Jared
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
     // while PLN may find it useful to have them together or separate.
@@ -1945,10 +1945,10 @@ void PAI::processInstruction(DOMElement * element)
         // Put the newly parsed sentence into AtomSpace, then
         // PsiActionSelectionAgent and dialog_system.scm will continue
         // processing it.
-        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        scheme_return_value = evaluator->eval(parsedSentenceText);
         if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to put the parsed result from"
-                           " RelexServer to AtomSpace", 
+                           " RelexServer to AtomSpace",
                            __FUNCTION__);
         }
         delete evaluator;
@@ -2718,8 +2718,8 @@ void PAI::addSpaceMap(DOMElement* element,unsigned long timestamp)
     int floorHeight = getIntAttribute(element, GLOBAL_FLOOR_HEIGHT_ATTRIBUTE);
     logger().fine("PAI - addSpaceMap: global floor height = %d", floorHeight);
     */
-    
-    //Because there is no data for resolution of block, set resolution as 1, 
+
+    //Because there is no data for resolution of block, set resolution as 1,
     double resolution = 1.0;
 
     spaceServer().addOrGetSpaceMap(timestamp, mapName, resolution);
@@ -2775,7 +2775,7 @@ void PAI::processMapInfo(DOMElement* element, HandleSeq &toUpdateHandles,
         mapinfoSeq.ParseFromArray((void*)binary, length);
         logger().debug("PAI - processMapInfo recieved mapinfos information: %s",
                        mapinfoSeq.DebugString().c_str());
-        
+
         for (int j = 0; j < mapinfoSeq.mapinfos_size(); j++)
         {
             const MapInfo& mapinfo = mapinfoSeq.mapinfos(j);

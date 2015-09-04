@@ -302,7 +302,7 @@ void SpatialPredicateUpdater::computeRelationshipsBetweenObjectsAndAvatars(const
             for (auto nonBlockIt = allNoneBlockEntities.begin(); nonBlockIt != allNoneBlockEntities.end(); nonBlockIt ++ )
             {
                 Handle nonBE = *nonBlockIt;
-                if (nonBE == avatar) 
+                if (nonBE == avatar)
                 {
                     continue;
                 }
