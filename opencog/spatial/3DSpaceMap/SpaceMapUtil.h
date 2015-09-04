@@ -123,13 +123,12 @@ namespace opencog
          * Then pass them to create a AxisAlignedBox object representing the entity.
          * @param atomSpace Given atomspace containing given entity handle
          *        It's not const because we need to add temporary atom to query info
-         * @param spaceMap Given spaceMap containing given entity handle
+         * @param entityManager Given spaceMap containing given entity handle
          * @param entity Given entity handle
          * @return A bounding box object
 	 */
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const OctomapOcTree& spaceMap,
                                       const EntityManager& entityManager,
                                       const Handle& entity);
         /**
@@ -165,7 +164,7 @@ namespace opencog
          *       spatial relationship we should remove it.
          * @param atomSpace Given atomspace containing given entity handles
          *        It's not const because we need to add temporary atom to query info
-         * @param spaceMap Given spaceMap containing given entity handles
+         * @param entityManager Given spaceMap containing given entity handles
 	 * @param entityA the entity to be judged
 	 * @param entityB first reference entity
          * @param entityC second reference entity for ternary spatial relation.
@@ -182,7 +181,6 @@ namespace opencog
 	 */
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const OctomapOcTree& spaceMap,
                                                       const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,

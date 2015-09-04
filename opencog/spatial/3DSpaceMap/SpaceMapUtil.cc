@@ -261,7 +261,6 @@ namespace opencog
 
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const OctomapOcTree& spaceMap,
                                       const EntityManager& entityManager,
                                       const Handle& entity)
         {
@@ -276,18 +275,17 @@ namespace opencog
         }
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const OctomapOcTree& spaceMap,
                                                       const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,
                                                       const Handle& observer)
         {
-            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityManager, entityA);
-            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityManager, entityB);
+            AxisAlignedBox boxA = getBoundingBox(atomSpace, entityManager, entityA);
+            AxisAlignedBox boxB = getBoundingBox(atomSpace, entityManager, entityB);
             AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
-                : getBoundingBox(atomSpace, spaceMap, entityManager, entityC);
+                : getBoundingBox(atomSpace, entityManager, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 
@@ -325,6 +323,27 @@ namespace opencog
                 spatialRelations.insert(FAR_);
             }
             return spatialRelations;
+        }
+
+        string spatialRelationToString(SPATIAL_RELATION relation ) {
+            switch( relation ) {
+            case LEFT_OF: return "left_of";
+            case RIGHT_OF: return "right_of";
+            case ABOVE: return "above";
+            case BELOW: return "below";
+            case BEHIND: return "behind";
+            case IN_FRONT_OF: return "in_front_of";
+            case BESIDE: return "beside";
+            case NEAR: return "near";
+            case FAR_: return "far";
+            case TOUCHING: return "touching";
+            case BETWEEN: return "between";
+            case INSIDE: return "inside";
+            case OUTSIDE: return "outside";
+            default:
+            case TOTAL_RELATIONS:
+                return " invalid relation ";
+            }
         }
 
         BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityManager& entityManager, Handle entity, const string& rotationPredicateName, int yawNodePosition)
