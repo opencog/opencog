@@ -77,6 +77,9 @@ foreach my $af (sort @aimlFiles)
 	$textfile =~ s/\r\n/ /gi;
 	$textfile =~ s/\n/ /gi;
 	$textfile =~ s/\r/ /gi;
+	$textfile =~ s/ xml\:space=\"preserve\"//gi;
+	$textfile =~ s/ xml\:space=\"default\"//gi;
+
 	while ($textfile =~ /  /) { $textfile =~ s/  / /gi;}
 
 	# normalize so every category has a pattern/topic/that/template entries
@@ -86,7 +89,7 @@ foreach my $af (sort @aimlFiles)
 	$textfile =~ s/<category>/\#\#SPLIT \<category\>/gi;
 	$textfile =~ s/<\/category>/\<\/category\>\#\#SPLIT /gi;
 	$textfile =~ s/<topic /\#\#SPLIT\<topic /gi;
-	# $textfile =~ s/<\/topic>/\<\/topic\>\#\#SPLIT /gi;
+    $textfile =~ s/<\/topic>/\<\/topic\>\#\#SPLIT /gi;
 	$textfile =~ s/<aiml/\#\#SPLIT\<aiml/gi;
 	$textfile =~ s/<\/aiml>/\<\/aiml\>\#\#SPLIT /gi;
 
@@ -101,6 +104,11 @@ foreach my $af (sort @aimlFiles)
 		{
 			my @t = $c =~ /name=\"(.*?)\"/;
 			$topicx = $t[0];
+			next;
+		}
+		if ($c =~ /<\/topic>/)
+		{
+			$topicx = "";
 			next;
 		}
 		
