@@ -51,8 +51,8 @@
 ; r2l pipeline.
 (define (pre-poss-rule noun poss)
   (ListLink
-    (possessive-rule (word-inst-get-word-str noun) (cog-name noun)
-              (word-inst-get-word-str poss) (cog-name poss)
+    (possessive-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
+              (cog-name (word-inst-get-lemma poss)) (cog-name poss)
     )
   )
 )
