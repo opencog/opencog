@@ -99,10 +99,10 @@
 (define (pre-todo1-rule subj verb1 verb2 obj)
  (ListLink
   (to-do-rule-1 
-	(word-inst-get-word-str verb1) (cog-name verb1)
-	(word-inst-get-word-str verb2) (cog-name verb2)
-	(word-inst-get-word-str subj) (cog-name subj)
-        (word-inst-get-word-str obj) (cog-name obj)
+	(cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
+	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
+	(cog-name (word-inst-get-lemma subj)) (cog-name subj)
+    (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
   )
  )
 )
