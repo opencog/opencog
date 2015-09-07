@@ -13,6 +13,7 @@ For details run:
 
 `perl aiml2oc.pl --help`
 
+For aiml files check https://github.com/jstnhuang/chatbot/tree/master/aiml
 
 ### Notes
 1. One option is during pass 2 to use the derived path to over write the final
