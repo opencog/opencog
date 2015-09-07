@@ -38,7 +38,7 @@
 ; r2l pipeline.
 (define (pre-definite-rule noun)
   (ListLink
-    	(definite-rule (word-inst-get-word-str noun) (cog-name noun)
+    	(definite-rule (cog-name (word-inst-get-lemma str noun)) (cog-name noun)
     )
   )
 )

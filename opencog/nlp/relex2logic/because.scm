@@ -52,8 +52,8 @@
 (define (pre-because-rule comp pred)
  (ListLink
   (because-rule
-		(word-inst-get-word-str comp) (cog-name comp)
-		(word-inst-get-word-str pred) (cog-name pred)
+		(cog-name (word-inst-get-lemma comp)) (cog-name comp)
+		(cog-name (word-inst-get-lemma pred)) (cog-name pred)
 	)
  )
 )

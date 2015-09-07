@@ -53,8 +53,8 @@
 ; r2l pipeline.
 (define (pre-advmod-rule verb adv)
   (ListLink
-    (advmod-rule (word-inst-get-word-str verb) (cog-name verb)
-              (word-inst-get-word-str adv) (cog-name adv)
+    (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
+              (cog-name (word-inst-get-lemma adv)) (cog-name adv)
     )
   )
 )
