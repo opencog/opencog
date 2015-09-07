@@ -110,7 +110,8 @@ IF (HAVE_ATOMSPACE)
 	  )
 
     TARGET_LINK_LIBRARIES(spatial_cython
-	      SpaceMap
+                  SpaceMap
+                  SpaceMapUtil
 		  spacetime
 		  ${ATOMSPACE_LIBRARIES}
 		  ${COGUTIL_LIBRARY}
