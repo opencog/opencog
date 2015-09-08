@@ -139,7 +139,6 @@ namespace opencog
 
 
             // set node block handle at given key or coordinate. Replaces previous block handle.
-            OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
 
