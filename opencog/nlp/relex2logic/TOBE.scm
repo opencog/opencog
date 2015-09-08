@@ -73,9 +73,9 @@
 ; r2l pipeline.
 (define (pre-tobe-rule verb adj subj)
  (ListLink
-	(to-be-rule (word-inst-get-word-str verb) (cog-name verb)
-		(word-inst-get-word-str adj) (cog-name adj)
-		(word-inst-get-word-str subj) (cog-name subj)
+	(to-be-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb)
+		(cog-name (word-inst-get-lemma adj)) (cog-name adj)
+		(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
  )
 )

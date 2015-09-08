@@ -52,8 +52,8 @@
 ; r2l pipeline.
 (define (pre-rel-rule rel pred)
  (ListLink
-  (complement-rule (word-inst-get-word-str rel) (cog-name rel)
-	(word-inst-get-word-str pred) (cog-name pred)
+  (complement-rule (cog-name (word-inst-get-lemma  rel)) (cog-name rel)
+	(cog-name (word-inst-get-lemma  pred)) (cog-name pred)
 
   )
  )
