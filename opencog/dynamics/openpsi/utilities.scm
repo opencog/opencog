@@ -1096,7 +1096,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (define-psi-modulator modulator-name default-value)
+(define (define-psi-modulator modulator-name stimulus-value)
 "
   Define an OpenPsi modulator. By default an in-born drive/action that aims to
   maintain the goal of keeping the demand-value within the given range is
@@ -1105,14 +1105,14 @@
   modulator-name:
     - The name of the modulator that is created.
 
-  default-value:
+  stimulus-value:
     - The initial stimulus level. This is the strength of the modulator's
       ConceptNode stv. The confidence of the stv is always 1.
 "
     (let ((modulator (string-append "OpenPsi: " modulator-name)))
         (list
             (InheritanceLink
-                (ConceptNode modulator (stv default-value 1))
+                (ConceptNode modulator (stv stimulus-value 1))
                 (ConceptNode "OpenPsi: Modulator")
             )
 
