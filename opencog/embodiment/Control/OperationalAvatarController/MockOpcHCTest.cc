@@ -27,7 +27,6 @@
 #include <opencog/spacetime/TimeServer.h>
 
 #include <opencog/embodiment/Control/MessagingSystem/MessageFactory.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 #include "MockOpcHCTest.h"

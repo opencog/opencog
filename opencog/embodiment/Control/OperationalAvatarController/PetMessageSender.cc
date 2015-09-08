@@ -24,12 +24,6 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
 
-#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
-#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
-
 #include <opencog/util/Config.h>
 
 #include "PetMessageSender.h"

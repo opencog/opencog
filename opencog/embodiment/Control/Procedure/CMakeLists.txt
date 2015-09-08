@@ -13,7 +13,6 @@ ADD_LIBRARY (Procedure SHARED
 )
 
 TARGET_LINK_LIBRARIES (Procedure
-	LearningServerMessages
 	WorldWrapper
 )
 
@@ -32,7 +31,6 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
 )
 IF (HAVE_PROTOBUF)
    TARGET_LINK_LIBRARIES(combo_shell_stdio
-	  LearningServerMessages
 	  ${PROTOBUF_LIBRARY}
    )
 ENDIF (HAVE_PROTOBUF)
@@ -44,12 +42,10 @@ TARGET_LINK_LIBRARIES (combo_shell
 	Procedure
 	MessagingSystem
 	WorldWrapper
-	lslib
 )
 
 IF (HAVE_PROTOBUF)
 	TARGET_LINK_LIBRARIES(combo_shell
-		LearningServerMessages
 		${PROTOBUF_LIBRARY}
 	)
 ENDIF (HAVE_PROTOBUF)

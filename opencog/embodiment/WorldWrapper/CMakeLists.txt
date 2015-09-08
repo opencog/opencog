@@ -5,12 +5,11 @@ ADD_LIBRARY(WorldWrapper SHARED
 	WorldWrapperUtilCache
 	ShellWorldWrapper
 	PAIWorldWrapper
-	NoSpaceLifeWorldWrapper
 )
 
 TARGET_LINK_LIBRARIES(WorldWrapper
 	Control
-	ImaginaryLife
+    PAI
 	TangentBug
 	AStar
 	HPASearch
