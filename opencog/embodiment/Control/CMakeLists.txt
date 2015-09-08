@@ -1,7 +1,6 @@
 ADD_SUBDIRECTORY (MessagingSystem)
 ADD_SUBDIRECTORY (Language)
 ADD_SUBDIRECTORY (PerceptionActionInterface)
-ADD_SUBDIRECTORY (PredicateUpdaters)
 
 IF(HAVE_MOSES)
 	# OAC is deprecated.  If you are working on refactoring some of the code
