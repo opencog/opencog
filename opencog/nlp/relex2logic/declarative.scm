@@ -13,6 +13,18 @@
                 (VariableNode "$interp-node")
                 (TypeNode "InterpretationNode")
             )
+            (TypedVariableLink
+                (VariableNode "$word-inst-node-1")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word-inst-node-2")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word-inst-node-3")
+                (TypeNode "WordInstanceNode")
+            )
         )
         (AndLink
             (LemmaLink
@@ -30,6 +42,24 @@
             (InterpretationLink
                 (VariableNode "$interp-node")
                 (VariableNode "$parse-node")
+            )
+            (AbsentLink
+                (InheritanceLink
+                    (VariableNode "$word-inst-node-1")
+                    (DefinedLinguisticConceptNode "imperative")
+                )
+            )
+            (AbsentLink
+                (InheritanceLink
+                    (VariableNode "$word-inst-node-2")
+                    (DefinedLinguisticConceptNode "interrogative")
+                )
+            )
+            (AbsentLink
+                (InheritanceLink
+                    (VariableNode "$word-inst-node-3")
+                    (DefinedLinguisticConceptNode "truth-query")
+                )
             )
         )
         (ListLink

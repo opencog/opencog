@@ -57,4 +57,3 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/truthquery.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/interrogative.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/imperative.scm")
-(load-scm-from-file "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")
