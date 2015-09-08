@@ -311,11 +311,11 @@ Handle AtomSpaceUtil::getCurrentSpaceMapHandle(const AtomSpace& atomSpace)
 */
 bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
                                                 const std::string predicate,
-                                                const SpaceServer::EntityManager& em,
+                                                const SpaceServer::EntityRecorder& entityRecorder,
                                                 Handle obj1, Handle obj2)
 {
 
-    auto relationSet = spatial::computeSpatialRelations(atomSpace, em, obj1, obj2);
+    auto relationSet = spatial::computeSpatialRelations(atomSpace, entityRecorder, obj1, obj2);
     for (auto relation : relationSet) {
         if(spatial::spatialRelationToString(relation) == predicate) {
             return true;
@@ -469,14 +469,14 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace& atomSpace,
 
 
 bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
-                                        const SpaceServer::EntityManager& em1,
-                                        const SpaceServer::EntityManager& em2,
+                                        const SpaceServer::EntityRecorder& entityRecorder1,
+                                        const SpaceServer::EntityRecorder& entityRecorder2,
                                         Handle obj)
 {
 
     //const std::string& obj_str = atomSpace.getName(obj);
-    bool insm1 = em1.containsEntity(obj);
-    bool insm2 = em2.containsEntity(obj);
+    bool insm1 = entityRecorder1.containsEntity(obj);
+    bool insm2 = entityRecorder2.containsEntity(obj);
     //we consider that :
     //1)if the object appears or disappears from the spaceMaps it has moved.
     //2)if it is in neither those spaceMap it hasn't

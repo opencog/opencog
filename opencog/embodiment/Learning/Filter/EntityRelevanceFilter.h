@@ -62,7 +62,7 @@ public:
     //selfID and owner are given here to be changed into
     //"self" and "owner" respectively
     EntityRelevanceFilter(const WorldProvider& wp,
-                          const SpaceServer::EntityManager &entityManager,
+                          const SpaceServer::EntityRecorder &entityRecorder,
                           const std::string& selfID,
                           const std::string& ownerID);
     ~EntityRelevanceFilter();

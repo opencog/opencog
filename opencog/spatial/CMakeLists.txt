@@ -33,7 +33,7 @@ ADD_LIBRARY(SpaceMap SHARED
   3DSpaceMap/Block3DMapUtil.cc
   #3DSpaceMap/Block3D.cc
   #3DSpaceMap/Octree.cc
-  3DSpaceMap/EntityManager.cc
+  3DSpaceMap/EntityRecorder.cc
   #3DSpaceMap/Entity3D.cc
   #3DSpaceMap/BlockEntity.cc
   3DSpaceMap/StructGraph.cc
@@ -199,7 +199,7 @@ INSTALL (FILES
   3DSpaceMap/Block3DMapUtil.h
 #  3DSpaceMap/Block3D.h
 #  3DSpaceMap/Octree.h
-  3DSpaceMap/EntityManager.h
+  3DSpaceMap/EntityRecorder.h
 #  3DSpaceMap/Entity3D.h
 #  3DSpaceMap/BlockEntity.h
   3DSpaceMap/Pathfinder3D.h

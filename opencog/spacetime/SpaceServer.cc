@@ -57,7 +57,7 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
 
     curSpaceMapHandle = Handle::UNDEFINED;
     curMap = NULL;
-    curEntityManager = NULL;
+    curEntityRecorder = NULL;
 
     // connect signals
     removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
@@ -140,10 +140,10 @@ const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
     return *((itr->second).first);
 }
 
-const EntityManager& SpaceServer::getEntityManager(Handle spaceMapHandle) const
+const EntityRecorder& SpaceServer::getEntityRecorder(Handle spaceMapHandle) const
     throw (opencog::RuntimeException, std::bad_exception)
 {
-    logger().fine("SpaceServer::getEntityManager() for mapHandle = %s",
+    logger().fine("SpaceServer::getEntityRecorder() for mapHandle = %s",
             spaceMapHandle != Handle::UNDEFINED ?
             ATOM_AS_STRING(spaceMapHandle)
             : "Handle::UNDEFINED");
@@ -152,7 +152,7 @@ const EntityManager& SpaceServer::getEntityManager(Handle spaceMapHandle) const
 
     if (itr == scenes.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
-                "SpaceServer - Found no EntityManager associate with handle: '%s'.",
+                "SpaceServer - Found no EntityRecorder associate with handle: '%s'.",
                 ATOM_AS_STRING(spaceMapHandle));
     }
 
@@ -176,9 +176,9 @@ SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
     return *curMap;
 }
 
-SpaceServer::EntityManager& SpaceServer::getLatestEntityManager() const
+SpaceServer::EntityRecorder& SpaceServer::getLatestEntityRecorder() const
 {
-    return *curEntityManager;
+    return *curEntityRecorder;
 }
 
 Handle SpaceServer::getLatestMapHandle() const
@@ -242,8 +242,8 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
         SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
         theSpaceMap->addSolidUnitBlock(objectNode, pos);
     } else {
-        EntityManager* entityManager = scenes[spaceMapHandle].second;
-        entityManager->addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
+        EntityRecorder* entityRecorder = scenes[spaceMapHandle].second;
+        entityRecorder->addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
@@ -260,14 +260,14 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
 
         SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution);
 
-        EntityManager* newEntityManager = new EntityManager();
+        EntityRecorder* newEntityRecorder = new EntityRecorder();
         // add into the map set
-        scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityManager*>(newSpaceMap, newEntityManager)));
+        scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityRecorder*>(newSpaceMap, newEntityRecorder)));
         curMap = newSpaceMap;
-        curEntityManager = newEntityManager;
+        curEntityRecorder = newEntityRecorder;
     } else {
         curMap = scenes[spaceMapNode].first;
-        curEntityManager = scenes[spaceMapNode].second;
+        curEntityRecorder = scenes[spaceMapNode].second;
     }
 
     curSpaceMapHandle = spaceMapNode;
@@ -294,8 +294,8 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
         theSpaceMap->removeSolidUnitBlock(objectNode);
     } else {
-        EntityManager* entityManager = scenes[spaceMapHandle].second;
-        entityManager->removeNoneBlockEntity(objectNode);
+        EntityRecorder* entityRecorder = scenes[spaceMapHandle].second;
+        entityRecorder->removeNoneBlockEntity(objectNode);
     }
 
     logger().debug("%s(%s)\n", __FUNCTION__, atomspace->get_name(objectNode).c_str());

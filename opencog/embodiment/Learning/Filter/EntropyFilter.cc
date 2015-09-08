@@ -166,7 +166,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     timeServer().getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::STARTS_WITHIN);
 
-    const SpaceServer::EntityManager* pre_sm = NULL; //previous spaceMap
+    const SpaceServer::EntityRecorder* preEntityRecorder = NULL; //previous spaceMap
     //used for isMoving
     //for each spaceMap update _perceptToTime
     for (std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
@@ -175,7 +175,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         Handle smh = timeServer().getAtTimeLink(*htp_it);
         OC_ASSERT(smh != Handle::UNDEFINED,
                          "There must be a spaceMap for that handle");
-        const SpaceServer::EntityManager& sm = spaceServer().getEntityManager(smh);
+        const SpaceServer::EntityRecorder& entityRecorder = spaceServer().getEntityRecorder(smh);
         //determine lower and upper boundary of that spaceMap
         //if the space map started before the exemplar start time
         //ltl is the exemplar start time instead
@@ -197,7 +197,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         //belong to the map yet it goes with true, because we don't
         //have previous value of the predicate at this point
         for (const definite_object& obj : _dos)
-            setIsMoving(obj, pre_sm, sm);
+            setIsMoving(obj, preEntityRecorder, entityRecorder);
         //eval each perception
         for (combo_tree_bool_time_map_it vti = _perceptToBoolTime.begin();
                 vti != _perceptToBoolTime.end(); ++vti)
@@ -392,7 +392,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         }
         //get the pointer of the previous spaceMap for the next iterator,
         //for isMoving
-        pre_sm = &sm;
+        preEntityRecorder = &entityRecorder;
         //reset _indefToDef
         for (unsigned int i = 0; i < _indefToDef.size(); i++)
             _indefToDef[i] = "";
@@ -465,16 +465,16 @@ inline void EntropyFilter::setIsMoving(const definite_object& obj, bool val)
 }
 
 inline void EntropyFilter::setIsMoving(const definite_object& obj,
-                                       const SpaceServer::EntityManager* pre_em,
-                                       const SpaceServer::EntityManager& em)
+                                       const SpaceServer::EntityRecorder* preEntityRecorder,
+                                       const SpaceServer::EntityRecorder& entityRecorder)
 {
-    if (pre_em == NULL)
+    if (preEntityRecorder == NULL)
         setIsMoving(obj, true);
     else {
         Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace, obj,
                                                   _self_id, _owner_id);
         setIsMoving(obj, AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
-                                                            *pre_em, em,
+                                                            *preEntityRecorder, entityRecorder,
                                                             obj_h));
     }
 }

@@ -51,7 +51,7 @@ const std::string emptyString = "";
 
 EntityRelevanceFilter::EntityRelevanceFilter() {}
 
-EntityRelevanceFilter::EntityRelevanceFilter(const WorldProvider& wp, const SpaceServer::EntityManager &entityManager, const std::string& selfID, const std::string& ownerID)
+EntityRelevanceFilter::EntityRelevanceFilter(const WorldProvider& wp, const SpaceServer::EntityRecorder &entityRecorder, const std::string& selfID, const std::string& ownerID)
         : _selfID(selfID), _ownerID(ownerID)
 {
 
@@ -59,7 +59,7 @@ EntityRelevanceFilter::EntityRelevanceFilter(const WorldProvider& wp, const Spac
     //spaceMap.findAllEntities(back_inserter(spaceMapHandles));
     vector<Handle> allEntities;
     AtomSpace& atomSpace = wp.getAtomSpace();
-    entityManager.findAllEntities(back_inserter(allEntities));
+    entityRecorder.findAllEntities(back_inserter(allEntities));
     for(auto entity: allEntities)
     {
         spaceMapIds.push_back(atomSpace.get_name(entity));
@@ -105,9 +105,9 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
         HandleSeq resmh;
         timeServer().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
         for (Handle h : resmh) {
-            const SpaceServer::EntityManager& entityManager = spaceServer().getEntityManager(h);
+            const SpaceServer::EntityRecorder& entityRecorder = spaceServer().getEntityRecorder(h);
             //then make union of the object of that map with the result
-            EntityRelevanceFilter erf(wp, entityManager, selfID, ownerID);
+            EntityRelevanceFilter erf(wp, entityRecorder, selfID, ownerID);
             definite_object_set ires = erf.getEntities();
             set_union(ires.begin(), ires.end(), result.begin(), result.end(),
                       insert_iterator<definite_object_set>(result,

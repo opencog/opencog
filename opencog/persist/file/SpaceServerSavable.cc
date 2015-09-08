@@ -155,7 +155,7 @@ void SpaceServerSavable::loadRepository(FILE* fp, HandMapPtr conv)
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = conv->get(mapHandle)->getHandle();
         (server->scenes[newMapHandle]).first = map;
-        (server->scenes[newMapHandle]).second = new SpaceServer::EntityManager();
+        (server->scenes[newMapHandle]).second = new SpaceServer::EntityRecorder();
 
     }
     CHECK_FREAD;

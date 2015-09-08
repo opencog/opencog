@@ -752,7 +752,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     Handle objectC = (scm_is_pair(ground2SemeNode) && !scm_is_null(SCM_CAR(ground2SemeNode)) ) ?
         SchemeSmob::scm_to_handle(SCM_CAR(ground2SemeNode)) : Handle::UNDEFINED;
 
-    const SpaceServer::EntityManager& entityManager = spaceServer( ).getLatestEntityManager( );
+    const SpaceServer::EntityRecorder& entityRecorder = spaceServer( ).getLatestEntityRecorder( );
     // double besideDistance = spaceMap.getNextDistance( );
 
     {
@@ -779,7 +779,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     //     (SemeNode "id_4410" (stv 1 0.051008303))
     // )
     if ( atomSpace.get_type( objectA ) == VARIABLE_NODE ) {
-        entityManager.getAllObjects( std::back_inserter( entitiesA ) );
+        entityRecorder.getAllObjects( std::back_inserter( entitiesA ) );
     } else {
         HandleSeq incoming = atomSpace.get_incoming( objectA );
         unsigned int i;
@@ -792,7 +792,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
     } // else
 
     if ( atomSpace.get_type( objectB ) == VARIABLE_NODE ) {
-        entityManager.getAllObjects( std::back_inserter( entitiesB ) );
+        entityRecorder.getAllObjects( std::back_inserter( entitiesB ) );
     } else {
         HandleSeq incoming = atomSpace.get_incoming( objectB );
         unsigned int i;
@@ -806,7 +806,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
 
     if ( objectC != Handle::UNDEFINED ) {
         if ( atomSpace.get_type( objectC ) == VARIABLE_NODE ) {
-            entityManager.getAllObjects( std::back_inserter( entitiesC ) );
+            entityRecorder.getAllObjects( std::back_inserter( entitiesC ) );
         } else {
             HandleSeq incoming = atomSpace.get_incoming( objectC );
             unsigned int i;
@@ -840,12 +840,12 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                         } // if
                         Handle entityC = entitiesC[k];
                         createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                                                           computeSpatialRelations( atomSpace, entityManager, entityA, entityB, entityC, observerEntity ),
+                                                           computeSpatialRelations( atomSpace, entityRecorder, entityA, entityB, entityC, observerEntity ),
                                 entitiesA[i], entitiesB[j], entitiesC[k] );
                     } // for
                 } else {
                     createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                                                       computeSpatialRelations( atomSpace, entityManager, entityA,entityB, Handle::UNDEFINED, observerEntity ),
+                                                       computeSpatialRelations( atomSpace, entityRecorder, entityA,entityB, Handle::UNDEFINED, observerEntity ),
                                                        entitiesA[i], entitiesB[j], Handle::UNDEFINED );
                 } // else
             } // for

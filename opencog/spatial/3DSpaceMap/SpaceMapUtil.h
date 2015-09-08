@@ -7,7 +7,7 @@
 #include <opencog/atomspace/Handle.h>
 #include "OctomapOcTree.h"
 #include "Block3DMapUtil.h"
-#include "EntityManager.h"
+#include "EntityRecorder.h"
 
 using namespace std;
 
@@ -86,14 +86,14 @@ namespace opencog
 	 */
 
 	double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityManager& entityManager,
+                               const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const Handle& objectB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityManager& entityManager,
+                               const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const BlockVector& posB);
 
@@ -123,13 +123,13 @@ namespace opencog
          * Then pass them to create a AxisAlignedBox object representing the entity.
          * @param atomSpace Given atomspace containing given entity handle
          *        It's not const because we need to add temporary atom to query info
-         * @param entityManager Given spaceMap containing given entity handle
+         * @param entityRecorder Given spaceMap containing given entity handle
          * @param entity Given entity handle
          * @return A bounding box object
 	 */
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const EntityManager& entityManager,
+                                      const EntityRecorder& entityRecorder,
                                       const Handle& entity);
         /**
          * spatial relation enumeration for expressing state of relation
@@ -164,7 +164,7 @@ namespace opencog
          *       spatial relationship we should remove it.
          * @param atomSpace Given atomspace containing given entity handles
          *        It's not const because we need to add temporary atom to query info
-         * @param entityManager Given spaceMap containing given entity handles
+         * @param entityRecorder Given spaceMap containing given entity handles
 	 * @param entityA the entity to be judged
 	 * @param entityB first reference entity
          * @param entityC second reference entity for ternary spatial relation.
@@ -181,7 +181,7 @@ namespace opencog
 	 */
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const EntityManager& entityManager,
+                                                      const EntityRecorder& entityRecorder,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC = Handle::UNDEFINED,
@@ -218,7 +218,7 @@ namespace opencog
          *     NumberNode roll
          *     NumberNode yaw
          */
-        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityManager& entitymanager, Handle entity, const string& rotationPredicateName, int yawNodePosition);
+        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityRecorder& entityRecorder, Handle entity, const string& rotationPredicateName, int yawNodePosition);
     }
 }
 

@@ -259,7 +259,7 @@ Handle WorldWrapperUtil::getAvatarHandle(AtomSpace& as,
     return as.get_handle(AVATAR_NODE, avatar_id);
 }
 
-bool WorldWrapperUtil::inSpaceMap(const SpaceServer::EntityManager& em,
+bool WorldWrapperUtil::inSpaceMap(const SpaceServer::EntityRecorder& entityRecorder,
                                   AtomSpace& as,
                                   const string& self_id,
                                   const string& owner_id,
@@ -272,7 +272,7 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::EntityManager& em,
               "WorldWrapperUtil - Null handle for definite objetc %s.",
               get_definite_object(v).c_str());
 
-    return em.containsEntity(toHandle(as, get_definite_object(v),
+    return entityRecorder.containsEntity(toHandle(as, get_definite_object(v),
                                       self_id, owner_id));
 }
 
@@ -737,8 +737,8 @@ combo::vertex WorldWrapperUtil::evalPerception(
     } else if (p == get_instance(id::exists)) {
         OC_ASSERT(it.number_of_children() == 1);
         OC_ASSERT(smh != Handle::UNDEFINED, "A SpaceMap must exist");
-        const SpaceServer::EntityManager& em = spaceServer().getEntityManager(smh);
-        return combo::bool_to_vertex(inSpaceMap(em, atomSpace, self_id, owner_id,
+        const SpaceServer::EntityRecorder& entityRecorder = spaceServer().getEntityRecorder(smh);
+        return combo::bool_to_vertex(inSpaceMap(entityRecorder, atomSpace, self_id, owner_id,
                                                 *it.begin()));
     }
 
@@ -829,7 +829,7 @@ combo::vertex WorldWrapperUtil::evalPerception(
         } else {
 
                 // if the definite object exists inside the latest map it exists
-                bool isExist = spaceServer().getLatestEntityManager().containsEntity(handle);
+                bool isExist = spaceServer().getLatestEntityRecorder().containsEntity(handle);
                 if (isExist)
                 result = true;
                 else
@@ -1154,11 +1154,11 @@ combo::vertex WorldWrapperUtil::evalPerception(
                         ss << get_instance(pe);
 
                         //const SpaceServer::SpaceMap& sm = spaceServer().getMap(smh);
-                        const SpaceServer::EntityManager& em = spaceServer().getEntityManager(smh);
+                        const SpaceServer::EntityRecorder& entityRecorder = spaceServer().getEntityRecorder(smh);
                         bool result =
                             AtomSpaceUtil::getPredicateValueAtSpaceMap(atomSpace,
                                     ss.str(),
-                                    em,
+                                    entityRecorder,
                                     h1,
                                     h2);
 
@@ -2643,11 +2643,11 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
 */
 
 SpaceServer::SpaceMapPoint
-WorldWrapperUtil::getLocation(const SpaceServer::EntityManager& em,
+WorldWrapperUtil::getLocation(const SpaceServer::EntityRecorder& entityRecorder,
                               const AtomSpace& atomSpace,
                               Handle h)
 {
-    return SpaceServer::SpaceMapPoint(em.getLastAppearedLocation(h));
+    return SpaceServer::SpaceMapPoint(entityRecorder.getLastAppearedLocation(h));
 }
 /*
 double
@@ -2668,13 +2668,13 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
 }
 */
 double
-WorldWrapperUtil::getOrientation(const SpaceServer::EntityManager& em,
+WorldWrapperUtil::getOrientation(const SpaceServer::EntityRecorder& entityRecorder,
                                  AtomSpace& atomSpace,
                                  Handle h) throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception)
 {
     std::string handleName = atomSpace.get_name(h);
 
-    if (!em.containsEntity(h)) {
+    if (!entityRecorder.containsEntity(h)) {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "WorldWrapperUtil - Space map does not contain '%s'.", handleName.c_str());
     }

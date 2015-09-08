@@ -7,7 +7,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
-#include <opencog/spatial/3DSpaceMap/EntityManager.h>
+#include <opencog/spatial/3DSpaceMap/EntityRecorder.h>
 #include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/util/Logger.h>
@@ -50,12 +50,12 @@ public:
     {
         AtomSpace as;
         OctomapOcTree spaceMap("testmap", 1);
-        EntityManager entityManager;
+        EntityRecorder entityRecorder;
 
         Handle entity = as.add_node(ENTITY_NODE, "block1");
         //prepare entity location
         BlockVector entityPos(12, 13, 14);
-        entityManager.addNoneBlockEntity(entity, entityPos, false, false, 123456);
+        entityRecorder.addNoneBlockEntity(entity, entityPos, false, false, 123456);
         //prepare entity size
         HandleSeq targetBlocks = {entity};
         Handle length = as.add_node(NUMBER_NODE, "2");
@@ -73,7 +73,7 @@ public:
         evalLinkOutgoings.push_back(listLink1);
         Handle EvalLink1 = as.add_link(EVALUATION_LINK, evalLinkOutgoings);
 
-        AxisAlignedBox box = getBoundingBox(as, entityManager, entity);
+        AxisAlignedBox box = getBoundingBox(as, entityRecorder, entity);
 
         TS_ASSERT_EQUALS(box.nearLeftBottomConer, entityPos);
         TS_ASSERT_EQUALS(box.size_x, 2);

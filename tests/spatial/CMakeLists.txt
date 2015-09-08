@@ -30,4 +30,4 @@ TARGET_LINK_LIBRARIES(SpaceMapUtilUTest
   SpaceMapUtil
 )
 
-ADD_CXXTEST(EntityManagerUTest)
+ADD_CXXTEST(EntityRecorderUTest)

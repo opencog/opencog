@@ -18,7 +18,7 @@ If you don't install the octomap, the compilation of SpaceMap will fail.
 
 Because in the future we will need to embody Opencog in different environment(Minecraft/Unity world/real world/...). In different embodiment we will need to save different infos in block/entity. It's difficult to use old Block3D/Entity3D/BlockEntity in all embodiment at the same time. So we decide to move the responsibility of querying block/entity info to atomspace. We just save the handle of block/entity in the 3DSpaceMap. The user will get the block handle by position and use the handle to query info in atomspace.
 
-(3) Add EntityManager to handle the location history of Entity
+(3) Add EntityRecorder to handle the location history of Entity
 
 ====
 

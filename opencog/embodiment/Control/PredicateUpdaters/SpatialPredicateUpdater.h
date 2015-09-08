@@ -113,13 +113,13 @@ private:
     }; // class SpatialRelationCache
 
     // compute all the relationships between all objects
-    void computeRelationshipsBetweenAllObjects(const SpaceServer::EntityManager & entityManager,
+    void computeRelationshipsBetweenAllObjects(const SpaceServer::EntityRecorder & entityRecorder,
                                                vector<Handle> &allEntities,
                                                Handle observer,
                                                unsigned long timestamp);
 
     // compute only the relationships between objects and avatar , which means every piece here descrips a relationship between an object and an avatar
-    void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::EntityManager & entityManager,
+    void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::EntityRecorder & entityRecorder,
                                                       std::set<Handle>& avatars,
                                                       std::vector<Handle>& nonblockEntities,
                                                       //std::vector<Handle>& blockEntities,

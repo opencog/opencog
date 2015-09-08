@@ -94,14 +94,14 @@ cdef class OctomapOcTree:
             return None
         return (c_pos.x, c_pos.y, c_pos.z)
 
-cdef class EntityManager:
-    cdef cEntityManager* c_entity_manager
+cdef class EntityRecorder:
+    cdef cEntityRecorder* c_entity_recorder
 
     def __cinit__(self):
         pass
 
     def __init__(self):
-        self.c_entity_manager = new cEntityManager()
+        self.c_entity_recorder = new cEntityRecorder()
 
     def __dealloc__(self):
         #SpaceServer will handle this
@@ -113,27 +113,27 @@ cdef class EntityManager:
     def add_none_block_entity(self, Handle handle, pos, isSelfObject, isAvatarEntity, timestamp):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_entity_manager.addNoneBlockEntity(deref((<Handle>handle).h), c_pos,
+        self.c_entity_recorder.addNoneBlockEntity(deref((<Handle>handle).h), c_pos,
                                              isSelfObject, isAvatarEntity, timestamp)
 
     def remove_none_block_entity(self, Handle handle):
-        self.c_entity_manager.removeNoneBlockEntity(deref((<Handle>handle).h))
+        self.c_entity_recorder.removeNoneBlockEntity(deref((<Handle>handle).h))
 
     def update_none_block_entity_location(self, Handle handle, pos, timestamp):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_entity_manager.updateNoneBlockEntityLocation(deref((<Handle>handle).h), c_pos,
+        self.c_entity_recorder.updateNoneBlockEntityLocation(deref((<Handle>handle).h), c_pos,
                                                         timestamp)
 
     def get_last_appeared_location(self, Handle handle):
         cdef cHandle c_handle = deref((<Handle>handle).h)
-        cdef cBlockVector c_pos = self.c_entity_manager.getLastAppearedLocation(c_handle)
+        cdef cBlockVector c_pos = self.c_entity_recorder.getLastAppearedLocation(c_handle)
         return (c_pos.x, c_pos.y, c_pos.z)
 
     def get_entity(self, pos):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        cdef cHandle c_handle = self.c_entity_manager.getEntity(c_pos)
+        cdef cHandle c_handle = self.c_entity_recorder.getEntity(c_pos)
         return Handle(c_handle.value())
 
 def check_standable(AtomSpace atomspace, OctomapOcTree space_map, pos, log_odds_occupancy = None):

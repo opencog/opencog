@@ -1,5 +1,5 @@
-#ifndef _SPATIAL_ENTITYMANAGER_H
-#define _SPATIAL_ENTITYMANAGER_H
+#ifndef _SPATIAL_ENTITYRECORDER_H
+#define _SPATIAL_ENTITYRECORDER_H
 
 #include <algorithm>
 #include <map>
@@ -16,12 +16,12 @@ namespace opencog
 {
     namespace spatial
     {
-        class EntityManager
+        class EntityRecorder
         {
         public:
 
-            EntityManager();
-            EntityManager* clone();
+            EntityRecorder();
+            EntityRecorder* clone();
 
             inline Handle getSelfAgentEntity() const {return mSelfAgentEntity;}
             // currently we consider the none block entity has no collision,
@@ -72,7 +72,7 @@ namespace opencog
             //Note that even the entity isn't on the map, we still record it here
             map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;
             void _addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp);
-            EntityManager(const EntityManager& rhs);
+            EntityRecorder(const EntityRecorder& rhs);
         };
     }
 }

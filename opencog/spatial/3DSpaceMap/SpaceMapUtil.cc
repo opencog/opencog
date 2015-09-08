@@ -181,7 +181,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityManager& entityManager,
+                               const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const Handle& objectB)
         {
@@ -189,13 +189,13 @@ namespace opencog
 
             Type typeA = objectA->getType();
             if (typeA == ENTITY_NODE) {
-                posA = entityManager.getLastAppearedLocation(objectA);
+                posA = entityRecorder.getLastAppearedLocation(objectA);
             } else if (typeA==STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             }
             Type typeB = objectB->getType();
             if (typeB == ENTITY_NODE) {
-                posB = entityManager.getLastAppearedLocation(objectB);
+                posB = entityRecorder.getLastAppearedLocation(objectB);
             } else if (typeB == STRUCTURE_NODE) {
                 posB = spaceMap.getBlockLocation(objectB);
             }
@@ -215,7 +215,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityManager& entityManager,
+                               const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const BlockVector& posB)
         {
@@ -224,7 +224,7 @@ namespace opencog
             if (typeA == STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             } else if (typeA==ENTITY_NODE) {
-                posA = entityManager.getLastAppearedLocation(objectA);
+                posA = entityRecorder.getLastAppearedLocation(objectA);
             }
 
             if (posA == BlockVector::ZERO) {
@@ -255,10 +255,10 @@ namespace opencog
 
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const EntityManager& entityManager,
+                                      const EntityRecorder& entityRecorder,
                                       const Handle& entity)
         {
-            BlockVector nearLeftPos = entityManager.getLastAppearedLocation(entity);
+            BlockVector nearLeftPos = entityRecorder.getLastAppearedLocation(entity);
             vector<string> sizeStrings = getPredicate(atomSpace, "size",
                                                       HandleSeq({entity}), 3);
             double length = std::stof(sizeStrings[0]);
@@ -269,17 +269,17 @@ namespace opencog
         }
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const EntityManager& entityManager,
+                                                      const EntityRecorder& entityRecorder,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,
                                                       const Handle& observer)
         {
-            AxisAlignedBox boxA = getBoundingBox(atomSpace, entityManager, entityA);
-            AxisAlignedBox boxB = getBoundingBox(atomSpace, entityManager, entityB);
+            AxisAlignedBox boxA = getBoundingBox(atomSpace, entityRecorder, entityA);
+            AxisAlignedBox boxB = getBoundingBox(atomSpace, entityRecorder, entityB);
             AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
-                : getBoundingBox(atomSpace, entityManager, entityC);
+                : getBoundingBox(atomSpace, entityRecorder, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 
@@ -340,9 +340,9 @@ namespace opencog
             }
         }
 
-        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityManager& entityManager, Handle entity, const string& rotationPredicateName, int yawNodePosition)
+        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityRecorder& entityRecorder, Handle entity, const string& rotationPredicateName, int yawNodePosition)
         {
-            if (!entityManager.containsEntity(entity)) {
+            if (!entityRecorder.containsEntity(entity)) {
                 return BlockVector::ZERO;
             } else {
                 //get yaw
