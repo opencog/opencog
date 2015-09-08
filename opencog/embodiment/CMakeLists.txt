@@ -5,7 +5,3 @@ IF (HAVE_ATOMSPACE)
 	# and so must static link them at compile time.)
 	ADD_SUBDIRECTORY (AtomSpaceExtensions)
 ENDIF (HAVE_ATOMSPACE)
-
-IF (HAVE_MOSES)
-	ADD_SUBDIRECTORY (AvatarComboVocabulary)
-ENDIF (HAVE_MOSES)
