@@ -1054,7 +1054,7 @@
 (define (define-psi-action gsn demand-name)
 ; --------------------------------------------------------------
 "
-  It associates an action to a OpenPsi-demand
+  It associates an action to an OpenPsi-demand
 
   gsn:
     - A valid GroundedSchemaNode. Since there is no type checking done, be
@@ -1098,9 +1098,7 @@
 ; --------------------------------------------------------------
 (define (define-psi-modulator modulator-name stimulus-value)
 "
-  Define an OpenPsi modulator. By default an in-born drive/action that aims to
-  maintain the goal of keeping the demand-value within the given range is
-  defined.
+  Define an OpenPsi modulator. By default an in-born stimulus is defined.
 
   modulator-name:
     - The name of the modulator that is created.
@@ -1121,9 +1119,35 @@
                 (PredicateNode "Psi: Stimulus")
                 (ListLink
                     (GroundedSchemaNode "scm: psi-modulator-updater")
-                    (ConceptNode "OpenPsi: Activation")
+                    (ConceptNode modulator)
                 )
             )
+        )
+    )
+)
+
+(define (define-psi-stimulus gsn modulator-name)
+; --------------------------------------------------------------
+"
+  It associates a stimulus to an OpenPsi-modulator
+
+  gsn:
+    - A valid GroundedSchemaNode. Since there is no type checking done, be
+      be sure that it is properly defined.
+
+  modulator-name:
+    - The name of the modultor that is stimulated by the execution of the
+      function associated with the GroundedSchemaNode.
+"
+    (EvaluationLink
+        (PredicateNode "Psi: Stimulus")
+        (ListLink
+            (if (equal? (cog-type gsn) 'GroundedSchemaNode)
+                gsn
+                (error (string-append "pass GroundedSchemaNode as the 1st "
+                     "argument in define-psi-stimulus"))
+            )
+            (ConceptNode (string-append "OpenPsi: " modulator-name))
         )
     )
 )
