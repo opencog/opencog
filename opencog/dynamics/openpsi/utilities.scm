@@ -982,8 +982,13 @@
         )
   )
 
-; Returns a list containging the atoms defining the demands.
+; --------------------------------------------------------------
+; Functions for OpenPsi Demands
+; --------------------------------------------------------------
 (define (psi-get-demands)
+"
+  Returns a list containging the atoms defining the demands.
+"
     (let* ((psi-demand (ConceptNode "OpenPsi: Demand"))
           (inheritance-list (cog-incoming-set psi-demand))
          )
@@ -995,18 +1000,6 @@
     )
 )
 
-; Returns a list containging the atoms defining the modulators.
-(define (psi-get-modulators)
-    (let* ((psi-modulator (ConceptNode "OpenPsi: Modulator"))
-          (inheritance-list (cog-incoming-set psi-modulator))
-         )
-         (remove!
-             (lambda (x) (equal? (cog-type x) 'VariableNode))
-             (par-map cog-get-partner inheritance-list
-                 (make-list (length inheritance-list) psi-modulator))
-         )
-    )
-)
 
 ; --------------------------------------------------------------
 (define (define-psi-demand  demand-name default-value min-value max-value)
@@ -1019,7 +1012,8 @@
     - The name of the demand that is created.
 
   default-value:
-    - The initial demand-value of the demand.
+    - The initial demand-value. This is the strength of the demand's
+      ConceptNode stv. The confidence of the stv is always 1.
 
   min-value:
     - The minimum acceptable demand-value. On going lower tha
@@ -1079,6 +1073,57 @@
                      "argument in define-psi-action"))
             )
             (ConceptNode (string-append "OpenPsi: " demand-name))
+        )
+    )
+)
+
+; --------------------------------------------------------------
+; Functions for OpenPsi Modulators
+; --------------------------------------------------------------
+(define (psi-get-modulators)
+"
+  Returns a list containging the atoms defining the modulators.
+"
+    (let* ((psi-modulator (ConceptNode "OpenPsi: Modulator"))
+          (inheritance-list (cog-incoming-set psi-modulator))
+         )
+         (remove!
+             (lambda (x) (equal? (cog-type x) 'VariableNode))
+             (par-map cog-get-partner inheritance-list
+                 (make-list (length inheritance-list) psi-modulator))
+         )
+    )
+)
+
+; --------------------------------------------------------------
+(define (define-psi-modulator modulator-name default-value)
+"
+  Define an OpenPsi modulator. By default an in-born drive/action that aims to
+  maintain the goal of keeping the demand-value within the given range is
+  defined.
+
+  modulator-name:
+    - The name of the modulator that is created.
+
+  default-value:
+    - The initial stimulus level. This is the strength of the modulator's
+      ConceptNode stv. The confidence of the stv is always 1.
+"
+    (let ((modulator (string-append "OpenPsi: " modulator-name)))
+        (list
+            (InheritanceLink
+                (ConceptNode modulator (stv default-value 1))
+                (ConceptNode "OpenPsi: Modulator")
+            )
+
+            ; This is the default function that each psi-modulator must have.
+            (EvaluationLink
+                (PredicateNode "Psi: Stimulus")
+                (ListLink
+                    (GroundedSchemaNode "scm: psi-modulator-updater")
+                    (ConceptNode "OpenPsi: Activation")
+                )
+            )
         )
     )
 )
