@@ -78,7 +78,7 @@ namespace opencog
      * The biggest change in orgnization is every Map handle match one map for a scene (such as a room)
      * The former SpaceServer would generate a new map copy when there is a change in the map (such as something moved)
      * Now, we don't save all the copies. Now one scene only has one map handle (not create a lot via the time)
-     * But the robot will enter more than one scene in the virtual world, so our HandleToScenes (std::map<Handle, pair<SpaceMap*, EntityRecorder*> >),
+     * But the robot will enter more than one scene in the virtual world, so our HandleToScenes (std::map<Handle, Scene >),
      * will save all the scenes.
      * @author Shujing ke  rainkekekeke@gmail.com
      */
@@ -86,13 +86,26 @@ namespace opencog
     class SpaceServer
     {
         friend class SpaceServerSavable;
+        /**
+         * Currently it's just a inner wrapper for SpaceMap and EntityRecorder
+         * since it's ugly to use pair to access them.
+         * The user of SpaceServer doesn't need to know this.
+         */
+        struct Scene
+        {
+        Scene(const string& mapName, double resolution):
+            spaceMap(mapName, resolution), entityRecorder(){}
+            spatial::OctomapOcTree spaceMap;
+            spatial::EntityRecorder entityRecorder;
+        };
+
+        typedef std::map<Handle, Scene> HandleToScenes;
 
     public:
 
         typedef spatial::EntityRecorder EntityRecorder;
         typedef spatial::BlockVector SpaceMapPoint;
         typedef spatial::OctomapOcTree SpaceMap;
-        typedef std::map<Handle, pair<SpaceMap*, EntityRecorder*> > HandleToScenes;
 
         explicit SpaceServer(AtomSpace&);
         virtual ~SpaceServer();
@@ -124,10 +137,10 @@ namespace opencog
          * Gets a const reference to the latest (more recent) map in this
          * SpaceServer
          */
-        SpaceMap& getLatestMap() const
+        const SpaceMap& getLatestMap() const
             throw (opencog::AssertionException, std::bad_exception);
 
-        SpaceServer::EntityRecorder& getLatestEntityRecorder() const;
+        const SpaceServer::EntityRecorder& getLatestEntityRecorder() const;
 
         /**
          * Gets the Handle of the latest map (== the map for current scene)  in this SpaceServer

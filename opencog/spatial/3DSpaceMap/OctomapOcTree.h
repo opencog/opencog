@@ -115,7 +115,7 @@ namespace opencog
 
             std::string getTreeType() const {return "OctomapOcTree";}
             // deep clone this octree3DMapManager and return the new instance
-            OctomapOcTree* clone();
+            OctomapOcTree* clone() const;
 
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}

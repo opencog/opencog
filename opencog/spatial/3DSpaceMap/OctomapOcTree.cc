@@ -23,7 +23,7 @@ BlockVector point3dToBlockVector(point3d pos)
 
 void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
 {
-    mblockHandle=rhs.mblockHandle;
+    mblockHandle = rhs.mblockHandle;
     if (rhs.hasChildren()) {
         for (unsigned i = 0; i<8; ++i) {
             if (rhs.children[i]) {
@@ -127,7 +127,7 @@ OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution)
     mAgentHeight = 1;
 }
 
-OctomapOcTree* OctomapOcTree::clone()
+OctomapOcTree* OctomapOcTree::clone() const
 {
     OctomapOcTree* cloneMap = new OctomapOcTree(*this);
     return cloneMap;
