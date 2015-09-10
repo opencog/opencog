@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/AtomSpaceExtensions/atom_types_init.cc
+ * opencog/embodiment/atom_types_init.cc
  *
  * Copyright (C) 2014 Linas Vepstas
  *
@@ -22,10 +22,10 @@
 #include <opencog/server/Module.h>
 
 #include "opencog/spacetime/atom_types.definitions"
-#include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
+#include "opencog/embodiment/atom_types.definitions"
 
 #define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
-#define INHERITANCE_FILE2 "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
+#define INHERITANCE_FILE2 "opencog/embodiment/atom_types.inheritance"
 #define INITNAME embodiment_types_init
 
 #include <opencog/atomspace/atom_types.cc>
