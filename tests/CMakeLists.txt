@@ -47,10 +47,4 @@ IF (CXXTEST_FOUND)
 
 	ADD_SUBDIRECTORY (learning)
 
-	# Embodiment requires that learning, spatial, etc.
-	# all works fine. So run this last.
-	IF (HAVE_EMBODIMENT)
-		ADD_SUBDIRECTORY (embodiment)
-	ENDIF (HAVE_EMBODIMENT)
-
 ENDIF (CXXTEST_FOUND)
