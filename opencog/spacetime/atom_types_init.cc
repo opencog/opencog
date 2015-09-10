@@ -1,5 +1,5 @@
 /*
- * opencog/spacetime/atom_types_init.cc
+ * opencog/embodiment/AtomSpaceExtensions/atom_types_init.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
