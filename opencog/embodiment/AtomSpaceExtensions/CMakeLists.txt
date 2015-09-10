@@ -23,27 +23,6 @@ TARGET_LINK_LIBRARIES (embodiment-types
 	${ATOMSPACE_LIBRARY}
 )
 
-# IF (HAVE_EMBODIMENT)
-# 	ADD_LIBRARY (AtomSpaceExtensions SHARED
-# 		# AtomSpaceUtil
-# 		# makeVirtualAtom
-# 		# CompareAtomTreeTemplate
-# 		# GetByOutgoing
-#         Intersect
-# 	)
-
-# 	TARGET_LINK_LIBRARIES (AtomSpaceExtensions
-# 		embodiment-types
-# 		${ATOMSPACE_query_LIBRARY}
-# 		spacetime
-# 		${ATOMSPACE_LIBRARY}
-# 	)
-
-# 	INSTALL (TARGETS AtomSpaceExtensions
-#    	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-# 	)
-# ENDIF (HAVE_EMBODIMENT)
-
 INSTALL (FILES
   	${CMAKE_CURRENT_BINARY_DIR}/embodiment_types.scm
   	DESTINATION "${DATADIR}/scm/embodiment"
