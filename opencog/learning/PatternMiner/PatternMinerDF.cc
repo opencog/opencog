@@ -37,7 +37,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/StringManipulator.h>

@@ -1,9 +1,7 @@
 /*
- * opencog/spacetime/atom_types_init.cc
+ * opencog/embodiment/atom_types_init.cc
  *
- * Copyright (C) 2002-2009 Novamente LLC
- * All Rights Reserved
- * Author(s): Welter Luigi
+ * Copyright (C) 2014 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,10 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/server/Module.h>
 
 #include "opencog/spacetime/atom_types.definitions"
+#include "opencog/embodiment/atom_types.definitions"
 
 #define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
-#define INITNAME spacetime_types_init
+#define INHERITANCE_FILE2 "opencog/embodiment/atom_types.inheritance"
+#define INITNAME embodiment_types_init
 
 #include <opencog/atomspace/atom_types.cc>
+
+using namespace opencog;
+TRIVIAL_MODULE(EmbodimentTypesModule)
+DECLARE_MODULE(EmbodimentTypesModule)
+

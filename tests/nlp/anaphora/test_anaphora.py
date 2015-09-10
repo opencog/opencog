@@ -27,7 +27,7 @@ class AnaphoraUnitTester(TestCase):
               "spacetime/spacetime_types.scm",
               "opencog/nlp/types/nlp_types.scm",
               "opencog/dynamics/attention/attention_types.scm",
-              "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm",
+              "opencog/embodiment/embodiment_types.scm",
               "opencog/reasoning/pln/pln_types.scm",
               "opencog/scm/apply.scm",
               "opencog/scm/file-utils.scm",
