@@ -91,5 +91,3 @@ Resources:
 
 * Psi Theory
   http://en.wikipedia.org/wiki/Psi-Theory
-
-xxx
