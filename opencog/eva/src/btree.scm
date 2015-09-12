@@ -38,6 +38,9 @@
 ;; a variable, and then uses EqualLink to check the value of
 ;; that variable.  This demo will not work right now, because
 ;; PresentLink is not implemented (github bug #218)
+;;
+;; This variant haas an advantage over the next one, as it requires
+;; only one invocation of the pattern matcher, not two.
 #|
 (define empty-seq
 	(SatisfactionLink
@@ -45,11 +48,31 @@
 			(PresentLink (ListLink room-state (VariableNode "$x")))
 			(EqualLink (VariableNode "$x") room-empty)
 			(EvaluationLink
-				(GroundedPredicateNode "src: print-msg")
+				(GroundedPredicateNode "scm: print-msg")
 				(ListLink))
 		)))
 
 (cog-satisfy empty-seq)
 |#
 
+; ------------------------------------------------------
+;; This variant uses a GetLink to fetch the room-state from the
+;; AtomSpace, and then uses EqualLink to see if it is in the desired
+;; state. Note that this results in *two* invocations of the pattern
+;; matcher; the GetLink being the inner one.  Note also that the
+;; GetLink returns it's results in a SetLink, so comparison must
+;; use a SetLink as well.
+
+(define empty-seq
+	(SatisfactionLink
+		(SequentialAndLink
+			(EqualLink
+				(SetLink room-empty)
+				(GetLink (ListLink room-state (VariableNode "$x"))))
+			(EvaluationLink
+				(GroundedPredicateNode "scm: print-msg")
+				(ListLink))
+		)))
+
+(cog-satisfy empty-seq)
 ; ------------------------------------------------------
