@@ -58,33 +58,28 @@
 		(GetLink (ListLink room-state (VariableNode "$x")))
 	))
 
+(DefineLink
+	(DefinedPredicateNode "is-sleeping")
+	(EqualLink
+		(SetLink soma-sleeping)
+		(GetLink (ListLink soma-state (VariableNode "$y")))
+	))
+
+(DefineLink
+	(DefinedPredicateNode "Print Msg")
+	(EvaluationLink
+		(GroundedPredicateNode "scm: print-msg")
+		(ListLink))
+	)
+
 (define empty-seq
 	(SatisfactionLink
 		(SequentialAndLink
 			(DefinedPredicateNode "is-empty")
-			(EvaluationLink
-				(GroundedPredicateNode "scm: print-msg")
-				(ListLink))
+			(DefinedPredicateNode "Print Msg")
+			(DefinedPredicateNode "is-sleeping")
+			(DefinedPredicateNode "Print Msg")
 		)))
 
-#|
-
-(define empty-seq
-	(SatisfactionLink
-		(SequentialAndLink
-			(PresentLink (ListLink room-state (VariableNode "$x")))
-			(EqualLink (VariableNode "$x") room-empty)
-			(EvaluationLink
-				(GroundedPredicateNode "scm: print-msg")
-				(ListLink (VariableNode "$x")))
-
-			(PresentLink (ListLink soma-state (VariableNode "$y")))
-			(EqualLink (VariableNode "$y") soma-sleeping)
-			(EvaluationLink
-				(GroundedPredicateNode "scm: print-msg")
-				(ListLink (VariableNode "$y")))
-		)))
-
-|#
 (cog-satisfy empty-seq)
 
