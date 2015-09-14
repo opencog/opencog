@@ -43,7 +43,7 @@
 
 ; Load the rules (use load for relative path w.r.t. to that file)
 (define rule-files (list "pln-rules/deduction.scm"
-                         "../../opencog/reasoning/pln/rules/modus-ponens.scm"
+                         "../../../opencog/reasoning/pln/rules/modus-ponens.scm"
                          "pln-rules/implication-or.scm"
                          "pln-rules/equivalence-transformation-rule.scm"
                          "pln-rules/hack.scm"
