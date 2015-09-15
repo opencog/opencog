@@ -20,7 +20,7 @@ howdeg-q.scm
 howpredadj1-q.scm
 how-q.scm
 howquant-q.scm
-IMPERATIVE.scm
+imperative.scm
 neg.scm
 poss.scm
 pp.scm
