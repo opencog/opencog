@@ -10,6 +10,10 @@
                 (TypeNode "ParseNode")
             )
             (TypedVariableLink
+                (VariableNode "$W")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
                 (VariableNode "$X")
                 (TypeNode "WordInstanceNode")
             )
@@ -49,8 +53,14 @@
                     (VariableNode "$Z")
                 )
             )
-			(AbsentLink
-				(DefinedLinguisticRelationshipNode "_iobj")
+            (AbsentLink
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_iobj")
+                    (ListLink
+                        (VariableNode "$Y")
+                        (VariableNode "$W")
+                    )
+                )
             )
 		)
        (ListLink
