@@ -62,17 +62,17 @@
                     )
                 )
             )
-		)
-       (ListLink
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pre-svo-rule")
-            (ListLink
-                (VariableNode "$X")
-                (VariableNode "$Y")
-                (VariableNode "$Z")
+        )
+        (ListLink
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm: pre-svo-rule")
+                (ListLink
+                    (VariableNode "$X")
+                    (VariableNode "$Y")
+                    (VariableNode "$Z")
+                )
             )
         )
-)
     )
 )
 
