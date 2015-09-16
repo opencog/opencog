@@ -26,8 +26,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/UREConfigReader.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
 
@@ -50,35 +49,23 @@ OpenPsiAgent::~OpenPsiAgent()
 void OpenPsiAgent::run()
 {
     AtomSpace& as = _cogserver.getAtomSpace();
-    Handle asp = as.get_node(CONCEPT_NODE, "OpenPsi: active-schema-pool");
 
-    // If the the openpsi active-schema-pool is not defined do nothing.
-    if (asp == Handle::UNDEFINED){
-        if ( !(_cogserver.getCycleCount() % 100)){
-            logger().info("[OpenPsiAgent] OpenPsi's active-schema-pool "
-                          "definition hasn't been loaded into atomspace.");
-        }
-        return;
-    }
+#if HAVE_GUILE
 
-    // Making sure the chainer isn't run before the whole asp definition is
-    // loaded into the atomspace.
-    try {
-        UREConfigReader cr(as, asp);
-        //cr.fetch_num_param(cr.max_iter_name, asp);
-    }
-    catch (...) {
-        logger().info("[OpenPsiAgent] OpenPsi's active-schema-pool definition"
-                      " hasn't been FULLY loaded into atomspace.");
-        return;
+    SchemeEval evaluator(&as);
+    string scheme_expression, scheme_returned_value;
+    scheme_expression = "(psi-run)";
+
+    scheme_returned_value = evaluator.eval(scheme_expression);
+
+    if (evaluator.eval_error()) {
+        logger().error("[OpenPsiAgent] %s - Failed to execute '%s'",
+                         __FUNCTION__, scheme_expression.c_str());
     }
 
-    if ( !(_cogserver.getCycleCount() % 100)){
-        logger().info("[OpenPsiAgent] Executing the active-schema-pool rules"
-                      " over the atomspace.");
-    }
-    DefaultForwardChainerCB dfc(as);
-    ForwardChainer fc(as, asp);
-    fc.do_chain(dfc, Handle::UNDEFINED);
+#else // HAVE_GUILE
+    logger().error("[OpenPsiAgent] %s - guile is required", __FUNCTION__);
+
+#endif // HAVE_GUILE
 
 }
