@@ -10,6 +10,10 @@
                 (TypeNode "ParseNode")
             )
             (TypedVariableLink
+                (VariableNode "$W")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
                 (VariableNode "$X")
                 (TypeNode "WordInstanceNode")
             )
@@ -49,20 +53,26 @@
                     (VariableNode "$Z")
                 )
             )
-			(AbsentLink
-				(DefinedLinguisticRelationshipNode "_iobj")
-            )
-		)
-       (ListLink
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pre-svo-rule")
-            (ListLink
-                (VariableNode "$X")
-                (VariableNode "$Y")
-                (VariableNode "$Z")
+            (AbsentLink
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_iobj")
+                    (ListLink
+                        (VariableNode "$Y")
+                        (VariableNode "$W")
+                    )
+                )
             )
         )
-)
+        (ListLink
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm: pre-svo-rule")
+                (ListLink
+                    (VariableNode "$X")
+                    (VariableNode "$Y")
+                    (VariableNode "$Z")
+                )
+            )
+        )
     )
 )
 
