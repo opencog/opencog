@@ -985,6 +985,64 @@
 ; --------------------------------------------------------------
 ; Functions for OpenPsi Demands
 ; --------------------------------------------------------------
+(define (psi-prefix-str)
+"
+  returns the string used as a prefix to all OpenPsi realted atom definition
+"
+ "OpenPsi: "
+)
+
+
+; --------------------------------------------------------------
+(define (psi-demand-pattern)
+"
+  Returns an alist used to define the psi demand pattern. The key strings are,
+  - 'var': its value is a list containing the VariableNodes and their type
+           restrictions.
+  - 'pat': its value is a DefinedPredicateNode that is associated with the
+           demand pattern.
+"
+    (define z-alist (acons "var" (list
+        (TypedVariableLink
+            (VariableNode "Demand")
+            (TypeNode "ConceptNode")
+        )
+        (TypedVariableLink
+            (VariableNode "min_acceptable_value")
+            (TypeNode "NumberNode")
+        )
+        (TypedVariableLink
+            (VariableNode "max_acceptable_value")
+            (TypeNode "NumberNode")
+        ))
+        '()))
+    (define dpn (DefinedPredicateNode
+        (string-append (psi-prefix-str) "demand-pattern")))
+
+    (DefineLink
+        dpn
+        (PresentLink
+            (InheritanceLink
+                ; the strength of the stv is the demand value
+                (VariableNode "Demand")
+                (ConceptNode "OpenPsi: Demand"))
+            ; This is equivalent to an in-born drive/goal. When
+            ; the value goes out of range then urge occurs
+            (EvaluationLink
+                (PredicateNode "must_have_value_within")
+                (ListLink
+                    (VariableNode "Demand")
+                    (VariableNode "min_acceptable_value")
+                    (VariableNode "max_acceptable_value")))
+            (EvaluationLink
+                (PredicateNode "Psi: acts-on")
+                (ListLink
+                    (GroundedSchemaNode "scm: psi-demand-updater")
+                    (VariableNode "Demand")))))
+    (acons "pat" dpn z-alist)
+)
+
+; --------------------------------------------------------------
 (define (psi-get-demands)
 "
   Returns a list containging the atoms defining the demands.
