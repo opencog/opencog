@@ -42,17 +42,22 @@
     ))
 
 ;--------------------------------------------------------------------
-; not working for now ... after the work of backward chaning is
-; completed it may need some fix
+; not working for now ...
+;
+; need to include the proper rule-base
+;
+; should also put the sentence's output atom into the focus set
+;
 ; It Use backward chaning to process Truth query
 ; Depending on the backward chaning generate the answer (using SuRel)
 ;--------------------------------------------------------------------
 (define (truth_query_process query)
     (define tmp)
     (define bc)
+    (define rule-base)
     (set! tmp (fAtom query))
     (set! bc (cog-bc
-        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp))))
+        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) rule-base (SetLink)))
 )
 ;--------------------------------------------------------------------
 ; Process wh-question using the fuzzy hyper graph Matcher
