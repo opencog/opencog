@@ -48,23 +48,46 @@ OpenPsiAgent::~OpenPsiAgent()
 
 void OpenPsiAgent::run()
 {
+
     AtomSpace& as = _cogserver.getAtomSpace();
+    Handle asp = as.get_node(CONCEPT_NODE, "OpenPsi: active-schema-pool");
+
+     // If the the openpsi active-schema-pool is not defined do nothing.
+     if (asp == Handle::UNDEFINED){
+         if ( !(_cogserver.getCycleCount() % 100)){
+             logger().info("[OpenPsiAgent] OpenPsi's active-schema-pool "
+                           "definition hasn't been loaded into atomspace.");
+         }
+         return;
+     }
+
+     // Making sure the chainer isn't run before the whole asp definition is
+     // loaded into the atomspace.
+     try {
+         UREConfigReader cr(as, asp);
+     }
+     catch (...) {
+         logger().info("[OpenPsiAgent] OpenPsi's active-schema-pool definition"
+                       " hasn't been FULLY loaded into atomspace.");
+         return;
+     }
 
 #if HAVE_GUILE
 
     SchemeEval evaluator(&as);
-    string scheme_expression, scheme_returned_value;
+    std::string scheme_expression, scheme_returned_value;
     scheme_expression = "(psi-run)";
 
     scheme_returned_value = evaluator.eval(scheme_expression);
 
     if (evaluator.eval_error()) {
-        logger().error("[OpenPsiAgent] %s - Failed to execute '%s'",
+        logger().info("[OpenPsiAgent] %s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
     }
 
 #else // HAVE_GUILE
-    logger().error("[OpenPsiAgent] %s - guile is required", __FUNCTION__);
+    logger().info("[OpenPsiAgent] %s - guile is required", __FUNCTION__);
+    return;
 
 #endif // HAVE_GUILE
 
