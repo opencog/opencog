@@ -131,7 +131,7 @@
         (cog-set-tv!
             BC
             (stv 
-                (simple-deduction-formula sB sA sC (inversion-formulat sAB sA sB) sAC) 
+                (simple-deduction-formula sB sA sC (inversion-formula sAB sA sB) sAC) 
                 (min cAB cAC)))))
                 
 ; =============================================================================
