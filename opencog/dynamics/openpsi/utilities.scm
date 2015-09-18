@@ -1045,19 +1045,18 @@
 ; --------------------------------------------------------------
 (define (psi-get-demands)
 "
-  Returns a list containging the atoms defining the demands.
+  Returns a list containing the ConceptNode that carry the demand-value. The
+  strength of their stv is the demand value.
 "
-    (let* ((psi-demand (ConceptNode "OpenPsi: Demand"))
-          (inheritance-list (cog-incoming-set psi-demand))
-         )
-         (remove!
-             (lambda (x) (equal? (cog-type x) 'VariableNode))
-             (par-map cog-get-partner inheritance-list
-                 (make-list (length inheritance-list) psi-demand))
-         )
-    )
-)
+    (define (list-merge list-of-list) (fold append '() list-of-list))
+    (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
 
+    (remove! is-nn? (list-merge (map cog-outgoing-set
+        (cog-outgoing-set (cog-execute!
+            (GetLink
+                (VariableList (assoc-ref (psi-demand-pattern) "var"))
+                (assoc-ref (psi-demand-pattern) "pat")))))))
+)
 
 ; --------------------------------------------------------------
 (define (define-psi-demand  demand-name default-value min-value max-value)
