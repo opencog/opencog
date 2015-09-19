@@ -20,7 +20,8 @@ howdeg-q.scm
 howpredadj1-q.scm
 how-q.scm
 howquant-q.scm
-IMPERATIVE.scm
+imperative.scm
+interrogative.scm
 neg.scm
 poss.scm
 pp.scm
@@ -39,6 +40,7 @@ TOBE.scm
 todo1.scm
 todo2.scm
 todo5.scm
+truthquery.scm
 when-cop-q.scm
 when-q.scm
 where-cop-q.scm
