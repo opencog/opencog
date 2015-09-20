@@ -1025,7 +1025,7 @@
             (InheritanceLink
                 ; the strength of the stv is the demand value
                 (VariableNode "Demand")
-                (ConceptNode "OpenPsi: Demand"))
+                (ConceptNode (string-append (psi-prefix-str) "Demand")))
             ; This is equivalent to an in-born drive/goal. When
             ; the value goes out of range then urge occurs
             (EvaluationLink
@@ -1035,7 +1035,7 @@
                     (VariableNode "min_acceptable_value")
                     (VariableNode "max_acceptable_value")))
             (EvaluationLink
-                (PredicateNode "Psi: acts-on")
+                (PredicateNode (string-append (psi-prefix-str) "acts-on"))
                 (ListLink
                     (GroundedSchemaNode "scm: psi-demand-updater")
                     (VariableNode "Demand")))))
@@ -1079,11 +1079,11 @@
     - The maximum acceptable demand-value.
 
 "
-    (let ((demand (string-append "OpenPsi: " demand-name)))
+    (let ((demand (string-append (psi-prefix-str) demand-name)))
         (list
             (InheritanceLink
                 (ConceptNode demand (stv default-value 1))
-                (ConceptNode "OpenPsi: Demand")
+                (ConceptNode (string-append (psi-prefix-str) "Demand"))
             )
 
             ; This is the goal of the demand
@@ -1098,7 +1098,7 @@
 
             ; This specifies the default action that each psi-demand must have.
             (EvaluationLink
-                (PredicateNode "Psi: acts-on")
+                (PredicateNode (string-append (psi-prefix-str) "acts-on"))
                 (ListLink
                     (GroundedSchemaNode "scm: psi-demand-updater")
                     (ConceptNode demand)
@@ -1129,7 +1129,7 @@
                 (error (string-append "pass GroundedSchemaNode as the 1st "
                      "argument in define-psi-action"))
             )
-            (ConceptNode (string-append "OpenPsi: " demand-name))
+            (ConceptNode (string-append (psi-prefix-str) demand-name))
         )
     )
 )
@@ -1141,7 +1141,8 @@
 "
   Returns a list containging the atoms defining the modulators.
 "
-    (let* ((psi-modulator (ConceptNode "OpenPsi: Modulator"))
+    (let* ((psi-modulator (ConceptNode
+                            (string-append (psi-prefix-str) "Modulator")))
           (inheritance-list (cog-incoming-set psi-modulator))
          )
          (remove!
@@ -1164,16 +1165,16 @@
     - The initial stimulus level. This is the strength of the modulator's
       ConceptNode stv. The confidence of the stv is always 1.
 "
-    (let ((modulator (string-append "OpenPsi: " modulator-name)))
+    (let ((modulator (string-append (psi-prefix-str) modulator-name)))
         (list
             (InheritanceLink
                 (ConceptNode modulator (stv stimulus-value 1))
-                (ConceptNode "OpenPsi: Modulator")
+                (ConceptNode (string-append (psi-prefix-str) "Modulator"))
             )
 
             ; This is the default function that each psi-modulator must have.
             (EvaluationLink
-                (PredicateNode "Psi: Stimulus")
+                (PredicateNode (string-append (psi-prefix-str) "Stimulus"))
                 (ListLink
                     (GroundedSchemaNode "scm: psi-modulator-updater")
                     (ConceptNode modulator)
@@ -1197,14 +1198,14 @@
       function associated with the GroundedSchemaNode.
 "
     (EvaluationLink
-        (PredicateNode "Psi: Stimulus")
+        (PredicateNode (string-append (psi-prefix-str) "Stimulus"))
         (ListLink
             (if (equal? (cog-type gsn) 'GroundedSchemaNode)
                 gsn
                 (error (string-append "pass GroundedSchemaNode as the 1st "
                      "argument in define-psi-stimulus"))
             )
-            (ConceptNode (string-append "OpenPsi: " modulator-name))
+            (ConceptNode (string-append (psi-prefix-str) modulator-name))
         )
     )
 )
