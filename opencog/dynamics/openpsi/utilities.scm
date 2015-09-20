@@ -1153,20 +1153,31 @@
     - Doesn't include `psi-prefix-str`
 
 "
+    (define rule-name-prefix
+        (string-append (psi-prefix-str) demand-name "-rule-"))
+    (define rule-name (string-append rule-name-prefix (random-string 2)))
+    (define rule
+        (BindLink
+            (if (equal? '() vars) ; an empty VariableList prevent matchs
+                '()
+                (VariableList vars)
+            )
+            (AndLink
+                context
+                (EvaluationLink
+                    (GroundedPredicateNode "scm: psi-demand?")
+                    (ListLink
+                        (ConceptNode
+                            (string-append (psi-prefix-str) demand-name)))))
+            action))
+    (define node (cog-chase-link 'DefineLink 'Node rule))
 
-    (BindLink
-        (if (equal? '() vars) ; an empty VariableList prevent matchs
-            '()
-            (VariableList vars)
-        )
-        (AndLink
-            context
-            (EvaluationLink
-                (GroundedPredicateNode "scm: psi-demand?")
-                (ListLink
-                    (ConceptNode
-                        (string-append (psi-prefix-str) demand-name)))))
-        action)
+    (cond ((and (equal? 1 (length node))
+                (string-prefix? rule-name-prefix (cog-name (car node))))
+                rule)
+          ((equal? 0 (length node))
+                (begin (DefineLink (Node rule-name) rule) rule))
+          (else (error "The pattern has been defined multiple times")))
 )
 
 ; --------------------------------------------------------------
