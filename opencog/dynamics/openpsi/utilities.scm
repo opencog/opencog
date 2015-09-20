@@ -1108,30 +1108,65 @@
     )
 )
 
-(define (define-psi-action gsn demand-name)
+(define (psi-demand? atom)
+"
+  Checks whether an atom is the ConceptNode that satisfies the pattern used
+  to define an OpenPsi demand. Returns True-TruthValue `(stv 1 1)` if it is
+  and False-TruthValue `(stv 0 1)` if it isn't.
+"
+    (define demand-names (map cog-name (psi-get-demands)))
+    (if (and (member (cog-name atom) demand-names)
+             (equal? (cog-type atom) 'ConceptNode))
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+(define (define-psi-action vars context action demand-name)
 ; --------------------------------------------------------------
 "
-  It associates an action to an OpenPsi-demand
+  It associates an action and context in which the action has to be taken
+  to an OpenPsi-demand. It returns a BindLink, structured as
+    (BindLink
+        (VariableList (vars))
+        (AndLink
+            (context)
+            (clauses required for linking with the demand named demand-name))
+        (action))
 
-  gsn:
-    - A valid GroundedSchemaNode. Since there is no type checking done, be
-      be sure that it is properly defined.
+  vars:
+    - A list containing the VariableNodes, and their type restrictions, that
+      are part of the context. If there is no type restrictions then pass empty
+      list.
+
+  context:
+    - A list containing the terms/clauses that should be met for this action
+      to be taken. Be careful on how you use Variable naming in the context
+
+  action:
+    - The Implicand of the rule. It should be an atom that uses the groundings
+      of the context to do something.
 
   demand-name:
     - The name of the demand that is affected by the execution of the function
-      associated with the GroundedSchemaNode.
+      associated with the action.
+    - Doesn't include `psi-prefix-str`
+
 "
-    (EvaluationLink
-        (PredicateNode "Psi: acts-on")
-        (ListLink
-            (if (equal? (cog-type gsn) 'GroundedSchemaNode)
-                gsn
-                (error (string-append "pass GroundedSchemaNode as the 1st "
-                     "argument in define-psi-action"))
-            )
-            (ConceptNode (string-append (psi-prefix-str) demand-name))
+
+    (BindLink
+        (if (equal? '() vars) ; an empty VariableList prevent matchs
+            '()
+            (VariableList vars)
         )
-    )
+        (AndLink
+            context
+            (EvaluationLink
+                (GroundedPredicateNode "scm: psi-demand?")
+                (ListLink
+                    (ConceptNode
+                        (string-append (psi-prefix-str) demand-name)))))
+        action)
 )
 
 ; --------------------------------------------------------------
