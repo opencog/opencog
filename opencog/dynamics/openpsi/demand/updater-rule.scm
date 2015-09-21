@@ -1,54 +1,13 @@
-
 (define psi-demand-updater-rule
     (BindLink
-        (VariableList
-            (TypedVariableLink
-                (VariableNode "Demand")
-                (TypeNode "ConceptNode")
-            )
-            (TypedVariableLink
-                (VariableNode "min_acceptable_value")
-                (TypeNode "NumberNode")
-            )
-            (TypedVariableLink
-                (VariableNode "max_acceptable_value")
-                (TypeNode "NumberNode")
-            )
-        )
-        (AndLink
-            (InheritanceLink
-                ; the strength of the stv is the demand value
-                (VariableNode "Demand")
-                (ConceptNode "OpenPsi: Demand")
-            )
-            ; This is equivalent to an in-born drive/goal. When
-            ; the value goes out of range then urge occurs
-            (EvaluationLink
-                (PredicateNode "must_have_value_within")
-                (ListLink
-                    (VariableNode "Demand")
-                    (VariableNode "min_acceptable_value")
-                    (VariableNode "max_acceptable_value")
-                )
-            )
-            (EvaluationLink
-                (PredicateNode "Psi: acts-on")
-                (ListLink
-                    (GroundedSchemaNode "scm: psi-demand-updater")
-                    (VariableNode "Demand")
-                )
-            )
-        )
+        (VariableList (assoc-ref (psi-demand-pattern) "var"))
+        (AndLink (assoc-ref (psi-demand-pattern) "pat"))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: psi-demand-updater") ; pre-condition
             (ListLink
                 (VariableNode "Demand")
                 (VariableNode "min_acceptable_value")
-                (VariableNode "max_acceptable_value")
-            )
-        )
-    )
-)
+                (VariableNode "max_acceptable_value")))))
 
 ; Rule Name
 (DefineLink (Node "psi-demand-updater-rule") psi-demand-updater-rule)
