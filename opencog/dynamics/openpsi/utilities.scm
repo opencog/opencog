@@ -1205,7 +1205,7 @@
     (let ((node (cog-chase-link 'DefineLink 'Node (rule))))
         (cond ((and (equal? 1 (length node))
                     (string-prefix? rule-name-prefix (cog-name (car node))))
-                    (begin (link-with-demand) (rule)))
+                     (rule))
               ((equal? 0 (length node))
                     (begin (DefineLink (Node rule-name) (rule))
                         (link-with-demand) (rule)))
@@ -1214,7 +1214,26 @@
     )
 )
 
-;(define (psi-get-actions) )
+(define (psi-get-actions demand-node)
+"
+  Returns a list containing the 'Node type atoms that name the action rules
+  for the given demand-node.
+
+  demand-node:
+    - A ConceptNode that represents a demand.
+"
+    (cog-outgoing-set (cog-execute!
+        (GetLink
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "Node"))
+             (EvaluationLink
+                 (PredicateNode (string-append (psi-prefix-str) "acts-on"))
+                 (ListLink
+                    (VariableNode "x")
+                    demand-node)))))
+)
+
 ; --------------------------------------------------------------
 ; Functions for OpenPsi Modulators
 ; --------------------------------------------------------------
