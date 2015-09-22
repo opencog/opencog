@@ -10,6 +10,10 @@ ADD_LIBRARY (spacetime-types SHARED
 	atom_types_init.cc
 )
 
+TARGET_LINK_LIBRARIES(spacetime-types
+	${ATOMSPACE_LIBRARY}
+)
+
 ADD_DEPENDENCIES(spacetime-types opencog_atom_types)
 ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
 
@@ -51,5 +55,5 @@ INSTALL (FILES
 	DESTINATION "${DATADIR}/scm/spacetime"
 )
 
-#INSTALL (TARGETS spacetime-types
-#	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+INSTALL (TARGETS spacetime-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
