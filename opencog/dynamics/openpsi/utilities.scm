@@ -1150,36 +1150,71 @@
   demand-name:
     - The name of the demand that is affected by the execution of the function
       associated with the action.
-    - Doesn't include `psi-prefix-str`
+    - Shouldn't include `psi-prefix-str`
+    - It is case sensetive, that is, a demand named `Energy` is not equal
+      to a demand named `energy`. If you pass a name of a not defined node,
+      since it's unrecognized it won't be run, eventhough a BindLink is
+      returned.
 
 "
     (define rule-name-prefix
         (string-append (psi-prefix-str) demand-name "-rule-"))
-    (define rule-name (string-append rule-name-prefix (random-string 2)))
-    (define rule
+    (define rule-name (string-append rule-name-prefix (random-string 5)))
+    (define (demand-node)
+        (ConceptNode (string-append (psi-prefix-str) demand-name)))
+
+    (define (rule)
+        ; Is function to avoid  insertion into the atomspace if argument check
+        ; fails.
         (BindLink
-            (if (equal? '() vars) ; an empty VariableList prevent matchs
+            ; An empty VariableList prevents matchs.
+            (if (equal? '() vars)
                 '()
                 (VariableList vars)
             )
             (AndLink
                 context
-                (EvaluationLink
+                (EvaluationLink ; Act only if their is such a demand.
                     (GroundedPredicateNode "scm: psi-demand?")
-                    (ListLink
-                        (ConceptNode
-                            (string-append (psi-prefix-str) demand-name)))))
+                    (ListLink (demand-node))))
             action))
-    (define node (cog-chase-link 'DefineLink 'Node rule))
 
-    (cond ((and (equal? 1 (length node))
-                (string-prefix? rule-name-prefix (cog-name (car node))))
-                rule)
-          ((equal? 0 (length node))
-                (begin (DefineLink (Node rule-name) rule) rule))
-          (else (error "The pattern has been defined multiple times")))
+    (define (link-with-demand)
+        ; For finding the rule. The atom is not part of the rule because if
+        ; rule-name is randomely generated, as such unless by chance all the
+        ; rules will not much even if the context and Variable types match.
+        (EvaluationLink
+            (PredicateNode (string-append (psi-prefix-str) "acts-on"))
+            (ListLink
+                (Node rule-name)
+                (demand-node))))
+
+
+    ; Check arguments
+    (if (not (list? vars))
+        (error "Expected first argument to be a list, got: " vars))
+    (if (not (list? context))
+        (error "Expected second argument to be a list, got: " context))
+    (if (not (cog-atom? action))
+        (error "Expected third argument to be an atom, got: " action))
+
+    ; 1. Get all nodes that define the BindLink as a ure recognizable rule.
+    ; 2. Check if the rule has already been defined, and return the rule or
+    ;    define the rule if it hasn't, or throw an error if it has been defined
+    ;    more than once.
+    (let ((node (cog-chase-link 'DefineLink 'Node (rule))))
+        (cond ((and (equal? 1 (length node))
+                    (string-prefix? rule-name-prefix (cog-name (car node))))
+                    (begin (link-with-demand) (rule)))
+              ((equal? 0 (length node))
+                    (begin (DefineLink (Node rule-name) (rule))
+                        (link-with-demand) (rule)))
+              (else (error "The rule has been defined multiple times"))
+        )
+    )
 )
 
+;(define (psi-get-actions) )
 ; --------------------------------------------------------------
 ; Functions for OpenPsi Modulators
 ; --------------------------------------------------------------
@@ -1254,4 +1289,15 @@
             (ConceptNode (string-append (psi-prefix-str) modulator-name))
         )
     )
+)
+
+(define (psi-run)
+"
+  The main function that runs OpenPsi active-schema-pool. It modifies the
+  member action-rules of the active-schema-pool.
+"
+
+    (cog-fc (SetLink)
+        (ConceptNode (string-append (psi-prefix-str) "active-schema-pool"))
+        (SetLink))
 )
