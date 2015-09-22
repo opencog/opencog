@@ -85,3 +85,6 @@ INSTALL (FILES
 	ImportanceUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/dynamics/attention"
 )
+
+INSTALL (TARGETS attention-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")

@@ -14,6 +14,7 @@
 ; the types.
 (load-extension "libnlp-types" "nlp_types_init")
 (load-extension "libspacetime-types" "spacetime_types_init")
+(load-extension "libattention-types" "attention_types_init")
 
 (load-from-path "nlp/types/nlp_types.scm")
 (load-from-path "spacetime/spacetime_types.scm")
