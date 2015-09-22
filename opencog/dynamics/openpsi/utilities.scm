@@ -1108,6 +1108,7 @@
     )
 )
 
+; --------------------------------------------------------------
 (define (psi-demand? atom)
 "
   Checks whether an atom is the ConceptNode that satisfies the pattern used
@@ -1122,8 +1123,8 @@
     )
 )
 
-(define (define-psi-action vars context action demand-name)
 ; --------------------------------------------------------------
+(define (define-psi-action vars context action demand-name)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. It returns a BindLink, structured as
@@ -1214,6 +1215,7 @@
     )
 )
 
+; --------------------------------------------------------------
 (define (psi-get-actions demand-node)
 "
   Returns a list containing the 'Node type atoms that name the action rules
@@ -1284,8 +1286,8 @@
     )
 )
 
-(define (define-psi-stimulus gsn modulator-name)
 ; --------------------------------------------------------------
+(define (define-psi-stimulus gsn modulator-name)
 "
   It associates a stimulus to an OpenPsi-modulator
 
@@ -1310,6 +1312,9 @@
     )
 )
 
+; --------------------------------------------------------------
+; Functions for OpenPsi active-schema-pool
+; --------------------------------------------------------------
 (define (psi-run)
 "
   The main function that runs OpenPsi active-schema-pool. It modifies the
