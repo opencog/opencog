@@ -32,32 +32,21 @@
 ; ---------------------------------------------------------------------
 ; A SetLink is the input because it is assumed that the output of the micro-planner
 ; is unordered.
-(define sureal
-    (let ((main
-            (lambda (a-set-link thoroughness)
-            (if (equal? 'SetLink (cog-type a-set-link))
-                (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
-                    (if (null? interpretations)
-                        (delete-duplicates (create-sentence a-set-link thoroughness))
-                        (get-sentence interpretations)
-                    )
-                )
-                (display "Please input a SetLink only")
-            ))
-         ))
-        ; Accepts an optional parameter "thoroughness", controlling how many
-        ; results (i.e. sentences) SuReal will be returning
-        ; Default value is 0, which means SuReal will return as many sentences as possible
-        (case-lambda
-            ((a-set-link) (main a-set-link 0))
-            ((a-set-link thoroughness) (main a-set-link thoroughness))
+(define (sureal a-set-link)
+    (if (equal? 'SetLink (cog-type a-set-link))
+        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+            (if (null? interpretations)
+                (delete-duplicates (create-sentence a-set-link))
+                (get-sentence interpretations)
+            )
         )
+        (display "Please input a SetLink only")
     )
 )
 
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link thoroughness)
+(define (create-sentence a-set-link)
     (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
@@ -124,7 +113,7 @@
         )
     )
 
-    (let* ((results (sureal-match a-set-link thoroughness))
+    (let* ((results (sureal-match a-set-link))
            (interps (delete-duplicates (map car results))))
         (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
     )
