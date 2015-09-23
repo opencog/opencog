@@ -1,12 +1,17 @@
 
+
+
 ADD_LIBRARY (PatternMiner SHARED
 	Pattern
 	HTree
 	PatternMiner
 	PatternMinerBF
         PatternMinerDF
+        PatternMinerDistributedWorker
+        PatternMinerCentralServer
 )
 
+ADD_DEPENDENCIES(PatternMiner libcpprest)
 ADD_DEPENDENCIES(PatternMiner opencog_atom_types)
 ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)

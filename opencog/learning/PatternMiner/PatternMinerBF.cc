@@ -48,6 +48,10 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
+
+
+// This file is not maintained anymore. Please use depth first mining.
+
 void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram)
 {
     // debug:

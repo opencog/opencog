@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com> in 2014
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -33,7 +33,14 @@
 #include <thread>
 #include <mutex>
 
+#include <cpprest/http_listener.h>
+#include <cpprest/http_client.h>
+
 using namespace std;
+using namespace web;
+using namespace web::http;
+using namespace web::http::client;
+using namespace web::http::experimental::listener;
 
 namespace opencog
 {
@@ -141,6 +148,13 @@ namespace PatternMining
      unsigned int processedLinkNum;
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
+
+     bool run_as_distributed_worker;
+     bool run_as_central_server;
+
+     http_client* httpClient;
+     http_listener* serverListener;
+
 
 //     // [gram], this to avoid different threads happen to work on the same links.
 //     // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
@@ -301,6 +315,11 @@ namespace PatternMining
 
      bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
+     void handleGet(http_request request);
+     void handleRegisterNewWorker(http_request request);
+     void handleReportWorkerStop(http_request request);
+     void handleFindANewPattern(http_request request);
+
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
@@ -319,6 +338,11 @@ namespace PatternMining
      void runPatternMinerBreadthFirst();
 
      void runPatternMinerDepthFirst();
+
+     void launchADistributedWorker(string serverURL);
+     void launchCentralServer();
+
+     void startCentralServer();
 
      void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
