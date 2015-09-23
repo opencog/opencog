@@ -37,15 +37,12 @@ using namespace opencog;
  *
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
- * @param thoroughness   the completeness of the search (the minimum number of
- *                       results being returned)
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thoroughness) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
-    m_vars(vars),
-    m_thoroughness(thoroughness)
+    m_vars(vars)
 {
 
 }
@@ -426,6 +423,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
+    // TODO: Check if all binary links are there in the solution, insert
+    //       into m_results and return true if so
+
     // store the solution; all common InterpretationNode are solutions for this
     // grounding, so store the solution for each InterpretationNode
     for (auto n : qItprNode)
@@ -523,9 +523,6 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
-
-        // stop the search if it already found enough results in a non-complete search
-        if (m_thoroughness > 0 and m_results.size() >= m_thoroughness) return true;
     }
     return false;
 }
