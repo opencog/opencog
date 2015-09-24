@@ -296,8 +296,10 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
     HandleSeqSeq results;
 
-    for (auto& k : keys)
+    // get the mapping of first InterpretationNode in the list
+    if (keys.size() > 0)
     {
+        Handle& k = keys[0];
         HandleSeqSeq mappings = sureal_get_mapping(k, collector[k]);
         results.insert(results.end(), mappings.begin(), mappings.end());
     }
