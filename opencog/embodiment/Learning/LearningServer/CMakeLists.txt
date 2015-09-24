@@ -8,7 +8,15 @@ ADD_LIBRARY(lslib
 )
 
 ADD_LIBRARY(TestPatternMinerAgent SHARED
-	TestPatternMinerAgent
+	TestPatternMinerAgent    
+)
+
+ADD_LIBRARY(DistributedPatternMinerClient SHARED
+        DistributedPatternMinerClient
+)
+
+ADD_LIBRARY(DistributedPatternMinerServer SHARED
+        DistributedPatternMinerServer
 )
 
 TARGET_LINK_LIBRARIES (TestPatternMinerAgent
