@@ -1,13 +1,45 @@
-;Author: Rohit Shinde
-;Date: 23rd July, 2015
+;
+; grammar.scm
+;
+; Copyright (c) 2015 Rohit Shinde
+;
 
-;This procedure gets all the MSTConnectors for a given disjunct
+; ---------------------------------------------------------------------
+; Get all the MSTConnectors for a given disjunct.
+; For example, given an input of ...
+; This will generate an output of ...
 (define (get-mst-connector disjunct)
 	(define disjunct-out-set (cog-outgoing-set disjunct))
 	(define mst-connectors (cog-outgoing-set (cadr disjunct-out-set)))
 	mst-connectors)
 
-;This function gets the decoded disjunct for a given disjunct.
+; ---------------------------------------------------------------------
+; Get the decoded disjunct for a given MST disjunct.
+; The 'decoded disjunct' is a disjunct, but with the abstract
+; connector types replaced by the name of the word-classes that they
+; connect to.  This is only possible when a word or word-class
+; has been given a distinct name, and when connector types have not
+; yet been clustered.  When this holds, a given connector type will
+; connect uniquely to just one word-class; thus the word-class can
+; be used as a synonym for the connector.  Note, however, the converse
+; is not true: a word-class does not, cannot uniquely identify a
+; connector.
+;
+; In the simplest example, before any clustering is performed, then all
+; connectors are in unique, one-to-one correspondance with word-pairs.
+; Thus, given a word, and a connector, the remote word is uniquely
+; identified, and cna be used as a "stand-in" for the connector.
+;
+; Decoded disjuncts are used during clustering. The 'decoded disjuncts'
+; associated with a word form the basis for a vector space. The
+; similarity of different words can be modllled by the cosine distance
+; between the vectors, and used as a metric for clustering.
+;
+; For example, given an input of ...
+;
+; This will generate an output of ...
+;
+
 (define (get-decoded-disjunct disjunct)
 	(define (create-actual-decoded-disjunct word-sign-list)
 		(define disjunct-outset (cog-outgoing-set disjunct))
@@ -24,43 +56,58 @@
 	(define mst-connectors (get-mst-connector disjunct))
 	(create-actual-decoded-disjunct (map get-connected-word mst-connectors)))
 
-;This function gets the sign of the mst-connector
+; ---------------------------------------------------------------------
+; Get the sign of the mst-connector.
+;
+; For example, given an input of ...
+;
+; This will generate an output of ...
+; LgConnDirNode ?????
+;
 (define (get-sign-mst-connector mst-connector)
 	(cog-name (cadr (cog-outgoing-set mst-connector))))
 
-;This function gets all connected words of a given disjunct. The connected
-;words are then passed to the (decoded-disjunct) function to get the 
-;decoded disjunct of those words. The distance from the words is then
-;calculated.
+; ---------------------------------------------------------------------
+; Gets all connected words of a given disjunct. The connected
+; words are then passed to the (decoded-disjunct) function to get the
+; decoded disjunct of those words. The distance from the words is then
+; calculated.
 (define (get-disjunct-connected-words disjunct)
 	(define mst-connectors (get-mst-connector disjunct))
 	(define words-connected-to-disjunct (map get-connected-word mst-connectors))
 	words-connected-to-disjunct)
 
-;This function gets all the disjuncts for a given word.
+; ---------------------------------------------------------------------
+; Gets all the disjuncts for a given word.
+; For example, given an input of ...
+;
+; This will return ...
 (define (get-disjunct-from-word wordnode)
 	(define inset (cog-incoming-set wordnode))
 	(define (disjunct-filter? x)
 		(cog-link? (cadr (cog-outgoing-set x))))
 	(filter disjunct-filter? inset))
 
-;This function creates decoded disjuncts for all the disjuncts of a given word
+; ---------------------------------------------------------------------
+; Creates decoded disjuncts for all the disjuncts of a given word
 (define (create-decoded-disjuncts-for-all-disjuncts wordnode)
 	(define all-disjuncts-of-word (get-disjunct-from-word wordnode))
 	(map get-decoded-disjunct all-disjuncts-of-word))
 
-;This function will create decoded disjuncts for all words connected to a
-;given disjunct
+; ---------------------------------------------------------------------
+; Create decoded disjuncts for all words connected to a
+; given disjunct
 (define (create-decoded-disjuncts-for-all-connected-words disjunct)
 	(define word-sign-pairs (get-disjunct-connected-words disjunct))
-	(map (lambda (x) 
-			(get-decoded-disjunct 
+	(map (lambda (x)
+			(get-decoded-disjunct
 				(car (get-disjunct-from-word (WordNode (car x))))))
 				word-sign-pairs))
 
-;This function gets the other word of a word pair. The input to this function
-;is an MST-connector which defines the name of the connector as well as the
-;sign.
+; ---------------------------------------------------------------------
+; Get the other word of a word pair. The input to this function
+; is an MST-connector which defines the name of the connector as well
+; as the sign.
 (define (get-connected-word mst-connector)
 	(define sign (get-sign-mst-connector mst-connector))
 	(define connector-name (cog-name (car (cog-outgoing-set mst-connector))))
@@ -81,8 +128,10 @@
 				(helper-function "-" (cog-incoming-set (car in-set))))
 			'())))
 
-;This function uses all the above functions to create decoded disjuncts for all
-;the disjuncts of a given wordnode as well as all the words connected to it.
+; ---------------------------------------------------------------------
+; This function uses all the above functions to create decoded disjuncts
+; for all the disjuncts of a given wordnode as well as all the words
+; connected to it.
 (define (create-em-all-decoded-disjuncts wordnode)
 	(define decoded-disjunct-of-word (create-decoded-disjuncts-for-all-disjuncts wordnode))
 	(define disjuncts-of-the-wordnode (get-disjunct-from-word wordnode))
