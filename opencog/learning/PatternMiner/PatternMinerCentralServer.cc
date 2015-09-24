@@ -65,8 +65,9 @@ using namespace utility;
 
 void PatternMiner::launchCentralServer()
 {
+   centralServerPort = Config().get("PMCentralServerPort");
 
-    serverListener = new http_listener( utility::string_t("http://localhost/PatternMinerServer") );
+   serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
 
    serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
 

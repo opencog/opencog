@@ -149,6 +149,12 @@ namespace PatternMining
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
 
+     string centralServerIP;
+     string centralServerPort;
+     string centralServerBaseURL;
+
+     string clientWorkerUID;
+
      bool run_as_distributed_worker;
      bool run_as_central_server;
 
@@ -339,7 +345,7 @@ namespace PatternMining
 
      void runPatternMinerDepthFirst();
 
-     void launchADistributedWorker(string serverURL);
+     void launchADistributedWorker();
      void launchCentralServer();
 
      void startCentralServer();

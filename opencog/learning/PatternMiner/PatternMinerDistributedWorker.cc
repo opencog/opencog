@@ -32,6 +32,7 @@
 #include <vector>
 #include <sstream>
 #include <thread>
+#include <ifaddrs.h>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Handle.h>
@@ -45,30 +46,43 @@
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
 
+#include <boost/uuid/uuid.hpp>            // uuid class
+#include <boost/uuid/uuid_io.hpp>
+
+#include "HTree.h"
+#include "PatternMiner.h"
+
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 using namespace concurrency::streams;       // Asynchronous streams
 
-#include "HTree.h"
-#include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-void PatternMiner::launchADistributedWorker(string serverURL)
+void PatternMiner::launchADistributedWorker()
 {
-    std::cout<<"Registering to the central server: "<< serverURL << std::endl;
+    centralServerIP = Config().get("PMCentralServerIP");
+    centralServerPort = Config().get("PMCentralServerPort");
+    centralServerBaseURL = "http://" +  centralServerIP + ":" + centralServerPort + "/PatternMinerServer";
+
+    boost::uuids::uuid uid;
+    std::stringstream ssuid;
+    ssuid << uid;
+    clientWorkerUID = ssuid.str();
+    std::cout<<"Current client UID = "<< clientWorkerUID << std::endl;
+    std::cout<<"Registering to the central server: "<< centralServerIP << std::endl;
 
     // Create http_client to send the request.
-    httpClient = new http_client(U(serverURL.c_str()));
+    httpClient = new http_client(U(centralServerBaseURL.c_str()));
 
     // Build request URI and start the request.
     uri_builder builder(U("/RegisterNewWorker"));
-    builder.append_query(U("ip"), U(""));
-    httpClient->request(methods::GET, builder.to_string());
+    builder.append_query(U("ClientUID"), U(clientWorkerUID));
+    std::cout << httpClient->request(methods::GET, builder.to_string()).get().extract_json().get() ;
 
 
 
