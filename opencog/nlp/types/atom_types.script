@@ -45,6 +45,11 @@ PARSE_LINK <- ASSOCIATIVE_LINK
 WORD_INSTANCE_NODE <- CONCEPT_NODE
 WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
 
+// These are needed for AIML conversion and dialog/speech handling.
+// Analogous to SENTNCE_NODE and DOCUMENT_NODE, but for speech.
+UTTERANCE_NODE <- CONCEPT_NODE
+DIALOG_NODE <- CONCEPT_NODE
+
 // These are used to number the sequence in which words,
 // sentences and documents are observed.  Use these with
 // GreaterThanLink to find out what order things came in.
@@ -62,7 +67,8 @@ DOCUMENT_SEQUENCE_LINK <- SEQUENCE_LINK
 FEATURE_NODE <- CONCEPT_NODE
 FEATURE_LINK <- ORDERED_LINK
 
-// XXX TODO -- below should be replaced by LG_CONNECTOR_NODE
+// XXX TODO -- below should be replaced by LG_LINK_NODE
+// This is NOT a connector, its a pair of connected connectors.
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
 
 // XXX TODO -- name should be shortened to LG_DISJUNCT_NODE
@@ -118,8 +124,6 @@ LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 // Consists of the connector node, the direction, and possibly the
 // multi-connector node.
 LG_CONNECTOR <- LINK   // e.g. "MX+"
-MST_CONNECTOR <- LINK "MSTConnector"
-DECODED_CONNECTOR <- LINK "DecodedConnector"
 
 // These vaguely resemble AND_LINK and OR_LINK, but DO NOT BE FOOLED!
 // They are not really the same, as they are not boolean; rather they
@@ -147,8 +151,16 @@ LG_WORD_CSET <- LIST_LINK
 LG_LINK_INSTANCE_NODE <- PREDICATE_NODE
 LG_LINK_INSTANCE_LINK <- LIST_LINK
 
-//MST parser node.
-//This comes from the MST parse
+// ---------------------------------------------------------------
+// Language-learning atoms. The langauge-learning code uses MST
+// (minimum spanning tree) parsing in the initial stages; thus, these
+// have MST as part of thier name.
+//
+MST_CONNECTOR <- LINK "MSTConnector"  // analogous to LG_CONNECTOR
+DECODED_CONNECTOR <- LINK  // with words, in place of connector letters.
+
+// Analogous to LG_LINK_NODE and LG_DISJUNCT_NODE
+// The LINK_NODE is a pair of connected connectors (i.e. what is called
+// "the intersection" in the LG code-base/documentation)
 MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
 MST_DISJUNCT_NODE <- PREDICATE_NODE "MSTDisjunctNode"
-
