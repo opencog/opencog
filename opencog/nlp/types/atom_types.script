@@ -45,6 +45,11 @@ PARSE_LINK <- ASSOCIATIVE_LINK
 WORD_INSTANCE_NODE <- CONCEPT_NODE
 WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
 
+// These are needed for AIML conversion and dialog/speech handling.
+// Analogous to SENTNCE_NODE and DOCUMENT_NODE, but for speech.
+UTTERANCE_NODE <- CONCEPT_NODE
+DIALOG_NODE <- CONCEPT_NODE
+
 // These are used to number the sequence in which words,
 // sentences and documents are observed.  Use these with
 // GreaterThanLink to find out what order things came in.
