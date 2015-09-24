@@ -115,44 +115,57 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // be assuming R2L will never use SetLink for other purposes.
     HandleSeq qClauses = pAS->get_outgoing(h);
 
-    // get all the nodes to be treated as variable in the Pattern Matcher
-    // XXX perhaps it's better to write a eval_q in SchemeEval to convert
-    //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = get_all_unique_nodes(h);
+    HandleSeq qBinaryLinks;
 
-    // isolate which nodes are actually words, and which are not; all words
-    // need to become variable for the Pattern Matcher
-    for (auto& n : allNodes)
+    HandleSeq qOS;
+    LinkPtr lp(LinkCast(h));
+    if (lp) qOS = lp->getOutgoingSet();
+
+    for (const Handle& hOS : qOS)
     {
-        // special treatment for InterpretationNode and VariableNode, treating
-        // them as variables;  this is because we have
-        //    (InterpreationNode "MicroplanningNewSentence")
-        // from the microplanner that should be matched to any InterpretationNode
-        if (n->getType() == INTERPRETATION_NODE || n->getType() == VARIABLE_NODE)
+        // get all the nodes to be treated as variable in the Pattern Matcher
+        UnorderedHandleSet allNodes = get_all_unique_nodes(hOS);
+
+        // how many words are there in this link
+        size_t iWordCount = 0;
+
+        // isolate which nodes are actually words, and which are not; all words
+        // need to become variable for the Pattern Matcher
+        for (auto& n : allNodes)
         {
+            // special treatment for InterpretationNode and VariableNode, treating
+            // them as variables;  this is because we have
+            //    (InterpreationNode "MicroplanningNewSentence")
+            // from the microplanner that should be matched to any InterpretationNode
+            if (n->getType() == INTERPRETATION_NODE || n->getType() == VARIABLE_NODE)
+            {
+                sVars.insert(n);
+                continue;
+            }
+
+            std::string sName = pAS->get_name(n);
+            std::string sWord = sName.substr(0, sName.find_first_of('@'));
+            Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
+
+            // no WordNode found
+            if (hWordNode == Handle::UNDEFINED)
+                continue;
+
+            // if no LG dictionary entry
+            if (get_neighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+                continue;
+
+            iWordCount++;
             sVars.insert(n);
-            continue;
         }
 
-        std::string sName = pAS->get_name(n);
-        std::string sWord = sName.substr(0, sName.find_first_of('@'));
-        Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
-
-        // no WordNode found
-        if (hWordNode == Handle::UNDEFINED)
-            continue;
-
-        // if no LG dictionary entry
-        if (get_neighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
-            continue;
-
-        sVars.insert(n);
+        if (iWordCount == 2) qBinaryLinks.push_back(hOS);
     }
 
     // separate the disconnected clauses (this will happen often with SuReal)
     std::vector<HandleSeq> connectedClauses;
     std::vector<std::set<Handle>> connectedVars;
-    get_connected_components(sVars, qClauses, connectedClauses, connectedVars);
+    get_connected_components(sVars, qClauses, connectedClauses, connectedVars);    
 
     logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
 
@@ -165,9 +178,16 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         const HandleSeq& qClause(connectedClauses[i]);
         const std::set<Handle>& qVars(connectedVars[i]);
 
+        // Find the binary links that exist in this clause
+        std::sort(qBinaryLinks.begin(), qBinaryLinks.end());
+        std::sort(connectedClauses[i].begin(), connectedClauses[i].end());
+        HandleSeq qConnBinaryLinks;
+        std::set_intersection(qBinaryLinks.begin(), qBinaryLinks.end(),
+                              qClause.begin(), qClause.end(), std::back_inserter(qConnBinaryLinks));
+
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars);
+        SuRealPMCB pmcb(pAS, qVars, qConnBinaryLinks);
         PatternLinkPtr slp(createPatternLink(qVars, qClause));
         slp->satisfy(pmcb);
 

@@ -38,11 +38,12 @@ using namespace opencog;
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, const HandleSeq& bl) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
-    m_vars(vars)
+    m_vars(vars),
+    m_binarylinks(bl)
 {
 
 }
@@ -345,7 +346,6 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (not std::any_of(qDisjuncts.begin(), qDisjuncts.end(), matchHelper))
             return false;
     }
-
     return true;
 }
 
@@ -423,8 +423,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
-    // TODO: Check if all binary links are there in the solution, insert
-    //       into m_results and return true if so
+    // if this solution itself is a binary link, remove it from m_binarylinks
+    for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
+    {
+        auto itc = std::find(m_binarylinks.begin(), m_binarylinks.end(), it->first);
+
+        if (itc != m_binarylinks.end())
+            m_binarylinks.erase(itc);
+    }
 
     // store the solution; all common InterpretationNode are solutions for this
     // grounding, so store the solution for each InterpretationNode
@@ -438,6 +444,11 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
         m_results[n].push_back(shrinked_soln);
     }
+
+    // return true if we found a good enough solution -- all binary links of
+    // this clause have been satisfied
+    if (m_binarylinks.size() == 0)
+        return true;
 
     return false;
 }
