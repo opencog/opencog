@@ -153,6 +153,8 @@ namespace PatternMining
      string centralServerPort;
      string centralServerBaseURL;
 
+     std::thread centralServerListeningThread;
+
      string clientWorkerUID;
 
      bool run_as_distributed_worker;
@@ -347,6 +349,7 @@ namespace PatternMining
 
      void launchADistributedWorker();
      void launchCentralServer();
+     void centralServerStartListening();
 
      void startCentralServer();
 

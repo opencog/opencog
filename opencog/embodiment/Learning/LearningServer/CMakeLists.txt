@@ -23,6 +23,14 @@ TARGET_LINK_LIBRARIES (TestPatternMinerAgent
 	PatternMiner
 )
 
+TARGET_LINK_LIBRARIES (DistributedPatternMinerClient
+        PatternMiner
+)
+
+TARGET_LINK_LIBRARIES (DistributedPatternMinerServer
+        PatternMiner
+)
+
 
 TARGET_LINK_LIBRARIES (lslib
 	PetaverseMOSES

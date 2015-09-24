@@ -65,8 +65,8 @@ using namespace opencog;
 
 void PatternMiner::launchADistributedWorker()
 {
-    centralServerIP = Config().get("PMCentralServerIP");
-    centralServerPort = Config().get("PMCentralServerPort");
+    centralServerIP = config().get("PMCentralServerIP");
+    centralServerPort = config().get("PMCentralServerPort");
     centralServerBaseURL = "http://" +  centralServerIP + ":" + centralServerPort + "/PatternMinerServer";
 
     boost::uuids::uuid uid;

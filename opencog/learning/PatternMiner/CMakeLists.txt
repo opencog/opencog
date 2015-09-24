@@ -11,13 +11,14 @@ ADD_LIBRARY (PatternMiner SHARED
         PatternMinerCentralServer
 )
 
-ADD_DEPENDENCIES(PatternMiner libcpprest)
+
 ADD_DEPENDENCIES(PatternMiner opencog_atom_types)
 ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
 TARGET_LINK_LIBRARIES (PatternMiner
 	${COGUTIL_LIBRARY}
+	cpprest
 )
 
 INSTALL (FILES

@@ -65,36 +65,40 @@ using namespace utility;
 
 void PatternMiner::launchCentralServer()
 {
-   centralServerPort = Config().get("PMCentralServerPort");
+   centralServerPort = config().get("PMCentralServerPort");
 
    serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
 
    serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
 
-   try
-   {
-      serverListener->open()
-         .then([](pplx::task<void> t){})
-         .wait();
-
-      while (true);
-   }
-   catch (exception const & e)
-   {
-      cout << e.what() << endl;
-   }
+   centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
 
    cout <<"\nPattern Miner central server started!\n";
+   // centralServerListeningThread.join();
 
-   cout << "\nPattern Miner central server stopped!\n";
+}
 
+void PatternMiner::centralServerStartListening()
+{
+    try
+    {
+       serverListener->open()
+          .then([](pplx::task<void> t){})
+          .wait();
+
+       while (true);
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+    }
 }
 
 void PatternMiner::handleGet(http_request request)
 {
     cout << "Got request: \n" << request.to_string() << std::endl;
     string path = request.relative_uri().path();
-    if (path == "RegisterNewWorker")
+    if (path == "/RegisterNewWorker")
     {
         handleRegisterNewWorker(request);
     }
