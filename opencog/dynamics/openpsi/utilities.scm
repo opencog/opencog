@@ -1124,7 +1124,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (define-psi-action vars context action demand-name)
+(define (define-psi-action vars context action demand-name effect-type)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. It returns a BindLink, structured as
@@ -1134,6 +1134,12 @@
             (context)
             (clauses required for linking with the demand named demand-name))
         (action))
+  If the action, context, and effect-type have already been defined in the
+  atomspace then the previous defined BindLink is returned.
+
+  A single action-rule could only have a either of the effect-types, thus
+  changing the effect-type will not have any effect if the action-rule has
+  already been defined in the atomspace with a different effect-type.
 
   vars:
     - A list containing the VariableNodes, and their type restrictions, that
@@ -1156,6 +1162,10 @@
       to a demand named `energy`. If you pass a name of a not defined node,
       since it's unrecognized it won't be run, eventhough a BindLink is
       returned.
+
+  effect-type:
+    - A string that describes the effect the particualr action would have on
+      the demand value. The only options are `Increase` and `Decrease`.
 
 "
     (define rule-name-prefix
@@ -1185,11 +1195,10 @@
         ; rule-name is randomely generated, as such unless by chance all the
         ; rules will not much even if the context and Variable types match.
         (EvaluationLink
-            (PredicateNode (string-append (psi-prefix-str) "acts-on"))
+            (PredicateNode (string-append (psi-prefix-str) effect-type))
             (ListLink
                 (Node rule-name)
                 (demand-node))))
-
 
     ; Check arguments
     (if (not (list? vars))
@@ -1198,6 +1207,9 @@
         (error "Expected second argument to be a list, got: " context))
     (if (not (cog-atom? action))
         (error "Expected third argument to be an atom, got: " action))
+    (if (not (member effect-type (list "Increase" "Decrease")))
+        (error (string-append "Expected fourth argument to be either"
+            "`Increase` or `Decrease` got: ") effect-type))
 
     ; 1. Get all nodes that define the BindLink as a ure recognizable rule.
     ; 2. Check if the rule has already been defined, and return the rule or
@@ -1218,7 +1230,7 @@
 ; --------------------------------------------------------------
 (define (psi-get-actions demand-node)
 "
-  Returns a list containing the 'Node type atoms that name the action rules
+  Returns a list containing the 'Node atom-type atoms that name the action-rules
   for the given demand-node.
 
   demand-node:
@@ -1229,11 +1241,20 @@
              (TypedVariableLink
                  (VariableNode "x")
                  (TypeNode "Node"))
-             (EvaluationLink
-                 (PredicateNode (string-append (psi-prefix-str) "acts-on"))
-                 (ListLink
-                    (VariableNode "x")
-                    demand-node)))))
+             (ChoiceLink
+                 (EvaluationLink
+                     (PredicateNode
+                         (string-append (psi-prefix-str) "Increase"))
+                     (ListLink
+                        (VariableNode "x")
+                        demand-node))
+                 (EvaluationLink
+                     (PredicateNode
+                         (string-append (psi-prefix-str) "Decrease"))
+                     (ListLink
+                        (VariableNode "x")
+                        demand-node))))
+    ))
 )
 
 ; --------------------------------------------------------------
