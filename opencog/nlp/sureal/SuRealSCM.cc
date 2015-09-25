@@ -169,6 +169,17 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
     logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
 
+    // a flag deciding whether we should search all possible groundings, or just
+    // stop the search when a good enough one is found
+    // by default it's false, as it may take a long time to do a complete search,
+    // but for disconnected clauses, it probably is simpler to do a complete
+    // search as it is hard to guarantee there is no overlapping mapping for
+    // all grounded clauses
+    bool searchAll = false;
+
+    if (connectedClauses.size() > 1)
+        searchAll = true;
+
     std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
 
     // call the pattern matcher on each set of disconnected commponents
@@ -187,7 +198,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars, qConnBinaryLinks);
+        SuRealPMCB pmcb(pAS, qVars, qConnBinaryLinks, searchAll);
         PatternLinkPtr slp(createPatternLink(qVars, qClause));
         slp->satisfy(pmcb);
 

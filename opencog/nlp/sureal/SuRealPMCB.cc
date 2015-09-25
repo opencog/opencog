@@ -38,12 +38,13 @@ using namespace opencog;
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, const HandleSeq& bl) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, const HandleSeq& bl, bool searchAll) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars),
-    m_binarylinks(bl)
+    m_binaryLinks(bl),
+    m_searchAll(searchAll)
 {
 
 }
@@ -346,6 +347,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         if (not std::any_of(qDisjuncts.begin(), qDisjuncts.end(), matchHelper))
             return false;
     }
+
     return true;
 }
 
@@ -423,13 +425,13 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
-    // if this solution itself is a binary link, remove it from m_binarylinks
+    // if this solution itself is a binary link, remove it from m_binaryLinks
     for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
     {
-        auto itc = std::find(m_binarylinks.begin(), m_binarylinks.end(), it->first);
+        auto itc = std::find(m_binaryLinks.begin(), m_binaryLinks.end(), it->first);
 
-        if (itc != m_binarylinks.end())
-            m_binarylinks.erase(itc);
+        if (itc != m_binaryLinks.end())
+            m_binaryLinks.erase(itc);
     }
 
     // store the solution; all common InterpretationNode are solutions for this
@@ -446,8 +448,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     }
 
     // return true if we found a good enough solution -- all binary links of
-    // this clause have been satisfied
-    if (m_binarylinks.size() == 0)
+    // this pattern have been satisfied
+    if (m_results.size() > 0 and m_binaryLinks.size() == 0 and not m_searchAll)
         return true;
 
     return false;
