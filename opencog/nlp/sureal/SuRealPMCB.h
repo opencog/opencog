@@ -45,7 +45,7 @@ class SuRealPMCB :
     public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, const HandleSeq& bl, bool searchAll = false);
+    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, const HandleSeq& bl, bool searchAll);
     ~SuRealPMCB();
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);

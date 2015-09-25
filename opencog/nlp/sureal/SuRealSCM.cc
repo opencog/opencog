@@ -189,16 +189,9 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         const HandleSeq& qClause(connectedClauses[i]);
         const std::set<Handle>& qVars(connectedVars[i]);
 
-        // Find the binary links that exist in this clause
-        std::sort(qBinaryLinks.begin(), qBinaryLinks.end());
-        std::sort(connectedClauses[i].begin(), connectedClauses[i].end());
-        HandleSeq qConnBinaryLinks;
-        std::set_intersection(qBinaryLinks.begin(), qBinaryLinks.end(),
-                              qClause.begin(), qClause.end(), std::back_inserter(qConnBinaryLinks));
-
         // I replaced sVars by qVars in the below. sVars had extra
         // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars, qConnBinaryLinks, searchAll);
+        SuRealPMCB pmcb(pAS, qVars, qBinaryLinks, searchAll);
         PatternLinkPtr slp(createPatternLink(qVars, qClause));
         slp->satisfy(pmcb);
 
