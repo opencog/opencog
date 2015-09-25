@@ -983,6 +983,25 @@
   )
 
 ; --------------------------------------------------------------
+; Helper Functions
+; --------------------------------------------------------------
+(define (psi-clean-demand-gets set-link)
+"
+  Returns a list aftering removing the 'SetLink + 'ListLink + 'NumberNode
+  from result of `cog-execute!` of 'GetLink wrapping psi-demand-pattern with or
+  without additional clauses.
+
+  set-link:
+    - A 'SetLink that is a result of running `cog-execute!` of 'GetLink
+      wrapping psi-demand-pattern.
+"
+    (define (list-merge list-of-list) (fold append '() list-of-list))
+    (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
+    (remove! is-nn?
+        (list-merge (map cog-outgoing-set (cog-outgoing-set set-link))))
+)
+
+; --------------------------------------------------------------
 ; Functions for OpenPsi Demands
 ; --------------------------------------------------------------
 (define (psi-prefix-str)
@@ -991,7 +1010,6 @@
 "
  "OpenPsi: "
 )
-
 
 ; --------------------------------------------------------------
 (define (psi-demand-pattern)
@@ -1048,14 +1066,10 @@
   Returns a list containing the ConceptNode that carry the demand-value. The
   strength of their stv is the demand value.
 "
-    (define (list-merge list-of-list) (fold append '() list-of-list))
-    (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
-
-    (remove! is-nn? (list-merge (map cog-outgoing-set
-        (cog-outgoing-set (cog-execute!
-            (GetLink
-                (VariableList (assoc-ref (psi-demand-pattern) "var"))
-                (assoc-ref (psi-demand-pattern) "pat")))))))
+    (psi-clean-demand-gets (cog-execute!
+        (GetLink
+            (VariableList (assoc-ref (psi-demand-pattern) "var"))
+            (assoc-ref (psi-demand-pattern) "pat"))))
 )
 
 ; --------------------------------------------------------------
