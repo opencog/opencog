@@ -56,7 +56,7 @@
 ; r2l pipeline.
 (define (pre-why-q-rule verb)
  (ListLink
-	(why-rule (word-inst-get-word-str verb) (cog-name verb)
+	(why-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb)
 	)
  )
 )

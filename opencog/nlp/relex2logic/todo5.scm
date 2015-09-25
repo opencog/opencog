@@ -96,9 +96,9 @@
 (define (pre-todo5-rule subj verb1 verb2)
  (ListLink
   (to-do-rule-5 
-	(word-inst-get-word-str verb1) (cog-name verb1)
-	(word-inst-get-word-str verb2) (cog-name verb2)
-	(word-inst-get-word-str subj) (cog-name subj)
+	(cog-name (word-inst-get-lemma verb1)) (cog-name verb1)
+	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
+	(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
   )
  )
 )

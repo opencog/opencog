@@ -69,7 +69,7 @@
 ; r2l pipeline.
 (define (pre-where-cop-q-rule subj)
  (ListLink
-	(wherecop-Q-rule (word-inst-get-word-str subj) (cog-name subj)
+	(wherecop-Q-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
  )
 )

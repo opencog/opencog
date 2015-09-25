@@ -55,8 +55,8 @@
 ; r2l pipeline.
 (define (pre-compmod-rule pred comp)
   (ListLink
-    (compmod-rule (word-inst-get-word-str pred) (cog-name pred)
-		(word-inst-get-word-str comp) (cog-name comp)
+    (compmod-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred)
+		(cog-name (word-inst-get-lemma comp)) (cog-name comp)
 	 )
   )
 )

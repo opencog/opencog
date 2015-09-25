@@ -57,8 +57,8 @@
 ; r2l pipeline.
 (define (pre-amod-rule noun adj)
   (ListLink
-    (amod-rule (word-inst-get-word-str noun) (cog-name noun)
-              (word-inst-get-word-str adj) (cog-name adj)
+    (amod-rule (cog-name (word-inst-get-lemma  noun)) (cog-name noun)
+              (cog-name (word-inst-get-lemma  adj)) (cog-name adj)
     )
   )
 )

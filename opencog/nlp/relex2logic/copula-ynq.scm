@@ -69,8 +69,8 @@
 ; r2l pipeline.
 (define (pre-copula-ynq-rule subj obj)
  (ListLink
-	(cop-ynQ-rule (word-inst-get-word-str subj) (cog-name subj)
-		(word-inst-get-word-str obj) (cog-name obj)
+	(cop-ynQ-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
+		(cog-name (word-inst-get-lemma obj)) (cog-name obj)
 	)
  )
 )

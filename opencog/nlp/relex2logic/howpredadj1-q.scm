@@ -69,7 +69,7 @@
 ; r2l pipeline.
 (define (pre-howpredadj1-q-rule subj)
  (ListLink
-	(howpredadj-Q-rule (word-inst-get-word-str subj) (cog-name subj)
+	(howpredadj-Q-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
 	)
  )
 )
