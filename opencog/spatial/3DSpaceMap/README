@@ -24,10 +24,8 @@ Because in the future we will need to embody Opencog in different environment(Mi
 
 TODO:
 
-(1) Fix the codes in embodiment/ and dynamics/: The change of SpaceMap will break the old embodiment code. Especially the OCPlanner should be the first thing to be fixed.
+(1) Spatial relation Calculation: See SpaceMapUtil
 
-(2) Spatial relation Calculation: See SpaceMapUtil
+(2) Add more cython binding: The cython binding of inherited interface of OctomapOcTree is not finished.
 
-(3) Add more cython binding: The cython binding of inherited interface of OctomapOcTree is not finished.
-
-(4) Add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case.
+(3) Add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case.
