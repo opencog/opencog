@@ -63,7 +63,6 @@ public:
     void tearDown(void);
 
     void test_basic(void);
-    void test_multiple(void);
     void test_complex(void);
     void test_disconnected(void);
     void test_multiconn(void);
@@ -125,35 +124,6 @@ void SuRealUTest::test_basic(void)
 
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "feeds" "."))) )");
     TSM_ASSERT("Failed on basic short sentence sureal!", result == "#t\n");
-
-    logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void SuRealUTest::test_multiple(void)
-{
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
-                 "tests/nlp/sureal/r2l-atomspace2.scm");
-    cogserver().loadSCMModules();
-
-    // Sentences in r2l-atomspace2.scm
-    // - He runs.
-    // - He runs quickly.
-
-    _evaluator->eval(R"( (WordNode "she") )");
-    _evaluator->eval(R"( (WordNode "walks") )");
-
-    // test multiple matches
-    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "walks") (ListLink (ConceptNode "she")))))) )");
-    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "walks" ".") (list "she" "walks" "quickly" "."))) )");
-    TSM_ASSERT("Failed on sureal with multiple matches!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
