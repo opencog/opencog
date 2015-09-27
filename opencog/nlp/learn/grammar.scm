@@ -6,8 +6,21 @@
 
 ; ---------------------------------------------------------------------
 ; Get all the MSTConnectors for a given disjunct.
-; For example, given an input of ...
-; This will generate an output of ...
+; For example, given an input of
+;(LgWordCset (ctv 1 0 20)
+;   	(WordNode "This" (ctv 1 0 470256))
+;   	(LgAnd
+;      		(MSTConnector
+;       	  	(LgConnectorNode "MB")
+;         		(LgConnDirNode "+")
+;      		)
+;   	)
+;	)
+; This will generate an output of 
+;((MSTConnector
+;   (LgConnectorNode "MB")
+;   (LgConnDirNode "+")
+;))
 (define (get-mst-connector disjunct)
 	(define disjunct-out-set (cog-outgoing-set disjunct))
 	(define mst-connectors (cog-outgoing-set (cadr disjunct-out-set)))
@@ -35,10 +48,27 @@
 ; similarity of different words can be modllled by the cosine distance
 ; between the vectors, and used as a metric for clustering.
 ;
-; For example, given an input of ...
+; For example, given an input of 
+; (LgWordCset (ctv 1 0 20)
+;   (WordNode "This" (ctv 1 0 470256))
+;   (LgAnd
+;      (MSTConnector
+;         (LgConnectorNode "MB")
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
 ;
-; This will generate an output of ...
-;
+; This will generate an output of 
+;(LgWordCset (ctv 1 0 1)
+;   (WordNode "This" (ctv 1 0 470256))
+;    (LgAnd
+;      (DecodedConnector
+;         (WordNode "is" (ctv 1 0 5058187))
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
 
 (define (get-decoded-disjunct disjunct)
 	(define (create-actual-decoded-disjunct word-sign-list)
@@ -59,10 +89,14 @@
 ; ---------------------------------------------------------------------
 ; Get the sign of the mst-connector.
 ;
-; For example, given an input of ...
+; For example, given an input of
+;(MSTConnector
+;   (LgConnectorNode "MB")
+;   (LgConnDirNode "+")
+;)
 ;
-; This will generate an output of ...
-; LgConnDirNode ?????
+; This will generate an output of
+; +
 ;
 (define (get-sign-mst-connector mst-connector)
 	(cog-name (cadr (cog-outgoing-set mst-connector))))
@@ -72,6 +106,25 @@
 ; words are then passed to the (decoded-disjunct) function to get the
 ; decoded disjunct of those words. The distance from the words is then
 ; calculated.
+;
+; For example, given an input of
+;(LgWordCset (ctv 1 0 20)
+;   (WordNode "is" (ctv 1 0 5058187))
+;   (LgAnd
+;      (MSTConnector
+;         (LgConnectorNode "MB")
+;         (LgConnDirNode "-")
+;      )
+;      (MSTConnector
+;         (LgConnectorNode "MC")
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
+;
+; The output is the following list:
+;((This . -) (a . -))
+
 (define (get-disjunct-connected-words disjunct)
 	(define mst-connectors (get-mst-connector disjunct))
 	(define words-connected-to-disjunct (map get-connected-word mst-connectors))
@@ -79,9 +132,41 @@
 
 ; ---------------------------------------------------------------------
 ; Gets all the disjuncts for a given word.
-; For example, given an input of ...
-;
-; This will return ...
+; For example, given an input of
+; (WordNode "is")
+; This will return
+; 
+;((LgWordCset (ctv 1 0 1)
+;   (WordNode "is" (ctv 1 0 5058187))
+;   (LgAnd
+;      (MSTConnector
+;         (LgConnectorNode "MB")
+;         (LgConnDirNode "-")
+;     )
+;     (MSTConnector
+;         (LgConnectorNode "MG")
+;         (LgConnDirNode "+")
+;      )
+;      (MSTConnector
+;         (LgConnectorNode "MH")
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
+; (LgWordCset (ctv 1 0 20)
+;   (WordNode "is" (ctv 1 0 5058187))
+;   (LgAnd
+;      (MSTConnector
+;         (LgConnectorNode "MB")
+;         (LgConnDirNode "-")
+;      )
+;      (MSTConnector
+;         (LgConnectorNode "MC")
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
+;)
 (define (get-disjunct-from-word wordnode)
 	(define inset (cog-incoming-set wordnode))
 	(define (disjunct-filter? x)
@@ -90,6 +175,41 @@
 
 ; ---------------------------------------------------------------------
 ; Creates decoded disjuncts for all the disjuncts of a given word
+; For example, given an input of
+; (WordNode "is")
+; This will return
+; ;((LgWordCset (ctv 1 0 1)
+;   (WordNode "is" (ctv 1 0 5058187))
+;   (LgAnd
+;      (DecodedConnector
+;         (WordNode "This" (ctv 1 0 470256))
+;         (LgConnDirNode "-")
+;      )
+;      (DecodedConnector
+;         (WordNode "another" (ctv 1 0 109754))
+;         (LgConnDirNode "-")
+;      )
+;      (DecodedConnector
+;         (WordNode "test" (ctv 1 0 22502))
+;         (LgConnDirNode "+")
+;      )
+;   )
+;)
+; (LgWordCset (ctv 1 0 1)
+;   (WordNode "is" (ctv 1 0 5058187))
+;   (LgAnd
+;      (DecodedConnector
+;         (WordNode "This" (ctv 1 0 470256))
+;         (LgConnDirNode "-")
+;      )
+;      (DecodedConnector
+;         (WordNode "a" (ctv 1 0 5658964))
+;         (LgConnDirNode "-")
+;      )
+;   )
+;)
+;)
+;
 (define (create-decoded-disjuncts-for-all-disjuncts wordnode)
 	(define all-disjuncts-of-word (get-disjunct-from-word wordnode))
 	(map get-decoded-disjunct all-disjuncts-of-word))
@@ -97,6 +217,18 @@
 ; ---------------------------------------------------------------------
 ; Create decoded disjuncts for all words connected to a
 ; given disjunct
+; Given the following structure as input
+;	(LgWordCset (ctv 1 0 20)
+;   	(WordNode "This" (ctv 1 0 470256))
+;   	(LgAnd
+;      		(MSTConnector
+;       	  	(LgConnectorNode "MB")
+;         		(LgConnDirNode "+")
+;      		)
+;   	)
+;	)
+;The output of this function is:
+; A list of all decoded disjuncts for all words connected to a particular disjunct
 (define (create-decoded-disjuncts-for-all-connected-words disjunct)
 	(define word-sign-pairs (get-disjunct-connected-words disjunct))
 	(map (lambda (x)
@@ -108,6 +240,13 @@
 ; Get the other word of a word pair. The input to this function
 ; is an MST-connector which defines the name of the connector as well
 ; as the sign.
+;The input to this function is the following structure:
+;(MSTConnector
+;   (LgConnectorNode "MB")
+;   (LgConnDirNode "+")
+;)
+;The output is the following:
+;(WordNode "XYZ")
 (define (get-connected-word mst-connector)
 	(define sign (get-sign-mst-connector mst-connector))
 	(define connector-name (cog-name (car (cog-outgoing-set mst-connector))))
