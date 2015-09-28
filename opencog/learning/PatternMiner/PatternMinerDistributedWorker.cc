@@ -47,6 +47,7 @@
 #include <cpprest/filestream.h>
 
 #include <boost/uuid/uuid.hpp>            // uuid class
+#include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 #include "HTree.h"
@@ -69,7 +70,8 @@ void PatternMiner::launchADistributedWorker()
     centralServerPort = config().get("PMCentralServerPort");
     centralServerBaseURL = "http://" +  centralServerIP + ":" + centralServerPort + "/PatternMinerServer";
 
-    boost::uuids::uuid uid;
+    boost::uuids::random_generator uuidGen;
+    boost::uuids::uuid uid = uuidGen();
     std::stringstream ssuid;
     ssuid << uid;
     clientWorkerUID = ssuid.str();
@@ -82,9 +84,26 @@ void PatternMiner::launchADistributedWorker()
     // Build request URI and start the request.
     uri_builder builder(U("/RegisterNewWorker"));
     builder.append_query(U("ClientUID"), U(clientWorkerUID));
-    std::cout << httpClient->request(methods::GET, builder.to_string()).get().extract_json().get() ;
 
 
+    httpClient->request(methods::GET, builder.to_string()).then([=](http_response response)
+    {
+        std::cout << response.to_string() << std::endl;
+        if (response.status_code() == status_codes::OK)
+        {
+            std::cout << "Registered to the central server successfully!" << std::endl;
+        }
+        else
+        {
+            std::cout << "Registered to the central server failed! Please check network and the the state of the central server." << std::endl;
+        }
+
+        return;
+
+    });
+
+
+    std::cout << "Registered to the central server failed! Please check network and the the state of the central server." << std::endl;
 
 //// Note: Breadth_First mining is not maintained anymore. Only Depth_First is used in distributed mining.
 ////    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
