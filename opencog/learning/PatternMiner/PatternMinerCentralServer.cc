@@ -65,16 +65,18 @@ using namespace utility;
 
 void PatternMiner::launchCentralServer()
 {
-   centralServerPort = config().get("PMCentralServerPort");
+    run_as_central_server = true;
 
-   serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
+    centralServerPort = config().get("PMCentralServerPort");
 
-   serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
+    serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
 
-   centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
+    serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
 
-   cout <<"\nPattern Miner central server started!\n";
-   // centralServerListeningThread.join();
+    centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
+
+    cout <<"\nPattern Miner central server started!\n";
+    // centralServerListeningThread.join();
 
 }
 
@@ -136,4 +138,115 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 void PatternMiner::handleFindANewPattern(http_request request)
 {
 
+}
+
+void PatternMiner::centralServerEvaluateInterestingness()
+{
+//    if (enable_Frequent_Pattern)
+//    {
+//        std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+
+//        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+//        {
+//            // sort by frequency
+//            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+
+//            // Finished mining gram patterns; output to file
+//            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+
+//            OutPutFrequentPatternsToFile(gram);
+
+//            std::cout<< std::endl;
+//        }
+//    }
+
+
+//    if (enable_Interesting_Pattern)
+//    {
+//        for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+//        {
+//            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+//            cur_index = -1;
+//            threads = new thread[THREAD_NUM];
+//            num_of_patterns_without_superpattern_cur_gram = 0;
+
+//            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+//            {
+//                threads[i] = std::thread([this]{this->evaluateInterestingnessTask();}); // using C++11 lambda-expression
+//            }
+
+//            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+//            {
+//                threads[i].join();
+//            }
+
+//            delete [] threads;
+
+//            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
+//            std::cout<<"Outputting to file ... ";
+
+//            if (interestingness_Evaluation_method == "Interaction_Information")
+//            {
+//                // sort by interaction information
+//                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+//                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+//            }
+//            else if (interestingness_Evaluation_method == "surprisingness")
+//            {
+//                // sort by surprisingness_I first
+//                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+//                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+
+//                vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
+
+//                // and then sort by surprisingness_II
+//                std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+//                OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
+
+//                // Get the min threshold of surprisingness_II
+//                int threshold_index_II;
+//                threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
+//                int looptimes = 0;
+//                while (true)
+//                {
+
+//                    surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+//                    if (surprisingness_II_threshold <= 0.00000f)
+//                    {
+//                        if (++ looptimes > 8)
+//                        {
+//                            surprisingness_II_threshold = 0.00000f;
+//                            break;
+//                        }
+
+//                        threshold_index_II = ((float)threshold_index_II) * SURPRISINGNESS_II_TOP_THRESHOLD;
+//                    }
+//                    else
+//                        break;
+//                }
+
+
+//                cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
+
+//                // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
+//                int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
+//                for (int p = 0; p <= threshold_index_I; p ++)
+//                {
+//                    HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+
+//                    // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
+//                    if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
+//                        finalPatternsForGram[cur_gram-1].push_back(pNode);
+//                }
+
+//                // sort by frequency
+//                std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+//                OutPutFinalPatternsToFile(cur_gram);
+
+//            }
+
+//            std::cout<< std::endl;
+//        }
+//    }
 }

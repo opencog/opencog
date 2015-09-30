@@ -149,19 +149,6 @@ namespace PatternMining
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
 
-     string centralServerIP;
-     string centralServerPort;
-     string centralServerBaseURL;
-
-     std::thread centralServerListeningThread;
-
-     string clientWorkerUID;
-
-     bool run_as_distributed_worker;
-     bool run_as_central_server;
-
-     http_client* httpClient;
-     http_listener* serverListener;
 
 
 //     // [gram], this to avoid different threads happen to work on the same links.
@@ -244,7 +231,7 @@ namespace PatternMining
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar);
+                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask);
 
      bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -323,10 +310,7 @@ namespace PatternMining
 
      bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
-     void handleGet(http_request request);
-     void handleRegisterNewWorker(http_request request);
-     void handleReportWorkerStop(http_request request);
-     void handleFindANewPattern(http_request request);
+
 
 
  public:
@@ -347,19 +331,48 @@ namespace PatternMining
 
      void runPatternMinerDepthFirst();
 
-     void launchADistributedWorker();
-     void launchCentralServer();
-     void centralServerStartListening();
-
-     void startCentralServer();
-
      void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
      void testPatternMatcher1();
      void testPatternMatcher2();
 
 
+     // ---------------start distributed version of pattern miner ---------------
+private:
+     string centralServerIP;
+     string centralServerPort;
+     string centralServerBaseURL;
 
+     std::thread centralServerListeningThread;
+
+     string clientWorkerUID;
+
+     bool run_as_distributed_worker;
+     bool run_as_central_server;
+
+     http_client* httpClient;
+     http_listener* serverListener;
+
+
+     void handleGet(http_request request);
+     void handleRegisterNewWorker(http_request request);
+     void handleReportWorkerStop(http_request request);
+     void handleFindANewPattern(http_request request);
+
+     void startMiningWork();
+     void centralServerEvaluateInterestingness();
+
+
+
+ public:
+
+     void launchADistributedWorker();
+     void launchCentralServer();
+     void centralServerStartListening();
+
+     void startCentralServer();
+
+     // ---------------end distributed version of pattern miner ---------------
   };
 
 }

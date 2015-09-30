@@ -174,7 +174,11 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
-        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+        // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
+        // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
+        vector<HTreeNode*> allHTreeNodesCurTask;
+
+        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false, allHTreeNodesCurTask);
     }
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
@@ -272,10 +276,10 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 }
 
-
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars,
-                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
+// vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
+                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -378,88 +382,110 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         // unify the pattern
         unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
 
-        string keyString = unifiedPatternToKeyString(unifiedPattern);
-
         // next, check if this pattern already exist (need lock)
         HTreeNode* newHTreeNode = 0;
 
-        string instancekeyString = "";
-        if (gram > 1)
-        {
-            // check if these fact links already been processed before or by other thread
 
-            set<Handle> originalLinksSet(inputLinks.begin(), inputLinks.end());
-
-            for (Handle h  : originalLinksSet)
-            {
-                instancekeyString +=  toString(h.value());
-                instancekeyString += "_";
-            }
-        }
-
-        uniqueKeyLock.lock();
-
-        map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
-
-        if (htreeNodeIter == keyStrToHTreeNodeMap.end())
+        if (run_as_distributed_worker)
         {
             newHTreeNode = new HTreeNode();
             returnHTreeNode = newHTreeNode;
             newHTreeNode->count = 1;
-
-            if (gram > 1)
-            {
-                newHTreeNode->instancesUidStrings.insert(instancekeyString);
-            }
-
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
-
-//            cout << "A new pattern Found:\n"<< keyString << std::endl;
-
-
+            newHTreeNode->pattern = unifiedPattern;
+            newHTreeNode->var_num = patternVarMap.size();
+            returnHTreeNode = newHTreeNode;
 
         }
         else
         {
-            returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
+            string keyString = unifiedPatternToKeyString(unifiedPattern);
 
-            bool alreadyExtracted = false;
-            if (gram > 1)
+            string instancekeyString = "";
+            if ( (gram > 1) && (THREAD_NUM > 1) )
             {
                 // check if these fact links already been processed before or by other thread
-                if (returnHTreeNode->instancesUidStrings.find(instancekeyString) == returnHTreeNode->instancesUidStrings.end())
+
+                set<Handle> originalLinksSet(inputLinks.begin(), inputLinks.end());
+
+                for (Handle h  : originalLinksSet)
                 {
-                    returnHTreeNode->instancesUidStrings.insert(instancekeyString);
+                    instancekeyString +=  toString(h.value());
+                    instancekeyString += "_";
                 }
-                else
+            }
+
+            if (THREAD_NUM > 1)
+                uniqueKeyLock.lock();
+
+            map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
+
+            if (htreeNodeIter == keyStrToHTreeNodeMap.end())
+            {
+                newHTreeNode = new HTreeNode();
+                returnHTreeNode = newHTreeNode;
+                newHTreeNode->count = 1;
+
+                if (gram > 1  && (THREAD_NUM > 1) )
                 {
-                    alreadyExtracted = true;
-                    // debug
-                    // cout << "already extracted!" << std::endl;
+                    newHTreeNode->instancesUidStrings.insert(instancekeyString);
                 }
+
+                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+
+    //            cout << "A new pattern Found:\n"<< keyString << std::endl;
+
+
+
+            }
+            else
+            {
+                returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
+
+                bool alreadyExtracted = false;
+                if (gram > 1  && (THREAD_NUM > 1))
+                {
+                    // check if these fact links already been processed before or by other thread
+                    if (returnHTreeNode->instancesUidStrings.find(instancekeyString) == returnHTreeNode->instancesUidStrings.end())
+                    {
+                        returnHTreeNode->instancesUidStrings.insert(instancekeyString);
+                    }
+                    else
+                    {
+                        alreadyExtracted = true;
+                        // debug
+                        // cout << "already extracted!" << std::endl;
+                    }
+
+                }
+
+                if (! alreadyExtracted)
+                    returnHTreeNode->count ++;
+
+    //            cout << "Unique Key already exists:" << keyString << std::endl;
 
             }
 
-            if (! alreadyExtracted)
-                returnHTreeNode->count ++;
+            if (THREAD_NUM > 1)
+                uniqueKeyLock.unlock();
 
-//            cout << "Unique Key already exists:" << keyString << std::endl;
 
+            if (newHTreeNode)
+            {
+                newHTreeNode->pattern = unifiedPattern;
+                newHTreeNode->var_num = patternVarMap.size();
+
+                if (THREAD_NUM > 1)
+                    addNewPatternLock.lock();
+
+                (patternsForGram[gram-1]).push_back(newHTreeNode);
+
+                if (THREAD_NUM > 1)
+                    addNewPatternLock.unlock();
+
+            }
         }
 
-        uniqueKeyLock.unlock();
 
-
-        if (newHTreeNode)
-        {
-            newHTreeNode->pattern = unifiedPattern;
-            newHTreeNode->var_num = patternVarMap.size();
-
-            addNewPatternLock.lock();
-            (patternsForGram[gram-1]).push_back(newHTreeNode);
-            addNewPatternLock.unlock();
-
-        }
 
     }
 
@@ -471,7 +497,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,  bool isExtendedFromVar)
+                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,  bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -619,6 +645,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
             if (thisGramHTreeNode)
             {
+
                 // This pattern is the super pattern of all its lastGramHTreeNodes (parentNode)
                 // add an ExtendRelation
 
@@ -716,10 +743,15 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         }
 
                         // extract patterns from these child
-                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap,isNewExtendedFromVar);
+                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask);
                     }
 
                     nodeIndex ++;
+                }
+
+                if (run_as_distributed_worker)
+                {
+                    allHTreeNodesCurTask.push_back(thisGramHTreeNode);
                 }
 
             }
