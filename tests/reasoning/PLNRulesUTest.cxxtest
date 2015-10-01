@@ -72,9 +72,12 @@ void PLNRulesUTest::setUp()
         "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(as);
+
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
 }
 
-/*
+/**
  * Tests the deduction rule (pln-rule-deduction) defined in:
  * opencog/reasoning/pln/rules/deduction.scm
  */
@@ -82,8 +85,6 @@ void PLNRulesUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm, "
                  "opencog/scm/utilities.scm, "
@@ -108,15 +109,13 @@ void PLNRulesUTest::test_deduction()
     TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
-/*
+/**
  * Tests the and rule (pln-rule-and-construction) defined in:
  * opencog/reasoning/pln/rules/and-construction-rule.scm
  */
 void PLNRulesUTest::test_and_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
 
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm, "
@@ -132,15 +131,13 @@ void PLNRulesUTest::test_and_construction()
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
-/*
+/**
  * Tests the and rule (pln-rule-or-construction) defined in:
  * opencog/reasoning/pln/rules/or-construction-rule.scm
  */
 void PLNRulesUTest::test_or_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
 
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm, "
@@ -156,16 +153,13 @@ void PLNRulesUTest::test_or_construction()
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
-/*
+/**
  * Tests the not rule (pln-rule-not-construction) defined in:
  * opencog/reasoning/pln/rules/not-construction-rule.scm
  */
 void PLNRulesUTest::test_not_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
 
     config().set("SCM_PRELOAD", "opencog/scm/core_types.scm, "
                  "opencog/scm/utilities.scm, "
