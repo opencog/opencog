@@ -362,7 +362,7 @@ private:
      void startMiningWork();
      void centralServerEvaluateInterestingness();
 
-
+     void sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex);
 
  public:
 

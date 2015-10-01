@@ -104,6 +104,10 @@ void PatternMiner::handleGet(http_request request)
     {
         handleRegisterNewWorker(request);
     }
+    else if (path == "/FindANewPattern")
+    {
+        handleFindANewPattern(request);
+    }
     else
     {
         json::value answer = json::value::object();

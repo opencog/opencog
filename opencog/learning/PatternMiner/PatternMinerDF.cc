@@ -640,24 +640,42 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
             }
 
-            unsigned int extendedLinkIndex;
+            unsigned int extendedLinkIndex = 999;
             HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex);
 
             if (thisGramHTreeNode)
             {
 
-                // This pattern is the super pattern of all its lastGramHTreeNodes (parentNode)
-                // add an ExtendRelation
+                if (run_as_distributed_worker)
+                {
+                    allHTreeNodesCurTask.push_back(thisGramHTreeNode);
+                    string curPatternKeyStr = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
 
-                ExtendRelation relation;
-                relation.extendedHTreeNode = thisGramHTreeNode;
-                relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
-                relation.sharedLink = extendedLink;
-                relation.extendedNode = extendedNode;
-                // relation.isExtendedFromVar = isExtendedFromVar;
+                    string parentKeyStr = "";
 
-                if (parentNode)
-                    parentNode->superPatternRelations.push_back(relation);
+                    if (parentNode)
+                    {
+                        parentKeyStr = unifiedPatternToKeyString(parentNode->pattern);
+
+                    }
+
+                    sendPatternToCentralServer(curPatternKeyStr, parentKeyStr, extendedLinkIndex);
+                }
+                else
+                {
+                    // This pattern is the super pattern of all its lastGramHTreeNodes (parentNode)
+                    // add an ExtendRelation
+
+                    ExtendRelation relation;
+                    relation.extendedHTreeNode = thisGramHTreeNode;
+                    relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
+                    relation.sharedLink = extendedLink;
+                    relation.extendedNode = extendedNode;
+                    // relation.isExtendedFromVar = isExtendedFromVar;
+
+                    if (parentNode)
+                        parentNode->superPatternRelations.push_back(relation);
+                }
 
                 // check if the current gram is already the MAX_GRAM
                 if(cur_pattern_gram >= MAX_GRAM)        
@@ -749,10 +767,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     nodeIndex ++;
                 }
 
-                if (run_as_distributed_worker)
-                {
-                    allHTreeNodesCurTask.push_back(thisGramHTreeNode);
-                }
+
 
             }
 

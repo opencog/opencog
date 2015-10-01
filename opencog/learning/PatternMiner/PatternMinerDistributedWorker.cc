@@ -134,3 +134,13 @@ void PatternMiner::startMiningWork()
         std::cout<< THREAD_NUM << " threads used. \n";
         std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 }
+
+void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex)
+{
+    uri_builder builder(U("/FindANewPattern"));
+    builder.append_query(U("Pattern"), U(curPatternKeyStr));
+    builder.append_query(U("ParentPattern"), U(parentKeyString));
+    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
+
+    httpClient->request(methods::GET, builder.to_string());
+}
