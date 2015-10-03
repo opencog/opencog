@@ -84,11 +84,8 @@ void PatternMiner::centralServerStartListening()
 {
     try
     {
-       serverListener->open()
-          .then([](pplx::task<void> t){})
-          .wait();
+       serverListener->open().wait();
 
-       while (true);
     }
     catch (exception const & e)
     {
@@ -98,23 +95,30 @@ void PatternMiner::centralServerStartListening()
 
 void PatternMiner::handleGet(http_request request)
 {
-    cout << "Got request: \n" << request.to_string() << std::endl;
-    string path = request.relative_uri().path();
-    if (path == "/RegisterNewWorker")
+    try
     {
-        handleRegisterNewWorker(request);
-    }
-    else if (path == "/FindANewPattern")
-    {
-        handleFindANewPattern(request);
-    }
-    else
-    {
-        json::value answer = json::value::object();
+        cout << "Got request: \n" << request.to_string() << std::endl;
+        string path = request.relative_uri().path();
+        if (path == "/RegisterNewWorker")
+        {
+            handleRegisterNewWorker(request);
+        }
+        else if (path == "/FindANewPattern")
+        {
+            handleFindANewPattern(request);
+        }
+        else
+        {
+            json::value answer = json::value::object();
 
-        answer["msg"] = json::value("Unknown request command!");
+            answer["msg"] = json::value("Unknown request command!");
 
-        request.reply(status_codes::NotFound, answer);
+            request.reply(status_codes::NotFound, answer);
+        }
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
     }
 
 
@@ -124,12 +128,23 @@ void PatternMiner::handleGet(http_request request)
 void PatternMiner::handleRegisterNewWorker(http_request request)
 {
 
-   cout << "Got request to RegisterNewWorker: \n" << request.to_string() << std::endl;
-   json::value answer = json::value::object();
+    try
+    {
+        auto paths = uri::split_path(uri::decode(request.relative_uri().query()));
 
-   answer["msg"] = json::value("Worker registered successfully!");
+        string clientID =  paths[0];
+        cout << "Got request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
 
-   request.reply(status_codes::OK, answer);
+        json::value answer = json::value::object();
+        answer["msg"] = json::value("Worker registered successfully!");
+        request.reply(status_codes::OK, answer);
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+    }
+
+
 
 }
 
@@ -141,6 +156,24 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 void PatternMiner::handleFindANewPattern(http_request request)
 {
+
+    try
+    {
+        json::value jval = request.extract_json().get();
+
+        string PatternStr =  jval[U("Pattern")].as_string();
+        cout << "PatternStr = " << PatternStr << std::endl;
+        string ParentPatternStr = jval[U("ParentPattern")].as_string();
+        cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
+        int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
+        cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+    }
+
+
 
 }
 

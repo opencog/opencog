@@ -138,9 +138,15 @@ void PatternMiner::startMiningWork()
 void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex)
 {
     uri_builder builder(U("/FindANewPattern"));
-    builder.append_query(U("Pattern"), U(curPatternKeyStr));
-    builder.append_query(U("ParentPattern"), U(parentKeyString));
-    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
 
-    httpClient->request(methods::GET, builder.to_string());
+    json::value patternInfo = json::value::object();
+    patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
+    patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
+    patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
+
+//    builder.append_query(U("Pattern"), U(curPatternKeyStr));
+//    builder.append_query(U("ParentPattern"), U(parentKeyString));
+//    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
+
+    httpClient->request(methods::GET, builder.to_string(), patternInfo.serialize().c_str(), "application/json");
 }

@@ -658,6 +658,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         parentKeyStr = unifiedPatternToKeyString(parentNode->pattern);
 
                     }
+                    else
+                    {
+                        parentKeyStr = "none";
+                    }
 
                     sendPatternToCentralServer(curPatternKeyStr, parentKeyStr, extendedLinkIndex);
                 }
