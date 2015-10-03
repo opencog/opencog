@@ -28,3 +28,5 @@ INSTALL (FILES
   	DESTINATION "${DATADIR}/scm/embodiment"
 )
 
+INSTALL (TARGETS embodiment-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")

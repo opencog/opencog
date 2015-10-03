@@ -16,7 +16,12 @@
 				(VariableNode "$C"))
 			(InheritanceLink
 				(VariableNode "$B")
-				(VariableNode "$C")))
+				(VariableNode "$C"))
+			; To avoid matching (Inheritance A C) and (Inheritance A C)
+			(NotLink
+				(EqualLink
+					(VariableNode "$A")
+					(VariableNode "$B"))))
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pln-formula-abduction")
 			(ListLink
@@ -28,10 +33,7 @@
 					(VariableNode "$C"))
 				(InheritanceLink
 					(VariableNode "$B")
-					(VariableNode "$C"))
-				(VariableNode "$A")
-				(VariableNode "$B")
-				(VariableNode "$C")))))
+					(VariableNode "$C"))))))
 
 ; -----------------------------------------------------------------------------
 ; Abduction Formula
@@ -41,16 +43,16 @@
 ; Side-effect: TruthValue of AB may be updated
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-abduction AB AC BC A B C)
+(define (pln-formula-abduction AB AC BC)
 	(cog-set-tv!
 		AB
 		(pln-formula-abduction-side-effect-free
 			AB
 			AC
 			BC
-			A
-			B
-			C)))
+			(gar AB)
+			(gar BC)
+			(gdr AC))))
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------

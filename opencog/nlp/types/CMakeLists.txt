@@ -16,6 +16,9 @@ ADD_LIBRARY (nlp-types SHARED
 	atom_types
 	NLPTypes
 )
+TARGET_LINK_LIBRARIES(nlp-types
+	${ATOMSPACE_LIBRARY}
+)
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(nlp-types nlp_atom_types)
