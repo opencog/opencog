@@ -169,3 +169,7 @@
 (define imperative-name (Node "imperative"))
 (DefineLink imperative-name imperative)
 (MemberLink (stv 1 1) imperative-name (ConceptNode "R2L-en-RuleBase"))
+(define det-name (Node "det"))
+(DefineLink det-name det)
+(MemberLink (stv 1 1) det-name (ConceptNode "R2L-en-RuleBase"))
+
