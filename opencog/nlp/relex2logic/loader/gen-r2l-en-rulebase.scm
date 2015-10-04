@@ -172,4 +172,7 @@
 (define det-name (Node "det"))
 (DefineLink det-name det)
 (MemberLink (stv 1 1) det-name (ConceptNode "R2L-en-RuleBase"))
+(define nn-name (Node "nn"))
+(DefineLink nn-name nn)
+(MemberLink (stv 1 1) nn-name (ConceptNode "R2L-en-RuleBase"))
 
