@@ -20,23 +20,9 @@ if so just compile it manually and it should work.
 
 Opencog depends on the many packages. Some of the more important ones are:
 
-   g++ cmake boost expat guile xerces-c-2 cxxtest unixodbc
+   g++ cmake boost guile cxxtest unixodbc
 
-xerces, expat, unixodbc are optional.  See the main README for details.
-
-----------------------------------------------------------
-
-Archlinux puts xerces-c-2 in a nonstandard location--
-you will need to make sure the build can find its includes
-and shared libraries.
-
-You may set the environment variable XERCESCROOT to
-"/opt/xerces-c-2/", or you may add that folder to the
-PATHS section of the FIND_LIBRARY(XERCESC_LIBRARIES) command in
-opencog/lib/FindXercesC.cmake
-
-If you get an error about XERCESC_LIBRARIES or XERCESC_INCLUDE_DIR
-being undefined, it is probably because you did not set
-the XERCESROOT before running cmake.
+unixodbc is optional; its neeeed for database persistance.  See the
+main README for details.
 
 ----------------------------------------------------------
