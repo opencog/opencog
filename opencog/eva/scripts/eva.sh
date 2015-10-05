@@ -40,9 +40,9 @@ tmux new-window -n 'cog' 'cogserver -c $OCBHAVE/scripts/opencog.conf; $SHELL'
 cd $OCBHAVE/src
 # Load data into the CogServer
 sleep 5
-# echo -e "py\n" | cat - ros_commo.py |netcat localhost 17002
-echo -e "py\n" | cat - atomic.py |netcat localhost 17002
-cat universal-fsm.scm |netcat localhost 17002
+# echo -e "py\n" | cat - ros_commo.py |netcat localhost 17020
+echo -e "py\n" | cat - atomic.py |netcat localhost 17020
+# cat bhave.scm |netcat localhost 17020
 sleep 5
 
 # Run the new face-tracker.
@@ -50,7 +50,7 @@ sleep 5
 tmux new-window -n 'fce' '../face_track/main.py; $SHELL'
 
 # Telnet shell
-tmux new-window -n 'tel' 'rlwrap telnet localhost 17002; $SHELL'
+tmux new-window -n 'tel' 'rlwrap telnet localhost 17020; $SHELL'
 
 # Fix the annoying byobu display
 echo "tmux_left=\"session\"" > $HOME/.byobu/status

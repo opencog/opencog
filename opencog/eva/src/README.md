@@ -57,7 +57,7 @@ Cython modules are installed here:
 
 Get to the cogserver prompt like this:
 ```
-rlwrap telnet localhost 17002
+rlwrap telnet localhost 17020
 ```
 and then enter the python interpreter by saying `py`, or the scheme
 interpreter by saying `scm`.
@@ -73,7 +73,7 @@ Face tracking debug
 Print all visible faces in the atomspace:
 
 ```
-rlwrap telnet localhost 17002
+rlwrap telnet localhost 17020
 (cog-incoming-set (PredicateNode "visible face"))
 (cog-bind chk-room-empty)
 (cog-bind chk-room-non-empty)
