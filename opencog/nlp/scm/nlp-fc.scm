@@ -61,7 +61,8 @@
 
 (define (run-fc parse-node interp-link)
     (list (cog-fc
-        (SetLink (parse-get-relex-outputs parse-node) interp-link)
+        (SetLink)
         r2l-rules
+        (SetLink (parse-get-relex-outputs parse-node) interp-link)
     ))
 )
