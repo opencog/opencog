@@ -11,6 +11,9 @@
 (use-modules (opencog exec))
 
 (load-from-path "utilities.scm")
+
+; (display %load-path)
+; (add-to-load-path "../src")
 (load-from-path "faces.scm")
 
 ; ------------------------------------------------------

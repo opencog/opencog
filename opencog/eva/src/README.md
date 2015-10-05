@@ -28,6 +28,14 @@ Failure to do this will result in the message:
 ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not found"
 ```
 
+* Change directory to your catkin_ws and then run `scripts/eva.sh`.
+  This will start up a byobu multiplexed terminal, and will run ROS,
+  the ros face tracker, the blender API and the opencog server
+  automatically, and will launch most of the needed behavior scripts.
+
+
+Development shortcuts
+=====================
 * Start guile in this directory, then from the guile prompt:
 ```
 (use-modules (opencog cogserver))
@@ -39,6 +47,7 @@ echo -e "py\n" | cat - atomic.py |netcat localhost 17020
 ```
 Then back at the guile prompt:
 ```
+(load-from-path "faces.scm")
 (load-from-path "btree.scm")
 ```
 
@@ -79,6 +88,9 @@ rlwrap telnet localhost 17020
 (cog-bind chk-room-non-empty)
 (show-room-state)
 ```
+
+Not that if the room state changes, `(show-room-state)` will show the
+wrong state until after both cog-binds ar performed!
 
 
 Enhancement TODO List
