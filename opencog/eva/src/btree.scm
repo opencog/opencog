@@ -11,20 +11,14 @@
 (use-modules (opencog exec))
 
 (load-from-path "utilities.scm")
+(load-from-path "faces.scm")
 
 ; ------------------------------------------------------
-; Same as in eva-fsm.scm
-
-; Is the room empty, or is someone in it?
-(define room-state (AnchorNode "Room State"))
-(define room-empty (ConceptNode "room empty"))
-(define room-nonempty (ConceptNode "room nonempty"))
 
 (define soma-state (AnchorNode "Soma State"))
 (define soma-sleeping (ConceptNode "Sleeping"))
 
-;; Assume room empty at first
-(ListLink room-state room-empty)
+;; Assume Eva is sleeping at first
 (ListLink soma-state soma-sleeping)
 
 ; --------------------------------------------------------
