@@ -1,4 +1,4 @@
-
+;"He stood at the goal line."
 (define nn
     (BindLink
         (VariableList
