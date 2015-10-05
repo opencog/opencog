@@ -59,3 +59,4 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/imperative.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/det.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/nn.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/to-do-rule-3.scm")
