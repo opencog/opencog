@@ -48,12 +48,9 @@ PACKAGES_BUILD="
 		binutils-dev \
 		libgsl0-dev \
 		unixodbc-dev \
-		libxerces-c-dev \
 		uuid-dev \
 		libprotoc-dev \
 		protobuf-compiler \
-		libcurl4-gnutls-dev \
-		libexpat1-dev \
 		libsdl-gfx1.2-dev \
 		libssl-dev \
 		tcl-dev \

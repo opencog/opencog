@@ -3,6 +3,7 @@ OpenCog is very easy to build under Ubuntu. Just follow this page
 http://wiki.opencog.org/w/Building_OpenCog_on_Ubuntu
 
 Below is a just copy/paste of it (Nov 18 2010)
+Its also obsolete ...
 
 =========================================================
 
@@ -198,7 +199,7 @@ sudo aptitude update
 
 Install dependencies
 
-sudo aptitude install libxerces-c2-dev 
+None required...
 
 Configure the build
 
@@ -207,9 +208,6 @@ cmake ..
 Build OpenCog Embodiment
 
 make 
-
-TBD
-Build the Embodiment proxy to Metaverse
 
 TBD
 Build the Embodiment question-answering support
