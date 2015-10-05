@@ -58,8 +58,7 @@
 	(DefinedSchemaNode "dice-roll: glance")
 	(EvaluationLink
 		(GroundedPredicateNode "scm: dice-roll")
-		(ListLink (NumberNode "0.5"))
-	)
+		(ListLink (NumberNode "0.5"))))
 
 ;; ------
 ;;

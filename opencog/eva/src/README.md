@@ -35,13 +35,17 @@ ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not
 ```
 Then load the python code:
 ```
-echo -e "py\n" | cat - atomic.py |netcat localhost 17002
+echo -e "py\n" | cat - atomic.py |netcat localhost 17020
 ```
 Then back at the guile prompt:
 ```
-(load-from-path "eva-fsm.scm")
+(load-from-path "btree.scm")
 ```
 
+A different, currently broken/unfinsihed/demo variant:
+```
+(load-from-path "eva-fsm.scm")
+```
 
 Debugging notes
 ===============
