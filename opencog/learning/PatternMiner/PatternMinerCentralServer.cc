@@ -174,6 +174,55 @@ void PatternMiner::handleFindANewPattern(http_request request)
         cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
         int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
         cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
+
+        HTreeNode* newHTreeNode;
+        // check if the pattern key already exist
+        map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
+        if (htreeNodeIter != keyStrToHTreeNodeMap.end())
+        {
+            newHTreeNode = htreeNodeIter->second;
+            newHTreeNode->count ++;
+        }
+        else
+        {
+            // add this new found pattern into the Atomspace
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+            if (patternHandleSeq.size() == 0)
+            {
+                throw ("Invalid pattern string: " + PatternStr);
+            }
+
+            // create a new HTreeNode
+            newHTreeNode = new HTreeNode();
+            newHTreeNode->pattern = patternHandleSeq;
+            newHTreeNode->count = 1;
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+        }
+
+        if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
+        {
+            if (ParentPatternStr == "none")
+                throw ("Pattern missing parent pattern string: " + PatternStr);
+            else
+            {
+                map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
+                if (parentNodeIter == keyStrToHTreeNodeMap.end())
+                    throw ("Pattern missing parent pattern string: " + PatternStr);
+                else
+                {
+                    // add super pattern relation
+
+                    HTreeNode* parentNode = parentNodeIter->second;
+
+                    ExtendRelation relation;
+                    relation.extendedHTreeNode = newHTreeNode;
+                    relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
+
+                    parentNode->superPatternRelations.push_back(relation);
+                }
+            }
+        }
+
     }
     catch (exception const & e)
     {
