@@ -44,6 +44,8 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/StringManipulator.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
 
 #include "HTree.h"
 #include "PatternMiner.h"
@@ -97,7 +99,8 @@ void PatternMiner::handleGet(http_request request)
 {
     try
     {
-        cout << "Got request: \n" << request.to_string() << std::endl;
+        // cout << "Got request: \n" << request.to_string() << std::endl;
+
         string path = request.relative_uri().path();
         if (path == "/RegisterNewWorker")
         {
@@ -106,6 +109,10 @@ void PatternMiner::handleGet(http_request request)
         else if (path == "/FindANewPattern")
         {
             handleFindANewPattern(request);
+        }
+        else if (path == "/ReportWorkerStop")
+        {
+            handleReportWorkerStop(request);
         }
         else
         {
@@ -150,7 +157,7 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
 
 void PatternMiner::handleReportWorkerStop(http_request request)
 {
-
+    // todo
 
 }
 
@@ -175,6 +182,151 @@ void PatternMiner::handleFindANewPattern(http_request request)
 
 
 
+}
+
+// a patternStr is sent from a distributed worker via json, it's the keystring of a pattern
+// the server need to load the string into links into AtomSpace
+// e.g. a patternStr =
+//  (InheritanceLink )\n
+//    (VariableNode $var_1)\n
+//    (ConceptNode human)\n\n
+//  (EvaluationLink )\n
+//    (PredicateNode like_drink)
+//    (Listlink )\n
+//      (VariableNode $var_1)\n
+//      (ConceptNode soda)\n\n
+//  (InheritanceLink )\n
+//    (VariableNode $var_1)\n
+//    (ConceptNode ugly)\n\n
+
+//(AndLink)\n
+//  (InheritanceLink )\n
+//    (VariableNode $var_1)\n
+//    (ConceptNode human)\n
+//  (EvaluationLink )\n
+//    (PredicateNode like_drink)
+//    (Listlink )\n
+//      (VariableNode $var_1)\n
+//      (ConceptNode soda)\n\n
+//(InheritanceLink )\n
+//    (VariableNode $var_1)\n
+//    (ConceptNode ugly)\n\n
+HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace *_atomSpace)
+{
+
+    std::vector<std::string> strs;
+    boost::algorithm::split_regex( strs, patternStr, boost::regex( "\n\n" ) ) ;
+
+    HandleSeq pattern;
+
+    for (string linkStr : strs) // load each link
+    {
+        if (linkStr == "")
+            continue;
+
+        try
+        {
+            HandleSeq rootOutgoings;
+
+            std::size_t firstLineEndPos = linkStr.find("\n");
+            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
+            stringstream outgoingStream(rootOutgoingStr);
+
+            loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings);
+
+            std::size_t typeEndPos = linkStr.find(" ");
+            string atomTypeStr = linkStr.substr(1, typeEndPos);
+            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+
+            if (linkOrNodeStr != "Link")
+            {
+                // exception
+                throw ("Not a Link: " + linkOrNodeStr);
+
+            }
+
+            Type atomType = classserver().getType(atomTypeStr);
+            if (NOTYPE == atomType)
+                throw InvalidParamException(TRACE_INFO,
+                    "Not a valid typename: '%s'", atomTypeStr.c_str());
+
+            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
+            pattern.push_back(rootLink);
+        }
+        catch (exception const & e)
+        {
+           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
+
+           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
+
+        }
+
+    }
+
+    return pattern;
+}
+
+// recursively function
+void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
+{
+    string line;
+    string curIndent = parentIndent + LINE_INDENTATION;
+
+    while(true)
+    {
+        if (! getline(outgoingStream, line))
+            return;
+
+        std::size_t nonIndentStartPos = line.find("(");
+        string indent = line.substr(0, nonIndentStartPos);
+        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
+        std::size_t typeEndPos = nonIndentSubStr.find(" ");
+        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
+        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() + 4, 4);
+        Type atomType = classserver().getType(atomTypeStr);
+        if (NOTYPE == atomType)
+            throw InvalidParamException(TRACE_INFO,
+                "Not a valid typename: '%s'", atomTypeStr.c_str());
+
+        if (indent == curIndent)
+        {
+            if (linkOrNodeStr == "Node")
+            {
+                std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
+                string nodeName = nonIndentSubStr.substr(typeEndPos, nodeNameEndPos - typeEndPos);
+                Handle node = _atomSpace->add_node(atomType, nodeName);
+                outgoings.push_back(node);
+            }
+            else if (linkOrNodeStr == "Link")
+            {
+                // call this function recursively
+                HandleSeq childOutgoings;
+                loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent);
+
+                Handle link = _atomSpace->add_link(atomType, childOutgoings);
+                outgoings.push_back(link);
+            }
+            else
+            {
+                // exception
+                throw ( "Not a Node, neighter a Link: " + linkOrNodeStr);
+
+
+            }
+
+        }
+        else if (indent.size() < curIndent.size())
+        {
+            return;
+        }
+        else
+        {
+            // exception
+            throw ("Indent wrong: " + line);
+
+        }
+
+    }
 }
 
 void PatternMiner::centralServerEvaluateInterestingness()

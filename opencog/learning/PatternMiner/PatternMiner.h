@@ -50,6 +50,8 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 
+#define LINE_INDENTATION "  "
+
  struct _non_ordered_pattern
  {
      Handle link;
@@ -363,6 +365,8 @@ private:
      void centralServerEvaluateInterestingness();
 
      void sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex);
+     HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
+     void loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
 
  public:
 

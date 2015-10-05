@@ -2305,7 +2305,7 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
         atomspace = this->atomSpace;
 
     std::stringstream answer;
-    std::string more_indent = indent + "  ";
+    std::string more_indent = indent + LINE_INDENTATION;
 
     answer << indent  << "(" << classserver().getTypeName(atomspace->get_type(h)) << " ";
 
