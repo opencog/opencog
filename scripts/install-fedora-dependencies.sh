@@ -44,7 +44,6 @@ PACKAGES_BUILD="
 		uuid-devel \
 		protobuf-c \
 		protobuf-compiler
-		gnutls-devel \
 		SDL_gfx-devel \
 		openssl-devel \
 		tcl-devel \
