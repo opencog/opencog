@@ -28,7 +28,7 @@ Failure to do this will result in the message:
 ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not found"
 ```
 
-* Start guile, then from th guile prompt:
+* Start guile in this directory, then from the guile prompt:
 ```
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
