@@ -42,19 +42,20 @@
 
 ; ------------------------------------------------------
 ;;
-;; Does the atomspace contains the link
+;; Is the room empty, viz: Does the atomspace contains the link
 ;; (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
 ;; line 665, were_no_people_in_the_scene
 (DefineLink
-	(DefinedPredicateNode "is-empty")
+	(DefinedPredicateNode "is room empty?")
 	(EqualLink
 		(SetLink room-empty)
 		(GetLink (ListLink room-state (VariableNode "$x")))
 	))
 
 ;; line 742, assign_face_target
+;; Set (PredicateNode "lookat-face") to the face ID to look at.
 (DefineLink
-	(DefinedPredicateNode "look-at-visible-face")
+	(DefinedSchemaNode "look at person")
 	(PutLink
 		(EvaluationLink (PredicateNode "lookat-face")
 			(ListLink (VariableNode "$face")))
@@ -63,12 +64,28 @@
 				(ListLink (VariableNode "$face-id"))))
 	))
 
+;; line 757, timestamp
+(define (get-timestamp)
+	(NumberNode (number->string (current-time))))
+
+(DefineLink
+	(DefinedSchemaNode "set timestamp")
+	(PutLink
+		(EvaluationLink (PredicateNode "start-interaction-timestamp")
+			(ListLink (VariableNode "$ts")))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: get-timestamp")
+			(ListLink))))
+
+;; line 392 -- Sequence - if there were no people in the room,
+;; then look at the new arrival .
 (define empty-seq
 	(SatisfactionLink
 		(SequentialAndLink
 			;; line 392
-			(DefinedPredicateNode "is-empty")
-			(DefinedPredicateNode "look-at-visible-face")
+			(DefinedPredicateNode "is room empty?")
+			(DefinedSchemaNode "look at person")
+			(DefinedSchemaNode "set timestamp")
 			(DefinedPredicateNode "Print Msg")
 		)))
 
