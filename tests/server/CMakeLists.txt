@@ -2,7 +2,6 @@ INCLUDE_DIRECTORIES (
 	${PROJECT_SOURCE_DIR}/opencog/util
 	${PROJECT_SOURCE_DIR}/opencog/atomspace
 	${PROJECT_SOURCE_DIR}/opencog/server
-	${EXPAT_INCLUDE_DIRS}
 )
 
 LINK_DIRECTORIES(
