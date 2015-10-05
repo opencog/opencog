@@ -2,6 +2,7 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/comp.scm")
 ;;
 (load-scm-from-file "../opencog/nlp/relex2logic/advmod.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/adverbialpp.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/amod.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/atTime.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/because.scm")
