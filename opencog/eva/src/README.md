@@ -75,3 +75,19 @@ rlwrap telnet localhost 17002
 (cog-bind chk-room-non-empty)
 (show-room-state)
 ```
+
+
+Enhancement TODO List
+=====================
+A list of changes to the atomspace that could help with this:
+
+* Use TimeNode for time; use the Timeserver as needed
+* Create a CurrentTimeNode that returns the current time.  To store
+  the current time, one would say this:
+```
+    (PutLink (EvaluationLink (PredicateNode "$timstamp") (VariableNode "$ts"))
+       (CurrentTimeNode "now"))
+```
+* Create RandomNode for a uniform distribution 0 to 1 which
+  can be used to evaluate to true/false by using GreaterThanLink
+  or alternately -- and all-in-one predicate for this.

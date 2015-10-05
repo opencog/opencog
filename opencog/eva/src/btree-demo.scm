@@ -32,8 +32,7 @@
 (define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
 ; ------------------------------------------------------
 ;;
-;; determining if the
-;; atomspace contains the link
+;; Determine if the atomspace contains the link
 ;; (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
 ;; If the atomspace does contain the above, then the print-msg
 ;; function is run.
@@ -82,4 +81,3 @@
 		)))
 
 (cog-satisfy empty-seq)
-
