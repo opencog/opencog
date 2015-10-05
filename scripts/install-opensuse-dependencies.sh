@@ -42,12 +42,8 @@ PACKAGES_BUILD="
 		binutils-devel \
 		libgsl0 gsl-devel \
 		unixodbc-devel \
-		libxerces-c-devel \
 		uuid-devel \
 		libprotobuf-c-devel \
-		libcurl4 \
-		curl \
-		libexpat-devel  \
 		libSDL_gfx-devel \
 		libssl27 \
 		tcl  \
