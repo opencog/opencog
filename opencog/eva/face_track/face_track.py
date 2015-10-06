@@ -21,6 +21,7 @@ import time
 
 import rospy
 import tf
+from std_msgs.msg import Int32
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
@@ -108,9 +109,9 @@ class FaceTrack:
 		self.TOPIC_GLANCE_FACE = "/opencog/glance_at"
 		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
 		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
-		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int, self.glance_at_face)
-		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int, self.look_at_face)
-		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int, self.gaze_at_face)
+		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int32, self.glance_at_cb)
+		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_face)
+		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_face)
 
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
@@ -191,6 +192,12 @@ class FaceTrack:
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 
+	def glance_at_cb(self, data):
+		self.glance_at_face(data, 0.5)
+
+	# ---------------------------------------------------------------
+	# Private functions, not for use outside of this class.
+	#
 	# Start tracking a face
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:

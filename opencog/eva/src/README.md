@@ -92,6 +92,12 @@ rlwrap telnet localhost 17020
 Not that if the room state changes, `(show-room-state)` will show the
 wrong state until after both cog-binds ar performed!
 
+```
+rostopic pub --once /opencog/glance_at std_msgs/Int32 29
+rostopic pub --once /opencog/look_at std_msgs/Int32 29
+rostopic pub --once /opencog/gaze_at std_msgs/Int32 29
+```
+
 
 Enhancement TODO List
 =====================
