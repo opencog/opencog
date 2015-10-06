@@ -110,8 +110,8 @@ class FaceTrack:
 		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
 		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
 		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int32, self.glance_at_cb)
-		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_face)
-		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_face)
+		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_cb)
+		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_cb)
 
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
@@ -135,8 +135,9 @@ class FaceTrack:
 
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
-		# Transform Listener.Allows history of RECENT_INTERVAL
-		self.tf_listener = tf.TransformListener(False, rospy.Duration(self.RECENT_INTERVAL))
+		# Transform Listener. Tracks history for RECENT_INTERVAL.
+		self.tf_listener = tf.TransformListener(False, \
+		                        rospy.Duration(self.RECENT_INTERVAL))
 
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
@@ -192,8 +193,14 @@ class FaceTrack:
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 
-	def glance_at_cb(self, data):
-		self.glance_at_face(data, 0.5)
+	def look_at_cb(self, msg):
+		self.look_at_face(msg.data)
+
+	def gaze_at_cb(self, msg):
+		self.gaze_at_face(msg.data)
+
+	def glance_at_cb(self, msg):
+		self.glance_at_face(msg.data, 0.5)
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
@@ -214,10 +221,10 @@ class FaceTrack:
 	def remove_face(self, faceid):
 		self.atomo.remove_face_from_atomspace(faceid)
 
-		print("Lost face; visibile faces now: " + str(self.visible_faces))
 		if faceid in self.visible_faces:
 			self.visible_faces.remove(faceid)
 
+		print("Lost face; visibile faces now: " + str(self.visible_faces))
 
 	# ----------------------------------------------------------
 	# Main look-at action driver.  Should be called at least a few times
@@ -242,16 +249,15 @@ class FaceTrack:
 			if self.first_glance < 0:
 				self.first_glance = now
 			if (now - self.first_glance < self.glance_howlong):
-				face = None
 
-				# Find latest postion known
+				# Find latest known postion
 				try:
 					trg = self.face_target(self.glance_at)
 					self.gaze_pub.publish(trg)
 				except:
 					print("Error: no face to glance at!")
 					self.glance_at = 0
-					self.first_flance = -1
+					self.first_glance = -1
 			else :
 				# We are done with the glance. Resume normal operations.
 				self.glance_at = 0
