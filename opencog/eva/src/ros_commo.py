@@ -23,7 +23,7 @@ import roslib
 import time
 
 # Eva ROS message imports
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
 from blender_api_msgs.msg import EmotionState
 from blender_api_msgs.msg import SetGesture
@@ -77,11 +77,23 @@ class EvaControl():
 		self.gesture_pub.publish(ges)
 		print "Just published gesture: ", ges.name
 
-#   def glance_at(self):
-#      face_id =
-#      print "----- Glancing at face:" + str(face_id)
-#      glance_seconds = 1
-#      self.facetrack.glance_at_face(face_id, glance_seconds)
+	# ----------------------------------------------------------
+	# Look at, gaze at, glance at face id's
+	# Look_at turns entire head in that direction, once.
+	# Gaze_at has the eyes track the face location (servoing)
+	# Glance_t is a momentary eye movement towards the face target.
+
+	def look_at(self, face_id):
+		print "----- Looking at face:" + str(face_id)
+		self.look_at_pub.publish(face_id)
+
+	def gaze_at(self, face_id):
+		print "----- Gazing at face:" + str(face_id)
+		self.gaze_at_pub.publish(face_id)
+
+	def glance_at(self, face_id):
+		print "----- Glancing at face:" + str(face_id)
+		self.glance_at_pub.publish(face_id)
 
 	# ----------------------------------------------------------
 	# Explicit directional look-at, gaze-at locations
@@ -139,3 +151,13 @@ class EvaControl():
 
 		self.gaze_pub = rospy.Publisher("/blender_api/set_gaze_target",
 			Target, queue_size=1)
+
+		# Int32 faceid of the face to glence at or turn and face.
+		self.glance_at_pub = rospy.Publisher("/opencog/glance_at",
+			Int32, queue_size=1)
+
+		self.look_at_pub = rospy.Publisher("/opencog/look_at",
+			Int32, queue_size=1)
+
+		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
+			Int32, queue_size=1)

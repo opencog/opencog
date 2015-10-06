@@ -19,10 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from ros_commo import EventLoop
+from ros_commo import EvaControl
 
 print "oc start"
-evl = EventLoop()
+evl = EvaControl()
 
 # Demo stuff. Don't do these all at once!
 evl.sad()
