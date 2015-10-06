@@ -62,3 +62,28 @@ For Eva, the number of messages that we anticipate sending to the
 cogserver is fairly low: a few per second, at most a few hundred per
 second, so either solution A or B should work fine. Solution B was
 implemented because it ws easier.
+
+What actually happens
+---------------------
+Have `main.py` running in a shell. It creates an instance of FaceTrack,
+and then loops forever.  FaceTrack is implemented in `face_track.py`
+It subscribes to `pi_vision` ROS topics and uses tf to maintain
+face locations in 3D.
+
+When faces become visible, or disappear, the face ID is sent to the
+OpenCog cogserver, using class `FaceAtomic`, implemented in
+`face_atomic.py`.
+
+FaceTrack has methods:
+   gaze_at_face(face_id)
+	look_at_face(face_id)
+	glance_at_face(face_id)
+
+
+We also have some python code running in the CogServer.  Its python, and
+not something else, because that is the easiest way of sending ROS
+messages out from OpenCog.  We need to be able to send such messages in
+order to directly control blender, or for other reasons. That code is
+in `../src/ros_commo.py`, implemetned as a normal python class. There is
+a wrapper around it, because OpenCog currently does not play nice with
+python classes. The wrapper is in `../src/atomic.py`.

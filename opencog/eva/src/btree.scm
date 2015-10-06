@@ -38,7 +38,7 @@
 	)
 
 ; ------------------------------------------------------
-; TODO -- implement
+; TODO -- implement replace by Grounded...
 ; (PredicateNode "lookat-face")
 ; (PredicateNode "glanceat-face")
 ;

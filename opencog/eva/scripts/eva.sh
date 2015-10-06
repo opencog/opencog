@@ -43,7 +43,7 @@ sleep 5
 # echo -e "py\n" | cat - ros_commo.py |netcat localhost 17020
 echo -e "py\n" | cat - atomic.py |netcat localhost 17020
 cat faces.scm |netcat localhost 17020
-cat bhave.scm |netcat localhost 17020
+cat btree.scm |netcat localhost 17020
 sleep 5
 
 # Run the new face-tracker.

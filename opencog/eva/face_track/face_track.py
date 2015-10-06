@@ -55,7 +55,7 @@ class FaceTrack:
 		rospy.init_node("OpenCog_Facetracker")
 		print("Starting OpenCog Face Tracker ROS Node")
 
-		# The OpenCog API
+		# The OpenCog API. This is used to send face data to OpenCog.
 		self.atomo = FaceAtomic()
 
 		# List of currently visible faces
@@ -313,7 +313,7 @@ class FaceTrack:
 		self.do_look_at_actions()
 
 	# Queries tf_listener to get latest available position
-	# Throws TF exceptions if transform canot be returned
+	# Throws TF exceptions if transform cannot be returned
 	def face_target(self, faceid):
 		(trans, rot) = self.tf_listener.lookupTransform( \
 			self.LOCATION_FRAME, 'Face' + str(faceid), rospy.Time(0))
