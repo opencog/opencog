@@ -6,8 +6,6 @@ numpy
 pyparsing
 python-dateutil
 scipy
-tornado
-wsgiref
 Flask
 flask-restful
 flask-restful-swagger
