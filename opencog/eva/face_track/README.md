@@ -75,10 +75,18 @@ OpenCog cogserver, using class `FaceAtomic`, implemented in
 `face_atomic.py`.
 
 FaceTrack has methods:
-   gaze_at_face(face_id)
-	look_at_face(face_id)
-	glance_at_face(face_id)
+   `gaze_at_face(face_id)`
+	`look_at_face(face_id)`
+	`glance_at_face(face_id)`
 
+When invoked, these issue messsages to blender to eithr glance at the
+corresponding face location, or "servo" it: move the blender face/eyes
+to constantly follow the face around.
+
+These methods are attached to ROS topics:
+	`/opencog/look_at`
+	`/opencog/gaze_at`
+	`/opencog/glance_at`
 
 We also have some python code running in the CogServer.  Its python, and
 not something else, because that is the easiest way of sending ROS
@@ -87,3 +95,8 @@ order to directly control blender, or for other reasons. That code is
 in `../src/ros_commo.py`, implemetned as a normal python class. There is
 a wrapper around it, because OpenCog currently does not play nice with
 python classes. The wrapper is in `../src/atomic.py`.
+
+Thus, OpenCog will publish ROS messages either directly to blender, or
+to the /opencog topic. FaceTrack listens to these topics, and then
+publishes to blender the appropraite messages to have blender look at
+the required 3D locations.

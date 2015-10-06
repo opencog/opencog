@@ -43,11 +43,24 @@ class Face:
 # actions, including:
 # *) turning to face a given face
 # *) tracking a face with the eyes
-# *) glancing a currrently-visible face, or a face that was recently
-#    seen.
+# *) glancing at a currrently-visible face, or at a location where a
+#    face that was recently seen.
 #
-# Provides the new-face, lost-face data to general-behavior, by putting
-# the face data into opencog... XXX Well, not yet it don't XXX
+# It does this by subscribing to pi_vision topics, to get face ID's and
+# 3D locations.  It maintains a database of 3D locations in ROS TF. It
+# then sends face_id's to the CogServer, using the FaceAtomic class.
+# These messages are currently sent as scheme strings.
+#
+# This class also subscribes to several /opencog topics, which is where
+# the CogServer will send commands. These includes commands to stare
+# at a given face_id, to glance at a face_id, and so on.  The handling
+# is done here, and not in OpenCog, because right now, we don't want to
+# track dynamic 3D locations in OpenCog. That is, we don't want to
+# implement the analog of TF inside the CogServer.
+#
+# Upon receiving messages on /opencog, it then obeys these, and servos
+# blender appropriately.
+#
 class FaceTrack:
 
 	def __init__(self):
@@ -92,8 +105,12 @@ class FaceTrack:
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
 
 		# Subscribed OpenCog commands
+		self.TOPIC_GLANCE_FACE = "/opencog/glance_at"
 		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
 		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
+		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int, self.glance_at_face)
+		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int, self.look_at_face)
+		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int, self.gaze_at_face)
 
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
