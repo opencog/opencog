@@ -62,6 +62,9 @@ CTestTestfile.cmake
 
 # CTAGS
 TAGS
+.TAGS
+tags
+.tags
 
 # GNU GLOBAL
 GPATH
@@ -106,4 +109,3 @@ Makefile
 ### Linux ###
 *~
 *.autosave
-
