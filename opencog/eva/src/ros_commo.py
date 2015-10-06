@@ -30,6 +30,11 @@ from blender_api_msgs.msg import SetGesture
 from blender_api_msgs.msg import Target
 
 
+# This class publishes various ROS messages to various locations.
+# Class members are meant to be invoked from within the cogserver.
+# Note that it ONLY publishes, it does not listen; currently listening
+# must be done in some other ROS node, which must then convert those
+# messages to scheme commands, and netcat them to the cogserver.
 class EvaControl():
 
 	def step(self):

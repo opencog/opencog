@@ -34,15 +34,28 @@ set_type_ctor_atomspace(atomspace)
 evl = EvaControl()
 
 # Global functions, because that's what PythonEval expects.
-# The must return a TruthValue, since EvaluationLinks
-# expect TruthValues.
+# Would be great if PythonEval was fixed to work smarter, not harder.
+#
+# Must return TruthValue, since EvaluationLinks expect TruthValues.
 def do_look_left():
-    evl.look_left()
-    return TruthValue(1, 1)
+	evl.look_left()
+	return TruthValue(1, 1)
 
 def do_look_right():
-    evl.look_right()
-    return TruthValue(1, 1)
+	evl.look_right()
+	return TruthValue(1, 1)
+
+def glance_at_face(face_id):
+	evl.glance_at(face_id)
+	return TruthValue(1, 1)
+
+def look_at_face(face_id):
+	evl.look_at(face_id)
+	return TruthValue(1, 1)
+
+def gaze_at_face(face_id):
+	evl.gaze_at(face_id)
+	return TruthValue(1, 1)
 
 ### Define an executable pattern
 ##satisfaction_handle = SatisfactionLink(

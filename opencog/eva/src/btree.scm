@@ -38,9 +38,7 @@
 	)
 
 ; ------------------------------------------------------
-; TODO -- implement replace by Grounded...
-; (PredicateNode "lookat-face")
-; (PredicateNode "glanceat-face")
+; TODO --
 ;
 ; grep for NumberNode below, and make these (more easily) configurable.
 ; ------------------------------------------------------
@@ -70,11 +68,11 @@
 	))
 
 ;; line 742, assign_face_target
-;; Set (PredicateNode "lookat-face") to the face ID to look at.
+;; Send ROS message to look at the face ID.
 (DefineLink
 	(DefinedSchemaNode "look at person")
 	(PutLink
-		(EvaluationLink (PredicateNode "lookat-face")
+		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink (VariableNode "$face")))
 		(GetLink
 			(EvaluationLink (PredicateNode "visible face")
@@ -85,7 +83,7 @@
 (DefineLink
 	(DefinedSchemaNode "glance at person")
 	(PutLink
-		(EvaluationLink (PredicateNode "glanceat-face")
+		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (VariableNode "$face")))
 		(GetLink
 			(EvaluationLink (PredicateNode "visible face")
