@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
@@ -57,6 +58,7 @@ public:
     void test_and_construction();
     void test_or_construction();
     void test_not_construction();
+    void test_forall_instantiation();
 };
 
 void PLNRulesUTest::tearDown()
@@ -175,5 +177,30 @@ void PLNRulesUTest::test_not_construction()
     Handle results = eval.eval_h("(cog-bind-af pln-rule-not-construction)");
 
     // It should contain 2 groundings, not(A), not(B)
+    TS_ASSERT_EQUALS(2, as.get_arity(results));
+}
+
+/**
+ * Test the pln-forall-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/forall-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_forall_instantiation()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-instantiation-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("pln-rule-forall-instantiation");
+    Handle results = bindlink(&as, rule);
+
+    // It should contain 2 groundings:
+    // 1. EvaluationLink PredicateNode "is-predicate" <some-predicate>
+    // 2. EvaluationLink PredicateNode "is-concept" <some-concept>
     TS_ASSERT_EQUALS(2, as.get_arity(results));
 }
