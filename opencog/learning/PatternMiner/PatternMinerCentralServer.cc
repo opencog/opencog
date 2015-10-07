@@ -65,6 +65,13 @@ using namespace web::http::experimental::listener;
 using namespace utility;
 
 
+bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2);
+bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2);
+bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2);
+bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2);
+bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2);
+
+
 void PatternMiner::launchCentralServer()
 {
     run_as_central_server = true;
@@ -76,6 +83,7 @@ void PatternMiner::launchCentralServer()
     serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
 
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
+    parsePatternTaskThread = std::thread([this]{this->runParsePatternTaskThread();});
 
     cout <<"\nPattern Miner central server started!\n";
     // centralServerListeningThread.join();
@@ -167,7 +175,39 @@ void PatternMiner::handleFindANewPattern(http_request request)
     try
     {
         json::value jval = request.extract_json().get();
+        patternQueueLock.lock();
+        waitForParsePatternQueue.push_back(jval);
+        patternQueueLock.unlock();
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << "handleFindANewPattern error: " << request.to_string() << endl;
+    }
+}
 
+void PatternMiner::runParsePatternTaskThread()
+{
+    while(patternMiningRunning)
+    {
+
+        patternQueueLock.lock();
+        if (waitForParsePatternQueue.size() > 0)
+        {
+            json::value jval = waitForParsePatternQueue.front();
+            waitForParsePatternQueue.pop_front();
+            parseAPatternTask(jval);
+
+        }
+
+
+    }
+}
+
+void PatternMiner::parseAPatternTask(json::value jval)
+{
+
+    try
+    {
         string PatternStr =  jval[U("Pattern")].as_string();
         cout << "PatternStr = " << PatternStr << std::endl;
         string ParentPatternStr = jval[U("ParentPattern")].as_string();
@@ -177,10 +217,14 @@ void PatternMiner::handleFindANewPattern(http_request request)
 
         HTreeNode* newHTreeNode;
         // check if the pattern key already exist
+
         map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
+
+
         if (htreeNodeIter != keyStrToHTreeNodeMap.end())
         {
             newHTreeNode = htreeNodeIter->second;
+
             newHTreeNode->count ++;
         }
         else
@@ -196,7 +240,9 @@ void PatternMiner::handleFindANewPattern(http_request request)
             newHTreeNode = new HTreeNode();
             newHTreeNode->pattern = patternHandleSeq;
             newHTreeNode->count = 1;
+
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+
         }
 
         if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
@@ -205,14 +251,20 @@ void PatternMiner::handleFindANewPattern(http_request request)
                 throw ("Pattern missing parent pattern string: " + PatternStr);
             else
             {
+
                 map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
+
                 if (parentNodeIter == keyStrToHTreeNodeMap.end())
+                {
+
                     throw ("Pattern missing parent pattern string: " + PatternStr);
+                }
                 else
                 {
                     // add super pattern relation
 
                     HTreeNode* parentNode = parentNodeIter->second;
+
 
                     ExtendRelation relation;
                     relation.extendedHTreeNode = newHTreeNode;
@@ -226,7 +278,7 @@ void PatternMiner::handleFindANewPattern(http_request request)
     }
     catch (exception const & e)
     {
-       cout << e.what() << endl;
+       cout << e.what() << "parseAPatternTask error: " << jval.serialize() << endl;
     }
 
 
@@ -273,8 +325,8 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
         if (linkStr == "")
             continue;
 
-        try
-        {
+//        try
+//        {
             HandleSeq rootOutgoings;
 
             std::size_t firstLineEndPos = linkStr.find("\n");
@@ -301,14 +353,14 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
             Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
             pattern.push_back(rootLink);
-        }
-        catch (exception const & e)
-        {
-           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
+//        }
+//        catch (exception const & e)
+//        {
+//           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
 
-           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
+//           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
 
-        }
+//        }
 
     }
 
@@ -326,165 +378,175 @@ void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
         if (! getline(outgoingStream, line))
             return;
 
-        std::size_t nonIndentStartPos = line.find("(");
-        string indent = line.substr(0, nonIndentStartPos);
-        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
-        std::size_t typeEndPos = nonIndentSubStr.find(" ");
-        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
-        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() + 4, 4);
-        Type atomType = classserver().getType(atomTypeStr);
-        if (NOTYPE == atomType)
-            throw InvalidParamException(TRACE_INFO,
-                "Not a valid typename: '%s'", atomTypeStr.c_str());
+//        try
+//        {
+            std::size_t nonIndentStartPos = line.find("(");
+            string indent = line.substr(0, nonIndentStartPos);
+            string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
+            std::size_t typeEndPos = nonIndentSubStr.find(" ");
+            string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
+            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() + 4, 4);
+            Type atomType = classserver().getType(atomTypeStr);
+            if (NOTYPE == atomType)
+                throw InvalidParamException(TRACE_INFO,
+                    "Not a valid typename: '%s'", atomTypeStr.c_str());
 
-        if (indent == curIndent)
-        {
-            if (linkOrNodeStr == "Node")
+            if (indent == curIndent)
             {
-                std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
-                string nodeName = nonIndentSubStr.substr(typeEndPos, nodeNameEndPos - typeEndPos);
-                Handle node = _atomSpace->add_node(atomType, nodeName);
-                outgoings.push_back(node);
+                if (linkOrNodeStr == "Node")
+                {
+                    std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
+                    string nodeName = nonIndentSubStr.substr(typeEndPos, nodeNameEndPos - typeEndPos);
+                    Handle node = _atomSpace->add_node(atomType, nodeName);
+                    outgoings.push_back(node);
+                }
+                else if (linkOrNodeStr == "Link")
+                {
+                    // call this function recursively
+                    HandleSeq childOutgoings;
+                    loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent);
+
+                    Handle link = _atomSpace->add_link(atomType, childOutgoings);
+                    outgoings.push_back(link);
+                }
+                else
+                {
+                    // exception
+                    throw ( "Not a Node, neighter a Link: " + linkOrNodeStr);
+
+
+                }
+
             }
-            else if (linkOrNodeStr == "Link")
+            else if (indent.size() < curIndent.size())
             {
-                // call this function recursively
-                HandleSeq childOutgoings;
-                loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent);
-
-                Handle link = _atomSpace->add_link(atomType, childOutgoings);
-                outgoings.push_back(link);
+                return;
             }
             else
             {
                 // exception
-                throw ( "Not a Node, neighter a Link: " + linkOrNodeStr);
-
+                throw ("Indent wrong: " + line);
 
             }
+//        }
+//        catch (exception const & e)
+//        {
+//           cout << e.what() << endl << "At loadOutgoingsIntoAtomSpaceFromString:" << line << endl;
 
-        }
-        else if (indent.size() < curIndent.size())
-        {
-            return;
-        }
-        else
-        {
-            // exception
-            throw ("Indent wrong: " + line);
+//           throw ("Exception in loadOutgoingsIntoAtomSpaceFromString: " + line);
 
-        }
+//        }
 
     }
 }
 
 void PatternMiner::centralServerEvaluateInterestingness()
 {
-//    if (enable_Frequent_Pattern)
-//    {
-//        std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+    if (enable_Frequent_Pattern)
+    {
+        std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
 
-//        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
-//        {
-//            // sort by frequency
-//            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+        {
+            // sort by frequency
+            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
 
-//            // Finished mining gram patterns; output to file
-//            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+            // Finished mining gram patterns; output to file
+            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-//            OutPutFrequentPatternsToFile(gram);
+            OutPutFrequentPatternsToFile(gram);
 
-//            std::cout<< std::endl;
-//        }
-//    }
-
-
-//    if (enable_Interesting_Pattern)
-//    {
-//        for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
-//        {
-//            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
-//            cur_index = -1;
-//            threads = new thread[THREAD_NUM];
-//            num_of_patterns_without_superpattern_cur_gram = 0;
-
-//            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
-//            {
-//                threads[i] = std::thread([this]{this->evaluateInterestingnessTask();}); // using C++11 lambda-expression
-//            }
-
-//            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
-//            {
-//                threads[i].join();
-//            }
-
-//            delete [] threads;
-
-//            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
-//            std::cout<<"Outputting to file ... ";
-
-//            if (interestingness_Evaluation_method == "Interaction_Information")
-//            {
-//                // sort by interaction information
-//                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
-//                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
-//            }
-//            else if (interestingness_Evaluation_method == "surprisingness")
-//            {
-//                // sort by surprisingness_I first
-//                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
-//                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
-
-//                vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
-
-//                // and then sort by surprisingness_II
-//                std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
-//                OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
-
-//                // Get the min threshold of surprisingness_II
-//                int threshold_index_II;
-//                threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
-//                int looptimes = 0;
-//                while (true)
-//                {
-
-//                    surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
-//                    if (surprisingness_II_threshold <= 0.00000f)
-//                    {
-//                        if (++ looptimes > 8)
-//                        {
-//                            surprisingness_II_threshold = 0.00000f;
-//                            break;
-//                        }
-
-//                        threshold_index_II = ((float)threshold_index_II) * SURPRISINGNESS_II_TOP_THRESHOLD;
-//                    }
-//                    else
-//                        break;
-//                }
+            std::cout<< std::endl;
+        }
+    }
 
 
-//                cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
+    if (enable_Interesting_Pattern)
+    {
+        for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+        {
+            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+            cur_index = -1;
+            threads = new thread[THREAD_NUM];
+            num_of_patterns_without_superpattern_cur_gram = 0;
 
-//                // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
-//                int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
-//                for (int p = 0; p <= threshold_index_I; p ++)
-//                {
-//                    HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            {
+                threads[i] = std::thread([this]{this->evaluateInterestingnessTask();}); // using C++11 lambda-expression
+            }
 
-//                    // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
-//                    if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
-//                        finalPatternsForGram[cur_gram-1].push_back(pNode);
-//                }
+            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            {
+                threads[i].join();
+            }
 
-//                // sort by frequency
-//                std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+            delete [] threads;
 
-//                OutPutFinalPatternsToFile(cur_gram);
+            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
+            std::cout<<"Outputting to file ... ";
 
-//            }
+            if (interestingness_Evaluation_method == "Interaction_Information")
+            {
+                // sort by interaction information
+                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+            }
+            else if (interestingness_Evaluation_method == "surprisingness")
+            {
+                // sort by surprisingness_I first
+                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
-//            std::cout<< std::endl;
-//        }
-//    }
+                vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
+
+                // and then sort by surprisingness_II
+                std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+                OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
+
+                // Get the min threshold of surprisingness_II
+                int threshold_index_II;
+                threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
+                int looptimes = 0;
+                while (true)
+                {
+
+                    surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+                    if (surprisingness_II_threshold <= 0.00000f)
+                    {
+                        if (++ looptimes > 8)
+                        {
+                            surprisingness_II_threshold = 0.00000f;
+                            break;
+                        }
+
+                        threshold_index_II = ((float)threshold_index_II) * SURPRISINGNESS_II_TOP_THRESHOLD;
+                    }
+                    else
+                        break;
+                }
+
+
+                cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
+
+                // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
+                int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
+                for (int p = 0; p <= threshold_index_I; p ++)
+                {
+                    HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+
+                    // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
+                    if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
+                        finalPatternsForGram[cur_gram-1].push_back(pNode);
+                }
+
+                // sort by frequency
+                std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+                OutPutFinalPatternsToFile(cur_gram);
+
+            }
+
+            std::cout<< std::endl;
+        }
+    }
 }

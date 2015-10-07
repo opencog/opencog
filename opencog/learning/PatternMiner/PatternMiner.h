@@ -346,6 +346,10 @@ private:
      string centralServerBaseURL;
 
      std::thread centralServerListeningThread;
+     std::thread parsePatternTaskThread;
+     std::mutex patternQueueLock;
+
+     list<json::value> waitForParsePatternQueue;
 
      string clientWorkerUID;
 
@@ -355,11 +359,16 @@ private:
      http_client* httpClient;
      http_listener* serverListener;
 
+     bool patternMiningRunning;
+
 
      void handleGet(http_request request);
      void handleRegisterNewWorker(http_request request);
      void handleReportWorkerStop(http_request request);
      void handleFindANewPattern(http_request request);
+
+     void runParsePatternTaskThread();
+     void parseAPatternTask(json::value jval);
 
      void startMiningWork();
      void centralServerEvaluateInterestingness();
