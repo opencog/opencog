@@ -77,7 +77,7 @@ class BindLinkExecution():
             self.tmpLink=self.atomspace.add_link(types.ListLink, [self.anchorNode, self.target], TruthValue(1.0, 100))
         else:
             self.tmpLink=None
-        response = scheme_eval_h(self.atomspace, self.command)
+        response = scheme_eval(self.atomspace, self.command)
         d=3;
 
     def returnResult(self):

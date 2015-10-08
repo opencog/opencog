@@ -43,19 +43,19 @@
             )
 
             ;; filter
-            (NotLink
+            (AbsentLink
                 (PartOfSpeechLink
                     (VariableNode "$word-inst-antecedent")
                     (DefinedLinguisticConceptNode "noun")
                 )
             )
-            (NotLink
+            (AbsentLink
                 (LemmaLink
                     (VariableNode "$word-inst-anaphor")
                     (WordNode "that")
                 )
             )
-            (NotLink
+            (AbsentLink
                 (LemmaLink
                     (VariableNode "$word-inst-anaphor")
                     (WordNode "enough")
