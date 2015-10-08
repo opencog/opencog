@@ -199,8 +199,22 @@ void PLNRulesUTest::test_forall_instantiation()
     Handle rule = eval.eval_h("pln-rule-forall-instantiation");
     Handle results = bindlink(&as, rule);
 
-    // It should contain 2 groundings:
-    // 1. EvaluationLink PredicateNode "is-predicate" <some-predicate>
-    // 2. EvaluationLink PredicateNode "is-concept" <some-concept>
-    TS_ASSERT_EQUALS(2, as.get_arity(results));
+    /**
+     * It should contain 3 groundings:
+     *
+     * 1. EvaluationLink
+     *       PredicateNode "is-predicate"
+     *       <some-predicate>
+     *
+     * 2. EvaluationLink
+     *       PredicateNode "is-concept"
+     *       <some-concept>
+     *
+     * 3. EvaluationLink
+     *       PredicateNode "are-concept-and-predicate"
+     *       ListLink
+     *          <some-concept>
+     *          <some-predicate>
+     */
+    TS_ASSERT_EQUALS(3, as.get_arity(results));
 }

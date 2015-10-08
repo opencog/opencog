@@ -1,5 +1,6 @@
-; Define 2 dummy foralls to test it, one for ConceptNodes, the for
-; PredicateNodes
+; Define simple foralls to test universal rules
+
+; Simple ForAll involving concepts
 
 (ForAllLink (stv 1 1)
    (TypedVariableLink
@@ -13,6 +14,8 @@
 
 (ConceptNode "A")
 
+; Simple ForAll involving predicates
+
 (ForAllLink (stv 1 1)
    (TypedVariableLink
       (VariableNode "$X")
@@ -24,3 +27,21 @@
 )
 
 (PredicateNode "P")
+
+; Simple ForAll involving concepts and predicates
+
+(ForAllLink (stv 1 1)
+   (VariableList
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode"))
+      (TypedVariableLink
+         (VariableNode "$Y")
+         (TypeNode "PredicateNode")))
+   (EvaluationLink
+      (PredicateNode "are-concept-and-predicate")
+      (ListLink
+         (VariableNode "$X")
+         (VariableNode "$Y"))
+   )
+)
