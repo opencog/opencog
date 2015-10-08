@@ -21,7 +21,7 @@
                 (VariableNode "$target")
                 (WordNode "enough")
             )
-            (NotLink
+            (AbsentLink
                 (EvaluationLink
                     (PrepositionalRelationshipNode "of")
                     (ListLink

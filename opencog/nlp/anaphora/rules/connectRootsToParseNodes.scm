@@ -46,7 +46,7 @@
                     (VariableNode "$child")
                 )
             )
-            (NotLink
+            (AbsentLink
                 (EvaluationLink
                     (VariableNode "$other relationship")
                     (ListLink

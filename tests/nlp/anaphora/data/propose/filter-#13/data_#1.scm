@@ -25,5 +25,6 @@
 
 (ReferenceLink
     (WordInstanceNode "antecedent")
-    (NumberNode "a number")
+    ; (NumberNode "42")
+    (ConceptNode "a number")
 )
