@@ -164,7 +164,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         // corresponding WordInstanceNode by variable match
         // if the node is not a variable, then the standard node_match would
         // have made it matched to itself, so let's move on and check the rest
-        // of the ndoes
+        // of the nodes
         if (hSolnWordInst == Handle::UNDEFINED)
             continue;
 
@@ -422,9 +422,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         shrinked_soln[kv.first] = kv.second;
     }
-
-    // TODO: Check if all binary links are there in the solution, insert
-    //       into m_results and return true if so
 
     // store the solution; all common InterpretationNode are solutions for this
     // grounding, so store the solution for each InterpretationNode

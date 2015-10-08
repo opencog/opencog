@@ -149,112 +149,19 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         sVars.insert(n);
     }
 
-    // separate the disconnected clauses (this will happen often with SuReal)
-    std::vector<HandleSeq> connectedClauses;
-    std::vector<std::set<Handle>> connectedVars;
-    get_connected_components(sVars, qClauses, connectedClauses, connectedVars);
+    SuRealPMCB pmcb(pAS, sVars);
+    PatternLinkPtr slp(createPatternLink(sVars, qClauses));
+    slp->satisfy(pmcb);
 
-    logger().debug("[SuReal] Found %d disconnected components", connectedClauses.size());
-
-    std::map<Handle, std::vector<std::map<Handle, Handle> > > collector;
-
-    // call the pattern matcher on each set of disconnected commponents
-    for (size_t i=0; i<connectedClauses.size(); i++)
-    {
-        logger().debug("[SuReal] starting pattern matcher");
-        const HandleSeq& qClause(connectedClauses[i]);
-        const std::set<Handle>& qVars(connectedVars[i]);
-
-        // I replaced sVars by qVars in the below. sVars had extra
-        // variables that don't appear anywhere in the clauses -- linas.
-        SuRealPMCB pmcb(pAS, qVars);
-        PatternLinkPtr slp(createPatternLink(qVars, qClause));
-        slp->satisfy(pmcb);
-
-        // no pattern matcher result
-        if (pmcb.m_results.empty())
-            return HandleSeqSeq();
-
-        // first disconnected component & result? add it all
-        if (collector.empty())
-        {
-            collector = pmcb.m_results;
-            continue;
-        }
-
-        // if we are checking subsequent disconnected components, we want to
-        // make sure the new results can be merged with results from previously
-        // checked components; ie. only keep those with common
-        // InterpretationNode & no overlapping mappings
-        for (auto it = collector.begin(); it != collector.end(); )
-        {
-            // no common Interpretation, erase the old results as it can no
-            // longer be satisfied
-            if (pmcb.m_results.count(it->first) == 0)
-            {
-                logger().debug("[SuReal] Discarding a result for %s", it->first->toShortString().c_str());
-
-                it = collector.erase(it);
-                continue;
-            }
-
-            auto& existingMaps = it->second;                // a vector of previous mappings
-            auto& appendMaps = pmcb.m_results[it->first];   // a vector of unmerged mappings
-            std::vector<std::map<Handle, Handle> > newMaps;
-
-            // check all combinations of all the old mappings to the new
-            for (auto& em : existingMaps)
-            {
-                for (auto& am: appendMaps)
-                {
-                    // at this point, we know nothing in em & am would map the
-                    // same variable because they are from two disconnected
-                    // clauses.  Instead, we want to check to make sure no two
-                    // variables get mapping to the same node.
-                    auto checker = [&](const std::pair<Handle, Handle>& ekv)
-                    {
-                        return std::any_of(am.begin(), am.end(),
-                                           [&](const std::pair<Handle, Handle>& akv) { return ekv.second == akv.second; });
-                    };
-
-                    if (std::any_of(em.begin(), em.end(), checker))
-                        continue;
-
-                    // clone the old mapping and append the new
-                    std::map<Handle, Handle> newMap(em);
-                    newMap.insert(am.begin(), am.end());
-
-                    // add as one mapping of one InterpretationNode
-                    newMaps.push_back(newMap);
-                }
-            }
-
-            // if none of the mappings can be merged, the interpretation is bad
-            if (newMaps.empty())
-            {
-                logger().debug("[SuReal] Discarding a result for %s", it->first->toShortString().c_str());
-
-                it = collector.erase(it);
-                continue;
-            }
-
-            // replace the old results with the new appended ones
-            it->second = newMaps;
-
-            // go to the next InterpretationNode
-            ++it;
-        }
-
-        // if there's no way to connect the disconnected components
-        if (collector.empty())
-            return HandleSeqSeq();
-    }
-
+    // TODO: Should have one key only?
     HandleSeq keys;
 
     // construct the list of InterpretationNode to be returned
-    for (auto& r : collector)
+    for (auto& r : pmcb.m_results)
         keys.push_back(r.first);
+
+    std::cout << "\nkeys:\n";
+    for (Handle& h : keys) std::cout << h->toShortString();
 
     // sort the InterpretationNode bases on the size of the corresponding
     // SetLink; the idea is that the larger the size, the more stuff in
@@ -278,7 +185,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
     for (auto& k : keys)
     {
-        HandleSeqSeq mappings = sureal_get_mapping(k, collector[k]);
+        HandleSeqSeq mappings = sureal_get_mapping(k, pmcb.m_results[k]);
         results.insert(results.end(), mappings.begin(), mappings.end());
     }
 
