@@ -45,7 +45,7 @@ class SuRealPMCB :
     public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, size_t thoroughness);
+    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars, const HandleSeq& bl);
     ~SuRealPMCB();
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
@@ -68,11 +68,11 @@ private:
     AtomSpace* m_as;
     std::set<Handle> m_vars;   // store nodes that are variables
 
-    size_t m_thoroughness;   // max no. of results being returned
-
     std::unordered_map<Handle, HandleSeq> m_disjuncts;   // store the disjuncts of nodes in the pattern
 
     std::unordered_map<Handle, Handle> m_words;   // store the corresponding WordNodes of the nodes in the pattern
+
+    HandleSeq m_binaryLinks;   // store binary links exist in the pattern
 
     struct CandHandle
     {

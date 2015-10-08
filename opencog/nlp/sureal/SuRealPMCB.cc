@@ -37,15 +37,13 @@ using namespace opencog;
  *
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
- * @param thoroughness   the completeness of the search (the minimum number of
- *                       results being returned)
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thoroughness) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, const HandleSeq& bl) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars),
-    m_thoroughness(thoroughness)
+    m_binaryLinks(bl)
 {
 
 }
@@ -426,6 +424,15 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
+    // if this solution itself is a binary link, remove it from m_binaryLinks
+    for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
+    {
+        auto itc = std::find(m_binaryLinks.begin(), m_binaryLinks.end(), it->first);
+
+        if (itc != m_binaryLinks.end())
+            m_binaryLinks.erase(itc);
+    }
+
     // store the solution; all common InterpretationNode are solutions for this
     // grounding, so store the solution for each InterpretationNode
     for (auto n : qItprNode)
@@ -438,6 +445,11 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
         m_results[n].push_back(shrinked_soln);
     }
+
+    // return true if we found a good enough solution -- all binary links of
+    // this pattern have been satisfied
+    if (m_results.size() > 0 and m_binaryLinks.size() == 0)
+        return true;
 
     return false;
 }
@@ -523,9 +535,6 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
-
-        // stop the search if it already found enough results in a non-complete search
-        if (m_thoroughness > 0 and m_results.size() >= m_thoroughness) return true;
     }
     return false;
 }
