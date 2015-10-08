@@ -71,7 +71,6 @@ class AnaphoraUnitTester(TestCase):
         else:
             return False
 
-    @unittest.skip("Unit test disabled, see: https://github.com/opencog/opencog/issues/1280")
     def test_bfs(self):
 
         '''
@@ -97,7 +96,6 @@ class AnaphoraUnitTester(TestCase):
         self.assertTrue(self.compare(['a','b','c','d','e','f','g','h','j'],self.hobbsAgent.getWords()))
         self.atomspace.clear()
 
-    @unittest.skip("Unit test disabled, see: https://github.com/opencog/opencog/issues/1280")
     def test_propose(self):
 
         '''
