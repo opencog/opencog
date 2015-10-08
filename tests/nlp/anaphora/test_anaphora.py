@@ -25,7 +25,6 @@ class AnaphoraUnitTester(TestCase):
     def setUp(self):
 
         self.atomspace= AtomSpace()
-        __init__(self.atomspace)
         data=["opencog/scm/config.scm",
               "opencog/scm/core_types.scm",
               "spacetime/spacetime_types.scm",
@@ -35,8 +34,6 @@ class AnaphoraUnitTester(TestCase):
               "opencog/reasoning/pln/pln_types.scm",
               "opencog/scm/apply.scm",
               "opencog/scm/file-utils.scm",
-              "opencog/scm/persistence.scm",
-              #"opencog/scm/repl-shell.scm",
               "opencog/scm/utilities.scm",
               "opencog/scm/av-tv.scm",
               "opencog/nlp/scm/type-definitions.scm",
@@ -51,7 +48,6 @@ class AnaphoraUnitTester(TestCase):
         for item in data:
             status=load_scm(self.atomspace, item)
         self.hobbsAgent=HobbsAgent()
-
 
     def tearDown(self):
         del self.atomspace
