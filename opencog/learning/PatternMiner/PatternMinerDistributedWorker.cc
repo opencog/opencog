@@ -138,10 +138,10 @@ void PatternMiner::startMiningWork()
 void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex)
 {
     // debug
-    static int count = 0;
-    count ++;
-    if (count > 10)
-        return;
+//    static int count = 0;
+//    count ++;
+//    if (count > 50)
+//        return;
 
     try
     {

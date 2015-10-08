@@ -327,13 +327,20 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     HandleSeq pattern;
 
+    // debug
+    if (strs.size() > 2)
+    {
+        int i = 0;
+        i++;
+    }
+
     for (string linkStr : strs) // load each link
     {
         if (linkStr == "")
             continue;
 
-//        try
-//        {
+        try
+        {
             HandleSeq rootOutgoings;
 
             std::size_t firstLineEndPos = linkStr.find("\n");
@@ -362,14 +369,14 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
             Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
             pattern.push_back(rootLink);
-//        }
-//        catch (exception const & e)
-//        {
-//           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
+        }
+        catch (exception const & e)
+        {
+           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
 
-//           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
+           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
 
-//        }
+        }
 
     }
 
