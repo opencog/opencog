@@ -88,7 +88,7 @@ void PatternMiner::launchADistributedWorker()
     builder.append_query(U("ClientUID"), U(clientWorkerUID));
 
 
-    httpClient->request(methods::GET, builder.to_string()).then([=](http_response response)
+    httpClient->request(methods::POST, builder.to_string()).then([=](http_response response)
     {
         std::cout << response.to_string() << std::endl;
         if (response.status_code() == status_codes::OK)
@@ -137,16 +137,32 @@ void PatternMiner::startMiningWork()
 
 void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex)
 {
-    uri_builder builder(U("/FindANewPattern"));
+    // debug
+    static int count = 0;
+    count ++;
+    if (count > 10)
+        return;
 
-    json::value patternInfo = json::value::object();
-    patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
-    patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
-    patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
+    try
+    {
 
-//    builder.append_query(U("Pattern"), U(curPatternKeyStr));
-//    builder.append_query(U("ParentPattern"), U(parentKeyString));
-//    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
+        uri_builder builder(U("/FindANewPattern"));
 
-    httpClient->request(methods::GET, builder.to_string(), patternInfo.serialize().c_str(), "application/json");
+        json::value patternInfo = json::value::object();
+        patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
+        patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
+        patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
+
+    //    builder.append_query(U("Pattern"), U(curPatternKeyStr));
+    //    builder.append_query(U("ParentPattern"), U(parentKeyString));
+    //    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
+
+        httpClient->request(methods::POST, builder.to_string(), patternInfo.serialize().c_str(), "application/json");
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << "sendPatternToCentralServer exception!: " << endl;
+
+    }
+
 }

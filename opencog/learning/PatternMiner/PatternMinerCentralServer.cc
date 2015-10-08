@@ -80,8 +80,9 @@ void PatternMiner::launchCentralServer()
 
     serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
 
-    serverListener->support(methods::GET, std::bind(&PatternMiner::handleGet, this,  std::placeholders::_1));
+    serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
 
+    patternMiningRunning = true;
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
     parsePatternTaskThread = std::thread([this]{this->runParsePatternTaskThread();});
 
@@ -103,7 +104,7 @@ void PatternMiner::centralServerStartListening()
     }
 }
 
-void PatternMiner::handleGet(http_request request)
+void PatternMiner::handlePost(http_request request)
 {
     try
     {
@@ -134,6 +135,7 @@ void PatternMiner::handleGet(http_request request)
     catch (exception const & e)
     {
        cout << e.what() << endl;
+       request.reply(status_codes::NotFound);
     }
 
 
@@ -178,10 +180,12 @@ void PatternMiner::handleFindANewPattern(http_request request)
         patternQueueLock.lock();
         waitForParsePatternQueue.push_back(jval);
         patternQueueLock.unlock();
+        request.reply(status_codes::OK);
     }
     catch (exception const & e)
     {
        cout << e.what() << "handleFindANewPattern error: " << request.to_string() << endl;
+       request.reply(status_codes::NotFound);
     }
 }
 
@@ -195,9 +199,12 @@ void PatternMiner::runParsePatternTaskThread()
         {
             json::value jval = waitForParsePatternQueue.front();
             waitForParsePatternQueue.pop_front();
+            patternQueueLock.unlock();
             parseAPatternTask(jval);
 
         }
+        else
+            patternQueueLock.unlock();
 
 
     }
@@ -336,7 +343,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
             loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings);
 
             std::size_t typeEndPos = linkStr.find(" ");
-            string atomTypeStr = linkStr.substr(1, typeEndPos);
+            string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
             string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
 
             if (linkOrNodeStr != "Link")
@@ -348,8 +355,10 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
             Type atomType = classserver().getType(atomTypeStr);
             if (NOTYPE == atomType)
+            {
                 throw InvalidParamException(TRACE_INFO,
                     "Not a valid typename: '%s'", atomTypeStr.c_str());
+            }
 
             Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
             pattern.push_back(rootLink);
@@ -364,6 +373,17 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     }
 
+    // debug:
+    string patternToStr = "";
+
+    for(Handle h : pattern)
+    {
+        patternToStr += _atomSpace->atom_as_string(h);
+        patternToStr += "\n";
+    }
+
+    cout << "\nAdded pattern: \n" << patternToStr;
+
     return pattern;
 }
 
@@ -373,10 +393,8 @@ void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
     string line;
     string curIndent = parentIndent + LINE_INDENTATION;
 
-    while(true)
+    while(getline(outgoingStream, line))
     {
-        if (! getline(outgoingStream, line))
-            return;
 
 //        try
 //        {
@@ -385,18 +403,20 @@ void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
             string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
             std::size_t typeEndPos = nonIndentSubStr.find(" ");
             string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() + 4, 4);
+            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
             Type atomType = classserver().getType(atomTypeStr);
             if (NOTYPE == atomType)
+            {
                 throw InvalidParamException(TRACE_INFO,
                     "Not a valid typename: '%s'", atomTypeStr.c_str());
+            }
 
             if (indent == curIndent)
             {
                 if (linkOrNodeStr == "Node")
                 {
                     std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
-                    string nodeName = nonIndentSubStr.substr(typeEndPos, nodeNameEndPos - typeEndPos);
+                    string nodeName = nonIndentSubStr.substr(typeEndPos + 1, nodeNameEndPos - typeEndPos - 1);
                     Handle node = _atomSpace->add_node(atomType, nodeName);
                     outgoings.push_back(node);
                 }

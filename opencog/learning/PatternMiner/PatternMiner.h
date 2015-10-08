@@ -362,7 +362,7 @@ private:
      bool patternMiningRunning;
 
 
-     void handleGet(http_request request);
+     void handlePost(http_request request);
      void handleRegisterNewWorker(http_request request);
      void handleReportWorkerStop(http_request request);
      void handleFindANewPattern(http_request request);
