@@ -5,8 +5,12 @@ import unittest
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
-from anaphora.agents.hobbs import HobbsAgent
-#from agents.hobbs import HobbsAgent
+# The path is commented out b/c there is no __init__.py in
+# https://github.com/opencog/opencog/tree/master/opencog/nlp don't think it
+# would make sense to add it there as the directory contains code from other
+# languages.
+#from anaphora.agents.hobbs import HobbsAgent
+from agents.hobbs import HobbsAgent
 from unittest import TestCase
 
 
