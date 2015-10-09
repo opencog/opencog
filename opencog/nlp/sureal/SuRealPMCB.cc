@@ -362,10 +362,12 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
-    logger().debug("[SuReal] grounding a solution");
+    logger().debug("[SuReal] grounding a solution");    
+
+    std::set<Handle> qSolnSetLinks;
 
     // helper to get the InterpretationNode
-    auto getInterpretation = [this](const Handle& h)
+    auto getInterpretation = [&](const Handle& h)
     {
         HandleSeq qISet = m_as->get_incoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -374,10 +376,13 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
+
+            // store the R2L-SetLinks so that we can examine them later
+            qSolnSetLinks.insert(hSetLink);
         }
 
         return results;
@@ -423,17 +428,79 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
-    // store the solution; all common InterpretationNode are solutions for this
-    // grounding, so store the solution for each InterpretationNode
-    for (auto n : qItprNode)
+    // if there are more than one common InterpretationNodes at this point,
+    // we should have the same no. of SetLinks here, so examine them one by one
+    for (Handle hSetLink : qSolnSetLinks)
     {
-        // there could also be multiple solutions for one InterpretationNode,
-        // so store them in a vector
-        if (m_results.count(n) == 0)
-            m_results[n] = std::vector<std::map<Handle, Handle> >();
+        bool isGoodEnough = true;
 
-        logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
-        m_results[n].push_back(shrinked_soln);
+        LinkPtr lp(LinkCast(hSetLink));
+        HandleSeq qLeftoverLinks = lp->getOutgoingSet();
+        for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
+        {
+            auto itc = std::find(qLeftoverLinks.begin(), qLeftoverLinks.end(), it->second);
+
+            if (itc != qLeftoverLinks.end())
+                qLeftoverLinks.erase(itc);
+        }
+
+        HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
+        qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
+                                            [](Handle& h) { return h->getType() != WORD_INSTANCE_NODE; }), qWordInstNodes.end());
+
+        for (Handle& l : qLeftoverLinks)
+        {
+            std::set<UUID> sWordFound;
+            HandleSeq qNodes = get_all_nodes(l);
+
+            for (Handle& n : qNodes)
+            {
+                auto matchWordInst = [&](Handle& hh)
+                {
+                    std::string wordInstName = NodeCast(hh)->getName();
+                    std::string nodeName = NodeCast(n)->getName();
+
+                    if (wordInstName.compare(0, nodeName.length()+1, nodeName+'@') == 0)
+                    {
+                        sWordFound.insert(hh.value());
+                        return true;
+                    }
+
+                    return false;
+                };
+
+                std::find_if(qWordInstNodes.begin(), qWordInstNodes.end(), matchWordInst);
+            }
+
+            // if it is not a unary link, reject the match
+            if (sWordFound.size() > 1)
+            {
+                isGoodEnough = false;
+                break;
+            }
+        }
+
+        if (isGoodEnough)
+        {
+            qItprNode = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+
+            // store the solution; all common InterpretationNode are solutions for this
+            // grounding, so store the solution for each InterpretationNode
+            // but normally there should be only one InterpretationNode for a
+            // given R2L-SetLink
+            for (auto n : qItprNode)
+            {
+                // there could also be multiple solutions for one InterpretationNode,
+                // so store them in a vector
+                if (m_results.count(n) == 0)
+                    m_results[n] = std::vector<std::map<Handle, Handle> >();
+
+                logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
+                m_results[n].push_back(shrinked_soln);
+            }
+
+            return true;
+        }
     }
 
     return false;
