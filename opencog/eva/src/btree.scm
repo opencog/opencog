@@ -17,12 +17,20 @@
 (load-from-path "faces.scm")
 
 ; ------------------------------------------------------
+; State variables
 
 (define soma-state (AnchorNode "Soma State"))
 (define soma-sleeping (ConceptNode "Sleeping"))
 
 ;; Assume Eva is sleeping at first
-(ListLink soma-state soma-sleeping)
+(StateLink soma-state soma-sleeping)
+
+;; Currently, interaction-state will be linked to the face-id of
+;; person with whom interaction is taking place.
+(define interaction-state (AnchorNode "Interaction State"))
+(define no-interaction (ConceptNode "none"))
+
+(StateLink interaction-state no-interaction)
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -50,12 +58,23 @@
 
 ; line 588 -- dice_roll("glance_new_face")
 (DefineLink
-	(DefinedSchemaNode "dice-roll: glance")
+	(DefinedPredicateNode "dice-roll: glance")
 	(EvaluationLink
 		(GroundedPredicateNode "scm: dice-roll")
 		(ListLink (NumberNode "0.5"))))
 
 ;; ------
+;;
+;; Return true if interacting with someone.
+;; line 650, is_interacting_with_someone
+;; (cog-satisfy (DefinedPredicateNode "is interacting with someone?"))
+(DefineLink
+	(DefinedPredicateNode "is interacting with someone?")
+	(NotLink (EqualLink
+		(SetLink no-interaction)
+		(GetLink (StateLink interaction-state (VariableNode "$x"))))
+	))
+
 ;;
 ;; Is the room empty, viz: Does the atomspace contains the link
 ;; (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
@@ -64,7 +83,7 @@
 	(DefinedPredicateNode "is room empty?")
 	(EqualLink
 		(SetLink room-empty)
-		(GetLink (ListLink room-state (VariableNode "$x")))
+		(GetLink (StateLink room-state (VariableNode "$x")))
 	))
 
 ;; line 742, assign_face_target
@@ -104,8 +123,10 @@
 			(ListLink))))
 
 ; ------------------------------------------------------
-;; line 392 -- Sequence - if there were no people in the room,
-;; then look at the new arrival.
+;; Sequence - if there were no people in the room, then look at the
+;; new arrival.
+;; line 391 -- owyl.sequence
+;; (cog-satisfy empty-seq)
 (define empty-seq
 	(SatisfactionLink
 		(SequentialAndLink
@@ -117,6 +138,7 @@
 		)))
 
 ;; line 399 -- Sequence - Currently interacting with someone
+; (cog-satisfy interact-seq)
 (define interact-seq
 	(SatisfactionLink
 		(SequentialAndLink
@@ -125,7 +147,5 @@
 			(DefinedPredicateNode "glance at person")
 	)))
 
-
-(cog-satisfy empty-seq)
 ;
 ;
