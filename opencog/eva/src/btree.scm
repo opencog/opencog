@@ -132,8 +132,8 @@
 		(SequentialAndLink
 			;; line 392
 			(DefinedPredicateNode "is room empty?")
-			(DefinedSchemaNode "look at person")
-			(DefinedSchemaNode "set timestamp")
+			(TrueLink (DefinedSchemaNode "look at person"))
+			(TrueLink (DefinedSchemaNode "set timestamp"))
 			(DefinedPredicateNode "Print Msg")
 		)))
 
@@ -144,7 +144,7 @@
 		(SequentialAndLink
 			(DefinedPredicateNode "is interacting with someone?")
 			(DefinedPredicateNode "dice-roll: glance")
-			(DefinedPredicateNode "glance at person")
+			(TrueLink (DefinedSchemaNode "glance at person"))
 	)))
 
 ;
