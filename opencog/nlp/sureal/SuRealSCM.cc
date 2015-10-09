@@ -153,15 +153,11 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
     slp->satisfy(pmcb);
 
-    // TODO: Should have one key only?
     HandleSeq keys;
 
     // construct the list of InterpretationNode to be returned
     for (auto& r : pmcb.m_results)
         keys.push_back(r.first);
-
-    std::cout << "\nkeys:\n";
-    for (Handle& h : keys) std::cout << h->toShortString();
 
     // sort the InterpretationNode bases on the size of the corresponding
     // SetLink; the idea is that the larger the size, the more stuff in

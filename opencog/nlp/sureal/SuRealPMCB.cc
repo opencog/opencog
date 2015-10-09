@@ -434,21 +434,24 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     {
         bool isGoodEnough = true;
 
+        // extract the leftovers from the solution SetLink
         LinkPtr lp(LinkCast(hSetLink));
-        HandleSeq qLeftoverLinks = lp->getOutgoingSet();
+        HandleSeq qLeftover = lp->getOutgoingSet();
         for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
         {
-            auto itc = std::find(qLeftoverLinks.begin(), qLeftoverLinks.end(), it->second);
+            auto itc = std::find(qLeftover.begin(), qLeftover.end(), it->second);
 
-            if (itc != qLeftoverLinks.end())
-                qLeftoverLinks.erase(itc);
+            if (itc != qLeftover.end())
+                qLeftover.erase(itc);
         }
 
         HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
                                             [](Handle& h) { return h->getType() != WORD_INSTANCE_NODE; }), qWordInstNodes.end());
 
-        for (Handle& l : qLeftoverLinks)
+        // check if all of the leftovers of this SetLink are unary -- doesn't
+        // form a logical relationship with more than one word of the sentence
+        for (Handle& l : qLeftover)
         {
             std::set<UUID> sWordFound;
             HandleSeq qNodes = get_all_nodes(l);
@@ -472,7 +475,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                 std::find_if(qWordInstNodes.begin(), qWordInstNodes.end(), matchWordInst);
             }
 
-            // if it is not a unary link, reject the match
+            // if it is not a unary link, not good enough, reject the match
             if (sWordFound.size() > 1)
             {
                 isGoodEnough = false;
