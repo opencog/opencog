@@ -35,15 +35,8 @@
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
-(define (print-msg) (display "Triggered\n") (stv 1 1))
+(define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
-
-(DefineLink
-	(DefinedPredicateNode "Print Msg")
-	(EvaluationLink
-		(GroundedPredicateNode "scm: print-msg")
-		(ListLink))
-	)
 
 ; ------------------------------------------------------
 ; TODO --
@@ -134,7 +127,8 @@
 			(DefinedPredicateNode "is room empty?")
 			(TrueLink (DefinedSchemaNode "look at person"))
 			(TrueLink (DefinedSchemaNode "set timestamp"))
-			(DefinedPredicateNode "Print Msg")
+			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				(ListLink (Node "look at person")))
 		)))
 
 ;; line 399 -- Sequence - Currently interacting with someone
@@ -145,6 +139,8 @@
 			(DefinedPredicateNode "is interacting with someone?")
 			(DefinedPredicateNode "dice-roll: glance")
 			(TrueLink (DefinedSchemaNode "glance at person"))
+			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				(ListLink (Node "glance at person")))
 	)))
 
 ;
