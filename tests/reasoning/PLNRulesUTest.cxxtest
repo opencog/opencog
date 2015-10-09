@@ -40,7 +40,7 @@ private:
 public:
 	PLNRulesUTest() : eval(&as)
     {
-        logger().setLevel(Logger::DEBUG);
+        logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
 
@@ -58,7 +58,8 @@ public:
     void test_and_construction();
     void test_or_construction();
     void test_not_construction();
-    void test_forall_instantiation();
+    void test_forall_full_instantiation();
+    void test_forall_partial_instantiation();
 };
 
 void PLNRulesUTest::tearDown()
@@ -184,7 +185,7 @@ void PLNRulesUTest::test_not_construction()
  * Test the pln-forall-instantiation-rule defined in:
  * opencog/reasoning/pln/rules/forall-instantiation-rule.scm
  */
-void PLNRulesUTest::test_forall_instantiation()
+void PLNRulesUTest::test_forall_full_instantiation()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -196,9 +197,50 @@ void PLNRulesUTest::test_forall_instantiation()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle rule = eval.eval_h("pln-rule-forall-instantiation");
+    Handle rule = eval.eval_h("pln-rule-forall-full-instantiation");
     Handle results = bindlink(&as, rule);
 
+    /**
+     * It should contain 3 groundings:
+     *
+     * 1. EvaluationLink
+     *       PredicateNode "is-predicate"
+     *       <some-predicate>
+     *
+     * 2. EvaluationLink
+     *       PredicateNode "is-concept"
+     *       <some-concept>
+     *
+     * 3. EvaluationLink
+     *       PredicateNode "are-concept-and-predicate"
+     *       ListLink
+     *          <some-concept>
+     *          <some-predicate>
+     */
+    TS_ASSERT_EQUALS(3, as.get_arity(results));
+}
+
+/**
+ * Test the pln-forall-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/forall-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_forall_partial_instantiation()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-instantiation-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("pln-rule-forall-partial-instantiation");
+    Handle results = bindlink(&as, rule);
+
+    std::cout << "results = " << results->toString();
+    
     /**
      * It should contain 3 groundings:
      *
