@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -362,9 +363,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
-    logger().debug("[SuReal] grounding a solution");    
-
-    std::set<Handle> qSolnSetLinks;
+    logger().debug("[SuReal] grounding a solution");
 
     // helper to get the InterpretationNode
     auto getInterpretation = [&](const Handle& h)
@@ -380,9 +379,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
-
-            // store the R2L-SetLinks so that we can examine them later
-            qSolnSetLinks.insert(hSetLink);
         }
 
         return results;
@@ -426,6 +422,23 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             return false;
 
         shrinked_soln[kv.first] = kv.second;
+    }
+
+    std::set<Handle> qSolnSetLinks;
+
+    // get the R2L-SetLinks that are related to these InterpretationNodes
+    for (Handle& hItprNode : qItprNode)
+    {
+        HandleSeq qN = get_neighbors(hItprNode, false, true, REFERENCE_LINK, false);
+        qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qN.end());
+
+        // just in case... make sure all the pred_solns exist in the SetLink
+        for (auto& hSetLink : qN)
+        {
+            if (std::all_of(pred_soln.begin(), pred_soln.end(),
+                            [&](std::pair<Handle, Handle> soln) { return is_atom_in_tree(hSetLink, soln.second); }))
+                qSolnSetLinks.insert(hSetLink);
+        }
     }
 
     // if there are more than one common InterpretationNodes at this point,
