@@ -429,7 +429,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     }
 
     // if there are more than one common InterpretationNodes at this point,
-    // we should have the same no. of SetLinks here, so examine them one by one
+    // we should also have more than one SetLinks here, so examine them one by one
     for (Handle hSetLink : qSolnSetLinks)
     {
         bool isGoodEnough = true;
@@ -458,14 +458,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
             for (Handle& n : qNodes)
             {
-                auto matchWordInst = [&](Handle& hh)
+                auto matchWordInst = [&](Handle& w)
                 {
-                    std::string wordInstName = NodeCast(hh)->getName();
+                    std::string wordInstName = NodeCast(w)->getName();
                     std::string nodeName = NodeCast(n)->getName();
 
                     if (wordInstName.compare(0, nodeName.length()+1, nodeName+'@') == 0)
                     {
-                        sWordFound.insert(hh.value());
+                        sWordFound.insert(w.value());
                         return true;
                     }
 
@@ -475,7 +475,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                 std::find_if(qWordInstNodes.begin(), qWordInstNodes.end(), matchWordInst);
             }
 
-            // if it is not a unary link, not good enough, reject the match
+            // if it is not a unary link, the solution is not good enough
             if (sWordFound.size() > 1)
             {
                 isGoodEnough = false;
