@@ -131,38 +131,49 @@ void PatternMiner::startMiningWork()
         std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 }
 
-void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex)
+void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
 {
-    // debug
-//    static int count = 0;
-//    count ++;
-//    if (count > 50)
-//        return;
-
     try
     {
-
-        uri_builder builder(U("/FindANewPattern"));
 
         json::value patternInfo = json::value::object();
         patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
         patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
         patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
 
-    //    builder.append_query(U("Pattern"), U(curPatternKeyStr));
-    //    builder.append_query(U("ParentPattern"), U(parentKeyString));
-    //    builder.append_query(U("ExtendedLinkIndex"), U(extendedLinkIndex));
+        patternJsonArray[patternJsonArray.size()] = patternInfo;
 
-        httpClient->request(methods::POST, builder.to_string(), patternInfo.serialize().c_str(), "application/json");
+        if(patternJsonArray.size() >= JSON_BUF_MAX_NUM)
+            sendPatternsToCentralServer(patternJsonArray);
+
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << "addPatternsToJsonArrayBuf exception!: " << endl;
+
+    }
+
+    cur_worker_mined_pattern_num ++;
+    cout << "\nWorker sent cur_worker_mined_pattern_num = " << cur_worker_mined_pattern_num << std::endl;
+}
+
+// this function will empty patternJsonArray after sent
+void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
+{
+    try
+    {
+        uri_builder builder(U("/FindNewPatterns"));
+
+        httpClient->request(methods::POST, builder.to_string(), patternJsonArray.serialize().c_str(), "application/json");
+
+        // empty the array
+        patternJsonArray = json::value::array();
+
+        usleep(500);
     }
     catch (exception const & e)
     {
        cout << e.what() << "sendPatternToCentralServer exception!: " << endl;
 
     }
-
-    cur_worker_mined_pattern_num ++;
-    cout << "\nWorker sent cur_worker_mined_pattern_num = " << cur_worker_mined_pattern_num << std::endl;
-    usleep(500);
-
 }

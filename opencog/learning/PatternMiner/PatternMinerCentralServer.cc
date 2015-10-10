@@ -116,9 +116,9 @@ void PatternMiner::handlePost(http_request request)
         {
             handleRegisterNewWorker(request);
         }
-        else if (path == "/FindANewPattern")
+        else if (path == "/FindNewPatterns")
         {
-            handleFindANewPattern(request);
+            handleFindNewPatterns(request);
         }
         else if (path == "/ReportWorkerStop")
         {
@@ -173,7 +173,7 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 }
 
-void PatternMiner::handleFindANewPattern(http_request request)
+void PatternMiner::handleFindNewPatterns(http_request request)
 {
 
     try

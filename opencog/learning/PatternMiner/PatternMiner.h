@@ -52,6 +52,8 @@ namespace PatternMining
 
 #define LINE_INDENTATION "  "
 
+#define JSON_BUF_MAX_NUM 10
+
  struct _non_ordered_pattern
  {
      Handle link;
@@ -233,7 +235,8 @@ namespace PatternMining
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask);
+                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
+                                     bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, web::json::value &patternJsonArray);
 
      bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -368,7 +371,7 @@ private:
      void handlePost(http_request request);
      void handleRegisterNewWorker(http_request request);
      void handleReportWorkerStop(http_request request);
-     void handleFindANewPattern(http_request request);
+     void handleFindNewPatterns(http_request request);
 
      void runParsePatternTaskThread();
      void parseAPatternTask(json::value jval);
@@ -376,7 +379,8 @@ private:
      void startMiningWork();
      void centralServerEvaluateInterestingness();
 
-     void sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex);
+     void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray);
+     void sendPatternsToCentralServer(json::value &patternJsonArray);
      HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
      bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
 

@@ -178,7 +178,12 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
 
-        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false, allHTreeNodesCurTask);
+        web::json::value patternJsonArray = web::json::value::array();
+        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+                                                patternVarMap, false, allHTreeNodesCurTask, patternJsonArray);
+
+        if (patternJsonArray.size() > 0)
+            sendPatternsToCentralServer(patternJsonArray);
     }
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
@@ -501,8 +506,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 // when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap and lastGramPatternVarMap are empty
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
+// patternJsonArray is only used in distributed mode, to buffer the pattern jsons to send to server
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,  bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask)
+                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
+                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, json::value &patternJsonArray)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -668,7 +675,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         parentKeyStr = "none";
                     }
 
-                    sendPatternToCentralServer(curPatternKeyStr, parentKeyStr, extendedLinkIndex);
+                    addPatternsToJsonArrayBuf(curPatternKeyStr, parentKeyStr, extendedLinkIndex, patternJsonArray);
                 }
                 else
                 {
@@ -770,7 +777,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         }
 
                         // extract patterns from these child
-                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask);
+                        extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode,
+                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask, patternJsonArray);
                     }
 
                     nodeIndex ++;
