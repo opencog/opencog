@@ -101,13 +101,7 @@ void PatternMiner::launchADistributedWorker()
             std::cout << "Registered to the central server failed! Please check network and the the state of the central server." << std::endl;
         }
 
-        return;
-
     });
-
-
-    std::cout << "Registered to the central server failed! Please check network and the the state of the central server." << std::endl;
-
 
 }
 
@@ -168,6 +162,7 @@ void PatternMiner::sendPatternToCentralServer(string curPatternKeyStr, string pa
     }
 
     cur_worker_mined_pattern_num ++;
-
+    cout << "\nWorker sent cur_worker_mined_pattern_num = " << cur_worker_mined_pattern_num << std::endl;
+    usleep(500);
 
 }
