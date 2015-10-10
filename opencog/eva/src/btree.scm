@@ -32,6 +32,7 @@
 
 (StateLink interaction-state no-interaction)
 
+
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
@@ -60,7 +61,7 @@
 ;;
 ;; Return true if interacting with someone.
 ;; line 650, is_interacting_with_someone
-;; (cog-satisfy (DefinedPredicateNode "is interacting with someone?"))
+;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
 (DefineLink
 	(DefinedPredicateNode "is interacting with someone?")
 	(NotLink (EqualLink
@@ -70,10 +71,10 @@
 
 ;;
 ;; Is the room empty, viz: Does the atomspace contains the link
-;; (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
+;; (StateLink (AnchorNode "Room State") (ConceptNode "room empty"))
 ;; line 665, were_no_people_in_the_scene
 (DefineLink
-	(DefinedPredicateNode "is room empty?")
+	(DefinedPredicateNode "was room empty?")
 	(EqualLink
 		(SetLink room-empty)
 		(GetLink (StateLink room-state (VariableNode "$x")))
@@ -119,12 +120,13 @@
 ;; Sequence - if there were no people in the room, then look at the
 ;; new arrival.
 ;; line 391 -- owyl.sequence
-;; (cog-satisfy empty-seq)
-(define empty-seq
+;; (cog-evaluate! (DefinedPredicateNode "Empty Sequence"))
+(DefineLink
+	(DefinedPredicateNode "Empty Sequence")
 	(SatisfactionLink
 		(SequentialAndLink
 			;; line 392
-			(DefinedPredicateNode "is room empty?")
+			(DefinedPredicateNode "was room empty?")
 			(TrueLink (DefinedSchemaNode "look at person"))
 			(TrueLink (DefinedSchemaNode "set timestamp"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
@@ -132,16 +134,27 @@
 		)))
 
 ;; line 399 -- Sequence - Currently interacting with someone
-; (cog-satisfy interact-seq)
-(define interact-seq
+; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
+(DefineLink
+	(DefinedPredicateNode "Interacting Sequence")
 	(SatisfactionLink
 		(SequentialAndLink
 			(DefinedPredicateNode "is interacting with someone?")
 			(DefinedPredicateNode "dice-roll: glance")
 			(TrueLink (DefinedSchemaNode "glance at person"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "glance at person")))
+				(ListLink (Node "--- glance at person")))
 	)))
+
+;; line 389 -- Selector
+(define select
+	(SatisfactionLink
+		(SequentialOrLink
+			(DefinedPredicateNode "Empty Sequence")
+			(DefinedPredicateNode "Interacting Sequence")
+			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				(ListLink (Node "--- Ignoring new person"))) ; line 406
+			(TrueLink))))
 
 ;
 ;

@@ -15,7 +15,7 @@
 (define room-nonempty (ConceptNode "room nonempty"))
 
 ;; Assume room empty at first
-(ListLink room-state room-empty)
+(StateLink room-state room-empty)
 
 ; A hacky rule that looks for the visible-face marker, and
 ; sets the room-is-not-empty flag if a face is visible.
@@ -25,11 +25,10 @@
 		(EvaluationLink
 			(PredicateNode "visible face")
 			(ListLink
-				(VariableNode "$face-id")
-			)
-		)
+				(VariableNode "$face-id")))
+
 		; Change the status of the room to "non-empty"
-		(AssignLink (TypeNode "ListLink") room-state room-nonempty)
+		(PutLink (StateLink room-state (VariableNode "$x")) room-nonempty)
 	)
 )
 
@@ -41,31 +40,25 @@
 			(EvaluationLink
 				(PredicateNode "visible face")
 				(ListLink
-					(VariableNode "$face-id")
-				)
-			)
-		)
+					(VariableNode "$face-id"))))
+
 		; Change the status of the room to "empty"
-		(AssignLink (TypeNode "ListLink") room-state room-empty)
+		(PutLink (StateLink room-state (VariableNode "$x") room-empty)
 	)
 )
 
 ;; Display the current room state
 (define (show-room-state)
-	(car (cog-chase-link 'ListLink 'ConceptNode room-state)))
+	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
 ; Quick hack to fill the room.
 (define (make-room-nonempty)
-	(ListLink room-state (ConceptNode "room nonempty"))
-	(cog-delete (ListLink room-state (ConceptNode "room empty")))
-)
+	(StateLink room-state room-nonempty))
 
 ; Quick hack to clear the room
 (define (make-room-empty)
-	(ListLink room-state (ConceptNode "room empty"))
-	(cog-delete (ListLink room-state (ConceptNode "room nonempty")))
-)
+	(StateLink room-state room-empty))
 
 
 
