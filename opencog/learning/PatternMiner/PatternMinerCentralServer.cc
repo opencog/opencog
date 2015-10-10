@@ -184,7 +184,7 @@ void PatternMiner::handleFindANewPattern(http_request request)
         patternQueueLock.unlock();
         request.reply(status_codes::OK);
 
-        cout << "Received pattern num = " << total_pattern_received << std::endl;
+        // cout << "Received pattern num = " << total_pattern_received << std::endl;
     }
     catch (exception const & e)
     {
@@ -217,9 +217,9 @@ void PatternMiner::runParsePatternTaskThread()
 void PatternMiner::parseAPatternTask(json::value jval)
 {
 
-    static int tryToParsePatternNum = 0;
-    tryToParsePatternNum ++;
-    cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
+    // static int tryToParsePatternNum = 0;
+    // tryToParsePatternNum ++;
+    // cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
     string PatternStr =  jval[U("Pattern")].as_string();
     // cout << "PatternStr = " << PatternStr << std::endl;
     string ParentPatternStr = jval[U("ParentPattern")].as_string();
@@ -232,7 +232,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
 
     map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
 
-    static int duplicatePatternNum = 0;
+    // static int duplicatePatternNum = 0;
 
     if (htreeNodeIter != keyStrToHTreeNodeMap.end())
     {
@@ -240,8 +240,8 @@ void PatternMiner::parseAPatternTask(json::value jval)
 
         newHTreeNode->count ++;
 
-        duplicatePatternNum ++;
-        cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
+//        duplicatePatternNum ++;
+//        cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
     }
     else
     {
@@ -338,12 +338,12 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     HandleSeq pattern;
 
-    // debug
-    if (strs.size() > 2)
-    {
-        int i = 0;
-        i++;
-    }
+//    // debug
+//    if (strs.size() > 2)
+//    {
+//        int i = 0;
+//        i++;
+//    }
 
     for (string linkStr : strs) // load each link
     {
