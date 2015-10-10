@@ -361,6 +361,9 @@ private:
 
      bool patternMiningRunning;
 
+     int cur_worker_mined_pattern_num;
+     int total_pattern_received; // in the server
+
 
      void handlePost(http_request request);
      void handleRegisterNewWorker(http_request request);
@@ -375,7 +378,7 @@ private:
 
      void sendPatternToCentralServer(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex);
      HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
-     void loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+     bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
 
  public:
 

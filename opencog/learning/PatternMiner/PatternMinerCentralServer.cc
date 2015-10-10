@@ -95,6 +95,7 @@ void PatternMiner::centralServerStartListening()
 {
     try
     {
+       total_pattern_received = 0;
        serverListener->open().wait();
 
     }
@@ -179,8 +180,11 @@ void PatternMiner::handleFindANewPattern(http_request request)
         json::value jval = request.extract_json().get();
         patternQueueLock.lock();
         waitForParsePatternQueue.push_back(jval);
+        total_pattern_received ++;
         patternQueueLock.unlock();
         request.reply(status_codes::OK);
+
+        cout << "Received pattern num = " << total_pattern_received << std::endl;
     }
     catch (exception const & e)
     {
@@ -213,82 +217,89 @@ void PatternMiner::runParsePatternTaskThread()
 void PatternMiner::parseAPatternTask(json::value jval)
 {
 
-    try
+    static int tryToParsePatternNum = 0;
+    tryToParsePatternNum ++;
+    cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
+    string PatternStr =  jval[U("Pattern")].as_string();
+    // cout << "PatternStr = " << PatternStr << std::endl;
+    string ParentPatternStr = jval[U("ParentPattern")].as_string();
+    // cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
+    int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
+    // cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
+
+    HTreeNode* newHTreeNode;
+    // check if the pattern key already exist
+
+    map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
+
+    static int duplicatePatternNum = 0;
+
+    if (htreeNodeIter != keyStrToHTreeNodeMap.end())
     {
-        string PatternStr =  jval[U("Pattern")].as_string();
-        cout << "PatternStr = " << PatternStr << std::endl;
-        string ParentPatternStr = jval[U("ParentPattern")].as_string();
-        cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
-        int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
-        cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
+        newHTreeNode = htreeNodeIter->second;
 
-        HTreeNode* newHTreeNode;
-        // check if the pattern key already exist
+        newHTreeNode->count ++;
 
-        map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
-
-
-        if (htreeNodeIter != keyStrToHTreeNodeMap.end())
+        duplicatePatternNum ++;
+        cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
+    }
+    else
+    {
+        // add this new found pattern into the Atomspace
+        HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+        if (patternHandleSeq.size() == 0)
         {
-            newHTreeNode = htreeNodeIter->second;
 
-            newHTreeNode->count ++;
+            cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
+            return;
+
+        }
+
+        // create a new HTreeNode
+        newHTreeNode = new HTreeNode();
+        newHTreeNode->pattern = patternHandleSeq;
+        newHTreeNode->count = 1;
+
+        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+
+    }
+
+    if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
+    {
+        if (ParentPatternStr == "none")
+        {
+
+            cout << "Warning: Pattern missing parent pattern string:" << PatternStr;
+            return;
+
         }
         else
         {
-            // add this new found pattern into the Atomspace
-            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
-            if (patternHandleSeq.size() == 0)
+
+            map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
+
+            if (parentNodeIter == keyStrToHTreeNodeMap.end())
             {
-                throw ("Invalid pattern string: " + PatternStr);
+
+                cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
+                return;
+
             }
-
-            // create a new HTreeNode
-            newHTreeNode = new HTreeNode();
-            newHTreeNode->pattern = patternHandleSeq;
-            newHTreeNode->count = 1;
-
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
-
-        }
-
-        if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
-        {
-            if (ParentPatternStr == "none")
-                throw ("Pattern missing parent pattern string: " + PatternStr);
             else
             {
+                // add super pattern relation
 
-                map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
-
-                if (parentNodeIter == keyStrToHTreeNodeMap.end())
-                {
-
-                    throw ("Pattern missing parent pattern string: " + PatternStr);
-                }
-                else
-                {
-                    // add super pattern relation
-
-                    HTreeNode* parentNode = parentNodeIter->second;
+                HTreeNode* parentNode = parentNodeIter->second;
 
 
-                    ExtendRelation relation;
-                    relation.extendedHTreeNode = newHTreeNode;
-                    relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
+                ExtendRelation relation;
+                relation.extendedHTreeNode = newHTreeNode;
+                relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
 
-                    parentNode->superPatternRelations.push_back(relation);
-                }
+                parentNode->superPatternRelations.push_back(relation);
             }
         }
-
     }
-    catch (exception const & e)
-    {
-       cout << e.what() << "parseAPatternTask error: " << jval.serialize() << endl;
-    }
-
-
 
 }
 
@@ -339,15 +350,18 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
         if (linkStr == "")
             continue;
 
-        try
-        {
             HandleSeq rootOutgoings;
 
             std::size_t firstLineEndPos = linkStr.find("\n");
             std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
             stringstream outgoingStream(rootOutgoingStr);
 
-            loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings);
+            if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings))
+            {
+                cout << "Warning: loadPatternIntoAtomSpaceFromString: Parse pattern string error: " << linkStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
+            }
 
             std::size_t typeEndPos = linkStr.find(" ");
             string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
@@ -355,32 +369,31 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
             if (linkOrNodeStr != "Link")
             {
-                // exception
-                throw ("Not a Link: " + linkOrNodeStr);
+
+                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a Link: " << linkOrNodeStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
 
             }
 
             Type atomType = classserver().getType(atomTypeStr);
             if (NOTYPE == atomType)
             {
-                throw InvalidParamException(TRACE_INFO,
-                    "Not a valid typename: '%s'", atomTypeStr.c_str());
+
+                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
+
             }
 
             Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
             pattern.push_back(rootLink);
-        }
-        catch (exception const & e)
-        {
-           cout << e.what() << endl << "At loadPatternIntoAtomSpaceFromString:" << linkStr << endl;
 
-           throw ("Exception in loadPatternIntoAtomSpaceFromString: " + linkStr);
-
-        }
 
     }
 
     // debug:
+    static int pattern_num = 1;
     string patternToStr = "";
 
     for(Handle h : pattern)
@@ -389,13 +402,14 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
         patternToStr += "\n";
     }
 
-    cout << "\nAdded pattern: \n" << patternToStr;
+    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
+    pattern_num ++;
 
     return pattern;
 }
 
 // recursively function
-void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
+bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
 {
     string line;
     string curIndent = parentIndent + LINE_INDENTATION;
@@ -403,68 +417,63 @@ void PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
     while(getline(outgoingStream, line))
     {
 
-//        try
-//        {
-            std::size_t nonIndentStartPos = line.find("(");
-            string indent = line.substr(0, nonIndentStartPos);
-            string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
-            std::size_t typeEndPos = nonIndentSubStr.find(" ");
-            string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-            Type atomType = classserver().getType(atomTypeStr);
-            if (NOTYPE == atomType)
+        std::size_t nonIndentStartPos = line.find("(");
+        string indent = line.substr(0, nonIndentStartPos);
+        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
+        std::size_t typeEndPos = nonIndentSubStr.find(" ");
+        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
+        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+        Type atomType = classserver().getType(atomTypeStr);
+        if (NOTYPE == atomType)
+        {
+            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
+            return false;
+
+        }
+
+        if (indent == curIndent)
+        {
+            if (linkOrNodeStr == "Node")
             {
-                throw InvalidParamException(TRACE_INFO,
-                    "Not a valid typename: '%s'", atomTypeStr.c_str());
+                std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
+                string nodeName = nonIndentSubStr.substr(typeEndPos + 1, nodeNameEndPos - typeEndPos - 1);
+                Handle node = _atomSpace->add_node(atomType, nodeName);
+                outgoings.push_back(node);
             }
-
-            if (indent == curIndent)
+            else if (linkOrNodeStr == "Link")
             {
-                if (linkOrNodeStr == "Node")
-                {
-                    std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
-                    string nodeName = nonIndentSubStr.substr(typeEndPos + 1, nodeNameEndPos - typeEndPos - 1);
-                    Handle node = _atomSpace->add_node(atomType, nodeName);
-                    outgoings.push_back(node);
-                }
-                else if (linkOrNodeStr == "Link")
-                {
-                    // call this function recursively
-                    HandleSeq childOutgoings;
-                    loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent);
+                // call this function recursively
+                HandleSeq childOutgoings;
+                if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent))
+                    return false;
 
-                    Handle link = _atomSpace->add_link(atomType, childOutgoings);
-                    outgoings.push_back(link);
-                }
-                else
-                {
-                    // exception
-                    throw ( "Not a Node, neighter a Link: " + linkOrNodeStr);
-
-
-                }
-
-            }
-            else if (indent.size() < curIndent.size())
-            {
-                return;
+                Handle link = _atomSpace->add_link(atomType, childOutgoings);
+                outgoings.push_back(link);
             }
             else
             {
-                // exception
-                throw ("Indent wrong: " + line);
+                cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a Node, neighter a Link: " << linkOrNodeStr << std::endl;
+                return false;
 
             }
-//        }
-//        catch (exception const & e)
-//        {
-//           cout << e.what() << endl << "At loadOutgoingsIntoAtomSpaceFromString:" << line << endl;
 
-//           throw ("Exception in loadOutgoingsIntoAtomSpaceFromString: " + line);
+        }
+        else if (indent.size() < curIndent.size())
+        {
+            return true;
+        }
+        else
+        {
+            // exception
+            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Indent wrong: " << line << std::endl;
+            return false;
 
-//        }
+
+        }
 
     }
+
+    return true;
 }
 
 void PatternMiner::centralServerEvaluateInterestingness()
