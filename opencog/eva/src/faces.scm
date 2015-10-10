@@ -24,8 +24,8 @@
 	(SatisfactionLink
 		(SequentialAndLink
 			; If someone is visible...
-			(EvaluationLink (PredicateNode "visible face")
-					(ListLink (VariableNode "$face-id")))
+			(PresentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
 			; Change the status of the room to "non-empty"
 			(TrueLink (PutLink
 					(StateLink room-state (VariableNode "$x"))
@@ -57,7 +57,6 @@
 ; Quick hack to clear the room
 (define (make-room-empty)
 	(StateLink room-state room-empty))
-
 
 
 #|
