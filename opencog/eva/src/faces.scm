@@ -17,35 +17,33 @@
 ;; Assume room empty at first
 (StateLink room-state room-empty)
 
-; A hacky rule that looks for the visible-face marker, and
+; A rule that looks for the visible-face marker, and
 ; sets the room-is-not-empty flag if a face is visible.
-(define chk-room-non-empty
-	(BindLink
-		(VariableNode "$face-id")
-		(EvaluationLink
-			(PredicateNode "visible face")
-			(ListLink
-				(VariableNode "$face-id")))
+(DefineLink
+	(DefinedPredicateNode "Check if room non-empty")
+	(SatisfactionLink
+		(SequentialAndLink
+			; If someone is visible...
+			(EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id")))
+			; Change the status of the room to "non-empty"
+			(TrueLink (PutLink
+					(StateLink room-state (VariableNode "$x"))
+					room-nonempty)))))
 
-		; Change the status of the room to "non-empty"
-		(PutLink (StateLink room-state (VariableNode "$x")) room-nonempty)
-	)
-)
+; A rule that inverts the above.
+(DefineLink
+	(DefinedPredicateNode "Check if room empty")
+	(SatisfactionLink
+		(SequentialAndLink
+			; If someone no-one visible...
+			(AbsentLink (EvaluationLink (PredicateNode "visible face")
+						(ListLink (VariableNode "$face-id"))))
 
-; A hack rule that inverts the above.
-(define chk-room-empty
-	(BindLink
-		(VariableNode "$face-id")
-		(AbsentLink
-			(EvaluationLink
-				(PredicateNode "visible face")
-				(ListLink
-					(VariableNode "$face-id"))))
-
-		; Change the status of the room to "empty"
-		(PutLink (StateLink room-state (VariableNode "$x") room-empty)
-	)
-)
+			; Change the status of the room to "empty"
+			(TrueLink (PutLink
+					(StateLink room-state (VariableNode "$x"))
+					room-empty)))))
 
 ;; Display the current room state
 (define (show-room-state)
@@ -65,8 +63,8 @@
 #|
 ;; Example usage:
 ;;
-(cog-bind chk-room-empty)
-(cog-bind chk-room-non-empty)
+(cog-evaluate! (DefinedPredicateNode "Check if room non-empty"))
+(cog-evaluate! (DefinedPredicateNode "Check if room empty"))
 (show-room-state)
 
 (cog-incoming-set (PredicateNode "visible face"))
