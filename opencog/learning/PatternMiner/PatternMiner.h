@@ -52,7 +52,7 @@ namespace PatternMining
 
 #define LINE_INDENTATION "  "
 
-#define JSON_BUF_MAX_NUM 20
+#define JSON_BUF_MAX_NUM 30
 
  struct _non_ordered_pattern
  {
@@ -347,6 +347,8 @@ private:
      string centralServerIP;
      string centralServerPort;
      string centralServerBaseURL;
+
+     web::json::value *patternJsonArrays;
 
      std::thread centralServerListeningThread;
      std::thread parsePatternTaskThread;

@@ -143,6 +143,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
     cout<< "Start thread " << thread_index << " from " << start_index << " to " << end_index-1 << std::endl;
 
+    patternJsonArrays[thread_index] = json::value::array();
+
     float allLinkNumberfloat = ((float)(end_index - start_index));
     for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++ t_cur_index)
     {
@@ -178,13 +180,22 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
 
-        web::json::value patternJsonArray = web::json::value::array();
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, patternJsonArray);
+                                                patternVarMap, false, allHTreeNodesCurTask, patternJsonArrays[thread_index]);
 
-        if (patternJsonArray.size() > 0)
-            sendPatternsToCentralServer(patternJsonArray);
+        // release all the HTreeNodes created in this task if it's running as a distributed worker
+        if (run_as_distributed_worker)
+        {
+            for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
+            {
+                delete (allHTreeNodesCurTask[hNodeNum]);
+            }
+        }
+
     }
+
+    if (patternJsonArrays[thread_index].size() > 0)
+        sendPatternsToCentralServer(patternJsonArrays[thread_index]);
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
     std::cout.flush();
@@ -260,8 +271,9 @@ void PatternMiner::runPatternMinerDepthFirst()
 
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
+
         threads[i] = std::thread(&PatternMiner::growPatternsDepthFirstTask,this,i);
-        //threads[i] = std::thread([this]{this->growPatternsDepthFirstTask(i);}); // using C++11 lambda-expression
+        // threads[i] = std::thread([this]{this->growPatternsDepthFirstTask(i);}); // using C++11 lambda-expression
     }
 
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
@@ -275,6 +287,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 //    delete [] cur_DF_ExtractedLinks;
     delete [] threads;
+    delete [] patternJsonArrays;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
     cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;

@@ -454,15 +454,15 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     // debug:
     static int pattern_num = 1;
-//    string patternToStr = "";
+    string patternToStr = "";
 
-//    for(Handle h : pattern)
-//    {
-//        patternToStr += _atomSpace->atom_as_string(h);
-//        patternToStr += "\n";
-//    }
+    for(Handle h : pattern)
+    {
+        patternToStr += _atomSpace->atom_as_string(h);
+        patternToStr += "\n";
+    }
 
-//    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
+    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
     pattern_num ++;
 
     return pattern;

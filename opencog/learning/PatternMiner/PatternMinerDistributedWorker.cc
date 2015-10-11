@@ -169,7 +169,7 @@ void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
         // empty the array
         patternJsonArray = json::value::array();
 
-        // usleep(200);
+        usleep(20000);
     }
     catch (exception const & e)
     {

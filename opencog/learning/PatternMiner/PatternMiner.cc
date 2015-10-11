@@ -2034,6 +2034,8 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 
     threads = new thread[THREAD_NUM];
 
+    patternJsonArrays = new web::json::value[THREAD_NUM];
+
     MAX_GRAM = max_gram;
     cur_gram = 0;
 
