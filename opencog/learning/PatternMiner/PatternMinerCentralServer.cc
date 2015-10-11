@@ -34,6 +34,7 @@
 #include <set>
 #include <string>
 #include <functional>
+#include <sys/time.h>
 
 
 #include <opencog/atomspace/ClassServer.h>
@@ -173,25 +174,62 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 }
 
+long startTime;
+long endTime;
 void PatternMiner::handleFindNewPatterns(http_request request)
 {
 
+    // check server load
+    static int msgReceivedNum = 0;
+    msgReceivedNum ++;
+
+    if (msgReceivedNum == 100)
+    {
+        timeval t1;
+        gettimeofday(&t1, NULL);
+
+        startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
+    }
+
+    if (msgReceivedNum == 2100)
+    {
+        timeval t2;
+        gettimeofday(&t2, NULL);
+
+        endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
+        long costSeconds = (endTime - startTime) / 1000;
+        std::cout<<std::endl<<"Server recieved 2000 requests in " << costSeconds << " seconds" << std::endl;
+        std::cout<< (int)(2000.0f / (float)costSeconds) << " requests per second in average! " << std::endl;
+    }
+
+    patternQueueLock.lock();
+
     try
     {
-        json::value jval = request.extract_json().get();
-        patternQueueLock.lock();
-        waitForParsePatternQueue.push_back(jval);
-        total_pattern_received ++;
-        patternQueueLock.unlock();
-        request.reply(status_codes::OK);
+        // should get an array of patterns
+        json::value jarray = request.extract_json().get();
+
+        for (json::array::iterator iter = jarray.as_array().begin(); iter != jarray.as_array().end(); ++iter)
+        {
+            json::value jval = (json::value)(*iter);
+            waitForParsePatternQueue.push_back(jval);
+            total_pattern_received ++;
+
+            //  cout << "Received pattern : \n" << jval.serialize() << std::endl;
+        }
 
         cout << "Received pattern num = " << total_pattern_received << std::endl;
+
+        request.reply(status_codes::OK);
+
     }
     catch (exception const & e)
     {
        cout << e.what() << "handleFindANewPattern error: " << request.to_string() << endl;
        request.reply(status_codes::NotFound);
     }
+
+    patternQueueLock.unlock();
 }
 
 void PatternMiner::runParsePatternTaskThread()
@@ -242,7 +280,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
         newHTreeNode->count ++;
 
         duplicatePatternNum ++;
-        cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
+        // cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
     }
     else
     {
@@ -251,7 +289,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
         if (patternHandleSeq.size() == 0)
         {
 
-            cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
+            // cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
             return;
 
         }
@@ -270,7 +308,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
         if (ParentPatternStr == "none")
         {
 
-            cout << "Warning: Pattern missing parent pattern string:" << PatternStr;
+            // cout << "Warning: Pattern missing parent pattern string:" << PatternStr;
             return;
 
         }
@@ -279,26 +317,47 @@ void PatternMiner::parseAPatternTask(json::value jval)
 
             map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
 
+            HTreeNode* parentNode;
+
             if (parentNodeIter == keyStrToHTreeNodeMap.end())
             {
 
                 cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
-                return;
+                // The parent pattern should have been added, but it is not.
+                // It's possibly sent by another thread, and added to the queue later than the current pattern.
+                // So we add this parent pattern here first, but set its count = 0
+                // add this new found pattern into the Atomspace
+                HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
+                if (parentPatternHandleSeq.size() == 0)
+                {
+
+                    cout << "Warning: Invalid pattern string: " << ParentPatternStr << std::endl;
+                    return;
+
+                }
+
+                // create a new HTreeNode
+                parentNode = new HTreeNode();
+                parentNode->pattern = parentPatternHandleSeq;
+                parentNode->count = 0;
+
+                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
 
             }
             else
-            {
-                // add super pattern relation
-
-                HTreeNode* parentNode = parentNodeIter->second;
+                parentNode = parentNodeIter->second;
 
 
-                ExtendRelation relation;
-                relation.extendedHTreeNode = newHTreeNode;
-                relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
+            // add super pattern relation
 
-                parentNode->superPatternRelations.push_back(relation);
-            }
+
+
+            ExtendRelation relation;
+            relation.extendedHTreeNode = newHTreeNode;
+            relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
+
+            parentNode->superPatternRelations.push_back(relation);
+
         }
     }
 
@@ -395,15 +454,15 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     // debug:
     static int pattern_num = 1;
-    string patternToStr = "";
+//    string patternToStr = "";
 
-    for(Handle h : pattern)
-    {
-        patternToStr += _atomSpace->atom_as_string(h);
-        patternToStr += "\n";
-    }
+//    for(Handle h : pattern)
+//    {
+//        patternToStr += _atomSpace->atom_as_string(h);
+//        patternToStr += "\n";
+//    }
 
-    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
+//    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
     pattern_num ++;
 
     return pattern;

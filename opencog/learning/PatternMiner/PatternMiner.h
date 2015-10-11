@@ -52,7 +52,7 @@ namespace PatternMining
 
 #define LINE_INDENTATION "  "
 
-#define JSON_BUF_MAX_NUM 10
+#define JSON_BUF_MAX_NUM 20
 
  struct _non_ordered_pattern
  {

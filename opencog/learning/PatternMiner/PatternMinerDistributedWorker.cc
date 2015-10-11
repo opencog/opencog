@@ -154,7 +154,7 @@ void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string par
     }
 
     cur_worker_mined_pattern_num ++;
-    cout << "\nWorker sent cur_worker_mined_pattern_num = " << cur_worker_mined_pattern_num << std::endl;
+    // cout << "\nWorker added cur_worker_mined_pattern_num = " << cur_worker_mined_pattern_num << std::endl;
 }
 
 // this function will empty patternJsonArray after sent
@@ -169,7 +169,7 @@ void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
         // empty the array
         patternJsonArray = json::value::array();
 
-        usleep(500);
+        // usleep(200);
     }
     catch (exception const & e)
     {
