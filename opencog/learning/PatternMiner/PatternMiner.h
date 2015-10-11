@@ -353,8 +353,11 @@ private:
      unsigned int pattern_parse_thread_num; // for the central server
      std::thread centralServerListeningThread;
      std::thread *parsePatternTaskThreads;
-     std::mutex patternQueueLock, addRelationLock, updatePatternCountLock;
+     std::mutex patternQueueLock, addRelationLock, updatePatternCountLock, modifyWorkerLock;
 
+     // map<uid, still_working>
+     map<string, bool> allWorkers;
+     bool allWorkersStop;
 
      list<json::value> waitForParsePatternQueue;
 
@@ -365,8 +368,6 @@ private:
 
      http_client* httpClient;
      http_listener* serverListener;
-
-     bool patternMiningRunning;
 
      int cur_worker_mined_pattern_num;
      int total_pattern_received; // in the server
@@ -379,6 +380,10 @@ private:
 
      void runParsePatternTaskThread();
      void parseAPatternTask(json::value jval);
+
+     bool checkIfAllWorkersStopWorking();
+
+     void notifyServerThisWorkerStop();
 
      void startMiningWork();
      void centralServerEvaluateInterestingness();
@@ -393,6 +398,7 @@ private:
      void launchADistributedWorker();
      void launchCentralServer();
      void centralServerStartListening();
+     void centralServerStopListening();
 
      void startCentralServer();
 

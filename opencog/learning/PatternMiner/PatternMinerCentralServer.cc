@@ -85,7 +85,8 @@ void PatternMiner::launchCentralServer()
 
     serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
 
-    patternMiningRunning = true;
+    allWorkersStop = false;
+
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
 
     parsePatternTaskThreads = new thread[pattern_parse_thread_num];
@@ -97,6 +98,14 @@ void PatternMiner::launchCentralServer()
     }
 
     cout <<"\nPattern Miner central server started! "<< pattern_parse_thread_num << " threads using to parse patterns." << std::endl;
+
+    for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
+    {
+        parsePatternTaskThreads[i].join();
+
+    }
+
+    cout <<"\n Pattern mining finished in the central server! Totaly " << keyStrToHTreeNodeMap.size() << " pattern found!" << std::endl;
 
 }
 
@@ -112,6 +121,37 @@ void PatternMiner::centralServerStartListening()
     {
        cout << e.what() << endl;
     }
+}
+
+void PatternMiner::centralServerStopListening()
+{
+    try
+    {
+       cout << "\nCentral Server Stop Listening! total_pattern_received = " << total_pattern_received << std::endl;
+       serverListener->close().wait();
+
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+    }
+}
+
+bool PatternMiner::checkIfAllWorkersStopWorking()
+{
+
+    if (allWorkers.size() == 0)
+        return false; // has not start yet
+
+    map<string,bool>::iterator workerIt;
+    for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
+    {
+        if (workerIt->second == true)
+            return false;
+    }
+
+
+    return true;
 }
 
 void PatternMiner::handlePost(http_request request)
@@ -162,6 +202,10 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
         string clientID =  paths[0];
         cout << "Got request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
 
+        modifyWorkerLock.lock();
+        allWorkers.insert(std::pair<string,bool>(clientID, true)); // true means this worker is still working.
+        modifyWorkerLock.unlock();
+
         json::value answer = json::value::object();
         answer["msg"] = json::value("Worker registered successfully!");
         request.reply(status_codes::OK, answer);
@@ -178,9 +222,40 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
 
 void PatternMiner::handleReportWorkerStop(http_request request)
 {
-    // todo
+    try
+    {
+        auto paths = uri::split_path(uri::decode(request.relative_uri().query()));
+
+        string clientID =  paths[0];
+        cout << "Got request to ReportWorkerStop: ClientID = \n" << clientID << std::endl;
+
+        modifyWorkerLock.lock();
+
+        map<string,bool>::iterator wokerIt = allWorkers.find(clientID);
+        if (wokerIt == allWorkers.end())
+            cout << "ClientID " << clientID <<  " not found!" <<std::endl;
+        else
+        {
+            wokerIt->second = false;
+            allWorkersStop = checkIfAllWorkersStopWorking();
+            if (allWorkersStop)
+                cout << "All workers connected to this server have stopped!" <<std::endl;
+        }
+
+        modifyWorkerLock.unlock();
+
+
+        request.reply(status_codes::OK);
+    }
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+       request.reply(status_codes::NotFound);
+    }
 
 }
+
+
 
 //long startTime;
 //long endTime;
@@ -244,7 +319,7 @@ void PatternMiner::runParsePatternTaskThread()
 {
     static int tryToParsePatternNum = 0;
 
-    while(patternMiningRunning)
+    while(true)
     {
 
         patternQueueLock.lock();
@@ -261,7 +336,12 @@ void PatternMiner::runParsePatternTaskThread()
 
         }
         else
+        {
             patternQueueLock.unlock();
+
+            if (allWorkersStop)
+                return;
+        }
 
 
     }

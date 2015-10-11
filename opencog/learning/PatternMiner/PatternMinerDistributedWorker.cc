@@ -105,6 +105,29 @@ void PatternMiner::launchADistributedWorker()
 
 }
 
+void PatternMiner::notifyServerThisWorkerStop()
+{
+    // Build request URI and start the request.
+    uri_builder builder(U("/ReportWorkerStop"));
+    builder.append_query(U("ClientUID"), U(clientWorkerUID));
+
+    httpClient->request(methods::POST, builder.to_string()).then([=](http_response response)
+    {
+        std::cout << response.to_string() << std::endl;
+        if (response.status_code() == status_codes::OK)
+        {
+            std::cout << "Report to the central server this worker stopped! " << std::endl;
+        }
+        else
+        {
+            std::cout << "Report to the central server this worker stopped , but failed!" << std::endl;
+        }
+
+    });
+
+
+}
+
 void PatternMiner::startMiningWork()
 {
     // Note: Breadth_First mining is not maintained anymore. Only Depth_First is used in distributed mining.
@@ -126,9 +149,16 @@ void PatternMiner::startMiningWork()
         runPatternMinerDepthFirst();
 
         int end_time = time(NULL);
-        printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
-        std::cout<< THREAD_NUM << " threads used. \n";
-        std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
+        printf("Current pattern mining worker finished working! Total time: %d seconds. \n", end_time - start_time);
+
+        notifyServerThisWorkerStop();
+
+        std::cout << THREAD_NUM << " threads used. "
+                  <<"Corpus size: "<< allLinkNumber << " links in total. \n"
+                  << cur_worker_mined_pattern_num << " patterns mined in total." << std::endl;
+
+        // std::exit(EXIT_SUCCESS);
+
 }
 
 void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
