@@ -350,9 +350,11 @@ private:
 
      web::json::value *patternJsonArrays;
 
+     unsigned int pattern_parse_thread_num; // for the central server
      std::thread centralServerListeningThread;
-     std::thread parsePatternTaskThread;
-     std::mutex patternQueueLock;
+     std::thread *parsePatternTaskThreads;
+     std::mutex patternQueueLock, addRelationLock, updatePatternCountLock;
+
 
      list<json::value> waitForParsePatternQueue;
 

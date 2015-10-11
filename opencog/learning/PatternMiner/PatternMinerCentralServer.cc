@@ -79,16 +79,24 @@ void PatternMiner::launchCentralServer()
 
     centralServerPort = config().get("PMCentralServerPort");
 
+    pattern_parse_thread_num = (unsigned int)(config().get_int("pattern_parse_thread_num"));
+
     serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
 
     serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
 
     patternMiningRunning = true;
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
-    parsePatternTaskThread = std::thread([this]{this->runParsePatternTaskThread();});
 
-    cout <<"\nPattern Miner central server started!\n";
-    // centralServerListeningThread.join();
+    parsePatternTaskThreads = new thread[pattern_parse_thread_num];
+
+    for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
+    {
+        parsePatternTaskThreads[i] = std::thread([this]{this->runParsePatternTaskThread();});
+
+    }
+
+    cout <<"\nPattern Miner central server started! "<< pattern_parse_thread_num << " threads using to parse patterns." << std::endl;
 
 }
 
@@ -174,33 +182,33 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 }
 
-long startTime;
-long endTime;
+//long startTime;
+//long endTime;
 void PatternMiner::handleFindNewPatterns(http_request request)
 {
 
-    // check server load
-    static int msgReceivedNum = 0;
-    msgReceivedNum ++;
+//    // check server load
+//    static int msgReceivedNum = 0;
+//    msgReceivedNum ++;
 
-    if (msgReceivedNum == 100)
-    {
-        timeval t1;
-        gettimeofday(&t1, NULL);
+//    if (msgReceivedNum == 100)
+//    {
+//        timeval t1;
+//        gettimeofday(&t1, NULL);
 
-        startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
-    }
+//        startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
+//    }
 
-    if (msgReceivedNum == 2100)
-    {
-        timeval t2;
-        gettimeofday(&t2, NULL);
+//    if (msgReceivedNum == 2100)
+//    {
+//        timeval t2;
+//        gettimeofday(&t2, NULL);
 
-        endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
-        long costSeconds = (endTime - startTime) / 1000;
-        std::cout<<std::endl<<"Server recieved 2000 requests in " << costSeconds << " seconds" << std::endl;
-        std::cout<< (int)(2000.0f / (float)costSeconds) << " requests per second in average! " << std::endl;
-    }
+//        endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
+//        long costSeconds = (endTime - startTime) / 1000;
+//        std::cout<<std::endl<<"Server recieved 2000 requests in " << costSeconds << " seconds" << std::endl;
+//        std::cout<< (int)(2000.0f / (float)costSeconds) << " requests per second in average! " << std::endl;
+//    }
 
     patternQueueLock.lock();
 
@@ -234,6 +242,8 @@ void PatternMiner::handleFindNewPatterns(http_request request)
 
 void PatternMiner::runParsePatternTaskThread()
 {
+    static int tryToParsePatternNum = 0;
+
     while(patternMiningRunning)
     {
 
@@ -242,7 +252,11 @@ void PatternMiner::runParsePatternTaskThread()
         {
             json::value jval = waitForParsePatternQueue.front();
             waitForParsePatternQueue.pop_front();
+
+            tryToParsePatternNum ++;
+            cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
             patternQueueLock.unlock();
+
             parseAPatternTask(jval);
 
         }
@@ -256,9 +270,7 @@ void PatternMiner::runParsePatternTaskThread()
 void PatternMiner::parseAPatternTask(json::value jval)
 {
 
-    static int tryToParsePatternNum = 0;
-    tryToParsePatternNum ++;
-    cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
+
     string PatternStr =  jval[U("Pattern")].as_string();
     // cout << "PatternStr = " << PatternStr << std::endl;
     string ParentPatternStr = jval[U("ParentPattern")].as_string();
@@ -268,8 +280,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
 
     HTreeNode* newHTreeNode;
     // check if the pattern key already exist
-
+    uniqueKeyLock.lock();
     map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
+    uniqueKeyLock.unlock();
 
     static int duplicatePatternNum = 0;
 
@@ -277,10 +290,11 @@ void PatternMiner::parseAPatternTask(json::value jval)
     {
         newHTreeNode = htreeNodeIter->second;
 
+        updatePatternCountLock.lock();
         newHTreeNode->count ++;
-
         duplicatePatternNum ++;
         // cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
+        updatePatternCountLock.unlock();
     }
     else
     {
@@ -298,8 +312,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
         newHTreeNode = new HTreeNode();
         newHTreeNode->pattern = patternHandleSeq;
         newHTreeNode->count = 1;
-
+        uniqueKeyLock.lock();
         keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+        uniqueKeyLock.unlock();
 
     }
 
@@ -314,8 +329,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
         }
         else
         {
-
+            uniqueKeyLock.lock();
             map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
+            uniqueKeyLock.unlock();
 
             HTreeNode* parentNode;
 
@@ -341,7 +357,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
                 parentNode->pattern = parentPatternHandleSeq;
                 parentNode->count = 0;
 
+                uniqueKeyLock.lock();
                 keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
+                uniqueKeyLock.unlock();
 
             }
             else
@@ -356,7 +374,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
             relation.extendedHTreeNode = newHTreeNode;
             relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
 
+            addRelationLock.lock();
             parentNode->superPatternRelations.push_back(relation);
+            addRelationLock.unlock();
 
         }
     }
