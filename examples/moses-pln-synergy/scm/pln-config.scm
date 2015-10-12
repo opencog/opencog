@@ -48,7 +48,6 @@
         (string-append pln-rules-dir "modus-ponens.scm")
         (string-append pln-rules-dir "forall-instantiation-rule.scm")
         "pln-rules/implication-or.scm"
-        "pln-rules/equivalence-transformation-rule.scm"
         "pln-rules/hack.scm"
         )
 )
