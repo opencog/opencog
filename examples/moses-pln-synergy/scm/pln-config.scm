@@ -60,7 +60,6 @@
 ; List the rules and their weights.
 (define rules (list (list pln-rule-deduction-name 1)
                     (list pln-rule-modus-ponens-name 1)
-                    (list pln-rule-equivalence-transformation-name 1)
               )
 )
 
