@@ -41,6 +41,10 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ```
 scheme@(guile-user)> ;; Infer that take-treatment-1 implies take-compound-A
+scheme@(guile-user)> (cog-bind pln-rule-forall-partial-instantiation)
+
+
+...
 scheme@(guile-user)> (cog-bind pln-rule-for-all-hack)
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-neutral-element-hack)
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-dangling-junctor-hack)
