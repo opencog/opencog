@@ -5,14 +5,14 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "treatment-1")
+              (ConceptNode "treatment-1")
            )
         )
         (EvaluationLink
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -34,14 +34,14 @@
               (PredicateNode "take")
               (ListLink
                  (QuoteLink (VariableNode "X"))
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
            (EvaluationLink
               (PredicateNode "contain")
               (ListLink
-                 (PredicateNode "treatment-1")
-                 (PredicateNode "compound-A")
+                 (ConceptNode "treatment-1")
+                 (ConceptNode "compound-A")
               )
            )
         )
@@ -49,7 +49,7 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -59,7 +59,7 @@
               (PredicateNode "take")
               (ListLink
                  (VariableNode "X")
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
         )
@@ -67,7 +67,7 @@
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -88,7 +88,7 @@
               (PredicateNode "take")
               (ListLink
                  (QuoteLink (VariableNode "X"))
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
         )
@@ -96,7 +96,7 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -105,14 +105,14 @@
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "treatment-1")
+              (ConceptNode "treatment-1")
            )
         )
         (EvaluationLink
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -210,14 +210,14 @@
 ;;                  (PredicateNode "take")
 ;;                  (ListLink
 ;;                     (VariableNode "X")
-;;                     (PredicateNode "treatment-1")
+;;                     (ConceptNode "treatment-1")
 ;;                  )
 ;;               )
 ;;               (EvaluationLink
 ;;                  (PredicateNode "contain")
 ;;                  (ListLink
-;;                     (PredicateNode "treatment-1")
-;;                     (PredicateNode "compound-A")
+;;                     (ConceptNode "treatment-1")
+;;                     (ConceptNode "compound-A")
 ;;                  )
 ;;               )
 ;;            )
@@ -225,7 +225,7 @@
 ;;               (PredicateNode "take")
 ;;               (ListLink
 ;;                  (VariableNode "X")
-;;                  (PredicateNode "compound-A")
+;;                  (ConceptNode "compound-A")
 ;;               )
 ;;            )
 ;;         )
