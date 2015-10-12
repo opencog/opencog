@@ -41,8 +41,10 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ```
 scheme@(guile-user)> ;; Infer that take-treatment-1 implies take-compound-A
-scheme@(guile-user)> (cog-bind pln-rule-forall-partial-instantiation)
-
+scheme@(guile-user)> (for-each (lambda (i) (cog-bind pln-rule-forall-partial-instantiation)) (iota 20))
+scheme@(guile-user)> (cog-prt-atomspace)
+...
+scheme@(guile-user)> ;; Search for (ConceptNode "treatment-1")
 
 ...
 scheme@(guile-user)> (cog-bind pln-rule-for-all-hack)
