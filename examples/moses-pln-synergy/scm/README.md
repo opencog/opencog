@@ -44,10 +44,41 @@ scheme@(guile-user)> ;; Infer that take-treatment-1 implies take-compound-A
 scheme@(guile-user)> (for-each (lambda (i) (cog-bind pln-rule-forall-partial-instantiation)) (iota 20))
 scheme@(guile-user)> (cog-prt-atomspace)
 ...
-scheme@(guile-user)> ;; Search for (ConceptNode "treatment-1")
+scheme@(guile-user)> ;; Search the following string
+   (ForAllLink (stv 1 0.99999982)
+      (TypedVariableLink
+         (VariableNode "X")
+         (TypeNode "ConceptNode")
+      )
+      (ImplicationLink
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
 
 ...
-scheme@(guile-user)> (cog-bind pln-rule-for-all-hack)
+
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-neutral-element-hack)
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-dangling-junctor-hack)
 scheme@(guile-user)> (cog-bind pln-rule-equivalence-hack)
