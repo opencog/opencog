@@ -168,73 +168,76 @@
   pln-rule-and-hack-name
   pln-rule-and-hack)
 
-(define pln-rule-for-all-hack
-  (BindLink
-     (ForAllLink
-        (ListLink
-           (QuoteLink (VariableNode "X"))
-           (QuoteLink (VariableNode "Y"))
-           (QuoteLink (VariableNode "Z"))
-        )
-        (ImplicationLink
-           (AndLink
-              (EvaluationLink
-                 (PredicateNode "take")
-                 (ListLink
-                    (QuoteLink (VariableNode "X"))
-                    (QuoteLink (VariableNode "Y"))
-                 )
-              )
-              (EvaluationLink
-                 (PredicateNode "contain")
-                 (ListLink
-                    (QuoteLink (VariableNode "Y"))
-                    (QuoteLink (VariableNode "Z"))
-                 )
-              )
-           )
-           (EvaluationLink
-              (PredicateNode "take")
-              (ListLink
-                 (QuoteLink (VariableNode "X"))
-                 (QuoteLink (VariableNode "Z"))
-              )
-           )
-        )
-     )
-     (ImplicationLink (stv 1 1)
-        (AndLink
-           (EvaluationLink
-              (PredicateNode "take")
-              (ListLink
-                 (VariableNode "X")
-                 (PredicateNode "treatment-1")
-              )
-           )
-           (EvaluationLink
-              (PredicateNode "contain")
-              (ListLink
-                 (PredicateNode "treatment-1")
-                 (PredicateNode "compound-A")
-              )
-           )
-        )
-        (EvaluationLink
-           (PredicateNode "take")
-           (ListLink
-              (VariableNode "X")
-              (PredicateNode "compound-A")
-           )
-        )
-     )
-  )
-)
+;; (define pln-rule-for-all-hack
+;;   (BindLink
+;;      (ForAllLink
+;;         (ListLink
+;;            (QuoteLink (VariableNode "X"))
+;;            (QuoteLink (VariableNode "Y"))
+;;            (QuoteLink (VariableNode "Z"))
+;;         )
+;;         (ImplicationLink
+;;            (AndLink
+;;               (EvaluationLink
+;;                  (PredicateNode "take")
+;;                  (ListLink
+;;                     (QuoteLink (VariableNode "X"))
+;;                     (QuoteLink (VariableNode "Y"))
+;;                  )
+;;               )
+;;               (EvaluationLink
+;;                  (PredicateNode "contain")
+;;                  (ListLink
+;;                     (QuoteLink (VariableNode "Y"))
+;;                     (QuoteLink (VariableNode "Z"))
+;;                  )
+;;               )
+;;            )
+;;            (EvaluationLink
+;;               (PredicateNode "take")
+;;               (ListLink
+;;                  (QuoteLink (VariableNode "X"))
+;;                  (QuoteLink (VariableNode "Z"))
+;;               )
+;;            )
+;;         )
+;;      )
+;;      (ForAllLink
+;;         (VariableNode "X")
+;;         (ImplicationLink (stv 1 1)
+;;            (AndLink
+;;               (EvaluationLink
+;;                  (PredicateNode "take")
+;;                  (ListLink
+;;                     (VariableNode "X")
+;;                     (PredicateNode "treatment-1")
+;;                  )
+;;               )
+;;               (EvaluationLink
+;;                  (PredicateNode "contain")
+;;                  (ListLink
+;;                     (PredicateNode "treatment-1")
+;;                     (PredicateNode "compound-A")
+;;                  )
+;;               )
+;;            )
+;;            (EvaluationLink
+;;               (PredicateNode "take")
+;;               (ListLink
+;;                  (VariableNode "X")
+;;                  (PredicateNode "compound-A")
+;;               )
+;;            )
+;;         )
+;;      )
+;;   )
+;; )
 
-(define pln-rule-for-all-hack-name
-  (Node "pln-rule-for-all-hack"))
-(DefineLink
-  pln-rule-for-all-hack-name
-  pln-rule-for-all-hack)
+;; (define pln-rule-for-all-hack-name
+;;   (Node "pln-rule-for-all-hack"))
+;; (DefineLink
+;;   pln-rule-for-all-hack-name
+;;   pln-rule-for-all-hack)
 
 (define pln-rule-average-hack
   (BindLink

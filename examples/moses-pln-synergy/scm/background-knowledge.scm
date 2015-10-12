@@ -4,10 +4,16 @@
 
 ; If X takes Y and Y contains Z, then X takes Z
 (ForAllLink (stv 1 1)
-   (ListLink
-      (VariableNode "X")
-      (VariableNode "Y")
-      (VariableNode "Z")
+   (VariableList
+      (TypedVariableLink
+         (VariableNode "X")
+         (TypeNode "ConceptNode"))
+      (TypedVariableLink
+         (VariableNode "Y")
+         (TypeNode "ConceptNode"))
+      (TypedVariableLink
+         (VariableNode "Z")
+         (TypeNode "ConceptNode"))
    )
    (ImplicationLink
       (AndLink
