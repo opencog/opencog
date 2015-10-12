@@ -15,6 +15,8 @@
 ; Contains as well a version with 3 universally quantified variables.
 ; -----------------------------------------------------------------------
 
+(use-modules (srfi srfi-1))
+
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 
@@ -62,6 +64,22 @@
 (define (select-rnd-outgoing link)
   (let ((outgoings (cog-outgoing-set link)))
     (list-ref outgoings (random (length outgoings)))))
+
+; Return a list without the indexed element
+(define (rm-list-ref l i)
+  (append (take l i) (drop l (+ i 1))))
+
+; Select a random atom from a Link's outgoings, return a pair composed of
+; 1. the selected atom
+; 2. a new link with the remaining outgoings
+(define (select-rm-rnd-outgoing link)
+  (let* ((link-type (cog-type link))
+         (outgoings (cog-outgoing-set link))
+         (rnd-index (random (length outgoings)))
+         (rnd-atom (list-ref outgoings rnd-index))
+         (remain-list (rm-list-ref outgoings rnd-index))
+         (remain (apply cog-new-link link-type remain-list)))
+    (list rnd-atom remain)))
 
 ; Helper for pln-formula-forall-instantiation. Given an atom
 ;
@@ -149,6 +167,13 @@
 ;; Forall partial instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define forall-partial-instantiation-variable-pattern
+  (VariableList
+     (TypedVariableLink
+        (VariableNode "$TyVs")
+        (TypeNode "VariableList"))
+     (VariableNode "$B")))
+
 (define forall-partial-instantiation-rewrite-rule
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: pln-formula-forall-partial-instantiation")
@@ -156,42 +181,55 @@
         (VariableNode "$TyVs")
         (VariableNode "$B"))))
 
-;; Like pln-rule-forall-full-instantiation but only instantiate one variable
+;; Like pln-rule-forall-full-instantiation but only instantiate one
+;; variable amonst a variable list (if there is just one variable in
+;; the forall scope, then this rule will not be invoked).
 (define pln-rule-forall-partial-instantiation
   (BindLink
-     forall-variable-pattern
+     forall-partial-instantiation-variable-pattern
      forall-body-pattern
      forall-partial-instantiation-rewrite-rule))
 
-; This function
-;
-; 1. randomly selects a substitution term (or a tuple of substitution
-;    terms, if the ForAll has multiple variables in scope),
-;
-; 2. performs the substitution,
-;
-; 3. calculates its TV (TODO: just <1 1> for now).
-;
-; Warning: there must be the same number of free variables in the body
-; and scoped variables in the forall, otherwise this is gonna crash.
-; That is because PutLink expects the number of variables in the
-; ListLink to be equal to the number of free variables in the body.
+;; This function
+;;
+;; 1. randomly selects a substitution term (or a tuple of substitution
+;;    terms, if the ForAll has multiple variables in scope),
+;;
+;; 2. performs the substitution,
+;;
+;; 3. calculates its TV (TODO: just <1 1> for now).
+;;
+;; Warning: there must be the same number of free variables in the body
+;; and scoped variables in the forall, otherwise this is gonna crash.
+;; That is because PutLink expects the number of variables in the
+;; ListLink to be equal to the number of free variables in the body.
 (define (pln-formula-forall-partial-instantiation TyVs B)
   (cog-set-tv!
    (let* (
-          (TyVs-type (cog-type TyVs))
-                                        ; Select the variable to substitute
-          (TyV (cond ((cog-subtype? 'TypedVariableLink TyVs-type) TyVs)
-                     ((cog-subtype? 'VariableList TyVs-type)
-                      (select-rnd-outgoing TyVs))
-                     (cog-logger-error
-                      (string-append "Wrong type for ~a, "
-                                     "should be a TypedVariableLink "
-                                     "or a VariableList") TyVs)))
-          (term (select-substitution-term TyV)))
-
-     ; Substitute the variable by the term in the body
-     (cog-execute! (PutLink (LambdaLink TyV B) term)))
+          (TyV-and-remain (select-rm-rnd-outgoing TyVs))
+          (TyV (car TyV-and-remain))
+          (TyVs-remain (cadr TyV-and-remain))
+          (TyVs-remain-len (length (cog-outgoing-set TyVs-remain)))
+                                        ; Select the term to substitute
+          (term (select-substitution-term TyV))
+                                        ; Substitute the variable by
+                                        ; the term in the body
+          (B-inst (cog-execute! (PutLink (LambdaLink TyV B) term)))
+                                        ; If there is only one
+                                        ; variable left, discard the
+                                        ; TypedVariableLink
+          (TyVs-remain (if (= TyVs-remain-len 1)
+                           (gar TyVs-remain)
+                           TyVs-remain)))
+     (if (> TyVs-remain-len 0)
+                                        ; If there are some variables
+                                        ; left, add the ForAllLink
+                                        ; back
+         (ForAllLink TyVs-remain B-inst)
+                                        ; Otherwise just return the
+                                        ; body instance
+         B-inst))
+   ;; TODO: implement a probabilistic formula rather than <1 1>
    (stv 1 1)))
 
 ;; Name the rule

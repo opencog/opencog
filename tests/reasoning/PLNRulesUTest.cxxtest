@@ -239,24 +239,16 @@ void PLNRulesUTest::test_forall_partial_instantiation()
     Handle rule = eval.eval_h("pln-rule-forall-partial-instantiation");
     Handle results = bindlink(&as, rule);
 
-    std::cout << "results = " << results->toString();
-    
     /**
-     * It should contain 3 groundings:
+     * It should contain 1 groundings:
      *
-     * 1. EvaluationLink
-     *       PredicateNode "is-predicate"
-     *       <some-predicate>
-     *
-     * 2. EvaluationLink
-     *       PredicateNode "is-concept"
-     *       <some-concept>
-     *
-     * 3. EvaluationLink
-     *       PredicateNode "are-concept-and-predicate"
-     *       ListLink
-     *          <some-concept>
-     *          <some-predicate>
+     * 3. ForAllLink
+     *       <one variable as the other has been instantiated>
+     *       EvaluationLink
+     *          PredicateNode "are-concept-and-predicate"
+     *          ListLink
+     *             <some-concept>
+     *             <some-predicate>
      */
-    TS_ASSERT_EQUALS(3, as.get_arity(results));
+    TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
