@@ -40,7 +40,7 @@
           (PredicateNode "have") ; [512]
         ) ; [513]
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "Possession") ; [533]
+          (DefinedLinguisticPredicateNode "possession") ; [533]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "hand@b4bdb455-6175-4d12-b09c-ae580db3c14c") ; [527]
             (ConceptNode "my@26aaee01-0701-4c7d-82cc-0bffb5b7aec0") ; [530]

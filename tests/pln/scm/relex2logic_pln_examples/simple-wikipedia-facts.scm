@@ -126,7 +126,7 @@
 ) ; [378]
 
 (EvaluationLink (stv 0.990000 0.990000)
-  (PredicateNode "Possession") ; [382]
+  (DefinedLinguisticPredicateNode "possession") ; [382]
   (ListLink (stv 0.990000 0.990000)
     (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
     (ConceptNode "our@16e09edd-8f0c-4b93-8b7e-c2a3a4d14c7d") ; [379]

@@ -143,7 +143,7 @@
          (ConceptNode "present" (stv 0.001 0.99000001))
       )
       (EvaluationLink (stv 0.99000001 0.99000001)
-         (PredicateNode "definite" (stv 0.001 0.99000001))
+         (DefinedLinguisticPredicateNode "definite" (stv 0.001 0.99000001))
          (ListLink (stv 0.99000001 0.99000001)
             (ConceptNode "he@5c3978be-30a7-493b-b276-ebaf4a879669" (stv 0.001 0.99000001))
          )

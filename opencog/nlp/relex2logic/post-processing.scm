@@ -15,7 +15,7 @@
 ; word-get-r2l-node -- Retrieve corresponding R2L created node
 ;
 ; Given a WordInstanceNode/WordNode created by RelEx, retrieve the corresponding
-; ConceptNode or PredicateNode or NumberNode created by R2L helper
+; ConceptNode or PredicateNode or NumberNode or DefinedLinguisticPredicateNode created by R2L helper
 ;
 ; XXX FIXME this method is really bad because for each new type of node R2L
 ; uses, it need to be added here.  It needs some different way for linking
@@ -32,6 +32,7 @@
 		((not (null? (cog-node 'ConceptNode name))) (cog-node 'ConceptNode name))
 		((not (null? (cog-node 'PredicateNode name))) (cog-node 'PredicateNode name))
 		((not (null? (cog-node 'NumberNode name))) (cog-node 'NumberNode name))
+		((not (null? (cog-node 'DefinedLinguisticPredicateNode name))) (cog-node 'DefinedLinguisticPredicateNode name))
 		(else '())
 	)
 )
@@ -103,7 +104,7 @@
 ; Check if a word-inst ConceptNode has definite-rule applied.
 ;
 (define (definite? word-concept-inst)
-	(define definite (cog-node 'PredicateNode "definite"))
+	(define definite (cog-node 'DefinedLinguisticPredicateNode "definite"))
 	(define llink (cog-link 'ListLink word-concept-inst))
 	(and (not (null? definite))
 		(not (null? llink))
@@ -201,7 +202,7 @@
 ; Given an allmarker of the form as 'orig-link':
 ;
 ;	EvaluationLink
-;		PredicateNode "allmarker"
+;		DefinedLinguisticPredicateNode "allmarker"
 ;		ListLink
 ;			ConceptNode noun_instance
 ;
@@ -277,7 +278,7 @@
 ; Given an maybemarker of the form as 'orig-link':
 ;
 ;	EvaluationLink
-;		PredicateNode "maybemarker"
+;		DefinedLinguisticPredicateNode "maybemarker"
 ;		ListLink
 ;			ConceptNode word_instance
 ;
@@ -306,7 +307,7 @@
 ; delete them.
 ;
 (define (marker-cleaner name helper)
-	(define marker (cog-node 'PredicateNode name))
+	(define marker (cog-node 'DefinedLinguisticPredicateNode name))
 	(define (call-helper)
 		; get the list of all unprocessed marker of type "name"
 		(define marker-list (cog-get-link 'EvaluationLink 'ListLink marker))
