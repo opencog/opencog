@@ -528,7 +528,7 @@
 (define (tense-rule verb instance tense)
 	(list (ImplicationLink (PredicateNode instance) (PredicateNode verb))
 	 (r2l-wordinst-Predicate instance)
-	(InheritanceLink (PredicateNode instance) (ConceptNode tense))
+	(InheritanceLink (PredicateNode instance) (DefinedLinguisticConceptNode tense))
 	)
 )
 
