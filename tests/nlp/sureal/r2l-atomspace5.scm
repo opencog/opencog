@@ -311,7 +311,7 @@
          (ConceptNode "round@c2e4cf62-8009-42b5-a0fb-4b50a1ef20ea" (stv 0.001 0.99000001))
       )
       (EvaluationLink (stv 0.99000001 0.99000001)
-         (PredicateNode "definite" (stv 0.001 0.99000001))
+         (DefinedLinguisticPredicateNode "definite" (stv 0.001 0.99000001))
          (ListLink (stv 0.99000001 0.99000001)
             (ConceptNode "he@23716e27-65f3-4a65-9be8-a37b5fbb0195" (stv 0.001 0.99000001))
          )

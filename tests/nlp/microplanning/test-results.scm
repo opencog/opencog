@@ -95,7 +95,7 @@
 			)
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
-			(PredicateNode "possession" (stv 0.001 0.99000001))
+			(DefinedLinguisticPredicateNode "possession" (stv 0.001 0.99000001))
 			(ListLink (stv 0.99000001 0.99000001)
 			   (ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
 			   (ConceptNode "apple@ca552878-32d4-41e3-aaa3-34239ba98f34" (stv 0.001 0.99000001))
