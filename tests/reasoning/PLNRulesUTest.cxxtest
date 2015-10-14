@@ -40,7 +40,7 @@ private:
 public:
 	PLNRulesUTest() : eval(&as)
     {
-        logger().setLevel(Logger::INFO);
+        logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
     }
 
@@ -60,6 +60,7 @@ public:
     void test_not_construction();
     void test_forall_full_instantiation();
     void test_forall_partial_instantiation();
+	void test_forall_implication_to_higher_order();
 };
 
 void PLNRulesUTest::tearDown()
@@ -251,4 +252,42 @@ void PLNRulesUTest::test_forall_partial_instantiation()
      *             <some-predicate>
      */
     TS_ASSERT_EQUALS(1, as.get_arity(results));
+}
+
+void PLNRulesUTest::test_forall_implication_to_higher_order()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-implication-to-higher-order-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("pln-rule-forall-implication-to-higher-order");
+    Handle results = bindlink(&as, rule);
+    Handle expected_results = eval.eval_h
+	    ("(SetLink"
+	     "   (ImplicationLink"
+	     "      (LambdaLink"
+	     "         (TypedVariableLink"
+	     "            (VariableNode \"$X\")"
+	     "            (TypeNode \"ConceptNode\"))"
+	     "         (EvaluationLink"
+	     "            (PredicateNode \"P\")"
+	     "            (VariableNode \"$X\")))"
+	     "      (LambdaLink"
+	     "         (TypedVariableLink"
+	     "            (VariableNode \"$X\")"
+	     "            (TypeNode \"ConceptNode\"))"
+	     "         (EvaluationLink"
+	     "            (PredicateNode \"Q\")"
+	     "            (VariableNode \"$X\")))))");
+
+    logger().debug() << "results = " << results->toString();
+    logger().debug() << "expected_results = " << expected_results->toString();
+
+    TS_ASSERT_EQUALS(results, expected_results);
 }

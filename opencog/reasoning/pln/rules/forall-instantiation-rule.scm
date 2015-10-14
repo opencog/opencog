@@ -1,19 +1,20 @@
-; =======================================================================
-; ForAll Instantiation rule
-; (TODO add wiki page)
-;
-; ForAllLink
-;    V
-;    B
-; T
-; |-
-; B[V->T]
-;
-; where V is a variable, B is a body containing V, T is an atom to
-; substitute and B[V->T] is B where V has been substituted by T
-;
-; Contains as well a version with 3 universally quantified variables.
-; -----------------------------------------------------------------------
+;; =======================================================================
+;; ForAll Instantiation rule
+;; (TODO add wiki page)
+;;
+;; ForAllLink
+;;    V
+;;    B
+;; T
+;; |-
+;; B[V->T]
+;;
+;; where V is a variable, B is a body containing V, T is an atom to
+;; substitute and B[V->T] is B where V has been substituted by T.
+;;
+;; As currently implemented T is not explicitely in the
+;; premises. Instead it is queried directly by the rule's formula.
+;; -----------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
 
@@ -24,7 +25,7 @@
 ;; Helper definition ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 
-(define forall-variable-pattern
+(define forall-full-instantiation-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$TyVs")
@@ -33,24 +34,24 @@
            (TypeNode "VariableList")))
      (VariableNode "$B")))
 
-(define forall-body-pattern
+(define forall-instantiation-body
   (ForAllLink
      (VariableNode "$TyVs")
      (VariableNode "$B")))
 
-; Helper for pln-formula-forall-instantiation. Given an atom
-;
-; (VariableList
-;    (TypedVariableLink
-;       (VariableNode "$V1")
-;       <type-constraint1>)
-;    ...
-;    (TypedVariableLink
-;       (VariableNode "$Vn")
-;       <type-constraintn>))
-;
-; return a ListLink of random terms satisfying the type constraints of
-; V1 to Vn.
+;; Helper for pln-formula-forall-instantiation. Given an atom
+;;
+;; (VariableList
+;;    (TypedVariableLink
+;;       (VariableNode "$V1")
+;;       <type-constraint1>)
+;;    ...
+;;    (TypedVariableLink
+;;       (VariableNode "$Vn")
+;;       <type-constraintn>))
+;;
+;; return a ListLink of random terms satisfying the type constraints of
+;; V1 to Vn.
 (define (select-substitution-terms TyVs)
   (let* (
                                         ; Get the list of typed
@@ -60,18 +61,18 @@
          (terms (map select-substitution-term typed-vars)))
     (apply ListLink terms)))
 
-; Select a random atom from a Link's outgoings
+;; Select a random atom from a Link's outgoings
 (define (select-rnd-outgoing link)
   (let ((outgoings (cog-outgoing-set link)))
     (list-ref outgoings (random (length outgoings)))))
 
-; Return a list without the indexed element
+;; Return a list without the indexed element
 (define (rm-list-ref l i)
   (append (take l i) (drop l (+ i 1))))
 
-; Select a random atom from a Link's outgoings, return a pair composed of
-; 1. the selected atom
-; 2. a new link with the remaining outgoings
+;; Select a random atom from a Link's outgoings, return a pair composed of
+;; 1. the selected atom
+;; 2. a new link with the remaining outgoings
 (define (select-rm-rnd-outgoing link)
   (let* ((link-type (cog-type link))
          (outgoings (cog-outgoing-set link))
@@ -81,13 +82,13 @@
          (remain (apply cog-new-link link-type remain-list)))
     (list rnd-atom remain)))
 
-; Helper for pln-formula-forall-instantiation. Given an atom
-;
-; (TypedVariableLink
-;    (VariableNode "$V")
-;    <type-constraint>)
-;
-; return a random term satisfying the type constraint.
+;; Helper for pln-formula-forall-instantiation. Given an atom
+;;
+;; (TypedVariableLink
+;;    (VariableNode "$V")
+;;    <type-constraint>)
+;;
+;; return a random term satisfying the type constraint.
 (define (select-substitution-term TyV)
   (let* (
          (V (gar TyV))
@@ -103,7 +104,7 @@
 ;; Forall full instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define forall-full-instantiation-rewrite-rule
+(define forall-full-instantiation-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: pln-formula-forall-full-instantiation")
      (ListLink
@@ -116,23 +117,23 @@
 ;; scoped variables are instantiated.
 (define pln-rule-forall-full-instantiation
   (BindLink
-     forall-variable-pattern
-     forall-body-pattern
-     forall-full-instantiation-rewrite-rule))
+     forall-full-instantiation-variables
+     forall-instantiation-body
+     forall-full-instantiation-rewrite))
 
-; This function
-;
-; 1. randomly selects a substitution term (or a tuple of substitution
-;    terms, if the ForAll has multiple variables in scope),
-;
-; 2. performs the substitution,
-;
-; 3. calculates its TV (TODO: just <1 1> for now).
-;
-; Warning: there must be the same number of free variables in the body
-; and scoped variables in the forall, otherwise this is gonna crash.
-; That is because PutLink expects the number of variables in the
-; ListLink to be equal to the number of free variables in the body.
+;; This function
+;;
+;; 1. randomly selects a substitution term (or a tuple of substitution
+;;    terms, if the ForAll has multiple variables in scope),
+;;
+;; 2. performs the substitution,
+;;
+;; 3. calculates its TV (TODO: just <1 1> for now).
+;;
+;; Warning: there must be the same number of free variables in the body
+;; and scoped variables in the forall, otherwise this is gonna crash.
+;; That is because PutLink expects the number of variables in the
+;; ListLink to be equal to the number of free variables in the body.
 (define (pln-formula-forall-full-instantiation SV B)
   (cog-set-tv!
    (let* (
@@ -153,7 +154,7 @@
                                        "should be a TypedVariableLink "
                                        "or a VariableList") SV))))
      
-     ; Substitute the variable by the term in the body
+     ;; Substitute the variable by the term in the body
      (cog-execute! (PutLink (LambdaLink SV B) terms)))
    (stv 1 1)))
 
@@ -167,14 +168,14 @@
 ;; Forall partial instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define forall-partial-instantiation-variable-pattern
+(define forall-partial-instantiation-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$TyVs")
         (TypeNode "VariableList"))
      (VariableNode "$B")))
 
-(define forall-partial-instantiation-rewrite-rule
+(define forall-partial-instantiation-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: pln-formula-forall-partial-instantiation")
      (ListLink
@@ -186,9 +187,9 @@
 ;; the forall scope, then this rule will not be invoked).
 (define pln-rule-forall-partial-instantiation
   (BindLink
-     forall-partial-instantiation-variable-pattern
-     forall-body-pattern
-     forall-partial-instantiation-rewrite-rule))
+     forall-partial-instantiation-variables
+     forall-instantiation-body
+     forall-partial-instantiation-rewrite))
 
 ;; This function
 ;;

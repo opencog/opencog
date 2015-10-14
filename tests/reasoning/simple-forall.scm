@@ -1,6 +1,6 @@
-; Define simple foralls to test universal rules
+;; Define simple foralls to test universal rules
 
-; Simple ForAll involving concepts
+;; Simple ForAll involving concepts
 
 (ForAllLink (stv 1 1)
    (TypedVariableLink
@@ -14,7 +14,7 @@
 
 (ConceptNode "A")
 
-; Simple ForAll involving predicates
+;; Simple ForAll involving predicates
 
 (ForAllLink (stv 1 1)
    (TypedVariableLink
@@ -28,7 +28,7 @@
 
 (PredicateNode "P")
 
-; Simple ForAll involving concepts and predicates
+;; Simple ForAll involving concepts and predicates
 
 (ForAllLink (stv 1 1)
    (VariableList
@@ -45,3 +45,17 @@
          (VariableNode "$Y"))
    )
 )
+
+;; Simple ForAll involving ImplicationLink
+
+(ForAllLink (stv 1 1)
+   (TypedVariableLink
+      (VariableNode "$X")
+      (TypeNode "ConceptNode"))
+   (ImplicationLink
+      (EvaluationLink
+         (PredicateNode "P")
+         (VariableNode "$X"))
+      (EvaluationLink
+         (PredicateNode "Q")
+         (VariableNode "$X"))))
