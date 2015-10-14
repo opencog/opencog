@@ -118,19 +118,19 @@
 ;	(2) Imperatives with subjects, i.e. "You tell me!" are interpreted as declaratives.
 ;
 (define (imperative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (ConceptNode "ImperativeSpeechAct"))
+	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
 	)
 )
 (define (interrogative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (ConceptNode "InterrogativeSpeechAct"))
+	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
 	)
 )
 (define (truth-query-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (ConceptNode "TruthQuerySpeechAct"))
+	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
 	)
 )
 (define (declarative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (ConceptNode "DeclarativeSpeechAct"))
+	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
 	)
 )
 ;
