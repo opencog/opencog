@@ -1,7 +1,7 @@
 ;Check the utterance speech act type
 ;------------------------------------------------------------------
 (define (QueryCheck querySentence)
-    (cog-chase-link 'InheritanceLink 'ConceptNode
+    (cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode
         (car (cog-chase-link 'InterpretationLink 'InterpretationNode
             (car (cog-chase-link 'ParseLink 'ParseNode querySentence))))
     )

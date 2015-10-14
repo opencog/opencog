@@ -263,7 +263,7 @@
       )
       (InheritanceLink (stv 0.001 0.99000001)
          (InterpretationNode "sentence@991a9f76-4485-454b-8a2e-0caa9176ca5e_parse_0_interpretation_$X")
-         (ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
       )
       (EvaluationLink (stv 0.99000001 0.99000001)
          (DefinedLinguisticPredicateNode "definite" (stv 0.001 0.99000001))
