@@ -36,7 +36,7 @@
 	(DefinedPredicateNode "Check if room empty")
 	(SatisfactionLink
 		(SequentialAndLink
-			; If someone no-one visible...
+			; If no-one is visible...
 			(AbsentLink (EvaluationLink (PredicateNode "visible face")
 						(ListLink (VariableNode "$face-id"))))
 
@@ -44,6 +44,14 @@
 			(TrueLink (PutLink
 					(StateLink room-state (VariableNode "$x"))
 					room-empty)))))
+
+; A rule to update the room state
+(DefineLink
+	(DefinedPredicateNode "Update room state")
+	(SatisfactionLink
+		(SequentialOrLink
+			(DefinedPredicateNode "Check if room non-empty")
+			(DefinedPredicateNode "Check if room empty"))))
 
 ;; Display the current room state
 (define (show-room-state)
@@ -62,8 +70,7 @@
 #|
 ;; Example usage:
 ;;
-(cog-evaluate! (DefinedPredicateNode "Check if room non-empty"))
-(cog-evaluate! (DefinedPredicateNode "Check if room empty"))
+(cog-evaluate! (DefinedPredicateNode "Update room state"))
 (show-room-state)
 
 (cog-incoming-set (PredicateNode "visible face"))
