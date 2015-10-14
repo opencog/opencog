@@ -79,6 +79,47 @@ scheme@(guile-user)> ;; Search the following string
 
 ...
 
+scheme@(guile-user)> (cog-bind pln-rule-forall-implication-to-higher-order)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "X")
+            (TypeNode "ConceptNode")
+         )
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-neutral-element-hack)
 scheme@(guile-user)> (cog-bind pln-rule-eliminate-dangling-junctor-hack)
 scheme@(guile-user)> (cog-bind pln-rule-equivalence-hack)
