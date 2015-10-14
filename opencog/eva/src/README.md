@@ -1,7 +1,7 @@
 
 Design overview
 ===============
-This is a pre-prototype.  But still:
+This is an incomplete prototype.
 
 * The `face_track` directory contains code for visual servoing: it
   receives ROS messages about human face locations from the webcam
