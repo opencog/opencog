@@ -104,14 +104,15 @@
 ;; faces.
 ;; line 973 clear_new_face_target()
 (DefineLink
-	(DefinedPredicateNode "Update room status")
-	(SequentialAndLink
-		(DefinedPredicateNode "Update room state")
-		(TrueLink (PutLink
-				(EvaluationLink (PredicateNode "acked face")
-						(ListLink (VariableNode "$face-id")))
-				(DefinedSchemaNode "New arrivals")))
-	))
+	(DefinedPredicateNode "Update status")
+	(SatisfactionLink
+		(SequentialAndLink
+			(DefinedPredicateNode "Update room state")
+			(TrueLink (PutLink
+					(EvaluationLink (PredicateNode "acked face")
+							(ListLink (VariableNode "$face-id")))
+					(DefinedSchemaNode "New arrivals")))
+		)))
 
 ;; ------
 ;;
@@ -206,7 +207,7 @@
 		(SequentialAndLink
 			(DefinedPredicateNode "Did someone arrive?")
 			(DefinedPredicateNode "New arrival")
-			(DefinedPredicateNode "Update room status")
+			(DefinedPredicateNode "Update status")
 		)))
 
 ;

@@ -113,3 +113,6 @@ A list of changes to the atomspace that could help with this:
 * Create RandomNode for a uniform distribution 0 to 1 which
   can be used to evaluate to true/false by using GreaterThanLink
   or alternately -- and all-in-one predicate for this.
+
+* SatisfactionLink is kind-of not-needed; should be able to directly
+  execute SequentialAndLink, SequentialOrLink.

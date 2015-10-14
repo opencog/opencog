@@ -59,12 +59,14 @@
 
 
 ; Quick hack to fill the room.
-(define (make-room-nonempty)
-	(StateLink room-state room-nonempty))
+(define (make-new-face)
+	(EvaluationLink (PredicateNode "visible face")
+		(ListLink (ConceptNode "42"))))
 
 ; Quick hack to clear the room
-(define (make-room-empty)
-	(StateLink room-state room-empty))
+(define (remove-face)
+	(cog-delete (EvaluationLink (PredicateNode "visible face")
+		(ListLink (ConceptNode "42")))))
 
 
 #|
