@@ -59,6 +59,21 @@
 
 ;; ------
 ;;
+;; Return true if a new face has become visible.
+;; line 631, is_someone_arrived
+(DefineLink
+	(DefinedPredicateNode "Did someone arrive?")
+	(AndLink
+		; If someone is visible...
+		(PresentLink (EvaluationLink (PredicateNode "visible face")
+				(ListLink (VariableNode "$face-id"))))
+		; but not yet acknowledged...
+		(AbsentLink (EvaluationLink (PredicateNode "acked face")
+				(ListLink (VariableNode "$face-id"))))
+	))
+
+;; ------
+;;
 ;; Return true if interacting with someone.
 ;; line 650, is_interacting_with_someone
 ;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
