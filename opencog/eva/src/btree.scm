@@ -70,8 +70,11 @@
 	))
 
 ;;
-;; Is the room empty, viz: Does the atomspace contains the link
-;; (StateLink (AnchorNode "Room State") (ConceptNode "room empty"))
+;; Was the the room empty, viz: Does the atomspace contains the link
+;; (StateLink (AnchorNode "Room State") (ConceptNode "room empty"))?
+;; Note that the room state is updated only when "Update room state"
+;; is called, so faces may be visible, but the room marked as empty.
+;; Think "level trigger" instead of "edge trigger".
 ;; line 665, were_no_people_in_the_scene
 (DefineLink
 	(DefinedPredicateNode "was room empty?")
@@ -120,9 +123,9 @@
 ;; Sequence - if there were no people in the room, then look at the
 ;; new arrival.
 ;; line 391 -- owyl.sequence
-;; (cog-evaluate! (DefinedPredicateNode "Empty Sequence"))
+;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
-	(DefinedPredicateNode "Empty Sequence")
+	(DefinedPredicateNode "Was Empty Sequence")
 	(SatisfactionLink
 		(SequentialAndLink
 			;; line 392
@@ -150,7 +153,7 @@
 (define select
 	(SatisfactionLink
 		(SequentialOrLink
-			(DefinedPredicateNode "Empty Sequence")
+			(DefinedPredicateNode "Was Empty Sequence")
 			(DefinedPredicateNode "Interacting Sequence")
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Ignoring new person"))) ; line 406
