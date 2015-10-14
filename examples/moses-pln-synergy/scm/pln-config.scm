@@ -47,6 +47,7 @@
   (list "pln-rules/deduction.scm"
         (string-append pln-rules-dir "modus-ponens.scm")
         (string-append pln-rules-dir "forall-instantiation-rule.scm")
+        (string-append pln-rules-dir "forall-implication-to-higher-order-rule.scm")
         "pln-rules/implication-or.scm"
         "pln-rules/hack.scm"
         )
