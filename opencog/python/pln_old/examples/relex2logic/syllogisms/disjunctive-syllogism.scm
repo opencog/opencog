@@ -33,7 +33,7 @@ can’t be true at the same time.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "is@cf2062c3-efa0-4d1e-b75e-f5bafdce4d04") ; [1473]
-          (ConceptNode "present") ; [1476]
+          (DefinedLinguisticConceptNode "present") ; [1476]
         ) ; [1477]
 
         (InheritanceLink (stv 0.990000 0.990000)
