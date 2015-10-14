@@ -63,26 +63,28 @@
 ;; line 631, is_someone_arrived
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
-	(AndLink
-		; If someone is visible...
-		(PresentLink (EvaluationLink (PredicateNode "visible face")
-				(ListLink (VariableNode "$face-id"))))
-		; but not yet acknowledged...
-		(AbsentLink (EvaluationLink (PredicateNode "acked face")
-				(ListLink (VariableNode "$face-id"))))
-	))
+	(SatisfactionLink
+		(AndLink
+			; If someone is visible...
+			(PresentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
+			; but not yet acknowledged...
+			(AbsentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id"))))
+		)))
 
-;; ------
-;;
-;; Return true if interacting with someone.
-;; line 650, is_interacting_with_someone
-;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
+;; Return the set of newly-arrived faces.
 (DefineLink
-	(DefinedPredicateNode "is interacting with someone?")
-	(NotLink (EqualLink
-		(SetLink no-interaction)
-		(GetLink (StateLink interaction-state (VariableNode "$x"))))
-	))
+	(DefinedSchemaNode "New arrivals")
+	(GetLink
+		(AndLink
+			; If someone is visible...
+			(PresentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
+			; but not yet acknowledged...
+			(AbsentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id"))))
+	)))
 
 ;;
 ;; Was the the room empty, viz: Does the atomspace contains the link
@@ -98,6 +100,31 @@
 		(GetLink (StateLink room-state (VariableNode "$x")))
 	))
 
+;; Update the room empty/full status; update the list of acknowledged
+;; faces.
+;; line 973 clear_new_face_target()
+(DefineLink
+	(DefinedPredicateNode "Update room status")
+	(SequentialAndLink
+		(DefinedPredicateNode "Update room state")
+		(TrueLink (PutLink
+				(EvaluationLink (PredicateNode "acked face")
+						(ListLink (VariableNode "$face-id")))
+				(DefinedSchemaNode "New arrivals")))
+	))
+
+;; ------
+;;
+;; Return true if interacting with someone.
+;; line 650, is_interacting_with_someone
+;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
+(DefineLink
+	(DefinedPredicateNode "is interacting with someone?")
+	(NotLink (EqualLink
+		(SetLink no-interaction)
+		(GetLink (StateLink interaction-state (VariableNode "$x"))))
+	))
+
 ;; line 742, assign_face_target
 ;; Send ROS message to look at the face ID.
 (DefineLink
@@ -105,9 +132,7 @@
 	(PutLink
 		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink (VariableNode "$face")))
-		(GetLink
-			(EvaluationLink (PredicateNode "visible face")
-				(ListLink (VariableNode "$face-id"))))
+		(DefinedSchemaNode "New arrivals")
 	))
 
 ;; line 818, glance_at_new_face
@@ -116,9 +141,7 @@
 	(PutLink
 		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (VariableNode "$face")))
-		(GetLink
-			(EvaluationLink (PredicateNode "visible face")
-				(ListLink (VariableNode "$face-id"))))
+		(DefinedSchemaNode "New arrivals")
 	))
 
 ;; line 757, timestamp
@@ -164,8 +187,10 @@
 				(ListLink (Node "--- glance at person")))
 	)))
 
+;; Respond to a new face becoming visible.
 ;; line 389 -- Selector
-(define select
+(DefineLink
+	(DefinedPredicateNode "New arrival")
 	(SatisfactionLink
 		(SequentialOrLink
 			(DefinedPredicateNode "Was Empty Sequence")
@@ -173,6 +198,16 @@
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Ignoring new person"))) ; line 406
 			(TrueLink))))
+
+;; Check to see if a new face has become visible.
+;; line 386 -- someone_arrived()
+(define select
+	(SatisfactionLink
+		(SequentialAndLink
+			(DefinedPredicateNode "Did someone arrive?")
+			(DefinedPredicateNode "New arrival")
+			(DefinedPredicateNode "Update room status")
+		)))
 
 ;
 ;
