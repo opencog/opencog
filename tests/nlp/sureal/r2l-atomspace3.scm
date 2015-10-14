@@ -259,7 +259,7 @@
       )
       (InheritanceLink (stv 0.99000001 0.99000001)
          (PredicateNode "hates@b1c858bb-6a0c-4488-b95c-3d3413d1d3a5" (stv 0.001 0.99000001))
-         (ConceptNode "present" (stv 0.001 0.99000001))
+         (DefinedLinguisticConceptNode "present" (stv 0.001 0.99000001))
       )
       (InheritanceLink (stv 0.001 0.99000001)
          (InterpretationNode "sentence@991a9f76-4485-454b-8a2e-0caa9176ca5e_parse_0_interpretation_$X")

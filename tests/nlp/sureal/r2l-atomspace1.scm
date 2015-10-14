@@ -140,7 +140,7 @@
       )
       (InheritanceLink (stv 0.99000001 0.99000001)
          (PredicateNode "runs@838adddd-073f-4e19-8e53-2f6b398809ea" (stv 0.001 0.99000001))
-         (ConceptNode "present" (stv 0.001 0.99000001))
+         (DefinedLinguisticConceptNode "present" (stv 0.001 0.99000001))
       )
       (EvaluationLink (stv 0.99000001 0.99000001)
          (DefinedLinguisticPredicateNode "definite" (stv 0.001 0.99000001))

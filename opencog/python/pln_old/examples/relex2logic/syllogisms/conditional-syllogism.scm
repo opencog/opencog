@@ -60,7 +60,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "placing@2d8ddb4f-dcb3-43c9-8247-1775208b44ee") ; [1085]
-          (ConceptNode "present_progressive") ; [1093]
+          (DefinedLinguisticConceptNode "present_progressive") ; [1093]
         ) ; [1094]
 
         (InheritanceLink (stv 0.990000 0.990000)
@@ -80,7 +80,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "is@017b204f-62c4-4d40-aa5a-604c735979bc") ; [1102]
-          (ConceptNode "present") ; [1105]
+          (DefinedLinguisticConceptNode "present") ; [1105]
         ) ; [1106]
 
         (InheritanceLink (stv 0.990000 0.990000)
@@ -185,7 +185,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "eat@b3fac38d-b546-439f-ae68-1ac1b00d812a") ; [1296]
-          (ConceptNode "present_infinitive") ; [1304]
+          (DefinedLinguisticConceptNode "present_infinitive") ; [1304]
         ) ; [1305]
 
         (InheritanceLink (stv 0.990000 0.990000)

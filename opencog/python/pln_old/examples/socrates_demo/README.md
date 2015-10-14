@@ -89,7 +89,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 
 (ConceptNode "air") ; [293]
 
-(ConceptNode "present") ; [227]
+(DefinedLinguisticConceptNode "present") ; [227]
 
 ```
 

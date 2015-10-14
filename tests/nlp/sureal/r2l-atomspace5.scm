@@ -288,7 +288,7 @@
       )
       (InheritanceLink (stv 0.99000001 0.99000001)
          (PredicateNode "ate@2248db85-cdb2-44e3-a7db-51222fe86ca4" (stv 0.001 0.99000001))
-         (ConceptNode "past" (stv 0.001 0.99000001))
+         (DefinedLinguisticConceptNode "past" (stv 0.001 0.99000001))
       )
       (InheritanceLink (stv 0.001 0.99000001)
          (InterpretationNode "sentence@75d2a7b8-8ace-43f9-b823-592c63e17f04_parse_0_interpretation_$X")

@@ -12,7 +12,7 @@
 
 (ConceptNode "air" (stv .001 .99)) ; [293]
 
-(ConceptNode "present" (stv .001 .99)) ; [227]
+(DefinedLinguisticConceptNode "present" (stv .001 .99)) ; [227]
 
 (ListLink (stv .99 .99)
   (ConceptNode "men@83d83a2e-940c-46aa-91f1-a7d2c106ef13") ; [290]
@@ -44,7 +44,7 @@
 
 (InheritanceLink (stv .99 .99) (av 1000 0 0)
   (PredicateNode "breathe@218b15b2-52a8-430c-93f6-b4bba225418c") ; [287]
-  (ConceptNode "present") ; [227]
+  (DefinedLinguisticConceptNode "present") ; [227]
 ) ; [297]
 
 (InheritanceLink (stv .99 .99) (av 1000 0 0)
@@ -69,7 +69,7 @@
 
 (InheritanceLink (stv .99 .99) (av 1000 0 0)
   (PredicateNode "is@9fb63f23-52ce-44ab-9bc4-806f0c4926e4") ; [224]
-  (ConceptNode "present") ; [227]
+  (DefinedLinguisticConceptNode "present") ; [227]
 ) ; [228]
 
 (PredicateNode "breathe@218b15b2-52a8-430c-93f6-b4bba225418c" (stv .001 .99)) ; [287]
