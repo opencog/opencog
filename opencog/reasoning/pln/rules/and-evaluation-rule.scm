@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-and-evaluation
+(define and-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-and-evaluation")
+            (GroundedSchemaNode "scm: and-evaluation-formula")
             (ListLink
                 (AndLink
                     (VariableNode "$A")
@@ -41,11 +41,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-and-evaluation AB CA CB)
+(define (and-evaluation-formula AB CA CB)
     (cog-set-tv!
-        AB (pln-formula-and-evaluation-side-effect-free AB CA CB)))
+        AB (and-evaluation-side-effect-free-formula AB CA CB)))
 
-(define (pln-formula-and-evaluation-side-effect-free AB CA CB)
+(define (and-evaluation-side-effect-free-formula AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
@@ -57,5 +57,5 @@
             (stv 0 1))))
 
 ; Name the rule
-(define pln-rule-and-evaluation-name (Node "pln-rule-and-evaluation"))
-(DefineLink pln-rule-and-evaluation-name pln-rule-and-evaluation)
+(define and-evaluation-rule-name (Node "and-evaluation-rule"))
+(DefineLink and-evaluation-rule-name and-evaluation-rule)

@@ -13,7 +13,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-and-to-subset1
+(define and-to-subset1-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -24,7 +24,7 @@
                 (VariableNode "$B"))
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-and-to-subset1")
+            (GroundedSchemaNode "scm: and-to-subset1-formula")
             (ListLink
                 (AndLink
                     (VariableNode "$A")
@@ -34,7 +34,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-and-to-subset1 AAB A SAB)
+(define (and-to-subset1-formula AAB A SAB)
     (cog-set-tv! 
         SAB
         (if

@@ -4,7 +4,7 @@
 ; Given P(A implies B) and sA, calculate sB
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-modus-ponens
+(define modus-ponens-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -15,7 +15,7 @@
                 (VariableNode "$B"))
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
+            (GroundedSchemaNode "scm: simple-modus-ponens-formula")
             (ListLink
                 (VariableNode "$B")
                 (ImplicationLink
@@ -30,17 +30,17 @@
 ; Side-effect: TruthValue of AC may be updated
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-simple-modus-ponens B AB)
+(define (simple-modus-ponens-formula B AB)
     (cog-set-tv!
         B
-        (pln-formula-simple-modus-ponens-side-effect-free
+        (simple-modus-ponens-side-effect-free-formula
             AB)))
 
 ; -----------------------------------------------------------------------------
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-simple-modus-ponens-side-effect-free AB)
+(define (simple-modus-ponens-side-effect-free-formula AB)
     (let
         ((sA (cog-stv-strength (gar AB)))
          (cA (cog-stv-confidence (gar AB))))
@@ -57,5 +57,5 @@
 ; =============================================================================
 
 ; Name the rule
-(define pln-rule-modus-ponens-name (Node "pln-rule-modus-ponens"))
-(DefineLink pln-rule-modus-ponens-name pln-rule-modus-ponens)
+(define modus-ponens-rule-name (Node "modus-ponens-rule"))
+(DefineLink modus-ponens-rule-name modus-ponens-rule)

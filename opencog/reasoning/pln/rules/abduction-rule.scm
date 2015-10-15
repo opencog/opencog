@@ -15,14 +15,14 @@
 ;
 ; Due to pattern matching issues, currently the file has been divided into 3 
 ; parts, each pertaining to different links. The rules are :-
-;       pln-rule-abduction-inheritance
-;       pln-rule-abduction-implication
-;       pln-rule-abduction-subset
+;       abduction-inheritance-rule
+;       abduction-implication-rule
+;       abduction-subset-rule
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-abduction-inheritance
+(define abduction-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -39,7 +39,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-abduction")
+            (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -54,7 +54,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define pln-rule-abduction-implication
+(define abduction-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -71,7 +71,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-abduction")
+            (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -86,7 +86,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define pln-rule-abduction-subset
+(define abduction-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -103,7 +103,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-abduction")
+            (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -118,7 +118,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define (pln-formula-abduction A B C AB CB AC)
+(define (abduction-formula A B C AB CB AC)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -133,5 +133,6 @@
         (cog-set-tv! 
             AC
             (stv 
-                (simple-deduction-formula sA sB sC sAB (inversion-formula sCB sC sB))
-                (min cAB cCB))))) 
+                (simple-deduction-strength formula sA sB sC sAB
+                                           (inversion-strength-formula sCB sC sB))
+                (min cAB cCB)))))

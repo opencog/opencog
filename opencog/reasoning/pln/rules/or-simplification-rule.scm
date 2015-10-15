@@ -14,7 +14,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-or-simplification
+(define or-simplification-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -26,7 +26,7 @@
       (VariableNode "$B")
       (VariableNode "$C")))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-or-simplification")
+    (GroundedSchemaNode "scm: or-simplification-formula")
     (ListLink
      (OrLink
       (VariableNode "$A")
@@ -38,18 +38,18 @@
       (VariableNode "$B")
       (VariableNode "$C"))))))
 
-(define (pln-formula-or-simplification AABC ABC)
+(define (or-simplification-formula AABC ABC)
   (cog-set-tv!
    ABC
-   (pln-formula-or-simplification-side-effect-free AABC ABC))
+   (or-simplification-side-effect-free-formula AABC ABC))
 )
 
-(define (pln-formula-or-simplification-side-effect-free AABC ABC)
+(define (or-simplification-side-effect-free-formula AABC ABC)
   (let 
       ((sAABC (cog-stv-strength AABC))
        (cAABC (cog-stv-confidence AABC)))
     (stv sAABC cAABC)))
 
 ; Name the rule
-(define pln-rule-or-simplification-name (Node "pln-rule-or-simplification"))
-(DefineLink pln-rule-or-simplification-name pln-rule-or-simplification)
+(define or-simplification-rule-name (Node "or-simplification-rule"))
+(DefineLink or-simplification-rule-name or-simplification-rule)

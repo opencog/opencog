@@ -17,7 +17,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-or-construction
+(define or-construction-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -38,18 +38,18 @@
               (VariableNode "$A")
               (VariableNode "$B"))))
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: pln-formula-or-construction")
+        (GroundedSchemaNode "scm: or-construction-formula")
         (ListLink
            (VariableNode "$A")
            (VariableNode "$B")))))
 
-(define (pln-formula-or-construction A B)
+(define (or-construction-formula A B)
   (cog-set-tv!
    (OrLink A B)
-   (pln-formula-or-construction-side-effect-free A B))
+   (or-construction-side-effect-free-formula A B))
 )
 
-(define (pln-formula-or-construction-side-effect-free A B)
+(define (or-construction-side-effect-free-formula A B)
   (let 
       ((sA (cog-stv-strength A))
        (sB (cog-stv-strength B))
@@ -58,8 +58,8 @@
     (stv (- (+ sA sB) (* sA sB)) (min cA cB))))
 
 ; Name the rule
-(define pln-rule-or-construction-name
-  (Node "pln-rule-or-construction"))
+(define or-construction-rule-name
+  (Node "or-construction-rule"))
 (DefineLink
-   pln-rule-or-construction-name
-   pln-rule-or-construction)
+   or-construction-rule-name
+   or-construction-rule)

@@ -6,7 +6,7 @@
 (EvaluationLink
     (PredicateNode "inputs")
     (ListLink
-        ; 1) input for (pln-rule-contextualize-inheritance)
+        ; 1) input for (contextualize-inheritance-rule)
         ; "Ben is competent in doing mathematics."
         (InheritanceLink (stv .8 .8)
             (AndLink
@@ -15,7 +15,7 @@
             (AndLink
                 (ConceptNode "competent")
                 (ConceptNode "doing_mathematics")))
-        ; 2) input for (pln-rule-contextualize-evaluation)
+        ; 2) input for (contextualize-evaluation-rule)
         ; "The sky is blue in the context of the earth.
         ; The sky is not blue in the context of the moon."
         (EvaluationLink (stv .8 .7)
@@ -30,19 +30,19 @@
                 (AndLink
                     (ConceptNode "sky")
                     (ConceptNode "moon"))))
-        ; 3) input for (pln-rule-contextualize-subset)
+        ; 3) input for (contextualize-subset-rule)
         ; "Dogs are animals."
         (SubsetLink (stv .8 .8)
             (ConceptNode "dogs")
             (ConceptNode "animals"))
-        ; 4) input for (pln-rule-decontextualize-inheritance)
+        ; 4) input for (decontextualize-inheritance-rule)
         ; "Ben is competent in the domain of mathematics.
         (ContextLink (stv .8 .8)
             (ConceptNode "doing_mathematics")
             (InheritanceLink
                 (ConceptNode "Ben")
                 (ConceptNode "competent")))
-        ; 5) input for (pln-rule-decontextualize-evaluation)
+        ; 5) input for (decontextualize-evaluation-rule)
         ; "In the context of the earth, the sky is blue."
         (ContextLink (stv .8 .8)
             (ConceptNode "earth")
@@ -50,7 +50,7 @@
                 (PredicateNode "isBlue")
                 (ListLink
                     (ConceptNode "sky"))))
-        ; 6) input for (pln-rule-decontextualize-subset)
+        ; 6) input for (decontextualize-subset-rule)
         ; "Dogs are animals."
         (ContextLink (stv .8 .8)
             (ConceptNode "dogs")

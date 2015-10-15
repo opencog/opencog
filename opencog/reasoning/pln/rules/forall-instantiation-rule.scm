@@ -39,7 +39,7 @@
      (VariableNode "$TyVs")
      (VariableNode "$B")))
 
-;; Helper for pln-formula-forall-instantiation. Given an atom
+;; Helper for forall-instantiation-formula. Given an atom
 ;;
 ;; (VariableList
 ;;    (TypedVariableLink
@@ -82,7 +82,7 @@
          (remain (apply cog-new-link link-type remain-list)))
     (list rnd-atom remain)))
 
-;; Helper for pln-formula-forall-instantiation. Given an atom
+;; Helper for forall-instantiation-formula. Given an atom
 ;;
 ;; (TypedVariableLink
 ;;    (VariableNode "$V")
@@ -106,16 +106,16 @@
 
 (define forall-full-instantiation-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: pln-formula-forall-full-instantiation")
+     (GroundedSchemaNode "scm: forall-full-instantiation-formula")
      (ListLink
         (VariableNode "$TyVs")
         (VariableNode "$B"))))
 
 ;; Only try to match a ForAllLink with a type restricted variable in
 ;; the ForAllLink variable definition. The choice of the substitution
-;; term is done randomly in pln-formula-forall-full-instantiation. All
+;; term is done randomly in forall-full-instantiation-formula. All
 ;; scoped variables are instantiated.
-(define pln-rule-forall-full-instantiation
+(define forall-full-instantiation-rule
   (BindLink
      forall-full-instantiation-variables
      forall-instantiation-body
@@ -134,7 +134,7 @@
 ;; and scoped variables in the forall, otherwise this is gonna crash.
 ;; That is because PutLink expects the number of variables in the
 ;; ListLink to be equal to the number of free variables in the body.
-(define (pln-formula-forall-full-instantiation SV B)
+(define (forall-full-instantiation-formula SV B)
   (cog-set-tv!
    (let* (
           (SV-type (cog-type SV))
@@ -159,10 +159,10 @@
    (stv 1 1)))
 
 ;; Name the rule
-(define pln-rule-forall-full-instantiation-name
-  (Node "pln-rule-forall-full-instantiation-name"))
-(DefineLink pln-rule-forall-full-instantiation-name
-  pln-rule-forall-full-instantiation)
+(define forall-full-instantiation-rule-name
+  (Node "forall-full-instantiation-rule"))
+(DefineLink forall-full-instantiation-rule-name
+  forall-full-instantiation-rule)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Forall partial instantiation rule ;;
@@ -177,15 +177,15 @@
 
 (define forall-partial-instantiation-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: pln-formula-forall-partial-instantiation")
+     (GroundedSchemaNode "scm: forall-partial-instantiation-formula")
      (ListLink
         (VariableNode "$TyVs")
         (VariableNode "$B"))))
 
-;; Like pln-rule-forall-full-instantiation but only instantiate one
+;; Like forall-full-instantiation-rule but only instantiate one
 ;; variable amonst a variable list (if there is just one variable in
 ;; the forall scope, then this rule will not be invoked).
-(define pln-rule-forall-partial-instantiation
+(define forall-partial-instantiation-rule
   (BindLink
      forall-partial-instantiation-variables
      forall-instantiation-body
@@ -204,7 +204,7 @@
 ;; and scoped variables in the forall, otherwise this is gonna crash.
 ;; That is because PutLink expects the number of variables in the
 ;; ListLink to be equal to the number of free variables in the body.
-(define (pln-formula-forall-partial-instantiation TyVs B)
+(define (forall-partial-instantiation-formula TyVs B)
   (cog-set-tv!
    (let* (
           (TyV-and-remain (select-rm-rnd-outgoing TyVs))
@@ -234,7 +234,7 @@
    (stv 1 1)))
 
 ;; Name the rule
-(define pln-rule-forall-partial-instantiation-name
-  (Node "pln-rule-forall-partial-instantiation-name"))
-(DefineLink pln-rule-forall-partial-instantiation-name
-  pln-rule-forall-partial-instantiation)
+(define forall-partial-instantiation-rule-name
+  (Node "forall-partial-instantiation-rule"))
+(DefineLink forall-partial-instantiation-rule-name
+  forall-partial-instantiation-rule)

@@ -4,7 +4,7 @@
 ; AND(Inheritance A C, Inheritance B C) entails Inheritance A B
 ;------------------------------------------------------------------------------
 (load "formulas.scm")
-(define pln-rule-abduction
+(define abduction-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$A")
@@ -23,7 +23,7 @@
 					(VariableNode "$A")
 					(VariableNode "$B"))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pln-formula-abduction")
+			(GroundedSchemaNode "scm: abduction-formula")
 			(ListLink
 				(InheritanceLink
 					(VariableNode "$A")
@@ -43,10 +43,10 @@
 ; Side-effect: TruthValue of AB may be updated
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-abduction AB AC BC)
+(define (abduction-formula AB AC BC)
 	(cog-set-tv!
 		AB
-		(pln-formula-abduction-side-effect-free
+		(abduction-side-effect-free-formula
 			AB
 			AC
 			BC
@@ -57,10 +57,10 @@
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-abduction-side-effect-free AB AC BC A B C)
+(define (abduction-side-effect-free-formula AB AC BC A B C)
 	(let
 		(
-			(sCB (inversion-formula 
+			(sCB (inversion-strength-formula 
 				(cog-stv-strength BC)
 				(cog-stv-strength B) 
 				(cog-stv-strength C)))
@@ -69,7 +69,7 @@
 			(sB (cog-stv-strength B))
 			(sA (cog-stv-strength A)))
 		(stv 
-			(simple-deduction-formula sA sC sB sAC sCB) ;Strength
+			(simple-deduction-strength-formula sA sC sB sAC sCB) ;Strength
                 	(min
                     		(cog-stv-confidence AB)
                     		(cog-stv-confidence BC))))) ; Confidence
@@ -77,5 +77,5 @@
 ; =============================================================================
 
 ; Name that rule
-(define pln-rule-abduction-name (Node "pln-rule-abduction"))
-(DefineLink pln-rule-abduction-name pln-rule-abduction)
+(define abduction-rule-name (Node "abduction-rule"))
+(DefineLink abduction-rule-name abduction-rule)
