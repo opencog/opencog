@@ -134,6 +134,12 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
         }
 
+        // special treatment for DefinedLinguisticConceptNode and
+        // DefinedLinguisticPredicateNode, do not treat them as variables
+        // because they are not actual words of a sentence.
+        if (n->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE || n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
+           continue;
+
         std::string sName = pAS->get_name(n);
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
