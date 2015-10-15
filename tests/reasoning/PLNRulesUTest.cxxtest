@@ -85,7 +85,7 @@ void PLNRulesUTest::setUp()
 }
 
 /**
- * Tests the deduction rule (pln-rule-deduction) defined in:
+ * Tests the deduction rule (deduction-rule) defined in:
  * opencog/reasoning/pln/rules/deduction.scm
  */
 void PLNRulesUTest::test_deduction()
@@ -106,7 +106,7 @@ void PLNRulesUTest::test_deduction()
     TS_ASSERT_EQUALS(1, as.get_arity(results));
     
     // Apply the deduction rule
-    eval.eval_h("(cog-bind pln-rule-deduction)");
+    eval.eval_h("(cog-bind deduction-rule)");
        
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
@@ -117,7 +117,7 @@ void PLNRulesUTest::test_deduction()
 }
 
 /**
- * Tests the and rule (pln-rule-and-construction) defined in:
+ * Tests the and rule (and-construction-rule) defined in:
  * opencog/reasoning/pln/rules/and-construction-rule.scm
  */
 void PLNRulesUTest::test_and_construction()
@@ -132,14 +132,14 @@ void PLNRulesUTest::test_and_construction()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-and-construction)");
+    Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
 
     // It should contain 1 groundings, and(A, B)
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
 /**
- * Tests the and rule (pln-rule-or-construction) defined in:
+ * Tests the and rule (or-construction-rule) defined in:
  * opencog/reasoning/pln/rules/or-construction-rule.scm
  */
 void PLNRulesUTest::test_or_construction()
@@ -154,14 +154,14 @@ void PLNRulesUTest::test_or_construction()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-or-construction)");
+    Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
 
     // It should contain 1 groundings, or(A, B)
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
 /**
- * Tests the not rule (pln-rule-not-construction) defined in:
+ * Tests the not rule (not-construction-rule) defined in:
  * opencog/reasoning/pln/rules/not-construction-rule.scm
  */
 void PLNRulesUTest::test_not_construction()
@@ -176,7 +176,7 @@ void PLNRulesUTest::test_not_construction()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-not-construction)");
+    Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
 
     // It should contain 2 groundings, not(A), not(B)
     TS_ASSERT_EQUALS(2, as.get_arity(results));
@@ -198,7 +198,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle rule = eval.eval_h("pln-rule-forall-full-instantiation");
+    Handle rule = eval.eval_h("forall-full-instantiation-rule");
     Handle results = bindlink(&as, rule);
 
     /**
@@ -218,7 +218,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
      *          <some-concept>
      *          <some-predicate>
      */
-    TS_ASSERT_EQUALS(3, as.get_arity(results));
+    TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
 /**
@@ -237,7 +237,7 @@ void PLNRulesUTest::test_forall_partial_instantiation()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle rule = eval.eval_h("pln-rule-forall-partial-instantiation");
+    Handle rule = eval.eval_h("forall-partial-instantiation-rule");
     Handle results = bindlink(&as, rule);
 
     /**
@@ -266,7 +266,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle rule = eval.eval_h("pln-rule-forall-implication-to-higher-order");
+    Handle rule = eval.eval_h("forall-implication-to-higher-order-rule");
     Handle results = bindlink(&as, rule);
     Handle expected_results = eval.eval_h
 	    ("(SetLink"

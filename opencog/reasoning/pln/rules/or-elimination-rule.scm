@@ -13,7 +13,7 @@
 ;; TODO :- Create the rule n-ary
 
 
-(define pln-rule-or-elimination
+(define or-elimination-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -23,7 +23,7 @@
      (VariableNode "$A")
      (VariableNode "$B")))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-or-elimination")
+    (GroundedSchemaNode "scm: or-elimination-formula")
     (ListLink
      (OrLink
       (VariableNode "$A")
@@ -31,21 +31,21 @@
      (VariableNode "$A")
      (VariableNode "$B")))))
 
-(define (pln-formula-or-elimination AB A B)
+(define (or-elimination-formula AB A B)
   (cog-set-tv!
    A
-   (pln-formula-or-elimination-side-effect-free AB))
+   (or-elimination-side-effect-free-formula AB))
   (cog-set-tv!
    B
-   (pln-formula-or-elimination-side-effect-free AB)) 
+   (or-elimination-side-effect-free-formula AB)) 
 )
 
-(define (pln-formula-or-elimination-side-effect-free AB)
+(define (or-elimination-side-effect-free-formula AB)
   (let 
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB)))
     (stv (/ sAB 2) 1)))
 
 ; Name the rule
-(define pln-rule-or-elimination-name (Node "pln-rule-or-elimination"))
-(DefineLink pln-rule-or-elimination-name pln-rule-or-elimination)
+(define or-elimination-rule-name (Node "or-elimination-rule"))
+(DefineLink or-elimination-rule-name or-elimination-rule)

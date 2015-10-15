@@ -10,15 +10,15 @@
 ;   B
 ; Due to pattern matching issues, currently the file has been divided into 3 
 ; parts, each pertaining to different links. The rules are :-
-;       pln-rule-modus-ponens-inheritance
-;       pln-rule-modus-ponens-implication
-;       pln-rule-modus-ponens-subset
+;       modus-ponens-inheritance-rule
+;       modus-ponens-implication-rule
+;       modus-ponens-subset-rule
 ;
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-modus-ponens-inheritance
+(define modus-ponens-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-modus-ponens")
+            (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
                 (InheritanceLink
@@ -37,7 +37,7 @@
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
 
-(define pln-rule-modus-ponens-implication
+(define modus-ponens-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -48,7 +48,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-modus-ponens")
+            (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
                 (ImplicationLink
@@ -56,7 +56,7 @@
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
 
-(define pln-rule-modus-ponens-subset
+(define modus-ponens-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -67,7 +67,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-modus-ponens")
+            (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
                 (SubsetLink
@@ -75,7 +75,7 @@
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
 
-(define (pln-formula-modus-ponens A AB B)
+(define (modus-ponens-formula A AB B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -86,6 +86,6 @@
         (cog-set-tv!
             B
             (stv 
-                (precise-modus-ponens-formula sA sAB snotAB) 
+                (precise-modus-ponens-strength-formula sA sAB snotAB) 
                 (min (min cAB cnotAB) cA)))))
 

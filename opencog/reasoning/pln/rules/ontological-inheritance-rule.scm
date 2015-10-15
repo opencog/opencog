@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-ontological-inheritance
+(define ontological-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -28,7 +28,7 @@
                 (VariableNode "$B")
                 (VariableNode "$A")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-ontological-inheritance")
+            (GroundedSchemaNode "scm: ontological-inheritance-formula")
             (ListLink
                 (OntologicalInheritanceLink
                     (VariableNode "$A")
@@ -40,14 +40,14 @@
                     (VariableNode "$B")
                     (VariableNode "$A"))))))
 
-(define (pln-formula-ontological-inheritance OAB AB BA)
+(define (ontological-inheritance-formula OAB AB BA)
     (cog-set-tv!
         OAB
-        (pln-formula-ontological-inheritance-side-effect-free OAB AB BA)
+        (ontological-inheritance-side-effect-free-formula OAB AB BA)
     )
 )
 
-(define (pln-formula-ontological-inheritance-side-effect-free OAB AB BA)
+(define (ontological-inheritance-side-effect-free-formula OAB AB BA)
     (let
         ((sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
@@ -61,8 +61,8 @@
 
 
 ; Name the rule
-(define pln-rule-ontological-inheritance-name
-  (Node "pln-rule-ontological-inheritance"))
+(define ontological-inheritance-rule-name
+  (Node "ontological-inheritance-rule"))
 (DefineLink
-  pln-rule-ontological-inheritance-name
-  pln-rule-ontological-inheritance)
+  ontological-inheritance-rule-name
+  ontological-inheritance-rule)

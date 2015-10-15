@@ -9,7 +9,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-not-simplification
+(define not-simplification-rule
   (BindLink
    (VariableList
     (VariableNode "$A"))
@@ -17,28 +17,28 @@
     (NotLink
      (VariableNode "$A")))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-not-simplification")
+    (GroundedSchemaNode "scm: not-simplification-formula")
     (ListLink
      (NotLink
       (NotLink
        (VariableNode "$A")))
      (VariableNode "$A")))))
 
-(define (pln-formula-not-simplification NNA A)
+(define (not-simplification-formula NNA A)
   (cog-set-tv!
    A
-   (pln-formula-not-simplification-side-effect-free NNA A))
+   (not-simplification-side-effect-free-formula NNA A))
 )
 
-(define (pln-formula-not-simplification-side-effect-free NNA A)
+(define (not-simplification-side-effect-free-formula NNA A)
   (let 
       ((sNNA (cog-stv-strength NNA))
        (cNNA (cog-stv-confidence NNA)))
     (stv (- 1 sNNA) cNNA)))
 
 ; Name the rule
-(define pln-rule-not-simplification-name
-  (Node "pln-rule-not-simplification"))
+(define not-simplification-rule-name
+  (Node "not-simplification-rule"))
 (DefineLink
-  pln-rule-not-simplification-name
-  pln-rule-not-simplification)
+  not-simplification-rule-name
+  not-simplification-rule)

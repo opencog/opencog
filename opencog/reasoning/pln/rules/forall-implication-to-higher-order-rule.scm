@@ -43,19 +43,19 @@
 
 (define forall-implication-to-higher-order-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: pln-formula-forall-implication-to-higher-order")
+     (GroundedSchemaNode "scm: forall-implication-to-higher-order-formula")
      (ListLink
         (VariableNode "$TyVs")
         (VariableNode "$Impl"))))
 
-(define pln-rule-forall-implication-to-higher-order
+(define forall-implication-to-higher-order-rule
   (BindLink
      forall-implication-to-higher-order-variables
      forall-implication-to-higher-order-body
      forall-implication-to-higher-order-rewrite))
 
 ;; TODO: only crisp for now
-(define (pln-formula-forall-implication-to-higher-order TyVs Impl)
+(define (forall-implication-to-higher-order-formula TyVs Impl)
   (cog-set-tv!
    (let* (
           (impl-outgoings (cog-outgoing-set Impl))
@@ -71,7 +71,7 @@
    (stv 1 1)))
 
 ;; Name the rule
-(define pln-rule-forall-implication-to-higher-order-name
-  (Node "pln-rule-forall-implication-to-higher-order-name"))
-(DefineLink pln-rule-forall-implication-to-higher-order-name
-  pln-rule-forall-implication-to-higher-order)
+(define forall-implication-to-higher-order-rule-name
+  (Node "forall-implication-to-higher-order-rule"))
+(DefineLink forall-implication-to-higher-order-rule-name
+  forall-implication-to-higher-order-rule)

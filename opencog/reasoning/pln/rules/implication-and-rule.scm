@@ -19,7 +19,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-implication-and
+(define implication-and-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -36,7 +36,7 @@
                     (VariableNode "$C"))
                 (VariableNode "$D")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-implication-and")
+            (GroundedSchemaNode "scm: implication-and-formula")
             (ListLink
                 (ImplicationLink
                     (AndLink
@@ -52,15 +52,15 @@
                         (VariableNode "$C"))
                     (VariableNode "$D"))))))
 
-(define (pln-formula-implication-and ACD AB BCD)
+(define (implication-and-formula ACD AB BCD)
     (cog-set-tv!
-        (pln-formula-implication-and-side-effect-free ACD AB BCD)
+        (implication-and-side-effect-free-formula ACD AB BCD)
     )
 )
 
-(define (pln-formula-implication-and-side-effect-free ACD AB BCD)
+(define (implication-and-side-effect-free-formula ACD AB BCD)
     (stv 1 1))
 
 ; Name the rule
-(define pln-rule-implication-and-name (Node "pln-rule-implication-and"))
-(DefineLink pln-rule-implication-and-name pln-rule-implication-and)
+(define implication-and-rule-name (Node "implication-and-rule"))
+(DefineLink implication-and-rule-name implication-and-rule)

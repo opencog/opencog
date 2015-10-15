@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-inheritance
+(define inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -28,7 +28,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-inheritance")
+            (GroundedSchemaNode "scm: inheritance-formula")
             (ListLink
                 (SubsetLink
                     (VariableNode "$A")
@@ -40,7 +40,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-inheritance SAB IIAB IAB)
+(define (inheritance-formula SAB IIAB IAB)
     (cog-set-tv! 
         IAB
         (stv 

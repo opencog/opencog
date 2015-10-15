@@ -3,13 +3,13 @@
 ; ==========================================================================
 
 (define functions-list (list
-    'pln-rule-deduction
-    'pln-formula-simple-deduction
-    'pln-formula-simple-deduction-side-effect-free
+    'deduction-rule
+    'simple-deduction-strength-formula
+    'simple-deduction-side-effect-free-formula
 
-    'pln-rule-modus-ponens
-    'pln-formula-simple-modus-ponens
-    'pln-formula-simple-modus-ponens-side-effect-free
+    'modus-ponens-rule
+    'simple-modus-ponens-formula
+    'simple-modus-ponens-side-effect-free-formula
 ))
 
 (for-each

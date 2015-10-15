@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-equivalence-transformation
+(define equivalence-transformation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -24,7 +24,7 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-equivalence-transformation")
+            (GroundedSchemaNode "scm: equivalence-transformation-formula")
             (ListLink
                 (AndLink
                     (ImplicationLink
@@ -37,13 +37,13 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-equivalence-transofrmation AII EV)
+(define (equivalence-transofrmation-formula AII EV)
     (cog-set-tv!
         AII (cog-tv EV)))
 
 ; Name the rule
-(define pln-rule-equivalence-transformation-name
-  (Node "pln-rule-equivalence-transformation"))
+(define equivalence-transformation-rule-name
+  (Node "equivalence-transformation-rule"))
 (DefineLink
-  pln-rule-equivalence-transformation-name
-  pln-rule-equivalence-transformation)
+  equivalence-transformation-rule-name
+  equivalence-transformation-rule)

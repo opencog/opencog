@@ -41,7 +41,7 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ```
 scheme@(guile-user)> ;; Infer that take-treatment-1 implies take-compound-A
-scheme@(guile-user)> (for-each (lambda (i) (cog-bind pln-rule-forall-partial-instantiation)) (iota 20))
+scheme@(guile-user)> (for-each (lambda (i) (cog-bind forall-partial-instantiation-rule)) (iota 20))
 scheme@(guile-user)> (cog-prt-atomspace)
 ...
 scheme@(guile-user)> ;; Search the following string
@@ -79,7 +79,7 @@ scheme@(guile-user)> ;; Search the following string
 
 ...
 
-scheme@(guile-user)> (cog-bind pln-rule-forall-implication-to-higher-order)
+scheme@(guile-user)> (cog-bind forall-implication-to-higher-order-rule)
 ...
    (ImplicationLink (stv 1 0.99999982)
       (LambdaLink

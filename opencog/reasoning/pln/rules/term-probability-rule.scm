@@ -14,14 +14,14 @@
 ;
 ; Due to issues in pattern matching in backward chaining, the files has been
 ; split into three rules for seperate link types. The 3 rules are
-;           pln-rule-term-probability-inheritance
-;           pln-rule-term-probability-implication
-;           pln-rule-term-probability-subset
+;           term-probability-inheritance-rule
+;           term-probability-implication-rule
+;           term-probability-subset-rule
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-term-probability-inheritance
+(define term-probability-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -35,7 +35,7 @@
                 (VariableNode "$B")
                 (VariableNode "$A")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-term-probability")
+            (GroundedSchemaNode "scm: term-probability-formula")
             (ListLink
                 (VariableNode "$A")
                 (InheritanceLink
@@ -46,7 +46,7 @@
                     (VariableNode "$A"))
                 (VariableNode "$B")))))
 
-(define pln-rule-term-probability-implication
+(define term-probability-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -60,7 +60,7 @@
                 (VariableNode "$B")
                 (VariableNode "$A")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-term-probability")
+            (GroundedSchemaNode "scm: term-probability-formula")
             (ListLink
                 (VariableNode "$A")
                 (ImplicationLink
@@ -71,7 +71,7 @@
                     (VariableNode "$A"))
                 (VariableNode "$B")))))
 
-(define pln-rule-term-probability-subset
+(define term-probability-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -85,7 +85,7 @@
                 (VariableNode "$B")
                 (VariableNode "$A")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-term-probability")
+            (GroundedSchemaNode "scm: term-probability-formula")
             (ListLink
                 (VariableNode "$A")
                 (SubsetLink
@@ -96,7 +96,7 @@
                     (VariableNode "$A"))
                 (VariableNode "$B")))))
 
-(define (pln-formula-term-probability A AB BA B)
+(define (term-probability-formula A AB BA B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))

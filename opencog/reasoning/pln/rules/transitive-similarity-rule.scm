@@ -15,14 +15,14 @@
 ;
 ; Due to issues in pattern matching in backward chaining, the files has been
 ; split into three rules for seperate link types. The 3 rules are
-;           pln-rule-transitive-similarity-similarity
-;           pln-rule-transitive-similarity-extensional-similarity
-;           pln-rule-transitive-similarity-intensional-similarity
+;           transitive-similarity-similarity-rule
+;           transitive-similarity-extensional-similarity-rule
+;           transitive-similarity-intensional-similarity-rule
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-transitive-similarity-similarity
+(define transitive-similarity-similarity-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -39,7 +39,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
+            (GroundedSchemaNode "scm: transitive-similarity-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -54,7 +54,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define pln-rule-transitive-similarity-extensional-similarity
+(define transitive-similarity-extensional-similarity-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -71,7 +71,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
+            (GroundedSchemaNode "scm: transitive-similarity-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -86,7 +86,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define pln-rule-transitive-similarity-intensional-similarity
+(define transitive-similarity-intensional-similarity-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -103,7 +103,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-transitive-similarity")
+            (GroundedSchemaNode "scm: transitive-similarity-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -118,7 +118,7 @@
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
 
-(define (pln-formula-transitive-similarity A B C AB BC AC)
+(define (transitive-similarity-formula A B C AB BC AC)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -133,5 +133,5 @@
         (cog-set-tv!
             AC 
             (stv 
-                (transitive-similarity-formula sA sB sC sAB sBC) 
+                (transitive-similarity-strength-formula sA sB sC sAB sBC) 
                 (min cAB cBC)))))

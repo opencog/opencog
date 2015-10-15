@@ -24,7 +24,7 @@
 (include "formulas.scm")
 
 ; No ListLink, 1 argument in EvaluationLink
-(define pln-rule-member-to-evaluation-0
+(define member-to-evaluation-0-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
@@ -39,7 +39,7 @@
 					(VariableNode "$D")
 					(VariableNode "$X-M2E"))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
 				(EvaluationLink
 					(VariableNode "$D")
@@ -53,7 +53,7 @@
 							(VariableNode "$X-M2E"))))))))
 
 ; Has ListLink, 1 argument in EvaluationLink
-(define pln-rule-member-to-evaluation-1
+(define member-to-evaluation-1-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
@@ -69,7 +69,7 @@
 					(ListLink
 						(VariableNode "$X-M2E")))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
 				(EvaluationLink
 					(VariableNode "$D")
@@ -85,7 +85,7 @@
 								(VariableNode "$X-M2E")))))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 1st argument in MemberLink
-(define pln-rule-member-to-evaluation-2-1
+(define member-to-evaluation-2-1-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
@@ -103,7 +103,7 @@
 						(VariableNode "$X-M2E")
 						(VariableNode "$C")))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
 				(EvaluationLink
 					(VariableNode "$D")
@@ -121,7 +121,7 @@
 								(VariableNode "$C")))))))))
 
 ; Has ListLink, 2 arguments in EvaluationLink, 2nd argument in MemberLink
-(define pln-rule-member-to-evaluation-2-2
+(define member-to-evaluation-2-2-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
@@ -139,7 +139,7 @@
 						(VariableNode "$B")
 						(VariableNode "$X-M2E")))))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pln-formula-member-to-evaluation")
+			(GroundedSchemaNode "scm: member-to-evaluation-formula")
 			(ListLink
 				(EvaluationLink
 					(VariableNode "$D")
@@ -162,19 +162,19 @@
 ; Member To Evaluation Formula
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-member-to-evaluation EVAL MEM)
+(define (member-to-evaluation-formula EVAL MEM)
 	(cog-set-tv! EVAL (cog-tv MEM)))
 
 
 ; Name the rule
-(define pln-rule-member-to-evaluation-0-name (Node "pln-rule-member-to-evaluation-0"))
-(DefineLink pln-rule-member-to-evaluation-0-name pln-rule-member-to-evaluation-0)
+(define member-to-evaluation-0-rule-name (Node "member-to-evaluation-0-rule"))
+(DefineLink member-to-evaluation-0-rule-name member-to-evaluation-0-rule)
 
-(define pln-rule-member-to-evaluation-1-name (Node "pln-rule-member-to-evaluation-1"))
-(DefineLink pln-rule-member-to-evaluation-1-name pln-rule-member-to-evaluation-1)
+(define member-to-evaluation-1-rule-name (Node "member-to-evaluation-1-rule"))
+(DefineLink member-to-evaluation-1-rule-name member-to-evaluation-1-rule)
 
-(define pln-rule-member-to-evaluation-2-1-name (Node "pln-rule-member-to-evaluation-2-1"))
-(DefineLink pln-rule-member-to-evaluation-2-1-name pln-rule-member-to-evaluation-2-1)
+(define member-to-evaluation-2-1-rule-name (Node "member-to-evaluation-2-1-rule"))
+(DefineLink member-to-evaluation-2-1-rule-name member-to-evaluation-2-1-rule)
 
-(define pln-rule-member-to-evaluation-2-2-name (Node "pln-rule-member-to-evaluation-2-2"))
-(DefineLink pln-rule-member-to-evaluation-2-2-name pln-rule-member-to-evaluation-2-2)
+(define member-to-evaluation-2-2-rule-name (Node "member-to-evaluation-2-2-rule"))
+(DefineLink member-to-evaluation-2-2-rule-name member-to-evaluation-2-2-rule)

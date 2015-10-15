@@ -11,14 +11,14 @@
 ;
 ; Due to pattern matching issues, currently the file has been divided into 3 
 ; parts, each pertaining to different links. The rules are :-
-;       pln-rule-inversion-inheritance
-;       pln-rule-inversion-implication
-;       pln-rule-inversion-subset
+;       inversion-inheritance-rule
+;       inversion-implication-rule
+;       inversion-subset-rule
 ;
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-inversion-inheritance
+(define inversion-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -30,7 +30,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-rule-inversion")
+            (GroundedSchemaNode "scm: inversion-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -41,7 +41,7 @@
                     (VariableNode "$B")
                     (VariableNode "$A"))))))
 
-(define pln-rule-inversion-implication
+(define inversion-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -53,7 +53,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-rule-inversion")
+            (GroundedSchemaNode "scm: inversion-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -64,7 +64,7 @@
                     (VariableNode "$B")
                     (VariableNode "$A"))))))
 
-(define pln-rule-inversion-subset
+(define inversion-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -76,7 +76,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-rule-inversion")
+            (GroundedSchemaNode "scm: inversion-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -87,7 +87,7 @@
                     (VariableNode "$B")
                     (VariableNode "$A"))))))
 
-(define (pln-formula-inversion A B AB BA)
+(define (inversion-formula A B AB BA)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
