@@ -16,6 +16,9 @@
 ; (add-to-load-path "../src")
 (load-from-path "faces.scm")
 
+(use-modules (opencog logger))
+(cog-logger-set-stdout #t)
+
 ; ------------------------------------------------------
 ; State variables
 
@@ -47,7 +50,9 @@
 
 ; Return true `fract` percent of the time, else return false.
 (define (dice-roll fract)
-	(if (> (string->number (cog-name fract)) (random:uniform))
+	(define rrr (random:uniform))
+	(cog-logger-info "rando: ~A" rrr)
+	(if (> (string->number (cog-name fract)) rrr)
 		(stv 1 1) (stv 0 1)))
 
 ; line 588 -- dice_roll("glance_new_face")
@@ -172,7 +177,7 @@
 			(TrueLink (DefinedSchemaNode "look at person"))
 			(TrueLink (DefinedSchemaNode "set timestamp"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "look at person")))
+				(ListLink (Node "--- Look at person")))
 		)))
 
 ;; line 399 -- Sequence - Currently interacting with someone
@@ -185,28 +190,29 @@
 			(DefinedPredicateNode "dice-roll: glance")
 			(TrueLink (DefinedSchemaNode "glance at person"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- glance at person")))
+				(ListLink (Node "--- Glance at person")))
 	)))
 
 ;; Respond to a new face becoming visible.
 ;; line 389 -- Selector
 (DefineLink
-	(DefinedPredicateNode "New arrival")
+	(DefinedPredicateNode "Respond to new arrival")
 	(SatisfactionLink
 		(SequentialOrLink
 			(DefinedPredicateNode "Was Empty Sequence")
 			(DefinedPredicateNode "Interacting Sequence")
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Ignoring new person"))) ; line 406
-			(TrueLink))))
+			(TrueLink)
+		)))
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
-(define select
+(define ysel
 	(SatisfactionLink
 		(SequentialAndLink
 			(DefinedPredicateNode "Did someone arrive?")
-			(DefinedPredicateNode "New arrival")
+			(DefinedPredicateNode "Respond to new arrival")
 			(DefinedPredicateNode "Update status")
 		)))
 
