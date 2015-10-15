@@ -115,6 +115,16 @@
 					(ListLink (VariableNode "$face-id")))
 		)))
 
+;; Randomly select a face out of the crowd.
+;; line 747 -- select_a_face_target() and also
+;; line 752 -- select_a_glance_target()
+(DefineLink
+	(DefinedSchemaNode "Select random face")
+	(RandomChoiceLink (GetLink
+		(EvaluationLink (PredicateNode "acked face")
+               (ListLink (VariableNode "$face-id")))
+	)))
+
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
 ;; line 973 clear_new_face_target()
@@ -159,6 +169,9 @@
 			(ListLink (VariableNode "$face")))
 		(DefinedSchemaNode "New arrivals")
 	))
+
+;; line 762, interact_with_face_target()
+;; XXX incomplete
 
 ;; line 757, timestamp
 (define (get-timestamp)
@@ -237,7 +250,9 @@
 	(DefinedPredicateNode "Interact with people")
 	(SatisfactionLink
 		(SequentialAndLink
+; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
+; (DefinedSchemaNode "Select random face")
 		)))
 ;
 ;

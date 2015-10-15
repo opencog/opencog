@@ -111,8 +111,10 @@ A list of changes to the atomspace that could help with this:
        (CurrentTimeNode "now"))
 ```
 * Create RandomNode for a uniform distribution 0 to 1 which
-  can be used to evaluate to true/false by using GreaterThanLink
-  or alternately -- and all-in-one predicate for this.
+  can be used to evaluate to true/false by using GreaterThanLink.
 
 * SatisfactionLink is kind-of not-needed; should be able to directly
-  execute SequentialAndLink, SequentialOrLink.
+  execute SequentialAndLink, SequentialOrLink. or maybe not ...
+
+* fix cog-execute to avoid doing eager execution..!? e.g. for
+  RandomChoiceLink ...? Or is this OK to leave as-is?
