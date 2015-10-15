@@ -208,13 +208,17 @@
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
-(define ysel
+(DefineLink
+	(DefinedPredicateNode "New arrival sequence")
 	(SatisfactionLink
 		(SequentialAndLink
 			(DefinedPredicateNode "Did someone arrive?")
 			(DefinedPredicateNode "Respond to new arrival")
 			(DefinedPredicateNode "Update status")
 		)))
+
+;; Check to see if someone left
+;; line 422 -- someone_left()
 
 ;
 ;
