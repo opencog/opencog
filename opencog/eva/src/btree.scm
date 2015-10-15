@@ -105,6 +105,16 @@
 		(GetLink (StateLink room-state (VariableNode "$x")))
 	))
 
+;; Is there someone present?  We chaked for acked faces.
+;; line 683 is_face_target().
+(DefineLink
+	(DefinedPredicateNode "Detected face")
+	(SatisfactionLink
+		(PresentLink
+			(EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id")))
+		)))
+
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
 ;; line 973 clear_new_face_target()
@@ -220,5 +230,14 @@
 ;; Check to see if someone left
 ;; line 422 -- someone_left()
 
+
+;; Interact with people
+;; line 457 -- interact_with_people()
+(DefineLink
+	(DefinedPredicateNode "Interact with people")
+	(SatisfactionLink
+		(SequentialAndLink
+			(DefinedPredicateNode "Detected face")
+		)))
 ;
 ;
