@@ -38,4 +38,5 @@ RuleEngineModule::~RuleEngineModule() {
 
 void RuleEngineModule::init(void) {
 	iscm_ = new InferenceSCM();
+	iscm_->module_init();
 }

@@ -2,8 +2,8 @@
 ; A list of the helper functions necessary in different inference rules
 ; -----------------------------------------------------------------------------
 ; Index
-; - inversion-formula
-; - simple-deduction-formula
+; - inversion-strength-formula
+; - simple-deduction-strength-formula
 ; - find-replace
 ;------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 ; sBA = (sAB * sB)/sA
 ; -----------------------------------------------------------------------------
 
-(define (inversion-formula sAB sA sB)
+(define (inversion-strength-formula sAB sA sB)
 	(/ (* sAB sB) sA))
 
 ; =============================================================================
@@ -45,7 +45,7 @@
 
 ; Main Formula
 
-(define (simple-deduction-formula sA sB sC sAB sBC)
+(define (simple-deduction-strength-formula sA sB sC sAB sBC)
 	(if
 		(and
 				(>= (consistency1 sA sB sAB) 0)
@@ -75,4 +75,46 @@
 		((equal? (car l) old) (cons new (cdr l)))
 		(else
 			(cons (car l) (find-replace (cdr l) old new)))))
+
+; =============================================================================
+; Invert formula
+;
+; Inverts the input
+; -----------------------------------------------------------------------------
+
+(define (invert a)
+    (/ 1.0 a))
+
+; =============================================================================
+; Negate formula
+;
+; Negates the probability
+; -----------------------------------------------------------------------------
+
+(define (negate a)
+    (- 1 a))
+
+; =============================================================================
+; Transitive Similarity Formula
+;
+; Returns the strength value of the transitive similarity rule
+; -----------------------------------------------------------------------------
+
+(define (transitive-similarity-strength-formula sA sB sC sAB sBC )
+    (let
+        ((T1 (/ (* (+ 1 (/ sB sA)) (sAB)) (+ 1 sAB)))
+         (T2 (/ (* (+ 1 (/ sC sB)) (sBC)) (+ 1 sBC)))
+         (T3 (/ (* (+ 1 (/ sB sC)) (sBC)) (+ 1 sBC)))
+         (T4 (/ (* (+ 1 (/ sA sB)) (sAB)) (+ 1 sAB))))
+        (invert (- (+ (invert (+ (* T1 T2) (* (negate T1) (/ (- sC (* sB T2)) (negate sB)))))
+                      (invert (+ (* T3 T4) (* (negate T3) (/ (- sC (* sB T4)) (negate sB)))))) 1))))
+
+; =============================================================================
+; PreciseModusPonens formula
+;
+; Returns the strength value of the precise modus ponens rule
+; -----------------------------------------------------------------------------
+
+(define (precise-modus-ponens-strength-formula sA sAB snotAB)
+    (+ (* sAB sA) (* snotAB (negate sA))))
 

@@ -11,7 +11,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-inheritance-to-member
+(define inheritance-to-member-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$B")
@@ -20,7 +20,7 @@
 			(VariableNode "$B")
 			(VariableNode "$C"))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-inheritance-to-member")
+			(GroundedSchemaNode "scm: inheritance-to-member-formula")
 			(ListLink
 				(MemberLink
 					(VariableNode "$B")
@@ -37,10 +37,10 @@
 ; Side-effect: TruthValue of the new link stays the same
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-inheritance-to-member MBC IBC)
+(define (inheritance-to-member-formula MBC IBC)
 	(cog-set-tv!
 		MBC
-		(pln-formula-member-to-inheritance-side-effect-free
+		(member-to-inheritance-side-effect-free-formula
 			MBC
 			IBC)))
 
@@ -48,7 +48,7 @@
 ; This version has no side effects and simply returns a TruthValue
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-inheritance-to-member-side-effect-free MBC IBC)
+(define (inheritance-to-member-side-effect-free-formula MBC IBC)
 	(stv
 		(cog-stv-strength IBC)
 		(* (cog-stv-confidence IBC) 0.9)))
@@ -56,8 +56,8 @@
 ; =============================================================================
 
 ; Name the rule
-(define pln-rule-inheritance-to-member-name
-  (Node "pln-rule-inheritance-to-member"))
+(define inheritance-to-member-rule-name
+  (Node "inheritance-to-member-rule"))
 (DefineLink
-  pln-rule-inheritance-to-member-name
-  pln-rule-inheritance-to-member)
+  inheritance-to-member-rule-name
+  inheritance-to-member-rule)

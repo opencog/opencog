@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty32"
   config.vm.hostname = "cogbox"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
-  config.vm.provision "shell", inline: "wget http://raw.github.com/opencog/ocpkg/master/ocpkg -O /tmp/octool  && chmod +rx /tmp/octool"
+  config.vm.provision "shell", inline: "wget https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg -O /tmp/octool  && chmod +rx /tmp/octool"
   config.vm.provision "shell", inline: "/tmp/octool -rdpscalv"
 
   # Port forwarding for REST API

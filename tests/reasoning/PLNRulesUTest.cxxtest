@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
@@ -57,6 +58,9 @@ public:
     void test_and_construction();
     void test_or_construction();
     void test_not_construction();
+    void test_forall_full_instantiation();
+    void test_forall_partial_instantiation();
+	void test_forall_implication_to_higher_order();
 };
 
 void PLNRulesUTest::tearDown()
@@ -66,27 +70,31 @@ void PLNRulesUTest::tearDown()
 void PLNRulesUTest::setUp()
 {
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/core_types.scm, "
         "opencog/scm/utilities.scm, "
         "opencog/scm/av-tv.scm, "
         "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(as);
+
+    eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
+    eval.eval("(use-modules (opencog logger))");
 }
 
-/*
- * Tests the deduction rule (pln-rule-deduction) defined in:
+/**
+ * Tests the deduction rule (deduction-rule) defined in:
  * opencog/reasoning/pln/rules/deduction.scm
  */
 void PLNRulesUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
     
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm, "
-                 "opencog/scm/utilities.scm, "
                  "tests/reasoning/simple-assertions.scm, "
                  "opencog/reasoning/pln/rules/deduction.scm");
     load_scm_files_from_config(as);
@@ -98,84 +106,188 @@ void PLNRulesUTest::test_deduction()
     TS_ASSERT_EQUALS(1, as.get_arity(results));
     
     // Apply the deduction rule
-    eval.eval_h("(cog-bind pln-rule-deduction)");
+    eval.eval_h("(cog-bind deduction-rule)");
        
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
     results = eval.eval_h("(cog-bind find-humans)");
 
-    // 4 in total, nan, Peirce, Einstein, Socrates
+    // 4 in total, man, Peirce, Einstein, Socrates
     TS_ASSERT_EQUALS(4, as.get_arity(results));
 }
 
-/*
- * Tests the and rule (pln-rule-and-construction) defined in:
+/**
+ * Tests the and rule (and-construction-rule) defined in:
  * opencog/reasoning/pln/rules/and-construction-rule.scm
  */
 void PLNRulesUTest::test_and_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
+
+    as.clear();
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm, "
-                 /*"opencog/scm/utilities.scm, "*/
                  "tests/reasoning/simple-predicates.scm, "
                  "opencog/reasoning/pln/rules/and-construction-rule.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-and-construction)");
+    Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
 
     // It should contain 1 groundings, and(A, B)
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
-/*
- * Tests the and rule (pln-rule-or-construction) defined in:
+/**
+ * Tests the and rule (or-construction-rule) defined in:
  * opencog/reasoning/pln/rules/or-construction-rule.scm
  */
 void PLNRulesUTest::test_or_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
+
+    as.clear();
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm, "
-                 /*"opencog/scm/utilities.scm, "*/
                  "tests/reasoning/simple-predicates.scm, "
                  "opencog/reasoning/pln/rules/or-construction-rule.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-or-construction)");
+    Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
 
     // It should contain 1 groundings, or(A, B)
     TS_ASSERT_EQUALS(1, as.get_arity(results));
 }
 
-/*
- * Tests the not rule (pln-rule-not-construction) defined in:
+/**
+ * Tests the not rule (not-construction-rule) defined in:
  * opencog/reasoning/pln/rules/not-construction-rule.scm
  */
 void PLNRulesUTest::test_not_construction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    
-    eval.eval("(use-modules (opencog))");
-    eval.eval("(use-modules (opencog query))");
 
-    config().set("SCM_PRELOAD", "opencog/scm/core_types.scm, "
-                 "opencog/scm/utilities.scm, "
+    as.clear();
+
+    config().set("SCM_PRELOAD",
                  "tests/reasoning/simple-predicates.scm, "
                  "opencog/reasoning/pln/rules/not-construction-rule.scm");
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-af pln-rule-not-construction)");
+    Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
 
     // It should contain 2 groundings, not(A), not(B)
     TS_ASSERT_EQUALS(2, as.get_arity(results));
+}
+
+/**
+ * Test the pln-forall-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/forall-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_forall_full_instantiation()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-instantiation-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("forall-full-instantiation-rule");
+    Handle results = bindlink(&as, rule);
+
+    /**
+     * It should contain 3 groundings:
+     *
+     * 1. EvaluationLink
+     *       PredicateNode "is-predicate"
+     *       <some-predicate>
+     *
+     * 2. EvaluationLink
+     *       PredicateNode "is-concept"
+     *       <some-concept>
+     *
+     * 3. EvaluationLink
+     *       PredicateNode "are-concept-and-predicate"
+     *       ListLink
+     *          <some-concept>
+     *          <some-predicate>
+     */
+    TS_ASSERT_EQUALS(4, as.get_arity(results));
+}
+
+/**
+ * Test the pln-forall-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/forall-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_forall_partial_instantiation()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-instantiation-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("forall-partial-instantiation-rule");
+    Handle results = bindlink(&as, rule);
+
+    /**
+     * It should contain 1 groundings:
+     *
+     * 3. ForAllLink
+     *       <one variable as the other has been instantiated>
+     *       EvaluationLink
+     *          PredicateNode "are-concept-and-predicate"
+     *          ListLink
+     *             <some-concept>
+     *             <some-predicate>
+     */
+    TS_ASSERT_EQUALS(1, as.get_arity(results));
+}
+
+void PLNRulesUTest::test_forall_implication_to_higher_order()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-forall.scm, "
+                 "opencog/reasoning/pln/rules/forall-implication-to-higher-order-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("forall-implication-to-higher-order-rule");
+    Handle results = bindlink(&as, rule);
+    Handle expected_results = eval.eval_h
+	    ("(SetLink"
+	     "   (ImplicationLink"
+	     "      (LambdaLink"
+	     "         (TypedVariableLink"
+	     "            (VariableNode \"$X\")"
+	     "            (TypeNode \"ConceptNode\"))"
+	     "         (EvaluationLink"
+	     "            (PredicateNode \"P\")"
+	     "            (VariableNode \"$X\")))"
+	     "      (LambdaLink"
+	     "         (TypedVariableLink"
+	     "            (VariableNode \"$X\")"
+	     "            (TypeNode \"ConceptNode\"))"
+	     "         (EvaluationLink"
+	     "            (PredicateNode \"Q\")"
+	     "            (VariableNode \"$X\")))))");
+
+    logger().debug() << "results = " << results->toString();
+    logger().debug() << "expected_results = " << expected_results->toString();
+
+    TS_ASSERT_EQUALS(results, expected_results);
 }

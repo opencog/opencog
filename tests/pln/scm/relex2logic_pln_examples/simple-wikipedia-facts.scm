@@ -32,7 +32,7 @@
 ; tense-rule
 (InheritanceLink (stv 1.000000 0.000000)
   (PredicateNode "is@efbcc00b-4b6f-4d5d-804e-6a8951dc5cb4") ; [204]
-  (ConceptNode "present") ; [207]
+  (DefinedLinguisticConceptNode "present") ; [207]
 ) ; [208]
 
 (InheritanceLink (stv 1.000000 0.000000)
@@ -43,7 +43,7 @@
 ; tense-rule
 (InheritanceLink (stv 1.000000 0.000000)
   (PredicateNode "works@b54f5154-d1e5-4ccc-9b24-b6607a7059f5") ; [209]
-  (ConceptNode "present") ; [207]
+  (DefinedLinguisticConceptNode "present") ; [207]
 ) ; [212]
 
 (InheritanceLink (stv 1.000000 1.000000)
@@ -126,7 +126,7 @@
 ) ; [378]
 
 (EvaluationLink (stv 0.990000 0.990000)
-  (PredicateNode "Possession") ; [382]
+  (DefinedLinguisticPredicateNode "possession") ; [382]
   (ListLink (stv 0.990000 0.990000)
     (ConceptNode "world@cf823ba7-fdca-4674-851f-51988a8de699") ; [375]
     (ConceptNode "our@16e09edd-8f0c-4b93-8b7e-c2a3a4d14c7d") ; [379]
@@ -150,7 +150,7 @@
 
 (InheritanceLink (stv 0.990000 0.990000)
   (PredicateNode "tries@8e4f8728-d2b3-4f1d-aa87-45cd9c24e6aa") ; [385]
-  (ConceptNode "present") ; [373]
+  (DefinedLinguisticConceptNode "present") ; [373]
 ) ; [388]
 
 (InheritanceLink (stv 0.990000 0.990000)
@@ -170,7 +170,7 @@
 
 (InheritanceLink (stv 0.990000 0.990000)
   (PredicateNode "works@562a14be-6028-4012-be39-5724003ecafc") ; [370]
-  (ConceptNode "present") ; [373]
+  (DefinedLinguisticConceptNode "present") ; [373]
 ) ; [374]
 
 ; Nodes need to be embedded.
@@ -266,7 +266,7 @@
 
 (InheritanceLink (stv 0.990000 0.990000)
   (PredicateNode "teach@5ea61496-0b3a-4ddc-b520-5aae837b642b") ; [1005]
-  (ConceptNode "present") ; [1008]
+  (DefinedLinguisticConceptNode "present") ; [1008]
 ) ; [1009]
 
 (InheritanceLink (stv 0.990000 0.990000)
@@ -315,7 +315,7 @@
 
 (InheritanceLink (stv 1.000000 0.000000)
   (PredicateNode "make@d6d5ff22-4fd7-4616-a443-31147a8bdb67") ; [220]
-  (ConceptNode "present") ; [231]
+  (DefinedLinguisticConceptNode "present") ; [231]
 ) ; [232]
 
 (InheritanceLink (stv 1.000000 0.000000)
@@ -453,7 +453,7 @@
 
 (InheritanceLink (stv 0.990000 0.990000)
   (PredicateNode "are@eb91546b-c50f-4574-b2f8-e41a4f776111") ; [1318]
-  (ConceptNode "present") ; [1321]
+  (DefinedLinguisticConceptNode "present") ; [1321]
 ) ; [1322]
 
 (InheritanceLink (stv 0.990000 0.990000)
@@ -468,7 +468,7 @@
 
 (InheritanceLink (stv 0.990000 0.990000)
   (PredicateNode "study@68cafe06-3ff2-4b39-8486-763d7a243e40") ; [1323]
-  (ConceptNode "present") ; [1321]
+  (DefinedLinguisticConceptNode "present") ; [1321]
 ) ; [1331]
 
 (InheritanceLink (stv 0.990000 0.990000)

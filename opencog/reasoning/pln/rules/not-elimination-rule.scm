@@ -8,31 +8,31 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-not-elimination
+(define not-elimination-rule
   (BindLink
    (VariableList
     (VariableNode "$A"))
    (NotLink
      (VariableNode "$A"))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-not-elimination")
+    (GroundedSchemaNode "scm: not-elimination-formula")
     (ListLink
      (NotLink
       (VariableNode "$A")
      (VariableNode "$A"))))))
 
-(define (pln-formula-not-elimination NA A)
+(define (not-elimination-formula NA A)
   (cog-set-tv!
    A
-   (pln-formula-not-elimination-side-effect-free NA A))
+   (not-elimination-side-effect-free-formula NA A))
 )
 
-(define (pln-formula-not-elimination-side-effect-free NA A)
+(define (not-elimination-side-effect-free-formula NA A)
   (let 
       ((sNA (cog-stv-strength NA))
        (cNA (cog-stv-confidence NA)))
     (stv (- 1 sNA) cAB )))
 
 ; Name the rule
-(define pln-rule-not-elimination-name (Node "pln-rule-not-elimination"))
-(DefineLink pln-rule-not-elimination-name pln-rule-not-elimination)
+(define not-elimination-rule-name (Node "not-elimination-rule"))
+(DefineLink not-elimination-rule-name not-elimination-rule)

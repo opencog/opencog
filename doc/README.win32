@@ -18,8 +18,6 @@ Opencog depends on the following packages:
     stlport:           http://stlport.sourceforge.net/
     pthreads:          http://sourceware.org/pthreads-win32/#download
     boost:             http://www.boost.org/users/download/
-    expat:             http://sourceforge.net/project/showfiles.php?group_id=10127&package_id=11277
-    libxml/zlib/iconv: http://www.zlatkovic.com/pub/libxml/
     cxxtest:           http://sourceforge.net/project/showfiles.php?group_id=52834
 
 -------------------------------------------------------------------------------

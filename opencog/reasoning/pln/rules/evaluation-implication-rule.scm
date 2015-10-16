@@ -24,7 +24,7 @@
 
 (load "formulas.scm")
 
-(define pln-rule-evaluation-implication
+(define evaluation-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -38,7 +38,7 @@
                 (VariableNode "$A")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-evaluation-implication")
+            (GroundedSchemaNode "scm: evaluation-implication-formula")
             (ListLink
                 (EvaluationLink
                     (VariableNode "$A")
@@ -50,14 +50,14 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-evaluation-implication AB AC CB)
+(define (evaluation-implication-formula AB AC CB)
     (define A (gar AB))
     (define B (gdr AB))
     (define C (gdr AC))
     (cog-set-tv!
         CB
         (stv
-            (simple-deduction-formula 
+            (simple-deduction-strength-formula 
                 (cog-stv-strength B)
                 (cog-stv-strength A)
                 (cog-stv-strength C)
@@ -73,8 +73,8 @@
                     (* 0.9 (cog-stv-confidence AB)))))))
 
 ; Name the rule
-(define pln-rule-evaluation-implication-name (Node "pln-rule-evaluation-implication"))
-(DefineLink pln-rule-evaluation-implication-name pln-rule-evaluation-implication)
+(define evaluation-implication-rule-name (Node "evaluation-implication-rule"))
+(DefineLink evaluation-implication-rule-name evaluation-implication-rule)
 
 
 ; Similarity substitution Rule is equivalent to combining that rule with

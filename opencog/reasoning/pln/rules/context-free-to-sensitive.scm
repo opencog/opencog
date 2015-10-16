@@ -10,7 +10,7 @@
 ;     A
 ;-------------------------------------------------------------------------------
 
-(define pln-rule-context-free-to-sensitive
+(define context-free-to-sensitive-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -19,7 +19,7 @@
             (VariableNode "$C")
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context-free-to-sensitive")
+            (GroundedSchemaNode "scm: context-free-to-sensitive-formula")
             (ListLink
                 (ContextLink
                     (VariableNode "$C")
@@ -28,7 +28,7 @@
                     (VariableNode "$C")
                     (VariableNode "$A"))))))
 
-(define (pln-formula-context-free-to-sensitive Context CA)
+(define (context-free-to-sensitive-formula Context CA)
     (cog-set-tv! Context 
         (cog-new-stv (cog-stv-strength CA) (cog-stv-confidence CA))))
 ;            ; strength (now just computed as the mean of the strengths of C & A)
@@ -52,8 +52,8 @@
 ;                (log p)))))
 
 ; Name the rule
-(define pln-rule-context-free-to-sensitive-name
-  (Node "pln-rule-context-free-to-sensitive"))
+(define context-free-to-sensitive-rule-name
+  (Node "context-free-to-sensitive-rule"))
 (DefineLink
-  pln-rule-context-free-to-sensitive-name
-  pln-rule-context-free-to-sensitive)
+  context-free-to-sensitive-rule-name
+  context-free-to-sensitive-rule)

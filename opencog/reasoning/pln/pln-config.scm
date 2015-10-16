@@ -35,7 +35,7 @@
 
 ; Define pln-fc and pln-bc for convenience 
 (define (pln-fc source) (cog-fc source pln-rbs))
-(define (pln-bc target) (cog-bc target pln-rbs))
+(define (pln-bc target) (cog-bc target pln-rbs (SetLink)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -53,8 +53,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list (list pln-rule-deduction-name 1)
-                    (list pln-rule-modus-ponens-name 1))
+(define rules (list (list deduction-rule-name 1)
+                    (list modus-ponens-rule-name 1))
 )
 
 ; Associate rules to PLN

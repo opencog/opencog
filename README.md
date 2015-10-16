@@ -42,16 +42,6 @@ The following packages are optional. If they are not installed, some
 optional parts of OpenCog will not be built.  The CMake command, during
 the build, will be more precise as to which parts will not be built.
 
-###### curl
-> cURL groks URLs
-> Used by opencog/ubigraph
-> http://curl.haxx.se/ | libcurl4-gnutls-dev
-
-###### expat
-> an XML parsing library
-> Used by Embodiment subsystem
-> http://expat.sourceforge.net/ | http://www.jclark.com/xml/expat.html (version 1.2) | libexpat1-dev
-
 ###### Link Grammar
 > Natural Language Parser for English, Russian, other languages.
 > Required for experimental Viterbi parser.
@@ -82,16 +72,6 @@ the build, will be more precise as to which parts will not be built.
 ###### Threading Building Blocks
 > C++ template library for parallel programming
 > https://www.threadingbuildingblocks.org/download | libtbb-dev
-
-###### xercesc
-> Apache Xerces-C++ XML Parser
-> Required for embodiment
-> http://xerces.apache.org/xerces-c/ | libxerces-c-dev
-
-###### xmlrpc
-> XML-RPC support
-> Required by opencog/ubigraph
-> http://www.xmlrpc.com | libxmlrpc-c-dev
 
 ###### ZeroMQ (version 3.2.4 or higher)
 > Asynchronous messaging library

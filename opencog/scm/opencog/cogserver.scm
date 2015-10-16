@@ -3,7 +3,6 @@
 ;
 (define-module (opencog cogserver))
 
-
 ; Hack LD path, but argh, this doesn't work!
 ; (setenv "LD_LIBRARY_PATH" "/usr/local/lib/opencog/modules")
 
@@ -17,6 +16,8 @@
   Start the cogserver, optionally specifying the config file to use.
   To stop the cogserver, just say stop-cogserver.
 "
+	;; Server falls over if the atom types are not loaded.
+	(use-modules (opencog atom-types))
 	(c-start-cogserver config-path)
 )
 

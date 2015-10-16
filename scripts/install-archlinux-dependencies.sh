@@ -40,12 +40,8 @@ PACKAGES_BUILD="
         binutils \
         gsl \
         unixodbc \
-        xerces-c \
         protobuf \
         protobuf-c \
-        gnurl \
-        curl \
-        expat \
 		sdl_gfx \
 		openssl \
 		tcl \

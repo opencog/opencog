@@ -37,14 +37,14 @@
 ; Accepts either an actual sentence or a SentenceNode as the input. Also accepts
 ; an optional argument "exclude-list" which is a list of atoms that we don't want
 ; them to exist in the hypergraphs of the answers. By default they are
-; (ConceptNode "TruthQuerySpeechAct") and (ConceptNode "InterrogativeSpeechAct").
+; (DefinedLinguisticConceptNode "TruthQuerySpeechAct") and (DefinedLinguisticConceptNode "InterrogativeSpeechAct").
 ;
 ; Returns one or more sentences -- the answers.
 ;
 (define get-answers
     (case-lambda
-        ((question) (main-ss (sentence-node question) (list (ConceptNode "TruthQuerySpeechAct")
-                                                            (ConceptNode "InterrogativeSpeechAct"))))
+        ((question) (main-ss (sentence-node question) (list (DefinedLinguisticConceptNode "TruthQuerySpeechAct")
+                                                            (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))))
         ((question exclude-list) (main-ss (sentence-node question) exclude-list))
     )
 )

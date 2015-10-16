@@ -47,7 +47,7 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    HandleSeqSeq do_sureal_match(Handle, int);
+    HandleSeqSeq do_sureal_match(Handle);
 
     HandleSeqSeq sureal_get_mapping(Handle&, std::vector<std::map<Handle, Handle> >&);
 

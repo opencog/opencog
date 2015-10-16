@@ -41,12 +41,9 @@ PACKAGES_BUILD="
 		binutils-devel \
 		gsl-devel \
 		unixODBC-devel \
-		xerces-c-devel \
 		uuid-devel \
 		protobuf-c \
 		protobuf-compiler
-		gnutls-devel \
-		expat-devel \
 		SDL_gfx-devel \
 		openssl-devel \
 		tcl-devel \

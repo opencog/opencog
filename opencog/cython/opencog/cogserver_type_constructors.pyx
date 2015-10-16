@@ -7,7 +7,7 @@
 # This imports all the python wrappers for atom creation.
 #
 
-from opencog.atomspace import AtomSpace, types
+from opencog.atomspace import AtomSpace, get_refreshed_types
 
 atomspace = None
 def set_type_ctor_atomspace(new_atomspace):
@@ -15,7 +15,26 @@ def set_type_ctor_atomspace(new_atomspace):
     atomspace = new_atomspace
 
 # include "opencog/atomspace/core_types.pyx"
-include "opencog/embodiment/AtomSpaceExtensions/embodiment_types.pyx"
 include "opencog/nlp/types/nlp_types.pyx"
 include "opencog/spacetime/spacetime_types.pyx"
 include "opencog/dynamics/attention/attention_types.pyx"
+include "opencog/embodiment/embodiment_types.pyx"
+
+cdef extern :
+    void nlp_types_init()
+
+cdef extern :
+    void spacetime_types_init()
+
+cdef extern :
+    void attention_types_init()
+
+cdef extern :
+    void embodiment_types_init()
+
+nlp_types_init()
+spacetime_types_init()
+attention_types_init()
+embodiment_types_init()
+
+types = get_refreshed_types()

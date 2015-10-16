@@ -5,7 +5,7 @@
 ; AND(Inheritance A B, Inheritance B C) entails Inheritance A C
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
-(define pln-rule-deduction
+(define deduction-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: simple-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
@@ -55,10 +55,10 @@
 ; -----------------------------------------------------------------------------
 ; Side-effect: TruthValue of AC may be updated
 ; -----------------------------------------------------------------------------
-(define (pln-formula-simple-deduction AB BC AC)
+(define (simple-deduction-formula AB BC AC)
     (cog-set-tv!
         AC
-        (pln-formula-simple-deduction-side-effect-free AB BC AC)
+        (simple-deduction-side-effect-free-formula AB BC AC)
     )
 )
 
@@ -70,7 +70,7 @@
 ; TODO The confidence calcualtion is not inline with the wiki as the details
 ;      not clearly defined there.
 ; -----------------------------------------------------------------------------
-(define (pln-formula-simple-deduction-side-effect-free AB BC AC)
+(define (simple-deduction-side-effect-free-formula AB BC AC)
     (let
         ((sA (cog-stv-strength (gar AB)))
          (sB (cog-stv-strength (gdr AB)))
@@ -81,7 +81,7 @@
 
         ; Returns sAC. Includes the consistency conditions
         (define (strength)
-            (simple-deduction-formula sA sB sC sAB sBC))
+            (simple-deduction-strength-formula sA sB sC sAB sBC))
 
         ; This is not consistant with the defintion on the wiki
         (define (confidence)
@@ -98,5 +98,5 @@
 ; =============================================================================
 
 ; Name the rule
-(define pln-rule-deduction-name (Node "pln-rule-deduction"))
-(DefineLink pln-rule-deduction-name pln-rule-deduction)
+(define deduction-rule-name (Node "deduction-rule"))
+(DefineLink deduction-rule-name deduction-rule)

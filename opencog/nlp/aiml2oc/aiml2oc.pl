@@ -451,7 +451,9 @@ while(my $line =<FIN>)
 	if ($cmd eq "TEMPLATECODE")
 	{
 	    $code .= "     )\n";  # close pattern section
+
 		$arg =~ s/\"/\'/g;
+
 		# just raw AIML code
 		$code .= "    (PutLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";

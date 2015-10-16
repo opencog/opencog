@@ -53,8 +53,8 @@
 ; r2l pipeline.
 (define (pre-prepadj-rule noun adj)
   (ListLink
-    (prepadj-rule (word-inst-get-word-str noun) (cog-name noun)
-              (word-inst-get-word-str adj) (cog-name adj)
+    (prepadj-rule (cog-name (word-inst-get-lemma  noun)) (cog-name noun)
+              (cog-name (word-inst-get-lemma adj)) (cog-name adj)
     )
   )
 )

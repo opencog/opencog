@@ -16,7 +16,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-attraction
+(define attraction-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -30,7 +30,7 @@
                     (VariableNode "$A"))
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-attraction")
+            (GroundedSchemaNode "scm: attraction-formula")
             (ListLink
                 (AttractionLink
                     (VariableNode "$A")
@@ -43,14 +43,14 @@
                         (VariableNode "$A"))
                     (VariableNode "$B"))))))
 
-(define (pln-formula-attraction AB SAB SnAB)
+(define (attraction-formula AB SAB SnAB)
     (cog-set-tv!
         AB
-        (pln-formula-attraction-side-effect-free AB SAB SnAB)
+        (attraction-side-effect-free-formula AB SAB SnAB)
     )
 )
 
-(define (pln-formula-attraction-side-effect-free AB SAB SnAB)
+(define (attraction-side-effect-free-formula AB SAB SnAB)
     (let
         (
             (sSAB (cog-stv-strength SAB))
@@ -65,5 +65,5 @@
             (stv (- sSAB sSnAB) (min cSAB cSnAB)))))
 
 ; Name the rule
-(define pln-rule-attraction-name (Node "pln-rule-attraction"))
-(DefineLink pln-rule-attraction-name pln-rule-attraction)
+(define attraction-rule-name (Node "attraction-rule"))
+(DefineLink attraction-rule-name attraction-rule)

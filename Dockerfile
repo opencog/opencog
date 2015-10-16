@@ -9,24 +9,14 @@ FROM ubuntu:14.04
 MAINTAINER David Hart "dhart@opencog.org"
 MAINTAINER Linas Vepstas "linasvepstas@gmail.com"
 
-# Change line below on rebuild. Will use cache up to this line.
-ENV LAST_OS_UPDATE 2015-02-18
-
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get -y install software-properties-common python-pip
+RUN apt-get update ; apt-get -y upgrade ; apt-get -y autoclean
+RUN apt-get -y install software-properties-common wget rlwrap \
+                       telnet netcat-openbsd git gdb python2.7-dbg
 
 # Use the ocpkg tool to install repositories and dependencies.
-COPY scripts/ocpkg /tmp/install-dependencies-trusty
-COPY opencog/python/requirements.txt /tmp/
-RUN chmod +x /tmp/install-dependencies-trusty
-RUN /tmp/install-dependencies-trusty
-RUN pip install -U -r /tmp/requirements.txt
-
-# Tools
-RUN apt-get -y install git wget
-RUN apt-get -y install rlwrap telnet netcat-openbsd
-RUN apt-get -y install gdb python2.7-dbg
+ADD https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg \
+    /tmp/octool
+RUN chmod 755 /tmp/octool && /tmp/octool -rdpcalv
 
 # Copy the .gdbinit file so we can debug the CogServer
 COPY scripts/.gdbinit ~/.gdbinit
@@ -49,17 +39,6 @@ WORKDIR /home/opencog/src
 
 # Change line below on rebuild. Will use cache up to this line.
 ENV LAST_SOFTWARE_UPDATE 2015-02-18
-
-# Get the things that ockpg didn't get.
-# First, sureal needs link-grammar...
-
-# Link Parser -- changes often
-# Download the current released version of link-grammar.
-# The wget gets the latest version w/ wildcard
-RUN wget -r --no-parent -nH --cut-dirs=2 http://www.abisource.com/downloads/link-grammar/current/
-RUN tar -zxf current/link-grammar-5*.tar.gz
-RUN rm -r current
-RUN (cd link-grammar-5.*/; mkdir build; cd build; ../configure; make -j4; sudo make install; sudo ldconfig)
 
 # Now, OpenCog itself.
 RUN git clone https://github.com/opencog/opencog

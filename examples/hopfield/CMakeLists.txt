@@ -13,11 +13,6 @@ INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}
 )
 
-IF (XMLRPC_FOUND AND CURL_FOUND)
-	SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
-	SET (PROJECT_UBI_LIB ubigraph ${XMLRPC_LIBRARIES})
-ENDIF (XMLRPC_FOUND AND CURL_FOUND)
-
 ADD_EXECUTABLE (hopfield
 	HopfieldDemo.cc
 	HopfieldServer.cc
@@ -33,6 +28,4 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
-	${PROJECT_UBI_LIB}
-	${EXPAT_LIBRARIES}
 )

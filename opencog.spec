@@ -23,11 +23,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
 BuildRequires:  cmake >= 2.6, make >= 3, gcc-c++ >= 4.4, boost-devel >= 1.44, unixODBC-devel >= 2.2, guile-devel >= 1.8.6, gsl-devel >= 1.9, glibc-devel >= 2.3
-%if 0%{?suse_version} > 1020
-BuildRequires:  libexpat-devel >= 2
-%else
-BuildRequires:  expat-devel >= 2
-%endif
 
 %description
 The Open Cognition Framework (OpenCog) provides research scientists and
@@ -95,11 +90,6 @@ Summary: The base server of the Open Cognition Framework
 Group: Development/Libraries
 AutoReqProv: 0
 Requires: libatomspace >= %{version}, boost >= 1.44
-%if 0%{?suse_version} > 1020
-Requires: libexpat1 >= 2
-%else
-Requires: expat >= 2
-%endif
 %description server
 The opencog-server package contains the base server and essential modules used
 by the Open Cognition Framework.
@@ -109,7 +99,6 @@ by the Open Cognition Framework.
 /%{_bindir}/cogserver
 /%{_libdir}/opencog/libbuiltinreqs.so
 /%{_libdir}/opencog/libserver.so
-/%{_libdir}/opencog/libxml.so
 %config(noreplace) /%{_sysconfdir}/opencog.conf
 
 
@@ -118,11 +107,6 @@ Summary: Header files and development files for the opencog-server
 Group:   Development/Libraries
 AutoReqProv: 0
 Requires: opencog-server >= %{version}, libatomspace-devel >= %{version}
-%if 0%{?suse_version} > 1020
-Requires: libexpat-devel >= 2
-%else
-Requires: expat-devel >= 2
-%endif
 %description server-devel
 The opencog-server-devel package contains the header files and cmake scripts
 needed to develop programs that use the Open Cognition Framework.

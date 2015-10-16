@@ -52,7 +52,7 @@
 ; r2l pipeline.
 (define (pre-how-q-rule verb)
  (ListLink
-	(how-rule (word-inst-get-word-str verb) (cog-name verb)
+	(how-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb)
 	)
  )
 )

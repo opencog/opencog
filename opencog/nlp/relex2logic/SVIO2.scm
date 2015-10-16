@@ -96,10 +96,10 @@
 ; r2l pipeline.
 (define (pre-svio-rule subj verb obj iobj)
  (ListLink
-	(SVIO-rule (word-inst-get-word-str subj) (cog-name subj)
-		(word-inst-get-word-str verb) (cog-name verb)
-		(word-inst-get-word-str obj) (cog-name obj)
-		(word-inst-get-word-str iobj) (cog-name iobj)
+	(SVIO-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
+		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
+		(cog-name (word-inst-get-lemma  obj)) (cog-name obj)
+		(cog-name (word-inst-get-lemma  iobj)) (cog-name iobj)
 
 	)
  )
