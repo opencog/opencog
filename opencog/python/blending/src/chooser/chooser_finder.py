@@ -8,15 +8,18 @@ __author__ = 'DongMin Kim'
 
 
 class ChooserFinder(object):
-    """Provide chooser instance for user.
+    """Provider class to make atoms chooser instance.
+
+    This provider will made the instance of atoms chooser, and returns them to
+    the blender.
 
     Attributes:
-        a: An instance of atomspace.
+        a: An instance of AtomSpace.
         last_status: A last status of class.
         choosers: An available atoms chooser list.
         :type a: opencog.atomspace.AtomSpace
         :type last_status: int
-        :type choosers: dict[abc.ABCMeta]
+        :type choosers: dict[BaseChooser]
     """
 
     def __init__(self, a):
@@ -30,6 +33,17 @@ class ChooserFinder(object):
         }
 
     def get_chooser(self, config_base):
+        """Provider method for atoms chooser.
+
+        Args:
+            config_base: A Node to save custom config.
+            :param config_base: Atom
+        Returns:
+            The instance of atoms chooser.
+            :rtype : BaseChooser
+        Raises:
+            UserWarning: Can't find the atoms chooser with given name.
+        """
         self.last_status = blending_status.IN_PROCESS
 
         chooser = self.choosers.get(

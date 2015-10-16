@@ -41,12 +41,25 @@ class InteractionInformation
 public:
  template<typename Metadata>
  inline static float calculateInteractionInformation(
-         std::vector<Metadata> &onePieceOfData, DataProvider<Metadata> &provider)
+         std::vector<Metadata> &onePieceOfData,
+         DataProvider<Metadata> &provider)
+ {
+     return calculateInteractionInformation(onePieceOfData, provider, -1);
+ }
+
+ template<typename Metadata>
+ inline static float calculateInteractionInformation(
+         std::vector<Metadata> &onePieceOfData,
+         DataProvider<Metadata> &provider,
+         long n_max_limit)
  {
      if (!provider.isOrderDependent)
          std::sort(onePieceOfData.begin(), onePieceOfData.end());
 
-     long n_max = onePieceOfData.size();
+     long n_max = n_max_limit;
+     if(n_max == -1)
+         n_max = onePieceOfData.size();
+
      bool sign = true;
      float interactionInfo = 0.0f;
      float tmpSum;
@@ -87,7 +100,6 @@ public:
              interactionInfo += tmpSum;
          else
              interactionInfo -= tmpSum;
-
          sign = !sign;
      }
 
@@ -98,8 +110,17 @@ public:
  inline static float calculateInteractionInformationFromKey(
          std::vector<long> &onePieceOfData, DataProvider<Metadata> &provider)
  {
+     return calculateInteractionInformationFromKey(onePieceOfData, provider, -1);
+ }
+
+ template<typename Metadata>
+ inline static float calculateInteractionInformationFromKey(
+         std::vector<long> &onePieceOfData,
+         DataProvider<Metadata> &provider,
+         long n_max_limit)
+ {
      std::vector<Metadata> data = provider.makeDataFromKey(onePieceOfData);
-     return calculateInteractionInformation(data, provider);
+     return calculateInteractionInformation(data, provider, n_max_limit);
  }
 
  template<typename Metadata>
@@ -118,7 +139,7 @@ public:
              std::vector<long> onePieceOfData = (std::vector<long>)it->first;
              pieceData.interactionInformation =
                      calculateInteractionInformationFromKey(
-                             onePieceOfData, provider
+                             onePieceOfData, provider, -1
                      );
          }
 

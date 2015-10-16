@@ -31,9 +31,6 @@
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
             (EvaluationLink
                 (VariableNode "$A")
                 (VariableNode "$B"))
@@ -43,9 +40,6 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pln-formula-evaluation-implication")
             (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
                 (EvaluationLink
                     (VariableNode "$A")
                     (VariableNode "$B"))
@@ -56,7 +50,10 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-evaluation-implication A B C AB AC CB)
+(define (pln-formula-evaluation-implication AB AC CB)
+    (define A (gar AB))
+    (define B (gdr AB))
+    (define C (gdr AC))
     (cog-set-tv!
         CB
         (stv
@@ -74,6 +71,11 @@
                     (cog-stv-confidence C)
                     (cog-stv-confidence AC)
                     (* 0.9 (cog-stv-confidence AB)))))))
+
+; Name the rule
+(define pln-rule-evaluation-implication-name (Node "pln-rule-evaluation-implication"))
+(DefineLink pln-rule-evaluation-implication-name pln-rule-evaluation-implication)
+
 
 ; Similarity substitution Rule is equivalent to combining that rule with
 ; Abduction

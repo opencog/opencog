@@ -97,6 +97,20 @@ class TestConceptualBlendingBase(object):
             types.ConceptNode, "person"
         )
 
+        # D. Make inherit relation to test interaction information algorithm.
+        self.sample_nodes["bumblebee"] = self.a.add_node(
+            types.ConceptNode, "bumblebee"
+        )
+        self.sample_nodes["suv"] = self.a.add_node(
+            types.ConceptNode, "suv"
+        )
+        self.sample_nodes["rickshaw"] = self.a.add_node(
+            types.ConceptNode, "rickshaw"
+        )
+        self.sample_nodes["programmer"] = self.a.add_node(
+            types.ConceptNode, "programmer"
+        )
+
         """
         Give some stimulates.
         """
@@ -175,6 +189,105 @@ class TestConceptualBlendingBase(object):
         )
         self.a.set_tv(l6.h, TruthValue(0.1, 0.8))
         self.a.set_tv(l7.h, TruthValue(0.8, 0.9))
+
+        # D. Make inherit relation to test interaction information algorithm.
+        l8 = self.a.add_link(
+            types.InheritanceLink,
+            [
+                self.sample_nodes["bumblebee"],
+                self.sample_nodes["car"]
+            ]
+        )
+        l9 = self.a.add_link(
+            types.InheritanceLink,
+            [
+                self.sample_nodes["suv"],
+                self.sample_nodes["car"]
+            ]
+        )
+        l10 = self.a.add_link(
+            types.InheritanceLink,
+            [
+                self.sample_nodes["rickshaw"],
+                self.sample_nodes["man"]
+            ]
+        )
+        l11 = self.a.add_link(
+            types.InheritanceLink,
+            [
+                self.sample_nodes["programmer"],
+                self.sample_nodes["man"]
+            ]
+        )
+
+        # E Give properties to specific entity.
+        l12 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["bumblebee"],
+                self.sample_nodes["vehicle"]
+            ]
+        )
+        l13 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["bumblebee"],
+                self.sample_nodes["person"]
+            ]
+        )
+        self.a.set_tv(l12.h, TruthValue(0.8, 0.9))
+        self.a.set_tv(l13.h, TruthValue(0.6, 0.9))
+
+        l14 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["suv"],
+                self.sample_nodes["vehicle"]
+            ]
+        )
+        l15 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["suv"],
+                self.sample_nodes["person"]
+            ]
+        )
+        self.a.set_tv(l14.h, TruthValue(0.9, 0.9))
+        self.a.set_tv(l15.h, TruthValue(0.2, 0.9))
+
+        l16 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["rickshaw"],
+                self.sample_nodes["vehicle"]
+            ]
+        )
+        l17 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["rickshaw"],
+                self.sample_nodes["person"]
+            ]
+        )
+        self.a.set_tv(l16.h, TruthValue(0.4, 0.9))
+        self.a.set_tv(l17.h, TruthValue(0.9, 0.9))
+
+        l18 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["programmer"],
+                self.sample_nodes["vehicle"]
+            ]
+        )
+        l19 = self.a.add_link(
+            types.SimilarityLink,
+            [
+                self.sample_nodes["programmer"],
+                self.sample_nodes["person"]
+            ]
+        )
+        self.a.set_tv(l18.h, TruthValue(0.1, 0.9))
+        self.a.set_tv(l19.h, TruthValue(0.8, 0.9))
 
         """
         Make default configs.

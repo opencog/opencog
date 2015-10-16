@@ -148,12 +148,12 @@
 					(MemberLink
 						(VariableNode "$B")
 						(SatisfyingSetLink
-							(VariableNode "$X")
+							(VariableNode "$Y")
 							(EvaluationLink
 								(VariableNode "$D")
 								(ListLink
 									(VariableNode "$A")
-									(VariableNode "$X")))))
+									(VariableNode "$Y")))))
 					(EvaluationLink
 						(VariableNode "$D")
 						(ListLink

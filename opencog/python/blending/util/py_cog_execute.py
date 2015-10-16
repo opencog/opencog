@@ -14,9 +14,9 @@ class PyCogExecute(Singleton):
     to scheme directly.
 
     Attributes:
-        a: An instance of atomspace.
+        a: An instance of AtomSpace.
         is_initialized: Displays whether wrapper was initialized or not.
-        :type a: opencog.atomspace.AtomSpace
+        :type a: AtomSpace
         :type is_initialized: bool
     """
 
@@ -27,6 +27,15 @@ class PyCogExecute(Singleton):
         cls.is_initialized = False
 
     def __initialize(cls, a):
+        """Initializes a singleton object for specified AtomSpace.
+
+        If the given AtomSpace is different from AtomSpace in class, then
+        it starts re-initialize.
+
+        Args:
+            a: An instance of AtomSpace to find Atom.
+            :param a: AtomSpace
+        """
         if cls.a is not a:
             cls.is_initialized = False
             cls.a = a
@@ -38,7 +47,14 @@ class PyCogExecute(Singleton):
         cls.is_initialized = True
 
     def load_scheme(cls):
-        # TODO: FIXME: Hacky method to find scheme framework..
+        """Load scheme framework to use (cog-execute! ) function.
+
+        TODO: FIXME: Hacky method to find scheme framework!
+        If someone uses OpenCog only for Python, maybe he had not make the
+        environment to use scheme environment, so this method try to load it
+        manually. When the OpenCog framework(with Scheme) stabilized, this
+        hacky method should be wipe out from OpenCog.
+        """
         # 1. Find by current loaded atomspace library's file path
         atomspace_lib_file = opencog.atomspace.__file__
         path_of_opencog_lib = '/'.join(atomspace_lib_file.split('/')[0:-3])
@@ -75,9 +91,23 @@ class PyCogExecute(Singleton):
         )
 
     def execute(cls, a, execute_link):
+        """Execute the given link and return an Atom.
+
+        Args:
+            a: An instance of AtomSpace.
+            execute_link: A link to execute.
+            :param a: AtomSpace
+            :param execute_link: Link
+        Returns:
+            A result of executing the link.
+            :rtype: Atom
+        Raises:
+            RuntimeError: An error occurred in loading scheme environment.
+        """
         try:
             cls.__initialize(a)
 
+            # (cog-execute! (cog-atom <UUID: xxx>))
             result_set_uuid = scheme_eval_h(
                 cls.a,
                 '(cog-execute! ' +
