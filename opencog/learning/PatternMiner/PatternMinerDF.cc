@@ -180,6 +180,11 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
 
+
+        actualProcessedLinkLock.lock();
+        actualProcessedLinkNum ++;
+        actualProcessedLinkLock.unlock();
+
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allHTreeNodesCurTask, patternJsonArrays[thread_index]);
 
@@ -191,6 +196,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
                 delete (allHTreeNodesCurTask[hNodeNum]);
             }
         }
+
 
     }
 
@@ -268,6 +274,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     linksPerThread = allLinkNumber/THREAD_NUM;
 
     processedLinkNum = 0;
+    actualProcessedLinkNum = 0;
 
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {

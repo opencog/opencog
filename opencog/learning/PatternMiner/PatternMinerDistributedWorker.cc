@@ -170,6 +170,8 @@ void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string par
         patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
         patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
         patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
+        patternInfo[U("ClientUID")] = json::value(U(clientWorkerUID));
+        patternInfo[U("ProcessedFactsNum")] = json::value(U(actualProcessedLinkNum));
 
         patternJsonArray[patternJsonArray.size()] = patternInfo;
 

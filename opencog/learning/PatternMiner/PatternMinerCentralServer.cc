@@ -105,7 +105,24 @@ void PatternMiner::launchCentralServer()
 
     }
 
-    cout <<"\n Pattern mining finished in the central server! Totaly " << keyStrToHTreeNodeMap.size() << " pattern found!\n Now start to evaluate interestingness." << std::endl;
+
+    // calculate the corpus size by adding up all the processedFactsNum of every worker
+    unsigned int totalProcessedFactsNum = 0;
+    map<string,std::pair<bool, unsigned int>>::iterator workerIt;
+
+    for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
+    {
+        totalProcessedFactsNum += (workerIt->second).second ;
+    }
+
+    atomspaceSizeFloat = (float) totalProcessedFactsNum;
+
+    cout <<"\n Pattern mining finished in the central server! \n"
+         << "Totally " << totalProcessedFactsNum << " facts processed! "
+         << keyStrToHTreeNodeMap.size() << " pattern found!\n"
+         << "Now start to evaluate interestingness." << std::endl;
+
+
 
     centralServerEvaluateInterestingness();
 
@@ -145,10 +162,10 @@ bool PatternMiner::checkIfAllWorkersStopWorking()
     if (allWorkers.size() == 0)
         return false; // has not start yet
 
-    map<string,bool>::iterator workerIt;
+    map<string,std::pair<bool, unsigned int>>::iterator workerIt;
     for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
     {
-        if (workerIt->second == true)
+        if ( (workerIt->second).first == true)
             return false;
     }
 
@@ -205,7 +222,7 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
         cout << "Got request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
 
         modifyWorkerLock.lock();
-        allWorkers.insert(std::pair<string,bool>(clientID, true)); // true means this worker is still working.
+        allWorkers.insert(std::pair<string,std::pair<bool, unsigned int>>(clientID, std::pair<bool, unsigned int>(true, 0))); // true means this worker is still working.
         modifyWorkerLock.unlock();
 
         json::value answer = json::value::object();
@@ -233,12 +250,12 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
         modifyWorkerLock.lock();
 
-        map<string,bool>::iterator wokerIt = allWorkers.find(clientID);
+        map<string, std::pair<bool, unsigned int>>::iterator wokerIt = allWorkers.find(clientID);
         if (wokerIt == allWorkers.end())
             cout << "ClientID " << clientID <<  " not found!" <<std::endl;
         else
         {
-            wokerIt->second = false;
+            (wokerIt->second).first = false;
             allWorkersStop = checkIfAllWorkersStopWorking();
             if (allWorkersStop)
                 cout << "All workers connected to this server have stopped!" <<std::endl;
@@ -352,129 +369,140 @@ void PatternMiner::runParsePatternTaskThread()
 void PatternMiner::parseAPatternTask(json::value jval)
 {
 
-
-    string PatternStr =  jval[U("Pattern")].as_string();
-    // cout << "PatternStr = " << PatternStr << std::endl;
-    string ParentPatternStr = jval[U("ParentPattern")].as_string();
-    // cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
-    int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
-    // cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
-
-    HTreeNode* newHTreeNode;
-    // check if the pattern key already exist
-    uniqueKeyLock.lock();
-    map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
-    uniqueKeyLock.unlock();
-
-    static int duplicatePatternNum = 0;
-
-    if (htreeNodeIter != keyStrToHTreeNodeMap.end())
+    try
     {
-        newHTreeNode = htreeNodeIter->second;
+        string PatternStr =  jval[U("Pattern")].as_string();
+        // cout << "PatternStr = " << PatternStr << std::endl;
+        string ParentPatternStr = jval[U("ParentPattern")].as_string();
+        // cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
+        int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
+        // cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
+        string clientIDStr = jval[U("ClientUID")].as_string();
+        unsigned int processedFactsNum = (unsigned int)(jval[U("ProcessedFactsNum")].as_integer());
 
-        updatePatternCountLock.lock();
-        newHTreeNode->count ++;
-        duplicatePatternNum ++;
-        // cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
-        updatePatternCountLock.unlock();
-    }
-    else
-    {
-        // add this new found pattern into the Atomspace
-        HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+        modifyWorkerLock.lock();
+        allWorkers[clientIDStr].second = processedFactsNum;
+        modifyWorkerLock.unlock();
 
-
-        if (patternHandleSeq.size() == 0)
-        {
-
-            // cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
-            return;
-
-        }
-
-        // create a new HTreeNode
-        newHTreeNode = new HTreeNode();
-        newHTreeNode->pattern = patternHandleSeq;
-        newHTreeNode->count = 1;
+        HTreeNode* newHTreeNode;
+        // check if the pattern key already exist
         uniqueKeyLock.lock();
-        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+        map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(PatternStr);
         uniqueKeyLock.unlock();
 
+        static int duplicatePatternNum = 0;
 
-        addNewPatternLock.lock();
-        (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
-        addNewPatternLock.unlock();
-
-    }
-
-    if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
-    {
-        if (ParentPatternStr == "none")
+        if (htreeNodeIter != keyStrToHTreeNodeMap.end())
         {
+            newHTreeNode = htreeNodeIter->second;
 
-            // cout << "Warning: Pattern missing parent pattern string:" << PatternStr;
-            return;
-
+            updatePatternCountLock.lock();
+            newHTreeNode->count ++;
+            duplicatePatternNum ++;
+            // cout << "\nduplicatePatternNum = " << duplicatePatternNum << std::endl;
+            updatePatternCountLock.unlock();
         }
         else
         {
-            uniqueKeyLock.lock();
-            map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
-            uniqueKeyLock.unlock();
+            // add this new found pattern into the Atomspace
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
 
-            HTreeNode* parentNode;
 
-            if (parentNodeIter == keyStrToHTreeNodeMap.end())
+            if (patternHandleSeq.size() == 0)
             {
 
-                cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
-                // The parent pattern should have been added, but it is not.
-                // It's possibly sent by another thread, and added to the queue later than the current pattern.
-                // So we add this parent pattern here first, but set its count = 0
-                // add this new found pattern into the Atomspace
-                HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
-                if (parentPatternHandleSeq.size() == 0)
-                {
+                // cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
+                return;
 
-                    cout << "Warning: Invalid pattern string: " << ParentPatternStr << std::endl;
-                    return;
+            }
 
-                }
+            // create a new HTreeNode
+            newHTreeNode = new HTreeNode();
+            newHTreeNode->pattern = patternHandleSeq;
+            newHTreeNode->count = 1;
+            uniqueKeyLock.lock();
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+            uniqueKeyLock.unlock();
 
-                // create a new HTreeNode
-                parentNode = new HTreeNode();
-                parentNode->pattern = parentPatternHandleSeq;
-                parentNode->count = 0;
 
-                uniqueKeyLock.lock();
-                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
-                uniqueKeyLock.unlock();
+            addNewPatternLock.lock();
+            (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
+            addNewPatternLock.unlock();
 
-                addNewPatternLock.lock();
-                (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
-                addNewPatternLock.unlock();
+        }
 
+        if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
+        {
+            if (ParentPatternStr == "none")
+            {
+
+                // cout << "Warning: Pattern missing parent pattern string:" << PatternStr;
+                return;
 
             }
             else
-                parentNode = parentNodeIter->second;
+            {
+                uniqueKeyLock.lock();
+                map<string, HTreeNode*>::iterator parentNodeIter = keyStrToHTreeNodeMap.find(ParentPatternStr);
+                uniqueKeyLock.unlock();
+
+                HTreeNode* parentNode;
+
+                if (parentNodeIter == keyStrToHTreeNodeMap.end())
+                {
+
+                    cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
+                    // The parent pattern should have been added, but it is not.
+                    // It's possibly sent by another thread, and added to the queue later than the current pattern.
+                    // So we add this parent pattern here first, but set its count = 0
+                    // add this new found pattern into the Atomspace
+                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
+                    if (parentPatternHandleSeq.size() == 0)
+                    {
+
+                        cout << "Warning: Invalid pattern string: " << ParentPatternStr << std::endl;
+                        return;
+
+                    }
+
+                    // create a new HTreeNode
+                    parentNode = new HTreeNode();
+                    parentNode->pattern = parentPatternHandleSeq;
+                    parentNode->count = 0;
+
+                    uniqueKeyLock.lock();
+                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
+                    uniqueKeyLock.unlock();
+
+                    addNewPatternLock.lock();
+                    (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
+                    addNewPatternLock.unlock();
 
 
-            // add super pattern relation
+                }
+                else
+                    parentNode = parentNodeIter->second;
+
+
+                // add super pattern relation
 
 
 
-            ExtendRelation relation;
-            relation.extendedHTreeNode = newHTreeNode;
-            relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
+                ExtendRelation relation;
+                relation.extendedHTreeNode = newHTreeNode;
+                relation.newExtendedLink = (newHTreeNode->pattern)[ExtendedLinkIndex];
 
-            addRelationLock.lock();
-            parentNode->superPatternRelations.push_back(relation);
-            addRelationLock.unlock();
+                addRelationLock.lock();
+                parentNode->superPatternRelations.push_back(relation);
+                addRelationLock.unlock();
 
+            }
         }
     }
-
+    catch (exception const & e)
+    {
+       cout << e.what() << endl;
+    }
 }
 
 // a patternStr is sent from a distributed worker via json, it's the keystring of a pattern

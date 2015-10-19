@@ -134,7 +134,7 @@ namespace PatternMining
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
-                readNextLinkLock, curDFExtractedLinksLock, readNextPatternLock;
+                readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
      Type ignoredTypes[1];
 
@@ -149,7 +149,8 @@ namespace PatternMining
      float surprisingness_II_threshold;
 
      //debug
-     unsigned int processedLinkNum;
+     unsigned int processedLinkNum; // include those links of ignored types
+     unsigned int actualProcessedLinkNum;
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
 
@@ -363,8 +364,8 @@ private:
      std::thread *parsePatternTaskThreads;
      std::mutex patternQueueLock, addRelationLock, updatePatternCountLock, modifyWorkerLock;
 
-     // map<uid, still_working>
-     map<string, bool> allWorkers;
+     // map < uid, <is_still_working, processedFactsNum> >
+     map<string, std::pair<bool, unsigned int> > allWorkers;
      bool allWorkersStop;
 
      list<json::value> waitForParsePatternQueue;

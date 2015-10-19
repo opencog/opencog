@@ -2168,7 +2168,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         else
         {
             HNode->nII_Surprisingness = -1.0f;
-            num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
+            // num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
         }
     }
 
