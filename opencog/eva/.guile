@@ -1,0 +1,5 @@
+
+; Make the arrow-keys work!
+(use-modules (ice-9 readline))
+(activate-readline)
+
