@@ -326,6 +326,14 @@ namespace PatternMining
 
      void OutPutFrequentPatternsToFile(unsigned int n_gram);
 
+     void OutPutStaticsToCsvFile(unsigned int n_gram);
+
+     void OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
+
+     void OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int min_frequency);
+
+     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
+
      void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
 
      void OutPutFinalPatternsToFile(unsigned int n_gram);
