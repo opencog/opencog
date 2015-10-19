@@ -105,7 +105,9 @@ void PatternMiner::launchCentralServer()
 
     }
 
-    cout <<"\n Pattern mining finished in the central server! Totaly " << keyStrToHTreeNodeMap.size() << " pattern found!" << std::endl;
+    cout <<"\n Pattern mining finished in the central server! Totaly " << keyStrToHTreeNodeMap.size() << " pattern found!\n Now start to evaluate interestingness." << std::endl;
+
+    centralServerEvaluateInterestingness();
 
 }
 
@@ -380,6 +382,8 @@ void PatternMiner::parseAPatternTask(json::value jval)
     {
         // add this new found pattern into the Atomspace
         HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+
+
         if (patternHandleSeq.size() == 0)
         {
 
@@ -395,6 +399,11 @@ void PatternMiner::parseAPatternTask(json::value jval)
         uniqueKeyLock.lock();
         keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
         uniqueKeyLock.unlock();
+
+
+        addNewPatternLock.lock();
+        (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
+        addNewPatternLock.unlock();
 
     }
 
@@ -440,6 +449,11 @@ void PatternMiner::parseAPatternTask(json::value jval)
                 uniqueKeyLock.lock();
                 keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
                 uniqueKeyLock.unlock();
+
+                addNewPatternLock.lock();
+                (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
+                addNewPatternLock.unlock();
+
 
             }
             else

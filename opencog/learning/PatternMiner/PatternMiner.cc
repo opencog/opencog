@@ -1972,6 +1972,9 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 //    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
 //        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
 
+    if (HNode->count == 0)
+        HNode->count = 1;
+
     if (HNode->count < 2)
     {
 

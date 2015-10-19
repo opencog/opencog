@@ -401,6 +401,7 @@ private:
      HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
      bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
 
+
  public:
 
      void launchADistributedWorker();
