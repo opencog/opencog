@@ -27,6 +27,11 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 (use-modules (opencog exec))
+(use-modules (opencog cogserver))
+(start-cogserver "../scripts/opencog.conf")
+
+; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
+(system "echo \"py\\n\" | cat - atomic-dbg.py |netcat localhost 17020")
 
 (load-from-path "utilities.scm")
 
@@ -36,6 +41,7 @@
 
 (use-modules (opencog logger))
 (cog-logger-set-stdout #t)
+
 
 ; ------------------------------------------------------
 ; State variables
@@ -193,7 +199,7 @@
 ;; XXX incomplete
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
-	(SequetialAndLink
+	(SequentialAndLink
 		;; Look a the interaction face - line 765
 		(TrueLink (PutLink
 			(EvaluationLink (GroundedPredicateNode "py:look_at_face")

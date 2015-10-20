@@ -1,5 +1,5 @@
 #
-# atomic.py - Simple atoms for simple Eva demo
+# atomic-dbg.py - Simple atoms for simple Eva demo
 # Copyright (C) 2015  Linas Vepstas
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,46 +18,51 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from ros_commo import EvaControl
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.bindlink import satisfaction_link
 from opencog.type_constructors import *
 
 from opencog.cogserver import get_server_atomspace
 
+
 # The atomspace where everything will live.
 atomspace = get_server_atomspace()
 set_type_ctor_atomspace(atomspace)
-
-# The ROS layer.
-evl = EvaControl()
 
 # Global functions, because that's what PythonEval expects.
 # Would be great if PythonEval was fixed to work smarter, not harder.
 #
 # Must return TruthValue, since EvaluationLinks expect TruthValues.
 
+def prt_msg(face_id_node):
+	face_id = int(face_id_node.name)
+	print "Python face id", face_id
+	return TruthValue(1, 1)
+
 def do_look_left():
-	evl.look_left()
+	# evl.look_left()
 	return TruthValue(1, 1)
 
 def do_look_right():
-	evl.look_right()
+	# evl.look_right()
 	return TruthValue(1, 1)
 
 def glance_at_face(face_id_node):
 	face_id = int(face_id_node.name)
-	evl.glance_at(face_id)
+	print "Python glance at face id", face_id
+	# evl.glance_at(face_id)
 	return TruthValue(1, 1)
 
 def look_at_face(face_id_node):
 	face_id = int(face_id_node.name)
-	evl.look_at(face_id)
+	print "Python look at face id", face_id
+	# evl.look_at(face_id)
 	return TruthValue(1, 1)
 
 def gaze_at_face(face_id_node):
 	face_id = int(face_id_node.name)
-	evl.gaze_at(face_id)
+	print "Python gaze at face id", face_id
+	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
 ### Define an executable pattern

@@ -45,17 +45,13 @@ Development shortcuts
 ```
 Then load the python code:
 ```
-echo -e "py\n" | cat - atomic.py |netcat localhost 17020
+; echo -e "py\n" | cat - atomic.py |netcat localhost 17020
+
+(system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
 ```
 Then back at the guile prompt:
 ```
-(load-from-path "faces.scm")
-(load-from-path "btree.scm")
-```
-
-A different, currently broken/unfinsihed/demo variant:
-```
-(load-from-path "eva-fsm.scm")
+(load "btree.scm")
 ```
 
 Debugging notes
