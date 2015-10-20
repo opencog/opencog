@@ -86,6 +86,9 @@
 		(GroundedPredicateNode "scm: dice-roll")
 		(ListLink (NumberNode "0.5"))))
 
+; ------------------------------------------------------
+; Basic utilities for working with newly-visible faces.
+
 ;; ------
 ;;
 ;; Return true if a new face has become visible.
@@ -195,6 +198,34 @@
 		(DefinedSchemaNode "New arrivals")
 	))
 
+; ------------------------------------------------------
+; Time-stamp-related stuff.
+
+;; Set a timestamp. XXX todo replace this with TimeNode, timeserver.
+;; line 757, timestamp
+(define (get-timestamp)
+	(NumberNode (number->string (current-time))))
+
+(DefineLink
+	(DefinedSchemaNode "set timestamp")
+	(PutLink
+		(StateLink (PredicateNode "start-interaction-timestamp")
+			(VariableNode "$ts"))
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: get-timestamp")
+			(ListLink))))
+
+;; Evaluate to true, if an expression should be shown.
+;; line 933, should_show_expression()
+;; XXX incomplete, need to be timestamp-driven.
+(DefineLink
+	(DefinedPredicateNode "Show expression")
+	(TrueLink)
+)
+
+; ------------------------------------------------------
+; More complex interaction sequences.
+
 ;; line 762, interact_with_face_target()
 ;; XXX incomplete
 (DefineLink
@@ -208,20 +239,6 @@
 				(GetLink (StateLink interaction-state (VariableNode "$x")))))
 		)))
 ;xxxxxxxxx
-
-;; Set a timestamp. XXX todo replace this with TimeNode, timeserver.
-;; line 757, timestamp
-(define (get-timestamp)
-	(NumberNode (number->string (current-time))))
-
-(DefineLink
-	(DefinedSchemaNode "set timestamp")
-	(PutLink
-		(EvaluationLink (PredicateNode "start-interaction-timestamp")
-			(ListLink (VariableNode "$ts")))
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: get-timestamp")
-			(ListLink))))
 
 ; ------------------------------------------------------
 ;; Sequence - if there were no people in the room, then look at the
