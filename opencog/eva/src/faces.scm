@@ -83,6 +83,8 @@
 	(cog-delete (EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id)))))
 
+(define (undefine def)
+	(cog-delete(car (cog-incoming-set def))))
 
 #|
 ;; Example usage:

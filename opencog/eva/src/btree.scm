@@ -19,6 +19,7 @@
 ; (show-acked-faces)
 ; (show-room-state)
 ; (show-interaction-state)
+; (cog-evaluate! (DefinedPredicateNode "Interact with people"))
 
 
 (add-to-load-path "/usr/local/share/opencog/scm")
@@ -46,7 +47,7 @@
 (StateLink soma-state soma-sleeping)
 
 ;; Currently, interaction-state will be linked to the face-id of
-;; person with whom interaction is taking place.
+;; person with whom interaction is taking place. (current_face_target in owyl)
 (define interaction-state (AnchorNode "Interaction State"))
 (define no-interaction (ConceptNode "none"))
 
@@ -122,7 +123,8 @@
 		(GetLink (StateLink room-state (VariableNode "$x")))
 	))
 
-;; Is there someone present?  We chaked for acked faces.
+;; Is there someone present?  We check for acked faces.
+;; The someone-arrived code converts newly-visible faces to acked faces.
 ;; line 683 is_face_target().
 (DefineLink
 	(DefinedPredicateNode "Detected face")
@@ -139,7 +141,7 @@
 	(DefinedSchemaNode "Select random face")
 	(RandomChoiceLink (GetLink
 		(EvaluationLink (PredicateNode "acked face")
-               (ListLink (VariableNode "$face-id")))
+			(ListLink (VariableNode "$face-id")))
 	)))
 
 ;; Update the room empty/full status; update the list of acknowledged
@@ -260,6 +262,18 @@
 ;; Check to see if someone left
 ;; line 422 -- someone_left()
 
+
+;; Start a new interaction
+;; line 461 -- sequence ....
+(DefineLink
+	(DefinedPredicateNode "Start new interction")
+	(SatisfactionLink
+		(SequentialAndLink
+			(NotLink (DefinedPredicateNode "is interacting with someone?"))
+			(TrueLink (PutLink
+				(StateLink interaction-state (VariableNode "$face-id"))
+					(DefinedSchemaNode "Select random face")))
+		)))
 
 ;; Interact with people
 ;; line 457 -- interact_with_people()
