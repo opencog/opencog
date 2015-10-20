@@ -3,8 +3,9 @@
 ;
 (define-module (opencog cogserver))
 
-; Hack LD path, but argh, this doesn't work!
-; (setenv "LD_LIBRARY_PATH" "/usr/local/lib/opencog/modules")
+; libguile-cogserver.so is located in /usr/local/lib/opencog
+; libnlp-types.so is in /usr/local/lib/opencog/modules
+(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog:/usr/local/lib/opencog/modules")
 
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
 
