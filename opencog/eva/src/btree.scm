@@ -1,8 +1,25 @@
 ;
 ; btree.scm
 ;
-; Experimental behavior tree in the atomspace.
+; Behavior tree in the atomspace.
+; Under construction.
 ;
+; Unit testing:
+; The various predicates below can be manually unit tested by manually
+; adding and removing new visible faces, and then manually invoking the
+; various rules. See faces.scm for utilities:
+;
+; Manually insert a face: (make-new-face id)
+; etc: (remove-face id)  (show-room-state) (show-interaction-state)
+; (show-visible-faces)
+;
+; Unit test the new-arrival sequence:
+; (make-new-face "42")
+; (cog-evaluate! (DefinedPredicateNode "New arrival sequence"))
+; (show-acked-faces)
+; (show-room-state)
+; (show-interaction-state)
+
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 

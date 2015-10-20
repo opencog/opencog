@@ -54,19 +54,34 @@
 			(DefinedPredicateNode "Check if room empty"))))
 
 ;; Display the current room state
+(define (show-visible-faces)
+	(define visible-face (PredicateNode "visible face"))
+	(map (lambda (x) (car (cog-outgoing-set x)))
+	(cog-chase-link 'EvaluationLink 'ListLink visible-face)))
+
+(define (show-acked-faces)
+	(define acked-face (PredicateNode "acked face"))
+	(map (lambda (x) (car (cog-outgoing-set x)))
+	(cog-chase-link 'EvaluationLink 'ListLink acked-face)))
+
 (define (show-room-state)
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
+(define (show-interaction-state)
+	(define interaction-state (AnchorNode "Interaction State"))
+	(car (cog-chase-link 'StateLink 'ConceptNode interaction-state)))
+
+
 ; Quick hack to fill the room.
-(define (make-new-face)
+(define (make-new-face id)
 	(EvaluationLink (PredicateNode "visible face")
-		(ListLink (ConceptNode "42"))))
+		(ListLink (ConceptNode id))))
 
 ; Quick hack to clear the room
-(define (remove-face)
+(define (remove-face id)
 	(cog-delete (EvaluationLink (PredicateNode "visible face")
-		(ListLink (ConceptNode "42")))))
+		(ListLink (ConceptNode id)))))
 
 
 #|
