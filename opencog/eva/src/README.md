@@ -28,7 +28,7 @@ Failure to do this will result in the message:
 ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not found"
 ```
 
-* Change directory to your catkin_ws and then run `scripts/eva.sh`.
+* Change directory to your `catkin_ws` and then run `scripts/eva.sh`.
   This will start up a byobu multiplexed terminal, and will run ROS,
   the ros face tracker, the blender API and the opencog server
   automatically, and will launch most of the needed behavior scripts.
@@ -38,6 +38,8 @@ Development shortcuts
 =====================
 * Start guile in this directory, then from the guile prompt:
 ```
+(add-to-load-path "/usr/local/share/opencog/scm")
+(use-modules (opencog))
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 ```

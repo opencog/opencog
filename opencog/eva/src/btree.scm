@@ -191,6 +191,16 @@
 
 ;; line 762, interact_with_face_target()
 ;; XXX incomplete
+(DefineLink
+	(DefinedPredicateNode "Interact with face")
+	(SequetialAndLink
+		;; Look a the interaction face - line 765
+		(TrueLink (PutLink
+			(EvaluationLink (GroundedPredicateNode "py:look_at_face")
+				(ListLink (VariableNode "$face")))
+			(GetLink (StateLink interaction-state (VariableNode "$x")))))
+	))
+;xxxxxxxxx
 
 ;; line 757, timestamp
 (define (get-timestamp)
@@ -265,8 +275,10 @@
 
 ;; Start a new interaction
 ;; line 461 -- sequence ....
+; XXX  todo -- check if more han one face target
+; record the start time ....
 (DefineLink
-	(DefinedPredicateNode "Start new interction")
+	(DefinedPredicateNode "Start new interaction")
 	(SatisfactionLink
 		(SequentialAndLink
 			(NotLink (DefinedPredicateNode "is interacting with someone?"))
