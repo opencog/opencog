@@ -40,7 +40,7 @@
 (load-from-path "faces.scm")
 
 (use-modules (opencog logger))
-(cog-logger-set-stdout #t)
+; (cog-logger-set-stdout #t)
 
 
 ; ------------------------------------------------------
@@ -199,15 +199,17 @@
 ;; XXX incomplete
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
-	(SequentialAndLink
-		;; Look a the interaction face - line 765
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:look_at_face")
-				(ListLink (VariableNode "$face")))
-			(GetLink (StateLink interaction-state (VariableNode "$x")))))
-	))
+	(SatisfactionLink
+		(SequentialAndLink
+			;; Look a the interaction face - line 765
+			(TrueLink (PutLink
+				(EvaluationLink (GroundedPredicateNode "py:look_at_face")
+					(ListLink (VariableNode "$face")))
+				(GetLink (StateLink interaction-state (VariableNode "$x")))))
+		)))
 ;xxxxxxxxx
 
+;; Set a timestamp. XXX todo replace this with TimeNode, timeserver.
 ;; line 757, timestamp
 (define (get-timestamp)
 	(NumberNode (number->string (current-time))))
