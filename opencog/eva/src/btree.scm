@@ -135,6 +135,24 @@
 		(DefinedPredicateNode "Angry")
 	))
 
+;; Pick random gesture
+;; XXX really need to pick gestures from a class of appropriate
+;; ones, given an emotional state.
+;; line 334 -- pick_random_gesture()
+(DefineLink
+	(DefinedPredicateNode "Pick random gesture")
+	(EvaluationLink (GroundedPredicateNode "py:do_gesture")
+		(ListLink
+			(RandomChoiceLink
+				(ConceptNode "nod-1")
+				(ConceptNode "nod-2")
+				(ConceptNode "yawn-1")
+				(ConceptNode "shake-2")
+				(ConceptNode "shake-3")
+			)
+			(NumberNode 0.9) ; duration
+			(NumberNode 0.7)))) ; intensity
+
 ; ------------------------------------------------------
 ; TODO --
 ;
@@ -295,20 +313,22 @@
 ; ------------------------------------------------------
 ; More complex interaction sequences.
 
+;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
-;; XXX incomplete
+;; XXX Needs to be replaced by emotional state modelling.
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SatisfactionLink
 		(SequentialAndLink
-			;; Look a the interaction face - line 765
+			;; Look at the interaction face - line 765
 			(TrueLink (PutLink
 				(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 					(ListLink (VariableNode "$face")))
 				(GetLink (StateLink interaction-state (VariableNode "$x")))))
 			;; line 768
+			(DefinedPredicateNode "Pick random positive expression")
+			(DefinedPredicateNode "Pick random gesture")
 		)))
-;xxxxxxxxx
 
 ; ------------------------------------------------------
 ;; Sequence - if there were no people in the room, then look at the
@@ -390,7 +410,8 @@
 		(SequentialAndLink
 ; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
-; (DefinedSchemaNode "Select random face")
+			(DefinedSchemaNode "Select random face")
+			(DefinedPredicateNode "Interact with face")
 		)))
 ;
 ;

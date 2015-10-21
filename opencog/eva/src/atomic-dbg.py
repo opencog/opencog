@@ -72,6 +72,13 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	return TruthValue(1, 1)
 
+def do_gesture(gesture_node, duration_node, intensity_node):
+	gesture = gesture_node.name
+	duration = float(duration_node.name)
+	intensity = float(intensity_node.name)
+	print "Python gesture: ", gesture, " for ", duration, " int ", intensity
+	return TruthValue(1, 1)
+
 ### Define an executable pattern
 ##satisfaction_handle = SatisfactionLink(
 ##	SequentialAndLink(
