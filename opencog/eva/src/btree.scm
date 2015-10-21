@@ -59,6 +59,17 @@
 
 (StateLink interaction-state no-interaction)
 
+(DefineLink
+	(DefinedPredicateNode "Smile")
+	(EvaluationLink (GroundedPredicateNode "py:do_smile")
+		(ListLink
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7))) ; intensity
+	)
+
+;; Pick random expression, and display it.
+;; line 305 -- pick_random_expression()
+
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -237,6 +248,7 @@
 				(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 					(ListLink (VariableNode "$face")))
 				(GetLink (StateLink interaction-state (VariableNode "$x")))))
+			;; line 768
 		)))
 ;xxxxxxxxx
 

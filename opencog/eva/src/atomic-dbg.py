@@ -65,6 +65,10 @@ def gaze_at_face(face_id_node):
 	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
+def do_smile(duration, intensity):
+	print "Python smiling for ", duration, " at strength ", intensity
+	return TruthValue(1, 1)
+
 ### Define an executable pattern
 ##satisfaction_handle = SatisfactionLink(
 ##	SequentialAndLink(
