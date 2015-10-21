@@ -59,23 +59,81 @@
 
 (StateLink interaction-state no-interaction)
 
-(DefineLink
-	(DefinedPredicateNode "Smile")
-	(EvaluationLink (GroundedPredicateNode "py:do_smile")
-		(ListLink
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7))) ; intensity
-	)
-
-;; Pick random expression, and display it.
-;; line 305 -- pick_random_expression()
-
-
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
+
+; --------------------------------------------------------
+; Temporary stand-in for emotion modelling. Right now, just some
+; random selectors for classes of emotions.
+
+(DefineLink
+	(DefinedPredicateNode "Smile")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "smile")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+(DefineLink
+	(DefinedPredicateNode "Engaged")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "engaged")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+(DefineLink
+	(DefinedPredicateNode "Surprised")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "surprised")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+(DefineLink
+	(DefinedPredicateNode "Bored")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "bored")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+(DefineLink
+	(DefinedPredicateNode "Frustrated")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "frustrated")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+(DefineLink
+	(DefinedPredicateNode "Angry")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(ConceptNode "angry")
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)))) ; intensity
+
+;; Pick random expression, and display it.
+;; line 305 -- pick_random_expression()
+(DefineLink
+	(DefinedPredicateNode "Pick random positive expression")
+	(RandomChoiceLink
+		(DefinedPredicateNode "Smile")
+		(DefinedPredicateNode "Engaged")
+		(DefinedPredicateNode "Surprised")
+	))
+
+(DefineLink
+	(DefinedPredicateNode "Pick random negative expression")
+	(RandomChoiceLink
+		(DefinedPredicateNode "Bored")
+		(DefinedPredicateNode "Frustrated")
+		(DefinedPredicateNode "Angry")
+	))
 
 ; ------------------------------------------------------
 ; TODO --

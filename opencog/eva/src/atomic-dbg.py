@@ -65,8 +65,11 @@ def gaze_at_face(face_id_node):
 	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
-def do_smile(duration, intensity):
-	print "Python smiling for ", duration, " at strength ", intensity
+def do_emotion(emotion_node, duration_node, intensity_node):
+	emotion = emotion_node.name
+	duration = float(duration_node.name)
+	intensity = float(intensity_node.name)
+	print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	return TruthValue(1, 1)
 
 ### Define an executable pattern
