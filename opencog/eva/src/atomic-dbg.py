@@ -73,6 +73,7 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	return TruthValue(1, 1)
 
 def do_gesture(gesture_node, duration_node, intensity_node):
+	print "duuuude its ", gesture_node
 	gesture = gesture_node.name
 	duration = float(duration_node.name)
 	intensity = float(intensity_node.name)

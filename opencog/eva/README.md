@@ -29,8 +29,8 @@ explicitly with a certain OpenCog-based scripting language.
 
 Status
 ------
-This is version 0.1.0 of the project. A few basics kind-of work.
-There's still a mish-mash of code.
+This is version 0.3.0 of the project. A few basics kind-of work.
+There's still a mish-mash of unstarted cool ideas.
 
 The `notes` directory contains a copy of the original owyl code,
 (in `general_behavior.py`, for line-by-line reference), as well

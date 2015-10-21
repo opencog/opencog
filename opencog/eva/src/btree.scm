@@ -69,70 +69,32 @@
 ; Temporary stand-in for emotion modelling. Right now, just some
 ; random selectors for classes of emotions.
 
-(DefineLink
-	(DefinedPredicateNode "Smile")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "smile")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
-(DefineLink
-	(DefinedPredicateNode "Engaged")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "engaged")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
-(DefineLink
-	(DefinedPredicateNode "Surprised")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "surprised")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
-(DefineLink
-	(DefinedPredicateNode "Bored")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "bored")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
-(DefineLink
-	(DefinedPredicateNode "Frustrated")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "frustrated")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
-(DefineLink
-	(DefinedPredicateNode "Angry")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(ConceptNode "angry")
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)))) ; intensity
-
 ;; Pick random expression, and display it.
 ;; line 305 -- pick_random_expression()
 (DefineLink
 	(DefinedPredicateNode "Pick random positive expression")
-	(RandomChoiceLink
-		(DefinedPredicateNode "Smile")
-		(DefinedPredicateNode "Engaged")
-		(DefinedPredicateNode "Surprised")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(RandomChoiceLink
+				(ConceptNode "smile")
+				(ConceptNode "engaged")
+				(ConceptNode "surprised")
+			)
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)) ; intensity
 	))
 
 (DefineLink
 	(DefinedPredicateNode "Pick random negative expression")
-	(RandomChoiceLink
-		(DefinedPredicateNode "Bored")
-		(DefinedPredicateNode "Frustrated")
-		(DefinedPredicateNode "Angry")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(RandomChoiceLink
+				(ConceptNode "bored")
+				(ConceptNode "frustrated")
+				(ConceptNode "angry")
+			)
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)) ; intensity
 	))
 
 ;; Pick random gesture
@@ -410,8 +372,9 @@
 		(SequentialAndLink
 ; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
-			(DefinedSchemaNode "Select random face")
+			(TrueLink (DefinedSchemaNode "Select random face"))
 			(DefinedPredicateNode "Interact with face")
 		)))
 ;
 ;
+(TrueLink)
