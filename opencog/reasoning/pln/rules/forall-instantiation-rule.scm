@@ -129,8 +129,7 @@
 
 ;; This function
 ;;
-;; 1. randomly selects a substitution term (or a tuple of substitution
-;;    terms, if the ForAll has multiple variables in scope),
+;; 1. randomly selects a substitution term,
 ;;
 ;; 2. performs the substitution,
 ;;
