@@ -70,11 +70,6 @@
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
-;;
-;; Warning: there must be the same number of free variables in the body
-;; and scoped variables in the forall, otherwise this is gonna crash.
-;; That is because PutLink expects the number of variables in the
-;; ListLink to be equal to the number of free variables in the body.
 (define (forall-full-instantiation-formula SV B)
   (cog-set-tv!
    (let* (
@@ -140,11 +135,6 @@
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
-;;
-;; Warning: there must be the same number of free variables in the body
-;; and scoped variables in the forall, otherwise this is gonna crash.
-;; That is because PutLink expects the number of variables in the
-;; ListLink to be equal to the number of free variables in the body.
 (define (forall-partial-instantiation-formula TyVs B)
   (cog-set-tv!
    (let* (
