@@ -701,7 +701,7 @@ void PatternMiner::centralServerEvaluateInterestingness()
 
     if (enable_Interesting_Pattern)
     {
-        for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+        for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
             cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
             cur_index = -1;
@@ -734,6 +734,9 @@ void PatternMiner::centralServerEvaluateInterestingness()
                 // sort by surprisingness_I first
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+
+                if (cur_gram == MAX_GRAM)
+                    break;
 
                 vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 

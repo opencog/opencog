@@ -64,7 +64,7 @@ DistributedPatternMinerServer::DistributedPatternMinerServer(CogServer& cs) : Ag
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()), 4);
+    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()), 3);
 
     logger().info("[DistributedPatternMinerServer] constructor");
 

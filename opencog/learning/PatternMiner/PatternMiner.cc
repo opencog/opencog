@@ -2309,6 +2309,7 @@ PatternMiner::~PatternMiner()
 
 void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
+
     thresholdFrequency = _thresholdFrequency;
 
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
@@ -2350,8 +2351,9 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Interesting_Pattern)
         {
-            for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+            for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
             {
+
                 cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
                 cur_index = -1;
                 threads = new thread[THREAD_NUM];
@@ -2384,7 +2386,11 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
                     OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
+                    if (cur_gram == MAX_GRAM)
+                        break;
+
                     vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
+
 
                     // and then sort by surprisingness_II
                     std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
@@ -2428,11 +2434,11 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
 
-                    OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+                    // OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
 
-                    OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  15);
+                    // OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  15);
 
-                    OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
+                    // OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
 
                     // sort by frequency
                     std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
