@@ -4,6 +4,24 @@
 
 ;; Given an atom
 ;;
+;; (TypedVariableLink
+;;    (VariableNode "$V")
+;;    <type-constraint>)
+;;
+;; return a random term satisfying the type constraint.
+(define (select-substitution-term TyV)
+  (let* (
+         (V (gar TyV))
+                                        ; Build pattern matcher query
+                                        ; for the subtitution term
+         (query (GetLink TyV V))
+                                        ; Fetch all possible substitution terms
+         (result (cog-execute! query)))
+                                        ; Select one randomly
+    (select-rnd-outgoing result)))
+
+;; Given an atom
+;;
 ;; (VariableList
 ;;    (TypedVariableLink
 ;;       (VariableNode "$V1")
@@ -45,19 +63,15 @@
          (remain (apply cog-new-link link-type remain-list)))
     (list rnd-atom remain)))
 
-;; Given an atom
-;;
-;; (TypedVariableLink
-;;    (VariableNode "$V")
-;;    <type-constraint>)
-;;
-;; return a random term satisfying the type constraint.
-(define (select-substitution-term TyV)
+;; Given 2 atoms, a list of variables (or a single variable) and a
+;; condition P, return a random term list (or a single term in case
+;; there was just a single variable) satisfying the type constraint
+;; and the condition.
+(define (select-conditioned-substitution-terms TyVs P)
   (let* (
-         (V (gar TyV))
                                         ; Build pattern matcher query
                                         ; for the subtitution term
-         (query (GetLink TyV V))
+         (query (GetLink TyVs P))
                                         ; Fetch all possible substitution terms
          (result (cog-execute! query)))
                                         ; Select one randomly
