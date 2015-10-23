@@ -191,6 +191,10 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         // release all the HTreeNodes created in this task if it's running as a distributed worker
         if (run_as_distributed_worker)
         {
+            // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
+            if (THREAD_NUM == 1)
+                atomSpace->clear(); // can only clear the atomspace when only 1 thread is used
+
             for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
             {
                 delete (allHTreeNodesCurTask[hNodeNum]);
