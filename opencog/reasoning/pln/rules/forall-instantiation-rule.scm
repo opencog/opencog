@@ -21,6 +21,8 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 
+(load "instantiation.scm")
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper definition ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -38,67 +40,6 @@
   (ForAllLink
      (VariableNode "$TyVs")
      (VariableNode "$B")))
-
-;; Helper for forall-instantiation-formula. Given an atom
-;;
-;; (VariableList
-;;    (TypedVariableLink
-;;       (VariableNode "$V1")
-;;       <type-constraint1>)
-;;    ...
-;;    (TypedVariableLink
-;;       (VariableNode "$Vn")
-;;       <type-constraintn>))
-;;
-;; return a ListLink of random terms satisfying the type constraints of
-;; V1 to Vn.
-(define (select-substitution-terms TyVs)
-  (let* (
-                                        ; Get the list of typed
-                                        ; variables V1 to Vn
-         (typed-vars (cog-outgoing-set TyVs))
-                                        ; Pick up a random term of each
-         (terms (map select-substitution-term typed-vars)))
-    (apply ListLink terms)))
-
-;; Select a random atom from a Link's outgoings
-(define (select-rnd-outgoing link)
-  (let ((outgoings (cog-outgoing-set link)))
-    (list-ref outgoings (random (length outgoings)))))
-
-;; Return a list without the indexed element
-(define (rm-list-ref l i)
-  (append (take l i) (drop l (+ i 1))))
-
-;; Select a random atom from a Link's outgoings, return a pair composed of
-;; 1. the selected atom
-;; 2. a new link with the remaining outgoings
-(define (select-rm-rnd-outgoing link)
-  (let* ((link-type (cog-type link))
-         (outgoings (cog-outgoing-set link))
-         (rnd-index (random (length outgoings)))
-         (rnd-atom (list-ref outgoings rnd-index))
-         (remain-list (rm-list-ref outgoings rnd-index))
-         (remain (apply cog-new-link link-type remain-list)))
-    (list rnd-atom remain)))
-
-;; Helper for forall-instantiation-formula. Given an atom
-;;
-;; (TypedVariableLink
-;;    (VariableNode "$V")
-;;    <type-constraint>)
-;;
-;; return a random term satisfying the type constraint.
-(define (select-substitution-term TyV)
-  (let* (
-         (V (gar TyV))
-                                        ; Build pattern matcher query
-                                        ; for the subtitution term
-         (query (GetLink TyV V))
-                                        ; Fetch all possible substitution terms
-         (result (cog-execute! query)))
-                                        ; Select one randomly
-    (select-rnd-outgoing result)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Forall full instantiation rule ;;
@@ -129,11 +70,6 @@
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
-;;
-;; Warning: there must be the same number of free variables in the body
-;; and scoped variables in the forall, otherwise this is gonna crash.
-;; That is because PutLink expects the number of variables in the
-;; ListLink to be equal to the number of free variables in the body.
 (define (forall-full-instantiation-formula SV B)
   (cog-set-tv!
    (let* (
@@ -193,17 +129,11 @@
 
 ;; This function
 ;;
-;; 1. randomly selects a substitution term (or a tuple of substitution
-;;    terms, if the ForAll has multiple variables in scope),
+;; 1. randomly selects a substitution term,
 ;;
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
-;;
-;; Warning: there must be the same number of free variables in the body
-;; and scoped variables in the forall, otherwise this is gonna crash.
-;; That is because PutLink expects the number of variables in the
-;; ListLink to be equal to the number of free variables in the body.
 (define (forall-partial-instantiation-formula TyVs B)
   (cog-set-tv!
    (let* (
@@ -218,7 +148,7 @@
           (B-inst (cog-execute! (PutLink (LambdaLink TyV B) term)))
                                         ; If there is only one
                                         ; variable left, discard the
-                                        ; TypedVariableLink
+                                        ; VariableLink
           (TyVs-remain (if (= TyVs-remain-len 1)
                            (gar TyVs-remain)
                            TyVs-remain)))
