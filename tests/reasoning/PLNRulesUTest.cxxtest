@@ -62,6 +62,7 @@ public:
     void test_forall_partial_instantiation();
     void test_forall_implication_to_higher_order();
     void test_implication_full_instantiation();
+    void test_implication_partial_instantiation();
 };
 
 void PLNRulesUTest::tearDown()
@@ -326,4 +327,62 @@ void PLNRulesUTest::test_implication_full_instantiation()
     logger().debug() << "expected_results = " << expected_results->toString();
 
     TS_ASSERT_EQUALS(results, expected_results);
+}
+
+/**
+ * Test implication-partial-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/implication-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_implication_partial_instantiation()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-implication.scm, "
+                 "opencog/reasoning/pln/rules/implication-instantiation-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("implication-partial-instantiation-rule");
+    Handle results = bindlink(&as, rule);
+
+    // Depending on the random seed the result can be one of the other
+    // (partial instantiation occurs on $X or $Y).
+    Handle possible_results_1 = eval.eval_h
+	    ("(SetLink"
+	     "   (ImplicationLink"
+	     "      (TypedVariableLink"
+	     "         (VariableNode \"$X\")"
+	     "         (TypeNode \"ConceptNode\"))"
+	     "      (EvaluationLink"
+	     "         (PredicateNode \"P\")"
+	     "         (ListLink"
+	     "            (VariableNode \"$X\")"
+	     "            (ConceptNode \"B\")))"
+	     "      (EvaluationLink"
+	     "         (PredicateNode \"Q\")"
+	     "         (ListLink"
+	     "            (ConceptNode \"B\")"
+	     "            (VariableNode \"$X\")))))");
+    Handle possible_results_2 = eval.eval_h
+	    ("(SetLink"
+	     "   (ImplicationLink"
+	     "      (TypedVariableLink"
+	     "         (VariableNode \"$Y\")"
+	     "         (TypeNode \"ConceptNode\"))"
+	     "      (EvaluationLink"
+	     "         (PredicateNode \"P\")"
+	     "         (ListLink"
+	     "            (ConceptNode \"A\")"
+	     "            (VariableNode \"$Y\")))"
+	     "      (EvaluationLink"
+	     "         (PredicateNode \"Q\")"
+	     "         (ListLink"
+	     "            (VariableNode \"$Y\")"
+	     "            (ConceptNode \"A\")))))");
+
+    TS_ASSERT((results == possible_results_1)
+              or (results == possible_results_2));
 }
