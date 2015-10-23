@@ -148,7 +148,7 @@
           (B-inst (cog-execute! (PutLink (LambdaLink TyV B) term)))
                                         ; If there is only one
                                         ; variable left, discard the
-                                        ; TypedVariableLink
+                                        ; VariableLink
           (TyVs-remain (if (= TyVs-remain-len 1)
                            (gar TyVs-remain)
                            TyVs-remain)))
