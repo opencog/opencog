@@ -245,7 +245,7 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
         auto paths = uri::split_path(uri::decode(request.relative_uri().query()));
 
         string clientID =  paths[0];
-        cout << "Got request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
+        // cout << "\nGot request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
 
         modifyWorkerLock.lock();
         allWorkersStop = false;
@@ -256,6 +256,8 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
         json::value answer = json::value::object();
         answer["msg"] = json::value("Worker registered successfully!");
         request.reply(status_codes::OK, answer);
+        cout << "\nA new worker connected! ClientID = \n" << clientID << std::endl;
+
     }
     catch (exception const & e)
     {
