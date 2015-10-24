@@ -11,7 +11,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(ATOMSPACE_LIBPATH
-   /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
+   /usr/lib/ /usr/lib64/ /usr/local/lib/ /usr/local/lib64/)
 
 find_library(ATOMSPACE_LIBRARY atomspace
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
