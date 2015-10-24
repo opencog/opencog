@@ -79,9 +79,11 @@ void PatternMiner::launchCentralServer()
 
     centralServerPort = config().get("PMCentralServerPort");
 
+    centralServerIP = config().get("PMCentralServerIP");
+
     pattern_parse_thread_num = (unsigned int)(config().get_int("pattern_parse_thread_num"));
 
-    serverListener = new http_listener( utility::string_t("http://localhost:" + centralServerPort +"/PatternMinerServer") );
+    serverListener = new http_listener( utility::string_t("http://" + centralServerIP + ":" + centralServerPort +"/PatternMinerServer") );
 
     serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
 
