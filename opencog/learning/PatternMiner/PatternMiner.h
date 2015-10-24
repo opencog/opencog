@@ -381,6 +381,8 @@ private:
      int cur_worker_mined_pattern_num;
      int total_pattern_received; // in the server
 
+     bool waitingForNewClients;
+
 
      void handlePost(http_request request);
      void handleRegisterNewWorker(http_request request);

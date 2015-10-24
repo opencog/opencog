@@ -77,6 +77,8 @@ void PatternMiner::launchCentralServer()
 {
     run_as_central_server = true;
 
+    waitingForNewClients = false;
+
     centralServerPort = config().get("PMCentralServerPort");
 
     centralServerIP = config().get("PMCentralServerIP");
@@ -91,42 +93,64 @@ void PatternMiner::launchCentralServer()
 
     centralServerListeningThread = std::thread([this]{this->centralServerStartListening();});
 
-    parsePatternTaskThreads = new thread[pattern_parse_thread_num];
 
-    for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
+    while (true)
     {
-        parsePatternTaskThreads[i] = std::thread([this]{this->runParsePatternTaskThread();});
+        parsePatternTaskThreads = new thread[pattern_parse_thread_num];
 
+        for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
+        {
+            parsePatternTaskThreads[i] = std::thread([this]{this->runParsePatternTaskThread();});
+
+        }
+
+        cout <<"\nPattern Miner central server started! "<< pattern_parse_thread_num << " threads using to parse patterns." << std::endl;
+
+        for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
+        {
+            parsePatternTaskThreads[i].join();
+
+        }
+
+        delete [] parsePatternTaskThreads;
+
+        string inputstr;
+        cout << "All connected clients have finished and all the received patterns have been parsed by the server.\n"
+             << "Enter 'y' or 'yes' to start evaluating pattern interestingness.\n"
+             << "Enter any other words to keep waiting for more clients to connect" << std::endl;
+        cin  >> inputstr;
+
+        if ( (inputstr == "y") or  (inputstr == "yes") )
+        {
+            // calculate the corpus size by adding up all the processedFactsNum of every worker
+            unsigned int totalProcessedFactsNum = 0;
+            map<string,std::pair<bool, unsigned int>>::iterator workerIt;
+
+            for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
+            {
+                totalProcessedFactsNum += (workerIt->second).second ;
+            }
+
+            atomspaceSizeFloat = (float) totalProcessedFactsNum;
+
+            cout <<"\n Pattern mining finished in the central server! \n"
+                 << "Totally " << totalProcessedFactsNum << " facts processed! "
+                 << keyStrToHTreeNodeMap.size() << " pattern found!\n"
+                 << "Now start to evaluate interestingness." << std::endl;
+
+            centralServerEvaluateInterestingness();
+
+            break;
+        }
+        else
+        {
+            waitingForNewClients = true;
+            cout <<"Wainting for new clients to connect..." << std::endl;
+
+        }
     }
 
-    cout <<"\nPattern Miner central server started! "<< pattern_parse_thread_num << " threads using to parse patterns." << std::endl;
 
-    for (unsigned int i = 0; i < pattern_parse_thread_num; ++ i)
-    {
-        parsePatternTaskThreads[i].join();
-
-    }
-
-
-    // calculate the corpus size by adding up all the processedFactsNum of every worker
-    unsigned int totalProcessedFactsNum = 0;
-    map<string,std::pair<bool, unsigned int>>::iterator workerIt;
-
-    for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
-    {
-        totalProcessedFactsNum += (workerIt->second).second ;
-    }
-
-    atomspaceSizeFloat = (float) totalProcessedFactsNum;
-
-    cout <<"\n Pattern mining finished in the central server! \n"
-         << "Totally " << totalProcessedFactsNum << " facts processed! "
-         << keyStrToHTreeNodeMap.size() << " pattern found!\n"
-         << "Now start to evaluate interestingness." << std::endl;
-
-
-
-    centralServerEvaluateInterestingness();
 
 }
 
@@ -224,6 +248,8 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
         cout << "Got request to RegisterNewWorker: ClientID = \n" << clientID << std::endl;
 
         modifyWorkerLock.lock();
+        allWorkersStop = false;
+        waitingForNewClients = false;
         allWorkers.insert(std::pair<string,std::pair<bool, unsigned int>>(clientID, std::pair<bool, unsigned int>(true, 0))); // true means this worker is still working.
         modifyWorkerLock.unlock();
 
@@ -322,7 +348,7 @@ void PatternMiner::handleFindNewPatterns(http_request request)
             //  cout << "Received pattern : \n" << jval.serialize() << std::endl;
         }
 
-        cout << "Received pattern num = " << total_pattern_received << std::endl;
+        // cout << "Received pattern num = " << total_pattern_received << std::endl;
 
         request.reply(status_codes::OK);
 
@@ -350,7 +376,9 @@ void PatternMiner::runParsePatternTaskThread()
             waitForParsePatternQueue.pop_front();
 
             tryToParsePatternNum ++;
-            cout << "\ntryToParsePatternNum = " << tryToParsePatternNum << std::endl;
+            cout<< "\r" << tryToParsePatternNum << + "received patterns parsed." ;
+            std::cout.flush();
+
             patternQueueLock.unlock();
 
             parseAPatternTask(jval);
@@ -360,7 +388,7 @@ void PatternMiner::runParsePatternTaskThread()
         {
             patternQueueLock.unlock();
 
-            if (allWorkersStop)
+            if (allWorkersStop && (! waitingForNewClients))
                 return;
         }
 
@@ -453,7 +481,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
                 if (parentNodeIter == keyStrToHTreeNodeMap.end())
                 {
 
-                    cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
+                    // cout << "Warning: Cannot find parent pattern in server: " << ParentPatternStr << std::endl;
                     // The parent pattern should have been added, but it is not.
                     // It's possibly sent by another thread, and added to the queue later than the current pattern.
                     // So we add this parent pattern here first, but set its count = 0
@@ -597,17 +625,17 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
     }
 
     // debug:
-    static int pattern_num = 1;
-    string patternToStr = "";
+    // static int pattern_num = 0;
+    // string patternToStr = "";
 
-    for(Handle h : pattern)
-    {
-        patternToStr += _atomSpace->atom_as_string(h);
-        patternToStr += "\n";
-    }
+    // for(Handle h : pattern)
+    // {
+    //    patternToStr += _atomSpace->atom_as_string(h);
+    //    patternToStr += "\n";
+    // }
 
-    cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
-    pattern_num ++;
+    // cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
+    // pattern_num ++;
 
     return pattern;
 }
