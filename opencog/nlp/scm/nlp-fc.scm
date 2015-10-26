@@ -1,16 +1,31 @@
+; -----------------------------------------------------------------------
 ; This loads all the rules into the cogserver shell. This assumes that the
 ; cogserver is started from in-source build directory.
+; TODO: This should be replaced by a module.
 (define (load-r2l-rulebase)
     (load-scm-from-file "../opencog/nlp/relex2logic/loader/load-rules.scm")
     (load-scm-from-file
         "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")
 )
 
-; Run forward chaining on the sentence
 (define (nlp-fc sent)
+"
+    Runs the rules found in R2L-en-RuleBase over the RelEx output creating
+    the logical representation of sentence in the atomspace.
+
+    sent:
+        - a sting containing the sentence to be parsed.
+"
+    (define (run-fc parse-node interp-link)
+        (list (cog-fc
+            (SetLink)
+            r2l-rules
+            (SetLink (parse-get-relex-outputs parse-node) interp-link))))
+
     (let* ((parse-node (car (sentence-get-parses (nlp-parse sent))))
-           (interp-node (gen-interp-node (cog-name parse-node)))
-           (interp-link (gen-interp-link interp-node parse-node))
+           (interp-node (InterpretationNode (string-append
+                (cog-name parse-node) "_interpretation_$X")))
+           (interp-link (InterpretationLink interp-node parse-node))
            (results (cog-outgoing-set (car (run-fc parse-node interp-link))))
            (result-contents '()))
 
@@ -46,23 +61,4 @@
         )
     )
     #t
-)
-
-(define (gen-interp-node parse-name)
-    (InterpretationNode (string-append parse-name "_interpretation_$X"))
-)
-
-(define (gen-interp-link interp-node parse-node)
-    (InterpretationLink
-       interp-node
-       parse-node
-    )
-)
-
-(define (run-fc parse-node interp-link)
-    (list (cog-fc
-        (SetLink)
-        r2l-rules
-        (SetLink (parse-get-relex-outputs parse-node) interp-link)
-    ))
 )
