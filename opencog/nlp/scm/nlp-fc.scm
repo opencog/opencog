@@ -17,12 +17,16 @@
         - a sting containing the sentence to be parsed.
 "
     (define (run-fc parse-node interp-link)
+        ; This runs all the rules of R2L-en-RuleBase over relex parse output.
         (list (cog-fc
             (SetLink)
             r2l-rules
             (SetLink (parse-get-relex-outputs parse-node) interp-link))))
 
-    (let* ((parse-node (car (sentence-get-parses (nlp-parse sent))))
+    ; Get the relex output for the sentence.
+    (relex-parse sent)
+
+    (let* ((parse-node (car (sentence-get-parses (car (get-new-parsed-sentences)))))
            (interp-node (InterpretationNode (string-append
                 (cog-name parse-node) "_interpretation_$X")))
            (interp-link (InterpretationLink interp-node parse-node))
