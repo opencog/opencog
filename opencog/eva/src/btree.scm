@@ -379,11 +379,12 @@
 ;; Main loop diagnostics
 ;; line 988 - idle_spin()
 (define loop-count 0)
+(define do-run-loop #t)
 (define (idle-loop)
 	(set! loop-count (+ loop-count 1))
 	(format #t "Main loop: ~a\n" loop-count)
 	(usleep 1001000)
-	(stv 1 1))
+	(if do-run-loop (stv 1 1) (stv 0 1)))
 
 ;; Main loop. Uses tail recursion optimizatio to form the loop.
 ;; line 556 -- build_tree()
@@ -406,7 +407,12 @@
 
 ;; Run the loop
 ;; line 297 -- self.tree.next()
-; (cog-evaluate! (DefinedPredicateNode "main loop"))
+(define (run)
+	(set! do-run-loop #t)
+	(call-with-new-thread
+		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
+(define (halt) (set! do-run-loop #f))
+(all-threads)
 
 ;
 ; Silence the output.
