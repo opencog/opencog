@@ -79,6 +79,12 @@ def do_gesture(gesture_node, duration_node, intensity_node):
 	print "Python gesture: ", gesture, " for ", duration, " int ", intensity
 	return TruthValue(1, 1)
 
+# Return true as long as ROS is running.
+def ros_is_running():
+	# if (rospy.is_shutdown())
+	#	return TruthValue(0, 1)
+	return TruthValue(1, 1)
+
 ### Define an executable pattern
 ##satisfaction_handle = SatisfactionLink(
 ##	SequentialAndLink(

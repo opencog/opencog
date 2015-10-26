@@ -387,18 +387,26 @@
 
 ;; Main loop. Uses tail recursion optimizatio to form the loop.
 ;; line 556 -- build_tree()
-
+;; XXX incomplete.... missing someone_left, nothig_is_happening
 (DefineLink
 	(DefinedPredicateNode "main loop")
 	(SatisfactionLink
 		(SequentialAndLink
+			(SequentialOrLink
+				(DefinedPredicateNode "New arrival sequence")
+				(DefinedPredicateNode "Interact with people")
+				(TrueLink)
+			)
 			(EvaluationLink
 				(GroundedPredicateNode "scm:idle-loop") (ListLink))
+			(EvaluationLink
+				(GroundedPredicateNode "py:ros_is_running") (ListLink))
 			(DefinedPredicateNode "main loop")
 		)))
 
 ;; Run the loop
-(cog-evaluate! (DefinedPredicateNode "main loop"))
+;; line 297 -- self.tree.next()
+; (cog-evaluate! (DefinedPredicateNode "main loop"))
 
 ;
 ; Silence the output.
