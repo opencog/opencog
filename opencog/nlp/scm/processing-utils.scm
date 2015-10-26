@@ -142,8 +142,8 @@
 (define (r2l-parse sent)
 "
     Runs the rules found in R2L-en-RuleBase over the RelEx output creating
-    the logical representation of sentence in the atomspace. Returns `#t` on
-    completion.
+    the logical representation of sentence in the atomspace. Returns a list
+    containing SetLinks that are the r2l-interpretations for individual parses.
 
     This can't handle  mutliple thread execution. Thus mapping this function
     over a list of sentences even though possible is not advised.
@@ -171,9 +171,8 @@
         (let* ((focus-set (SetLink (parse-get-relex-outputs parse-node)))
               (outputs (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set))))
 
-          (while (equal? 'ListLink (cog-type (car outputs)))
-              (set! outputs (fold append '() (map cog-delete-parent outputs))))
-          (delete-duplicates outputs)
+              (append-map cog-delete-parent
+                  (append-map cog-delete-parent outputs))
         )
     )
 
@@ -184,20 +183,16 @@
         ; are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               (results (run-ure parse-node)))
+               (result (SetLink (run-ure parse-node))))
 
             ; Construct a ReferenceLink to the output
-            (ReferenceLink
-                interp-node
-                ; The function in the SetLink returns a list of outputs that
-                ; are the results of the evaluation of the relex-to-logic functions,
-                ; on the relex-opencog-outputs.
-                (SetLink results))
+            (ReferenceLink interp-node result)
 
             ; Associate the interpreation with a parse, as there could be multiplie
             ; interpreations to the same parse.
             (InterpretationLink interp-node parse-node)
 
+            ; Time stamp the parse
             (AtTimeLink
                 ; FIXME: maybe opencog's internal time octime should be used. Will do for
                 ; now assuming a single instance deals with a single conversation.
@@ -205,8 +200,8 @@
                 interp-node
                 (TimeDomainNode "Dialogue-System"))
 
+            result
         )
-    #t
     )
 
     ; Check input to ensure that not-empty string isn't passed.
@@ -217,7 +212,6 @@
     (relex-parse sent)
 
     (map interpret (sentence-get-parses (car (get-new-parsed-sentences))))
-    #t
 )
 
 ; -----------------------------------------------------------------------
