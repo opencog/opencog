@@ -38,7 +38,7 @@ find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_persist-zmq_LIBRARY persist-zmq
-   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+	PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
@@ -63,12 +63,18 @@ set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_lambda_LIBRARY}
 	${ATOMSPACE_persist_LIBRARY}
 	${ATOMSPACE_persist-sql_LIBRARY}
-	${ATOMSPACE_zmqatoms_LIBRARY}
 	${ATOMSPACE_query_LIBRARY}
 	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
 )
+
+IF (HAVE_ZMQ)
+	set(ATOMSPACE_LIBRARIES
+		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_zmqatoms_LIBRARY}
+	)
+ENDIF (HAVE_ZMQ)
 
 INCLUDE (CheckIncludeFiles)
 
