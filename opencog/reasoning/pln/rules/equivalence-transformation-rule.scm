@@ -38,8 +38,26 @@
                     (VariableNode "$B"))))))
 
 (define (equivalence-transformation-formula AII EV)
-    (cog-set-tv!
-        AII (cog-tv EV)))
+    (let (
+            (IAB (gar AII))
+            (IBA (gdr AII)))
+         (cog-set-tv!
+            IAB
+            (equivalence-transformation-side-effect-free-formula IAB EV))
+         (cog-set-tv!
+            IBA
+            (equivalence-transformation-side-effect-free-formula IBA EV))
+    AII))
+
+(define (equivalence-transformation-side-effect-free-formula IAB EV)
+    (let* (
+            (A (gar IAB))
+            (B (gdr IAB))
+            (sA (cog-stv-strength A))
+            (sB (cog-stv-strength B))
+            (sEV (cog-stv-strength EV))
+            (sIAB (/ (* (+ 1 (/ sB sA)) sEV) (+ 1 sEV))))
+        (stv sIAB (cog-stv-confidence EV))))
 
 ; Name the rule
 (define equivalence-transformation-rule-name
