@@ -2,17 +2,13 @@
 This directory has the initial specification of the R2L-RuleBase for the
 English language.
 
-To test the rules, use the following steps.
+To use the rules, use the following steps.
 1. Start the cogserver
 2. Enter the scm shell.
-3. Load the scheme files in this directory and the sub-directories using
-   `(load "../path/to/scheme/files")` (a configuration file that adds the
-   relevant set of files are shortly going to be added).
+3. Load the rules using `(load-r2l-rulebase)`
 4. Start the relex server using the --relex flag (don't use the --logic flag)
-5. In the opencog scheme shell run (relex-parse "some sentence"), preferably
-   sentences on which the rules are applicable.
-6. Run `(cog-bind name-of-the-variable-which-has-BindLink-as-its-value)`
-
+5. In the opencog scheme shell run (nlp-parse "some sentence")
+6. Build your thing :smile:
 
 ## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns
 [A. Nitzkin](https://github.com/anitzkin), June 2015
