@@ -375,6 +375,31 @@
 			(TrueLink (DefinedSchemaNode "Select random face"))
 			(DefinedPredicateNode "Interact with face")
 		)))
+
+;; Main loop diagnostics
+;; line 988 - idle_spin()
+(define loop-count 0)
+(define (idle-loop)
+	(set! loop-count (+ loop-count 1))
+	(format #t "Main loop: ~a\n" loop-count)
+	(usleep 1001000)
+	(stv 1 1))
+
+;; Main loop. Uses tail recursion optimizatio to form the loop.
+;; line 556 -- build_tree()
+
+(DefineLink
+	(DefinedPredicateNode "main loop")
+	(SatisfactionLink
+		(SequentialAndLink
+			(EvaluationLink
+				(GroundedPredicateNode "scm:idle-loop") (ListLink))
+			(DefinedPredicateNode "main loop")
+		)))
+
+;; Run the loop
+(cog-evaluate! (DefinedPredicateNode "main loop"))
+
 ;
-;
+; Silence the output.
 (TrueLink)
