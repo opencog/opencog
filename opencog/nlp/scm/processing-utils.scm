@@ -161,7 +161,7 @@
         )
     )
 
-    (define (run-ure parse-node)
+    (define (run-fc parse-node)
         ; This runs all the rules of R2L-en-RuleBase over relex parse outputs,
         ; and returns a cleaned and de-duplicated list. The relex outputs
         ; associated with 'parse-node' make the focus-set, this way, IF there
@@ -183,7 +183,7 @@
         ; are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               (result (SetLink (run-ure parse-node))))
+               (result (SetLink (run-fc parse-node))))
 
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
