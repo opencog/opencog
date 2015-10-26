@@ -29,7 +29,7 @@ explicitly with a certain OpenCog-based scripting language.
 
 Status
 ------
-This is version 0.3.0 of the project. A few basics kind-of work.
+This is version 0.4.0 of the project. A few basics kind-of work.
 There's still a mish-mash of unstarted cool ideas.
 
 The `notes` directory contains a copy of the original owyl code,

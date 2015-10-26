@@ -4,6 +4,11 @@
 ; Behavior tree in the atomspace.
 ; Under construction.
 ;
+; Run the main loop:
+;    (run)
+; Pause the main loop:
+;    (halt)
+;
 ; Unit testing:
 ; The various predicates below can be manually unit tested by manually
 ; adding and removing new visible faces, and then manually invoking the
@@ -20,13 +25,12 @@
 ; (show-room-state)
 ; (show-interaction-state)
 ; (cog-evaluate! (DefinedPredicateNode "Interact with people"))
-
+;
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
-(use-modules (opencog))
-(use-modules (opencog query))
-(use-modules (opencog exec))
+(use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog atom-types))
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 
@@ -38,6 +42,7 @@
 ; (display %load-path)
 ; (add-to-load-path "../src")
 (load-from-path "faces.scm")
+(load-from-path "behavior-cfg.scm")
 
 (use-modules (opencog logger))
 ; (cog-logger-set-stdout #t)
@@ -58,6 +63,9 @@
 (define no-interaction (ConceptNode "none"))
 
 (StateLink interaction-state no-interaction)
+
+; current_emotion_duration set to default_emotion_duration
+(StateLink (SchemaNode "current_emotion_duration") (TimeNode 1.0)) ; in seconds
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -250,10 +258,10 @@
 ; ------------------------------------------------------
 ; Time-stamp-related stuff.
 
-;; Set a timestamp. XXX todo replace this with TimeNode, timeserver.
+;; Set a timestamp. XXX todo replace this with timeserver.
 ;; line 757, timestamp
 (define (get-timestamp)
-	(NumberNode (number->string (current-time))))
+	(TimeNode (current-time)))
 
 (DefineLink
 	(DefinedSchemaNode "set timestamp")
