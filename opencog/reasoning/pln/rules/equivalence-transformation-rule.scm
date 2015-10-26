@@ -56,6 +56,7 @@
             (sA (cog-stv-strength A))
             (sB (cog-stv-strength B))
             (sEV (cog-stv-strength EV))
+            ; Formula based on PLN book formula for sim2inh
             (sIAB (/ (* (+ 1 (/ sB sA)) sEV) (+ 1 sEV))))
         (stv sIAB (cog-stv-confidence EV))))
 
