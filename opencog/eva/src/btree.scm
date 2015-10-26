@@ -348,11 +348,16 @@
 
 ;; Check to see if someone left
 ;; line 422 -- someone_left()
+;; XXX not implemented at all
+(DefineLink
+	(DefinedPredicateNode "Someone left")
+	(FalseLink)
+)
 
 
 ;; Start a new interaction
 ;; line 461 -- sequence ....
-; XXX  todo -- check if more han one face target
+; XXX  todo -- check if more than one face target
 ; record the start time ....
 (DefineLink
 	(DefinedPredicateNode "Start new interaction")
@@ -376,6 +381,15 @@
 			(DefinedPredicateNode "Interact with face")
 		)))
 
+;; Nothing is happening
+;; line 507 -- nothing_is_happening()
+;; XXX Not implemented!
+(DefineLink
+	(DefinedPredicateNode "Nothing is happening")
+	(FalseLink)
+)
+
+;; ------------------------------------------------------------------
 ;; Main loop diagnostics
 ;; line 988 - idle_spin()
 (define loop-count 0)
@@ -388,14 +402,15 @@
 
 ;; Main loop. Uses tail recursion optimizatio to form the loop.
 ;; line 556 -- build_tree()
-;; XXX incomplete.... missing someone_left, nothig_is_happening
 (DefineLink
 	(DefinedPredicateNode "main loop")
 	(SatisfactionLink
 		(SequentialAndLink
 			(SequentialOrLink
 				(DefinedPredicateNode "New arrival sequence")
+				(DefinedPredicateNode "Someone left")
 				(DefinedPredicateNode "Interact with people")
+				(DefinedPredicateNode "Nothing is happening")
 				(TrueLink)
 			)
 			(EvaluationLink
@@ -405,7 +420,8 @@
 			(DefinedPredicateNode "main loop")
 		)))
 
-;; Run the loop
+;; Run the loop (in a new thread)
+;; Call (run) to run the loop, (halt) to pause the loop.
 ;; line 297 -- self.tree.next()
 (define (run)
 	(set! do-run-loop #t)
