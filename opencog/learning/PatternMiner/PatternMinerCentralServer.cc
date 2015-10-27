@@ -378,7 +378,7 @@ void PatternMiner::runParsePatternTaskThread()
             waitForParsePatternQueue.pop_front();
 
             tryToParsePatternNum ++;
-            cout<< "\r" << tryToParsePatternNum << + "received patterns parsed." ;
+            cout<< "\r" << tryToParsePatternNum << + " received patterns parsed." ;
             std::cout.flush();
 
             patternQueueLock.unlock();

@@ -1085,7 +1085,7 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
 }
 
-void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int min_frequency)
+void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency)
 {
 
     // out put the n_gram patterns to a file
@@ -1549,7 +1549,9 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
         findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
         // cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
 
-        return log2(newHTreeNode->count);
+        int count = newHTreeNode->count;
+
+        return log2(count);
 
     }
 }
@@ -1656,6 +1658,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              generateNextCombinationGroup(indexes, maxgram);
          }
 
+         delete [] indexes;
 
     }
 
@@ -2228,6 +2231,8 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 //     THREAD_NUM = system_thread_num;
 
     THREAD_NUM = 1;
+
+    run_as_distributed_worker = false;
 
 
     threads = new thread[THREAD_NUM];

@@ -589,7 +589,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     if (n_limit == 1)
         n_limit = 2;
 
-    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
+
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -604,6 +604,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     if( filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace) )
         return; //already been filter out in this phrase
+
+    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
 /*    // debug
     string lastGramLinksStr = "";
@@ -823,6 +825,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
         }
     }
 
+    delete [] indexes;
+
 //    HandleSeq instance;
 //    instance.push_back(startLink);
 
@@ -1009,7 +1013,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
     if (n_limit == 1)
         n_limit = 2;
 
-    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
+
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -1017,6 +1021,8 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
     if (filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars, _fromAtomSpace))
         return; // already been filter out in this phrase
+
+    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
     // var_num is the number of variables
     for (int var_num = 1;var_num < n_limit; ++ var_num)
@@ -1211,5 +1217,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
             generateNextCombinationGroup(indexes, n_max);
         }
     }
+
+    delete [] indexes;
 
 }
