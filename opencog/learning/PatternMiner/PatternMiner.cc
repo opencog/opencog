@@ -1835,16 +1835,26 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
         // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
-        HTreeNode* newHTreeNode = new HTreeNode();
-        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
-        uniqueKeyLock.unlock();
+        cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
+        if (run_as_central_server)
+        {
 
-        newHTreeNode->pattern = connectedPattern;
+            return 0;
+        }
+        else
+        {
 
-        // Find All Instances in the original AtomSpace For this Pattern
-        findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
-//        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
-        return newHTreeNode->count;
+            HTreeNode* newHTreeNode = new HTreeNode();
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+            uniqueKeyLock.unlock();
+
+            newHTreeNode->pattern = connectedPattern;
+
+            // Find All Instances in the original AtomSpace For this Pattern
+            findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
+    //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+            return newHTreeNode->count;
+        }
 
     }
 
@@ -2036,6 +2046,10 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             {
                 // std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
+
+                if (component_count == 0)
+                    break;
+
                 // cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
