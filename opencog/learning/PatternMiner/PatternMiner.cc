@@ -2247,6 +2247,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     THREAD_NUM = 1;
 
     run_as_distributed_worker = false;
+    run_as_central_server = false;
 
 
     threads = new thread[THREAD_NUM];
