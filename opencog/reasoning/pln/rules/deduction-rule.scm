@@ -1,28 +1,27 @@
-; =============================================================================
-; DeductionRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   LinkType
-;       B
-;       C
-; |-
-; LinkType
-;   A
-;   C
-;
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       deduction-inheritance-rule
-;       deduction-implication-rule
-;       deduction-subset-rule
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; DeductionRule
+;;
+;; <link-type>
+;;   A
+;;   B
+;; <link-type>
+;;   B
+;;   C
+;; |-
+;; <link-type>
+;;   A
+;;   C
+;;
+;; Due to type system limitations, the rule has been divided into 3:
+;;       deduction-inheritance-rule
+;;       deduction-implication-rule
+;;       deduction-subset-rule
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define deduction-inheritance-rule
+;; Generate the corresponding deduction rule given its link-type.
+(define (gen-deduction-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -32,10 +31,10 @@
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C")
-            (InheritanceLink
+            (link-type
                 (VariableNode "$A")
                 (VariableNode "$B"))
-            (InheritanceLink
+            (link-type
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
@@ -44,79 +43,25 @@
                 (VariableNode "$A")
                 (VariableNode "$B")
                 (VariableNode "$C")
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (InheritanceLink
+                (link-type
                     (VariableNode "$B")
                     (VariableNode "$C"))
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
+
+
+(define deduction-inheritance-rule
+  (gen-deduction-rule InheritanceLink))
 
 (define deduction-implication-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (ImplicationLink
-                (VariableNode "$B")
-                (VariableNode "$C")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: deduction-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (VariableNode "$B")
-                    (VariableNode "$C"))
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))))))
+  (gen-deduction-rule ImplicationLink))
 
 (define deduction-subset-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
-            (SubsetLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (SubsetLink
-                (VariableNode "$B")
-                (VariableNode "$C")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: deduction-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (SubsetLink
-                    (VariableNode "$B")
-                    (VariableNode "$C"))
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))))))
+  (gen-deduction-rule SubsetLink))
 
 (define (deduction-formula A B C AB BC AC)
     (let
@@ -135,3 +80,19 @@
             (stv
                 (simple-deduction-strength-formula sA sB sC sAB sBC) 
                 (min cAB cBC)))))
+
+;; Name the rules
+(define deduction-inheritance-rule-name
+  (Node "deduction-inheritance-rule"))
+(DefineLink deduction-inheritance-rule-name
+  deduction-inheritance-rule)
+
+(define deduction-implication-rule-name
+  (Node "deduction-implication-rule"))
+(DefineLink deduction-implication-rule-name
+  deduction-implication-rule)
+
+(define deduction-subset-rule-name
+  (Node "deduction-subset-rule"))
+(DefineLink deduction-subset-rule-name
+  deduction-subset-rule)
