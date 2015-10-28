@@ -24,7 +24,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
             (SimilarityLink
                 (VariableNode "$A")
                 (VariableNode "$B")))
@@ -43,7 +42,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
             (IntensionalSimilarityLink
                 (VariableNode "$A")
                 (VariableNode "$B")))
@@ -62,7 +60,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
             (ExtensionalSimilarityLink
                 (VariableNode "$A")
                 (VariableNode "$B")))

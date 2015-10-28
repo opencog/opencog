@@ -28,9 +28,6 @@
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
             (link-type
                 (VariableNode "$A")
                 (VariableNode "$B"))

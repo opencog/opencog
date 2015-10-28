@@ -12,8 +12,7 @@
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")
-                (VariableNode "$B"))
-            (VariableNode "$A"))
+                (VariableNode "$B")))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: simple-modus-ponens-formula")
             (ListLink

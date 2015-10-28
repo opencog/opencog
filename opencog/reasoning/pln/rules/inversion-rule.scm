@@ -24,8 +24,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
             (InheritanceLink
                 (VariableNode "$A")
                 (VariableNode "$B")))
@@ -47,8 +45,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
             (ImplicationLink
                 (VariableNode "$A")
                 (VariableNode "$B")))
@@ -70,8 +66,6 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
             (SubsetLink
                 (VariableNode "$A")
                 (VariableNode "$B")))
