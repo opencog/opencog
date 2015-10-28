@@ -1,79 +1,48 @@
-; =============================================================================
-; ModusPonensRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   A
-; |-
-;   B
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       modus-ponens-inheritance-rule
-;       modus-ponens-implication-rule
-;       modus-ponens-subset-rule
-;
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; ModusPonensRule
+;; 
+;; <LinkType>
+;;   A
+;;   B
+;; A
+;; |-
+;; B
+;;
+;; Due to type system limitations, the rule has been divided into 3:
+;;       modus-ponens-inheritance-rule
+;;       modus-ponens-implication-rule
+;;       modus-ponens-subset-rule
+;;
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define modus-ponens-inheritance-rule
+;; Generate the corresponding modus ponens rule given its link-type.
+(define (gen-modus-ponens-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (AndLink
+        (link-type
             (VariableNode "$A")
-            (InheritanceLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
+            (VariableNode "$B"))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
+
+(define modus-ponens-inheritance-rule
+  (gen-modus-ponens-rule InheritanceLink))
 
 (define modus-ponens-implication-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: modus-ponens-formula")
-            (ListLink
-                (VariableNode "$A")
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
+  (gen-modus-ponens-rule ImplicationLink))
 
 (define modus-ponens-subset-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (SubsetLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: modus-ponens-formula")
-            (ListLink
-                (VariableNode "$A")
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
+  (gen-modus-ponens-rule SubsetLink))
 
 (define (modus-ponens-formula A AB B)
     (let

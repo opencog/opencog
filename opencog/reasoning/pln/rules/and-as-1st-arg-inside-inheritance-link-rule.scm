@@ -1,21 +1,20 @@
-; =============================================================================
-; And as 1st arg inside inheritance link rule
-;
-; AndLink
-;   InheritanceLink
-;       A
-;       C
-;   InheritanceLink
-;       B
-;       C
-; |-
-; InheritanceLink
-;   AndLink
-;       A
-;       B
-;   C
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; And as 1st arg inside inheritance link rule
+;;
+;; InheritanceLink
+;;   A
+;;   C
+;; InheritanceLink
+;;   B
+;;   C
+;; |-
+;; InheritanceLink
+;;   AndLink
+;;       A
+;;       B
+;;   C
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
 (define and-as-1st-arg-inside-inheritance-link-rule
@@ -25,9 +24,6 @@
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
             (InheritanceLink
                 (VariableNode "$A")
                 (VariableNode "$C"))
