@@ -26,6 +26,4 @@ Opencog also optionally depends on the following packages:
 
    guile-devel    -- needed for scheme bindings
 
-   libexpat-devel -- needed for embodiment
-
 -------------------------------------------------------------------------------

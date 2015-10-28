@@ -9,7 +9,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-or-transformation
+(define or-transformation-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -18,7 +18,7 @@
     (VariableNode "$A")
     (VariableNode "$B"))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-or-transformation")
+    (GroundedSchemaNode "scm: or-transformation-formula")
     (ListLink
      (OrLink
       (VariableNode "$A")
@@ -28,19 +28,19 @@
        (VariableNode "$A"))
       (VariableNode "$B"))))))
 
-(define (pln-formula-or-transformation OAB IAB)
+(define (or-transformation-formula OAB IAB)
   (cog-set-tv!
    IAB
-   (pln-formula-or-transformation-side-effect-free OAB IAB))
+   (or-transformation-side-effect-free-formula OAB IAB))
 )
 
 
-(define (pln-formula-or-transformation-side-effect-free OAB IAB)
+(define (or-transformation-side-effect-free-formula OAB IAB)
   (let 
       ((sOAB (cog-stv-strength OAB))
        (cOAB (cog-stv-confidence OAB)))
     (stv sOAB cOAB)))
 
 ; Name the rule
-(define pln-rule-or-transformation-name (Node "pln-rule-or-transformation"))
-(DefineLink pln-rule-or-transformation-name pln-rule-or-transformation)
+(define or-transformation-rule-name (Node "or-transformation-rule"))
+(DefineLink or-transformation-rule-name or-transformation-rule)

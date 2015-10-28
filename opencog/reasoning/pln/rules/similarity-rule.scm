@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-similarity
+(define similarity-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -28,7 +28,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-similarity")
+            (GroundedSchemaNode "scm: similarity-formula")
             (ListLink
                 (AndLink
                     (VariableNode "$A")
@@ -40,7 +40,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-similarity AAB OAB SAB)
+(define (similarity-formula AAB OAB SAB)
     (cog-set-tv! 
         SAB
         (if 

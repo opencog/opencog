@@ -16,7 +16,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-negated-subset-evaluation
+(define negated-subset-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -30,7 +30,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-negated-subset-evaluation")
+            (GroundedSchemaNode "scm: negated-subset-evaluation-formula")
             (ListLink
                 (SubsetLink
                     (NotLink
@@ -43,11 +43,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-negated-subset-evaluation nAB CA CB)
+(define (negated-subset-evaluation-formula nAB CA CB)
     (cog-set-tv!
-        nAB (pln-formula-negated-subset-evaluation-side-effect-free nAB CA CB)))
+        nAB (negated-subset-evaluation-side-effect-free-formula nAB CA CB)))
 
-(define (pln-formula-subset-negated-evaluation-side-effect-free nAB CA CB)
+(define (subset-negated-evaluation-side-effect-free-formula nAB CA CB)
     (let 
         ((snCA (- 1 (cog-stv-strength CA)))
          (cnCA (cog-stv-confidence CA))
@@ -62,8 +62,8 @@
                 (stv 1 1)))))
 
 ; Name the rule
-(define pln-rule-negated-subset-evaluation-name
-  (Node "pln-rule-negated-subset-evaluation"))
+(define negated-subset-evaluation-rule-name
+  (Node "negated-subset-evaluation-rule"))
 (DefineLink
-  pln-rule-negated-subset-evaluation-name
-  pln-rule-negated-subset-evaluation)
+  negated-subset-evaluation-rule-name
+  negated-subset-evaluation-rule)

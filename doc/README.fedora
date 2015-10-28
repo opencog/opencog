@@ -20,8 +20,6 @@ Opencog also optionally depends on the following packages:
 
    unixODBC-devel     -- needed for SQL persistence
 
-   expat expat-devel  -- needed for embodiment
-
    guile-devel        -- needed for scheme bindings
 
 ----------------------------------------------------------

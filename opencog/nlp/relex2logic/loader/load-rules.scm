@@ -2,6 +2,7 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/comp.scm")
 ;;
 (load-scm-from-file "../opencog/nlp/relex2logic/advmod.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/adverbialpp.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/amod.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/atTime.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/because.scm")
@@ -57,3 +58,6 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/truthquery.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/interrogative.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/imperative.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/det.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/nn.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/to-do-rule-3.scm")

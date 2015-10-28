@@ -9,7 +9,6 @@ storing atomspaces or part of it to persistent storage devices. These include:
 - experimental \ref sect_persist_hyper "HyperTable" support
 - experimental/broken \ref sect_persist_memcached "memcached" support
 - \ref sect_persist_sql "sql"
-- \ref sect_persist_xml "XML-based file storage"
 
 In this context, it is worth reading 
 <a href="http://wiki.opencog.org/w/Distributed_Architecture_RFC">Distributed Architecture RFC</a>.
@@ -85,30 +84,6 @@ simple readers and writers to save and restore atoms from an SQL
 database. The current design can save/restore individual atoms, and it can
 bulk-save/bulk-restore the entire contents of an AtomTable.
 
-\section sect_persist_xml  xml
-
-To build it, use:
-@code
-make xml
-@endcode
-
-Dependencies:
-- expat
-
-The library does NOT use the modern BackingStore interface from 
-\ref libatomspace "atomspace" library.
-
-XMLBufferReader is the interface that requires 
-\ref XMLBufferReader::open "open()",
-\ref XMLBufferReader::open "read()" and
-\ref XMLBufferReader::open "close()". StringXMLBufferReader and
-FileXMLBufferReader implement this interface.
-
-NMXmlExporter's method \ref NMXmlExporter::toXML "toXML()" 
-exports a subset of the AtomSpace to XML. NMXmlParser, on the other hand,
-implements an XML parser that reads XML files and inserts the
-corresponding structure of nodes and links in the AtomSpace.
-
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
 \endif
@@ -131,11 +106,8 @@ This module <em>opencog/persist</em> groups various libraries that allow
 storing atomspaces or part of it to persistent storage devices.
 To build it type:
 @code
-make cachedb
 make hypertabledb
 make persist
-make savable
-make xml
 @endcode
 
 To read a high level overview of this library head to 

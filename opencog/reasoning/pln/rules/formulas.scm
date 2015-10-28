@@ -2,8 +2,8 @@
 ; A list of the helper functions necessary in different inference rules
 ; -----------------------------------------------------------------------------
 ; Index
-; - inversion-formula
-; - simple-deduction-formula
+; - inversion-strength-formula
+; - simple-deduction-strength-formula
 ; - find-replace
 ;------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 ; sBA = (sAB * sB)/sA
 ; -----------------------------------------------------------------------------
 
-(define (inversion-formula sAB sA sB)
+(define (inversion-strength-formula sAB sA sB)
 	(/ (* sAB sB) sA))
 
 ; =============================================================================
@@ -45,7 +45,7 @@
 
 ; Main Formula
 
-(define (simple-deduction-formula sA sB sC sAB sBC)
+(define (simple-deduction-strength-formula sA sB sC sAB sBC)
 	(if
 		(and
 				(>= (consistency1 sA sB sAB) 0)
@@ -100,7 +100,7 @@
 ; Returns the strength value of the transitive similarity rule
 ; -----------------------------------------------------------------------------
 
-(define (transitive-similarity-formula sA sB sC sAB sBC )
+(define (transitive-similarity-strength-formula sA sB sC sAB sBC )
     (let
         ((T1 (/ (* (+ 1 (/ sB sA)) (sAB)) (+ 1 sAB)))
          (T2 (/ (* (+ 1 (/ sC sB)) (sBC)) (+ 1 sBC)))
@@ -115,6 +115,6 @@
 ; Returns the strength value of the precise modus ponens rule
 ; -----------------------------------------------------------------------------
 
-(define (precise-modus-ponens-formula sA sAB snotAB)
+(define (precise-modus-ponens-strength-formula sA sAB snotAB)
     (+ (* sAB sA) (* snotAB (negate sA))))
 

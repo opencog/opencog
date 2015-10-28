@@ -8,7 +8,7 @@
 ;    A
 ;----------------------------------------------------------------------
 
-(define pln-rule-not-construction
+(define not-construction-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -18,20 +18,20 @@
               (TypeNode "ConceptNode"))))
      (VariableNode "$A")
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: pln-formula-not-construction")
+        (GroundedSchemaNode "scm: not-construction-formula")
         (ListLink
            (VariableNode "$A")))))
 
-(define (pln-formula-not-construction A)
+(define (not-construction-formula A)
   (cog-set-tv!
    (NotLink A)
-   (pln-formula-not-construction-side-effect-free A))
+   (not-construction-side-effect-free-formula A))
 )
 
 (define (negate x)
   (- 1 x))
 
-(define (pln-formula-not-construction-side-effect-free A)
+(define (not-construction-side-effect-free-formula A)
   (let ((sA (cog-stv-strength A))
         (cA (cog-stv-confidence A)))
     (stv (negate sA) cA)))
@@ -41,8 +41,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Name the rule
-(define pln-rule-not-construction-name
-  (Node "pln-rule-not-construction"))
+(define not-construction-rule-name
+  (Node "not-construction-rule"))
 (DefineLink
-   pln-rule-not-construction-name
-   pln-rule-not-construction)
+   not-construction-rule-name
+   not-construction-rule)

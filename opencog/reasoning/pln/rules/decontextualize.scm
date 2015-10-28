@@ -12,10 +12,10 @@
 ;     C ANDLink B
 ;----------------------------------------------------------------------
 
-; Inverse of (pln-rule-contextualize-inheritance):
+; Inverse of (contextualize-inheritance-rule):
 ; a ContextLink consisting of an InheritanceLink is decontextualized,
 ; i.e. reduced to an inheritance relationship
-(define pln-rule-decontextualize-inheritance
+(define decontextualize-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -27,7 +27,7 @@
                 (VariableNode "$A")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 (InheritanceLink
                     (AndLink
@@ -42,10 +42,10 @@
                         (VariableNode "$A")
                         (VariableNode "$B")))))))
 
-; Inverse of (pln-rule-contextualize-evaluation):
+; Inverse of (contextualize-evaluation-rule):
 ; in an EvaluationLink, the PredicateNode is not 'andified';
 ; gets rid of the ContextLink enclosing an EvaluationLink
-(define pln-rule-decontextualize-evaluation
+(define decontextualize-evaluation-rule
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -60,7 +60,7 @@
                 (ListLink
                     (VariableNode "$B"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 (EvaluationLink
                     (VariableNode "$A")
@@ -85,9 +85,9 @@
 ;     C
 ;     A
 ;----------------------------------------------------------------------
-; Inverse of (pln-rule-contextualize-subset):
+; Inverse of (contextualize-subset-rule):
 ; ContextLink is transformed into a SubsetLink
-(define pln-rule-decontextualize-subset
+(define decontextualize-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -96,7 +96,7 @@
             (VariableNode "$C")
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 (SubsetLink
                     (VariableNode "$C")
@@ -105,12 +105,12 @@
                     (VariableNode "$C")
                     (VariableNode "$A"))))))
 
-(define (pln-formula-context Relation Context)
+(define (context-formula Relation Context)
     (cog-set-tv! Relation (cog-tv Context)))
 
 ; Name the rule
-(define pln-rule-contextualize-inheritance-name
-  (Node "pln-rule-contextualize-inheritance")
+(define contextualize-inheritance-rule-name
+  (Node "contextualize-inheritance-rule")
 (DefineLink
-  pln-rule-contextualize-inheritance-name
-  pln-rule-contextualize-inheritance)
+  contextualize-inheritance-rule-name
+  contextualize-inheritance-rule)

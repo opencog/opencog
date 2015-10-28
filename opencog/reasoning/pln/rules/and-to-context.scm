@@ -16,7 +16,7 @@
 ;       B
 ;
 ; -----------------------------------------------------------------------------
-(define pln-rule-and-to-context
+(define and-to-context-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -30,7 +30,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-and-to-context")
+            (GroundedSchemaNode "scm: and-to-context-formula")
             (ListLink
                 (SubsetLink
                     (AndLink
@@ -45,12 +45,12 @@
                             (VariableNode "$A")
                             (VariableNode "$B")))))))
 
-(define (pln-formual-and-to-context SACBC CAB)
+(define (and-to-context-formula SACBC CAB)
     (cog-set-tv!
         CAB (cog-tv SACBC)))
 
 		
 
 ; Name the rule
-(define pln-rule-and-to-context-name (Node "pln-rule-and-to-context"))
-(DefineLink pln-rule-and-to-context-name pln-rule-and-to-context)
+(define and-to-context-rule-name (Node "and-to-context-rule"))
+(DefineLink and-to-context-rule-name and-to-context-rule)

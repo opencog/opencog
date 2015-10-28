@@ -8,18 +8,18 @@ in Scheme.
 
 The following rules are defined for PLN:
 
-    - pln-rule-and
-    - pln-rule-not
-    - pln-rule-deduction
-    - pln-rule-modus-ponens
+    - and-rule
+    - not-rule
+    - deduction-rule
+    - modus-ponens-rule
     - Context rules:
-        - pln-rule-contextualize-inheritance
-        - pln-rule-contextualize-evaluation
-        - pln-rule-contextualize-subset
-        - pln-rule-decontextualize-inheritance
-        - pln-rule-decontextualize-evaluation
-        - pln-rule-decontextualize-subset
-        - pln-rule-context-free-to-sensitive
+        - contextualize-inheritance-rule
+        - contextualize-evaluation-rule
+        - contextualize-subset-rule
+        - decontextualize-inheritance-rule
+        - decontextualize-evaluation-rule
+        - decontextualize-subset-rule
+        - context-free-to-sensitive-rule
         (here, the exact formula is still unclear)
 
 ## Additional instructions
@@ -73,7 +73,7 @@ in order to compile the rules and formulas for better performance.
 - Run this command:
 
     ```
-    (cog-bind pln-rule-deduction)
+    (cog-bind deduction-rule)
     ```
 
 - Run this command again:

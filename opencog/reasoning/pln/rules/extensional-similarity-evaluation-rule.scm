@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-extensional-similarity-evaluation
+(define extensional-similarity-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-extensional-similarity-evaluation")
+            (GroundedSchemaNode "scm: extensional-similarity-evaluation-formula")
             (ListLink
                 (ExtensionalSimilarityLink
                     (VariableNode "$A")
@@ -41,11 +41,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-extensional-similarity-evaluation AB CA CB)
+(define (extensional-similarity-evaluation-formula AB CA CB)
     (cog-set-tv!
-        AB (pln-formula-extensional-similarity-evaluation-side-effect-free AB CA CB)))
+        AB (extensional-similarity-evaluation-side-effect-free-formula AB CA CB)))
 
-(define (pln-formula-extensional-similarity-evaluation-side-effect-free AB CA CB)
+(define (extensional-similarity-evaluation-side-effect-free-formula AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
@@ -60,7 +60,7 @@
                 (stv 0 1)))))
 
 ; Name the rule
-(define pln-rule-extensional-similarity-evaluation-name
-  (Node "pln-rule-extensional-similarity-evaluation"))
-(DefineLink pln-rule-extensional-similarity-evaluation-name
-  pln-rule-extensional-similarity-evaluation)
+(define extensional-similarity-evaluation-rule-name
+  (Node "extensional-similarity-evaluation-rule"))
+(DefineLink extensional-similarity-evaluation-rule-name
+  extensional-similarity-evaluation-rule)

@@ -1,109 +1,63 @@
-; =============================================================================
-; PreciseModusPonensRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   LinkType
-;       NotLink
-;           A
-;       B
-;   A
-; |-
-;   B
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       pln-rule-precise-modus-ponens-inheritance
-;       pln-rule-precise-modus-ponens-implication
-;       pln-rule-precise-modus-ponens-subset
-;
+;; =============================================================================
+;; PreciseModusPonensRule
+;; 
+;; <LinkType>
+;;   A
+;;   B
+;; <LinkType>
+;;   NotLink
+;;     A
+;;   B
+;; A
+;; |-
+;;   B
+;; Due to type system limitations, the rule has been divided into 3:
+;;       precise-modus-ponens-inheritance-rule
+;;       precise-modus-ponens-implication-rule
+;;       precise-modus-ponens-subset-rule
+;;
 
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-precise-modus-ponens-inheritance
+;; Generate the corresponding precise modus ponens rule given its
+;; link-type.
+(define (gen-precise-modus-ponens-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
         (AndLink
-            (VariableNode "$A")
-            (InheritanceLink
+            (link-type
                 (VariableNode "$A")
                 (VariableNode "$B"))
-            (InheritanceLink
+            (link-type
                 (NotLink
                     (VariableNode "$A"))
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
+            (GroundedSchemaNode "scm: precise-modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (InheritanceLink
+                (link-type
                     (NotLink
                         (VariableNode "$A"))
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
 
-(define pln-rule-precise-modus-ponens-implication
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (ImplicationLink
-                (NotLink
-                    (VariableNode "$A"))
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
-            (ListLink
-                (VariableNode "$A")
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (NotLink
-                        (VariableNode "$A"))
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
+(define precise-modus-ponens-inheritance-rule
+  (gen-precise-modus-ponens-rule InheritanceLink))
 
-(define pln-rule-precise-modus-ponens-subset
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (SubsetLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (SubsetLink
-                (NotLink
-                    (VariableNode "$A"))
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-precise-modus-ponens")
-            (ListLink
-                (VariableNode "$A")
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (SubsetLink
-                    (NotLink
-                        (VariableNode "$A"))
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
+(define precise-modus-ponens-implication-rule
+  (gen-precise-modus-ponens-rule ImplicationLink))
 
-(define (pln-formula-precise-modus-ponens A AB notAB B)
+(define precise-modus-ponens-subset-rule
+  (gen-precise-modus-ponens-rule SubsetLink))
+
+(define (precise-modus-ponens-formula A AB notAB B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
@@ -114,5 +68,5 @@
         (cog-set-tv!
             B
             (stv 
-                (precise-modus-ponens-formula sA sAB snotAB) 
+                (precise-modus-ponens-strength-formula sA sAB snotAB) 
                 (min (min cAB cnotAB) cA)))))

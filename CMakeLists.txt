@@ -200,11 +200,6 @@ ELSE(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
 
-FIND_PACKAGE(CURL)
-IF (NOT CURL_FOUND)
-	MESSAGE(STATUS "libcurl missing: needed for ubigraph module.")
-ENDIF (NOT CURL_FOUND)
-
 FIND_PACKAGE(Cxxtest)
 IF (NOT CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
@@ -290,9 +285,6 @@ IF (OPENGL_FOUND)
 ELSE (OPENGL_FOUND)
 	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
 ENDIF (OPENGL_FOUND)
-
-# At this time, there is no reason to build with memcached for
-# FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
@@ -417,27 +409,6 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# These are required for building the embodiment code
-FIND_PACKAGE(XercesC)
-IF (XERCESC_FOUND)
-	IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 3.* are supported. Embodiment won't be built.")
-		SET(XERCESC_VERSION_OK FALSE)
-	ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
-		INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
-		SET(XERCESC_VERSION_OK TRUE)
-	ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-ELSE (XERCESC_FOUND)
-	MESSAGE(STATUS "Xerces-C missing: needed for embodiment")
-ENDIF (XERCESC_FOUND)
-
-# XML-RPC, used by the ubigraph module
-FIND_PACKAGE(XMLRPC COMPONENTS client)
-IF (NOT XMLRPC_FOUND)
-	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
-ENDIF (NOT XMLRPC_FOUND)
-
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
 IF (ZMQ_FOUND AND ZMQ_LIBRARY)
@@ -465,23 +436,11 @@ IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 	SET(HAVE_SPATIAL_TOOLS 1)
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
-# FYI, at this time, no part of opencog depends on expat being installed!
-IF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-	SET(HAVE_XML 1)
-ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-
 IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
 
-IF(XERCESC_VERSION_OK)
-	SET(HAVE_EMBODIMENT 1)
-ENDIF(XERCESC_VERSION_OK)
-
-IF (CURL_FOUND AND XMLRPC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
-	SET(HAVE_UBIGRAPH 1)
-ENDIF (CURL_FOUND AND XMLRPC_FOUND)
+SET(HAVE_EMBODIMENT 1)
 
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	SET(HAVE_VITERBI 1)
@@ -526,7 +485,8 @@ IF (NOT DEFINED LIB_DIR_SUFFIX)
 ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
 
 # rpath handling
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
@@ -708,7 +668,6 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("TBB" "Intel TBB for multithreading" HAVE_TBB)
-SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
