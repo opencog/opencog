@@ -1835,9 +1835,10 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
         // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
-        cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
+        // cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
         if (run_as_central_server)
         {
+            uniqueKeyLock.unlock();
 
             return 0;
         }
@@ -2020,6 +2021,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         float total_p = 1.0f;
 
         bool containsComponentDisconnected = false;
+        bool subComponentNotFound = false;
+
         for (vector<unsigned int>& oneComponent : oneCombin)
         {
             HandleSeq subPattern;
@@ -2048,7 +2051,11 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
 
                 if (component_count == 0)
+                {
+                    // one of the subcomponents is missing, skip this combination
+                    subComponentNotFound = true;
                     break;
+                }
 
                 // cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
@@ -2062,7 +2069,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
         }
 
-        if (containsComponentDisconnected)
+        if (containsComponentDisconnected || subComponentNotFound)
             continue;
 
 
