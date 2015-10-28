@@ -38,7 +38,7 @@
                 (EqualLink
                     (VariableNode "$A")
                     (VariableNode "$C")
-                ))
+                )))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: deduction-formula")
             (ListLink
