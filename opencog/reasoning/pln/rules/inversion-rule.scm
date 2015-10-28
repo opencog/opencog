@@ -1,91 +1,51 @@
-; =============================================================================
-; InversionRule
-;
-; LinkType
-;   A
-;   B
-; |-
-; LinkType
-;   B
-;   A
-;
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       inversion-inheritance-rule
-;       inversion-implication-rule
-;       inversion-subset-rule
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; InversionRule
+;;
+;; <LinkType>
+;;   A
+;;   B
+;; |-
+;; <LinkType>
+;;   B
+;;   A
+;;
+;; Due to type system limitations, the rule has been divided into 3:
+;;       inversion-inheritance-rule
+;;       inversion-implication-rule
+;;       inversion-subset-rule
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define inversion-inheritance-rule
+;; Generate the corresponding inversion rule given its link-type.
+(define (gen-inversion-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (AndLink
+        (link-type
             (VariableNode "$A")
-            (VariableNode "$B")
-            (InheritanceLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
+            (VariableNode "$B"))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: inversion-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (InheritanceLink
+                (link-type
                     (VariableNode "$B")
                     (VariableNode "$A"))))))
+
+(define inversion-inheritance-rule
+    (gen-inversion-rule InheritanceLink))
 
 (define inversion-implication-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: inversion-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (VariableNode "$B")
-                    (VariableNode "$A"))))))
+    (gen-inversion-rule ImplicationLink))
 
 (define inversion-subset-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (SubsetLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: inversion-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (SubsetLink
-                    (VariableNode "$B")
-                    (VariableNode "$A"))))))
+    (gen-inversion-rule SubsetLink))
 
 (define (inversion-formula A B AB BA)
     (let
@@ -100,3 +60,19 @@
             (stv 
                 (/ (* sAB sB) (floor sA)) 
                 (min sA sB sAB)))))
+
+;; Name the rules
+(define inversion-inheritance-rule-name
+  (Node "inversion-inheritance-rule"))
+(DefineLink inversion-inheritance-rule-name
+  inversion-inheritance-rule)
+
+(define inversion-implication-rule-name
+  (Node "inversion-implication-rule"))
+(DefineLink inversion-implication-rule-name
+  inversion-implication-rule)
+
+(define inversion-subset-rule-name
+  (Node "inversion-subset-rule"))
+(DefineLink inversion-subset-rule-name
+  inversion-subset-rule)

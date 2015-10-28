@@ -1,14 +1,14 @@
 ;; =============================================================================
 ;; DeductionRule
 ;;
-;; <link-type>
+;; <LinkType>
 ;;   A
 ;;   B
-;; <link-type>
+;; <LinkType>
 ;;   B
 ;;   C
 ;; |-
-;; <link-type>
+;; <LinkType>
 ;;   A
 ;;   C
 ;;
@@ -28,15 +28,17 @@
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
             (link-type
                 (VariableNode "$A")
                 (VariableNode "$B"))
             (link-type
                 (VariableNode "$B")
-                (VariableNode "$C")))
+                (VariableNode "$C"))
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
+                ))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: deduction-formula")
             (ListLink
@@ -55,13 +57,13 @@
 
 
 (define deduction-inheritance-rule
-  (gen-deduction-rule InheritanceLink))
+    (gen-deduction-rule InheritanceLink))
 
 (define deduction-implication-rule
-  (gen-deduction-rule ImplicationLink))
+    (gen-deduction-rule ImplicationLink))
 
 (define deduction-subset-rule
-  (gen-deduction-rule SubsetLink))
+    (gen-deduction-rule SubsetLink))
 
 (define (deduction-formula A B C AB BC AC)
     (let
