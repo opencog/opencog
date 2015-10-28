@@ -127,10 +127,10 @@ rm -rf master.tar.gz atomspace-master/
 # as well as dependencies required for running opencog with other services.
 install_dependencies() {
 MESSAGE="Updating Package db...." ; message
-yum updateinfo
+dnf updateinfo
 
 MESSAGE="Installing OpenCog build dependencies...." ; message
-if !  (yum -y install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_TOOLS); then
+if !  (dnf -y install $PACKAGES_BUILD $PACKAGES_RUNTIME $PACKAGES_TOOLS); then
   MESSAGE="Error installing some of dependencies... :( :("  ; message
   exit 1
 fi
