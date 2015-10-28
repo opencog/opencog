@@ -334,6 +334,8 @@ void PatternMiner::handleFindNewPatterns(http_request request)
 //        std::cout<< (int)(2000.0f / (float)costSeconds) << " requests per second in average! " << std::endl;
 //    }
 
+    request.reply(status_codes::OK);
+
     patternQueueLock.lock();
 
     try
@@ -352,13 +354,12 @@ void PatternMiner::handleFindNewPatterns(http_request request)
 
         // cout << "Received pattern num = " << total_pattern_received << std::endl;
 
-        request.reply(status_codes::OK);
 
     }
     catch (exception const & e)
     {
        cout << e.what() << "handleFindANewPattern error: " << request.to_string() << endl;
-       request.reply(status_codes::NotFound);
+
     }
 
     patternQueueLock.unlock();

@@ -412,6 +412,8 @@ private:
      void centralServerStartListening();
      void centralServerStopListening();
 
+     bool sendRequest(http_request &request, http_response &response);
+
      void startCentralServer();
 
      // ---------------end distributed version of pattern miner ---------------

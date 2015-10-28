@@ -87,10 +87,12 @@ void PatternMiner::launchADistributedWorker()
     uri_builder builder(U("/RegisterNewWorker"));
     builder.append_query(U("ClientUID"), U(clientWorkerUID));
 
-
-    httpClient->request(methods::POST, builder.to_string()).then([=](http_response response)
+    http_request request(methods::POST);
+    request.set_request_uri(builder.to_uri());
+    http_response response;
+    if (sendRequest(request, response))
     {
-        std::cout << response.to_string() << std::endl;
+        // std::cout << response.to_string() << std::endl;
         if (response.status_code() == status_codes::OK)
         {
             std::cout << "Registered to the central server successfully! " << std::endl;
@@ -98,33 +100,84 @@ void PatternMiner::launchADistributedWorker()
         }
         else
         {
-            std::cout << "Registered to the central server failed! Please check network and the the state of the central server." << std::endl;
+            std::cout << "Registered to the central server failed! Please check network and the the state of the central server.Client application quited!" << std::endl;
+            std::exit(EXIT_SUCCESS);
         }
-
-    });
+    }
+    else
+    {
+        std::cout << "Network problem. Cannot connect to the central server! Client application quited!" << std::endl;
+        std::exit(EXIT_SUCCESS);
+    }
 
 }
 
+
 void PatternMiner::notifyServerThisWorkerStop()
 {
-    // Build request URI and start the request.
-    uri_builder builder(U("/ReportWorkerStop"));
-    builder.append_query(U("ClientUID"), U(clientWorkerUID));
 
-    httpClient->request(methods::POST, builder.to_string()).then([=](http_response response)
+
+    int tryTimes = 0;
+    int maxTryTimes = 10;
+
+    while (tryTimes ++ < maxTryTimes)
     {
-        std::cout << response.to_string() << std::endl;
-        if (response.status_code() == status_codes::OK)
+        // Build request URI and start the request.
+        uri_builder builder(U("/ReportWorkerStop"));
+        builder.append_query(U("ClientUID"), U(clientWorkerUID));
+
+        http_request request(methods::POST);
+        request.set_request_uri(builder.to_uri());
+        http_response response;
+
+        if (sendRequest(request, response))
         {
-            std::cout << "Report to the central server this worker stopped! " << std::endl;
+            std::cout << response.to_string() << std::endl;
+            if (response.status_code() == status_codes::OK)
+            {
+                std::cout << "Report to the central server this worker stopped successfully! " << std::endl;
+                break;
+            }
+            else
+            {
+                std::cout << "Network problem: Failed report to the central server this worker stopped!" << std::endl;
+            }
         }
         else
         {
-            std::cout << "Report to the central server this worker stopped , but failed!" << std::endl;
+            std::cout << "Network problem: Failed report to the central server this worker stopped!" << std::endl;
         }
 
-    });
+        if (tryTimes < maxTryTimes)
+        {
+            std::cout << "Wait for 5 seconds and retry..."  << std::endl;
+            sleep(5);
+        }
+        else
+        {
+            std::cout << "Already tried " << maxTryTimes << " times. Enter 'y' to keep trying, enter others to quit."  << std::endl;
 
+            string inputstr;
+            cin  >> inputstr;
+
+            if ( (inputstr == "y") or  (inputstr == "yes") )
+            {
+                maxTryTimes += 10;
+                std::cout << "Continue trying..."  << std::endl;
+                sleep(5);
+            }
+            else
+            {
+                break;
+            }
+
+        }
+
+    }
+
+
+    cout << "Client quited!" << std::endl;
+    std::exit(EXIT_SUCCESS);
 
 }
 
@@ -192,20 +245,115 @@ void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string par
 // this function will empty patternJsonArray after sent
 void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
 {
+
+    uri_builder builder(U("/FindNewPatterns"));
+
+    // httpClient->request(methods::POST, builder.to_string(), patternJsonArray.serialize().c_str(), "application/json");
+
+    int tryTimes = 0;
+    int maxTryTimes = 10;
+
+    while (tryTimes ++ < maxTryTimes)
+    {
+        http_request request(methods::POST);
+        request.set_request_uri(builder.to_uri());
+        request.headers().add(header_names::accept, U("application/json"));
+        request.set_body(patternJsonArray);
+
+        http_response response;
+
+        if (sendRequest(request, response))
+        {
+//            std::cout << response.to_string() << std::endl;
+            if (response.status_code() == status_codes::OK)
+            {
+                break;
+            }
+            else
+            {
+                std::cout << "Network problem: Failed to send new found patterns!" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Network problem: Failed to send new found patterns!" << std::endl;
+        }
+
+        if (tryTimes < maxTryTimes)
+        {
+            std::cout << "Wait for 5 seconds and retry..."  << std::endl;
+            sleep(5);
+        }
+        else
+        {
+            std::cout << "Already tried " << maxTryTimes << " times. Enter 'y' to keep trying, enter others to quit."  << std::endl;
+
+            string inputstr;
+            cin  >> inputstr;
+
+            if ( (inputstr == "y") or  (inputstr == "yes") )
+            {
+                maxTryTimes += 10;
+                std::cout << "Continue trying..."  << std::endl;
+                sleep(5);
+            }
+            else
+            {
+
+                cout << "Client quited!" << std::endl;
+                std::exit(EXIT_SUCCESS);
+            }
+
+        }
+
+    }
+
+
+    // empty the array
+    patternJsonArray = json::value::array();
+
+    usleep(20000);
+
+
+}
+
+// send request, get response back
+bool PatternMiner::sendRequest(http_request &request, http_response &response)
+{
+    pplx::task<http_response> task = httpClient->request(request);
+
     try
     {
-        uri_builder builder(U("/FindNewPatterns"));
+        if (task.wait() == pplx::task_status::completed)
+        {
+            response = task.get();
+//            response.StatusCode = task.get().status_code();
+//            pplx::task<web::json::value> contentTask = task.get().extract_json();
+//            if (contentTask.wait() == task_status::completed)
+//            {
+//                response.JsonContent = contentTask.get();
+//            }
 
-        httpClient->request(methods::POST, builder.to_string(), patternJsonArray.serialize().c_str(), "application/json");
-
-        // empty the array
-        patternJsonArray = json::value::array();
-
-        usleep(20000);
+            return true;
+        }
+        else
+        {
+            cout << "Network problem:http request task is not finished! " << std::endl;
+            return false;
+        }
     }
-    catch (exception const & e)
+    catch (http_exception e)
     {
-       cout << e.what() << "sendPatternToCentralServer exception!: " << endl;
-
+        cout << "http_exception:" << e.what() << std::endl;
+        return false;
     }
+    catch (exception e)
+    {
+        cout << "exception:" << e.what() << std::endl;
+        return false;
+    }
+
+
+
 }
+
