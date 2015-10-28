@@ -248,12 +248,7 @@ void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
 
     uri_builder builder(U("/FindNewPatterns"));
 
-    // httpClient->request(methods::POST, builder.to_string(), patternJsonArray.serialize().c_str(), "application/json");
-
-    int tryTimes = 0;
-    int maxTryTimes = 10;
-
-    while (tryTimes ++ < maxTryTimes)
+    while (true)
     {
         http_request request(methods::POST);
         request.set_request_uri(builder.to_uri());
@@ -271,39 +266,12 @@ void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
             }
             else
             {
-                std::cout << "Network problem: Failed to send new found patterns!" << std::endl;
+                std::cout << "Network problem: Failed to send new found patterns! Retrying ... " << std::endl;
             }
         }
         else
         {
-            std::cout << "Network problem: Failed to send new found patterns!" << std::endl;
-        }
-
-        if (tryTimes < maxTryTimes)
-        {
-            std::cout << "Wait for 5 seconds and retry..."  << std::endl;
-            sleep(5);
-        }
-        else
-        {
-            std::cout << "Already tried " << maxTryTimes << " times. Enter 'y' to keep trying, enter others to quit."  << std::endl;
-
-            string inputstr;
-            cin  >> inputstr;
-
-            if ( (inputstr == "y") or  (inputstr == "yes") )
-            {
-                maxTryTimes += 10;
-                std::cout << "Continue trying..."  << std::endl;
-                sleep(5);
-            }
-            else
-            {
-
-                cout << "Client quited!" << std::endl;
-                std::exit(EXIT_SUCCESS);
-            }
-
+            std::cout << "Network problem: Failed to send new found patterns! Retrying ... " << std::endl;
         }
 
     }
