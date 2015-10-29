@@ -21,6 +21,30 @@ TARGET_LINK_LIBRARIES (PatternMiner
 	cpprest.so
 )
 
+ADD_LIBRARY(TestPatternMinerAgent SHARED
+	TestPatternMinerAgent    
+)
+
+ADD_LIBRARY(DistributedPatternMinerClient SHARED
+        DistributedPatternMinerClient
+)
+
+ADD_LIBRARY(DistributedPatternMinerServer SHARED
+        DistributedPatternMinerServer
+)
+
+TARGET_LINK_LIBRARIES (TestPatternMinerAgent
+	PatternMiner
+)
+
+TARGET_LINK_LIBRARIES (DistributedPatternMinerClient
+        PatternMiner
+)
+
+TARGET_LINK_LIBRARIES (DistributedPatternMinerServer
+        PatternMiner
+)
+
 INSTALL (FILES
 
 	Pattern.h
