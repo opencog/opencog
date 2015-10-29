@@ -63,9 +63,11 @@
 (define no-interaction (ConceptNode "none"))
 
 (StateLink interaction-state no-interaction)
+(StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
 
 ; current_emotion_duration set to default_emotion_duration
-(StateLink (SchemaNode "current_emotion_duration") (TimeNode 1.0)) ; in seconds
+; (StateLink (SchemaNode "current emotion duration") (TimeNode 1.0)) ; in seconds
+(StateLink (SchemaNode "current emotion duration") (NumberNode 1.0)) ; in seconds
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -260,25 +262,30 @@
 
 ;; Set a timestamp. XXX todo replace this with timeserver.
 ;; line 757, timestamp
-(define (get-timestamp)
-	(TimeNode (current-time)))
-
 (DefineLink
 	(DefinedSchemaNode "set timestamp")
 	(PutLink
-		(StateLink (PredicateNode "start-interaction-timestamp")
-			(VariableNode "$ts"))
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: get-timestamp")
-			(ListLink))))
+		(StateLink (SchemaNode "start-interaction-timestamp")
+			(VariableNode "$x"))
+		(TimeLink)))
+
+(DefineLink
+	(DefinedSchemaNode "get timestamp")
+	(GetLink
+		(StateLink (SchemaNode "start-interaction-timestamp")
+			(VariableNode "$x"))))
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
-;; XXX incomplete, need to be timestamp-driven.
 (DefineLink
 	(DefinedPredicateNode "Show expression")
-	(TrueLink)
-)
+	(GreaterThanLink
+		(MinusLink
+			(TimeLink)
+			(DefinedSchemaNode "get timestamp"))
+		(GetLink (StateLink (SchemaNode "current emotion duration")
+			(VariableNode "$x"))) ; in seconds
+	))
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
