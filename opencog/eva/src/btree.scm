@@ -66,8 +66,8 @@
 (StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
 
 ; current_emotion_duration set to default_emotion_duration
-; (StateLink (SchemaNode "current emotion duration") (TimeNode 1.0)) ; in seconds
-(StateLink (SchemaNode "current emotion duration") (NumberNode 6.0)) ; in seconds
+; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
+(StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -80,7 +80,13 @@
 ; Emotional-state to expression mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
 ; expressions to display for that emotional state, as well as the
-; intensities and durations.
+; intensities and durations.  `emo-set` adds an expression to a
+; an emotional state, while `emo-map` is used to set parameters.
+(define (emo-set emo-state expression)
+	(EvaluationLink
+		(PredicateNode "Emotion-expression")
+		(ListLink (ConceptNode emo-state) (ConceptNode expression))))
+
 (define (emo-map emo-state expression param value)
 	(StateLink (ListLink
 		(ConceptNode emo-state) (ConceptNode expression) (SchemaNode param))
@@ -89,6 +95,7 @@
 ; Shorthand utility, takes probability, intensity min ad max, duration min
 ; and max.
 (define (emo-spec emo-state expression prob int-min int-max dur-min dur-max)
+	(emo-set emo-state expression)
 	(emo-map emo-state expression "probability" prob)
 	(emo-map emo-state expression "intensity-min" int-min)
 	(emo-map emo-state expression "intensity-max" int-max)
@@ -96,10 +103,43 @@
 	(emo-map emo-state expression "duration-max" dur-max))
 
 ; Translation of behavior.cfg line 23 ff
-(emo-map "positive" "happy"         0.4 0.6 0.8 10 15)
-(emo-map "positive" "comprehending" 0.2 0.5 0.8 10 15)
-(emo-map "positive" "engaged"       0.2 0.5 0.8 10 15)
+(emo-spec "positive" "happy"         0.4 0.6 0.8 10 15)
+(emo-spec "positive" "comprehending" 0.2 0.5 0.8 10 15)
+(emo-spec "positive" "engaged"       0.2 0.5 0.8 10 15)
 
+; Given the name of a emotion, pick one of the allowed emotional
+; expressions at random. Example usage:
+;
+;   (cog-execute!
+;      (PutLink (DefinedSchemaNode "Pick random expression")
+;         (ConceptNode "positive")))
+;
+; This will pick out one of the "positive" emotions (defined above).
+
+(DefineLink
+	(DefinedSchemaNode "Pick random expression")
+	(LambdaLink
+		(VariableNode "$emo")
+		(RandomChoiceLink
+			(GetLink
+				(VariableNode "$expr")
+				(EvaluationLink
+					(PredicateNode "Emotion-expression")
+					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
+
+; xxxxxxxxx
+(DefineLink
+	(DefinedPredicateNode "Show random expression")
+	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+		(ListLink
+			(RandomChoiceLink
+				(ConceptNode "smile")
+				(ConceptNode "engaged")
+				(ConceptNode "surprised")
+			)
+			(NumberNode 5.5) ; duration
+			(NumberNode 0.7)) ; intensity
+	))
 
 ; --------------------------------------------------------
 ; Temporary stand-in for emotion modelling. Right now, just some
@@ -309,7 +349,7 @@
 		(MinusLink
 			(TimeLink)
 			(DefinedSchemaNode "get timestamp"))
-		(GetLink (StateLink (SchemaNode "current emotion duration")
+		(GetLink (StateLink (SchemaNode "current expression duration")
 			(VariableNode "$x"))) ; in seconds
 	))
 
@@ -319,7 +359,7 @@
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
-;; XXX not yet a complete impleetation of owyl
+;; XXX not yet a complete implemetation of owyl
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SatisfactionLink
