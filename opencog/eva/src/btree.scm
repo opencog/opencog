@@ -67,13 +67,39 @@
 
 ; current_emotion_duration set to default_emotion_duration
 ; (StateLink (SchemaNode "current emotion duration") (TimeNode 1.0)) ; in seconds
-(StateLink (SchemaNode "current emotion duration") (NumberNode 1.0)) ; in seconds
+(StateLink (SchemaNode "current emotion duration") (NumberNode 6.0)) ; in seconds
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
+(define (print-f-msg node) (display (cog-name node)) (newline) (stv 0 1))
 (define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
+
+; --------------------------------------------------------
+; Emotional-state to expression mapping. For a given emotional state
+; (for example, happy, bored, excited) this specifies a range of
+; expressions to display for that emotional state, as well as the
+; intensities and durations.
+(define (emo-map emo-state expression param value)
+	(StateLink (ListLink
+		(ConceptNode emo-state) (ConceptNode expression) (SchemaNode param))
+		(NumberNode value)))
+
+; Shorthand utility, takes probability, intensity min ad max, duration min
+; and max.
+(define (emo-spec emo-state expression prob int-min int-max dur-min dur-max)
+	(emo-map emo-state expression "probability" prob)
+	(emo-map emo-state expression "intensity-min" int-min)
+	(emo-map emo-state expression "intensity-max" int-max)
+	(emo-map emo-state expression "duration-min" dur-min)
+	(emo-map emo-state expression "duration-max" dur-max))
+
+; Translation of behavior.cfg line 23 ff
+(emo-map "positive" "happy"         0.4 0.6 0.8 10 15)
+(emo-map "positive" "comprehending" 0.2 0.5 0.8 10 15)
+(emo-map "positive" "engaged"       0.2 0.5 0.8 10 15)
+
 
 ; --------------------------------------------------------
 ; Temporary stand-in for emotion modelling. Right now, just some
@@ -278,7 +304,7 @@
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
 (DefineLink
-	(DefinedPredicateNode "Show expression")
+	(DefinedPredicateNode "Time to change expression")
 	(GreaterThanLink
 		(MinusLink
 			(TimeLink)
@@ -292,7 +318,8 @@
 
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
-;; XXX Needs to be replaced by emotional state modelling.
+;; XXX Needs to be replaced by OpenPsi emotional state modelling.
+;; XXX not yet a complete impleetation of owyl
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SatisfactionLink
@@ -303,7 +330,15 @@
 					(ListLink (VariableNode "$face")))
 				(GetLink (StateLink interaction-state (VariableNode "$x")))))
 			;; line 768
-			(DefinedPredicateNode "Pick random positive expression")
+			(SequentialOrLink
+; xxxx
+(EvaluationLink (GroundedPredicateNode "scm: print-f-msg")
+(ListLink (Node "is it ??? time r")))
+				(NotLink (DefinedPredicateNode "Time to change expression"))
+(EvaluationLink (GroundedPredicateNode "scm: print-f-msg")
+(ListLink (Node "time to chane expr")))
+				(DefinedPredicateNode "Pick random positive expression")
+			)
 			(DefinedPredicateNode "Pick random gesture")
 		)))
 
