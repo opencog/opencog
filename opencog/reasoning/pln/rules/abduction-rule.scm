@@ -33,7 +33,11 @@
                 (VariableNode "$B"))
             (link-type
                 (VariableNode "$C")
-                (VariableNode "$B")))
+                (VariableNode "$B"))
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
