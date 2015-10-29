@@ -31,7 +31,6 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
-                (VariableNode "$A")
                 (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
@@ -46,10 +45,10 @@
 (define modus-ponens-subset-rule
   (gen-modus-ponens-rule SubsetLink))
 
-(define (modus-ponens-formula A AB B)
+(define (modus-ponens-formula AB B)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
+        ((sA (cog-stv-strength (gar AB)))
+         (cA (cog-stv-confidence (gar AB)))
          (sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
          (snotAB 0.2)
