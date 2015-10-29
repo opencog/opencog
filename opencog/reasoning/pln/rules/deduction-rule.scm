@@ -42,9 +42,6 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: deduction-formula")
             (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
                 (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
@@ -65,14 +62,14 @@
 (define deduction-subset-rule
     (gen-deduction-rule SubsetLink))
 
-(define (deduction-formula A B C AB BC AC)
+(define (deduction-formula AB BC AC)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B))
-         (sC (cog-stv-strength C))
-         (cC (cog-stv-confidence C))
+        ((sA (cog-stv-strength (gar AB)))
+         (cA (cog-stv-confidence (gar AB)))
+         (sB (cog-stv-strength (gar BC)))
+         (cB (cog-stv-confidence (gar BC)))
+         (sC (cog-stv-strength (gdr BC)))
+         (cC (cog-stv-confidence (gdr BC)))
          (sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
          (sBC (cog-stv-strength BC))
