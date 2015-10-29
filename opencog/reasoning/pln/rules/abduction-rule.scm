@@ -33,13 +33,14 @@
                 (VariableNode "$B"))
             (link-type
                 (VariableNode "$C")
-                (VariableNode "$B")))
+                (VariableNode "$B"))
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
                 (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
@@ -59,14 +60,14 @@
 (define abduction-subset-rule
   (gen-abduction-rule SubsetLink))
 
-(define (abduction-formula A B C AB CB AC)
+(define (abduction-formula AB CB AC)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B))
-         (sC (cog-stv-strength C))
-         (cC (cog-stv-confidence C))
+        ((sA (cog-stv-strength (gar AB)))
+         (cA (cog-stv-confidence (gar AB)))
+         (sB (cog-stv-strength (gdr AB)))
+         (cB (cog-stv-confidence (gdr AB)))
+         (sC (cog-stv-strength (gar CB)))
+         (cC (cog-stv-confidence (gar CB)))
          (sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
          (sCB (cog-stv-strength CB))
