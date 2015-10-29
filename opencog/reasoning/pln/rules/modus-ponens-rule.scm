@@ -23,9 +23,11 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (link-type
-            (VariableNode "$A")
-            (VariableNode "$B"))
+        (AndLink
+            (link-type
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (VariableNode "$A"))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: modus-ponens-formula")
             (ListLink
