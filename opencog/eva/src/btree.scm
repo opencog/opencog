@@ -115,7 +115,7 @@
 ;         (ConceptNode "positive")))
 ;
 ; This will pick out one of the "positive" emotions (defined above).
-
+;
 (DefineLink
 	(DefinedSchemaNode "Pick random expression")
 	(LambdaLink
@@ -127,19 +127,74 @@
 					(PredicateNode "Emotion-expression")
 					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
 
-; xxxxxxxxx
+; Get a random intensity value forthe indicated emotion-expression.
+; That is, given an emotion-expression pair, this wil look up the
+; min and max allowed intensity levels, and return a random number
+; betwee these min ad max values.
+;
+; Example usage:
+;    (cog-execute!
+;        (PutLink (DefinedSchemaNode "get random intensity")
+;            (ListLink (ConceptNode "positive") (ConceptNode "engaged"))))
+; will return an intensity level for the positive-egaged expression.
 (DefineLink
-	(DefinedPredicateNode "Show random expression")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(RandomChoiceLink
-				(ConceptNode "smile")
-				(ConceptNode "engaged")
-				(ConceptNode "surprised")
-			)
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)) ; intensity
-	))
+	(DefinedSchemaNode "get random intensity")
+	(LambdaLink
+		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
+		(RandomNumberLink
+			(GetLink (VariableNode "$int-min")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode "intensity-min")) (VariableNode "$int-min")))
+			(GetLink (VariableNode "$int-max")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode "intensity-max")) (VariableNode "$int-max")))
+		)))
+
+; Similar to above, but for duration. See explaation above.
+(DefineLink
+	(DefinedSchemaNode "get random duration")
+	(LambdaLink
+		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
+		(RandomNumberLink
+			(GetLink (VariableNode "$dur-min")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode "duration-min")) (VariableNode "$dur-min")))
+			(GetLink (VariableNode "$dur-max")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode "duration-max")) (VariableNode "$dur-max")))
+		)))
+
+;(DefineLink
+;	(DefinedPredicateNode "Show expression")
+;	(LambdaLink
+;		(VariableNode "$expr")
+;		(SequentialAndLink
+;			(TrueLink (PutLink
+;				(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+;				(ListLink
+;					(VariableNode "$expr")
+;					(RandomNumberNode
+;						()
+;					)
+;			)
+; xxxxxxxxx
+;(DefineLink
+;	(DefinedPredicateNode "Show random expression")
+;	(LambdaLink
+;		(VariableNode "$emo")
+;		(SequentialAndLink
+;			(TrueLink (PutLink
+;				(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+;				(ListLink
+;					(
+;			)
+;			(NumberNode 5.5) ; duration
+;			(NumberNode 0.7)) ; intensity
+;	))
 
 ; --------------------------------------------------------
 ; Temporary stand-in for emotion modelling. Right now, just some
@@ -359,7 +414,7 @@
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
-;; XXX not yet a complete implemetation of owyl
+;; XXX not yet a complete implementation of owyl
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SatisfactionLink
