@@ -1,9 +1,11 @@
 #
-# Primary OpenCog Dockerfile
-#
 # Usage:  docker build -t $USER/opencog .
-#         docker run --name="my_cog" -p 17001:17001 -p 18001:18001 -it $USER/opencog
-#         docker exec -it my_cog bash
+#         docker run --name="my_cog" -v $PWD:/home/opencog/src -p 17001:17001 -p 18001:18001 -it $USER/opencog
+#         # The folowing steps are run inside the container
+#         cd /opencog
+#         mkdir build ; cd build
+#         cmake .. ; make -j$(nproc)
+#         # Follow steps in http://wiki.opencog.org/w/OpenCog_shell
 #
 FROM ubuntu:14.04
 MAINTAINER David Hart "dhart@opencog.org"
@@ -18,9 +20,6 @@ ADD https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg \
     /tmp/octool
 RUN chmod 755 /tmp/octool && /tmp/octool -rdpcalv
 
-# Copy the .gdbinit file so we can debug the CogServer
-COPY scripts/.gdbinit ~/.gdbinit
-
 # Environment Variables
 ## Set Locale
 RUN locale-gen en_US.UTF-8
@@ -33,16 +32,7 @@ RUN adduser --disabled-password --gecos "OpenCog Developer" opencog
 RUN adduser opencog sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER opencog
-
-RUN mkdir /home/opencog/src
-WORKDIR /home/opencog/src
-
-# Change line below on rebuild. Will use cache up to this line.
-ENV LAST_SOFTWARE_UPDATE 2015-02-18
-
-# Now, OpenCog itself.
-RUN git clone https://github.com/opencog/opencog
-RUN (cd opencog; mkdir build; cd build; cmake ..; make -j4)
+WORKDIR /home/opencog
 
 # Defaults
 ## cogserver shell ports
