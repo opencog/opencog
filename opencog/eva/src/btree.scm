@@ -74,6 +74,10 @@
 ; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
 (StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
 
+; line 115 of behavior.cfg - time_to_change_face_target_min
+(StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
+(StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
+
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
@@ -636,16 +640,21 @@
 			(VariableNode "$x"))) ; in seconds
 	))
 
+; Return true if it is time to interact with someone else.
 ;; line 697 -- is_time_to_change_face_target()
 (DefineLink
 	(DefinedPredicateNode "Time to change interaction")
 	(GreaterThanLink
+		; Minus lik computes number of seconds since interaction start.
 		(MinusLink
 			(TimeLink)
 			(DefinedSchemaNode "get interaction timestamp"))
-xxxxxxxxx
-		(GetLink (StateLink (SchemaNode "current expression duration")
-			(VariableNode "$x"))) ; in seconds
+		; Random number in the configured range.
+		(RandomNumberLink
+			(GetLink (StateLink (SchemaNode "time_to_change_face_target_min")
+				(VariableNode "$min")))
+			(GetLink (StateLink (SchemaNode "time_to_change_face_target_max")
+				(VariableNode "$max"))))
 	))
 
 
@@ -797,12 +806,16 @@ xxxxxxxxx
 	(DefinedPredicateNode "Interact with people")
 	(SatisfactionLink
 		(SequentialAndLink
+			; This or-link is true if we're not interacting with anyone,
+			; or if there are several people and its time to change up.
 			(SequentialOrLink
 				(NotLink (DefinedPredicateNode "is interacting with someone?"))
 				(SequentialAndLink
 					(DefinedPredicateNode "More than one face visible")
+					(DefinedPredicateNode "Time to change interaction")
 				)
 			)
+			; select a new face target
 ; xxxxxxxxx
 ; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
