@@ -823,4 +823,7 @@ void PatternMiner::centralServerEvaluateInterestingness()
             std::cout<< std::endl;
         }
     }
+
+    std::cout << "Pattern Miner application quited!" << std::endl;
+    std::exit(EXIT_SUCCESS);
 }
