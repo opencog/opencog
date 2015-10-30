@@ -26,6 +26,11 @@
 ; (show-interaction-state)
 ; (cog-evaluate! (DefinedPredicateNode "Interact with people"))
 ;
+; Unit test the main interaction loop:
+; (run)  ; start the behavior tree running. Should print loop iteration.
+; (make-new-face "42")  ; Should start showing expressions, gestures.
+; (remove-face "42")  ; Should retur to neutral.
+; (halt) ; Pause the loop iteration; (run) will start it again.
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
