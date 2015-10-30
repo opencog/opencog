@@ -495,7 +495,7 @@
 
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
-;; line 973 clear_new_face_target()
+;; line 973 -- clear_new_face_target()
 (DefineLink
 	(DefinedPredicateNode "Update status")
 	(SatisfactionLink
@@ -507,6 +507,15 @@
 					(DefinedSchemaNode "New arrivals")))
 		)))
 
+;; line 980 -- clear_lost_face_target()
+(DefineLink
+	(DefinedPredicateNode "Clear lost face")
+	(TrueLink (PutLink
+		(DeleteLink
+			(EvaluationLink (PredicateNode "acked face")
+				(ListLink (VariableNode "$face-id"))))
+		(DefinedSchemaNode "New departures"))
+	))
 ;; ------
 ;;
 ;; Return true if interacting with someone.
@@ -675,17 +684,29 @@
 				(ListLink (Node "--- Someone left")))
 			(SequentialOrLink
 				; Were we interacting with the person who left? If so,
-				; look frustrated, return to neutral.
+				; look frustrated, return to neutral. Oh, and clear the
+				; interaction target, too.
 				(SequentialAndLink
 					(EqualLink
 						(DefinedSchemaNode "New departures")
 						(GetLink (StateLink interaction-state (VariableNode "$x"))))
 					(DefinedPredicateNode "Show frustrated expression")
 					(DefinedPredicateNode "return to neutral")
+					(TrueLink (PutLink
+						(StateLink interaction-state (VariableNode "$face-id"))
+						no-interaction))
 				)
+				;; Were we interacting with someone else?
+				(SequentialAndLink
 ;xxxxxxxxxxxxxxxxxxxxx
-				(FalseLink)
+					(FalseLink)
+				)
+				(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+					(ListLink (Node "--- Ignoring lost face")))
+				(TrueLink)
 			)
+			;; Clear the lost face target
+			(DefinedPredicateNode "Clear lost face")
 		)))
 
 
