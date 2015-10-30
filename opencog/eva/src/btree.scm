@@ -525,6 +525,18 @@
 			(ListLink (VariableNode "$face-id")))
 	)))
 
+; Start interacting with a new face picked randomly from the crowd.
+(DefineLink
+	(DefinedPredicateNode "Start new interaction")
+	(SequenttialAndLink
+		; First, pick a face at random...
+		(TrueLink (PutLink
+			(StateLink interaction-state (VariableNode "$face-id"))
+			(DefinedSchemaNode "Select random face")))
+		; Record a timestamp
+		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+	))
+
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
 ;; line 973 -- clear_new_face_target()
@@ -795,9 +807,7 @@
 	(SatisfactionLink
 		(SequentialAndLink
 			(NotLink (DefinedPredicateNode "is interacting with someone?"))
-			(TrueLink (PutLink
-				(StateLink interaction-state (VariableNode "$face-id"))
-					(DefinedSchemaNode "Select random face")))
+			(DefinedPredicateNode "Start new interaction")
 		)))
 
 ;; Interact with people
@@ -815,11 +825,13 @@
 					(DefinedPredicateNode "Time to change interaction")
 				)
 			)
-			; select a new face target
+			; Select a new face target
+			(DefinedPredicateNode "Start new interaction")
+			(DefinedPredicateNode "Interact with face")
 ; xxxxxxxxx
 ; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
-			(TrueLink (DefinedSchemaNode "Select random face"))
+			(DefinedPredicateNode "Start new interaction")
 			(DefinedPredicateNode "Interact with face")
 		)))
 
