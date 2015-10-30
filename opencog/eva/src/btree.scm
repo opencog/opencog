@@ -116,6 +116,8 @@
 ;
 ; This will pick out one of the "positive" emotions (defined above).
 ;
+; XXX TODO: currently, this selects with uniform weighting; instead,
+; the selection should be based on the "probability" parameter.
 (DefineLink
 	(DefinedSchemaNode "Pick random expression")
 	(LambdaLink
@@ -199,20 +201,31 @@
 		)
 	))
 
-; xxxxxxxxx
-;(DefineLink
-;	(DefinedPredicateNode "Show random expression")
-;	(LambdaLink
-;		(VariableNode "$emo")
-;		(SequentialAndLink
-;			(TrueLink (PutLink
-;				(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-;				(ListLink
-;					(
-;			)
-;			(NumberNode 5.5) ; duration
-;			(NumberNode 0.7)) ; intensity
-;	))
+;
+; Pick an expression of the given, and send it to ROS for display.
+; The expression is picked randomly from the class of expressions for
+; the given emotion.  Likewise, the strength of display, and the
+; duration are picked randomly.  The timestamp is recorded as well.
+;
+; Example usage:
+;    (cog-evaluate!
+;       (PutLink (DefinedPredicateNode "Show random expression")
+;          (ConceptNode "positive")))
+; will pick one of te "positive" emotions, and send it off.
+;
+(DefineLink
+	(DefinedPredicateNode "Show random expression")
+	(LambdaLink
+		(VariableNode "$emo")
+		(PutLink
+			(DefinedPredicateNode "Show expression")
+			(ListLink
+				(VariableNode "$emo")
+				(PutLink
+					(DefinedSchemaNode "Pick random expression")
+					(VariableNode "$emo"))
+			))
+	))
 
 ; --------------------------------------------------------
 ; Temporary stand-in for emotion modelling. Right now, just some
