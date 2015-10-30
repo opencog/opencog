@@ -409,7 +409,7 @@
 ;;
 ;; Return true if a new face has become visible.
 ;; A "new  face" is one tat is visible (in the atomspace) but
-;; has not yet bee acked.
+;; has not yet been acked.
 ;; line 631, is_someone_arrived()
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
@@ -494,6 +494,22 @@
 			(EvaluationLink (PredicateNode "acked face")
 					(ListLink (VariableNode "$face-id")))
 		)))
+
+;; Return the number of visible faces
+;; line 690 -- is_more_than_one_face_target()
+(DefineLink
+	(DefinedSchemaNode "Num visible faces")
+	(ArityLink
+		(GetLink (EvaluationLink (PredicateNode "acked face")
+			(ListLink (VariableNode "$face-id"))))))
+
+; True if more than one face is visible.
+(DefineLink
+	(DefinedPredicateNode "More than one face visible")
+	(GreaterThanLink
+		(DefinedSchemaNode "Num visible faces")
+		(NumberNode 1)))
+
 
 ;; Randomly select a face out of the crowd.
 ;; line 747 -- select_a_face_target() and also
@@ -606,6 +622,9 @@
 		(GetLink (StateLink (SchemaNode "current expression duration")
 			(VariableNode "$x"))) ; in seconds
 	))
+
+;; line 697 -- is_time_to_change_face_target()
+;; XX TBD
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
@@ -755,6 +774,13 @@
 	(DefinedPredicateNode "Interact with people")
 	(SatisfactionLink
 		(SequentialAndLink
+			(SequentialOrLink
+				(NotLink (DefinedPredicateNode "is interacting with someone?"))
+				(SequentialAndLink
+					(DefinedPredicateNode "More than one face visible")
+				)
+			)
+; xxxxxxxxx
 ; XXX incomplete!
 			(DefinedPredicateNode "Detected face")
 			(TrueLink (DefinedSchemaNode "Select random face"))
