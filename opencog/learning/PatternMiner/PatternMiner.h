@@ -320,7 +320,7 @@ namespace PatternMining
 
 
  public:
-     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
+     PatternMiner(AtomSpace* _originalAtomSpace);
      ~PatternMiner();
 
      bool checkPatternExist(const string& patternKeyStr);

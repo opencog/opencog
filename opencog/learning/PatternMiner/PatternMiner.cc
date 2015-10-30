@@ -2236,7 +2236,7 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 
 }
 
-PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
+PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
@@ -2261,7 +2261,8 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 
     patternJsonArrays = new web::json::value[THREAD_NUM];
 
-    MAX_GRAM = max_gram;
+    int max_gram = config().get_int("Pattern_Max_Gram");
+    MAX_GRAM = (unsigned int)max_gram;
     cur_gram = 0;
 
     ignoredTypes[0] = LIST_LINK;
@@ -2293,7 +2294,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     }
 
     // vector < vector<HTreeNode*> > patternsForGram
-    for (unsigned int i = 0; i < max_gram; ++i)
+    for (unsigned int i = 0; i < MAX_GRAM; ++i)
     {
         vector<HTreeNode*> patternVector;
         patternsForGram.push_back(patternVector);
@@ -2483,6 +2484,9 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
     std::cout<< THREAD_NUM << " threads used. \n";
     std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
+
+    std::cout << "Pattern Miner application quited!" << std::endl;
+    std::exit(EXIT_SUCCESS);
 
 //   testPatternMatcher2();
 
