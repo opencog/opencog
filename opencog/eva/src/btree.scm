@@ -152,7 +152,7 @@
 					(SchemaNode "intensity-max")) (VariableNode "$int-max")))
 		)))
 
-; Similar to above, but for duration. See explaation above.
+; Similar to above, but for duration. See explanation above.
 (DefineLink
 	(DefinedSchemaNode "get random duration")
 	(LambdaLink
@@ -168,19 +168,37 @@
 					(SchemaNode "duration-max")) (VariableNode "$dur-max")))
 		)))
 
-;(DefineLink
-;	(DefinedPredicateNode "Show expression")
-;	(LambdaLink
-;		(VariableNode "$expr")
-;		(SequentialAndLink
-;			(TrueLink (PutLink
-;				(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-;				(ListLink
-;					(VariableNode "$expr")
-;					(RandomNumberNode
-;						()
-;					)
-;			)
+; Show a expression from a given emotional class. Sends the expression
+; to ROS for display.  Sets a timestamp as well.  The intensity and
+; duration of the expression is picked randomly from the parameters for
+; the emotion-expression.
+;
+; Example usage:
+;    (cog-evaluate!
+;        (PutLink (DefinedPredicateNode "Show expression")
+;           (ListLink (ConceptNode "positive") (ConceptNode "engaged"))))
+;
+(DefineLink
+	(DefinedPredicateNode "Show expression")
+	(LambdaLink
+		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
+		(SequentialAndLink
+			;; Record the time
+			(TrueLink (DefinedSchemaNode "set timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+				(ListLink
+					(VariableNode "$expr")
+					(PutLink
+						(DefinedSchemaNode "get random duration")
+						(ListLink (VariableNode "$emo") (VariableNode "$expr")))
+					(PutLink
+						(DefinedSchemaNode "get random intensity")
+						(ListLink (VariableNode "$emo") (VariableNode "$expr")))
+			))
+		)
+	))
+
 ; xxxxxxxxx
 ;(DefineLink
 ;	(DefinedPredicateNode "Show random expression")
