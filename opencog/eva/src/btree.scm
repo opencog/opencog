@@ -78,6 +78,8 @@
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
 (StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
 
+(StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
+
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
@@ -385,26 +387,27 @@
 ; grep for NumberNode below, and make these (more easily) configurable.
 ; ------------------------------------------------------
 
-; Return true `fract` percent of the time, else return false.
-(define (dice-roll fract)
-	(define rrr (random:uniform))
-	(cog-logger-info "rando: ~A" rrr)
-	(if (> (string->number (cog-name fract)) rrr)
-		(stv 1 1) (stv 0 1)))
-
 ; line 588 -- dice_roll("glance_new_face")
 ; XXX incomplete, needs refinement
 (DefineLink
 	(DefinedPredicateNode "dice-roll: glance new face")
-	(EvaluationLink
-		(GroundedPredicateNode "scm: dice-roll")
-		(ListLink (NumberNode "0.5"))))
+	(GreaterThanLink
+		(NumberNode "0.5")
+		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
 (DefineLink
 	(DefinedPredicateNode "dice-roll: glance lost face")
-	(EvaluationLink
-		(GroundedPredicateNode "scm: dice-roll")
-		(ListLink (NumberNode "0.5"))))
+	(GreaterThanLink
+		(NumberNode "0.5")
+		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
+
+;; line 599 kwargs["event"] == "group_interaction"
+(DefineLink
+	(DefinedPredicateNode "dice-roll: group interaction")
+	(GreaterThanLink
+		(GetLink (StateLink (SchemaNode "glance_probability")
+				 (VariableNode "$x")))
+		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
 ; ------------------------------------------------------
 ; Basic utilities for working with newly-visible faces.
@@ -834,9 +837,16 @@
 
 				; ##### Glance At Other Faces & Continue With The Last Interaction
 				(SequentialAndLink ; line 476
+					(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+						(ListLink (Node "--- Continue interaction")))
+					(SequentialOrLink  ; line 478
+						(SequentialAndLink ; line 479
+							(DefinedPredicateNode "More than one face visible")
+							(DefinedPredicateNode "dice-roll: group interaction")
 ; xxxxxxxxx
 ; XXX incomplete!
 (FalseLink)
+					))
 				))
 		)))
 
