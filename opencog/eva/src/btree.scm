@@ -263,7 +263,7 @@
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
 		(SequentialAndLink
 			;; Record the time
-			(TrueLink (DefinedSchemaNode "set timestamp"))
+			(TrueLink (DefinedSchemaNode "set expression timestamp"))
 			;; Send it off to ROS to actually do it.
 			(EvaluationLink (GroundedPredicateNode "py:do_emotion")
 				(ListLink
@@ -599,16 +599,29 @@
 ;; Set a timestamp. XXX todo replace this with timeserver.
 ;; line 757, timestamp
 (DefineLink
-	(DefinedSchemaNode "set timestamp")
+	(DefinedSchemaNode "set interaction timestamp")
 	(PutLink
 		(StateLink (SchemaNode "start-interaction-timestamp")
 			(VariableNode "$x"))
 		(TimeLink)))
 
 (DefineLink
-	(DefinedSchemaNode "get timestamp")
+	(DefinedSchemaNode "get interaction timestamp")
 	(GetLink
 		(StateLink (SchemaNode "start-interaction-timestamp")
+			(VariableNode "$x"))))
+
+(DefineLink
+	(DefinedSchemaNode "set expression timestamp")
+	(PutLink
+		(StateLink (SchemaNode "start-expression-timestamp")
+			(VariableNode "$x"))
+		(TimeLink)))
+
+(DefineLink
+	(DefinedSchemaNode "get expression timestamp")
+	(GetLink
+		(StateLink (SchemaNode "start-expression-timestamp")
 			(VariableNode "$x"))))
 
 ;; Evaluate to true, if an expression should be shown.
@@ -618,13 +631,23 @@
 	(GreaterThanLink
 		(MinusLink
 			(TimeLink)
-			(DefinedSchemaNode "get timestamp"))
+			(DefinedSchemaNode "get expression timestamp"))
 		(GetLink (StateLink (SchemaNode "current expression duration")
 			(VariableNode "$x"))) ; in seconds
 	))
 
 ;; line 697 -- is_time_to_change_face_target()
-;; XX TBD
+(DefineLink
+	(DefinedPredicateNode "Time to change interaction")
+	(GreaterThanLink
+		(MinusLink
+			(TimeLink)
+			(DefinedSchemaNode "get interaction timestamp"))
+xxxxxxxxx
+		(GetLink (StateLink (SchemaNode "current expression duration")
+			(VariableNode "$x"))) ; in seconds
+	))
+
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
@@ -664,7 +687,7 @@
 			(DefinedPredicateNode "was room empty?")
 			(TrueLink (DefinedSchemaNode "interact with new person"))
 			(TrueLink (DefinedSchemaNode "look at person"))
-			(TrueLink (DefinedSchemaNode "set timestamp"))
+			(TrueLink (DefinedSchemaNode "set interaction timestamp"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Look at newly arrived person")))
 		)))
