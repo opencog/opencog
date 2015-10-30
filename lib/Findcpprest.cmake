@@ -8,7 +8,7 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-FIND_LIBRARY(cpprest_LIBRARY NAMES libcpprest PATHS
+FIND_LIBRARY(cpprest_LIBRARY NAMES cpprest PATHS
     /usr/lib
     /usr/local/lib
 )
