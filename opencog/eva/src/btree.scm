@@ -69,6 +69,10 @@
 ; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
 (StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
 
+;; The "look at neutral position" face. Used to tell the eye/head
+;; movemet subsystem to move to a neutral position.
+(define neutral-face (ConceptNode "0"))
+
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
@@ -350,9 +354,15 @@
 
 ;; Pick random expression, and display it.
 (DefineLink
-	(DefinedPredicateNode "Pick random positive expression")
+	(DefinedPredicateNode "Show positive expression")
 	(PutLink (DefinedPredicateNode "Show random expression")
 		(ConceptNode "positive")))
+
+;; line 840 -- show_frustrated_expression()
+(DefineLink
+	(DefinedPredicateNode "Show frustrated expression")
+	(PutLink (DefinedPredicateNode "Show random expression")
+		(ConceptNode "frustrated")))
 
 ;; Pick random positive  gesture
 (DefineLink
@@ -414,6 +424,12 @@
 					(ListLink (VariableNode "$face-id"))))
 	)))
 
+;; Return he person with whom we are currently interacting.
+;; aka "current_face_target" in Owyl.
+(DefineLink
+	(DefinedSchemaNode "Current interaction target")
+	(GetLink (StateLink interaction-state (VariableNode "$x"))))
+
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
 ;; line 641, is_someone_left()
@@ -428,6 +444,19 @@
 			(AbsentLink (EvaluationLink (PredicateNode "visible face")
 					(ListLink (VariableNode "$face-id"))))
 		)))
+
+;; Return list of recetly departed individuals
+(DefineLink
+	(DefinedSchemaNode "New departures")
+	(GetLink
+		(AndLink
+			; If someone was previously acked...
+			(PresentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id"))))
+			; But is no loger visible...
+			(AbsentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
+	)))
 
 ;;
 ;; Was the the room empty, viz: Does the atomspace contains the link
@@ -490,14 +519,14 @@
 		(GetLink (StateLink interaction-state (VariableNode "$x"))))
 	))
 
+;; Send ROS message to look at the person we are interacting with.
 ;; line 742, assign_face_target
-;; Send ROS message to look at the face ID.
 (DefineLink
 	(DefinedSchemaNode "look at person")
 	(PutLink
 		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink (VariableNode "$face")))
-		(DefinedSchemaNode "New arrivals")
+		(GetLink (StateLink interaction-state (VariableNode "$x")))
 	))
 
 ;; line 818, glance_at_new_face
@@ -507,6 +536,16 @@
 		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (VariableNode "$face")))
 		(DefinedSchemaNode "New arrivals")
+	))
+
+;; Move to a neutral head position. Right now, this just issues a
+;; look-at command; it could do more (e.g. halt the chatbot.)
+;; line 845, return_to_neutral_position
+(DefineLink
+	(DefinedPredicateNode "return to neutral")
+	(SequentialAndLink
+		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
+			(ListLink neutral-face))
 	))
 
 ; ------------------------------------------------------
@@ -559,7 +598,7 @@
 			;; line 768
 			(SequentialOrLink
 				(NotLink (DefinedPredicateNode "Time to change expression"))
-				(DefinedPredicateNode "Pick random positive expression")
+				(DefinedPredicateNode "Show positive expression")
 			)
 			(DefinedPredicateNode "Pick random positive gesture")
 		)))
@@ -575,11 +614,17 @@
 		(SequentialAndLink
 			;; line 392
 			(DefinedPredicateNode "was room empty?")
+			(TrueLink (DefinedSchemaNode "interact with new person"))
 			(TrueLink (DefinedSchemaNode "look at person"))
 			(TrueLink (DefinedSchemaNode "set timestamp"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Look at person")))
+				(ListLink (Node "--- Look at newly arrived person")))
 		)))
+
+(DefineLink
+	(DefinedSchemaNode "interact with new person")
+	(PutLink (StateLink interaction-state (VariableNode "$x"))
+		(DefinedSchemaNode "New arrivals")))
 
 ;; line 399 -- Sequence - Currently interacting with someone
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
@@ -628,8 +673,19 @@
 			(DefinedPredicateNode "Did someone leave?")
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Someone left")))
-			
-			(FalseLink)
+			(SequentialOrLink
+				; Were we interacting with the person who left? If so,
+				; look frustrated, return to neutral.
+				(SequentialAndLink
+					(EqualLink
+						(DefinedSchemaNode "New departures")
+						(GetLink (StateLink interaction-state (VariableNode "$x"))))
+					(DefinedPredicateNode "Show frustrated expression")
+					(DefinedPredicateNode "return to neutral")
+				)
+;xxxxxxxxxxxxxxxxxxxxx
+				(FalseLink)
+			)
 		)))
 
 
