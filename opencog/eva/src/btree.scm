@@ -384,8 +384,15 @@
 		(stv 1 1) (stv 0 1)))
 
 ; line 588 -- dice_roll("glance_new_face")
+; XXX incomplete, needs refinement
 (DefineLink
-	(DefinedPredicateNode "dice-roll: glance")
+	(DefinedPredicateNode "dice-roll: glance new face")
+	(EvaluationLink
+		(GroundedPredicateNode "scm: dice-roll")
+		(ListLink (NumberNode "0.5"))))
+
+(DefineLink
+	(DefinedPredicateNode "dice-roll: glance lost face")
 	(EvaluationLink
 		(GroundedPredicateNode "scm: dice-roll")
 		(ListLink (NumberNode "0.5"))))
@@ -538,14 +545,22 @@
 		(GetLink (StateLink interaction-state (VariableNode "$x")))
 	))
 
-;; line 818, glance_at_new_face
+;; line 818 -- glance_at_new_face()
 (DefineLink
-	(DefinedSchemaNode "glance at person")
+	(DefinedSchemaNode "glance at new person")
 	(PutLink
 		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (VariableNode "$face")))
 		(DefinedSchemaNode "New arrivals")
 	))
+
+;; line 827 -- glance_at_lost_face()
+(DefineLink
+	(DefinedSchemaNode "glance at lost face")
+	(PutLink
+		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
+			(ListLink (VariableNode "$face")))
+		(DefinedSchemaNode "New departures")))
 
 ;; Move to a neutral head position. Right now, this just issues a
 ;; look-at command; it could do more (e.g. halt the chatbot.)
@@ -642,10 +657,10 @@
 	(SatisfactionLink
 		(SequentialAndLink
 			(DefinedPredicateNode "is interacting with someone?")
-			(DefinedPredicateNode "dice-roll: glance")
-			(TrueLink (DefinedSchemaNode "glance at person"))
+			(DefinedPredicateNode "dice-roll: glance new face")
+			(TrueLink (DefinedSchemaNode "glance at new person"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Glance at person")))
+				(ListLink (Node "--- Glance at new person")))
 	)))
 
 ;; Respond to a new face becoming visible.
@@ -672,9 +687,8 @@
 			(DefinedPredicateNode "Update status")
 		)))
 
-;; Check to see if someone left
+;; Check to see if someone left.
 ;; line 422 -- someone_left()
-;; XXX not implemented
 (DefineLink
 	(DefinedPredicateNode "Someone left")
 	(SatisfactionLink
@@ -696,10 +710,16 @@
 						(StateLink interaction-state (VariableNode "$face-id"))
 						no-interaction))
 				)
-				;; Were we interacting with someone else?
+				;; Were we interacting with someone else?  If so, then
+				;; maybe glance at the location of the person who left.
 				(SequentialAndLink
-;xxxxxxxxxxxxxxxxxxxxx
-					(FalseLink)
+					(DefinedPredicateNode "is interacting with someone?")
+					(SequentialOrLink
+						(NotLink (DefinedPredicateNode "dice-roll: glance lost face"))
+						(FalseLink (DefinedSchemaNode "glance at lost face"))
+						(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+							(ListLink (Node "--- Glance at lost face"))))
+					(TrueLink)
 				)
 				(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 					(ListLink (Node "--- Ignoring lost face")))
