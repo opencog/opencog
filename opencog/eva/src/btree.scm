@@ -80,44 +80,86 @@
 ; Emotional-state to expression mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
 ; expressions to display for that emotional state, as well as the
-; intensities and durations.  `emo-set` adds an expression to a
-; an emotional state, while `emo-map` is used to set parameters.
-(define (emo-set emo-state expression)
+; intensities and durations.  `emo-set` adds an expression to an
+; emotional state, while `emo-map` is used to set parameters.
+(define (emo-expr-set emo-state expression)
 	(EvaluationLink
 		(PredicateNode "Emotion-expression")
 		(ListLink (ConceptNode emo-state) (ConceptNode expression))))
 
-(define (emo-map emo-state expression param value)
+(define (emo-expr-map emo-state expression param value)
 	(StateLink (ListLink
 		(ConceptNode emo-state) (ConceptNode expression) (SchemaNode param))
 		(NumberNode value)))
 
-; Shorthand utility, takes probability, intensity min ad max, duration min
+; Shorthand utility, takes probability, intensity min and max, duration min
 ; and max.
-(define (emo-spec emo-state expression prob int-min int-max dur-min dur-max)
-	(emo-set emo-state expression)
-	(emo-map emo-state expression "probability" prob)
-	(emo-map emo-state expression "intensity-min" int-min)
-	(emo-map emo-state expression "intensity-max" int-max)
-	(emo-map emo-state expression "duration-min" dur-min)
-	(emo-map emo-state expression "duration-max" dur-max))
+(define (emo-expr-spec emo-state expression prob int-min int-max dur-min dur-max)
+	(emo-expr-set emo-state expression)
+	(emo-expr-map emo-state expression "probability" prob)
+	(emo-expr-map emo-state expression "intensity-min" int-min)
+	(emo-expr-map emo-state expression "intensity-max" int-max)
+	(emo-expr-map emo-state expression "duration-min" dur-min)
+	(emo-expr-map emo-state expression "duration-max" dur-max))
 
 ; Translation of behavior.cfg line 9 ff
-(emo-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
+(emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
-(emo-spec "frustrated" "sad"         0.4 0.6 0.8 5 15)
-(emo-spec "frustrated" "confused"    0.4 0.6 0.8 5 15)
-(emo-spec "frustrated" "recoil"      0.1 0.1 0.2 5 15)
-(emo-spec "frustrated" "surprised"   0.1 0.1 0.2 5 15)
+(emo-expr-spec "frustrated" "sad"         0.4 0.6 0.8 5 15)
+(emo-expr-spec "frustrated" "confused"    0.4 0.6 0.8 5 15)
+(emo-expr-spec "frustrated" "recoil"      0.1 0.1 0.2 5 15)
+(emo-expr-spec "frustrated" "surprised"   0.1 0.1 0.2 5 15)
 
-(emo-spec "positive" "happy"         0.4 0.6 0.8 10 15)
-(emo-spec "positive" "comprehending" 0.2 0.5 0.8 10 15)
-(emo-spec "positive" "engaged"       0.2 0.5 0.8 10 15)
+(emo-expr-spec "positive" "happy"         0.4 0.6 0.8 10 15)
+(emo-expr-spec "positive" "comprehending" 0.2 0.5 0.8 10 15)
+(emo-expr-spec "positive" "engaged"       0.2 0.5 0.8 10 15)
 
-(emo-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
-(emo-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
-(emo-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
+(emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
+(emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
+(emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
+; --------------------------------------------------------
+; Emotional-state to gesture mapping. For a given emotional state
+; (for example, happy, bored, excited) this specifies a range of
+; gestures to display for that emotional state, as well as the
+; intensities and durations.  `ges-set` adds a gesture to an
+; emotional state, while `ges-map` is used to set parameters.
+(define (emo-gest-set emo-state gesture)
+	(EvaluationLink
+		(PredicateNode "Emotion-gesture")
+		(ListLink (ConceptNode emo-state) (ConceptNode gesture))))
+
+(define (emo-gest-map emo-state gesture param value)
+	(StateLink (ListLink
+		(ConceptNode emo-state) (ConceptNode gesture) (SchemaNode param))
+		(NumberNode value)))
+
+; Shorthand utility, takes probability, intensity min and max, duration min
+; and max, repeat min and max.
+(define (emo-gest-spec emo-state gesture prob
+		int-min int-max rep-min rep-max spd-min spd-max)
+	(emo-gest-set emo-state gesture)
+	(emo-gest-map emo-state gesture "probability" prob)
+	(emo-gest-map emo-state gesture "intensity-min" int-min)
+	(emo-gest-map emo-state gesture "intensity-max" int-max)
+	(emo-gest-map emo-state gesture "repeat-min" rep-min)
+	(emo-gest-map emo-state gesture "repeat-max" rep-max)
+	(emo-gest-map emo-state gesture "speed-min" spd-min)
+	(emo-gest-map emo-state gesture "speed-max" spd-max))
+
+; Translation of behavior.cfg line 75 ff
+(emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
+(emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
+
+(emo-gest-spec "bored"   "yawn-1"  0.01 0.6 0.9 1 1 1 1)
+
+(emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
+
+(emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
+(emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
+(emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
+
+; --------------------------------------------------------
 ; Given the name of a emotion, pick one of the allowed emotional
 ; expressions at random. Example usage:
 ;
@@ -140,10 +182,39 @@
 					(PredicateNode "Emotion-expression")
 					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
 
+; As above, but for gestures.
+(DefineLink
+	(DefinedSchemaNode "Pick random gesture")
+	(LambdaLink
+		(VariableNode "$emo")
+		(RandomChoiceLink
+			(GetLink
+				(VariableNode "$expr")
+				(EvaluationLink
+					(PredicateNode "Emotion-gesture")
+					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
+
+; Pick a random numeric value, lying in the range between min and max.
+; The range min and max depends on an emotion-expression pair. For an
+; example usage, see below.
+(define (pick-value-in-range min-name max-name)
+	(LambdaLink
+		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
+		(RandomNumberLink
+			(GetLink (VariableNode "$int-min")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode min-name)) (VariableNode "$int-min")))
+			(GetLink (VariableNode "$int-max")
+				(StateLink (ListLink
+					(VariableNode "$emo") (VariableNode "$expr")
+					(SchemaNode max-name)) (VariableNode "$int-max")))
+		)))
+
 ; Get a random intensity value forthe indicated emotion-expression.
 ; That is, given an emotion-expression pair, this wil look up the
 ; min and max allowed intensity levels, and return a random number
-; betwee these min ad max values.
+; betwee these min and max values.
 ;
 ; Example usage:
 ;    (cog-execute!
@@ -152,34 +223,20 @@
 ; will return an intensity level for the positive-egaged expression.
 (DefineLink
 	(DefinedSchemaNode "get random intensity")
-	(LambdaLink
-		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
-		(RandomNumberLink
-			(GetLink (VariableNode "$int-min")
-				(StateLink (ListLink
-					(VariableNode "$emo") (VariableNode "$expr")
-					(SchemaNode "intensity-min")) (VariableNode "$int-min")))
-			(GetLink (VariableNode "$int-max")
-				(StateLink (ListLink
-					(VariableNode "$emo") (VariableNode "$expr")
-					(SchemaNode "intensity-max")) (VariableNode "$int-max")))
-		)))
+	(pick-value-in-range "intensity-min" "intensity-max"))
 
 ; Similar to above, but for duration. See explanation above.
 (DefineLink
 	(DefinedSchemaNode "get random duration")
-	(LambdaLink
-		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
-		(RandomNumberLink
-			(GetLink (VariableNode "$dur-min")
-				(StateLink (ListLink
-					(VariableNode "$emo") (VariableNode "$expr")
-					(SchemaNode "duration-min")) (VariableNode "$dur-min")))
-			(GetLink (VariableNode "$dur-max")
-				(StateLink (ListLink
-					(VariableNode "$emo") (VariableNode "$expr")
-					(SchemaNode "duration-max")) (VariableNode "$dur-max")))
-		)))
+	(pick-value-in-range "duration-min" "duration-max"))
+
+(DefineLink
+	(DefinedSchemaNode "get random repeat")
+	(pick-value-in-range "repeat-min" "repeat-max"))
+
+(DefineLink
+	(DefinedSchemaNode "get random speed")
+	(pick-value-in-range "speed-min" "speed-max"))
 
 ; Show a expression from a given emotional class. Sends the expression
 ; to ROS for display.  Sets a timestamp as well.  The intensity and
@@ -212,6 +269,37 @@
 		)
 	))
 
+; Show a gesture for a given emotional class. Sends the gesture
+; to ROS for display.  The intensity, repetition and speed of the
+; gesture is picked randomly from the parameters for the emotion-gesture.
+;
+; Example usage:
+;    (cog-evaluate!
+;        (PutLink (DefinedPredicateNode "Show gesture")
+;           (ListLink (ConceptNode "positive") (ConceptNode "nod-1"))))
+;
+(DefineLink
+	(DefinedPredicateNode "Show gesture")
+	(LambdaLink
+		(VariableList (VariableNode "$emo") (VariableNode "$gest"))
+		(SequentialAndLink
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicateNode "py:do_gesture")
+				(ListLink
+					(VariableNode "$gest")
+					(PutLink
+						(DefinedSchemaNode "get random intensity")
+						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+					(PutLink
+						(DefinedSchemaNode "get random repeat")
+						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+					(PutLink
+						(DefinedSchemaNode "get random speed")
+						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+			))
+		)
+	))
+
 ;
 ; Pick an expression of the given, and send it to ROS for display.
 ; The expression is picked randomly from the class of expressions for
@@ -239,8 +327,9 @@
 	))
 
 ; --------------------------------------------------------
-; Temporary stand-in for emotion modelling. Right now, just some
-; random selectors for classes of emotions.
+; Show facial expressions and gestures suitable for a given emotional
+; state. These are radom selectors, picking some expression randomly
+; from a meu of choices, ad displaying it.
 
 ;; Pick random expression, and display it.
 ;; line 305 -- pick_random_expression()
@@ -248,19 +337,6 @@
 	(DefinedPredicateNode "Pick random positive expression")
 	(PutLink (DefinedPredicateNode "Show random expression")
 		(ConceptNode "positive")))
-
-(DefineLink
-	(DefinedPredicateNode "Pick random negative expression")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(RandomChoiceLink
-				(ConceptNode "bored")
-				(ConceptNode "frustrated")
-				(ConceptNode "angry")
-			)
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)) ; intensity
-	))
 
 ;; Pick random gesture
 ;; XXX really need to pick gestures from a class of appropriate
@@ -449,6 +525,7 @@
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 ;; XXX not yet a complete implementation of owyl
+;; XXX The owyl pick_instant code is insane...
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SatisfactionLink

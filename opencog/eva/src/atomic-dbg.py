@@ -72,11 +72,13 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	return TruthValue(1, 1)
 
-def do_gesture(gesture_node, duration_node, intensity_node):
+def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 	gesture = gesture_node.name
-	duration = float(duration_node.name)
 	intensity = float(intensity_node.name)
-	print "Python gesture: ", gesture, " for ", duration, " int ", intensity
+	repeat = float(repeat_node.name)
+	speed = float(speed_node.name)
+	print "Python gesture: ", gesture, ", int: ", intensity, \
+		", rep: ", repeat, ", speed: ", speed
 	return TruthValue(1, 1)
 
 # Return true as long as ROS is running.
