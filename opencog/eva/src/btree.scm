@@ -102,10 +102,21 @@
 	(emo-map emo-state expression "duration-min" dur-min)
 	(emo-map emo-state expression "duration-max" dur-max))
 
-; Translation of behavior.cfg line 23 ff
+; Translation of behavior.cfg line 9 ff
+(emo-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
+
+(emo-spec "frustrated" "sad"         0.4 0.6 0.8 5 15)
+(emo-spec "frustrated" "confused"    0.4 0.6 0.8 5 15)
+(emo-spec "frustrated" "recoil"      0.1 0.1 0.2 5 15)
+(emo-spec "frustrated" "surprised"   0.1 0.1 0.2 5 15)
+
 (emo-spec "positive" "happy"         0.4 0.6 0.8 10 15)
 (emo-spec "positive" "comprehending" 0.2 0.5 0.8 10 15)
 (emo-spec "positive" "engaged"       0.2 0.5 0.8 10 15)
+
+(emo-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
+(emo-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
+(emo-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
 ; Given the name of a emotion, pick one of the allowed emotional
 ; expressions at random. Example usage:
@@ -449,12 +460,7 @@
 				(GetLink (StateLink interaction-state (VariableNode "$x")))))
 			;; line 768
 			(SequentialOrLink
-; xxxx
-(EvaluationLink (GroundedPredicateNode "scm: print-f-msg")
-(ListLink (Node "is it ??? time r")))
 				(NotLink (DefinedPredicateNode "Time to change expression"))
-(EvaluationLink (GroundedPredicateNode "scm: print-f-msg")
-(ListLink (Node "time to chane expr")))
 				(DefinedPredicateNode "Pick random positive expression")
 			)
 			(DefinedPredicateNode "Pick random gesture")
