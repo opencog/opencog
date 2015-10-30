@@ -312,6 +312,7 @@
 ;          (ConceptNode "positive")))
 ; will pick one of te "positive" emotions, and send it off.
 ;
+;; line 305 -- pick_random_expression()
 (DefineLink
 	(DefinedPredicateNode "Show random expression")
 	(LambdaLink
@@ -326,35 +327,38 @@
 			))
 	))
 
+;; Like the above, but for gestures
+;; line 334 -- pick_random_gesture()
+(DefineLink
+	(DefinedPredicateNode "Show random gesture")
+	(LambdaLink
+		(VariableNode "$emo")
+		(PutLink
+			(DefinedPredicateNode "Show gesture")
+			(ListLink
+				(VariableNode "$emo")
+				(PutLink
+					(DefinedSchemaNode "Pick random gesture")
+					(VariableNode "$emo"))
+			))
+	))
+
 ; --------------------------------------------------------
 ; Show facial expressions and gestures suitable for a given emotional
 ; state. These are radom selectors, picking some expression randomly
 ; from a meu of choices, ad displaying it.
 
 ;; Pick random expression, and display it.
-;; line 305 -- pick_random_expression()
 (DefineLink
 	(DefinedPredicateNode "Pick random positive expression")
 	(PutLink (DefinedPredicateNode "Show random expression")
 		(ConceptNode "positive")))
 
-;; Pick random gesture
-;; XXX really need to pick gestures from a class of appropriate
-;; ones, given an emotional state.
-;; line 334 -- pick_random_gesture()
+;; Pick random positive  gesture
 (DefineLink
-	(DefinedPredicateNode "Pick random gesture")
-	(EvaluationLink (GroundedPredicateNode "py:do_gesture")
-		(ListLink
-			(RandomChoiceLink
-				(ConceptNode "nod-1")
-				(ConceptNode "nod-2")
-				(ConceptNode "yawn-1")
-				(ConceptNode "shake-2")
-				(ConceptNode "shake-3")
-			)
-			(NumberNode 0.9) ; duration
-			(NumberNode 0.7)))) ; intensity
+	(DefinedPredicateNode "Pick random positive gesture")
+	(PutLink (DefinedPredicateNode "Show random gesture")
+		(ConceptNode "positive")))
 
 ; ------------------------------------------------------
 ; TODO --
@@ -540,7 +544,7 @@
 				(NotLink (DefinedPredicateNode "Time to change expression"))
 				(DefinedPredicateNode "Pick random positive expression")
 			)
-			(DefinedPredicateNode "Pick random gesture")
+			(DefinedPredicateNode "Pick random positive gesture")
 		)))
 
 ; ------------------------------------------------------
