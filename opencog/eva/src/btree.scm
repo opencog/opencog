@@ -235,16 +235,8 @@
 ;; line 305 -- pick_random_expression()
 (DefineLink
 	(DefinedPredicateNode "Pick random positive expression")
-	(EvaluationLink (GroundedPredicateNode "py:do_emotion")
-		(ListLink
-			(RandomChoiceLink
-				(ConceptNode "smile")
-				(ConceptNode "engaged")
-				(ConceptNode "surprised")
-			)
-			(NumberNode 5.5) ; duration
-			(NumberNode 0.7)) ; intensity
-	))
+	(PutLink (DefinedPredicateNode "Show random expression")
+		(ConceptNode "positive")))
 
 (DefineLink
 	(DefinedPredicateNode "Pick random negative expression")
