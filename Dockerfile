@@ -1,9 +1,11 @@
 #
-# Primary OpenCog Dockerfile
-#
 # Usage:  docker build -t $USER/opencog .
 #         docker run --name="my_cog" -v $PWD:/home/opencog/src -p 17001:17001 -p 18001:18001 -it $USER/opencog
-#         docker exec -it my_cog bash
+#         # The folowing steps are run inside the container
+#         cd /opencog
+#         mkdir build ; cd build
+#         cmake .. ; make -j$(nproc)
+#         # Follow steps in http://wiki.opencog.org/w/OpenCog_shell
 #
 FROM ubuntu:14.04
 MAINTAINER David Hart "dhart@opencog.org"
