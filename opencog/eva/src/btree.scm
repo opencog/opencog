@@ -15,8 +15,8 @@
 ; various rules. See faces.scm for utilities:
 ;
 ; Manually insert a face: (make-new-face id)
-; etc: (remove-face id)  (show-room-state) (show-interaction-state)
-; (show-visible-faces)
+; Remove a face: (remove-face id)
+; Etc.: (show-room-state) (show-interaction-state) (show-visible-faces)
 ;
 ; Unit test the new-arrival sequence:
 ; (make-new-face "42")
@@ -386,7 +386,9 @@
 ;; ------
 ;;
 ;; Return true if a new face has become visible.
-;; line 631, is_someone_arrived
+;; A "new  face" is one tat is visible (in the atomspace) but
+;; has not yet bee acked.
+;; line 631, is_someone_arrived()
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
 	(SatisfactionLink
@@ -411,6 +413,21 @@
 			(AbsentLink (EvaluationLink (PredicateNode "acked face")
 					(ListLink (VariableNode "$face-id"))))
 	)))
+
+;; Return true if some face has is no longer visible (has left the room)
+;; We detect this by looking for "acked" faces tat are not also visible.
+;; line 641, is_someone_left()
+(DefineLink
+	(DefinedPredicateNode "Did someone leave?")
+	(SatisfactionLink
+		(AndLink
+			; If someone was previously acked...
+			(PresentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id"))))
+			; But is no loger visible...
+			(AbsentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
+		)))
 
 ;;
 ;; Was the the room empty, viz: Does the atomspace contains the link
@@ -528,7 +545,7 @@
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
-;; XXX not yet a complete implementation of owyl
+;; XXX Almost a complete implementation of whats in owyl...  but
 ;; XXX The owyl pick_instant code is insane...
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
@@ -603,11 +620,17 @@
 
 ;; Check to see if someone left
 ;; line 422 -- someone_left()
-;; XXX not implemented at all
+;; XXX not implemented
 (DefineLink
 	(DefinedPredicateNode "Someone left")
-	(FalseLink)
-)
+	(SatisfactionLink
+		(SequentialAndLink
+			(DefinedPredicateNode "Did someone leave?")
+			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				(ListLink (Node "--- Someone left")))
+			
+			(FalseLink)
+		)))
 
 
 ;; Start a new interaction
