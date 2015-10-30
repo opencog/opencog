@@ -420,6 +420,17 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
+# cpprest
+FIND_PACKAGE(cpprest 2.6)
+IF (cpprest_FOUND AND cpprest_LIBRARY)
+	ADD_DEFINITIONS(-DHAVE_cpprest)
+	SET(HAVE_cpprest 1)
+	SET(cpprest_DIR_MESSAGE "cpprest was found.")
+ELSE (cpprest_FOUND AND cpprest_LIBRARY)
+	SET(cpprest_DIR_MESSAGE "cpprest was not found; PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
+ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
+MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 
