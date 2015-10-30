@@ -70,9 +70,8 @@
 (StateLink interaction-state no-interaction)
 (StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
 
-; current_emotion_duration set to default_emotion_duration
-; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
-(StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
+; The face to glance at.
+(StateLink glance-state no-interaction)
 
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
@@ -83,6 +82,10 @@
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
+
+; current_emotion_duration set to default_emotion_duration
+; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
+(StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -520,13 +523,29 @@
 
 ;; Randomly select a face out of the crowd.
 ;; line 747 -- select_a_face_target() and also
-;; line 752 -- select_a_glance_target()
 (DefineLink
 	(DefinedSchemaNode "Select random face")
 	(RandomChoiceLink (GetLink
 		(EvaluationLink (PredicateNode "acked face")
 			(ListLink (VariableNode "$face-id")))
 	)))
+
+;; line 752 -- select_a_glance_target()
+(DefineLink
+	(DefinedPredicateNode "Select random glance target")
+	(SequentialAndLink
+		; Recursive loop, keep picking, while the current glance target
+		; is the same as the current interaction target.
+		(TrueLink
+			(PutLink (StateLink glance-state (VariableNode "$face-id"))
+				(DefinedSchemaNode "Select random face")))
+		(EqualLink
+			(GetLink (StateLink glance-state (VariableNode "$face-id")))
+			(GetLink (StateLink interaction-state (VariableNode "$face-id")))
+		)
+		(DefinedPredicateNode "More than one face visible")
+		(DefinedPredicateNode "Select random glance target")
+	))
 
 ; Start interacting with a new face picked randomly from the crowd.
 (DefineLink
@@ -584,6 +603,17 @@
 			(ListLink (VariableNode "$face")))
 		(GetLink (StateLink interaction-state (VariableNode "$x")))
 	))
+
+;; line 809 + line 483 -- glance_at(id="current_glance_target")
+(DefineLink
+	(DefinedPredicateNode "glance at random face")
+	(SequentialAndLink
+		(DefinedPredicateNode "Select random glance target")
+		(TrueLink (PutLink
+			(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
+				(ListLink (VariableNode "$face")))
+			(GetLink (StateLink glance-state (VariableNode "$face-id")))
+		))))
 
 ;; line 818 -- glance_at_new_face()
 (DefineLink
@@ -843,10 +873,16 @@
 						(SequentialAndLink ; line 479
 							(DefinedPredicateNode "More than one face visible")
 							(DefinedPredicateNode "dice-roll: group interaction")
+							(DefinedPredicateNode "glance at random face"))
+						(TrueLink)) ; line 485
+					(DefinedPredicateNode "Interact with face")
+					(SequentialOrLink  ; line 488
+						(SequentialAndLink ; line 489
 ; xxxxxxxxx
-; XXX incomplete!
-(FalseLink)
-					))
+; XXX incomplete!  need the face study saccade stuff...
+							(FalseLink)
+						)
+						(TrueLink))  ; line 493
 				))
 		)))
 
