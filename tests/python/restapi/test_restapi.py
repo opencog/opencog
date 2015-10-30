@@ -29,17 +29,17 @@ class TestRESTApi():
         # Populate a test AtomSpace
         self.atomspace = AtomSpace()
         self.animal = self.atomspace.add_node(
-            types.ConceptNode, 'animal', TruthValue(.1, .95))
+            types.ConceptNode, 'animal', TruthValue(.1, 0.0011860914528369904))
         self.bird = self.atomspace.add_node(
-            types.ConceptNode, 'bird', TruthValue(.01, .9))
+            types.ConceptNode, 'bird', TruthValue(.01, 0.0011237357975915074))
         self.swan = self.atomspace.add_node(
-            types.ConceptNode, 'swan', TruthValue(.001, .9))
+            types.ConceptNode, 'swan', TruthValue(.001, 0.0011237357975915074))
         self.frog = self.atomspace.add_node(
-            types.ConceptNode, 'frog', TruthValue(.001, 2000))
+            types.ConceptNode, 'frog', TruthValue(.001, 0.7142857313156128))
         self.swan_bird = self.atomspace.add_link(
-            types.InheritanceLink, [self.swan, self.bird], TruthValue(1, .9))
+            types.InheritanceLink, [self.swan, self.bird], TruthValue(1, 0.0011237357975915074))
         self.bird_animal = self.atomspace.add_link(
-            types.InheritanceLink, [self.bird, self.animal], TruthValue(1, .9))
+            types.InheritanceLink, [self.bird, self.animal], TruthValue(1, 0.0011237357975915074))
         self.bird.av = {'sti': 9}
         self.swan.av = {'sti': 9}
 
@@ -81,7 +81,7 @@ class TestRESTApi():
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            float(post_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -136,7 +136,7 @@ class TestRESTApi():
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            float(post_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -183,7 +183,7 @@ class TestRESTApi():
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            float(put_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
@@ -225,7 +225,7 @@ class TestRESTApi():
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            float(put_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
@@ -262,7 +262,7 @@ class TestRESTApi():
         assert post_result['handle'] == existing_atom.h.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            float(post_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
     def test_post_revise_existing_link(self):
@@ -294,7 +294,7 @@ class TestRESTApi():
         assert post_result['handle'] == existing_atom.h.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            float(post_result['truthvalue']['details']['count'])) \
+            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
     @raises(IndexError)

@@ -11,7 +11,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-and-breakdown
+(define and-breakdown-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -22,7 +22,7 @@
      (VariableNode "$B"))
     (VariableNode "$A"))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-and-breakdown")
+    (GroundedSchemaNode "scm: and-breakdown-formula")
     (ListLink
      (AndLink
       (VariableNode "$A")
@@ -30,13 +30,13 @@
      (VariableNode "$A")
      (VariableNode "$B")))))
 
-(define (pln-formula-and-breakdown AB A B)
+(define (and-breakdown-formula AB A B)
   (cog-set-tv!
    B
-   (pln-formula-and-breakdown-side-effect-free AB A B))
+   (and-breakdown-side-effect-free-formula AB A B))
 )
 
-(define (pln-formula-and-breakdown-side-effect-free AB A B)
+(define (and-breakdown-side-effect-free-formula AB A B)
   (let 
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB))
@@ -45,5 +45,5 @@
     (stv (/ sAB sA) (min cAB cA))))
 
 ; Name the rule
-(define pln-rule-and-breakdown-name (Node "pln-rule-and-breakdown"))
-(DefineLink pln-rule-and-breakdown-name pln-rule-and-breakdown)
+(define and-breakdown-rule-name (Node "and-breakdown-rule"))
+(DefineLink and-breakdown-rule-name and-breakdown-rule)

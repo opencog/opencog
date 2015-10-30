@@ -81,12 +81,12 @@ void MicroplanningUTest::setUp(void)
                  "opencog/modules/libLGDictModule.so,"
                  "opencog/modules/libSuRealModule.so,"
                  // need embodiment-types for SequentialAndLink...
-                 "opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
+                 "opencog/embodiment/libembodiment-types.so");
 
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm,"
                  "opencog/scm/utilities.scm,"
-                 "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm,"
+                 "opencog/embodiment/embodiment_types.scm,"
                  "opencog/nlp/types/nlp_types.scm,"
                  "opencog/nlp/scm/nlp-utils.scm,"
                  "opencog/nlp/relex2logic/utilities.scm,"

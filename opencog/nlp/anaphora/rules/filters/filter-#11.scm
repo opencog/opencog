@@ -47,7 +47,7 @@
             )
 
             ;; filter
-            (NotLink
+            (AbsentLink
                 (InheritanceLink
                     (VariableNode "$word-inst-anaphor")
                     (DefinedLinguisticConceptNode "reflexive")

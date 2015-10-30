@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-intensional-inheritance-evaluation
+(define intensional-inheritance-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-intensional-inheritance-evaluation")
+            (GroundedSchemaNode "scm: intensional-inheritance-evaluation-formula")
             (ListLink
                 (IntensionalInheritanceLink
                     (VariableNode "$A")
@@ -41,11 +41,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-intensional-inheritance-evaluation AB CA CB)
+(define (intensional-inheritance-evaluation-formula AB CA CB)
     (cog-set-tv!
-        AB (pln-formula-intensional-inheritance-evaluation-side-effect-free AB CA CB)))
+        AB (intensional-inheritance-evaluation-side-effect-free-formula AB CA CB)))
 
-(define (pln-formula-intensional-inheritance-evaluation-side-effect-free AB CA CB)
+(define (intensional-inheritance-evaluation-side-effect-free-formula AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
@@ -60,8 +60,8 @@
                 (stv 1 1)))))
 
 ; Name the rule
-(define pln-rule-intensional-inheritance-evaluation-name
-  (Node "pln-rule-intensional-inheritance-evaluation"))
+(define intensional-inheritance-evaluation-rule-name
+  (Node "intensional-inheritance-evaluation-rule"))
 (DefineLink
-  pln-rule-intensional-inheritance-evaluation-name
-  pln-rule-intensional-inheritance-evaluation)
+  intensional-inheritance-evaluation-rule-name
+  intensional-inheritance-evaluation-rule)

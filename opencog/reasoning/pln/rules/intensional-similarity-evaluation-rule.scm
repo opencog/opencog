@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-intensional-similarity-evaluation
+(define intensional-similarity-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-intensional-similarity-evaluation")
+            (GroundedSchemaNode "scm: intensional-similarity-evaluation-formula")
             (ListLink
                 (IntensionalSimilarityLink
                     (VariableNode "$A")
@@ -41,11 +41,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-intensional-similarity-evaluation AB CA CB)
+(define (intensional-similarity-evaluation-formula AB CA CB)
     (cog-set-tv!
-        AB (pln-formula-intensional-similarity-evaluation-side-effect-free AB CA CB)))
+        AB (intensional-similarity-evaluation-side-effect-free-formula AB CA CB)))
 
-(define (pln-formula-intensional-similarity-evaluation-side-effect-free AB CA CB)
+(define (intensional-similarity-evaluation-side-effect-free-formula AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
@@ -60,8 +60,8 @@
                 (stv 0 1)))))
 
 ; Name the rule
-(define pln-rule-intensional-similarity-evaluation-name
-  (Node "pln-rule-intensional-similarity-evaluation"))
+(define intensional-similarity-evaluation-rule-name
+  (Node "intensional-similarity-evaluation-rule"))
 (DefineLink
-  pln-rule-intensional-similarity-evaluation-name
-  pln-rule-intensional-similarity-evaluation)
+  intensional-similarity-evaluation-rule-name
+  intensional-similarity-evaluation-rule)

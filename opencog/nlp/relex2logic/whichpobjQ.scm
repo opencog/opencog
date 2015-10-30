@@ -95,9 +95,9 @@
 ; r2l pipeline.
 (define (pre-whichpobjQ-rule subj prep pobj)
   (ListLink
-    (whichpobjQ-rule (word-inst-get-word-str pobj) (cog-name pobj)
-              (word-inst-get-word-str prep) (cog-name prep)
-              (word-inst-get-word-str subj) (cog-name subj)
+    (whichpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
+              (cog-name (word-inst-get-lemma prep)) (cog-name prep)
+              (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
     )
   )
 )

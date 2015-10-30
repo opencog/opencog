@@ -17,3 +17,7 @@ TARGET_LINK_LIBRARIES(sureal
 )
 
 INSTALL (TARGETS sureal DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+INSTALL (FILES
+	surface-realization.scm
+	DESTINATION "${DATADIR}/scm/nlp/sureal")

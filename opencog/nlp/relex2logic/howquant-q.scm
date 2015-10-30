@@ -53,7 +53,7 @@
 ; r2l pipeline.
 (define (pre-howquant-q-rule noun)
  (ListLink
-	(howquantQ-rule (word-inst-get-word-str noun) (cog-name noun)
+	(howquantQ-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
 	)
  )
 )

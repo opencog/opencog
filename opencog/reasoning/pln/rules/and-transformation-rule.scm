@@ -10,7 +10,7 @@
 ;----------------------------------------------------------------------
 
 
-(define pln-rule-and-transformation
+(define and-transformation-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -19,7 +19,7 @@
      (VariableNode "$A")
      (VariableNode "$B"))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-and-transformation")
+    (GroundedSchemaNode "scm: and-transformation-formula")
     (ListLink
      (AndLink
       (VariableNode "$A")
@@ -30,19 +30,19 @@
 	(NotLink
 	 (VariableNode "$B"))))))))
 
-(define (pln-formula-and-transformation AB NIAB)
+(define (and-transformation-formula AB NIAB)
   (cog-set-tv!
    NIAB
-   (pln-formula-and-transformation-side-effect-free AB NIAB))
+   (and-transformation-side-effect-free-formula AB NIAB))
 )
 
 
-(define (pln-formula-and-transformation-side-effect-free AB NIAB)
+(define (and-transformation-side-effect-free-formula AB NIAB)
   (let 
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB)))
     (stv sAB cAB)))
 
 ; Name the rule
-(define pln-rule-and-transformation-name (Node "pln-rule-and-transformation"))
-(DefineLink pln-rule-and-transformation-name pln-rule-and-transformation)
+(define and-transformation-rule-name (Node "and-transformation-rule"))
+(DefineLink and-transformation-rule-name and-transformation-rule)

@@ -40,7 +40,7 @@
 ; r2l pipeline.
 (define (pre-pred-ynq-rule verb)
  (ListLink
-	(pred-ynQ-rule (word-inst-get-word-str verb) (cog-name verb)
+	(pred-ynQ-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
 	)
  )
 )

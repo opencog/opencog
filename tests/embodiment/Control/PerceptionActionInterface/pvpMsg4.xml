@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain">
-    <avatar-signal id="1" invalid="2007-06-18T20:15:04.000-07:00"/>
-        <action name="whatever" status="done" plan-id="13" sequence="1"/> 
-    </avatar-signal>
-</oc:embodiment-msg>
-

@@ -52,8 +52,8 @@
 ; r2l pipeline.
 (define (pre-sp-rule subj predadj)
  (ListLink
-	(SV-rule (word-inst-get-word-str subj) (cog-name subj)
-		(word-inst-get-word-str predadj) (cog-name predadj)
+	(SV-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
+		(cog-name (word-inst-get-lemma  predadj)) (cog-name predadj)
 	)
  )
 )
