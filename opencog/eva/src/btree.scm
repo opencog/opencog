@@ -492,7 +492,7 @@
 ;; The someone-arrived code converts newly-visible faces to acked faces.
 ;; line 683 is_face_target().
 (DefineLink
-	(DefinedPredicateNode "Detected face")
+	(DefinedPredicateNode "Someone visible")
 	(SatisfactionLink
 		(PresentLink
 			(EvaluationLink (PredicateNode "acked face")
@@ -815,24 +815,29 @@
 (DefineLink
 	(DefinedPredicateNode "Interact with people")
 	(SatisfactionLink
-		(SequentialAndLink
+		(SequentialAndLink ; line 458
+			; True, if there is anyone visible.
+			(DefinedPredicateNode "Someone visible") ; line 459
 			; This or-link is true if we're not interacting with anyone,
 			; or if there are several people and its time to change up.
-			(SequentialOrLink
-				(NotLink (DefinedPredicateNode "is interacting with someone?"))
-				(SequentialAndLink
-					(DefinedPredicateNode "More than one face visible")
-					(DefinedPredicateNode "Time to change interaction")
-				)
-			)
-			; Select a new face target
-			(DefinedPredicateNode "Start new interaction")
-			(DefinedPredicateNode "Interact with face")
+			(SequentialOrLink ; line 460
+				; ##### Start A New Interaction #####
+				(SequentialAndLink ; line 462
+					(SequentialOrLink ; line 463
+						(NotLink (DefinedPredicateNode "is interacting with someone?"))
+						(SequentialAndLink ; line 465
+							(DefinedPredicateNode "More than one face visible")
+							(DefinedPredicateNode "Time to change interaction")))
+					; Select a new face target
+					(DefinedPredicateNode "Start new interaction")
+					(DefinedPredicateNode "Interact with face"))
+
+				; ##### Glance At Other Faces & Continue With The Last Interaction
+				(SequentialAndLink ; line 476
 ; xxxxxxxxx
 ; XXX incomplete!
-			(DefinedPredicateNode "Detected face")
-			(DefinedPredicateNode "Start new interaction")
-			(DefinedPredicateNode "Interact with face")
+(FalseLink)
+				))
 		)))
 
 ;; Nothing is happening
