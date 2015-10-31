@@ -749,18 +749,6 @@
 		)))
 
 
-;; Start a new interaction
-;; line 461 -- sequence ....
-; XXX  todo -- check if more than one face target
-; record the start time ....
-(DefineLink
-	(DefinedPredicateNode "Start new interaction")
-	(SatisfactionLink
-		(SequentialAndLink
-			(NotLink (DefinedPredicateNode "is interacting with someone?"))
-			(DefinedPredicateNode "Start new interaction")
-		)))
-
 ;; Interact with people
 ;; line 457 -- interact_with_people()
 (DefineLink
