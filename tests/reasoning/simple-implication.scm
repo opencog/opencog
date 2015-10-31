@@ -39,3 +39,16 @@
    (ListLink
       (ConceptNode "A")
       (ConceptNode "B")))
+
+;; This one is to test the implication instantiation rule when the
+;; precondition cannot be satisfied
+(ImplicationLink (stv 1 1)
+   (TypedVariableLink
+      (VariableNode "$X")
+      (TypeNode "ConceptNode"))
+   (EvaluationLink
+      (PredicateNode "dummy-implicant")
+      (VariableNode "$X"))
+   (EvaluationLink
+      (PredicateNode "dummy-implicand")
+      (VariableNode "$X")))

@@ -42,10 +42,14 @@
          (terms (map select-substitution-term typed-vars)))
     (apply ListLink terms)))
 
-;; Select a random atom from a Link's outgoings
+;; Select a random atom from a Link's outgoings. If the link is empty
+;; return the undefined handle.
 (define (select-rnd-outgoing link)
-  (let ((outgoings (cog-outgoing-set link)))
-    (list-ref outgoings (random (length outgoings)))))
+  (let* ((outgoings (cog-outgoing-set link))
+         (outgoings-len (length outgoings)))
+    (if (= outgoings-len 0)
+        (cog-undefined-handle)
+        (list-ref outgoings (random outgoings-len)))))
 
 ;; Return a list without the indexed element
 (define (rm-list-ref l i)

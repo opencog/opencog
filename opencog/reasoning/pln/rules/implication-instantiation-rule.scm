@@ -53,9 +53,10 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-full-instantiation-formula")
      (ListLink
-        (VariableNode "$TyVs")
-        (VariableNode "$P")
-        (VariableNode "$Q"))))
+        ;; (ImplicationLink
+           (VariableNode "$TyVs")
+           (VariableNode "$P")
+           (VariableNode "$Q"))));;)
 
 ;; Only try to match an ImplicationLink with a type restricted
 ;; variable in the ImplicationLink variable definition. The choice of
@@ -74,15 +75,25 @@
 ;;    terms, if the ImplicationLink has multiple variables in scope)
 ;;    that meets the implication's condition (the implicant),
 ;;
-;; 2. performs the substitution,
+;; 2. performs the substitution.
 ;;
-;; 3. calculates its TV (TODO: just <1 1> for now).
-(define (implication-full-instantiation-formula SV P Q)
-  (cog-set-tv!
-   (let ((terms (select-conditioned-substitution-terms SV P)))
-     ;; Substitute the variable by the term in the body
-     (cog-execute! (PutLink (LambdaLink SV Q) terms)))
-   (stv 1 1)))
+;; 3. calculates its TV (TODO: just <1 1> for now, but might be just
+;;    the TV on the ImplicationLink)
+;;
+;; If no substitution is possible it returns the undefined handle
+(define (implication-full-instantiation-formula SV P Q);;Impl)
+  (let* (
+         ;; (SV (gar Impl))
+         ;; (P (gadr Impl))
+         ;; (Q (gaddr Impl))
+         (terms (select-conditioned-substitution-terms SV P)))
+    (if (equal? terms (cog-undefined-handle))
+        terms
+        ;; Substitute the variables by the terms in the body
+        (cog-set-tv!
+         (cog-execute! (PutLink (LambdaLink SV Q) terms))
+         (stv 1 1)))))
+         ;; (cog-tv Impl)))))
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name
@@ -121,52 +132,57 @@
 
 ;; This function
 ;;
-;; 1. randomly selects a substitution term that meets the
+;; 1. randomly selects a substitution term that partially meets the
 ;;    implication's condition (the implicant),
 ;;
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
 (define (implication-partial-instantiation-formula TyVs P Q)
-  (cog-set-tv!
-   (let* (
-          (TyVs-outgoings (cog-outgoing-set TyVs))
-          (TyVs-outgoings-len (length TyVs-outgoings))
+  (let* (
+         (TyVs-outgoings (cog-outgoing-set TyVs))
+         (TyVs-outgoings-len (length TyVs-outgoings))
                                         ; Select all potential
                                         ; substitution terms
-          (terms (select-conditioned-substitution-terms TyVs P))
-                                        ; Choose one to as substitution term
-          (rnd-index (random TyVs-outgoings-len))
-          (term (list-ref (cog-outgoing-set terms) rnd-index))
+         (terms (select-conditioned-substitution-terms TyVs P))
+                                        ; Choose the index of the
+                                        ; variable to substitute
+         (rnd-index (random TyVs-outgoings-len))
                                         ; Take it's corresponding
                                         ; variable
-          (TyV (list-ref TyVs-outgoings rnd-index))
+         (TyV (list-ref TyVs-outgoings rnd-index))
                                         ; Build a VariableList of the
                                         ; remaining variables
-          (TyVs-remain-list (rm-list-ref TyVs-outgoings rnd-index))
-          (TyVs-remain-len (length TyVs-remain-list))
-          (TyVs-remain (apply cog-new-link 'VariableList TyVs-remain-list))
+         (TyVs-remain-list (rm-list-ref TyVs-outgoings rnd-index))
+         (TyVs-remain-len (length TyVs-remain-list))
+         (TyVs-remain (apply cog-new-link 'VariableList TyVs-remain-list)))
+    (if (equal? terms (cog-undefined-handle))
+        terms
+        (cog-set-tv!
+         (let* (
+                                        ; Take the corresponding term
+                (term (list-ref (cog-outgoing-set terms) rnd-index))
                                         ; Substitute the variable by
                                         ; the term in the P and Q bodies
-          (P-inst (cog-execute! (PutLink (LambdaLink TyV P) term)))
-          (Q-inst (cog-execute! (PutLink (LambdaLink TyV Q) term)))
+                (P-inst (cog-execute! (PutLink (LambdaLink TyV P) term)))
+                (Q-inst (cog-execute! (PutLink (LambdaLink TyV Q) term)))
                                         ; If there is only one
                                         ; variable left, discard the
                                         ; VariableLink
-          (TyVs-remain (if (= TyVs-remain-len 1)
-                           (gar TyVs-remain)
-                           TyVs-remain)))
-     (if (> TyVs-remain-len 0)
+                (TyVs-remain (if (= TyVs-remain-len 1)
+                                 (gar TyVs-remain)
+                                 TyVs-remain)))
+           (if (> TyVs-remain-len 0)
                                         ; If there are some variables
                                         ; left, rebuild the
                                         ; ImplicationLink with the
                                         ; remaining variables
-         (ImplicationLink TyVs-remain P-inst Q-inst)
+               (ImplicationLink TyVs-remain P-inst Q-inst)
                                         ; Otherwise just return the
                                         ; Q instance
-         Q-inst))
-   ;; TODO: implement a probabilistic formula rather than <1 1>
-   (stv 1 1)))
+               Q-inst))
+         ;; TODO: implement a probabilistic formula rather than <1 1>
+         (stv 1 1)))))
 
 ;; Name the rule
 (define implication-partial-instantiation-rule-name
