@@ -660,6 +660,8 @@
 			(TrueLink (DefinedSchemaNode "interact with new person"))
 			(TrueLink (DefinedSchemaNode "look at person"))
 			(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+			(PutLink (DefinedPredicateNode "Show random expression")
+				(ConceptNode "new-arrival"))
 			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				(ListLink (Node "--- Look at newly arrived person")))
 		)))
