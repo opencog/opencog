@@ -69,6 +69,8 @@
 
 (StateLink interaction-state no-interaction)
 (StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
+(StateLink (SchemaNode "start-expression-timestamp") (NumberNode 0))
+(StateLink (SchemaNode "gesture-timestamp") (NumberNode 0))
 
 ; The face to glance at.
 (define glance-state (AnchorNode "Glance State"))
@@ -77,6 +79,9 @@
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
 (StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
+
+(StateLink (SchemaNode "time_to_make_gesture_min") (NumberNode 6))
+(StateLink (SchemaNode "time_to_make_gesture_max") (NumberNode 10))
 
 (StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
 
@@ -233,6 +238,11 @@
 						(DefinedSchemaNode "get random speed")
 						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
 			))
+			;; Log the time.
+			(TrueLink (PutLink
+					(StateLink (SchemaNode "gesture-timestamp")
+						(VariableNode "$x"))
+					(TimeLink)))
 		)
 	))
 
@@ -603,6 +613,24 @@
 			(VariableNode "$x"))) ; in seconds
 	))
 
+(DefineLink
+	(DefinedPredicateNode "Time to make gesture")
+	(GreaterThanLink
+		; Minus lik computes number of seconds since interaction start.
+		(MinusLink
+			(TimeLink)
+			(GetLink
+				(StateLink (SchemaNode "gesture-timestamp")
+					(VariableNode "$x"))))
+		; Random number in the configured range.
+		(RandomNumberLink
+			(GetLink (StateLink (SchemaNode "time_to_make_gesture_min")
+				(VariableNode "$min")))
+			(GetLink (StateLink (SchemaNode "time_to_make_gesture_max")
+				(VariableNode "$max"))))
+	))
+
+
 ; Return true if it is time to interact with someone else.
 ;; line 697 -- is_time_to_change_face_target()
 (DefineLink
@@ -643,7 +671,9 @@
 				(NotLink (DefinedPredicateNode "Time to change expression"))
 				(DefinedPredicateNode "Show positive expression")
 			)
-			(DefinedPredicateNode "Pick random positive gesture")
+			(SequentialOrLink
+				(NotLink (DefinedPredicateNode "Time to make gesture"))
+				(DefinedPredicateNode "Pick random positive gesture"))
 		)))
 
 ; ------------------------------------------------------
