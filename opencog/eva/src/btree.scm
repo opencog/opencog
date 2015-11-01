@@ -71,6 +71,8 @@
 (StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
 (StateLink (SchemaNode "start-expression-timestamp") (NumberNode 0))
 (StateLink (SchemaNode "gesture-timestamp") (NumberNode 0))
+(StateLink (SchemaNode "start-sleep-timestamp") (NumberNode 0))
+(StateLink (SchemaNode "start-boredom-timestamp") (NumberNode 0))
 
 ; The face to glance at.
 (define glance-state (AnchorNode "Glance State"))
@@ -84,6 +86,7 @@
 (StateLink (SchemaNode "time_to_make_gesture_max") (NumberNode 10))
 
 (StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
+(StateLink (SchemaNode "sleep_probability") (NumberNode 0.1))
 
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
@@ -332,11 +335,21 @@
 		(NumberNode "0.5")
 		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
-;; line 599 kwargs["event"] == "group_interaction"
+;; line 599 -- kwargs["event"] == "group_interaction"
 (DefineLink
 	(DefinedPredicateNode "dice-roll: group interaction")
 	(GreaterThanLink
 		(GetLink (StateLink (SchemaNode "glance_probability")
+				(VariableNode "$x")))
+		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
+
+;; line 619 -- kwargs["event"] == "go_to_sleep"
+;; XXX incomplete, should depend on "bored-since" time
+;; if bored for 5 minutes, go to sleep.
+(DefineLink
+	(DefinedPredicateNode "dice-roll: go to sleep")
+	(GreaterThanLink
+		(GetLink (StateLink (SchemaNode "sleep_probability")
 				(VariableNode "$x")))
 		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
@@ -574,7 +587,7 @@
 ; Time-stamp-related stuff.
 
 ;; Set a timestamp. XXX todo replace this with timeserver.
-;; line 757, timestamp
+;; line 757, record_start_time
 (DefineLink
 	(DefinedSchemaNode "set interaction timestamp")
 	(PutLink
@@ -600,6 +613,20 @@
 	(GetLink
 		(StateLink (SchemaNode "start-expression-timestamp")
 			(VariableNode "$x"))))
+
+(DefineLink
+	(DefinedSchemaNode "set bored timestamp")
+	(PutLink
+		(StateLink (SchemaNode "start-boredom-timestamp")
+			(VariableNode "$x"))
+		(TimeLink)))
+
+(DefineLink
+	(DefinedSchemaNode "set sleep timestamp")
+	(PutLink
+		(StateLink (SchemaNode "start-sleep-timestamp")
+			(VariableNode "$x"))
+		(TimeLink)))
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
@@ -816,7 +843,6 @@
 					(DefinedPredicateNode "Interact with face")
 					(SequentialOrLink  ; line 488
 						(SequentialAndLink ; line 489
-; xxxxxxxxx
 ; XXX incomplete!  need the face study saccade stuff...
 							(FalseLink)
 						)
@@ -824,13 +850,53 @@
 				))
 		)))
 
+; ------------------------------------------------------
+;
+; Call once, to fall asleep.
+; line 941 -- go_to_sleep
+(DefineLink
+	(DefinedPredicateNode "Go to sleep")
+	(SequentialAndLink
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Go to sleep.")))
+		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
+		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
+			(SetLink soma-sleeping)))
+		(PutLink (DefinedPredicateNode "Show random expression")
+			(ConceptNode "sleep"))
+		(PutLink (DefinedPredicateNode "Show random gesture")
+			(ConceptNode "sleep"))
+	))
+
+(DefineLink
+	(DefinedPredicateNode "Continue sleeping")
+	(SequentialAndLink
+		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+	))
+
 ;; Nothing is happening
 ;; line 507 -- nothing_is_happening()
 ;; XXX Not implemented!
 (DefineLink
 	(DefinedPredicateNode "Nothing is happening")
-	(FalseLink)
-)
+	(SequentialAndLink  ; line 508
+		(SequentialOrLink  ; line 509
+			; ##### Is Not Sleeping #####
+			(SequentialAndLink ; line 511
+				(NotLink (EqualLink
+					(SetLink soma-sleeping)
+					(GetLink (StateLink soma-state (VariableNode "$x")))))
+
+				(SequentialOrLink  ; line 513
+					; ##### Go To Sleep #####
+					(SequentialAndLink  ; line 515
+						(DefinedPredicateNode "dice-roll: go to sleep")
+						(DefinedPredicateNode "Go to sleep"))
+				)))
+
+; xxxxxxxxxxxx
+(FalseLink)
+))
 
 ;; ------------------------------------------------------------------
 ;; Main loop diagnostics

@@ -55,6 +55,8 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
 (emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
+(emo-expr-spec "sleep"    "happy"         1.0 0.0 0.1 5 15)
+
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
