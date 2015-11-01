@@ -138,6 +138,11 @@
 ;; 2. performs the substitution,
 ;;
 ;; 3. calculates its TV (TODO: just <1 1> for now).
+;;
+;; TODO: To make this function better a form of partial pattern
+;; matching should be supported. Probably enabling self grounding in
+;; the pattern matcher would do the trick (see
+;; PatternMatchEngine::self_compare)
 (define (implication-partial-instantiation-formula TyVs P Q)
   (let* (
          (TyVs-outgoings (cog-outgoing-set TyVs))

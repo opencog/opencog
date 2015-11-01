@@ -74,7 +74,7 @@
 (define (select-conditioned-substitution-terms TyVs P)
   (let* (
                                         ; Build pattern matcher query
-                                        ; for the subtitution term
+                                        ; for the subtitution terms
          (query (GetLink TyVs P))
                                         ; Fetch all possible substitution terms
          (result (cog-execute! query)))
