@@ -9,6 +9,13 @@
 
 (load-from-path "utilities.scm")
 
+;; XXX FIXME: This file defines a "Room State", which currently can
+;; be "empty" or "non-empty", depending on whether faces are visible
+;; or not.  But this is kind-of pointless: its probably easier to just
+;; check if the number of visible faces is greater than zero, or not.
+;; Thus, this adds a complex mechanism, ripe for bugs, that is not
+;; really needed .. and should probably be removed.  Right?
+
 ; Is the room empty, or is someone in it?
 (define room-state (AnchorNode "Room State"))
 (define room-empty (ConceptNode "room empty"))

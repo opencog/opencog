@@ -514,6 +514,8 @@
 					(DefinedSchemaNode "New arrivals")))
 		)))
 
+;; Remove the lost faces from "acked face" (so that "acked face" accurately
+;; reflects the visible faces)
 ;; line 980 -- clear_lost_face_target()
 (DefineLink
 	(DefinedPredicateNode "Clear lost face")
@@ -805,6 +807,7 @@
 			)
 			;; Clear the lost face target
 			(DefinedPredicateNode "Clear lost face")
+			(DefinedPredicateNode "Update status")
 		)))
 
 
