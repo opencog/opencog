@@ -55,7 +55,12 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
 (emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
-(emo-expr-spec "sleep"    "happy"         1.0 0.0 0.1 5 15)
+(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.1 5 15)
+
+(emo-expr-spec "wake-up"  "surprised"     0.45 0.2 0.6 5 15)
+(emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
+(emo-expr-spec "wake-up"  "irritated"     0.6  0.1 0.4 1  4)
+
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state

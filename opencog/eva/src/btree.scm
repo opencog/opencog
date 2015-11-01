@@ -56,8 +56,10 @@
 ; ------------------------------------------------------
 ; State variables
 
+; Soma: awake, agitated, excited, tired, manic, depressed
 (define soma-state (AnchorNode "Soma State"))
 (define soma-sleeping (ConceptNode "Sleeping"))
+(define soma-awake (ConceptNode "Awake"))
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
@@ -100,7 +102,6 @@
 ; temp scaffolding and junk.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (print-f-msg node) (display (cog-name node)) (newline) (stv 0 1))
 (define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
 
 ; --------------------------------------------------------
@@ -359,7 +360,7 @@
 ;; ------
 ;;
 ;; Return true if a new face has become visible.
-;; A "new  face" is one tat is visible (in the atomspace) but
+;; A "new  face" is one that is visible (in the atomspace) but
 ;; has not yet been acked.
 ;; line 631, is_someone_arrived()
 (DefineLink
@@ -505,14 +506,13 @@
 ;; line 973 -- clear_new_face_target()
 (DefineLink
 	(DefinedPredicateNode "Update status")
-	(SatisfactionLink
-		(SequentialAndLink
-			(DefinedPredicateNode "Update room state")
-			(TrueLink (PutLink
-					(EvaluationLink (PredicateNode "acked face")
-							(ListLink (VariableNode "$face-id")))
-					(DefinedSchemaNode "New arrivals")))
-		)))
+	(SequentialAndLink
+		(DefinedPredicateNode "Update room state")
+		(TrueLink (PutLink
+				(EvaluationLink (PredicateNode "acked face")
+						(ListLink (VariableNode "$face-id")))
+				(DefinedSchemaNode "New arrivals")))
+	))
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
 ;; reflects the visible faces)
@@ -854,7 +854,16 @@
 		)))
 
 ; ------------------------------------------------------
+; Empty-room behaviors. We either search for attention, or we sleep,
+; or we wake up.
+
+; line 898 -- search_for_attention.
 ;
+(DefineLink
+	(DefinedPredicateNode "Search for attention")
+	(SequentialAndLink
+	))
+
 ; Call once, to fall asleep.
 ; line 941 -- go_to_sleep
 (DefineLink
@@ -863,18 +872,37 @@
 		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 			(ListLink (Node "--- Go to sleep.")))
 		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
-		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
-			(SetLink soma-sleeping)))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "sleep"))
 		(PutLink (DefinedPredicateNode "Show random gesture")
 			(ConceptNode "sleep"))
+		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
+			(SetLink soma-sleeping)))
 	))
 
+; line 537 -- Continue To Sleep
 (DefineLink
 	(DefinedPredicateNode "Continue sleeping")
 	(SequentialAndLink
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Continue sleeping.")))
+	))
+
+; Wake-up sequence
+; line 957 -- wake_up()
+(DefineLink
+	(DefinedPredicateNode "Wake up")
+	(SequentialAndLink
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Wake up!")))
+		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+		(PutLink (StateLink soma-state (VariableNode "$x"))
+			soma-awake)
+		(PutLink (DefinedPredicateNode "Show random expression")
+			(ConceptNode "wake-up"))
+		(PutLink (DefinedPredicateNode "Show random gesture")
+			(ConceptNode "wake-up"))
 	))
 
 ;; Nothing is happening
@@ -895,10 +923,28 @@
 					(SequentialAndLink  ; line 515
 						(DefinedPredicateNode "dice-roll: go to sleep")
 						(DefinedPredicateNode "Go to sleep"))
-				)))
+					; ##### Search For Attention #####
+					; If we didn't fall asleep above, then search for attention.
+					(DefinedPredicateNode "Search for attention")
+				))
+			; ##### Is Sleeping #####
+			(SequentialOrLink  ; line 528
+				; ##### Wake Up #####
+				(SequentialAndLink  ; line 530
+; xxxxx dice roll wake up.
+				)
+				; ##### Continue To Sleep #####
+				(DefinedPredicateNode "Continue sleeping")
+			)
+		)
 
-; xxxxxxxxxxxx
-(FalseLink)
+		; ##### If Interruption && Sleeping -> Wake Up #####
+		(SequentialAndLink  ; line 545
+			(EqualLink (SetLink soma-sleeping)
+				(GetLink (StateLink soma-state (VariableNode "$x"))))
+			(DefinedPredicateNode "Did someone arrive?")
+			(DefinedPredicateNode "Wake up")
+		)
 ))
 
 ;; ------------------------------------------------------------------
