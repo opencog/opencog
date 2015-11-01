@@ -14,6 +14,12 @@
 ;;
 ;; As currently implemented T is not explicitely in the
 ;; premises. Instead it is queried directly by the rule's formula.
+;;
+;; Warning: the forall instantiation doesn't cleverly select the
+;; instances that satisfy a precondition, if you have an
+;; ImplicationLink inside your ForAllLink you probably want to use
+;; Implication Instantiation on your ImplicationLink directly
+;; (see implication-instantiation-rule.scm).
 ;; -----------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))

@@ -44,10 +44,9 @@
 ; Load the rules (use load for relative path w.r.t. to that file)
 (define pln-rules-dir "../../../opencog/reasoning/pln/rules/")
 (define rule-files
-  (list "pln-rules/deduction.scm"
-        (string-append pln-rules-dir "modus-ponens.scm")
-        (string-append pln-rules-dir "forall-instantiation-rule.scm")
-        (string-append pln-rules-dir "forall-implication-to-higher-order-rule.scm")
+  (list (string-append pln-rules-dir "deduction-rule.scm")
+        (string-append pln-rules-dir "modus-ponens-rule.scm")
+        (string-append pln-rules-dir "implication-instantiation-rule.scm")
         "pln-rules/implication-or.scm"
         "pln-rules/hack.scm"
         )
@@ -58,14 +57,14 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
-(define rules (list (list deduction-rule-name 1)
-                    (list modus-ponens-rule 1)
-              )
-)
+;; ; List the rules and their weights.
+;; (define rules (list (list deduction-implication-rule-name 1)
+;;                     (list modus-ponens-implication-rule-name 1)
+;;               )
+;; )
 
-; Associate rules to PLN
-(ure-add-rules pln-rbs rules)
+;; ; Associate rules to PLN
+;; (ure-add-rules pln-rbs rules)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; Other parameters ;;
