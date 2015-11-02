@@ -97,6 +97,18 @@ rostopic pub --once /opencog/gaze_at std_msgs/Int32 29
 ```
 
 
+Unfinished work TODO List
+=========================
+Grep for XXX in the code:
+
+* Implement the face-study saccade.
+
+* Implement the look-for-attention segment.
+
+* Implement the remaining new behaviors from `public_ws`.
+
+* Implement the non-uniform RandomChoice link.
+
 Enhancement TODO List
 =====================
 A random list of ideas.
