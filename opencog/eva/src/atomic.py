@@ -47,28 +47,40 @@ def do_look_right():
 
 def glance_at_face(face_id_node):
 	face_id = int(face_id_node.name)
+	print "Python glance at face id", face_id
 	evl.glance_at(face_id)
 	return TruthValue(1, 1)
 
 def look_at_face(face_id_node):
 	face_id = int(face_id_node.name)
+	print "Python look at face id", face_id
 	evl.look_at(face_id)
 	return TruthValue(1, 1)
 
 def gaze_at_face(face_id_node):
 	face_id = int(face_id_node.name)
+	print "Python gaze at face id", face_id
 	evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
-### Define an executable pattern
-##satisfaction_handle = SatisfactionLink(
-##	SequentialAndLink(
-##		EvaluationLink(
-##			# GroundedPredicateNode("py: evl.look_right"),
-##			# GroundedPredicateNode("py: do_look_right"),
-##			GroundedPredicateNode("py: do_look_left"),
-##			ListLink()))).h
-##
-### See if the pattern can be satsified.  This should result
-### in a ROS message being sent.
-##result = satisfaction_link(atomspace, satisfaction_handle)
+def do_emotion(emotion_node, duration_node, intensity_node):
+	emotion = emotion_node.name
+	duration = float(duration_node.name)
+	intensity = float(intensity_node.name)
+	print "Python emotion: ", emotion, " for ", duration, " int ", intensity
+	return TruthValue(1, 1)
+
+def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
+	gesture = gesture_node.name
+	intensity = float(intensity_node.name)
+	repeat = float(repeat_node.name)
+	speed = float(speed_node.name)
+	print "Python gesture: ", gesture, ", int: ", intensity, \
+		", rep: ", repeat, ", speed: ", speed
+	return TruthValue(1, 1)
+
+# Return true as long as ROS is running.
+def ros_is_running():
+	if (rospy.is_shutdown())
+		return TruthValue(0, 1)
+	return TruthValue(1, 1)
