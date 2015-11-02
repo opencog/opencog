@@ -934,9 +934,9 @@
 			(ConceptNode "wake-up"))
 	))
 
-;; Nothing is happening
+;; Nothing is happening (no faces are visibile)
+;; Go to sleep after a while, and wake up every now and then.
 ;; line 507 -- nothing_is_happening()
-;; XXX Not implemented!
 (DefineLink
 	(DefinedPredicateNode "Nothing is happening")
 	(SequentialAndLink  ; line 508
