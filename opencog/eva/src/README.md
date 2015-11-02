@@ -101,6 +101,8 @@ Enhancement TODO List
 =====================
 A random list of ideas.
 
+* Integrate with OpenPsi.
+
 * Integrate the authoring GUI.
 
 * Integrate the chatbot.
