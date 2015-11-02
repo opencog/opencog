@@ -897,8 +897,8 @@
 		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 			(ListLink (Node "--- Wake up!")))
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
-		(PutLink (StateLink soma-state (VariableNode "$x"))
-			soma-awake)
+		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
+			soma-awake))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "wake-up"))
 		(PutLink (DefinedPredicateNode "Show random gesture")
@@ -932,6 +932,8 @@
 				; ##### Wake Up #####
 				(SequentialAndLink  ; line 530
 ; xxxxx dice roll wake up.
+(FalseLink)
+					(DefinedPredicateNode "Wake up")
 				)
 				; ##### Continue To Sleep #####
 				(DefinedPredicateNode "Continue sleeping")
