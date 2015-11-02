@@ -87,8 +87,11 @@
 (StateLink (SchemaNode "time_to_make_gesture_min") (NumberNode 6))
 (StateLink (SchemaNode "time_to_make_gesture_max") (NumberNode 10))
 
+(StateLink (SchemaNode "time_to_wake_up") (NumberNode 5))
+
 (StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
 (StateLink (SchemaNode "sleep_probability") (NumberNode 0.1))
+(StateLink (SchemaNode "wake_up_probability") (NumberNode 0.5))
 
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
@@ -344,13 +347,21 @@
 				(VariableNode "$x")))
 		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
-;; line 619 -- kwargs["event"] == "go_to_sleep"
+;; line 609 -- kwargs["event"] == "go_to_sleep"
 ;; XXX incomplete, should depend on "bored-since" time
 ;; if bored for 5 minutes, go to sleep.
 (DefineLink
 	(DefinedPredicateNode "dice-roll: go to sleep")
 	(GreaterThanLink
 		(GetLink (StateLink (SchemaNode "sleep_probability")
+				(VariableNode "$x")))
+		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
+
+;; line 619 -- kwargs["event"] == "wake_up"
+(DefineLink
+	(DefinedPredicateNode "dice-roll: wake up")
+	(GreaterThanLink
+		(GetLink (StateLink (SchemaNode "wake_up_probability")
 				(VariableNode "$x")))
 		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
@@ -630,6 +641,12 @@
 			(VariableNode "$x"))
 		(TimeLink)))
 
+(DefineLink
+	(DefinedSchemaNode "get sleep timestamp")
+	(GetLink
+		(StateLink (SchemaNode "start-sleep-timestamp")
+			(VariableNode "$x"))))
+
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
 (DefineLink
@@ -677,6 +694,18 @@
 				(VariableNode "$max"))))
 	))
 
+; Return true if we've been sleeping for long enough (i.e. longer than
+; the time_to_wake_up parameter.)
+; line 707 -- is_time_to_wake_up()
+(DefineLink
+	(DefinedPredicateNode "Time to wake up")
+	(GreaterThanLink
+		(MinusLink
+			(TimeLink)
+			(DefinedSchemaNode "get sleep timestamp"))
+		(GetLink (StateLink (SchemaNode "time_to_wake_up")
+			(VariableNode "$x"))) ; in seconds
+	))
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
@@ -931,8 +960,9 @@
 			(SequentialOrLink  ; line 528
 				; ##### Wake Up #####
 				(SequentialAndLink  ; line 530
-; xxxxx dice roll wake up.
-(FalseLink)
+					(DefinedPredicateNode "dice-roll: wake up")
+					; did we sleep for long enough?
+					(DefinedPredicateNode "Time to wake up")
 					(DefinedPredicateNode "Wake up")
 				)
 				; ##### Continue To Sleep #####
