@@ -1,4 +1,4 @@
-; --------------------------------------------------------------
+Lin; --------------------------------------------------------------
 ; Helper Functions
 ; --------------------------------------------------------------
 (define (psi-clean-demand-gets set-link)
@@ -375,4 +375,79 @@
     (cog-fc (SetLink)
         (ConceptNode (string-append (psi-prefix-str) "active-schema-pool"))
         (SetLink))
+)
+
+; --------------------------------------------------------------
+(define (psi-select-goal gpn)
+"
+  Goal are defined as demands choosen for either increase or decrease in
+  their demand values. The choice for being the current-goal is made by pattern
+  matching over the demands by using the GroundedPredicateNode passed as a
+  constraint.
+
+  The GroundedPredicateNode passed should tag the demands for increase or
+  decrease by evaluating the demands that satisfy the conditions set through
+  its goal-selection function. The function should tag the goal representing
+  atom (the demand-ConceptNode) for being increased or decreased.
+
+  gpn:
+    - GroundedPredicateNode that names an goal-selection function that will
+      choose the demands . Its function should take a single demand-ConceptNode
+      and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
+      in addition to tagging the demand-ConceptNodes as either,
+
+      (StateLink
+          (Node (string-append (psi-prefix-str) "action-on-demand"))
+          (ListLink
+              (ConceptNode (string-append (psi-prefix-str) "Increase"))
+              (ConceptNode (string-append (psi-prefix-str) "Energy"))))
+
+      (StateLink
+          (Node (string-append (psi-prefix-str) "action-on-demand"))
+          (ListLink
+              (ConceptNode (string-append (psi-prefix-str) "Decrease"))
+              (ConceptNode (string-append (psi-prefix-str) "Energy"))))
+
+      The tags are necessary because, that is the means for signaling what type
+      of actions should be taken, in effect it is the demand-goal. For example,
+      if the 'action-on-demand' is 'Increase', then only the actions of type
+      Increase would be choosen.
+"
+
+    ; XXX: Should there be weight b/n the different demand-goals? For now a
+    ; a random choice of demands is assumed. In subsequent steps. The
+    ; demand-value could possibly be used for that.
+    (define (get-demand) (psi-clean-demand-gets (cog-execute!
+        (GetLink
+            (VariableList
+                (assoc-ref (psi-demand-pattern) "var"))
+            (AndLink
+                (assoc-ref (psi-demand-pattern) "pat")
+                (EvaluationLink
+                    gpn
+                    (ListLink (VariableNode "Demand"))))))))
+
+    ; check arguments
+    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " gpn))
+
+    (psi-clean-demand-gets (get-demand))
+)
+
+; --------------------------------------------------------------
+(define (psi-select-actions gpn)
+"
+  Select the actions that should be added to the active-schema-pool depending
+  on the present goal, by using the plan choosen by the GroundedPredicateNode.
+
+  gpn:
+   - GroundedPredicateNode that refers to a function that does the planning.
+"
+     ;TODO: I think the planner is kind of a behavior tree genrator (assuming
+     ; there is no change of a preset plan) .URE's random selection policy
+     ; isn't being used now thus each plan is in effect a single action choosen,
+     ; this has to be improved but is good for starters.
+
+;(psi-get-actions ((psi-get-current-goal))
+(display "WIP")
 )
