@@ -1,4 +1,4 @@
-Lin; --------------------------------------------------------------
+; --------------------------------------------------------------
 ; Helper Functions
 ; --------------------------------------------------------------
 (define (psi-clean-demand-gets set-link)
@@ -397,21 +397,22 @@ Lin; --------------------------------------------------------------
       in addition to tagging the demand-ConceptNodes as either,
 
       (StateLink
-          (Node (string-append (psi-prefix-str) "action-on-demand"))
+          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
           (ListLink
-              (ConceptNode (string-append (psi-prefix-str) "Increase"))
-              (ConceptNode (string-append (psi-prefix-str) "Energy"))))
+              (ConceptNode (string-append (psi-prefix-str) \"Increase\"))
+              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
 
       (StateLink
-          (Node (string-append (psi-prefix-str) "action-on-demand"))
+          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
           (ListLink
-              (ConceptNode (string-append (psi-prefix-str) "Decrease"))
-              (ConceptNode (string-append (psi-prefix-str) "Energy"))))
+              (ConceptNode (string-append (psi-prefix-str) \"Decrease\"))
+              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
 
       The tags are necessary because, that is the means for signaling what type
       of actions should be taken, in effect it is the demand-goal. For example,
-      if the 'action-on-demand' is 'Increase', then only the actions of type
+      if the action-on-demand is Increase, then only the actions of type
       Increase would be choosen.
+
 "
 
     ; XXX: Should there be weight b/n the different demand-goals? For now a
@@ -431,7 +432,7 @@ Lin; --------------------------------------------------------------
     (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
         (error "Expected DefinedPredicateNode got: " gpn))
 
-    (psi-clean-demand-gets (get-demand))
+    (get-demand)
 )
 
 ; --------------------------------------------------------------
