@@ -70,8 +70,8 @@ current rule set will be much clearer.
 
 #### The 8 main predicate-argument structures:
 
-1. Be-inheritance     – “Bill is the teacher.”
-2. Copula            – “When is the meeting?”
+    1. Be-inheritance     – “Bill is the teacher.”
+    2. Copula            – “When is the meeting?”
 
 These two seem confused from the point of linguistics, but perhaps that is just
 a matter of labeling, so Opencog may not care.  Pretty much anything that gets
@@ -96,9 +96,9 @@ of “being a property” and the logical meaning of being a property.
 
 The other structures which seem closely related to these are:
 
-3. SP or “predadj” (predicate adjective) – “Bill is smart.”
-4. PREP or predicate preposition(al phrase) – “The book is on the table.”
-5. SV – subject-verb – “Bill sleeps.”
+    3. SP or “predadj” (predicate adjective) – “Bill is smart.”
+    4. PREP or predicate preposition(al phrase) – “The book is on the table.”
+    5. SV – subject-verb – “Bill sleeps.”
 
 Linguistically, these make pretty good sense.  But when you go to the
 scheme-helpers you realize that not all these of distinctions are necessary.
@@ -120,9 +120,8 @@ I didn't fully realize this at first, so right now, SV and SP both call the SV s
 
 **This discussion is most important because if you continue with the old design of R2L, then you need to write five different rules when you combine these patterns with each of the question-types or other sentence-types that require separate rules; so reducing the need for five scheme helpers to two could save a lot of work and processing time**
 
-6. SVO    –    “Bill ate a peach.”
-7. SVIO –    “Bill sent a bomb to the White House.” / “Bill sent the White House
-   a bomb.”
+    6. SVO    –    “Bill ate a peach.”
+    7. SVIO –    “Bill sent a bomb to the White House.” / “Bill sent the White House a bomb.”
 
 The only thing to note here is that properly catching SVIO sentences is tricky
 and always will be, because there are other sentences that look exactly like
@@ -133,7 +132,7 @@ can't say “Bill flew the White House a plane.”
 
 The difference may be important, because the “adverbial” modifies the predicate,
 while the IO is a nuclear argument of the predicate—the structure is
-fundamentally different (taking a lot of short-cuts with the presentation of the code here . . .):
+fundamentally different (taking a lot of short-cuts with the presentation of the code here ...):
 
 Adverbial modification:
 ```
@@ -194,6 +193,7 @@ below . . .
 #### The “to-do” statements
 
 e.g.
+
     - She wants to sing.
     - She wants you to sing.
 
@@ -210,7 +210,9 @@ their own.  Anyway, to summarize, the two “to-do”rules that I didn't port ar
 too specific, and there need to be two more rules to handle those patterns
 instead—a rule for modals (can, must, will), and a rule for this:
 
-**A predadj-to-do rule – e.g.**
+**A predadj-to-do rule**
+
+e.g.
 
     - She seems to be able to sing.
     - He intends to be ready to leave.
