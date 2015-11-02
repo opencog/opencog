@@ -66,9 +66,10 @@ void OpenPsiAgent::run()
      try {
          UREConfigReader cr(as, asp);
      }
-     catch (...) {
+     catch (std::exception& e) {
          logger().info("[OpenPsiAgent] OpenPsi's active-schema-pool definition"
-                       " hasn't been FULLY loaded into atomspace.");
+                       " hasn't been FULLY loaded into atomspace.\n"
+                       "Exception Detail: %s", e.what());
          return;
      }
 
