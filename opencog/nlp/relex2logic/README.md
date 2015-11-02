@@ -1,15 +1,21 @@
-## Relex2Logic RuleBase
-This directory has the initial specification of the R2L-RuleBase for the
-English language.
+## RelEx2Logic
 
-To use the rules, use the following steps.
+RelEx2Logic aims to produce the semantic representation of some input sentence.
+This is done by creating a [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+rule base to by processed by a slightly modified forward chainer.
 
-1. Start the cogserver
-2. Enter the scm shell.
-3. Load the rules using `(load-r2l-rulebase)`
-4. Start the relex server using the --relex flag (don't use the --logic flag)
-5. In the opencog scheme shell run `(nlp-parse "some sentence")`
-6. Build your thing :smile:
+The current pipeline for a sentence is
+
+1. sentence -> link-grammar
+2. link-grammar -> relex
+3. relex -> relex2logic
+
+Step 1 & 2 are done by the relex server in https://github.com/opencog/relex,
+while step 3 is done by the URE.
+
+For further information on how to use the rule base, see the README in the
+"rules" directory.
+
 
 ## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns
 [A. Nitzkin](https://github.com/anitzkin), June 2015
