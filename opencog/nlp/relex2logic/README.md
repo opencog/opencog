@@ -157,22 +157,23 @@ gets the thematic role “goal” or “recipient” and since locations are oth
 usually indicated by adverbial phrases, it probably wouldn't hurt to forget
 entirely about the idea of indirect object in the R2L output, and just treat
 them exactly like adverbial modifiers (a predicate of which the modified verb
-is an argument).  
+is an argument).
 
 But anyway, at the moment there are two SVIO rules, one for “Bill sent the
 White House a bomb” and another for “Bill sent a bomb to the White House.” And
-they rely on relex not to mis-classify a “to” adverbial as an indirect object.  
+they rely on relex not to mis-classify a “to” adverbial as an indirect object.
 I think it gets it right most of the time.  I used to have a third rule to
 catch IO's which were mis-classified as _advmod, but it doesn't seem necessary
 anymore.
 
-8. TOBE – “Bill seems to be happy.”
+    8. TOBE – “Bill seems to be happy.”
 
 This seems like an appropriate structure to have its own rule, although there
 are a couple of things about it worth being aware of.  “to be happy” here is
 known as an intensional complement, same as “Bill is happy.”  The difference of
 course is that “seems” or similar verbs such as “appears” or “looks” imply that
-Bill's being happy is not reality; it “is” within the “world” of appearances.  
+Bill's being happy is not reality; it “is” within the “world” of appearances.
+
 My favorite theory for modeling the logic of this kind of thing is Fauconnier
 and Turner's “mental spaces” but I am sure there are other ways; see the
 discussion further below about _rep().  Also note that the “to be” can be
@@ -256,7 +257,7 @@ However, another problem arises, which is that the whole-sentence pattern
 combinations still multiply endlessly when combined with certain question types
 in the current implementation, as follows:
 
-“which-rules e.g.”
+**which-rules**
 
     - Which bomb did you send to the White House?
     - Which guy is smarter?
@@ -342,7 +343,7 @@ upon detection of variables as their main arguments, e.g.:
 )
 ```
 
-I haven't done this for “to-do” sentences yet, so they can't handle “who” or “what” questions yet.  
+I haven't done this for “to-do” sentences yet, so they can't handle “who” or “what” questions yet.
 
 I'm not sure why “which”-questions require satisfying-set logic but “what” and
 “who” questions don't.  This difference was defined before I got here. It seems
@@ -355,11 +356,11 @@ ate the pizza?”  I assume there is a good reason for this that I don't
 understand . . .
 
 Secondly, the branching rules really aren't much more efficient code-wise than
-just having separate rules for each case, anyway.  
+just having separate rules for each case, anyway.
 
 ### The “plug-n-play” solution
 
-Much more efficient would be to insert the right constituents into templates.  
+Much more efficient would be to insert the right constituents into templates.
 One rule (or perhaps in some cases 2-3 for whatever reasons) for each argument
 type (subject, object, and various phrasal or clausal complements, and “who”
 and “what”)  and one rule for each predicate-argument template including
