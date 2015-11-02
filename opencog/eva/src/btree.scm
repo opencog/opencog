@@ -963,6 +963,9 @@
 		)
 
 		; ##### If Interruption && Sleeping -> Wake Up #####
+		;; XXX This never runs, since the face-detected code is
+		;; triggered before we can get to here. Thus, the wake-up
+		;; sequence never runs, and the soma-state is incorrect...
 		(SequentialAndLink  ; line 545
 			(EqualLink (SetLink soma-sleeping)
 				(GetLink (StateLink soma-state (VariableNode "$x"))))
