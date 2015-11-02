@@ -87,7 +87,7 @@
 (StateLink (SchemaNode "time_to_make_gesture_min") (NumberNode 6))
 (StateLink (SchemaNode "time_to_make_gesture_max") (NumberNode 10))
 
-(StateLink (SchemaNode "time_to_wake_up") (NumberNode 5))
+(StateLink (SchemaNode "time_to_wake_up") (NumberNode 25))
 
 (StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
 (StateLink (SchemaNode "sleep_probability") (NumberNode 0.1))
