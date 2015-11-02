@@ -717,22 +717,21 @@
 ;; XXX The owyl pick_instant code is insane...
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
-	(SatisfactionLink
-		(SequentialAndLink
-			;; Look at the interaction face - line 765
-			(TrueLink (PutLink
-				(EvaluationLink (GroundedPredicateNode "py:look_at_face")
-					(ListLink (VariableNode "$face")))
-				(GetLink (StateLink interaction-state (VariableNode "$x")))))
-			;; line 768
-			(SequentialOrLink
-				(NotLink (DefinedPredicateNode "Time to change expression"))
-				(DefinedPredicateNode "Show positive expression")
-			)
-			(SequentialOrLink
-				(NotLink (DefinedPredicateNode "Time to make gesture"))
-				(DefinedPredicateNode "Pick random positive gesture"))
-		)))
+	(SequentialAndLink
+		;; Look at the interaction face - line 765
+		(TrueLink (PutLink
+			(EvaluationLink (GroundedPredicateNode "py:look_at_face")
+				(ListLink (VariableNode "$face")))
+			(GetLink (StateLink interaction-state (VariableNode "$x")))))
+		;; line 768
+		(SequentialOrLink
+			(NotLink (DefinedPredicateNode "Time to change expression"))
+			(DefinedPredicateNode "Show positive expression")
+		)
+		(SequentialOrLink
+			(NotLink (DefinedPredicateNode "Time to make gesture"))
+			(DefinedPredicateNode "Pick random positive gesture"))
+	))
 
 ; ------------------------------------------------------
 ;; Sequence - if there were no people in the room, then look at the
@@ -741,18 +740,17 @@
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
 	(DefinedPredicateNode "Was Empty Sequence")
-	(SatisfactionLink
-		(SequentialAndLink
-			;; line 392
-			(DefinedPredicateNode "was room empty?")
-			(TrueLink (DefinedSchemaNode "interact with new person"))
-			(TrueLink (DefinedSchemaNode "look at person"))
-			(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-			(PutLink (DefinedPredicateNode "Show random expression")
-				(ConceptNode "new-arrival"))
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Look at newly arrived person")))
-		)))
+	(SequentialAndLink
+		;; line 392
+		(DefinedPredicateNode "was room empty?")
+		(TrueLink (DefinedSchemaNode "interact with new person"))
+		(TrueLink (DefinedSchemaNode "look at person"))
+		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+		(PutLink (DefinedPredicateNode "Show random expression")
+			(ConceptNode "new-arrival"))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Look at newly arrived person")))
+	))
 
 (DefineLink
 	(DefinedSchemaNode "interact with new person")
@@ -763,124 +761,118 @@
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
 (DefineLink
 	(DefinedPredicateNode "Interacting Sequence")
-	(SatisfactionLink
-		(SequentialAndLink
-			(DefinedPredicateNode "is interacting with someone?")
-			(DefinedPredicateNode "dice-roll: glance new face")
-			(TrueLink (DefinedSchemaNode "glance at new person"))
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Glance at new person")))
-	)))
+	(SequentialAndLink
+		(DefinedPredicateNode "is interacting with someone?")
+		(DefinedPredicateNode "dice-roll: glance new face")
+		(TrueLink (DefinedSchemaNode "glance at new person"))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Glance at new person")))
+	))
 
 ;; Respond to a new face becoming visible.
 ;; line 389 -- Selector
 (DefineLink
 	(DefinedPredicateNode "Respond to new arrival")
-	(SatisfactionLink
-		(SequentialOrLink
-			(DefinedPredicateNode "Was Empty Sequence")
-			(DefinedPredicateNode "Interacting Sequence")
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Ignoring new person"))) ; line 406
+	(SequentialOrLink
+		(DefinedPredicateNode "Was Empty Sequence")
+		(DefinedPredicateNode "Interacting Sequence")
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Ignoring new person"))) ; line 406
 			(TrueLink)
-		)))
+	))
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
 (DefineLink
 	(DefinedPredicateNode "New arrival sequence")
-	(SatisfactionLink
-		(SequentialAndLink
-			(DefinedPredicateNode "Did someone arrive?")
-			(DefinedPredicateNode "Respond to new arrival")
-			(DefinedPredicateNode "Update status")
-		)))
+	(SequentialAndLink
+		(DefinedPredicateNode "Did someone arrive?")
+		(DefinedPredicateNode "Respond to new arrival")
+		(DefinedPredicateNode "Update status")
+	))
 
 ;; Check to see if someone left.
 ;; line 422 -- someone_left()
 (DefineLink
 	(DefinedPredicateNode "Someone left")
-	(SatisfactionLink
-		(SequentialAndLink
-			(DefinedPredicateNode "Did someone leave?")
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-				(ListLink (Node "--- Someone left")))
-			(SequentialOrLink
-				; Were we interacting with the person who left? If so,
-				; look frustrated, return to neutral. Oh, and clear the
-				; interaction target, too.
-				(SequentialAndLink
-					(EqualLink
-						(DefinedSchemaNode "New departures")
-						(GetLink (StateLink interaction-state (VariableNode "$x"))))
-					(DefinedPredicateNode "Show frustrated expression")
-					(DefinedPredicateNode "return to neutral")
-					(TrueLink (PutLink
-						(StateLink interaction-state (VariableNode "$face-id"))
-						no-interaction))
-				)
-				;; Were we interacting with someone else?  If so, then
-				;; maybe glance at the location of the person who left.
-				(SequentialAndLink
-					(DefinedPredicateNode "is interacting with someone?")
-					(SequentialOrLink
-						(NotLink (DefinedPredicateNode "dice-roll: glance lost face"))
-						(FalseLink (DefinedSchemaNode "glance at lost face"))
-						(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-							(ListLink (Node "--- Glance at lost face"))))
-					(TrueLink)
-				)
-				(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-					(ListLink (Node "--- Ignoring lost face")))
+	(SequentialAndLink
+		(DefinedPredicateNode "Did someone leave?")
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Someone left")))
+		(SequentialOrLink
+			; Were we interacting with the person who left? If so,
+			; look frustrated, return to neutral. Oh, and clear the
+			; interaction target, too.
+			(SequentialAndLink
+				(EqualLink
+					(DefinedSchemaNode "New departures")
+					(GetLink (StateLink interaction-state (VariableNode "$x"))))
+				(DefinedPredicateNode "Show frustrated expression")
+				(DefinedPredicateNode "return to neutral")
+				(TrueLink (PutLink
+					(StateLink interaction-state (VariableNode "$face-id"))
+					no-interaction))
+			)
+			;; Were we interacting with someone else?  If so, then
+			;; maybe glance at the location of the person who left.
+			(SequentialAndLink
+				(DefinedPredicateNode "is interacting with someone?")
+				(SequentialOrLink
+					(NotLink (DefinedPredicateNode "dice-roll: glance lost face"))
+					(FalseLink (DefinedSchemaNode "glance at lost face"))
+					(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+						(ListLink (Node "--- Glance at lost face"))))
 				(TrueLink)
 			)
-			;; Clear the lost face target
-			(DefinedPredicateNode "Clear lost face")
-			(DefinedPredicateNode "Update status")
-		)))
-
+			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				(ListLink (Node "--- Ignoring lost face")))
+			(TrueLink)
+		)
+		;; Clear the lost face target
+		(DefinedPredicateNode "Clear lost face")
+		(DefinedPredicateNode "Update status")
+	))
 
 ;; Interact with people
 ;; line 457 -- interact_with_people()
 (DefineLink
 	(DefinedPredicateNode "Interact with people")
-	(SatisfactionLink
-		(SequentialAndLink ; line 458
-			; True, if there is anyone visible.
-			(DefinedPredicateNode "Someone visible") ; line 459
-			; This or-link is true if we're not interacting with anyone,
-			; or if there are several people and its time to change up.
-			(SequentialOrLink ; line 460
-				; ##### Start A New Interaction #####
-				(SequentialAndLink ; line 462
-					(SequentialOrLink ; line 463
-						(NotLink (DefinedPredicateNode "is interacting with someone?"))
-						(SequentialAndLink ; line 465
-							(DefinedPredicateNode "More than one face visible")
-							(DefinedPredicateNode "Time to change interaction")))
-					; Select a new face target
-					(DefinedPredicateNode "Start new interaction")
-					(DefinedPredicateNode "Interact with face"))
+	(SequentialAndLink ; line 458
+		; True, if there is anyone visible.
+		(DefinedPredicateNode "Someone visible") ; line 459
+		; This or-link is true if we're not interacting with anyone,
+		; or if there are several people and its time to change up.
+		(SequentialOrLink ; line 460
+			; ##### Start A New Interaction #####
+			(SequentialAndLink ; line 462
+				(SequentialOrLink ; line 463
+					(NotLink (DefinedPredicateNode "is interacting with someone?"))
+					(SequentialAndLink ; line 465
+						(DefinedPredicateNode "More than one face visible")
+						(DefinedPredicateNode "Time to change interaction")))
+				; Select a new face target
+				(DefinedPredicateNode "Start new interaction")
+				(DefinedPredicateNode "Interact with face"))
 
-				; ##### Glance At Other Faces & Continue With The Last Interaction
-				(SequentialAndLink ; line 476
-					(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-						(ListLink (Node "--- Continue interaction")))
-					(SequentialOrLink  ; line 478
-						(SequentialAndLink ; line 479
-							(DefinedPredicateNode "More than one face visible")
-							(DefinedPredicateNode "dice-roll: group interaction")
-							(DefinedPredicateNode "glance at random face"))
-						(TrueLink)) ; line 485
-					(DefinedPredicateNode "Interact with face")
-					(SequentialOrLink  ; line 488
-						(SequentialAndLink ; line 489
+			; ##### Glance At Other Faces & Continue With The Last Interaction
+			(SequentialAndLink ; line 476
+				(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+					(ListLink (Node "--- Continue interaction")))
+				(SequentialOrLink  ; line 478
+					(SequentialAndLink ; line 479
+						(DefinedPredicateNode "More than one face visible")
+						(DefinedPredicateNode "dice-roll: group interaction")
+						(DefinedPredicateNode "glance at random face"))
+					(TrueLink)) ; line 485
+				(DefinedPredicateNode "Interact with face")
+				(SequentialOrLink  ; line 488
+					(SequentialAndLink ; line 489
 ; XXX incomplete!  need the face study saccade stuff...
-							(FalseLink)
-						)
-						(TrueLink))  ; line 493
-				))
-		)))
+						(FalseLink)
+					)
+					(TrueLink))  ; line 493
+			))
+	))
 
 ; ------------------------------------------------------
 ; Empty-room behaviors. We either search for attention, or we sleep,
