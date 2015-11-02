@@ -1,7 +1,24 @@
+This is a functional but incomplete prototype.  Certain previously-
+supported features are missing, such as face-study saccades. A list
+of other to-do items are at the bottom.
 
 Design overview
 ===============
-This is an incomplete prototype.
+
+* The main behavior tree is in `btree.scm`.  Many of the configurable
+  parameters are in `behavior-cfg.scm`.
+
+* The OpenCog behaviors interface to ROS by calling the functions in
+  `atomic.py`. This file is just a "thin" wrapper around the actual ROS
+  code, which is in `ros_commo.py`.  A non-ROS, debugging-only interface
+  is in `atomic-dbg.py`; it does not import ROS, ad only prints to
+  stdout.
+
+* The behavior tree works with visible faces beased on face ID's,
+  and is only interested in the visible faces, ant not thier locations.
+  It outputs commad such as "look at face ID 42". The actualy tracking
+  of face locations, ad the visual servoing needed to maintain a
+  steady, accurate gaze is in the `face_track` directory.
 
 * The `face_track` directory contains code for visual servoing: it
   receives ROS messages about human face locations from the webcam
@@ -18,15 +35,6 @@ This is an incomplete prototype.
 
 Running
 =======
-
-* At the bash prompt:
-```
-export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
-```
-Failure to do this will result in the message:
-```
-ERROR: In procedure dynamic-link: file: "libguile-cogserver", message: "file not found"
-```
 
 * Change directory to your `catkin_ws` and then run `scripts/eva.sh`.
   This will start up a byobu multiplexed terminal, and will run ROS,
