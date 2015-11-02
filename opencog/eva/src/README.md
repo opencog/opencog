@@ -99,9 +99,24 @@ rostopic pub --once /opencog/gaze_at std_msgs/Int32 29
 
 Enhancement TODO List
 =====================
-A list of changes to the atomspace that could help with this:
+A random list of ideas.
 
-* Use TimeNode for time; use the Timeserver as needed
+* Integrate the authoring GUI.
+
+* Integrate the chatbot.
+
+* Integrate face recognition.  This not only requires the API, but
+  also needs SQL eabled to remember things.
+
+* Use the Timeserver ... The timeserver tracks intervals, so that queries
+  can be performed against a time-range.  It might make sense to redesign
+  the timeserver to be native atomese. Anyway, none of the logic in the
+  btree currently needs TimeServer functions.
+
+* However, there is a fair amount of "did a unit of time elapse since
+  event XYZ" logic in the btree.  Its kind-of klunky, and could use
+  a better design.
 
 * SatisfactionLink is kind-of not-needed; should be able to directly
-  execute SequentialAndLink, SequentialOrLink. or maybe not ...
+  execute SequentialAndLink, SequentialOrLink. (when there are no
+  actual query variables in it!?)

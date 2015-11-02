@@ -879,7 +879,7 @@
 ; or we wake up.
 
 ; line 898 -- search_for_attention.
-;
+; XXX not done.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
