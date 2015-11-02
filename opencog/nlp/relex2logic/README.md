@@ -1,14 +1,14 @@
-## RelEx2Logic
+# RelEx2Logic
 
 RelEx2Logic aims to produce the semantic representation of some input sentence.
 This is done by creating a [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
-rule base to by processed by a slightly modified forward chainer.
+rule base to be processed by a slightly modified forward chainer.
 
 The current pipeline for a sentence is
 
-1. sentence -> link-grammar
-2. link-grammar -> relex
-3. relex -> relex2logic
+1. sentence => link-grammar
+2. link-grammar => relex
+3. relex => relex2logic
 
 Step 1 & 2 are done by the relex server in https://github.com/opencog/relex,
 while step 3 is done by the URE.
@@ -24,6 +24,7 @@ For further information on how to use the rule base, see the README in the
 ### Overview:
 Currently the linguistic structures which R2L translates into logic atoms can
 be divided into roughly three classes,
+
 1. predicate-argument structures (the main structure of any clause) such as
    SVO etc.,
 2. a variety of types of constituents that can take the place of a predicate
@@ -37,6 +38,7 @@ There are also, more-or-less, three kinds of rule, or aspects of rule-structure
 (since some rules combine these approaches), which roughly correspond to the
 three types of linguistic phenomena described above, although this was never
 thought out ahead of time in that way; it just sort-of coalesced.  The three kinds of rule are,
+
 1. rules which assign an entire predicate-argument structure at one time,
 2. rules which contain conditional branching in order to assign different types
    of arguments or predicates to a particular structural “slot”, and
@@ -44,6 +46,7 @@ thought out ahead of time in that way; it just sort-of coalesced.  The three kin
    using an InheritanceLink or ImplicationLink.
 
 The currently evident 'issues' with Relex2Logic are also threefold (why not, it's a magic number, right?):
+
 1. a lot of redundancy (to be discussed in excruciating detail below)
 2. relex output which is inadequate for the creation of 'good' R2L rules, and
 3. the question of whether R2L should be more or less specific in terms of its
@@ -65,7 +68,7 @@ the redundancy problem, with some comments on the issues with each of them;
 then by the time we get through that, the problems and possibilities with the
 current rule set will be much clearer.
 
-** 1. The 8 main predicate-argument structures: **
+#### The 8 main predicate-argument structures:
 
 1. Be-inheritance     – “Bill is the teacher.”
 2. Copula            – “When is the meeting?”
@@ -92,6 +95,7 @@ think there may be an ambiguity being abused here between the linguistic usage
 of “being a property” and the logical meaning of being a property.
 
 The other structures which seem closely related to these are:
+
 3. SP or “predadj” (predicate adjective) – “Bill is smart.”
 4. PREP or predicate preposition(al phrase) – “The book is on the table.”
 5. SV – subject-verb – “Bill sleeps.”
@@ -114,7 +118,7 @@ or a preposition.
 
 I didn't fully realize this at first, so right now, SV and SP both call the SV scheme helper, and PREP goes to the SVO scheme helper because the existence of the _pobj (preposition object relation) made this seem natural at the time.  But since _pobj also gets assigned by its own rule, regardless of these rules, PREP structures could be handled by SV or be-inheritance.
 
-***This discussion is most important because if you continue with the old design of R2L, then you need to write five different rules when you combine these patterns with each of the question-types or other sentence-types that require separate rules; so reducing the need for five scheme helpers to two could save a lot of work and processing time***
+**This discussion is most important because if you continue with the old design of R2L, then you need to write five different rules when you combine these patterns with each of the question-types or other sentence-types that require separate rules; so reducing the need for five scheme helpers to two could save a lot of work and processing time**
 
 6. SVO    –    “Bill ate a peach.”
 7. SVIO –    “Bill sent a bomb to the White House.” / “Bill sent the White House
@@ -164,6 +168,7 @@ catch IO's which were mis-classified as _advmod, but it doesn't seem necessary
 anymore.
 
 8. TOBE – “Bill seems to be happy.”
+
 This seems like an appropriate structure to have its own rule, although there
 are a couple of things about it worth being aware of.  “to be happy” here is
 known as an intensional complement, same as “Bill is happy.”  The difference of
@@ -186,7 +191,9 @@ basic structures multiplies the number of rules you need to have for each of
 the other categories of sentence-encompassing structure, which are described
 below . . .
 
-** The “to-do” statements - e.g.**
+#### The “to-do” statements
+
+e.g.
     - She wants to sing.
     - She wants you to sing.
 
@@ -203,7 +210,8 @@ their own.  Anyway, to summarize, the two “to-do”rules that I didn't port ar
 too specific, and there need to be two more rules to handle those patterns
 instead—a rule for modals (can, must, will), and a rule for this:
 
-** A predadj-to-do rule – e.g.**
+**A predadj-to-do rule – e.g.**
+
     - She seems to be able to sing.
     - He intends to be ready to leave.
     - It must be possible to fix this.
@@ -222,9 +230,11 @@ To continue with the to-do rules . . . .The current selection “to-do” rules
 seems arbitrary. They don't cover most of the 8 basic structures described
 previously, nor many other two-predicate patterns that we have no rules for,
 such as:
+
     - “I made her happy.”
     - “I consider him (to be) a fool.”
     - “I saw him running away.”
+    
 (see further on for a more complete list)
 
 I didn't create all the necessary rules yet, because of the redundancy
@@ -238,18 +248,20 @@ the first, and leaving the other argument assignments for other rules to fill
 in.  I didn't see this immediately because I was porting the old R2L “to-do”
 rules which were all done as whole-sentence structures.  
 
-** The “Which” Problem **
+#### The “Which” Problem
 
 However, another problem arises, which is that the whole-sentence pattern
 combinations still multiply endlessly when combined with certain question types
 in the current implementation, as follows:
 
 “which-rules e.g.”
+
     - Which bomb did you send to the White House?
     - Which guy is smarter?
     - Which table is the book on?
 
-** question-determiner-rules **
+**question-determiner-rules**
+
     - At what time will you arrive?
     - For what reason, would you do that?
     - In what way can we solve this problem?
@@ -468,6 +480,7 @@ indicated by earlier words in the sentence, or what Fauconnier would have
 called a “mental-space builder”.  Often the context is the mind of the subject
 of the main verb, but also it could be someone's speech, or some other
 “representation” (and perhaps other things?):
+
     - “Mary called Bob a wombat.”
     (Bob is a wombat in Mary's verbal representation)
 
