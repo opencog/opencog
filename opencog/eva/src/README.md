@@ -32,39 +32,31 @@ Design overview
   ```
   See `face_track/README.md` for details.
 
+* XXX The code currently uses a bogus design, where a "room state" is
+  set, to be either "empty" or "non-empty".  This is not really needed,
+  since one can also query if the number of visible faces is greater
+  than zero, or not.  The room-state stuff is in `faces.scm` and should
+  probably be removed.
+
 
 Running
 =======
+The code can be ru in debug mode, or in fully-integrated mode.
 
-* Change directory to your `catkin_ws` and then run `scripts/eva.sh`.
+* Debug mode: Edit `btree.scm`, locate the line referencing `atomic.py`
+  and change it to `atomic-dbg.py`.  The start guile, and, at the guile
+  prompt, say `(load "btree.scm")`  ad then `(run)`.  See the top of
+  the `btree.scm` file for more hints on debugging.
+
+* Itegrated mode:
+  Change directory to your `catkin_ws` and then run `scripts/eva.sh`.
   This will start up a byobu multiplexed terminal, and will run ROS,
   the ros face tracker, the blender API and the opencog server
   automatically, and will launch most of the needed behavior scripts.
 
 
-Development shortcuts
-=====================
-* Start guile in this directory, then from the guile prompt:
-```
-(add-to-load-path "/usr/local/share/opencog/scm")
-(use-modules (opencog))
-(use-modules (opencog cogserver))
-(start-cogserver "../scripts/opencog.conf")
-```
-Then load the python code:
-```
-; echo -e "py\n" | cat - atomic.py |netcat localhost 17020
-
-(system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
-```
-Then back at the guile prompt:
-```
-(load "btree.scm")
-```
-
 Debugging notes
 ===============
-
 Cython modules are installed here:
 ```
 /usr/local/share/opencog/python/opencog
@@ -95,7 +87,7 @@ rlwrap telnet localhost 17020
 (show-room-state)
 ```
 
-Not that if the room state changes, `(show-room-state)` will show the
+Note that if the room state changes, `(show-room-state)` will show the
 wrong state until after both cog-binds ar performed!
 
 ```
