@@ -1,3 +1,4 @@
+(use-modules (rnrs sorting)) ; needed for sorting demands by their values.
 ; --------------------------------------------------------------
 ; Helper Functions
 ; --------------------------------------------------------------
@@ -144,12 +145,40 @@
   Checks whether an atom is the ConceptNode that satisfies the pattern used
   to define an OpenPsi demand. Returns True-TruthValue `(stv 1 1)` if it is
   and False-TruthValue `(stv 0 1)` if it isn't.
+
+  atom:
+  - The atom that is being checked to see if it is the Node that represents
+    a demand type.
 "
     (define demand-names (map cog-name (psi-get-demands)))
     (if (and (member (cog-name atom) demand-names)
              (equal? (cog-type atom) 'ConceptNode))
         (stv 1 1)
         (stv 0 1)
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-lowest-demand? atom)
+"
+  Returns #t if the atom passed is a demand that has the lowest demand-value.
+
+  atom:
+  - The atom that is being checked to see if it is the Node that represents
+    a demand type, with a lowest demand-value.
+"
+    ; check if atom is a demand-node
+    (if (equal? (stv 0 1) (psi-demand? atom))
+        (error "Expected argument to be a demand-node, got: " atom))
+
+    (let ((atom-strength (tv-mean (cog-tv atom)))
+          (lowest-demand-value (car (list-sort < (delete-duplicates
+              (map (lambda (x) (tv-mean (cog-tv x))) (psi-get-demands))))))
+         )
+         (if (<= atom-strength lowest-demand-value)
+            (stv 1 1)
+            (stv 0 1)
+         )
     )
 )
 
@@ -435,20 +464,57 @@
     (get-demand)
 )
 
+
 ; --------------------------------------------------------------
-(define (psi-select-actions gpn)
+(define (psi-get-current-goal)
+"
+  Returns the demand that is being acted upon presently. When a demand is set
+  for action it would be used.
+"
+(display "WIP")
+
+#!
+;this doesn't work, seems to be a bug.
+   (cog-execute!
+      (GetLink
+        (TypedVariableLink
+            (VariableNode "demand")
+            (TypeNode "ConceptNode"))
+        (AndLink
+            (StateLink
+                (Node (string-append (psi-prefix-str) "action-on-demand"))
+                (ListLink
+                    (ChoiceLink
+                        (ConceptNode
+                            (string-append (psi-prefix-str) "Decrease"))
+                        (ConceptNode
+                            (string-append (psi-prefix-str) "Increase")))
+                    (VariableNode "demand")))
+            (EvaluationLink ; Act only if their is such a demand.
+                (GroundedPredicateNode "scm: psi-demand?")
+                (ListLink
+                    (VariableNode "demand"))))))
+!#
+)
+
+; --------------------------------------------------------------
+(define (psi-select-actions demand-node gpn)
 "
   Select the actions that should be added to the active-schema-pool depending
   on the present goal, by using the plan choosen by the GroundedPredicateNode.
 
-  gpn:
-   - GroundedPredicateNode that refers to a function that does the planning.
-"
-     ;TODO: I think the planner is kind of a behavior tree genrator (assuming
-     ; there is no change of a preset plan) .URE's random selection policy
-     ; isn't being used now thus each plan is in effect a single action choosen,
-     ; this has to be improved but is good for starters.
+  demand-node:
+    - A ConceptNode that represents a demand.
 
-;(psi-get-actions ((psi-get-current-goal))
+  gpn:
+   - GroundedPredicateNode that refers to a function that checks the actions
+     for constraints.
+"
+    ;TODO: I think the planner is kind of a behavior tree genrator (assuming
+    ; there is no change of a preset plan) .URE's random selection policy
+    ; isn't being used now thus each plan is in effect a single action choosen,
+    ; this has to be improved but is good for starters.
+
+; (psi-get-actions (psi-get-current-goal))
 (display "WIP")
 )

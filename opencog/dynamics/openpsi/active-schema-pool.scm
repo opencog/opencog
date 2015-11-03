@@ -32,3 +32,8 @@
 (MemberLink (stv 1 1)
     (Node "psi-modulator-updater-rule")
     psi-active-schema-pool)
+
+(DefineLink
+    (ConceptNode
+        (string-append (psi-prefix-str) "default-asp-goal-selector-gpn"))
+    (GroundedPredicateNode "scm: psi-lowest-demand?"))
