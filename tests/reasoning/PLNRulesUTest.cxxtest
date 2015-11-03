@@ -63,6 +63,7 @@ public:
     void test_forall_implication_to_higher_order();
     void test_implication_full_instantiation();
     void test_implication_partial_instantiation();
+    void test_implication_lambda_distribution();
 };
 
 void PLNRulesUTest::tearDown()
@@ -385,4 +386,91 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 
     TS_ASSERT((results == possible_results_1)
               or (results == possible_results_2));
+}
+
+/**
+ * Test implication-partial-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/implication-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_implication_lambda_distribution()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-implication.scm, "
+                 "opencog/reasoning/pln/rules/implication-lambda-distribution-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("implication-lambda-distribution-rule");
+    Handle results = bindlink(&as, rule);
+
+    // Depending on the random seed the result can be one of the other
+    // (partial instantiation occurs on $X or $Y).
+    Handle expected_results = eval.eval_h
+        ("(SetLink"
+         "   (ImplicationLink"
+         "      (LambdaLink"
+         "         (TypedVariableLink"
+         "            (VariableNode \"$X\")"
+         "            (TypeNode \"ConceptNode\"))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"dummy-implicant\")"
+         "            (VariableNode \"$X\")))"
+         "      (LambdaLink"
+         "         (TypedVariableLink"
+         "            (VariableNode \"$X\")"
+         "            (TypeNode \"ConceptNode\"))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"dummy-implicand\")"
+         "            (VariableNode \"$X\"))))"
+         "   (ImplicationLink"
+         "      (LambdaLink"
+         "         (VariableList"
+         "            (TypedVariableLink"
+         "               (VariableNode \"$X\")"
+         "               (TypeNode \"ConceptNode\"))"
+         "            (TypedVariableLink"
+         "               (VariableNode \"$Y\")"
+         "               (TypeNode \"ConceptNode\")))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"P\")"
+         "            (ListLink"
+         "               (VariableNode \"$X\")"
+         "               (VariableNode \"$Y\"))))"
+         "      (LambdaLink"
+         "         (VariableList"
+         "            (TypedVariableLink"
+         "               (VariableNode \"$X\")"
+         "               (TypeNode \"ConceptNode\"))"
+         "            (TypedVariableLink"
+         "               (VariableNode \"$Y\")"
+         "               (TypeNode \"ConceptNode\")))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"Q\")"
+         "            (ListLink"
+         "               (VariableNode \"$Y\")"
+         "               (VariableNode \"$X\")))))"
+         "   (ImplicationLink"
+         "      (LambdaLink"
+         "         (TypedVariableLink"
+         "            (VariableNode \"$X\")"
+         "            (TypeNode \"ConceptNode\"))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"P\")"
+         "            (VariableNode \"$X\")))"
+         "      (LambdaLink"
+         "         (TypedVariableLink"
+         "            (VariableNode \"$X\")"
+         "            (TypeNode \"ConceptNode\"))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"Q\")"
+         "            (VariableNode \"$X\")))))");
+
+    std::cout << "results = " << results->toString();
+    std::cout << "expected_results = " << expected_results->toString();
+
+    TS_ASSERT_EQUALS(results, expected_results);
 }
