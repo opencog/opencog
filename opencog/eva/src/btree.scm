@@ -45,7 +45,7 @@
 (load-from-path "utilities.scm")
 
 ; (display %load-path)
-; (add-to-load-path "../src")
+(add-to-load-path "../src")
 (load-from-path "faces.scm")
 (load-from-path "behavior-cfg.scm")
 
@@ -1013,8 +1013,11 @@
 	(call-with-new-thread
 		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
 (define (halt) (set! do-run-loop #f))
-(all-threads)
 
 ;
 ; Silence the output.
 (TrueLink)
+
+;; Actually set it running
+(all-threads)
+(run)
