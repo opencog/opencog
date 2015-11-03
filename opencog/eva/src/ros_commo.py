@@ -83,6 +83,29 @@ class EvaControl():
 		print "Just published gesture: ", ges.name
 
 	# ----------------------------------------------------------
+	# Wrapper for emotional expressions
+	def expression(self, name, intensity, duration):
+		# Create the message
+		exp = EmotionState()
+		exp.name = name
+		exp.magnitude = intensity
+		exp.duration.secs = int(duration)
+		exp.duration.nsecs = 1000000000 * (duration - int(duration))
+		self.emotion_pub.publish(exp)
+		print "Publish expression: ", exp.name
+
+	# Wrapper for gestures
+	def gesture(self, name, intensity, repeat, speed):
+		# Create the message
+		ges = SetGesture()
+		ges.name = name
+		ges.magnitude = intensity
+		ges.repeat = repeat
+		ges.speed = speed
+		self.gesture_pub.publish(ges)
+		print "Published gesture: ", ges.name
+
+	# ----------------------------------------------------------
 	# Look at, gaze at, glance at face id's
 	# Look_at turns entire head in that direction, once.
 	# Gaze_at has the eyes track the face location (servoing)
