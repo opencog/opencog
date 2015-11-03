@@ -161,14 +161,14 @@
         )
     )
 
-    (define (run-fc parse-node)
+    (define (run-fc parse-node interp-link)
         ; This runs all the rules of R2L-en-RuleBase over relex parse outputs,
         ; and returns a cleaned and de-duplicated list. The relex outputs
         ; associated with 'parse-node' make the focus-set, this way, IF there
         ; are  multiple parses then each are handled independently by passing
         ; them seprately as they are likely exist in a seperate
         ; semantic-universe.
-        (let* ((focus-set (SetLink (parse-get-relex-outputs parse-node)))
+        (let* ((focus-set (SetLink (parse-get-relex-outputs parse-node) interp-link))
               (outputs (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set))))
 
               (append-map cog-delete-parent
@@ -183,14 +183,13 @@
         ; are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               (result (SetLink (delete-duplicates (run-fc parse-node)))))
+               ; Associate the interpreation with a parse, as there could be multiplie
+               ; interpreations to the same parse.
+               (interp-link (InterpretationLink interp-node parse-node))
+               (result (SetLink (delete-duplicates (run-fc parse-node interp-link)))))
 
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
-
-            ; Associate the interpreation with a parse, as there could be multiplie
-            ; interpreations to the same parse.
-            (InterpretationLink interp-node parse-node)
 
             ; Time stamp the parse
             (AtTimeLink
