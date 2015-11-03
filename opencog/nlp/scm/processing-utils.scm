@@ -183,7 +183,7 @@
         ; are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               (result (SetLink (run-fc parse-node))))
+               (result (SetLink (delete-duplicates (run-fc parse-node)))))
 
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
