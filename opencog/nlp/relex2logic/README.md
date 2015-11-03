@@ -1,6 +1,6 @@
 # RelEx2Logic
 
-RelEx2Logic aims to produce the semantic representation of some input sentence.
+RelEx2Logic (R2L) aims to produce the semantic representation of some input sentence.
 This is done by creating a [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
 rule base to be processed by a slightly modified forward chainer.
 
@@ -13,8 +13,14 @@ The current pipeline for a sentence is
 Step 1 & 2 are done by the relex server in https://github.com/opencog/relex,
 while step 3 is done by the URE.
 
-For further information on how to use the rule base, see the README in the
-"rules" directory.
+To use R2L:
+
+1. Start the cogserver
+2. Enter the scm shell.
+3. Load the rules using `(load-r2l-rulebase)`
+4. Start the relex server using the --relex flag (don't use the --logic flag)
+5. In the opencog scheme shell run `(nlp-parse "some complete sentence")`
+6. Build your thing :smile:
 
 
 ## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns
