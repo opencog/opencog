@@ -17,7 +17,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
+import rospy
 from ros_commo import EvaControl
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.bindlink import satisfaction_link

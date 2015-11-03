@@ -39,8 +39,8 @@
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 
-; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
-(system "echo \"py\\n\" | cat - atomic-dbg.py |netcat localhost 17020")
+(system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
+; (system "echo \"py\\n\" | cat - atomic-dbg.py |netcat localhost 17020")
 
 (load-from-path "utilities.scm")
 
