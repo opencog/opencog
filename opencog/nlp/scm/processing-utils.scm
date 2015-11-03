@@ -186,7 +186,11 @@
                ; Associate the interpreation with a parse, as there could be multiplie
                ; interpreations to the same parse.
                (interp-link (InterpretationLink interp-node parse-node))
-               (result (SetLink (delete-duplicates (run-fc parse-node interp-link)))))
+               (pre-result
+                   (remove
+                       (lambda (a) (equal? (cog-type a) 'ReferenceLink))
+                       (delete-duplicates (run-fc parse-node interp-link))))
+               (result (SetLink pre-result)))
 
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
