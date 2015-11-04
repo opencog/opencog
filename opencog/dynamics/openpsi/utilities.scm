@@ -287,7 +287,38 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-actions demand-node)
+(define (psi-get-actions demand-node effect-type)
+"
+  Returns a list containing the 'Node atom-type atoms that name the action-rules
+  for the given demand-node.
+
+  demand-node:
+    - A ConceptNode that represents a demand.
+
+  effect-type:
+    - A string that describes the effect the particualr action would have on
+      the demand value. The only options are `Increase` and `Decrease`.
+"
+    ; Check arguments
+    (if (not (member effect-type (list "Increase" "Decrease")))
+        (error (string-append "Expected second argument to be either"
+            "`Increase` or `Decrease` got: ") effect-type))
+
+    (cog-outgoing-set (cog-execute!
+        (GetLink
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "Node"))
+             (EvaluationLink
+                 (PredicateNode (string-append (psi-prefix-str) effect-type))
+                 (ListLink
+                    (VariableNode "x")
+                    demand-node)))
+    ))
+)
+
+; --------------------------------------------------------------
+(define (psi-get-all-actions demand-node)
 "
   Returns a list containing the 'Node atom-type atoms that name the action-rules
   for the given demand-node.
@@ -295,25 +326,10 @@
   demand-node:
     - A ConceptNode that represents a demand.
 "
-    (cog-outgoing-set (cog-execute!
-        (GetLink
-             (TypedVariableLink
-                 (VariableNode "x")
-                 (TypeNode "Node"))
-             (ChoiceLink
-                 (EvaluationLink
-                     (PredicateNode
-                         (string-append (psi-prefix-str) "Increase"))
-                     (ListLink
-                        (VariableNode "x")
-                        demand-node))
-                 (EvaluationLink
-                     (PredicateNode
-                         (string-append (psi-prefix-str) "Decrease"))
-                     (ListLink
-                        (VariableNode "x")
-                        demand-node))))
-    ))
+    (append
+        (psi-get-actions demand-node "Increase")
+        (psi-get-actions demand-node "Decrease")
+    )
 )
 
 ; --------------------------------------------------------------
@@ -397,8 +413,9 @@
 ; --------------------------------------------------------------
 (define (psi-run)
 "
-  The main function that runs OpenPsi active-schema-pool. It modifies the
-  member action-rules of the active-schema-pool.
+  The main function that runs OpenPsi active-schema-pool. The active-schema-pool
+  is a rulebase, that is modified depending on the demand-values, on every
+  cogserver cycle.
 "
 
     (cog-fc (SetLink)
@@ -503,6 +520,8 @@
   Select the actions that should be added to the active-schema-pool depending
   on the present goal, by using the plan choosen by the GroundedPredicateNode.
 
+  XXX should it modify the member action-rules of the active-schema-pool.
+
   demand-node:
     - A ConceptNode that represents a demand.
 
@@ -516,5 +535,18 @@
     ; this has to be improved but is good for starters.
 
 ; (psi-get-actions (psi-get-current-goal))
+(display "WIP")
+)
+
+; --------------------------------------------------------------
+(define (psi-update-asp demand-node gpn)
+"
+  It modifies the member action-rules of the active-schema-pool.
+"
+;not sure if should be part of psi-select-actions, why separate them?
+    ;(let ((choosen-actions (psi-select-actions demand-node gpn)))
+
+    ;)
+
 (display "WIP")
 )
