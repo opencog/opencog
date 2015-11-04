@@ -64,6 +64,7 @@ public:
     void test_implication_full_instantiation();
     void test_implication_partial_instantiation();
     void test_implication_lambda_distribution();
+    void test_and_lambda_distribution();
 };
 
 void PLNRulesUTest::tearDown()
@@ -465,6 +466,47 @@ void PLNRulesUTest::test_implication_lambda_distribution()
          "         (TypedVariableLink"
          "            (VariableNode \"$X\")"
          "            (TypeNode \"ConceptNode\"))"
+         "         (EvaluationLink"
+         "            (PredicateNode \"Q\")"
+         "            (VariableNode \"$X\")))))");
+
+    std::cout << "results = " << results->toString();
+    std::cout << "expected_results = " << expected_results->toString();
+
+    TS_ASSERT_EQUALS(results, expected_results);
+}
+
+/**
+ * Test implication-partial-instantiation-rule defined in:
+ * opencog/reasoning/pln/rules/implication-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_and_lambda_distribution()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    as.clear();
+
+    config().set("SCM_PRELOAD",
+                 "tests/reasoning/simple-lambda.scm, "
+                 "opencog/reasoning/pln/rules/and-lambda-distribution-rule.scm");
+    load_scm_files_from_config(as);
+
+    // Apply the and rule
+    Handle rule = eval.eval_h("and-lambda-distribution-rule");
+    Handle results = bindlink(&as, rule);
+
+    // Depending on the random seed the result can be one of the other
+    // (partial instantiation occurs on $X or $Y).
+    Handle expected_results = eval.eval_h
+        ("(SetLink"
+         "   (AndLink"
+         "      (LambdaLink"
+         "         (VariableNode \"$X\")"
+         "         (EvaluationLink"
+         "            (PredicateNode \"P\")"
+         "            (VariableNode \"$X\")))"
+         "      (LambdaLink"
+         "         (VariableNode \"$X\")"
          "         (EvaluationLink"
          "            (PredicateNode \"Q\")"
          "            (VariableNode \"$X\")))))");
