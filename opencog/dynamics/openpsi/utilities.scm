@@ -485,14 +485,9 @@
 ; --------------------------------------------------------------
 (define (psi-get-current-goal)
 "
-  Returns the demand that is being acted upon presently. When a demand is set
-  for action it would be used.
+  Returns the demand-ConceptNode that has been choosen for action presently.
 "
-(display "WIP")
-
-#!
-;this doesn't work, seems to be a bug.
-   (cog-execute!
+   (define (get-psi-goal) (cog-execute!
       (GetLink
         (TypedVariableLink
             (VariableNode "demand")
@@ -500,18 +495,53 @@
         (AndLink
             (StateLink
                 (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ListLink
-                    (ChoiceLink
+                (ChoiceLink
+                    (ListLink
                         (ConceptNode
                             (string-append (psi-prefix-str) "Decrease"))
+                        (VariableNode "demand"))
+                    (ListLink
                         (ConceptNode
-                            (string-append (psi-prefix-str) "Increase")))
-                    (VariableNode "demand")))
+                            (string-append (psi-prefix-str) "Increase"))
+                        (VariableNode "demand"))))
             (EvaluationLink ; Act only if their is such a demand.
                 (GroundedPredicateNode "scm: psi-demand?")
                 (ListLink
-                    (VariableNode "demand"))))))
-!#
+                    (VariableNode "demand")))))
+    ))
+
+    (let* ((set-link (get-psi-goal))
+          (result (car (cog-outgoing-set set-link)))
+          )
+          (cog-delete set-link)
+          result
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-get-current-action-type)
+"
+  This returns a node of the type of effect that the current-goal have.
+"
+; TODO: return string instead of node
+   (define (get-psi-action-type) (cog-execute!
+        (GetLink
+            (TypedVariableLink
+                (VariableNode "effect-type")
+                (TypeNode "ConceptNode"))
+            (StateLink
+                (Node (string-append (psi-prefix-str) "action-on-demand"))
+                (ListLink
+                    (VariableNode "effect-type")
+                    (psi-get-current-goal))))
+    ))
+
+    (let* ((set-link (get-psi-action-type))
+          (result (car (cog-outgoing-set set-link)))
+          )
+          (cog-delete set-link)
+          result
+    )
 )
 
 ; --------------------------------------------------------------
@@ -523,7 +553,7 @@
   XXX should it modify the member action-rules of the active-schema-pool.
 
   demand-node:
-    - A ConceptNode that represents a demand.
+    - A ConceptNode that represents a demand
 
   gpn:
    - GroundedPredicateNode that refers to a function that checks the actions
@@ -534,8 +564,9 @@
     ; isn't being used now thus each plan is in effect a single action choosen,
     ; this has to be improved but is good for starters.
 
-; (psi-get-actions (psi-get-current-goal))
-(display "WIP")
+
+    ;(psi-get-actions demand-node gpn)
+    (display "WIP")
 )
 
 ; --------------------------------------------------------------
@@ -545,7 +576,7 @@
 "
 ;not sure if should be part of psi-select-actions, why separate them?
     ;(let ((choosen-actions (psi-select-actions demand-node gpn)))
-
+    ;    ()
     ;)
 
 (display "WIP")
