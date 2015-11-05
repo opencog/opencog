@@ -357,6 +357,34 @@
       )
    )
 )
+(ReferenceLink
+    (PredicateNode "walked@2ef39a41-8a28-489b-a47c-5d5581d3ec6a" (stv 0.001 0.99000001))
+    (WordInstanceNode "walked@2ef39a41-8a28-489b-a47c-5d5581d3ec6a")
+)
+(ReferenceLink
+    (ConceptNode "he@3f74682f-8c1d-415b-bf49-ccbc54875a1a" (stv 0.001 0.99000001))
+    (WordInstanceNode "he@3f74682f-8c1d-415b-bf49-ccbc54875a1a")
+)
+(ReferenceLink
+    (PredicateNode "walked@2ef39a41-8a28-489b-a47c-5d5581d3ec6a" (stv 0.001 0.99000001))
+    (WordInstanceNode "walked@2ef39a41-8a28-489b-a47c-5d5581d3ec6a")
+)
+(ReferenceLink
+    (ConceptNode "slowly@9ae3ede1-2c2e-4a65-adbe-64bc02a26b65" (stv 0.001 0.99000001))
+    (WordInstanceNode "slowly@9ae3ede1-2c2e-4a65-adbe-64bc02a26b65")
+)
+(ReferenceLink
+    (PredicateNode "ran@c37ad251-c3c2-4d7f-9adf-9cb2675c6add" (stv 0.001 0.99000001))
+    (WordInstanceNode "ran@c37ad251-c3c2-4d7f-9adf-9cb2675c6add")
+)
+(ReferenceLink
+    (ConceptNode "she@06833d51-dd26-4694-b951-db6aecee550c" (stv 0.001 0.99000001))
+    (WordInstanceNode "she@06833d51-dd26-4694-b951-db6aecee550c")
+)
+(ReferenceLink
+    (ConceptNode "quickly@926e2837-3958-4095-9d6c-a54b6c320adf" (stv 0.001 0.99000001))
+    (WordInstanceNode "quickly@926e2837-3958-4095-9d6c-a54b6c320adf")
+)
 (ParseLink (stv 1 0.99999982)
    (ParseNode "sentence@7ef5e932-e74e-40d7-b6bc-4f072b4fa8e8_parse_0" (stv 1 0.43079999))
    (SentenceNode "sentence@7ef5e932-e74e-40d7-b6bc-4f072b4fa8e8")
