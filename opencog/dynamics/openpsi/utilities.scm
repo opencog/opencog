@@ -12,6 +12,7 @@
     - A 'SetLink that is a result of running `cog-execute!` of 'GetLink
       wrapping psi-demand-pattern.
 "
+; TODO: Make this generic for pattern gets
     (define (list-merge list-of-list) (fold append '() list-of-list))
     (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
     (remove! is-nn?
@@ -19,15 +20,31 @@
 )
 
 ; --------------------------------------------------------------
-; Functions for OpenPsi Demands
-; --------------------------------------------------------------
 (define (psi-prefix-str)
 "
-  returns the string used as a prefix to all OpenPsi realted atom definition
+  Returns the string used as a prefix to all OpenPsi realted atom definition
 "
  "OpenPsi: "
 )
 
+(define (psi-suffix-str a-string)
+"
+  Returns the suffix of that follows `psi-prefix-str` sub-string.
+
+  a-string:
+    - a string that should have the`psi-prefix-str`
+
+"
+    (let ((z-match (string-match (psi-prefix-str) a-string)))
+        (if z-match
+            (match:suffix z-match)
+            (error (string-append "The string argument must have the prefix: "
+                "\"" (psi-prefix-str) "\"") )
+        )
+    )
+)
+; --------------------------------------------------------------
+; Functions for OpenPsi Demands
 ; --------------------------------------------------------------
 (define (psi-demand-pattern)
 "
@@ -523,7 +540,6 @@
 "
   This returns a node of the type of effect that the current-goal have.
 "
-; TODO: return string instead of node
    (define (get-psi-action-type) (cog-execute!
         (GetLink
             (TypedVariableLink
