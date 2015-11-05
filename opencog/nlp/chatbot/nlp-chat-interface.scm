@@ -35,7 +35,7 @@
         (display "I can't process truth query for now"))
         ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")
             (display "You made an Interrogative SpeechAct ")
-        (wh_query_process query))
+        (wh_query_process querySentence))
         ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")
             (display "You made a Declarative SpeechAct "))
         (else (display "Sorry,I don't know the type"))
