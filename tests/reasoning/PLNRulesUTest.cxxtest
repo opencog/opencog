@@ -66,6 +66,7 @@ public:
 	void test_implication_lambda_distribution();
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
+	void test_implication_construction();
 };
 
 void PLNRulesUTest::tearDown()
@@ -537,6 +538,39 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 		 "      (AndLink"
 		 "         (PredicateNode \"P\")"
 		 "         (PredicateNode \"Q\"))))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected_results = " << expected_results->toString();
+
+	TS_ASSERT_EQUALS(results, expected_results);
+}
+
+/**
+ * Test implication-construction-rule defined in:
+ * opencog/reasoning/pln/rules/implication-construction-rule.scm
+ */
+void PLNRulesUTest::test_implication_construction()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	config().set("SCM_PRELOAD",
+	             "tests/reasoning/simple-predicates.scm, "
+	             "opencog/reasoning/pln/rules/implication-construction-rule.scm");
+	load_scm_files_from_config(as);
+
+	// Apply the and rule
+	Handle rule = eval.eval_h("implication-construction-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected_results = eval.eval_h
+		("(SetLink"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"P\")"
+		 "      (PredicateNode \"Q\"))"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (PredicateNode \"P\")))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected_results = " << expected_results->toString();
