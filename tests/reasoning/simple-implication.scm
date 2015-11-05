@@ -52,3 +52,9 @@
    (EvaluationLink
       (PredicateNode "dummy-implicand")
       (VariableNode "$X")))
+
+;; This one is to test implicant distribution
+
+(ImplicationLink
+   (PredicateNode "P")
+   (PredicateNode "Q"))
