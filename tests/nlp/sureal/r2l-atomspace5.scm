@@ -318,6 +318,26 @@
       )
    )
 )
+(ReferenceLink
+    (PredicateNode "ate@2248db85-cdb2-44e3-a7db-51222fe86ca4" (stv 0.001 0.99000001))
+    (WordInstanceNode "ate@2248db85-cdb2-44e3-a7db-51222fe86ca4")
+)
+(ReferenceLink
+    (ConceptNode "he@23716e27-65f3-4a65-9be8-a37b5fbb0195" (stv 0.001 0.99000001))
+    (WordInstanceNode "he@23716e27-65f3-4a65-9be8-a37b5fbb0195")
+)
+(ReferenceLink
+    (ConceptNode "olive@f574fb10-4d6d-4b35-a925-6addc9cf9392" (stv 0.001 0.99000001))
+    (WordInstanceNode "olive@f574fb10-4d6d-4b35-a925-6addc9cf9392")
+)
+(ReferenceLink
+    (ConceptNode "big@cc6d1269-54f2-434e-8c25-ed561845de18" (stv 0.001 0.99000001))
+    (WordInstanceNode "big@cc6d1269-54f2-434e-8c25-ed561845de18")
+)
+(ReferenceLink
+    (ConceptNode "round@c2e4cf62-8009-42b5-a0fb-4b50a1ef20ea" (stv 0.001 0.99000001))
+    (WordInstanceNode "round@c2e4cf62-8009-42b5-a0fb-4b50a1ef20ea")
+)
 (ParseLink (stv 1 0.99999982)
    (ParseNode "sentence@75d2a7b8-8ace-43f9-b823-592c63e17f04_parse_0" (stv 1 0.96170002))
    (SentenceNode "sentence@75d2a7b8-8ace-43f9-b823-592c63e17f04")

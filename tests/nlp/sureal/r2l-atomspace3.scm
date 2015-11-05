@@ -287,6 +287,22 @@
       )
    )
 )
+(ReferenceLink
+    (PredicateNode "hates@b1c858bb-6a0c-4488-b95c-3d3413d1d3a5" (stv 0.001 0.99000001))
+    (WordInstanceNode "hates@b1c858bb-6a0c-4488-b95c-3d3413d1d3a5")
+)
+(ReferenceLink
+    (ConceptNode "dog@ef0b81f7-f20f-43cf-a650-80150dc8f121" (stv 0.001 0.99000001))
+    (WordInstanceNode "dog@ef0b81f7-f20f-43cf-a650-80150dc8f121")
+)
+(ReferenceLink
+    (ConceptNode "cat@fb08d0ff-337f-425e-88ce-c07d7dc0919f" (stv 0.001 0.99000001))
+    (WordInstanceNode "cat@fb08d0ff-337f-425e-88ce-c07d7dc0919f")
+)
+(ReferenceLink
+    (ConceptNode "yellow@3ef5a0ee-558d-4157-be61-29700a00451f" (stv 0.001 0.99000001))
+    (WordInstanceNode "yellow@3ef5a0ee-558d-4157-be61-29700a00451f")
+)
 (ParseLink (stv 1 0.99999982)
    (ParseNode "sentence@991a9f76-4485-454b-8a2e-0caa9176ca5e_parse_0" (stv 1 0.96170002))
    (SentenceNode "sentence@991a9f76-4485-454b-8a2e-0caa9176ca5e")
