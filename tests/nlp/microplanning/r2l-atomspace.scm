@@ -1203,6 +1203,18 @@
    )
 )
 (ReferenceLink
+   (PredicateNode "grow@cbf77b70-75b4-4902-9339-a54639377ec4" (stv 0.001 0.99000001))
+   (WordInstanceNode "grow@cbf77b70-75b4-4902-9339-a54639377ec4")
+)
+(ReferenceLink
+   (ConceptNode "dogs@e80edc9e-b5c5-4cae-90d9-eb91296b2e18" (stv 0.001 0.99000001))
+   (WordInstanceNode "dogs@e80edc9e-b5c5-4cae-90d9-eb91296b2e18")
+)
+(ReferenceLink
+   (ConceptNode "apple@dd5f32bb-5bca-4b23-81f0-39f71e06b55f" (stv 0.001 0.99000001))
+   (WordInstanceNode "apple@dd5f32bb-5bca-4b23-81f0-39f71e06b55f")
+)
+(ReferenceLink
    (LgLinkInstanceNode "Sp@822550bc-a595-45a2-854a-d56b0c8431c3")
    (LinkGrammarRelationshipNode "Sp")
 )
@@ -1252,6 +1264,14 @@
          (DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
       )
    )
+)
+(ReferenceLink
+   (PredicateNode "grow@4cf777c1-a989-4aac-831c-8c1175d4b197" (stv 0.001 0.99000001))
+   (WordInstanceNode "grow@4cf777c1-a989-4aac-831c-8c1175d4b197")
+)
+(ReferenceLink
+   (ConceptNode "they@deb8f479-5b5a-447c-9ef3-c31a60e21371" (stv 0.001 0.99000001))
+   (WordInstanceNode "they@deb8f479-5b5a-447c-9ef3-c31a60e21371")
 )
 (ReferenceLink
    (LgLinkInstanceNode "Wd@312908d5-ef45-42e4-bb71-7f61fcc48e47")
@@ -1332,6 +1352,22 @@
          )
       )
    )
+)
+(ReferenceLink
+   (PredicateNode "collects@553733bb-8159-44a5-a0b0-1b815aeafdce" (stv 0.001 0.99000001))
+   (WordInstanceNode "collects@553733bb-8159-44a5-a0b0-1b815aeafdce")
+)
+(ReferenceLink
+   (ConceptNode "Sam@8c89bbba-4638-4370-a4ad-4c8918f3bdc6" (stv 0.001 0.99000001))
+   (WordInstanceNode "Sam@8c89bbba-4638-4370-a4ad-4c8918f3bdc6")
+)
+(ReferenceLink
+   (ConceptNode "bones@b30ec255-69ae-433d-bdb4-4ba943ce659f" (stv 0.001 0.99000001))
+   (WordInstanceNode "bones@b30ec255-69ae-433d-bdb4-4ba943ce659f")
+)
+(ReferenceLink
+   (ConceptNode "tiny@7db7acbd-9ef8-483c-88e6-5e04964b0eef" (stv 0.001 0.99000001))
+   (WordInstanceNode "tiny@7db7acbd-9ef8-483c-88e6-5e04964b0eef")
 )
 (ReferenceLink (stv 1 0.99999982)
    (WordInstanceNode ".@2997225b-691d-473e-a8ac-bb1790e8e42e")
@@ -1584,6 +1620,14 @@
    )
 )
 (ReferenceLink
+   (PredicateNode "burns@e491539f-5f54-487b-ace6-d1055a422ec5" (stv 0.001 0.99000001))
+   (WordInstanceNode "burns@e491539f-5f54-487b-ace6-d1055a422ec5")
+)
+(ReferenceLink
+   (ConceptNode "tree@70199077-d25f-4abd-9519-5fddd34c5e18" (stv 0.001 0.99000001))
+   (WordInstanceNode "tree@70199077-d25f-4abd-9519-5fddd34c5e18")
+)
+(ReferenceLink
    (InterpretationNode "sentence@bb54d100-5325-400d-ac0b-9f5d2c1bd4bf_parse_0_interpretation_$X")
    (SetLink
       (ImplicationLink (stv 0.99000001 0.99000001)
@@ -1634,6 +1678,22 @@
          )
       )
    )
+)
+(ReferenceLink
+   (PredicateNode "climbs@0addbb01-d017-47ff-bd2d-c7a2afa3c60c" (stv 0.001 0.99000001))
+   (WordInstanceNode "climbs@0addbb01-d017-47ff-bd2d-c7a2afa3c60c")
+)
+(ReferenceLink
+   (ConceptNode "cat@9f3565d0-834e-4b30-a598-11cfb8adb3b9" (stv 0.001 0.99000001))
+   (WordInstanceNode "cat@9f3565d0-834e-4b30-a598-11cfb8adb3b9")
+)
+(ReferenceLink
+   (ConceptNode "table@54e19a50-96a3-48c4-805b-954e1c91dce6" (stv 0.001 0.99000001))
+   (WordInstanceNode "table@54e19a50-96a3-48c4-805b-954e1c91dce6")
+)
+(ReferenceLink
+   (ConceptNode "brown@62945422-ac5f-4aef-bca6-4491369928dc" (stv 0.001 0.99000001))
+   (WordInstanceNode "brown@62945422-ac5f-4aef-bca6-4491369928dc")
 )
 (ReferenceLink
    (LgLinkInstanceNode "Wd@18722252-fbb2-4b3c-9bf8-698dfbb84fa7")
@@ -1720,6 +1780,22 @@
    )
 )
 (ReferenceLink
+   (PredicateNode "mean@3973436d-87f8-4abf-b5c8-f297c173c6a7" (stv 0.001 0.99000001))
+   (WordInstanceNode "mean@3973436d-87f8-4abf-b5c8-f297c173c6a7")
+)
+(ReferenceLink
+   (ConceptNode "I@58decb35-c9b0-4328-88a2-f1d0ff42470d" (stv 0.001 0.99000001))
+   (WordInstanceNode "I@58decb35-c9b0-4328-88a2-f1d0ff42470d")
+)
+(ReferenceLink
+   (ConceptNode "man@8cffb349-5881-433f-af6d-79cd72c23aa7" (stv 0.001 0.99000001))
+   (WordInstanceNode "man@8cffb349-5881-433f-af6d-79cd72c23aa7")
+)
+(ReferenceLink
+   (ConceptNode "tall@66156a86-5eb9-4eaf-80ee-f17a04d1de7e" (stv 0.001 0.99000001))
+   (WordInstanceNode "tall@66156a86-5eb9-4eaf-80ee-f17a04d1de7e")
+)
+(ReferenceLink
    (LgLinkInstanceNode "Ss@850ba150-f0de-4afe-9493-a63201b47feb")
    (LinkGrammarRelationshipNode "Ss")
 )
@@ -1788,6 +1864,18 @@
    )
 )
 (ReferenceLink
+   (PredicateNode "steals@40cc074b-75f1-4e8d-a1dc-b55c529078f3" (stv 0.001 0.99000001))
+   (WordInstanceNode "steals@40cc074b-75f1-4e8d-a1dc-b55c529078f3")
+)
+(ReferenceLink
+   (ConceptNode "John@6a8c11d0-cfb9-4740-a88e-1aaab20af288" (stv 0.001 0.99000001))
+   (WordInstanceNode "John@6a8c11d0-cfb9-4740-a88e-1aaab20af288")
+)
+(ReferenceLink
+   (ConceptNode "it@3cbaf1c9-026d-4464-9fb3-afcd4bc09574" (stv 0.001 0.99000001))
+   (WordInstanceNode "it@3cbaf1c9-026d-4464-9fb3-afcd4bc09574")
+)
+(ReferenceLink
    (LgLinkInstanceNode "Wd@5b3d6cfa-2827-44db-afa7-f1d4295f75e9")
    (LinkGrammarRelationshipNode "Wd")
 )
@@ -1846,6 +1934,18 @@
          )
       )
    )
+)
+(ReferenceLink
+   (PredicateNode "steals@95cb50da-10ac-493c-928a-d52e6f2c3644" (stv 0.001 0.99000001))
+   (WordInstanceNode "steals@95cb50da-10ac-493c-928a-d52e6f2c3644")
+)
+(ReferenceLink
+   (ConceptNode "John@82cd9bb7-b68a-44d5-a5ee-8dd96313532b" (stv 0.001 0.99000001))
+   (WordInstanceNode "John@82cd9bb7-b68a-44d5-a5ee-8dd96313532b")
+)
+(ReferenceLink
+   (ConceptNode "orange@138d2783-960d-4030-86d9-e19597d3b5e9" (stv 0.001 0.99000001))
+   (WordInstanceNode "orange@138d2783-960d-4030-86d9-e19597d3b5e9")
 )
 (ReferenceLink (stv 1 0.99999982)
    (WordInstanceNode ".@1d3c5cc7-1ae2-42f3-a439-2200187b9cda")
