@@ -664,6 +664,8 @@
 ) 
 
 (define (nn-rule n1 n1_instance n2 n2_instance)
+	(r2l-wordinst-concept n1_instance)
+	(r2l-wordinst-concept n2_instance)
 	(list (InheritanceLink (ConceptNode n1_instance) (ConceptNode n1))
 	(InheritanceLink (ConceptNode n2_instance) (ConceptNode n2))
 	(InheritanceLink (ConceptNode n1_instance) (ConceptNode n2_instance))
