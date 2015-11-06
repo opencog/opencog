@@ -339,7 +339,13 @@
 "
 	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
 		(if (null? wlist)
-			'()
+			; FIXME: this is a dumb way to get other type
+			(let ((nlist (cog-chase-link 'LemmaLink 'NumberNode word-inst)))
+				(if (null? nlist)
+					'()
+					(car nlist)
+				)
+			)
 			(car wlist)
 		)
 	)
