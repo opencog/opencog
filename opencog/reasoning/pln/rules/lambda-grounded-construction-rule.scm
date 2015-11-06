@@ -14,7 +14,7 @@
 ;; alpha-equivalence support.
 ;; ----------------------------------------------------------------------
 
-(define lambda-fully-grounded-construction-variables
+(define lambda-grounded-construction-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$V")
@@ -24,7 +24,7 @@
            (TypeNode "VariableNode")))
      (VariableNode "$B")))
 
-(define lambda-fully-grounded-construction-body
+(define lambda-grounded-construction-body
   (AndLink
      (LambdaLink
         (VariableNode "$V")
@@ -34,21 +34,21 @@
         (ListLink
            (VariableNode "$B")))))
 
-(define lambda-fully-grounded-construction-rewrite
+(define lambda-grounded-construction-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: lambda-fully-grounded-construction-formula")
+     (GroundedSchemaNode "scm: lambda-grounded-construction-formula")
      (ListLink
         (LambdaLink
            (VariableNode "$V")
            (VariableNode "$B")))))
 
-(define lambda-fully-grounded-construction-rule
+(define lambda-grounded-construction-rule
   (BindLink
-     lambda-fully-grounded-construction-variables
-     lambda-fully-grounded-construction-body
-     lambda-fully-grounded-construction-rewrite))
+     lambda-grounded-construction-variables
+     lambda-grounded-construction-body
+     lambda-grounded-construction-rewrite))
 
-(define (lambda-fully-grounded-construction-formula lamb)
+(define (lambda-grounded-construction-formula lamb)
   (let* ((lamb-outgoings (cog-outgoing-set lamb))
          (body (cadr lamb-outgoings))
          (body-tv (cog-tv body)))
