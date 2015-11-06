@@ -152,10 +152,7 @@ IF (HAVE_MOSES)
 	)
 
 	TARGET_LINK_LIBRARIES(moses_cython
-		moses_exec
-		moses
-		comboreduct
-		feature_selection
+		${MOSES_LIBRARIES}
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_PROGRAM_OPTIONS_LIBRARY}
