@@ -67,6 +67,7 @@ public:
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
 	void test_implication_construction();
+	void test_lambda_fully_grounded_construction();
 };
 
 void PLNRulesUTest::tearDown()
@@ -571,6 +572,38 @@ void PLNRulesUTest::test_implication_construction()
 		 "   (ImplicationLink"
 		 "      (PredicateNode \"Q\")"
 		 "      (PredicateNode \"P\")))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected_results = " << expected_results->toString();
+
+	TS_ASSERT_EQUALS(results, expected_results);
+}
+
+/**
+ * Test lambda-fully-grounded-construction-rule defined in:
+ * opencog/reasoning/pln/rules/lambda-fully-grounded-construction-rule.scm
+ */
+void PLNRulesUTest::test_lambda_fully_grounded_construction()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	config().set("SCM_PRELOAD",
+	             "tests/reasoning/simple-lambda.scm, "
+	             "opencog/reasoning/pln/rules/lambda-fully-grounded-construction-rule.scm");
+	load_scm_files_from_config(as);
+
+	// Apply the and rule
+	Handle rule = eval.eval_h("lambda-fully-grounded-construction-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected_results = eval.eval_h
+		("(SetLink"
+		 "   (LambdaLink"
+		 "      (VariableNode \"$X\")"
+		 "      (EvaluationLink"
+		 "         (PredicateNode \"P\")"
+		 "         (ConceptNode \"A\"))))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected_results = " << expected_results->toString();

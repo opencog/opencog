@@ -9,3 +9,9 @@
       (EvaluationLink
          (PredicateNode "Q")
          (VariableNode "$X"))))
+
+(LambdaLink
+   (VariableNode "$X")
+   (EvaluationLink (stv 0.4 0.7)
+      (PredicateNode "P")
+      (ConceptNode "A")))
