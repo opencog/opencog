@@ -359,7 +359,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  *
  * @param var_soln   the variable & links mapping
  * @param pred_soln  the clause mapping
- * @return           always return false to search for more solutions
+ * @return           always return false to search for more solutions, unless a
+ *                   good enough solution is found
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
@@ -525,7 +526,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 /**
  * Implement the initiate_search method.
  *
- * Similar to DefaultPatternMatcherCB::initiate_search, in which we start search
+ * Similar to InitiateSearchCB::initiate_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -533,9 +534,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * limiting the search space.
  *
  * @param pPME       pointer to the PatternMatchEngine
- * @param vars       a set of nodes that are variables
- * @param clauses    the clauses for the query
- * @param negations  the negative clauses
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
