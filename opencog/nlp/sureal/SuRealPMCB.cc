@@ -608,22 +608,22 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 }
 
 /**
- * Override the find_starter method in DefaultPatternMatchCB.
+ * Override the find_starter_recursive method in InitiateSearchCB.
  *
- * Override find_starter so that it will not treat VariableNode variables,
+ * Override find_starter_recursive so that it will not treat VariableNode variables,
  * but instead compare against the variable list.
  *
- * @param h       same as InitiateSearchCB::find_starter
- * @param depth   same as InitiateSearchCB::find_starter
- * @param start   same as InitiateSearchCB::find_starter
- * @param width   same as InitiateSearchCB::find_starter
- * @return        same as InitiateSearchCB::find_starter but change
+ * @param h       same as InitiateSearchCB::find_starter_recursive
+ * @param depth   same as InitiateSearchCB::find_starter_recursive
+ * @param start   same as InitiateSearchCB::find_starter_recursive
+ * @param width   same as InitiateSearchCB::find_starter_recursive
+ * @return        same as InitiateSearchCB::find_starter_recursive but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth,
-                                Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter_recursive(const Handle& h, size_t& depth,
+                                          Handle& start, size_t& width)
 {
-    Handle rh = InitiateSearchCB::find_starter(h, depth, start, width);
+    Handle rh = InitiateSearchCB::find_starter_recursive(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)
