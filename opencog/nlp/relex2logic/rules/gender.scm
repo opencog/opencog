@@ -43,7 +43,6 @@
                 )
             )
         )
-
    		(ListLink
 			(ExecutionOutputLink
 				(GroundedSchemaNode "scm: pre-gender-rule")
@@ -56,8 +55,6 @@
         
     )
 )
-
-
 
 
 (define (pre-gender-rule word gtype)
