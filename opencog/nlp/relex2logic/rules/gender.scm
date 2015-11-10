@@ -1,3 +1,4 @@
+;check the atoms that should be grounded 
 (define (check-gender gtype)
     (if (or (string=? (cog-name gtype) "masculine") (string=? (cog-name gtype) "feminine"))
         (begin (stv 1 1))
@@ -43,26 +44,25 @@
                 )
             )
         )
-   		(ListLink
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm: pre-gender-rule")
-				(ListLink
-					(VariableNode "$word")
-					(VariableNode "$gtype")
-				)
-			)
-   		)
-        
+        (ListLink
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm: pre-gender-rule")
+                (ListLink
+                    (VariableNode "$word")
+                    (VariableNode "$gtype")
+                )
+            )
+        )
     )
 )
 
 
 (define (pre-gender-rule word gtype)
   (ListLink
-	(gender-rule 
-	 	(cog-name (word-inst-get-lemma word)) (cog-name word) 
-		(cog-name gtype)
-	)
+        (gender-rule 
+            (cog-name (word-inst-get-lemma word)) (cog-name word) 
+            (cog-name gtype)
+        )
   )
 )
   
