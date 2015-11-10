@@ -63,7 +63,7 @@ public:
     std::map<Handle, std::vector<std::map<Handle, Handle> > > m_results;   // store the PM results
 
 private:
-    virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
+    virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&, size_t&);
 
     AtomSpace* m_as;
     std::set<Handle> m_vars;   // store nodes that are variables
