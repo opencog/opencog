@@ -599,9 +599,9 @@
 (define (det-rule concept instance var_name determiner)
 	(cond ((or (string=? determiner "those") (string=? determiner "these"))
 		(list (ImplicationLink
-			(r2l-wordinst-concept instance)
 			(MemberLink (VariableNode var_name) (ConceptNode instance))
 			(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
+			(r2l-wordinst-concept instance)
 		)
 		((or (string=? determiner "this") (string=? determiner "that"))
 		(list
