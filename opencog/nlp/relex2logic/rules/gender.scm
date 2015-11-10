@@ -58,10 +58,12 @@
 
 
 (define (pre-gender-rule word gtype)
+  (ListLink
 	(gender-rule 
 	 	(cog-name (word-inst-get-lemma word)) (cog-name word) 
 		(cog-name gtype)
 	)
+  )
 )
   
  
