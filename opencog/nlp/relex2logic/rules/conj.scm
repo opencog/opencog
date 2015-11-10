@@ -1,4 +1,11 @@
-(define conjand
+(define (check-conjunction var3)
+    (if (or (string=? (cog-name var3) "conj_and") (string=? (cog-name var3) "conj_or") (string=? (cog-name var3) "conj_but"))
+        (begin (stv 1 1))
+        (begin (stv 0 1))
+    )
+)
+
+(define conj
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -16,6 +23,10 @@
 		    (TypedVariableLink
                 (VariableNode "$pos")
                 (TypeNode "DefinedLinguisticConceptNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$var3")
+                (TypeNode "PrepositionalRelationshipNode")
             )
         )
         (AndLink
@@ -35,28 +46,35 @@
                 (VariableNode "$var2")
    				(VariableNode "$pos")
 			)
-		    (EvaluationLink
-   					(PrepositionalRelationshipNode "conj_and")
+            (EvaluationLink
+   			    (VariableNode "$var3")		
    						(ListLink
       						(VariableNode "$var1")
       						(VariableNode "$var2")
    						)
-				)
-        )
-       (ListLink
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-conjand-rule")
-       	      (ListLink
-       	         (VariableNode "$var1")
-       	         (VariableNode "$var2")
-			     (VariableNode "$pos")
+            )
+            (EvaluationLink
+                (GroundedPredicateNode "scm: check-conjunction")
+                (ListLink
+                    (VariableNode "$var3")
+                )
             )
         )
-      )
+        (ListLink
+            (ExecutionOutputLink
+       	        (GroundedSchemaNode "scm: pre-conj-rule")
+       	        (ListLink
+                    (VariableNode "$var1")
+                    (VariableNode "$var2")
+                    (VariableNode "$var3")
+                    (VariableNode "$pos")
+                )
+            )
+        )
     )
 )
 
-(define (pre-conjand-rule var1 var2 pos)
+(define (pre-conj-rule var1 var2 var3 pos)
   (ListLink 
     (and-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
               (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
