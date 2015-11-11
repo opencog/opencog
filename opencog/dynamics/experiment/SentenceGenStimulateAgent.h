@@ -9,17 +9,31 @@
 #define _SENTENCEGENAGENT_H_
 
 namespace opencog {
+class Agent;
+class SchemeEval;
+class CogServer;
 namespace ECANExperiment {
+
+extern std::vector<std::string> generated_sentences;
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.
  */
-class SentenceGenStimulateAgent {
+class SentenceGenStimulateAgent: Agent {
 private:
+    UnorderedHandleSet _hword_wordInstance_nodes;
+    SchemeEval* _scm_eval;
+    AtomSpace& _as;
 
 public:
-    SentenceGenStimulateAgent();
-    virtual ~SentenceGenStimulateAgent();
+    virtual ~ SentenceGenStimulateAgent();
+    SentenceGenStimulateAgent(CogServer& cs);
+
+    virtual const ClassInfo& classinfo() const;
+    static const ClassInfo& info();
+    void insertStimulate(void);
+    virtual void run();
 };
+
 }
 }
 #endif /* _SENTENCEGENAGENT_H_ */
