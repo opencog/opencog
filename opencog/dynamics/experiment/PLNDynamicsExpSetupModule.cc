@@ -179,3 +179,68 @@ std::string PLNDynamicsExpSetupModule::do_dump_data(Request *req,
     return "Time series data dumped in to " + file_name;
 
 }
+
+std::string PLNDynamicsExpSetupModule::load_word_dict(
+        Request *req, std::list<std::string> args)
+{
+    auto get_wordvec = [](const std::string& str) {
+        std::vector<std::string> words;
+        auto init = str.begin();
+        for (auto i = str.begin(); i != str.end(); ++i) {
+            if (*i == ',') {
+                std::string word = str.substr(
+                        init - str.begin(), i - 1 - str.begin());
+                words.push_back(word);
+                init = i + 1;
+            }
+        }
+
+        return words;
+    };
+
+    std::string file_name = args.back();
+    config().load(file_name.c_str());
+    std::string special_wstr = config().get("SPECIAL_WORDS");
+    std::string nspecial_wstr = config().get("NON_SPECIAL_WORDS");
+
+    std::vector<std::string> special_words = get_wordvec(special_wstr);
+    std::vector<std::string> nspecial_words = get_wordvec(nspecial_wstr);
+
+    std::vector<std::string> sentences = generate_sentence(
+            nspecial_words, special_words, config().get_int("SENTENCE_SIZE"));
+
+    generated_sentences = sentences;
+
+}
+
+std::vector<std::string> PLNDynamicsExpSetupModule::generate_sentence(
+        const std::vector<std::string>& non_special_words,
+        const std::vector<std::string>& special_words, int sent_size)
+{
+    std::vector<std::string> sentences;
+    int send = special_words.size() - 1;
+    int nsend = non_special_words.size() - 1;
+
+    for (; sent_size > 0; sent_size--) {
+        //Two random special words from each half
+        int sw1 = rand() % (send / 2);
+        int sw2 = rand() % (send / 2) + send / 2;
+
+        //Four Random non-special words chosen from each quarters
+        int rw1 = rand() % (nsend / 4);
+        int rw2 = rand() % (nsend / 4) + nsend / 4;
+        int rw3 = rand() % (nsend / 4) + nsend / 2;
+        int rw4 = rand() % (nsend / 4) + nsend * 3 / 4;
+
+        //Don't care about order
+        std::string sentence = special_words[sw1] + non_special_words[rw1]
+                               + non_special_words[rw2] + special_words[sw2]
+                               + non_special_words[rw3]
+                               + non_special_words[rw4];
+
+        sentences.push_back(sentence);
+    }
+
+    return sentences;
+}
+

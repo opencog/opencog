@@ -27,6 +27,8 @@ static std::string ECAN_EXP_AGENTS = "opencog::HebbianUpdatingAgent\n"
                                      "opencog::ArtificilaStimulatorAgent\n"
                                      "opencog::SurprisingnessEvaluatorAgent\n";
 
+extern std::vector<std::string> generated_sentences={};
+
 class PLNDynamicsExpSetupModule: public Module {
 private:
     struct ECANValue {
@@ -61,6 +63,9 @@ private:
     void AVChangedCBListener(const Handle& h, const AttentionValuePtr& av_old,
                              const AttentionValuePtr& av_new);
 
+    std::vector<std::string> generate_sentence(
+            const std::vector<std::string>& non_special_words,
+            const std::vector<std::string>& special_words, int sent_size);
 
     //Start stop ECAN agents commands
     DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "ecan-load", do_ecan_load,
@@ -97,6 +102,15 @@ private:
     DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "dump-tseries", do_dump_data,
             "Dumps ECAN time series data to file\n",
             "Usage: dump-tseries [FILE_NAME]\n"
+            "Dump time serise ECAN data\n",
+            false, true)
+
+    //Load word dict.
+    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "load-word-dict",load_word_dict,
+            "Loads word dict for experimentation. The word dict file should have two sections\n"
+            "SPEICAL_WORDS = [comma separated words]\n"
+            "NON_SPECIAL_WORDS = [comma separated words] >> SPECIAL words size\n",
+            "Usage: load-word-dict [FILE_NAME]\n"
             "Dump time serise ECAN data\n",
             false, true)
 
