@@ -263,15 +263,13 @@ ELSE (LINK_GRAMMAR_FOUND)
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
-# MOSES needed for embodiment learning...
+# MOSES needed for ???
 FIND_PACKAGE(MOSES)
 
 IF (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES was found.")
 	ADD_DEFINITIONS(-DHAVE_MOSES)
 	SET(HAVE_MOSES 1)
-	SET(HAVE_COMBOREDUCT 1)
-	SET(HAVE_FEATURE_SELECTION 1)
 ELSE (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
 ENDIF (MOSES_FOUND)
@@ -451,17 +449,13 @@ IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
 
-SET(HAVE_EMBODIMENT 1)
-
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	SET(HAVE_VITERBI 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
-# At this time, there is no reason to build with memcached for
-# any "normal" use, so just stub it out.
-# IF (LIBMEMCACHED_FOUND)
-#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-# ENDIF (LIBMEMCACHED_FOUND)
+IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
+	SET(HAVE_REST 1)
+ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
 
 # ===================================================================
 # global includes
@@ -672,14 +666,11 @@ SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
+SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("TBB" "Intel TBB for multithreading" HAVE_TBB)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
 SUMMARY_SHOW()
