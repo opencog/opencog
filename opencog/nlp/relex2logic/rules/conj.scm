@@ -32,20 +32,20 @@
                 (VariableNode "$var2")
                 (VariableNode "$a-parse")
             )
-		    (PartOfSpeechLink
-   				(VariableNode "$var1")
-   				(VariableNode "$pos")
-			)
-		    (PartOfSpeechLink
+            (PartOfSpeechLink
+                (VariableNode "$var1")
+                (VariableNode "$pos")
+            )
+            (PartOfSpeechLink
                 (VariableNode "$var2")
-   				(VariableNode "$pos")
-			)
+                (VariableNode "$pos")
+            )
             (EvaluationLink
-   			    (VariableNode "$var3")		
-   						(ListLink
-      						(VariableNode "$var1")
-      						(VariableNode "$var2")
-   						)
+                (VariableNode "$var3")		
+                    (ListLink
+                        (VariableNode "$var1")
+                        (VariableNode "$var2")
+                    )
             )
         (OrLink
             (EqualLink
