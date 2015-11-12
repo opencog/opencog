@@ -59,3 +59,4 @@
 (load-scm-from-file "../opencog/nlp/relex2logic/rules/nn.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/rules/to-do-rule-3.scm")
 (load-scm-from-file "../opencog/nlp/relex2logic/rules/gender.scm")
+(load-scm-from-file "../opencog/nlp/relex2logic/rules/conj.scm")
