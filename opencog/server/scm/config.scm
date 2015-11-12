@@ -20,5 +20,12 @@
 ; --------------------------------------------------------------
 ; Default OpenCog modules loaded
 ; --------------------------------------------------------------
+; TODO: some of the modules loaded by SCM_PRELOAD in opencog.conf can be
+; removed and imported using (use-modules), so
+; 1. Figure out which one this are and remove them and replace them with an
+;    import in this file
+; 2. Make sure this works when cogserver is installed
+; 3. Document the steps needed when installing atomspace/cogutils/opencog
+;    in non-standard locations.
 ; For cog-execute!
 (use-modules (opencog exec))
