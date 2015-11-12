@@ -62,13 +62,21 @@ set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_clearbox_LIBRARY}
 	${ATOMSPACE_lambda_LIBRARY}
 	${ATOMSPACE_persist_LIBRARY}
-	${ATOMSPACE_persist-sql_LIBRARY}
 	${ATOMSPACE_query_LIBRARY}
 	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
 )
 
+# persist-sql is optional
+IF (ATOMSPACE_persist-sql_LIBRARY)
+	set(ATOMSPACE_LIBRARIES
+		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_persist-sql_LIBRARY}
+	)
+ENDIF (ATOMSPACE_persist-sql_LIBRARY)
+
+# persist-zmq is optional
 IF (ATOMSPACE_zmqatoms_LIBRARY)
 	set(ATOMSPACE_LIBRARIES
 		${ATOMSPACE_LIBRARIES}
