@@ -1,9 +1,3 @@
-(define (check-conjunction var3)
-    (if (or (string=? (cog-name var3) "conj_and") (string=? (cog-name var3) "conj_or") (string=? (cog-name var3) "conj_but"))
-        (begin (stv 1 1))
-        (begin (stv 0 1))
-    )
-)
 
 (define conj
     (BindLink
