@@ -25,7 +25,7 @@ Summary of behaviors
 --------------------
 Here's a summary of the currently scripted behaviors.  Note that these
 were diligently hand-crafted; it is meant to be only a rough draft for
-what will evetually be maintained by the GUI tool, ad automatically
+what will evetually be controlled by OpenPsi, including automatically
 learned behaviors.  Thus, the scripts here really are just "temporary
 scaffolding", to simplify initial phases of integration with OpenCog.
 
@@ -45,7 +45,7 @@ scaffolding", to simplify initial phases of integration with OpenCog.
 
  * While interacting with someone:
    -- Randomly display one of: happy, comprehending, engaged
-   -- Ocasionally glance at other faces in the room.
+   -- Occasionally glance at other faces in the room.
    -- If the interaction has been long-running, then switch and pay
       attention to someone new
 
@@ -58,7 +58,7 @@ scaffolding", to simplify initial phases of integration with OpenCog.
 Status
 ------
 This is version 0.8.0 of the scripts. The basic behavior tree is
-implemented. Some brad-new stuff as not bee integrated.  Some parts
+implemented. Some brand-new stuff as not bee integrated.  Some parts
 are still klunky. Future plans are not started.
 
 The `notes` directory contains a copy of the original owyl code,
@@ -102,16 +102,18 @@ This means that the authoring tool needs to be able to work with not
 just some convenient scripting language, but it should work very
 explicitly with a certain OpenCog-based scripting language.
 
+
 Owyl implementation
 -------------------
 The previous implementation used Owyl trees to represent behaviors.
 This choice turned out to be terrible: there was no way to do any
-ru-time editing of the behaviors; they are hard-coded in python code.
+run-time editing of the behaviors; they are hard-coded in python code.
 In particular, it's impossible to create a GUI or API for editing these,
 as that would require editing python code, ad the recompiling it!
 
 The old code can be found here:
-https://github.com/hansonrobotics/eva_behavior
+`https://github.com/hansonrobotics/eva_behavior`
+
 
 Resources:
 ----------
