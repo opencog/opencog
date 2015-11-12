@@ -67,12 +67,17 @@
         )
 
         (append-map (lambda (r)
-            ; Send each of the SetLinks returned by Microplanning to SuReal for sentence generation
-            (append-map
+            ; Send each of the SetLinks found by the fuzzy matcher to Microplanner to see if they are good
+            (let ((m-results (microplanning (SequentialAndLink (cog-outgoing-set r)) (get-speech-act r) *default_chunks_option* #f)))
                 ; Don't send it to SuReal in case it's not good (i.e. Microplanner returns #f)
-                (lambda (m) (if m (sureal m)))
-                ; Send each of the SetLinks found by the fuzzy matcher to Microplanner to see if they are good
-                (car (microplanning (SequentialAndLink (cog-outgoing-set r)) (get-speech-act r) *default_chunks_option* #f))
+                (if m-results
+                    (append-map
+                        ; Send each of the SetLinks returned by Microplanning to SuReal for sentence generation
+                        (lambda (m) (sureal (car m)))
+                        m-results
+                    )
+                    '()
+                )
             ))
             setlinks
         )
