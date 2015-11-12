@@ -455,11 +455,9 @@ IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	SET(HAVE_VITERBI 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
-# At this time, there is no reason to build with memcached for
-# any "normal" use, so just stub it out.
-# IF (LIBMEMCACHED_FOUND)
-#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-# ENDIF (LIBMEMCACHED_FOUND)
+IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
+	SET(HAVE_REST 1)
+ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
 
 # ===================================================================
 # global includes
@@ -673,10 +671,9 @@ SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
+SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("TBB" "Intel TBB for multithreading" HAVE_TBB)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
 SUMMARY_SHOW()

@@ -4,10 +4,11 @@ IF (HAVE_SERVER)
 	IF (HAVE_CYTHON)
 		ADD_SUBDIRECTORY(python)
 	ENDIF (HAVE_CYTHON)
-	IF (HAVE_ZMQ AND TBB_FOUND)
-		ADD_SUBDIRECTORY(events)
-	ENDIF (HAVE_ZMQ AND TBB_FOUND)
 ENDIF (HAVE_SERVER)
+
+IF (HAVE_REST)
+	ADD_SUBDIRECTORY(events)
+ENDIF (HAVE_REST)
 
 # ----------------------------------------
 # Link-grammar cogserver module
