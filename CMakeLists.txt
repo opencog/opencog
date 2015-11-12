@@ -263,15 +263,13 @@ ELSE (LINK_GRAMMAR_FOUND)
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
-# MOSES needed for embodiment learning...
+# MOSES needed for ???
 FIND_PACKAGE(MOSES)
 
 IF (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES was found.")
 	ADD_DEFINITIONS(-DHAVE_MOSES)
 	SET(HAVE_MOSES 1)
-	SET(HAVE_COMBOREDUCT 1)
-	SET(HAVE_FEATURE_SELECTION 1)
 ELSE (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
 ENDIF (MOSES_FOUND)
@@ -668,7 +666,6 @@ SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
