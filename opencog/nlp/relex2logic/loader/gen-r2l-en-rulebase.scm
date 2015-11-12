@@ -181,4 +181,7 @@
 (define nn-name (Node "nn"))
 (DefineLink nn-name nn)
 (MemberLink (stv 1 1) nn-name (ConceptNode "R2L-en-RuleBase"))
+(define conj-name (Node "conj"))
+(DefineLink conj-name conj)
+(MemberLink (stv 1 1) conj-name (ConceptNode "R2L-en-RuleBase"))
 
