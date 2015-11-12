@@ -14,8 +14,10 @@
 ; Default guile modules loaded
 ; --------------------------------------------------------------
 ; To make working with arrow keys easier
-(use-modules (ice-9 readline))
-(activate-readline)
+; TODO: Figure out why this doesn't work.
+; For now continue using `rlwrap telnet ...`
+;(use-modules (ice-9 readline))
+;(activate-readline)
 
 ; --------------------------------------------------------------
 ; Default OpenCog modules loaded
@@ -27,5 +29,12 @@
 ; 2. Make sure this works when cogserver is installed
 ; 3. Document the steps needed when installing atomspace/cogutils/opencog
 ;    in non-standard locations.
-; For cog-execute!
+
+; Load core-types and other utility functions.
+; NOTE: Must be loaded first to avoid error likes
+; ERROR: In procedure dynamic-link: file: "libruleengine", message: "file not found"
+; TODO: It seems weird that one-module has to be imported to use another one.
+(use-modules (opencog))
+
+; Load cog-execute! and other execution/evaluation related functions.
 (use-modules (opencog exec))
