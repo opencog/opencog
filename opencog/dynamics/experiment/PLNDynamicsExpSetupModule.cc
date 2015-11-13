@@ -218,19 +218,19 @@ std::vector<std::string> PLNDynamicsExpSetupModule::generate_sentence(
         const std::vector<std::string>& special_words, int sent_size)
 {
     std::vector<std::string> sentences;
-    int send = special_words.size() - 1;
-    int nsend = non_special_words.size() - 1;
+    int sw_end = special_words.size() - 1;
+    int nsw_end = non_special_words.size() - 1;
 
     for (; sent_size > 0; sent_size--) {
         //Two random special words from each half
-        int sw1 = rand() % (send / 2);
-        int sw2 = rand() % (send / 2) + send / 2;
+        int sw1 = rand() % (sw_end / 2);
+        int sw2 = rand() % (sw_end / 2) + sw_end / 2;
 
         //Four Random non-special words chosen from each quarters
-        int rw1 = rand() % (nsend / 4);
-        int rw2 = rand() % (nsend / 4) + nsend / 4;
-        int rw3 = rand() % (nsend / 4) + nsend / 2;
-        int rw4 = rand() % (nsend / 4) + nsend * 3 / 4;
+        int rw1 = rand() % (nsw_end / 4);
+        int rw2 = rand() % (nsw_end / 4) + nsw_end / 4;
+        int rw3 = rand() % (nsw_end / 4) + nsw_end / 2;
+        int rw4 = rand() % (nsw_end / 4) + nsw_end * 3 / 4;
 
         //Don't care about order
         std::string sentence = special_words[sw1] + non_special_words[rw1]
