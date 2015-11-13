@@ -17,7 +17,9 @@
          (query (GetLink TyV V))
                                         ; Fetch all possible substitution terms
          (result (cog-execute! query)))
-                                        ; Select one randomly
+    ;; Select one randomly, but first purge the query to not pollute
+    ;; the atomspace
+    (purge-hypergraph query)
     (select-rnd-outgoing result)))
 
 ;; Given an atom
@@ -78,5 +80,7 @@
          (query (GetLink TyVs P))
                                         ; Fetch all possible substitution terms
          (result (cog-execute! query)))
-                                        ; Select one randomly
+    ;; Select one randomly, but first purge the query to not pollute
+    ;; the atomspace
+    (purge-hypergraph query)
     (select-rnd-outgoing result)))
