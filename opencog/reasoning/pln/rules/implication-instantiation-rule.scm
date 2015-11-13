@@ -53,10 +53,7 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-full-instantiation-formula")
      (ListLink
-        ;; (ImplicationLink
-           (VariableNode "$TyVs")
-           (VariableNode "$P")
-           (VariableNode "$Q"))));;)
+        implication-instantiation-body)))
 
 ;; Only try to match an ImplicationLink with a type restricted
 ;; variable in the ImplicationLink variable definition. The choice of
@@ -77,23 +74,24 @@
 ;;
 ;; 2. performs the substitution.
 ;;
-;; 3. calculates its TV (TODO: just <1 1> for now, but might be just
-;;    the TV on the ImplicationLink)
+;; 3. calculates its TV (just the TV on the ImplicationLink)
 ;;
 ;; If no substitution is possible it returns the undefined handle
-(define (implication-full-instantiation-formula SV P Q);;Impl)
+(define (implication-full-instantiation-formula Impl)
   (let* (
-         ;; (SV (gar Impl))
-         ;; (P (gadr Impl))
-         ;; (Q (gaddr Impl))
-         (terms (select-conditioned-substitution-terms SV P)))
+         (Impl-outgoings (cog-outgoing-set Impl))
+         (TyVs (car Impl-outgoings))
+         (P (cadr Impl-outgoings))
+         (Q (caddr Impl-outgoings))
+         (terms (select-conditioned-substitution-terms TyVs P)))
     (if (equal? terms (cog-undefined-handle))
         terms
         ;; Substitute the variables by the terms in the body
-        (cog-set-tv!
-         (cog-execute! (PutLink (LambdaLink SV Q) terms))
-         (stv 1 1)))))
-         ;; (cog-tv Impl)))))
+        (let* ((put (PutLink (LambdaLink TyVs Q) terms))
+               (inst (cog-execute! put)))
+          ;; Remove the PutLink to not pollute the atomspace
+          (purge-hypergraph put)
+          (cog-set-tv! inst (cog-tv Impl))))))
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name
@@ -117,9 +115,7 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-partial-instantiation-formula")
      (ListLink
-        (VariableNode "$TyVs")
-        (VariableNode "$P")
-        (VariableNode "$Q"))))
+        implication-instantiation-body)))
 
 ;; Like implication-full-instantiation-rule but only instantiate one
 ;; variable amonst a variable list (if there is just one variable in
@@ -137,14 +133,19 @@
 ;;
 ;; 2. performs the substitution,
 ;;
-;; 3. calculates its TV (TODO: just <1 1> for now).
+;; 3. calculates its TV (just the TV on the implication link for now,
+;; in principle there might better ways)
 ;;
 ;; TODO: To make this function better a form of partial pattern
 ;; matching should be supported. Probably enabling self grounding in
 ;; the pattern matcher would do the trick (see
 ;; PatternMatchEngine::self_compare)
-(define (implication-partial-instantiation-formula TyVs P Q)
+(define (implication-partial-instantiation-formula Impl)
   (let* (
+         (Impl-outgoings (cog-outgoing-set Impl))
+         (TyVs (car Impl-outgoings))
+         (P (cadr Impl-outgoings))
+         (Q (caddr Impl-outgoings))
          (TyVs-outgoings (cog-outgoing-set TyVs))
          (TyVs-outgoings-len (length TyVs-outgoings))
                                         ; Select all potential
@@ -169,14 +170,19 @@
                 (term (list-ref (cog-outgoing-set terms) rnd-index))
                                         ; Substitute the variable by
                                         ; the term in the P and Q bodies
-                (P-inst (cog-execute! (PutLink (LambdaLink TyV P) term)))
-                (Q-inst (cog-execute! (PutLink (LambdaLink TyV Q) term)))
+                (P-put (PutLink (LambdaLink TyV P) term))
+                (Q-put (PutLink (LambdaLink TyV Q) term))
+                (P-inst (cog-execute! P-put))
+                (Q-inst (cog-execute! Q-put))
                                         ; If there is only one
                                         ; variable left, discard the
                                         ; VariableLink
                 (TyVs-remain (if (= TyVs-remain-len 1)
                                  (gar TyVs-remain)
                                  TyVs-remain)))
+           ;; Remove the put links to not populate the atomspace
+           (purge-hypergraph P-put)
+           (purge-hypergraph Q-put)
            (if (> TyVs-remain-len 0)
                                         ; If there are some variables
                                         ; left, rebuild the
@@ -186,8 +192,7 @@
                                         ; Otherwise just return the
                                         ; Q instance
                Q-inst))
-         ;; TODO: implement a probabilistic formula rather than <1 1>
-         (stv 1 1)))))
+         (cog-tv Impl)))))
 
 ;; Name the rule
 (define implication-partial-instantiation-rule-name
