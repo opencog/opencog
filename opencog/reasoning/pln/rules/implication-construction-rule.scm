@@ -8,7 +8,9 @@
 ;;    P
 ;;    Q
 ;;
-;;----------------------------------------------------------------------
+;; To properly deal with this we should support deep type and infer
+;; that P and Q are over the same domain.
+;; ----------------------------------------------------------------------
 
 (define implication-construction-variables
   (VariableList
@@ -53,14 +55,16 @@
          (Q-tv-c (cog-stv-confidence Q))
          ; Compute the implication TV
          (Impl-tv-s Q-tv-s)
-         (Impl-tv-c (if (< (* Q-tv-s Q-tv-c) 0.9) ; Hack to overcome
+         (Impl-tv-c (if (< 0.9 (* Q-tv-s Q-tv-c)) ; Hack to overcome
                                                   ; the lack of
                                                   ; distributional TV
                         Q-tv-c
                         P-tv-c)))
-    (cog-logger-info "There?")
-    (cog-set-tv!
-     (ImplicationLink
-        P
-        Q)
-     (cog-new-stv Impl-tv-s Impl-tv-c))))
+    (if (= Impl-tv-c 0) ; Try to avoid constructing informationless
+                        ; knowledge
+        (cog-undefined-handle)
+        (cog-set-tv!
+         (ImplicationLink
+            P
+            Q)
+         (cog-new-stv Impl-tv-s Impl-tv-c)))))
