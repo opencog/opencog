@@ -9,6 +9,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
+#include <opencog/nlp/types/atom_types.h>
 
 #include "SentenceGenStimulateAgent.h"
 
@@ -46,7 +47,7 @@ void SentenceGenStimulateAgent::insertStimulate(void)
         _as.get_handles_by_name(std::back_inserter(hs), sentence_atom);
         Handle hparseLink = _as.get_incoming(hs.back()).back();
         UnorderedHandleSet hseq = get_outgoing_nodes(hparseLink, std::vector<Type> {
-                /*WORD_NODE, WORD_INSTANCE_NODE*/ });
+                WORD_NODE,WORD_INSTANCE_NODE});
         HandleSeq hsc;
         hsc.insert(hsc.end(),hseq.begin(),hseq.end());
         stimulateAtom(hs, 20);
