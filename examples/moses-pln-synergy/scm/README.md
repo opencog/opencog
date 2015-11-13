@@ -76,16 +76,204 @@ And search for the following
    )
 ...
 
-scheme@(guile-user)> (cog-bind pln-rule-eliminate-neutral-element-hack)
-scheme@(guile-user)> (cog-bind pln-rule-eliminate-dangling-junctor-hack)
-scheme@(guile-user)> (cog-bind pln-rule-equivalence-hack)
-$6 = (SetLink
+scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
+...
    (ImplicationLink (stv 1 0.99999982)
-      (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
-      (PredicateNode "take-compound-A" (stv 0.2 0.80000001))
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
+...
+   (AndLink
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink (stv 1 0.99999982)
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
+$5 = (SetLink
+   (LambdaLink (stv 1 0.99999982)
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode")
+      )
+      (EvaluationLink (stv 1 0.99999982)
+         (PredicateNode "contain")
+         (ListLink
+            (ConceptNode "treatment-1")
+            (ConceptNode "compound-A")
+         )
+      )
    )
 )
 
+scheme@(guile-user)> (cog-bind implication-construction-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink (stv 1 0.99999982)
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink (stv 1 0.99999982)
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+
+scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (AndLink
+         (LambdaLink
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+         )
+         (LambdaLink (stv 1 0.99999982)
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+   )
+...
+scheme@(guile-user)> ;; If X takes treatment-1 then X takes compound-A
+scheme@(guile-user)> (cog-bind deduction-implication-rule)
+...
+   (ImplicationLink (stv 0 0.80000001)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
 scheme@(guile-user)> ;; Infer that being well hydrated speeds up recovery 
 scheme@(guile-user)> (cog-bind pln-rule-average-hack)
 scheme@(guile-user)> (cog-bind pln-rule-modus-ponens)

@@ -47,6 +47,11 @@
   (list (string-append pln-rules-dir "deduction-rule.scm")
         (string-append pln-rules-dir "modus-ponens-rule.scm")
         (string-append pln-rules-dir "implication-instantiation-rule.scm")
+        (string-append pln-rules-dir "implication-lambda-distribution-rule.scm")
+        (string-append pln-rules-dir "and-lambda-distribution-rule.scm")
+        (string-append pln-rules-dir "lambda-grounded-construction-rule.scm")
+        (string-append pln-rules-dir "implication-construction-rule.scm")
+        (string-append pln-rules-dir "implication-implicant-distribution-rule.scm")
         "pln-rules/implication-or.scm"
         "pln-rules/hack.scm"
         )
