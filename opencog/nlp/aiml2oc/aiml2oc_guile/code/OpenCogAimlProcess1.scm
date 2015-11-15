@@ -1,5 +1,6 @@
 (use-modules (sxml simple))
 (use-modules (ice-9 pretty-print))
+(use-modules (opencog atom-types))
 ;;==============================================================
 ;;http://stackoverflow.com/questions/5546552/scheme-recursive-function-to-compute-all-possible-combinations-of-some-lists
 ;;==============================================================
@@ -133,12 +134,16 @@
 	     (if (equal? (car a) 'think)    (set! ans (list (list 'ConceptNode "AIMLTHINK"  ) (cdr a))) )
 	     (if (equal? (car a) 'srai)     (set! ans (list (list 'ConceptNode "AIMLSRAI"  ) (map aimltag4oc (cdr a) expansion))) )
 	     (if (equal? (car a) 'star)     (set! ans (list (list 'ConceptNode "AIMLSTAR"  ) (mstar1a "$star" 1 expansion))) )
+	     (if (equal? (car a) 'random)   (set! ans (randomExpansion (cdr a) ) )) 
+		 
              )
      )
      ans
    )
   )
 )
+
+
 
 (define bindPatternStar 
  (lambda (pattern glob index count)
@@ -233,6 +238,11 @@
 	)
 ))
 
+(define upperlist
+ (lambda (inlist)
+   (map (lambda (x) (if (string? x) (string-upcase x) x)) inlist)
+  )
+ )
 
 (define flatList
   (lambda (e)
@@ -250,7 +260,7 @@
 	    (append (list (car pattern)) (conceptualizePattern (cdr pattern)))
 		(if (and (string? (car pattern))(string-null? (car pattern))) 
 		    (conceptualizePattern (cdr pattern))
-			(append (list (list 'ConceptNode (car pattern))) (conceptualizePattern (cdr pattern)))
+			(append (list (list 'ConceptNode  (car pattern))) (conceptualizePattern (cdr pattern)))
 		 )
 	  )
 	)
@@ -276,7 +286,71 @@
 ;(extractIndex (list 'star))
 ;(extractIndex (list 'star (list '@ (list 'index 2))) )
 
+(define (randomChoice0 . choice-list)
+	(nth (random (length choice-list)) choice-list)
+) 
+ 
+(define (randomChoice . choice-list)
+    (display "randomChoice")(display choice-list)(newline)
+	(car choice-list)
+)
 
+(define (fixStars clist)
+  ; should be (ConceptNode "text") (ConceptNode (star)) or (ConceptNode (star (index 2)))
+  (if (string? (car(cdr clist)))
+		(list (car clist)(string-upcase (car (cdr clist))))
+		(if (list?  (car(cdr clist)))
+			(list 'GlobNode "$star2_1")
+			(list 'GlobNode "$star1_1")
+		)
+   )
+)
+
+(define liExpand 
+ (lambda (expression)
+   (append (list 'ListLink ) (map fixStars (conceptualizePattern (atomize (cdr expression)))))
+ )
+)
+
+(define genWeightList
+ (lambda (n w)
+  (if (eq? n 0) 
+	(list) 
+	(append (list (list 'NumberNode (number->string w))) (genWeightList (- n 1) w))
+  )
+ )
+)
+
+(define generateRandomWeights
+ (lambda (options)
+  (let ( (weight (/ 1 (length options))))
+	    (append (list 'ListLink) (genWeightList (length options) weight))
+	   )
+   )
+  )
+ 
+  
+(define randomExpansion
+  (lambda (expression)
+   (let ( (core (map liExpand expression)) )
+     (list  (list 'RandomChoiceLink  (generateRandomWeights core)  (append (list 'ListLink) core)))
+	)
+  )
+)
+(define randomExpansion1
+  (lambda (expression)
+   (let ( (core (map liExpand expression)) )
+     (list (list 'ExecutionOutputLink (list 'GroundedSchemaNode "scm:randomChoice" (append (list 'ListLink) core))))
+	)
+  )
+)
+(define randomExpansion0
+  (lambda (expression)
+   (let ( (core (map liExpand expression)) )
+     (list  (car core))
+	)
+  )
+)
 (define bindTemplateStar 
  (lambda (template glob index)
  ;;(display "bindTemplateStar:")(display template) (display "  -glob:")(display glob)(display "  -index:")(display index)(newline)
@@ -288,7 +362,7 @@
 					   (begin
 					    ;;(if (string? (car template)) (set! ans (list (list 'PhraseNode (car template)))) ) 
 						;; if a string or symbol give the appropriate Concept node form
-					    (if (string? (car template)) (set! ans (conceptualizePattern (atomize (list(car template))))) ) 
+					    (if (string? (car template)) (set! ans (conceptualizePattern (upperlist (atomize (list(car template)))))) ) 
 					    (if (symbol? (car template)) (set! ans (list (list 'ConceptNode (car template)))) ) 
 					   )
 					 )
@@ -324,6 +398,13 @@
                         (set! skip 't)						  
 					  )
 				    )
+					
+					(if (equal? (car template) 'random)    
+					  (begin
+					    (set! ans (randomExpansion (cdr template))) 
+						(set! skip 't)
+					  )
+					 )
 					;; If it is a list then embed the appropriate star inside the rest
 				   (if (list? (car template))
 				      (set! ans (bindTemplateStar (car template) glob index)) )
@@ -389,6 +470,12 @@
 					  )
 				    )
 					
+					(if (equal? (car template) 'random)    
+					  (begin
+					    (set! ans (randomExpansion (cdr template))) 
+						(set! skip 't)
+					  )
+					 )
 					
 					;; If it is a list then embed the appropriate star inside the rest
 				   (if (list? (car template))
@@ -513,6 +600,16 @@
    (aiml4oc (cadr (call-with-input-file filename (lambda (port) (xml->sxml port #:trim-whitespace? #t)) )) )
   )
 )
+(define showAimlFile 
+    (lambda (input-file output-file)
+       (call-with-output-file output-file
+		(lambda (output-port)
+		   (map (lambda (x)	(printLinks  x output-port)) (call-with-input-file input-file (lambda (port) (xml->sxml port #:trim-whitespace? #t))) )
+		 )
+		)
+	)
+)
+			 
 
 ;;(processAimlFile "/home/adminuser/testaiml2.aiml")
 

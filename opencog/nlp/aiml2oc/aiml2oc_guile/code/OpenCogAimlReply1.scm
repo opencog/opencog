@@ -1,9 +1,17 @@
 (use-modules (ice-9 pretty-print))
+(use-modules (opencog atom-types))
+
 (define (mapConceptualizeString input)
    (ListLink 
     (map (lambda (x) (ConceptNode x )) (string-split input #\ )))
    )
 
+
+(define (randomChoice choice-list)
+	(nth (random (length choice-list)) choice-list)
+)   
+   
+   
 ; (mapConceptualizeString "I love you")
 
 (define (genQueryPattern input)
@@ -52,9 +60,25 @@
      (cog-recognize (genSRAIPattern input)))
 	 
 (define (generateReply input)
-  (map cog-bind (cog-outgoing-set (findQueryPatterns input))))
-
+  (display "generateReply:")(pretty-print input)(newline)
+  (let ((queryPatterns  (findQueryPatterns  input)) (outset '()) )
+   (begin
+     (display "generateReply-queryPatterns:")(pretty-print queryPatterns)(newline)
+	 (set! outset (cog-outgoing-set queryPatterns))
+	 (display "generateReply-outset:")(pretty-print outset)(newline)
+     (map cog-bind outset)
+   )
+  )
+ )
+ 
+(define (generateReply0 input)
+   (map cog-bind (cog-outgoing-set (findQueryPatterns input)))
+ )
+ (define (generateReply1 input)
+   (map cog-bind (cog-outgoing-set (cog-recognize (genQueryPattern input))))
+ )
 (define (generateSRAIReply input)
+(display "generateSRAIReply:")(pretty-print input)(newline)
   (map cog-bind (cog-outgoing-set (findQuerySRAIPatterns input))))
   
   
@@ -97,10 +121,10 @@
 ; (cog-atomspace-uuid (cog-as (car (cog-incoming-set (ConceptNode "too")))))
 
 (define (answerInput input)
- (push-atomspace)
+ (cog-push-atomspace)
  (pretty-print (generateReply input))
- (cog-delete-recursive (mapConceptualizeString input))
- (pop-atomspace)
+ ;;(cog-delete-recursive (mapConceptualizeString input))
+ (cog-pop-atomspace)
 )
 
 (define (sraiAnswer input)
@@ -127,21 +151,21 @@
 (define (answerInput2 input)
  (let ( (ans (list)) (ansList (list)) )
   (begin
-	(push-atomspace)
+	(cog-push-atomspace)
 
 	(set! ans (generateReply input))
 
 	(set! ansList (cog-get-all-nodes (car ans)))
 	(if (equal? (cog-name (car ansList)) "AIMLSRAI")
 	    (begin
-		    ;;(display "ans1:")(pretty-print ans)(newline)
+		    (display "ans1:")(pretty-print ans)(newline)
 			(set! ans (sraiAnswer (cdr ansList)))
-			;;(display "ans2:")(pretty-print ans)(newline)
+			(display "ans2:")(pretty-print ans)(newline)
 		)
 	)
-	 (pop-atomspace)
-	;;(display "ans:")(pretty-print ans)(newline)
-	;;(display "ansList:")(pretty-print ansList)(newline)
+	 (cog-pop-atomspace)
+	(display "ans:")(pretty-print ans)(newline)
+	(display "ansList:")(pretty-print ansList)(newline)
 	ans
    )
  )
