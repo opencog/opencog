@@ -104,24 +104,6 @@
 		(throw 'badpop "More pops than pushes!")))
 
 
-; (push-atomspace)
-; (generateReply "I love you")
-; (pop-atomspace)
-; (push-atomspace)
-; (generateReply "I want you")
-; (pop-atomspace)
-; (push-atomspace)
-; (generateReply "I need you")
-; (pop-atomspace)
-
-
-; (cog-prt-atomspace)
-; (cog-incoming-set (ConceptNode "love"))
-; (cog-incoming-set (ConceptNode "too"))
-
-; cog-atomspace-uuid
-; cog-atomspace-clear
-; cog-as
 
 ; (cog-atomspace-uuid (cog-as (car (cog-incoming-set (ConceptNode "love")))))
 ; shows 16 .. why is it not deleted ? Oh, its nnot garbage colected!
@@ -184,7 +166,7 @@
 (BindLink
   (ListLink (ConceptNode "SORRY"))
   (ListLink
-    (ExecutionOutputLink
+    
       (RandomChoiceLink
         (ListLink
           (NumberNode 1/4)
@@ -217,7 +199,7 @@
             (ConceptNode "BOTHER")
             (ConceptNode "ME.")
             (ConceptNode "PLEASE")
-            (ConceptNode "CONTINUE..")))))))
+            (ConceptNode "CONTINUE.."))))))
 			
 (BindLink
   (ListLink
@@ -235,7 +217,6 @@
     (ConceptNode "REMEMBER")
     (GlobNode "$star1_1"))
   (ListLink
-    (ExecutionOutputLink
       (RandomChoiceLink
         (ListLink
           (NumberNode 1/5)
@@ -285,7 +266,7 @@
             (ConceptNode "WHAT")
             (ConceptNode "IS")
             (ConceptNode "THE")
-            (ConceptNode "CONNECTION")))))))
+            (ConceptNode "CONNECTION"))))))
 			
 ;;TEST CASE ONE
 ;; I get the following error sequence :
