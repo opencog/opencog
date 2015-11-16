@@ -1460,6 +1460,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              generateNextCombinationGroup(indexes, maxgram);
          }
 
+         delete [] indexes;
 
     }
 

@@ -1630,6 +1630,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
                                             agentNode,targetNode,
                                             actionHandles, tsValue);
 
+    // debug
+    for (unsigned int i = 0; i < actionConcernedHandles.size(); ++ i)
+        std::cout << "/n" << atomSpace.atomAsString (actionConcernedHandles[i]) << std::endl;
+
     XMLString::release(&targetName);
 
 }
@@ -3057,7 +3061,7 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
                  predicateName.c_str(), (int)propertyValue,
                  atomSpace.getName(objectNode).c_str());
 
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
+    // AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
 
     // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
     // so we need to add both
@@ -3710,7 +3714,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     //addPropertyPredicate(std::string("is_moving"), objectNode, moving);
 
     // Add semantic structure of this map-info to be used in language comprehension
-    addSemanticStructure(objectNode, mapinfo);
+    // addSemanticStructure(objectNode, mapinfo);
 
     return objectNode;
 }
@@ -3874,26 +3878,27 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     // list and then query each property in a loop.
     const PropertyMap& properties = getPropertyMap(mapinfo);
     bool isEdible = getBooleanProperty(properties, EDIBLE_ATTRIBUTE);
-    bool isDrinkable = getBooleanProperty(properties, DRINKABLE_ATTRIBUTE);
-    bool isHome = getBooleanProperty(properties, PET_HOME_ATTRIBUTE);
-    bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
-    bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
-    bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+ //   bool isDrinkable = getBooleanProperty(properties, DRINKABLE_ATTRIBUTE);
+ //   bool isHome = getBooleanProperty(properties, PET_HOME_ATTRIBUTE);
+ //   bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
+ //   bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
+ //   bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
     const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
+    const std::string& color = getStringProperty(properties, "color");
 
-    const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
+   // const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
     if (isEdible)
     {
         printf("Something edible was reported!!\n\n\n");
     }
 
-    bool isVisible = isObjectVisible(properties);
+//    bool isVisible = isObjectVisible(properties);
 
-    const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
-    const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
-    const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
+   // const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
+   // const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
+//    const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
 
     // the specific class this entity is, e.g. battery
     std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
@@ -3905,49 +3910,65 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     // Add the property predicates in atomspace
     addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
     addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
-    addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
-    addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
+//  addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
+//  addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
     addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
 
+
     // Add the inheritance link to mark the family of this entity.
-    addInheritanceLink(std::string("pet_home"), objectNode, isHome);
-    addInheritanceLink(std::string("food_bowl"), objectNode, isFoodbowl);
-    addInheritanceLink(std::string("water_bowl"), objectNode, isWaterbowl);
+//    addInheritanceLink(std::string("pet_home"), objectNode, isHome);
+//    addInheritanceLink(std::string("food_bowl"), objectNode, isFoodbowl);
+//    addInheritanceLink(std::string("water_bowl"), objectNode, isWaterbowl);
 
     // Set the owner id of avatar
-    if (ownerId != NULL_ATTRIBUTE) {
-        string internalOwnerId = PAIUtils::getInternalId(ownerId.c_str());
-        if (isSelfObject) {
-            avatarInterface.setOwnerId(internalOwnerId);
-        }
+//    if (ownerId != NULL_ATTRIBUTE) {
+//        string internalOwnerId = PAIUtils::getInternalId(ownerId.c_str());
+//        if (isSelfObject) {
+//            avatarInterface.setOwnerId(internalOwnerId);
+//        }
 
-        Handle ownerNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalOwnerId.c_str(), isSelfObject);
-        addOwnershipRelation(ownerNode, objectNode, isSelfObject);
-    }
+//        Handle ownerNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalOwnerId.c_str(), isSelfObject);
+//        addOwnershipRelation(ownerNode, objectNode, isSelfObject);
+//    }
 
-    Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, avatarInterface.getPetId());
-    if (agentNode != objectNode) { // an agent cannot see itself
-        AtomSpaceUtil::setPredicateValue(atomSpace, "inside_pet_fov",
-                                        SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f),
-                                        agentNode, objectNode);
-    } // if
+//    Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, avatarInterface.getPetId());
+//    if (agentNode != objectNode) { // an agent cannot see itself
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "inside_pet_fov",
+//                                        SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f),
+//                                        agentNode, objectNode);
+//    } // if
 
     // Add holder property predicate
     if (holder != NULL_ATTRIBUTE)
     {
         // Add a reference link
         Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+       /* Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
             holderConceptNode,
             atomSpace.addNode(WORD_NODE, holder));
 
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
-
+       */
         AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
     }
 
+    // Add color property predicate
+    if (color != NULL_ATTRIBUTE)
+    {
+        // Add a reference link
+        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, color);
+      /*  Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+            holderConceptNode,
+
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+        */
+        AtomSpaceUtil::setPredicateValue(atomSpace, "color",
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
+    }
+/*
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){
        // printf("Material found: %s\n",material.c_str());
@@ -4000,7 +4021,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
                                           SimpleTruthValue::createTV(1.0f, 1.0f), objectNode, textureConceptNode);
     } // if
-
+*/
     /* TODO
     // Add color properties predicate
     std::map<std::string, float>::const_iterator it;

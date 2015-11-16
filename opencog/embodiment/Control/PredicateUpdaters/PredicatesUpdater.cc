@@ -45,12 +45,12 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     logger().debug("%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
     // Perceptual predicates
-    updaters.push_back(new IsSmallPredicateUpdater(atomSpace));
-    updaters.push_back(new IsNoisyPredicateUpdater(atomSpace));
-    updaters.push_back(new IsMovablePredicateUpdater(atomSpace));
+ //   updaters.push_back(new IsSmallPredicateUpdater(atomSpace));
+//    updaters.push_back(new IsNoisyPredicateUpdater(atomSpace));
+//    updaters.push_back(new IsMovablePredicateUpdater(atomSpace));
 //    updaters.push_back(new IsPickupablePredicateUpdater(atomSpace));
-    updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
-    updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
+//    updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
+//    updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
 
     // Spatial relation predicates
     if (config().get_bool( "ENABLE_SPATIAL_RELATIONSHIP_UPDATER"))

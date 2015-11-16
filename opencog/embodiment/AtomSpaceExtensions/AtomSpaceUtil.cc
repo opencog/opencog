@@ -34,6 +34,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/random.h>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
@@ -841,6 +842,9 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
         result = el;
     }
     if (permanent) { atomSpace.setLTI(result, 1); }
+
+    // debug
+    cout << "\n" << atomSpace.atomAsString(result) << std::endl;
     return result;
 }
 
@@ -1595,6 +1599,9 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
                                                    true
                                                   );
     atomSpace.setTV(evalLinkHandle, tv);
+
+    // debug
+    cout << "\n" << atomSpace.atomAsString(evalLinkHandle) << std::endl;
 
     return evalLinkHandle;
 }
