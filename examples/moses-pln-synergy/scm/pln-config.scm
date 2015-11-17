@@ -49,6 +49,7 @@
         (string-append pln-rules-dir "implication-instantiation-rule.scm")
         (string-append pln-rules-dir "implication-lambda-distribution-rule.scm")
         (string-append pln-rules-dir "and-lambda-distribution-rule.scm")
+        (string-append pln-rules-dir "implication-and-lambda-factorization-rule.scm")
         (string-append pln-rules-dir "lambda-grounded-construction-rule.scm")
         (string-append pln-rules-dir "implication-construction-rule.scm")
         (string-append pln-rules-dir "implication-implicant-distribution-rule.scm")
