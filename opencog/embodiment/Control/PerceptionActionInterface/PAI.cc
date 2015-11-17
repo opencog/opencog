@@ -1398,103 +1398,103 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     char* targetName = XMLString::transcode(signal->getAttribute(tag));
     Handle targetNode;
 
-    // if there is a targetName
-    if (strlen(targetName))
-    {
-        // if there is a target, there should be a target-type too
-        XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
-        XMLString::transcode(ACTION_TARGET_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* targetType = XMLString::transcode(signal->getAttribute(tag));
+//    // if there is a targetName
+//    if (strlen(targetName))
+//    {
+//        // if there is a target, there should be a target-type too
+//        XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+//        XMLString::transcode(ACTION_TARGET_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+//        char* targetType = XMLString::transcode(signal->getAttribute(tag));
 
-        if (strlen(targetType))
-        {
+//        if (strlen(targetType))
+//        {
 
-            // Currently only process the Avatar and Object type target:
-            string targetTypeStr(targetType);
-            opencog::Type targetTypeCode;
-
-
-            std::string internalTargetId = PAIUtils::getInternalId(targetName);
-
-            if (targetTypeStr == "avatar")
-            {
-                if (internalTargetId == avatarInterface.getPetId())
-                    targetTypeCode = PET_NODE;
-                else
-                    targetTypeCode = AVATAR_NODE;
-            }
-            else if (targetTypeStr == "object")
-                targetTypeCode = OBJECT_NODE;
-            else
-            {
-                logger().error("PAI - action: %s's targe: %s has a unresolved target type ", nameStr.c_str(), targetName,targetType);
-                return;
-            }
-            // Add the conceptnode: target of action into AtomSpace
-            Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
-            actionConcernedHandles.push_back(actionTargetPredicateNode);
-
-            // Add the target of this action into AtomSpace
-            targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
-            actionConcernedHandles.push_back(targetNode);
-
-            // the predicate node name is ActionName:PamaterName, e.g.: kick:target
-            std::string targetStr = nameStr + ":" + ACTION_TARGET_NAME;
-            Handle targetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, targetStr.c_str() , true);
-            actionConcernedHandles.push_back(targetPredicateNode);
+//            // Currently only process the Avatar and Object type target:
+//            string targetTypeStr(targetType);
+//            opencog::Type targetTypeCode;
 
 
-            // e.g.: "kick:target" is a kind of  "target"
-            HandleSeq targetInheritanceLinkOutgoing;
-            targetInheritanceLinkOutgoing.push_back(targetPredicateNode);
-            targetInheritanceLinkOutgoing.push_back(actionTargetPredicateNode);
-            Handle inherLink3 =  AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, targetInheritanceLinkOutgoing);
-            actionConcernedHandles.push_back(inherLink3);
+//            std::string internalTargetId = PAIUtils::getInternalId(targetName);
 
-            // e.g.: the kick:Target of kick2454 is ball39
-            HandleSeq predicateListLinkOutgoing2;
-            predicateListLinkOutgoing2.push_back(actionInstanceNode);
-            predicateListLinkOutgoing2.push_back(targetNode);
-            Handle predicateListLink2 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing2);
-            actionConcernedHandles.push_back(predicateListLink2);
+//            if (targetTypeStr == "avatar")
+//            {
+//                if (internalTargetId == avatarInterface.getPetId())
+//                    targetTypeCode = PET_NODE;
+//                else
+//                    targetTypeCode = AVATAR_NODE;
+//            }
+//            else if (targetTypeStr == "object")
+//                targetTypeCode = OBJECT_NODE;
+//            else
+//            {
+//                logger().error("PAI - action: %s's targe: %s has a unresolved target type ", nameStr.c_str(), targetName,targetType);
+//                return;
+//            }
+//            // Add the conceptnode: target of action into AtomSpace
+//            Handle actionTargetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_TARGET_NAME, true);
+//            actionConcernedHandles.push_back(actionTargetPredicateNode);
 
-            HandleSeq evalLinkOutgoing2;
-            evalLinkOutgoing2.push_back(targetPredicateNode);
-            evalLinkOutgoing2.push_back(predicateListLink2);
-            Handle evalLink2 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing2);
-            actionConcernedHandles.push_back(evalLink2);
+//            // Add the target of this action into AtomSpace
+//            targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());
+//            actionConcernedHandles.push_back(targetNode);
 
-            actionHandles.push_back(evalLink2);
+//            // the predicate node name is ActionName:PamaterName, e.g.: kick:target
+//            std::string targetStr = nameStr + ":" + ACTION_TARGET_NAME;
+//            Handle targetPredicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, targetStr.c_str() , true);
+//            actionConcernedHandles.push_back(targetPredicateNode);
 
-            if (targetTypeCode == OBJECT_NODE)
-            {
-                std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,targetNode);
-                if (inheritanceResults.size() != 0)
-                    actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
-            }
 
-            // if the action is grab or drop created/update isHoldingSomething
-            // and isHolding predicates
-            if (nameStr == "grab") {
-                AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                                  internalAgentId,
-                                                  internalTargetId,
-                                                  getLatestSimWorldTimestamp());
-            } else if (nameStr == "drop") {
-                AtomSpaceUtil::setupHoldingObject(atomSpace,
-                                                  internalAgentId,
-                                                  string(""),
-                                                  getLatestSimWorldTimestamp());
-            }
-        }
-        else
-        {
-            logger().error("PAI - action: %s has a targe: %s but without a target type ", nameStr.c_str(), targetName);
-            return;
-        }
+//            // e.g.: "kick:target" is a kind of  "target"
+//            HandleSeq targetInheritanceLinkOutgoing;
+//            targetInheritanceLinkOutgoing.push_back(targetPredicateNode);
+//            targetInheritanceLinkOutgoing.push_back(actionTargetPredicateNode);
+//            Handle inherLink3 =  AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, targetInheritanceLinkOutgoing);
+//            actionConcernedHandles.push_back(inherLink3);
 
-        XMLString::release(&targetType);
-    }
+//            // e.g.: the kick:Target of kick2454 is ball39
+//            HandleSeq predicateListLinkOutgoing2;
+//            predicateListLinkOutgoing2.push_back(actionInstanceNode);
+//            predicateListLinkOutgoing2.push_back(targetNode);
+//            Handle predicateListLink2 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing2);
+//            actionConcernedHandles.push_back(predicateListLink2);
+
+//            HandleSeq evalLinkOutgoing2;
+//            evalLinkOutgoing2.push_back(targetPredicateNode);
+//            evalLinkOutgoing2.push_back(predicateListLink2);
+//            Handle evalLink2 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing2);
+//            actionConcernedHandles.push_back(evalLink2);
+
+//            actionHandles.push_back(evalLink2);
+
+//            if (targetTypeCode == OBJECT_NODE)
+//            {
+//                std::vector<Handle> inheritanceResults = AtomSpaceUtil::getInheritanceLinks(atomSpace,targetNode);
+//                if (inheritanceResults.size() != 0)
+//                    actionConcernedHandles.insert(actionConcernedHandles.end(),inheritanceResults.begin(),inheritanceResults.end());
+//            }
+
+//            // if the action is grab or drop created/update isHoldingSomething
+//            // and isHolding predicates
+//            if (nameStr == "grab") {
+//                AtomSpaceUtil::setupHoldingObject(atomSpace,
+//                                                  internalAgentId,
+//                                                  internalTargetId,
+//                                                  getLatestSimWorldTimestamp());
+//            } else if (nameStr == "drop") {
+//                AtomSpaceUtil::setupHoldingObject(atomSpace,
+//                                                  internalAgentId,
+//                                                  string(""),
+//                                                  getLatestSimWorldTimestamp());
+//            }
+//        }
+//        else
+//        {
+//            logger().error("PAI - action: %s has a targe: %s but without a target type ", nameStr.c_str(), targetName);
+//            return;
+//        }
+
+//        XMLString::release(&targetType);
+//    }
     //-------------------------------End-------the target of the action-------End--------------------------------------------------
 
     //-------------------------------Begin-------process the parameters-----Begin------------------------------------------------
@@ -1521,61 +1521,61 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     //-------------------------------End-------process the parameters-----End------------------------------------------------
 
 
-    //-------------------------------Begin-------the result state of the action-----Begin------------------------------------------------
+//    //-------------------------------Begin-------the result state of the action-----Begin------------------------------------------------
 
-      // Add the conceptnode: resultstate of action into AtomSpace
-    Handle resultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
-                                                        PREDICATE_NODE,
-                                                        ACTION_RESULT_STATE,
-                                                        true);
-    actionConcernedHandles.push_back(resultPredicateNode);
+//      // Add the conceptnode: resultstate of action into AtomSpace
+//    Handle resultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+//                                                        PREDICATE_NODE,
+//                                                        ACTION_RESULT_STATE,
+//                                                        true);
+//    actionConcernedHandles.push_back(resultPredicateNode);
 
-    // the predicate node name is ActionName:PamaterName, e.g.: kick:result-state
-    std::string restultStr = nameStr + ":" + ACTION_RESULT_STATE;
-    Handle thisResultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
-                                                            PREDICATE_NODE,
-                                                            restultStr.c_str(),
-                                                            true);
-    actionConcernedHandles.push_back(thisResultPredicateNode);
+//    // the predicate node name is ActionName:PamaterName, e.g.: kick:result-state
+//    std::string restultStr = nameStr + ":" + ACTION_RESULT_STATE;
+//    Handle thisResultPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+//                                                            PREDICATE_NODE,
+//                                                            restultStr.c_str(),
+//                                                            true);
+//    actionConcernedHandles.push_back(thisResultPredicateNode);
 
-    // getting result state attribute value
-    XMLString::transcode(ACTION_RESULT_STATE, tag, PAIUtils::MAX_TAG_LENGTH);
-    bool resultState = XMLString::transcode(signal->getAttribute(tag));
-    // Add the action result state node into AtomSpace
-    Handle resultNode;
-    if (resultState)
-        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
-                                            ACTION_DONE_PREDICATE_NAME);
-    else
-        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
-                                            ACTION_FAILED_PREDICATE_NAME);
+//    // getting result state attribute value
+//    XMLString::transcode(ACTION_RESULT_STATE, tag, PAIUtils::MAX_TAG_LENGTH);
+//    bool resultState = XMLString::transcode(signal->getAttribute(tag));
+//    // Add the action result state node into AtomSpace
+//    Handle resultNode;
+//    if (resultState)
+//        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
+//                                            ACTION_DONE_PREDICATE_NAME);
+//    else
+//        resultNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE,
+//                                            ACTION_FAILED_PREDICATE_NAME);
 
-    actionConcernedHandles.push_back(resultNode);
+//    actionConcernedHandles.push_back(resultNode);
 
-    // e.g.: "kick:result-state" is a kind of  "result-state"
-    HandleSeq resultInheritanceLinkOutgoing;
-    resultInheritanceLinkOutgoing.push_back(thisResultPredicateNode);
-    resultInheritanceLinkOutgoing.push_back(resultPredicateNode);
-    Handle inherLink4 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK,
-                                               resultInheritanceLinkOutgoing);
-    actionConcernedHandles.push_back(inherLink4);
+//    // e.g.: "kick:result-state" is a kind of  "result-state"
+//    HandleSeq resultInheritanceLinkOutgoing;
+//    resultInheritanceLinkOutgoing.push_back(thisResultPredicateNode);
+//    resultInheritanceLinkOutgoing.push_back(resultPredicateNode);
+//    Handle inherLink4 = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK,
+//                                               resultInheritanceLinkOutgoing);
+//    actionConcernedHandles.push_back(inherLink4);
 
-    // e.g.: the kick:result-state of kick2454 is true
-    HandleSeq predicateListLinkOutgoing4;
-    predicateListLinkOutgoing4.push_back(actionInstanceNode);
-    predicateListLinkOutgoing4.push_back(resultNode);
-    Handle predicateListLink4 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
-                                                       predicateListLinkOutgoing4);
-    actionConcernedHandles.push_back(predicateListLink4);
+//    // e.g.: the kick:result-state of kick2454 is true
+//    HandleSeq predicateListLinkOutgoing4;
+//    predicateListLinkOutgoing4.push_back(actionInstanceNode);
+//    predicateListLinkOutgoing4.push_back(resultNode);
+//    Handle predicateListLink4 = AtomSpaceUtil::addLink(atomSpace, LIST_LINK,
+//                                                       predicateListLinkOutgoing4);
+//    actionConcernedHandles.push_back(predicateListLink4);
 
-    HandleSeq evalLinkOutgoing4;
-    evalLinkOutgoing4.push_back(thisResultPredicateNode);
-    evalLinkOutgoing4.push_back(predicateListLink4);
-    Handle evalLink4 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
-                                              evalLinkOutgoing4);
-    actionConcernedHandles.push_back(evalLink4);
-    actionHandles.push_back(evalLink4);
-    //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
+//    HandleSeq evalLinkOutgoing4;
+//    evalLinkOutgoing4.push_back(thisResultPredicateNode);
+//    evalLinkOutgoing4.push_back(predicateListLink4);
+//    Handle evalLink4 = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK,
+//                                              evalLinkOutgoing4);
+//    actionConcernedHandles.push_back(evalLink4);
+//    actionHandles.push_back(evalLink4);
+//    //-------------------------------End-------the result state actor of the action-------End--------------------------------------------------
 
     // Add this action to timelink
     Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
@@ -1610,13 +1610,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     // Jared
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
     // while PLN may find it useful to have them together or separate.
-    Handle andLink = AtomSpaceUtil::addLink(atomSpace, AND_LINK, actionHandles);
+    // Handle andLink = AtomSpaceUtil::addLink(atomSpace, AND_LINK, actionHandles);
     // The event detector will record the AndLink in a scheme file, and its elements separately
-    actionConcernedHandles.push_back(andLink);
+    // actionConcernedHandles.push_back(andLink);
     // Add an AtTimeLink around the AndLink, because Fishgram will ignore the Action ID ConceptNode,
     // and so it won't notice the AtTimeLink created above (which is only connected by having the same ActionID).
-    Handle atTimeLink2 = timeServer().addTimeInfo(andLink, tsValue);
-    actionConcernedHandles.push_back(atTimeLink2);
+    // Handle atTimeLink2 = timeServer().addTimeInfo(andLink, tsValue);
+    // actionConcernedHandles.push_back(atTimeLink2);
 
     // call the event detector
     if (enableCollectActions)
@@ -1626,13 +1626,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     }
 
     // call the event responser
-    EventResponder::getInstance()->response(nameStr,actionInstanceNode,
-                                            agentNode,targetNode,
-                                            actionHandles, tsValue);
+//    EventResponder::getInstance()->response(nameStr,actionInstanceNode,
+//                                            agentNode,targetNode,
+//                                            actionHandles, tsValue);
 
     // debug
     for (unsigned int i = 0; i < actionConcernedHandles.size(); ++ i)
-        std::cout << "/n" << atomSpace.atomAsString (actionConcernedHandles[i]) << std::endl;
+        std::cout << "\n" << atomSpace.atomAsString (actionConcernedHandles[i]) << std::endl;
 
     XMLString::release(&targetName);
 

@@ -426,10 +426,10 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     // Update the truth value of 'has_novelty' predicates in AtomSpace
     // TODO: 'has_novelty' predicate is probably obsolete
 
-    if (bHasNovelty)
-        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(1.0f, 0.0f), petHandle);
-    else
-        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(0.0f, 0.0f), petHandle);
+//    if (bHasNovelty)
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(1.0f, 0.0f), petHandle);
+//    else
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(0.0f, 0.0f), petHandle);
 }
 
 void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace,
