@@ -214,6 +214,8 @@ private:
      * - finishing learning sessions, if started
      */
     void adjustPetToBePersisted();
+public:
+    static HandleSeq perceptionLinksForPatternMiner;
 
 public:
 

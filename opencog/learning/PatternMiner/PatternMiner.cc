@@ -2249,6 +2249,146 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
 }
 
+void PatternMiner::feedNewLinksToPatternMiner (HandleSeq &_newLinks)
+{
+    waitingLinkQueueLock.lock();
+
+    for(Handle h :_newLinks)
+    {
+        waitingForProcessLinksQueue.push(h);
+    }
+
+    waitingLinkQueueLock.unlock();
+}
+
+void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
+{
+    thresholdFrequency = _thresholdFrequency;
+    evaluatePatternsEveryXSeconds = _evaluatePatternsEveryXSeconds;
+
+    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
+    assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
+
+    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
+
+
+    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
+    observingAtomSpace = new AtomSpace();
+
+    processedLinkNum = 0;
+
+    std::thread(&PatternMiner::growPatternsDepthFirstTaskForEmbodiment,this);
+    std::thread(&PatternMiner::runEvaluatePatternTaskForEmbodiment,this);
+}
+
+// this function is run evaluatePatternsEveryXSeconds
+void PatternMiner::runEvaluatePatternTaskForEmbodiment()
+{
+
+    while (true)
+    {
+        sleep(evaluatePatternsEveryXSeconds);
+        miningOrEvaluatingLock.lock();
+
+        atomspaceSizeFloat = (float)processedLinkNum;
+        std::cout<<"Debug: PatternMiner: Start a pattern evaluation task.\n";
+
+        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+        {
+            // sort by frequency
+            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+
+            // Finished mining gram patterns; output to file
+            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+
+            OutPutFrequentPatternsToFile(gram);
+
+            std::cout<< std::endl;
+        }
+
+        for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+        {
+            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+            cur_index = -1;
+            threads = new thread[THREAD_NUM];
+            num_of_patterns_without_superpattern_cur_gram = 0;
+
+            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            {
+                threads[i] = std::thread([this]{this->evaluateInterestingnessTask();}); // using C++11 lambda-expression
+            }
+
+            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            {
+                threads[i].join();
+            }
+
+            delete [] threads;
+
+            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
+            std::cout<<"Outputting to file ... ";
+
+
+            // sort by surprisingness_I first
+            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+            OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+
+            vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
+
+            // and then sort by surprisingness_II
+            std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+            OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
+
+            // Get the min threshold of surprisingness_II
+            int threshold_index_II;
+            threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
+            int looptimes = 0;
+            while (true)
+            {
+
+                surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+                if (surprisingness_II_threshold <= 0.00000f)
+                {
+                    if (++ looptimes > 8)
+                    {
+                        surprisingness_II_threshold = 0.00000f;
+                        break;
+                    }
+
+                    threshold_index_II = ((float)threshold_index_II) * SURPRISINGNESS_II_TOP_THRESHOLD;
+                }
+                else
+                    break;
+            }
+
+
+            cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
+
+            // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
+            int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
+            for (int p = 0; p <= threshold_index_I; p ++)
+            {
+                HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+
+                // for patterns have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
+                if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
+                    finalPatternsForGram[cur_gram-1].push_back(pNode);
+            }
+
+            // sort by frequency
+            std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+            OutPutFinalPatternsToFile(cur_gram);
+
+
+            std::cout<< std::endl;
+        }
+
+        printf("Pattern Mining Finish one evaluation! \n");
+        miningOrEvaluatingLock.unlock();
+    }
+}
+
 void PatternMiner::evaluateInterestingnessTask()
 {
 

@@ -181,6 +181,56 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
     std::cout.flush();
 }
 
+void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
+{
+
+    while (true)
+    {
+        miningOrEvaluatingLock.lock();
+        waitingLinkQueueLock.lock();
+
+        if (waitingForProcessLinksQueue.size() > 0)
+        {
+
+            Handle& cur_link = waitingForProcessLinksQueue.front();
+            waitingForProcessLinksQueue.pop();
+
+            waitingLinkQueueLock.unlock();
+
+            // if this link is listlink, ignore it
+            if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+            {
+                miningOrEvaluatingLock.unlock();
+                continue;
+            }
+
+            processedLinkNum ++;
+
+            // Add this link into observingAtomSpace
+            HandleSeq outgoingLinks,outVariableNodes;
+
+            swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+            Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+            newLink->merge(originalAtomSpace->getTV(cur_link));
+
+
+            // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+            HandleSeq lastGramLinks;
+            map<Handle,Handle> lastGramValueToVarMap;
+            map<Handle,Handle> patternVarMap;
+
+            extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+        }
+        else
+        {
+            waitingLinkQueueLock.unlock();
+        }
+
+        miningOrEvaluatingLock.unlock();
+
+    }
+
+}
 
 //void PatternMiner::growPatternsDepthFirstTask()
 //{

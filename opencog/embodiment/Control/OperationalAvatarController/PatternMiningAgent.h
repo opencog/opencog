@@ -48,7 +48,7 @@ private:
 
     PatternMiner* patternMiner;
 
-    AtomSpace* corpusAtomSpace;
+    // AtomSpace* corpusAtomSpace;
 
     void init();
 

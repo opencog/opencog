@@ -58,7 +58,7 @@ void PatternMiningAgent::init()
 
 
     // create corpus AtomSpace
-    corpusAtomSpace = new AtomSpace();
+//    corpusAtomSpace = new AtomSpace();
 
     // pre-load scm files:
 //    SCM_PRELOAD           = scm/core_types.scm,
@@ -71,33 +71,33 @@ void PatternMiningAgent::init()
 //                            scm/file-utils.scm,
 //                            scm/debug.scm,
 
-    load_scm_file( *(this->corpusAtomSpace), "./scm/core_types.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/spacetime_types.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/nlp_types.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/attention_types.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/embodiment_types.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/persistence.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/utilities.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/file-utils.scm" );
-    load_scm_file( *(this->corpusAtomSpace), "./scm/debug.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/core_types.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/spacetime_types.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/nlp_types.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/attention_types.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/embodiment_types.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/persistence.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/utilities.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/file-utils.scm" );
+//    load_scm_file( *(this->corpusAtomSpace), "./scm/debug.scm" );
 
     // load test corpus
-    if ( load_scm_file( *(this->corpusAtomSpace), "./pm_test_corpus.scm" ) == 0  )
-        logger().info( "PatternMiningAgent::%s - Loaded pattern miner test corpus file: '%s'",
-                        __FUNCTION__,
-                       "pm_test_corpus.scm"
-                     );
-    else
-        logger().error( "PatternMiningAgent::%s - Failed to load pattern miner test corpus file: '%s'",
-                         __FUNCTION__,
-                        "pm_test_corpus.scm"
-                      );
+//    if ( load_scm_file( *(this->corpusAtomSpace), "./pm_test_corpus.scm" ) == 0  )
+//        logger().info( "PatternMiningAgent::%s - Loaded pattern miner test corpus file: '%s'",
+//                        __FUNCTION__,
+//                       "pm_test_corpus.scm"
+//                     );
+//    else
+//        logger().error( "PatternMiningAgent::%s - Failed to load pattern miner test corpus file: '%s'",
+//                         __FUNCTION__,
+//                        "pm_test_corpus.scm"
+//                      );
 
 
-    cout << "PatternMiningAgent: init: loaded test corpus into corpusAtomSpace \n ";
+//    cout << "PatternMiningAgent: init: loaded test corpus into corpusAtomSpace \n ";
 
     // create a pattern miner
-    this->patternMiner = new PatternMiner(corpusAtomSpace,config().get_int("PATTERN_MAX_GRAM"));
+    this->patternMiner = new PatternMiner(&(oac->getAtomSpace(),config().get_int("PATTERN_MAX_GRAM"));
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
