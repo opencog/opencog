@@ -24,12 +24,12 @@ static std::string ECAN_EXP_AGENTS = "opencog::HebbianUpdatingAgent\n"
                                      "opencog::ImportanceUpdatingAgent\n"
                                      "opencog::SimpleImportanceDiffusionAgent\n"
                                      "opencog::ForgettingAgent\n"
-                                     "opencog::ArtificilaStimulatorAgent\n"
-                                     "opencog::SurprisingnessEvaluatorAgent\n";
+                                     "opencog::ArtificilaStimulatorAgent\n";
+                                     //"opencog::SurprisingnessEvaluatorAgent\n";
 
 extern std::vector<std::string> generated_sentences={};
 
-class PLNDynamicsExpSetupModule: public Module {
+class ExperimentSetupModule: public Module {
 private:
     struct ECANValue {
         AttentionValue::sti_t _sti;
@@ -68,21 +68,21 @@ private:
             const std::vector<std::string>& special_words, int sent_size);
 
     //Start stop ECAN agents commands
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "ecan-load", do_ecan_load,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-load", do_ecan_load,
             "Loads all agents of ECAN and experiment\n",
             "Usage: ecan_load\n"
             "Loads the following ECAN agents\n"+ECAN_EXP_AGENTS
             ,
             false, true)
 
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "ecan-start", do_ecan_start,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-start", do_ecan_start,
             "Starts main ECAN agents\n",
             "Usage: ecan_start\n"
             "Starts the following ECAN agents\n"+ECAN_EXP_AGENTS
             ,
             false, true)
 
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "ecan-pause", do_ecan_pause,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-pause", do_ecan_pause,
             "Pause main ECAN agents\n",
             "Usage: ecan_pause\n"
             "Stops the following ECAN agents\n"+ECAN_EXP_AGENTS
@@ -90,7 +90,7 @@ private:
             true, true)
 
     //For manually stimulating some atoms by referring them via their UUID
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "stimulate-atoms", do_stimulate,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "stimulate-atoms", do_stimulate,
             "Stimulate an atom or set of atoms\n",
             "Usage: stimulate_atoms UUID,STIMULUS \n"
             "Stimulates atoms with certain stimulus value\n"
@@ -99,17 +99,17 @@ private:
             false, true)
 
     //Dump all STI,LTI changes recorded till now to a file.
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "dump-tseries", do_dump_data,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "dump-tseries", do_dump_data,
             "Dumps ECAN time series data to file\n",
             "Usage: dump-tseries [FILE_NAME]\n"
             "Dump time serise ECAN data\n",
             false, true)
 
     //Load word dict.
-    DECLARE_CMD_REQUEST(PLNDynamicsExpSetupModule, "load-word-dict",load_word_dict,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "load-word-dict",do_load_word_dict,
             "Loads word dict for experimentation. The word dict file should have two sections\n"
             "SPEICAL_WORDS = [comma separated words]\n"
-            "NON_SPECIAL_WORDS = [comma separated words] >> SPECIAL words size\n",
+            "NON_SPECIAL_WORDS = [comma separated words] size\n",
             "Usage: load-word-dict [FILE_NAME]\n"
             "Dump time serise ECAN data\n",
             false, true)
@@ -118,8 +118,8 @@ private:
     void unregisterAgentRequests();
 
 public:
-    PLNDynamicsExpSetupModule(CogServer&);
-    virtual ~PLNDynamicsExpSetupModule();
+    ExperimentSetupModule(CogServer&);
+    virtual ~ExperimentSetupModule();
     static inline const char* id();
     virtual void init(void);
 };
