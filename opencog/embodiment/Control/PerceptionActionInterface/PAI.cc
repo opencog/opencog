@@ -1396,7 +1396,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     XMLString::transcode(ACTION_TARGET_NAME, tag, PAIUtils::MAX_TAG_LENGTH);
     char* targetName = XMLString::transcode(signal->getAttribute(tag));
-    Handle targetNode;
+//    Handle targetNode;
 
 //    // if there is a targetName
 //    if (strlen(targetName))
@@ -1595,7 +1595,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         Handle newStateEvalLink =
             AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName,
-                                                targetNode, newStateValNode,
+                                                agentNode, newStateValNode,
                                                 tv,Temporal(tsValue));
 
         actionConcernedHandles.push_back(newStateValNode);
@@ -3673,9 +3673,15 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
 {
     // bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
-    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    std::string internalEntityId;
+
     std::string entityType = mapinfo.type();
     std::string entityName = mapinfo.name();
+
+    if (entityType != PET_OBJECT_TYPE)
+        internalEntityId = PAIUtils::getInternalId((entityName + mapinfo.id()).c_str());
+    else
+        internalEntityId = PAIUtils::getInternalId( mapinfo.id().c_str());
 
     bool isSelfObject = (internalEntityId == avatarInterface.getPetId());
     bool isOwnerObject = (internalEntityId == avatarInterface.getOwnerId());
@@ -3683,7 +3689,8 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     Handle objectNode;
 
     // Add entity type in atomspace
-    if (entityType != "") {
+    if (entityType != "")
+    {
         objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType.c_str()), internalEntityId.c_str());
         // add an inheritance link
         Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType.c_str());
@@ -3721,9 +3728,17 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
 
 Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
 {
-    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    std::string internalEntityId;
+
     std::string entityType = mapinfo.type();
+
+    if (entityType != PET_OBJECT_TYPE)
+        internalEntityId = PAIUtils::getInternalId((mapinfo.name() + mapinfo.id()).c_str());
+    else
+        internalEntityId = PAIUtils::getInternalId( mapinfo.id().c_str());
+
     Type nodeType = getSLObjectNodeType(entityType.c_str());
+
     Handle objectNode = atomSpace.getHandle(nodeType, internalEntityId);
 
     //bool keepPreviousMap = avatarInterface.isExemplarInProgress();
@@ -4054,8 +4069,14 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
 void PAI::addSemanticStructure(Handle objectNode, const MapInfo& mapinfo)
 {
-    std::string internalEntityId = PAIUtils::getInternalId(mapinfo.id().c_str());
+    std::string internalEntityId;
     const std::string& entityType = mapinfo.type();
+
+    if (entityType != PET_OBJECT_TYPE)
+        internalEntityId = PAIUtils::getInternalId((mapinfo.name() + mapinfo.id()).c_str());
+    else
+        internalEntityId = PAIUtils::getInternalId( mapinfo.id().c_str());
+
     std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
     addSemanticStructure(objectNode, internalEntityId, entityClass, entityType);
 }
