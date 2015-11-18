@@ -41,23 +41,45 @@ const ClassInfo& SentenceGenStimulateAgent::info()
 void SentenceGenStimulateAgent::insertStimulate(void)
 {
     for (const auto& sentence : generated_sentences) {
-        std::string sentence_atom = _scm_eval->eval(
-                "(nlp-parse " + sentence + ")");
-        HandleSeq hs;
-        _as.get_handles_by_name(std::back_inserter(hs), sentence_atom);
-        Handle hparseLink = _as.get_incoming(hs.back()).back();
-        UnorderedHandleSet hseq = get_outgoing_nodes(hparseLink, std::vector<Type> {
-                WORD_NODE,WORD_INSTANCE_NODE});
-        HandleSeq hsc;
-        hsc.insert(hsc.end(),hseq.begin(),hseq.end());
-        stimulateAtom(hs, 20);
-        _hword_wordInstance_nodes.insert(hseq.begin(), hseq.end());
+        HandleSeq word_and_wordinst;
+
+        //Get the word nodes
+        std::string wordinst_list =
+                "(ListLink (parse-get-words (car (sentence-get-parses (car (nlp-parse " + sentence
+                + "))))))";
+        Handle hwordinst_list = _scm_eval->eval_h(wordinst_list);
+
+        HandleSeq hstemp = _as.get_outgoing(hwordinst_list);
+        std::copy(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
+
+        //Get the word instances nodes
+        std::string wordnode_list =
+                "(ListLink (append-map (lambda (x) (cog-chase-link 'ReferenceLink 'WordNode x)) "
+                "(parse-get-words (car (sentence-get-parses (car (nlp-parse "
+                + sentence + ")))))))";
+        Handle hwordnode_list = _scm_eval->eval_h(wordnode_list);
+
+        hstemp = _as.get_outgoing(hwordnode_list);
+        std::copy(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
+
+        //Stimulate. TODO read stimulus value from config file
+        stimulateAtom(word_and_wordinst, 20);
+
+        _hword_wordInstance_nodes.insert(word_and_wordinst.begin(),
+                                         word_and_wordinst.end());
     }
 }
 
 void SentenceGenStimulateAgent::run()
 {
-    for (const Handle& h : _hword_wordInstance_nodes) {
-        stimulateAtom(h, 20);
+    static bool nlp_parse_called = false;
+
+    if (not nlp_parse_called) {
+        insertStimulate();
+        nlp_parse_called = true;
+
+    } else {
+        for (const Handle& h : _hword_wordInstance_nodes)
+            stimulateAtom(h, 20);
     }
 }
