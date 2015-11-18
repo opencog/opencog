@@ -13,13 +13,13 @@ IF (TBB_FOUND)
 		${TBB_LIBRARY_DIRS}
 	)
 
-	ADD_LIBRARY(plndynamicsexpsetupmodule SHARED
-		PLNDynamicsExpSetupModule
+	ADD_LIBRARY(dynamicsexpsetupmodule SHARED
+		ExperimentSetupModule
 		SentenceGenStimulateAgent	
 		ArtificialStimulatorAgent	
 	)
 
-	TARGET_LINK_LIBRARIES(plndynamicsexpsetupmodule
+	TARGET_LINK_LIBRARIES(dynamicsexpsetupmodule
 		${ATOMSPACE_LIBRARIES}
 		server
 		tbb
