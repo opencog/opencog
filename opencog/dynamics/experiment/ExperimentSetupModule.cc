@@ -1,5 +1,5 @@
 /*
- * PLNDynamicsExpSetupModule.cc
+ * ExperimentSetupModule.cc
  *
  *  Created on: Apr 19, 2015
  *      Author: misgana
@@ -17,10 +17,8 @@
 #include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/dynamics/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/dynamics/experiment/ExperimentSetupModule.h>
-//#include <opencog/dynamics/experiment/SurprisingnessEvaluatorAgent.h>
 
 #include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
 
 #include <opencog/util/Config.h>
@@ -64,6 +62,8 @@ void ExperimentSetupModule::registerAgentRequests()
     do_stimulate_register();
     do_load_word_dict_register();
     do_dump_data_register();
+    do_start_nlp_stimulate_register();
+    do_pause_nlp_stimulate_register();
 }
 
 void ExperimentSetupModule::unregisterAgentRequests()
@@ -74,6 +74,8 @@ void ExperimentSetupModule::unregisterAgentRequests()
     do_stimulate_unregister();
     do_load_word_dict_unregister();
     do_dump_data_unregister();
+    do_start_nlp_stimulate_unregister();
+    do_pause_nlp_stimulate_unregister();
 }
 void ExperimentSetupModule::init(void)
 {
@@ -97,16 +99,6 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
             SimpleImportanceDiffusionAgent::info().id, false);
 
     //Register experiment specific agents. Add more if you have here.
-
-    /*Factory<SurprisingnessEvaluatorAgent, Agent> surprisingnessAgentFactory;
-     bool status = _cs.registerAgent(SurprisingnessEvaluatorAgent::info().id,
-     &surprisingnessAgentFactory);
-     if (status) {
-     _surprisingness_agentptr = _cs.createAgent(
-     SurprisingnessEvaluatorAgent::info().id, false);
-     }*/
-
-    Factory<ArtificialStimulatorAgent, Agent> artificialStimulatorAgentFactory;
     bool status = _cs.registerAgent(ArtificialStimulatorAgent::info().id,
                                     &artificialStimulatorAgentFactory);
     if (status) {
@@ -124,7 +116,6 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
     _cs.startAgent(_hebbianupdating_agentptr);
     _cs.startAgent(_importanceupdating_agentptr);
     _cs.startAgent(_simpleimportancediffusion_agentptr);
-
     _cs.startAgent(_artificialstimulatoragentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
@@ -141,6 +132,29 @@ std::string ExperimentSetupModule::do_ecan_pause(Request *req,
     _cs.stopAgent(_artificialstimulatoragentptr);
 
     return "The following agents were stopped:\n" + ECAN_EXP_AGENTS;
+}
+
+std::string ExperimentSetupModule::do_start_nlp_stimulate(
+        Request *req, std::list<std::string> args)
+{
+    bool status = _cs.registerAgent(SentenceGenStimulateAgent::info().id,
+                                    &sentenceGenStimulateFactory);
+    if (status) {
+        _sentencegenstim_agentptr = _cs.createAgent(
+                SentenceGenStimulateAgent::info().id, false);
+        _cs.startAgent(_sentencegenstim_agentptr);
+        return "The following agents were started:\nopencog::SentenceGenStimulateAgent\n";
+    }
+
+    return "Unable to start the agent.\n";
+}
+
+std::string ExperimentSetupModule::do_pause_nlp_stimulate(
+        Request *req, std::list<std::string> args)
+{
+    _cs.stopAgent(_sentencegenstim_agentptr);
+
+    return "The following agents were stopped:\nopencog::SentenceGenStimulateAgent\n";
 }
 
 std::string ExperimentSetupModule::do_stimulate(Request *req,
@@ -175,7 +189,7 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
         << "\n";
     }
 
-    std::ofstream outf(file_name);
+    std::ofstream outf(file_name, std::ofstream::out | std::ofstream::trunc);
     outf << sstream.str();
     outf.flush();
     outf.close();
@@ -219,6 +233,8 @@ std::string ExperimentSetupModule::do_load_word_dict(
     return "Loading successful.\n";
 }
 
+//TODO make it flexible enough to specify no of special and non special words
+//to include in the sentence to be generated.
 std::vector<std::string> ExperimentSetupModule::generate_sentence(
         const std::vector<std::string>& non_special_words,
         const std::vector<std::string>& special_words, int sent_size)
@@ -250,4 +266,3 @@ std::vector<std::string> ExperimentSetupModule::generate_sentence(
 
     return sentences;
 }
-
