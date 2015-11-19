@@ -43,24 +43,24 @@ void SentenceGenStimulateAgent::insertStimulate(void)
     for (const auto& sentence : generated_sentences) {
         HandleSeq word_and_wordinst;
 
-        //Get the word nodes
+        //Get the word instance nodes.
         std::string wordinst_list =
-                "(ListLink (parse-get-words (car (sentence-get-parses (car (nlp-parse " + sentence
-                + "))))))";
+                "(ListLink (parse-get-words (car (sentence-get-parses (car (nlp-parse \"" + sentence
+                + "\"))))))";
         Handle hwordinst_list = _scm_eval->eval_h(wordinst_list);
-
         HandleSeq hstemp = _as.get_outgoing(hwordinst_list);
-        std::copy(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
 
-        //Get the word instances nodes
+        word_and_wordinst.insert(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
+
+        //Get the word nodes.
         std::string wordnode_list =
                 "(ListLink (append-map (lambda (x) (cog-chase-link 'ReferenceLink 'WordNode x)) "
-                "(parse-get-words (car (sentence-get-parses (car (nlp-parse "
-                + sentence + ")))))))";
+                "(parse-get-words (car (sentence-get-parses (car (nlp-parse \""
+                + sentence + "\")))))))";
         Handle hwordnode_list = _scm_eval->eval_h(wordnode_list);
-
         hstemp = _as.get_outgoing(hwordnode_list);
-        std::copy(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
+
+        word_and_wordinst.insert(word_and_wordinst.end(), hstemp.begin(), hstemp.end());
 
         //Stimulate. TODO read stimulus value from config file
         stimulateAtom(word_and_wordinst, 20);
