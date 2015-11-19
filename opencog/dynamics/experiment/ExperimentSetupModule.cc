@@ -50,8 +50,8 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
                                                 const AttentionValuePtr& av_old,
                                                 const AttentionValuePtr& av_new)
 {
-    ECANValue ecanval(av_new->getSTI(), av_new->getLTI(), _cs.getCycleCount());
-    _data[h] = ecanval;
+    ECANValue ecanval(av_new->getSTI(), av_new->getLTI(),av_new->getVLTI(), _cs.getCycleCount());
+    _data[h].push_back(ecanval);
 }
 
 void ExperimentSetupModule::registerAgentRequests()
@@ -183,10 +183,13 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
     std::stringstream sstream;
 
     for (const auto& p : _data) {
-        sstream << std::to_string(p.second._cycle) << ","
-        << std::to_string(p.first.value()) << ","
-        << std::to_string(p.second._sti) << "," << std::to_string(p.second._lti)
-        << "\n";
+        for (const ECANValue& ev : p.second) {
+            sstream << std::to_string(p.first.value()) << ","
+                    << std::to_string(ev._sti) << ","
+                    << std::to_string(ev._lti) << ","
+                    << std::to_string(ev._vlti) << ","
+                    << std::to_string(ev._cycle) << "\n";
+        }
     }
 
     std::ofstream outf(file_name, std::ofstream::out | std::ofstream::trunc);
