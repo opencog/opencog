@@ -11,6 +11,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>
 
+#include <opencog/dynamics/experiment/SentenceGenStimulateAgent.h>
+
 namespace opencog {
 
 class AtomSpace;
@@ -50,8 +52,12 @@ private:
     AgentPtr _importanceupdating_agentptr;
     AgentPtr _simpleimportancediffusion_agentptr;
 
-    AgentPtr _surprisingness_agentptr;
+    AgentPtr _sentencegenstim_agentptr;
     AgentPtr _artificialstimulatoragentptr;
+
+    Factory<ArtificialStimulatorAgent, Agent> artificialStimulatorAgentFactory;
+    Factory<SentenceGenStimulateAgent, Agent> sentenceGenStimulateFactory;
+
 
     AtomSpace * _as;
     CogServer& _cs;
@@ -70,29 +76,40 @@ private:
     //Start stop ECAN agents commands
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-load", do_ecan_load,
             "Loads all agents of ECAN and experiment\n",
-            "Usage: ecan_load\n"
+            "Usage: ecan-load\n"
             "Loads the following ECAN agents\n"+ECAN_EXP_AGENTS
             ,
             false, true)
 
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-start", do_ecan_start,
             "Starts main ECAN agents\n",
-            "Usage: ecan_start\n"
-            "Starts the following ECAN agents\n"+ECAN_EXP_AGENTS
-            ,
+            "Usage: ecan-start\n"
+            "Starts the following ECAN agents\n"+ECAN_EXP_AGENTS,
             false, true)
 
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-pause", do_ecan_pause,
             "Pause main ECAN agents\n",
-            "Usage: ecan_pause\n"
-            "Stops the following ECAN agents\n"+ECAN_EXP_AGENTS
-            ,
+            "Usage: ecan-pause\n"
+            "Stops the following ECAN agents\n"+ECAN_EXP_AGENTS,
             true, true)
+
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "start-word-stimulator",do_start_nlp_stimulate,
+            "Starts NLP atoms stimulator agent\n",
+            "Usage: start-nlp-stimulator\n"
+            "Starts the following ECAN agents\nopencog::SentenceGenStimulateAgent",
+            false, true)
+
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "pause-word-stimulator",do_pause_nlp_stimulate,
+            "Pauses NLP atoms stimulator agent\n",
+            "Usage: pause-nlp-stimulator\n"
+            "Starts the following ECAN agents\nopencog::SentenceGenStimulateAgent",
+            false, true)
+
 
     //For manually stimulating some atoms by referring them via their UUID
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "stimulate-atoms", do_stimulate,
             "Stimulate an atom or set of atoms\n",
-            "Usage: stimulate_atoms UUID,STIMULUS \n"
+            "Usage: stimulate-atoms UUID,STIMULUS \n"
             "Stimulates atoms with certain stimulus value\n"
             "arguments are a pair of uuid and stimulus vaue\n"
             "separated by comma and each pair separated by space\n",
