@@ -1,5 +1,5 @@
 /*
- * SentenceGenAgent.h
+ * SentenceGenStimulateAgent.h
  *
  *  Created on: 10 Nov 2015
  *      Author: misgana
@@ -18,7 +18,7 @@ extern std::vector<std::string> generated_sentences;
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.
  */
-class SentenceGenStimulateAgent: Agent {
+class SentenceGenStimulateAgent: public Agent {
 private:
     UnorderedHandleSet _hword_wordInstance_nodes;
     SchemeEval* _scm_eval;
