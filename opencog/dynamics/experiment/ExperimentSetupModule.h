@@ -36,13 +36,17 @@ private:
     struct ECANValue {
         AttentionValue::sti_t _sti;
         AttentionValue::lti_t _lti;
-        long  _cycle;
+        AttentionValue::vlti_t _vlti;
+        long _cycle;
 
-        ECANValue():_sti(0), _lti(0), _cycle(0){}
+        ECANValue() :
+                _sti(0), _lti(0),_vlti(0), _cycle(0)
+        {
+        }
 
         ECANValue(AttentionValue::sti_t sti, AttentionValue::lti_t lti,
-                  long cycle) :
-                _sti(sti), _lti(lti), _cycle(cycle)
+                  AttentionValue::vlti_t vlti, long cycle) :
+                _sti(sti), _lti(lti), _vlti(vlti), _cycle(cycle)
         {
         }
     };
@@ -63,7 +67,7 @@ private:
     CogServer& _cs;
     Logger * _log;
 
-    std::map<Handle, ECANValue> _data;
+    std::map<Handle, std::vector<ECANValue>> _data;
     boost::signals2::connection _AVChangedSignalConnection;
 
     void AVChangedCBListener(const Handle& h, const AttentionValuePtr& av_old,
