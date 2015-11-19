@@ -187,7 +187,7 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
     while (true)
     {
         miningOrEvaluatingLock.lock();
-        waitingLinkQueueLock.lock();
+        waitingToFeedQueueLock.lock();
 
         if (waitingForProcessLinksQueue.size() > 0)
         {
@@ -195,7 +195,7 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
             Handle& cur_link = waitingForProcessLinksQueue.front();
             waitingForProcessLinksQueue.pop();
 
-            waitingLinkQueueLock.unlock();
+            waitingToFeedQueueLock.unlock();
 
             // if this link is listlink, ignore it
             if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
@@ -223,7 +223,7 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
         }
         else
         {
-            waitingLinkQueueLock.unlock();
+            waitingToFeedQueueLock.unlock();
         }
 
         miningOrEvaluatingLock.unlock();

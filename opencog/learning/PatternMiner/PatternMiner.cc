@@ -47,6 +47,8 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
+std::mutex PatternMiner::waitingToFeedQueueLock;
+
 const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
 
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
@@ -2249,16 +2251,15 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
 }
 
+// need to lock waitingToFeedQueueLock when calling this function
 void PatternMiner::feedNewLinksToPatternMiner (HandleSeq &_newLinks)
 {
-    waitingLinkQueueLock.lock();
 
     for(Handle h :_newLinks)
     {
         waitingForProcessLinksQueue.push(h);
     }
 
-    waitingLinkQueueLock.unlock();
 }
 
 void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)

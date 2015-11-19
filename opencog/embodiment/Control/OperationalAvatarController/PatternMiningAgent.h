@@ -52,6 +52,8 @@ private:
 
     void init();
 
+    void feedingNewAtomsToPatternMiner();
+
 public:
 
     PatternMiningAgent(CogServer&);

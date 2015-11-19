@@ -331,11 +331,12 @@ namespace PatternMining
      void runPatternMinerForEmbodiment(unsigned int _thresholdFrequency = 4,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
      void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
+     static std::mutex waitingToFeedQueueLock;
 
  protected:
      unsigned int evaluatePatternsEveryXSeconds;
      queue<Handle> waitingForProcessLinksQueue;
-     std::mutex waitingLinkQueueLock, miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time
+     std::mutex miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time
 
      void growPatternsDepthFirstTaskForEmbodiment();
 

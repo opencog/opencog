@@ -29,6 +29,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <thread>
 #include "OAC.h"
 #include "PatternMiningAgent.h"
 
@@ -97,7 +98,7 @@ void PatternMiningAgent::init()
 //    cout << "PatternMiningAgent: init: loaded test corpus into corpusAtomSpace \n ";
 
     // create a pattern miner
-    this->patternMiner = new PatternMiner(&(oac->getAtomSpace(),config().get_int("PATTERN_MAX_GRAM"));
+    this->patternMiner = new PatternMiner(&(oac->getAtomSpace()),config().get_int("PATTERN_MAX_GRAM"));
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -124,7 +125,23 @@ void PatternMiningAgent::run()
     static bool hasRun = false;
     if (hasRun)
         return;
-    this->patternMiner->runPatternMiner();
+    this->patternMiner->runPatternMinerForEmbodiment();
+
+    std::thread([this]{this->feedingNewAtomsToPatternMiner();});
     hasRun = true;
 
+}
+
+
+void PatternMiningAgent::feedingNewAtomsToPatternMiner()
+{
+    while (true)
+    {
+        PatternMiner::waitingToFeedQueueLock.lock();
+        PAI::waitingToFeedToPatternMinerLock.lock();
+        this->patternMiner->feedNewLinksToPatternMiner(PAI::perceptionWaitingForPatternMiner);
+        PAI::perceptionWaitingForPatternMiner.clear();
+        PAI::waitingToFeedToPatternMinerLock.unlock();
+        PatternMiner::waitingToFeedQueueLock.unlock();
+    }
 }

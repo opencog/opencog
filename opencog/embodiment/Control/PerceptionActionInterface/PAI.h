@@ -31,6 +31,7 @@
 #include <map>
 #include <vector>
 #include <exception>
+#include <mutex>
 
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
@@ -87,6 +88,9 @@ typedef map<std::string, std::string> PropertyMap;
  */
 class PAI
 {
+public:
+    static HandleSeq perceptionWaitingForPatternMiner;
+    static std::mutex waitingToFeedToPatternMinerLock;
 
 private:
 
