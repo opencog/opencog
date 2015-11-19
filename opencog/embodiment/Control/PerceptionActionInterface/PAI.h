@@ -672,7 +672,7 @@ private:
      * @param permanent An optional flag to indicate If the property must be
      * kept forever (or until it is explicitly removed). It's false by default
      */
-    void addPropertyPredicate(std::string predicateName, Handle objectNode,
+    Handle addPropertyPredicate(std::string predicateName, Handle objectNode,
                               bool propertyValue, bool permanent = false);
 
     /**
@@ -687,11 +687,11 @@ private:
      * @param inheritanceValue Boolean used to indicate if the inheritance
      *        relation is valid or not.
      */
-    void addInheritanceLink(std::string conceptNodeName,
+    Handle addInheritanceLink(std::string conceptNodeName,
                             Handle subNodeHandle,
                             bool inheritanceValue);
 
-    void addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle);
+    Handle addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle);
 
     /**
      * Adds a vector-type (e.g., "position" and "velocity") predicate for the
@@ -876,7 +876,7 @@ private:
      * @param isSelfObject the flag to see if the entity is the avatar itself.
      * @param mapinfo the map info instance containing information of this entity.
      */
-    void addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo);
+    void addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo, HandleSeq &entityRelatedLinks);
 
     /**
      * Add semantic structure of an entity into atomspace, which would be used
@@ -961,6 +961,8 @@ private:
      * @return true if the object is an obstacle.
      */
     bool isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const;
+
+    void addToWaitFeedingQueue(HandleSeq &newLinks);
 
 
     #endif

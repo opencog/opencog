@@ -2294,6 +2294,23 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
         atomspaceSizeFloat = (float)processedLinkNum;
         std::cout<<"Debug: PatternMiner: Start a pattern evaluation task.\n";
 
+        // output the corpus
+        ofstream corpusFile;
+        string fileName = "PerceptionCorpus.scm";
+
+        std::cout<<"\nDebug: PatternMiner: output all the perception atoms to file " + fileName << std::endl;
+
+        corpusFile.open(fileName.c_str());
+        HandleSeq allPerceptionLinks;
+        observingAtomSpace->getHandlesByType(back_inserter(allPerceptionLinks), (Type) LINK, true );
+        corpusFile << "Total perception link number = " << allPerceptionLinks.size() << std::endl;
+        for (Handle ph : allPerceptionLinks)
+        {
+            if (observingAtomSpace->getType(ph) != opencog::LIST_LINK)
+                corpusFile << observingAtomSpace->atomAsString(ph) << std::endl;
+        }
+
+
         for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
         {
             // sort by frequency

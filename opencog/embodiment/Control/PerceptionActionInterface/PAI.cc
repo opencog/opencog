@@ -1622,9 +1622,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 //                                            agentNode,targetNode,
 //                                            actionHandles, tsValue);
 
-    waitingToFeedToPatternMinerLock.lock();
-    perceptionWaitingForPatternMiner.insert(perceptionWaitingForPatternMiner.end(), actionConcernedHandles.begin(), actionConcernedHandles.end());
-    waitingToFeedToPatternMinerLock.unlock();
+
+    addToWaitFeedingQueue(actionConcernedHandles);
 
     // debug
     for (unsigned int i = 0; i < actionConcernedHandles.size(); ++ i)
@@ -1632,6 +1631,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
     XMLString::release(&targetName);
 
+}
+
+void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
+{
+    waitingToFeedToPatternMinerLock.lock();
+    perceptionWaitingForPatternMiner.insert(perceptionWaitingForPatternMiner.end(), newLinks.begin(), newLinks.end());
+    waitingToFeedToPatternMinerLock.unlock();
 }
 
 void PAI::processAgentActionPlanResult(char* agentID,
@@ -3043,7 +3049,7 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
     return result;
 }
 
-void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, bool propertyValue, bool permanent)
+Handle PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, bool propertyValue, bool permanent)
 {
 
     TruthValuePtr tv(SimpleTruthValue::createTV(0.0, 1.0));
@@ -3062,14 +3068,15 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
     // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
     // so we need to add both
     if (propertyValue)
-        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
+        return AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
     else
-        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
+        return AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
 }
 
-void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)
+Handle PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)
 {
-    if (inheritanceValue) {
+    if (inheritanceValue)
+    {
         logger().debug("PAI - Inheritance: %s => %s",
                      atomSpace.getName(subNodeHandle).c_str(),
                      conceptNodeName.c_str());
@@ -3083,16 +3090,19 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
 
         Handle link = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, seq, true);
         atomSpace.setTV(link, SimpleTruthValue::createTV(1.0, 1.0));
+        return link;
     }
+
+    return Handle::UNDEFINED;
 }
 
-void PAI::addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle)
+Handle PAI::addInheritanceLink(Handle fatherNodeHandle, Handle subNodeHandle)
 {
     HandleSeq inheritanceLinkOutgoing;
     inheritanceLinkOutgoing.push_back(subNodeHandle);
     inheritanceLinkOutgoing.push_back(fatherNodeHandle);
 
-    AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
+    return AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
 }
 
 /*
@@ -3669,6 +3679,8 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
 {
     // bool keepPreviousMap = avatarInterface.isExemplarInProgress();
 
+    HandleSeq entityRelatedLinks;
+
     std::string internalEntityId;
 
     std::string entityType = mapinfo.type();
@@ -3683,6 +3695,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     bool isOwnerObject = (internalEntityId == avatarInterface.getOwnerId());
 
     Handle objectNode;
+    Handle typeInherlink = Handle::UNDEFINED;
 
     // Add entity type in atomspace
     if (entityType != "")
@@ -3690,10 +3703,13 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
         objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType.c_str()), internalEntityId.c_str());
         // add an inheritance link
         Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType.c_str());
-        addInheritanceLink(typeNode, objectNode);
+        typeInherlink = addInheritanceLink(typeNode, objectNode);
     } else {
         objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
     }
+
+    if (typeInherlink != Handle::UNDEFINED)
+        entityRelatedLinks.push_back(typeInherlink);
 
     // Add entity name in atomspace
     if (entityName != "") {
@@ -3709,7 +3725,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     }
 
     // Add property predicates
-    addEntityProperties(objectNode, isSelfObject, mapinfo);
+    addEntityProperties(objectNode, isSelfObject, mapinfo, entityRelatedLinks);
 
     // Add space predicate.
     addSpacePredicates(objectNode, mapinfo, isSelfObject, timestamp,isFirstTimePercept);
@@ -3719,11 +3735,15 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     // Add semantic structure of this map-info to be used in language comprehension
     // addSemanticStructure(objectNode, mapinfo);
 
+    addToWaitFeedingQueue(entityRelatedLinks);
+
     return objectNode;
 }
 
 Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
 {
+    HandleSeq entityRelatedLinks;
+
     std::string internalEntityId;
 
     std::string entityType = mapinfo.type();
@@ -3741,7 +3761,11 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     spaceServer().removeSpaceInfo(objectNode, timestamp);
 
-    addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
+    Handle propertyLink = addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
+
+    entityRelatedLinks.push_back(propertyLink);
+
+    addToWaitFeedingQueue(entityRelatedLinks);
 
     // check if the object to be removed is marked as grabbed in
     // AvatarInterface. If so grabbed status should be unset.
@@ -3882,7 +3906,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
 }
 
 
-void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo)
+void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInfo& mapinfo, HandleSeq &entityRelatedLinks)
 {
     // TODO should we process the properties one by one? What if the property
     // amount increases? Maybe it would be a good idea to maintain a property
@@ -3916,15 +3940,25 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     Handle classHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityClass);
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
+    Handle propertyLink = AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
+
+    if (propertyLink != Handle::UNDEFINED)
+        entityRelatedLinks.push_back(propertyLink);
 
     // Add the property predicates in atomspace
-    addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
-    addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
+    propertyLink = addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
+    if (propertyLink != Handle::UNDEFINED)
+        entityRelatedLinks.push_back(propertyLink);
+
+    propertyLink = addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
+    if (propertyLink != Handle::UNDEFINED)
+        entityRelatedLinks.push_back(propertyLink);
+
 //  addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
 //  addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
-    addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
-
+    propertyLink = addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
+    if (propertyLink != Handle::UNDEFINED)
+        entityRelatedLinks.push_back(propertyLink);
 
     // Add the inheritance link to mark the family of this entity.
 //    addInheritanceLink(std::string("pet_home"), objectNode, isHome);
@@ -3961,8 +3995,11 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
        */
-        AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
+        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
+
+        if (propertyLink != Handle::UNDEFINED)
+            entityRelatedLinks.push_back(propertyLink);
     }
 
     // Add color property predicate
@@ -3976,8 +4013,11 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         referenceLink->setTruthValue(TruthValue::TRUE_TV());
         atomSpace.setLTI(referenceLink, 1);
         */
-        AtomSpaceUtil::setPredicateValue(atomSpace, "color",
+        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "color",
                                           SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
+
+        if (propertyLink != Handle::UNDEFINED)
+            entityRelatedLinks.push_back(propertyLink);
     }
 /*
     // Add material property predicate
@@ -4285,7 +4325,14 @@ void PAI::processExistingStateInfo(DOMElement* element)
     TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     string stateNameStr(stateName);
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, stateNameStr, objectHandle, valueHandle,tv,Temporal(tsValue));
+    Handle stateLink = AtomSpaceUtil::addPropertyPredicate(atomSpace, stateNameStr, objectHandle, valueHandle,tv,Temporal(tsValue));
+
+    if (stateLink != Handle::UNDEFINED)
+    {
+        HandleSeq stateRelatedLinks;
+        stateRelatedLinks.push_back(stateLink);
+        addToWaitFeedingQueue(stateRelatedLinks);
+    }
 
 }
 
