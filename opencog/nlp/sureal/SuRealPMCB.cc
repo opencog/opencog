@@ -113,11 +113,11 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
-    // store the InterpretationNodes, will be considered as targets for next
-    // disconnected clause in the pattern if this grounding is accepted
+    // store the InterpretationNodes, will be needed if this grounding is accepted
     HandleSeq qTempInterpNodes;
 
-    // helper lambda function to check for linkage to an InterpretationNode, given SetLink
+    // helper lambda function to check for linkage to an InterpretationNode,
+    // and see if it's one of the targets we are looking for, given SetLink
     auto hasInterpretation = [&](Handle& h)
     {
         HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
@@ -128,7 +128,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
                 return isInterpNode and isTarget; });
     };
 
-    // reject match (ie. return false) if there is no InterpretationNode
+    // reject match (ie. return false) if there is no InterpretationNode, or
+    // the InterpretationNode is not one of the targets
     if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation))
         return false;
 
@@ -355,8 +356,9 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             return false;
     }
 
-    // store the matched InterpretationNode as targets
-    m_tempTargets.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
+    // store the accepted InterpretationNodes, which will be the targets for the
+    // next disconnected clause in the pattern, if any
+    m_interp.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
 
     return true;
 }
@@ -573,11 +575,11 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
-    // m_targets should always be a subset of m_tempTargets
-    if (m_tempTargets.size() > 0)
+    // set targets, m_targets should always be a subset of m_interp
+    if (m_interp.size() > 0)
     {
-        m_targets = m_tempTargets;
-        m_tempTargets.clear();
+        m_targets = m_interp;
+        m_interp.clear();
     }
 
     _search_fail = false;
@@ -618,7 +620,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         HandleSeq qISet = m_as->get_incoming(c);
 
-        // erase atoms that are neither R2L-Setlink nor SetLink
+        // erase atoms that are neither a SetLink nor a target
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
 
         if (qISet.size() >= 1)
