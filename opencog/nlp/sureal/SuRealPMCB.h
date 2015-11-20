@@ -72,6 +72,9 @@ private:
 
     std::unordered_map<Handle, Handle> m_words;   // store the corresponding WordNodes of the nodes in the pattern
 
+    std::set<Handle> m_tempTargets;
+    std::set<Handle> m_targets;   // store a set of target InterpretationNodes
+
     struct CandHandle
     {
         Handle handle;

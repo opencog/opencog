@@ -113,11 +113,19 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
+    // store the InterpretationNodes, will be considered as targets for next
+    // disconnected clause in the pattern if this grounding is accepted
+    HandleSeq qTempInterpNodes;
+
     // helper lambda function to check for linkage to an InterpretationNode, given SetLink
-    auto hasInterpretation = [this](Handle& h)
+    auto hasInterpretation = [&](Handle& h)
     {
         HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
-        return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+        return std::any_of(qN.begin(), qN.end(), [&](Handle& hn) {
+                bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
+                bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
+                if (isInterpNode) qTempInterpNodes.push_back(hn);
+                return isInterpNode and isTarget; });
     };
 
     // reject match (ie. return false) if there is no InterpretationNode
@@ -347,6 +355,9 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             return false;
     }
 
+    // store the matched InterpretationNode as targets
+    m_tempTargets.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
+
     return true;
 }
 
@@ -562,6 +573,13 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
+    // m_targets should always be a subset of m_tempTargets
+    if (m_tempTargets.size() > 0)
+    {
+        m_targets = m_tempTargets;
+        m_tempTargets.clear();
+    }
+
     _search_fail = false;
     if (not _variables->varset.empty())
     {
@@ -585,13 +603,17 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
     for (auto& c : qCandidate)
     {
-        auto rm = [](Handle& h)
+        auto rm = [&](Handle& h)
         {
             if (h->getType() != SET_LINK) return true;
 
             HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
             return not std::any_of(qN.begin(), qN.end(),
-                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+                [&](Handle& hn) {
+                    bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
+                    bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
+                    return isInterpNode and isTarget;
+                });
         };
 
         HandleSeq qISet = m_as->get_incoming(c);
