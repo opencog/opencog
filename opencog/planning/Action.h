@@ -30,13 +30,15 @@ namespace opencog {
 /** \addtogroup planning
  * @{
  */
-class Action : public Rule
+class Action
 {
 public:
-    Action(Handle member_l);
+    Action(Rule a_rule);
     ~Action();
 
 private:
+    // An action is  a rule with some more conditions.
+    Rule _rule;
 
     // The implicant of the pattern, which is also called  "context"
     // is divided into two
@@ -46,6 +48,7 @@ private:
 
     // Function for helping construct
     void init();
+    void choose_rule();
 
 }; // class Action
 

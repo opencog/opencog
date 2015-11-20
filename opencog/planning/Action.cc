@@ -29,17 +29,23 @@ using namespace opencog;
 /**
  * Main Constructor
  */
-Action::Action(Handle member_l) : Rule(member_l)
+Action::Action(Rule a_rule) : _rule(a_rule)
 {
     init();
 }
 
 void Action::init()
 {
-    /*PatternLinkPtr pattern(PatternLinkCast(rule_handle_));
-    _virtual_terms(pattern->get_pattern()._virtual);
-    _fixed_terms(pattern->get_pattern()._fixed);
-    */
+
+    PatternLinkPtr pattern(PatternLinkCast(_rule.get_handle()));
+    if(NULL == pattern) {
+        throw InvalidParamException(TRACE_INFO,
+			"Expecting a PatternLink type or sub-type for Rule handle, got %s",
+             _rule.get_handle()->toString().c_str());
+    }
+
+    _virtual_terms = pattern->get_virtual();
+    _fixed_terms = pattern->get_fixed();
 }
 
 Action::~Action()
