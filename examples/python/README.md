@@ -34,7 +34,7 @@ library, is because this allows a far greater range of functions to be
 implemented.
 
 Most importantly, the cogserver allows multiple simultaneous threads
-to be running and performing compute tasks or wating on I/O, all working
+to be running and performing compute tasks or waitng on I/O, all working
 in parallel. This is fundamentally impossible with python alone, in part
 due to Python's GIL, but also for other technical reasons.  Thus, to get
 all the various cogserver features, you have to use it as a server, not
@@ -56,7 +56,7 @@ rlwrap telnet localhost 17001
 ```
 and then enter the python interpreter by saying `py`. You can also get
 to the scheme interpreter by saying `scm`.   From the python prompt,
-enter the below. Its valid python, but several of teh steps will not
+enter the below. Its valid python, but several of the steps will not
 work outside of the cogserver; in particular `get_server_atomspace`
 works only inside the cogserver.
 

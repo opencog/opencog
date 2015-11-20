@@ -111,7 +111,7 @@ them.  For examples, see the `/examples/guile` and the
 `/examples/pattern-matcher` directories.
 
 Python is more familiar than scheme (guile) to most programmers, and
-it offers another way of intrfacing to the atomspace. See the
+it offers another way of interfacing to the atomspace. See the
 `/examples/python` directory for how to use python with OpenCog.
 
 The cogserver provides a network server interface to OpenCog. It is
@@ -125,7 +125,7 @@ components and agents.  After building everything, change directory
 to your `opencog/build` folder and execute `opencog/cogserver/server/cogserver`.
 Then, from another terminal, run `rlwrap telnet localhost 17001`
 The `help` command will list all of the other available commands.
-Notable among these are teh commands to attach to a (Postgres) database,
+Notable among these are the commands to attach to a (Postgres) database,
 and networked scheme and python interfaces (i.e. scheme and python
 shells that are usable over the network, if you are logged in remotely
 to the cogserver).
