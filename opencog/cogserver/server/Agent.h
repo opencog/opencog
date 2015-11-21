@@ -58,10 +58,10 @@ class CogServer;
  * defines how often the agent will be executed. A value of 1 (the default)
  * means that the agent will be executed every server cycle. A value of 2 means
  * that the agent will be executed every 2 cycles. And so on.
- * 
+ *
  * Since agents are registered with the cogserver using the Registry+Factory
- * pattern, agent classes must override the 'classinfo' which uniquelly
- * identifies its class. Typicall the 'classinfo' method will simply forward to
+ * pattern, agent classes must override the 'classinfo' which uniquely
+ * identifies its class. Typically the 'classinfo' method will simply forward to
  * a call to an 'info' class method that provides the actual class info -- the
  * 'info' class method is required by the Registry+Factory anyway.
  *
@@ -98,7 +98,7 @@ class CogServer;
  * \endcode
  *
  * @todo create a run wrapper around the actual implementation of the run method.
- * This would flip an "active" or "running" boolean property on or off. Any
+ * This would flip an "active" or "running" boolean property on or off. And
  * carry out other admin tasks before and after each cycle, without subclasses
  * needing to carry these out themselves unless they had specific reason to.
  */
@@ -141,12 +141,12 @@ protected:
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
-    Agent(CogServer&, const unsigned int f = 1);    
+    Agent(CogServer&, const unsigned int f = 1);
 
     /** Agent's destructor */
     virtual ~Agent();
 
-    /** Abstract run method. Should be overriden by a derived agent with the
+    /** Abstract run method. Should be overridden by a derived agent with the
      *  actual agent's behavior. */
     virtual void run() = 0;
 
@@ -158,9 +158,9 @@ public:
 
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
-    
+
     /** Dumps the agent's name and all its configuration parameters
-     * to a string. */    
+     * to a string. */
     std::string to_string() const;
 
     /** Returns the sequence of handle sets for this cycle that the agent
