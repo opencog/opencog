@@ -134,7 +134,7 @@
 	     (if (equal? (car a) 'think)    (set! ans (list (list 'ConceptNode "AIMLTHINK"  ) (cdr a))) )
 	     (if (equal? (car a) 'srai)     (set! ans (list (list 'ConceptNode "AIMLSRAI"  ) (map aimltag4oc (cdr a) expansion))) )
 	     (if (equal? (car a) 'star)     (set! ans (list (list 'ConceptNode "AIMLSTAR"  ) (mstar1a "$star" 1 expansion))) )
-	     (if (equal? (car a) 'random)   (set! ans (randomExpansion (cdr a) ) )) 
+	     (if (equal? (car a) 'random)   (set! ans (randomExpansion (cdr a) '() ) )) 
 		 
              )
      )
@@ -296,17 +296,34 @@
 )
 
 (define (fixStars clist)
+  ; for <star/> or <star index="2"/>
   ; should be (ConceptNode "text") (ConceptNode (star)) or (ConceptNode (star (index 2)))
+  (display "fixStars:")(display clist) (newline)
   (if (string? (car(cdr clist)))
 		(list (car clist)(string-upcase (car (cdr clist))))
 		(if (list?  (car(cdr clist)))
 			(list 'GlobNode "$star2_1")
-			(list 'GlobNode "$star1_1")
+			(if (equal? (car(cdr clist)) 'person)
+				(list (list 'ConceptNode "BEGINPERSON") (list 'GlobNode "$star1_1") (list 'ConceptNode "ENDPERSON") )
+				(list 'GlobNode "$star1_1")
+			)
 		)
    )
 )
 
 (define liExpand 
+ (lambda (expression glob)
+   (append 
+   (list 'ListLink ) 
+	   (bindTemplateStarN 
+			(cdr expression) 
+			glob 
+		) 
+	)
+ )
+)
+
+(define liExpand0 
  (lambda (expression)
    (append (list 'ListLink ) (map fixStars (conceptualizePattern (atomize (cdr expression)))))
  )
@@ -329,14 +346,24 @@
    )
   )
  
+(define duplicateN 
+   (lambda (a N)
+     (if (<= N 0) 
+		 (list)
+		 (append  (list a) (duplicateN a (- N 1)))
+	  )
+   )
+)
+ 
   
 (define randomExpansion
-  (lambda (expression)
-   (let ( (core (map liExpand expression)) )
+  (lambda (expression globs)
+   (let ( (core (map liExpand expression (duplicateN globs (length expression)) )) )
      (list  (list 'RandomChoiceLink  (generateRandomWeights core)  (append (list 'ListLink) core)))
 	)
   )
 )
+
 (define randomExpansion1
   (lambda (expression)
    (let ( (core (map liExpand expression)) )
@@ -351,6 +378,24 @@
 	)
   )
 )
+
+(define personExpansion
+  (lambda (temp globList)
+   (let ((core (bindTemplateStarN temp globList )) )
+    (begin
+      (if (list? (car core)) (set! core (car core)))
+	 )
+     (list  
+		 (list 'ConceptNode "BEGINPERSON") 
+		 core
+		 (list 'ConceptNode "ENDPERSON") 
+	 )	 
+	) 
+  )
+)
+
+
+
 (define bindTemplateStar 
  (lambda (template glob index)
  ;;(display "bindTemplateStar:")(display template) (display "  -glob:")(display glob)(display "  -index:")(display index)(newline)
@@ -369,6 +414,8 @@
 					 ;; Are they specific tags
 					(if (equal? (car template) 'template) (set! ans  (list) ) )
 					(if (equal? (car template) 'think)    (set! ans (list (list 'ConceptNode "AIMLThink" )) )) 
+					(if (equal? (car template) 'person)   (begin (set! ans (personExpansion (cdr template) glob) ) (set! skip 't)))
+
 					(if (equal? (car template) 'srai)     (set! ans (list (list 'ConceptNode "AIMLSRAI"  )) ))
 					(if (equal? (car template) 'star)    
 					  (begin
@@ -401,7 +448,7 @@
 					
 					(if (equal? (car template) 'random)    
 					  (begin
-					    (set! ans (randomExpansion (cdr template))) 
+					    (set! ans (randomExpansion (cdr template) glob)) 
 						(set! skip 't)
 					  )
 					 )
@@ -442,7 +489,9 @@
 					 ;; Are they specific tags
 					(if (equal? (car template) 'template) (set! ans  (list) ) )
 					(if (equal? (car template) 'think)    (set! ans (list (list 'ConceptNode "AIMLTHINK"  ))   )) 
+					(if (equal? (car template) 'person)   (begin (set! ans (personExpansion (cdr template) globList) ) (set! skip 't)))
 					(if (equal? (car template) 'srai)     (set! ans (list (list 'ConceptNode "AIMLSRAI"  )) ))
+					
 					(if (equal? (car template) 'star)    
 					  (begin
 					     ;; If it is a star then get the embedded index if any
@@ -472,7 +521,7 @@
 					
 					(if (equal? (car template) 'random)    
 					  (begin
-					    (set! ans (randomExpansion (cdr template))) 
+					    (set! ans (randomExpansion (cdr template) globList)) 
 						(set! skip 't)
 					  )
 					 )
@@ -502,6 +551,23 @@
 ;(bindTemplateStar (list 'a 'b (list 'star) 'c) (list 'star1_1 'star1_2) 1)
 ;(bindTemplateStar (list 'a 'b (list 'star) 'c) (list 'star2_1) 2)
 
+
+;; wrapTemplate
+
+(define wrapTemplate
+	(lambda (a)
+	 (if (list? a)
+		(begin
+			;;(display "wrapTemplate-car-a:")(display (car a)) (newline)
+			(if (equal? (caar a) 'RandomChoiceLink) 
+	          (car a)
+			(append (list 'ListLink) a)
+			)
+	    )
+	  a)
+	)
+ )
+ 
 ;; This system is modified for using the GlobNode, so only one star expansion per aiml star										
 (define processCategory
 	(lambda (a)
@@ -521,7 +587,7 @@
 		        (begin
 		            (set! ans (list (list 'BindLink
 										          (append (list 'ListLink) (conceptualizePattern (bindPatternStar  (atomize (cdr (getTag 'pattern a))) (list) 1 -1)))
-										          (append (list 'ListLink) (bindTemplateStar (getTag 'template a) (list) 1) )
+										          (wrapTemplate (bindTemplateStar (getTag 'template a) (list) 1) )
 												 ))
 					 )
 				)
@@ -540,7 +606,7 @@
 										  (list (list 'BindLink
 										          ;;(append (list 'ListLink) (conceptualizePattern (bindPatternStar  (atomize (car(cdr (getTag 'pattern a)))) starglob 1 0)))
 										          (append (list 'ListLink) (conceptualizePattern (bindPatternStar  (atomize (cdr (getTag 'pattern a))) starglob 1 0)))
-										          (append (list 'ListLink) (bindTemplateStar (getTag 'template a) starglob 1) )
+										          (wrapTemplate (bindTemplateStar (getTag 'template a) starglob 1) )
 												 ))
 						                )
 										starlist) )
@@ -567,7 +633,7 @@
 										  (list (list 'BindLink
 										          ;;(append (list 'ListLink) (conceptualizePattern (bindPatternStar  (atomize (car(cdr (getTag 'pattern a)))) starglob 1 0)))
 										          (append (list 'ListLink) (conceptualizePattern (bindPatternStarN  (atomize (cdr (getTag 'pattern a))) starglobPair 0)))
-										          (append (list 'ListLink) (bindTemplateStarN (getTag 'template a) starglobPair) )
+										          (wrapTemplate (bindTemplateStarN (getTag 'template a) starglobPair) )
 												 ))
 						                )
 										crossStars) )

@@ -1,5 +1,5 @@
 (use-modules (ice-9 pretty-print))
-(use-modules (opencog atom-types))
+;(use-modules (opencog atom-types))
 
 (define (nth n l)
   (if (or (> n (length l)) (< n 0))
@@ -100,7 +100,8 @@
 		(begin
 			(cog-set-atomspace! (car atomspace-stack))
 			(set! atomspace-stack (cdr atomspace-stack))
-			(gc) (gc) (gc)) ; MUST GC OR ELSE DELTE ATOMSPACE STICKS AROUND!!
+			;(gc) (gc) (gc)) ; MUST GC OR ELSE DELTE ATOMSPACE STICKS AROUND!!
+			)
 		(throw 'badpop "More pops than pushes!")))
 
 
