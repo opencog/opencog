@@ -359,7 +359,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  *
  * @param var_soln   the variable & links mapping
  * @param pred_soln  the clause mapping
- * @return           always return false to search for more solutions
+ * @return           always return false to search for more solutions, unless a
+ *                   good enough solution is found
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
@@ -525,7 +526,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 /**
  * Implement the initiate_search method.
  *
- * Similar to DefaultPatternMatcherCB::initiate_search, in which we start search
+ * Similar to InitiateSearchCB::initiate_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -533,9 +534,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * limiting the search space.
  *
  * @param pPME       pointer to the PatternMatchEngine
- * @param vars       a set of nodes that are variables
- * @param clauses    the clauses for the query
- * @param negations  the negative clauses
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
@@ -608,22 +606,22 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 }
 
 /**
- * Override the find_starter method in DefaultPatternMatchCB.
+ * Override the find_starter_recursive method in InitiateSearchCB.
  *
- * Override find_starter so that it will not treat VariableNode variables,
+ * Override find_starter_recursive so that it will not treat VariableNode variables,
  * but instead compare against the variable list.
  *
- * @param h       same as InitiateSearchCB::find_starter
- * @param depth   same as InitiateSearchCB::find_starter
- * @param start   same as InitiateSearchCB::find_starter
- * @param width   same as InitiateSearchCB::find_starter
- * @return        same as InitiateSearchCB::find_starter but change
+ * @param h       same as InitiateSearchCB::find_starter_recursive
+ * @param depth   same as InitiateSearchCB::find_starter_recursive
+ * @param start   same as InitiateSearchCB::find_starter_recursive
+ * @param width   same as InitiateSearchCB::find_starter_recursive
+ * @return        same as InitiateSearchCB::find_starter_recursive but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth,
-                                Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter_recursive(const Handle& h, size_t& depth,
+                                          Handle& start, size_t& width)
 {
-    Handle rh = InitiateSearchCB::find_starter(h, depth, start, width);
+    Handle rh = InitiateSearchCB::find_starter_recursive(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)

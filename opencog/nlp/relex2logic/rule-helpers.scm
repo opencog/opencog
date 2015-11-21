@@ -87,6 +87,7 @@
 )
 ; -----------------------------------------------------------------------
 ; Connect WordInstanceNode With ConceptNode
+; TODO: do the same for non-instanced node
 (define (r2l-wordinst-concept inst-name)
 	(ReferenceLink
 		(ConceptNode inst-name)
@@ -95,6 +96,7 @@
 )
 ; -----------------------------------------------------------------------
 ; Connect WordInstanceNode With PredicateNode
+; TODO: do the same for non-instanced node
 (define (r2l-wordinst-Predicate inst-name)
 	(ReferenceLink
 		(PredicateNode inst-name)
@@ -508,6 +510,7 @@
 	(list (InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word)))
 )
 
+; FIXME: this is bad because in SV, SVO type rules the same word is ConceptNode instead
 (define (gender-rule word word_instance gender_type)
 	(define concept_node (ConceptNode word))
 	(cond ((string=? gender_type "feminine")
@@ -596,9 +599,9 @@
 (define (det-rule concept instance var_name determiner)
 	(cond ((or (string=? determiner "those") (string=? determiner "these"))
 		(list (ImplicationLink
-			(r2l-wordinst-concept instance)
 			(MemberLink (VariableNode var_name) (ConceptNode instance))
 			(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
+			(r2l-wordinst-concept instance)
 		)
 		((or (string=? determiner "this") (string=? determiner "that"))
 		(list
@@ -661,6 +664,8 @@
 ) 
 
 (define (nn-rule n1 n1_instance n2 n2_instance)
+	(r2l-wordinst-concept n1_instance)
+	(r2l-wordinst-concept n2_instance)
 	(list (InheritanceLink (ConceptNode n1_instance) (ConceptNode n1))
 	(InheritanceLink (ConceptNode n2_instance) (ConceptNode n2))
 	(InheritanceLink (ConceptNode n1_instance) (ConceptNode n2_instance))

@@ -154,6 +154,14 @@
       )
    )
 )
+(ReferenceLink
+    (PredicateNode "runs@838adddd-073f-4e19-8e53-2f6b398809ea" (stv 0.001 0.99000001))
+    (WordInstanceNode "runs@838adddd-073f-4e19-8e53-2f6b398809ea")
+)
+(ReferenceLink
+    (ConceptNode "he@5c3978be-30a7-493b-b276-ebaf4a879669" (stv 0.001 0.99000001))
+    (WordInstanceNode "he@5c3978be-30a7-493b-b276-ebaf4a879669")
+)
 (ParseLink (stv 1 0.99999982)
    (ParseNode "sentence@17302cea-0d43-40f0-b454-311c18d6478b_parse_0" (stv 1 0.991))
    (SentenceNode "sentence@17302cea-0d43-40f0-b454-311c18d6478b")

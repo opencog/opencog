@@ -31,7 +31,7 @@
 ;
 (define (r2l-get-word-inst node)
 	(cond ((null? node) '())
-	      ((has-word-inst? node) (cog-node 'WordInstanceNode (cog-name node)))
+	      ((has-word-inst? node) (car (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 	      (else '())
 	)
 )
@@ -41,6 +41,7 @@
 ;
 ; Given a R2L style node, find the corresponding WordNode.  Skipping
 ; WordInstanceNode since maybe it is not an instanced word.
+; TODO: update this when non-instanced R2L node are linked to WordNode
 ;
 (define (r2l-get-word node)
 	(cond ((null? node) '())
@@ -64,13 +65,14 @@
 ; Return #t or #f depends on whether the node has a WordInstanceNode.
 ;
 (define (has-word-inst? node)
-	(not (null? (cog-node 'WordInstanceNode (cog-name node))))
+	(not (null? (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 )
 
 ; -----------------------------------------------------------------------
 ; has-word? -- Check if a node has the corresponding WordNode
 ;
 ; Return #t or #f depends on whether the node has a WordNode.
+; TODO: update this when non-instanced R2L node are linked to WordNode
 ;
 (define (has-word? node)
 	(not (null? (cog-node 'WordNode (cog-name node))))

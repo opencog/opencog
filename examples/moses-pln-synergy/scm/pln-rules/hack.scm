@@ -168,36 +168,36 @@
   pln-rule-and-hack-name
   pln-rule-and-hack)
 
-(define pln-rule-average-hack
-  (BindLink
-     (AverageLink
-        (QuoteLink (VariableNode "X"))
-        (ImplicationLink
-           (MemberLink
-              (QuoteLink (VariableNode "X"))
-              (ConceptNode "injury-recovery-speed-predicates")
-           )
-           (ImplicationLink
-              (PredicateNode "is-well-hydrated")
-              (QuoteLink (VariableNode "X"))
-           )
-        )
-     )
-     (ImplicationLink (stv 0.7 0.6)
-        (MemberLink
-           (PredicateNode "recovery-speed-of-injury-alpha")
-           (ConceptNode "injury-recovery-speed-predicates")
-        )
-        (ImplicationLink
-           (PredicateNode "is-well-hydrated")
-           (PredicateNode "recovery-speed-of-injury-alpha")
-        )
-     )
-  )
-)
+;; (define pln-rule-average-hack
+;;   (BindLink
+;;      (AverageLink
+;;         (QuoteLink (VariableNode "X"))
+;;         (ImplicationLink
+;;            (MemberLink
+;;               (QuoteLink (VariableNode "X"))
+;;               (ConceptNode "injury-recovery-speed-predicates")
+;;            )
+;;            (ImplicationLink
+;;               (PredicateNode "is-well-hydrated")
+;;               (QuoteLink (VariableNode "X"))
+;;            )
+;;         )
+;;      )
+;;      (ImplicationLink (stv 0.7 0.6)
+;;         (MemberLink
+;;            (PredicateNode "recovery-speed-of-injury-alpha")
+;;            (ConceptNode "injury-recovery-speed-predicates")
+;;         )
+;;         (ImplicationLink
+;;            (PredicateNode "is-well-hydrated")
+;;            (PredicateNode "recovery-speed-of-injury-alpha")
+;;         )
+;;      )
+;;   )
+;; )
 
-(define pln-rule-average-hack-name
-  (Node "pln-rule-average-hack"))
-(DefineLink
-  pln-rule-average-hack-name
-  pln-rule-average-hack)
+;; (define pln-rule-average-hack-name
+;;   (Node "pln-rule-average-hack"))
+;; (DefineLink
+;;   pln-rule-average-hack-name
+;;   pln-rule-average-hack)

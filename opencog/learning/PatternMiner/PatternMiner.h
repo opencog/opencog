@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com> in 2014
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -33,7 +33,14 @@
 #include <thread>
 #include <mutex>
 
+#include <cpprest/http_listener.h>
+#include <cpprest/http_client.h>
+
 using namespace std;
+using namespace web;
+using namespace web::http;
+using namespace web::http::client;
+using namespace web::http::experimental::listener;
 
 namespace opencog
 {
@@ -42,6 +49,10 @@ namespace PatternMining
 #define FLOAT_MIN_DIFF 0.00001
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
+
+#define LINE_INDENTATION "  "
+
+#define JSON_BUF_MAX_NUM 30
 
  struct _non_ordered_pattern
  {
@@ -123,7 +134,7 @@ namespace PatternMining
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
      std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
-                readNextLinkLock, curDFExtractedLinksLock, readNextPatternLock;
+                readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
      Type ignoredTypes[1];
 
@@ -138,9 +149,12 @@ namespace PatternMining
      float surprisingness_II_threshold;
 
      //debug
-     unsigned int processedLinkNum;
+     unsigned int processedLinkNum; // include those links of ignored types
+     unsigned int actualProcessedLinkNum;
 
      vector<vector<vector<unsigned int>>> components_ngram[3];
+
+
 
 //     // [gram], this to avoid different threads happen to work on the same links.
 //     // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
@@ -222,7 +236,8 @@ namespace PatternMining
      //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
 
      void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar);
+                                     HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
+                                     bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, web::json::value &patternJsonArray);
 
      bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -302,13 +317,23 @@ namespace PatternMining
      bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
 
+
+
  public:
-     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
+     PatternMiner(AtomSpace* _originalAtomSpace);
      ~PatternMiner();
 
      bool checkPatternExist(const string& patternKeyStr);
 
      void OutPutFrequentPatternsToFile(unsigned int n_gram);
+
+     void OutPutStaticsToCsvFile(unsigned int n_gram);
+
+     void OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
+
+     void OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency);
+
+     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
      void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
 
@@ -326,7 +351,72 @@ namespace PatternMining
      void testPatternMatcher2();
 
 
+     // ---------------start distributed version of pattern miner ---------------
+private:
+     string centralServerIP;
+     string centralServerPort;
+     string centralServerBaseURL;
 
+     web::json::value *patternJsonArrays;
+
+     unsigned int pattern_parse_thread_num; // for the central server
+     std::thread centralServerListeningThread;
+     std::thread *parsePatternTaskThreads;
+     std::mutex patternQueueLock, addRelationLock, updatePatternCountLock, modifyWorkerLock;
+
+     // map < uid, <is_still_working, processedFactsNum> >
+     map<string, std::pair<bool, unsigned int> > allWorkers;
+     bool allWorkersStop;
+
+     list<json::value> waitForParsePatternQueue;
+
+     string clientWorkerUID;
+
+     bool run_as_distributed_worker;
+     bool run_as_central_server;
+
+     http_client* httpClient;
+     http_listener* serverListener;
+
+     int cur_worker_mined_pattern_num;
+     int total_pattern_received; // in the server
+
+     bool waitingForNewClients;
+
+
+     void handlePost(http_request request);
+     void handleRegisterNewWorker(http_request request);
+     void handleReportWorkerStop(http_request request);
+     void handleFindNewPatterns(http_request request);
+
+     void runParsePatternTaskThread();
+     void parseAPatternTask(json::value jval);
+
+     bool checkIfAllWorkersStopWorking();
+
+     void notifyServerThisWorkerStop();
+
+     void startMiningWork();
+     void centralServerEvaluateInterestingness();
+
+     void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray);
+     void sendPatternsToCentralServer(json::value &patternJsonArray);
+     HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
+     bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+
+
+ public:
+
+     void launchADistributedWorker();
+     void launchCentralServer();
+     void centralServerStartListening();
+     void centralServerStopListening();
+
+     bool sendRequest(http_request &request, http_response &response);
+
+     void startCentralServer();
+
+     // ---------------end distributed version of pattern miner ---------------
   };
 
 }

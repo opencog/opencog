@@ -51,7 +51,7 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument('limit', type=int, location='args')
 
         super(AtomCollectionAPI, self).__init__()
-        self.atomspace = opencog.cogserver.get_server_atomspace()
+        # self.atomspace = opencog.cogserver.get_server_atomspace()
 
     # Set CORS headers to allow cross-origin access
     # (https://github.com/twilio/flask-restful/pull/131):

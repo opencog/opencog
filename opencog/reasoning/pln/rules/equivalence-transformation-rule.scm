@@ -37,7 +37,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (equivalence-transofrmation-formula AII EV)
+(define (equivalence-transformation-formula AII EV)
     (cog-set-tv!
         AII (cog-tv EV)))
 

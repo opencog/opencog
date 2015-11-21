@@ -181,4 +181,7 @@
 (define nn-name (Node "nn"))
 (DefineLink nn-name nn)
 (MemberLink (stv 1 1) nn-name (ConceptNode "R2L-en-RuleBase"))
+(define gender-name (Node "gender"))
+(DefineLink gender-name gender)
+(MemberLink (stv 1 1) gender-name (ConceptNode "R2L-en-RuleBase"))
 

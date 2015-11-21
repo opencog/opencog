@@ -52,9 +52,18 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-advmod-rule verb adv)
-  (ListLink
-    (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
+  (cond 
+    ((or (string=? (cog-name (word-inst-get-lemma adv)) "maybe") 
+     (string=? (cog-name (word-inst-get-lemma adv)) "possibly") 
+     (string=? (cog-name (word-inst-get-lemma adv)) "perhaps")
+     (string=? (cog-name (word-inst-get-lemma adv)) "probably"))
+     (ListLink
+        (maybe-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
+     ))
+  (else
+    (ListLink
+        (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
               (cog-name (word-inst-get-lemma adv)) (cog-name adv)
-    )
-  )
+    ))
+  ))
 )

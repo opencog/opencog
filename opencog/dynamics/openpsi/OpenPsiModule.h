@@ -25,6 +25,7 @@
 #define _OPENCOG_DYNAMICS_OPENPSI_H
 
 #include <opencog/server/Module.h>
+#include <opencog/dynamics/openpsi/OpenPsiAgent.h>
 
 namespace opencog
 {
@@ -36,6 +37,7 @@ namespace opencog
 class OpenPsiModule : public Module
 {
 private:
+    Factory<OpenPsiAgent, Agent> openPsiAgentFactory;
 
 public:
     OpenPsiModule(CogServer&);

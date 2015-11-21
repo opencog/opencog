@@ -1,131 +1,73 @@
-; =============================================================================
-; AbductionRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   LinkType
-;       C
-;       B
-; |-
-; LinkType
-;   A
-;   C
-;
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       abduction-inheritance-rule
-;       abduction-implication-rule
-;       abduction-subset-rule
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; AbductionRule
+;; 
+;; <LinkType>
+;;   A
+;;   B
+;; <LinkType>
+;;   C
+;;   B
+;; |-
+;; <LinkType>
+;;   A
+;;   C
+;;
+;; Due to type system limitations, the rule has been divided into 3:
+;;       abduction-inheritance-rule
+;;       abduction-implication-rule
+;;       abduction-subset-rule
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define abduction-inheritance-rule
+;; Generate the corresponding abduction rule given its link-type.
+(define (gen-abduction-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
-            (InheritanceLink
+            (link-type
                 (VariableNode "$A")
                 (VariableNode "$B"))
-            (InheritanceLink
+            (link-type
                 (VariableNode "$C")
-                (VariableNode "$B")))
+                (VariableNode "$B"))
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C"))))
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: abduction-formula")
             (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (InheritanceLink
+                (link-type
                     (VariableNode "$C")
                     (VariableNode "$B"))
-                (InheritanceLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$C"))))))
+
+(define abduction-inheritance-rule
+  (gen-abduction-rule InheritanceLink))
 
 (define abduction-implication-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
-            (ImplicationLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (ImplicationLink
-                (VariableNode "$C")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: abduction-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (VariableNode "$C")
-                    (VariableNode "$B"))
-                (ImplicationLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))))))
+  (gen-abduction-rule ImplicationLink))
 
 (define abduction-subset-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C"))
-        (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
-            (SubsetLink
-                (VariableNode "$A")
-                (VariableNode "$B"))
-            (SubsetLink
-                (VariableNode "$C")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: abduction-formula")
-            (ListLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C")
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (SubsetLink
-                    (VariableNode "$C")
-                    (VariableNode "$B"))
-                (SubsetLink
-                    (VariableNode "$A")
-                    (VariableNode "$C"))))))
+  (gen-abduction-rule SubsetLink))
 
-(define (abduction-formula A B C AB CB AC)
+(define (abduction-formula AB CB AC)
     (let
-        ((sA (cog-stv-strength A))
-         (cA (cog-stv-confidence A))
-         (sB (cog-stv-strength B))
-         (cB (cog-stv-confidence B))
-         (sC (cog-stv-strength C))
-         (cC (cog-stv-confidence C))
+        ((sA (cog-stv-strength (gar AB)))
+         (cA (cog-stv-confidence (gar AB)))
+         (sB (cog-stv-strength (gdr AB)))
+         (cB (cog-stv-confidence (gdr AB)))
+         (sC (cog-stv-strength (gar CB)))
+         (cC (cog-stv-confidence (gar CB)))
          (sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
          (sCB (cog-stv-strength CB))
@@ -136,3 +78,19 @@
                 (simple-deduction-strength formula sA sB sC sAB
                                            (inversion-strength-formula sCB sC sB))
                 (min cAB cCB)))))
+
+;; Name the rules
+(define abduction-inheritance-rule-name
+  (Node "abduction-inheritance-rule"))
+(DefineLink abduction-inheritance-rule-name
+  abduction-inheritance-rule)
+
+(define abduction-implication-rule-name
+  (Node "abduction-implication-rule"))
+(DefineLink abduction-implication-rule-name
+  abduction-implication-rule)
+
+(define abduction-subset-rule-name
+  (Node "abduction-subset-rule"))
+(DefineLink abduction-subset-rule-name
+  abduction-subset-rule)

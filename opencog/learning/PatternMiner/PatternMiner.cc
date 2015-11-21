@@ -1000,6 +1000,201 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 
 }
 
+
+// call this function only after sort by frequency
+void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
+{
+    // out put to csv file
+    ofstream csvFile;
+    string csvfileName = "PatternStatics_" + toString(n_gram) + "gram.csv";
+
+    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+
+    std::cout<<"\nDebug: PatternMiner: writing  (gram = " + toString(n_gram) + ") pattern statics to csv file " + csvfileName << std::endl;
+
+    csvFile.open(csvfileName.c_str());
+
+
+    csvFile << "Frequency,Surprisingness_I,Surprisingness_II" << std::endl;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count < 2)
+            continue;
+
+        csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ",";
+
+        if (htreeNode->superPatternRelations.size() > 0)
+            csvFile << htreeNode->nII_Surprisingness;
+        else
+            csvFile << "unknown";
+
+        csvFile << std::endl;
+    }
+
+    csvFile.close();
+}
+
+void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram)
+{
+
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+
+    fileName = "LowFrequencyHighSurprisingness_" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") LowFrequencyHighSurprisingness patterns to file " + fileName << std::endl;
+
+
+    vector<HTreeNode*> resultPatterns;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if ( (htreeNode->count < 4) && (htreeNode->count > 1))
+            resultPatterns.push_back(htreeNode);
+    }
+
+    std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeBySurprisingness_I);
+
+    resultFile.open(fileName.c_str());
+
+    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+
+    resultFile << "This file contains the pattern with Frequency < 4, sort by Surprisingness_I"  << std::endl;
+
+
+    for (HTreeNode* htreeNode : resultPatterns)
+    {
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+
+        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << endl;
+
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+
+    }
+
+    resultFile.close();
+
+
+}
+
+void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency)
+{
+
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+
+    fileName = "HighFrequencyHighSurprisingness_" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") HighFrequencyHighSurprisingness patterns to file " + fileName << std::endl;
+
+    vector<HTreeNode*> resultPatterns;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count > min_frequency)
+            resultPatterns.push_back(htreeNode);
+    }
+
+    std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeBySurprisingness_I);
+
+
+    resultFile.open(fileName.c_str());
+
+
+    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+
+    resultFile << "This file contains the pattern with Frequency > " << min_frequency << ", sort by Surprisingness_I"  << std::endl;
+
+
+    for (HTreeNode* htreeNode : resultPatterns)
+    {
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+
+        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << endl;
+
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+
+    }
+
+    resultFile.close();
+
+
+}
+
+void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram,unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II)
+{
+
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+
+    fileName = "HighSurprisingILowSurprisingnessII" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") HighSurprisingILowSurprisingnessII patterns to file " + fileName << std::endl;
+
+    vector<HTreeNode*> resultPatterns;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->superPatternRelations.size() == 0)
+            continue;
+
+        if (htreeNode->count < 10)
+            continue;
+
+        if ( (htreeNode->nI_Surprisingness > min_surprisingness_I) && (htreeNode->nII_Surprisingness < max_surprisingness_II) )
+            resultPatterns.push_back(htreeNode);
+    }
+
+
+    resultFile.open(fileName.c_str());
+
+
+    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+
+    resultFile << "This file contains the pattern with Surprising_I > " << min_surprisingness_I << ", and Surprisingness_II < "  << max_surprisingness_II << std::endl;
+
+
+    // std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeBySurprisingness_I);
+
+    for (HTreeNode* htreeNode : resultPatterns)
+    {
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+
+        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << endl;
+
+        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+
+    }
+
+    resultFile.close();
+
+
+}
+
+
+
 // To exclude this kind of patterns:
 // $var_3 doesn't really can be a variable, all the links contains it doesn't contains any const nodes, so actually $var_3 is a leaf
 // we call variable nodes like $var_3 as "loop variable"
@@ -1354,7 +1549,9 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
         findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
         // cout << "CalculateEntropy: Not found in H-tree! call pattern matcher again! h = log" << newHTreeNode->count << " ";
 
-        return log2(newHTreeNode->count);
+        int count = newHTreeNode->count;
+
+        return log2(count);
 
     }
 }
@@ -1461,6 +1658,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              generateNextCombinationGroup(indexes, maxgram);
          }
 
+         delete [] indexes;
 
     }
 
@@ -1637,16 +1835,27 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
         // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
-        HTreeNode* newHTreeNode = new HTreeNode();
-        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
-        uniqueKeyLock.unlock();
+        // cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
+        if (run_as_central_server)
+        {
+            uniqueKeyLock.unlock();
 
-        newHTreeNode->pattern = connectedPattern;
+            return 0;
+        }
+        else
+        {
 
-        // Find All Instances in the original AtomSpace For this Pattern
-        findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
-//        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
-        return newHTreeNode->count;
+            HTreeNode* newHTreeNode = new HTreeNode();
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+            uniqueKeyLock.unlock();
+
+            newHTreeNode->pattern = connectedPattern;
+
+            // Find All Instances in the original AtomSpace For this Pattern
+            findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
+    //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+            return newHTreeNode->count;
+        }
 
     }
 
@@ -1777,6 +1986,9 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 //    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
 //        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
 
+    if (HNode->count == 0)
+        HNode->count = 1;
+
     if (HNode->count < 2)
     {
 
@@ -1809,6 +2021,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         float total_p = 1.0f;
 
         bool containsComponentDisconnected = false;
+        bool subComponentNotFound = false;
+
         for (vector<unsigned int>& oneComponent : oneCombin)
         {
             HandleSeq subPattern;
@@ -1835,6 +2049,14 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             {
                 // std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
+
+                if (component_count == 0)
+                {
+                    // one of the subcomponents is missing, skip this combination
+                    subComponentNotFound = true;
+                    break;
+                }
+
                 // cout << ", count = " << component_count;
                 float p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
@@ -1847,7 +2069,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
         }
 
-        if (containsComponentDisconnected)
+        if (containsComponentDisconnected || subComponentNotFound)
             continue;
 
 
@@ -1970,7 +2192,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         else
         {
             HNode->nII_Surprisingness = -1.0f;
-            num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
+            // num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
         }
     }
 
@@ -2014,7 +2236,7 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 
 }
 
-PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
+PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
@@ -2031,10 +2253,16 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 
     THREAD_NUM = 1;
 
+    run_as_distributed_worker = false;
+    run_as_central_server = false;
+
 
     threads = new thread[THREAD_NUM];
 
-    MAX_GRAM = max_gram;
+    patternJsonArrays = new web::json::value[THREAD_NUM];
+
+    int max_gram = config().get_int("Pattern_Max_Gram");
+    MAX_GRAM = (unsigned int)max_gram;
     cur_gram = 0;
 
     ignoredTypes[0] = LIST_LINK;
@@ -2066,7 +2294,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     }
 
     // vector < vector<HTreeNode*> > patternsForGram
-    for (unsigned int i = 0; i < max_gram; ++i)
+    for (unsigned int i = 0; i < MAX_GRAM; ++i)
     {
         vector<HTreeNode*> patternVector;
         patternsForGram.push_back(patternVector);
@@ -2098,7 +2326,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
         ngram ++;
     }
 
-    std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
+    // std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
 }
 
 PatternMiner::~PatternMiner()
@@ -2109,6 +2337,7 @@ PatternMiner::~PatternMiner()
 
 void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
+
     thresholdFrequency = _thresholdFrequency;
 
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
@@ -2150,8 +2379,9 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
         if (enable_Interesting_Pattern)
         {
-            for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
+            for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
             {
+
                 cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
                 cur_index = -1;
                 threads = new thread[THREAD_NUM];
@@ -2184,11 +2414,17 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                     std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
                     OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
+                    if (cur_gram == MAX_GRAM)
+                        break;
+
                     vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
+
 
                     // and then sort by surprisingness_II
                     std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
                     OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
+
+                    OutPutStaticsToCsvFile(cur_gram);
 
                     // Get the min threshold of surprisingness_II
                     int threshold_index_II;
@@ -2226,6 +2462,12 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
                             finalPatternsForGram[cur_gram-1].push_back(pNode);
                     }
 
+                    // OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+
+                    // OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  15);
+
+                    // OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
+
                     // sort by frequency
                     std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
@@ -2242,6 +2484,9 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
     std::cout<< THREAD_NUM << " threads used. \n";
     std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
+
+    std::cout << "Pattern Miner application quited!" << std::endl;
+    std::exit(EXIT_SUCCESS);
 
 //   testPatternMatcher2();
 
@@ -2305,7 +2550,7 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
         atomspace = this->atomSpace;
 
     std::stringstream answer;
-    std::string more_indent = indent + "  ";
+    std::string more_indent = indent + LINE_INDENTATION;
 
     answer << indent  << "(" << classserver().getTypeName(atomspace->get_type(h)) << " ";
 

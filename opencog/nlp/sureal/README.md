@@ -5,6 +5,8 @@ The microplanner also uses SuReal to determine whether a chunk (a set of atoms)
 can be translated into a sentence, so the two projects are dependent on each
 other.
 
+This requires LG, RelEx, and RelEx2Logic outputs.
+
 The main function is `sureal` which takes in a `SetLink` and returns a
 sentence.
 
@@ -23,8 +25,13 @@ For example, you can do
 which will return all possible sentence is words list, like
 
 ```
-((she drinks .) (she drinks quickly .))
+((she drinks quickly .) (she drinks .))
 ```
+or just
+```
+((she drinks .)
+```
+due to some internal algorithm that will stop if it find a "good enough" solution.
 
 ## Algorithm
 

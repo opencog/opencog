@@ -231,7 +231,8 @@
   Given a parse, returns a list of RelEx outputs associated with the ParseNode.
 "
     (let* ((sent-node (car (cog-chase-link 'ParseLink 'SentenceNode parse-node)))
-           (sent-incoming-set (cog-incoming-set sent-node))
+           (anchor (car (cog-get-link 'ListLink 'AnchorNode sent-node)))
+           (sent-incoming-set (remove (lambda (x) (equal? anchor x)) (cog-incoming-set sent-node)))
            (word-inst-nodes (parse-get-words parse-node))
            (relex-relations (concatenate (map word-inst-get-relations word-inst-nodes)))
            (word-incoming-set (concatenate (map cog-incoming-set word-inst-nodes)))
@@ -338,7 +339,13 @@
 "
 	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
 		(if (null? wlist)
-			'()
+			; FIXME: this is a dumb way to get other type
+			(let ((nlist (cog-chase-link 'LemmaLink 'NumberNode word-inst)))
+				(if (null? nlist)
+					'()
+					(car nlist)
+				)
+			)
 			(car wlist)
 		)
 	)
@@ -795,7 +802,7 @@
 	; (cog-map-type delone 'EvaluationLink)
 	; Can't delete ListLink, these are used in EvaluationLinks.
 	; (cog-map-type delone 'ListLink)
-	
+
 	; Part of Speech links are used in the word-sense
 	; database, so cannot delete these.
 	; (cog-map-type delone 'PartOfSpeechLink)

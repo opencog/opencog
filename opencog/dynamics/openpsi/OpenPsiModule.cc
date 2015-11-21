@@ -37,11 +37,14 @@ DECLARE_MODULE(OpenPsiModule);
 OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
 {
     logger().info("[OpenPsiModule] Entering constructor");
+    _cogserver.registerAgent(OpenPsiAgent::info().id,
+                                &openPsiAgentFactory);
 }
 
 OpenPsiModule::~OpenPsiModule()
 {
     logger().info("[OpenPsiModule] Entering destructor");
+    _cogserver.unregisterAgent(OpenPsiAgent::info().id);
 }
 
 

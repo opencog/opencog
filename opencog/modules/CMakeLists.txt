@@ -4,10 +4,11 @@ IF (HAVE_SERVER)
 	IF (HAVE_CYTHON)
 		ADD_SUBDIRECTORY(python)
 	ENDIF (HAVE_CYTHON)
-	IF (HAVE_ZMQ AND TBB_FOUND)
-		ADD_SUBDIRECTORY(events)
-	ENDIF (HAVE_ZMQ AND TBB_FOUND)
 ENDIF (HAVE_SERVER)
+
+IF (HAVE_REST)
+	ADD_SUBDIRECTORY(events)
+ENDIF (HAVE_REST)
 
 # ----------------------------------------
 # Link-grammar cogserver module
@@ -38,18 +39,20 @@ INSTALL (TARGETS QueryModule
 # ----------------------------------------
 # The SQL persistence module
 
-ADD_LIBRARY (PersistModule SHARED
-	PersistModule.cc
-)
+IF (HAVE_PERSIST_SQL)
+	ADD_LIBRARY (PersistModule SHARED
+		PersistModule.cc
+	)
 
-TARGET_LINK_LIBRARIES(PersistModule
-	# server  # needed for definition of _ZTIN7opencog7RequestE
-	${ATOMSPACE_LIBRARIES}
-)
+	TARGET_LINK_LIBRARIES(PersistModule
+		# server  # needed for definition of _ZTIN7opencog7RequestE
+		${ATOMSPACE_LIBRARIES}
+	)
 
-INSTALL (TARGETS PersistModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
+	INSTALL (TARGETS PersistModule
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	)
+ENDIF (HAVE_PERSIST_SQL)
 
 # ----------------------------------------
 # The ZeroMQ persistence module

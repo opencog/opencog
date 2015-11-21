@@ -1,17 +1,26 @@
-## Relex2Logic RuleBase
-This directory has the initial specification of the R2L-RuleBase for the
-English language.
+# RelEx2Logic
 
-To test the rules, use the following steps.
+RelEx2Logic (R2L) aims to produce the semantic representation of some input sentence.
+This is done by creating a [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+rule base to be processed by a slightly modified forward chainer.
+
+The current pipeline for a sentence is
+
+1. sentence => link-grammar
+2. link-grammar => relex
+3. relex => relex2logic
+
+Step 1 & 2 are done by the relex server in https://github.com/opencog/relex,
+while step 3 is done by the URE.
+
+To use R2L:
+
 1. Start the cogserver
 2. Enter the scm shell.
-3. Load the scheme files in this directory and the sub-directories using
-   `(load "../path/to/scheme/files")` (a configuration file that adds the
-   relevant set of files are shortly going to be added).
+3. Load the rules using `(load-r2l-rulebase)`
 4. Start the relex server using the --relex flag (don't use the --logic flag)
-5. In the opencog scheme shell run (relex-parse "some sentence"), preferably
-   sentences on which the rules are applicable.
-6. Run `(cog-bind name-of-the-variable-which-has-BindLink-as-its-value)`
+5. In the opencog scheme shell run `(nlp-parse "some complete sentence")`
+6. Build your thing :smile:
 
 
 ## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns
@@ -21,6 +30,7 @@ To test the rules, use the following steps.
 ### Overview:
 Currently the linguistic structures which R2L translates into logic atoms can
 be divided into roughly three classes,
+
 1. predicate-argument structures (the main structure of any clause) such as
    SVO etc.,
 2. a variety of types of constituents that can take the place of a predicate
@@ -34,6 +44,7 @@ There are also, more-or-less, three kinds of rule, or aspects of rule-structure
 (since some rules combine these approaches), which roughly correspond to the
 three types of linguistic phenomena described above, although this was never
 thought out ahead of time in that way; it just sort-of coalesced.  The three kinds of rule are,
+
 1. rules which assign an entire predicate-argument structure at one time,
 2. rules which contain conditional branching in order to assign different types
    of arguments or predicates to a particular structural “slot”, and
@@ -41,6 +52,7 @@ thought out ahead of time in that way; it just sort-of coalesced.  The three kin
    using an InheritanceLink or ImplicationLink.
 
 The currently evident 'issues' with Relex2Logic are also threefold (why not, it's a magic number, right?):
+
 1. a lot of redundancy (to be discussed in excruciating detail below)
 2. relex output which is inadequate for the creation of 'good' R2L rules, and
 3. the question of whether R2L should be more or less specific in terms of its
@@ -62,10 +74,10 @@ the redundancy problem, with some comments on the issues with each of them;
 then by the time we get through that, the problems and possibilities with the
 current rule set will be much clearer.
 
-** 1. The 8 main predicate-argument structures: **
+#### The 8 main predicate-argument structures:
 
-1. Be-inheritance     – “Bill is the teacher.”
-2. Copula            – “When is the meeting?”
+    1. Be-inheritance     – “Bill is the teacher.”
+    2. Copula            – “When is the meeting?”
 
 These two seem confused from the point of linguistics, but perhaps that is just
 a matter of labeling, so Opencog may not care.  Pretty much anything that gets
@@ -89,9 +101,10 @@ think there may be an ambiguity being abused here between the linguistic usage
 of “being a property” and the logical meaning of being a property.
 
 The other structures which seem closely related to these are:
-3. SP or “predadj” (predicate adjective) – “Bill is smart.”
-4. PREP or predicate preposition(al phrase) – “The book is on the table.”
-5. SV – subject-verb – “Bill sleeps.”
+
+    3. SP or “predadj” (predicate adjective) – “Bill is smart.”
+    4. PREP or predicate preposition(al phrase) – “The book is on the table.”
+    5. SV – subject-verb – “Bill sleeps.”
 
 Linguistically, these make pretty good sense.  But when you go to the
 scheme-helpers you realize that not all these of distinctions are necessary.
@@ -111,11 +124,10 @@ or a preposition.
 
 I didn't fully realize this at first, so right now, SV and SP both call the SV scheme helper, and PREP goes to the SVO scheme helper because the existence of the _pobj (preposition object relation) made this seem natural at the time.  But since _pobj also gets assigned by its own rule, regardless of these rules, PREP structures could be handled by SV or be-inheritance.
 
-***This discussion is most important because if you continue with the old design of R2L, then you need to write five different rules when you combine these patterns with each of the question-types or other sentence-types that require separate rules; so reducing the need for five scheme helpers to two could save a lot of work and processing time***
+**This discussion is most important because if you continue with the old design of R2L, then you need to write five different rules when you combine these patterns with each of the question-types or other sentence-types that require separate rules; so reducing the need for five scheme helpers to two could save a lot of work and processing time**
 
-6. SVO    –    “Bill ate a peach.”
-7. SVIO –    “Bill sent a bomb to the White House.” / “Bill sent the White House
-   a bomb.”
+    6. SVO    –    “Bill ate a peach.”
+    7. SVIO –    “Bill sent a bomb to the White House.” / “Bill sent the White House a bomb.”
 
 The only thing to note here is that properly catching SVIO sentences is tricky
 and always will be, because there are other sentences that look exactly like
@@ -126,7 +138,7 @@ can't say “Bill flew the White House a plane.”
 
 The difference may be important, because the “adverbial” modifies the predicate,
 while the IO is a nuclear argument of the predicate—the structure is
-fundamentally different (taking a lot of short-cuts with the presentation of the code here . . .):
+fundamentally different (taking a lot of short-cuts with the presentation of the code here ...):
 
 Adverbial modification:
 ```
@@ -151,21 +163,23 @@ gets the thematic role “goal” or “recipient” and since locations are oth
 usually indicated by adverbial phrases, it probably wouldn't hurt to forget
 entirely about the idea of indirect object in the R2L output, and just treat
 them exactly like adverbial modifiers (a predicate of which the modified verb
-is an argument).  
+is an argument).
 
 But anyway, at the moment there are two SVIO rules, one for “Bill sent the
 White House a bomb” and another for “Bill sent a bomb to the White House.” And
-they rely on relex not to mis-classify a “to” adverbial as an indirect object.  
+they rely on relex not to mis-classify a “to” adverbial as an indirect object.
 I think it gets it right most of the time.  I used to have a third rule to
 catch IO's which were mis-classified as _advmod, but it doesn't seem necessary
 anymore.
 
-8. TOBE – “Bill seems to be happy.”
+    8. TOBE – “Bill seems to be happy.”
+
 This seems like an appropriate structure to have its own rule, although there
 are a couple of things about it worth being aware of.  “to be happy” here is
 known as an intensional complement, same as “Bill is happy.”  The difference of
 course is that “seems” or similar verbs such as “appears” or “looks” imply that
-Bill's being happy is not reality; it “is” within the “world” of appearances.  
+Bill's being happy is not reality; it “is” within the “world” of appearances.
+
 My favorite theory for modeling the logic of this kind of thing is Fauconnier
 and Turner's “mental spaces” but I am sure there are other ways; see the
 discussion further below about _rep().  Also note that the “to be” can be
@@ -183,7 +197,10 @@ basic structures multiplies the number of rules you need to have for each of
 the other categories of sentence-encompassing structure, which are described
 below . . .
 
-** The “to-do” statements - e.g.**
+#### The “to-do” statements
+
+e.g.
+
     - She wants to sing.
     - She wants you to sing.
 
@@ -200,7 +217,10 @@ their own.  Anyway, to summarize, the two “to-do”rules that I didn't port ar
 too specific, and there need to be two more rules to handle those patterns
 instead—a rule for modals (can, must, will), and a rule for this:
 
-** A predadj-to-do rule – e.g.**
+**A predadj-to-do rule**
+
+e.g.
+
     - She seems to be able to sing.
     - He intends to be ready to leave.
     - It must be possible to fix this.
@@ -219,9 +239,11 @@ To continue with the to-do rules . . . .The current selection “to-do” rules
 seems arbitrary. They don't cover most of the 8 basic structures described
 previously, nor many other two-predicate patterns that we have no rules for,
 such as:
+
     - “I made her happy.”
     - “I consider him (to be) a fool.”
     - “I saw him running away.”
+    
 (see further on for a more complete list)
 
 I didn't create all the necessary rules yet, because of the redundancy
@@ -235,18 +257,20 @@ the first, and leaving the other argument assignments for other rules to fill
 in.  I didn't see this immediately because I was porting the old R2L “to-do”
 rules which were all done as whole-sentence structures.  
 
-** The “Which” Problem **
+#### The “Which” Problem
 
 However, another problem arises, which is that the whole-sentence pattern
 combinations still multiply endlessly when combined with certain question types
 in the current implementation, as follows:
 
-“which-rules e.g.”
+**which-rules**
+
     - Which bomb did you send to the White House?
     - Which guy is smarter?
     - Which table is the book on?
 
-** question-determiner-rules **
+**question-determiner-rules**
+
     - At what time will you arrive?
     - For what reason, would you do that?
     - In what way can we solve this problem?
@@ -325,7 +349,7 @@ upon detection of variables as their main arguments, e.g.:
 )
 ```
 
-I haven't done this for “to-do” sentences yet, so they can't handle “who” or “what” questions yet.  
+I haven't done this for “to-do” sentences yet, so they can't handle “who” or “what” questions yet.
 
 I'm not sure why “which”-questions require satisfying-set logic but “what” and
 “who” questions don't.  This difference was defined before I got here. It seems
@@ -338,11 +362,11 @@ ate the pizza?”  I assume there is a good reason for this that I don't
 understand . . .
 
 Secondly, the branching rules really aren't much more efficient code-wise than
-just having separate rules for each case, anyway.  
+just having separate rules for each case, anyway.
 
 ### The “plug-n-play” solution
 
-Much more efficient would be to insert the right constituents into templates.  
+Much more efficient would be to insert the right constituents into templates.
 One rule (or perhaps in some cases 2-3 for whatever reasons) for each argument
 type (subject, object, and various phrasal or clausal complements, and “who”
 and “what”)  and one rule for each predicate-argument template including
@@ -465,6 +489,7 @@ indicated by earlier words in the sentence, or what Fauconnier would have
 called a “mental-space builder”.  Often the context is the mind of the subject
 of the main verb, but also it could be someone's speech, or some other
 “representation” (and perhaps other things?):
+
     - “Mary called Bob a wombat.”
     (Bob is a wombat in Mary's verbal representation)
 
