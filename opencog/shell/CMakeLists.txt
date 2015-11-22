@@ -32,6 +32,7 @@ ADD_LIBRARY (scheme-shell SHARED
 )
 
 TARGET_LINK_LIBRARIES(scheme-shell
+	server # setting the guile atomspace needs atomspace of server.
 	${ATOMSPACE_smob_LIBRARY}
 	${ATOMSPACE_LIBRARY}
 	${COGUTIL_LIBRARY}
