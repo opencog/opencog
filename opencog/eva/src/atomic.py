@@ -46,19 +46,19 @@ def do_look_right():
 	return TruthValue(1, 1)
 
 def glance_at_face(face_id_node):
-	face_id = int(face_id_node.name)
+	face_id = int(float(face_id_node.name))
 	print "Python glance at face id", face_id
 	evl.glance_at(face_id)
 	return TruthValue(1, 1)
 
 def look_at_face(face_id_node):
-	face_id = int(face_id_node.name)
+	face_id = int(float(face_id_node.name))
 	print "Python look at face id", face_id
 	evl.look_at(face_id)
 	return TruthValue(1, 1)
 
 def gaze_at_face(face_id_node):
-	face_id = int(face_id_node.name)
+	face_id = int(float(face_id_node.name))
 	print "Python gaze at face id", face_id
 	evl.gaze_at(face_id)
 	return TruthValue(1, 1)
