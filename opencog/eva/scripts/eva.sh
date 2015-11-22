@@ -10,7 +10,7 @@
 # and blender models were installed. It assumes that catkin_make was
 # already run.
 #
-# If you ave not yet installed the pre-requisites, then do this:
+# If you have not yet installed the pre-requisites, then do this:
 # cd ~ ; mkdir src ; cd src
 # echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
 # mkdir catkin ; cd catkin ; mkdir src ;
@@ -22,9 +22,9 @@
 # catkin build
 
 # Change this for your setup!
-export BLENDIR="../hr/blender_api"
-# export OCBHAVE="../opencog/ros-behavior-scripting/"
-export OCBHAVE="../ros-behavior-scripting/"
+export CATKINDIR="."
+export BLENDIR="$CATKINDIR/../hr/blender_api"
+export OCBHAVE="$CATKINDIR/../opencog/ros-behavior-scripting/"
 export PYTHONPATH=$PYTHONPATH:`pwd`/$OCBHAVE/src
 
 # Without this, some ros messages seem to run astray.
