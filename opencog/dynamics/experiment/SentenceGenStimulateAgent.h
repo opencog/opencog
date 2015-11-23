@@ -15,6 +15,15 @@ class CogServer;
 namespace ECANExperiment {
 
 extern std::vector<std::string> generated_sentences;
+extern std::vector<HandleSeq> sent_wordnodes;
+extern std::vector<HandleSeq> wordinstancenodes;
+
+extern UnorderedHandleSet hspecial_word_nodes;
+
+extern std::vector<std::string> special_words;
+extern std::vector<std::string> nspecial_words;
+extern int sent_size;
+
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.
  */
@@ -30,7 +39,7 @@ public:
 
     virtual const ClassInfo& classinfo() const;
     static const ClassInfo& info();
-    void insertStimulate(void);
+    void generate_stimuate_sentence(void);
     virtual void run();
 };
 

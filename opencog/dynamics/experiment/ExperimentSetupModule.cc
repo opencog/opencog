@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
@@ -35,6 +36,7 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
     _log = new Logger(); //new Logger("ecanexpe.log");
     _log->fine("uuid,cycle,sti_old,sti_new,lti,vlti,wage,rent,agent_name");
     _as = &_cs.getAtomSpace();
+    _scmeval = new SchemeEval(_as);
 
     _AVChangedSignalConnection = _as->AVChangedSignal(
             boost::bind(&ExperimentSetupModule::AVChangedCBListener, this, _1,
@@ -44,6 +46,7 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
 ExperimentSetupModule::~ExperimentSetupModule()
 {
     unregisterAgentRequests();
+    delete(_scmeval);
 }
 
 void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
@@ -180,20 +183,27 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
 {
     std::string file_name = args.back();
     // cycle,uuid,sti,lti
-    std::stringstream sstream;
 
-    for (const auto& p : _data) {
-        for (const ECANValue& ev : p.second) {
-            sstream << std::to_string(p.first.value()) << ","
+    auto sprint = [this](const UnorderedHandleSet & uhs) {
+        std::stringstream sstream;
+        for (const auto & p : _data) {
+            if(uhs.find(p.first) != uhs.end()) {
+                for (const ECANValue& ev : p.second) {
+                    sstream << std::to_string(p.first.value()) << ","
                     << std::to_string(ev._sti) << ","
                     << std::to_string(ev._lti) << ","
                     << std::to_string(ev._vlti) << ","
                     << std::to_string(ev._cycle) << "\n";
+                }
+            }
         }
-    }
+        return sstream.str();
+    };
 
     std::ofstream outf(file_name, std::ofstream::out | std::ofstream::trunc);
-    outf << sstream.str();
+
+    //Print ecan  values of special word nodes
+    outf << sprint(hspecial_word_nodes);
     outf.flush();
     outf.close();
 
@@ -223,49 +233,12 @@ std::string ExperimentSetupModule::do_load_word_dict(
     config().load(file_name.c_str());
     std::string special_wstr = config().get("SPECIAL_WORDS");
     std::string nspecial_wstr = config().get("NON_SPECIAL_WORDS");
-    std::vector<std::string> special_words = tokenize(special_wstr, ',');
-    std::vector<std::string> nspecial_words = tokenize(nspecial_wstr, ',');
-    std::vector<std::string> sentences = generate_sentence(
-            nspecial_words, special_words, config().get_int("SENTENCE_SIZE"));
 
-    //std::cout << "GENERATED SENTENCES" << std::endl;
-    //for(const auto& sentence: sentences) std:: cout << sentence << std::endl;
-
-    generated_sentences = sentences;
+    special_words = tokenize(special_wstr, ',');
+    nspecial_words = tokenize(nspecial_wstr, ',');
+    sent_size = config().get_int("SENTENCE_SIZE");
 
     return "Loading successful.\n";
 }
 
-//TODO make it flexible enough to specify no of special and non special words
-//to include in the sentence to be generated.
-std::vector<std::string> ExperimentSetupModule::generate_sentence(
-        const std::vector<std::string>& non_special_words,
-        const std::vector<std::string>& special_words, int sent_size)
-{
-    std::vector<std::string> sentences;
-    int sw_end = special_words.size() - 1;
-    int nsw_end = non_special_words.size() - 1;
 
-    for (; sent_size > 0; sent_size--) {
-        //Two random special words from each half
-        int sw1 = rand() % (sw_end / 2);
-        int sw2 = rand() % (sw_end / 2) + sw_end / 2;
-
-        //Four Random non-special words chosen from each quarters
-        int rw1 = rand() % (nsw_end / 4);
-        int rw2 = rand() % (nsw_end / 4) + nsw_end / 4;
-        int rw3 = rand() % (nsw_end / 4) + nsw_end / 2;
-        int rw4 = rand() % (nsw_end / 4) + nsw_end * 3 / 4;
-
-        //Don't care about order
-        std::string sentence = special_words[sw1] + " " + non_special_words[rw1]
-                               + " " + non_special_words[rw2] + " "
-                               + special_words[sw2] + " "
-                               + non_special_words[rw3] + " "
-                               + non_special_words[rw4] + ".";
-
-        sentences.push_back(sentence);
-    }
-
-    return sentences;
-}
