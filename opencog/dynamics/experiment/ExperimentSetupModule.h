@@ -17,6 +17,7 @@ namespace opencog {
 
 class AtomSpace;
 class CogServer;
+class SchemeEval;
 class Module;
 class Logger;
 
@@ -29,7 +30,15 @@ static std::string ECAN_EXP_AGENTS = "opencog::HebbianUpdatingAgent\n"
                                      "opencog::ArtificilaStimulatorAgent\n";
                                      //"opencog::SurprisingnessEvaluatorAgent\n";
 
-extern std::vector<std::string> generated_sentences={};
+std::vector<std::string> generated_sentences={};
+std::vector<HandleSeq> sent_wordnodes;
+std::vector<HandleSeq> wordinstancenodes;
+
+UnorderedHandleSet hspecial_word_nodes;
+
+std::vector<std::string> special_words;
+std::vector<std::string> nspecial_words;
+int sent_size;
 
 class ExperimentSetupModule: public Module {
 private:
@@ -66,16 +75,13 @@ private:
     AtomSpace * _as;
     CogServer& _cs;
     Logger * _log;
+    SchemeEval * _scmeval;
 
     std::map<Handle, std::vector<ECANValue>> _data;
     boost::signals2::connection _AVChangedSignalConnection;
 
     void AVChangedCBListener(const Handle& h, const AttentionValuePtr& av_old,
                              const AttentionValuePtr& av_new);
-
-    std::vector<std::string> generate_sentence(
-            const std::vector<std::string>& non_special_words,
-            const std::vector<std::string>& special_words, int sent_size);
 
     //Start stop ECAN agents commands
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-load", do_ecan_load,
