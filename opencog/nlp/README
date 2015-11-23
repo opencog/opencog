@@ -73,7 +73,7 @@ old-chatbot
 -----------
 The old-chatbot directory contains some code to tie opencog NLP
 processing to chat systems, and particularly, to IRC chat.  Provides
-a high-level implementation of a simple, hard-coded question-answering 
+a high-level implementation of a simple, hard-coded question-answering
 system, resting on the foundations of "seme" and "triples".  It worked,
 but had some design difficulties.
 
@@ -85,35 +85,37 @@ to convert dependencies into (first-order, probabilistic) logic forms.
 
 scm
 ---
-The scm directory contains miscellaneous scheme scripts of general 
-utility for NLP work. This includes scripts for pulling out link-grammar 
+The scm directory contains miscellaneous scheme scripts of general
+utility for NLP work. This includes scripts for pulling out link-grammar
 disjuncts from parse data.
 
 sureal
 ------
-Language generation.
+Surface realization -- the lowest level portion of natural language
+generation. Works in conjunction with the microplanner to build
+sentences.
 
 types
 -----
-Scripts, etc. to load NLP-specific atom types.
+Scripts specifying NLP-specific atom types.
 
 viterbi
 -------
-A barely-started, mostly abaondoned attempt to create a viterbi parser
+A barely-started, mostly abandoned attempt to create a viterbi parser
 for link-grammar (actually, a port of the partly-implemented viterbi
 parser in the link-grammar code base, which is more functional than
 this one, but is still broken.)
 
 wsd
 ---
-The wsd directory contains code that implements the Rada Mihalcea 
+The wsd directory contains code that implements the Rada Mihalcea
 word-sense disambiguation algorithm.  The Mihalcea algorithm assigns
 senses to the words in a sentence, and constructs links between these
 different senses. The links are weighted by a word-sense similarity
-measure. The result is a graph whose vertices are word-senses, and 
-whose edges are these links.  The graph is essentially just a Markov 
-chain, and is solved as such, looking for a stationary vector of 
-probabilities for the word-sense vertices. The vertices with the 
+measure. The result is a graph whose vertices are word-senses, and
+whose edges are these links.  The graph is essentially just a Markov
+chain, and is solved as such, looking for a stationary vector of
+probabilities for the word-sense vertices. The vertices with the
 highest scores are then the most likely meaning for a word.
 
 wsd-post
@@ -131,11 +133,11 @@ Input file format
 -----------------
 This style of input may be produced in one of two ways. It is produced
 directly by RelEx, when using the opencog output format: the -o flag
-appended to the relex.RelationExtractor executable. The other way is
+appended to the `relex.RelationExtractor` executable. The other way is
 indirect, but can be considerably more convenient: First, parse text
-using the  relex.WebFormat module, to create the "compact file format".
-Then, use the relex/src/perl/cff-to-opencog.pl perl script to convert 
-this to the final output. 
+using the `relex.WebFormat` module, to create the "compact file format".
+Then, use the `relex/src/perl/cff-to-opencog.pl` perl script to convert
+this to the final output.
 
 
 A Side-note About Syntactic Sugar
@@ -188,8 +190,7 @@ file "src/nlp/scm/type-definitions.scm"
 ======================================================================
 References:
 -----------
-"To verbize one's nouns" -- the concept of "Lexical Implication Rules": 
+"To verbize one's nouns" -- the concept of "Lexical Implication Rules":
 N. Ostler, B.T.S.Atkins, "Predictable Meaning Shift: Some Linguistic
 Properties of Lexical Implication Rules", (1991) Proceedings of the
 First SIGLEX Workshop on Lexical Semantics and Knowledge Representation
-
