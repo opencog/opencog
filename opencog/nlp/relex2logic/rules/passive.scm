@@ -1,13 +1,10 @@
-
+;check the tense if it is passive 
 (define (check-tense tense)
 	(if (string-contains (cog-name tense) "passive")
 		(begin (stv 1 1))
-		(begin (stv 0 1))
- 	
-    )
-  	
+		(begin (stv 0 1)) 	
+    ) 	
 )
-
  
 (define passive
     (BindLink
