@@ -522,27 +522,26 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             }
         }
 
+        // if we find a good enough solution, clear previous (not good enough) ones, if any
         if (isGoodEnough)
+            m_results.clear();
+
+        // store the solution; all common InterpretationNode are solutions for this
+        // grounding, so store the solution for each InterpretationNode
+        // but normally there should be only one InterpretationNode for a
+        // given R2L-SetLink
+        for (auto n : qItprNode)
         {
-            qItprNode = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            // there could also be multiple solutions for one InterpretationNode,
+            // so store them in a vector
+            if (m_results.count(n) == 0)
+                m_results[n] = std::vector<std::map<Handle, Handle> >();
 
-            // store the solution; all common InterpretationNode are solutions for this
-            // grounding, so store the solution for each InterpretationNode
-            // but normally there should be only one InterpretationNode for a
-            // given R2L-SetLink
-            for (auto n : qItprNode)
-            {
-                // there could also be multiple solutions for one InterpretationNode,
-                // so store them in a vector
-                if (m_results.count(n) == 0)
-                    m_results[n] = std::vector<std::map<Handle, Handle> >();
-
-                logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
-                m_results[n].push_back(shrinked_soln);
-            }
-
-            return true;
+            logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
+            m_results[n].push_back(shrinked_soln);
         }
+
+        return isGoodEnough;
     }
 
     return false;
