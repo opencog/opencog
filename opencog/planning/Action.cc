@@ -1,6 +1,6 @@
 /*
  * @file opencog/planning/Action.cc
- * @author Amen Belayneh <amenbelayneh@gmail.com> August 2015
+ * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved

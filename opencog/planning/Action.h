@@ -48,7 +48,6 @@ private:
 
     // Function for helping construct
     void init();
-    void choose_rule();
 
 }; // class Action
 
