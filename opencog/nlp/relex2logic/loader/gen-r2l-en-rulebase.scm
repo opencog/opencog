@@ -192,3 +192,6 @@
 (define tense-name (Node "tense"))
 (DefineLink tense-name tense)
 (MemberLink (stv 1 1) tense-name (ConceptNode "R2L-en-RuleBase"))
+(define passive-name (Node "passive"))
+(DefineLink passive-name passive)
+(MemberLink (stv 1 1) passive-name (ConceptNode "R2L-en-RuleBase"))
