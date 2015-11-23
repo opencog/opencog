@@ -461,18 +461,18 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
-                    [](Handle& h) {
-                        HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
+            [](Handle& h) {
+                HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
 
-                        /*  for words in a sentence, they should be ConceptNodes in the
-                         *  R2L output and are linked to their corresponding WordInstanceNodes
-                         *  in this way currently:
-                         *    ReferenceLink
-                         *      ConceptNode "water@123"
-                         *      WordInstanceNode "water@123"
-                         */
-                        return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
-                    }), qWordInstNodes.end());
+                /*  for words in a sentence, they should be ConceptNodes in the
+                 *  R2L outputs and are linked to their corresponding
+                 *  WordInstanceNodes by a ReferenceLink, for example:
+                 *    ReferenceLink
+                 *      ConceptNode "water@123"
+                 *      WordInstanceNode "water@123"
+                 */
+                return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
+            }), qWordInstNodes.end());
 
         // check if all of the leftovers of this SetLink are unary -- doesn't
         // form a logical relationship with more than one word of the sentence
@@ -483,12 +483,26 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
             for (Handle& n : qNodes)
             {
+                bool isGrounded = false;
+
+                // just ignore it if it's already grounded
+                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
+                {
+                    if (n == i->second)
+                    {
+                        isGrounded = true;
+                        break;
+                    }
+                }
+
+                if (isGrounded) continue;
+
                 auto matchWordInst = [&](Handle& w)
                 {
                     std::string wordInstName = NodeCast(w)->getName();
                     std::string nodeName = NodeCast(n)->getName();
 
-                    if (wordInstName.compare(0, nodeName.length()+1, nodeName+'@') == 0)
+                    if (wordInstName.compare(nodeName) == 0)
                     {
                         sWordFound.insert(w.value());
                         return true;
