@@ -40,7 +40,8 @@ void Action::init()
     PatternLinkPtr pattern(PatternLinkCast(_rule.get_handle()));
     if(NULL == pattern) {
         throw InvalidParamException(TRACE_INFO,
-			"Expecting a PatternLink type or sub-type for Rule handle, got %s",
+			"[Action::init()] Expecting a PatternLink type or ",
+            "sub-type for Rule handle, got %s",
              _rule.get_handle()->toString().c_str());
     }
 
@@ -50,4 +51,12 @@ void Action::init()
 
 Action::~Action()
 {
+}
+
+/**
+ * @return The rule associated with an action.
+ */
+Rule Action::get_rule()
+{
+    return _rule;
 }

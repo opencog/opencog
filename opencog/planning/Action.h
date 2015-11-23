@@ -36,6 +36,8 @@ public:
     Action(Rule a_rule);
     ~Action();
 
+    Rule get_rule();
+
 private:
     // An action is  a rule with some more conditions.
     Rule _rule;
