@@ -483,20 +483,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
             for (Handle& n : qNodes)
             {
-                bool isGrounded = false;
-
-                // just ignore it if it's already grounded
-                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
-                {
-                    if (n == i->second)
-                    {
-                        isGrounded = true;
-                        break;
-                    }
-                }
-
-                if (isGrounded) continue;
-
                 auto matchWordInst = [&](Handle& w)
                 {
                     std::string wordInstName = NodeCast(w)->getName();
@@ -517,8 +503,22 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             // if it is not a unary link, the solution is not good enough
             if (sWordFound.size() > 1)
             {
-                isGoodEnough = false;
-                break;
+                size_t cnt = sWordFound.size();
+
+                // see how many of the words found in the leftover-link have
+                // actually been grounded
+                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
+                    if (std::find(sWordFound.begin(), sWordFound.end(), i->second.value()) != sWordFound.end())
+                        cnt--;
+
+                // so it would not be considered as good enough if there are
+                // at least one ungrounded word in a leftover-link containing
+                // two or more words
+                if (cnt > 0)
+                {
+                    isGoodEnough = false;
+                    break;
+                }
             }
         }
 
