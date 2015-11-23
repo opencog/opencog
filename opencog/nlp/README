@@ -26,18 +26,56 @@ more about language learning. See the wsd directory for more about wsd.
 
 Subdirectories (in alphabetical order)
 ======================================
+aiml2oc
+-------
+Prototype for converting AIML XML into opencog "atomese", so that a
+simple opencog script could run AIML dialogs. Under developemnt,
+incomplete.
+
+anaphora
+--------
+Code that picks out pronouns (he, she, it) and offers up a list of
+plausible candidates that these might refer to.
+
 chatbot
 -------
-The chatbot directory contains some crude code to tie opencog NLP
+Scripts for running a chatbot.  Prototypes, incomplete.
+
+diary
+-----
+Research notes.
+
+irc
+---
+Interfaces to IRC; provide an easy way to connect opencog to IRC.
+
+learn
+-----
+Langauge learning code. Goal is to learn any language at all, given
+some sufficiently large corpus.  Experiment is in progress, results
+are promising but inconclusive. Starved for time.
+
+lg-dict
+-------
+Code to convert the Link Grammar dictionaries to "atomese". These are
+used to construct and validate generated sentences for correct syntax.
+
+microplanning
+-------------
+A planner for generating natural language sentences from a bag of
+dependency-grammar relations. That is, given a set of dependencies
+that express an idea, the planner will create a series of sentences that
+express the idea, are syntactically correct, are of appropriate length,
+and use pronouns in an appropriate way.
+
+
+old-chatbot
+-----------
+The old-chatbot directory contains some code to tie opencog NLP
 processing to chat systems, and particularly, to IRC chat.  Provides
 a high-level implementation of a simple, hard-coded question-answering 
-system, resting on the foundations of "seme" and "triples".
-
-lexical_attraction
-------------------
-The lexical-attraction directory contains a README file describing some
-ideas for performing pattern recognition to automatically extract 
-semantic content, primarily by employing mutual information.
+system, resting on the foundations of "seme" and "triples".  It worked,
+but had some design difficulties.
 
 pln
 ---
