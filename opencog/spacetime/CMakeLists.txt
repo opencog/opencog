@@ -31,7 +31,10 @@ ADD_LIBRARY (spacetime SHARED
 	TimeServer.cc
 )
 
-TARGET_LINK_LIBRARIES(spacetime spacetime-types SpaceMap server
+TARGET_LINK_LIBRARIES(spacetime
+	spacetime-types
+	SpaceMap
+	server
 	${ATOMSPACE_LIBRARIES})
 
 INSTALL (FILES
@@ -56,4 +59,4 @@ INSTALL (FILES
 )
 
 INSTALL (TARGETS spacetime-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")

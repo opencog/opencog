@@ -21,3 +21,13 @@ scm_c_with_fluid
   ans = cproc (cdata);
   scm_dynwind_end ();
 
+
+=========================================================
+
+/usr/local/share/opencog/scm/nlp/scm/processing-utils.scm:
+In procedure module-lookup: Unbound variable: r2l-rules
+
+nlp/relex2logic/loader/gen-r2l-en-rulebase.scm:(define r2l-rules
+
+(load-r2l-rulebase)
+
