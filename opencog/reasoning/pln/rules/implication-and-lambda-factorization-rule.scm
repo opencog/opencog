@@ -56,20 +56,17 @@
      (VariableNode "$A2")))
 
 (define implication-and-lambda-factorization-body
-  (AndLink                              ; extraneous AndLink to tell
-                                        ; the PM that we're looking
-                                        ; for an AndLink, not the
-                                        ; presence of 2
-                                        ; LambdaLinks. Maybe
-                                        ; PresentLink could be used
-                                        ; for that.
+  (QuoteLink                        ; Necessary so the AndLink doesn't
+                                    ; count as a connective
      (AndLink
-        (LambdaLink
-           (VariableNode "$TyVs")
-           (VariableNode "$A1"))
-        (LambdaLink
-           (VariableNode "$TyVs")
-           (VariableNode "$A2")))))
+        (UnquoteLink
+           (LambdaLink
+              (VariableNode "$TyVs")
+              (VariableNode "$A1")))
+        (UnquoteLink
+           (LambdaLink
+              (VariableNode "$TyVs")
+              (VariableNode "$A2"))))))
 
 (define implication-and-lambda-factorization-rewrite
   (ExecutionOutputLink
