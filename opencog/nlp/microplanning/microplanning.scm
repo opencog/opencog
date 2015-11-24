@@ -17,19 +17,22 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-(define-public microplanning
-"
-  microplanning -- The main microplanning interface
-
-  A shortcut for calling microplanning without specifying all the
-  arguments.
-"
+(define microplanning
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
 		((sl ut opt a) (microplanning-main sl ut opt a))
 	)
 )
 
+(export microplanning)
+
+(set-procedure-property! microplanning 'documentation
+"
+  microplanning -- The main microplanning interface
+
+  A shortcut for calling microplanning without specifying all the
+  arguments.
+")
 
 ; =======================================================================
 ; Some contants

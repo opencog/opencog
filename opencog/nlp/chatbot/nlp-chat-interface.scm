@@ -2,6 +2,7 @@
 ; Hack, this is needed for some reason...
 (add-to-load-path "/usr/local/share/opencog/scm")
 (use-modules (opencog) (opencog atom-types))
+(use-modules (opencog nlp microplanning))
 
 ; Hack, it seems that no one else sets this up ...
 (load-r2l-rulebase)
