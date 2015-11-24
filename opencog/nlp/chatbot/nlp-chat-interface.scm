@@ -1,3 +1,7 @@
+
+(add-to-load-path "/usr/local/share/opencog/scm")
+(use-modules (opencog) (opencog atom-types))
+
 ;Check the utterance speech act type
 ;------------------------------------------------------------------
 (define (QueryCheck querySentence)

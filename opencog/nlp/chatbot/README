@@ -51,6 +51,13 @@ From the build directory:
    opencog/server/cogserver ../lib/opencog-chatbot.conf
 ```
 
+A simple "sniff-test" to verify that this is working is to telnet to
+port 17004 and manually specify a sentence.
+```
+   rlwrap telnet localhost 17004
+   (process_query "luser" "Are you a bot?")
+```
+
 
 Configure and run the chat bridge:
 ----------------------------------
