@@ -15,7 +15,7 @@
     )
 )
 ;-------------------------------------------------------------------
-(define (check_query_type querySentence)
+(define (check-query-type querySentence)
     (define temp)
     (set! temp (QueryCheck querySentence))
     (cond
@@ -24,28 +24,37 @@
 )
 
 ;-------------------------------------------------------------------
-; Accept user's ID and utterance as input
-; Call "check_query_type" function to get the speech act type of the utterance
-; based on the type of the speech act a processing functions will be called
 ;--------------------------------------------------------------------
-(define (process_query user query)
-    (define querySentence)
-    (set! querySentence (car (nlp-parse query)))
+(define (process-query user query)
+"
+  process-query USER QUERY -- accept user's text and generate a reply.
+
+  This is the master opencog chatbot interface; it accepts an utterance
+  (in the form of a text string) and generates a reply.  The USER is
+  the user-name (currently, the user's IRC nick). The QUERY is the
+  string holding what the user said.
+"
+    (define querySentence (car (nlp-parse query)))
+
+    ;; XXX FIXME -- remove the IRC debug response below.
     (display "Hello ")
     (display user)
     (display ", you said: \"")
     (display query)
     (display "\"")
     (newline)
+    ; Call the `check-query-type` function to get the speech act type
+    ; of the utterance.  The response processing will be based on the
+    ; type of the speech act.
     (cond
-        ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")
+        ((equal? (check-query-type querySentence) "TruthQuerySpeechAct")
              (display "You ask a Truth Query ")
         ; (truth_query_process querySentence)
         (display "I can't process truth query for now"))
-        ((equal? (check_query_type querySentence) "InterrogativeSpeechAct")
+        ((equal? (check-query-type querySentence) "InterrogativeSpeechAct")
             (display "You made an Interrogative SpeechAct ")
         (wh_query_process querySentence))
-        ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")
+        ((equal? (check-query-type querySentence) "DeclarativeSpeechAct")
             (display "You made a Declarative SpeechAct "))
         (else (display "Sorry, I can't identify the speech act type"))
     ))

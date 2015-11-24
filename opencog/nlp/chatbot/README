@@ -58,7 +58,7 @@ channel.  Thus, after the telnet, no prompt will be displayed; that
 is normal.
 ```
    rlwrap telnet localhost 17004
-   (process_query "luser" "Are you a bot?")
+   (process-query "luser" "Are you a bot?")
 ```
 This should return either a reasonable answer, or something like
 "I can't process truth query for now"
@@ -96,7 +96,7 @@ The pipeline is as follows:
    forwards the resulting plain-text to OpenCog. This is done by
    issuing one simple scheme expression to OpenCog, via the OpenCog
    command-line interface/scheme shell on port 17004. The expression
-   is ''(process_query user text)'', where the ''user'' is
+   is ''(process-query user text)'', where the ''user'' is
    the user's IRC nick, and ''text'' is what the user entered.  The
    return value from this command is sent back to the IRC channel.
    Communications is stateless and blocking: the irc bridge closes the
@@ -111,7 +111,7 @@ The pipeline is as follows:
    and then resume again. A proper architecture remains unimplemented.
 
 2) Parsing of English text by RelEx. The very first thing that the
-   ''process_query'' routine does is to send the input text to RelEx
+   ''process-query'' routine does is to send the input text to RelEx
    for parsing.  This is done by sending the plain-text via a socket
    to a listening RelEx server; the server responds with the parsed
    text, in the form of a hypergraph of atoms expressed in scheme.
