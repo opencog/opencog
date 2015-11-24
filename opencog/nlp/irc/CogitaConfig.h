@@ -1,4 +1,4 @@
-/*   
+/*
  *   Config class for La Cogita IRC chatbot
  *   Copyright (C) 2009 Joel Pitt <joel@fruitionnz.com>
  *
@@ -22,7 +22,6 @@
 
 #include <string>
 #include <vector>
-#include <set>
 
 
 namespace opencog {
@@ -32,7 +31,7 @@ namespace chatbot {
 #define COGITA_DEFAULT_PORT 6667
 #define COGITA_DEFAULT_NICK "cogita-bot"
 #define COGITA_DEFAULT_CHANNELS { "#opencog", 0 }
-#define COGITA_VSTRING "La Cogita OpenCog (http://opencog.org) chatbot version 0.1.3"
+#define COGITA_VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version 1.0"
 #define COGITA_DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
 #define COGITA_DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
 
@@ -55,8 +54,6 @@ public:
     void printHelp();
     void printVersion();
     int parseOptions(int argc, char* argv[]);
-
-
 };
 
 }} // ~namespace opencog::chatbot

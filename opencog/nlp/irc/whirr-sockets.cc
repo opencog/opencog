@@ -5,12 +5,12 @@
  * Call whirr_sock_setup() to initialize.
  * Call whirr_sock_io() to send message, and return reply.
  *
- * Copied from "whirr.c". 
+ * Copied from "whirr.c".
  * Linas October 2007 ported to opencog April 2009
  */
 
-#include <arpa/inet.h>  
-#include <errno.h>  
+#include <arpa/inet.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,14 +42,14 @@ void whirr_sock_setup (void)
  * whirr_sock_io -- send mesg to the server, receive reply.
  *
  * The i/o is stateless and blocking: each new message opens
- * a new connection to the server. After the message is sent, 
+ * a new connection to the server. After the message is sent,
  * the send conection is closed, to indicate end-of-message.
  * The call then blocks waiting for the reply; the reply is
  * judged to be complete when the server closes the connection.
  * This routine blocks and does not return until the server
  * closes its connection.
  *
- * If the server is allive but unresponsive, then this routine
+ * If the server is alive but unresponsive, then this routine
  * can block indefinitely. This could be a real problem, because
  * it will make the chat server unresponsive. ... XXX this should
  * be fixed in some way, to tell the chat user that the server is
