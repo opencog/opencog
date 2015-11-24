@@ -48,7 +48,7 @@ This is most easily done by starting the cog server using the
 port, silences the OpenCog prompt, and loads the needed scheme files.
 From the build directory:
 ```
-   opencog/server/cogserver ../lib/opencog-chatbot.conf
+   opencog/server/cogserver -c ../lib/opencog-chatbot.conf
 ```
 
 A simple "sniff-test" to verify that this is working is to telnet to
@@ -57,6 +57,8 @@ port 17004 and manually specify a sentence.
    rlwrap telnet localhost 17004
    (process_query "luser" "Are you a bot?")
 ```
+This should return either a reasonable answer, or something like
+"I can't process truth query for now"
 
 
 Configure and run the chat bridge:
