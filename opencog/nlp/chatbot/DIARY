@@ -31,3 +31,12 @@ nlp/relex2logic/loader/gen-r2l-en-rulebase.scm:(define r2l-rules
 
 (load-r2l-rulebase)
 
+====================================================
+bugs:
+* relex fails to identify speech act if sentence not terminated by period.
+  Here: InterpretationLink 'InterpretationNode
+  DefinedLinguisticConceptNode DeclarativeSpeechAct,
+
+* "Where is ...?" not idnetified as a question ..
+
+scm/sentence-matching.scm:

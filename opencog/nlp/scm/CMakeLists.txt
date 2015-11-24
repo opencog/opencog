@@ -5,6 +5,7 @@ INSTALL (FILES
 	nlp-utils.scm
 	parse-rank.scm
 	processing-utils.scm
+	sentence-matching.scm
 	type-definitions.scm
    DESTINATION "${DATADIR}/scm/nlp/scm"
 )
