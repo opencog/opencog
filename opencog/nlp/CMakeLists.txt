@@ -22,3 +22,16 @@ IF (HAVE_VITERBI)
     ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
 
+INSTALL (FILES
+	microplanning/microplanning.scm
+	microplanning/anaphora-noun-item.scm
+	microplanning/chunks-option.scm
+	microplanning/anaphora-nouns-list.scm
+	microplanning/chunks-set.scm
+	microplanning/sentence-forms.scm
+	microplanning/anaphora.scm
+	microplanning/helpers.scm
+	microplanning/atomW.scm
+
+	DESTINATION "${DATADIR}/scm/opencog/nlp"
+)

@@ -3,7 +3,7 @@
 The folder contains microplanning code for the natural langauge
 generation (NLG) pipeline.
 
-- main.scm
+- microplanning.scm
 
     The main scheme file to load into OpenCog.  Other dependencies are
     loaded automatically.
