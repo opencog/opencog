@@ -41,7 +41,8 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ### (1) Partially instantiate if X takes Y and Y contains Z, then X takes Z,
     with Y = treatment-1 and Z = compound-A. Semi-formally
-    \x (take(x, treatment-1) and contain(treatment-1, compound-A)) -> take(x, compound-A)
+    \x (take(x, treatment-1) and contain(treatment-1, compound-A))
+       -> take(x, compound-A)
 
 ```
 scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instantiation-rule)) (iota 2))
@@ -80,7 +81,8 @@ And search for the following
 ...
 
 ### (2) Distribute the lambda in the implicant and implicand of (1). Semi-formally
-    (\x take(x, treatment-1) and contain(treatment-1, compound-A)) -> (\x take(x, compound-A))
+    (\x take(x, treatment-1) and contain(treatment-1, compound-A))
+    -> (\x take(x, compound-A))
 
 scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
 ...
@@ -409,18 +411,20 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
    )
 ...
 
-### TODO
+### (10) Fully instantiate that if a predicate is in the
+    injury-recovery-speed-predicates class, then is-well-hydrated
+    implies it.
 
-scheme@(guile-user)> ;; Infer that being well hydrated speeds up recovery 
-scheme@(guile-user)> (cog-bind pln-rule-average-hack)
-scheme@(guile-user)> (cog-bind pln-rule-modus-ponens)
-$8 = (SetLink
-   ...
+scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-full-instantiation-rule)) (iota 2)) # TODO: try with one iteration
+scheme@(guile-user)> (cog-prt-atomspace)
+...
    (ImplicationLink (stv 0.69999999 0.60000002)
-      (PredicateNode "is-well-hydrated" (stv 0.059500001 0.80000001))
-      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.80000001 0))
+      (PredicateNode "is-well-hydrated")
+      (PredicateNode "recovery-speed-of-injury-alpha")
    )
-)
+...
+
+### (11) TODO
 
 scheme@(guile-user)> ;; Infer relationships between input and target features
 scheme@(guile-user)> (cog-bind pln-rule-deduction)

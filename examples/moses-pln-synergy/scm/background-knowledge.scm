@@ -54,11 +54,16 @@
 ; take-treatment-1(X) is equivalent to take(X, treatment-1)
 (EquivalenceLink (stv 1 1)
    (PredicateNode "take-treatment-1")
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
+   (LambdaLink
+      (TypedVariableLink
          (VariableNode "$X")
-         (ConceptNode "treatment-1")
+         (TypeNode "ConceptNode"))
+      (EvaluationLink
+         (PredicateNode "take")
+         (ListLink
+            (VariableNode "$X")
+            (ConceptNode "treatment-1")
+         )
       )
    )
 )
@@ -66,11 +71,16 @@
 ; take-compound-A(X) is equivalent to take(X, compound-A)
 (EquivalenceLink (stv 1 1)
    (PredicateNode "take-compound-A")
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
+   (LambdaLink
+      (TypedVariableLink
          (VariableNode "$X")
-         (ConceptNode "compound-A")
+         (TypeNode "ConceptNode"))
+      (EvaluationLink
+         (PredicateNode "take")
+         (ListLink
+            (VariableNode "$X")
+            (ConceptNode "compound-A")
+         )
       )
    )
 )
