@@ -6,4 +6,3 @@
 ; XXX FIXME The install paths need to be rationalized. This load
 ; path is insane.
 (load "../../nlp/relex2logic/utilities.scm")
-(load "../../nlp/sureal/surface-realization.scm")
