@@ -10,7 +10,7 @@
 ; Similar to cog-get-root, except that it will stop at the SetLink in case
 ; RelEx2Logic is called with the r2l(...) function.
 ;
-(define (r2l-get-root atom)
+(define-public (r2l-get-root atom)
 	(define iset (cog-incoming-set atom))
 	
 	; if reached the SetLink that wrap around R2L outputs (happens when using r2l(...))
@@ -29,7 +29,7 @@
 ;
 ; Given a R2L style node, find the corresponding WordInstanceNode.
 ;
-(define (r2l-get-word-inst node)
+(define-public (r2l-get-word-inst node)
 	(cond ((null? node) '())
 	      ((has-word-inst? node) (car (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 	      (else '())
@@ -43,7 +43,7 @@
 ; WordInstanceNode since maybe it is not an instanced word.
 ; TODO: update this when non-instanced R2L node are linked to WordNode
 ;
-(define (r2l-get-word node)
+(define-public (r2l-get-word node)
 	(cond ((null? node) '())
 	      ((has-word? node) (cog-node 'WordNode (cog-name node)))
 	      (else '())
@@ -55,7 +55,7 @@
 ;
 ; Returns the InterpretationNode associated with the SetLink.
 ;
-(define (r2l-get-interp a-set-link)
+(define-public (r2l-get-interp a-set-link)
 	(car (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link))
 )
 
@@ -64,7 +64,7 @@
 ;
 ; Return #t or #f depends on whether the node has a WordInstanceNode.
 ;
-(define (has-word-inst? node)
+(define-public (has-word-inst? node)
 	(not (null? (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 )
 
@@ -74,7 +74,7 @@
 ; Return #t or #f depends on whether the node has a WordNode.
 ; TODO: update this when non-instanced R2L node are linked to WordNode
 ;
-(define (has-word? node)
+(define-public (has-word? node)
 	(not (null? (cog-node 'WordNode (cog-name node))))
 )
 
@@ -84,7 +84,7 @@
 ; Return #t or #f depends on whether the node is instanced.  VariableNode
 ; is also instanced node.
 ;
-(define (is-r2l-inst? node)
+(define-public (is-r2l-inst? node)
 	(or (equal? 'VariableNode (cog-type node)) (has-word-inst? node))
 )
 
@@ -93,7 +93,7 @@
 ;
 ; Return #t or #f depends on whether the node is the abstract version.
 ;
-(define (is-r2l-abstract? node)
+(define-public (is-r2l-abstract? node)
 	(has-word? node)
 )
 

@@ -1,6 +1,6 @@
 (define-module (opencog nlp microplanning))
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog nlp) (opencog nlp relex2logic))
 (use-modules (srfi srfi-1))
 
 ; loading additional dependency
