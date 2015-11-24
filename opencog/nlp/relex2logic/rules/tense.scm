@@ -1,13 +1,3 @@
-(PartOfSpeechLink (stv 1.0 1.0)
-   (WordInstanceNode "gave@d4cefa13-7e1e-46b8-9cd7-6c63c98f1abe")
-   (DefinedLinguisticConceptNode "verb")
-)
-
-(InheritanceLink (stv 1.0 1.0)
-   (WordInstanceNode "gave@d4cefa13-7e1e-46b8-9cd7-6c63c98f1abe")
-   (DefinedLinguisticConceptNode "past")
-)
-
 (define tense
     (BindLink
         (VariableList
