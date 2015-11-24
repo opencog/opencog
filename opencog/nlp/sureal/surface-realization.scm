@@ -30,9 +30,13 @@
 )
 
 ; ---------------------------------------------------------------------
-; A SetLink is the input because it is assumed that the output of the micro-planner
-; is unordered.
-(define (sureal a-set-link)
+(define-public (sureal a-set-link)
+"
+  sureal SETLINK -- main entry point for sureface realization
+
+  Expect SETLINK to be a SetLink -- since it is assumed that the
+  output of the micro-planner is unordered.
+"
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
@@ -170,5 +174,3 @@
         )
     )
 )
-
-
