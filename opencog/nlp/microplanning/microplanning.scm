@@ -3,8 +3,7 @@
 (use-modules (srfi srfi-1)
              (opencog)
              (opencog nlp)  ; need the atom types
-             (opencog nlp relex2logic)
-             (opencog nlp lg-dict))
+             (opencog nlp sureal))
 
 ; loading additional dependency
 (load "sentence-forms.scm")

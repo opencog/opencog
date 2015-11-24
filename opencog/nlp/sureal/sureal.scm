@@ -1,6 +1,6 @@
-;
 ; Links relex-to-logic output with relex-opencog-output
 ; It is temporary until the r2l rules are moved into the URE
+; XXX Huh ???
 
 ; Test sentence : "This is a sentence."
 
@@ -8,9 +8,17 @@
 ;  (use-modules (rnrs io ports))
 ;  (use-modules (ice-9 rdelim))
 
+(define-module (opencog nlp sureal))
+
 (use-modules (srfi srfi-1)   ; needed for delete-duplicates
              (ice-9 threads) ; needed for par-map
-             (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
+             (ice-9 rdelim) (ice-9 regex) (ice-9 receive)
+             (opencog nlp)
+             (opencog nlp relex2logic)
+             (opencog nlp lg-dict)
+)
+
+(load-extension "libsureal" "opencog_nlp_sureal_init")
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with the exception
