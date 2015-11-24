@@ -1,16 +1,16 @@
-;
-; URE Configuration file for PLN
-;
-; Before running any PLN inference you must load that file in the
-; AtomSpace
-;
-; In order to add new rules you need to hack this file in 2 places
-;
-; 1. In the Load rules section, to add the file name where the rule is
-; defined (see define rule-files).
-;
-; 2. In the Associate rules to PLN section, to add the name of the
-; rule and its weight (see define rules).
+;;
+;; URE Configuration file for PLN
+;;
+;; Before running any PLN inference you must load that file in the
+;; AtomSpace
+;;
+;; In order to add new rules you need to hack this file in 2 places
+;;
+;; 1. In the Load rules section, to add the file name where the rule is
+;; defined (see define rule-files).
+;;
+;; 2. In the Associate rules to PLN section, to add the name of the
+;; rule and its weight (see define rules).
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load required modules and utils ;;
@@ -33,7 +33,7 @@
    (ConceptNode "URE")
 )
 
-; Define pln-fc and pln-bc for convenience 
+;; Define pln-fc and pln-bc for convenience 
 (define (pln-fc source) (cog-fc source pln-rbs))
 (define (pln-bc target) (cog-bc target pln-rbs (SetLink)))
 
@@ -41,7 +41,7 @@
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
 
-; Load the rules (use load for relative path w.r.t. to that file)
+;; Load the rules (use load for relative path w.r.t. to that file)
 (define pln-rules-dir "../../../opencog/reasoning/pln/rules/")
 (define rule-files
   (list (string-append pln-rules-dir "deduction-rule.scm")
@@ -76,8 +76,8 @@
 ;; Other parameters ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 
-; Termination criteria parameters
+;; Termination criteria parameters
 (ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20)
 
-; Attention allocation (0 to disable it, 1 to enable it)
+;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
