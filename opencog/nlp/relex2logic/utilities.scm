@@ -1,16 +1,17 @@
 ;
-; utilities.scm
+; relex2logic/utilities.scm
 ;
 ; Assorted utilties for checking R2L outputs.
 ;
 
 ; -----------------------------------------------------------------------
-; r2l-get-root -- Return all hypergraph R2L roots containing 'atom'
-;
-; Similar to cog-get-root, except that it will stop at the SetLink in case
-; RelEx2Logic is called with the r2l(...) function.
-;
 (define-public (r2l-get-root atom)
+"
+  r2l-get-root -- Return all hypergraph R2L roots containing 'atom'
+
+  Similar to cog-get-root, except that it will stop at the SetLink in case
+  RelEx2Logic is called with the r2l(...) function.
+"
 	(define iset (cog-incoming-set atom))
 	
 	; if reached the SetLink that wrap around R2L outputs (happens when using r2l(...))
@@ -25,11 +26,12 @@
 )
 
 ; -----------------------------------------------------------------------
-; r2l-get-word-inst -- Retrieve WordInstanceNode given R2L style node
-;
-; Given a R2L style node, find the corresponding WordInstanceNode.
-;
 (define-public (r2l-get-word-inst node)
+"
+  r2l-get-word-inst -- Retrieve WordInstanceNode given R2L style node
+
+  Given a R2L style node, find the corresponding WordInstanceNode.
+"
 	(cond ((null? node) '())
 	      ((has-word-inst? node) (car (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 	      (else '())
@@ -37,13 +39,14 @@
 )
 
 ; -----------------------------------------------------------------------
-; r2l-get-word -- Retrieve WordNode given R2L style node
-;
-; Given a R2L style node, find the corresponding WordNode.  Skipping
-; WordInstanceNode since maybe it is not an instanced word.
-; TODO: update this when non-instanced R2L node are linked to WordNode
-;
 (define-public (r2l-get-word node)
+"
+  r2l-get-word -- Retrieve WordNode given R2L style node
+
+  Given a R2L style node, find the corresponding WordNode.  Skipping
+  WordInstanceNode since maybe it is not an instanced word.
+  XXX TODO: update this when non-instanced R2L node are linked to WordNode
+"
 	(cond ((null? node) '())
 	      ((has-word? node) (cog-node 'WordNode (cog-name node)))
 	      (else '())
@@ -51,49 +54,55 @@
 )
 
 ; -----------------------------------------------------------------------
-; r2l-get-interp -- Retrieve the InterpretationNode given SetLink.
-;
-; Returns the InterpretationNode associated with the SetLink.
-;
 (define-public (r2l-get-interp a-set-link)
+"
+  r2l-get-interp -- Retrieve the InterpretationNode given SetLink.
+
+  Returns the InterpretationNode associated with the SetLink.
+"
 	(car (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link))
 )
 
 ; -----------------------------------------------------------------------
-; has-word-inst? -- Check if a node has the corresponding WordInstanceNode
-;
-; Return #t or #f depends on whether the node has a WordInstanceNode.
-;
 (define-public (has-word-inst? node)
+"
+  has-word-inst? -- Check if a node has the corresponding WordInstanceNode
+
+  Return #t or #f depends on whether the node has a WordInstanceNode.
+"
 	(not (null? (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
 )
 
 ; -----------------------------------------------------------------------
-; has-word? -- Check if a node has the corresponding WordNode
-;
-; Return #t or #f depends on whether the node has a WordNode.
-; TODO: update this when non-instanced R2L node are linked to WordNode
-;
 (define-public (has-word? node)
+"
+  has-word? -- Check if a node has the corresponding WordNode
+
+  Return #t or #f depends on whether the node has a WordNode.
+  TODO: update this when non-instanced R2L node are linked to WordNode
+"
 	(not (null? (cog-node 'WordNode (cog-name node))))
 )
 
 ; -----------------------------------------------------------------------
-; is-r2l-inst? -- Check if a node is a R2L instanced node.
-;
-; Return #t or #f depends on whether the node is instanced.  VariableNode
-; is also instanced node.
-;
 (define-public (is-r2l-inst? node)
+"
+  is-r2l-inst? -- Check if a node is a R2L instanced node.
+
+  Return #t or #f depends on whether the node is instanced.  VariableNode
+  is also instanced node.
+"
 	(or (equal? 'VariableNode (cog-type node)) (has-word-inst? node))
 )
 
 ; -----------------------------------------------------------------------
-; is-r2l-abstract? -- Check if a node is a R2L abstract node.
-;
-; Return #t or #f depends on whether the node is the abstract version.
-;
 (define-public (is-r2l-abstract? node)
+"
+  is-r2l-abstract? -- Check if a node is a R2L abstract node.
+
+  Return #t or #f depends on whether the node is the abstract version.
+"
 	(has-word? node)
 )
 
+; -----------------------------------------------------------------------
