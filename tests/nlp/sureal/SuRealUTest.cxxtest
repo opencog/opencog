@@ -194,24 +194,24 @@ void SuRealUTest::test_disconnected(void)
                          (ListLink (ConceptNode "he"))))))
                      )");
 
-    std::string result = _evaluator->eval("(equal? 1 (length s-result))");
+    std::string result = _evaluator->eval("(equal? 2 (length s-result))");
     TSM_ASSERT("Failed to get the correct number of realization!", result == "#t\n");
 
-    // should return either one of these two possible solutions
     result = _evaluator->eval(R"(
-                              (or
-                               (not
-                                (equal?
-                                 #f
-                                 (member (list "he" "ran" "slowly" "and" "she" "walked" "quickly" ".") s-result)))
-                               (not
-                                (equal?
-                                 #f
-                                 (member (list "she" "walked" "slowly" "and" "he" "ran" "quickly" ".") s-result)))
-                              )
-                             )");
+                              (not
+                               (equal?
+                                #f
+                                (member (list "he" "ran" "slowly" "and" "she" "walked" "quickly" ".") s-result)))
+                              )");
+    TSM_ASSERT("Failed to get the first expected result!", result == "#t\n");
 
-    TSM_ASSERT("Failed to sureal on disconnected components!", result == "#t\n");
+    result = _evaluator->eval(R"(
+                              (not
+                               (equal?
+                                #f
+                                (member (list "she" "walked" "slowly" "and" "he" "ran" "quickly" ".") s-result)))
+                              )");
+    TSM_ASSERT("Failed to get the second expected result!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

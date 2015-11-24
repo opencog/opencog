@@ -459,20 +459,20 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                 qLeftover.erase(itc);
         }
 
+        // for words in a sentence, they should be linked to their
+        // corresponding WordInstanceNodes by a ReferenceLink, for example:
+        //   ReferenceLink
+        //     ConceptNode "water@123"
+        //     WordInstanceNode "water@123"
+        auto checker = [] (Handle& h)
+        {
+            HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
+            return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
+        };
+
         HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
-            [](Handle& h) {
-                HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
-
-                /*  for words in a sentence, they should be ConceptNodes in the
-                 *  R2L outputs and are linked to their corresponding
-                 *  WordInstanceNodes by a ReferenceLink, for example:
-                 *    ReferenceLink
-                 *      ConceptNode "water@123"
-                 *      WordInstanceNode "water@123"
-                 */
-                return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
-            }), qWordInstNodes.end());
+                                            checker), qWordInstNodes.end());
 
         // check if all of the leftovers of this SetLink are unary -- doesn't
         // form a logical relationship with more than one word of the sentence
@@ -483,20 +483,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
             for (Handle& n : qNodes)
             {
-                bool isGrounded = false;
-
-                // just ignore it if it's already grounded
-                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
-                {
-                    if (n == i->second)
-                    {
-                        isGrounded = true;
-                        break;
-                    }
-                }
-
-                if (isGrounded) continue;
-
                 auto matchWordInst = [&](Handle& w)
                 {
                     std::string wordInstName = NodeCast(w)->getName();
@@ -517,32 +503,45 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             // if it is not a unary link, the solution is not good enough
             if (sWordFound.size() > 1)
             {
-                isGoodEnough = false;
-                break;
+                size_t cnt = sWordFound.size();
+
+                // see how many of the words found in the leftover-link have
+                // actually been grounded
+                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
+                    if (std::find(sWordFound.begin(), sWordFound.end(), i->second.value()) != sWordFound.end())
+                        cnt--;
+
+                // so it would not be considered as good enough if there are
+                // at least one ungrounded word in a leftover-link containing
+                // two or more words
+                if (cnt > 0)
+                {
+                    isGoodEnough = false;
+                    break;
+                }
             }
         }
 
+        // if we find a good enough solution, clear previous (not good enough) ones, if any
         if (isGoodEnough)
+            m_results.clear();
+
+        // store the solution; all common InterpretationNode are solutions for this
+        // grounding, so store the solution for each InterpretationNode
+        // but normally there should be only one InterpretationNode for a
+        // given R2L-SetLink
+        for (auto n : qItprNode)
         {
-            qItprNode = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            // there could also be multiple solutions for one InterpretationNode,
+            // so store them in a vector
+            if (m_results.count(n) == 0)
+                m_results[n] = std::vector<std::map<Handle, Handle> >();
 
-            // store the solution; all common InterpretationNode are solutions for this
-            // grounding, so store the solution for each InterpretationNode
-            // but normally there should be only one InterpretationNode for a
-            // given R2L-SetLink
-            for (auto n : qItprNode)
-            {
-                // there could also be multiple solutions for one InterpretationNode,
-                // so store them in a vector
-                if (m_results.count(n) == 0)
-                    m_results[n] = std::vector<std::map<Handle, Handle> >();
-
-                logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
-                m_results[n].push_back(shrinked_soln);
-            }
-
-            return true;
+            logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
+            m_results[n].push_back(shrinked_soln);
         }
+
+        return isGoodEnough;
     }
 
     return false;
