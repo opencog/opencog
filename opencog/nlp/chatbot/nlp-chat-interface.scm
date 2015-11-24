@@ -6,21 +6,31 @@
 ; Hack, it seems that no one else sets this up ...
 (load-r2l-rulebase)
 
-;Check the utterance speech act type
 ;------------------------------------------------------------------
-(define (QueryCheck querySentence)
-    (cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode
-        (car (cog-chase-link 'InterpretationLink 'InterpretationNode
-            (car (cog-chase-link 'ParseLink 'ParseNode querySentence))))
-    )
-)
-;-------------------------------------------------------------------
-(define (check-query-type querySentence)
-    (define temp)
-    (set! temp (QueryCheck querySentence))
+(define (get-utterance-type sent)
+"
+  get-utterance-type SENT -- Check the utterance speech act type
+
+  Expect SENT to be (SentenceNode \"sentence@45c470a6-29...\")
+  Will return (DefinedLinguisticConceptNode ACT) where ACT is
+  one of DeclarativeSpeechAct, InterrogativeSpeechAct,
+  TruthQuerySpeechAct, etc...
+"
+    ; parse will be (ParseNode "sentence@a6_parse_0")
+    (define parse (car (cog-chase-link 'ParseLink 'ParseNode sent)))
+    ; interp will be (InterpretationNode "sentence@a610_interpretation_$X")
+
+    (define interp (car
+        (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+
+    ; act-type will be (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+    (define act-type (cog-chase-link
+        'InheritanceLink 'DefinedLinguisticConceptNode interp))
+
+    ; Return string holding the speech act type.
     (cond
-        ((equal? '() temp) "I don't know the speech act type")
-        (else (cog-name (car temp))))
+        ((equal? '() act-type) "Unknown speech act type")
+        (else (cog-name (car act-type))))
 )
 
 ;-------------------------------------------------------------------
@@ -34,6 +44,7 @@
   the user-name (currently, the user's IRC nick). The QUERY is the
   string holding what the user said.
 "
+    ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
     (define querySentence (car (nlp-parse query)))
 
     ;; XXX FIXME -- remove the IRC debug response below.
@@ -43,18 +54,18 @@
     (display query)
     (display "\"")
     (newline)
-    ; Call the `check-query-type` function to get the speech act type
+    ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
     (cond
-        ((equal? (check-query-type querySentence) "TruthQuerySpeechAct")
+        ((equal? (get-utterance-type querySentence) "TruthQuerySpeechAct")
              (display "You ask a Truth Query ")
         ; (truth_query_process querySentence)
         (display "I can't process truth query for now"))
-        ((equal? (check-query-type querySentence) "InterrogativeSpeechAct")
+        ((equal? (get-utterance-type querySentence) "InterrogativeSpeechAct")
             (display "You made an Interrogative SpeechAct ")
         (wh_query_process querySentence))
-        ((equal? (check-query-type querySentence) "DeclarativeSpeechAct")
+        ((equal? (get-utterance-type querySentence) "DeclarativeSpeechAct")
             (display "You made a Declarative SpeechAct "))
         (else (display "Sorry, I can't identify the speech act type"))
     ))
