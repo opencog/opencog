@@ -170,7 +170,7 @@ Currently, the following dialog is working.
 
  <Mr. x> hello
  <cogita-bot> Hello Mr. x, you said: "hello
- <cogita-bot> Sorry,I don't know the type
+ <cogita-bot> Sorry, I don't know the type
 
  <Mr. x> Tom eats apples.
  <cogita-bot> Hello Mr. x, you said: "Tom eats apples.

@@ -35,6 +35,7 @@
     (display user)
     (display ", you said: \"")
     (display query)
+    (display "\"")
     (newline)
     (cond
         ((equal? (check_query_type querySentence) "TruthQuerySpeechAct")
@@ -46,7 +47,7 @@
         (wh_query_process querySentence))
         ((equal? (check_query_type querySentence) "DeclarativeSpeechAct")
             (display "You made a Declarative SpeechAct "))
-        (else (display "Sorry,I don't know the type"))
+        (else (display "Sorry, I can't identify the speech act type"))
     ))
 
 ;--------------------------------------------------------------------
