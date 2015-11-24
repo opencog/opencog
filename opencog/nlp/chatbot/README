@@ -52,7 +52,10 @@ From the build directory:
 ```
 
 A simple "sniff-test" to verify that this is working is to telnet to
-port 17004 and manually specify a sentence.
+port 17004 and manually specify a sentence.  Note that the normal
+cogserver prompt is blanked, to prevent it from showing on the IRC
+channel.  Thus, after the telnet, no prompt will be displayed; that
+is normal.
 ```
    rlwrap telnet localhost 17004
    (process_query "luser" "Are you a bot?")
@@ -65,9 +68,21 @@ Configure and run the chat bridge:
 ----------------------------------
 The chatbot itself is just a simple daemon that bridges text from the
 chat system to the OpenCog server, and returns the responses that
-OpenCog generates. The brdige is tailored for IRC chat; other chat
+OpenCog generates. The bridge is tailored for IRC chat; other chat
 systems could be supported in a straightforward manner.  See the file
 `../irc/README` for details.
+
+Start the bot directly from the build directory:
+```
+   opencog/nlp/irc/cogita
+```
+
+It should then appear on the freenode.net #opencog IRC channel. You
+can then talk to it by addressing it by name, i.e.  prefacing comments
+with cog:, cogita: or cogita-bot: or by opening a private dialog
+window to it, in which case, you don't need to address it directly.
+
+
 
 Architecture:
 -------------
