@@ -24,7 +24,7 @@ Run the parse server:
 ---------------------
 The chatbot requires the Link Grammar + RelEx English-language parse
 serving daemon to be running.  The server is provided in the RelEx
-package, and is started by running ./opencog-server.sh from the main
+package, and is started by running `./opencog-server.sh` from the main
 RelEx directory. (You must first download, compile and install Link
 Grammar first, and then download and compile RelEx.)
 
@@ -44,8 +44,12 @@ server needs to be appropriately configured and loaded with assorted
 databases, code, etc.
 
 This is most easily done by starting the cog server using the
-"lib/opencog-chatbot.conf" configuration file, which sets the correct
+`lib/opencog-chatbot.conf` configuration file, which sets the correct
 port, silences the OpenCog prompt, and loads the needed scheme files.
+From the build directory:
+```
+   opencog/server/cogserver ../lib/opencog-chatbot.conf
+```
 
 
 Configure and run the chat bridge:
