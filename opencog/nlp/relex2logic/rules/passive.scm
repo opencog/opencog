@@ -35,21 +35,11 @@
                 (VariableNode "$obj")
                 (VariableNode "$a-parse")
             )
-            (InheritanceLink
-                (VariableNode "$word")
-                (VariableNode "$gtype")
-                
-            )
-            (InheritanceLink
-                (VariableNode "$word")
-                (DefinedLinguisticConceptNode "person")
-                
-            )
             (InheritanceLink 
                 (VariableNode "$verb")
                 (VariableNode "$tense")
             )
-		    (EvaluationLink
+            (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_obj")
                 (ListLink
                     (VariableNode "$verb")
