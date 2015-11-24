@@ -1,7 +1,10 @@
 (define-module (opencog nlp microplanning))
 
-(use-modules (opencog) (opencog nlp) (opencog nlp relex2logic))
-(use-modules (srfi srfi-1))
+(use-modules (srfi srfi-1)
+             (opencog)
+             (opencog nlp)  ; need the atom types
+             (opencog nlp relex2logic)
+             (opencog nlp lg-dict))
 
 ; loading additional dependency
 (load "sentence-forms.scm")

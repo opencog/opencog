@@ -1,13 +1,15 @@
-; XXX cannot become a module yet unless scm/utilities.scm becomes a module
+(define-module (opencog nlp lg-dict))
 
-;(define-module (opencog nlp lg-dict))
+(use-modules (srfi srfi-1) (opencog) (opencog nlp))
 
-;(use-modules (opencog))
+(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
+(load-extension "lg-dict" "opencog_nlp_lgdict_init")
 
 ; ---------------------------------------------------------------------
-; lg-similar? - Handy function to quickly check if two words' LG entries intersect
-;
 (define-public (lg-similar? word1 word2)
+"
+  lg-similar? - Check if two words' LG entries intersect
+"
 	(define (get-set w)
  		(define roots (filter (lambda (l) (equal? (cog-type l) 'LgWordCset)) (cog-incoming-set w)))
 		(map cog-get-partner roots (circular-list w))
@@ -21,16 +23,19 @@
 )
 
 ; ---------------------------------------------------------------------
-; lg-conn-get-type - Get the LgConnectorNode out of LgConnector link
-;
 (define-public (lg-conn-get-type conn)
+"
+  lg-conn-get-type - Get the LgConnectorNode out of LgConnector link
+"
 	(car (cog-outgoing-set conn))
 )
 
 ; ---------------------------------------------------------------------
-; lg-conn-get-dir - Get the LgConnDirNode out of LgConnector link
-;
 (define-public (lg-conn-get-dir conn)
+"
+  lg-conn-get-dir - Get the LgConnDirNode out of LgConnector link
+"
 	(cadr (cog-outgoing-set conn))
 )
 
+(export lg-get-dict-entry)
