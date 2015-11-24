@@ -276,7 +276,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 	// Apply the and rule
 	Handle rule = eval.eval_h("forall-implication-to-higher-order-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (ImplicationLink"
 		 "      (LambdaLink"
@@ -295,9 +295,9 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 		 "            (VariableNode \"$X\")))))");
 
 	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected_results = " << expected_results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -318,7 +318,7 @@ void PLNRulesUTest::test_implication_full_instantiation()
 	// Apply the and rule
 	Handle rule = eval.eval_h("implication-full-instantiation-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (EvaluationLink"
 		 "      (PredicateNode \"Q\")"
@@ -330,9 +330,9 @@ void PLNRulesUTest::test_implication_full_instantiation()
 		 "      (ConceptNode \"A\")))");
 
 	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected_results = " << expected_results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -411,7 +411,7 @@ void PLNRulesUTest::test_implication_lambda_distribution()
 	// Apply the and rule
 	Handle rule = eval.eval_h("implication-lambda-distribution-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (ImplicationLink"
 		 "      (LambdaLink"
@@ -472,9 +472,9 @@ void PLNRulesUTest::test_implication_lambda_distribution()
 		 "            (VariableNode \"$X\")))))");
 
 	std::cout << "results = " << results->toString();
-	std::cout << "expected_results = " << expected_results->toString();
+	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -495,7 +495,7 @@ void PLNRulesUTest::test_and_lambda_distribution()
 	// Apply the and rule
 	Handle rule = eval.eval_h("and-lambda-distribution-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (AndLink"
 		 "      (LambdaLink"
@@ -510,9 +510,9 @@ void PLNRulesUTest::test_and_lambda_distribution()
 		 "            (VariableNode \"$X\")))))");
 
 	std::cout << "results = " << results->toString();
-	std::cout << "expected_results = " << expected_results->toString();
+	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -533,7 +533,7 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 	// Apply the and rule
 	Handle rule = eval.eval_h("implication-implicant-distribution-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (ImplicationLink"
 		 "      (PredicateNode \"P\")"
@@ -542,9 +542,9 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 		 "         (PredicateNode \"Q\"))))");
 
 	std::cout << "results = " << results->toString();
-	std::cout << "expected_results = " << expected_results->toString();
+	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -565,7 +565,7 @@ void PLNRulesUTest::test_implication_construction()
 	// Apply the and rule
 	Handle rule = eval.eval_h("implication-construction-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (ImplicationLink"
 		 "      (PredicateNode \"P\")"
@@ -575,9 +575,9 @@ void PLNRulesUTest::test_implication_construction()
 		 "      (PredicateNode \"P\")))");
 
 	std::cout << "results = " << results->toString();
-	std::cout << "expected_results = " << expected_results->toString();
+	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
@@ -598,7 +598,7 @@ void PLNRulesUTest::test_lambda_grounded_construction()
 	// Apply the and rule
 	Handle rule = eval.eval_h("lambda-grounded-construction-rule");
 	Handle results = bindlink(&as, rule);
-	Handle expected_results = eval.eval_h
+	Handle expected = eval.eval_h
 		("(SetLink"
 		 "   (LambdaLink"
 		 "      (VariableNode \"$X\")"
@@ -607,9 +607,9 @@ void PLNRulesUTest::test_lambda_grounded_construction()
 		 "         (ConceptNode \"A\"))))");
 
 	std::cout << "results = " << results->toString();
-	std::cout << "expected_results = " << expected_results->toString();
+	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected_results);
+	TS_ASSERT_EQUALS(results, expected);
 }
 
 /**
