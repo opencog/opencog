@@ -1388,18 +1388,20 @@
 ; -----------------------------------------------------------------------
 ; functions without R2L rule, not working, unneeded, etc
 ; -----------------------------------------------------------------------
-(define (comparative-rule w1 w1_instance w2 w2_instance adj adj_instance)
-	(list (InheritanceLink (ConceptNode adj_instance) (ConceptNode adj))
-	(InheritanceLink (ConceptNode w1_instance) (ConceptNode w1))
-	(InheritanceLink (ConceptNode w2_instance) (ConceptNode w2))
-	(r2l-wordinst-concept adj_instance)
-	(r2l-wordinst-concept w1_instance)
-	(r2l-wordinst-concept w2_instance)
-	(TruthValueGreaterThanLink
-		(InheritanceLink (ConceptNode w1_instance) (ConceptNode adj_instance))
-		(InheritanceLink (ConceptNode w2_instance) (ConceptNode adj_instance))
-	))
-)
+; XXX FIXME: there is no such thing as a "TruthValueGreaterThanLink",
+; so this rule is borken.
+;(define (comparative-rule w1 w1_instance w2 w2_instance adj adj_instance)
+;	(list (InheritanceLink (ConceptNode adj_instance) (ConceptNode adj))
+;	(InheritanceLink (ConceptNode w1_instance) (ConceptNode w1))
+;	(InheritanceLink (ConceptNode w2_instance) (ConceptNode w2))
+;	(r2l-wordinst-concept adj_instance)
+;	(r2l-wordinst-concept w1_instance)
+;	(r2l-wordinst-concept w2_instance)
+;	(TruthValueGreaterThanLink
+;		(InheritanceLink (ConceptNode w1_instance) (ConceptNode adj_instance))
+;		(InheritanceLink (ConceptNode w2_instance) (ConceptNode adj_instance))
+;	))
+;)
 
 (define (on-rule w1 w1_instance w2 w2_instance)
 	(list (InheritanceLink (ConceptNode w1_instance) (ConceptNode w1))
