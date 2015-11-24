@@ -14,6 +14,8 @@
 ;;
 ;; -----------------------------------------------------------------------------
 
+(use-modules (opencog logger))
+
 (define equivalence-to-double-implication-rule
     (BindLink
         (VariableList
@@ -25,39 +27,35 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: equivalence-to-double-implication-formula")
             (ListLink
-                (AndLink
-                    (ImplicationLink
-                        (ConceptNode "$A")
-                        (ConceptNode "$B"))
-                    (ImplicationLink
-                        (ConceptNode "$B")
-                        (ConceptNode "$A")))
-                (EquivalenceLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))))))
+               (ImplicationLink
+                  (VariableNode "$A")
+                  (VariableNode "$B"))
+               (ImplicationLink
+                  (VariableNode "$B")
+                  (VariableNode "$A"))
+               (EquivalenceLink
+                  (VariableNode "$A")
+                  (VariableNode "$B"))))))
 
-(define (equivalence-to-double-implication-formula AII EV)
-    (let (
-            (IAB (gar AII))
-            (IBA (gdr AII)))
-         (cog-set-tv!
-            IAB
-            (equivalence-to-double-implication-side-effect-free-formula IAB EV))
-         (cog-set-tv!
-            IBA
-            (equivalence-to-double-implication-side-effect-free-formula IBA EV))
-    AII))
+(define (equivalence-to-double-implication-formula AB BA EQ)
+    (cog-set-tv!
+       AB
+       (equivalence-to-double-implication-side-effect-free-formula AB EQ))
+    (cog-set-tv!
+       BA
+       (equivalence-to-double-implication-side-effect-free-formula BA EQ))
+    (ListLink AB BA))
 
-(define (equivalence-to-double-implication-side-effect-free-formula IAB EV)
+(define (equivalence-to-double-implication-side-effect-free-formula AB EQ)
     (let* (
-            (A (gar IAB))
-            (B (gdr IAB))
+            (A (gar AB))
+            (B (gdr AB))
             (sA (cog-stv-strength A))
             (sB (cog-stv-strength B))
-            (sEV (cog-stv-strength EV))
+            (sEQ (cog-stv-strength EQ))
             ;; Formula based on PLN book formula for sim2inh
-            (sIAB (/ (* (+ 1 (/ sB sA)) sEV) (+ 1 sEV))))
-        (stv sIAB (cog-stv-confidence EV))))
+            (sAB (/ (* (+ 1 (/ sB sA)) sEQ) (+ 1 sEQ))))
+        (stv sAB (cog-stv-confidence EQ))))
 
 ;; Name the rule
 (define equivalence-to-double-implication-rule-name
