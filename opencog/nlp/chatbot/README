@@ -1,18 +1,12 @@
 
-                       La Cogita Chatbot
-                       -----------------
-                Linas Vepstas <linasvepstas@gmail.com>
-                          August 2009
+                       OpenCog Chatbot
+                       ---------------
 
-A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
+A hacky hookup of the OpenCog NLP pipeline to an IRC chat client.
 
-At this time, the bot is a demo of the OpenCog natural-language
-processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
-OpenCog reasoning, deduction, or anything like that.
-
-To make the chatbot to actually answer the question with a correct
-answer PLN inference should be used and that would be the next
-implementation step.
+At this time, the bot is a demo of a portion of the OpenCog
+natural-language processing (NLP) pipeline; missing feautres include
+reference resolution, reasoning, dialog planning and emotional control.
 
 The chatbot can currently answer certain simple English-language
 wh-questions.  It does this by using "fuzzy-pattern-matching". This
@@ -22,30 +16,26 @@ will offer that up as an answer.  See below for additional details.
 
 Running the chatbot requires three steps:
 
-1) Running the parser server.
+1) Running the parse server.
 2) Running the opencog server.
 3) Running the chat-to-opencog bridge.
 
-Run the parser server:
-----------------------
-The chatbot requires the English parser daemon to be running.  The
-parser is available in the newer versions of RelEx, and is started by
-running ./opencog-server.sh from the main RelEx directory. (You must
-compile RelEx first, by installing java and ant, and saying "ant" to
-build RelEx).
+Run the parse server:
+---------------------
+The chatbot requires the Link Grammar + RelEx English-language parse
+serving daemon to be running.  The server is provided in the RelEx
+package, and is started by running ./opencog-server.sh from the main
+RelEx directory. (You must first download, compile and install Link
+Grammar first, and then download and compile RelEx.)
 
-The parse server listens on port 4444: it will read plain-text input and
-generates parsed text in OpenCog format. It uses RelEx2Logic rules
-for mapping the output of RelEx into a style of OpenCog Atom representation
-which will be  used for automated reasoning by PLN. The speech act of the
-input sentence will be tagged by R2L.
-
-The chatbot needs this server to process the input text.
+The parse server listens on port 4444: it will read plain-text input
+and return parsed text in OpenCog format.
 
 There is a simple "sniff-test" that can be used to verify that the
 server is running: try "telnet localhost 4444" to connect to the server,
 then type in an English sentence, then hit return. It should respond
 with a verbose parse of the sentence.
+
 
 Run the OpenCog server:
 -----------------------
@@ -57,12 +47,14 @@ This is most easily done by starting the cog server using the
 "lib/opencog-chatbot.conf" configuration file, which sets the correct
 port, silences the OpenCog prompt, and loads the needed scheme files.
 
+
 Configure and run the chat bridge:
 ----------------------------------
-The chatbot itself is just a simple deamon that bridges text from the
-chat system to the OpenCog server. The cogita chatbot is tailored for
-IRC chat; other chat systems could be supported in a straightforward
-manner.  See the file ../irc/README for details.
+The chatbot itself is just a simple daemon that bridges text from the
+chat system to the OpenCog server, and returns the responses that
+OpenCog generates. The brdige is tailored for IRC chat; other chat
+systems could be supported in a straightforward manner.  See the file
+`../irc/README` for details.
 
 Architecture:
 -------------
