@@ -2,8 +2,7 @@
 
 (use-modules (srfi srfi-1) (opencog) (opencog nlp))
 
-(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
-(load-extension "lg-dict" "opencog_nlp_lgdict_init")
+(load-extension "liblg-dict" "opencog_nlp_lgdict_init")
 
 ; ---------------------------------------------------------------------
 (define-public (lg-similar? word1 word2)
