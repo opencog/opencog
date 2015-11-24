@@ -2,7 +2,7 @@
                        OpenCog Chatbot
                        ---------------
 
-A hacky hookup of the OpenCog NLP pipeline to an IRC chat client.
+A (partial) demo the OpenCog NLP pipeline, connected to IRC chat.
 
 At this time, the bot is a demo of a portion of the OpenCog
 natural-language processing (NLP) pipeline; missing feautres include
@@ -63,7 +63,7 @@ TCP/IP sockets to perform NLP processing.
 
 The pipeline is as follows:
 
-1) IRC I/O, performed by cogita, acts as an intermediary between
+1) IRC I/O, via a simple irc daemon, acts as an intermediary between
    IRC and OpenCog.  It listens for input on an IRC channel, and
    forwards the resulting plain-text to OpenCog. This is done by
    issuing one simple scheme expression to OpenCog, via the OpenCog
@@ -71,10 +71,10 @@ The pipeline is as follows:
    is ''(process_query user text)'', where the ''user'' is
    the user's IRC nick, and ''text'' is what the user entered.  The
    return value from this command is sent back to the IRC channel.
-   Communications is stateless and blocking: cogita closes the socket
-   to indicate end-of-messsage, and expects that the cog server will
-   do the same. Only after the cog-server closes its socket does cogita
-   reply on the IRC channel.
+   Communications is stateless and blocking: the irc bridge closes the
+   socket to indicate end-of-messsage, and expects that the cogserver
+   will do the same. Only after the cog-server closes its socket does
+   the bridge reply on the IRC channel.
 
    Note that if the cog-server is busy, then "whirr" can block for an
    indefinitely long time. The person who is chatting will start to
@@ -90,43 +90,50 @@ The pipeline is as follows:
    The hypergraph is then loaded into the OpenCog atomspace, and is
    ready for processing.
 
-   I/O to parser is stateless: RelEx will close the socket after it has
-   completed its parse and returned its results.
+   I/O to the parser is stateless: RelEx will close the socket after
+   it has completed its parse and returned its results.
 
    The newly parsed sentence will be sent to a scheme function called
-   ''check_query_type''.This function will identify the speech act type
-   of the sentence then the next appropriate processing functions will
-   be called. For instance currently  ''(wh_query_process query)'' will
-   be invoked if the speech act tag is 'InterrogativeSpeechAct'
+   ''check_query_type''. This function will identify the speech act
+   type of the sentence, and then call the next appropriate processing
+   functions. For instance, ''(wh_query_process query)'' will
+   be invoked if the speech act tag is `InterrogativeSpeechAct`.
 
-3) Question-Answering. Currently The bot can recognize speech act type
-   of the utterance. specifically it identifies 'InterrogativeSpeechAct',
-   'TruthQuerySpeechAct and 'DeclarativeSpeechAct'
+3) The RelEx dependency parse is converted to a "logical" form,
+   suitable for reasoning, by a set of Relex2Logic (R2L) rules,
+   applied by the rule engine (URE).  The current fuzzy-pattern
+   matcher uses the R2L output. Also PLN will use R2L output for
+   reasoning.
 
-   The bot can answer some simple wh-questions ('InterrogativeSpeechAct')
-   by using the fuzzy-pattern-matcher. Sentences ("facts") pertaining
-   to the question must first be present in the atomspace, of course.
+4) Question-Answering. The bot currently recognizes the speech act
+   types `InterrogativeSpeechAct`, `TruthQuerySpeechAct` and
+   `DeclarativeSpeechAct`.
 
-4) Relex2Logic replaces the old "semantic triples" code (in the
-   ../old-chatbot directory). The current fuzzy-pattern-matcher uses
-   the R2L output. Also PLN will use r2l output for reasoning.
+   The bot answers some simple wh-questions (`InterrogativeSpeechAct`)
+   by using the fuzzy-pattern-matcher.  The atomspace must first have
+   been primed with factual sentences pertaining to the question.
 
-5) Sureal and Microplanning is  used for Natural Language Generation.
+5) Word-sense disambiguation (WSD) (not hooked up).  This is just the
+   most elementary step of determining the word senses of the words
+   used in the input text. See the wiki page for details.
+   http://wiki.opencog.org/w/Word_sense_disambiguation
 
-6) OpenPsi (not hooked up yet) will be used to make the chatbot to
+6) Reasoning (not hooked up). PLN, the core reasoning engine will be
+   used. This stage interacts strongly with WSD.
+
+7) Anaphora resolution (not hooked up) will be used to resolve pronouns
+   and other references.  This interacts strongly with WSD.
+
+8) OpenPsi (not hooked up yet) will be used to make the chatbot to
    generate a speech-act goal plus context for utterances. Here,
    different speech act schema will be triggered based on the goal
    and context.
 
-7) Reasoning (not hooked up). PLN, the core reasoning engine will be
-   used.
-
-8) Anaphora resolution (not hooked up) will be used to resolve pronouns
-   and other references
-
-9) Word-sense disambiguation (not hooked up)
-   http://wiki.opencog.org/w/Word_sense_disambiguation
-
+9) The result of the above processing is a collection of natural
+   language dependency relations.  These are converted to one or
+   more syntactically correct output sentences, using the micro-
+   planning+sureal (surface realization) subsystem.  The resuklting
+   sentences are passed back to the IRC bridge.
 
 Examples:
 ---------
@@ -180,16 +187,16 @@ Currently, the following dialog is working.
 ToDo:
 -----
 * Implement the truth-query processing after the issue on the backward
-  chaining is fixed
+  chaining is fixed.
 
-* Write different  speech  act schema's as it is described on the
-  "dialog system" paper
+* Write different  speech act schema's as it is described on the
+  "dialog system" paper.
 
 * Create an object holding the name of the user, the chat connection,
   and the 'pseudo-continuation' of the chat status: Create a dialog node
   for each dialog and an utterance node for each utterance.
 
-* Integrate the components described in the architecture part
+* Integrate the components described in the architecture part.
 
 References
 ==========
@@ -203,8 +210,3 @@ http://en.wikipedia.org/wiki/MultiNet
 
 “Initial OpenCog Based Dialogue System Design Document”
 an ongoing thesis by Ruiting Lian
-
-Initial draft: April 2009 Linas Vepstas
-Updated: September 2009 Linas Vepstas
-Updated: April 2010  Vamsi Krishna Davuluri
-Updated: July 2015 Rodas Solomon
