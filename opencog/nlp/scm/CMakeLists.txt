@@ -1,4 +1,9 @@
 INSTALL (FILES
+	nlp.scm
+   DESTINATION "${DATADIR}/scm/opencog"
+)
+
+INSTALL (FILES
 	config.scm
 	disjunct-list.scm
 	file-utils.scm

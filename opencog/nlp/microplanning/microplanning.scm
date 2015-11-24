@@ -1,7 +1,7 @@
 (define-module (opencog nlp microplanning))
 
-;(use-modules (opencog))
-;(use-modules (srfi srfi-1))
+(use-modules (opencog))
+(use-modules (srfi srfi-1))
 
 ; loading additional dependency
 (load "sentence-forms.scm")
@@ -17,6 +17,7 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
+; See documentation below ...
 (define microplanning
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
