@@ -216,7 +216,8 @@ scheme@(guile-user)> (cog-bind implication-construction-rule)
 ...
 
 ### (6) Distribute the implicant in the implication (5). Semi-formally
-    (\x take(x, treatment-1)) -> (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+    (\x take(x, treatment-1))
+    -> (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
 
 scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
 ...
@@ -286,7 +287,7 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
                )
             )
          )
-         (LambdaLink
+         (LambdaLink (stv 1 0.99999982)
             (TypedVariableLink
                (VariableNode "$X")
                (TypeNode "ConceptNode")
@@ -333,7 +334,7 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
 
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 0 0.80000001)
+   (ImplicationLink (stv 1 0.99999982)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -372,13 +373,13 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
    )
 ...
 
-### (9) Using (1) and (8) infer that if X takes treatment-1 then X
+### (9) Using (2) and (8) infer that if X takes treatment-1 then X
     takes compound-A. Semi-formally
     (\x takes(x, treatment-1)) -> (\x takes(x, compound-A))
 
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 0 0.80000001)
+   (ImplicationLink (stv 1 0.99999982)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
