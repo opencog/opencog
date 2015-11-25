@@ -183,6 +183,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
 void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
 {
+    sleep (30);
 
     while (true)
     {

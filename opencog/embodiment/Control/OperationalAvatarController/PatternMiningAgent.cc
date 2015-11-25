@@ -49,7 +49,7 @@ PatternMiningAgent::PatternMiningAgent(CogServer& cs) : Agent(cs)
 
 void PatternMiningAgent::init()
 {
-    sleep(15);
+
     logger().debug( "PatternMiningAgent::%s - Initialize the Agent [cycle = %d]",
                     __FUNCTION__, this->cycleCount);
 
@@ -125,9 +125,11 @@ void PatternMiningAgent::run()
     static bool hasRun = false;
     if (hasRun)
         return;
+
     this->patternMiner->runPatternMinerForEmbodiment();
 
-    std::thread([this]{this->feedingNewAtomsToPatternMiner();});
+    std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
+    feedingthread.detach();
     hasRun = true;
 
 }
@@ -139,9 +141,13 @@ void PatternMiningAgent::feedingNewAtomsToPatternMiner()
     {
         PatternMiner::waitingToFeedQueueLock.lock();
         PAI::waitingToFeedToPatternMinerLock.lock();
-        this->patternMiner->feedNewLinksToPatternMiner(PAI::perceptionWaitingForPatternMiner);
-        PAI::perceptionWaitingForPatternMiner.clear();
+        if (PAI::perceptionWaitingForPatternMiner.size() != 0)
+        {
+            this->patternMiner->feedNewLinksToPatternMiner(PAI::perceptionWaitingForPatternMiner);
+            PAI::perceptionWaitingForPatternMiner.clear();
+        }
         PAI::waitingToFeedToPatternMinerLock.unlock();
         PatternMiner::waitingToFeedQueueLock.unlock();
+        sleep(5);
     }
 }

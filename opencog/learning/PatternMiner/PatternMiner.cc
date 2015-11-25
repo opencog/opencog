@@ -1972,7 +1972,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         else
         {
             HNode->nII_Surprisingness = -1.0f;
-            num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
+            // num_of_patterns_without_superpattern_cur_gram ++; // todo: need a lock
         }
     }
 
@@ -2272,14 +2272,18 @@ void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency
 
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
 
-
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
     observingAtomSpace = new AtomSpace();
 
     processedLinkNum = 0;
 
-    std::thread(&PatternMiner::growPatternsDepthFirstTaskForEmbodiment,this);
-    std::thread(&PatternMiner::runEvaluatePatternTaskForEmbodiment,this);
+    miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
+    miningFromEmbodimentThread.detach();
+
+    evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
+    evaluatingForEmbodimentThread.detach();
+
+
 }
 
 // this function is run evaluatePatternsEveryXSeconds
@@ -2290,6 +2294,12 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
     {
         sleep(evaluatePatternsEveryXSeconds);
         miningOrEvaluatingLock.lock();
+
+        if(processedLinkNum == 0)
+        {
+            miningOrEvaluatingLock.unlock();
+            continue;
+        }
 
         atomspaceSizeFloat = (float)processedLinkNum;
         std::cout<<"Debug: PatternMiner: Start a pattern evaluation task.\n";
@@ -2310,6 +2320,7 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
                 corpusFile << observingAtomSpace->atomAsString(ph) << std::endl;
         }
 
+        corpusFile.close();
 
         for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
         {
@@ -2326,10 +2337,13 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
 
         for(cur_gram = 2; cur_gram <= MAX_GRAM - 1; cur_gram ++)
         {
+            if (patternsForGram[cur_gram-1].size() == 0)
+                break;
+
             cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
             cur_index = -1;
             threads = new thread[THREAD_NUM];
-            num_of_patterns_without_superpattern_cur_gram = 0;
+            // num_of_patterns_without_superpattern_cur_gram = 0;
 
             for (unsigned int i = 0; i < THREAD_NUM; ++ i)
             {
