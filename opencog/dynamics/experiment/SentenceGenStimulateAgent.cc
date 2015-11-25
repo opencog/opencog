@@ -169,6 +169,8 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
     stimulateAtom(hwords, 20);
     stimulateAtom(hword_instances, 20);
 
+    cycle++;
+
     //Push sentence nodes
     sent_wordnodes.push_back(hwords);
     wordinstancenodes.push_back(hword_instances);
