@@ -1,8 +1,8 @@
 
-; XXX this needs to be part of some module, maybe a fuzzy-matcher
-; module, or something like that.
+(define-module (opencog nlp fuzzy))
 
-(use-modules (opencog)
+(use-modules (srfi srfi-1)
+             (opencog)
              (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))

@@ -5,6 +5,7 @@
              (opencog atom-types)
              (opencog rule-engine)
              (opencog nlp)
+             (opencog nlp fuzzy)
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
