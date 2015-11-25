@@ -1,6 +1,5 @@
+(define-module (opencog nlp chatbot))
 
-; Hack, this is needed for some reason...
-(add-to-load-path "/usr/local/share/opencog/scm")
 (use-modules (opencog)
              (opencog atom-types)
              (opencog rule-engine)
@@ -9,9 +8,7 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
-; hack -- these need to be modules of thier own.
-(load "../scm/nlp-utils.scm")
-(load "../scm/sentence-matching.scm")
+(load "processing-utils.scm")
 
 ;------------------------------------------------------------------
 (define (get-utterance-type sent)
