@@ -23,6 +23,7 @@ extern UnorderedHandleSet hspecial_word_nodes;
 extern std::vector<std::string> special_words;
 extern std::vector<std::string> nspecial_words;
 extern int sent_size;
+extern int special_word_occurence_period;
 
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.
