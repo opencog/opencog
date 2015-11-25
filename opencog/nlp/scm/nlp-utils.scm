@@ -70,6 +70,15 @@
 
 (use-modules (ice-9 receive) (srfi srfi-1))
 
+; XXX WTF I get the error:
+; "In procedure module-lookup: Unbound variable: cog-chase-link"
+; when running from the cogserver, unless I *explcitly* load
+; "utilities.scm" below. But that's crazy!! Something is really
+; messed up with how the cogserver is handling modules...
+; (use-modules (opencog))
+(load-from-path "utilities.scm")
+
+
 ; ---------------------------------------------------------------------
 (define-public (map-parses proc sent-or-list)
 "
