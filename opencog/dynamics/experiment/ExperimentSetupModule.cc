@@ -184,7 +184,7 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
     std::string file_name = args.back();
     // cycle,uuid,sti,lti
 
-    auto sprint = [this](const UnorderedHandleSet & uhs) {
+    auto swprint = [this](const UnorderedHandleSet & uhs) {
         std::stringstream sstream;
         for (const auto & p : _data) {
             if(uhs.find(p.first) != uhs.end()) {
@@ -200,12 +200,34 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
         return sstream.str();
     };
 
-    std::ofstream outf(file_name, std::ofstream::out | std::ofstream::trunc);
+    auto nswprint = [this](const UnorderedHandleSet & uhs) {
+        std::stringstream sstream;
+        for (const auto & p : _data) {
+            if(uhs.find(p.first) == uhs.end()) {
+                for (const ECANValue& ev : p.second) {
+                    sstream << std::to_string(p.first.value()) << ","
+                    << std::to_string(ev._sti) << ","
+                    << std::to_string(ev._lti) << ","
+                    << std::to_string(ev._vlti) << ","
+                    << std::to_string(ev._cycle) << "\n";
+                }
+            }
+        }
+        return sstream.str();
+    };
 
+    std::ofstream outf(file_name+"-sw.data",
+                       std::ofstream::out | std::ofstream::trunc);
     //Print ecan  values of special word nodes
-    outf << sprint(hspecial_word_nodes);
+    outf << swprint(hspecial_word_nodes);
     outf.flush();
     outf.close();
+
+    std::ofstream outf2(file_name+"-nsw.data",
+                         std::ofstream::out | std::ofstream::trunc);
+    outf2 << nswprint(hspecial_word_nodes);
+    outf2.flush();
+    outf2.close();
 
     return "Time series data dumped in to " + file_name + ".\n";
 
