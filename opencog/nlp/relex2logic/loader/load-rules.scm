@@ -31,6 +31,7 @@
 (load "../rules/SVIO2.scm")
 (load "../rules/svo.scm")
 (load "../rules/SV.scm")
+(load "../rules/tense.scm")
 (load "../rules/TOBE.scm")
 (load "../rules/todo1.scm")
 (load "../rules/todo2.scm")

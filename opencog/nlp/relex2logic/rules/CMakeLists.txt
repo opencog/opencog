@@ -35,6 +35,7 @@ INSTALL (FILES
 	SVIO2.scm
 	svo.scm
 	SV.scm
+	tense.scm
 	TOBE.scm
 	todo1.scm
 	todo2.scm

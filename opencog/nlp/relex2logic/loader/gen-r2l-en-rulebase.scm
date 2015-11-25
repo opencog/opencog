@@ -189,3 +189,6 @@
 (define conj-name (Node "conj"))
 (DefineLink conj-name conj)
 (MemberLink (stv 1 1) conj-name (ConceptNode "R2L-en-RuleBase"))
+(define tense-name (Node "tense"))
+(DefineLink tense-name tense)
+(MemberLink (stv 1 1) tense-name (ConceptNode "R2L-en-RuleBase"))
