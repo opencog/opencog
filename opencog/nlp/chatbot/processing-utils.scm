@@ -13,47 +13,51 @@
 (use-modules (ice-9 regex) (srfi srfi-1))
 
 ; -----------------------------------------------------------------------
-; Release items attached to the named anchor
-;
 (define (release-from-anchor anchor)
+"
+  Release items attached to the named anchor
+"
    (for-each (lambda (x) (cog-purge x))
       (cog-incoming-set anchor)
    )
 )
 
-; Return the list of SentenceNodes that are attached to the
-; freshly-parsed anchor.  This list will be non-empty if relex-parse
-; has been recently run. This list can be emptied with the call
-; release-new-parsed-sent below.
-;
 (define (get-new-parsed-sentences)
+"
+  Return the list of SentenceNodes that are attached to the
+  freshly-parsed anchor.  This list will be non-empty if relex-parse
+  has been recently run. This list can be emptied with the call
+  release-new-parsed-sent below.
+"
 	(cog-chase-link 'ListLink 'SentenceNode (AnchorNode "# New Parsed Sentence"))
 )
 
-; release-new-parsed-sents deletes the links that anchor sentences to
-; to new-parsed-sent anchor.
-;
 (define (release-new-parsed-sents)
+"
+  release-new-parsed-sents deletes the links that anchor sentences to
+  to new-parsed-sent anchor.
+"
 	(release-from-anchor (AnchorNode "# New Parsed Sentence"))
 )
 
 ; -----------------------------------------------------------------------
-; relex-parse -- send text to RelEx parser, load the resulting opencog atoms
-;
-; This routine takes plain-text input (in english), and sends it off
-; to a running instance of the RelEx parser, which should be listening
-; on port 4444. The parser will return a set of atoms, and these are
-; then loaded into this opencog instance. After import, these are attached
-; to the "*new-parsed-sent-anchor*" via a ListLink; the set of newly added
-; sentences can be fetched with the "get-new-parsed-sentences" call.
-;
-; The relex-server-host and port are set in config.scm, and default to
-; localhost 127.0.0.1 and port 4444
-;
-; This version will not wrap R2L atoms inside ReferenceLink.  Using
-; (r2l-parse ...) is preferred.
-;
 (define (relex-parse plain-txt)
+"
+  relex-parse -- send text to RelEx parser, load the resulting opencog atoms
+
+  This routine takes plain-text input (in English), and sends it off
+  to a running instance of the RelEx parser, which should be listening
+  on port 4444. The parser will return a set of atoms, and these are
+  then loaded into this opencog instance. After import, these are attached
+  to the \"*new-parsed-sent-anchor*\" via a ListLink; the set of newly added
+  sentences can be fetched with the \"get-new-parsed-sentences\" call.
+
+  The relex-server-host and port are set in config.scm, and default to
+  localhost 127.0.0.1 and port 4444
+
+  This version will not wrap R2L atoms inside ReferenceLink.  Using
+  (r2l-parse ...) is preferred.
+"
 
 	; A little short routine that sends the plain-text to the
 	; RelEx parser, and then loads the resulting parse into the
@@ -84,15 +88,15 @@
 )
 
 ; -----------------------------------------------------------------------
-; get-parses-of-sents -- return parses of the sentences
-; Given a list of sentences, return a list of parses of those sentences.
-; That is, given a List of SentenceNode's, return a list of ParseNode's
-; associated with those sentences.
-;
-; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
-; and probably should be, when processing becomes fully rule-driven.
-
 (define (get-parses-of-sents sent-list)
+"
+  get-parses-of-sents -- return parses of the sentences
+  Given a list of sentences, return a list of parses of those sentences.
+  That is, given a List of SentenceNode's, return a list of ParseNode's
+  associated with those sentences.
+"
+;  OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+;  and probably should be, when processing becomes fully rule-driven.
 	(define (get-parses sent)
 		(cog-chase-link 'ParseLink 'ParseNode sent)
 	)
@@ -100,17 +104,17 @@
 )
 
 ; -----------------------------------------------------------------------
-; attach-parses-to-anchor -- given sentences, attach the parses to anchor.
-;
-; Given a list of sentences i.e. a list of SentenceNodes, go through them,
-; locate the ParseNodes, and attach the parse nodes to the anchor.
-;
-; return value is undefined (no return value).
-;
-; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
-; and probably should be, when processing becomes fully rule-driven.
-;
 (define (attach-parses-to-anchor sent-list anchor)
+"
+  attach-parses-to-anchor -- given sentences, attach the parses to anchor.
+
+  Given a list of sentences i.e. a list of SentenceNodes, go through them,
+  locate the ParseNodes, and attach the parse nodes to the anchor.
+
+  return value is undefined (no return value).
+"
+;  OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+;   and probably should be, when processing becomes fully rule-driven.
 
 	;; Attach all parses of a sentence to the anchor.
 	(define (attach-parses sent)
@@ -210,11 +214,12 @@
 )
 
 ; -----------------------------------------------------------------------
-; nlp-parse -- Wrap the whole NLP pipeline in one function.
-;
-; Call the necessary functions for the full NLP pipeline.
-;
 (define (nlp-parse plain-text)
+"
+  nlp-parse -- Wrap the whole NLP pipeline in one function.
+
+  Call the necessary functions for the full NLP pipeline.
+"
 	; making sure  we emptied previous sentences as fail-safe
 	(release-new-parsed-sents)
 
@@ -267,12 +272,13 @@
 )
 
 ; -----------------------------------------------------------------------
-; Returns the parses of strings found on each line in a file at 'filepath'.
-;
-; 'filepath': a string that points to the file containing the strings
-;             to be parsed.
-;
 (define (nlp-parse-from-file filepath)
+"
+  Returns the parses of strings found on each line in a file at 'filepath'.
+
+  'filepath': a string that points to the file containing the strings
+              to be parsed.
+"
     (let*
         ((cmd-string (string-join (list "cat " filepath) ""))
         (port (open-input-pipe cmd-string))
