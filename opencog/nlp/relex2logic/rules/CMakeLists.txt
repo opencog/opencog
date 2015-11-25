@@ -1,4 +1,5 @@
 INSTALL (FILES
+	adverbialpp.scm
 	advmod.scm
 	amod.scm
 	atTime.scm
@@ -6,9 +7,13 @@ INSTALL (FILES
 	be-inheritance.scm
 	compmod.scm
 	comp.scm
+	conj.scm
 	copula-ynq.scm
+	declarative.scm
 	definite.scm
 	demdet.scm
+	det.scm
+	gender.scm
 	howdeg-q.scm
 	howpredadj1-q.scm
 	how-q.scm
@@ -16,6 +21,7 @@ INSTALL (FILES
 	imperative.scm
 	interrogative.scm
 	neg.scm
+	nn.scm
 	poss.scm
 	pp.scm
 	pred-ynq.scm
@@ -33,6 +39,7 @@ INSTALL (FILES
 	todo1.scm
 	todo2.scm
 	todo5.scm
+	to-do-rule-3.scm
 	truthquery.scm
 	when-cop-q.scm
 	when-q.scm

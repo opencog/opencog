@@ -1,12 +1,9 @@
 
 (define-module (opencog nlp relex2logic))
 
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog atom-types) (opencog nlp))
 
-; XXX FIXME The install paths need to be rationalized. This load
-; path is insane.
 (load "relex2logic/utilities.scm")
-
 
 ; -----------------------------------------------------------------------
 ; This loads all the rules into the cogserver shell.
