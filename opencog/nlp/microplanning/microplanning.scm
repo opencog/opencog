@@ -53,6 +53,7 @@
 	)
 )
 
+(export *default_chunks_option*)
 
 ; =======================================================================
 ; Main microplanning functions
