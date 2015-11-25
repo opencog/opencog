@@ -12,5 +12,5 @@ INSTALL (FILES
 	processing-utils.scm
 	sentence-matching.scm
 	type-definitions.scm
-   DESTINATION "${DATADIR}/scm/nlp/scm"
+   DESTINATION "${DATADIR}/scm/opencog/nlp"
 )

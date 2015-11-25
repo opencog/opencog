@@ -2,7 +2,8 @@
 ; XXX this needs to be part of some module, maybe a fuzzy-matcher
 ; module, or something like that.
 
-(use-modules (opencog nlp)
+(use-modules (opencog)
+             (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))
 

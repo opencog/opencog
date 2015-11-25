@@ -1,6 +1,8 @@
 
 (define-module (opencog nlp relex2logic))
 
+; (add-to-load-path "/usr/local/share/opencog/scm")
+
 (use-modules (opencog) (opencog atom-types) (opencog nlp))
 
 (load "relex2logic/utilities.scm")

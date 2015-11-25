@@ -68,7 +68,7 @@
 ; Copyright (c) 2015 OpenCog Foundation
 ;
 
-(use-modules (ice-9 receive))
+(use-modules (ice-9 receive) (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
 (define-public (map-parses proc sent-or-list)
