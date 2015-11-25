@@ -3,12 +3,14 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 (use-modules (opencog)
              (opencog atom-types)
+             (opencog rule-engine)
              (opencog nlp)
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
-; Hack, it seems that no one else sets this up ...
-; (load-r2l-rulebase)
+; hack -- these need to be modules of thier own.
+(load "../scm/nlp-utils.scm")
+(load "../scm/sentence-matching.scm")
 
 ;------------------------------------------------------------------
 (define (get-utterance-type sent)
