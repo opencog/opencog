@@ -130,27 +130,19 @@
 )
 
 ; -----------------------------------------------------------------------
-; This loads all the rules into the cogserver shell. This assumes that the
-; cogserver is started from in-source build directory.
-; TODO: This should be replaced by a module.
-(define-public (load-r2l-rulebase)
-    (load-scm-from-file "../opencog/nlp/relex2logic/loader/load-rules.scm")
-    (load-scm-from-file
-        "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")
-)
-
 (define (r2l-parse sent)
 "
-    Runs the rules found in R2L-en-RuleBase over the RelEx output creating
-    the logical representation of sentence in the atomspace. Returns a list
-    containing SetLinks that are the r2l-interpretations for individual parses.
+  r2l-parse SENT -- perform relex2logic processing on sentence SENT.
 
-    This can't handle  mutliple thread execution. Thus mapping this function
-    over a list of sentences even though possible is not advised.
+  Runs the rules found in R2L-en-RuleBase over the RelEx output creating
+  the logical representation of sentence in the atomspace. Returns a list
+  containing SetLinks that are the r2l-interpretations for individual parses.
 
-    sent:
-        - a sting containing the sentence to be parsed. An empty string is not
-          accepted.
+  This can't handle  mutliple thread execution. Thus mapping this function
+  over a list of sentences even though possible is not advised.
+
+  SENT must be a string containing the sentence to be parsed. An empty
+  string is not accepted.
 "
     (define (cog-delete-parent a-link)
         ; returns the outgoing-set of `a-link` and delete it if possible.
