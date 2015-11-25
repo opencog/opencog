@@ -5,7 +5,7 @@
 ;
 
 (use-modules (ice-9 receive))
-(load "utilities.scm")
+(load "r2l-utilities.scm")
 
 ; =======================================================================
 ; Helper utilities for post-processing.
