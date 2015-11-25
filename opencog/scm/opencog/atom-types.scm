@@ -19,6 +19,7 @@
 (load-extension "libattention-types" "attention_types_init")
 (load-extension "libembodiment-types" "embodiment_types_init")
 
+(add-to-load-path "/usr/local/share/opencog/scm")
 (load-from-path "nlp/types/nlp_types.scm")
 (load-from-path "spacetime/spacetime_types.scm")
 (load-from-path "dynamics/attention/attention_types.scm")
