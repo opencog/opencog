@@ -50,6 +50,6 @@ INSTALL (FILES
 	whichsubjSVQ.scm
 	why-cop-q.scm
 	why-q.scm
-	DESTINATION "${DATADIR}/scm/nlp/relex2logic/rules"
+	DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic/rules"
 )
 
