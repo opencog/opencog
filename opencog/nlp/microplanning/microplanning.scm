@@ -6,6 +6,7 @@
              (opencog nlp relex2logic) ; helpers.scm uses this
              (opencog nlp sureal))
 
+;
 ; loading additional dependency
 (load "sentence-forms.scm")
 (load "helpers.scm")

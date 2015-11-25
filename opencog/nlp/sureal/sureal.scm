@@ -15,8 +15,8 @@
              (ice-9 rdelim) (ice-9 regex) (ice-9 receive)
              (opencog)
              (opencog nlp)
-             (opencog nlp relex2logic)
              (opencog nlp lg-dict)
+             (opencog nlp relex2logic)
 )
 
 (load-extension "libsureal" "opencog_nlp_sureal_init")
