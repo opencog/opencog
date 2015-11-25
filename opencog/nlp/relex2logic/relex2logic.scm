@@ -5,7 +5,7 @@
 
 (use-modules (opencog) (opencog atom-types) (opencog nlp))
 
-(load "relex2logic/utilities.scm")
+(load "relex2logic/r2l-utilities.scm")
 (load "relex2logic/loader/load-rules.scm")
 (load "relex2logic/loader/gen-r2l-en-rulebase.scm")
 
