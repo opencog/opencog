@@ -1,3 +1,14 @@
+;Both link grammar and relex output are selected because of the pattern 
+;Example : "He gave me the book."
+;(DefinedLinguisticConceptNode "past") and (DefinedLinguisticConceptNode ".v-d")
+;I just want to avoid the Link Grammar output. There might be another way to do this
+(define (check-tense tense)
+    (if (string-contains (cog-name tense) ".")
+        (begin (stv 0 1))
+        (begin (stv 1 1))
+    )
+)
+
 (define tense
     (BindLink
         (VariableList
@@ -9,7 +20,7 @@
                 (VariableNode "$verb")
                 (TypeNode "WordInstanceNode")
             )
-		    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$tense")
                 (TypeNode "DefinedLinguisticConceptNode")
             )
@@ -26,6 +37,12 @@
             (InheritanceLink
                 (VariableNode "$verb")
                 (VariableNode "$tense")
+            )
+            (EvaluationLink
+                (GroundedPredicateNode "scm: check-tense")
+                (ListLink
+                    (VariableNode "$tense")
+                )
             )
         )
         (ListLink
