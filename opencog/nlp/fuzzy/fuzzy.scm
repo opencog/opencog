@@ -3,6 +3,7 @@
 
 (use-modules (srfi srfi-1)
              (opencog)
+             (opencog query)  ; for cog-fuzzy-match
              (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))
