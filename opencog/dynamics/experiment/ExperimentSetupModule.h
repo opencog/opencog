@@ -40,6 +40,8 @@ std::vector<std::string> special_words;
 std::vector<std::string> nspecial_words;
 int sent_size;
 
+int special_word_occurence_period = 4;
+
 class ExperimentSetupModule: public Module {
 private:
     struct ECANValue {
