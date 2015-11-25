@@ -133,7 +133,7 @@
 ; This loads all the rules into the cogserver shell. This assumes that the
 ; cogserver is started from in-source build directory.
 ; TODO: This should be replaced by a module.
-(define (load-r2l-rulebase)
+(define-public (load-r2l-rulebase)
     (load-scm-from-file "../opencog/nlp/relex2logic/loader/load-rules.scm")
     (load-scm-from-file
         "../opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm")

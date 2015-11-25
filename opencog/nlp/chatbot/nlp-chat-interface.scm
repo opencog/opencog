@@ -4,10 +4,11 @@
 (use-modules (opencog)
              (opencog atom-types)
              (opencog nlp)
-             (opencog nlp microplanning))
+             (opencog nlp microplanning)
+             (opencog nlp relex2logic))
 
 ; Hack, it seems that no one else sets this up ...
-(load-r2l-rulebase)
+; (load-r2l-rulebase)
 
 ;------------------------------------------------------------------
 (define (get-utterance-type sent)
