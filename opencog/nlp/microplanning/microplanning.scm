@@ -8,12 +8,12 @@
 
 ;
 ; loading additional dependency
-(load "sentence-forms.scm")
-(load "helpers.scm")
-(load "anaphora.scm")
-(load "chunks-option.scm")
-(load "chunks-set.scm")
-(load "atomW.scm")
+(load "microplanning/sentence-forms.scm")
+(load "microplanning/helpers.scm")
+(load "microplanning/anaphora.scm")
+(load "microplanning/chunks-option.scm")
+(load "microplanning/chunks-set.scm")
+(load "microplanning/atomW.scm")
 
 
 ; =======================================================================

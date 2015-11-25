@@ -8,7 +8,7 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
-(load "processing-utils.scm")
+(load "chatbot/processing-utils.scm")
 
 ;------------------------------------------------------------------
 (define (get-utterance-type sent)
