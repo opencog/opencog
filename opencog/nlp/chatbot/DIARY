@@ -87,3 +87,7 @@ bugs:
 * "Where is ...?" not idnetified as a question ..
 
 scm/sentence-matching.scm:
+
+* typoes fool the fuzzy matcher... e.g. 
+  "Linas eats banannas. "Who eats bannanas?"  note variable nn
+
