@@ -429,6 +429,16 @@ ELSE (cpprest_FOUND AND cpprest_LIBRARY)
 ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
 MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
 
+#Octomap
+FIND_PACKAGE(Octomap)
+IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
+  SET(HAVE_OCTOMAP 1)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
+ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 
