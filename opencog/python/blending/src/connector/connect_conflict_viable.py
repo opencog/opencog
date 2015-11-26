@@ -12,13 +12,21 @@ __author__ = 'DongMin Kim'
 
 
 class ConnectConflictAllViable(BaseConnector):
-    """Make 2^k available(viable) new blend atoms if there exists k conflicts.
+    """Link connector that connects every viable cases of links to new blends.
+
+    If there exists k conflict links pair, then connector will makes the 2^k
+    new blends, and connects each viable case to each new blend.
+
+    1. Find the duplicate links, and the non-duplicate links.
+    2. Find the conflict links, and non-conflict links from duplicate links.
+    3. Make 2^k available conflict link cases if there exists k conflicts.
+    4. Connects every viable cases of links to new blends.
 
     Attributes:
         check_type: A link type to check conflict.
         strength_diff_limit: A limit of difference between links strength value.
         confidence_above_limit: A threshold of both links confidence value.
-        viable_atoms_count_threshold: A max count limit of new blend atoms.
+        viable_atoms_count_threshold: A max limit count of new blend atoms.
         :type check_type: opencog.type_constructors.types
         :type strength_diff_limit: float
         :type confidence_above_limit: float
@@ -35,6 +43,7 @@ class ConnectConflictAllViable(BaseConnector):
         self.viable_atoms_count_threshold = None
 
     def make_default_config(self):
+        """Initialize a default config for this class."""
         super(self.__class__, self).make_default_config()
         BlendConfig().update(self.a, "connect-check-type", "SimilarityLink")
         BlendConfig().update(self.a, "connect-strength-diff-limit", "0.3")
@@ -42,6 +51,14 @@ class ConnectConflictAllViable(BaseConnector):
         BlendConfig().update(self.a, "connect-viable-atoms-count-limit", "100")
 
     def __prepare_blended_atoms(self, conflict_links, merged_atom):
+        """Prepare new blend atoms list if the number of result atom is
+        expected to more than one.
+
+        Args:
+            conflict_links: Conflicted link tuples list.
+            merged_atom: The atom to connect new links.
+            :param merged_atom: Atom
+        """
         # 1. Make all available new blended atoms.
         # Number of new atoms is expected to 2^k, if there exists k conflicts.
         if self.viable_atoms_count_threshold is not None:
@@ -64,43 +81,38 @@ class ConnectConflictAllViable(BaseConnector):
                 )
             )
 
-    def __connect_conflict_links(self, conflict_links):
-        # 1-b. Prepare cartesian product iterator.
-        # if number of conflict_links is 3, this iterator produces:
-        # (0, 0, 0), (0, 0, 1), (0, 1, 0), (0, 1, 1), ... (1, 1, 1)
-        cartesian_binary_iterator = \
-            itertools.product([0, 1], repeat=len(conflict_links))
+    def __connect_links(self, conflict_link_cases, non_conflict_links,
+                        non_duplicate_links):
+        """Connect the every viable cases of links to new blends.
 
-        # 1-c. Connect to each viable atoms.
-        for i, viable_case_binary in enumerate(cartesian_binary_iterator):
-            for j, selector in enumerate(viable_case_binary):
-                eq_link.key_to_link(
-                    self.a,
-                    conflict_links[j][selector],
-                    self.ret[i],
-                    conflict_links[j][selector].tv
-                )
-
-    def __connect_non_conflict_links(self, non_conflict_links):
-        # 2. Others, evaluate the weighted average of truth value between
-        # the duplicate links.
-        for merged_atom in self.ret:
-            for links in non_conflict_links:
-                # array elements are same except original node information.
-                link_key_sample = links[0]
-                eq_link.key_to_link(
-                    self.a, link_key_sample, merged_atom,
-                    get_weighted_tv(links)
-                )
-
-    def __connect_non_duplicate_links(self, non_duplicate_links):
-        # Just copy.
-        for links in non_duplicate_links:
-            for link in links:
-                for merged_atom in self.ret:
+        Args:
+            conflict_link_cases: conflicted links list.
+            non_conflict_link_cases: non-conflicted links list.
+            non_duplicate_link_cases: non-duplicated links list.
+            :param conflict_link_cases: list[list[EqualLinkKey]]
+            :param non_conflict_links: list[EqualLinkKey]
+            :param non_conflict_links: list[EqualLinkKey]
+        """
+        for i, merged_atom in enumerate(self.ret):
+            # 1. Connect to each viable atoms.
+            for conflict_link_case in conflict_link_cases:
+                for link in conflict_link_case:
                     eq_link.key_to_link(self.a, link, merged_atom, link.tv)
+            # 2. Others, connect link with weighted average of truth value
+            # between the duplicate links.
+            for link in non_conflict_links:
+                eq_link.key_to_link(self.a, link, merged_atom, link.tv)
+            # 3. Just copy.
+            for link in non_duplicate_links:
+                eq_link.key_to_link(self.a, link, merged_atom, link.tv)
 
     def __connect_to_blended_atoms(self, decided_atoms):
+        """Connect source atoms to new blend atom.
+
+        Args:
+            decided_atoms: The source atoms to make new atom.
+            :param decided_atoms: list[Atom]
+        """
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
         for merged_atom in self.ret:
@@ -113,8 +125,20 @@ class ConnectConflictAllViable(BaseConnector):
                 )
 
     def __connect_viable_conflict_links(self, decided_atoms, merged_atom):
+        """Actual algorithm for connecting links.
+
+        Args:
+            decided_atoms: The source atoms to make new atom.
+            merged_atom: The atom to connect new links.
+            :param decided_atoms: list[Atom]
+            :param merged_atom: Atom
+        """
+        # 1. Find the duplicate links, and the non-duplicate links.
         duplicate_links, non_duplicate_links = \
             find_duplicate_links(self.a, decided_atoms)
+
+        # 2. Find the conflict links, and non-conflict links from
+        # duplicate links.
         conflict_links, non_conflict_links = \
             find_conflict_links(
                 self.a, duplicate_links,
@@ -123,15 +147,27 @@ class ConnectConflictAllViable(BaseConnector):
                 self.confidence_above_limit
             )
 
+        # 3. Make 2^k available conflict link cases if there exists k conflicts.
+        conflict_link_cases = make_conflict_link_cases(conflict_links)
+
+        # 4. Connect the every viable cases of links to new blends.
         self.__prepare_blended_atoms(conflict_links, merged_atom)
-
-        self.__connect_conflict_links(conflict_links)
-        self.__connect_non_conflict_links(non_conflict_links)
-        self.__connect_non_duplicate_links(non_duplicate_links)
-
+        self.__connect_links(
+            conflict_link_cases, non_conflict_links, non_duplicate_links
+        )
         self.__connect_to_blended_atoms(decided_atoms)
 
     def link_connect_impl(self, decided_atoms, merged_atom, config_base):
+        """Implemented factory method to connecting links.
+
+        Args:
+            decided_atoms: The source atoms to make new atom.
+            merged_atom: The atom to connect new links.
+            config_base: A Node to save custom config.
+            :param decided_atoms: list[Atom]
+            :param merged_atom: Atom
+            :param config_base: Atom
+        """
         check_type_str = BlendConfig().get_str(
             self.a, "connect-check-type", config_base
         )
@@ -145,12 +181,13 @@ class ConnectConflictAllViable(BaseConnector):
             self.a, "connect-viable-atoms-count-limit", config_base
         )
 
-        self.check_type = get_type(check_type_str)
+        # Check if given atom_type is valid or not.
+        try:
+            self.check_type = types.__dict__[check_type_str]
+        except KeyError:
+            self.check_type = types.Node
 
-        if check_type_str != get_type_name(self.check_type):
-            self.last_status = blending_status.UNKNOWN_TYPE
-            return
-
+        # Check if given threshold value is valid or not.
         self.strength_diff_limit = float(strength_diff_threshold)
         self.confidence_above_limit = float(confidence_above_threshold)
         self.viable_atoms_count_threshold = viable_atoms_count_threshold

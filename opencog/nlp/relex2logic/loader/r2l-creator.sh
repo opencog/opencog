@@ -6,5 +6,7 @@ echo "(define r2l-rules (ConceptNode \"R2L-en-RuleBase\"))">>"loader/gen-r2l-en-
 echo "(ExecutionLink (SchemaNode \"URE:maximum-iterations\") (ConceptNode \"R2L-en-RuleBase\") (NumberNode \"100\") )">>"loader/gen-r2l-en-rulebase.scm"
 for var in `ls *.scm`
 do
-echo "(MemberLink (stv 1 1) $var (ConceptNode \"R2L-en-RuleBase\"))" >>"loader/gen-r2l-en-rulebase.scm"
+echo "(define "$var"-name (Node \"$var\"))" >>"loader/gen-r2l-en-rulebase.scm"
+echo "(DefineLink "$var"-name $var)" >>"loader/gen-r2l-en-rulebase.scm"
+echo "(MemberLink (stv 1 1) "$var"-name (ConceptNode \"R2L-en-RuleBase\"))" >>"loader/gen-r2l-en-rulebase.scm"
 done

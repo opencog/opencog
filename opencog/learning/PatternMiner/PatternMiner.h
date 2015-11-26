@@ -40,6 +40,8 @@ namespace opencog
 namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
+#define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
+#define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 
  struct _non_ordered_pattern
  {
@@ -87,6 +89,7 @@ namespace PatternMining
      map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
      vector < vector<HTreeNode*> > patternsForGram;
+     vector < vector<HTreeNode*> > finalPatternsForGram;
 
      std::thread *threads;
 
@@ -108,8 +111,14 @@ namespace PatternMining
 
      bool enable_filter_leaves_should_not_be_vars;
      bool enable_filter_links_should_connect_by_vars;
+     bool enable_filter_not_inheritant_from_same_var;
+     bool enable_filter_not_same_var_from_same_predicate;
+     bool enable_filter_not_all_first_outgoing_const;
+     bool enable_filter_first_outgoing_evallink_should_be_var;
      bool enable_filter_node_types_should_not_be_vars;
      vector<Type> node_types_should_not_be_vars;
+
+     unsigned int num_of_patterns_without_superpattern_cur_gram;
 
      unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
 
@@ -125,6 +134,8 @@ namespace PatternMining
      string interestingness_Evaluation_method;
 
      float atomspaceSizeFloat;
+
+     float surprisingness_II_threshold;
 
      //debug
      unsigned int processedLinkNum;
@@ -216,7 +227,7 @@ namespace PatternMining
      bool containsLoopVariable(HandleSeq& inputPattern);
 
      HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                       HandleSeq &shouldNotBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
+                                                       HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
 
      void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -288,7 +299,7 @@ namespace PatternMining
      void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
                                             AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
-     void filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, AtomSpace* _atomSpace);
+     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
 
  public:
@@ -297,7 +308,11 @@ namespace PatternMining
 
      bool checkPatternExist(const string& patternKeyStr);
 
-     void OutPutPatternsToFile(unsigned int n_gram, bool is_interesting_pattern = false);
+     void OutPutFrequentPatternsToFile(unsigned int n_gram);
+
+     void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
+
+     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
      void runPatternMiner(unsigned int _thresholdFrequency = 2);
 

@@ -45,16 +45,12 @@
 // If the occupancy log odds of node < thres, we regard it as freespace
 // else, It's a block in the space.
 
-
+#include <map>
 #include <vector>
-#include <iostream>
 #include <octomap/OcTreeNode.h>
 #include <octomap/OccupancyOcTreeBase.h>
-
 #include <opencog/atomspace/Handle.h>
-#include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-
-#include <map>
+#include "Block3DMapUtil.h"
 
 using namespace std;
 using namespace octomap;
@@ -95,12 +91,7 @@ namespace opencog
                 mblockHandle = block;
             }
 
-            const Handle getBlock() const
-            {
-                return mblockHandle;
-            }
-
-            Handle getBlock()
+            Handle getBlock() const
             {
                 return mblockHandle;
             }
@@ -115,7 +106,7 @@ namespace opencog
 
         public:
             // Default constructor, sets resolution of leafs
-            OctomapOcTree(const std::string& mapName, const double resolution, const float agentHeight);
+            OctomapOcTree(const std::string& mapName, const double resolution);
             ~OctomapOcTree(){}
 
             // virtual constructor: creates a new object of same type
@@ -124,7 +115,7 @@ namespace opencog
 
             std::string getTreeType() const {return "OctomapOcTree";}
             // deep clone this octree3DMapManager and return the new instance
-            OctomapOcTree* clone();
+            OctomapOcTree* clone() const;
 
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}
@@ -148,7 +139,6 @@ namespace opencog
 
 
             // set node block handle at given key or coordinate. Replaces previous block handle.
-            OctomapOcTreeNode* setNodeBlock(const OcTreeKey& key, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
             OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
 

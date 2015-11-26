@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<oc:embodiment-msg xmlns:oc="http://www.opencog.org/brain" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opencog.org/brain BrainProxyAxon.xsd">
-<instruction avatar-id="817751" from-id="779547" timestamp="2009-05-29T18:40:02.437" content-type="SPECIFIC_COMMAND" target-mode="SCAVENGER_HUNT_MODE">
-<sentence length="12">lets play sh</sentence>
-</instruction>
-</oc:embodiment-msg>

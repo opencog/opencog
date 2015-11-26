@@ -44,8 +44,8 @@ public:
               it != provider.mDataMaps[n].end(); ++it) {
              StatisticData &pieceData = it->second;
              pieceData.probability =
-                     ((float) (pieceData.count)) /
-                     ((float) (provider.mRawDataNumbers[n]));
+                     pieceData.count /
+                     (static_cast<float> (provider.mRawDataNumbers[n]));
          }
      }
  }

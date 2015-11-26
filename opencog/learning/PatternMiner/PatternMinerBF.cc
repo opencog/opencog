@@ -37,7 +37,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/StringManipulator.h>
@@ -432,12 +432,12 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
     int end_time = time(NULL);
-    OutPutPatternsToFile(1);
+    OutPutFrequentPatternsToFile(1);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
-    OutPutPatternsToFile(cur_gram);
+    OutPutFrequentPatternsToFile(cur_gram);
 
     HandleSeq allDumpNodes, allDumpLinks;
     atomSpace->get_handles_by_type(back_inserter(allDumpNodes), (Type) NODE, true );
@@ -493,7 +493,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutPatternsToFile(cur_gram);
+            OutPutFrequentPatternsToFile(cur_gram);
         }
 
 
@@ -530,7 +530,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interesting pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutPatternsToFile(cur_gram, true);
+            OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1],cur_gram, true);
         }
 
 

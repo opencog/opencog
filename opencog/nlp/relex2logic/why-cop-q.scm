@@ -88,7 +88,7 @@
 ; r2l pipeline.
 (define (pre-why-cop-q-rule subj)
  (ListLink
-	(whycop-Q-rule (word-inst-get-word-str subj) (cog-name subj)
+	(whycop-Q-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
  )
 )

@@ -52,7 +52,7 @@
 ; r2l pipeline.
 (define (pre-howdeg-q-rule pred)
  (ListLink
-	(howdegQ-rule (word-inst-get-word-str pred) (cog-name pred)
+	(howdegQ-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred)
 	)
  )
 )

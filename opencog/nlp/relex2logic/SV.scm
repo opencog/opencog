@@ -51,8 +51,8 @@
 ; r2l pipeline.
 (define (pre-sv-rule subj verb)
  (ListLink
-	(SV-rule (word-inst-get-word-str subj) (cog-name subj)
-		(word-inst-get-word-str verb) (cog-name verb)
+	(SV-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
+		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
 	)
  )
 )

@@ -8,9 +8,9 @@
 (define pln-rule-deduction
     (BindLink
         (VariableList
-                (VariableNode "$A")
-                (VariableNode "$B")
-                (VariableNode "$C"))
+            (VariableNode "$A")
+            (VariableNode "$B")
+            (VariableNode "$C"))
         (AndLink
             (InheritanceLink
                 (VariableNode "$A")

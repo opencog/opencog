@@ -37,7 +37,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/StringManipulator.h>
@@ -275,7 +275,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
 HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars,
-                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
+                                                                HandleSeq &leaves, HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -287,7 +287,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 //        inputLinksStr += _fromAtomSpace->atomAsString(h);
 
 
-    if ( enable_filter_node_types_should_not_be_vars)
+    if ( shouldNotBeVars.size() > 0)
     {
         for (Handle noTypeNode  : shouldNotBeVars)
         {
@@ -299,7 +299,19 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
     }
 
-    if ((! skip) && enable_filter_links_should_connect_by_vars)
+    if ((! skip) && (shouldBeVars.size() > 0))
+    {
+        for (Handle shouldBeVarNode  : shouldBeVars)
+        {
+            if (patternVarMap.find(shouldBeVarNode) == patternVarMap.end())
+            {
+                skip = true;
+                break;
+            }
+        }
+    }
+
+    if ((! skip) && (enable_filter_links_should_connect_by_vars || enable_filter_not_all_first_outgoing_const))
     {
 
         // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
@@ -341,7 +353,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             }
         }
     }
-
 
     if (! skip)
     {
@@ -424,7 +435,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 {
                     alreadyExtracted = true;
                     // debug
-                    //cout << "already extracted!" << std::endl;
+                    // cout << "already extracted!" << std::endl;
                 }
 
             }
@@ -520,7 +531,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
-    HandleSeq leaves, shouldNotBeVars;
+    HandleSeq leaves, shouldNotBeVars, shouldBeVars;
 
     HandleSeq inputLinks = lastGramLinks;
     inputLinks.push_back(extendedLink);
@@ -529,9 +540,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
     //               atomSpace->atomAsString(inputLinks[0]).c_str() );
 
-    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+    if( filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace) )
+        return; //already been filter out in this phrase
 
-//    // debug
+/*    // debug
     string lastGramLinksStr = "";
     for (Handle h : lastGramLinks)
         lastGramLinksStr += _fromAtomSpace->atom_as_string(h);
@@ -542,10 +554,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
         if ((inputLinksStr.find("man") != inputLinksStr.npos) && (inputLinksStr.find("soda drinker") != inputLinksStr.npos))
         {
-            int i = 0; // debug 1111111111
+            int i = 0; // debug
             i ++;
         }
-
+*/
 
     // var_num is the number of variables
     unsigned int var_num;
@@ -603,7 +615,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             }
 
             unsigned int extendedLinkIndex;
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace, extendedLinkIndex);
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex);
 
             if (thisGramHTreeNode)
             {
@@ -615,7 +627,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 relation.newExtendedLink = (thisGramHTreeNode->pattern)[extendedLinkIndex];
                 relation.sharedLink = extendedLink;
                 relation.extendedNode = extendedNode;
-                relation.isExtendedFromVar = isExtendedFromVar;
+                // relation.isExtendedFromVar = isExtendedFromVar;
 
                 if (parentNode)
                     parentNode->superPatternRelations.push_back(relation);
@@ -913,9 +925,10 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
-    HandleSeq leaves, shouldNotBeVars;
+    HandleSeq leaves, shouldNotBeVars, shouldBeVars;
 
-    filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, _fromAtomSpace);
+    if (filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars, _fromAtomSpace))
+        return; // already been filter out in this phrase
 
     // var_num is the number of variables
     for (int var_num = 1;var_num < n_limit; ++ var_num)
@@ -948,7 +961,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 index ++;
             }
 
-            if (enable_filter_links_should_connect_by_vars)
+            if (enable_filter_links_should_connect_by_vars || enable_filter_not_all_first_outgoing_const)
             {
 
                 // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
@@ -991,7 +1004,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 }
             }
 
-            if ( (! skip) && (enable_filter_node_types_should_not_be_vars))
+            if ( (! skip) && ( shouldNotBeVars.size() > 0) )
             {
                 for (Handle noTypeNode  : shouldNotBeVars)
                 {
@@ -1002,6 +1015,20 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                     }
                 }
             }
+
+
+            if ((! skip) && (shouldBeVars.size() > 0))
+            {
+                for (Handle shouldBeVarNode  : shouldBeVars)
+                {
+                    if (patternVarMap.find(shouldBeVarNode) == patternVarMap.end())
+                    {
+                        skip = true;
+                        break;
+                    }
+                }
+            }
+
 
 
             if (! skip)

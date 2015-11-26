@@ -18,16 +18,14 @@ If you don't install the octomap, the compilation of SpaceMap will fail.
 
 Because in the future we will need to embody Opencog in different environment(Minecraft/Unity world/real world/...). In different embodiment we will need to save different infos in block/entity. It's difficult to use old Block3D/Entity3D/BlockEntity in all embodiment at the same time. So we decide to move the responsibility of querying block/entity info to atomspace. We just save the handle of block/entity in the 3DSpaceMap. The user will get the block handle by position and use the handle to query info in atomspace.
 
-(3) Add EntityManager to handle the location history of Entity
+(3) Add EntityRecorder to handle the location history of Entity
 
 ====
 
 TODO:
 
-(1) Fix the codes in embodiment/ and dynamics/: The change of SpaceMap will break the old embodiment code. Especially the OCPlanner should be the first thing to be fixed.
+(1) Spatial relation Calculation: See SpaceMapUtil
 
-(2) Spatial relation Calculation: See SpaceMapUtil
+(2) Add more cython binding: The cython binding of inherited interface of OctomapOcTree is not finished.
 
-(3) Add more cython binding: The cython binding of inherited interface of OctomapOcTree is not finished.
-
-(4) Add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case.
+(3) Add more tests: since the use case of SpaceMap is complicated. It's better to test it with more complicated use case.

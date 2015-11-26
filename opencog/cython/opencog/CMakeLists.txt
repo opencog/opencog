@@ -74,7 +74,7 @@ IF (HAVE_ATOMSPACE)
 
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "${DATADIR}/python/opencog")
-    ############################ spacetime #########################
+        ############################ spacetime #########################
 	#"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	CYTHON_ADD_MODULE_PYX(spacetime
 	  "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
@@ -110,7 +110,8 @@ IF (HAVE_ATOMSPACE)
 	  )
 
     TARGET_LINK_LIBRARIES(spatial_cython
-	      SpaceMap
+                  SpaceMap
+                  SpaceMapUtil
 		  spacetime
 		  ${ATOMSPACE_LIBRARIES}
 		  ${COGUTIL_LIBRARY}

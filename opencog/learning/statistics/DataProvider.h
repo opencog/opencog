@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_STATISTICS_DATAPROVIDER_H
 #define _OPENCOG_STATISTICS_DATAPROVIDER_H
 
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <map>
@@ -37,13 +38,13 @@ namespace opencog { namespace statistics {
 struct StatisticData
 {
 public:
-    int count;
+    uint64_t count;
     float probability;
     float entropy;
     float interactionInformation;
 
 public:
-    StatisticData(int _count,
+    StatisticData(uint64_t _count,
                   float _probability,
                   float _entropy,
                   float _interactionInformation)
@@ -54,7 +55,15 @@ public:
         interactionInformation = _interactionInformation;
     }
 
-    StatisticData(int _count)
+    StatisticData(uint64_t _count)
+    {
+        count = _count;
+        probability = 0.0f;
+        entropy = 0.0f;
+        interactionInformation = 0.0f;
+    }
+
+    StatisticData(unsigned int _count)
     {
         count = _count;
         probability = 0.0f;
@@ -174,7 +183,7 @@ public:
     // e.g. there are 3435 datas for 3-gram raw data map, which is not the
     // size of the 3-gram raw data map, it is the sum of all the count number
     // of each data in the 3-gram raw data map
-    int *mRawDataNumbers;
+    uint64_t *mRawDataNumbers;
 
     // Does the permutation order of the metadatas in one pattern matter?
     // like whether "a-b-c" is considered to be the same with "b-c-a".
@@ -186,7 +195,7 @@ public:
         mDataSet = new MetaDataContainer<Metadata>();
         mDataMaps = new std::map<std::vector<long>, StatisticData>[n_gram + 1];
 
-        mRawDataNumbers = new int[n_gram + 1];
+        mRawDataNumbers = new uint64_t[n_gram + 1];
         for (int i = 0; i < n_gram + 1; i++)
             mRawDataNumbers[i] = 0;
     }
@@ -208,7 +217,8 @@ public:
     // if there is already a piece of this raw data in the mDataMaps as a key,
     // just add the countNum.
     // if there is not, add a new pair to mDataMaps.
-    inline void addOneRawDataCount(std::vector<Metadata> &oneRawData, int countNum)
+    inline void addOneRawDataCount(std::vector<Metadata> &oneRawData,
+                                   unsigned int countNum)
     {
         std::vector<Metadata> rawData;
 
@@ -303,7 +313,7 @@ protected:
     // just add the countNum.
     // if there is not, add a new pair to mDataMaps.
     inline void _addOneRawDataCount(std::vector<Metadata> &oneRawData,
-                                    int countNum)
+                                    unsigned int countNum)
     {
         long n_gram = oneRawData.size();
         std::map<std::vector<long>, StatisticData>::iterator it;

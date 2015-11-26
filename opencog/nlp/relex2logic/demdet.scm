@@ -55,8 +55,8 @@
 ;;ToDo: define demdet-rule
 (define (pre-demdet-rule demdet noun)
  (ListLink
-  (demdet-rule (word-inst-get-word-str noun) (cog-name noun)
-	(word-inst-get-word-str demdet) (cog-name demdet)
+  (demdet-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
+	(cog-name (word-inst-get-lemma demdet)) (cog-name demdet)
 
   )
  )

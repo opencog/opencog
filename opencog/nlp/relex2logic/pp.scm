@@ -52,8 +52,8 @@
 ; r2l pipeline.
 (define (pre-pp-rule prep noun)
  (ListLink
-  (pp-rule (word-inst-get-word-str prep) (cog-name prep)
-	(word-inst-get-word-str noun) (cog-name noun)
+  (pp-rule (cog-name (word-inst-get-lemma prep)) (cog-name prep)
+	(cog-name (word-inst-get-lemma noun)) (cog-name noun)
 
     )
  )

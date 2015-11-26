@@ -24,6 +24,7 @@
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- parse-get-relex-outputs  Get all RelEx outputs in a parse.
 ; -- parse-get-r2l-outputs  Get all R2L outputs in a parse.
 ; -- interp-get-r2l-outputs Get all R2L outputs in an Interpretation.
 ; -- interp-get-parse       Get the Interpretation of a Parse.
@@ -220,6 +221,34 @@
 			)
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+(define (parse-get-relex-outputs parse-node)
+"
+  parse-get-relex-outputs  Get all RelEx outputs in a parse.
+
+  Given a parse, returns a list of RelEx outputs associated with the ParseNode.
+"
+    (let* ((sent-node (car (cog-chase-link 'ParseLink 'SentenceNode parse-node)))
+           (sent-incoming-set (cog-incoming-set sent-node))
+           (word-inst-nodes (parse-get-words parse-node))
+           (relex-relations (concatenate (map word-inst-get-relations word-inst-nodes)))
+           (word-incoming-set (concatenate (map cog-incoming-set word-inst-nodes)))
+           (eval-lglin-links (concatenate (map (lambda(x) (cog-get-pred x 'LgLinkInstanceNode)) word-inst-nodes)))
+           (eval-lgrn-links (concatenate (map (lambda(x) (cog-get-pred x 'LinkGrammarRelationshipNode)) word-inst-nodes)))
+           (lg-incoming-set (concatenate (map cog-incoming-set (map (lambda(x) (car (cog-outgoing-set x))) eval-lglin-links)))))
+
+        (delete-duplicates!
+            (append
+                sent-incoming-set
+                relex-relations
+                word-incoming-set
+                lg-incoming-set
+                eval-lgrn-links
+            )
+        )
+    )
 )
 
 ; --------------------------------------------------------------------

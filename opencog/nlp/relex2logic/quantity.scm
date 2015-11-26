@@ -52,8 +52,8 @@
 ; r2l pipeline.
 (define (pre-quantity-rule noun quant)
   (ListLink
-    (quantity-rule (word-inst-get-word-str noun) (cog-name noun)
-              (word-inst-get-word-str quant) (cog-name quant)
+    (quantity-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
+              (cog-name (word-inst-get-lemma quant)) (cog-name quant)
     )
   )
 )
