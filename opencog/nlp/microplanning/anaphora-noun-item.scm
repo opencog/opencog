@@ -2,6 +2,8 @@
 (use-modules (oop goops))
 (use-modules (ice-9 receive))
 
+(load "helpers.scm")
+
 ; -----------------------------------------------------------------------
 ; <noun-item> -- A class containing information on a noun
 ;

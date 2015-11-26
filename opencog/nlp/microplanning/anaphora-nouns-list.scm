@@ -1,5 +1,6 @@
 ; loading additional dependency
 (use-modules (oop goops))
+(load "anaphora-noun-item.scm")
 
 ; -----------------------------------------------------------------------
 ; <nouns-list> -- A class containing a list of <noun-item>
