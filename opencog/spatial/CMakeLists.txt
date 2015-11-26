@@ -19,8 +19,8 @@ ADD_LIBRARY(SpaceMap SHARED
 	math/MathCommon.cc	
 	math/Matrix4.cc	
 	math/Quaternion.cc
-	math/Face.cc 
-	math/Matrix3.cc 
+	math/Face.cc
+	math/Matrix3.cc
 	math/Plane.cc
 	math/Rectangle.cc
 
@@ -33,7 +33,7 @@ ADD_LIBRARY(SpaceMap SHARED
 	3DSpaceMap/Block3DMapUtil.cc
 	#3DSpaceMap/Block3D.cc
 	#3DSpaceMap/Octree.cc
-	3DSpaceMap/EntityManager.cc
+	3DSpaceMap/EntityRecorder.cc
 	#3DSpaceMap/Entity3D.cc
 	#3DSpaceMap/BlockEntity.cc
 	3DSpaceMap/StructGraph.cc
@@ -62,10 +62,29 @@ IF (HAVE_ZMQ)
 ENDIF (HAVE_ZMQ)
 
 IF (HAVE_OCTOMAP)
-	TARGET_LINK_LIBRARIES(SpaceMap 
+	TARGET_LINK_LIBRARIES(SpaceMap
 	${OCTOMAP_LIBRARY}
 	${OCTOMAP_OCTOMATH_LIBRARY})
 ENDIF (HAVE_OCTOMAP)
+
+ADD_LIBRARY(SpaceMapUtil SHARED
+	3DSpaceMap/SpaceMapUtil.cc
+)
+
+TARGET_LINK_LIBRARIES(SpaceMapUtil
+	SpaceMap
+	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_LIBRARY}
+)
+
+ADD_LIBRARY(PathFinder3D SHARED
+	3DSpaceMap/Pathfinder3D.cc
+)
+
+TARGET_LINK_LIBRARIES(PathFinder3D
+	SpaceMap
+	SpaceMapUtil
+)
 
 ADD_LIBRARY(HPASearch
 	HPASearch
@@ -81,6 +100,7 @@ ADD_EXECUTABLE (tangentbug_test TangentBugTestExec.cc)
 TARGET_LINK_LIBRARIES(tangentbug_test
 	TangentBug
 	SpaceMap
+	SpaceMapUtil
 	${COGUTIL_LIBRARY}
 )
 
@@ -91,6 +111,7 @@ IF(TB_PRINT_NCURSES)
 	ADD_DEFINITIONS(-DTB_PRINT_NCURSES)
 	TARGET_LINK_LIBRARIES(tangentbug ncurses)
 ENDIF(TB_PRINT_NCURSES)
+
 
 ###################
 # AStar Directives
@@ -108,6 +129,7 @@ TARGET_LINK_LIBRARIES(astartest
 	TangentBug
 	AStar
 	SpaceMap
+	SpaceMapUtil
 )
 
  #IF(HAVE_SPATIAL_TOOLS)
@@ -176,7 +198,7 @@ INSTALL (FILES
 	3DSpaceMap/Block3DMapUtil.h
 #	3DSpaceMap/Block3D.h
 #	3DSpaceMap/Octree.h
-	3DSpaceMap/EntityManager.h
+	3DSpaceMap/EntityRecorder.h
 #	3DSpaceMap/Entity3D.h
 #	3DSpaceMap/BlockEntity.h
 	3DSpaceMap/Pathfinder3D.h

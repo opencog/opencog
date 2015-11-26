@@ -74,7 +74,8 @@ IF (HAVE_ATOMSPACE)
 
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "${DATADIR}/python/opencog")
-    ############################ spacetime #########################
+
+	############################ spacetime #########################
 	#"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	CYTHON_ADD_MODULE_PYX(spacetime
 		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
@@ -84,7 +85,7 @@ IF (HAVE_ATOMSPACE)
 		spacetime.cpp
 	)
 
-   TARGET_LINK_LIBRARIES(spacetime_cython
+	TARGET_LINK_LIBRARIES(spacetime_cython
 		SpaceMap
 		spacetime
 		${ATOMSPACE_LIBRARIES}
@@ -99,7 +100,7 @@ IF (HAVE_ATOMSPACE)
 	INSTALL (TARGETS spacetime_cython
 		DESTINATION "${DATADIR}/python/opencog")
 
-   ############################ spatial #########################
+	############################ spatial #########################
 	CYTHON_ADD_MODULE_PYX(spatial
 		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
 		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
@@ -109,8 +110,9 @@ IF (HAVE_ATOMSPACE)
 		spatial.cpp
 	)
 
-   TARGET_LINK_LIBRARIES(spatial_cython
+	TARGET_LINK_LIBRARIES(spatial_cython
 		SpaceMap
+		SpaceMapUtil
 		spacetime
 		${ATOMSPACE_LIBRARIES}
 		${COGUTIL_LIBRARY}
