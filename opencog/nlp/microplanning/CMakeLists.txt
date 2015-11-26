@@ -5,15 +5,15 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
-	main.scm
 	anaphora-noun-item.scm
-	chunks-option.scm
 	anaphora-nouns-list.scm
-	chunks-set.scm
-	sentence-forms.scm
 	anaphora.scm
-	helpers.scm
 	atomW.scm
+	chunks-option.scm
+	chunks-set.scm
+	helpers.scm
+	main.scm
+	sentence-forms.scm
 
 	DESTINATION "${DATADIR}/scm/opencog/nlp/microplanning"
 )

@@ -1,6 +1,4 @@
 ; loading additional dependency
-(load "helpers.scm")
-(load "anaphora-nouns-list.scm")
 
 ; =======================================================================
 ; Main anaphora insertion functions

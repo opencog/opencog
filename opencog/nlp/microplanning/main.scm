@@ -2,6 +2,8 @@
 ; loading additional dependency
 (load "sentence-forms.scm")
 (load "helpers.scm")
+(load "anaphora-noun-item.scm")
+(load "anaphora-nouns-list.scm")
 (load "anaphora.scm")
 (load "chunks-option.scm")
 (load "chunks-set.scm")
