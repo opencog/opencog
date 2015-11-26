@@ -9,7 +9,8 @@ from minecraft_bot.msg import entity_movement_meta, entity_object_meta, entity_p
 
 
 
-from spock.utils import pl_announce, Info
+from spockbot.plugins.base import pl_announce
+from spockbot.mcdata.utils import Info
 
 import logging
 logger = logging.getLogger('spock')

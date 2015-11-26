@@ -74,7 +74,10 @@ class ActionGenerator:
         """
         result = bindlink(self._atomspace,
                           BindLink(
-                              VariableNode("$block"),
+                              TypedVariableLink(
+                                  VariableNode("$block"),
+                                  TypeNode("StructureNode")
+                                  ),
                               AndLink(
                                   EvaluationLink(
                                       PredicateNode("material"),
@@ -84,16 +87,15 @@ class ActionGenerator:
                                       )
                                   ),
                                   EvaluationLink(
-                                      GroundedPredicateNode("py: action_schemas.is_attractive"),
-                                      ListLink(
-                                          VariableNode("$block")
-                                      )
+                                     GroundedPredicateNode("py: action_schemas.is_attractive"),
+                                     ListLink(
+                                        VariableNode("$block")
+                                     )
                                   ),
                                   EvaluationLink(
                                       GroundedPredicateNode("py: action_schemas.move_toward_block"),
                                       ListLink(
                                           VariableNode("$block")
-
                                       )
                                   )
                               ),
@@ -101,7 +103,7 @@ class ActionGenerator:
                           ).h
                       )
         print "action_gen: result", Atom(result, self._atomspace)
-        
+
         if self._atomspace.get_outgoing(result) == []:
             print "action_gen: no result, random walk."
 
@@ -109,8 +111,13 @@ class ActionGenerator:
                              EvaluationLink(
                                  GroundedPredicateNode("py: action_schemas.set_relative_move"),
                                  ListLink(
-                                     NumberNode("90"),
-                                     NumberNode("2"),
+                                     RandomChoiceLink(
+                                         NumberNode("0"),
+                                         NumberNode("90"),
+                                         NumberNode("180"),
+                                         NumberNode("270"),
+                                         ),
+                                     NumberNode("1"),
                                      ConceptNode("jump")
                                  )
                              )

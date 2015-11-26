@@ -7,9 +7,9 @@ transfer significantly faster by delegating the work of unpacking individual blo
 ROS node. This does break some of the 'modularity', but performance will improve tremendously.
 """
 
-from spock.utils import pl_announce
-from spock.mcmap import smpmap, mapdata
-from spock.mcp import mcdata
+from spockbot.plugins.base import pl_announce
+from spockbot.plugins.tools import smpmap
+from spockbot.mcp import proto
 
 class SendMapDataCore():
     
@@ -43,7 +43,7 @@ class SendMapDataPlugin:
         
         for i in range(len(packets)):
             ploader.reg_event_handler(
-                    (mcdata.PLAY_STATE, mcdata.SERVER_TO_CLIENT, packets[i]),
+                    (proto.PLAY_STATE, proto.SERVER_TO_CLIENT, packets[i]),
                     packet_handlers[i]
                     )
             ploader.reg_event_handler('disconnect', self.handleDisconnect)

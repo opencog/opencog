@@ -8,8 +8,9 @@ and ability to set message attributes from dictionary (with timestamp)
 
 import rospy
 
-from spock.utils import pl_announce
-from spock.mcp import mcdata
+from spockbot.plugins.base import pl_announce
+#from spockbot import mcdata
+from spockbot.mcp import proto
 
 import logging
 logger = logging.getLogger('spock')
@@ -60,7 +61,7 @@ class MessengerPlugin:
         self.core = MessengerCore()
         ploader.provides('Messenger', self.core)
 
-        ploader.reg_event_handler((mcdata.PLAY_STATE, mcdata.SERVER_TO_CLIENT, 0x03), self.handleTimeUpdate)
+        ploader.reg_event_handler((proto.PLAY_STATE, proto.SERVER_TO_CLIENT, 0x03), self.handleTimeUpdate)
         ploader.reg_event_handler('disconnect', self.handleDisconnect)
         
 

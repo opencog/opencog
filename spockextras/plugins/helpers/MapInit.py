@@ -7,9 +7,7 @@ to player position update events.
 
 """
 
-from spock.utils import pl_announce
-from spock.mcmap import mapdata
-from spock.utils import Vec3
+from spockbot.plugins.base import pl_announce
 
 import logging
 logger = logging.getLogger('spock')

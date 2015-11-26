@@ -34,7 +34,7 @@ hostiles = {50: 'creeper',
             66: 'witch'}
 """
 
-from spock.utils import pl_announce, Info
+from spockbot.plugins.base import pl_announce, Info
 
 class RunAwayCore:
     
