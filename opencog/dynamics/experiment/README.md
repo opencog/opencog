@@ -60,7 +60,7 @@ Running the experiment
  
  3. Run start-word-stimulator command to start WordNode and WordNodeInstances creation and stimulation
 
- 4. After letting it run for a while, type dump-tseries /home/misgana/OPENCOG/opencog/opencog/dynamics/experiment/visualization/dump
+ 4. After letting it run for a while, type dump-tseries ABS_PATH_TO/visualization/dump
     will create files named dump-sw.data and dump-nsw.data (sw for special words and nsw for non-special words).
 
  5. Plot the graphs for both speical and non spcial words by using the following commands *./plot.sh [sw|nsw] [sti|lti|vlti]*
