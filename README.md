@@ -34,24 +34,15 @@ If you are not using ROS indigo distro, just change the `ros-indigo-octomap` to 
 
 ####Opencog https://github.com/opencog/opencog
 
-There are some Octomap codes in Opencog side has not been pulled into Opencog official repository. So you have to add all of files under [opencog-to-minecraft/opencog](https://github.com/OC2MC/opencog-to-minecraft/tree/master/opencog)) in the same place in your Opencog code base manually.
-
-Because for now(2015-08-23) the new OctoMap breaks the old embodiment, so it will FAIL to build the whole Opencog. To make this Minecraft embodiment work, we only need to partially build Opencog Space/TimeServer, spacetime-types, SpaceMap and cython binding,
-
-So, after adding files under your opencog directory, build it by following procedure (assume the working directory is under your Opencog):
-
-    mkdir build
-    cmake ..
-    cd build
-    cd ../spatial
-    make
-    cd ../spacetime
-    make
-    cd ../cython/opencog
-    make
-
-
 Before installing Opencog you have to install [atomspace](https://github.com/opencog/atomspace) and [cogutils](https://github.com/opencog/cogutils). Just install them by the instruction in README.
+
+There are some Octomap codes in Opencog side has not been pulled into Opencog official repository. So you have to add all of files under [opencog-to-minecraft/opencog](https://github.com/OC2MC/opencog-to-minecraft/tree/master/opencog)) in the same place in your Opencog code base.
+
+You can run the buildOpenCog.sh script, assuming the root folder of the opencog repo is in the same location as the root folder of this repo. This will stash all your current changes to the repo and create the OpenCogMineCraft brach, if that is not your current branch. It will then apply all neccesary chagnes and build OpenCog.
+
+If your opencog repo is somewhere else you will have to manually add all the chagnes.
+
+Now you have to run "sudo make install" in the build Dir.
 
 ####Minecraft server(official) https://minecraft.net/download
 
@@ -86,7 +77,7 @@ It's recommended to use `tmux or `screen to run multiple ROS nodes in multiple t
 
 2. Start Minecraft Server.
 
-3. Follow instructions in [minecraft_bot](https://github.com/OC2MC/opencog-to-minecraft/tree/master/minecraft_bot) to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
+3. Follow instructions in [minecraft_bot](https://github.com/opencog/opencog-to-minecraft/tree/master/minecraft_bot) to start ROS nodes and initialize Spock. Now you should see the bot appeared in your Minecraft. You can find the bot by move to the place bot spawned(showed in the Minecraft Server).
 
 4. Start the opencog_initializer.py.
 

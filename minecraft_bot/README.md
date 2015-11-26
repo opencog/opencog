@@ -5,23 +5,18 @@ The catkin (ROS) package for running the Minecraft bot
 
 (assuming server, OpenCog, ROS, and SpockBot have been installed as detailed in the main directory)
 
-1. Create a catkin package in your workspace (minecraft_bot) and include all the files from this directory:
-    
-    cd /your_catkin_ws_dir/src/
-    catkin_create_pkg minecraft_bot std_msgs rospy roscpp
-    cp -r /your_opencog-to-minecraft_dir/minecraft_bot . 
-    cd /your_catkin_ws_dir
-    catkin_make
-
-   See the [ROS official tutorial](http://wiki.ros.org/catkin/Tutorials/CreatingPackage)
+Run the build_minecraft_bot.sh script in the root folder of this repo.
 
 ##Steps to run##
 
-Before running these steps you should have run the following command to set up ROS environment:
+First you will need to start roscore with the following command:
 
-    roscore &
-    cd /your_catkin_ws_dir/
-    source ./devel/setup.bash
+    roscore
+
+Then it is recommended to start each node in it's own terminal.
+
+    source ./catkin_ws/devel/setup.bash
+    rosrun minecraft_bot NODENAME.py
 
 1. Start actionsnode.py. It will start a ROS node to publish actions message to Spock and provide ROS services for Opencog. Opencog can use the services to do action.
 
