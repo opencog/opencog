@@ -8,6 +8,9 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
+(define relex-server-host "127.0.0.1")
+(define relex-server-port 4444)
+
 (load "chatbot/processing-utils.scm")
 
 ;------------------------------------------------------------------
