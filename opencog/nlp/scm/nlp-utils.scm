@@ -231,8 +231,7 @@
   Given a parse, returns a list of RelEx outputs associated with the ParseNode.
 "
     (let* ((sent-node (car (cog-chase-link 'ParseLink 'SentenceNode parse-node)))
-           (anchor (car (cog-get-link 'ListLink 'AnchorNode sent-node)))
-           (sent-incoming-set (remove (lambda (x) (equal? anchor x)) (cog-incoming-set sent-node)))
+           (sent-incoming-set (cog-incoming-set sent-node))
            (word-inst-nodes (parse-get-words parse-node))
            (relex-relations (concatenate (map word-inst-get-relations word-inst-nodes)))
            (word-incoming-set (concatenate (map cog-incoming-set word-inst-nodes)))
