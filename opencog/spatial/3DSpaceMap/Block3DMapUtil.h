@@ -29,11 +29,11 @@ namespace opencog
             static const BlockVector NEG_Y_UNIT;
             static const BlockVector NEG_Z_UNIT;
 
-            double x;
-            double y;
-            double z;
+            int x;
+            int y;
+            int z;
             BlockVector(){x = 0; y = 0; z = 0;}
-            BlockVector(double _x, double _y, double _z){x = _x; y = _y; z = _z;}
+            BlockVector(int _x, int _y, int _z){x = _x; y = _y; z = _z;}
             BlockVector(const BlockVector& other){x = other.x; y = other.y; z = other.z;}
 
 
