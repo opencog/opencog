@@ -87,6 +87,15 @@ void SuRealUTest::setUp(void)
                  "opencog/modules/libSuRealModule.so");
 
     cogserver().loadModules();
+
+    config().set("SCM_PRELOAD",
+                 "opencog/scm/core_types.scm,"
+                 "opencog/scm/utilities.scm,"
+                 "opencog/nlp/types/nlp_types.scm,"
+                 "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/r2l-utilities.scm,"
+                 "opencog/nlp/sureal/surface-realization.scm");
+    cogserver().loadSCMModules();
 }
 
 void SuRealUTest::tearDown(void)
@@ -100,12 +109,6 @@ void SuRealUTest::test_basic(void)
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
                  "tests/nlp/sureal/r2l-atomspace1.scm");
     cogserver().loadSCMModules();
 
@@ -133,12 +136,6 @@ void SuRealUTest::test_complex(void)
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
                  "tests/nlp/sureal/r2l-atomspace3.scm");
     cogserver().loadSCMModules();
 
@@ -169,12 +166,6 @@ void SuRealUTest::test_disconnected(void)
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
                  "tests/nlp/sureal/r2l-atomspace4.scm");
     cogserver().loadSCMModules();
 
@@ -221,12 +212,6 @@ void SuRealUTest::test_multiconn(void)
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
                  "tests/nlp/sureal/r2l-atomspace5.scm");
     cogserver().loadSCMModules();
 
@@ -256,15 +241,6 @@ void SuRealUTest::test_multiconn(void)
 void SuRealUTest::test_negative(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm");
-    cogserver().loadSCMModules();
 
     _evaluator->eval(R"( (WordNode "he") )");
     _evaluator->eval(R"( (WordNode "ate") )");
