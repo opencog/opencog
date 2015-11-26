@@ -45,11 +45,13 @@ databases, code, etc.
 
 This is most easily done by starting the cog server using the
 `run-chatbot.scm` script.  It loads the various needed modules,
-the relex2logic rules, and starts the cogserver.
+the relex2logic rules, and starts the cogserver. The
+`opencog-chatbot.conf` file sets the port number to 17004 and
+silences the opencog prompt, so that it doesn't echo to IRC.
 
 From the build directory:
 ```
-   guile -l run-chatbot.scm
+   guile -l ../opencog/nlp/chatbot/run-chatbot.scm
 ```
 
 A simple "sniff-test" to verify that this is working is to telnet to

@@ -42,7 +42,7 @@
 
 ;-------------------------------------------------------------------
 ;--------------------------------------------------------------------
-(define (process-query user query)
+(define-public (process-query user query)
 "
   process-query USER QUERY -- accept user's text and generate a reply.
 

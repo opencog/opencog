@@ -2,7 +2,7 @@
 Misc development notes, in random order.
 ---------------------------------------
 
-Would like to use continuations for the chat pipe ... 
+Would like to use continuations for the chat pipe ...
 However, it seems that scm_with_guile() has a continuation barrier
 in it. It appears that the barrier is overly pessimistic.
 
@@ -35,8 +35,51 @@ nlp/relex2logic/loader/gen-r2l-en-rulebase.scm:(define r2l-rules
 
 nlp/scm/disjunct-list.scm
 
+scheme@(guile-user)> (nlp-parse "who what where")
+ERROR: In procedure cog-new-node:
+ERROR: Throw to key `C++-EXCEPTION' with args `("cog-new-node"
+"vector::_M_range_check")'.
+
+scheme@(guile-user) [1]> ,bt
+In opencog/nlp/chatbot/processing-utils.scm:
+    226:8  2 (nlp-parse "who what where")
+    42:29  1 (release-new-parsed-sents)
+In unknown file:
+           0 (cog-new-node 69 "# New Parsed Sentence")
+
+#0  _M_lower_bound (this=<optimized out>, __k=..., __y=0x1c7ffe8,
+    __x=0x100000000) at /usr/include/c++/4.8/bits/stl_tree.h:1157
+#1  find (__k=..., this=0x1c7ffe0) at /usr/include/c++/4.8/bits/stl_tree.h:1805
+#2  find (__x=..., this=0x1c7ffe0) at /usr/include/c++/4.8/bits/stl_map.h:837
+#3  get (str=..., this=0x1c7ffe0)
+    at atomspace-git/opencog/atomspace/StringIndex.h:52
+#4  getAtom (str=..., type=3, this=0x1c74f48)
+    at atomspace-git/opencog/atomspace/NodeIndex.h:66
+#5  opencog::AtomTable::getHandle (this=this@entry=0x1c74ef0, t=t@entry=3,
+    name=...)
+    at atomspace-git/opencog/atomspace/AtomTable.cc:157
+#6  0x00007ffff46398b7 in opencog::AtomSpace::add_node (this=0x1c74ef0,
+    t=t@entry=3, name=..., async=async@entry=false)
+    at atomspace-git/opencog/atomspace/AtomSpace.cc:149
+
+ in guile:
+scheme@(guile-user)> (cog-atomspace)
+$1 = #<atomspace 0x31803a0>
+
+above must be bogus or freed
+
+ in cogserver:
+Entering scheme shell; use ^D or a single . on a line by itself to exit.
+guile> #<atomspace 0x300f150>
+
+
+
+
 ====================================================
 bugs:
+
+* See above: conflicting atomspaces; one is bogus!
+
 * relex fails to identify speech act if sentence not terminated by period.
   Here: InterpretationLink 'InterpretationNode
   DefinedLinguisticConceptNode DeclarativeSpeechAct,
