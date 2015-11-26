@@ -1,4 +1,4 @@
-/*   
+/*
  *   Config class for La Cogita IRC chatbot
  *   Copyright (C) 2009 Joel Pitt <joel@fruitionnz.com>
  *
@@ -40,22 +40,21 @@ CogitaConfig::CogitaConfig() :
     ircNetwork(COGITA_DEFAULT_SERVER), ircPort(COGITA_DEFAULT_PORT),
     vstring(COGITA_VSTRING), nick(COGITA_DEFAULT_NICK)
 {
-        const char* defaultAttns[] = COGITA_DEFAULT_ATTN;
-        const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
-        const char* defaultChannels[] = COGITA_DEFAULT_CHANNELS;
-        for (int i = 0; defaultAttns[i]; i++) {
-            for (int i = 0; defaultSuffixes[i]; i++) {
-                attn.push_back(string(defaultAttns[i]) +
-                        string(defaultSuffixes[i]));
-            }
+    const char* defaultAttns[] = COGITA_DEFAULT_ATTN;
+    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
+    const char* defaultChannels[] = COGITA_DEFAULT_CHANNELS;
+    for (int i = 0; defaultAttns[i]; i++) {
+        for (int i = 0; defaultSuffixes[i]; i++) {
+            attn.push_back(string(defaultAttns[i]) +
+                    string(defaultSuffixes[i]));
         }
-        for (int i = 0; defaultChannels[i]; i++) {
-            ircChannels.push_back(std::string(defaultChannels[i]));
-        }
-
+    }
+    for (int i = 0; defaultChannels[i]; i++) {
+        ircChannels.push_back(std::string(defaultChannels[i]));
+    }
 }
 
-const std::string CogitaConfig::helpOutput = 
+const std::string CogitaConfig::helpOutput =
     " Cogita - An OpenCog chatbot. \n"
     " ======\n"
     " Usage: \n"
@@ -141,8 +140,6 @@ void CogitaConfig::createAttnVector()
     for (int i = 0; defaultSuffixes[i]; i++) {
         attn.push_back(nick + string(defaultSuffixes[i]));
     }
-
 }
 
 }} // ~namespace opencog::chatbot
-

@@ -1,16 +1,12 @@
-;
 ; Links relex-to-logic output with relex-opencog-output
 ; It is temporary until the r2l rules are moved into the URE
+; XXX Huh ???
 
 ; Test sentence : "This is a sentence."
 
 ; modules needed for call-with-input-file and get-string-all
 ;  (use-modules (rnrs io ports))
 ;  (use-modules (ice-9 rdelim))
-
-(use-modules (ice-9 rdelim))
-(use-modules (ice-9 regex))
-(use-modules (ice-9 receive))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with the exception
@@ -30,9 +26,13 @@
 )
 
 ; ---------------------------------------------------------------------
-; A SetLink is the input because it is assumed that the output of the micro-planner
-; is unordered.
-(define (sureal a-set-link)
+(define-public (sureal a-set-link)
+"
+  sureal SETLINK -- main entry point for sureface realization
+
+  Expect SETLINK to be a SetLink -- since it is assumed that the
+  output of the micro-planner is unordered.
+"
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
@@ -170,5 +170,3 @@
         )
     )
 )
-
-

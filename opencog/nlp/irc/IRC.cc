@@ -59,7 +59,7 @@ IRC::~IRC()
 		delete_irc_command_hook(hooks);
 }
 
-void IRC::insert_irc_command_hook(irc_command_hook* hook, const char* cmd_name, 
+void IRC::insert_irc_command_hook(irc_command_hook* hook, const char* cmd_name,
          int (*function_ptr)(const char*, irc_reply_data*, void*))
 {
 	if (hook->function)
@@ -106,7 +106,7 @@ void IRC::delete_irc_command_hook(irc_command_hook* cmd_hook)
 	delete cmd_hook;
 }
 
-int IRC::start(const char* server, int port, const char* nick, 
+int IRC::start(const char* server, int port, const char* nick,
                const char* user, const char* name, const char* pass)
 {
 	#ifdef WIN32_NOT_UNIX

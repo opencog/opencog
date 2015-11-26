@@ -1,7 +1,8 @@
 # RelEx2Logic
 
-RelEx2Logic (R2L) aims to produce the semantic representation of some input sentence.
-This is done by creating a [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+RelEx2Logic (R2L) aims to produce the semantic representation of some
+input sentence.  This is done by creating a
+[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
 rule base to be processed by a slightly modified forward chainer.
 
 The current pipeline for a sentence is

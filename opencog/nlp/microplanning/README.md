@@ -3,7 +3,7 @@
 The folder contains microplanning code for the natural langauge
 generation (NLG) pipeline.
 
-- main.scm
+- microplanning.scm
 
     The main scheme file to load into OpenCog.  Other dependencies are
     loaded automatically.
@@ -129,11 +129,12 @@ Currently these files are not included in the .conf file.  In order to
 use the microplanner, you need to run the following in OpenCog Scheme
 shell:
 ```
-(load "../opencog/nlp/microplanning/main.scm")
+(use-modules (opencog nlp microplanning))
 ```
 
 If you want to use the testing atomspace, you also need
 ```
+(use-modules (opencog atom-types))
 (load "../tests/nlp/microplanning/test-atomspace.scm")
 ```
 

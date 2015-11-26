@@ -73,23 +73,28 @@ void MicroplanningUTest::setUp(void)
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
+    _evaluator->eval("(add-to-load-path \".\")");
+    _evaluator->eval("(add-to-load-path \"../../..\")");
+    _evaluator->eval("(add-to-load-path \"../opencog/scm\")");
+    _evaluator->eval("(add-to-load-path \"../opencog/nlp\")");
+    _evaluator->eval("(add-to-load-path \"../opencog/nlp/microplanning\")");
     _evaluator->clear_pending();
 
     // Load the required data
     config().set("MODULES",
                  "opencog/nlp/types/libnlp-types.so,"
                  "opencog/modules/libLGDictModule.so,"
-                 "opencog/modules/libSuRealModule.so,"
-                 // need embodiment-types for SequentialAndLink...
-                 "opencog/embodiment/libembodiment-types.so");
+                 "opencog/modules/libSuRealModule.so");
 
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm,"
                  "opencog/scm/utilities.scm,"
-                 "opencog/embodiment/embodiment_types.scm,"
+                 "opencog/scm/atom-types.scm,"
                  "opencog/nlp/types/nlp_types.scm,"
                  "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/utilities.scm,"
+                 "opencog/nlp/relex2logic/r2l-utilities.scm,"
+                 "opencog/nlp/relex2logic/loader/load-rules.scm,"
+                 "opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm,"
                  "opencog/nlp/sureal/surface-realization.scm,"
                  "opencog/nlp/microplanning/main.scm,"
                  "tests/nlp/microplanning/r2l-atomspace.scm,"
