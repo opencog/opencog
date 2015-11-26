@@ -30,12 +30,15 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 IF (HAVE_SERVER AND HAVE_OCTOMAP)
+    MESSAGE(STATUS "WHAT THE FUCK")
     ADD_SUBDIRECTORY (spacetime)
     ADD_SUBDIRECTORY (spatial)
 ENDIF (HAVE_SERVER AND HAVE_OCTOMAP)
 
 # build unconditionally; a check is made there.
+IF (HAVE_OCTOMAP)
 ADD_SUBDIRECTORY (embodiment)
+ENDIF (HAVE_OCTOMAP)
 
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (visualization)
