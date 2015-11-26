@@ -272,7 +272,7 @@ no rules for, such as:
     - “I made her happy.”
     - “I consider him (to be) a fool.”
     - “I saw him running away.”
-    
+
 (see further on for a more complete list)
 
 I didn't create all the necessary rules yet, because of the redundancy
