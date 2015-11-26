@@ -44,11 +44,12 @@ server needs to be appropriately configured and loaded with assorted
 databases, code, etc.
 
 This is most easily done by starting the cog server using the
-`lib/opencog-chatbot.conf` configuration file, which sets the correct
-port, silences the OpenCog prompt, and loads the needed scheme files.
+`run-chatbot.scm` script.  It loads the various needed modules,
+the relex2logic rules, and starts the cogserver.
+
 From the build directory:
 ```
-   opencog/server/cogserver -c ../lib/opencog-chatbot.conf
+   guile -l run-chatbot.scm
 ```
 
 A simple "sniff-test" to verify that this is working is to telnet to
