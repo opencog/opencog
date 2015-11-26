@@ -15,6 +15,7 @@ IMAGINARY_STRUCTURE_NODE <- OBJECT_NODE
 TIME_NODE <- NODE
 TIME_DOMAIN_NODE <- NODE
 AT_TIME_LINK <- ORDERED_LINK
+AT_LOCATION_LINK <- ORDERED_LINK
 LATEST_LINK <- ORDERED_LINK
 
 // ====================================================================

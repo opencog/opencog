@@ -11,9 +11,10 @@ import rospy
 from minecraft_bot.msg import chunk_data_msg, chunk_bulk_msg, chunk_meta_msg, block_data_msg, map_block_msg
 from minecraft_bot.srv import get_block_srv, get_block_multi_srv
 
-from spock.utils import pl_announce, BoundBuffer
-from spock.mcmap import smpmap, mapdata
-from spock.mcp import mcdata
+from spockbot.plugins.base import pl_announce
+from spockbot.mcp.bbuff import BoundBuffer
+from spockbot.plugins.tools import smpmap
+from spockbot import mcdata
 
 import time
 

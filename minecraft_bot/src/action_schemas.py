@@ -104,12 +104,17 @@ def move_toward_block(block_atom):
         types.SpaceMapNode, "MCmap")[0]).h
     cur_map = space_server.get_map(map_handle)
     block_pos = cur_map.get_block_location(block_atom.h)
+    if block_pos == None:
+        print 'block postion not found.',block_atom
+        return TruthValue(0,1)
     dest = get_near_free_point(cur_map, block_pos, 2, (1,0,0), True)
+
     if dest == None:
         print 'get_no_free_point'
     print 'block_pos, dest', block_pos, dest
     self_handle = cur_map.get_self_agent_entity()
     self_pos = cur_map.get_last_appeared_location(self_handle)
+
     if (math.floor(self_pos[0]) == dest[0]
         and math.floor(self_pos[1]) == dest[1]
         and math.floor(self_pos[2]) == dest[2]):

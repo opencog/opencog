@@ -15,8 +15,8 @@ import Queue
 import logging
 logger = logging.getLogger('spock')
 
-from spock.utils import pl_announce
-from spock.mcp import mcdata
+from spockbot.plugins.base import pl_announce
+from spockbot import mcdata
 
 # receives movement commands from ROS and sends update of current
 # position of client every 'client_tick'

@@ -4,9 +4,10 @@
 # import rospy
 # from minecraft_bot.msg import movement_msg
 
-from spock import Client, PluginLoader
-from spock.plugins import DefaultPlugins
-from spock.plugins.helpers.entities import EntityPlugin
+from spockbot import Client
+from spockbot.plugins import default_plugins
+from spockbot.plugins.loader import PluginLoader
+from spockbot.plugins.helpers.entities import EntitiesPlugin
 
 # load custom plugins. I use capitalized names to indicate non-standard plugins
 from spockextras.plugins.helpers.MineAndPlace import MineAndPlacePlugin
@@ -22,7 +23,7 @@ from spockextras.plugins.helpers.SendEntityData import SendEntityDataPlugin
 
 # connect to localhost server
 settings = {'start': {'username': 'Bot',},'auth': {'authenticated': False,},}
-plugins = DefaultPlugins
+plugins = default_plugins
 
 plugins.append(('Messenger', MessengerPlugin))
 plugins.append(('SendMapData', SendMapDataPlugin))

@@ -4,8 +4,8 @@ created by Bradley Sheneman
 simple plugin to provide block mine and place capability
 
 """
-from spock.mcp import mcdata
-from spock.utils import pl_announce
+from spockbot import mcdata
+from spockbot.plugins.base import pl_announce
 
 import logging
 logger = logging.getLogger('spock')

@@ -253,12 +253,16 @@ void Octree3DMapManager::setUnitBlock(const Handle& _unitBlockAtom, BlockVector 
     {
         mTotalUnitBlockNum++;
         mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
-
     }
     else if(oldBlock != Handle::UNDEFINED && _unitBlockAtom == Handle::UNDEFINED)
     {
         mTotalUnitBlockNum--;
         mAllUnitAtomsToBlocksMap.erase(oldBlock);
+    }
+    else if(oldBlock != Handle::UNDEFINED && _unitBlockAtom != Handle::UNDEFINED)
+    {
+        mAllUnitAtomsToBlocksMap.erase(oldBlock);
+        mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(_unitBlockAtom, _pos));
     }
     mOctomapOctree->setBlock(_unitBlockAtom, _pos, updateLogOddsOccupancy);
 }

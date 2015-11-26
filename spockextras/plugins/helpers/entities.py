@@ -1,7 +1,7 @@
 """
 An entity tracker
 """
-from spock.utils import pl_announce, Info
+from spockbot.plugins.base import pl_announce, Info
 
 import logging
 logger = logging.getLogger('spock')

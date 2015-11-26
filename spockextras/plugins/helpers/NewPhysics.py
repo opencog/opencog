@@ -59,9 +59,9 @@ motions = { 1: PLAYER_WLK_ACC,
 PLAYER_JMP_ACC    = 0.45
 
 import math
-from spock.mcmap import mapdata
-from spock.utils import pl_announce, BoundingBox
-from spock.vector import Vector3
+from spockbot.plugins.base  import pl_announce
+from spockbot.mcdata.utils import BoundingBox
+from spockbot.vector import Vector3
 
 import logging
 logger = logging.getLogger('spock')
