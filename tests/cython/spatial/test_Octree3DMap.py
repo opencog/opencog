@@ -8,8 +8,7 @@ class TestMap(unittest.TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
         resolution = 1
-        agent_height = 1.6
-        self.testmap = OctomapOcTree.init_new_map("testmap", resolution, agent_height)
+        self.testmap = OctomapOcTree.init_new_map("testmap", resolution)
 
     def tearDown(self):
         del self.testmap
@@ -84,6 +83,7 @@ class TestMap(unittest.TestCase):
         #case1: single block
         test_pos = (1, 2, 4)
         block_pos = (1, 2, 3)
+        self.testmap.set_agent_height(1)
         self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node = self.atomspace.add_node(types.ConceptNode, "dirt").h
@@ -101,6 +101,7 @@ class TestMap(unittest.TestCase):
         #case2: single block which is water, cannot stand on water
         test_pos = (1, 2, 4)
         block_pos = (1, 2, 3)
+        self.testmap.set_agent_height(1)
         self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node = self.atomspace.add_node(types.ConceptNode, "water").h
@@ -120,6 +121,8 @@ class TestMap(unittest.TestCase):
         # so it's not standable
         test_pos = (1, 2, 4)
         block_pos1 = (1, 2, 3)
+        # higher agent hieght
+        self.testmap.set_agent_height(2)
         self.assertFalse(check_standable(self.atomspace, self.testmap, test_pos))
         test_block1 = self.atomspace.add_node(types.StructureNode, "block1").h
         material_node1 = self.atomspace.add_node(types.ConceptNode, "dirt").h
