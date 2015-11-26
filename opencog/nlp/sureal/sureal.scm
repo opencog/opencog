@@ -21,4 +21,4 @@
              (opencog nlp relex2logic)
 )
 
-(load "surface-realization.scm")
+(load "sureal/surface-realization.scm")
