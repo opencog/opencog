@@ -8,6 +8,9 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
+(define relex-server-host "127.0.0.1")
+(define relex-server-port 4444)
+
 (load "chatbot/processing-utils.scm")
 
 ;------------------------------------------------------------------
@@ -39,7 +42,7 @@
 
 ;-------------------------------------------------------------------
 ;--------------------------------------------------------------------
-(define (process-query user query)
+(define-public (process-query user query)
 "
   process-query USER QUERY -- accept user's text and generate a reply.
 

@@ -10,7 +10,9 @@
 ; Copyright (c) 2015 OpenCog Foundation
 ;
 
-(use-modules (ice-9 regex) (srfi srfi-1))
+(use-modules (ice-9 regex)
+             (ice-9 threads)  ; needed for par-map
+             (srfi srfi-1))
 
 ; -----------------------------------------------------------------------
 (define (release-from-anchor anchor)
@@ -214,7 +216,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (nlp-parse plain-text)
+(define-public (nlp-parse plain-text)
 "
   nlp-parse -- Wrap the whole NLP pipeline in one function.
 

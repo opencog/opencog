@@ -147,7 +147,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	size_t textlen = strlen(start);
 	size_t len = textlen;
 	// len += strlen ("(say-id-english )");
-	len += strlen ("(process_query)");
+	len += strlen ("(process-query)");
 	len += strlen (ird->nick);
 	len += 120;
 
@@ -157,7 +157,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	{
 		// Get into the opencog scheme shell, and run the command
 		// strcpy (cmdline, "scm hush\n(say-id-english \"");
-		strcpy (cmdline, "scm hush\n(process_query \"");
+		strcpy (cmdline, "scm hush\n(process-query \"");
 		strcat (cmdline, ird->nick);
 		strcat (cmdline, "\" \"");
 		size_t toff = strlen(cmdline);
