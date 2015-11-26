@@ -136,8 +136,8 @@ predicate-adjective, or a preposition.
 
 I didn't fully realize this at first, so right now, SV and SP both call
 the SV scheme helper, and PREP goes to the SVO scheme helper because the
-existence of the _pobj (preposition object relation) made this seem
-natural at the time.  But since _pobj also gets assigned by its own
+existence of the `_pobj` (preposition object relation) made this seem
+natural at the time.  But since `_pobj` also gets assigned by its own
 rule, regardless of these rules, PREP structures could be handled by SV
 or be-inheritance.
 
