@@ -1,11 +1,11 @@
 ;
 ; loading additional dependency
-(load-from-path "microplanning/sentence-forms.scm")
-(load-from-path "microplanning/helpers.scm")
-(load-from-path "microplanning/anaphora.scm")
-(load-from-path "microplanning/chunks-option.scm")
-(load-from-path "microplanning/chunks-set.scm")
-(load-from-path "microplanning/atomW.scm")
+(load "sentence-forms.scm")
+(load "helpers.scm")
+(load "anaphora.scm")
+(load "chunks-option.scm")
+(load "chunks-set.scm")
+(load "atomW.scm")
 
 
 ; =======================================================================
