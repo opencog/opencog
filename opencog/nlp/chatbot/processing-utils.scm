@@ -214,7 +214,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (nlp-parse plain-text)
+(define-public (nlp-parse plain-text)
 "
   nlp-parse -- Wrap the whole NLP pipeline in one function.
 
