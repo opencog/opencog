@@ -200,6 +200,17 @@ ELSE(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
 
+# cpprest
+FIND_PACKAGE(cpprest 2.6)
+IF (cpprest_FOUND AND cpprest_LIBRARY)
+	ADD_DEFINITIONS(-DHAVE_cpprest)
+	SET(HAVE_cpprest 1)
+	SET(cpprest_DIR_MESSAGE "cpprest was found.")
+ELSE (cpprest_FOUND AND cpprest_LIBRARY)
+	SET(cpprest_DIR_MESSAGE "cpprest was not found; PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
+ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
+MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
+
 FIND_PACKAGE(Cxxtest)
 IF (NOT CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
@@ -273,6 +284,16 @@ IF (MOSES_FOUND)
 ELSE (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
 ENDIF (MOSES_FOUND)
+
+# Octomap
+FIND_PACKAGE(Octomap)
+IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
+  SET(HAVE_OCTOMAP 1)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
+ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 
 # OpenGL needed for visualization...
@@ -417,27 +438,6 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
-
-# cpprest
-FIND_PACKAGE(cpprest 2.6)
-IF (cpprest_FOUND AND cpprest_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_cpprest)
-	SET(HAVE_cpprest 1)
-	SET(cpprest_DIR_MESSAGE "cpprest was found.")
-ELSE (cpprest_FOUND AND cpprest_LIBRARY)
-	SET(cpprest_DIR_MESSAGE "cpprest was not found; PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
-ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
-MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
-
-#Octomap
-FIND_PACKAGE(Octomap)
-IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
-  SET(HAVE_OCTOMAP 1)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
-ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
-ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 # ==========================================================
 # Decide what to build, based on the packages found.
