@@ -1,3 +1,6 @@
+
+(use-modules (ice-9 receive))  ; for receive, below
+
 ;
 ; loading additional dependency
 (load "sentence-forms.scm")

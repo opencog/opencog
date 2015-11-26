@@ -36,7 +36,7 @@ IRC and OpenCog.  It listens for input on an IRC channel, and
 forwards the resulting plain-text to OpenCog. This is done by
 issuing one simple scheme expression to OpenCog, via the OpenCog
 command-line interface/scheme shell on port 17004. The expression
-is ''(process_query user text)'', where the ''user'' is
+is ''(process-query user text)'', where the ''user'' is
 the user's IRC nick, and ''text'' is what the user entered.  The
 return value from this command is sent back to the IRC channel.
 Communications is stateless and blocking: cogita closes the socket
