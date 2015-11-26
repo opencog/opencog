@@ -8,4 +8,4 @@
 
 ;
 ; loading additional dependency
-(load-from-path "microplanning/main.scm")
+(load "microplanning/main.scm")
