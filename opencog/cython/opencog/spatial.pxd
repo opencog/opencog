@@ -25,7 +25,7 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         float getLogOdds()
 
     cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
-        cOctomapOcTree(string, double)
+        cOctomapOcTree(string, float, float)
 
         #OctomapOcTree Inherited Interface
 
@@ -51,10 +51,10 @@ cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog
         cBlockVector getBlockLocation(cHandle, float)
 
 
-cdef extern from "opencog/spatial/3DSpaceMap/EntityRecorder.h" namespace "opencog::spatial":
+cdef extern from "opencog/spatial/3DSpaceMap/EntityManager.h" namespace "opencog::spatial":
 
-    cdef cppclass cEntityRecorder "opencog::spatial::EntityRecorder":
-        cEntityRecorder()
+    cdef cppclass cEntityManager "opencog::spatial::EntityManager":
+        cEntityManager()
         cHandle getSelfAgentEntity()
         void addNoneBlockEntity(cHandle, cBlockVector, bool, bool, uint64_t)
         void removeNoneBlockEntity(cHandle)

@@ -1,10 +1,14 @@
+#include <iterator>
+#include <string>
+#include <set>
 #include <limits.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
-#include <opencog/spatial/math/Quaternion.h>
-#include <opencog/spatial/math/Vector3.h>
 #include "SpaceMapUtil.h"
 
 // used for distanceBetween()
@@ -181,7 +185,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityRecorder& entityRecorder,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const Handle& objectB)
         {
@@ -189,13 +193,13 @@ namespace opencog
 
             Type typeA = objectA->getType();
             if (typeA == ENTITY_NODE) {
-                posA = entityRecorder.getLastAppearedLocation(objectA);
+                posA = entityManager.getLastAppearedLocation(objectA);
             } else if (typeA==STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             }
             Type typeB = objectB->getType();
             if (typeB == ENTITY_NODE) {
-                posB = entityRecorder.getLastAppearedLocation(objectB);
+                posB = entityManager.getLastAppearedLocation(objectB);
             } else if (typeB == STRUCTURE_NODE) {
                 posB = spaceMap.getBlockLocation(objectB);
             }
@@ -215,7 +219,7 @@ namespace opencog
         }
 
         double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityRecorder& entityRecorder,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const BlockVector& posB)
         {
@@ -224,7 +228,7 @@ namespace opencog
             if (typeA == STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             } else if (typeA==ENTITY_NODE) {
-                posA = entityRecorder.getLastAppearedLocation(objectA);
+                posA = entityManager.getLastAppearedLocation(objectA);
             }
 
             if (posA == BlockVector::ZERO) {
@@ -255,10 +259,11 @@ namespace opencog
 
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const EntityRecorder& entityRecorder,
+                                      const OctomapOcTree& spaceMap,
+                                      const EntityManager& entityManager,
                                       const Handle& entity)
         {
-            BlockVector nearLeftPos = entityRecorder.getLastAppearedLocation(entity);
+            BlockVector nearLeftPos = entityManager.getLastAppearedLocation(entity);
             vector<string> sizeStrings = getPredicate(atomSpace, "size",
                                                       HandleSeq({entity}), 3);
             double length = std::stof(sizeStrings[0]);
@@ -269,17 +274,18 @@ namespace opencog
         }
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const EntityRecorder& entityRecorder,
+                                                      const OctomapOcTree& spaceMap,
+                                                      const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC,
                                                       const Handle& observer)
         {
-            AxisAlignedBox boxA = getBoundingBox(atomSpace, entityRecorder, entityA);
-            AxisAlignedBox boxB = getBoundingBox(atomSpace, entityRecorder, entityB);
+            AxisAlignedBox boxA = getBoundingBox(atomSpace, spaceMap, entityManager, entityA);
+            AxisAlignedBox boxB = getBoundingBox(atomSpace, spaceMap, entityManager, entityB);
             AxisAlignedBox boxC = (entityC == Handle::UNDEFINED)
                 ? AxisAlignedBox::ZERO
-                : getBoundingBox(atomSpace, entityRecorder, entityC);
+                : getBoundingBox(atomSpace, spaceMap, entityManager, entityC);
             return computeSpatialRelations(boxA, boxB, boxC, observer);
         }
 
@@ -319,7 +325,8 @@ namespace opencog
             return spatialRelations;
         }
 
-        string spatialRelationToString(SPATIAL_RELATION relation ) {
+        string spatialRelationToString(SPATIAL_RELATION relation)
+        {
             switch( relation ) {
             case LEFT_OF: return "left_of";
             case RIGHT_OF: return "right_of";
@@ -339,62 +346,5 @@ namespace opencog
                 return " invalid relation ";
             }
         }
-
-        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityRecorder& entityRecorder, Handle entity, const string& rotationPredicateName, int yawNodePosition)
-        {
-            if (!entityRecorder.containsEntity(entity)) {
-                return BlockVector::ZERO;
-            } else {
-                //get yaw
-                std::vector<std::string> rotationStrs = getPredicate(atomSpace, rotationPredicateName, HandleSeq{entity}, 3);
-                if (rotationStrs.empty()) {
-                    return BlockVector::ZERO;
-                }
-
-                double yaw = std::stod(rotationStrs[yawNodePosition]);
-                spatial::math::Quaternion orientation = spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, yaw);
-                spatial::math::Vector3 mathVec = orientation.rotate( spatial::math::Vector3::X_UNIT );
-                int x = 1, y = 1;
-                if (mathVec.x < 0) {
-                    x = -1;
-                }
-
-                if (mathVec.y < 0) {
-                    y = -1;
-                }
-
-                // calculate the tan of the angle
-                double tan = mathVec.y / mathVec.x;
-                if (tan < 0) {
-                    tan *= -1.0f;
-                }
-
-                // For the sake of simplification, we only have 8 kinds of direction:
-                // (x = 1, y = 0):    -pai/8 <= a < pai/8
-                // (x = 1, y = 1):     pai/8 <= a < pai*3/8
-                // (x = 0, y = 1):   pai*3/8 <= a < pai*5/8
-                // (x = -1, y = 1):  pai*5/8 <= a < pai*7/8
-                // (x = -1, y = 0):  pai*7/8 <= a < -pai*7/8
-                // (x = -1, y = -1):-pai*7/8 <= a < -pai*5/8
-                // (x = 0, y = -1): -pai*5/8 <= a < -pai*3/8
-                // (x = 1, y = -1): -pai*5/8 <= a < -pai/8
-
-                // tan(pai/8) = 0.41414356f
-                // tan(pai*3/8) = 2.41421356f
-
-                if (tan < 0.41414356f) {
-                    // x >> y, so |x| -> 1, y -> 0
-                    y = 0;
-                } else if (tan > 2.41421356f) {
-                    // x <<y , so x -> 0, |y| -> 1
-                    x = 0;
-                }
-                // else x approximate to y, so |x| -> 1, |y| -> 1
-                return BlockVector(x,y,0);
-
-            }
-
-        }
-
     }
 }

@@ -1,16 +1,16 @@
-#include "EntityRecorder.h"
+#include "EntityManager.h"
 
 using namespace opencog;
 using namespace opencog::spatial;
 
-EntityRecorder::EntityRecorder():mSelfAgentEntity(Handle::UNDEFINED)
+EntityManager::EntityManager():mSelfAgentEntity(Handle::UNDEFINED)
 {
     mAllNoneBlockEntities.clear();
     mPosToNoneBlockEntityMap.clear();
     mNoneBlockEntitieshistoryLocations.clear();
 }
 
-EntityRecorder::EntityRecorder(const EntityRecorder& rhs):
+EntityManager::EntityManager(const EntityManager& rhs):
     mSelfAgentEntity(rhs.mSelfAgentEntity)
 {
     mAllNoneBlockEntities.clear();
@@ -22,14 +22,14 @@ EntityRecorder::EntityRecorder(const EntityRecorder& rhs):
     mNoneBlockEntitieshistoryLocations = rhs.mNoneBlockEntitieshistoryLocations;
 }
 
-EntityRecorder* EntityRecorder::clone()
+EntityManager* EntityManager::clone()
 {
-    EntityRecorder* cloneEntityRecorder = new EntityRecorder(*this);
-    return cloneEntityRecorder;
+    EntityManager* cloneEntityManager = new EntityManager(*this);
+    return cloneEntityManager;
 }
 
 // currently we consider all the none block entities has no collision, agents can get through them
-void EntityRecorder::addNoneBlockEntity(const Handle &entityNode, const BlockVector& pos,
+void EntityManager::addNoneBlockEntity(const Handle &entityNode, const BlockVector& pos,
                                        bool isSelfObject, bool isAvatarEntity, const unsigned long timestamp)
 {
     auto it = mAllNoneBlockEntities.find(entityNode);
@@ -45,7 +45,7 @@ void EntityRecorder::addNoneBlockEntity(const Handle &entityNode, const BlockVec
     }
 }
 
-void EntityRecorder::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
+void EntityManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
 {
     auto it = mNoneBlockEntitieshistoryLocations.find(entityHandle);
     if (it == mNoneBlockEntitieshistoryLocations.end()) {
@@ -63,7 +63,7 @@ void EntityRecorder::_addNonBlockEntityHistoryLocation(Handle entityHandle, Bloc
 }
 // currently we consider all the none block entities has no collision, agents can get through them
 
-void EntityRecorder::removeNoneBlockEntity(const Handle& entityNode)
+void EntityManager::removeNoneBlockEntity(const Handle& entityNode)
 {
     auto it = mAllNoneBlockEntities.find(entityNode);
     if (it != mAllNoneBlockEntities.end()) {
@@ -82,17 +82,7 @@ void EntityRecorder::removeNoneBlockEntity(const Handle& entityNode)
     }
 }
 
-bool EntityRecorder::containsEntity(const Handle& entityNode) const
-{
-    return mAllNoneBlockEntities.find(entityNode) != mAllNoneBlockEntities.end();
-}
-
-bool EntityRecorder::isAvatarEntity(const Handle& entityNode) const
-{
-    return mAllAvatarList.find(entityNode) != mAllAvatarList.end();
-}
-
-void EntityRecorder::updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, unsigned long timestamp)
+void EntityManager::updateNoneBlockEntityLocation(const Handle& entityNode, BlockVector newpos, unsigned long timestamp)
 {
     mPosToNoneBlockEntityMap.insert(pair<BlockVector, Handle>(newpos, entityNode));
 
@@ -111,7 +101,7 @@ void EntityRecorder::updateNoneBlockEntityLocation(const Handle& entityNode, Blo
     _addNonBlockEntityHistoryLocation(entityNode, newpos, timestamp);
 }
 
-BlockVector EntityRecorder::getLastAppearedLocation(const Handle& entityHandle) const
+BlockVector EntityManager::getLastAppearedLocation(const Handle& entityHandle) const
 {
     auto it = mNoneBlockEntitieshistoryLocations.find(entityHandle);
     if (it == mNoneBlockEntitieshistoryLocations.end()) {
@@ -126,7 +116,7 @@ BlockVector EntityRecorder::getLastAppearedLocation(const Handle& entityHandle) 
     }
 }
 
-Handle EntityRecorder::getEntity(const BlockVector& pos) const
+Handle EntityManager::getEntity(const BlockVector& pos) const
 {
     auto it = mPosToNoneBlockEntityMap.find(pos);
     if (it == mPosToNoneBlockEntityMap.end()) {

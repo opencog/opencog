@@ -1,29 +1,23 @@
 #include <algorithm>
+#include <iterator>
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
-//#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-//#include "Block3DMapUtil.h"
+#include "Block3DMapUtil.h"
 #include "OctomapOcTree.h"
+#include "SpaceMapUtil.h"
 
 using namespace opencog;
 using namespace opencog::spatial;
 using namespace octomap;
 
-//helper
-point3d blockVectorToPoint3d(BlockVector pos)
-{
-    return point3d(pos.x, pos.y, pos.z);
-}
-
-BlockVector point3dToBlockVector(point3d pos)
-{
-    return BlockVector(pos.x(), pos.y(), pos.z());
-}
-
 void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
 {
-    mblockHandle = rhs.mblockHandle;
+    mblockHandle=rhs.mblockHandle;
     if (rhs.hasChildren()) {
         for (unsigned i = 0; i<8; ++i) {
             if (rhs.children[i]) {
@@ -58,21 +52,20 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x,
 
 OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& block)
 {
-    OctomapOcTreeNode* n = search(pos);
-    if (n != NULL) {
-        // add/remove record in atom->position map
-        Handle oldBlock = n->getBlock();
-        if (oldBlock == Handle::UNDEFINED && block != Handle::UNDEFINED) {
-            mTotalUnitBlockNum++;
-            mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(block, point3dToBlockVector(pos)));
-        } else if (oldBlock != Handle::UNDEFINED && block == Handle::UNDEFINED) {
-            mTotalUnitBlockNum--;
-            mAllUnitAtomsToBlocksMap.erase(oldBlock);
-        }
+    OcTreeKey key;
+    if (!this->coordToKeyChecked(pos, key)) {
+        return NULL;
+    }
+    return setNodeBlock(key, block);
+}
 
+
+OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const OcTreeKey& key, const Handle& block)
+{
+    OctomapOcTreeNode* n = search(key);
+    if (n != NULL) {
         n->setBlock(block);
     }
-
     return n;
 }
 
@@ -119,15 +112,14 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block,
     }
 }
 
-OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution):
+OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution, const float agentHeight):
     OccupancyOcTreeBase<OctomapOcTreeNode>(resolution),
-    mMapName(mapName)
+    mMapName(mapName), mAgentHeight(agentHeight)
 {
-    //set default agent height as 1
-    mAgentHeight = 1;
+
 }
 
-OctomapOcTree* OctomapOcTree::clone() const
+OctomapOcTree* OctomapOcTree::clone()
 {
     OctomapOcTree* cloneMap = new OctomapOcTree(*this);
     return cloneMap;
@@ -165,6 +157,20 @@ void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 
 void OctomapOcTree::setUnitBlock(const Handle& block, BlockVector pos, float updateLogOddsOccupancy)
 {
+    if (this->checkIsOutOfRange(pos)) {
+        logger().error("addSolidUnitBlock: You want to add a unit block which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
+                       pos.x,pos.y,pos.z);
+        return;
+    }
+    Handle oldBlock = this->getBlock(pos);
+
+    if (oldBlock == Handle::UNDEFINED && block != Handle::UNDEFINED) {
+        mTotalUnitBlockNum++;
+        mAllUnitAtomsToBlocksMap.insert(pair<Handle, BlockVector>(block, pos));
+    } else if (oldBlock != Handle::UNDEFINED && block == Handle::UNDEFINED) {
+        mTotalUnitBlockNum--;
+        mAllUnitAtomsToBlocksMap.erase(oldBlock);
+    }
     this->updateNode(pos.x, pos.y, pos.z, float(updateLogOddsOccupancy));
     this->setNodeBlock(pos.x, pos.y, pos.z, block);
 }

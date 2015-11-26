@@ -40,12 +40,13 @@ cdef class SpaceServer:
         map_instance = SpaceMap(<long>(&(self.c_space_server.getMap(c_handle))))
         return map_instance
 
-    def add_map(self, timestamp, map_name, resolution, time_domain = None):
+    def add_map(self,timestamp, map_name, resolution, agent_height, time_domain = None):
         cdef string c_map_name = map_name.encode('UTF-8')
         cdef string c_time_domain = DEFAULT_TIMEDOMAIN if time_domain is None else time_domain.encode('UTF-8')
 
         cdef cHandle ch = self.c_space_server.addOrGetSpaceMap(timestamp, c_map_name,
-                                                               resolution, c_time_domain)
+                                                               resolution, agent_height,
+                                                               c_time_domain)
         handle = Handle(ch.value())
         return handle
 

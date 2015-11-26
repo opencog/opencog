@@ -7,7 +7,7 @@
 #include <opencog/atomspace/Handle.h>
 #include "OctomapOcTree.h"
 #include "Block3DMapUtil.h"
-#include "EntityRecorder.h"
+#include "EntityManager.h"
 
 using namespace std;
 
@@ -15,7 +15,6 @@ namespace opencog
 {
     namespace spatial
     {
-        const double AccessDistance = 2.0;
         /**
          * Get predicate value of given predicate name and argument handles
          * It will search the following pattern:
@@ -48,7 +47,6 @@ namespace opencog
                                     const HandleSeq& handles,
                                     const unsigned& numberOfPredicateValue);
 
-
         /**
          * Check if given position in given spaceMap is standable
          */
@@ -72,7 +70,7 @@ namespace opencog
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
-                                               bool toBeStandOn=true);
+                                               bool toBeStandOn);
 	/**
 	 * Calculate distance between 2 given block/entity handles or positions
 	 * For polymorphism design in Inquery, we overload the distanceBetween.
@@ -86,14 +84,14 @@ namespace opencog
 	 */
 
 	double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityRecorder& entityRecorder,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const Handle& objectB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB);
 	double distanceBetween(const OctomapOcTree& spaceMap,
-                               const EntityRecorder& entityRecorder,
+                               const EntityManager& entityManager,
                                const Handle& objectA,
                                const BlockVector& posB);
 
@@ -123,13 +121,14 @@ namespace opencog
          * Then pass them to create a AxisAlignedBox object representing the entity.
          * @param atomSpace Given atomspace containing given entity handle
          *        It's not const because we need to add temporary atom to query info
-         * @param entityRecorder Given spaceMap containing given entity handle
+         * @param spaceMap Given spaceMap containing given entity handle
          * @param entity Given entity handle
          * @return A bounding box object
 	 */
 
         AxisAlignedBox getBoundingBox(AtomSpace& atomSpace,
-                                      const EntityRecorder& entityRecorder,
+                                      const OctomapOcTree& spaceMap,
+                                      const EntityManager& entityManager,
                                       const Handle& entity);
         /**
          * spatial relation enumeration for expressing state of relation
@@ -152,7 +151,7 @@ namespace opencog
             INSIDE,
             OUTSIDE,
 
-            TOTAL_RELATIONS,
+            TOTAL_RELATIONS
         };
 
 	/**
@@ -164,7 +163,7 @@ namespace opencog
          *       spatial relationship we should remove it.
          * @param atomSpace Given atomspace containing given entity handles
          *        It's not const because we need to add temporary atom to query info
-         * @param entityRecorder Given spaceMap containing given entity handles
+         * @param spaceMap Given spaceMap containing given entity handles
 	 * @param entityA the entity to be judged
 	 * @param entityB first reference entity
          * @param entityC second reference entity for ternary spatial relation.
@@ -181,7 +180,8 @@ namespace opencog
 	 */
 
         set<SPATIAL_RELATION> computeSpatialRelations(AtomSpace& atomSpace,
-                                                      const EntityRecorder& entityRecorder,
+                                                      const OctomapOcTree& spaceMap,
+                                                      const EntityManager& entityManager,
                                                       const Handle& entityA,
                                                       const Handle& entityB,
                                                       const Handle& entityC = Handle::UNDEFINED,
@@ -198,27 +198,6 @@ namespace opencog
          */
 
 	string spatialRelationToString(SPATIAL_RELATION relation);
-
-        /** For old interface
-         * For the sake of simplification, we only have 8 kinds of direction:
-         * (x = 1, y = 0):    -pai/8 <= a < pai/8
-         * (x = 1, y = 1):     pai/8 <= a < pai*3/8
-         * (x = 0, y = 1):   pai*3/8 <= a < pai*5/8
-         * (x = -1, y = 1):  pai*5/8 <= a < pai*7/8
-         * (x = -1, y = 0):  pai*7/8 <= a < -pai*7/8
-         * (x = -1, y = -1):-pai*7/8 <= a < -pai*5/8
-         * (x = 0, y = -1): -pai*5/8 <= a < -pai*3/8
-         * (x = 1, y = -1): -pai*5/8 <= a < -pai/8
-         * And we assume in the AtomSpace we express rotation of entity as
-         * EvaluationLink
-         *   PredicateNode "$rotationPredicateName"
-         *   ListLink
-         *     ObjectNode entity
-         *     NumberNode pitch
-         *     NumberNode roll
-         *     NumberNode yaw
-         */
-        BlockVector getEntityDirection(AtomSpace& atomSpace, const EntityRecorder& entityRecorder, Handle entity, const string& rotationPredicateName, int yawNodePosition);
     }
 }
 

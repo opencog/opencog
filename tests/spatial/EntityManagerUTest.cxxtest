@@ -7,7 +7,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-#include <opencog/spatial/3DSpaceMap/EntityRecorder.h>
+#include <opencog/spatial/3DSpaceMap/EntityManager.h>
 
 #include <opencog/util/Logger.h>
 
@@ -17,21 +17,21 @@ using namespace opencog::spatial;
 
 bool entityIsSelf = true;
 bool entityIsAvatar = true;
-class EntityRecorderUTest : public CxxTest::TestSuite
+class EntityManagerUTest : public CxxTest::TestSuite
 { 
 
 public:
-    EntityRecorder* testEntityRecorder;
+    EntityManager* testEntityManager;
     AtomSpace as;
 
     void setUp()
     {
-        testEntityRecorder = new EntityRecorder();
+        testEntityManager = new EntityManager();
     }
     void tearDown()
     {
-        delete testEntityRecorder;
-        testEntityRecorder = NULL;
+        delete testEntityManager;
+        testEntityManager = NULL;
         as.clear();
     }
 
@@ -40,18 +40,18 @@ public:
         BlockVector testpos1(17, 28, 39);
         unsigned long timestamp1 = 12345;
         Handle testHandle1 = as.add_node(ENTITY_NODE, "entity");
-        testEntityRecorder->addNoneBlockEntity(testHandle1, testpos1,
+        testEntityManager->addNoneBlockEntity(testHandle1, testpos1,
                                     !entityIsSelf, !entityIsAvatar, 
                                     timestamp1);
 
-        Handle testHandle2 = testEntityRecorder->getEntity(testpos1);
+        Handle testHandle2 = testEntityManager->getEntity(testpos1);
         TS_ASSERT(testHandle1 == testHandle2);
-        TS_ASSERT(testEntityRecorder->getLastAppearedLocation(testHandle1) == testpos1);
-        testEntityRecorder->removeNoneBlockEntity(testHandle1);
+        TS_ASSERT(testEntityManager->getLastAppearedLocation(testHandle1) == testpos1);
+        testEntityManager->removeNoneBlockEntity(testHandle1);
 		
-        TS_ASSERT(testEntityRecorder->getEntity(testpos1) == Handle::UNDEFINED);
+        TS_ASSERT(testEntityManager->getEntity(testpos1) == Handle::UNDEFINED);
         //preserve record
-        TS_ASSERT(testEntityRecorder->getLastAppearedLocation(testHandle1) == testpos1);
+        TS_ASSERT(testEntityManager->getLastAppearedLocation(testHandle1) == testpos1);
     }
 
     void testUpdateEntityLocation_MultipleLocation_LastLocationIsPos2()
@@ -59,13 +59,13 @@ public:
         BlockVector testpos1(17, 28, 39);
         unsigned long timestamp1 = 12345;
         Handle testHandle1 = as.add_node(ENTITY_NODE, "entity");
-        testEntityRecorder->addNoneBlockEntity(testHandle1, testpos1,
+        testEntityManager->addNoneBlockEntity(testHandle1, testpos1,
                                     !entityIsSelf, !entityIsAvatar, 
                                     timestamp1);
         BlockVector testpos2(17, 28, 40);
         unsigned long timestamp2 = 12346;
-        testEntityRecorder->updateNoneBlockEntityLocation(testHandle1, testpos2, timestamp2);
-        BlockVector lastLocation = testEntityRecorder->getLastAppearedLocation(testHandle1);
+        testEntityManager->updateNoneBlockEntityLocation(testHandle1, testpos2, timestamp2);
+        BlockVector lastLocation = testEntityManager->getLastAppearedLocation(testHandle1);
 
         TS_ASSERT_EQUALS(testpos2, lastLocation);
     }
@@ -80,16 +80,16 @@ public:
             count --;
             BlockVector testpos1(count, count, count);
             Handle testHandle1 = as.add_node(ENTITY_NODE, countstr);
-            testEntityRecorder->addNoneBlockEntity(testHandle1, testpos1,
+            testEntityManager->addNoneBlockEntity(testHandle1, testpos1,
                                         !entityIsSelf, !entityIsAvatar, 12345678892);
-            Handle testHandle2 = testEntityRecorder->getEntity(testpos1);
+            Handle testHandle2 = testEntityManager->getEntity(testpos1);
             TS_ASSERT(testHandle1 == testHandle2);
-            TS_ASSERT(testEntityRecorder->getLastAppearedLocation(testHandle1) == testpos1);
-            testEntityRecorder->removeNoneBlockEntity(testHandle1);
+            TS_ASSERT(testEntityManager->getLastAppearedLocation(testHandle1) == testpos1);
+            testEntityManager->removeNoneBlockEntity(testHandle1);
 			
-            TS_ASSERT(testEntityRecorder->getEntity(testpos1) == Handle::UNDEFINED);
+            TS_ASSERT(testEntityManager->getEntity(testpos1) == Handle::UNDEFINED);
             //preserve record
-            TS_ASSERT(testEntityRecorder->getLastAppearedLocation(testHandle1) == testpos1);	
+            TS_ASSERT(testEntityManager->getLastAppearedLocation(testHandle1) == testpos1);	
         }
     }
 

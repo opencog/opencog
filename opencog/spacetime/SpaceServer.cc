@@ -57,7 +57,6 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
 
     curSpaceMapHandle = Handle::UNDEFINED;
     curMap = NULL;
-    curEntityRecorder = NULL;
 
     // connect signals
     removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
@@ -106,17 +105,16 @@ void SpaceServer::setAgentRadius(unsigned int _radius)
 
 void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 {
-    auto scenePairItr = scenes.find(spaceMapHandle);
-    if ( scenePairItr == scenes.end()) {
+    if (scenes.find(spaceMapHandle) == scenes.end()) {
         logger().error("SpaceServer::setAgentHeight - Map not found!");
         return;
     }
 
-    SpaceMap& theMap = (scenePairItr->second).spaceMap;
+    SpaceMap* theMap = scenes[spaceMapHandle].first;
 
     if (agentHeight != _height) {
         agentHeight = _height;
-        theMap.setAgentHeight(_height);
+        theMap->setAgentHeight(_height);
         logger().info("SpaceServer - AgentHeight: %d", agentHeight);
     }
 
@@ -130,7 +128,7 @@ const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
             ATOM_AS_STRING(spaceMapHandle)
             : "Handle::UNDEFINED");
 
-    auto itr = scenes.find(spaceMapHandle);
+    HandleToScenes::const_iterator itr = scenes.find(spaceMapHandle);
 
     if (itr == scenes.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
@@ -138,26 +136,26 @@ const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
                 ATOM_AS_STRING(spaceMapHandle));
     }
 
-    return (itr->second).spaceMap;
+    return *((itr->second).first);
 }
 
-const EntityRecorder& SpaceServer::getEntityRecorder(Handle spaceMapHandle) const
+const EntityManager& SpaceServer::getEntityManager(Handle spaceMapHandle) const
     throw (opencog::RuntimeException, std::bad_exception)
 {
-    logger().fine("SpaceServer::getEntityRecorder() for mapHandle = %s",
+    logger().fine("SpaceServer::getEntityManager() for mapHandle = %s",
             spaceMapHandle != Handle::UNDEFINED ?
             ATOM_AS_STRING(spaceMapHandle)
             : "Handle::UNDEFINED");
 
-    auto itr = scenes.find(spaceMapHandle);
+    HandleToScenes::const_iterator itr = scenes.find(spaceMapHandle);
 
     if (itr == scenes.end()) {
         throw opencog::RuntimeException(TRACE_INFO,
-                "SpaceServer - Found no EntityRecorder associate with handle: '%s'.",
+                "SpaceServer - Found no EntityManager associate with handle: '%s'.",
                 ATOM_AS_STRING(spaceMapHandle));
     }
 
-    return (itr->second).entityRecorder;
+    return *((itr->second).second);
 }
 
 
@@ -171,15 +169,10 @@ const bool SpaceServer::isLatestMapValid() const
     return ((curSpaceMapHandle != Handle::UNDEFINED) && (curMap != 0));
 }
 
-const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
+SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
     throw (opencog::AssertionException, std::bad_exception)
 {
-    return getMap(curSpaceMapHandle);
-}
-
-const SpaceServer::EntityRecorder& SpaceServer::getLatestEntityRecorder() const
-{
-    return getEntityRecorder(curSpaceMapHandle);
+    return *curMap;
 }
 
 Handle SpaceServer::getLatestMapHandle() const
@@ -189,8 +182,10 @@ Handle SpaceServer::getLatestMapHandle() const
 
 void SpaceServer::removeMap(Handle spaceMapHandle)
 {
-    auto itr = scenes.find(spaceMapHandle);
+    HandleToScenes::iterator itr = scenes.find(spaceMapHandle);
     if (itr != scenes.end()) {
+        delete (itr->second).first;
+        delete (itr->second).second;
         scenes.erase(itr);
     }
 }
@@ -202,19 +197,23 @@ unsigned int SpaceServer::getSpaceMapsSize() const
 
 void SpaceServer::clear()
 {
+    for (auto itr = scenes.begin(); itr != scenes.end(); ++itr) {
+        delete (itr->second).first;
+        delete (itr->second).second;
+    }
     scenes.clear();
 }
 
 SpaceServer::SpaceMap* SpaceServer::cloneTheLatestSpaceMap() const
 {
-    return cloneSpaceMap(curSpaceMapHandle);
+    return curMap->clone();
 }
 
 SpaceServer::SpaceMap* SpaceServer::cloneSpaceMap(Handle spaceMapHandle) const
 {
     auto itr = scenes.find(spaceMapHandle);
     return (itr == scenes.end())
-        ? (itr->second).spaceMap.clone()
+        ? ((itr->second).first)->clone()
         : nullptr;
 }
 
@@ -222,12 +221,6 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 {
     if (spaceMapHandle == Handle::UNDEFINED) {
         logger().error("SpaceServer::addSpaceInfo - No space map now!");
-        return false;
-    }
-
-    auto scenePairItr = scenes.find(spaceMapHandle);
-    if ( scenePairItr == scenes.end()) {
-        logger().error("SpaceServer::removeSpaceInfo - No space map now!");
         return false;
     }
 
@@ -240,30 +233,37 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 
     if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
         // it's a block
-        SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
-        theSpaceMap.addSolidUnitBlock(objectNode, pos);
+        SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
+        theSpaceMap->addSolidUnitBlock(objectNode, pos);
     } else {
-        EntityRecorder& entityRecorder = (scenePairItr->second).entityRecorder;
-        entityRecorder.addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
+        EntityManager* entityManager = scenes[spaceMapHandle].second;
+        entityManager->addNoneBlockEntity(objectNode, pos, isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, const TimeDomain& timeDomain)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, float _agentHeight, const TimeDomain& timeDomain)
 {
-    Handle spaceMapHandle = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
+    Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
     // There is not a space map node for this map in the atomspace, so create a new one
-    if (spaceMapHandle == Handle::UNDEFINED) {
-        spaceMapHandle = atomspace->add_node(SPACE_MAP_NODE,_mapName);
-        atomspace->set_LTI(spaceMapHandle, 1);
-        timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
-        scenes.emplace(std::piecewise_construct, std::make_tuple(spaceMapHandle),
-                       std::make_tuple(_mapName, _resolution));
+    if (spaceMapNode == Handle::UNDEFINED) {
+        spaceMapNode = atomspace->add_node(SPACE_MAP_NODE,_mapName);
+        atomspace->set_LTI(spaceMapNode, 1);
+        timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
+
+        SpaceMap* newSpaceMap = new SpaceMap(_mapName, _resolution, _agentHeight);
+
+        EntityManager* newEntityManager = new EntityManager();
+        // add into the map set
+        scenes.insert(HandleToScenes::value_type(spaceMapNode, pair<SpaceMap*, EntityManager*>(newSpaceMap, newEntityManager)));
+        curMap = newSpaceMap;
+    } else {
+        curMap = scenes[spaceMapNode].first;
     }
 
-    curSpaceMapHandle = spaceMapHandle;
-    return spaceMapHandle;
+    curSpaceMapHandle = spaceMapNode;
+    return spaceMapNode;
 }
 
 void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octime_t timestamp, const TimeDomain& timeDomain)
@@ -272,9 +272,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         logger().error("SpaceServer::removeSpaceInfo - Undefined SpaceMap!");
         return;
     }
-
-    auto scenePairItr = scenes.find(spaceMapHandle);
-    if ( scenePairItr == scenes.end()) {
+    if (scenes.find(spaceMapHandle) == scenes.end()) {
         logger().error("SpaceServer::removeSpaceInfo - No space map now!");
         return;
     }
@@ -283,12 +281,13 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
     }
 
+
     if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
-        SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
-        theSpaceMap.removeSolidUnitBlock(objectNode);
+        SpaceMap* theSpaceMap = scenes[spaceMapHandle].first;
+        theSpaceMap->removeSolidUnitBlock(objectNode);
     } else {
-        EntityRecorder& entityRecorder = (scenePairItr->second).entityRecorder;
-        entityRecorder.removeNoneBlockEntity(objectNode);
+        EntityManager* entityManager = scenes[spaceMapHandle].second;
+        entityManager->removeNoneBlockEntity(objectNode);
     }
 
     logger().debug("%s(%s)\n", __FUNCTION__, atomspace->get_name(objectNode).c_str());
