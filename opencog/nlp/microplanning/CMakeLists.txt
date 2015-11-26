@@ -5,7 +5,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
-	microplanning.scm
+	main.scm
 	anaphora-noun-item.scm
 	chunks-option.scm
 	anaphora-nouns-list.scm
