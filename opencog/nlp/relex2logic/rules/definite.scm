@@ -34,9 +34,9 @@
 )
 
 ; This is function is not needed. It is added so as not to break the
-; existing r2l pipeline.  Huh ??? it is used right up above.
-; Needs to be define-public so that evaluators can find it.
-(define-public (pre-definite-rule noun)
+; existing r2l pipeline.  Huh ??? How can it not be needed?  It is
+; used right up above!
+(define (pre-definite-rule noun)
   (ListLink
     	(definite-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
     )

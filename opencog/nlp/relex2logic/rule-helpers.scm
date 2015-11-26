@@ -615,7 +615,7 @@
 	 (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
-(define (definite-rule word word_instance)
+(define-public (definite-rule word word_instance)
 	(list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
 	(r2l-wordinst-concept word_instance)
 	(EvaluationLink

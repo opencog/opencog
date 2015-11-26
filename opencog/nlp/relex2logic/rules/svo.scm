@@ -80,8 +80,9 @@
 
 ;;(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
 
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
+; This is function is not needed. It is added so as not to break the
+; existing r2l pipeline.  XXX Huh? It is used above! How can it not be
+; needed?
 (define (pre-svo-rule subj verb obj)
 (ListLink
     (SVO-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
