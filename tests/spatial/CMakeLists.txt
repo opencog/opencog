@@ -16,7 +16,7 @@ ADD_CXXTEST(VisibilityMapUTest)
 
 ADD_CXXTEST(HPASearchUTest)
 TARGET_LINK_LIBRARIES(HPASearchUTest
-    HPASearch
+	HPASearch
 )
 
 ADD_CXXTEST(MathUTest)
@@ -25,3 +25,6 @@ ADD_CXXTEST(TemporalMapUTest)
 ADD_CXXTEST(TemporalTableUTest)
 ADD_CXXTEST(TimeServerUTest)
 
+ADD_CXXTEST(Octree3DMapManagerUTest)
+ADD_CXXTEST(OctomapOctreeUTest)
+ADD_CXXTEST(SpaceMapUtilUTest)

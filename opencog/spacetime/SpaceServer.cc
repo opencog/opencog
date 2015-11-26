@@ -522,13 +522,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, octime_t timestamp,
 }
 */
 
-bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject,
-			        octime_t timestamp,
-			       int objX, int objY, int objZ,
-			       int objLength, int objWidth, int objHeight,
-			       double objYaw, bool isObstacle,  std::string entityClass,
-			       std::string objectName, std::string material,
-                               const TimeDomain& timeDomain)
+bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool isSelfObject, bool isAvatarEntity, octime_t timestamp, double objX, double objY, double objZ, const TimeDomain& timeDomain)
 {
     
     if (spaceMapHandle == Handle::UNDEFINED){
@@ -544,20 +538,20 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
     opencog::spatial::BlockVector pos(objX, objY, objZ);
     SpaceMap* theSpaceMap=spaceMaps[spaceMapHandle];
 
-    if (entityClass == "block") {
+    if (atomspace->get_type(objectNode) == STRUCTURE_NODE)
+    {
         // it's a block
-        theSpaceMap->addSolidUnitBlock(pos,objectNode, material);
+        theSpaceMap->addSolidUnitBlock(objectNode,pos);
+
     }
-    else{
-        theSpaceMap->addNoneBlockEntity(objectNode,pos,objWidth,objLength,objHeight,objYaw,objectName, entityClass,isSelfObject, true);
+    else
+    {
+        theSpaceMap->addNoneBlockEntity(objectNode,pos,isSelfObject, isAvatarEntity, timestamp);
     }
     return true;
 }
 
-Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName,
-				     int _xMin, int _yMin, int _zMin,
-                                     int _xDim, int _yDim, int _zDim, int _floorHeight,
-                                     const TimeDomain& timeDomain)
+Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, double _resolution, int _floorHeight, float _agentHeight, const TimeDomain& timeDomain)
 {
     Handle spaceMapNode = atomspace->get_handle(SPACE_MAP_NODE,_mapName);
 
@@ -565,9 +559,9 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName,
     if (spaceMapNode == Handle::UNDEFINED) {
         spaceMapNode = atomspace->add_node(SPACE_MAP_NODE,_mapName);
         atomspace->set_LTI(spaceMapNode, 1);
-        timeser->addTimeInfo(spaceMapNode, timestamp,  timeDomain);
+        timeser->addTimeInfo(spaceMapNode, timestamp, timeDomain);
 
-        SpaceMap* newSpaceMap = new SpaceMap( _mapName, _xMin,  _yMin, _zMin,  _xDim,  _yDim,  _zDim,  _floorHeight);
+        SpaceMap* newSpaceMap = new SpaceMap(atomspace, _mapName, _resolution, _floorHeight, _agentHeight);
 
         // add into the map set
         spaceMaps.insert(map<Handle,SpaceMap*>::value_type(spaceMapNode,newSpaceMap));
@@ -703,7 +697,7 @@ void SpaceServer::markCurMapPerceptedForFirstTime()
     if (curMap)
         curMap->hasPerceptedMoreThanOneTimes = true;
 }
-
+/*
 void SpaceServer::findAllBlockEntitiesOnTheMap(Handle spaceMapHandle)
 {
     if (spaceMaps.find(spaceMapHandle) == spaceMaps.end()) {
@@ -782,7 +776,6 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
         }
     }
 
-    /*
     //    (AtTimeLink (stv 1 1)
     //       (TimeNode "15818205490")
     //       (EvaluationLink (stv 1 0.0012484394)
@@ -797,24 +790,22 @@ void SpaceServer::addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* 
     //          )
     //       )
     //    )
-    HandleSeq blocklist;
-    vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
-    vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
-    for (; it != blocks.end(); ++it)
-    {
-        opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
-        HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
-        blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
-    }
+    //HandleSeq blocklist;
+    //vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
+    //vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
+    //for (; it != blocks.end(); ++it)
+    //{
+    //    opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
+    //    HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
+    //    blocklist.insert(blocklist.end(), unitBlockNodes.begin(),unitBlockNodes.end());
+    //}
 
-    Handle blocklistLink = atomspace->add_link(LIST_LINK, blocklist);
+    //Handle blocklistLink = atomspace->add_link(LIST_LINK, blocklist);
 
-    SimpleTruthValue tv(1.0, 1.0);
-    Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
+    //SimpleTruthValue tv(1.0, 1.0);
+    //Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
 
-    timeser->addTimeInfo(evalLink,timeStamp);
-    */
-
+    //timeser->addTimeInfo(evalLink,timeStamp);
 }
 
 void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _entity, octime_t timestamp, Handle spaceMapHandle, const TimeDomain& timeDomain)
@@ -871,6 +862,7 @@ void SpaceServer::updateBlockEntitiesProperties(octime_t timestamp,HandleSeq &to
     theMap->updateBlockEntityList.clear();
 
 }
+*/
 
 Handle SpaceServer::addPropertyPredicate(
         std::string predicateName,
@@ -896,4 +888,3 @@ Handle SpaceServer::addPropertyPredicate(
     //atomspace->set_LTI(result, 1);
     return result;
 }
-
