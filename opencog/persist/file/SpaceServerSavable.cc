@@ -58,14 +58,15 @@ const char* SpaceServerSavable::getId() const
 void SpaceServerSavable::saveRepository(FILE * fp) const
 {
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
-    unsigned int mapSize = server->scenes.size();
+    unsigned int mapSize = server->spaceMaps.size();
     fwrite(&mapSize, sizeof(unsigned int), 1, fp);
-    for (auto itr = server->scenes.begin(); itr != server->scenes.end(); ++itr) {
+    std::map<Handle, SpaceServer::SpaceMap*>::iterator itr;
+    for (itr = server->spaceMaps.begin(); itr != server->spaceMaps.end(); ++itr) {
         Handle mapHandle = (Handle)(itr->first);
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
-        SpaceServer::SpaceMap* map = (itr->second).first;
-        //int xMin,yMin, zMin,floorHeight;
-        //unsigned int xDim, yDim, zDim;
+        SpaceServer::SpaceMap* map = itr->second;
+        int xMin,yMin, zMin,floorHeight;
+        unsigned int xDim, yDim, zDim;
 
         std::string mapName;
         mapName = map->getMapName();
@@ -78,21 +79,17 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
         memset(charMapName, '\0',strlen(mapName.c_str()));
         strcpy(charMapName,mapName.c_str());
 
-        //xMin = map->xMin();
-        //yMin = map->yMin();
-        //zMin = map->zMin();
+        xMin = map->xMin();
+        yMin = map->yMin();
+        zMin = map->zMin();
 
-        //xDim = map->xDim();
-        //yDim = map->yDim();
-        //zDim = map->zDim();
+        xDim = map->xDim();
+        yDim = map->yDim();
+        zDim = map->zDim();
 
-        //floorHeight = map->getFloorHeight();
-        double resolution = map->getResolution();
-        float agentHeight = map->getAgentHeight();
-        fwrite(&charMapName, 128, 1, fp);
-        fwrite(&resolution, sizeof(double), 1, fp);
-        fwrite(&agentHeight, sizeof(float), 1, fp);
-        /*
+        floorHeight = map->getFloorHeight();
+
+        fwrite(&charMapName, 128,1,fp);
         fwrite(&xMin, sizeof(int), 1, fp);
         fwrite(&yMin, sizeof(int), 1, fp);
         fwrite(&zMin, sizeof(int), 1, fp);
@@ -102,7 +99,7 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
         fwrite(&zDim, sizeof(unsigned int), 1, fp);
 
         fwrite(&floorHeight, sizeof(int), 1, fp);
-        */
+
         map->save(fp);
     }
     /*
@@ -126,14 +123,14 @@ void SpaceServerSavable::loadRepository(FILE* fp, HandMapPtr conv)
     for (unsigned int i = 0; i < mapSize; i++) {
         Handle mapHandle;
         FREAD_CK(&mapHandle, sizeof(Handle), 1, fp);
-        //int xMin,yMin, zMin,floorHeight;
-        //unsigned int xDim, yDim, zDim;
+        int xMin,yMin, zMin,floorHeight;
+        unsigned int xDim, yDim, zDim;
 
         char charMapName[128];
 
         FREAD_CK(&charMapName, 128, 1, fp);
         std::string mapName(charMapName);
-        /*
+
         FREAD_CK(&xMin, sizeof(int), 1, fp);
         FREAD_CK(&yMin, sizeof(int), 1, fp);
         FREAD_CK(&zMin, sizeof(int), 1, fp);
@@ -145,18 +142,12 @@ void SpaceServerSavable::loadRepository(FILE* fp, HandMapPtr conv)
         FREAD_CK(&floorHeight, sizeof( int), 1, fp);
 
         SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(mapName,xMin,yMin,zMin,xDim,yDim,zDim,floorHeight);
-        */
-        double resolution;
-        FREAD_CK(&resolution, sizeof(double), 1, fp);
-        SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(mapName, resolution);
         map->load(fp);
 
         OC_ASSERT(conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = conv->get(mapHandle)->getHandle();
-        (server->scenes[newMapHandle]).first = map;
-        (server->scenes[newMapHandle]).second = new SpaceServer::EntityRecorder();
-
+        server->spaceMaps[newMapHandle] = map;
     }
     CHECK_FREAD;
     /*
@@ -176,3 +167,4 @@ void SpaceServerSavable::clear()
 {
     server->clear();
 }
+
