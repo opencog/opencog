@@ -1,5 +1,0 @@
-int32 x
-int32 y
-int32 z
----
-map_block_msg block
