@@ -74,56 +74,58 @@ IF (HAVE_ATOMSPACE)
 
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "${DATADIR}/python/opencog")
+    IF (HAVE_OCTOMAP)
         ############################ spacetime #########################
-	#"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-	CYTHON_ADD_MODULE_PYX(spacetime
-	  "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
-	  )
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spacetime.cpp")
-	ADD_LIBRARY(spacetime_cython SHARED
-	  spacetime.cpp
-	  )
+        #"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+        CYTHON_ADD_MODULE_PYX(spacetime
+            "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
+        )
+        list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spacetime.cpp")
+        ADD_LIBRARY(spacetime_cython SHARED
+            spacetime.cpp
+        )
 
-    TARGET_LINK_LIBRARIES(spacetime_cython
-	      SpaceMap
-		  spacetime
-		  ${ATOMSPACE_LIBRARIES}
-		  ${COGUTIL_LIBRARY}
-		  ${PYTHON_LIBRARIES}
-		  )
+        TARGET_LINK_LIBRARIES(spacetime_cython
+            SpaceMap
+            spacetime
+            ${ATOMSPACE_LIBRARIES}
+            ${COGUTIL_LIBRARY}
+            ${PYTHON_LIBRARIES}
+        )
 
-		SET_TARGET_PROPERTIES(spacetime_cython PROPERTIES
-		  PREFIX ""
-		  OUTPUT_NAME spacetime)
+        SET_TARGET_PROPERTIES(spacetime_cython PROPERTIES
+            PREFIX ""
+            OUTPUT_NAME spacetime)
 
-		INSTALL (TARGETS spacetime_cython
-		  DESTINATION "${DATADIR}/python/opencog")
+        INSTALL (TARGETS spacetime_cython
+            DESTINATION "${DATADIR}/python/opencog")
 
-    ############################ spatial #########################
-	CYTHON_ADD_MODULE_PYX(spatial
-	  "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
-	  "../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-	  )
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spatial.cpp")
-	ADD_LIBRARY(spatial_cython SHARED
-	  spatial.cpp
-	  )
+        ############################ spatial #########################
+        CYTHON_ADD_MODULE_PYX(spatial
+            "${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
+            "../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
+        )
+        list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spatial.cpp")
+        ADD_LIBRARY(spatial_cython SHARED
+            spatial.cpp
+        )
 
-    TARGET_LINK_LIBRARIES(spatial_cython
-                  SpaceMap
-                  SpaceMapUtil
-		  spacetime
-		  ${ATOMSPACE_LIBRARIES}
-		  ${COGUTIL_LIBRARY}
-		  ${PYTHON_LIBRARIES}
-		  )
+        TARGET_LINK_LIBRARIES(spatial_cython
+            SpaceMap
+            SpaceMapUtil
+            spacetime
+            ${ATOMSPACE_LIBRARIES}
+            ${COGUTIL_LIBRARY}
+            ${PYTHON_LIBRARIES}
+        )
 
-		SET_TARGET_PROPERTIES(spatial_cython PROPERTIES
-		  PREFIX ""
-		  OUTPUT_NAME spatial)
+        SET_TARGET_PROPERTIES(spatial_cython PROPERTIES
+            PREFIX ""
+            OUTPUT_NAME spatial)
 
-		INSTALL (TARGETS spatial_cython
-		  DESTINATION "${DATADIR}/python/opencog")
+        INSTALL (TARGETS spatial_cython
+            DESTINATION "${DATADIR}/python/opencog")
+    ENDIF (HAVE_OCTOMAP)
 ENDIF (HAVE_ATOMSPACE)
 
 	
