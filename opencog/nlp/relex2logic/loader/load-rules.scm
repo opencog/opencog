@@ -61,3 +61,5 @@
 (load "../rules/to-do-rule-3.scm")
 (load "../rules/gender.scm")
 (load "../rules/conj.scm")
+(load "../rules/tense.scm")
+(load "../rules/passive.scm")
