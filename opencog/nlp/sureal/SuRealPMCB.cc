@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -37,15 +38,12 @@ using namespace opencog;
  *
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
- * @param thoroughness   the completeness of the search (the minimum number of
- *                       results being returned)
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars, size_t thoroughness) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
-    m_vars(vars),
-    m_thoroughness(thoroughness)
+    m_vars(vars)
 {
 
 }
@@ -115,14 +113,23 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
     qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
 
-    // helper lambda function to check for linkage to an InterpretationNode, given SetLink
-    auto hasInterpretation = [this](Handle& h)
+    // store the InterpretationNodes, will be needed if this grounding is accepted
+    HandleSeq qTempInterpNodes;
+
+    // helper lambda function to check for linkage to an InterpretationNode,
+    // and see if it's one of the targets we are looking for, given SetLink
+    auto hasInterpretation = [&](Handle& h)
     {
         HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
-        return std::any_of(qN.begin(), qN.end(), [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+        return std::any_of(qN.begin(), qN.end(), [&](Handle& hn) {
+                bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
+                bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
+                if (isInterpNode) qTempInterpNodes.push_back(hn);
+                return isInterpNode and isTarget; });
     };
 
-    // reject match (ie. return false) if there is no InterpretationNode
+    // reject match (ie. return false) if there is no InterpretationNode, or
+    // the InterpretationNode is not one of the targets
     if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation))
         return false;
 
@@ -167,7 +174,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         // corresponding WordInstanceNode by variable match
         // if the node is not a variable, then the standard node_match would
         // have made it matched to itself, so let's move on and check the rest
-        // of the ndoes
+        // of the nodes
         if (hSolnWordInst == Handle::UNDEFINED)
             continue;
 
@@ -349,6 +356,10 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             return false;
     }
 
+    // store the accepted InterpretationNodes, which will be the targets for the
+    // next disconnected clause in the pattern, if any
+    m_interp.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
+
     return true;
 }
 
@@ -361,14 +372,15 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  *
  * @param var_soln   the variable & links mapping
  * @param pred_soln  the clause mapping
- * @return           always return false to search for more solutions
+ * @return           always return false to search for more solutions, unless a
+ *                   good enough solution is found
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
     logger().debug("[SuReal] grounding a solution");
 
     // helper to get the InterpretationNode
-    auto getInterpretation = [this](const Handle& h)
+    auto getInterpretation = [&](const Handle& h)
     {
         HandleSeq qISet = m_as->get_incoming(h);
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
@@ -377,7 +389,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN  = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -426,17 +438,123 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         shrinked_soln[kv.first] = kv.second;
     }
 
-    // store the solution; all common InterpretationNode are solutions for this
-    // grounding, so store the solution for each InterpretationNode
-    for (auto n : qItprNode)
-    {
-        // there could also be multiple solutions for one InterpretationNode,
-        // so store them in a vector
-        if (m_results.count(n) == 0)
-            m_results[n] = std::vector<std::map<Handle, Handle> >();
+    std::set<Handle> qSolnSetLinks;
 
-        logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
-        m_results[n].push_back(shrinked_soln);
+    // get the R2L-SetLinks that are related to these InterpretationNodes
+    for (Handle& hItprNode : qItprNode)
+    {
+        HandleSeq qN = get_neighbors(hItprNode, false, true, REFERENCE_LINK, false);
+        qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qN.end());
+
+        // just in case... make sure all the pred_solns exist in the SetLink
+        for (auto& hSetLink : qN)
+        {
+            if (std::all_of(pred_soln.begin(), pred_soln.end(),
+                            [&](std::pair<Handle, Handle> soln) { return is_atom_in_tree(hSetLink, soln.second); }))
+                qSolnSetLinks.insert(hSetLink);
+        }
+    }
+
+    // if there are more than one common InterpretationNodes at this point,
+    // we should also have more than one SetLinks here, so examine them one by one
+    for (Handle hSetLink : qSolnSetLinks)
+    {
+        bool isGoodEnough = true;
+
+        // extract the leftovers from the solution SetLink
+        LinkPtr lp(LinkCast(hSetLink));
+        HandleSeq qLeftover = lp->getOutgoingSet();
+        for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
+        {
+            auto itc = std::find(qLeftover.begin(), qLeftover.end(), it->second);
+
+            if (itc != qLeftover.end())
+                qLeftover.erase(itc);
+        }
+
+        // for words in a sentence, they should be linked to their
+        // corresponding WordInstanceNodes by a ReferenceLink, for example:
+        //   ReferenceLink
+        //     ConceptNode "water@123"
+        //     WordInstanceNode "water@123"
+        auto checker = [] (Handle& h)
+        {
+            HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
+            return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
+        };
+
+        HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
+        qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
+                                            checker), qWordInstNodes.end());
+
+        // check if all of the leftovers of this SetLink are unary -- doesn't
+        // form a logical relationship with more than one word of the sentence
+        for (Handle& l : qLeftover)
+        {
+            std::set<UUID> sWordFound;
+            HandleSeq qNodes = get_all_nodes(l);
+
+            for (Handle& n : qNodes)
+            {
+                auto matchWordInst = [&](Handle& w)
+                {
+                    std::string wordInstName = NodeCast(w)->getName();
+                    std::string nodeName = NodeCast(n)->getName();
+
+                    if (wordInstName.compare(nodeName) == 0)
+                    {
+                        sWordFound.insert(w.value());
+                        return true;
+                    }
+
+                    return false;
+                };
+
+                std::find_if(qWordInstNodes.begin(), qWordInstNodes.end(), matchWordInst);
+            }
+
+            // if it is not a unary link, the solution is not good enough
+            if (sWordFound.size() > 1)
+            {
+                size_t cnt = sWordFound.size();
+
+                // see how many of the words found in the leftover-link have
+                // actually been grounded
+                for (auto i = var_soln.begin(); i != var_soln.end(); i++)
+                    if (std::find(sWordFound.begin(), sWordFound.end(), i->second.value()) != sWordFound.end())
+                        cnt--;
+
+                // so it would not be considered as good enough if there are
+                // at least one ungrounded word in a leftover-link containing
+                // two or more words
+                if (cnt > 0)
+                {
+                    isGoodEnough = false;
+                    break;
+                }
+            }
+        }
+
+        // if we find a good enough solution, clear previous (not good enough) ones, if any
+        if (isGoodEnough)
+            m_results.clear();
+
+        // store the solution; all common InterpretationNode are solutions for this
+        // grounding, so store the solution for each InterpretationNode
+        // but normally there should be only one InterpretationNode for a
+        // given R2L-SetLink
+        for (auto n : qItprNode)
+        {
+            // there could also be multiple solutions for one InterpretationNode,
+            // so store them in a vector
+            if (m_results.count(n) == 0)
+                m_results[n] = std::vector<std::map<Handle, Handle> >();
+
+            logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
+            m_results[n].push_back(shrinked_soln);
+        }
+
+        return isGoodEnough;
     }
 
     return false;
@@ -445,7 +563,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 /**
  * Implement the initiate_search method.
  *
- * Similar to DefaultPatternMatcherCB::initiate_search, in which we start search
+ * Similar to InitiateSearchCB::initiate_search, in which we start search
  * by looking at the thinnest clause with constants.  However, since most clauses
  * for SuReal will have 0 constants, most searches will require looking at all
  * the links.  This implementation improves that by looking at links within a
@@ -453,12 +571,16 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
  * limiting the search space.
  *
  * @param pPME       pointer to the PatternMatchEngine
- * @param vars       a set of nodes that are variables
- * @param clauses    the clauses for the query
- * @param negations  the negative clauses
  */
 bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 {
+    // set targets, m_targets should always be a subset of m_interp
+    if (m_interp.size() > 0)
+    {
+        m_targets = m_interp;
+        m_interp.clear();
+    }
+
     _search_fail = false;
     if (not _variables->varset.empty())
     {
@@ -482,18 +604,22 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
     for (auto& c : qCandidate)
     {
-        auto rm = [](Handle& h)
+        auto rm = [&](Handle& h)
         {
             if (h->getType() != SET_LINK) return true;
 
             HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
             return not std::any_of(qN.begin(), qN.end(),
-                [](Handle& hn) { return hn->getType() == INTERPRETATION_NODE; });
+                [&](Handle& hn) {
+                    bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
+                    bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
+                    return isInterpNode and isTarget;
+                });
         };
 
         HandleSeq qISet = m_as->get_incoming(c);
 
-        // erase atoms that are neither R2L-Setlink nor SetLink
+        // erase atoms that are neither a SetLink nor a target
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
 
         if (qISet.size() >= 1)
@@ -523,30 +649,27 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;
-
-        // stop the search if it already found enough results in a non-complete search
-        if (m_thoroughness > 0 and m_results.size() >= m_thoroughness) return true;
     }
     return false;
 }
 
 /**
- * Override the find_starter method in DefaultPatternMatchCB.
+ * Override the find_starter_recursive method in InitiateSearchCB.
  *
- * Override find_starter so that it will not treat VariableNode variables,
+ * Override find_starter_recursive so that it will not treat VariableNode variables,
  * but instead compare against the variable list.
  *
- * @param h       same as InitiateSearchCB::find_starter
- * @param depth   same as InitiateSearchCB::find_starter
- * @param start   same as InitiateSearchCB::find_starter
- * @param width   same as InitiateSearchCB::find_starter
- * @return        same as InitiateSearchCB::find_starter but change
+ * @param h       same as InitiateSearchCB::find_starter_recursive
+ * @param depth   same as InitiateSearchCB::find_starter_recursive
+ * @param start   same as InitiateSearchCB::find_starter_recursive
+ * @param width   same as InitiateSearchCB::find_starter_recursive
+ * @return        same as InitiateSearchCB::find_starter_recursive but change
  *                the result if is a variable
  */
-Handle SuRealPMCB::find_starter(const Handle& h, size_t& depth,
-                                Handle& start, size_t& width)
+Handle SuRealPMCB::find_starter_recursive(const Handle& h, size_t& depth,
+                                          Handle& start, size_t& width)
 {
-    Handle rh = InitiateSearchCB::find_starter(h, depth, start, width);
+    Handle rh = InitiateSearchCB::find_starter_recursive(h, depth, start, width);
 
     // if the non-VariableNode is actually a variable
     if (m_vars.count(rh) == 1)

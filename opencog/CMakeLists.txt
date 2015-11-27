@@ -29,10 +29,13 @@ IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-IF (HAVE_SERVER)
-    ADD_SUBDIRECTORY (spacetime)
+# build uncoditionally; check is made there
+# always generate the types
+ADD_SUBDIRECTORY (spacetime)
+
+IF (HAVE_SERVER AND HAVE_OCTOMAP)
     ADD_SUBDIRECTORY (spatial)
-ENDIF (HAVE_SERVER)
+ENDIF (HAVE_SERVER AND HAVE_OCTOMAP)
 
 # build unconditionally; a check is made there.
 ADD_SUBDIRECTORY (embodiment)

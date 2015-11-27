@@ -15,7 +15,7 @@ can’t be true at the same time.
         ) ; [1475]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1470]
+          (DefinedLinguisticPredicateNode "definite") ; [1470]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "meeting@5d6d7498-c7fe-4738-95e2-9620d00d478e") ; [1467]
           ) ; [1471]
@@ -33,7 +33,7 @@ can’t be true at the same time.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "is@cf2062c3-efa0-4d1e-b75e-f5bafdce4d04") ; [1473]
-          (ConceptNode "present") ; [1476]
+          (DefinedLinguisticConceptNode "present") ; [1476]
         ) ; [1477]
 
         (InheritanceLink (stv 0.990000 0.990000)
@@ -74,7 +74,7 @@ can’t be true at the same time.
         ) ; [1622]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1626]
+          (DefinedLinguisticPredicateNode "definite") ; [1626]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "meeting@93b8fb75-0e7a-4809-9b9c-58cc6bae20a8") ; [1623]
           ) ; [1627]

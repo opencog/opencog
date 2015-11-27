@@ -21,12 +21,3 @@ the following commands:
   prompt# ebuild vendor/cxxtest/gentoo/dev-cpp/cxxtest/cxxtest*.ebuild install qmerge
 
 ----------------------------------------------------------
-
-Opencog also _optionally_ depends on the following packages:
-
-  dev-db/unixODBC  -- needed for SQL persistence
-
-  dev-scheme/guile -- needed for scheme bindings
-
-  dev-libs/expat   -- needed for embodiment
-

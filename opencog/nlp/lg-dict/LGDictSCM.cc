@@ -87,9 +87,12 @@ void LGDictSCM::init()
     m_pDictionary = dictionary_create_default_lang();
 
 #ifdef HAVE_GUILE
-    define_scheme_primitive("lg-get-dict-entry", &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-type-match?", &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-linkable?", &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
+    define_scheme_primitive("lg-get-dict-entry",
+         &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
+    define_scheme_primitive("lg-conn-type-match?",
+         &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
+    define_scheme_primitive("lg-conn-linkable?",
+         &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
 #endif
 }
 

@@ -15,7 +15,7 @@
             ; Why this link?-> To enable flexibility by allowing the definition
             ; of other rules.
             (EvaluationLink
-                (PredicateNode "Psi: Stimulates")
+                (PredicateNode "Psi: Stimulus")
                 (ListLink
                     (GroundedSchemaNode "scm: psi-modulator-updater")
                     (VariableNode "Modulator")

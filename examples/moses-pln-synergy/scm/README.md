@@ -39,29 +39,392 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ## Apply rules iteratively
 
+### (1) Partially instantiate if X takes Y and Y contains Z, then X takes Z,
+    with Y = treatment-1 and Z = compound-A. Semi-formally
+    \x (take(x, treatment-1) and contain(treatment-1, compound-A))
+       -> take(x, compound-A)
+
 ```
-scheme@(guile-user)> ;; Infer that take-treatment-1 implies take-compound-A
-scheme@(guile-user)> (cog-bind pln-rule-for-all-hack)
-scheme@(guile-user)> (cog-bind pln-rule-eliminate-neutral-element-hack)
-scheme@(guile-user)> (cog-bind pln-rule-eliminate-dangling-junctor-hack)
-scheme@(guile-user)> (cog-bind pln-rule-equivalence-hack)
-$6 = (SetLink
+scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instantiation-rule)) (iota 2))
+scheme@(guile-user)> (cog-prt-atomspace)
+And search for the following
+...
    (ImplicationLink (stv 1 0.99999982)
-      (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
-      (PredicateNode "take-compound-A" (stv 0.2 0.80000001))
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode")
+      )
+      (AndLink
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+         (EvaluationLink (stv 1 0.99999982)
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "take")
+         (ListLink
+            (VariableNode "$X")
+            (ConceptNode "compound-A")
+         )
+      )
+   )
+...
+
+### (2) Distribute the lambda in the implicant and implicand of (1). Semi-formally
+    (\x take(x, treatment-1) and contain(treatment-1, compound-A))
+    -> (\x take(x, compound-A))
+
+scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+
+### (3) Distribute the lambda in the conjunction of the implicant of (2).
+    Semi-formally
+    (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+
+scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
+...
+   (AndLink
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink (stv 1 0.99999982)
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+
+### (4) Calculate the TV of the constant predicate obtained in (3).
+    Semi-formally \x contain(treatment-1, compound-A)
+
+scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
+$5 = (SetLink
+   (LambdaLink (stv 1 0.99999982)
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode")
+      )
+      (EvaluationLink (stv 1 0.99999982)
+         (PredicateNode "contain")
+         (ListLink
+            (ConceptNode "treatment-1")
+            (ConceptNode "compound-A")
+         )
+      )
    )
 )
 
-scheme@(guile-user)> ;; Infer that being well hydrated speeds up recovery 
-scheme@(guile-user)> (cog-bind pln-rule-average-hack)
-scheme@(guile-user)> (cog-bind pln-rule-modus-ponens)
-$8 = (SetLink
-   ...
-   (ImplicationLink (stv 0.69999999 0.60000002)
-      (PredicateNode "is-well-hydrated" (stv 0.059500001 0.80000001))
-      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.80000001 0))
+### (5) Build the tautology that if X takes treatment-1, then
+    treatment-1 contains compound-A. Semi-formally
+    (\x take(x, treatment-1)) -> (\x contain(treatment-1, compound-A))
+
+scheme@(guile-user)> (cog-bind implication-construction-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink (stv 1 0.99999982)
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink (stv 1 0.99999982)
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
    )
-)
+...
+
+### (6) Distribute the implicant in the implication (5). Semi-formally
+    (\x take(x, treatment-1))
+    -> (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+
+scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (AndLink
+         (LambdaLink
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+         )
+         (LambdaLink (stv 1 0.99999982)
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+   )
+...
+
+### (7) Factorize the lambda in the implicand of (6). Semi-formally
+    (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+    -> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+
+scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (AndLink
+         (LambdaLink
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+         )
+         (LambdaLink (stv 1 0.99999982)
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+   )
+...
+
+
+### (8) Using (6) and (7) infer that if X takes treatment-1 then X
+    takes treatment-1 and treatment-1 contains compound-A. Semi-formally
+    (\x take(x, treatment-1))
+    -> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+
+scheme@(guile-user)> (cog-bind deduction-implication-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink (stv 1 0.99999982)
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
+            )
+         )
+      )
+   )
+...
+
+### (9) Using (2) and (8) infer that if X takes treatment-1 then X
+    takes compound-A. Semi-formally
+    (\x takes(x, treatment-1)) -> (\x takes(x, compound-A))
+
+scheme@(guile-user)> (cog-bind deduction-implication-rule)
+...
+   (ImplicationLink (stv 1 0.99999982)
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+      )
+      (LambdaLink
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "compound-A")
+            )
+         )
+      )
+   )
+...
+
+### (10) Fully instantiate that if a predicate is in the
+    injury-recovery-speed-predicates class, then is-well-hydrated
+    implies it.
+
+scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-full-instantiation-rule)) (iota 2)) # TODO: try with one iteration
+scheme@(guile-user)> (cog-prt-atomspace)
+...
+   (ImplicationLink (stv 0.69999999 0.60000002)
+      (PredicateNode "is-well-hydrated")
+      (PredicateNode "recovery-speed-of-injury-alpha")
+   )
+...
+
+### (11) TODO
 
 scheme@(guile-user)> ;; Infer relationships between input and target features
 scheme@(guile-user)> (cog-bind pln-rule-deduction)

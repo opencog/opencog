@@ -5,7 +5,13 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/opencog.conf
 # Create a test configuration file by copying the default configuration file
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/opencog-test.conf
     ${PROJECT_BINARY_DIR}/lib/opencog-test.conf)
-ADD_SUBDIRECTORY (json_spirit)
+
+# json is only used by the Rest API, which cannot be built if there
+# is no TBB or ZMQ. Since its a huge memory hog, don't build it unless
+# building REST.
+IF (HAVE_REST)
+	ADD_SUBDIRECTORY (json_spirit)
+ENDIF (HAVE_REST)
 
 # Place a default config file in a default location
 # CONFDIR normally expands to /usr/local/etc/

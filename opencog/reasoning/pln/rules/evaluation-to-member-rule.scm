@@ -27,7 +27,7 @@
 ;(include "formulas.scm")
 
 ; -----------------------------------------------------------------------------
-; pln-rule-evaluation-to-member-0
+; evaluation-to-member-0-rule
 ;	Converts EvaluationLinks which have only one member which is not part of 
 ;	the ListLink
 ;	eg:- EvaluationLink
@@ -35,7 +35,7 @@
 ;			ConceptNode "John"			
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-evaluation-to-member-0
+(define evaluation-to-member-0-rule
 	(BindLink
 		(VariableList
 			(TypedVariableLink
@@ -48,7 +48,7 @@
 			(VariableNode "$D")
 			(VariableNode "$A"))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-0")
+			(GroundedSchemaNode "scm: evaluation-to-member-0-formula")
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
@@ -61,14 +61,14 @@
 						(VariableNode "$D")
 						(VariableNode "$A"))))))
 
-(define (pln-formula-evaluation-to-member-0 MAXDX DA)
+(define (evaluation-to-member-0-formula MAXDX DA)
 	(cog-set-tv! MAXDX
-		(pln-formula-evaluation-to-member-side-effect-free
+		(evaluation-to-member-side-effect-free-formula
 			MAXDX
 			DA)))
 
 ; -----------------------------------------------------------------------------
-; pln-rule-evaluation-to-member-1
+; evaluation-to-member-1-rule
 ;	Converts EvaluationLinks which have only one member which is part of 
 ;	the ListLink
 ;	eg:- EvaluationLink
@@ -77,7 +77,7 @@
 ;				ConceptNode "John"			
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-evaluation-to-member-1
+(define evaluation-to-member-1-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$A")
@@ -89,7 +89,7 @@
 			(ListLink
 				(VariableNode "$A")))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-1")
+			(GroundedSchemaNode "scm: evaluation-to-member-1-formula")
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
@@ -104,14 +104,14 @@
 						(ListLink
 							(VariableNode "$A")))))))
 
-(define (pln-formula-evaluation-to-member-1 MAXDX DA)
+(define (evaluation-to-member-1-formula MAXDX DA)
 	(cog-set-tv! MAXDX
-		(pln-formula-evaluation-to-member-side-effect-free
+		(evaluation-to-member-side-effect-free-formula
 			MAXDX
 			DA)))
 
 ; -----------------------------------------------------------------------------
-; pln-rule-evaluation-to-member-2
+; evaluation-to-member-2-rule
 ;	Converts EvaluationLinks which have two members
 ;	eg:- EvaluationLink
 ;			PredicateNode "Eat"
@@ -120,7 +120,7 @@
 ;				ConceptNode "Cookies"			
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-evaluation-to-member-2
+(define evaluation-to-member-2-rule
 	(BindLink
 		(VariableList
 			(VariableNode "$A")
@@ -134,7 +134,7 @@
 				(VariableNode "$A")
 				(VariableNode "$B")))
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm:pln-formula-evaluation-to-member-2")
+			(GroundedSchemaNode "scm: evaluation-to-member-2-formula")
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
@@ -161,22 +161,22 @@
 							(VariableNode "$B")))))))
 
 
-(define (pln-formula-evaluation-to-member-2 MAXDXB MBXDAX DAB)
+(define (evaluation-to-member-2-formula MAXDXB MBXDAX DAB)
 	(cog-set-tv! MAXDXB
-		(pln-formula-evaluation-to-member-side-effect-free
+		(evaluation-to-member-side-effect-free-formula
 			MAXDXB
 			DAB))
 	(cog-set-tv! MBXDAX 
-		(pln-formula-evaluation-to-member-side-effect-free
+		(evaluation-to-member-side-effect-free-formula
 			MBXDAX
 			DAB)))
 
-(define (pln-formula-evaluation-to-member-side-effect-free MD ED)
+(define (evaluation-to-member-side-effect-free-formula MD ED)
 	(stv
 		(cog-stv-strength ED)
 		(cog-stv-confidence ED)))
 
-;(define pln-rule-evaluation-to-member
+;(define evaluation-to-member-rule
 ;	(BindLink
 ;		(VariableList
 ;			(VariableNode "$A")
@@ -187,7 +187,7 @@
 ;           (VariableNode "$D")
 ;           (VariableNode "$A"))
 ;       (ExecutionOutputLink
-;           (GroundedSchemaNode "scm:pln-formula-evaluation-to-member")
+;           (GroundedSchemaNode "scm: evaluation-to-member-formula")
 ;           (ListLink
 ;               (EvaluationLink
 ;                   (VariableNode "$D")
@@ -201,7 +201,7 @@
 ; Side-effect: TruthValue of the new link/s stays the same
 ; -----------------------------------------------------------------------------
 
-;(define (pln-formula-evaluation-to-member DA)
+;(define (evaluation-to-member-formula DA)
 ;	(if (= (cog-arity (gdr DA)) 0)
 ;		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
 ;			(gdr DA)
@@ -237,20 +237,20 @@
 ; =============================================================================
 
 ; Name the rule
-(define pln-rule-evaluation-to-member-0-name
-  (Node "pln-rule-evaluation-to-member-0"))
+(define evaluation-to-member-0-rule-name
+  (Node "evaluation-to-member-0-rule"))
 (DefineLink
-  pln-rule-evaluation-to-member-0-name
-  pln-rule-evaluation-to-member-0)
+  evaluation-to-member-0-rule-name
+  evaluation-to-member-0-rule)
 
-(define pln-rule-evaluation-to-member-1-name
-  (Node "pln-rule-evaluation-to-member-1"))
+(define evaluation-to-member-1-rule-name
+  (Node "evaluation-to-member-1-rule"))
 (DefineLink
-  pln-rule-evaluation-to-member-1-name
-  pln-rule-evaluation-to-member-1)
+  evaluation-to-member-1-rule-name
+  evaluation-to-member-1-rule)
 
-(define pln-rule-evaluation-to-member-2-name
-  (Node "pln-rule-evaluation-to-member-2"))
+(define evaluation-to-member-2-rule-name
+  (Node "evaluation-to-member-2-rule"))
 (DefineLink
-  pln-rule-evaluation-to-member-2-name
-  pln-rule-evaluation-to-member-2)
+  evaluation-to-member-2-rule-name
+  evaluation-to-member-2-rule)

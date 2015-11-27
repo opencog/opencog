@@ -3,38 +3,46 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; If X takes Y and Y contains Z, then X takes Z
-(ForAllLink (stv 1 1)
-   (ListLink
-      (VariableNode "X")
-      (VariableNode "Y")
-      (VariableNode "Z")
-   )
-   (ImplicationLink
-      (AndLink
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "X")
-               (VariableNode "Y")
-            )
-         )
-         (EvaluationLink
-            (PredicateNode "contain")
-            (ListLink
-               (VariableNode "Y")
-               (VariableNode "Z")
-            )
-         )
-      )
+(ImplicationLink (stv 1 1)
+   (VariableList
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode"))
+      (TypedVariableLink
+         (VariableNode "$Y")
+         (TypeNode "ConceptNode"))
+      (TypedVariableLink
+         (VariableNode "$Z")
+         (TypeNode "ConceptNode")))
+   (AndLink
       (EvaluationLink
          (PredicateNode "take")
          (ListLink
-            (VariableNode "X")
-            (VariableNode "Z")
-         )
-      )
-   )
-)
+            (VariableNode "$X")
+            (VariableNode "$Y")))
+      (EvaluationLink
+         (PredicateNode "contain")
+         (ListLink
+            (VariableNode "$Y")
+            (VariableNode "$Z"))))
+   (EvaluationLink
+      (PredicateNode "take")
+      (ListLink
+         (VariableNode "$X")
+         (VariableNode "$Z"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Background knowledge about John ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This is essentially dummy, just to make partial implication
+;; instantiation works till partial pattern matcher (probably via self
+;; grounding is supported).
+(EvaluationLink (stv 1 1)
+   (PredicateNode "take")
+   (ListLink
+      (ConceptNode "John")
+      (ConceptNode "treatment-1")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about treatment-1 ;;
@@ -46,11 +54,16 @@
 ; take-treatment-1(X) is equivalent to take(X, treatment-1)
 (EquivalenceLink (stv 1 1)
    (PredicateNode "take-treatment-1")
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
-         (VariableNode "X")
-         (ConceptNode "treatment-1")
+   (LambdaLink
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "ConceptNode"))
+      (EvaluationLink
+         (PredicateNode "take")
+         (ListLink
+            (VariableNode "$X")
+            (ConceptNode "treatment-1")
+         )
       )
    )
 )
@@ -58,11 +71,16 @@
 ; take-compound-A(X) is equivalent to take(X, compound-A)
 (EquivalenceLink (stv 1 1)
    (PredicateNode "take-compound-A")
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
+   (LambdaLink
+      (TypedVariableLink
          (VariableNode "$X")
-         (ConceptNode "compound-A")
+         (TypeNode "ConceptNode"))
+      (EvaluationLink
+         (PredicateNode "take")
+         (ListLink
+            (VariableNode "$X")
+            (ConceptNode "compound-A")
+         )
       )
    )
 )
@@ -94,7 +112,7 @@
    (EvaluationLink
       (PredicateNode "take")
       (ListLink
-         (VariableNode "X")
+         (VariableNode "$X")
          (ConceptNode "treatment-2")
       )
    )
@@ -142,19 +160,16 @@
 )
 
 ; Being well hydrated tends to speed up injury recovery
-(AverageLink (stv 0.7 0.6)
-   (VariableNode "X")
+(ImplicationLink (stv 0.7 0.6)
+   (TypedVariableLink
+      (VariableNode "$X")
+      (TypeNode "PredicateNode"))
+   (MemberLink
+      (VariableNode "$X")
+      (ConceptNode "injury-recovery-speed-predicates"))
    (ImplicationLink
-      (MemberLink
-         (VariableNode "X")
-         (ConceptNode "injury-recovery-speed-predicates")
-      )
-      (ImplicationLink
-         (PredicateNode "is-well-hydrated")
-         (VariableNode "X")
-      )
-   )
-)
+      (PredicateNode "is-well-hydrated")
+      (VariableNode "$X")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about the target feature ;;

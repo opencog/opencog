@@ -15,7 +15,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -28,7 +28,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -41,7 +41,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -54,7 +54,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -71,7 +71,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -84,7 +84,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -95,7 +95,7 @@
 			)
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
-			(PredicateNode "possession" (stv 0.001 0.99000001))
+			(DefinedLinguisticPredicateNode "possession" (stv 0.001 0.99000001))
 			(ListLink (stv 0.99000001 0.99000001)
 			   (ConceptNode "seeds@474593d7-5a5c-4ceb-9cbb-173ade98cc59" (stv 0.001 0.99000001))
 			   (ConceptNode "apple@ca552878-32d4-41e3-aaa3-34239ba98f34" (stv 0.001 0.99000001))
@@ -103,7 +103,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 	))
@@ -125,7 +125,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -138,7 +138,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
@@ -151,13 +151,13 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		)
 		 (SetLink
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
 			(PredicateNode "eats@5ec780eb-a98b-4650-a680-3b0163a8822e" (stv 0.001 0.99000001))
@@ -174,7 +174,7 @@
 		   )
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
 			(PredicateNode "collects@78c90976-cb18-4b09-9169-00bc3cc6a70a" (stv 0.001 0.99000001))
@@ -187,7 +187,7 @@
 		 (SetLink
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
 			(PredicateNode "plants@0f71e243-1327-49af-8020-f6aa3ef0d273" (stv 0.001 0.99000001))
@@ -200,7 +200,7 @@
 		 (SetLink
 		   (InheritanceLink
 			(InterpretationNode "MicroplanningNewSentence")
-			(ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+			(DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 		   )
 		   (EvaluationLink (stv 0.99000001 0.99000001)
 			(PredicateNode "grow@3fe4efed-5135-408f-bc1b-d02343bb69c1" (stv 0.001 0.99000001))
@@ -224,7 +224,7 @@
 	   )
 	   (InheritanceLink
 	      (InterpretationNode "MicroplanningNewSentence")
-	      (ConceptNode "InterrogativeSpeechAct" (stv 0.001 0.99000001))
+	      (DefinedLinguisticConceptNode "InterrogativeSpeechAct" (stv 0.001 0.99000001))
 	   )
 	)
 	 (SetLink
@@ -241,7 +241,7 @@
 	   )
 	   (InheritanceLink
 	      (InterpretationNode "MicroplanningNewSentence")
-	      (ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+	      (DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 	   )
 	)
 	))
@@ -259,13 +259,13 @@
 	   )
 	   (InheritanceLink
 	      (InterpretationNode "MicroplanningNewSentence")
-	      (ConceptNode "InterrogativeSpeechAct" (stv 0.001 0.99000001))
+	      (DefinedLinguisticConceptNode "InterrogativeSpeechAct" (stv 0.001 0.99000001))
 	   )
 	)
 	 (SetLink
 	   (InheritanceLink
 	      (InterpretationNode "MicroplanningNewSentence")
-	      (ConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
+	      (DefinedLinguisticConceptNode "DeclarativeSpeechAct" (stv 0.001 0.99000001))
 	   )
 	   (EvaluationLink (stv 0.99000001 0.99000001)
 	      (PredicateNode "mean@524fdbed-149e-47ce-a2a2-494e80962580" (stv 0.001 0.99000001))

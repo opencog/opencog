@@ -282,6 +282,11 @@ foreach my $af (sort @aimlFiles)
 				{
 					print FOUT "TEMPLATECODE,$template[0]\n";
 				}
+				print FOUT "TEMPATOMICEND,0\n";
+			}
+			else
+			{
+				print FOUT "TEMPLATECODE,$template[0]\n";
 			}
 			
 			
@@ -330,7 +335,7 @@ while(my $line =<FIN>)
 	if ($cmd eq "CATEND")
 	{
 	    $code .= ")\n";     # close category section
-	
+
 		if ($overwrite)
 		{
 			# overwrite in a hash space indexed by the current path
@@ -446,7 +451,9 @@ while(my $line =<FIN>)
 	if ($cmd eq "TEMPLATECODE")
 	{
 	    $code .= "     )\n";  # close pattern section
+
 		$arg =~ s/\"/\'/g;
+
 		# just raw AIML code
 		$code .= "    (PutLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";

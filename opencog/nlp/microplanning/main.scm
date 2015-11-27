@@ -1,11 +1,12 @@
-;(define-module (opencog nlp microplanning))
 
-;(use-modules (opencog))
-;(use-modules (srfi srfi-1))
+(use-modules (ice-9 receive))  ; for receive, below
 
+;
 ; loading additional dependency
 (load "sentence-forms.scm")
 (load "helpers.scm")
+(load "anaphora-noun-item.scm")
+(load "anaphora-nouns-list.scm")
 (load "anaphora.scm")
 (load "chunks-option.scm")
 (load "chunks-set.scm")
@@ -17,19 +18,23 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; microplanning -- The main microplanning interface
-;
-; A shortcut for calling microplanning without specifying all the
-; arguments.  This will the function to declare-public when scheme
-; modules are bug free.
-;
-(define microplanning 
+; See documentation below ...
+(define microplanning
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
 		((sl ut opt a) (microplanning-main sl ut opt a))
 	)
 )
 
+(export microplanning)
+
+(set-procedure-property! microplanning 'documentation
+"
+  microplanning -- The main microplanning interface
+
+  A shortcut for calling microplanning without specifying all the
+  arguments.
+")
 
 ; =======================================================================
 ; Some contants
@@ -46,20 +51,23 @@
 	)
 )
 
+(export *default_chunks_option*)
 
 ; =======================================================================
 ; Main microplanning functions
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; microplanning-main -- The main microplanning function call
-;
-; Accepts a SequentialAndLink containing a list of atoms to be spoken.
-; "utterance-type" is either 'declarative', 'interrogative', 'imperative'
-; or 'interjective', "option" is an <chunks-option> object, and "anaphora"
-; can be #t or #f.
-;
-(define (microplanning-main seq-link utterance-type option anaphora)
+(define-public  (microplanning-main seq-link utterance-type option anaphora)
+"
+  microplanning-main SEQ-LINK UTTERANCE-TYPE OPTION ANAPHORA
+
+  The main microplanning function call.
+  Accepts a SequentialAndLink containing a list of atoms to be spoken.
+  UTTERANCE-TYPE is either 'declarative', 'interrogative', 'imperative'
+  or 'interjective', OPTION is a <chunks-option> object, and ANAPHORA
+  can be #t or #f.
+"
 	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
@@ -108,7 +116,7 @@
 (define (make-sentence-chunks atoms-list utterance-type option)
 	; wrap each atom in a container to allow repeated atoms, and persistence time weights
 	(define atomW-complete-set
-		(map 
+		(map
 			(lambda (a t) (make <atomW> #:atom a #:time-weight t))
 			atoms-list
 			(iota (length atoms-list) (length atoms-list) -1)
@@ -127,7 +135,7 @@
 				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
 				(recursive-helper
 					(lset-difference equal? atomW-unused new-atomW-chunk)
-					(cons (map get-atom new-atomW-chunk) curr-chunks) 
+					(cons (map get-atom new-atomW-chunk) curr-chunks)
 					(cons ut curr-uts)
 				)
 			      )
@@ -373,20 +381,20 @@
 	)
 	
 	(cond ((string=? "declarative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "DeclarativeSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
 	      )
 	      ((string=? "interrogative" utterance-type)
 		; TruthQuerySpeechAct will have no VariableNode on the main sentence-form link
 		(if (search-varnode)
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "InterrogativeSpeechAct"))
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "TruthQuerySpeechAct"))
+			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
 		)
 	      )
 	      ((string=? "imperative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "ImperativeSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
 	      )
 	      ((string=? "interjective" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (ConceptNode "InterjectiveSpeechAct"))
+		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterjectiveSpeechAct"))
 	      )
 	)
 )
@@ -452,7 +460,7 @@
 	; remove the temporary SetLink
 	(cog-purge temp-set-link)
 
-	(cond 
+	(cond
 	      ; not long/complex but sayable
 	      ((and ok-length say-able) *microplanning_sayable*)
 	      ; long/complex but sayable
@@ -461,5 +469,3 @@
 	      (else *microplanning_not_sayable*)
 	)
 )
-
-

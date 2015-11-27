@@ -32,7 +32,7 @@
 ; Instances of Ben that are doing mathematics are competent, while
 ; instances of Ben that are juggling are incompetent. An AndLink 
 ; between two concepts designates the intersection of these concepts.
-(define pln-rule-contextualize-inheritance
+(define contextualize-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -46,7 +46,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 ; this ContextLink is the desired output
                 (ContextLink
@@ -54,7 +54,7 @@
                     (InheritanceLink
                         (VariableNode "$A")
                         (VariableNode "$B")))
-                ; the 2nd argument of pln-formula-context
+                ; the 2nd argument of context-formula
                 (InheritanceLink
                     (AndLink
                         (VariableNode "$C")
@@ -69,7 +69,7 @@
 ; that differ between different contexts.
 ; Example: "In the context of the earth, the sky is blue.
 ; In the context of the moon, the sky is black."
-(define pln-rule-contextualize-evaluation
+(define contextualize-evaluation-rule
     (BindLink
         (VariableList
             (TypedVariableLink
@@ -84,7 +84,7 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 (ContextLink ; output link
                     (VariableNode "$C")
@@ -123,7 +123,7 @@
 ; (ContextLink
 ;   (ConceptNode "dog")
 ;   (ConceptNode "bulldog"))
-(define pln-rule-contextualize-subset
+(define contextualize-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$C")
@@ -132,7 +132,7 @@
             (VariableNode "$C")
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-context")
+            (GroundedSchemaNode "scm: context-formula")
             (ListLink
                 (ContextLink ; output link
                     (VariableNode "$C")
@@ -154,7 +154,7 @@
 ; if there are two InheritanceLinks with the same argument in 2nd postion.
 ; This is necessary to create the InheritanceLinks required
 ; for the above rules which have AndLinks as embedded links.
-(define pln-rule-create-and-as-1st-arg-of-inheritance
+(define create-and-as-1st-arg-of-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -168,7 +168,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+            (GroundedSchemaNode "scm: create-and-inside-inheritance-formula")
             (ListLink
                 (InheritanceLink ; main output link
                     (AndLink
@@ -207,7 +207,7 @@
 ; if there are two InheritanceLinks with the same argument in the 1st position.
 ; This is necessary to create the InheritanceLinks required
 ; for the above rules which have AndLinks as embedded links.
-(define pln-rule-create-and-as-2nd-arg-of-inheritance
+(define create-and-as-2nd-arg-of-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -221,7 +221,7 @@
                 (VariableNode "$A")
                 (VariableNode "$C")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-create-and-inside-inheritance")
+            (GroundedSchemaNode "scm: create-and-inside-inheritance-formula")
             (ListLink
                 (InheritanceLink ; main output link
                     (VariableNode "$A")
@@ -247,16 +247,16 @@
 
 ; TODO define formula appropriately (see comment in inheritance_rules.py
 ; AndCreationInsideLinkRule) 
-(define (pln-formula-create-and-inside-inheritance outInh outAnd inAnd inEmbedInh1 inEmbedInh2)
+(define (create-and-inside-inheritance-formula outInh outAnd inAnd inEmbedInh1 inEmbedInh2)
     (cog-set-tv! outInh (cog-tv inAnd)))                  
 
-(define (pln-formula-context Context Relation)
+(define (context-formula Context Relation)
     (cog-set-tv! Context (cog-tv Relation)))
 
 
 ; Name the rule
-(define pln-rule-contextualize-inheritance-name
-  (Node "pln-rule-contextualize-inheritance"))
+(define contextualize-inheritance-rule-name
+  (Node "contextualize-inheritance-rule"))
 (DefineLink
-  pln-rule-contextualize-inheritance-name
-  pln-rule-contextualize-inheritance)
+  contextualize-inheritance-rule-name
+  contextualize-inheritance-rule)

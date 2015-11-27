@@ -12,7 +12,7 @@
 ;; an issue with backward chaining.
 ;; TODO :- Create the rule n-ary
 
-(define pln-rule-and-elimination
+(define and-elimination-rule
   (BindLink
    (VariableList
     (VariableNode "$A")
@@ -22,7 +22,7 @@
      (VariableNode "$A")
      (VariableNode "$B")))
    (ExecutionOutputLink
-    (GroundedSchemaNode "scm: pln-formula-and-elimination")
+    (GroundedSchemaNode "scm: and-elimination-formula")
     (ListLink
      (AndLink
       (VariableNode "$A")
@@ -30,21 +30,21 @@
      (VariableNode "$A")
      (VariableNode "$B")))))
 
-(define (pln-formula-and-elimination AB A B)
+(define (and-elimination-formula AB A B)
   (cog-set-tv!
    A
-   (pln-formula-and-elimination-side-effect-free AB))
+   (and-elimination-side-effect-free-formula AB))
   (cog-set-tv!
    B
-   (pln-formula-and-elimination-side-effect-free AB)) 
+   (and-elimination-side-effect-free-formula AB)) 
 )
 
-(define (pln-formula-and-elimination-side-effect-free AB)
+(define (and-elimination-side-effect-free-formula AB)
   (let 
       ((sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB)))
     (stv (expt sAB 0.5) (/ cAB 1.42))))
 
 ; Name the rule
-(define pln-rule-and-elimination-name (Node "pln-rule-and-elimination"))
-(DefineLink pln-rule-and-elimination-name pln-rule-and-elimination)
+(define and-elimination-rule-name (Node "and-elimination-rule"))
+(DefineLink and-elimination-rule-name and-elimination-rule)

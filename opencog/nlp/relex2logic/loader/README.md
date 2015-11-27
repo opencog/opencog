@@ -1,9 +1,3 @@
-Following files are in same directory as rules, need to change directory for rules.
-rule-helpers.scm
-post-processing.scm
-utilities.scm
-
-
 Following rules are not implemented:
 prepadj.scm
 demdat.scm

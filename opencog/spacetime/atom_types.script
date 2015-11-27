@@ -13,7 +13,9 @@ IMAGINARY_STRUCTURE_NODE <- OBJECT_NODE
 AT_LOCATION_LINK <- ORDERED_LINK
 
 // Time-related atoms
-TIME_NODE <- NODE
+// TimeNode inherits from NumerNode, so that a umeric value can be
+// directly stored (wihout converting it to a string)
+TIME_NODE <- NUMBER_NODE
 TIME_DOMAIN_NODE <- NODE
 AT_TIME_LINK <- ORDERED_LINK
 LATEST_LINK <- ORDERED_LINK

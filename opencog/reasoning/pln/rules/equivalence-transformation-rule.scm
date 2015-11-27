@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-equivalence-transformation
+(define equivalence-transformation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -24,7 +24,7 @@
             (VariableNode "$A")
             (VariableNode "$B"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm:pln-formula-equivalence-transformation")
+            (GroundedSchemaNode "scm: equivalence-transformation-formula")
             (ListLink
                 (AndLink
                     (ImplicationLink
@@ -37,13 +37,32 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-equivalence-transofrmation AII EV)
-    (cog-set-tv!
-        AII (cog-tv EV)))
+(define (equivalence-transformation-formula AII EV)
+    (let (
+            (IAB (gar AII))
+            (IBA (gdr AII)))
+         (cog-set-tv!
+            IAB
+            (equivalence-transformation-side-effect-free-formula IAB EV))
+         (cog-set-tv!
+            IBA
+            (equivalence-transformation-side-effect-free-formula IBA EV))
+    AII))
+
+(define (equivalence-transformation-side-effect-free-formula IAB EV)
+    (let* (
+            (A (gar IAB))
+            (B (gdr IAB))
+            (sA (cog-stv-strength A))
+            (sB (cog-stv-strength B))
+            (sEV (cog-stv-strength EV))
+            ; Formula based on PLN book formula for sim2inh
+            (sIAB (/ (* (+ 1 (/ sB sA)) sEV) (+ 1 sEV))))
+        (stv sIAB (cog-stv-confidence EV))))
 
 ; Name the rule
-(define pln-rule-equivalence-transformation-name
-  (Node "pln-rule-equivalence-transformation"))
+(define equivalence-transformation-rule-name
+  (Node "equivalence-transformation-rule"))
 (DefineLink
-  pln-rule-equivalence-transformation-name
-  pln-rule-equivalence-transformation)
+  equivalence-transformation-rule-name
+  equivalence-transformation-rule)

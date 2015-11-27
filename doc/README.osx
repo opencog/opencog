@@ -25,11 +25,8 @@ Proper operation can be confirmed with opencog, or by invoking guile on
 the command line:
 
     $ guile
-    guile> (use-modules (srfi srfi-1))
+    guile> (use-modules (opencog))
     guile>
 
 The above should not generate any errors when the shared libary load
 path is correctly configured.
-
-
-

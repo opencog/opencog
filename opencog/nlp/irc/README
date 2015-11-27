@@ -14,7 +14,7 @@ IRC chat; other chat systems could be supported in a straightforward
 manner.
 
 The IRC chatbot has an assortment of hard-coded config parameters in the
-source code.  See CogitaConfig.cc for setable values for the name of the
+source code.  See CogitaConfig.cc for settable values for the name of the
 chatbot, the irc channel and irc network to join, and the bot ID strings,
 etc.  By default, it connects to the #opencog channel on freenode.net.
 
@@ -24,7 +24,9 @@ number is hard-coded in whirr-sockets.cc.
 After modifying the hard-coded config as desired, start the bot by
 saying "opencog/nlp/irc/cogita". It should then appear on the IRC
 channel. You can then talk to it by addressing it by name, i.e.
-prefacing comments with cog:, cogita: or cogita-bot:
+prefacing comments with cog:, cogita: or cogita-bot: or by opening a
+private dialog window to it, in which case, you don't need to address
+it directly.
 
 
 Architecture
@@ -34,7 +36,7 @@ IRC and OpenCog.  It listens for input on an IRC channel, and
 forwards the resulting plain-text to OpenCog. This is done by
 issuing one simple scheme expression to OpenCog, via the OpenCog
 command-line interface/scheme shell on port 17004. The expression
-is ''(process_query user text)'', where the ''user'' is
+is ''(process-query user text)'', where the ''user'' is
 the user's IRC nick, and ''text'' is what the user entered.  The
 return value from this command is sent back to the IRC channel.
 Communications is stateless and blocking: cogita closes the socket

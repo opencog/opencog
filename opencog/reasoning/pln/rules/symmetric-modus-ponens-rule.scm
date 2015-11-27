@@ -1,81 +1,50 @@
-; =============================================================================
-; SymmetricModusPonensRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   A
-; |-
-;   B
-; 
-; Due to issues in pattern matching in backward chaining, the files has been
-; split into three rules for seperate link types. The 3 rules are
-;           pln-rule-symmetric-modus-ponens-similarity
-;           pln-rule-symmetric-modus-ponens-intensional-similarity
-;           pln-rule-summetric-modus-ponens-extensional-similarity
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; SymmetricModusPonensRule
+;;
+;; <LinkType>
+;;   A
+;;   B
+;; A
+;; |-
+;; B
+;;
+;; Due to type system limitations, the rule has been divided into 3:
+;;           symmetric-modus-ponens-similarity-rule
+;;           symmetric-modus-ponens-intensional-similarity-rule
+;;           summetric-modus-ponens-extensional-similarity-rule
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-symmetric-modus-ponens-similarity
+;; Generate the corresponding symmetric modus ponens rule given its
+;; link-type.
+(define (gen-symmetric-modus-ponens-rule link-type)
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (SimilarityLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-symmetric-modus-ponens")
-            (ListLink
-                (VariableNode "$A")
-                (SimilarityLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
-
-(define pln-rule-symmetric-modus-ponens-intensional-similarity
-    (BindLink
-        (VariableList
+        (link-type
             (VariableNode "$A")
             (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (IntensionalSimilarityLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-symmetric-modus-ponens")
+            (GroundedSchemaNode "scm: symmetric-modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
-                (IntensionalSimilarityLink
+                (link-type
                     (VariableNode "$A")
                     (VariableNode "$B"))
                 (VariableNode "$B")))))
 
-(define pln-rule-symmetric-modus-ponens-extensional-similarity
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (AndLink
-            (VariableNode "$A")
-            (ExtensionalSimilarityLink
-                (VariableNode "$A")
-                (VariableNode "$B")))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-symmetric-modus-ponens")
-            (ListLink
-                (VariableNode "$A")
-                (ExtensionalSimilarityLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (VariableNode "$B")))))
+(define symmetric-modus-ponens-similarity-rule
+  (gen-symmetric-modus-ponens-rule SimilarityLink))
 
-(define (pln-formula-symmetric-modus-ponens A AB B)
+(define symmetric-modus-ponens-intensional-similarity-rule
+  (gen-symmetric-modus-ponens-rule IntensionalSimilarityLink))
+
+(define symmetric-modus-ponens-extensional-similarity-rule
+  (gen-symmetric-modus-ponens-rule ExtensionalSimilarityLink))
+
+(define (symmetric-modus-ponens-formula A AB B)
     (let
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))

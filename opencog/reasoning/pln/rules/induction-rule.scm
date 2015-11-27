@@ -15,15 +15,15 @@
 ;
 ; Due to pattern matching issues, currently the file has been divided into 3 
 ; parts, each pertaining to different links. The rules are :-
-;       pln-rule-induction-inheritance
-;       pln-rule-induction-implication
-;       pln-rule-induction-subset
+;       induction-inheritance-rule
+;       induction-implication-rule
+;       induction-subset-rule
 ;
 
 ; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-induction-inheritance
+(define induction-inheritance-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -41,7 +41,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-induction")
+            (GroundedSchemaNode "scm: induction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
@@ -53,7 +53,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))))
     
-(define pln-rule-induction-implication
+(define induction-implication-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -71,7 +71,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-induction")
+            (GroundedSchemaNode "scm: induction-formula")
             (ListLink
                 (ImplicationLink
                     (VariableNode "$A")
@@ -83,7 +83,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))))
 
-(define pln-rule-induction-subset
+(define induction-subset-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -101,7 +101,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-induction")
+            (GroundedSchemaNode "scm: induction-formula")
             (ListLink
                 (SubsetLink
                     (VariableNode "$A")
@@ -113,7 +113,7 @@
                     (VariableNode "$B")
                     (VariableNode "$C"))))))
 
-(define (pln-formula-induction AB AC BC)
+(define (induction-formula AB AC BC)
     (define A (gar AB))
     (define B (gdr AB))
     (define C (gdr AC))
@@ -131,17 +131,17 @@
         (cog-set-tv!
             BC
             (stv 
-                (simple-deduction-formula sB sA sC (inversion-formula sAB sA sB) sAC) 
+                (simple-deduction-strength-formula sB sA sC (inversion-strength-formula sAB sA sB) sAC) 
                 (min cAB cAC)))))
                 
 ; =============================================================================
 
 ; Name the rules
-(define pln-rule-induction-inheritance-name (Node "pln-rule-induction-inheritance"))
-(DefineLink pln-rule-induction-inheritance-name pln-rule-induction-inheritance)
+(define induction-inheritance-rule-name (Node "induction-inheritance-rule"))
+(DefineLink induction-inheritance-rule-name induction-inheritance-rule)
 
-(define pln-rule-induction-implication-name (Node "pln-rule-induction-implication"))
-(DefineLink pln-rule-induction-implication-name pln-rule-induction-implication)
+(define induction-implication-rule-name (Node "induction-implication-rule"))
+(DefineLink induction-implication-rule-name induction-implication-rule)
 
-(define pln-rule-induction-subset-name (Node "pln-rule-induction-subset"))
-(DefineLink pln-rule-induction-subset-name pln-rule-induction-subset)
+(define induction-subset-rule-name (Node "induction-subset-rule"))
+(DefineLink induction-subset-rule-name induction-subset-rule)

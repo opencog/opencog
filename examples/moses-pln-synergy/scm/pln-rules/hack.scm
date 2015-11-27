@@ -5,14 +5,14 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "treatment-1")
+              (ConceptNode "treatment-1")
            )
         )
         (EvaluationLink
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -34,14 +34,14 @@
               (PredicateNode "take")
               (ListLink
                  (QuoteLink (VariableNode "X"))
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
            (EvaluationLink
               (PredicateNode "contain")
               (ListLink
-                 (PredicateNode "treatment-1")
-                 (PredicateNode "compound-A")
+                 (ConceptNode "treatment-1")
+                 (ConceptNode "compound-A")
               )
            )
         )
@@ -49,7 +49,7 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -59,7 +59,7 @@
               (PredicateNode "take")
               (ListLink
                  (VariableNode "X")
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
         )
@@ -67,7 +67,7 @@
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -88,7 +88,7 @@
               (PredicateNode "take")
               (ListLink
                  (QuoteLink (VariableNode "X"))
-                 (PredicateNode "treatment-1")
+                 (ConceptNode "treatment-1")
               )
            )
         )
@@ -96,7 +96,7 @@
            (PredicateNode "take")
            (ListLink
               (QuoteLink (VariableNode "X"))
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -105,14 +105,14 @@
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "treatment-1")
+              (ConceptNode "treatment-1")
            )
         )
         (EvaluationLink
            (PredicateNode "take")
            (ListLink
               (VariableNode "X")
-              (PredicateNode "compound-A")
+              (ConceptNode "compound-A")
            )
         )
      )
@@ -168,104 +168,36 @@
   pln-rule-and-hack-name
   pln-rule-and-hack)
 
-(define pln-rule-for-all-hack
-  (BindLink
-     (ForAllLink
-        (ListLink
-           (QuoteLink (VariableNode "X"))
-           (QuoteLink (VariableNode "Y"))
-           (QuoteLink (VariableNode "Z"))
-        )
-        (ImplicationLink
-           (AndLink
-              (EvaluationLink
-                 (PredicateNode "take")
-                 (ListLink
-                    (QuoteLink (VariableNode "X"))
-                    (QuoteLink (VariableNode "Y"))
-                 )
-              )
-              (EvaluationLink
-                 (PredicateNode "contain")
-                 (ListLink
-                    (QuoteLink (VariableNode "Y"))
-                    (QuoteLink (VariableNode "Z"))
-                 )
-              )
-           )
-           (EvaluationLink
-              (PredicateNode "take")
-              (ListLink
-                 (QuoteLink (VariableNode "X"))
-                 (QuoteLink (VariableNode "Z"))
-              )
-           )
-        )
-     )
-     (ImplicationLink (stv 1 1)
-        (AndLink
-           (EvaluationLink
-              (PredicateNode "take")
-              (ListLink
-                 (VariableNode "X")
-                 (PredicateNode "treatment-1")
-              )
-           )
-           (EvaluationLink
-              (PredicateNode "contain")
-              (ListLink
-                 (PredicateNode "treatment-1")
-                 (PredicateNode "compound-A")
-              )
-           )
-        )
-        (EvaluationLink
-           (PredicateNode "take")
-           (ListLink
-              (VariableNode "X")
-              (PredicateNode "compound-A")
-           )
-        )
-     )
-  )
-)
+;; (define pln-rule-average-hack
+;;   (BindLink
+;;      (AverageLink
+;;         (QuoteLink (VariableNode "X"))
+;;         (ImplicationLink
+;;            (MemberLink
+;;               (QuoteLink (VariableNode "X"))
+;;               (ConceptNode "injury-recovery-speed-predicates")
+;;            )
+;;            (ImplicationLink
+;;               (PredicateNode "is-well-hydrated")
+;;               (QuoteLink (VariableNode "X"))
+;;            )
+;;         )
+;;      )
+;;      (ImplicationLink (stv 0.7 0.6)
+;;         (MemberLink
+;;            (PredicateNode "recovery-speed-of-injury-alpha")
+;;            (ConceptNode "injury-recovery-speed-predicates")
+;;         )
+;;         (ImplicationLink
+;;            (PredicateNode "is-well-hydrated")
+;;            (PredicateNode "recovery-speed-of-injury-alpha")
+;;         )
+;;      )
+;;   )
+;; )
 
-(define pln-rule-for-all-hack-name
-  (Node "pln-rule-for-all-hack"))
-(DefineLink
-  pln-rule-for-all-hack-name
-  pln-rule-for-all-hack)
-
-(define pln-rule-average-hack
-  (BindLink
-     (AverageLink
-        (QuoteLink (VariableNode "X"))
-        (ImplicationLink
-           (MemberLink
-              (QuoteLink (VariableNode "X"))
-              (ConceptNode "injury-recovery-speed-predicates")
-           )
-           (ImplicationLink
-              (PredicateNode "is-well-hydrated")
-              (QuoteLink (VariableNode "X"))
-           )
-        )
-     )
-     (ImplicationLink (stv 0.7 0.6)
-        (MemberLink
-           (PredicateNode "recovery-speed-of-injury-alpha")
-           (ConceptNode "injury-recovery-speed-predicates")
-        )
-        (ImplicationLink
-           (PredicateNode "is-well-hydrated")
-           (PredicateNode "recovery-speed-of-injury-alpha")
-        )
-     )
-  )
-)
-
-(define pln-rule-average-hack-name
-  (Node "pln-rule-average-hack"))
-(DefineLink
-  pln-rule-average-hack-name
-  pln-rule-average-hack)
+;; (define pln-rule-average-hack-name
+;;   (Node "pln-rule-average-hack"))
+;; (DefineLink
+;;   pln-rule-average-hack-name
+;;   pln-rule-average-hack)

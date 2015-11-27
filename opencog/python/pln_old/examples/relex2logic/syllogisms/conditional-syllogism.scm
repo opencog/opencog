@@ -20,7 +20,7 @@ syllogism type is: if A is true then B is true as well.
         ) ; [1087]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1082]
+          (DefinedLinguisticPredicateNode "definite") ; [1082]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "he@6b863a70-f21a-43f8-bd8f-cebe3c1bc685") ; [1079]
           ) ; [1083]
@@ -35,14 +35,14 @@ syllogism type is: if A is true then B is true as well.
         ) ; [1092]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1082]
+          (DefinedLinguisticPredicateNode "definite") ; [1082]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "Johnny@0d917209-b7ab-400e-b456-f457842d1c58") ; [1095]
           ) ; [1120]
         ) ; [1121]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1082]
+          (DefinedLinguisticPredicateNode "definite") ; [1082]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "himself@7076068f-4f5e-4686-8dab-b29879b02ef6") ; [1088]
           ) ; [1122]
@@ -60,7 +60,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "placing@2d8ddb4f-dcb3-43c9-8247-1775208b44ee") ; [1085]
-          (ConceptNode "present_progressive") ; [1093]
+          (DefinedLinguisticConceptNode "present_progressive") ; [1093]
         ) ; [1094]
 
         (InheritanceLink (stv 0.990000 0.990000)
@@ -80,7 +80,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "is@017b204f-62c4-4d40-aa5a-604c735979bc") ; [1102]
-          (ConceptNode "present") ; [1105]
+          (DefinedLinguisticConceptNode "present") ; [1105]
         ) ; [1106]
 
         (InheritanceLink (stv 0.990000 0.990000)
@@ -134,7 +134,7 @@ syllogism type is: if A is true then B is true as well.
         ) ; [1298]
 
         (EvaluationLink (stv 0.990000 0.990000)
-          (PredicateNode "definite") ; [1286]
+          (DefinedLinguisticPredicateNode "definite") ; [1286]
           (ListLink (stv 0.990000 0.990000)
             (ConceptNode "Johnny@1e78390b-c0d2-40c0-9ff1-f44ec9dfc655") ; [1284]
           ) ; [1287]
@@ -185,7 +185,7 @@ syllogism type is: if A is true then B is true as well.
 
         (InheritanceLink (stv 0.990000 0.990000)
           (PredicateNode "eat@b3fac38d-b546-439f-ae68-1ac1b00d812a") ; [1296]
-          (ConceptNode "present_infinitive") ; [1304]
+          (DefinedLinguisticConceptNode "present_infinitive") ; [1304]
         ) ; [1305]
 
         (InheritanceLink (stv 0.990000 0.990000)

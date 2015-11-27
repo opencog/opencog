@@ -53,7 +53,9 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
+#ifdef HAVE_PERSIST_SQL
 #include <opencog/modules/PersistModule.h>
+#endif
 
 #include "CogServer.h"
 #include "BaseServer.h"
@@ -735,6 +737,7 @@ void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 
 void CogServer::openDatabase(void)
 {
+#ifdef HAVE_PERSIST_SQL
     // No-op if the user has not configured a storage backend
     if (!config().has("STORAGE")) {
         logger().warn("No database persistant storage configured! "
@@ -766,6 +769,9 @@ void CogServer::openDatabase(void)
 
     logger().info("Preload %s as user %s msg: %s",
         dbname.c_str(), username.c_str(), resp.c_str());
+#else
+    logger().warn("Cogserver compiled without database support");
+#endif
 }
 
 Logger &CogServer::logger()

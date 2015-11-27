@@ -21,7 +21,7 @@
                 (VariableNode "$target")
                 (DefinedLinguisticConceptNode "numeric")
             )
-            (NotLink
+            (AbsentLink
                 (EvaluationLink
                     (PrepositionalRelationshipNode "of")
                     (ListLink

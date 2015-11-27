@@ -1,33 +1,29 @@
-; =============================================================================
-; And as 1st arg inside inheritance link rule
-;
-; AndLink
-;   InheritanceLink
-;       A
-;       C
-;   InheritanceLink
-;       B
-;       C
-; |-
-; InheritanceLink
-;   AndLink
-;       A
-;       B
-;   C
-;
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; And as 1st arg inside inheritance link rule
+;;
+;; InheritanceLink
+;;   A
+;;   C
+;; InheritanceLink
+;;   B
+;;   C
+;; |-
+;; InheritanceLink
+;;   AndLink
+;;       A
+;;       B
+;;   C
+;;
+;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
-(define pln-rule-and-as-1st-arg-inside-inheritance-link
+(define and-as-1st-arg-inside-inheritance-link-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
             (VariableNode "$C"))
         (AndLink
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C")
             (InheritanceLink
                 (VariableNode "$A")
                 (VariableNode "$C"))
@@ -39,7 +35,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-and-as-1st-arg")
+            (GroundedSchemaNode "scm: and-as-1st-arg-formula")
             (ListLink
                 (VariableNode "$A")
                 (VariableNode "$B")
@@ -59,7 +55,7 @@
                         (VariableNode "$B"))
                     (VariableNode "$C"))))))
 
-(define (pln-formula-and-as-1st-arg A B C AC BC AB ABC)
+(define (and-as-1st-arg-formula A B C AC BC AB ABC)
     (
         (cog-set-tv! 
             AB 

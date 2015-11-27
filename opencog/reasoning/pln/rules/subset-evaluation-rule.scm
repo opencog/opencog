@@ -15,7 +15,7 @@
 ;
 ; -----------------------------------------------------------------------------
 
-(define pln-rule-subset-evaluation
+(define subset-evaluation-rule
     (BindLink
         (VariableList
             (VariableNode "$A")
@@ -29,7 +29,7 @@
                 (VariableNode "$C")
                 (VariableNode "$B")))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-subset-evaluation")
+            (GroundedSchemaNode "scm: subset-evaluation-formula")
             (ListLink
                 (SubsetLink
                     (VariableNode "$A")
@@ -41,11 +41,11 @@
                     (VariableNode "$C")
                     (VariableNode "$B"))))))
 
-(define (pln-formula-subset-evaluation AB CA CB)
+(define (subset-evaluation-formula AB CA CB)
     (cog-set-tv!
-        AB (pln-formula-subset-evaluation-side-effect-free AB CA CB)))
+        AB (subset-evaluation-side-effect-free-formula AB CA CB)))
 
-(define (pln-formula-subset-evaluation-side-effect-free AB CA CB)
+(define (subset-evaluation-side-effect-free-formula AB CA CB)
     (let 
         ((sCA (cog-stv-strength CA))
          (cCA (cog-stv-confidence CA))
@@ -60,5 +60,5 @@
                 (stv 1 1)))))
 
 ; Name the rule
-(define pln-rule-subset-evaluation-name (Node "pln-rule-subset-evaluation"))
-(DefineLink pln-rule-subset-evaluation-name pln-rule-subset-evaluation)
+(define subset-evaluation-rule-name (Node "subset-evaluation-rule"))
+(DefineLink subset-evaluation-rule-name subset-evaluation-rule)

@@ -11,64 +11,80 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(ATOMSPACE_LIBPATH
-   /usr/lib/opencog /usr/lib64/opencog /usr/local/lib/opencog /usr/local/lib64/opencog)
+   /usr/lib/ /usr/lib64/ /usr/local/lib/ /usr/local/lib64/)
 
 find_library(ATOMSPACE_LIBRARY atomspace
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_atomutils_LIBRARY atomutils
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_clearbox_LIBRARY clearbox
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_execution_LIBRARY execution
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_lambda_LIBRARY lambda
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_persist_LIBRARY persist
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_persist-zmq_LIBRARY persist-zmq
-   PATH ${ATOMSPACE_LIBPATH})
+	PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_PythonEval_LIBRARY PythonEval
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_query_LIBRARY query
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_ruleengine_LIBRARY ruleengine
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_smob_LIBRARY smob
-   PATH ${ATOMSPACE_LIBPATH})
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_LIBRARY}
 	${ATOMSPACE_atomspaceutils_LIBRARY}
 	${ATOMSPACE_atomutils_LIBRARY}
 	${ATOMSPACE_clearbox_LIBRARY}
-	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_lambda_LIBRARY}
 	${ATOMSPACE_persist_LIBRARY}
-	${ATOMSPACE_persist-sql_LIBRARY}
-	${ATOMSPACE_zmqatoms_LIBRARY}
 	${ATOMSPACE_query_LIBRARY}
+	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
 )
+
+# persist-sql is optional
+IF (ATOMSPACE_persist-sql_LIBRARY)
+	SET(ATOMSPACE_LIBRARIES
+		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_persist-sql_LIBRARY}
+	)
+	SET(HAVE_PERSIST_SQL 1)
+	ADD_DEFINITIONS(-DHAVE_PERSIST_SQL)
+ENDIF (ATOMSPACE_persist-sql_LIBRARY)
+
+# persist-zmq is optional
+IF (ATOMSPACE_zmqatoms_LIBRARY)
+	SET(ATOMSPACE_LIBRARIES
+		${ATOMSPACE_LIBRARIES}
+		${ATOMSPACE_zmqatoms_LIBRARY}
+	)
+ENDIF (ATOMSPACE_zmqatoms_LIBRARY)
 
 INCLUDE (CheckIncludeFiles)
 

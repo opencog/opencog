@@ -200,10 +200,16 @@ ELSE(Boost_MATH_C99_FOUND)
 	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
 ENDIF(Boost_MATH_C99_FOUND)
 
-FIND_PACKAGE(CURL)
-IF (NOT CURL_FOUND)
-	MESSAGE(STATUS "libcurl missing: needed for ubigraph module.")
-ENDIF (NOT CURL_FOUND)
+# cpprest
+FIND_PACKAGE(cpprest 2.6)
+IF (cpprest_FOUND AND cpprest_LIBRARY)
+	ADD_DEFINITIONS(-DHAVE_cpprest)
+	SET(HAVE_cpprest 1)
+	SET(cpprest_DIR_MESSAGE "cpprest was found.")
+ELSE (cpprest_FOUND AND cpprest_LIBRARY)
+	SET(cpprest_DIR_MESSAGE "cpprest was not found; PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
+ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
+MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
 
 FIND_PACKAGE(Cxxtest)
 IF (NOT CXXTEST_FOUND)
@@ -268,18 +274,26 @@ ELSE (LINK_GRAMMAR_FOUND)
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
-# MOSES needed for embodiment learning...
+# MOSES needed for ???
 FIND_PACKAGE(MOSES)
 
 IF (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES was found.")
 	ADD_DEFINITIONS(-DHAVE_MOSES)
 	SET(HAVE_MOSES 1)
-	SET(HAVE_COMBOREDUCT 1)
-	SET(HAVE_FEATURE_SELECTION 1)
 ELSE (MOSES_FOUND)
 	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
 ENDIF (MOSES_FOUND)
+
+# Octomap
+FIND_PACKAGE(Octomap)
+IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
+  SET(HAVE_OCTOMAP 1)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
+ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 
 # OpenGL needed for visualization...
@@ -290,9 +304,6 @@ IF (OPENGL_FOUND)
 ELSE (OPENGL_FOUND)
 	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
 ENDIF (OPENGL_FOUND)
-
-# At this time, there is no reason to build with memcached for
-# FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
@@ -417,27 +428,6 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# These are required for building the embodiment code
-FIND_PACKAGE(XercesC)
-IF (XERCESC_FOUND)
-	IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 3.* are supported. Embodiment won't be built.")
-		SET(XERCESC_VERSION_OK FALSE)
-	ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
-		INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
-		SET(XERCESC_VERSION_OK TRUE)
-	ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-ELSE (XERCESC_FOUND)
-	MESSAGE(STATUS "Xerces-C missing: needed for embodiment")
-ENDIF (XERCESC_FOUND)
-
-# XML-RPC, used by the ubigraph module
-FIND_PACKAGE(XMLRPC COMPONENTS client)
-IF (NOT XMLRPC_FOUND)
-	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
-ENDIF (NOT XMLRPC_FOUND)
-
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
 IF (ZMQ_FOUND AND ZMQ_LIBRARY)
@@ -448,16 +438,6 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
-
-#Octomap
-FIND_PACKAGE(Octomap)
-IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
-  SET(HAVE_OCTOMAP 1)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
-ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
-ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -475,33 +455,17 @@ IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 	SET(HAVE_SPATIAL_TOOLS 1)
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
-# FYI, at this time, no part of opencog depends on expat being installed!
-IF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-	SET(HAVE_XML 1)
-ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-
 IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
-
-IF(XERCESC_VERSION_OK)
-	SET(HAVE_EMBODIMENT 1)
-ENDIF(XERCESC_VERSION_OK)
-
-IF (CURL_FOUND AND XMLRPC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
-	SET(HAVE_UBIGRAPH 1)
-ENDIF (CURL_FOUND AND XMLRPC_FOUND)
 
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	SET(HAVE_VITERBI 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
-# At this time, there is no reason to build with memcached for
-# any "normal" use, so just stub it out.
-# IF (LIBMEMCACHED_FOUND)
-#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-# ENDIF (LIBMEMCACHED_FOUND)
+IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
+	SET(HAVE_REST 1)
+ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
 
 # ===================================================================
 # global includes
@@ -536,7 +500,8 @@ IF (NOT DEFINED LIB_DIR_SUFFIX)
 ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+	${COGUTIL_INCLUDE_DIR} ${ATOMSPACE_INCLUDE_DIR})
 
 # rpath handling
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
@@ -711,15 +676,11 @@ SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
+SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
-SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("TBB" "Intel TBB for multithreading" HAVE_TBB)
-SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
+SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
 SUMMARY_SHOW()

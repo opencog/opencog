@@ -7,34 +7,23 @@ programs have their own directories.
 
 Source code overview:
 
-atomspace       -- Defines atoms, nodes, links, truth values, etc. 
-                   Everything else depends on this.
-
-persist         -- Methods for communication between servers, also,
-                   saving/restoring the atomspace to disk, database, etc.
-
-query           -- Pattern matching, evaluation for the atomspace.
-
-guile, scm      -- Scheme language bindings.
+scm             -- Scheme language bindings to cogserver.
 python,cython   -- Python langauge bindings.  
 shell           -- Command-line shell interface.
 
 server          -- CogServer main server.
-benchmark       -- Performance benchmarks.
 
 nlp             -- English language processing
-reasoning       -- Backward-chainers
-
+reasoning       -- PLN reasoner.
 dynamics        -- Attention allocation.
-spatial, spacetime -- Space and time matrix for avatars.
-embodiment      -- Avatars
 
-comboreduct     -- Combo language, term-rewriting system.
-learning        -- Supervised program learning, including MOSES
+spatial, spacetime -- Space and time matrix for avatars.
+persist         -- Save/restore timserer to file.
+
+learning        -- Misc supervised learning.
 
 visualization   -- Visualization, graphics.
 
 cycl-import     -- Import OpenCyc datasets
 
 @todo Create doxygen filter to parse scm files.
-

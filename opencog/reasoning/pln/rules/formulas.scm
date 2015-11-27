@@ -1,29 +1,48 @@
-; =============================================================================
-; A list of the helper functions necessary in different inference rules
-; -----------------------------------------------------------------------------
-; Index
-; - inversion-formula
-; - simple-deduction-formula
-; - find-replace
-;------------------------------------------------------------------------------
+;; =============================================================================
+;; A list of the helper functions necessary in different inference rules
+;; -----------------------------------------------------------------------------
+;; Index
+;; - inversion-strength-formula
+;; - simple-deduction-strength-formula
+;; - find-replace
+;;------------------------------------------------------------------------------
 
 
-; =============================================================================
-; Inversion Formula
-; sBA = (sAB * sB)/sA
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Inversion Formula
+;; sBA = (sAB * sB)/sA
+;; -----------------------------------------------------------------------------
 
-(define (inversion-formula sAB sA sB)
+(define (inversion-strength-formula sAB sA sB)
 	(/ (* sAB sB) sA))
 
-; =============================================================================
-; Simple Deduction Formula
-; IF: 0 <= sAB-max((sA+sB-1)/sA, 0) 0<= min(1, sB/sA) -max((sA+sB-1)/sA, 0)
-; AND 0 <= sBC-max((sB+sC-1)/sB, 0) 0<= min(1, sC/sB)-max((sB+sC-1)/sB, 0)
-; sAC = [sAB.sBC + ((1-sAB)(sC - sBsBC))/(1-sB)] 
-; ELSE:
-; sAC = 0
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Simple Deduction Formula
+;;
+;; Preconditions:
+;;
+;;   0 <= sAB-max((sA+sB-1)/sA, 0), 0<= min(1, sB/sA)-max((sA+sB-1)/sA, 0)
+;;
+;;   0 <= sBC-max((sB+sC-1)/sB, 0), 0<= min(1, sC/sB)-max((sB+sC-1)/sB, 0)
+;;
+;; Calculation:
+;;
+;;   sAC = [sAB.sBC + ((1-sAB)(sC - sBsBC))/(1-sB)]
+;;
+;; To avoid division by 0 (which the preconditions do not necessarily
+;; prevent), i.e. when sB tends to 1 we find that
+;;
+;;   sAC tends to sC
+;;
+;; Indeed, in such case sAB tends to sB and sBC tends to sC. As a
+;; result (according to the main formula above) sAC tends to
+;;
+;;   sB.sC + ((1-sB)(sC - sBsC))/(1-sB) = sB.sC + (sC - sB.sC) = sC
+;;
+;; If the preconditions are not met it returns sAC = 0, although
+;; honnestly the deduction rule should not have been applied in the
+;; first place.
+;; -----------------------------------------------------------------------------
 
 ; Consistency Conditions
 (define (consistency1 sA sB sAB)
@@ -45,22 +64,28 @@
 
 ; Main Formula
 
-(define (simple-deduction-formula sA sB sC sAB sBC)
+(define (simple-deduction-strength-formula sA sB sC sAB sBC)
 	(if
 		(and
-				(>= (consistency1 sA sB sAB) 0)
-				(>= (consistency2 sA sB sAB) 0)
-				(>= (consistency1 sB sC sBC) 0)
-				(>= (consistency2 sB sC sBC) 0))
-		(+ 
-			(* sAB sBC) 
-			(/ 
-				(* 
-					(- 1 sAB) 
-					(- sC 
-						(* sB sBC))) 
-				(- 1 sB)))
-		0 ))
+           (>= (consistency1 sA sB sAB) 0)
+           (>= (consistency2 sA sB sAB) 0)
+           (>= (consistency1 sB sC sBC) 0)
+           (>= (consistency2 sB sC sBC) 0))
+        ;; Preconditions are met
+        (if (>= sB 0.9999999)
+            ;; sB tends to 1
+            sC
+            ;; otherwise
+            (+
+               (* sAB sBC)
+               (/
+				  (*
+                     (- 1 sAB)
+                     (- sC
+						(* sB sBC)))
+                  (- 1 sB))))
+        ;; Preconditions are not met
+		0))
 
 ; =============================================================================
 ; Basic find and replace formula
@@ -100,7 +125,7 @@
 ; Returns the strength value of the transitive similarity rule
 ; -----------------------------------------------------------------------------
 
-(define (transitive-similarity-formula sA sB sC sAB sBC )
+(define (transitive-similarity-strength-formula sA sB sC sAB sBC )
     (let
         ((T1 (/ (* (+ 1 (/ sB sA)) (sAB)) (+ 1 sAB)))
          (T2 (/ (* (+ 1 (/ sC sB)) (sBC)) (+ 1 sBC)))
@@ -115,6 +140,6 @@
 ; Returns the strength value of the precise modus ponens rule
 ; -----------------------------------------------------------------------------
 
-(define (precise-modus-ponens-formula sA sAB snotAB)
+(define (precise-modus-ponens-strength-formula sA sAB snotAB)
     (+ (* sAB sA) (* snotAB (negate sA))))
 
