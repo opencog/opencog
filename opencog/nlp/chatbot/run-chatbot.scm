@@ -1,4 +1,7 @@
 
+; For users who are not aware of readline ...
+(use-modules (ice-9 readline))
+(activate-readline)
 
 ; Stuff actually needed to get the chatbot running...
 (use-modules (opencog) (opencog cogserver))
