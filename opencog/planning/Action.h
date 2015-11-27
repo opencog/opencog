@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_PLANNING_ACTION_H
 #define _OPENCOG_PLANNING_ACTION_H
 
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/rule-engine/Rule.h>
 
 namespace opencog {
@@ -34,19 +35,16 @@ class Action
 {
 public:
     Action(Rule a_rule);
-    ~Action();
 
     Rule get_rule();
+    BindLinkPtr get_derived_rule();
 
 private:
     // An action is  a rule with some more conditions.
     Rule _rule;
 
-    // The implicant of the pattern, which is also called  "context"
-    // is divided into two
-    // terms that have virtual clauses and terms that don't.
-    HandleSeq _virtual_terms ;
-    HandleSeq _fixed_terms;
+    // This is used for action-selction, planning, or simulation.
+    BindLinkPtr _derived_rule;
 
     // Function for helping construct
     void init();
