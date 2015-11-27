@@ -14,7 +14,7 @@
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
+#include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/dynamics/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/dynamics/experiment/ExperimentSetupModule.h>
@@ -94,7 +94,7 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 {
     //These mind agents have already been made registered by the attention module.So no need to register them.
     _forgetting_agentptr = _cs.createAgent(ForgettingAgent::info().id, false);
-    _hebbianupdating_agentptr = _cs.createAgent(HebbianUpdatingAgent::info().id,
+    _hebbianupdating_agentptr = _cs.createAgent(SimpleHebbianUpdatingAgent::info().id,
     false);
     _importanceupdating_agentptr = _cs.createAgent(
             ImportanceUpdatingAgent::info().id, false);

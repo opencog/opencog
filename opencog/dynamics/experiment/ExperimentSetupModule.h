@@ -23,7 +23,7 @@ class Logger;
 
 namespace ECANExperiment {
 
-static std::string ECAN_EXP_AGENTS = "opencog::HebbianUpdatingAgent\n"
+static std::string ECAN_EXP_AGENTS = "opencog::SimpleHebbianUpdatingAgent\n"
                                      "opencog::ImportanceUpdatingAgent\n"
                                      "opencog::SimpleImportanceDiffusionAgent\n"
                                      "opencog::ForgettingAgent\n"
@@ -40,7 +40,7 @@ std::vector<std::string> special_words;
 std::vector<std::string> nspecial_words;
 int sent_size;
 
-int special_word_occurence_period = 4;
+int special_word_occurence_period = 2;
 
 class ExperimentSetupModule: public Module {
 private:
