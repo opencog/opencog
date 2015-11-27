@@ -27,8 +27,6 @@
 #define _OPENCOG_COGSERVER_SCM_H
 
 #include <thread>
-
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 
 namespace opencog
