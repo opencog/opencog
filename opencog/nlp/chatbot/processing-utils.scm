@@ -207,6 +207,49 @@
 )
 
 ; -----------------------------------------------------------------------
+(define (r2l-count sent-list)
+"
+  r2l-count SENT -- maintain counts of R2L statistics for SENT-LIST.
+"
+	; Increment the R2L's node count value
+	(parallel-map-parses
+		(lambda (p)
+			; The preferred algorithm is
+			; (1) get all non-abstract nodes
+			; (2) delete duplicates
+			; (3) get the corresponding abstract nodes
+			; (4) update count
+			(let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
+			       ; XXX FIXME this is undercounting since each abstract node can have
+			       ; multiple instances in a sentence.  Since there is no clean way
+			       ; to get to the abstracted node from an instanced node yet, such
+			       ; repeatition are ignored for now
+			       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
+				(par-map
+					(lambda (n)
+						(let* ((atv (cog-tv->alist (cog-tv n)))
+								(mean (assoc-ref atv 'mean))
+								(conf (assoc-ref atv 'confidence))
+								(count (assoc-ref atv 'count))
+								; STV will have count value as well, so checking type
+								; to see whether we want that count value
+								(ntv
+									(if (cog-ptv? (cog-tv n))
+										(cog-new-ptv mean conf (+ count 1))
+										(cog-new-ptv mean conf 1))
+								))
+							(cog-set-tv! n ntv)
+						)
+					)
+					abst-nodes
+				)
+			)
+		)
+		sent-list
+	)
+)
+
+; -----------------------------------------------------------------------
 (define-public (nlp-parse plain-text)
 "
   nlp-parse -- Wrap most of the NLP pipeline in one function.
@@ -226,49 +269,13 @@
 	; Perform the R2L processing.
 	(r2l-parse (car (get-new-parsed-sentences)))
 
-	(let ((sent-nodes (get-new-parsed-sentences)))
-		; Increment the R2L's node count value
-		; XXX TODO, this should move to the r2l-parse function.
-		(parallel-map-parses
-			(lambda (p)
-				; The preferred algorithm is
-				; (1) get all non-abstract nodes
-				; (2) delete duplicates
-				; (3) get the corresponding abstract nodes
-				; (4) update count
-				(let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
-				       ; XXX FIXME this is undercounting since each abstract node can have
-				       ; multiple instances in a sentence.  Since there is no clean way
-				       ; to get to the abstracted node from an instanced node yet, such
-				       ; repeatition are ignored for now
-				       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
-					(par-map
-						(lambda (n)
-							(let* ((atv (cog-tv->alist (cog-tv n)))
-							       (mean (assoc-ref atv 'mean))
-							       (conf (assoc-ref atv 'confidence))
-							       (count (assoc-ref atv 'count))
-							       ; STV will have count value as well, so checking type
-							       ; to see whether we want that count value
-							       (ntv
-							       	(if (cog-ptv? (cog-tv n))
-								 		(cog-new-ptv mean conf (+ count 1))
-								 		(cog-new-ptv mean conf 1)
-								 	)
-							       ))
-								(cog-set-tv! n ntv)
-							)
-						)
-						abst-nodes
-					)
-				)
-			)
-			sent-nodes
-		)
-		(release-new-parsed-sents)
+	; Track some counts needed by R2L.
+	(r2l-count (get-new-parsed-sentences))
 
-		; return the list of SentenceNode
-		sent-nodes
+	(let ((sent-list (get-new-parsed-sentences)))
+		(release-new-parsed-sents)
+		; Return the sentence list (why ???)
+		sent-list
 	)
 )
 
