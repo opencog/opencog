@@ -162,9 +162,7 @@
 	; Discard sentences that we've worked with.
 	(let ((sent-list (get-new-parsed-sentences)))
 		(release-new-parsed-sents)
-(display "yaaa")
-(display sent-list)
-		; Return the sentence list (why ???)
+		; Return the sentence list.
 		sent-list
 	)
 )
