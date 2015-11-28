@@ -50,12 +50,13 @@
         ; This is done so that, IF there are multiple parses, then
         ; each is handled independently by passing it seperately, as
         ; each is likely to exist in a seperate semantic-universe.
-        (let* ((focus-set (SetLink (parse-get-relex-outputs parse-node) interp-link))
-              (outputs (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set))))
+        (define focus-set
+            (SetLink (parse-get-relex-outputs parse-node) interp-link))
+        (define outputs
+            (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set)))
 
-              (append-map cog-delete-parent
+        (append-map cog-delete-parent
                   (append-map cog-delete-parent outputs))
-        )
     )
 
     (define (interpret parse-node)

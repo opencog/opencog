@@ -229,12 +229,7 @@ r2l-parse does ... how? in processing_utils...
 
 OK, but only the first one ever gets used ... fixed!
 
-
-
-
-
 ====================================================
-bugs:
 
 * "Where is ...?" not identified as a question ..
   "When is ..." identified as conjunction by relex!
@@ -260,6 +255,15 @@ Where is the ball -- Q and Wq links
 
 
 scm/sentence-matching.scm:
+
+fixed! Relex was mis-behaving and R2L was using a fragile mechanism.
+
+====================================================
+bugs:
+* (process-query 'luser "Look to the left!") crashes
+
+   C++-EXCEPTION' with args `("cog-fc"
+
 
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn
