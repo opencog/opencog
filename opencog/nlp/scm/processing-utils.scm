@@ -19,16 +19,25 @@
 ; -----------------------------------------------------------------------
 (define-public (release-from-anchor anchor)
 "
-  Release items attached to the named anchor
+  release-from-anchor ANCHOR
+
+  Release items attached to ANCHOR.
 "
-   (for-each (lambda (x) (cog-purge x))
-      (cog-incoming-set anchor)
-   )
+
+	; Arghh Some bit of asshole code is wrapping the anchor in
+	; a SetLink. Basically, someone somewhere is running a
+	; badly-scoped search pattern.  However, we need this to work,
+	; so break out using cog-purge-recursive not cog-purge.
+	(for-each (lambda (x) (cog-purge-recursive x))
+		(cog-incoming-set anchor)
+	)
 )
 
 (define-public (get-new-parsed-sentences)
 "
-  Return the list of SentenceNodes that are attached to the
+  get-new-parsed-sentences -- return newly parsed sentences.
+
+  Return the list of SentenceNode's that are attached to the
   freshly-parsed anchor.  This list will be non-empty if relex-parse
   has been recently run. This list can be emptied with the call
   release-new-parsed-sent below.
@@ -117,7 +126,7 @@
   return value is undefined (no return value).
 "
 ;  OPENCOG RULE: FYI this could be easily implemented as a pattern match,
-;   and probably should be, when processing becomes fully rule-driven.
+;  and probably should be, when processing becomes fully rule-driven.
 
 	;; Attach all parses of a sentence to the anchor.
 	(define (attach-parses sent)
