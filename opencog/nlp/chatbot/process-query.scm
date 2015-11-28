@@ -51,6 +51,7 @@
     (display query)
     (display "\"")
     (newline)
+(display querySentence)
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
@@ -104,19 +105,19 @@
 ; Process wh-question using the fuzzy hyper graph Matcher
 ;--------------------------------------------------------------------
 (define (wh_query_process query)
-    (define temp)
-    (set! temp  (get-answers query))
+    (define temp (get-answers query))
     (cond
-        ((equal? #f (car temp)) "Sorry, I don't know the answer")
+        ((equal? '() temp) "Sorry, I don't know the answer.")
         (else (car temp))
 ))
 ;-------------------------------------------------------------------
-; Used by 'truth_query_process' to find the input for the backward chaining
-; This also definitely require ca hange after the backward chaning is completed
+; Used by 'truth_query_process' to find the input for the backward
+; chaining.
+; XXX FIXME This also definitely requires change after the backward
+; chaning is completed.
 ;-------------------------------------------------------------------
 (define (fAtom querySentence)
-    (define x)
-    (set! x (cog-filter 'EvaluationLink (cog-outgoing-set
+    (define x (cog-filter 'EvaluationLink (cog-outgoing-set
         (car (cog-chase-link 'ReferenceLink 'SetLink
             (car (cog-chase-link 'InterpretationLink 'InterpretationNode
                 (car (cog-chase-link 'ParseLink 'ParseNode  querySentence))
