@@ -1,6 +1,8 @@
 ; TODO Notes: random-string, random-node-name and choose-var-name can be moved
 ; to utilities.scm
 
+(use-modules (srfi srfi-1))
+
 ;------------------------------------------------------------------------
 ; Returns a random string of length 'str-length'.
 (define (random-string str-length)

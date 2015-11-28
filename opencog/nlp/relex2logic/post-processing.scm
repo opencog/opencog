@@ -4,7 +4,7 @@
 ; Assorted functions for post-processing relex2logic output.
 ;
 
-(use-modules (ice-9 receive))
+(use-modules (ice-9 receive) (srfi srfi-1))
 (load "r2l-utilities.scm")
 
 ; =======================================================================
