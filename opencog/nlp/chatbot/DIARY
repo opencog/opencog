@@ -196,7 +196,7 @@ duuude guile release 0x20781c0
 ====================================================
 bugs:
 
-* relex fails to identify speech act if sentence not terminated by period.
+* r2l fails to identify speech act if sentence not terminated by period.
   Here: InterpretationLink 'InterpretationNode
   DefinedLinguisticConceptNode DeclarativeSpeechAct,
 
