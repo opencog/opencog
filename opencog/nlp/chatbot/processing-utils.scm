@@ -13,6 +13,7 @@
 (use-modules (ice-9 popen)    ; needed for open-pipe, close-pipe
              (ice-9 regex)
              (ice-9 threads)  ; needed for par-map
+             (rnrs io ports)  ; needed for get-line
              (srfi srfi-1))
 
 ; -----------------------------------------------------------------------
@@ -182,8 +183,8 @@
         ; post-processing are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               ; Associate the interpreation with a parse, as there
-               ; could be multiplie interpreations for the same parse.
+               ; Associate the interpretation with a parse, as there
+               ; could be multiplie interpretations for the same parse.
                (interp-link (InterpretationLink interp-node parse-node))
                (pre-result
                    (remove
