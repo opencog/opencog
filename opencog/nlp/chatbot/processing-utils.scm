@@ -14,7 +14,14 @@
              (ice-9 regex)
              (ice-9 threads)  ; needed for par-map
              (rnrs io ports)  ; needed for get-line
-             (srfi srfi-1))
+             (srfi srfi-1)
+             (opencog)
+             (opencog atom-types)
+             (opencog rule-engine)
+             (opencog nlp)
+             (opencog nlp fuzzy)
+             (opencog nlp microplanning)
+             (opencog nlp relex2logic))
 
 ; -----------------------------------------------------------------------
 (define (release-from-anchor anchor)
