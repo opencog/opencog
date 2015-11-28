@@ -272,6 +272,7 @@
 	; Track some counts needed by R2L.
 	(r2l-count (get-new-parsed-sentences))
 
+	; Discard sentences that we've worked with.
 	(let ((sent-list (get-new-parsed-sentences)))
 		(release-new-parsed-sents)
 		; Return the sentence list (why ???)

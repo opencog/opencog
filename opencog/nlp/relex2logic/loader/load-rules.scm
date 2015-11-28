@@ -52,6 +52,8 @@
 ;;(load "../rules/whichsubjSVQ.scm")
 (load "../rules/why-cop-q.scm")
 (load "../rules/why-q.scm")
+
+; XXX fixme .. is there a reason these are not in alphabetical order?
 (load "../rules/declarative.scm")
 (load "../rules/truthquery.scm")
 (load "../rules/interrogative.scm")
