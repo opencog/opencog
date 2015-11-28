@@ -188,6 +188,22 @@ duuude swap: new as=0x20781c0
 duuude guile release 0x1f0eeb0
 duuude guile release 0x20781c0
 
+====================================================
+
+(define (declarative-rule interpretation_index)
+   (list (InheritanceLink interpretation_index
+      (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+   )
+)
+
+(define (pre-decl-rule int-index)
+    (ListLink
+        (declarative-rule int-index)
+    )
+
+(load
+"/usr/local/share/opencog/scm/./opencog/nlp/relex2logic/rules/declarative.scm")
+
 
 
 
@@ -199,6 +215,8 @@ bugs:
 * r2l fails to identify speech act if sentence not terminated by period.
   Here: InterpretationLink 'InterpretationNode
   DefinedLinguisticConceptNode DeclarativeSpeechAct,
+
+  declarative-rule truth-query-rule interrogative-rule
 
 * "Where is ...?" not idnetified as a question ..
 

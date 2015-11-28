@@ -141,11 +141,6 @@
 		(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
 	)
 )
-(define (declarative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index
-		(DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
-	)
-)
 ;
 ; ======================================================
 ; Predicate-Argument templates
