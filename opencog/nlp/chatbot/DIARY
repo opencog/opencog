@@ -73,14 +73,130 @@ Entering scheme shell; use ^D or a single . on a line by itself to exit.
 guile> #<atomspace 0x300f150>
 
 
+====================================================
+
+
+scheme@(guile-user)> (use-modules (opencog))
+duuude guile create as 0xc61840
+duuude guile created count 1
+duude call set_as
+duuude swap: old as=(nil)
+duuude swap: new as=0xc61840
+duuude swapped: new count=2002001001
+
+(start-cogserver "../lib/opencog-chatbot.conf")
+duuuude cogserver telling scheme to use this: 0x1f0eeb0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0xc61840
+duuude swap: new as=0x1f0eeb0
+duuude swapped: old count=2002001000
+duuuude cogserver finished telling scheme to use this: 0x1f0eeb0
+
+OK now this ... why? happens on module load ... like scheme is getting
+inited again? but its already inited ??
+
+(its tie use-modules (opencog)) being by-pased and running again. So
+bad.  Must fix this! XXXXXXXXXX
+
+Also the define-public is not being respected.. why? XXXXXXX
+
+also gc is not respecting the fluid ref -- its been set as
+current as but gc is collecting it wtf.
+
+
+duuude guile create as 0x20781c0
+duuude guile created count 1
+duude call set_as
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude swapped: new count=2
+
+Now this .. who is releaseing?  The GC is .. releasing the very first
+aAS created.
+duuude guile release 0xc61840
+duuude guile release 0xc61840 has count 2002000999 <-- this is a
+define-public, should not be released! how is that so?
+duuude guile release 0x1f0eeb0 <--- this belongs to the cogserver.
+
+Now who is setting the released thing??
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude swapped: old count=1
+
+
+who is setting again??
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0  << belongs to cogser
+duuude swap: new as=0x20781c0
+duuude swapped: new count=2
+
+duuude guile release 0x1f0eeb0  << belong to cogser
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude swapped: old count=1
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude swapped: new count=2
+duuude guile release 0x20781c0
+duuude guile release 0x20781c0 has count 1 << here GC thinks its free!
+duuude guile release 0x1f0eeb0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude swapped: old count=0
+duuude call set env_as to 0x20781c0  << this is "freeed" who i suising it??
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude swapped: new count=1
+duuude guile release 0x20781c0
+duuude guile release 0x1f0eeb0
+duuude guile release 0x20781c0 has count 0
+duuude guile delete!!!!! 0x20781c0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude guile release 0x20781c0
+duuude guile release 0x1f0eeb0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude guile release 0x20781c0
+duuude guile release 0x1f0eeb0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude guile release 0x1f0eeb0
+duuude guile release 0x20781c0
+duuude call set env_as to 0x1f0eeb0
+duuude swap: old as=0x20781c0
+duuude swap: new as=0x1f0eeb0
+duuude call set env_as to 0x20781c0
+duuude swap: old as=0x1f0eeb0
+duuude swap: new as=0x20781c0
+duuude guile release 0x1f0eeb0
+duuude guile release 0x20781c0
+
+
+
+
 
 
 ====================================================
 bugs:
 
-* See above: conflicting atomspaces; one is bogus!
-
-* relex fails to identify speech act if sentence not terminated by period.
+* r2l fails to identify speech act if sentence not terminated by period.
   Here: InterpretationLink 'InterpretationNode
   DefinedLinguisticConceptNode DeclarativeSpeechAct,
 
@@ -88,6 +204,6 @@ bugs:
 
 scm/sentence-matching.scm:
 
-* typoes fool the fuzzy matcher... e.g. 
+* typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn
 

@@ -22,6 +22,7 @@ INSTALL (FILES
 	interrogative.scm
 	neg.scm
 	nn.scm
+	passive.scm
 	poss.scm
 	pp.scm
 	pred-ynq.scm
@@ -60,4 +61,3 @@ INSTALL (FILES
 	why-q.scm
 	DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic/rules"
 )
-
