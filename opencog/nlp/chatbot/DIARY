@@ -201,8 +201,15 @@ duuude guile release 0x20781c0
         (declarative-rule int-index)
     )
 
+(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+(InheritanceLink
+ (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+(DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+
+
+(nlp-parse "Who ate an apple?")
 (load
-"/usr/local/share/opencog/scm/./opencog/nlp/relex2logic/rules/declarative.scm")
+"../opencog/nlp/relex2logic/rules/interrogative.scm")
 
 
 

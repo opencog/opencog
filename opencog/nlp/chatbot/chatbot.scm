@@ -66,15 +66,16 @@
     ; type of the speech act.
     (cond
         ((equal? (get-utterance-type querySentence) "TruthQuerySpeechAct")
-             (display "You ask a Truth Query ")
-        ; (truth_query_process querySentence)
-        (display "I can't process truth query for now"))
+            (display "You asked a Truth Query\n")
+            ; (truth_query_process querySentence)
+            (display "I can't process truth query for now\n"))
         ((equal? (get-utterance-type querySentence) "InterrogativeSpeechAct")
-            (display "You made an Interrogative SpeechAct ")
-        (wh_query_process querySentence))
+            (display "You made an Interrogative SpeechAct\n")
+            (wh_query_process querySentence))
         ((equal? (get-utterance-type querySentence) "DeclarativeSpeechAct")
-            (display "You made a Declarative SpeechAct "))
-        (else (display "Sorry, I can't identify the speech act type"))
+            (display "You made a Declarative SpeechAct\n"))
+        (else
+            (display "Sorry, I can't identify the speech act type\n"))
     ))
 
 ;--------------------------------------------------------------------
