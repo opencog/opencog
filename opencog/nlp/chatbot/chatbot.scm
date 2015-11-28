@@ -34,10 +34,8 @@
     (define act-type (cog-chase-link
         'InheritanceLink 'DefinedLinguisticConceptNode interp))
 
-    ; Return string holding the speech act type.
-    (cond
-        ((equal? '() act-type) "Unknown speech act type")
-        (else (cog-name (car act-type))))
+    ; Return act-type
+    act-type
 )
 
 ;-------------------------------------------------------------------
@@ -64,19 +62,33 @@
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
+    (let* ((gutr (get-utterance-type querySentence))
+           (utr (if (equal? '() gutr) '() (car gutr)))
+        )
     (cond
-        ((equal? (get-utterance-type querySentence) "TruthQuerySpeechAct")
+        ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
             (display "You asked a Truth Query\n")
             ; (truth_query_process querySentence)
-            (display "I can't process truth query for now\n"))
-        ((equal? (get-utterance-type querySentence) "InterrogativeSpeechAct")
+            (display "I can't process truth query for now\n")
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
             (display "You made an Interrogative SpeechAct\n")
-            (wh_query_process querySentence))
-        ((equal? (get-utterance-type querySentence) "DeclarativeSpeechAct")
-            (display "You made a Declarative SpeechAct\n"))
+            (wh_query_process querySentence)
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+            (display "You made a Declarative SpeechAct\n")
+            ; XXX Use AIML here to say something snarky.
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+            (display "You made a Imperative SpeechAct\n")
+            ; Make the robot do whatever ...
+            ; XXX Use AIML here to say something snarky.
+        )
         (else
-            (display "Sorry, I can't identify the speech act type\n"))
-    ))
+            (display "Sorry, I can't identify the speech act type\n")
+            ; XXX Use AIML here to say something snarky.
+        )
+    )))
 
 ;--------------------------------------------------------------------
 ; not working for now ...
