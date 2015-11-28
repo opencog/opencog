@@ -127,7 +127,8 @@ public:
      * just get it and set it to be the current map, 
      * not to create a new spaceMap
      */
-    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN );
+
+    Handle addOrGetSpaceMap(octime_t timestamp, std::string _mapName,double _resolution, int _floorHeight, float _agentHeight, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * comment@20150520 by YiShan
@@ -138,11 +139,9 @@ public:
      * Some member functions having the same problem also have the argument.
      */
     bool addSpaceInfo(Handle objectNode, Handle spaceMapHandle, 
-		      bool isSelfObject, octime_t timestamp,
-                      int objX, int objY, int objZ,
-                      int objLength, int objWidth, int objHeight,
-                      double objYaw, bool isObstacle,  
-		      std::string entityClass, std::string objectName, std::string material = "",  
+                      bool isSelfObject, bool isAvatarEntity, 
+                      octime_t timestamp,
+                      double objX, double objY, double objZ,
                       const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
 
@@ -206,31 +205,36 @@ public:
 
     void markCurMapPerceptedForFirstTime();
 
+	//
+	// Comment on 20150716 by Yi-Shan,
+	// The following is old functions about BlockEntity add/remove/query
+	// Because the BlockEntity feature has not been designed well, 
+	// so we comment out all the code related to BlockEntity
+	// Once we need to use it/decide to do it, maybe we'll need the legacy code.
+	
     /**
      * after the first time percept a map, 
      * we should find all the blockEntities on this map
      */
-    void findAllBlockEntitiesOnTheMap(Handle spaceMapHandle);
+    //void findAllBlockEntitiesOnTheMap(Handle spaceMapHandle);
 
     /**
      *  add all the newly constructed BlockEntity nodes to the atomspace
      */
-    void addBlockEntityNodes(HandleSeq &toUpdateHandles, Handle spaceMapHandle);
+    //void addBlockEntityNodes(HandleSeq &toUpdateHandles, Handle spaceMapHandle);
 
     /**
      *  add blocklist to an entity
      */
-    void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
+    //void addBlocksListPredicateToEntity(opencog::spatial::BlockEntity* _entity, const octime_t timeStamp, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
     /**
      * add properties predicate link to an entity node when there is a change
      * this including addBlocksListPredicateToEntity
      */
-    void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
+    //void updateBlockEntityProperties(opencog::spatial::BlockEntity* entity, octime_t timestamp,Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
-    void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
-
-
+    //void updateBlockEntitiesProperties(octime_t timestamp, HandleSeq &toUpdateHandles, Handle spaceMapHandle, const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN);
 
 private:
 

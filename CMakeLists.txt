@@ -48,6 +48,8 @@ MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
                 -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
+MESSAGE("CMake source dir: ${CMAKE_SOURCE_DIR}")
+
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
@@ -429,6 +431,15 @@ ELSE (cpprest_FOUND AND cpprest_LIBRARY)
 ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
 MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
 
+FIND_PACKAGE(Octomap)
+IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  ADD_DEFINITIONS(-DHAVE_OCTOMAP)
+  SET(HAVE_OCTOMAP 1)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
+ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 
@@ -497,7 +508,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
-                        "${CMAKE_INSTALL_PREFIX}/lib/opencog//modules")
+                        "${CMAKE_INSTALL_PREFIX}/lib/opencog/modules")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
