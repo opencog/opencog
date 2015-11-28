@@ -140,12 +140,14 @@
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
 
-  Runs the rules found in R2L-en-RuleBase over the RelEx output creating
-  the logical representation of sentence in the atomspace. Returns a list
-  containing SetLinks that are the r2l-interpretations for individual parses.
+  Runs the rules found in R2L-en-RuleBase over the RelEx output
+  creating the logical representation of sentence in the atomspace.
+  Returns a list containing SetLinks that are the r2l-interpretations
+  for individual parses.
 
-  This can't handle  mutliple thread execution. Thus mapping this function
-  over a list of sentences even though possible is not advised.
+  This can't handle  mutliple thread execution (Why???). Thus, mapping
+  this function over a list of sentences, even though possible, is not
+  advised.
 
   SENT must be a SentenceNode.
 "
@@ -159,12 +161,12 @@
     )
 
     (define (run-fc parse-node interp-link)
-        ; This runs all the rules of R2L-en-RuleBase over relex parse outputs,
-        ; and returns a cleaned and de-duplicated list. The relex outputs
-        ; associated with 'parse-node' make the focus-set, this way, IF there
-        ; are  multiple parses then each are handled independently by passing
-        ; them seprately as they are likely exist in a seperate
-        ; semantic-universe.
+        ; This runs all the rules of R2L-en-RuleBase over relex parse
+        ; outputs, and returns a cleaned and de-duplicated list. The
+        ; relex outputs associated with 'parse-node' make the focus-set.
+        ; This is done so that, IF there are multiple parses, then
+        ; each is handled independently by passing it seperately, as
+        ; each is likely to exist in a seperate semantic-universe.
         (let* ((focus-set (SetLink (parse-get-relex-outputs parse-node) interp-link))
               (outputs (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set))))
 
@@ -174,14 +176,14 @@
     )
 
     (define (interpret parse-node)
-        ; FIXME: Presently only a single interpretation is created for each
-        ; parse. Multiple interpreation should be handled, when
-        ; word-sense-disambiguation, anaphora-resolution and other post-processes
-        ; are added to the pipeline.
+        ; FIXME: Presently only a single interpretation is created for
+        ; each parse. Multiple interpreation should be handled, when
+        ; word-sense-disambiguation, anaphora-resolution and other
+        ; post-processing are added to the pipeline.
         (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
                (interp-node (InterpretationNode interp-name))
-               ; Associate the interpreation with a parse, as there could be multiplie
-               ; interpreations to the same parse.
+               ; Associate the interpreation with a parse, as there
+               ; could be multiplie interpreations for the same parse.
                (interp-link (InterpretationLink interp-node parse-node))
                (pre-result
                    (remove
@@ -194,8 +196,9 @@
 
             ; Time stamp the parse
             (AtTimeLink
-                ; FIXME: maybe opencog's internal time octime should be used. Will do for
-                ; now assuming a single instance deals with a single conversation.
+                ; FIXME: maybe opencog's internal time octime should
+                ; be used. Will do for now, assuming a single instance
+                ; deals with a single conversation.
                 (TimeNode (number->string (current-time)))
                 interp-node
                 (TimeDomainNode "Dialogue-System"))

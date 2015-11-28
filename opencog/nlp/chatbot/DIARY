@@ -207,9 +207,25 @@ duuude guile release 0x20781c0
 (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
 
 
+(use-modules (opencog exec))
 (nlp-parse "Who ate an apple?")
-(load
-"../opencog/nlp/relex2logic/rules/interrogative.scm")
+(load "../opencog/nlp/relex2logic/rules/interrogative.scm")
+(load "../opencog/nlp/relex2logic/rules/in.scm")
+(load "../opencog/nlp/chatbot/processing-utils.scm")
+
+(InterpretationLink
+   (InterpretationNode
+"sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X")
+   (ParseNode "sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0"
+(stv 1 0.98210001))
+)
+
+why is there only one??  why is it not for the question?
+who creates the InterpretationLink ?
+who creates
+sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X"
+??
+r2l-parse does ... how? in processing_utils...
 
 
 

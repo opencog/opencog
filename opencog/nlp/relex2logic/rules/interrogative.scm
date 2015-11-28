@@ -19,6 +19,7 @@
                 (VariableNode "$word-inst-node")
                 (VariableNode "$parse-node")
             )
+            ; WH-words will be POS-tagged with "interrogative"
             (InheritanceLink
                 (VariableNode "$word-inst-node")
                 (DefinedLinguisticConceptNode "interrogative")
