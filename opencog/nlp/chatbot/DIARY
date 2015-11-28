@@ -237,6 +237,27 @@ OK, but only the first one ever gets used ... fixed!
 bugs:
 
 * "Where is ...?" not identified as a question ..
+  "When is ..." identified as conjunction by relex!
+
+
+  Who works ...  What works ... 
+  Who sets interrogative-FLAG (_$qVar, T)
+  "How is..."
+  "Why is ..? also broken.
+
+
+Where is the ball -- Q and Wq links
+
+(InheritanceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (DefinedLinguisticConceptNode "where")
+)
+
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (WordNode "where")
+)
+
 
 scm/sentence-matching.scm:
 
