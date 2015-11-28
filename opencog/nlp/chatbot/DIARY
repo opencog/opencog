@@ -227,8 +227,7 @@ sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X"
 ??
 r2l-parse does ... how? in processing_utils...
 
-OK, but only the first one ever gets used ...
-
+OK, but only the first one ever gets used ... fixed!
 
 
 
@@ -237,13 +236,7 @@ OK, but only the first one ever gets used ...
 ====================================================
 bugs:
 
-* r2l fails to identify speech act if sentence not terminated by period.
-  Here: InterpretationLink 'InterpretationNode
-  DefinedLinguisticConceptNode DeclarativeSpeechAct,
-
-  declarative-rule truth-query-rule interrogative-rule
-
-* "Where is ...?" not idnetified as a question ..
+* "Where is ...?" not identified as a question ..
 
 scm/sentence-matching.scm:
 
