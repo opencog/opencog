@@ -618,6 +618,7 @@
 )
 
 (define-public (definite-rule word word_instance)
+(trace-msg "ola dfeinito!\n")
 	(list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
 	(r2l-wordinst-concept word_instance)
 	(EvaluationLink

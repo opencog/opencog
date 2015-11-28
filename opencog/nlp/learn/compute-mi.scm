@@ -107,6 +107,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
@@ -630,7 +631,7 @@
 ;
 (define (all-pair-wildcard-counts lg_rel)
 	(begin
-		(init-trace)
+		(init-trace "/tmp/progress")
 		(trace-msg "Start on-demand wildcounting\n")
 
 		; Make sure all words are in the atomspace
@@ -649,11 +650,13 @@
 
 ; ---------------------------------------------------------------------
 ; temp debug support
+; XXX Delete the below when its confirmed that import from opencog works
+; correctly (see debug-trace.scm in the atomspace git repo)
 (define oport 0)
 (define dbg-cnt 0)
 (define dbg-tim 0)
-(define (init-trace)
-	(set! oport (open-file "/tmp/progress" "w"))
+(define (init-trace filename)
+	(set! oport (open-file filename "w"))
 )
 (define (start-trace msg)
 	(set! dbg-tim (current-time))
@@ -1048,7 +1051,7 @@
 
 (define (do-em-all)
 	(begin
-		(init-trace)
+		(init-trace "/tmp/progress")
 		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
 	)
 )
