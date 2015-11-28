@@ -10,7 +10,8 @@
 ; Copyright (c) 2015 OpenCog Foundation
 ;
 
-(use-modules (ice-9 regex)
+(use-modules (ice-9 popen)    ; needed for open-pipe, close-pipe
+             (ice-9 regex)
              (ice-9 threads)  ; needed for par-map
              (srfi srfi-1))
 
