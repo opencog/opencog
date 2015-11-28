@@ -28,19 +28,9 @@
                 (VariableNode "$parse-node")
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-interr-rule")
-                (ListLink
-                    (VariableNode "$interp-node")
-                )
-            )
-        )
-    )
-)
-
-(define (pre-interr-rule int-index)
-    (ListLink
-        (interrogative-rule int-index)
+        ; mark this as a question
+        (InheritanceLink
+            (VariableNode "$interp-node")
+            (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
     )
 )

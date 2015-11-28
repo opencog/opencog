@@ -28,19 +28,9 @@
                 (VariableNode "$parse-node")
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-imp-rule")
-                (ListLink
-                    (VariableNode "$interp-node")
-                )
-            )
-        )
-    )
-)
-
-(define (pre-imp-rule int-index)
-    (ListLink
-        (imperative-rule int-index)
+        ; Mark this as an imperative.
+        (InheritanceLink
+            (VariableNode "$interp-node")
+            (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
     )
 )

@@ -65,7 +65,6 @@
         ; mark this as declarative
         (InheritanceLink
             (VariableNode "$interp-node")
-            (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
-        )
+            (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
     )
 )

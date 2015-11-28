@@ -113,34 +113,6 @@
 ; post-processing and NLG tasks.
 ;=======================================================
 ;
-; Tag Interpretation Nodes with Speech Act Types
-; (interrogative means question-word questions, while truth-query means
-; yes/no questions)
-;
-; NB: Imperatives are not perfect -- (1) I've got relex to add an
-; implicit subject "you" to imperatives, but the "instance" still has
-; to be the Left-Wall -- the Left-Wall inherits the concept "you";
-; the problem is that if you replace the left-wall with "you" entirely
-; it totally de-rails relex.
-;
-; (2) Imperatives with subjects, i.e. "You tell me!" are interpreted
-; as declaratives.
-;
-(define (imperative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index
-		(DefinedLinguisticConceptNode "ImperativeSpeechAct"))
-	)
-)
-(define (interrogative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index
-		(DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
-	)
-)
-(define (truth-query-rule interpretation_index)
-	(list (InheritanceLink interpretation_index
-		(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
-	)
-)
 ;
 ; ======================================================
 ; Predicate-Argument templates
