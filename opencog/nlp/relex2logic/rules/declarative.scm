@@ -62,19 +62,9 @@
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-decl-rule")
-                (ListLink
-                    (VariableNode "$interp-node")
-                )
-            )
-        )
-    )
-)
-
-(define (pre-decl-rule int-index)
-    (ListLink
-        (declarative-rule int-index)
+        ; mark this as declarative
+        (InheritanceLink
+            (VariableNode "$interp-node")
+            (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
     )
 )

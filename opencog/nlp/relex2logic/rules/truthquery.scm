@@ -28,19 +28,9 @@
                 (VariableNode "$parse-node")
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-tq-rule")
-                (ListLink
-                    (VariableNode "$interp-node")
-                )
-            )
-        )
-    )
-)
-
-(define (pre-tq-rule int-index)
-    (ListLink
-        (truth-query-rule int-index)
+        ; Mark this as a truth-query
+        (InheritanceLink
+            (VariableNode "$interp-node")
+            (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
     )
 )
