@@ -1,8 +1,9 @@
-; Notes: random-string, random-node-name and choose-var-name can be moved to utilities.scm
+; TODO Notes: random-string, random-node-name and choose-var-name can be moved
+; to utilities.scm
 
 ;------------------------------------------------------------------------
 ; Returns a random string of length 'str-length'.
-(define (random-string str-length) 
+(define (random-string str-length)
 	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	(define str "")
 	(while (> str-length 0)
@@ -53,8 +54,8 @@
 )
 
 ; -----------------------------------------------------------------------
-; Returns a list of WordInstanceNodes from 'parse-node', which have a LemmaLink with a
-; WordNode named 'word'.
+; Returns a list of WordInstanceNodes from 'parse-node', which have
+; a LemmaLink with a WordNode named 'word'.
 (define (get-word-inst-nodes word parse-node)
 	(define word-inst-list (parse-get-words-in-order parse-node))
 	(append-map (lambda (a-predicate a-word-inst) (if a-predicate (list a-word-inst) '()))
@@ -72,9 +73,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Returns the word-instance name when its word-lemma, word-index and parse-node is inputed.
-; It also checks whether an atom name is a word-instance name for the given parse-node and
-; word lemma and returns the word-instance name.
+; Returns the word-instance name when its word-lemma, word-index and
+; parse-node is inputed. It also checks whether an atom name is a
+; word-instance name for the given parse-node and word lemma and
+; returns the word-instance name.
 (define (get-instance-name word word-index parse-node)
 	(cond	((number? word-index)
 			(cog-name (list-ref (get-word-inst-nodes word parse-node) (- word-index 1)))
@@ -103,52 +105,68 @@
 		(WordInstanceNode inst-name)
 	)
 )
-; =========================================================================================
+; ======================================================
 ; Actual helper functions for creating OpenCog atoms
-; =========================================================================================
-; The atoms added to the atomspace , by the helper functions below must be
-; returned in a list or should be a single atom so as to simplify
+; ======================================================
+; The atoms added to the atomspace (by the helper functions below) must
+; be returned in a list or should be a single atom so as to simplify
 ; post-processing and NLG tasks.
-;==========================================================================================
+;=======================================================
 ;
 ; Tag Interpretation Nodes with Speech Act Types
-; (interrogative means question-word questions, while truthquery means yes/no questions)
+; (interrogative means question-word questions, while truth-query means
+; yes/no questions)
 ;
-; NB: Imperatives are not perfect -- (1) I've got relex to add an implicit subject "you" to imperatives,
-; 	but the "instance" still has to be the Left-Wall -- the Left-Wall inherits the concept "you";
-;	the problem is that if you replace the left-wall with "you" entirely it totally de-rails relex.
-;	(2) Imperatives with subjects, i.e. "You tell me!" are interpreted as declaratives.
+; NB: Imperatives are not perfect -- (1) I've got relex to add an
+; implicit subject "you" to imperatives, but the "instance" still has
+; to be the Left-Wall -- the Left-Wall inherits the concept "you";
+; the problem is that if you replace the left-wall with "you" entirely
+; it totally de-rails relex.
+;
+; (2) Imperatives with subjects, i.e. "You tell me!" are interpreted
+; as declaratives.
 ;
 (define (imperative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+	(list (InheritanceLink interpretation_index
+		(DefinedLinguisticConceptNode "ImperativeSpeechAct"))
 	)
 )
 (define (interrogative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+	(list (InheritanceLink interpretation_index
+		(DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
 	)
 )
 (define (truth-query-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+	(list (InheritanceLink interpretation_index
+		(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
 	)
 )
 (define (declarative-rule interpretation_index)
-	(list (InheritanceLink interpretation_index (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+	(list (InheritanceLink interpretation_index
+		(DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
 	)
 )
 ;
-; =========================================================================================
+; ======================================================
 ; Predicate-Argument templates
-; Major revision October 2014 -- conditional substitution of query variables replaces separate query-rules
-;==========================================================================================
+; Conditional substitution of query variables replaces separate query-rules
+;=======================================================
 ;
 ; Subject-Copula-Object
 ;
-; Declarative Examples: "Socrates is a man", "Cats are animals", "Trees are plants"
-; Question Examples: 	"What is Socrates?" (object query) "Who is the teacher?" (object query) "Who is a man?" (subject query (rare))
+; Declarative Examples: "Socrates is a man", "Cats are animals",
+;                       "Trees are plants"
 ;
-; (*actually relex processes all of these questions as subject-queries, which reverses the logic of inheritance they should have, hence
-; the rule below has the "object" inheriting the variable in order to compensate*since there is no way syntactic way to distinguish subject from 
-; object queries for these sentences, correcting the logic of the rare true subject queries will have to be left to general intelligence*)
+; Question Examples: "What is Socrates?" (object query) "Who is the
+; teacher?" (object query) "Who is a man?" (subject query (rare))
+;
+; Relex processes all of these questions as subject-queries, which
+; reverses the logic of inheritance they should have, hence the
+; rule below has the "object" inheriting the variable in order to
+; compensate, since there is no way syntactic way to distinguish
+; subject from object queries for these sentences, correcting the
+; logic of the rare true subject queries will have to be left to
+; general intelligence.
 ;
 (define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
 	(cond ((string=? subj_concept "_$qVar")
@@ -159,7 +177,7 @@
 				(InheritanceLink (ConceptNode obj_instance) (VariableNode var_name))
 				)
 			)
-		)	
+		)
 		((string=? obj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
 				(list
@@ -169,7 +187,7 @@
 				)
 			)
 		)
-	(else (list 
+	(else (list
 		(r2l-wordinst-concept subj_instance)
 		(r2l-wordinst-concept obj_instance)
 		(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -179,17 +197,28 @@
 	)
 	)
 )
-;--------------------------------------------------------------------------------------------
+;------------------------------------------------
 ;
 ; SVIO
 ;
-; Declarative: 			"Bill gave Mary the pox." / "Bill sold his children to the gypsies."
-; Questioned subject: 		"Who told you that bullshit?" "Who told that story to the police?," "What gives you that idea?" "What gave that idea to the police?"
-; Questioned object: 		"What did you tell the fuzz?" "What did you give to Mary?" "Who did you give the slavers?" "Who did you sell to the slavers?"
-; Questioned indirect object: 	"To whom did you sell the children?" "To what do we owe the pleasure?" "Who did you sell the children to?"
+; Declarative:          "Bill gave Mary the pox."
+;                       "Bill sold his children to the gypsies."
+; Questioned subject: 	"Who told you that bullshit?"
+;                       "Who told that story to the police?"
+;                       "What gives you that idea?"
+;                       "What gave that idea to the police?"
+; Questioned object: 	"What did you tell the fuzz?"
+;                       "What did you give to Mary?"
+;                       "Who did you give the slavers?"
+;                       "Who did you sell to the slavers?"
+; Questioned indirect object: 	"To whom did you sell the children?"
+;                       "To what do we owe the pleasure?"
+;                       "Who did you sell the children to?"
 ;
-;	NB: The first two iobj q-types work, although the relex output for the second one relies on a to(), instead of iobj()
-;	the third one still doesn't work because the relex output for it is a disaster and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
+; NB: The first two iobj q-types work, although the relex output for
+; the second one relies on a to(), instead of iobj() the third one
+; still doesn't work because the relex output for it is a disaster
+; and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
 ;
 (define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
 	(cond ((string=? subj_concept "_$qVar")
@@ -271,11 +300,11 @@
 		)
 	)
 )
-;-----------------------------------------------------------------------------------------------------------------------------
+;---------------------------------------------------------------
 ;
 ; SVO
 ;
-; Declarative: 			"Computers can bite me."
+; Declarative: 		"Computers can bite me."
 ; Prepositional:		"The book is on the table."
 ; Subject query: 		"What bothers you?" "Who programmed you?" "What is on the table?"
 ; Object query: 		"What did you say?" "Who do you love?"
@@ -331,7 +360,7 @@
 		)
 	))
 )
-;----------------------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------------
 ;
 ; SV
 ;
@@ -382,12 +411,14 @@
 		)
 	))
 )
-;----------------------------------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------
 ;
 ; "To-be" rule
 ; Declarative: "He seems happy." "He seems to be happy."
 ;
-; NB: This rule is not getting called enough; with the verb "appears" it only gets called on the second parse. With the verb "looks" not at all.
+; NB: This rule is not getting called enough; with the verb "appears"
+; it only gets called on the second parse. With the verb "looks" not
+; at all.
 ;
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
 	(list (ImplicationLink (PredicateNode verb_ins) (PredicateNode verb))
@@ -403,9 +434,9 @@
 		)
 	))
 )
-;--------------------------------------------------------------------------------------------------------------------
+;----------------------------------------------------------------
 ; Yes / no question rules
-;--------------------------------------------------------------------------------------------------------------------
+;----------------------------------------------------------------
 ;
 ; Copula example: "Are you the one?"
 ;
@@ -424,7 +455,7 @@
 	)
 )
 ;
-; Predicate Adjective example: 			"Are you mad?" 
+; Predicate Adjective example: 			"Are you mad?"
 ; Predicate prepositional phrase example: 	"Is the book under the table?"
 ; to-be example:				"Does he seem mad?"
 ; to-do1 example:				"Does she want to help us?"
@@ -432,8 +463,8 @@
 ; to-do3 example:				"Was she good enough to help?" (questions appropriately but the original rule is a logical disaster -- rewrite*)
 ; to-do4 example:				"Must she be able to sing?" (*ditto*)
 ; to-do5 example:				"Does she want to sing?"
-; SV examples: 					"Have you slept?", "Will you sleep?", "Did you sleep?"
-; SVO example: 					"Did you eat the leftover baba-ganoush?"
+; SV examples: 				"Have you slept?", "Will you sleep?", "Did you sleep?"
+; SVO example: 				"Did you eat the leftover baba-ganoush?"
 ; SVIO examples: 				"Did you give her the money?", "Did you give the money to her?"
 ;
 ; NB: this rule also allows the system to handle all intonation-only versions of these questions (i.e. "The book is under the table?" etc.)
@@ -486,7 +517,7 @@
         (PredicateNode prep_instance)
         (ListLink
             (PredicateNode instance)
-            (ConceptNode noun_instance))  
+            (ConceptNode noun_instance))
 	))
 )
 ;-----------------------------------------------------------------------
@@ -506,11 +537,12 @@
 ; -----------------------------------------------------------------------
 ; unary rules
 ; -----------------------------------------------------------------------
-(define (entity-rule word word_instance) 
+(define (entity-rule word word_instance)
 	(list (InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word)))
 )
 
-; FIXME: this is bad because in SV, SVO type rules the same word is ConceptNode instead
+; FIXME: this is bad because in SV, SVO type rules the same word is
+; ConceptNode instead
 (define (gender-rule word word_instance gender_type)
 	(define concept_node (ConceptNode word))
 	(cond ((string=? gender_type "feminine")
@@ -542,11 +574,12 @@
 	(r2l-wordinst-concept quantifier_instance)
 	(QuantityLink (ConceptNode noun_instance)(ConceptNode quantifier_instance))
 	)
-)	
+)
 
 ;-----------------------------------------------------------------------------
 ; Determiner-question-word questions, e.g.
-; "At what time . . . ", "For what reason . . .", "In what way . . .", "To what degree . . . ", "At what location . . ."
+; "At what time . . . ", "For what reason . . .", "In what way . . .",
+; "To what degree . . . ", "At what location . . ."
 ;-----------------------------------------------------------------------------
 (define (q-det-rule noun_concept noun_instance verb verb_instance qtype)
 	(list (InheritanceLink (VariableNode "$qVar") (ConceptNode noun_concept))
@@ -559,27 +592,27 @@
 			(PredicateNode verb_instance)
 		))
 	((string=? qtype "where")
-		(EvaluationLink 
+		(EvaluationLink
 			(DefinedLinguisticPredicateNode "AtPlace")
-			(ListLink	
+			(ListLink
 				(VariableNode "$qVar")
 				(PredicateNode verb_instance)
 			)
 		)
 	)
 	((string=? qtype "why")
-		(EvaluationLink 
+		(EvaluationLink
 			(DefinedLinguisticPredicateNode "Because")
-			(ListLink	
+			(ListLink
 				(VariableNode "$qVar")
 				(PredicateNode verb_instance)
 			)
 		)
 	)
 	((string=? qtype "how")
-		(EvaluationLink 
+		(EvaluationLink
 			(DefinedLinguisticPredicateNode "InManner")
-			(ListLink	
+			(ListLink
 				(VariableNode "$qVar")
 				(PredicateNode verb_instance)
 			)
@@ -661,7 +694,7 @@
 			(ConceptNode noun_instance)
 		)
 	))
-) 
+)
 
 (define (nn-rule n1 n1_instance n2 n2_instance)
 	(r2l-wordinst-concept n1_instance)
@@ -715,9 +748,10 @@
 	))
 )
 ;
-; Example: "She wants you to help us." -- assigns wrong subject in second clause
+; Example: "She wants you to help us." -- assigns wrong subject in
+; second clause. XXX FIXME
 ;
-(define (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance) 
+(define (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance)
 	(list (InheritanceLink (ConceptNode s1_instance) (ConceptNode s1))
 	(InheritanceLink (ConceptNode s2_instance) (ConceptNode s2))
 	(InheritanceLink (ConceptNode o_instance) (ConceptNode o))
@@ -743,7 +777,8 @@
 	))
 )
 ;
-; Example: "She is nice to help with the project." -- the scheme output for this rule is a logical mess
+; Example: "She is nice to help with the project." -- the scheme output
+; for this rule is a logical mess
 ;
 (define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
     (list (InheritanceLink (ConceptNode v1_instance) (ConceptNode v1))
@@ -762,9 +797,10 @@
 ;
 ; Example: "She must be able to sing." ; v1 = sing , v2 = she
 ;
-; What about "She must need to sing?" "She must want to sing?" -- why is must being treated as a main-verb rather than an auxiliary?
+; What about "She must need to sing?" "She must want to sing?"
+; -- why is must being treated as a main-verb rather than an auxiliary?
 ;
-(define (to-do-rule-4 v1 v1_instance v2 v2_instance) 
+(define (to-do-rule-4 v1 v1_instance v2 v2_instance)
     (list (InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
     (ImplicationLink (PredicateNode v1_instance) (PredicateNode v1))
 	(r2l-wordinst-concept v2_instance)
@@ -795,14 +831,14 @@
         )
     ))
 )
-;-------------------------------------------------------------------------------------------------------
+;---------------------------------------------------
 ;
 ; Where, When, Why, and How (of manner) -- the first rule of each of these groups handles questions with
-; any of the templates SV, SVO, SVIO, SP, to-be, to-do, prep etc. (see the Y/N question rules for a complete list) 
+; any of the templates SV, SVO, SVIO, SP, to-be, to-do, prep etc. (see the Y/N question rules for a complete list)
 ;
-;-------------------------------------------------------------------------------------------------------
+;---------------------------------------------------
 ; WHERE QUESTIONS
-;-------------------------------------------------------------------------------------------------------
+;---------------------------------------------------
 ;
 ; Examples: "Where do you live?","Where did you eat dinner?" etc.
 ;
@@ -811,9 +847,9 @@
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
-			(EvaluationLink 
+			(EvaluationLink
 				(DefinedLinguisticPredicateNode "AtPlace")
-				(ListLink	
+				(ListLink
 					(VariableNode var_name)
 					(PredicateNode verb_instance)
 				)
@@ -823,15 +859,15 @@
 )
 ;
 ; Examples: "Where is the party?", "Where will she be happy?" etc.
-; 
+;
 (define (wherecop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
 		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
-			(EvaluationLink 
+			(EvaluationLink
 				(DefinedLinguisticPredicateNode "AtPlace")
-				(ListLink	
+				(ListLink
 					(VariableNode var_name)
 					(ConceptNode subj_instance)
 				)
@@ -840,11 +876,12 @@
 	)
 )
 ;
-;--------------------------------------------------------------------------------------------------------
+;----------------------------------------------------
 ; WHEN QUESTIONS
-;--------------------------------------------------------------------------------------------------------
-; 
-; Example: "When did jazz die?","When did you bake the cake?", "When did you give him the money?" etc.
+;----------------------------------------------------
+;
+; Example: "When did jazz die?","When did you bake the cake?",
+; "When did you give him the money?" etc.
 ;
 (define (when-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
@@ -854,7 +891,7 @@
 			(AtTimeLink
 				(VariableNode var_name)
 				(PredicateNode verb_instance)
-			)	
+			)
 		)
 	)
 )
@@ -863,7 +900,7 @@
 ;
 (define (whencop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 	
+		(list 
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(AtTimeLink
@@ -874,20 +911,20 @@
 	)
 )
 ;
-;----------------------------------------------------------------------------------------------------------
+;------------------------------------------------------
 ; Why questions
-;----------------------------------------------------------------------------------------------------------
+;------------------------------------------------------
 ;
-; Example: "Why do you live?","Why do you like terrible music?
+; Example: "Why do you live?", "Why do you like terrible music?"
 ;
 (define (why-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
-			(EvaluationLink 
+			(EvaluationLink
 				(DefinedLinguisticPredicateNode "Because")
-				(ListLink	
+				(ListLink
 					(VariableNode var_name)
 					(PredicateNode verb_instance)
 				)
@@ -903,9 +940,9 @@
 		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
-			(EvaluationLink 
+			(EvaluationLink
 				(DefinedLinguisticPredicateNode "Because")
-				(ListLink	
+				(ListLink
 					(VariableNode var_name)
 					(ConceptNode subj_instance)
 				)
@@ -913,10 +950,10 @@
 		)
 	)
 )
-;----------------------------------------------------------------------------------------------------------
+;------------------------------------------------------
 ; How adverbial (manner) questions
-;----------------------------------------------------------------------------------------------------------
-; 
+;------------------------------------------------------
+;
 ; Example: "How did you sleep?" etc.
 ;
 (define (how-rule verb verb_instance)
@@ -924,9 +961,9 @@
 		(list
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
-			(EvaluationLink 
+			(EvaluationLink
 				(DefinedLinguisticPredicateNode "InManner")
-				(ListLink	
+				(ListLink
 					(VariableNode var_name)
 					(PredicateNode verb_instance)
 				)
@@ -934,15 +971,15 @@
 		)
 	)
 )
-;---------------------------------------------------------------------------------------------
+;-----------------------------------------
 ; Predicative How
-;---------------------------------------------------------------------------------------------
-; 
+;-----------------------------------------
+;
 ; Examples: "How was the party?" "How is your food?")
 ;
 (define (howpredadj-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 	
+		(list 
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(InheritanceLink (ConceptNode subj_instance) (VariableNode var_name))
@@ -950,20 +987,21 @@
 	)
 )
 ;
-;----------------------------------------------------------------------------------------------------------------	
+;------------------------------------------------------------
 ; How of quantity and degree questions
-;----------------------------------------------------------------------------------------------------------------
+;------------------------------------------------------------
 ;
 ; Example: "How much money does it cost?", "How many books have you read?"
 ;
-; NB: doesn't call rule if there is no noun after "how much" because relex doesn't give it a quantity dependency relation in that case
+; NB: doesn't call rule if there is no noun after "how much" because
+; relex doesn't give it a quantity dependency relation in that case
 ;
 (define (howquantQ-rule concept instance)
 	(let ((var_name (choose-var-name)))
 		(list
 			(InheritanceLink (ConceptNode instance) (ConceptNode concept))
 			(r2l-wordinst-concept instance)
-			(QuantityLink	
+			(QuantityLink
 				(ConceptNode instance)
 				(VariableNode var_name)
 			)
@@ -989,16 +1027,16 @@
 	)
 )
 ;
-;-----------------------------------------------------------------------------------------------
+;-------------------------------------------
 ; CHOICE-TYPE QUESTIONS (also known as question-determiners) -- what and which
 ;
 ; NB: I don't think these rules could be made to plug into the setence templates because of the
 ; SatisfyingSet logic . . .
 ;
-; Therefore still need to write SV, prep, to-do, and to-be versions of these if we want that functionality -- 
+; Therefore still need to write SV, prep, to-do, and to-be versions of these if we want that functionality --
 ; or do them without the satisfying set logic, so they can just plug into the templates . . .
 ;
-;-----------------------------------------------------------------------------------------------
+;-------------------------------------------
 ;
 ; Example: "Which girl do you like?" "What book are you reading?"
 ;
@@ -1013,7 +1051,7 @@
 			(r2l-wordinst-concept obj_instance)
 			(r2l-wordinst-Predicate verb_instance)
 			(SatisfyingSetLink
-				(VariableNode var_name) 	
+				(VariableNode var_name) 
 				(EvaluationLink (PredicateNode verb_instance)
 					(ListLink
 						(ConceptNode subj_instance)
@@ -1084,7 +1122,7 @@
 	(let ((var_name (choose-var-name)))
 		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))	
+			(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance) )
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-Predicate pred_instance)
@@ -1166,13 +1204,13 @@
 ; -----------------------------------------------------------------------
 ;  conjunction rules
 ; -----------------------------------------------------------------------
-;coordinating conjunction - And, but, for, nor, or, so, and yet
-;Example:"I did my homework, and I went to school."
-;       "John and Madison eat the cake."
-;       " Joan is poor  but  happy." 
+; coordinating conjunction - And, but, for, nor, or, so, and yet
+; Example:"I did my homework, and I went to school."
+;         "John and Madison eat the cake."
+;         " Joan is poor  but  happy."
 
 (define (and-rule var1 var1_instance var2 var2_instance pos)
-    (cond [(equal? pos "verb") 
+    (cond [(equal? pos "verb")
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
 	(r2l-wordinst-Predicate var1_instance)
@@ -1184,7 +1222,7 @@
 			(PredicateNode var2_instance)
 		)
 	))]
-	[else 
+	[else
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
 	(r2l-wordinst-concept var1_instance)
@@ -1199,7 +1237,7 @@
 )
 
 (define (but-rule var1 var1_instance var2 var2_instance pos)
-    (cond [(equal? pos "verb") 
+    (cond [(equal? pos "verb")
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
 	(r2l-wordinst-Predicate var1_instance)
@@ -1211,7 +1249,7 @@
 			(PredicateNode var2_instance)
 		)
 	))]
-	[else 
+	[else
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(r2l-wordinst-concept var1_instance)
 	(r2l-wordinst-concept var2_instance)
@@ -1225,7 +1263,7 @@
 )
 
 (define (or-rule var1 var1_instance var2 var2_instance pos)
-    (cond [(equal? pos "verb") 
+    (cond [(equal? pos "verb")
 	(list (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
 	(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
 	(r2l-wordinst-Predicate var1_instance)
@@ -1237,7 +1275,7 @@
 			(PredicateNode var2_instance)
 		)
 	))]
-	[else 
+	[else
     (list (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
 	(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
 	(r2l-wordinst-concept var1_instance)
@@ -1255,7 +1293,7 @@
 ; complement clauses
 ;-----------------------------------------------------------------------
 (define (complement-rule comp_concept comp_instance pred_concept pred_instance)
-	(list 
+	(list
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
@@ -1270,7 +1308,7 @@
 )
 
 (define (compmod-rule comp_concept comp_instance pred_concept pred_instance)
-	(list 
+	(list
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
@@ -1286,7 +1324,7 @@
 )
 
 (define (because-rule comp_concept comp_instance pred_concept pred_instance)
-	(list 
+	(list
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
@@ -1302,7 +1340,7 @@
 )
 
 (define (attime-rule comp_concept comp_instance pred_concept pred_instance)
-	(list 
+	(list
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
@@ -1314,7 +1352,7 @@
 )
 
 (define (rep-rule comp_concept comp_instance pred_concept pred_instance)
-	(list 
+	(list
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
@@ -1331,8 +1369,10 @@
 ; -----------------------------------------------------------------------
 ; that rule for creating thatmarker
 ; -----------------------------------------------------------------------
-; Example: "I think that dogs can fly.", "He is glad that she won.", "He ran so quickly that he flew."
-; A that-rule for "object clause", "content clause", "complement clause", etc, but not "adjective clause"
+; Examples: "I think that dogs can fly.", "He is glad that she won.",
+; "He ran so quickly that he flew."
+; A that-rule for "object clause", "content clause", "complement clause",
+; etc, but not "adjective clause"
 (define (that-rule main main_instance sub sub_instance)
 	(list
 		(ImplicationLink (PredicateNode main_instance) (PredicateNode main))
@@ -1431,9 +1471,10 @@
 ;		)
 ;	))
 ;)
-;-----------------------------------------------------------------------------------------------------------------------------
-; Functional Question rules replaced by conditional statements and templates in October 2014
-;-----------------------------------------------------------------------------------------------------------------------------
+;---------------------------------------------------------------
+; Functional Question rules replaced by conditional statements and
+; templates in October 2014
+;---------------------------------------------------------------
 ;
 ; NB: sentences with prepositional phrases as the predicate-complements of the subject are treated by Relex in a variety
 ; of ways, including the prepobj relation and also treating the prep as a simple predicate; those sentences that do not
@@ -1449,8 +1490,8 @@
 ;			(VariableNode "$var1"))
 ;))
 ;
-;-------------------------------------------------------------------------------------------------------
-; 
+;---------------------------------------------------
+;
 ;
 ;(define (SV-ynQ-rule subj_concept subj_instance verb verb_instance)
 ;	(list (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1463,7 +1504,7 @@
 ;
 
 ;
-; NB: 	This rule applies incorrectly to many SVIO sentences where the IO is interpreted by relex as 
+; NB: 	This rule applies incorrectly to many SVIO sentences where the IO is interpreted by relex as
 ;	an extra prepositional phrase rather than an IO.
 ;
 ;(define (SVO-ynQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
@@ -1472,7 +1513,7 @@
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 ;	(EvaluationLink (PredicateNode "Truth-Value")
 ;		(EvaluationLink (PredicateNode verb_instance)
-;			(ListLink 
+;			(ListLink
 ;				(ConceptNode subj_instance)
 ;				(ConceptNode obj_instance)))
 ;		(VariableNode "$qVar"))
@@ -1487,16 +1528,16 @@
 ;	(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
 ;	(EvaluationLink (PredicateNode "Truth-Value")
 ;		(EvaluationLink (PredicateNode verb_instance)
-;			(ListLink			
+;			(ListLink
 ;				(ConceptNode subj_instance)
 ;				(ConceptNode obj_instance)
 ;				(ConceptNode iobj_instance)))
 ;		(VariableNode "$qVar"))
 ;))
 ;
-;------------------------------------------------------------------------------------------
+;------------------------------------------------------
 ; who/what subject questions (who and what may be treated identically as far as I can tell).
-;------------------------------------------------------------------------------------------
+;------------------------------------------------------
 ;
 ; Examples: "Who farted?", "What happened?"
 ;
@@ -1553,9 +1594,9 @@
 ;	(InheritanceLink (ConceptNode subj_instance) (VariableNode "_$qVar"))
 ;))
 ;
-;----------------------------------------------------------------------------------------
+;----------------------------------------------------
 ; who/what object and who/what indirect object questions
-;----------------------------------------------------------------------------------------
+;----------------------------------------------------
 ;
 ; Examples: "Who do you love?", "What do you think?"
 ;
@@ -1566,7 +1607,7 @@
 ;		(PredicateNode verb_instance)
 ;		(ListLink
 ;			(ConceptNode subj_instance)
-;			(VariableNode "_$qVar")))		
+;			(VariableNode "_$qVar")))
 ;))
 ;
 ; Examples: "To whom did you sell the children?"
@@ -1583,9 +1624,9 @@
 ;			(VariableNode "_$qVar")))
 ;))
 ;
-;----------------------------------------------------------------------------------------------------------
+;----------------------------------------------------------------------
 ;
-; Example: 
+; Example:
 ;
 ;(define (when-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 ;	(list (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1599,15 +1640,15 @@
 ;					(ConceptNode subj_instance)
 ;					(ConceptNode obj_instance))))
 ;))
-; 
-; Example: 
+;
+; Example:
 ;
 ;(define (when-SVIOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
 ;	(list (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 ;	(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-;	(AtTimeLink 
+;	(AtTimeLink
 ;		(VariableNode "$qVar")
 ;		(EvaluationLink
 ;			(PredicateNode verb_instance)
@@ -1616,17 +1657,17 @@
 ;					(ConceptNode obj_instance)
 ;					(ConceptNode iobj_instance))))
 ;))
-;------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------
 ;
-; Example: " 
+; Example: "
 ;
 ;(define (why-SVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 ;	(list (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-;	(EvaluationLink 
+;	(EvaluationLink
 ;		(PredicateNode "Because")
-;			(ListLink	
+;			(ListLink
 ;				(VariableNode "$qVar")
 ;				(EvaluationLink
 ;					(PredicateNode verb_instance)
@@ -1642,9 +1683,9 @@
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 ;	(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-;	(EvaluationLink 
+;	(EvaluationLink
 ;		(PredicateNode "Because")
-;			(ListLink	
+;			(ListLink
 ;				(VariableNode "$qVar")
 ;				(EvaluationLink
 ;					(PredicateNode verb_instance)
@@ -1659,15 +1700,15 @@
 ;(define (why-Q-rule subj_concept subj_instance predicative_concept predicative_instance)
 ;	(list (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode predicative_instance) (ConceptNode predicative_concept))
-;	(EvaluationLink 
+;	(EvaluationLink
 ;		(PredicateNode "Because")
-;			(ListLink	
+;			(ListLink
 ;				(VariableNode "$qVar")
-;				(EvaluationLink (PredicateNode predicative_instance) 
+;				(EvaluationLink (PredicateNode predicative_instance)
 ;					(ListLink (ConceptNode subj_instance)))))
 ;))
 ;
-;------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------
 ;
 ; Example: "How did you like the movie?"
 ;
@@ -1675,9 +1716,9 @@
 ;	(list (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-;	(EvaluationLink 
+;	(EvaluationLink
 ;		(PredicateNode "InManner")
-;			(ListLink	
+;			(ListLink
 ;				(VariableNode "$qVar")
 ;				(EvaluationLink
 ;					(PredicateNode verb_instance)
@@ -1685,7 +1726,7 @@
 ;							(ConceptNode subj_instance)
 ;							(ConceptNode obj_instance)))))
 ;))
-; 
+;
 ; Example: "How did you send him the message?"
 ;
 ;(define (how-SVIOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
@@ -1693,9 +1734,9 @@
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 ;	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 ;	(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-;	(EvaluationLink 
+;	(EvaluationLink
 ;		(PredicateNode "InManner")
-;			(ListLink	
+;			(ListLink
 ;				(VariableNode "$qVar")
 ;				(EvaluationLink
 ;					(PredicateNode verb_instance)
@@ -1704,7 +1745,7 @@
 ;							(ConceptNode obj_instance)
 ;							(ConceptNode iobj_instance)))))
 ;))
-;----------------------------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------------
 ;(define (SVP-rule subj  subj_instance  predicative  predicative_instance)
 ;	(list (InheritanceLink (ConceptNode predicative_instance) (ConceptNode predicative))
 ;	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
