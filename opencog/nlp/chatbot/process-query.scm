@@ -5,32 +5,22 @@
 ; Somewhat generic, somewhat IRC-specific.
 ;
 
-;------------------------------------------------------------------
-(define (get-utterance-type sent)
-"
-  get-utterance-type SENT -- Check the utterance speech act type
-
-  Expect SENT to be (SentenceNode \"sentence@45c470a6-29...\")
-  Will return (DefinedLinguisticConceptNode ACT) where ACT is
-  one of DeclarativeSpeechAct, InterrogativeSpeechAct,
-  TruthQuerySpeechAct, etc...
-"
-    ; parse will be (ParseNode "sentence@a6_parse_0")
-    (define parse (car (cog-chase-link 'ParseLink 'ParseNode sent)))
-    ; interp will be (InterpretationNode "sentence@a610_interpretation_$X")
-
-    (define interp (car
-        (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
-
-    ; act-type will be (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
-    (define act-type (cog-chase-link
-        'InheritanceLink 'DefinedLinguisticConceptNode interp))
-
-    ; Return act-type
-    act-type
-)
+(use-modules (opencog nlp) (opencog nlp fuzzy))
 
 ;-------------------------------------------------------------------
+;--------------------------------------------------------------------
+(define (wh_query_process query)
+"
+  Process wh-question using the fuzzy hyper graph Matcher
+  QUERY should be a SentenceNode
+
+  Wrapper around get-ansers provided by (opencog nlp fuzzy)
+"
+    (define temp (get-answers query))
+    (cond
+        ((equal? '() temp) "Sorry, I don't know the answer.")
+        (else (car temp))
+))
 ;--------------------------------------------------------------------
 (define-public (process-query user query)
 "
@@ -54,7 +44,7 @@
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
-    (let* ((gutr (get-utterance-type querySentence))
+    (let* ((gutr (sentence-get-utterance-type querySentence))
            (utr (if (equal? '() gutr) '() (car gutr)))
         )
     (cond
@@ -100,15 +90,6 @@
     (set! bc (cog-bc
         (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) rule-base (SetLink)))
 )
-;--------------------------------------------------------------------
-; Process wh-question using the fuzzy hyper graph Matcher
-;--------------------------------------------------------------------
-(define (wh_query_process query)
-    (define temp (get-answers query))
-    (cond
-        ((equal? '() temp) "Sorry, I don't know the answer.")
-        (else (car temp))
-))
 ;-------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward
 ; chaining.

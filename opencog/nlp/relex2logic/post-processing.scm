@@ -14,12 +14,14 @@
 ; -----------------------------------------------------------------------
 ; word-get-r2l-node -- Retrieve corresponding R2L created node
 ;
-; Given a WordInstanceNode/WordNode created by RelEx, retrieve the corresponding
-; ConceptNode or PredicateNode or NumberNode or DefinedLinguisticPredicateNode created by R2L helper
+; Given a WordInstanceNode/WordNode created by RelEx, retrieve the
+; corresponding ConceptNode or PredicateNode or NumberNode or
+; DefinedLinguisticPredicateNode created by R2L helper.
 ;
-; XXX FIXME this method is really bad because for each new type of node R2L
-; uses, it need to be added here.  It needs some different way for linking
-; R2L nodes to WordInstanceNodes other than node name!
+; XXX FIXME this method is really bad because for each new type of
+; node that R2L uses, it needs to be added here.  There needs some
+; different way for linking R2L nodes to WordInstanceNodes other
+; than node name! e.g. maybe an R2LLink ?
 ;
 (define (word-get-r2l-node node)
 	(define name

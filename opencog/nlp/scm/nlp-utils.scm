@@ -20,6 +20,7 @@
 ; -- map-word-node        Call proc on the word-node associated to word-inst.
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
+; -- sentence-get-utterance-type  Get the speech act of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
@@ -175,6 +176,36 @@
 	(concatenate! (map sentence-get-parses sent-list))
 )
 
+;------------------------------------------------------------------
+(define-public (sentence-get-utterance-type sent)
+"
+  sentence-get-utterance-type SENT -- Check the utterance speech act type
+
+  Expect SENT to be (SentenceNode \"sentence@45c470a6-29...\")
+  Will return (DefinedLinguisticConceptNode ACT) where ACT is
+  one of DeclarativeSpeechAct, InterrogativeSpeechAct,
+  TruthQuerySpeechAct, etc...
+"
+	; XXX TODO (1) this could be converted into a simple GetLink
+	; and probably should be. (2) There should be a syntax for GetLink
+	; that is lest verbose, and closer in style to what is written
+	; below. Viz, it should be posible to write GetLink's as a sequence
+	; of chases.
+
+	; parse will be (ParseNode "sentence@a6_parse_0")
+	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent)))
+
+	; interp will be (InterpretationNode "sentence@a610_interpretation_$X")
+	(define interp (car
+		(cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+
+	; act-type will be (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+	(define act-type (cog-chase-link
+		'InheritanceLink 'DefinedLinguisticConceptNode interp))
+
+	; Return act-type
+	act-type
+)
 
 ; ---------------------------------------------------------------------
 (define-public (parse-get-words parse-node)

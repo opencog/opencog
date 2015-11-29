@@ -8,56 +8,35 @@
              (opencog nlp sureal)
              (opencog nlp microplanning))
 
-(define-public (get-answers question)
+; ----------------------------------------------------------
+(define-public (get-answers sent-node)
 "
   Find answers (i.e., similar sentences that share some keyword) from
   the Atomspace by using the fuzzy pattern matcher. By default, it
   excludes sentences with TruthQuerySpeechAct and InterrogativeSpeechAct.
 
-  Accepts either an actual sentence or a SentenceNode as the input.
-  Also accepts an optional argument \"exclude-list\" which is a list of
-  atoms that we don't want them to exist in the hypergraphs of the
-  answers. By default they are
-     (DefinedLinguisticConceptNode \"TruthQuerySpeechAct\")
-  and (DefinedLinguisticConceptNode \"InterrogativeSpeechAct\").
-
-  Returns one or more sentences -- the answers.
+  Accepts a SentenceNode as the input.
+  Returns one or more sentence strings -- the answers.
 
   For example:
-     (get-answers \"What did Pete eat?\")
+     (get-answers (car (nlp-parse \"What did Pete eat?\")))
   OR:
      (get-answers (SentenceNode \"sentence@123\"))
 
   Possible result:
      (Pete ate apples .)
 "
-    ; Check if the input is an actual sentence or a SentenceNode,
-    ; parse and return the corresponding SentenceNode if it is a sentence
-    (define (process-q input)
-        (if (cog-atom? input)
-            (if (equal? 'SentenceNode (cog-type input))
-                input
-                #f
-            )
-            (car (nlp-parse input))
-        )
-    )
-
-    (let ((sent-node (process-q question))
-          (ex-list (list (DefinedLinguisticConceptNode "TruthQuerySpeechAct")
-                         (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))))
-        (if sent-node
-            (sent-matching sent-node ex-list)
-            (display "Please input a SentenceNode only")
-        )
-    )
+    (sent-matching sent-node
+        (list (DefinedLinguisticConceptNode "TruthQuerySpeechAct")
+              (DefinedLinguisticConceptNode "InterrogativeSpeechAct")))
 )
 
+; ----------------------------------------------------------
 (define-public (sent-matching sent-node exclude-list)
 "
   The main function for finding similar sentences
   Returns one or more sentences that are similar to the input one but
-  contains no atoms that are listed in the exclude-list
+  contain no atoms that are listed in the exclude-list.
 "
     ; Generate sentences from each of the R2L-SetLinks
     ; (define (generate-sentences r2l-setlinks) (if (> (length r2l-setlinks) 0) (map sureal r2l-setlinks) '()))
@@ -65,7 +44,9 @@
     ; Generate sentences for each of the SetLinks found by the fuzzy matcher
     ; TODO: May need to filter out some of the contents of the SetLinks
     ; before sending each of them to Microplanner
-    (define (generate-sentences setlinks)
+
+    (define (gen-sentences setlinks)
+
         ; Find the speech act from the SetLink and use it for Microplanning
         (define (get-speech-act setlink)
             (let* ((speech-act-node-name
@@ -84,7 +65,14 @@
         (append-map (lambda (r)
             ; Send each of the SetLinks found by the fuzzy matcher to
             ; Microplanner to see if they are good
-            (let ((m-results (microplanning (SequentialAndLink (cog-outgoing-set r)) (get-speech-act r) *default_chunks_option* #f)))
+            (let* ( (spe-act (get-speech-act r))
+                    (seq-and (AndLink (cog-outgoing-set r)))
+                    (m-results (microplanning seq-and spe-act
+                         *default_chunks_option* #f)))
+(trace-msg "duuude sp-act is ")
+(trace-msg spe-act)
+(trace-msg "duuude m-res is ")
+(trace-msg m-results)
                 ; Don't send it to SuReal in case it's not good
                 ; (i.e. Microplanner returns #f)
                 (if m-results
@@ -101,23 +89,25 @@
         )
     )
 
-    (begin
-        ; Delete identical sentences from the return set
-        (delete-duplicates
-            ; Use Mircoplanner and SuReal to generate sentences from the SetLinks found
-            (generate-sentences
-                ; Search for any similar SetLinks in the atomspace
-                (cog-outgoing-set (cog-fuzzy-match
-                    ; Get the R2L SetLink of the input sentence
-                    (car (cog-chase-link 'ReferenceLink 'SetLink
-                        (car (cog-chase-link 'InterpretationLink 'InterpretationNode
-                            (car (cog-chase-link 'ParseLink 'ParseNode sent-node))
-                        ))
-                    ))
-                    'SetLink
-                    exclude-list
-                ))
-            )
+    (let* ( ; parse is the ParseNode for the sentence
+            (parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
+
+            ; intrp is the InterpretationNode for the sentence
+            (intrp (car (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+            ; setlk is the R2L SetLink of the input sentence
+            (setlk (car (cog-chase-link 'ReferenceLink 'SetLink intrp)))
+
+            ; fzset is the set of similar sets.
+            (fzset (cog-fuzzy-match setlk 'SetLink exclude-list))
+
+            ; reply is the generated reply sentences.
+            ; generated by  Microplanner and SuReal
+            (reply (gen-sentences (cog-outgoing-set fzset)))
         )
+(trace-msg "duuude gens  is ")
+(trace-msg reply)
+
+        ; Delete identical sentences from the return set
+        (delete-duplicates reply)
     )
 )
