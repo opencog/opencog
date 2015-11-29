@@ -58,7 +58,7 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-(define-public  (microplanning-main seq-link utterance-type option anaphora)
+(define-public (microplanning-main seq-link utterance-type option anaphora)
 "
   microplanning-main SEQ-LINK UTTERANCE-TYPE OPTION ANAPHORA
 
@@ -211,7 +211,7 @@
 				(set! incomplete-sets
 					(remove (lambda (is)
 							(any is-subset? (circular-list is) complete-sets))
-						 incomplete-sets))
+						incomplete-sets))
 
 				; Incomplete chunks sets (those which did not say
 				; everything) are sorted by how many atoms are leftover.
@@ -401,18 +401,19 @@
 ;
 (define (get-sentence-forms utterance-type)
 	(cog-outgoing-set (car
-		(cond ((string=? "declarative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "DeclarativeUtterance"))
-			)
+		(cond
+			((string=? "declarative" utterance-type)
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "DeclarativeUtterance")))
+
 			((string=? "interrogative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "InterrogativeUtterance"))
-		      )
-		      ((string=? "imperative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "ImperativeUtterance"))
-		      )
-		      ((string=? "interjective" utterance-type)
-			'()
-		      )
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "InterrogativeUtterance")))
+
+			((string=? "imperative" utterance-type)
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "ImperativeUtterance")))
+			((string=? "interjective" utterance-type) '())
 		)
 	))
 )
@@ -435,22 +436,32 @@
 		(any helper atoms)
 	)
 
-	(cond ((string=? "declarative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
-	      )
-	      ((string=? "interrogative" utterance-type)
-		; TruthQuerySpeechAct will have no VariableNode on the main sentence-form link
-		(if (search-varnode)
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
-		)
-	      )
-	      ((string=? "imperative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
-	      )
-	      ((string=? "interjective" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterjectiveSpeechAct"))
-	      )
+	(cond
+		((string=? "declarative" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "DeclarativeSpeechAct")))
+
+		((string=? "interrogative" utterance-type)
+			; TruthQuerySpeechAct will have no VariableNode on the main
+			; sentence-form link.
+			(if (search-varnode)
+				(InheritanceLink
+					(InterpretationNode "MicroplanningNewSentence")
+					(DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+				(InheritanceLink
+					(InterpretationNode "MicroplanningNewSentence")
+					(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))))
+
+		((string=? "imperative" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "ImperativeSpeechAct")))
+
+		((string=? "interjective" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "InterjectiveSpeechAct")))
 	)
 )
 
@@ -516,11 +527,11 @@
 	(cog-purge temp-set-link)
 
 	(cond
-	      ; not long/complex but sayable
-	      ((and ok-length say-able) *microplanning_sayable*)
-	      ; long/complex but sayable
-	      ((and (not ok-length) say-able) *microplanning_too_long*)
-	      ; not sayable
-	      (else *microplanning_not_sayable*)
+		; not long/complex but sayable
+		((and ok-length say-able) *microplanning_sayable*)
+		; long/complex but sayable
+		((and (not ok-length) say-able) *microplanning_too_long*)
+		; not sayable
+		(else *microplanning_not_sayable*)
 	)
 )
