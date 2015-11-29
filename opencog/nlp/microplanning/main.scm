@@ -161,6 +161,11 @@
 			)
 		)
 
+(trace-msg "duuuude enter reursive-helpter\n")
+(trace-msg "atom-unused: ") (trace-msg atomW-unused)
+(trace-msg "\ncurr chunks: ") (trace-msg curr-chunks)
+(trace-msg "\ncuruts: ")(trace-msg curr-uts)
+(trace-msg "\n")
 		; If not the first sentence, and have "interrogative" utterance
 		; type, allow "declarative"
 		(if (and (not (null? curr-chunks))
@@ -170,11 +175,11 @@
 
 		(cond
 			; Use the sub-helper to keep calling make-sentence until
-			; all atoms are used, branching on all allowed utterance type
+			; all atoms are used, branching on all allowed utterance type.
 			((not (null? atomW-unused)) (for-each sub-helper ut))
 
 			; Finished all atoms, store the created chunks & their
-			; corresponding utterance-type
+			; corresponding utterance-type.
 			(else
 				(set! all-chunks-sets
 					(cons (make <chunks-set>
@@ -186,6 +191,7 @@
 		)
 	)
 
+(trace-msg "duuuude enter make-sentence-cheunks\n")
 	; loop make-sentence on remaining atoms
 	(recursive-helper atomW-complete-set '() '())
 
