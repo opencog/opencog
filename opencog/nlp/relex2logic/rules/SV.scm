@@ -17,6 +17,14 @@
 				(VariableNode "$verb")
 				(TypeNode "WordInstanceNode")
 			)
+			(TypedVariableLink
+				(VariableNode "$subj-lemma")
+				(TypeNode "WordNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$verb-lemma")
+				(TypeNode "WordNode")
+			)
 		)
 		(AndLink
 			(WordInstanceLink
@@ -26,6 +34,14 @@
 			(WordInstanceLink
 				(VariableNode "$verb")
 				(VariableNode "$a-parse")
+			)
+			(LemmaLink
+				(VariableNode "$subj")
+				(VariableNode "$subj-lemma")
+			)
+			(LemmaLink
+				(VariableNode "$verb")
+				(VariableNode "$verb-lemma")
 			)
 			(EvaluationLink
 				(DefinedLinguisticRelationshipNode "_subj")
@@ -37,22 +53,14 @@
 		)
    (ListLink
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-sv-rule")
+			(GroundedSchemaNode "scm: SV-rule")
 			(ListLink
+				(VariableNode "$subj-lemma")
 				(VariableNode "$subj")
+				(VariableNode "$verb-lemma")
 				(VariableNode "$verb")
 			)
 		)
    )
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-sv-rule subj verb)
- (ListLink
-	(SV-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-	)
- )
 )

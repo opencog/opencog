@@ -333,12 +333,17 @@
 ;
 ; SV
 ;
-; Declarative verb:			"Computers suck."
-; Declarative predicate adjective:	"I am happy."
-; Subject query:			"Who farted?" "What is happening?" "Who is correct?" "What is right?"
-; Verb query:				"What are you doing?"
+; Declarative verb:      "Computers suck."
+; Declarative predicative adjective:   "I am happy."
+; Subject query:         "Who farted?" "What is happening?"
+;                        "Who is correct?" "What is right?"
+; Verb query:            "What are you doing?"
 ;
-(define (SV-rule subj_concept subj_instance verb verb_instance)
+(define (SV-rule subj-lemma subj-inst verb-lemma verb-inst)
+	(define subj_concept  (cog-name subj-lemma))
+	(define subj_instance (cog-name subj-inst))
+	(define verb          (cog-name verb-lemma))
+	(define verb_instance (cog-name verb-inst))
 	(cond ((string=? subj_concept "_$qVar")
 		(let ((var_name (choose-var-name)))
 			(list
