@@ -177,15 +177,11 @@
 			; corresponding utterance-type
 			(else
 				(set! all-chunks-sets
-					(cons
-						(make <chunks-set>
+					(cons (make <chunks-set>
 							#:chunks (reverse curr-chunks)
 							#:utterance-types (reverse curr-uts)
-							#:leftover-count 0
-						)
-						all-chunks-sets
-					)
-				)
+							#:leftover-count 0)
+						all-chunks-sets))
 			)
 		)
 	)
@@ -195,39 +191,46 @@
 
 	(cond
 		((not (null? all-chunks-sets))
-		(receive (complete-sets incomplete-sets)
-			(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-chunks-sets)
+			(receive (complete-sets incomplete-sets)
+				(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-chunks-sets)
 
-			; remove sets in incomplete-sets which is a subset of a set in complete-sets
-			(set! incomplete-sets (remove (lambda (is) (any is-subset? (circular-list is) complete-sets)) incomplete-sets))
+				; Remove sets in incomplete-sets which are a subset
+				; of a set in complete-sets
+				(set! incomplete-sets
+					(remove (lambda (is)
+							(any is-subset? (circular-list is) complete-sets))
+						 incomplete-sets))
 
-			; incomplete chunks set (those which did not say everything) are sorted by how many atoms leftover
-			(sort! incomplete-sets less-leftover?)
+				; Incomplete chunks sets (those which did not say
+				; everything) are sorted by how many atoms are leftover.
+				(sort! incomplete-sets less-leftover?)
 
-			; sort the complete sets bases on how many chunks (sentences) in the set
-			(sort! complete-sets less-chunks?)
+				; Sort the complete sets based on how many chunks
+				; (sentences) are in the set.
+				(sort! complete-sets less-chunks?)
 
-			; sort sets with same amount of sentences bases on variation
-			(letrec ((sort-by-variation
-					(lambda (sets)
-						(if (null? sets)
-							'()
-							(receive (this next)
-								; split by finding all whose # of sentences is the same as the first in the list
-								(span (lambda (c) (= (get-length c) (get-length (car sets)))) sets)
-								(append
-									(sort this less-variation?)
-									(sort-by-variation next)
+				; Sort sets with same amount of sentences bases on
+				; variation.
+				(letrec ((sort-by-variation
+						(lambda (sets)
+							(if (null? sets)
+								'()
+								(receive (this next)
+									; Split by finding all whose # of sentences is
+									; the same as the first in the list
+									(span (lambda (c) (= (get-length c)
+												(get-length (car sets)))) sets)
+									(append
+										(sort this less-variation?)
+										(sort-by-variation next))
 								)
 							)
 						)
-					)
-				))
-				(append (sort-by-variation complete-sets) incomplete-sets)
+					))
+					(append (sort-by-variation complete-sets) incomplete-sets)
+				)
 			)
 		)
-	)
-		(else '())
 	)
 )
 
@@ -283,70 +286,81 @@
 		(define temp-differences '())
 
 		(cond ; not say-able
-		      ((= result *microplanning_not_sayable*)
-			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
-			; try to add more (up to 3 different links)
-			(cond ((<= (length atomW-not-chunked) 3)
-				; look to see if the newest link has any node that is solo (ie. appear only once in the current set)
-				(set! temp-var1 (cog-get-all-nodes (get-atom (car atomW-to-try))))
-				(set! temp-var2 (append-map cog-get-all-nodes (map get-atom (cdr atomW-to-try))))
-				(set! temp-differences (filter has-word-inst? (lset-difference equal? temp-var1 temp-var2)))
+			((= result *microplanning_not_sayable*)
+				; Could be the atoms cannot be said, unless bringing in
+				; additional atoms (such as "and/or/that").  Try to add
+				; more (up to 3 different links)
+				(cond ((<= (length atomW-not-chunked) 3)
+						; Look to see if the newest link has any node that
+						; is solo (i.e. appears only once in the current set).
+						(set! temp-var1
+							(cog-get-all-nodes (get-atom (car atomW-to-try))))
+						(set! temp-var2
+							(append-map cog-get-all-nodes
+								(map get-atom (cdr atomW-to-try))))
+						(set! temp-differences
+							(filter has-word-inst?
+								(lset-difference equal? temp-var1 temp-var2)))
 
-				(cond ((null? temp-differences)
-					(give-up-unadded-part)
-				      )
-				      (else
-					; find the first link in atomW-not-tried that contains one of the solo word
-					; XXX could possibly allow choosing different link to generate multiple chunking result
-					(set! temp-var1
-						(find (lambda (a)
-							(find (lambda (w) (cog-has-node? (get-atom a) w)) temp-differences)
-						     )
-						     atomW-not-tried
+						(cond
+							((null? temp-differences)
+								(give-up-unadded-part))
+							(else
+								; Find the first link in atomW-not-tried that
+								; contains one of the solo words.
+								; XXX could possibly allow choosing different
+								; link to generate multiple chunking result.
+								(set! temp-var1
+									(find (lambda (a)
+										(find (lambda (w) (cog-has-node?
+											(get-atom a) w)) temp-differences))
+										atomW-not-tried))
+
+								; If an atom with the solo word exists
+								(if temp-var1
+									(recursive-helper (cons temp-var1 atomW-to-try) #t)
+									(give-up-unadded-part)
+								)
+							)
 						)
 					)
-
-					; if an atom with the solo word exists
-					(if temp-var1
-						(recursive-helper (cons temp-var1 atomW-to-try) #t)
+					; Give up on all the atoms not "say-able"
+					(else
 						(give-up-unadded-part)
 					)
-				      )
 				)
-			      )
-			      ; give up on all the atoms not "say-able"
-			      (else
-				(give-up-unadded-part)
-			      )
 			)
-		      )
-		      ; not long/complex enough
-		      ((= result *microplanning_sayable*)
-			; add the currently "say-able" stuff to our chunk
-			(update-chunk)
+			; Not long/complex enough.
+			((= result *microplanning_sayable*)
+				; Add the currently "say-able" stuff to our chunk.
+				(update-chunk)
 
-			; only continue if there are more to say
-			(if (not (null? atomW-unused))
-				(recursive-helper
-					(cons
-						(pick-atomW atomW-unused atomW-chunk (get-supp-weight-proc option) utterance-type)
-						atomW-to-try
+				; Continue only if there is more to say.
+				(if (not (null? atomW-unused))
+					(recursive-helper
+						(cons
+							(pick-atomW atomW-unused atomW-chunk
+								(get-supp-weight-proc option) utterance-type)
+							atomW-to-try
+						)
+						#t
 					)
-					#t
 				)
 			)
-		      )
-		      ; too long/complex
-		      (else
-			(update-chunk)
-		      )
+			; too long/complex
+			(else
+				(update-chunk)
+			)
 		)
 	)
 
-	; the initial critera for choosing a starting point would be (time-weights + link-weights) * form-weights
-	(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
+	; The initial critera for choosing a starting point would be
+	; (time-weights + link-weights) * form-weights
+	(recursive-helper (list (pick-atomW atomW-unused atomW-used
+			(get-main-weight-proc option) utterance-type)) #t)
 
-	; return the sentence chunk (reverse because we've been adding to the front)
+	; Return the sentence chunk (reverse because we've been adding
+	; to the front).
 	(reverse atomW-chunk)
 )
 
