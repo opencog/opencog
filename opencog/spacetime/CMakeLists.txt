@@ -20,6 +20,14 @@ ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
 INSTALL (TARGETS spacetime-types
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 
+INSTALL (FILES
+	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
+	DESTINATION "${DATADIR}/scm/spacetime"
+)
+
+# FIXME -- actually, the timeserver does not depend on ocotomap,
+# and could be built just fine without it. However, its not clear
+# why we need to fix this just right now.
 IF (HAVE_OCTOMAP)
 	ADD_LIBRARY (spacetime SHARED
 		HandleToTemporalEntryMap.cc
@@ -55,10 +63,5 @@ IF (HAVE_OCTOMAP)
 		TemporalToHandleSetMap.h
 		TimeServer.h
 		DESTINATION "include/${PROJECT_NAME}/spacetime"
-	)
-
-	INSTALL (FILES
-		${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
-		DESTINATION "${DATADIR}/scm/spacetime"
 	)
 ENDIF (HAVE_OCTOMAP)
