@@ -649,53 +649,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; temp debug support
-; XXX Delete the below when its confirmed that import from opencog works
-; correctly (see debug-trace.scm in the atomspace git repo)
-(define oport 0)
-(define dbg-cnt 0)
-(define dbg-tim 0)
-(define (init-trace filename)
-	(set! oport (open-file filename "w"))
-)
-(define (start-trace msg)
-	(set! dbg-tim (current-time))
-	(set! dbg-cnt 0)
-	(display msg oport)
-	(force-output oport)
-)
-(define (trace-msg msg)
-	(display msg oport)
-	(force-output oport)
-)
-(define (trace-msg-num msg num)
-	(display msg oport)
-	(display num oport)
-	(display "\n" oport)
-	(force-output oport)
-)
-(define (trace-elapsed)
-	(begin
-		(display "Elapsed secs " oport)
-		(display (- (current-time) dbg-tim) oport)
-		(display "\n" oport)
-		(set! dbg-tim (current-time))
-	)
-)
-(define (trace-msg-cnt msg)
-	(display msg oport)
-	(set! dbg-cnt (+ dbg-cnt 1))
-	(display dbg-cnt oport)
-	(display "\n" oport)
-
-	; Provide some crude timing info too ...
-	(if (eqv? 0 (modulo dbg-cnt 10000))
-		(trace-elapsed)
-	)
-	(force-output oport)
-)
-
-; ---------------------------------------------------------------------
 ; Compute wildcard counts for all word-pairs, for the relation lg_rel.
 ; lg_rel is a link-grammar link type.
 ;
