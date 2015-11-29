@@ -8,6 +8,7 @@
              (opencog nlp sureal)
              (opencog nlp microplanning))
 
+; ----------------------------------------------------------
 (define-public (get-answers sent-node)
 "
   Find answers (i.e., similar sentences that share some keyword) from
@@ -30,6 +31,7 @@
               (DefinedLinguisticConceptNode "InterrogativeSpeechAct")))
 )
 
+; ----------------------------------------------------------
 (define-public (sent-matching sent-node exclude-list)
 "
   The main function for finding similar sentences
@@ -42,9 +44,9 @@
     ; Generate sentences for each of the SetLinks found by the fuzzy matcher
     ; TODO: May need to filter out some of the contents of the SetLinks
     ; before sending each of them to Microplanner
-; XXX fixme we already know the speech act. Don't do this again.
-; Just pas it in as an argument.
+
     (define (generate-sentences setlinks)
+
         ; Find the speech act from the SetLink and use it for Microplanning
         (define (get-speech-act setlink)
             (let* ((speech-act-node-name

@@ -9,12 +9,13 @@
 "
   r2l-get-root -- Return all hypergraph R2L roots containing 'atom'
 
-  Similar to cog-get-root, except that it will stop at the SetLink in case
-  RelEx2Logic is called with the r2l(...) function.
+  Similar to cog-get-root, except that it will stop at the SetLink,
+  in the case where RelEx2Logic is called with the r2l(...) function.
 "
 	(define iset (cog-incoming-set atom))
 	
-	; if reached the SetLink that wrap around R2L outputs (happens when using r2l(...))
+	; Halt when the SetLink that wraps around R2L outputs is reached.
+	; The SetLink is cratd by r2l(...)
 	(if (and (= (length iset) 1) (equal? 'SetLink (cog-type (car iset))))
 		(list atom)
 		; if no incoming set (happens when using relex-parse(...))
