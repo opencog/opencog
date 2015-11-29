@@ -107,6 +107,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
@@ -630,7 +631,7 @@
 ;
 (define (all-pair-wildcard-counts lg_rel)
 	(begin
-		(init-trace)
+		(init-trace "/tmp/progress")
 		(trace-msg "Start on-demand wildcounting\n")
 
 		; Make sure all words are in the atomspace
@@ -645,51 +646,6 @@
 			(cog-get-atoms item-type)
 		)
 	)
-)
-
-; ---------------------------------------------------------------------
-; temp debug support
-(define oport 0)
-(define dbg-cnt 0)
-(define dbg-tim 0)
-(define (init-trace)
-	(set! oport (open-file "/tmp/progress" "w"))
-)
-(define (start-trace msg)
-	(set! dbg-tim (current-time))
-	(set! dbg-cnt 0)
-	(display msg oport)
-	(force-output oport)
-)
-(define (trace-msg msg)
-	(display msg oport)
-	(force-output oport)
-)
-(define (trace-msg-num msg num)
-	(display msg oport)
-	(display num oport)
-	(display "\n" oport)
-	(force-output oport)
-)
-(define (trace-elapsed)
-	(begin
-		(display "Elapsed secs " oport)
-		(display (- (current-time) dbg-tim) oport)
-		(display "\n" oport)
-		(set! dbg-tim (current-time))
-	)
-)
-(define (trace-msg-cnt msg)
-	(display msg oport)
-	(set! dbg-cnt (+ dbg-cnt 1))
-	(display dbg-cnt oport)
-	(display "\n" oport)
-
-	; Provide some crude timing info too ...
-	(if (eqv? 0 (modulo dbg-cnt 10000))
-		(trace-elapsed)
-	)
-	(force-output oport)
 )
 
 ; ---------------------------------------------------------------------
@@ -1048,7 +1004,7 @@
 
 (define (do-em-all)
 	(begin
-		(init-trace)
+		(init-trace "/tmp/progress")
 		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
 	)
 )

@@ -13,32 +13,33 @@
                 (VariableNode "$noun")
                 (TypeNode "WordInstanceNode")
             )
+            (TypedVariableLink
+                (VariableNode "$lemma")
+                (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
                 (VariableNode "$noun")
                 (VariableNode "$a-parse")
             )
+            (LemmaLink
+                (VariableNode "$noun")
+                (VariableNode "$lemma")
+            )
             (InheritanceLink
                 (VariableNode "$noun")
                 (DefinedLinguisticConceptNode "definite")
             )
         )
+; XXX FIXME ... is this ListLink wrapper really needed ???
         (ListLink
             (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-definite-rule")
-                (ListLink (VariableNode "$noun"))
+                (GroundedSchemaNode "scm: definite-rule")
+                (ListLink
+                    (VariableNode "$lemma")
+                    (VariableNode "$noun"))
             )
         )
     )
-)
-
-; This is function is not needed. It is added so as not to break the
-; existing r2l pipeline.  Huh ??? How can it not be needed?  It is
-; used right up above!
-(define (pre-definite-rule noun)
-  (ListLink
-    	(definite-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
-    )
-  )
 )

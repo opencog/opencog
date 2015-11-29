@@ -333,12 +333,17 @@
 ;
 ; SV
 ;
-; Declarative verb:			"Computers suck."
-; Declarative predicate adjective:	"I am happy."
-; Subject query:			"Who farted?" "What is happening?" "Who is correct?" "What is right?"
-; Verb query:				"What are you doing?"
+; Declarative verb:      "Computers suck."
+; Declarative predicative adjective:   "I am happy."
+; Subject query:         "Who farted?" "What is happening?"
+;                        "Who is correct?" "What is right?"
+; Verb query:            "What are you doing?"
 ;
-(define (SV-rule subj_concept subj_instance verb verb_instance)
+(define (SV-rule subj-lemma subj-inst verb-lemma verb-inst)
+	(define subj_concept  (cog-name subj-lemma))
+	(define subj_instance (cog-name subj-inst))
+	(define verb          (cog-name verb-lemma))
+	(define verb_instance (cog-name verb-inst))
 	(cond ((string=? subj_concept "_$qVar")
 		(let ((var_name (choose-var-name)))
 			(list
@@ -617,15 +622,17 @@
 	 (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
-(define-public (definite-rule word word_instance)
-	(list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
-	(r2l-wordinst-concept word_instance)
-	(EvaluationLink
-        (DefinedLinguisticPredicateNode "definite")
-        (ListLink
-	        (ConceptNode word_instance)
-        )
-    ))
+(define-public (definite-rule lemma word-inst)
+	(define word (cog-name lemma))
+	(define word_instance (cog-name word-inst))
+
+	(ListLink
+		(InheritanceLink (ConceptNode word_instance) (ConceptNode word))
+		(r2l-wordinst-concept word_instance)
+		(EvaluationLink
+			(DefinedLinguisticPredicateNode "definite")
+			(ListLink (ConceptNode word_instance))
+		))
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
@@ -869,7 +876,7 @@
 ;
 (define (whencop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 
+		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(AtTimeLink
@@ -948,7 +955,7 @@
 ;
 (define (howpredadj-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 
+		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(InheritanceLink (ConceptNode subj_instance) (VariableNode var_name))

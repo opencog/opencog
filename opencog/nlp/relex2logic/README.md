@@ -16,12 +16,10 @@ while step 3 is done by the URE.
 
 To use R2L:
 
-1. Start the cogserver
-2. Enter the scm shell.
-3. Load the rules using `(load-r2l-rulebase)`
-4. Start the relex server using the --relex flag (don't use the --logic flag)
-5. In the opencog scheme shell run `(nlp-parse "some complete sentence")`
-6. Build your thing :smile:
+1. Start the relex server using the `opencog-server.sh` script.
+2. Start scheme as `guile -l run-r2l.scm`
+3. At the scheme repl, enter `(nlp-parse "some complete sentence")`
+4. :smile:
 
 
 ## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns

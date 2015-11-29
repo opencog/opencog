@@ -1,0 +1,188 @@
+;
+; processing-utils.scm
+;
+; Utilities for applying different processing steps to input sentences.
+; These include getting a list of recently parsed sentences, and a
+; utility to send raw input text to the RelEx parse server, with the
+; resulting parse inserted into the cogserver atomspace.
+;
+; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2015 OpenCog Foundation
+;
+
+(use-modules (ice-9 popen)    ; needed for open-pipe, close-pipe
+             (rnrs io ports)  ; needed for get-line
+             (srfi srfi-1)
+             (opencog)
+             (opencog atom-types))
+
+; -----------------------------------------------------------------------
+(define-public (release-from-anchor anchor)
+"
+  release-from-anchor ANCHOR
+
+  Release items attached to ANCHOR.
+"
+
+	; Arghh Some bit of asshole code is wrapping the anchor in
+	; a SetLink. Basically, someone somewhere is running a
+	; badly-scoped search pattern.  However, we need this to work,
+	; so break out using cog-purge-recursive not cog-purge.
+	(for-each (lambda (x) (cog-purge-recursive x))
+		(cog-incoming-set anchor)
+	)
+)
+
+(define-public (get-new-parsed-sentences)
+"
+  get-new-parsed-sentences -- return newly parsed sentences.
+
+  Return the list of SentenceNode's that are attached to the
+  freshly-parsed anchor.  This list will be non-empty if relex-parse
+  has been recently run. This list can be emptied with the call
+  release-new-parsed-sent below.
+"
+	(cog-chase-link 'ListLink 'SentenceNode (AnchorNode "# New Parsed Sentence"))
+)
+
+(define-public (release-new-parsed-sents)
+"
+  release-new-parsed-sents deletes the links that anchor sentences to
+  to new-parsed-sent anchor.
+"
+	(release-from-anchor (AnchorNode "# New Parsed Sentence"))
+)
+
+; -----------------------------------------------------------------------
+(define-public (relex-parse plain-txt)
+"
+  relex-parse -- send text to RelEx parser, load the resulting opencog atoms
+
+  This routine takes plain-text input (in English), and sends it off
+  to a running instance of the RelEx parser, which should be listening
+  on port 4444. The parser will return a set of atoms, which are
+  then loaded into this opencog instance. After import, these are attached
+  to the \"*new-parsed-sent-anchor*\" via a ListLink; the set of newly added
+  sentences can be fetched with the \"get-new-parsed-sentences\" call.
+
+  The relex-server-host and port are set in config.scm, and default to
+  localhost 127.0.0.1 and port 4444
+
+  This routine does NOT perform R2L processing.
+"
+	; A little short routine that sends the plain-text to the
+	; RelEx parser, and then loads the resulting parse into the
+	; atomspace (using exec-scm-from-port to do the load)
+	(define (do-sock-io sent-txt)
+		(let ((s (socket PF_INET SOCK_STREAM 0)))
+			; inet-aton is deprecated, so don't use it (as of 2013)
+			; (connect s AF_INET (inet-aton relex-server-host) relex-server-port)
+			(connect s AF_INET (inet-pton AF_INET relex-server-host) relex-server-port)
+
+			; An explicit port-encoding is needed by guile-2.0.9
+			(set-port-encoding! s "utf-8")
+
+			(display sent-txt s)
+			(display "\n" s) ; must send newline to flush socket
+			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+			(exec-scm-from-port s)
+			(system (string-join (list "echo Info: close socket to parser" )))
+			(close-port s)
+		)
+	)
+
+	; Perform the actual processing
+	(if (string=? plain-txt "")
+		(display "Please enter a valid sentence.")
+		(do-sock-io plain-txt)
+	)
+)
+
+; -----------------------------------------------------------------------
+(define-public (get-parses-of-sents sent-list)
+"
+  get-parses-of-sents -- return parses of the sentences
+
+  Given a list of sentences, return a list of parses of those sentences.
+  That is, given a List of SentenceNode's, return a list of ParseNode's
+  associated with those sentences.
+"
+;  OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+;  and probably should be, when processing becomes fully rule-driven.
+	(define (get-parses sent)
+		(cog-chase-link 'ParseLink 'ParseNode sent)
+	)
+	(concatenate! (map get-parses sent-list))
+)
+
+; -----------------------------------------------------------------------
+(define-public (attach-parses-to-anchor sent-list anchor)
+"
+  attach-parses-to-anchor -- given sentences, attach the parses to anchor.
+
+  Given a list of sentences i.e. a list of SentenceNodes, go through them,
+  locate the ParseNodes, and attach the parse nodes to the anchor.
+
+  return value is undefined (no return value).
+"
+;  OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+;  and probably should be, when processing becomes fully rule-driven.
+
+	;; Attach all parses of a sentence to the anchor.
+	(define (attach-parses sent)
+		;; Get list of parses for the sentence.
+		(define (get-parses sent)
+			(cog-chase-link 'ParseLink 'ParseNode sent)
+		)
+		;; Attach all parses of the sentence to the anchor.
+		;; This must have a true/confident TV so that the pattern
+		;; matcher will find and use this link.
+		(for-each (lambda (x) (ListLink anchor x (stv 1 1)))
+			(get-parses sent)
+		)
+	)
+	;; Attach all parses of all sentences to the anchor.
+	(for-each attach-parses sent-list)
+)
+
+; -----------------------------------------------------------------------
+(define (nlp-parse-from-file filepath)
+"
+  Returns the parses of strings found on each line in a file at 'filepath'.
+
+  'filepath': a string that points to the file containing the strings
+              to be parsed.
+"
+    (let*
+        ((cmd-string (string-join (list "cat " filepath) ""))
+        (port (open-input-pipe cmd-string))
+        (line (get-line port))
+        )
+        (while (not (eof-object? line))
+            (if (or (= (string-length line) 0)
+                    (char=? #\; (string-ref (string-trim line) 0))
+                )
+                (set! line (get-line port))
+                (if (string=? "END." line)  ; continuing the tradition of RelEx
+                    (break)
+                    (begin
+                        (catch #t
+                            (lambda ()
+                                (nlp-parse line)
+                            )
+                            (lambda (key . parameters)
+                                (begin
+                                    (display "*** Unable to parse: \"")
+                                    (display line)
+                                    (display "\"\n")
+                                )
+                            )
+                        )
+                        (set! line (get-line port))
+                    )
+                )
+            )
+        )
+        (close-pipe port)
+    )
+)

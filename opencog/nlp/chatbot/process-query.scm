@@ -51,7 +51,6 @@
     (display query)
     (display "\"")
     (newline)
-(display querySentence)
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.

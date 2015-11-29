@@ -4,7 +4,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
+	chat-utils.scm
 	process-query.scm
-	processing-utils.scm
    DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot"
 )

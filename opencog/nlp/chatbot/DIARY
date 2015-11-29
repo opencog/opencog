@@ -227,25 +227,51 @@ sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X"
 ??
 r2l-parse does ... how? in processing_utils...
 
-OK, but only the first one ever gets used ...
+OK, but only the first one ever gets used ... fixed!
+
+====================================================
+
+* "Where is ...?" not identified as a question ..
+  "When is ..." identified as conjunction by relex!
 
 
+  Who works ...  What works ...
+  Who sets interrogative-FLAG (_$qVar, T)
+  "How is..."
+  "Why is ..? also broken.
 
 
+Where is the ball -- Q and Wq links
 
+(InheritanceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (DefinedLinguisticConceptNode "where")
+)
+
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (WordNode "where")
+)
+
+
+scm/sentence-matching.scm:
+
+fixed! Relex was mis-behaving and R2L was using a fragile mechanism.
+
+Relex failed to mark 4 of the 6 WH-words as interrogatives!
+
+====================================================
+* (process-query 'luser "Look to the left!") crashes
+   C++-EXCEPTION' with args `("cog-fc"
+
+  bug was the pre-SV-rule and definite-rule were running
+    word-inst-get-lemma on LEFT-WALL, got nil, and then crashed.
+  Fix to not run these rules when there is no lemma.
 
 ====================================================
 bugs:
 
-* r2l fails to identify speech act if sentence not terminated by period.
-  Here: InterpretationLink 'InterpretationNode
-  DefinedLinguisticConceptNode DeclarativeSpeechAct,
-
-  declarative-rule truth-query-rule interrogative-rule
-
-* "Where is ...?" not idnetified as a question ..
-
-scm/sentence-matching.scm:
+* Its not answering any questions ...
 
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn

@@ -9,6 +9,7 @@ INSTALL (FILES
 	file-utils.scm
 	nlp-utils.scm
 	parse-rank.scm
+	processing-utils.scm
 	type-definitions.scm
    DESTINATION "${DATADIR}/scm/opencog/nlp"
 )

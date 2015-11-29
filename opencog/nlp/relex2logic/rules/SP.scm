@@ -18,6 +18,14 @@
 				(VariableNode "$predadj")
 				(TypeNode "WordInstanceNode")
 			)
+			(TypedVariableLink
+				(VariableNode "$subj-lemma")
+				(TypeNode "WordNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$predadj-lemma")
+				(TypeNode "WordNode")
+			)
 		)
 		(AndLink
 			(WordInstanceLink
@@ -28,6 +36,14 @@
 				(VariableNode "$predadj")
 				(VariableNode "$a-parse")
 			)
+			(LemmaLink
+				(VariableNode "$subj")
+				(VariableNode "$subj-lemma")
+			)
+			(LemmaLink
+				(VariableNode "$predadj")
+				(VariableNode "$predadj-lemma")
+			)
 			(EvaluationLink
 				(DefinedLinguisticRelationshipNode "_predadj")
 				(ListLink
@@ -36,24 +52,17 @@
 				)
 			)
 		)
+; XXX FIXME ... is this ListLink wrapper really needed ???
    (ListLink
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-sp-rule")
+			(GroundedSchemaNode "scm: SV-rule")
 			(ListLink
+				(VariableNode "$subj-lemma")
 				(VariableNode "$subj")
+				(VariableNode "$predadj-lemma")
 				(VariableNode "$predadj")
 			)
 		)
    )
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-sp-rule subj predadj)
- (ListLink
-	(SV-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-		(cog-name (word-inst-get-lemma  predadj)) (cog-name predadj)
-	)
- )
 )
