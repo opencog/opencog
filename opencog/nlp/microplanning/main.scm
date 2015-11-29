@@ -64,10 +64,15 @@
 
   The main microplanning function call.
   Accepts a SequentialAndLink containing a list of atoms to be spoken.
-  UTTERANCE-TYPE is either 'declarative', 'interrogative', 'imperative'
-  or 'interjective', OPTION is a <chunks-option> object, and ANAPHORA
-  can be #t or #f.
+  UTTERANCE-TYPE is a string, either 'declarative', 'interrogative',
+  'imperative' or 'interjective'.
+  OPTION is a <chunks-option> object
+  ANAPHORA can be #t or #f.
 "
+	; XXX FIXME utterance-type should be an atom, not a string!
+	; viz (DefinedLinguisticConceptNode "DeclarativeSpeechAct") etc.
+	; this would avoid a lot of string-matching/downcasing/appending
+	; tomfoolery i.e. simplify the code.
 	(define all-sets '())
 	
 	(define (wrap-setlink atoms ut)
@@ -84,24 +89,18 @@
 		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
-	(cond ((equal? 'SequentialAndLink (cog-type seq-link))
-		; initialize the sentence forms as needed
-		(microplanning-init)
+	(if (not (equal? 'SequentialAndLink (cog-type seq-link)))
+		(scm-error 'wrong-type-arg "microplanning"
+			"Wrong type (expecting SequentialAndLink): ~A"
+			(list seq-link) (list seq-link)))
 
-		(set! all-sets (make-sentence-chunks (cog-outgoing-set seq-link) utterance-type option))
+	; Initialize the sentence forms as needed
+	(microplanning-init)
 
-		(cond ((not (null? all-sets))
-			(map finalize all-sets)
-		      )
-		      (else
-			#f
-		      )
-		)
-	      )
-	      (else
-		(scm-error 'wrong-type-arg "microplanning" "Wrong type (expecting SequentialAndLink): ~A" (list seq-link) (list seq-link))
-	      )
-	)
+	(set! all-sets (make-sentence-chunks
+		(cog-outgoing-set seq-link) utterance-type option))
+
+	(if (null? all-sets) #f (map finalize all-sets))
 )
 
 ; -----------------------------------------------------------------------

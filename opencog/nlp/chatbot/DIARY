@@ -269,6 +269,42 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
   Fix to not run these rules when there is no lemma.
 
 ====================================================
+
+(use-modules (opencog)
+(opencog nlp)
+ (opencog nlp microplanning))
+
+(define lap
+(SequentialAndLink
+   (InheritanceLink
+      (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (ConceptNode "Linas"))
+   (EvaluationLink
+      (DefinedLinguisticPredicateNode "definite")
+      (ListLink
+         (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")))
+   (ImplicationLink
+      (PredicateNode "ate@37537945-4593-4136-bc70-236f4c86c43c")
+      (PredicateNode "eat"))
+   (InheritanceLink
+      (ConceptNode "apple@5409a01f-f0d1-4665-af02-5811c9806b0e")
+      (ConceptNode "apple"))
+   (EvaluationLink
+      (PredicateNode "ate@37537945-4593-4136-bc70-236f4c86c43c")
+      (ListLink
+         (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+         (ConceptNode "apple@5409a01f-f0d1-4665-af02-5811c9806b0e")))
+   (InheritanceLink
+      (SpecificEntityNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (DefinedLinguisticConceptNode "male"))
+   (InheritanceLink
+      (SpecificEntityNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (ConceptNode "Linas"))
+))
+
+(microplanning lap "declarative" *default_chunks_option* #f)
+
+====================================================
 bugs:
 
 * Its not answering any questions ...
