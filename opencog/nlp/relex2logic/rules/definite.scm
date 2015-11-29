@@ -32,6 +32,7 @@
                 (DefinedLinguisticConceptNode "definite")
             )
         )
+; XXX FIXME ... is this ListLink wrapper really needed ???
         (ListLink
             (ExecutionOutputLink
                 (GroundedSchemaNode "scm: definite-rule")
