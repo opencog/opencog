@@ -58,7 +58,7 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-(define-public  (microplanning-main seq-link utterance-type option anaphora)
+(define-public (microplanning-main seq-link utterance-type option anaphora)
 "
   microplanning-main SEQ-LINK UTTERANCE-TYPE OPTION ANAPHORA
 
@@ -132,11 +132,17 @@
 		(define (sub-helper ut)
 			(define new-atomW-chunk
 				(make-sentence atomW-unused atomW-complete-set ut option))
+(trace-msg "duuude enter sub-helpter, cur chksis:")
+(trace-msg curr-chunks) (trace-msg "\n")
+(trace-msg "duuude sub-helpter, new cuunk is:")
+(trace-msg new-atomW-chunk) (trace-msg "\n")
+(trace-msg "duuude sub-helpter, all-hunks is:")
+(trace-msg all-chunks-sets) (trace-msg "\n")
 			(cond
-				; Has a new chunk, continue to make more chunks
-				; with the rest of the atoms
+				; make-sentence made a new chunk; make more chunks
+				; with the remaining atoms.
 				((not (null? new-atomW-chunk))
-					; TODO keep some of the atoms (those that do not
+					; TODO Keep some of the atoms (those that do not
 					; satisfy sentence forms) for later use?
 					(recursive-helper
 						(lset-difference equal? atomW-unused new-atomW-chunk)
@@ -145,7 +151,7 @@
 					)
 				)
 				; Unable to form more chunks, store the created chunks
-				; (if any) & their corresponding utterance-type
+				; (if any) & their corresponding utterance-type.
 				((not (null? curr-chunks))
 					(set! all-chunks-sets
 						(cons
@@ -205,7 +211,7 @@
 				(set! incomplete-sets
 					(remove (lambda (is)
 							(any is-subset? (circular-list is) complete-sets))
-						 incomplete-sets))
+						incomplete-sets))
 
 				; Incomplete chunks sets (those which did not say
 				; everything) are sorted by how many atoms are leftover.
@@ -242,47 +248,61 @@
 )
 
 ; -----------------------------------------------------------------------
-; make-sentence -- Create a single sentence
-;
-; Greedily add new atoms (using some heuristics) to form a new sentence.
-; Accepts a list of un-said links, the complete set, the utterance type,
-; and the chunking option.
-;
 (define (make-sentence atomW-unused atomW-complete-set utterance-type option)
-	; bunch of variables for storing the recursive looping results
-	(define atomW-used (lset-difference equal? atomW-complete-set atomW-unused)) ; the set of atoms said in previous sentences
-	(define atomW-chunk '())	; the set of successful atoms to be returned
+"
+  make-sentence -- Create a single sentence
 
-	; main helper function for looping
+  Greedily add new atoms (using some heuristics) to form a new sentence.
+  Accepts a list of un-said links, the complete set, the utterance type,
+  and the chunking option.
+"
+	; Two variables for storing the recursive looping results.
+	; --
+	; The set of atoms said in previous sentences.
+	(define atomW-used
+		(lset-difference equal? atomW-complete-set atomW-unused))
+	; The set of successful atoms to be returned.
+	(define atomW-chunk '())
+
+	; Main helper function for looping
 	(define (recursive-helper atomW-to-try do-check)
-		; the result of trying to say the atoms in a sentence
+		; The result of trying to say the atoms in a sentence.
 		(define result
-			; just return *microplanning_sayable* if no need to check
+			; Return *microplanning_sayable* if no need to check.
 			(if do-check
 				(check-chunk (map get-atom atomW-to-try) utterance-type option)
 				*microplanning_sayable*
 			)
 		)
-		(define atomW-not-tried (lset-difference equal? atomW-unused atomW-to-try)) ; the set of atoms not yet used
-		(define atomW-not-chunked (lset-difference equal? atomW-to-try atomW-chunk)) ; the set of atoms not yet added to the chunk
+
+		; The set of atoms not yet used.
+		(define atomW-not-tried
+			(lset-difference equal? atomW-unused atomW-to-try))
+
+		; The set of atoms not yet added to the chunk.
+		(define atomW-not-chunked
+			(lset-difference equal? atomW-to-try atomW-chunk))
 
 		(define (give-up-unadded-part)
-			; atoms that worked (already added to the chunk)
+			; Atoms that worked (already added to the chunk).
 			(define good-set (lset-intersection equal? atomW-to-try atomW-chunk))
 
-			; remove the stuff in dead-set from consideration
+			; Remove the stuff in dead-set from consideration.
 			(set! atomW-unused (lset-difference equal? atomW-unused atomW-not-chunked))
 
-			; try "saying" the previous working iteration again (if available)
+			; Try "saying" the previous working iteration again (if
+			; available).
 			(if (null? good-set)
 				(if (not (null? atomW-unused))
-					(recursive-helper (list (pick-atomW atomW-unused atomW-used (get-main-weight-proc option) utterance-type)) #t)
+					(recursive-helper (list
+							(pick-atomW atomW-unused atomW-used
+								(get-main-weight-proc option) utterance-type)) #t)
 				)
 				(recursive-helper good-set #f)
 			)
 		)
 		(define (update-chunk)
-			; add anything that has not been included in the chunk yet
+			; Add anything that has not been included in the chunk yet.
 			(set! atomW-chunk (lset-union equal? atomW-to-try atomW-chunk))
 			(set! atomW-unused atomW-not-tried)
 		)
@@ -292,11 +312,13 @@
 		(define temp-var2 '())
 		(define temp-differences '())
 
+(trace-msg "duuude int make-sentence syaabilit is:")
+(trace-msg result) (trace-msg "\n")
 		(cond ; not say-able
 			((= result *microplanning_not_sayable*)
-				; Could be the atoms cannot be said, unless bringing in
+				; Could be the atoms cannot be said, without bringing in
 				; additional atoms (such as "and/or/that").  Try to add
-				; more (up to 3 different links)
+				; more (up to 3 different links).
 				(cond ((<= (length atomW-not-chunked) 3)
 						; Look to see if the newest link has any node that
 						; is solo (i.e. appears only once in the current set).
@@ -361,6 +383,7 @@
 		)
 	)
 
+(trace-msg "duuude enter make-sentence \n")
 	; The initial critera for choosing a starting point would be
 	; (time-weights + link-weights) * form-weights
 	(recursive-helper (list (pick-atomW atomW-unused atomW-used
@@ -378,18 +401,19 @@
 ;
 (define (get-sentence-forms utterance-type)
 	(cog-outgoing-set (car
-		(cond ((string=? "declarative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "DeclarativeUtterance"))
-		      )
-		      ((string=? "interrogative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "InterrogativeUtterance"))
-		      )
-		      ((string=? "imperative" utterance-type)
-			(cog-chase-link 'InheritanceLink 'OrLink (ConceptNode "ImperativeUtterance"))
-		      )
-		      ((string=? "interjective" utterance-type)
-			'()
-		      )
+		(cond
+			((string=? "declarative" utterance-type)
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "DeclarativeUtterance")))
+
+			((string=? "interrogative" utterance-type)
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "InterrogativeUtterance")))
+
+			((string=? "imperative" utterance-type)
+				(cog-chase-link 'InheritanceLink 'OrLink
+					(ConceptNode "ImperativeUtterance")))
+			((string=? "interjective" utterance-type) '())
 		)
 	))
 )
@@ -412,22 +436,32 @@
 		(any helper atoms)
 	)
 
-	(cond ((string=? "declarative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
-	      )
-	      ((string=? "interrogative" utterance-type)
-		; TruthQuerySpeechAct will have no VariableNode on the main sentence-form link
-		(if (search-varnode)
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
-			(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
-		)
-	      )
-	      ((string=? "imperative" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
-	      )
-	      ((string=? "interjective" utterance-type)
-		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "InterjectiveSpeechAct"))
-	      )
+	(cond
+		((string=? "declarative" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "DeclarativeSpeechAct")))
+
+		((string=? "interrogative" utterance-type)
+			; TruthQuerySpeechAct will have no VariableNode on the main
+			; sentence-form link.
+			(if (search-varnode)
+				(InheritanceLink
+					(InterpretationNode "MicroplanningNewSentence")
+					(DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+				(InheritanceLink
+					(InterpretationNode "MicroplanningNewSentence")
+					(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))))
+
+		((string=? "imperative" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "ImperativeSpeechAct")))
+
+		((string=? "interjective" utterance-type)
+			(InheritanceLink
+				(InterpretationNode "MicroplanningNewSentence")
+				(DefinedLinguisticConceptNode "InterjectiveSpeechAct")))
 	)
 )
 
@@ -493,11 +527,11 @@
 	(cog-purge temp-set-link)
 
 	(cond
-	      ; not long/complex but sayable
-	      ((and ok-length say-able) *microplanning_sayable*)
-	      ; long/complex but sayable
-	      ((and (not ok-length) say-able) *microplanning_too_long*)
-	      ; not sayable
-	      (else *microplanning_not_sayable*)
+		; not long/complex but sayable
+		((and ok-length say-able) *microplanning_sayable*)
+		; long/complex but sayable
+		((and (not ok-length) say-able) *microplanning_too_long*)
+		; not sayable
+		(else *microplanning_not_sayable*)
 	)
 )
