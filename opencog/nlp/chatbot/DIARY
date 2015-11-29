@@ -270,9 +270,8 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 ====================================================
 
-(use-modules (opencog)
-(opencog nlp)
- (opencog nlp microplanning))
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+(init-trace "/tmp/wtf")
 
 (define lap
 (SequentialAndLink
