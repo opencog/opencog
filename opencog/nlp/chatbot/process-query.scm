@@ -5,6 +5,8 @@
 ; Somewhat generic, somewhat IRC-specific.
 ;
 
+(use-modules (opencog nlp fuzzy))
+
 ;------------------------------------------------------------------
 (define (get-utterance-type sent)
 "
@@ -31,6 +33,19 @@
 )
 
 ;-------------------------------------------------------------------
+;--------------------------------------------------------------------
+(define (wh_query_process query)
+"
+  Process wh-question using the fuzzy hyper graph Matcher
+  QUERY should be a SentenceNode
+
+  Wrapper around get-ansers provided by (opencog nlp fuzzy)
+"
+    (define temp (get-answers query))
+    (cond
+        ((equal? '() temp) "Sorry, I don't know the answer.")
+        (else (car temp))
+))
 ;--------------------------------------------------------------------
 (define-public (process-query user query)
 "
@@ -100,15 +115,6 @@
     (set! bc (cog-bc
         (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) rule-base (SetLink)))
 )
-;--------------------------------------------------------------------
-; Process wh-question using the fuzzy hyper graph Matcher
-;--------------------------------------------------------------------
-(define (wh_query_process query)
-    (define temp (get-answers query))
-    (cond
-        ((equal? '() temp) "Sorry, I don't know the answer.")
-        (else (car temp))
-))
 ;-------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward
 ; chaining.
