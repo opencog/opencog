@@ -89,16 +89,12 @@
 		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
-(trace-msg "duuuude enter micro-main: and-link is\n")
-(trace-msg seq-link)
 	; Initialize the sentence forms as needed
 	(microplanning-init)
 
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
 
-(trace-msg "duuuude all-sets:")
-(trace-msg all-sets)
 	(if (null? all-sets) #f (map finalize all-sets))
 )
 
@@ -132,12 +128,6 @@
 		(define (sub-helper ut)
 			(define new-atomW-chunk
 				(make-sentence atomW-unused atomW-complete-set ut option))
-(trace-msg "duuude enter sub-helpter, cur chksis:")
-(trace-msg curr-chunks) (trace-msg "\n")
-(trace-msg "duuude sub-helpter, new cuunk is:")
-(trace-msg new-atomW-chunk) (trace-msg "\n")
-(trace-msg "duuude sub-helpter, all-hunks is:")
-(trace-msg all-chunks-sets) (trace-msg "\n")
 			(cond
 				; make-sentence made a new chunk; make more chunks
 				; with the remaining atoms.
@@ -167,11 +157,6 @@
 			)
 		)
 
-(trace-msg "duuuude enter reursive-helpter\n")
-(trace-msg "atom-unused: ") (trace-msg atomW-unused)
-(trace-msg "\ncurr chunks: ") (trace-msg curr-chunks)
-(trace-msg "\ncuruts: ")(trace-msg curr-uts)
-(trace-msg "\n")
 		; If not the first sentence, and have "interrogative" utterance
 		; type, allow "declarative"
 		(if (and (not (null? curr-chunks))
@@ -197,7 +182,6 @@
 		)
 	)
 
-(trace-msg "duuuude enter make-sentence-cheunks\n")
 	; loop make-sentence on remaining atoms
 	(recursive-helper atomW-complete-set '() '())
 
@@ -312,8 +296,6 @@
 		(define temp-var2 '())
 		(define temp-differences '())
 
-(trace-msg "duuude int make-sentence syaabilit is:")
-(trace-msg result) (trace-msg "\n")
 		(cond ; not say-able
 			((= result *microplanning_not_sayable*)
 				; Could be the atoms cannot be said, without bringing in
@@ -383,7 +365,6 @@
 		)
 	)
 
-(trace-msg "duuude enter make-sentence \n")
 	; The initial critera for choosing a starting point would be
 	; (time-weights + link-weights) * form-weights
 	(recursive-helper (list (pick-atomW atomW-unused atomW-used
