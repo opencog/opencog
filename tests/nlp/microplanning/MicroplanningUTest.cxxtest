@@ -89,7 +89,8 @@ void MicroplanningUTest::setUp(void)
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm,"
                  "opencog/scm/utilities.scm,"
-                 "opencog/scm/atom-types.scm,"
+                 "opencog/scm/debug-trace.scm,"
+                 "opencog/scm/opencog/atom-types.scm,"
                  "opencog/nlp/types/nlp_types.scm,"
                  "opencog/nlp/scm/nlp-utils.scm,"
                  "opencog/nlp/relex2logic/r2l-utilities.scm,"
