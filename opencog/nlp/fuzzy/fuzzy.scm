@@ -82,23 +82,22 @@
         )
     )
 
-    (begin
+    (let* ( ; parse is the ParseNode for the sentence
+            (parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
+
+            ; intrp is the InterpretationNode for the sentence
+            (intrp (car (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+            ; setlk is the R2L SetLink of the input sentence
+            (setlk (car (cog-chase-link 'ReferenceLink 'SetLink intrp)))
+
+            ; fzset is the set of similar sets.
+            (fzset (cog-fuzzy-match setlk 'SetLink exclude-list))
+        )
+
         ; Delete identical sentences from the return set
         (delete-duplicates
             ; Use Mircoplanner and SuReal to generate sentences from the SetLinks found
-            (generate-sentences
-                ; Search for any similar SetLinks in the atomspace
-                (cog-outgoing-set (cog-fuzzy-match
-                    ; Get the R2L SetLink of the input sentence
-                    (car (cog-chase-link 'ReferenceLink 'SetLink
-                        (car (cog-chase-link 'InterpretationLink 'InterpretationNode
-                            (car (cog-chase-link 'ParseLink 'ParseNode sent-node))
-                        ))
-                    ))
-                    'SetLink
-                    exclude-list
-                ))
-            )
+            (generate-sentences (cog-outgoing-set fzset))
         )
     )
 )

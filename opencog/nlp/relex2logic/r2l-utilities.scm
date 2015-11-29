@@ -15,7 +15,7 @@
 	(define iset (cog-incoming-set atom))
 	
 	; Halt when the SetLink that wraps around R2L outputs is reached.
-	; The SetLink is cratd by r2l(...)
+	; The SetLink is created by r2l(...)
 	(if (and (= (length iset) 1) (equal? 'SetLink (cog-type (car iset))))
 		(list atom)
 		; if no incoming set (happens when using relex-parse(...))
