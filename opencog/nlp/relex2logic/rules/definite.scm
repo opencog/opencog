@@ -34,39 +34,11 @@
         )
         (ListLink
             (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-definite-rule")
+                (GroundedSchemaNode "scm: definite-rule")
                 (ListLink
                     (VariableNode "$lemma")
                     (VariableNode "$noun"))
             )
         )
-    )
-)
-
-; This is function is not needed. It is added so as not to break the
-; existing r2l pipeline.  Huh ??? How can it not be needed?  It is
-; used right up above!
-;
-; Here's what this does: given as input
-;    (WordInstanceNode "ballgame@8cb61431")
-;
-; It generates the following output:
-;    (InheritanceLink
-;        (ConceptNode "ballgame@8cb61431")
-;        (ConceptNode "ballgame"))
-;     (ReferenceLink
-;        (ConceptNode "ballgame@8cb61431")
-;        (WordInstanceNode "ballgame@8cb61431"))
-;     (EvaluationLink
-;        (DefinedLinguisticPredicateNode "definite")
-;        (ListLink (ConceptNode "ballgame@8cb61431")))
-;
-; Which strikes me as ugly, but wtf...
-
-
-(define (pre-definite-rule lemma noun)
-    ; XXX FIXME doe we really need the ListLink here ???
-    (ListLink
-        (definite-rule (cog-name lemma) (cog-name noun))
     )
 )

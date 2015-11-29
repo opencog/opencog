@@ -617,16 +617,17 @@
 	 (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
-(define-public (definite-rule word word_instance)
-(trace-msg "ola dfeinito!\n")
-	(list (InheritanceLink (ConceptNode word_instance) (ConceptNode word))
-	(r2l-wordinst-concept word_instance)
-	(EvaluationLink
-        (DefinedLinguisticPredicateNode "definite")
-        (ListLink
-	        (ConceptNode word_instance)
-        )
-    ))
+(define-public (definite-rule lemma word-inst)
+	(define word (cog-name lemma))
+	(define word_instance (cog-name word-inst))
+
+	(ListLink
+		(InheritanceLink (ConceptNode word_instance) (ConceptNode word))
+		(r2l-wordinst-concept word_instance)
+		(EvaluationLink
+			(DefinedLinguisticPredicateNode "definite")
+			(ListLink (ConceptNode word_instance))
+		))
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
@@ -870,7 +871,7 @@
 ;
 (define (whencop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 
+		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(AtTimeLink
@@ -949,7 +950,7 @@
 ;
 (define (howpredadj-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list 
+		(list
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(InheritanceLink (ConceptNode subj_instance) (VariableNode var_name))
