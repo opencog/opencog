@@ -74,7 +74,7 @@
 	; this would avoid a lot of string-matching/downcasing/appending
 	; tomfoolery i.e. simplify the code.
 	(define all-sets '())
-	
+
 	(define (finalize set)
 		(define (wrap-setlink atoms ut)
 			; add additional link base on utterance type
@@ -86,13 +86,6 @@
 		(if anaphora
 			(set! new-set (insert-anaphora set))
 		)
-(trace-msg "duuuude new-set: ")
-(trace-msg new-set)
-(trace-msg "duuuude new-set utters : ")
-(trace-msg (get-utterance-types new-set))
-(trace-msg "duuuude chunks : ")
-(trace-msg (get-chunks new-set))
-		
 		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
@@ -121,7 +114,7 @@
   varying utterance-types, with each set of chunks contained
   within an <chunks-set> object.
 "
-	; wrap each atom in a container to allow repeated atoms, and
+	; Wrap each atom in a container to allow repeated atoms, and
 	; persistence time weights
 	(define atomW-complete-set
 		(map
@@ -134,76 +127,86 @@
 
 	(define (recursive-helper atomW-unused curr-chunks curr-uts)
 		(define ut (list utterance-type))
-		
-		; helper function for branching into different utterance type
+
+		; Helper function for branching into different utterance types.
 		(define (sub-helper ut)
-			(define new-atomW-chunk (make-sentence atomW-unused atomW-complete-set ut option))
-			(cond ; has a new chunk, continue to make more chunk with the rest of the atoms
-			      ((not (null? new-atomW-chunk))
-				; TODO keep some of the atoms (those that do not satisfy sentence forms) for later use?
-				(recursive-helper
-					(lset-difference equal? atomW-unused new-atomW-chunk)
-					(cons (map get-atom new-atomW-chunk) curr-chunks)
-					(cons ut curr-uts)
+			(define new-atomW-chunk
+				(make-sentence atomW-unused atomW-complete-set ut option))
+			(cond
+				; Has a new chunk, continue to make more chunks
+				; with the rest of the atoms
+				((not (null? new-atomW-chunk))
+					; TODO keep some of the atoms (those that do not
+					; satisfy sentence forms) for later use?
+					(recursive-helper
+						(lset-difference equal? atomW-unused new-atomW-chunk)
+						(cons (map get-atom new-atomW-chunk) curr-chunks)
+						(cons ut curr-uts)
+					)
 				)
-			      )
-			      ; unable to form more chunks, store the created chunks (if any) & their corresponding utterance-type
-			      ((not (null? curr-chunks))
+				; Unable to form more chunks, store the created chunks
+				; (if any) & their corresponding utterance-type
+				((not (null? curr-chunks))
+					(set! all-chunks-sets
+						(cons
+							(make <chunks-set>
+								#:chunks (reverse curr-chunks)
+								#:utterance-types (reverse curr-uts)
+								#:leftover-count (length atomW-unused)
+							)
+							all-chunks-sets
+						)
+					)
+				)
+			)
+		)
+
+		; If not the first sentence, and have "interrogative" utterance
+		; type, allow "declarative"
+		(if (and (not (null? curr-chunks))
+				(string=? "interrogative" utterance-type))
+			(set! ut (list "interrogative" "declarative"))
+		)
+
+		(cond
+			; Use the sub-helper to keep calling make-sentence until
+			; all atoms are used, branching on all allowed utterance type
+			((not (null? atomW-unused)) (for-each sub-helper ut))
+
+			; Finished all atoms, store the created chunks & their
+			; corresponding utterance-type
+			(else
 				(set! all-chunks-sets
 					(cons
 						(make <chunks-set>
 							#:chunks (reverse curr-chunks)
 							#:utterance-types (reverse curr-uts)
-							#:leftover-count (length atomW-unused)
+							#:leftover-count 0
 						)
 						all-chunks-sets
 					)
 				)
-			      )
-			)		
-		)
-		
-		; if not the first sentence and has "interrogative" utterance type, allow "declarative"
-		(if (and (not (null? curr-chunks)) (string=? "interrogative" utterance-type))
-			(set! ut (list "interrogative" "declarative"))
-		)
-
-		(cond ; use the sub-helper to keep calling make sentence until all atoms are used, branching on all allowed utterance type
-		      ((not (null? atomW-unused))
-			(for-each sub-helper ut)
-		      )
-		      ; finished all atoms, store the created chunks & their corresponding utterance-type
-		      (else
-			(set! all-chunks-sets
-				(cons
-					(make <chunks-set>
-						#:chunks (reverse curr-chunks)
-						#:utterance-types (reverse curr-uts)
-						#:leftover-count 0
-					)
-					all-chunks-sets
-				)
 			)
-		      )
 		)
 	)
 
 	; loop make-sentence on remaining atoms
 	(recursive-helper atomW-complete-set '() '())
 
-	(cond ((not (null? all-chunks-sets))
+	(cond
+		((not (null? all-chunks-sets))
 		(receive (complete-sets incomplete-sets)
 			(partition (lambda (cs) (= (get-leftover-count cs) 0)) all-chunks-sets)
-			
+
 			; remove sets in incomplete-sets which is a subset of a set in complete-sets
 			(set! incomplete-sets (remove (lambda (is) (any is-subset? (circular-list is) complete-sets)) incomplete-sets))
-			
+
 			; incomplete chunks set (those which did not say everything) are sorted by how many atoms leftover
 			(sort! incomplete-sets less-leftover?)
-			
+
 			; sort the complete sets bases on how many chunks (sentences) in the set
 			(sort! complete-sets less-chunks?)
-			
+
 			; sort sets with same amount of sentences bases on variation
 			(letrec ((sort-by-variation
 					(lambda (sets)
@@ -223,8 +226,8 @@
 				(append (sort-by-variation complete-sets) incomplete-sets)
 			)
 		)
-	      )
-	      (else '())
+	)
+		(else '())
 	)
 )
 
@@ -242,7 +245,7 @@
 
 	; main helper function for looping
 	(define (recursive-helper atomW-to-try do-check)
-		 ; the result of trying to say the atoms in a sentence
+		; the result of trying to say the atoms in a sentence
 		(define result
 			; just return *microplanning_sayable* if no need to check
 			(if do-check
@@ -259,7 +262,7 @@
 
 			; remove the stuff in dead-set from consideration
 			(set! atomW-unused (lset-difference equal? atomW-unused atomW-not-chunked))
-			
+
 			; try "saying" the previous working iteration again (if available)
 			(if (null? good-set)
 				(if (not (null? atomW-unused))
@@ -278,7 +281,7 @@
 		(define temp-var1 '())
 		(define temp-var2 '())
 		(define temp-differences '())
-		
+
 		(cond ; not say-able
 		      ((= result *microplanning_not_sayable*)
 			; could be the atoms cannot be said unless bringing in additional atoms (such as "and/or/that")
@@ -384,10 +387,10 @@
 		(define (helper atom)
 			(and (match-sentence-forms atom favored-forms) (cog-has-atom-type? atom 'VariableNode))
 		)
-		
+
 		(any helper atoms)
 	)
-	
+
 	(cond ((string=? "declarative" utterance-type)
 		(InheritanceLink (InterpretationNode "MicroplanningNewSentence") (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
 	      )
@@ -418,7 +421,7 @@
 ;
 (define (pick-atomW atomW-list base-atomW-list comb-proc utterance-type)
 	(define favored-forms (get-sentence-forms utterance-type))
-	
+
 	; helper function that calculate the weights of each atoms in 'choices' using 'comb-proc'
 	(define (calc-weights choices bases comb-proc)
 		(define unwrapped-choices (map get-atom choices))
@@ -437,7 +440,7 @@
 		(define form-weights (map (lambda (atom) (if (match-sentence-forms atom favored-forms) 1 0)) unwrapped-choices))
 		; initialize weight bases on linkage to other atoms in 'bases'
 		(define link-weights (map link-count unwrapped-choices))
-		
+
 		; create a combined weight using comb-proc
 		(map comb-proc time-weights form-weights link-weights)
 	)
