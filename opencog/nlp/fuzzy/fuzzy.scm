@@ -71,8 +71,6 @@
                          *default_chunks_option* #f)))
 (trace-msg "duuude sp-act is ")
 (trace-msg spe-act)
-(trace-msg "\nduuude seq-and is ")
-(trace-msg seq-and)
 (trace-msg "duuude m-res is ")
 (trace-msg m-results)
                 ; Don't send it to SuReal in case it's not good

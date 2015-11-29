@@ -86,30 +86,43 @@
 		(if anaphora
 			(set! new-set (insert-anaphora set))
 		)
+(trace-msg "duuuude new-set: ")
+(trace-msg new-set)
+(trace-msg "duuuude new-set utters : ")
+(trace-msg (get-utterance-types new-set))
+(trace-msg "duuuude chunks : ")
+(trace-msg (get-chunks new-set))
 		
 		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
+(trace-msg "duuuude enter micro-main: and-link is\n")
+(trace-msg seq-link)
 	; Initialize the sentence forms as needed
 	(microplanning-init)
 
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
 
+(trace-msg "duuuude all-sets:")
+(trace-msg all-sets)
 	(if (null? all-sets) #f (map finalize all-sets))
 )
 
 ; -----------------------------------------------------------------------
-; make-sentence-chunks -- The main helper function for handling a microplanning request
-;
-; Calls make-sentence repeatedly until all informations have been spoken, or
-; no longer say-able.  Accepts a list of links 'atoms-set' from within the original
-; SequentialAndLink, the utterance-type, and the option.  Returns a list of different
-; ways chunks can form by varying utterance-types, each set of chunks contained
-; within an <chunks-set> object.
-;
 (define (make-sentence-chunks atoms-list utterance-type option)
-	; wrap each atom in a container to allow repeated atoms, and persistence time weights
+"
+  make-sentence-chunks -- main helper function for microplanning
+
+  Calls make-sentence repeatedly until all informations have been
+  spoken, or no longer say-able.  Accepts a list of links 'atoms-set'
+  from within the original ATOMS-LIST, the UTTERANCE-TYPE, and the
+  OPTION.  Returns a list of different ways chunks can form by
+  varying utterance-types, with each set of chunks contained
+  within an <chunks-set> object.
+"
+	; wrap each atom in a container to allow repeated atoms, and
+	; persistence time weights
 	(define atomW-complete-set
 		(map
 			(lambda (a t) (make <atomW> #:atom a #:time-weight t))
