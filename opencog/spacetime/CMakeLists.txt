@@ -21,44 +21,44 @@ INSTALL (TARGETS spacetime-types
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 
 IF (HAVE_OCTOMAP)
-    ADD_LIBRARY (spacetime SHARED
-        HandleToTemporalEntryMap.cc
-        HandleTemporalPairEntry.cc
-        HandleTemporalPair.cc
-        SpaceServer.cc
-        SpaceTime.cc
-        Temporal.cc
-        TemporalEntry.cc
-        TemporalMap.cc
-        TemporalTable.cc
-        TemporalToHandleSetMap.cc
-        TimeServer.cc
-    )
+	ADD_LIBRARY (spacetime SHARED
+		HandleToTemporalEntryMap.cc
+		HandleTemporalPairEntry.cc
+		HandleTemporalPair.cc
+		SpaceServer.cc
+		SpaceTime.cc
+		Temporal.cc
+		TemporalEntry.cc
+		TemporalMap.cc
+		TemporalTable.cc
+		TemporalToHandleSetMap.cc
+		TimeServer.cc
+	)
 
-TARGET_LINK_LIBRARIES(spacetime
-	spacetime-types
-	SpaceMap
-	server
-        ${ATOMSPACE_LIBRARIES})
+	TARGET_LINK_LIBRARIES(spacetime
+		spacetime-types
+		SpaceMap
+		server
+		${ATOMSPACE_LIBRARIES})
 
-    INSTALL (FILES
-        HandleToTemporalEntryMap.h
-        HandleTemporalPairEntry.h
-        HandleTemporalPair.h
-        SpaceServer.h
-        SpaceTime.h
-        SpaceServerContainer.h
-        Temporal.h
-        TemporalEntry.h
-        TemporalMap.h
-        TemporalTable.h
-        TemporalToHandleSetMap.h
-        TimeServer.h
-        DESTINATION "include/${PROJECT_NAME}/spacetime"
-    )
+	INSTALL (FILES
+		HandleToTemporalEntryMap.h
+		HandleTemporalPairEntry.h
+		HandleTemporalPair.h
+		SpaceServer.h
+		SpaceTime.h
+		SpaceServerContainer.h
+		Temporal.h
+		TemporalEntry.h
+		TemporalMap.h
+		TemporalTable.h
+		TemporalToHandleSetMap.h
+		TimeServer.h
+		DESTINATION "include/${PROJECT_NAME}/spacetime"
+	)
 
-    INSTALL (FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
-        DESTINATION "${DATADIR}/scm/spacetime"
-    )
+	INSTALL (FILES
+		${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
+		DESTINATION "${DATADIR}/scm/spacetime"
+	)
 ENDIF (HAVE_OCTOMAP)
