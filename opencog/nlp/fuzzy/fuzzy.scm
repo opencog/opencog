@@ -8,56 +8,33 @@
              (opencog nlp sureal)
              (opencog nlp microplanning))
 
-(define-public (get-answers question)
+(define-public (get-answers sent-node)
 "
   Find answers (i.e., similar sentences that share some keyword) from
   the Atomspace by using the fuzzy pattern matcher. By default, it
   excludes sentences with TruthQuerySpeechAct and InterrogativeSpeechAct.
 
-  Accepts either an actual sentence or a SentenceNode as the input.
-  Also accepts an optional argument \"exclude-list\" which is a list of
-  atoms that we don't want them to exist in the hypergraphs of the
-  answers. By default they are
-     (DefinedLinguisticConceptNode \"TruthQuerySpeechAct\")
-  and (DefinedLinguisticConceptNode \"InterrogativeSpeechAct\").
-
-  Returns one or more sentences -- the answers.
+  Accepts a SentenceNode as the input.
+  Returns one or more sentence strings -- the answers.
 
   For example:
-     (get-answers \"What did Pete eat?\")
+     (get-answers (car (nlp-parse \"What did Pete eat?\")))
   OR:
      (get-answers (SentenceNode \"sentence@123\"))
 
   Possible result:
      (Pete ate apples .)
 "
-    ; Check if the input is an actual sentence or a SentenceNode,
-    ; parse and return the corresponding SentenceNode if it is a sentence
-    (define (process-q input)
-        (if (cog-atom? input)
-            (if (equal? 'SentenceNode (cog-type input))
-                input
-                #f
-            )
-            (car (nlp-parse input))
-        )
-    )
-
-    (let ((sent-node (process-q question))
-          (ex-list (list (DefinedLinguisticConceptNode "TruthQuerySpeechAct")
-                         (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))))
-        (if sent-node
-            (sent-matching sent-node ex-list)
-            (display "Please input a SentenceNode only")
-        )
-    )
+    (sent-matching sent-node
+        (list (DefinedLinguisticConceptNode "TruthQuerySpeechAct")
+              (DefinedLinguisticConceptNode "InterrogativeSpeechAct")))
 )
 
 (define-public (sent-matching sent-node exclude-list)
 "
   The main function for finding similar sentences
   Returns one or more sentences that are similar to the input one but
-  contains no atoms that are listed in the exclude-list
+  contain no atoms that are listed in the exclude-list.
 "
     ; Generate sentences from each of the R2L-SetLinks
     ; (define (generate-sentences r2l-setlinks) (if (> (length r2l-setlinks) 0) (map sureal r2l-setlinks) '()))
