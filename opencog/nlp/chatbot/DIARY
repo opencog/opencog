@@ -235,7 +235,7 @@ OK, but only the first one ever gets used ... fixed!
   "When is ..." identified as conjunction by relex!
 
 
-  Who works ...  What works ... 
+  Who works ...  What works ...
   Who sets interrogative-FLAG (_$qVar, T)
   "How is..."
   "Why is ..? also broken.
@@ -258,12 +258,20 @@ scm/sentence-matching.scm:
 
 fixed! Relex was mis-behaving and R2L was using a fragile mechanism.
 
-====================================================
-bugs:
-* (process-query 'luser "Look to the left!") crashes
+Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
+====================================================
+* (process-query 'luser "Look to the left!") crashes
    C++-EXCEPTION' with args `("cog-fc"
 
+  bug was the pre-SV-rule and definite-rule were running
+    word-inst-get-lemma on LEFT-WALL, got nil, and then crashed.
+  Fix to not run these rules when there is no lemma.
+
+====================================================
+bugs:
+
+* Its not answering any questions ...
 
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn
