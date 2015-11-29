@@ -5,32 +5,7 @@
 ; Somewhat generic, somewhat IRC-specific.
 ;
 
-(use-modules (opencog nlp fuzzy))
-
-;------------------------------------------------------------------
-(define (get-utterance-type sent)
-"
-  get-utterance-type SENT -- Check the utterance speech act type
-
-  Expect SENT to be (SentenceNode \"sentence@45c470a6-29...\")
-  Will return (DefinedLinguisticConceptNode ACT) where ACT is
-  one of DeclarativeSpeechAct, InterrogativeSpeechAct,
-  TruthQuerySpeechAct, etc...
-"
-    ; parse will be (ParseNode "sentence@a6_parse_0")
-    (define parse (car (cog-chase-link 'ParseLink 'ParseNode sent)))
-    ; interp will be (InterpretationNode "sentence@a610_interpretation_$X")
-
-    (define interp (car
-        (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
-
-    ; act-type will be (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
-    (define act-type (cog-chase-link
-        'InheritanceLink 'DefinedLinguisticConceptNode interp))
-
-    ; Return act-type
-    act-type
-)
+(use-modules (opencog nlp) (opencog nlp fuzzy))
 
 ;-------------------------------------------------------------------
 ;--------------------------------------------------------------------
@@ -69,7 +44,7 @@
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
-    (let* ((gutr (get-utterance-type querySentence))
+    (let* ((gutr (sentence-get-utterance-type querySentence))
            (utr (if (equal? '() gutr) '() (car gutr)))
         )
     (cond
