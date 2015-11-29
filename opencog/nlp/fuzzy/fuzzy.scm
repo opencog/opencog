@@ -66,7 +66,7 @@
             ; Send each of the SetLinks found by the fuzzy matcher to
             ; Microplanner to see if they are good
             (let* ( (spe-act (get-speech-act r))
-                    (seq-and (SequentialAndLink (cog-outgoing-set r)))
+                    (seq-and (AndLink (cog-outgoing-set r)))
                     (m-results (microplanning seq-and spe-act
                          *default_chunks_option* #f)))
 (trace-msg "duuude sp-act is ")

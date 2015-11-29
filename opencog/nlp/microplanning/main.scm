@@ -75,11 +75,12 @@
 	; tomfoolery i.e. simplify the code.
 	(define all-sets '())
 	
-	(define (wrap-setlink atoms ut)
-		; add additional link base on utterance type
-		(SetLink (get-utterance-link ut atoms) atoms)
-	)
 	(define (finalize set)
+		(define (wrap-setlink atoms ut)
+			; add additional link base on utterance type
+			(SetLink (get-utterance-link ut atoms) atoms)
+		)
+
 		(define new-set set)
 
 		(if anaphora
