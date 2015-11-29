@@ -89,11 +89,6 @@
 		(map wrap-setlink (get-chunks new-set) (get-utterance-types new-set))
 	)
 
-	(if (not (equal? 'SequentialAndLink (cog-type seq-link)))
-		(scm-error 'wrong-type-arg "microplanning"
-			"Wrong type (expecting SequentialAndLink): ~A"
-			(list seq-link) (list seq-link)))
-
 	; Initialize the sentence forms as needed
 	(microplanning-init)
 
