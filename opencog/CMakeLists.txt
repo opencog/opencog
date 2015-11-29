@@ -30,8 +30,12 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 IF (HAVE_SERVER)
+    #Octomap checking will be done inside
+    #Will always build types
     ADD_SUBDIRECTORY (spacetime)
-    ADD_SUBDIRECTORY (spatial)
+    IF (HAVE_OCTOMAP)
+        ADD_SUBDIRECTORY (spatial)
+    ENDIF (HAVE_OCTOMAP)
 ENDIF (HAVE_SERVER)
 
 # build unconditionally; a check is made there.

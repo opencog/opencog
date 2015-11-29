@@ -25,8 +25,10 @@ IF (CXXTEST_FOUND)
 		IF (HAVE_SERVER)
 			ADD_SUBDIRECTORY (server)
 		ENDIF (HAVE_SERVER)
-
- 		ADD_SUBDIRECTORY (spatial)
+        IF (HAVE_OCTOMAP)
+            ADD_SUBDIRECTORY (spacetime)
+            ADD_SUBDIRECTORY (spatial)
+        ENDIF (HAVE_OCTOMAP)
 
 		ADD_SUBDIRECTORY (nlp)
 

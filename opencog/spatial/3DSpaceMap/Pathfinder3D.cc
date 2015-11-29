@@ -21,16 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Pathfinder3D.h"
+
 #include <set>
 #include <map>
 #include <iterator>
 #include <algorithm>
-
+#include "SpaceMapUtil.h"
+#include "Pathfinder3D.h"
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
+bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OctomapOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
                                      BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos, bool tryOptimal)
 {
     BlockVector end = target;
@@ -44,7 +45,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
     bool nostandable = false;
 
     // check if the begin and target pos standable first
-    if ((! mapManager->checkStandable(begin)) || (! mapManager->checkStandable(target)))
+    if ((! checkStandable(*atomSpace, *mapManager, begin)) || (! checkStandable(*atomSpace, *mapManager, target)))
     {
         nostandable = true;
         if ((! getNearestPos) && (! getBestPos))
@@ -98,7 +99,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
                     }
 
                     // check if standable
-                    if (! mapManager->checkStandable(curPos))
+                    if (! checkStandable(*atomSpace, *mapManager, curPos))
                     {
                         searchedList.insert(curPos);
                         continue;
@@ -164,7 +165,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
         // switch the start and end point
         vector<BlockVector> inversePath;
         BlockVector inearestPos,ibestPos;
-        AStar3DPathFinder(mapManager, target, begin, inversePath, inearestPos,ibestPos);
+        AStar3DPathFinder(atomSpace, mapManager, target, begin, inversePath, inearestPos,ibestPos);
         if (inversePath.size() < path.size())
         {
             path = inversePath;
@@ -203,7 +204,7 @@ double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const Blo
 
 
 // before call this funciton, please make sure the pos want to access is standable first
-bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, BlockVector& lastPos, int i, int j, int k)
+bool Pathfinder3D::checkNeighbourAccessable(OctomapOcTree *mapManager, BlockVector& lastPos, int i, int j, int k)
 {
     // if want to access the pos 1 unit lower than last pos
     if (k == -1)
@@ -213,21 +214,24 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
             if (i != 0)
             {
                 BlockVector neighbour1(lastPos.x + i,lastPos.y,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour1))
+                Handle neighbourblock1 = mapManager->getBlock(neighbour1);
+                if ( neighbourblock1 != Handle::UNDEFINED)
                     return false;
             }
 
             if (j != 0)
             {
                 BlockVector neighbour2(lastPos.x,lastPos.y + j,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour2))
+                Handle neighbourblock2 = mapManager->getBlock(neighbour2);
+                if ( neighbourblock2 != Handle::UNDEFINED)
                     return false;
             }
 
             if ( (i != 0) && (j != 0))
             {
                 BlockVector neighbour3(lastPos.x + i,lastPos.y + j,lastPos.z + h);
-                if (mapManager->checkIsSolid(neighbour3))
+                Handle neighbourblock3 = mapManager->getBlock(neighbour3);
+                if ( neighbourblock3 != Handle::UNDEFINED)
                     return false;
             }
         }
@@ -244,7 +248,8 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
     //    FBG
     if (k == 1) // if  want to access higer position
     {
-        if (mapManager->checkIsSolid(lastPos.x,lastPos.y,lastPos.z + 1)) // if the block on top is solid
+        Handle block = mapManager->getBlock(BlockVector(lastPos.x,lastPos.y,lastPos.z + 1));
+        if ( block != Handle::UNDEFINED)
             return false;
     }
 
@@ -254,17 +259,18 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
         for (int h = 0; h < mapManager->getAgentHeight(); h++)
         {
             BlockVector neighbour1(lastPos.x + i,lastPos.y,lastPos.z + h + k );
-            if (mapManager->checkIsSolid(neighbour1))
+            Handle neighbourblock1 = mapManager->getBlock(neighbour1);
+            if ( neighbourblock1 != Handle::UNDEFINED)
                 return false;
 
             BlockVector neighbour2(lastPos.x,lastPos.y + j,lastPos.z + h + k );
-            if (mapManager->checkIsSolid(neighbour2))
+            Handle neighbourblock2 = mapManager->getBlock(neighbour2);
+            if ( neighbourblock2 != Handle::UNDEFINED)
                 return false;
         }
 
         return true;
     }
-
 
     return true;
 }
