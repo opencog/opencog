@@ -53,9 +53,15 @@
             (sA (cog-stv-strength A))
             (sB (cog-stv-strength B))
             (sEQ (cog-stv-strength EQ))
-            ;; Formula based on PLN book formula for sim2inh
-            (sAB (/ (* (+ 1 (/ sB sA)) sEQ) (+ 1 sEQ))))
-        (stv sAB (cog-stv-confidence EQ))))
+            (cEQ (cog-stv-confidence EQ))
+            (sAB (if (< 0.99 (* sEQ cEQ)) ; Hack to work around the
+                                          ; last of distributional
+                                          ; TV. If sEQ is high enough,
+                                          ; we just set sAB as sEQ
+                     sEQ
+                     ;; Formula based on PLN book formula for sim2inh
+                     (/ (* (+ 1 (/ sB sA)) sEQ) (+ 1 sEQ)))))
+            (stv sAB cEQ)))
 
 ;; Name the rule
 (define equivalence-to-double-implication-rule-name
