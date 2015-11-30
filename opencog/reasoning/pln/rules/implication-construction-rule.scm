@@ -59,11 +59,12 @@
                                                   ; the lack of
                                                   ; distributional TV
                         Q-tv-c
-                        P-tv-c)))
+                        (* P-tv-c Q-tv-c)))) ; Big hack because the
+                                             ; naive formula sucks
     (if (= Impl-tv-c 0) ; Try to avoid constructing informationless
                         ; knowledge
         (cog-undefined-handle)
-        (cog-set-tv!
+        (cog-merge-hi-conf-tv!
          (ImplicationLink
             P
             Q)

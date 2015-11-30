@@ -1,25 +1,24 @@
-; =============================================================================
-; Evaluation Implication Rule
-;
-; AndLink
-;   EvaluationLink
-;       A
-;       B
-;   ImplicationLink
-;       A
-;       C
-; |-
-; EvaluationLink
-;   C
-;   B
-; -----------------------------------------------------------------------------
-; Based on Chapter 10: Higher Order Extensional Inference
-; This rule handles some cases of PLN higher order logic that don't
-; require quantifiers
+;; =============================================================================
+;; Evaluation Implication Rule
+;;
+;; EvaluationLink
+;;   A
+;;   B
+;; ImplicationLink
+;;   A
+;;   C
+;; |-
+;; EvaluationLink
+;;   C
+;;   B
+;; -----------------------------------------------------------------------------
+;; Based on Chapter 10: Higher Order Extensional Inference
+;; This rule handles some cases of PLN higher order logic that don't
+;; require quantifiers
 
-; ImplicationLink PredicateNode:A PredicateNode:A
-; can be handled trivially using the existing first-order PLN rules.
-; This is where we handle a special case.
+;; ImplicationLink PredicateNode:A PredicateNode:A
+;; can be handled trivially using the existing first-order PLN rules.
+;; This is where we handle a special case.
 
 
 (load "formulas.scm")

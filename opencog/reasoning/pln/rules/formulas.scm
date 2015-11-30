@@ -45,34 +45,33 @@
 ;; -----------------------------------------------------------------------------
 
 ; Consistency Conditions
-(define (consistency1 sA sB sAB)
-	(- sAB
-		(max 
-			(/ 
-				(- 
-					(+ sA sB) 
-					1) 
-				sA) 
-			0)))
+(define (deduction-consistency-max sA sB)
+  (max (/ (+ sA sB -1) sA) 0))
 
-(define (consistency2 sA sB sAB)
-	(- 
-		(min 
-			1 
-			(/ sB sA)) 
-		sAB))
+(define (deduction-consistency-min sA sB)
+  (min (/ sB sA) 1))
+
+(define (deduction-consistency-1 sA sB sAB)
+  (- sAB (deduction-consistency-max sA sB)))
+
+(define (deduction-consistency-2 sA sB sAB)
+  (- (deduction-consistency-min sA sB) (deduction-consistency-max sA sB)))
 
 ; Main Formula
 
 (define (simple-deduction-strength-formula sA sB sC sAB sBC)
-	(if
+  (let* ((cons-1-AB (deduction-consistency-1 sA sB sAB))
+         (cons-2-AB (deduction-consistency-2 sA sB sAB))
+         (cons-1-BC (deduction-consistency-1 sB sC sBC))
+         (cons-2-BC (deduction-consistency-2 sB sC sBC)))
+    (if
 		(and
-           (>= (consistency1 sA sB sAB) 0)
-           (>= (consistency2 sA sB sAB) 0)
-           (>= (consistency1 sB sC sBC) 0)
-           (>= (consistency2 sB sC sBC) 0))
+           (>= cons-1-AB 0)
+           (>= cons-2-AB 0)
+           (>= cons-1-BC 0)
+           (>= cons-2-BC 0))
         ;; Preconditions are met
-        (if (>= sB 0.9999999)
+        (if (< 0.99 sB)
             ;; sB tends to 1
             sC
             ;; otherwise
@@ -85,14 +84,14 @@
 						(* sB sBC)))
                   (- 1 sB))))
         ;; Preconditions are not met
-		0))
+		0)))
 
-; =============================================================================
-; Basic find and replace formula
-;
-; Returns a new list by replacing first occurance of an element in the 
-; list(here old) to another element in the list(here new).
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Basic find and replace formula
+;;
+;; Returns a new list by replacing first occurance of an element in the
+;; list(here old) to another element in the list(here new).
+;; -----------------------------------------------------------------------------
 
 (define (find-replace l old new)
 	(cond
@@ -101,29 +100,29 @@
 		(else
 			(cons (car l) (find-replace (cdr l) old new)))))
 
-; =============================================================================
-; Invert formula
-;
-; Inverts the input
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Invert formula
+;;
+;; Inverts the input
+;; -----------------------------------------------------------------------------
 
 (define (invert a)
     (/ 1.0 a))
 
-; =============================================================================
-; Negate formula
-;
-; Negates the probability
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Negate formula
+;;
+;; Negates the probability
+;; -----------------------------------------------------------------------------
 
 (define (negate a)
     (- 1 a))
 
-; =============================================================================
-; Transitive Similarity Formula
-;
-; Returns the strength value of the transitive similarity rule
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Transitive Similarity Formula
+;;
+;; Returns the strength value of the transitive similarity rule
+;; -----------------------------------------------------------------------------
 
 (define (transitive-similarity-strength-formula sA sB sC sAB sBC )
     (let
@@ -134,11 +133,11 @@
         (invert (- (+ (invert (+ (* T1 T2) (* (negate T1) (/ (- sC (* sB T2)) (negate sB)))))
                       (invert (+ (* T3 T4) (* (negate T3) (/ (- sC (* sB T4)) (negate sB)))))) 1))))
 
-; =============================================================================
-; PreciseModusPonens formula
-;
-; Returns the strength value of the precise modus ponens rule
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; PreciseModusPonens formula
+;;
+;; Returns the strength value of the precise modus ponens rule
+;; -----------------------------------------------------------------------------
 
 (define (precise-modus-ponens-strength-formula sA sAB snotAB)
     (+ (* sAB sA) (* snotAB (negate sA))))

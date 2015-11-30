@@ -1,26 +1,25 @@
-; =============================================================================
-; InductionRule
-; 
-; AndLink
-;   LinkType
-;       A
-;       B
-;   LinkType
-;       A
-;       C
-; |-
-; LinkType
-;   B
-;   C
-;
-; Due to pattern matching issues, currently the file has been divided into 3 
-; parts, each pertaining to different links. The rules are :-
-;       induction-inheritance-rule
-;       induction-implication-rule
-;       induction-subset-rule
-;
+;; =============================================================================
+;; InductionRule
+;;
+;; LinkType
+;;   A
+;;   B
+;; LinkType
+;;   A
+;;   C
+;; |-
+;; LinkType
+;;   B
+;;   C
+;;
+;; Due to pattern matching issues, currently the file has been divided into 3
+;; parts, each pertaining to different links. The rules are :-
+;;       induction-inheritance-rule
+;;       induction-implication-rule
+;;       induction-subset-rule
+;;
+;; -----------------------------------------------------------------------------
 
-; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
 (define induction-inheritance-rule
@@ -134,9 +133,9 @@
                 (simple-deduction-strength-formula sB sA sC (inversion-strength-formula sAB sA sB) sAC) 
                 (min cAB cAC)))))
                 
-; =============================================================================
+;; =============================================================================
 
-; Name the rules
+;; Name the rules
 (define induction-inheritance-rule-name (Node "induction-inheritance-rule"))
 (DefineLink induction-inheritance-rule-name induction-inheritance-rule)
 
