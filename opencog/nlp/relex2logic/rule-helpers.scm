@@ -143,7 +143,8 @@
 	(define obj_concept (cog-name obj_lemma))
 	(define obj_instance (cog-name obj_inst))
 
-	(cond ((string=? subj_concept "_$qVar")
+	(cond
+		((string=? subj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
 				(list
 				(r2l-wordinst-concept obj_instance)
@@ -161,14 +162,14 @@
 				)
 			)
 		)
-	(else (list
-		(r2l-wordinst-concept subj_instance)
-		(r2l-wordinst-concept obj_instance)
-		(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-		(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-		(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
+		(else (list
+			(r2l-wordinst-concept subj_instance)
+			(r2l-wordinst-concept obj_instance)
+			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
+			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
+			(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
+			)
 		)
-	)
 	)
 )
 ;------------------------------------------------
