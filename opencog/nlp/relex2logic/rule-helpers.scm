@@ -137,7 +137,12 @@
 ; logic of the rare true subject queries will have to be left to
 ; general intelligence.
 ;
-(define (be-inheritance-rule subj_concept subj_instance obj_concept obj_instance)
+(define (be-inheritance-rule subj_lemma subj_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(cond ((string=? subj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
 				(list
