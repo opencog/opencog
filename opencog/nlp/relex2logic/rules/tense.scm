@@ -1,18 +1,3 @@
-;
-; Both link grammar and relex output are selected because of the
-; pattern
-; Example : "He gave me the book."
-;   (DefinedLinguisticConceptNode "past") and
-;   (DefinedLinguisticConceptNode ".v-d")
-; We don't want to the Link Grammar subscript.
-; A better way to do this would be to use TenseLink and SubscriptLink...
-;
-(define (check-tense tense)
-    (if (string-contains (cog-name tense) ".")
-        (begin (stv 0 1))
-        (begin (stv 1 1))
-    )
-)
 
 (define tense
     (BindLink
@@ -43,19 +28,13 @@
                 (VariableNode "$verb")
                 (DefinedLinguisticConceptNode "verb")
             )
-            (InheritanceLink
+            (TenseLink
                 (VariableNode "$verb")
                 (VariableNode "$tense")
             )
             (LemmaLink
                 (VariableNode "$verb")
                 (VariableNode "$lemma")
-            )
-            (EvaluationLink
-                (GroundedPredicateNode "scm: check-tense")
-                (ListLink
-                    (VariableNode "$tense")
-                )
             )
         )
         (ExecutionOutputLink
