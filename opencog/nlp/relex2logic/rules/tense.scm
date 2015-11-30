@@ -1,7 +1,12 @@
-;Both link grammar and relex output are selected because of the pattern 
-;Example : "He gave me the book."
-;(DefinedLinguisticConceptNode "past") and (DefinedLinguisticConceptNode ".v-d")
-;I just want to avoid the Link Grammar output. There might be another way to do this
+;
+; Both link grammar and relex output are selected because of the
+; pattern
+; Example : "He gave me the book."
+;   (DefinedLinguisticConceptNode "past") and
+;   (DefinedLinguisticConceptNode ".v-d")
+; We don't want to the Link Grammar subscript.
+; A better way to do this would be to use TenseLink and SubscriptLink...
+;
 (define (check-tense tense)
     (if (string-contains (cog-name tense) ".")
         (begin (stv 0 1))
@@ -24,6 +29,10 @@
                 (VariableNode "$tense")
                 (TypeNode "DefinedLinguisticConceptNode")
             )
+            (TypedVariableLink
+                (VariableNode "$lemma")
+                (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -38,6 +47,10 @@
                 (VariableNode "$verb")
                 (VariableNode "$tense")
             )
+            (LemmaLink
+                (VariableNode "$verb")
+                (VariableNode "$lemma")
+            )
             (EvaluationLink
                 (GroundedPredicateNode "scm: check-tense")
                 (ListLink
@@ -45,20 +58,13 @@
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-       	        (GroundedSchemaNode "scm: pre-tense-rule")
-       	        (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$tense")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: tense-rule")
+            (ListLink
+                (VariableNode "$lemma")
+                (VariableNode "$verb")
+                (VariableNode "$tense")
             )
         )
     )
-)
-
-(define (pre-tense-rule verb tense)
-  (ListLink
-    (tense-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb) (cog-name tense))
-  )
 )
