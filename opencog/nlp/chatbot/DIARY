@@ -274,6 +274,9 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 (process-query 'luser "Linas ate a cookie.")
 (process-query 'luser "Who ate a cookie?")
 
+(process-query 'luser "Linas ate an apple.")
+(process-query 'luser "Who ate an apple?")
+
 (cog-get-atoms 'InheritanceLink)
 
 (cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))

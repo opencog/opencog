@@ -87,18 +87,15 @@
                 )
             )
         )
-; XXX FIXME ... is this ListLink wrapper really needed ???
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: SVO-rule")
-                (ListLink
-                    (VariableNode "$subj-lemma")
-                    (VariableNode "$X")
-                    (VariableNode "$verb-lemma")
-                    (VariableNode "$Y")
-                    (VariableNode "$obj-lemma")
-                    (VariableNode "$Z")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: SVO-rule")
+            (ListLink
+                (VariableNode "$subj-lemma")
+                (VariableNode "$X")
+                (VariableNode "$verb-lemma")
+                (VariableNode "$Y")
+                (VariableNode "$obj-lemma")
+                (VariableNode "$Z")
             )
         )
     )
