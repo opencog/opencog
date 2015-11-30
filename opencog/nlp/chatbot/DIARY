@@ -348,6 +348,14 @@ ERROR: Unbound variable: pre-be-inheritance-rule
 pre-be-inheritance-rule
 
 ====================================================
+
+crash with null atom ptr .. line 455
+outgoing set has null ptrs in it ... line 480
+space :215
+ForwardChainer::apply_rule
+opencog/rule-engine/forwardchainer/ForwardChainer.cc:396
+
+====================================================
 bugs:
 
 * Its not answering any questions ...

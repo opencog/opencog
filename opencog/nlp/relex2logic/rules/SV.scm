@@ -51,8 +51,6 @@
 				)
 			)
 		)
-; XXX FIXME ... is this ListLink wrapper really needed ???
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SV-rule")
 			(ListLink
@@ -62,6 +60,5 @@
 				(VariableNode "$verb")
 			)
 		)
-   )
 	)
 )

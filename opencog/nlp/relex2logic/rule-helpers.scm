@@ -360,46 +360,43 @@
 	(define subj_instance (cog-name subj-inst))
 	(define verb          (cog-name verb-lemma))
 	(define verb_instance (cog-name verb-inst))
-	(cond ((string=? subj_concept "_$qVar")
-		(let ((var_name (choose-var-name)))
-			(list
-				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-				(r2l-wordinst-Predicate verb_instance)
-				(EvaluationLink
-					(PredicateNode verb_instance)
-					(ListLink
-						(VariableNode var_name)
-					)
+	(cond
+		((string=? subj_concept "_$qVar")
+			(let ((var_name (choose-var-name)))
+				(ListLink
+					(ImplicationLink
+						(PredicateNode verb_instance) (PredicateNode verb))
+					(r2l-wordinst-Predicate verb_instance)
+					(EvaluationLink
+						(PredicateNode verb_instance)
+						(ListLink (VariableNode var_name)))
 				)
-			)
 		))
 		((string=? verb "_$qVar")
 			(let ((var_name (choose-var-name)))
-				(list
-					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
+				(ListLink
+					(InheritanceLink
+						(ConceptNode subj_instance) (ConceptNode subj_concept))
 					(r2l-wordinst-concept subj_instance)
 					(EvaluationLink
 						(PredicateNode var_name)
-						(ListLink
-							(ConceptNode subj_instance)
-						)
-					)
+						(ListLink (ConceptNode subj_instance)))
 				)
+		))
+		(else
+			(ListLink
+				(r2l-wordinst-concept subj_instance)
+				(r2l-wordinst-Predicate verb_instance)
+				(ImplicationLink
+					(PredicateNode verb_instance) (PredicateNode verb))
+				(InheritanceLink
+					(ConceptNode subj_instance) (ConceptNode subj_concept))
+				(EvaluationLink
+					(PredicateNode verb_instance)
+					(ListLink (ConceptNode subj_instance)))
 			)
 		)
-		(else (list
-			(r2l-wordinst-concept subj_instance)
-			(r2l-wordinst-Predicate verb_instance)
-			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(EvaluationLink
-				(PredicateNode verb_instance)
-				(ListLink
-					(ConceptNode subj_instance)
-				)
-			)
-		)
-	))
+	)
 )
 ;------------------------------------------------------------------------
 ;
