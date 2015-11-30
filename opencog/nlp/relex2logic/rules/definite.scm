@@ -32,14 +32,11 @@
                 (DefinedLinguisticConceptNode "definite")
             )
         )
-; XXX FIXME ... is this ListLink wrapper really needed ???
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: definite-rule")
-                (ListLink
-                    (VariableNode "$lemma")
-                    (VariableNode "$noun"))
-            )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: definite-rule")
+            (ListLink
+                (VariableNode "$lemma")
+                (VariableNode "$noun"))
         )
     )
 )

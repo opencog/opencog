@@ -637,12 +637,12 @@
 	(define word_instance (cog-name word-inst))
 
 	(ListLink
-		(InheritanceLink (ConceptNode word_instance) (ConceptNode word))
+		(Inheritance (Concept word_instance) (Concept word))
 		(r2l-wordinst-concept word_instance)
-		(EvaluationLink
-			(DefinedLinguisticPredicateNode "definite")
-			(ListLink (ConceptNode word_instance))
-		))
+		(Evaluation
+			(DefinedLinguisticPredicate "definite")
+			(ListLink (Concept word_instance)))
+	)
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
