@@ -1,20 +1,3 @@
-; check the atoms that should be grounded
-;
-; XXX FIXME replace the GroundedPredicates by
-; (OrLink
-;    (EqualLink
-;      (VariableNode "$gtype")
-;      (DefinedLinguisticRelationshipNode "masculine"))
-;   (EqualLink
-;      (VariableNode "$gtype")
-;      (DefinedLinguisticRelationshipNode "feminine"))
-;
-(define (check-gender gtype)
-    (if (or (string=? (cog-name gtype) "masculine") (string=? (cog-name gtype) "feminine"))
-        (begin (stv 1 1))
-        (begin (stv 0 1))
-    )
-)
 
 (define gender
     (BindLink
@@ -53,11 +36,13 @@
                 (VariableNode "$word")
                 (VariableNode "$lemma")
             )
-            (EvaluationLink
-                (GroundedPredicateNode "scm: check-gender")
-                (ListLink
+            (OrLink
+                (EqualLink
                     (VariableNode "$gtype")
-                )
+                    (DefinedLinguisticRelationshipNode "masculine"))
+                (EqualLink
+                    (VariableNode "$gtype")
+                    (DefinedLinguisticRelationshipNode "feminine"))
             )
         )
         (ExecutionOutputLink
