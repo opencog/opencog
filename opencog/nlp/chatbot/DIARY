@@ -270,6 +270,19 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 ====================================================
 
+(use-modules (opencog) (opencog nlp chatbot))
+(process-query 'luser "Linas ate a cookie.")
+(process-query 'luser "Who ate a cookie?")
+
+(process-query 'luser "Linas ate an apple.")
+(process-query 'luser "Who ate an apple?")
+
+(cog-get-atoms 'InheritanceLink)
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+
+
+
 (use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
 (init-trace "/tmp/wtf")
 
@@ -333,6 +346,14 @@ probably because guile already thinks the module is loaded...
 ====================================================
 ERROR: Unbound variable: pre-be-inheritance-rule
 pre-be-inheritance-rule
+
+====================================================
+
+crash with null atom ptr .. line 455
+outgoing set has null ptrs in it ... line 480
+space :215
+ForwardChainer::apply_rule
+opencog/rule-engine/forwardchainer/ForwardChainer.cc:396
 
 ====================================================
 bugs:

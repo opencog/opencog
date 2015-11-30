@@ -25,6 +25,18 @@
                 (VariableNode "$Z")
                 (TypeNode "WordInstanceNode")
             )
+            (TypedVariableLink
+               (VariableNode "$subj-lemma")
+               (TypeNode "WordNode")
+            )
+            (TypedVariableLink
+               (VariableNode "$verb-lemma")
+               (TypeNode "WordNode")
+            )
+            (TypedVariableLink
+               (VariableNode "$obj-lemma")
+               (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -53,6 +65,18 @@
                     (VariableNode "$Z")
                 )
             )
+            (LemmaLink
+               (VariableNode "$X")
+               (VariableNode "$subj-lemma")
+            )
+            (LemmaLink
+               (VariableNode "$Y")
+               (VariableNode "$verb-lemma")
+            )
+            (LemmaLink
+               (VariableNode "$Z")
+               (VariableNode "$obj-lemma")
+            )
             (AbsentLink
                 (EvaluationLink
                     (DefinedLinguisticRelationshipNode "_iobj")
@@ -63,14 +87,15 @@
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-svo-rule")
-                (ListLink
-                    (VariableNode "$X")
-                    (VariableNode "$Y")
-                    (VariableNode "$Z")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: SVO-rule")
+            (ListLink
+                (VariableNode "$subj-lemma")
+                (VariableNode "$X")
+                (VariableNode "$verb-lemma")
+                (VariableNode "$Y")
+                (VariableNode "$obj-lemma")
+                (VariableNode "$Z")
             )
         )
     )
@@ -79,14 +104,3 @@
 ;;(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
 
 ;;(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)
-
-; This is function is not needed. It is added so as not to break the
-; existing r2l pipeline.  XXX Huh? It is used above! How can it not be
-; needed?
-(define (pre-svo-rule subj verb obj)
-(ListLink
-    (SVO-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
-              (cog-name (word-inst-get-lemma verb)) (cog-name verb)
-              (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
-    ))
-)

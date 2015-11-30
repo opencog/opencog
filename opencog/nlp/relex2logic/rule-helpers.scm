@@ -146,28 +146,29 @@
 	(cond
 		((string=? subj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
-				(list
-				(r2l-wordinst-concept obj_instance)
-				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-				(InheritanceLink (ConceptNode obj_instance) (VariableNode var_name))
+				(ListLink
+					(r2l-wordinst-concept obj_instance)
+					(Inheritance (Concept obj_instance) (Concept obj_concept))
+					(Inheritance (Concept obj_instance) (Variable var_name))
 				)
 			)
 		)
 		((string=? obj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
-				(list
-				(r2l-wordinst-concept subj_instance)
-				(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-				(InheritanceLink (ConceptNode subj_instance) (VariableNode var_name))
+				(ListLink
+					(r2l-wordinst-concept subj_instance)
+					(Inheritance (Concept subj_instance) (Concept subj_concept))
+					(Inheritance (Concept subj_instance) (Variable var_name))
 				)
 			)
 		)
-		(else (list
-			(r2l-wordinst-concept subj_instance)
-			(r2l-wordinst-concept obj_instance)
-			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-			(InheritanceLink (ConceptNode subj_instance) (ConceptNode obj_instance))
+		(else
+			(ListLink
+				(r2l-wordinst-concept subj_instance)
+				(r2l-wordinst-concept obj_instance)
+				(Inheritance (Concept subj_instance) (Concept subj_concept))
+				(Inheritance (Concept obj_instance) (Concept obj_concept))
+				(Inheritance (Concept subj_instance) (Concept obj_instance))
 			)
 		)
 	)
@@ -285,10 +286,17 @@
 ; Object query: 		"What did you say?" "Who do you love?"
 ; Prepositional subject query: 	"What is for dinner?", Who's on first?"
 ;
-(define (SVO-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define (SVO-rule subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(cond ((string=? subj_concept "_$qVar")
 		(let ((var_name (choose-var-name)))
-			(list
+			(ListLink
 				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 				(r2l-wordinst-Predicate verb_instance)
@@ -304,7 +312,7 @@
 		))
 		((string=? obj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
-				(list
+				(ListLink
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 					(r2l-wordinst-Predicate verb_instance)
@@ -319,20 +327,23 @@
 				)
 			)
 		)
-	(else (list	(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-			(r2l-wordinst-Predicate verb_instance)
-			(r2l-wordinst-concept subj_instance)
-			(r2l-wordinst-concept obj_instance)
-			(EvaluationLink
-				(PredicateNode verb_instance)
-				(ListLink
-					(ConceptNode subj_instance)
-					(ConceptNode obj_instance)
-				)
+		(else
+			(ListLink
+				(ImplicationLink
+					(PredicateNode verb_instance) (PredicateNode verb))
+				(InheritanceLink
+					(ConceptNode subj_instance) (ConceptNode subj_concept))
+				(InheritanceLink
+					(ConceptNode obj_instance) (ConceptNode obj_concept))
+				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-concept subj_instance)
+				(r2l-wordinst-concept obj_instance)
+				(EvaluationLink
+					(PredicateNode verb_instance)
+					(ListLink
+						(ConceptNode subj_instance)
+						(ConceptNode obj_instance)))
 			)
-		)
 	))
 )
 ;--------------------------------------------------------------
@@ -350,46 +361,39 @@
 	(define subj_instance (cog-name subj-inst))
 	(define verb          (cog-name verb-lemma))
 	(define verb_instance (cog-name verb-inst))
-	(cond ((string=? subj_concept "_$qVar")
-		(let ((var_name (choose-var-name)))
-			(list
-				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-				(r2l-wordinst-Predicate verb_instance)
-				(EvaluationLink
-					(PredicateNode verb_instance)
-					(ListLink
-						(VariableNode var_name)
-					)
+	(cond
+		((string=? subj_concept "_$qVar")
+			(let ((var_name (choose-var-name)))
+				(ListLink
+					(Implication (Predicate verb_instance) (Predicate verb))
+					(r2l-wordinst-Predicate verb_instance)
+					(EvaluationLink
+						(PredicateNode verb_instance)
+						(ListLink (VariableNode var_name)))
 				)
-			)
 		))
 		((string=? verb "_$qVar")
 			(let ((var_name (choose-var-name)))
-				(list
-					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
+				(ListLink
+					(Inheritance (Concept subj_instance) (Concept subj_concept))
 					(r2l-wordinst-concept subj_instance)
 					(EvaluationLink
 						(PredicateNode var_name)
-						(ListLink
-							(ConceptNode subj_instance)
-						)
-					)
+						(ListLink (ConceptNode subj_instance)))
 				)
+		))
+		(else
+			(ListLink
+				(r2l-wordinst-concept subj_instance)
+				(r2l-wordinst-Predicate verb_instance)
+				(Implication (Predicate verb_instance) (Predicate verb))
+				(Inheritance (Concept subj_instance) (Concept subj_concept))
+				(EvaluationLink
+					(PredicateNode verb_instance)
+					(ListLink (ConceptNode subj_instance)))
 			)
 		)
-		(else (list
-			(r2l-wordinst-concept subj_instance)
-			(r2l-wordinst-Predicate verb_instance)
-			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-			(EvaluationLink
-				(PredicateNode verb_instance)
-				(ListLink
-					(ConceptNode subj_instance)
-				)
-			)
-		)
-	))
+	)
 )
 ;------------------------------------------------------------------------
 ;
@@ -523,19 +527,33 @@
 
 ; FIXME: this is bad because in SV, SVO type rules the same word is
 ; ConceptNode instead
-(define (gender-rule word word_instance gender_type)
+(define (gender-rule lemma word_inst gender)
+	(define word (cog-name lemma))
+	(define word_instance (cog-name word_inst))
+	(define gender_type (cog-name gender))
+
 	(define concept_node (ConceptNode word))
-	(cond ((string=? gender_type "feminine")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "female"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+	(cond
+		((string=? gender_type "feminine")
+			(ListLink
+				(Inheritance
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "female"))
+				(Inheritance
+					(SpecificEntityNode word_instance) (Concept word))
 		))
-	((string=? gender_type "masculine")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "male"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+		((string=? gender_type "masculine")
+			(ListLink
+				(Inheritance
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "male"))
+				(Inheritance
+					(SpecificEntityNode word_instance) (Concept word))
 		))
-        ((string=? gender_type "person")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "unknown_gender"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+		((string=? gender_type "person")
+			(ListLink
+				(Inheritance
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "unknown_gender"))
+				(InheritanceLink
+					(SpecificEntityNode word_instance) (Concept word))
 		))
 	)
 )
@@ -633,12 +651,12 @@
 	(define word_instance (cog-name word-inst))
 
 	(ListLink
-		(InheritanceLink (ConceptNode word_instance) (ConceptNode word))
+		(Inheritance (Concept word_instance) (Concept word))
 		(r2l-wordinst-concept word_instance)
-		(EvaluationLink
+		(Evaluation
 			(DefinedLinguisticPredicateNode "definite")
-			(ListLink (ConceptNode word_instance))
-		))
+			(ListLink (Concept word_instance)))
+	)
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
