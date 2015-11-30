@@ -26,6 +26,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include <opencog/planning/Action.h>
@@ -41,15 +43,9 @@ public:
     ActionUTest() : _scm(&_as)
     {
         // Print output to standard
-        //logger().setLevel(Logger::DEBUG);
-        //logger().setPrintToStdoutFlag(true);
-        //logger().setPrintLevelFlag(true);
-
-        // Populate atomspace
-        _scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        _scm.eval("(use-modules (opencog))");
-        _scm.eval("(use-modules (opencog rule-engine))");
-        _scm.eval("(load \"test-rbs.scm\")");
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+        logger().setPrintLevelFlag(true);
     }
 
     ~ActionUTest()
@@ -59,10 +55,26 @@ public:
         //    std::remove(logger().getFilename().c_str());
     }
 
+    void setUp()
+    {
+        /* uncommenting seems to have no difference
+        config().set("SCM_PRELOAD",
+                     "opencog/atomspace/core_types.scm");
+        load_scm_files_from_config(_as);
+        */
+
+        cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        cout << _scm.eval("(use-modules (opencog) (opencog rule-engine))");
+        cout << _scm.eval("(load \"test-rbs.scm\")");
+    }
+
+
     // Why this check? B/c PatternLink api's behavior might change.
     // What is being checked? That the derived rule doesn't have any form of
     // virtual-terms.
     void test_constuctor() {
+    /*
+        cout << _scm.eval("(cog-prt-atomspace)");
         // Simple BindLink with an AndLink or SequentialAndLink
         Handle alias = _as.get_node(NODE, "initial-rule"),
                rbs = _as.get_node(CONCEPT_NODE, "initial-rbs"),
@@ -71,5 +83,6 @@ public:
         Action a(rule);
 
         TS_ASSERT_EQUALS(a.get_derived_rule()->get_virtual().size(), 0);
+    */
     }
 };

@@ -1,3 +1,5 @@
+(ConceptNode "abc")
+#!
 ; Create a rulebase
 (define initial-rbs (ConceptNode "initial-rbs"))
 (ure-define-rbs initial-rbs 1)
@@ -36,7 +38,6 @@
 
 (ure-add-rule initial-rbs "initial-rule" initial-rule 1)
 
-#!
 (define rule2
     (BindLink
         (VariableList
