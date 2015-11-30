@@ -558,10 +558,14 @@
 	)
 )
 
-(define (tense-rule verb instance tense)
-	(list (ImplicationLink (PredicateNode instance) (PredicateNode verb))
-	 (r2l-wordinst-Predicate instance)
-	(InheritanceLink (PredicateNode instance) (DefinedLinguisticConceptNode tense))
+(define (tense-rule lemma inst tns)
+	(define verb (cog-name lemma))
+	(define instance (cog-name inst))
+	(define tense (cog-name tns))
+	(ListLink
+		(Implication (Predicate instance) (Predicate verb))
+		(r2l-wordinst-Predicate instance)
+		(Inheritance (Predicate instance) (DefinedLinguisticConceptNode tense))
 	)
 )
 
