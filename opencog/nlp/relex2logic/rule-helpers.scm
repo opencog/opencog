@@ -527,19 +527,33 @@
 
 ; FIXME: this is bad because in SV, SVO type rules the same word is
 ; ConceptNode instead
-(define (gender-rule word word_instance gender_type)
+(define (gender-rule lemma word_inst gender)
+	(define word (cog-name lemma))
+	(define word_instance (cog-name word_inst))
+	(define gender_type (cog-name gender))
+
 	(define concept_node (ConceptNode word))
-	(cond ((string=? gender_type "feminine")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "female"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+	(cond
+		((string=? gender_type "feminine")
+			(ListLink
+				(Inheritance
+					(SpecificEntity word_instance) (DefinedLinguisticConcept "female"))
+				(Inheritance
+					(SpecificEntity word_instance) (Concept word))
 		))
-	((string=? gender_type "masculine")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "male"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+		((string=? gender_type "masculine")
+			(ListLink
+				(Inheritance
+					(SpecificEntity word_instance) (DefinedLinguisticConcept "male"))
+				(Inheritance
+					(SpecificEntity word_instance) (Concept word))
 		))
-        ((string=? gender_type "person")
-		(list (InheritanceLink (SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "unknown_gender"))
-		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word))
+		((string=? gender_type "person")
+			(ListLink
+				(Inheritance
+					(SpecificEntity word_instance) (DefinedLinguisticConcept "unknown_gender"))
+				(InheritanceLink
+					(SpecificEntity word_instance) (Concept word))
 		))
 	)
 )

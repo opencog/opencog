@@ -31,6 +31,10 @@
                 (VariableNode "$gtype")
                 (TypeNode "DefinedLinguisticConceptNode")
             )
+            (TypedVariableLink
+                (VariableNode "$lemma")
+                (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -45,31 +49,24 @@
                 (VariableNode "$word")
                 (DefinedLinguisticConceptNode "person")
             )
-        (EvaluationLink
+            (LemmaLink
+                (VariableNode "$word")
+                (VariableNode "$lemma")
+            )
+            (EvaluationLink
                 (GroundedPredicateNode "scm: check-gender")
                 (ListLink
                     (VariableNode "$gtype")
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-gender-rule")
-                (ListLink
-                    (VariableNode "$word")
-                    (VariableNode "$gtype")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: gender-rule")
+            (ListLink
+                (VariableNode "$lemma")
+                (VariableNode "$word")
+                (VariableNode "$gtype")
             )
         )
     )
-)
-
-
-(define (pre-gender-rule word gtype)
-  (ListLink
-        (gender-rule
-            (cog-name (word-inst-get-lemma word)) (cog-name word)
-            (cog-name gtype)
-        )
-  )
 )
