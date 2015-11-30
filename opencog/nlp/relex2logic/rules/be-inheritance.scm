@@ -22,6 +22,14 @@
                 (VariableNode "$Z")
                 (TypeNode "WordInstanceNode")
             )
+            (TypedVariableLink
+               (VariableNode "$subj-lemma")
+               (TypeNode "WordNode")
+            )
+            (TypedVariableLink
+               (VariableNode "$obj-lemma")
+               (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -54,25 +62,26 @@
                 (VariableNode "$Y")
                 (WordNode "be")
             )
+            (LemmaLink
+               (VariableNode "$X")
+               (VariableNode "$subj-lemma")
+            )
+            (LemmaLink
+               (VariableNode "$Z")
+               (VariableNode "$obj-lemma")
+            )
         )
+; XXX FIXME ... is this ListLink wrapper really needed ???
        (ListLink
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pre-be-inheritance-rule")
+            (GroundedSchemaNode "scm: be-inheritance-rule")
             (ListLink
+                (VariableNode "$subj-lemma")
                 (VariableNode "$X")
+                (VariableNode "$obj-lemma")
                 (VariableNode "$Z")
             )
         )
       )
     )
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-be-inheritance-rule subj obj)
-  (ListLink
-    (be-inheritance-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-              (cog-name (word-inst-get-lemma obj)) (cog-name obj)
-    )
-  )
 )
