@@ -18,6 +18,9 @@
 ;;       deduction-subset-rule
 ;;
 ;; -----------------------------------------------------------------------------
+
+(use-modules (opencog logger))
+
 (load "formulas.scm")
 
 ;; Generate the corresponding deduction rule given its link-type.
@@ -74,10 +77,19 @@
          (cAB (cog-stv-confidence AB))
          (sBC (cog-stv-strength BC))
          (cBC (cog-stv-confidence BC)))
-        (cog-set-tv!
+        (cog-merge-hi-conf-tv!
             AC
             (stv
-                (simple-deduction-strength-formula sA sB sC sAB sBC) 
+                (if (< 0.99 (* sAB sBC cAB cBC))
+                    ;; Hack to make it up for the lack of
+                    ;; distributional TV. This cover the case where
+                    ;; little is known about A and B (i.e. their
+                    ;; strength is meaningless), yet we can
+                    ;; confidently calculate sAC because sAB and sBC
+                    ;; are so high anyway.
+                    (* sAB sBC)
+                    ;; Otherwise fall back on the naive formula
+                    (simple-deduction-strength-formula sA sB sC sAB sBC))
                 (min cAB cBC)))))
 
 ;; Name the rules
