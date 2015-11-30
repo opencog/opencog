@@ -285,7 +285,14 @@
 ; Object query: 		"What did you say?" "Who do you love?"
 ; Prepositional subject query: 	"What is for dinner?", Who's on first?"
 ;
-(define (SVO-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define (SVO-rule subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(cond ((string=? subj_concept "_$qVar")
 		(let ((var_name (choose-var-name)))
 			(list

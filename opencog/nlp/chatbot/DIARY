@@ -270,6 +270,16 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 ====================================================
 
+(use-modules (opencog) (opencog nlp chatbot))
+(process-query 'luser "Linas ate a cookie.")
+(process-query 'luser "Who ate a cookie?")
+
+(cog-get-atoms 'InheritanceLink)
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+
+
+
 (use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
 (init-trace "/tmp/wtf")
 
