@@ -537,23 +537,23 @@
 		((string=? gender_type "feminine")
 			(ListLink
 				(Inheritance
-					(SpecificEntity word_instance) (DefinedLinguisticConcept "female"))
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "female"))
 				(Inheritance
-					(SpecificEntity word_instance) (Concept word))
+					(SpecificEntityNode word_instance) (Concept word))
 		))
 		((string=? gender_type "masculine")
 			(ListLink
 				(Inheritance
-					(SpecificEntity word_instance) (DefinedLinguisticConcept "male"))
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "male"))
 				(Inheritance
-					(SpecificEntity word_instance) (Concept word))
+					(SpecificEntityNode word_instance) (Concept word))
 		))
 		((string=? gender_type "person")
 			(ListLink
 				(Inheritance
-					(SpecificEntity word_instance) (DefinedLinguisticConcept "unknown_gender"))
+					(SpecificEntityNode word_instance) (DefinedLinguisticConceptNode "unknown_gender"))
 				(InheritanceLink
-					(SpecificEntity word_instance) (Concept word))
+					(SpecificEntityNode word_instance) (Concept word))
 		))
 	)
 )
@@ -654,7 +654,7 @@
 		(Inheritance (Concept word_instance) (Concept word))
 		(r2l-wordinst-concept word_instance)
 		(Evaluation
-			(DefinedLinguisticPredicate "definite")
+			(DefinedLinguisticPredicateNode "definite")
 			(ListLink (Concept word_instance)))
 	)
 )
