@@ -628,7 +628,7 @@
 	 (ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
-(define-public (definite-rule lemma word-inst)
+(define (definite-rule lemma word-inst)
 	(define word (cog-name lemma))
 	(define word_instance (cog-name word-inst))
 

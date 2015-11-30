@@ -331,6 +331,10 @@ probably because guile already thinks the module is loaded...
 
 
 ====================================================
+ERROR: Unbound variable: pre-be-inheritance-rule
+pre-be-inheritance-rule
+
+====================================================
 bugs:
 
 * Its not answering any questions ...
