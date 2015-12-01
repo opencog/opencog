@@ -154,15 +154,18 @@
 	; Call the RelEx server
 	(relex-parse plain-text)
 
-	; Perform the R2L processing.
-	(r2l-parse (car (get-new-parsed-sentences)))
-
-	; Track some counts needed by R2L.
-	(r2l-count (get-new-parsed-sentences))
-
-	; Discard sentences that we've worked with.
 	(let ((sent-list (get-new-parsed-sentences)))
+		; Unhook the acnhor. MUST do this before r2l-parse, as
+		; otherwise, parse-get-relex-outputs will wrap it in a
+		; SetLink! Ouch!!
 		(release-new-parsed-sents)
+
+		; Perform the R2L processing.
+		(r2l-parse (car sent-list))
+
+		; Track some counts needed by R2L.
+		(r2l-count sent-list)
+
 		; Return the sentence list.
 		sent-list
 	)
