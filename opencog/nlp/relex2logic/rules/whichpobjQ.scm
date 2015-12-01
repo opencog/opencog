@@ -86,14 +86,12 @@
         )
     )
 )
-;;ToDo: define whichpobjQ
+;;ToDo: XXX FIXME define whichpobjQ
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-whichpobjQ-rule subj prep pobj)
-  (ListLink
     (whichpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
               (cog-name (word-inst-get-lemma prep)) (cog-name prep)
               (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
     )
-  )
 )

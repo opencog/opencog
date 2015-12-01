@@ -870,7 +870,7 @@
 ;
 (define (where-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
 			(EvaluationLink
@@ -888,7 +888,7 @@
 ;
 (define (wherecop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(EvaluationLink
@@ -911,7 +911,7 @@
 ;
 (define (when-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
 			(AtTimeLink
@@ -926,7 +926,7 @@
 ;
 (define (whencop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(AtTimeLink
@@ -945,7 +945,7 @@
 ;
 (define (why-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
 			(EvaluationLink
@@ -963,7 +963,7 @@
 ;
 (define (whycop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
 			(EvaluationLink
@@ -1068,7 +1068,7 @@
 ;
 (define (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
@@ -1093,7 +1093,7 @@
 ;
 (define (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(ImplicationLink (PredicateNode obj_instance) (PredicateNode obj_concept))
@@ -1118,7 +1118,7 @@
 ;
 (define (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
@@ -1146,7 +1146,7 @@
 ;
 (define (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
 	(let ((var_name (choose-var-name)))
-		(list
+		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance) )

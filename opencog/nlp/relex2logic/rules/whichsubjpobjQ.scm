@@ -77,13 +77,12 @@
     )
 )
 
+;; XXX FIXME: define whichsubjpobjQ-rule
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-whichsubjpobjQ-rule subj prep pobj)
-  (ListLink
     (whichsubjpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
               (cog-name (word-inst-get-lemma prep)) (cog-name prep)
               (cog-name (word-inst-get-lemma subj)) (cog-name subj)
     )
-  )
 )

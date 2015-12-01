@@ -66,8 +66,5 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-when-cop-q-rule subj)
- (ListLink
-	(whencop-Q-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
-	)
- )
+	(whencop-Q-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj))
 )
