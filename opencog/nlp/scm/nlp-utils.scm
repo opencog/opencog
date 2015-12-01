@@ -259,7 +259,8 @@
 "
   parse-get-relex-outputs  Get all RelEx outputs in a parse.
 
-  Given a parse, returns a list of RelEx outputs associated with the ParseNode.
+  Given a parse, returns a list of RelEx outputs associated with
+  the ParseNode.
 "
     (let* ((sent-node (car (cog-chase-link 'ParseLink 'SentenceNode parse-node)))
            (sent-incoming-set (cog-incoming-set sent-node))
