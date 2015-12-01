@@ -35,12 +35,17 @@
   SENT must be a SentenceNode.
 "
     (define (cog-delete-parent a-link)
-        ; returns the outgoing-set of `a-link` and delete it if possible.
-        ; XXX maybe this has to be part of the ure module.
-        (let ((returned-list (cog-outgoing-set a-link)))
-            (cog-delete a-link)
-            returned-list
-        )
+        ; Many rules return a ListLink of results that they
+        ; generated. Some rules return singletons.  If A-LINK
+        ; is a ListLink, then delete it and return a list of
+        ; its contents, else return a list holding A-LINK.
+        ;
+        ; XXX maybe this should be part of the ure module??
+        (if (equal? 'ListLink (cog-type a-link))
+            (let ((returned-list (cog-outgoing-set a-link)))
+                    (cog-delete a-link)
+                    returned-list)
+            (list a-link))
     )
 
     (define (run-fc parse-node interp-link)
