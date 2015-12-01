@@ -46,13 +46,11 @@
     )
 )
 
-;;ToDo: Define prepadj-rule
+;;ToDo: XXX FIXME Define prepadj-rule
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-prepadj-rule noun adj)
-  (ListLink
     (prepadj-rule (cog-name (word-inst-get-lemma  noun)) (cog-name noun)
-              (cog-name (word-inst-get-lemma adj)) (cog-name adj)
+                  (cog-name (word-inst-get-lemma adj)) (cog-name adj)
     )
-  )
 )

@@ -61,10 +61,8 @@
 
 
 (define (pre-todo3-rule subj verb adj)
- (ListLink
 	(to-do-rule-3 (cog-name (word-inst-get-lemma adj)) (cog-name adj)
 		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
 		(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
- )
 )

@@ -49,9 +49,7 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-quantity-rule noun quant)
-  (ListLink
     (quantity-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
-              (cog-name (word-inst-get-lemma quant)) (cog-name quant)
+                   (cog-name (word-inst-get-lemma quant)) (cog-name quant)
     )
-  )
 )

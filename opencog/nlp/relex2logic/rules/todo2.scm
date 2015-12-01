@@ -98,7 +98,6 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo2-rule subj1 subj2 verb1 verb2 obj)
- (ListLink
   (to-do-rule-2
 	(cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
 	(cog-name (word-inst-get-lemma verb2)) (cog-name verb2)
@@ -106,5 +105,4 @@
 	(cog-name (word-inst-get-lemma subj2)) (cog-name subj2)
         (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
   )
- )
 )

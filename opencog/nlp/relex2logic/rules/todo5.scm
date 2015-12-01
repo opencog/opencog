@@ -92,11 +92,9 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo5-rule subj verb1 verb2)
- (ListLink
   (to-do-rule-5
 	(cog-name (word-inst-get-lemma verb1)) (cog-name verb1)
 	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
 	(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
   )
- )
 )
