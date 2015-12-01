@@ -55,13 +55,11 @@
      (string=? (cog-name (word-inst-get-lemma adv)) "possibly")
      (string=? (cog-name (word-inst-get-lemma adv)) "perhaps")
      (string=? (cog-name (word-inst-get-lemma adv)) "probably"))
-     (ListLink
-        (maybe-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
-     ))
+     (maybe-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
+     )
   (else
-    (ListLink
-        (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-              (cog-name (word-inst-get-lemma adv)) (cog-name adv)
-    ))
+     (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
+             (cog-name (word-inst-get-lemma adv)) (cog-name adv)
+     )
   ))
 )
