@@ -55,6 +55,9 @@
         (define outputs
             (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set)))
 
+        ; XXX FIXME! This appears to be forcing all of the outputs
+        ; to be double-wrapped in a ListLink. We should not be doing
+        ; this twice.
         (append-map cog-delete-parent
                   (append-map cog-delete-parent outputs))
     )
@@ -155,7 +158,7 @@
 	(relex-parse plain-text)
 
 	(let ((sent-list (get-new-parsed-sentences)))
-		; Unhook the acnhor. MUST do this before r2l-parse, as
+		; Unhook the anchor. MUST do this before r2l-parse, as
 		; otherwise, parse-get-relex-outputs will wrap it in a
 		; SetLink! Ouch!!
 		(release-new-parsed-sents)
