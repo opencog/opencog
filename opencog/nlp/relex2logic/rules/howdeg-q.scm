@@ -50,8 +50,5 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-howdeg-q-rule pred)
- (ListLink
-	(howdegQ-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred)
-	)
- )
+	(howdegQ-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred))
 )

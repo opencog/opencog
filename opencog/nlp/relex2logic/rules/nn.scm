@@ -44,9 +44,7 @@
 
 
 (define (pre-nn-rule N1 N2)
-  (ListLink
     (nn-rule (cog-name (word-inst-get-lemma  N1)) (cog-name N1)
-               (cog-name (word-inst-get-lemma N2)) (cog-name N2)
+             (cog-name (word-inst-get-lemma N2)) (cog-name N2)
     )
-  )
 )

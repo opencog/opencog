@@ -50,8 +50,5 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-howquant-q-rule noun)
- (ListLink
-	(howquantQ-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
-	)
- )
+	(howquantQ-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun))
 )
