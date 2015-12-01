@@ -1,6 +1,7 @@
-; This is a new rule -- the previous version of relex had an all-rule, but no quantity rule.
-; I am not porting the all-rule, because it seems silly to pick out that one quantifier for
-; its own rule, but none of the others -- some, many, few etc. etc. which also get _quantity
+; This is a new rule -- the previous version of relex had an all-rule,
+; but no quantity rule.  I am not porting the all-rule, because it
+; seems silly to pick out that one quantifier for its own rule, but
+; none of the others -- some, many, few etc. etc. which also get _quantity
 ; (AN June 2015)
 
 (define quantity
