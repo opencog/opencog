@@ -53,7 +53,6 @@
 				(DefinedLinguisticConceptNode "truth-query")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
@@ -61,16 +60,13 @@
 				(VariableNode "$obj")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-copula-ynq-rule subj obj)
- (ListLink
 	(cop-ynQ-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
 		(cog-name (word-inst-get-lemma obj)) (cog-name obj)
 	)
- )
 )

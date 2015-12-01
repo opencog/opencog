@@ -27,7 +27,7 @@
                 (VariableNode "$verb2")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
@@ -37,7 +37,7 @@
                 (VariableNode "$subj1")
                 (VariableNode "$a-parse")
             )
-	    (WordInstanceLink
+            (WordInstanceLink
                 (VariableNode "$subj2")
                 (VariableNode "$a-parse")
             )
@@ -60,7 +60,7 @@
                     (VariableNode "$subj1")
                 )
             )
-	    (EvaluationLink
+            (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
                     (VariableNode "$verb2")
@@ -81,8 +81,7 @@
                     (VariableNode "$verb2")
                 )
             )
-	)
-       (ListLink
+        )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo2-rule")
             (ListLink
@@ -90,23 +89,20 @@
                 (VariableNode "$subj2")
                 (VariableNode "$verb1")
                 (VariableNode "$verb2")
-		            (VariableNode "$obj")
+                (VariableNode "$obj")
             )
         )
-       )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo2-rule subj1 subj2 verb1 verb2 obj)
- (ListLink
-  (to-do-rule-2 
+  (to-do-rule-2
 	(cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
 	(cog-name (word-inst-get-lemma verb2)) (cog-name verb2)
 	(cog-name (word-inst-get-lemma subj1)) (cog-name subj1)
 	(cog-name (word-inst-get-lemma subj2)) (cog-name subj2)
         (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
   )
- )
 )

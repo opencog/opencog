@@ -36,7 +36,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-rel-rule")
        	      (ListLink
@@ -44,17 +43,13 @@
        	         (VariableNode "$pred")
             )
         )
-      )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-rel-rule rel pred)
- (ListLink
   (complement-rule (cog-name (word-inst-get-lemma  rel)) (cog-name rel)
-	(cog-name (word-inst-get-lemma  pred)) (cog-name pred)
-
+                  (cog-name (word-inst-get-lemma  pred)) (cog-name pred)
   )
- )
 )

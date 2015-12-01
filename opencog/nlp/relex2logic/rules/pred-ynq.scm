@@ -25,22 +25,17 @@
 				(DefinedLinguisticConceptNode "truth-query")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-pred-ynq-rule")
 			(ListLink
 				(VariableNode "$verb")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-pred-ynq-rule verb)
- (ListLink
-	(pred-ynQ-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-	)
- )
+	(pred-ynQ-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
 )

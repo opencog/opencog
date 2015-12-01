@@ -56,7 +56,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")
 			(ListLink
@@ -65,17 +64,14 @@
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-tobe-rule verb adj subj)
- (ListLink
 	(to-be-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb)
 		(cog-name (word-inst-get-lemma adj)) (cog-name adj)
 		(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
- )
 )

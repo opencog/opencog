@@ -36,7 +36,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-pp-rule")
        	      (ListLink
@@ -44,17 +43,13 @@
        	         (VariableNode "$noun")
             )
         )
-      )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-pp-rule prep noun)
- (ListLink
   (pp-rule (cog-name (word-inst-get-lemma prep)) (cog-name prep)
-	(cog-name (word-inst-get-lemma noun)) (cog-name noun)
-
-    )
- )
+	        (cog-name (word-inst-get-lemma noun)) (cog-name noun)
+  )
 )

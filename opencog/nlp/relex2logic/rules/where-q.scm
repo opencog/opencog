@@ -29,12 +29,12 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%atLocation")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_%atLocation")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$qVar")
+     			)
+	 		)
 			(AbsentLink
 				(LemmaLink
 					(VariableNode "$verb")
@@ -42,22 +42,17 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-where-q-rule")
 			(ListLink
 				(VariableNode "$verb")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-where-q-rule verb)
- (ListLink
-	(where-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-	)
- )
+	(where-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
 )

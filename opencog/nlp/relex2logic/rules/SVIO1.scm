@@ -66,7 +66,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
@@ -76,19 +75,16 @@
 				(VariableNode "$iobj")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-svio-rule subj verb obj iobj)
- (ListLink
 	(SVIO-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
 		(cog-name (word-inst-get-lemma  obj)) (cog-name obj)
 		(cog-name (word-inst-get-lemma  iobj)) (cog-name iobj)
 
 	)
- )
 )

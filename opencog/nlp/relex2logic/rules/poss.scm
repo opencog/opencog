@@ -35,7 +35,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-poss-rule")
        	      (ListLink
@@ -43,16 +42,13 @@
        	         (VariableNode "$poss")
             )
         )
-       )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-poss-rule noun poss)
-  (ListLink
     (possessive-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
               (cog-name (word-inst-get-lemma poss)) (cog-name poss)
     )
-  )
 )
