@@ -532,7 +532,7 @@
 ; XXX this rule is not used anywhere!
 (define (entity-rule word word_instance)
 	(ListLink
-		InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word)))
+		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word)))
 )
 
 ; FIXME: this is bad because in SV, SVO type rules the same word is
@@ -1084,7 +1084,7 @@
 			(r2l-wordinst-concept obj_instance)
 			(r2l-wordinst-Predicate verb_instance)
 			(SatisfyingSetLink
-				(VariableNode var_name) 
+				(VariableNode var_name)
 				(EvaluationLink (PredicateNode verb_instance)
 					(ListLink
 						(ConceptNode subj_instance)
