@@ -794,23 +794,25 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
         predBool = false;
     }
 
-    Handle ph = atomSpace.getHandle(PREDICATE_NODE, predicateName);
-    // if predicate handle not defined and TV equals < 0.5 just return
-    if (ph == Handle::UNDEFINED && predBool) {
-        logger().fine("AtomSpaceUtil - %s not added (no pred handle and TV less than 0.5).",
-                     predicateName.c_str());
-        return Handle::UNDEFINED;
-    } else {
-        ph = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
-    }
+//    Handle ph = atomSpace.getHandle(PREDICATE_NODE, predicateName);
+//    // if predicate handle not defined and TV equals < 0.5 just return
+//    if (ph == Handle::UNDEFINED && predBool) {
+//        logger().fine("AtomSpaceUtil - %s not added (no pred handle and TV less than 0.5).",
+//                     predicateName.c_str());
+//        return Handle::UNDEFINED;
+//    } else {
+      Handle  ph = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, predicateName, true);
+//    }
 
     Handle ll = atomSpace.getHandle(LIST_LINK, ll_out);
     // if list link handle not defined and TV equals < 0.5 just return
-    if (ll == Handle::UNDEFINED && predBool) {
-        logger().fine("AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
-                     predicateName.c_str());
-        return Handle::UNDEFINED;
-    } else {
+    if (ll == Handle::UNDEFINED && predBool)
+    {
+//        logger().fine("AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
+//                     predicateName.c_str());
+//        return Handle::UNDEFINED;
+//    } else
+//    {
         ll = atomSpace.addLink(LIST_LINK, ll_out);
         ll->setTruthValue(TruthValue::TRUE_TV());
     }
@@ -818,19 +820,19 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     HandleSeq hs2;
     hs2.push_back(ph);
     hs2.push_back(ll);
-    Handle el = atomSpace.getHandle(EVALUATION_LINK, hs2);
+//    Handle el = atomSpace.getHandle(EVALUATION_LINK, hs2);
 
-    // if evaluation link handle not defined and TV equals < 0.5 just return
-    if (el == Handle::UNDEFINED && predBool) {
-        logger().fine("AtomSpaceUtil - %s not added (no EvalLink and TV less than 0.5).",
-                     predicateName.c_str());
-        return Handle::UNDEFINED;
-    } else {
-        el = atomSpace.addLink(EVALUATION_LINK, hs2);
+//    // if evaluation link handle not defined and TV equals < 0.5 just return
+//    if (el == Handle::UNDEFINED && predBool) {
+//        logger().fine("AtomSpaceUtil - %s not added (no EvalLink and TV less than 0.5).",
+//                     predicateName.c_str());
+//        return Handle::UNDEFINED;
+//    } else {
+        Handle el = atomSpace.addLink(EVALUATION_LINK, hs2);
         el->setTruthValue(TruthValue::TRUE_TV());
         logger().fine("AtomSpaceUtil - %s added with TV %f.",
                      predicateName.c_str(), tv->getMean());
-    }
+//    }
     atomSpace.setTV(el, tv);
 
     Handle result;
@@ -844,7 +846,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     if (permanent) { atomSpace.setLTI(result, 1); }
 
     // debug
-    cout << "\n" << atomSpace.atomAsString(result) << std::endl;
+    // cout << "\n" << atomSpace.atomAsString(result) << std::endl;
     return result;
 }
 
