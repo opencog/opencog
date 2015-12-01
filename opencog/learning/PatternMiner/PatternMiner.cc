@@ -47,7 +47,6 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
-std::mutex PatternMiner::waitingToFeedQueueLock;
 
 const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
 
@@ -2257,13 +2256,27 @@ void PatternMiner::feedNewLinksToPatternMiner (HandleSeq &_newLinks)
 
     for(Handle h :_newLinks)
     {
-        waitingForProcessLinksQueue.push(h);
+
+        if (h == Handle::UNDEFINED)
+            cout << "Fedding a undefined link!";
+        else
+            waitingForProcessLinksQueue.push(h);
+
+        try
+        {
+            cout << "Fed new link: \n" << originalAtomSpace->atomAsString(h) << std::endl;
+        }
+        catch(exception e)
+        {
+            cout << "\natomAsString failed! "<< e.what() <<std::endl;
+        }
     }
 
 }
 
 void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
 {
+
     thresholdFrequency = _thresholdFrequency;
     evaluatePatternsEveryXSeconds = _evaluatePatternsEveryXSeconds;
 
@@ -2277,11 +2290,11 @@ void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency
 
     processedLinkNum = 0;
 
-    miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
-    miningFromEmbodimentThread.detach();
+//    miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
+//    miningFromEmbodimentThread.detach();
 
-    evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
-    evaluatingForEmbodimentThread.detach();
+   // evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
+   // evaluatingForEmbodimentThread.detach();
 
 
 }

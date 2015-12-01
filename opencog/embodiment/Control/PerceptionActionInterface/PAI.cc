@@ -85,8 +85,7 @@ using namespace opencog::pai;
 using namespace opencog::control;
 using namespace opencog;
 
-HandleSeq PAI::perceptionWaitingForPatternMiner;
-std::mutex PAI::waitingToFeedToPatternMinerLock;
+
 
 PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
          AvatarInterface& _avatarInterface, unsigned long nextPlanID) :
@@ -1301,6 +1300,8 @@ by Shujing ke   rainkekekeke@gmail.com
   */
 void PAI::processAgentActionWithParameters(Handle& agentNode, const string& internalAgentId, unsigned long tsValue, const string& nameStr,  const string& instanceNameStr, DOMElement* signal)
 {
+
+
     // All the handle this action concerned , for event detector
     std::vector<Handle> actionConcernedHandles;
     // The EvaluationLinks/InheritanceLink that constitute the action.
@@ -1625,9 +1626,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
     addToWaitFeedingQueue(actionConcernedHandles);
 
-    // debug
-    for (unsigned int i = 0; i < actionConcernedHandles.size(); ++ i)
-        std::cout << "\n" << atomSpace.atomAsString (actionConcernedHandles[i]) << std::endl;
+
 
     XMLString::release(&targetName);
 
@@ -1638,6 +1637,9 @@ void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
     waitingToFeedToPatternMinerLock.lock();
     perceptionWaitingForPatternMiner.insert(perceptionWaitingForPatternMiner.end(), newLinks.begin(), newLinks.end());
     waitingToFeedToPatternMinerLock.unlock();
+    // debug
+    for (unsigned int i = 0; i < newLinks.size(); ++ i)
+        std::cout << "\nPerceived new links:\n" << atomSpace.atomAsString (newLinks[i]) << std::endl;
 }
 
 void PAI::processAgentActionPlanResult(char* agentID,

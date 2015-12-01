@@ -183,10 +183,11 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
 void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
 {
-    sleep (30);
+    sleep (10);
 
     while (true)
     {
+        cout << "\nMinging tick." << std::endl;
         miningOrEvaluatingLock.lock();
         waitingToFeedQueueLock.lock();
 
@@ -196,16 +197,21 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
             Handle& cur_link = waitingForProcessLinksQueue.front();
             waitingForProcessLinksQueue.pop();
 
-            waitingToFeedQueueLock.unlock();
+            std::cout << "Current processing link:\n" << originalAtomSpace->atomAsString(cur_link) << std::endl;
+
 
             // if this link is listlink, ignore it
-            if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+            if ( (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK) || (originalAtomSpace->getType(cur_link) == opencog::AT_TIME_LINK))
             {
+                waitingToFeedQueueLock.unlock();
+
                 miningOrEvaluatingLock.unlock();
                 continue;
             }
 
             processedLinkNum ++;
+            waitingToFeedQueueLock.unlock();
+
 
             // Add this link into observingAtomSpace
             HandleSeq outgoingLinks,outVariableNodes;
@@ -221,13 +227,19 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
             map<Handle,Handle> patternVarMap;
 
             extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+
+            cout << "\nFinshed current link mining." << std::endl;
+            miningOrEvaluatingLock.unlock();
+
+            sleep (1);
         }
         else
         {
             waitingToFeedQueueLock.unlock();
+            miningOrEvaluatingLock.unlock();
+            sleep (8);
         }
 
-        miningOrEvaluatingLock.unlock();
 
     }
 
@@ -465,7 +477,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
 
-//            cout << "A new pattern Found:\n"<< keyString << std::endl;
+         cout << "A new pattern Found:\n"<< keyString << std::endl;
 
 
 

@@ -86,11 +86,11 @@ MAX_OAC_PORT                    = 16340
 #OPENCOG_LOG_LEVEL               = DEBUG
 
 LS_LOG_LEVEL                    = ERROR
-OAC_LOG_LEVEL  	                = ERROR
+OAC_LOG_LEVEL  	                = FINE
 ROUTER_LOG_LEVEL                = DEBUG
 SPAWNER_LOG_LEVEL               = DEBUG
 PROXY_LOG_LEVEL                 = DEBUG
-OPENCOG_LOG_LEVEL               = ERROR
+OPENCOG_LOG_LEVEL               = DEBUG
 
 # Back trace log level. 
 # Note it is of string type: error, warn, info, debug or fine (case insensitive)

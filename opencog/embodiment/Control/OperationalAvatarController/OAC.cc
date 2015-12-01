@@ -597,6 +597,7 @@ OAC::~OAC()
 
     // WARNIG: free memory should be implemented if there are more than one oac
     // per process
+    logger().debug("OAC - destroying .");
 
     delete (planSender);
     delete (petMessageSender);

@@ -54,8 +54,11 @@ void PatternMiningAgent::init()
                     __FUNCTION__, this->cycleCount);
 
     // Get OAC
+
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
+
+    pai = oac->pai;
 
 
     // create corpus AtomSpace
@@ -113,9 +116,6 @@ void PatternMiningAgent::run()
     logger().debug( "PatternMiningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
 
-    // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
-    OC_ASSERT(oac, "Did not get an OAC server!");
 
     // Initialize the Agent (demandList etc)
     if ( !this->bInitialized )
@@ -126,28 +126,35 @@ void PatternMiningAgent::run()
     if (hasRun)
         return;
 
+    hasRun = true;
+
     this->patternMiner->runPatternMinerForEmbodiment();
 
     std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
     feedingthread.detach();
-    hasRun = true;
+
 
 }
 
 
 void PatternMiningAgent::feedingNewAtomsToPatternMiner()
 {
+
+    return;
+    sleep(30);
+
     while (true)
     {
-        PatternMiner::waitingToFeedQueueLock.lock();
-        PAI::waitingToFeedToPatternMinerLock.lock();
-        if (PAI::perceptionWaitingForPatternMiner.size() != 0)
+
+        this->patternMiner->waitingToFeedQueueLock.lock();
+        pai->waitingToFeedToPatternMinerLock.lock();
+        if (pai->perceptionWaitingForPatternMiner.size() != 0)
         {
-            this->patternMiner->feedNewLinksToPatternMiner(PAI::perceptionWaitingForPatternMiner);
-            PAI::perceptionWaitingForPatternMiner.clear();
+            this->patternMiner->feedNewLinksToPatternMiner(pai->perceptionWaitingForPatternMiner);
+            pai->perceptionWaitingForPatternMiner.clear();
         }
-        PAI::waitingToFeedToPatternMinerLock.unlock();
-        PatternMiner::waitingToFeedQueueLock.unlock();
+        pai->waitingToFeedToPatternMinerLock.unlock();
+        this->patternMiner->waitingToFeedQueueLock.unlock();
         sleep(5);
     }
 }

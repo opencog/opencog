@@ -89,8 +89,8 @@ typedef map<std::string, std::string> PropertyMap;
 class PAI
 {
 public:
-    static HandleSeq perceptionWaitingForPatternMiner;
-    static std::mutex waitingToFeedToPatternMinerLock;
+    HandleSeq perceptionWaitingForPatternMiner;
+    std::mutex waitingToFeedToPatternMinerLock;
 
 private:
 

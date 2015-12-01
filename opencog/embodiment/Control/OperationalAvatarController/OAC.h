@@ -105,10 +105,7 @@ private:
      */
     Procedure::ProcedureRepository* procedureRepository;
 
-    /**
-     * Component to deal with perceptions and actions from PVP proxy.
-     */
-    pai::PAI * pai;
+
 
     /**
      * Store metadata concerning a pet controlled by the OAC. Also implements
@@ -217,6 +214,11 @@ private:
 
 
 public:
+
+    /**
+     * Component to deal with perceptions and actions from PVP proxy.
+     */
+    pai::PAI * pai;
 
     static BaseServer* createInstance();
 

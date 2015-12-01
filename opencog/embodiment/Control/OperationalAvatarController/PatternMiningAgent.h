@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
+
 using namespace opencog::PatternMining;
 
 namespace opencog { namespace oac {
@@ -36,6 +37,7 @@ namespace opencog { namespace oac {
  *
  * @brief Agent of pattern mining
  */
+
 
 class PatternMiningAgent  : public opencog::Agent
 {
@@ -47,6 +49,8 @@ private:
     bool bInitialized; 
 
     PatternMiner* patternMiner;
+
+    pai::PAI * pai;
 
     // AtomSpace* corpusAtomSpace;
 
