@@ -328,6 +328,17 @@ Date:   Sun Nov 29 14:24:00 2015 -0600
 iline 101 all-sets
 wtf
 
+(cog-get-atoms 'InterpretationNode)
+(cog-incoming-set (car (cog-get-atoms 'InterpretationNode)))
+
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+(cog-incoming-set (car (cog-incoming-set (car (cog-get-atoms 'AnchorNode)))))
+
+rel
+rep
+
+
 ====================================================
 
 WTF:
