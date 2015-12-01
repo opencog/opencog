@@ -56,7 +56,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")
 			(ListLink
@@ -65,7 +64,6 @@
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 

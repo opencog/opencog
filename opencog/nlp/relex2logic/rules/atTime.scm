@@ -36,7 +36,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-atTime-rule")
        	      (ListLink
@@ -44,7 +43,6 @@
 		            (VariableNode "$pred")
             )
         )
-      )
     )
 )
 

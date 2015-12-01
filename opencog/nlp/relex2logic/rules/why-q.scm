@@ -41,14 +41,12 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-why-q-rule")
 			(ListLink
 				(VariableNode "$verb")
 			)
 		)
-   )
 	)
 )
 

@@ -21,7 +21,7 @@
                 (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
-           (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$iobj")
                 (TypeNode "WordInstanceNode")
             )
@@ -43,7 +43,7 @@
                 (VariableNode "$obj")
                 (VariableNode "$a-parse")
             )
-          (WordInstanceLink
+            (WordInstanceLink
                 (VariableNode "$iobj")
                 (VariableNode "$a-parse")
             )
@@ -61,36 +61,34 @@
                     (VariableNode "$obj")
                 )
             )
- 	    (EvaluationLink
+            (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_iobj")
                 (ListLink
-                    	(VariableNode "$verb")
-                    	(VariableNode "$iobj")
+                    (VariableNode "$verb")
+                    (VariableNode "$iobj")
                 )
             )
-		(EvaluationLink
-   			(DefinedLinguisticRelationshipNode "_det")
-  			 (ListLink
-     				(VariableNode "$obj")
-      				(VariableNode "$qVar")
-			)
-		)
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
-		)
-        )
-       (ListLink
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichobjSVIOQ-rule")
-       	      (ListLink
-       	         (VariableNode "$subj")
-       	         (VariableNode "$verb")
-       	         (VariableNode "$obj")
-       	         (VariableNode "$iobj")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_det")
+                (ListLink
+                    (VariableNode "$obj")
+                    (VariableNode "$qVar")
+                )
+            )
+            (InheritanceLink
+                (VariableNode "$qVar")
+                (DefinedLinguisticConceptNode "which")
             )
         )
-      )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-whichobjSVIOQ-rule")
+            (ListLink
+               (VariableNode "$subj")
+               (VariableNode "$verb")
+               (VariableNode "$obj")
+               (VariableNode "$iobj")
+            )
+        )
     )
 )
 ;;ToDo: define whichobjSVIOQ

@@ -65,7 +65,6 @@
 				(DefinedLinguisticConceptNode "which")
 			)
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-whichsubjQ-rule")
        	      (ListLink
@@ -74,7 +73,6 @@
        	         (VariableNode "$obj")
             )
         )
-      )
     )
 )
 ;ToDo: define whichsubjQ-rule

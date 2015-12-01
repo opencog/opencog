@@ -27,25 +27,23 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_quantity")
-                			(ListLink
-                    			(VariableNode "$noun")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_quantity")
+     			(ListLink
+        			(VariableNode "$noun")
+        			(VariableNode "$qVar")
+     			)
+	 		)
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howquant-q-rule")
 			(ListLink
 				(VariableNode "$noun")
 			)
 		)
-   )
 	)
 )
 

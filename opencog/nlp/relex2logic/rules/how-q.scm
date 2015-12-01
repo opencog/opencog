@@ -31,22 +31,21 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(PrepositionalRelationshipNode "how")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(PrepositionalRelationshipNode "how")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$qVar")
+     			)
+ 			)
 		)
- (ListLink
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: pre-how-q-rule")
-		(ListLink
-			(VariableNode "$verb")
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-how-q-rule")
+			(ListLink
+				(VariableNode "$verb")
+			)
 		)
 	)
- )
-))
+)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.

@@ -35,11 +35,10 @@
                 (DefinedLinguisticRelationshipNode "_compmod")
                 (ListLink
                     (VariableNode "$pred")
-		(VariableNode "$comp")
+                    (VariableNode "$comp")
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-compmod-rule")
        	      (ListLink
@@ -47,7 +46,6 @@
 		             (VariableNode "$comp")
             )
         )
-      )
     )
 )
 

@@ -19,19 +19,17 @@
                 (VariableNode "$pred")
                 (VariableNode "$a-parse")
             )
-	    (InheritanceLink
-   		(VariableNode "$pred")
-   		(DefinedLinguisticConceptNode "negative")
-	    )
-        )
-       (ListLink
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-neg-rule")
-       	      (ListLink
-       	         (VariableNode "$pred")
+            (InheritanceLink
+                (VariableNode "$pred")
+                (DefinedLinguisticConceptNode "negative")
             )
         )
-      )
+        (ExecutionOutputLink
+           (GroundedSchemaNode "scm: pre-neg-rule")
+              (ListLink
+                 (VariableNode "$pred")
+            )
+        )
     )
 )
 

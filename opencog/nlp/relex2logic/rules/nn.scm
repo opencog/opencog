@@ -31,9 +31,7 @@
                     (VariableNode "$N2")
                 )
             )
-		 
         )
-      (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-nn-rule")
        	      (ListLink
@@ -41,7 +39,6 @@
        	         (VariableNode "$N2")
             )
         )
-      )
     )
 )
 

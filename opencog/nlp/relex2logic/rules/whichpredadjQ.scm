@@ -51,7 +51,6 @@
 				(DefinedLinguisticConceptNode "which")
 			)
         )
-       (ListLink
         (ExecutionOutputLink
        	    (GroundedSchemaNode "scm: pre-whichpredadjQ-rule")
        	    (ListLink
@@ -59,7 +58,6 @@
        	       (VariableNode "$predadj")
             )
         )
-      )
     )
 )
 

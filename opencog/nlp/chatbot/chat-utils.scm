@@ -55,11 +55,7 @@
         (define outputs
             (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set)))
 
-        ; XXX FIXME! This appears to be forcing all of the outputs
-        ; to be double-wrapped in a ListLink. We should not be doing
-        ; this twice.
-        (append-map cog-delete-parent
-                  (append-map cog-delete-parent outputs))
+        (append-map cog-delete-parent outputs)
     )
 
     (define (interpret parse-node)

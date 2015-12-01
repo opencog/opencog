@@ -143,7 +143,6 @@
 	(define obj_concept (cog-name obj_lemma))
 	(define obj_instance (cog-name obj_inst))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(cond
 		((string=? subj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
@@ -173,7 +172,6 @@
 			)
 		)
 	)
-)
 )
 ;------------------------------------------------
 ;
@@ -296,7 +294,6 @@
 	(define obj_concept (cog-name obj_lemma))
 	(define obj_instance (cog-name obj_inst))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(cond ((string=? subj_concept "_$qVar")
 		(let ((var_name (choose-var-name)))
 			(ListLink
@@ -349,7 +346,6 @@
 			)
 	))
 )
-)
 ;--------------------------------------------------------------
 ;
 ; SV
@@ -366,7 +362,6 @@
 	(define verb          (cog-name verb-lemma))
 	(define verb_instance (cog-name verb-inst))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(cond
 		((string=? subj_concept "_$qVar")
 			(let ((var_name (choose-var-name)))
@@ -399,7 +394,6 @@
 					(ListLink (ConceptNode subj_instance)))
 			)
 		)
-)
 	)
 )
 ;------------------------------------------------------------------------
@@ -541,7 +535,6 @@
 
 	(define concept_node (ConceptNode word))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(cond
 		((string=? gender_type "feminine")
 			(ListLink
@@ -566,20 +559,17 @@
 		))
 	)
 )
-)
 
 (define (tense-rule lemma inst tns)
 	(define verb (cog-name lemma))
 	(define instance (cog-name inst))
 	(define tense (cog-name tns))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(ListLink
 		(Implication (Predicate instance) (Predicate verb))
 		(r2l-wordinst-Predicate instance)
 		(Inheritance (Predicate instance) (DefinedLinguisticConceptNode tense))
 	)
-)
 )
 
 (define (quantity-rule noun_concept noun_instance quantifier_concept quantifier_instance)
@@ -667,7 +657,6 @@
 	(define word (cog-name lemma))
 	(define word_instance (cog-name word-inst))
 
-(ListLink ;; XXX FIXME -- temporary hack, double-wrap the ListLink
 	(ListLink
 		(Inheritance (Concept word_instance) (Concept word))
 		(r2l-wordinst-concept word_instance)
@@ -675,7 +664,6 @@
 			(DefinedLinguisticPredicateNode "definite")
 			(ListLink (Concept word_instance)))
 	)
-)
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."

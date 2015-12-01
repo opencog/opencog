@@ -29,12 +29,12 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%atTime")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_%atTime")
+     			(ListLink
+       			(VariableNode "$verb")
+      			(VariableNode "$qVar")
+     			)
+			)
 			(AbsentLink
 				(LemmaLink
 					(VariableNode "$verb")
@@ -42,15 +42,14 @@
 				)
 			)
 		)
- (ListLink
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: pre-when-q-rule")
-		(ListLink
-			(VariableNode "$verb")
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-when-q-rule")
+			(ListLink
+				(VariableNode "$verb")
+			)
 		)
 	)
- )
-))
+)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.

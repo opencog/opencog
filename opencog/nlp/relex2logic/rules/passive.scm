@@ -53,13 +53,11 @@
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-passive-rule")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-passive-rule")
+            (ListLink
+                (VariableNode "$verb")
+                (VariableNode "$obj")
             )
         )
     )

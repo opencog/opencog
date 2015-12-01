@@ -28,16 +28,14 @@
                 (VariableNode "$demdet")
                 (VariableNode "$a-parse")
             )
-	    (EvaluationLink
-   		(DefinedLinguisticRelationshipNode "_det")
-   			(ListLink
-      				(VariableNode "$noun")
-      				(VariableNode "$demdet")
-   			)
-		)
-
+            (EvaluationLink
+               (DefinedLinguisticRelationshipNode "_det")
+               (ListLink
+                   (VariableNode "$noun")
+                   (VariableNode "$demdet")
+               )
+            )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-demdet-rule")
        	      (ListLink
@@ -45,7 +43,6 @@
        	         (VariableNode "$noun")
             )
         )
-      )
     )
 )
 

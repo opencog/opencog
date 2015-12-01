@@ -66,7 +66,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-svio-rule")
 			(ListLink
@@ -76,7 +75,6 @@
 				(VariableNode "$iobj")
 			)
 		)
-   )
 	)
 )
 

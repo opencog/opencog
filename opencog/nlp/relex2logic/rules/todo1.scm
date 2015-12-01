@@ -15,7 +15,7 @@
                 (VariableNode "$subj")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$subj2")
                 (TypeNode "WordInstanceNode")
             )
@@ -27,7 +27,7 @@
                 (VariableNode "$verb2")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
@@ -56,14 +56,14 @@
                     (VariableNode "$subj")
                 )
             )
-	    (AbsentLink
-		(EvaluationLink
-	                (DefinedLinguisticRelationshipNode "_subj")
-	                (ListLink
-	                    (VariableNode "$verb2")
-	                    (VariableNode "$subj2")
-                	)
-		)
+            (AbsentLink
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_subj")
+                    (ListLink
+                        (VariableNode "$verb2")
+                        (VariableNode "$subj2")
+                    )
+                )
             )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_obj")
@@ -79,18 +79,16 @@
                     (VariableNode "$verb2")
                 )
             )
-	)
-       (ListLink
+        )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo1-rule")
             (ListLink
                 (VariableNode "$subj")
                 (VariableNode "$verb1")
                 (VariableNode "$verb2")
-		            (VariableNode "$obj")
+                (VariableNode "$obj")
             )
         )
-      )
     )
 )
 
@@ -99,9 +97,9 @@
 (define (pre-todo1-rule subj verb1 verb2 obj)
  (ListLink
   (to-do-rule-1 
-	(cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
-	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
-	(cog-name (word-inst-get-lemma subj)) (cog-name subj)
+    (cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
+    (cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
+    (cog-name (word-inst-get-lemma subj)) (cog-name subj)
     (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
   )
  )

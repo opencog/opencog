@@ -48,7 +48,6 @@
                 )
            )
         )
-      (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-adverbialpp-rule")
        	      (ListLink
@@ -57,7 +56,6 @@
                  (VariableNode "$verb")
             )
         )
-      )
     )
 )
 

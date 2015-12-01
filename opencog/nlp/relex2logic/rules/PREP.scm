@@ -53,7 +53,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-prep-rule")
 			(ListLink
@@ -62,7 +61,6 @@
 				(VariableNode "$obj")
 			)
 		)
-   )
 	)
 )
 

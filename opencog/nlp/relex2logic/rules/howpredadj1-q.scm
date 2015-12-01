@@ -36,32 +36,30 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%how")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_%how")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$qVar")
+     			)
+     		)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_subj")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$subj")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_subj")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$subj")
+     			)
+     		)
 			(LemmaLink
 				(WordInstanceNode "$verb")
 				(WordNode "be")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howpredadj1-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 

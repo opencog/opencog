@@ -1,5 +1,5 @@
 ;"She is nice to help with the project." 
-	
+
 (define to-do-rule-3
 	(BindLink
 		(VariableList
@@ -48,7 +48,6 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-todo3-rule")
 			(ListLink
@@ -57,7 +56,6 @@
 			 	(VariableNode "$adj")
 			)
 		)
-   )
    )
 )
 

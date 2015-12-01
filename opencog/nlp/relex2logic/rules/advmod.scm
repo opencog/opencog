@@ -37,7 +37,6 @@
                 )
             )
         )
-      (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-advmod-rule")
        	      (ListLink
@@ -45,7 +44,6 @@
        	         (VariableNode "$adv")
             )
         )
-      )
     )
 )
 

@@ -25,14 +25,12 @@
 				(DefinedLinguisticConceptNode "truth-query")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-pred-ynq-rule")
 			(ListLink
 				(VariableNode "$verb")
 			)
 		)
-   )
 	)
 )
 

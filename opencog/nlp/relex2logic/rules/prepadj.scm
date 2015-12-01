@@ -36,7 +36,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-prepadj-rule")
        	      (ListLink
@@ -44,7 +43,6 @@
        	         (VariableNode "$adj")
             )
         )
-      )
     )
 )
 

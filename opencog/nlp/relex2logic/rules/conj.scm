@@ -47,29 +47,27 @@
                         (VariableNode "$var2")
                     )
             )
-        (OrLink
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_and")
-            )
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_but")
-            )
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_or")
-            )
-        ))
-        (ListLink
-            (ExecutionOutputLink
-       	        (GroundedSchemaNode "scm: pre-conj-rule")
-       	        (ListLink
-                    (VariableNode "$var1")
-                    (VariableNode "$var2")
+            (OrLink
+                (EqualLink
                     (VariableNode "$var3")
-                    (VariableNode "$pos")
+                    (PrepositionalRelationshipNode "conj_and")
                 )
+                (EqualLink
+                    (VariableNode "$var3")
+                    (PrepositionalRelationshipNode "conj_but")
+                )
+                (EqualLink
+                    (VariableNode "$var3")
+                    (PrepositionalRelationshipNode "conj_or")
+                )
+            ))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-conj-rule")
+            (ListLink
+                (VariableNode "$var1")
+                (VariableNode "$var2")
+                (VariableNode "$var3")
+                (VariableNode "$pos")
             )
         )
     )

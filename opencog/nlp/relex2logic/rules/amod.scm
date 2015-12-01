@@ -41,7 +41,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-amod-rule")
        	      (ListLink
@@ -49,7 +48,6 @@
        	         (VariableNode "$adj")
             )
         )
-      )
     )
 )
 

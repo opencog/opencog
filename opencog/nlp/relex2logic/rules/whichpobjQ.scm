@@ -25,7 +25,7 @@
                 (VariableNode "$qVar")
                 (TypeNode "WordInstanceNode")
             )
-	(TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$be")
                 (TypeNode "WordInstanceNode")
             )
@@ -60,34 +60,30 @@
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_advmod")
                 (ListLink
-			(VariableNode "$be")
+                    (VariableNode "$be")
                     (VariableNode "$prep")
                 )
             )
-
-
-		(EvaluationLink
-   			(DefinedLinguisticRelationshipNode "_det")
-  			 (ListLink
-   				(VariableNode "$pobj")
-      				(VariableNode "$qVar")
-			)
-		)
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
-		)
-        )
-       (ListLink
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichpobjQ-rule")
-       	      (ListLink
-       	         (VariableNode "$subj")
-       	         (VariableNode "$prep")
-       	         (VariableNode "$pobj")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_det")
+                (ListLink
+                    (VariableNode "$pobj")
+                    (VariableNode "$qVar")
+                )
+            )
+            (InheritanceLink
+                (VariableNode "$qVar")
+                (DefinedLinguisticConceptNode "which")
             )
         )
-      )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-whichpobjQ-rule")
+            (ListLink
+                (VariableNode "$subj")
+                (VariableNode "$prep")
+                (VariableNode "$pobj")
+            )
+        )
     )
 )
 ;;ToDo: define whichpobjQ

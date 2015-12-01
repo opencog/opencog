@@ -27,7 +27,7 @@
                 (VariableNode "$verb2")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
@@ -37,7 +37,7 @@
                 (VariableNode "$subj1")
                 (VariableNode "$a-parse")
             )
-	    (WordInstanceLink
+            (WordInstanceLink
                 (VariableNode "$subj2")
                 (VariableNode "$a-parse")
             )
@@ -60,7 +60,7 @@
                     (VariableNode "$subj1")
                 )
             )
-	    (EvaluationLink
+            (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink
                     (VariableNode "$verb2")
@@ -81,8 +81,7 @@
                     (VariableNode "$verb2")
                 )
             )
-	)
-       (ListLink
+        )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo2-rule")
             (ListLink
@@ -90,10 +89,9 @@
                 (VariableNode "$subj2")
                 (VariableNode "$verb1")
                 (VariableNode "$verb2")
-		            (VariableNode "$obj")
+                (VariableNode "$obj")
             )
         )
-       )
     )
 )
 

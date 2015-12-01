@@ -36,32 +36,30 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%atLocation")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_%atLocation")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$qVar")
+     			)
+ 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_subj")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$subj")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_subj")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$subj")
+     			)
+			)
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-where-cop-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 

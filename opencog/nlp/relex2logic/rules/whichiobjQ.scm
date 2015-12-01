@@ -57,29 +57,27 @@
                     (VariableNode "$iobj")
                 )
             )
-			(EvaluationLink
-   				(DefinedLinguisticRelationshipNode "_det")
-  				 (ListLink
-     					(VariableNode "$iobj")
-      					(VariableNode "$qVar")
-				)
-			)
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
-        )
-       (ListLink
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichiobjQ-rule")
-       	      (ListLink
-       	         (VariableNode "$subj")
-       	         (VariableNode "$verb")
-       	         (VariableNode "$obj")
-		            (VariableNode "$iobj")
+            (EvaluationLink
+                (DefinedLinguisticRelationshipNode "_det")
+                (ListLink
+                    (VariableNode "$iobj")
+                    (VariableNode "$qVar")
+                )
+            )
+            (InheritanceLink
+                (VariableNode "$qVar")
+                (DefinedLinguisticConceptNode "which")
             )
         )
-      )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-whichiobjQ-rule")
+            (ListLink
+                (VariableNode "$subj")
+                (VariableNode "$verb")
+                (VariableNode "$obj")
+                (VariableNode "$iobj")
+            )
+        )
     )
 )
 

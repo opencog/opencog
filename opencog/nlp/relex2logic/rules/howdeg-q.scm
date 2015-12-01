@@ -27,26 +27,25 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%howdeg")
-                			(ListLink
-                    			(VariableNode "$pred")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+           	(DefinedLinguisticRelationshipNode "_%howdeg")
+           	(ListLink
+           		(VariableNode "$pred")
+           		(VariableNode "$qVar")
+           	)
+     		)
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")
 			)
 		)
- (ListLink
-	(ExecutionOutputLink
-		(GroundedSchemaNode "scm: pre-howdeg-q-rule")
-		(ListLink
-			(VariableNode "$pred")
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-howdeg-q-rule")
+			(ListLink
+				(VariableNode "$pred")
+			)
 		)
 	)
- )
-))
+)
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.

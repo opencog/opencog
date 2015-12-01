@@ -41,7 +41,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-rep-rule")
        	      (ListLink
@@ -49,7 +48,6 @@
 		            (VariableNode "$pred")
             )
         )
-      )
     )
 )
 

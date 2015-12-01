@@ -73,14 +73,12 @@
 				)
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-why-cop-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 

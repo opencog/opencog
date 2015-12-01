@@ -35,7 +35,6 @@
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-because-rule")
        	      (ListLink
@@ -43,7 +42,6 @@
 				        (VariableNode "$pred")
             )
         )
-      )
     )
 )
 

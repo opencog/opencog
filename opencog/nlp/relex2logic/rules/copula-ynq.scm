@@ -53,7 +53,6 @@
 				(DefinedLinguisticConceptNode "truth-query")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
 			(ListLink
@@ -61,7 +60,6 @@
 				(VariableNode "$obj")
 			)
 		)
-   )
 	)
 )
 
