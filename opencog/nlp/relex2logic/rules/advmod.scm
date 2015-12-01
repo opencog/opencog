@@ -50,9 +50,9 @@
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-advmod-rule verb adv)
-  (cond 
-    ((or (string=? (cog-name (word-inst-get-lemma adv)) "maybe") 
-     (string=? (cog-name (word-inst-get-lemma adv)) "possibly") 
+  (cond
+    ((or (string=? (cog-name (word-inst-get-lemma adv)) "maybe")
+     (string=? (cog-name (word-inst-get-lemma adv)) "possibly")
      (string=? (cog-name (word-inst-get-lemma adv)) "perhaps")
      (string=? (cog-name (word-inst-get-lemma adv)) "probably"))
      (ListLink

@@ -96,7 +96,7 @@
 ; r2l pipeline.
 (define (pre-todo1-rule subj verb1 verb2 obj)
  (ListLink
-  (to-do-rule-1 
+  (to-do-rule-1
     (cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
     (cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
     (cog-name (word-inst-get-lemma subj)) (cog-name subj)

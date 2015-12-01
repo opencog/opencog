@@ -64,7 +64,7 @@
   (ListLink
     (adverbialpp-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
               (cog-name (word-inst-get-lemma prep)) (cog-name prep)
-              (cog-name (word-inst-get-lemma noun)) (cog-name noun)        
+              (cog-name (word-inst-get-lemma noun)) (cog-name noun)
     )
   )
 )

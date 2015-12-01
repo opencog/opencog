@@ -31,11 +31,10 @@
                     (VariableNode "$det")
                 )
             )
-            (InheritanceLink 
+            (InheritanceLink
                 (VariableNode "$noun")
                 (DefinedLinguisticConceptNode "definite")
             )
-		 
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-det-rule")
@@ -50,8 +49,8 @@
 
 (define (pre-det-rule noun det)
   (ListLink
-    (det-rule  (cog-name (word-inst-get-lemma  noun)) (cog-name noun) 
-              (choose-var-name) (cog-name (word-inst-get-lemma det)) 
+    (det-rule  (cog-name (word-inst-get-lemma  noun)) (cog-name noun)
+              (choose-var-name) (cog-name (word-inst-get-lemma det))
     )
   )
 )

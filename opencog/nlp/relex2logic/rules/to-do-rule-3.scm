@@ -1,4 +1,4 @@
-;"She is nice to help with the project." 
+;"She is nice to help with the project."
 
 (define to-do-rule-3
 	(BindLink
