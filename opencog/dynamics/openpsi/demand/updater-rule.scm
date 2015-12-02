@@ -13,7 +13,7 @@
 (DefineLink (Node "psi-demand-updater-rule") psi-demand-updater-rule)
 
 (define (psi-demand-updater demand min-acceptable-value max-acceptable-value)
-    (let ((current-value (tv-mean (cog-tv  demand)))
+    (let ((current-value (cog-tv-mean  demand))
           (min-value (string->number (cog-name min-acceptable-value)))
           (max-value (string->number (cog-name max-acceptable-value)))
          )

@@ -551,7 +551,7 @@ i.e. entropy increses if the word-pairs are merged, the words are separated.
 
 Total entropy:
 (fold + 0 (map (lambda (atom)
-	(let ((ent (tv-conf (cog-tv atom))))
+	(let ((ent (cog-tv-confidence atom)))
 	(* ent (exp (* (- ent) (log 2))))))
 	(cog-get-atoms 'WordNode)))
 

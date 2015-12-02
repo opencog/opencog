@@ -128,7 +128,7 @@
 
 (define (get-total-atom-count atom-list)
 	(let ((cnt 0))
-		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
+		(define (inc atom) (set! cnt (+ cnt (cog-tv-count atom))))
 		(for-each inc atom-list)
 		cnt
 	)
@@ -214,7 +214,7 @@
 	(define evl
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
-	(tv-count (cog-tv evl))
+	(cog-tv-count evl)
 )
 
 ; ---------------------------------------------------------------------
@@ -225,7 +225,7 @@
 	(define evl
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
-	(tv-count (cog-tv evl))
+	(cog-tv-count evl)
 )
 
 ; ---------------------------------------------------------------------
@@ -233,11 +233,11 @@
 ; That is, get the count, for wild-cards on both the left and right.
 
 (define (get-pair-total lg_rel)
-	(tv-count (cog-tv
+	(cog-tv-count
 		(EvaluationLink lg_rel
 			(ListLink (AnyNode "left-word") (AnyNode "right-word"))
 		)
-	))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -248,7 +248,7 @@
 	(define evl
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
-	(tv-conf (cog-tv evl))
+	(cog-tv-confidence evl)
 )
 
 ; ---------------------------------------------------------------------
@@ -259,7 +259,7 @@
 	(define evl
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
-	(tv-conf (cog-tv evl))
+	(cog-tv-confidence evl)
 )
 
 ; ---------------------------------------------------------------------
@@ -783,11 +783,11 @@
 					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
 				)
 				; log-likelihood for the left wildcard
-				(if (< 0 (tv-count (cog-tv lefty)))
+				(if (< 0 (cog-tv-count lefty))
 					(store-atom (compute-atom-logli lefty pair-total))
 				)
 				; log-likelihood for the right wildcard
-				(if (< 0 (tv-count (cog-tv righty)))
+				(if (< 0 (cog-tv-count righty))
 					(store-atom (compute-atom-logli righty pair-total))
 				)
 			)

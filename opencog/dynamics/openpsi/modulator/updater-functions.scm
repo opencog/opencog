@@ -33,9 +33,9 @@
 ;    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
 ;           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
 ;    )
-    (let ((competence (tv-mean (cog-tv (ConceptNode "OpenPsi: Competence"))))
-           (energy (tv-mean (cog-tv (ConceptNode "OpenPsi: Energy"))))
-           (latest-value (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation"))))
+    (let ((competence (cog-tv-mean (ConceptNode "OpenPsi: Competence")))
+           (energy (cog-tv-mean (ConceptNode "OpenPsi: Energy")))
+           (latest-value (cog-tv-mean (ConceptNode "OpenPsi: Activation")))
            )
 
          (+  (* 2 (stimulate latest-value 0.95))
@@ -51,8 +51,8 @@
 ; A low resolution level tends to miss differences, then the agent would get a better overview
 
 (define (ResolutionModulatorUpdater)
-    (let ((latest-value (tv-mean (cog-tv (ConceptNode "OpenPsi: Resolution"))))
-          (activation (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation"))))
+    (let ((latest-value (cog-tv-mean (ConceptNode "OpenPsi: Resolution")))
+          (activation (cog-tv-mean (ConceptNode "OpenPsi: Activation")))
          )
 
         (+  (* 2 (stimulate latest-value 0.9))
@@ -76,10 +76,10 @@
 ;    (* (expt (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 0.5)
 ;       (expt (get_truth_value_mean (cog-tv IntegrityDemandGoal)) 2)
 ;    )
-    (let ( (certainty (tv-mean (cog-tv (ConceptNode "OpenPsi: Certainty"))))
-           (integrity (tv-mean (cog-tv (ConceptNode "OpenPsi: Integrity"))))
-           (latest-value (tv-mean (cog-tv
-                (ConceptNode "OpenPsi: SecuringThreshold"))))
+    (let ( (certainty (cog-tv-mean (ConceptNode "OpenPsi: Certainty")))
+           (integrity (cog-tv-mean (ConceptNode "OpenPsi: Integrity")))
+           (latest-value (cog-tv-mean
+                (ConceptNode "OpenPsi: SecuringThreshold")))
          )
 ;         (* (/ certainty (+ certainty 0.05) )
 ;            (expt integrity 3)
@@ -114,9 +114,9 @@
 ;         )
 ;    )
 
-    (let ( (competence (tv-mean (cog-tv (ConceptNode "OpenPsi: Competence"))))
-           (latest-value (tv-mean (cog-tv
-                (ConceptNode "OpenPsi: SelectionThreshold"))))
+    (let ( (competence (cog-tv-mean (ConceptNode "OpenPsi: Competence")))
+           (latest-value (cog-tv-mean
+                (ConceptNode "OpenPsi: SelectionThreshold")))
          )
 
          (+  (* 2 (stimulate latest-value 0.95))
