@@ -345,7 +345,6 @@ parse-get-relex-outputs
 
 ah haha!!!
 
-
 ====================================================
 
 WTF:
@@ -374,9 +373,13 @@ ForwardChainer::apply_rule
 opencog/rule-engine/forwardchainer/ForwardChainer.cc:396
 
 ====================================================
+
+state connected
+
+====================================================
 bugs:
 
-* Its not answering any questions ...
+* 1916, #1922
 
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn

@@ -34,6 +34,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <time.h>
 
@@ -115,6 +116,9 @@ int IRC::start(const char* server, int port, const char* nick,
 	hostent* resolv;
 	#endif
 	sockaddr_in rem;
+	int optval;
+	socklen_t optlen = sizeof(optval);
+	int rc;
 
 	if (connected)
 		return 1;
@@ -124,9 +128,54 @@ int IRC::start(const char* server, int port, const char* nick,
 	{
 		return 1;
 	}
+
+	/* Turn on keepalive. */
+	optval = 1;
+	rc=setsockopt(irc_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+	if (0 > rc)
+	{
+		perror("setsockopt()");
+		close(irc_socket);
+		return 1;
+	}
+	printf("SO_KEEPALIVE turned ON\n");
+
+	/* Verify that it worked. */
+	rc=getsockopt(irc_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen);
+	if (0 > rc)
+	{
+		perror("getsockopt()");
+		close(irc_socket);
+		return 1;
+	}
+	printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
+
+	/* Ping every .. I dunno -- 5 minutes? */
+	optval = 300;
+	rc=setsockopt(irc_socket, IPPROTO_TCP, TCP_KEEPIDLE, &optval, optlen);
+	if (0 > rc)
+	{
+		perror("setsockopt()");
+		close(irc_socket);
+		return 1;
+	}
+	printf("tcp_keepalive_time set to %d seconds\n", optval);
+
+	/* Ping every 10 seconds (for 9 tries == 90 seconds total) */
+	optval = 10;
+	rc=setsockopt(irc_socket, IPPROTO_TCP, TCP_KEEPINTVL, &optval, optlen);
+	if (0 > rc)
+	{
+		perror("setsockopt()");
+		close(irc_socket);
+		return 1;
+	}
+	printf("tcp_keepalive_intvl set to %d seconds\n", optval);
+
 	resolv=gethostbyname(server);
 	if (!resolv)
 	{
+		perror("gethostbyname()");
 		closesocket(irc_socket);
 		return 1;
 	}
