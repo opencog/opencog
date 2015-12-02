@@ -19,7 +19,7 @@
             )
             (TypedVariableLink
                 (VariableNode "a number")
-                (TypeNode "NumberNode")
+                (TypeNode "ConceptNode")
             )
         )
         (AndLink
