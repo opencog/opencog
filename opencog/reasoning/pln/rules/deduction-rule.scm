@@ -18,7 +18,7 @@
 ;;       deduction-subset-rule
 ;;
 ;; -----------------------------------------------------------------------------
-
+(use-modules (opencog))
 (use-modules (opencog logger))
 
 (load "formulas.scm")
