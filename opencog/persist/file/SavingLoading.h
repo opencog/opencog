@@ -35,7 +35,7 @@
 #include <opencog/atomutils/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
 #include <opencog/persist/file/SavableRepository.h>

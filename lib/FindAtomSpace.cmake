@@ -16,6 +16,9 @@ set(ATOMSPACE_LIBPATH
 find_library(ATOMSPACE_LIBRARY atomspace
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
+find_library(ATOMSPACE_truthvalue_LIBRARY truthvalue
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+
 find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -57,6 +60,7 @@ find_library(ATOMSPACE_smob_LIBRARY smob
 
 set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_truthvalue_LIBRARY}
 	${ATOMSPACE_atomspaceutils_LIBRARY}
 	${ATOMSPACE_atomutils_LIBRARY}
 	${ATOMSPACE_clearbox_LIBRARY}

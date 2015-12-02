@@ -14,7 +14,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/atomutils/ForeachChaseLink.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 using namespace opencog;
 

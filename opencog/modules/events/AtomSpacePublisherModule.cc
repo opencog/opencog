@@ -26,9 +26,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
-#include <opencog/atomspace/ProbabilisticTruthValue.h>
-#include <opencog/atomspace/FuzzyTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/truthvalue/FuzzyTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <lib/zmq/zhelpers.hpp>
 #include <lib/json_spirit/json_spirit.h>
 #include <tbb/task.h>

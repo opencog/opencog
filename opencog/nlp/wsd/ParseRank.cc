@@ -15,8 +15,8 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
 using namespace opencog;

@@ -10,7 +10,7 @@
 #define _OPENCOG_SENSE_SIMILARITY_H
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 namespace opencog {
 

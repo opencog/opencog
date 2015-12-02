@@ -3,6 +3,7 @@ ADD_DEFINITIONS(-DNDEBUG)
 
 LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/truthvalue
 	${PROJECT_BINARY_DIR}/opencog/server
 	${PROJECT_BINARY_DIR}/opencog/dynamics/attention
 )
@@ -26,6 +27,7 @@ ADD_EXECUTABLE (hopfield
 ADD_DEPENDENCIES(hopfield attention_atom_types)
 
 TARGET_LINK_LIBRARIES (hopfield
+	${ATOMSPACE_LIBRARIES}
 	server
 	attention
 )
