@@ -35,12 +35,17 @@
   SENT must be a SentenceNode.
 "
     (define (cog-delete-parent a-link)
-        ; returns the outgoing-set of `a-link` and delete it if possible.
-        ; XXX maybe this has to be part of the ure module.
-        (let ((returned-list (cog-outgoing-set a-link)))
-            (cog-delete a-link)
-            returned-list
-        )
+        ; Many rules return a ListLink of results that they
+        ; generated. Some rules return singletons.  If A-LINK
+        ; is a ListLink, then delete it and return a list of
+        ; its contents, else return a list holding A-LINK.
+        ;
+        ; XXX maybe this should be part of the ure module??
+        (if (equal? 'ListLink (cog-type a-link))
+            (let ((returned-list (cog-outgoing-set a-link)))
+                    (cog-delete a-link)
+                    returned-list)
+            (list a-link))
     )
 
     (define (run-fc parse-node interp-link)
@@ -55,8 +60,7 @@
         (define outputs
             (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set)))
 
-        (append-map cog-delete-parent
-                  (append-map cog-delete-parent outputs))
+        (append-map cog-delete-parent outputs)
     )
 
     (define (interpret parse-node)
@@ -154,15 +158,18 @@
 	; Call the RelEx server
 	(relex-parse plain-text)
 
-	; Perform the R2L processing.
-	(r2l-parse (car (get-new-parsed-sentences)))
-
-	; Track some counts needed by R2L.
-	(r2l-count (get-new-parsed-sentences))
-
-	; Discard sentences that we've worked with.
 	(let ((sent-list (get-new-parsed-sentences)))
+		; Unhook the anchor. MUST do this before r2l-parse, as
+		; otherwise, parse-get-relex-outputs will wrap it in a
+		; SetLink! Ouch!!
 		(release-new-parsed-sents)
+
+		; Perform the R2L processing.
+		(r2l-parse (car sent-list))
+
+		; Track some counts needed by R2L.
+		(r2l-count sent-list)
+
 		; Return the sentence list.
 		sent-list
 	)

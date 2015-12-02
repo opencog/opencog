@@ -357,7 +357,6 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
                            if (type == ASYMMETRIC_HEBBIAN_LINK ||
                                type == HEBBIAN_LINK ||
                                type == SYMMETRIC_HEBBIAN_LINK ||
-                               type == SYMMETRIC_HEBBIAN_LINK ||
                                type == INVERSE_HEBBIAN_LINK ||
                                type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
                            {

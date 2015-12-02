@@ -1,20 +1,3 @@
-; check the atoms that should be grounded
-;
-; XXX FIXME replace the GroundedPredicates by
-; (OrLink
-;    (EqualLink
-;      (VariableNode "$gtype")
-;      (DefinedLinguisticRelationshipNode "masculine"))
-;   (EqualLink
-;      (VariableNode "$gtype")
-;      (DefinedLinguisticRelationshipNode "feminine"))
-;
-(define (check-gender gtype)
-    (if (or (string=? (cog-name gtype) "masculine") (string=? (cog-name gtype) "feminine"))
-        (begin (stv 1 1))
-        (begin (stv 0 1))
-    )
-)
 
 (define gender
     (BindLink
@@ -31,6 +14,10 @@
                 (VariableNode "$gtype")
                 (TypeNode "DefinedLinguisticConceptNode")
             )
+            (TypedVariableLink
+                (VariableNode "$lemma")
+                (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -45,31 +32,26 @@
                 (VariableNode "$word")
                 (DefinedLinguisticConceptNode "person")
             )
-        (EvaluationLink
-                (GroundedPredicateNode "scm: check-gender")
-                (ListLink
+            (LemmaLink
+                (VariableNode "$word")
+                (VariableNode "$lemma")
+            )
+            (OrLink
+                (EqualLink
                     (VariableNode "$gtype")
-                )
+                    (DefinedLinguisticRelationshipNode "masculine"))
+                (EqualLink
+                    (VariableNode "$gtype")
+                    (DefinedLinguisticRelationshipNode "feminine"))
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-gender-rule")
-                (ListLink
-                    (VariableNode "$word")
-                    (VariableNode "$gtype")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: gender-rule")
+            (ListLink
+                (VariableNode "$lemma")
+                (VariableNode "$word")
+                (VariableNode "$gtype")
             )
         )
     )
-)
-
-
-(define (pre-gender-rule word gtype)
-  (ListLink
-        (gender-rule
-            (cog-name (word-inst-get-lemma word)) (cog-name word)
-            (cog-name gtype)
-        )
-  )
 )

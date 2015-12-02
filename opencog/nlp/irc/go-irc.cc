@@ -284,7 +284,8 @@ int got_kick(const char* params, irc_reply_data* ird, void* data)
 {
 	fixup_reply(ird);
 	printf("got kicked -- input=%s\n", params);
-	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
+	printf("nick=%s ident=%s host=%s target=%s\n",
+	       ird->nick, ird->ident, ird->host, ird->target);
 	return 0;
 }
 

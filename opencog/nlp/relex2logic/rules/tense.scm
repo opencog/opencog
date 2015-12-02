@@ -1,13 +1,3 @@
-;Both link grammar and relex output are selected because of the pattern 
-;Example : "He gave me the book."
-;(DefinedLinguisticConceptNode "past") and (DefinedLinguisticConceptNode ".v-d")
-;I just want to avoid the Link Grammar output. There might be another way to do this
-(define (check-tense tense)
-    (if (string-contains (cog-name tense) ".")
-        (begin (stv 0 1))
-        (begin (stv 1 1))
-    )
-)
 
 (define tense
     (BindLink
@@ -24,6 +14,10 @@
                 (VariableNode "$tense")
                 (TypeNode "DefinedLinguisticConceptNode")
             )
+            (TypedVariableLink
+                (VariableNode "$lemma")
+                (TypeNode "WordNode")
+            )
         )
         (AndLink
             (WordInstanceLink
@@ -34,31 +28,22 @@
                 (VariableNode "$verb")
                 (DefinedLinguisticConceptNode "verb")
             )
-            (InheritanceLink
+            (TenseLink
                 (VariableNode "$verb")
                 (VariableNode "$tense")
             )
-            (EvaluationLink
-                (GroundedPredicateNode "scm: check-tense")
-                (ListLink
-                    (VariableNode "$tense")
-                )
+            (LemmaLink
+                (VariableNode "$verb")
+                (VariableNode "$lemma")
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-       	        (GroundedSchemaNode "scm: pre-tense-rule")
-       	        (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$tense")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: tense-rule")
+            (ListLink
+                (VariableNode "$lemma")
+                (VariableNode "$verb")
+                (VariableNode "$tense")
             )
         )
     )
-)
-
-(define (pre-tense-rule verb tense)
-  (ListLink
-    (tense-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb) (cog-name tense))
-  )
 )

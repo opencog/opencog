@@ -28,16 +28,14 @@
                 (VariableNode "$demdet")
                 (VariableNode "$a-parse")
             )
-	    (EvaluationLink
-   		(DefinedLinguisticRelationshipNode "_det")
-   			(ListLink
-      				(VariableNode "$noun")
-      				(VariableNode "$demdet")
-   			)
-		)
-
+            (EvaluationLink
+               (DefinedLinguisticRelationshipNode "_det")
+               (ListLink
+                   (VariableNode "$noun")
+                   (VariableNode "$demdet")
+               )
+            )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-demdet-rule")
        	      (ListLink
@@ -45,19 +43,16 @@
        	         (VariableNode "$noun")
             )
         )
-      )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 
-;;ToDo: define demdet-rule
+;; XXX FIXME ToDo: define demdet-rule
 (define (pre-demdet-rule demdet noun)
- (ListLink
   (demdet-rule (cog-name (word-inst-get-lemma noun)) (cog-name noun)
 	(cog-name (word-inst-get-lemma demdet)) (cog-name demdet)
 
   )
- )
 )

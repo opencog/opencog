@@ -15,7 +15,7 @@
                 (VariableNode "$subj")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$subj2")
                 (TypeNode "WordInstanceNode")
             )
@@ -27,7 +27,7 @@
                 (VariableNode "$verb2")
                 (TypeNode "WordInstanceNode")
             )
-	    (TypedVariableLink
+            (TypedVariableLink
                 (VariableNode "$obj")
                 (TypeNode "WordInstanceNode")
             )
@@ -52,24 +52,24 @@
                     (VariableNode "$subj")
                 )
             )
-	    (AbsentLink
-		    (EvaluationLink
-        	        (DefinedLinguisticRelationshipNode "_subj")
-        	        (ListLink
-        	            (VariableNode "$verb2")
-        	            (VariableNode "$subj2")
-        	        )
-        	    )
-	    )
             (AbsentLink
-		    (EvaluationLink
-        	        (DefinedLinguisticRelationshipNode "_obj")
-        	        (ListLink
-        	            (VariableNode "$verb2")
-        	            (VariableNode "$obj")
-        	        )
-        	    )
-	    )
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_subj")
+                    (ListLink
+                        (VariableNode "$verb2")
+                        (VariableNode "$subj2")
+                    )
+                )
+            )
+            (AbsentLink
+                (EvaluationLink
+                    (DefinedLinguisticRelationshipNode "_obj")
+                    (ListLink
+                        (VariableNode "$verb2")
+                        (VariableNode "$obj")
+                     )
+                 )
+            )
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_to-do")
                 (ListLink
@@ -77,8 +77,7 @@
                     (VariableNode "$verb2")
                 )
             )
-	)
-       (ListLink
+        )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo5-rule")
             (ListLink
@@ -87,18 +86,15 @@
                 (VariableNode "$verb2")
             )
         )
-       )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo5-rule subj verb1 verb2)
- (ListLink
-  (to-do-rule-5 
+  (to-do-rule-5
 	(cog-name (word-inst-get-lemma verb1)) (cog-name verb1)
 	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
 	(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
   )
- )
 )

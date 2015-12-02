@@ -36,40 +36,35 @@
 				(VariableNode "$a-parse")
 			)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%how")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_%how")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$qVar")
+     			)
+     		)
 			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_subj")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$subj")
-                			)
-            		)
+     			(DefinedLinguisticRelationshipNode "_subj")
+     			(ListLink
+        			(VariableNode "$verb")
+        			(VariableNode "$subj")
+     			)
+     		)
 			(LemmaLink
 				(WordInstanceNode "$verb")
 				(WordNode "be")
 			)
 		)
-   (ListLink
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howpredadj1-q-rule")
 			(ListLink
 				(VariableNode "$subj")
 			)
 		)
-   )
 	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-howpredadj1-q-rule subj)
- (ListLink
-	(howpredadj-Q-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-	)
- )
+	(howpredadj-Q-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj))
 )

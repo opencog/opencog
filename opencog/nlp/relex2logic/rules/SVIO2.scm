@@ -1,6 +1,7 @@
-; This rule is for snagging some of the indirect objects that aren't lucky enough to get
-; the _iobj relation from relex.  So, instead theyre just object sof the preposition "to". Pooer things.
-; as in "I sent the money to your boss."
+; This rule is for snagging some of the indirect objects that aren't
+; lucky enough to get the _iobj relation from relex.  So, instead
+; they're just object of the preposition "to". Poor things.
+; Example: "I sent the money to your boss."
 ; (AN June 2015)
 
 (define SVIO2
@@ -29,6 +30,22 @@
 			(TypedVariableLink
 				(VariableNode "$to")
 				(TypeNode "WordInstanceNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$subj-lemma")
+				(TypeNode "WordNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$verb-lemma")
+				(TypeNode "WordNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$obj-lemma")
+				(TypeNode "WordNode")
+			)
+			(TypedVariableLink
+				(VariableNode "$iobj-lemma")
+				(TypeNode "WordNode")
 			)
 		)
 		(AndLink
@@ -77,30 +94,35 @@
 					(VariableNode "$iobj")
 				)
 			)
-		)
-   (ListLink
-		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-svio-rule")
-			(ListLink
+			(LemmaLink
 				(VariableNode "$subj")
+				(VariableNode "$subj-lemma")
+			)
+			(LemmaLink
 				(VariableNode "$verb")
+				(VariableNode "$verb-lemma")
+			)
+			(LemmaLink
 				(VariableNode "$obj")
+				(VariableNode "$obj-lemma")
+			)
+			(LemmaLink
+				(VariableNode "$iobj")
+				(VariableNode "$iobj-lemma")
+			)
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: SVIO-rule")
+			(ListLink
+				(VariableNode "$subj-lemma")
+				(VariableNode "$subj")
+				(VariableNode "$verb-lemma")
+				(VariableNode "$verb")
+				(VariableNode "$obj-lemma")
+				(VariableNode "$obj")
+				(VariableNode "$iobj-lemma")
 				(VariableNode "$iobj")
 			)
 		)
-   )
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-svio-rule subj verb obj iobj)
- (ListLink
-	(SVIO-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
-		(cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-		(cog-name (word-inst-get-lemma  obj)) (cog-name obj)
-		(cog-name (word-inst-get-lemma  iobj)) (cog-name iobj)
-
-	)
- )
 )

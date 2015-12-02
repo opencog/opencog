@@ -47,58 +47,50 @@
                         (VariableNode "$var2")
                     )
             )
-        (OrLink
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_and")
-            )
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_but")
-            )
-            (EqualLink
-                (VariableNode "$var3")
-                (PrepositionalRelationshipNode "conj_or")
-            )
-        ))
-        (ListLink
-            (ExecutionOutputLink
-       	        (GroundedSchemaNode "scm: pre-conj-rule")
-       	        (ListLink
-                    (VariableNode "$var1")
-                    (VariableNode "$var2")
+            (OrLink
+                (EqualLink
                     (VariableNode "$var3")
-                    (VariableNode "$pos")
+                    (PrepositionalRelationshipNode "conj_and")
                 )
+                (EqualLink
+                    (VariableNode "$var3")
+                    (PrepositionalRelationshipNode "conj_but")
+                )
+                (EqualLink
+                    (VariableNode "$var3")
+                    (PrepositionalRelationshipNode "conj_or")
+                )
+            ))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-conj-rule")
+            (ListLink
+                (VariableNode "$var1")
+                (VariableNode "$var2")
+                (VariableNode "$var3")
+                (VariableNode "$pos")
             )
         )
     )
 )
 
 (define (pre-conj-rule var1 var2 var3 pos)
-  (cond 
-    ((string=? (cog-name var3) "conj_and") 
-        (ListLink 
-            (and-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
-                (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
-                (cog-name pos)
-            )
+  (cond
+    ((string=? (cog-name var3) "conj_and")
+        (and-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
+            (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
+            (cog-name pos)
         )
     )
-    ((string=? (cog-name var3) "conj_or") 
-        (ListLink 
-            (or-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
-                (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
-                (cog-name pos)
-            )
+    ((string=? (cog-name var3) "conj_or")
+        (or-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
+            (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
+            (cog-name pos)
         )
     )
-    ((string=? (cog-name var3) "conj_but") 
-        (ListLink 
-            (but-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
-                (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
-                (cog-name pos)
-            )
+    ((string=? (cog-name var3) "conj_but")
+        (but-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)
+            (cog-name (word-inst-get-lemma  var2)) (cog-name var2)
+            (cog-name pos)
         )
     )
   )

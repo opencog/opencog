@@ -270,6 +270,19 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 ====================================================
 
+(use-modules (opencog) (opencog nlp chatbot))
+(process-query 'luser "Linas ate a cookie.")
+(process-query 'luser "Who ate a cookie?")
+
+(process-query 'luser "Linas ate an apple.")
+(process-query 'luser "Who ate an apple?")
+
+(cog-get-atoms 'InheritanceLink)
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+
+
+
 (use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
 (init-trace "/tmp/wtf")
 
@@ -303,10 +316,70 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 (microplanning lap "declarative" *default_chunks_option* #f)
 
+758c2970bd59a215f361b32f72a9f986966882c7 is the first bad commit
+commit 758c2970bd59a215f361b32f72a9f986966882c7
+Author: Linas Vepstas <linasvepstas@gmail.com>
+Date:   Sun Nov 29 14:24:00 2015 -0600
+
+    Wrap long lines
+
+53f6cd548e24f2274878065bde7a0a0e8dc665f3 is good
+
+iline 101 all-sets
+wtf
+
+(cog-get-atoms 'InterpretationNode)
+(cog-incoming-set (car (cog-get-atoms 'InterpretationNode)))
+
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+(cog-incoming-set (car (cog-incoming-set (car (cog-get-atoms 'AnchorNode)))))
+
+parse-get-r2l-outputs
+r2l-parse
+
+ahhh its focus-set!!!
+parse-get-relex-outputs
+
+(parse-get-relex-outputs parse-node)
+
+ah haha!!!
+
+====================================================
+
+WTF:
+fopencog has explocit error in scmutest -- can't find cog-atomspace
+during module load
+
+fopencog doesn't print this at guuile shell, but still doesn't define
+it... oh right.
+
+
+(use-modules (opencog)) from evaluator fails to actually
+load the module scm code ...
+probably because guile already thinks the module is loaded...
+
+
+====================================================
+ERROR: Unbound variable: pre-be-inheritance-rule
+pre-be-inheritance-rule
+
+====================================================
+
+crash with null atom ptr .. line 455
+outgoing set has null ptrs in it ... line 480
+space :215
+ForwardChainer::apply_rule
+opencog/rule-engine/forwardchainer/ForwardChainer.cc:396
+
+====================================================
+
+state connected
+
 ====================================================
 bugs:
 
-* Its not answering any questions ...
+* 1916, #1922
 
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn

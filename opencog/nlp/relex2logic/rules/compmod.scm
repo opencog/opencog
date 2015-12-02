@@ -35,11 +35,10 @@
                 (DefinedLinguisticRelationshipNode "_compmod")
                 (ListLink
                     (VariableNode "$pred")
-		(VariableNode "$comp")
+                    (VariableNode "$comp")
                 )
             )
         )
-       (ListLink
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-compmod-rule")
        	      (ListLink
@@ -47,16 +46,13 @@
 		             (VariableNode "$comp")
             )
         )
-      )
     )
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-compmod-rule pred comp)
-  (ListLink
     (compmod-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred)
 		(cog-name (word-inst-get-lemma comp)) (cog-name comp)
 	 )
-  )
 )

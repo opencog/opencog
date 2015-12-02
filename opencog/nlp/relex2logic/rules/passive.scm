@@ -53,13 +53,11 @@
                 )
             )
         )
-        (ListLink
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pre-passive-rule")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
-                )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pre-passive-rule")
+            (ListLink
+                (VariableNode "$verb")
+                (VariableNode "$obj")
             )
         )
     )
@@ -67,11 +65,8 @@
 
 
 (define (pre-passive-rule verb obj)
-  (ListLink
-        (passive-rule2 
-            (cog-name (word-inst-get-lemma verb)) (cog-name verb) 
-            (cog-name (word-inst-get-lemma obj)) (cog-name obj) 
-        )
-  )
+    (passive-rule2
+        (cog-name (word-inst-get-lemma verb)) (cog-name verb)
+        (cog-name (word-inst-get-lemma obj)) (cog-name obj)
+    )
 )
-  
