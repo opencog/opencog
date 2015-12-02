@@ -789,10 +789,10 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
         const HandleSeq& ll_out,
         TruthValuePtr tv, bool permanent, const Temporal &t)
 {
-    bool predBool = true;
-    if (tv->getMean() >= 0.5) {
-        predBool = false;
-    }
+//    bool predBool = true;
+//    if (tv->getMean() >= 0.5) {
+//        predBool = false;
+//    }
 
 //    Handle ph = atomSpace.getHandle(PREDICATE_NODE, predicateName);
 //    // if predicate handle not defined and TV equals < 0.5 just return
@@ -806,7 +806,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
 
     Handle ll = atomSpace.getHandle(LIST_LINK, ll_out);
     // if list link handle not defined and TV equals < 0.5 just return
-    if (ll == Handle::UNDEFINED && predBool)
+    if (ll == Handle::UNDEFINED )
     {
 //        logger().fine("AtomSpaceUtil - %s not added (no ListLink and TV less than 0.5)",
 //                     predicateName.c_str());

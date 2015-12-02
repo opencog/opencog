@@ -122,7 +122,7 @@ void PatternMiningAgent::run()
         this->init();
 
     // test, only run once
-    static bool hasRun = false;
+    static bool hasRun = true;
     if (hasRun)
         return;
 
@@ -140,7 +140,6 @@ void PatternMiningAgent::run()
 void PatternMiningAgent::feedingNewAtomsToPatternMiner()
 {
 
-    return;
     sleep(30);
 
     while (true)

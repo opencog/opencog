@@ -2290,11 +2290,11 @@ void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency
 
     processedLinkNum = 0;
 
-//    miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
-//    miningFromEmbodimentThread.detach();
+    miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
+    miningFromEmbodimentThread.detach();
 
-   // evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
-   // evaluatingForEmbodimentThread.detach();
+    evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
+    evaluatingForEmbodimentThread.detach();
 
 
 }
@@ -2303,6 +2303,7 @@ void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency
 void PatternMiner::runEvaluatePatternTaskForEmbodiment()
 {
 
+    sleep(60);
     while (true)
     {
         sleep(evaluatePatternsEveryXSeconds);
