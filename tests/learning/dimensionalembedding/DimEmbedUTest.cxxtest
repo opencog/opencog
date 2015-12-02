@@ -26,7 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/server/CogServer.h>
 

@@ -30,7 +30,7 @@
 
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>

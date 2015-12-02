@@ -26,7 +26,7 @@
 #include <string>
 #include <cstdio>
 
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Config.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>

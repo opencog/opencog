@@ -53,7 +53,7 @@
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
