@@ -32,10 +32,12 @@ namespace opencog
             double x;
             double y;
             double z;
-            BlockVector(){x = 0; y = 0; z = 0;}
-            BlockVector(double _x, double _y, double _z){x = _x; y = _y; z = _z;}
-            BlockVector(const BlockVector& other){x = other.x; y = other.y; z = other.z;}
-
+            BlockVector()
+                { x = 0.0; y = 0.0; z = 0.0; }
+            BlockVector(double _x, double _y, double _z)
+                { x = _x; y = _y; z = _z; }
+            BlockVector(const BlockVector& other)
+                { x = other.x; y = other.y; z = other.z; }
 
             inline BlockVector& operator = ( const BlockVector& other )
             {
@@ -45,16 +47,12 @@ namespace opencog
                 return *this;
             }
 
+            inline bool eq (double a, double b) const
+                { return fabs(a-b) < 1.0e-6; }
+
             inline bool operator == (const BlockVector& other) const
             {
-// XXX FIXME here and below!   These are floating-point numbers!
-// you cannot use the == compare for floating-point numbers, as
-// you will almost always get a mis-compare, due to rounding errors!
-// You MUST create a compare that does this:
-// fabs(x - other.x) < EPSILON
-// to see if two points are "close enough"!
-// XXX also, the unit tests are probably failing for the same reason!
-                if((other.x == x) && (other.y == y) && (other.z == z) )
+                if (eq(other.x, x) and eq(other.y, y) and eq(other.z, z))
                     return true;
                 else
                     return false;
@@ -62,10 +60,7 @@ namespace opencog
 
             inline bool operator != (const BlockVector& other) const
             {
-                if((other.x != x) || (other.y != y) || (other.z != z) )
-                    return true;
-                else
-                    return false;
+                return not this->operator==(other);
             }
 
             inline BlockVector operator + (const BlockVector& other) const
@@ -90,10 +85,12 @@ namespace opencog
             }
 
             // It doesn't make sense for the operator < in BlockVectors,
-            // - we implement operator < for BlockVector just in case it would be used as key of map
+            // - we implement operator < for BlockVector just in case
+            // it would be used as key of map
             inline bool operator < (const BlockVector& other) const
             {
-                if((x < other.x) )
+                // XXX FIXME this should use eq
+                if ((x < other.x) )
                     return true;
                 else if (x > other.x)
                     return false;
@@ -115,9 +112,12 @@ namespace opencog
 
             inline bool isFaceTouching(const BlockVector& other) const
             {
-                if ( ((x == other.x) && (y == other.y) && ((z == other.z - 1) || (z == other.z + 1)))
-                   ||((x == other.x) && (z == other.z) && ((y == other.y - 1) || (y == other.y + 1)))
-                   ||((y == other.y) && (z == other.z) && ((x == other.x - 1) || (x == other.x + 1))) )
+                if ( (eq(x, other.x) and eq(y, other.y) and
+                     (eq(z, other.z - 1) or eq(z, other.z + 1)))
+                   or (eq(x, other.x) and eq(z, other.z) and
+                     (eq(y, other.y - 1) or eq(y, other.y + 1)))
+                   or (eq(y, other.y) and eq(z, other.z) and
+                      (eq(x, other.x - 1) or eq(x, other.x + 1))) )
                     return true;
                 else
                     return false;
@@ -125,9 +125,15 @@ namespace opencog
 
             inline bool isSideTouching(const BlockVector& other) const
             {
-                if ( ((x == other.x) && ( (y == other.y - 1) || (y == other.y + 1)) && ((z == other.z - 1) || (z == other.z + 1)))
-                   ||((z == other.z) && ( (y == other.y - 1) || (y == other.y + 1)) && ((x == other.x - 1) || (x == other.x + 1)))
-                   ||((y == other.y) && ( (z == other.z - 1) || (z == other.z + 1)) && ((x == other.x - 1) || (x == other.x + 1))))
+                if (  (eq(x, other.x) and
+                      (eq(y, other.y - 1) or eq(y, other.y + 1)) and
+                      (eq(z, other.z - 1) or eq(z, other.z + 1)))
+                   or (eq(z, other.z) and
+                      (eq(y, other.y - 1) or eq(y, other.y + 1)) and
+                      (eq(x, other.x - 1) or eq(x, other.x + 1)))
+                   or (eq(y, other.y) and
+                      (eq(z, other.z - 1) or eq(z, other.z + 1)) and
+                      (eq(x, other.x - 1) or eq(x, other.x + 1))))
                     return true;
                 else
                     return false;
@@ -135,9 +141,9 @@ namespace opencog
 
             inline bool isCornerTouching(const BlockVector& other) const
             {
-                if ( ((x == other.x - 1) || (x == other.x + 1)) &&
-                     ((y == other.y - 1) || (y == other.y + 1)) &&
-                     ((z == other.z - 1) || (z == other.z + 1)) )
+                if ( (eq(x, other.x - 1) or eq(x, other.x + 1)) and
+                     (eq(y, other.y - 1) or eq(y, other.y + 1)) and
+                     (eq(z, other.z - 1) or eq(z, other.z + 1)) )
                     return true;
                 else
                     return false;
