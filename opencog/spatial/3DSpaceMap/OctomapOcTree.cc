@@ -144,22 +144,27 @@ void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 {
     auto it = mAllUnitAtomsToBlocksMap.find(blockHandle);
     if ( it == mAllUnitAtomsToBlocksMap.end()) {
-        logger().error("OctomapOcTree::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
+        // XXX FIXME this should be a throw, not a logger message.
+        logger().error("OctomapOcTree::removeSolidUnitBlock: "
+                       "Cannot find this unit block in space map!/n");
     }
 
     BlockVector pos = it->second;
-    float curLogOdds = search(pos.x, pos.y, pos.z)->getLogOdds();
+    OctomapOcTreeNode* n = search(pos.x, pos.y, pos.z);
+    if (NULL == n) return;
+
+    float curLogOdds = n->getLogOdds();
     float thres = getOccupancyThresLog();
     if (thres > curLogOdds) {
-        // the occupancy of the block is smaller than threshold, so we've regard it as freespace.
+        // the occupancy of the block is smaller than threshold,
+        // so we've regard it as freespace.
         return;
     } else {
-        // reduce its log odds to thres - prob_miss_log, so we can regard it as freespace.
+        // reduce its log odds to thres - prob_miss_log, so we can
+        // regard it as freespace.
         float updatedLogOdds = thres - curLogOdds - prob_miss_log;
         setUnitBlock(Handle::UNDEFINED, pos, updatedLogOdds);
     }
-
-
 }
 
 
