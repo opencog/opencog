@@ -1,9 +1,8 @@
 #include <algorithm>
+
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
-//#include <opencog/atomspace/Handle.h>
-#include <opencog/util/Logger.h>
-//#include "Block3DMapUtil.h"
+#include <opencog/util/exceptions.h>
 #include "OctomapOcTree.h"
 
 using namespace opencog;
@@ -143,15 +142,15 @@ void OctomapOcTree::addSolidUnitBlock(const Handle& block, BlockVector pos)
 void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 {
     auto it = mAllUnitAtomsToBlocksMap.find(blockHandle);
-    if ( it == mAllUnitAtomsToBlocksMap.end()) {
-        // XXX FIXME this should be a throw, not a logger message.
-        logger().error("OctomapOcTree::removeSolidUnitBlock: "
-                       "Cannot find this unit block in space map!/n");
-    }
+    if (mAllUnitAtomsToBlocksMap.end() == it)
+        throw opencog::NotFoundException(TRACE_INFO,
+             "OctomapOcTree::removeSolidUnitBlock");
 
     BlockVector pos = it->second;
     OctomapOcTreeNode* n = search(pos.x, pos.y, pos.z);
-    if (NULL == n) return;
+    if (NULL == n)
+        throw opencog::NotFoundException(TRACE_INFO,
+             "OctomapOcTree::removeSolidUnitBlock");
 
     float curLogOdds = n->getLogOdds();
     float thres = getOccupancyThresLog();
