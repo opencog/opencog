@@ -1,9 +1,8 @@
 #include <algorithm>
+
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
-//#include <opencog/atomspace/Handle.h>
-#include <opencog/util/Logger.h>
-//#include "Block3DMapUtil.h"
+#include <opencog/util/exceptions.h>
 #include "OctomapOcTree.h"
 
 using namespace opencog;
@@ -143,23 +142,28 @@ void OctomapOcTree::addSolidUnitBlock(const Handle& block, BlockVector pos)
 void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 {
     auto it = mAllUnitAtomsToBlocksMap.find(blockHandle);
-    if ( it == mAllUnitAtomsToBlocksMap.end()) {
-        logger().error("OctomapOcTree::removeSolidUnitBlock: Cannot find this unit block in space map!/n");
-    }
+    if (mAllUnitAtomsToBlocksMap.end() == it)
+        throw opencog::NotFoundException(TRACE_INFO,
+             "OctomapOcTree::removeSolidUnitBlock");
 
     BlockVector pos = it->second;
-    float curLogOdds = search(pos.x, pos.y, pos.z)->getLogOdds();
+    OctomapOcTreeNode* n = search(pos.x, pos.y, pos.z);
+    if (NULL == n)
+        throw opencog::NotFoundException(TRACE_INFO,
+             "OctomapOcTree::removeSolidUnitBlock");
+
+    float curLogOdds = n->getLogOdds();
     float thres = getOccupancyThresLog();
     if (thres > curLogOdds) {
-        // the occupancy of the block is smaller than threshold, so we've regard it as freespace.
+        // the occupancy of the block is smaller than threshold,
+        // so we've regard it as freespace.
         return;
     } else {
-        // reduce its log odds to thres - prob_miss_log, so we can regard it as freespace.
+        // reduce its log odds to thres - prob_miss_log, so we can
+        // regard it as freespace.
         float updatedLogOdds = thres - curLogOdds - prob_miss_log;
         setUnitBlock(Handle::UNDEFINED, pos, updatedLogOdds);
     }
-
-
 }
 
 
