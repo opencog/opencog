@@ -47,7 +47,7 @@ namespace opencog
                 return *this;
             }
 
-            inline bool eq (double a, double b) const
+            static inline bool eq (double a, double b)
                 { return fabs(a-b) < 1.0e-6; }
 
             inline bool operator == (const BlockVector& other) const
@@ -174,7 +174,7 @@ namespace opencog
                 size_x(_size_x), size_y(_size_y), size_z(_size_z)
             {
                 nearLeftBottomConer = BlockVector(_neaLeftBottomPos);
-                if ((size_x == size_y) && (size_x == size_z) )
+                if ((size_x == size_y) and (size_x == size_z))
                     size = size_x;
                 else
                     size = 0;
@@ -192,7 +192,9 @@ namespace opencog
 
             BlockVector getCenterPoint() const
             {
-                return BlockVector( (nearLeftBottomConer.x + size_x/2), (nearLeftBottomConer.y + size_y/2), (nearLeftBottomConer.z + size_z/2) );
+                return BlockVector((nearLeftBottomConer.x + 0.5*size_x),
+                                   (nearLeftBottomConer.y + 0.5*size_y),
+                                   (nearLeftBottomConer.z + 0.5*size_z));
             }
 
             float getRadius() const
@@ -200,16 +202,16 @@ namespace opencog
                 if (size!=0)
                     return size;
                 else
-                    return (size_x + size_y + size_z)/3.0f;
+                    return (size_x + size_y + size_z)/3.0;
             }
 
             inline bool operator==(const AxisAlignedBox& other) const
             {
-                if((nearLeftBottomConer == other.nearLeftBottomConer) &&
-                        (size == other.size) &&
-                        (size_x == other.size_x) &&
-                        (size_y == other.size_y) &&
-                        (size_z == other.size_z) )
+                if((nearLeftBottomConer == other.nearLeftBottomConer) and
+                        (size == other.size) and
+                        (size_x == other.size_x) and
+                        (size_y == other.size_y) and
+                        (size_z == other.size_z))
                     return true;
                 else
                     return false;
@@ -217,13 +219,12 @@ namespace opencog
 
             inline bool operator!=(const AxisAlignedBox& other) const
             {
-                return((nearLeftBottomConer != other.nearLeftBottomConer) || (other.size != size) ||
-                        (size_x != other.size_x) || (size_y != other.size_y) || (size_z != other.size_z) );
-
+                return not this->operator==(other);
             }
 
             // add this AxisAlignedBox with another AxisAlignedBox,
-            // Note: this AxisAlignedBox may become a new bigger one , and will contain the two AxisAlignedBoxs
+            // Note: this AxisAlignedBox may become a new bigger one,
+            // and will contain the two AxisAlignedBoxs
             inline void operator+=(const AxisAlignedBox& other)
             {
                 BlockVector farRightUp;
@@ -252,15 +253,14 @@ namespace opencog
                 if (other.nearLeftBottomConer.z < nearLeftBottomConer.z)
                     nearLeftBottomConer.z = other.nearLeftBottomConer.z;
 
-                size_x = farRightUp.x - nearLeftBottomConer.x;
-                size_y = farRightUp.y - nearLeftBottomConer.y;
-                size_z = farRightUp.z - nearLeftBottomConer.z;
+                size_x = round(farRightUp.x - nearLeftBottomConer.x);
+                size_y = round(farRightUp.y - nearLeftBottomConer.y);
+                size_z = round(farRightUp.z - nearLeftBottomConer.z);
 
-                if ((size_x == size_y) && (size_x == size_z) )
+					 if ((size_x == size_y) and (size_x == size_z))
                     size = size_x;
                 else
                     size = 0;
-
             }
 
 
@@ -299,91 +299,94 @@ namespace opencog
                     return false;
             }
 
+            static inline bool eq (double a, double b)
+                { return BlockVector::eq(a,b); }
+
             inline bool isFaceTouching(const AxisAlignedBox& other) const
             {
                 std::vector<BlockVector> coners1 = getAllCorners();
                 std::vector<BlockVector> coners2 = other.getAllCorners();
 
                 // is my bottom face touching the bottom face of the other
-                if ( ((((BlockVector)coners1[0]).z == ((BlockVector)coners2[0]).z + 1) ||
-                      (((BlockVector)coners1[0]).z == ((BlockVector)coners2[0]).z - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).z, ((BlockVector)coners2[0]).z + 1) or
+                      eq(((BlockVector)coners1[0]).z, ((BlockVector)coners2[0]).z - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).y, ((BlockVector)coners1[2]).x, ((BlockVector)coners1[2]).y,
                                            ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).y, ((BlockVector)coners2[2]).x, ((BlockVector)coners2[2]).y ) )
                     return true;
 
                 // is my bottom face touching the top face of the other
-                if ( ((((BlockVector)coners1[0]).z == ((BlockVector)coners2[4]).z + 1) ||
-                      (((BlockVector)coners1[0]).z == ((BlockVector)coners2[4]).z - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).z, ((BlockVector)coners2[4]).z + 1) or
+                      eq(((BlockVector)coners1[0]).z, ((BlockVector)coners2[4]).z - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).y, ((BlockVector)coners1[2]).x, ((BlockVector)coners1[2]).y,
                                            ((BlockVector)coners2[4]).x, ((BlockVector)coners2[4]).y, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).y ) )
                     return true;
 
                 // is my top face touching the bottom face of the other
-                if ( ((((BlockVector)coners1[4]).z == ((BlockVector)coners2[0]).z + 1) ||
-                      (((BlockVector)coners1[4]).z == ((BlockVector)coners2[0]).z - 1) ) &&
+                if ( (eq(((BlockVector)coners1[4]).z, ((BlockVector)coners2[0]).z + 1) or
+                      eq(((BlockVector)coners1[4]).z, ((BlockVector)coners2[0]).z - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[4]).x, ((BlockVector)coners1[4]).y, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).y,
                                            ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).y, ((BlockVector)coners2[2]).x, ((BlockVector)coners2[2]).y ) )
                     return true;
 
                 // is my top face touching the top face of the other
-                if ( ((((BlockVector)coners1[4]).z == ((BlockVector)coners2[4]).z + 1) ||
-                      (((BlockVector)coners1[4]).z == ((BlockVector)coners2[4]).z - 1) ) &&
+                if ( (eq(((BlockVector)coners1[4]).z, ((BlockVector)coners2[4]).z + 1) or
+                      eq(((BlockVector)coners1[4]).z, ((BlockVector)coners2[4]).z - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[4]).x, ((BlockVector)coners1[4]).y, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).y,
                                            ((BlockVector)coners2[4]).x, ((BlockVector)coners2[4]).y, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).y ) )
                     return true;
 
                 // is my left face touching the left face of the other
-                if ( ((((BlockVector)coners1[0]).x == ((BlockVector)coners2[0]).x + 1) ||
-                      (((BlockVector)coners1[0]).x == ((BlockVector)coners2[0]).x - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).x, ((BlockVector)coners2[0]).x + 1) or
+                      eq(((BlockVector)coners1[0]).x, ((BlockVector)coners2[0]).x - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).y, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[7]).y, ((BlockVector)coners1[7]).z,
                                            ((BlockVector)coners2[0]).y, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[7]).y, ((BlockVector)coners2[7]).z ) )
                     return true;
 
                 // is my left face touching the right face of the other
-                if ( ((((BlockVector)coners1[0]).x == ((BlockVector)coners2[1]).x + 1) ||
-                      (((BlockVector)coners1[0]).x == ((BlockVector)coners2[1]).x - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).x, ((BlockVector)coners2[1]).x + 1) or
+                      eq(((BlockVector)coners1[0]).x, ((BlockVector)coners2[1]).x - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).y, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[7]).y, ((BlockVector)coners1[7]).z,
                                            ((BlockVector)coners2[1]).y, ((BlockVector)coners2[1]).z, ((BlockVector)coners2[6]).y, ((BlockVector)coners2[6]).z ) )
                     return true;
 
                 // is my right face touching the left face of the other
-                if ( ((((BlockVector)coners1[1]).x == ((BlockVector)coners2[0]).x + 1) ||
-                      (((BlockVector)coners1[1]).x == ((BlockVector)coners2[0]).x - 1) ) &&
+                if ( (eq(((BlockVector)coners1[1]).x, ((BlockVector)coners2[0]).x + 1) or
+                      eq(((BlockVector)coners1[1]).x, ((BlockVector)coners2[0]).x - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[1]).y, ((BlockVector)coners1[1]).z, ((BlockVector)coners1[6]).y, ((BlockVector)coners1[6]).z,
                                            ((BlockVector)coners2[0]).y, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[7]).y, ((BlockVector)coners2[7]).z ) )
                     return true;
 
                 // is my right face touching the right face of the other
-                if ( ((((BlockVector)coners1[1]).x == ((BlockVector)coners2[1]).x + 1) ||
-                      (((BlockVector)coners1[1]).x == ((BlockVector)coners2[1]).x - 1) ) &&
+                if ( (eq(((BlockVector)coners1[1]).x, ((BlockVector)coners2[1]).x + 1) or
+                      eq(((BlockVector)coners1[1]).x, ((BlockVector)coners2[1]).x - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[1]).y, ((BlockVector)coners1[1]).z, ((BlockVector)coners1[6]).y, ((BlockVector)coners1[6]).z,
                                            ((BlockVector)coners2[1]).y, ((BlockVector)coners2[1]).z, ((BlockVector)coners2[6]).y, ((BlockVector)coners2[6]).z ) )
                     return true;
 
                 // is my near face touching the near face of the other
-                if ( ((((BlockVector)coners1[0]).y == ((BlockVector)coners2[0]).y + 1) ||
-                      (((BlockVector)coners1[0]).y == ((BlockVector)coners2[0]).y - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).y, ((BlockVector)coners2[0]).y + 1) or
+                      eq(((BlockVector)coners1[0]).y, ((BlockVector)coners2[0]).y - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[5]).x, ((BlockVector)coners1[5]).z,
                                            ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[5]).x, ((BlockVector)coners2[5]).z ) )
                     return true;
 
                 // is my near face touching the far face of the other
-                if ( ((((BlockVector)coners1[0]).y == ((BlockVector)coners2[3]).y + 1) ||
-                      (((BlockVector)coners1[0]).y == ((BlockVector)coners2[3]).y - 1) ) &&
+                if ( (eq(((BlockVector)coners1[0]).y, ((BlockVector)coners2[3]).y + 1) or
+                      eq(((BlockVector)coners1[0]).y, ((BlockVector)coners2[3]).y - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[0]).x, ((BlockVector)coners1[0]).z, ((BlockVector)coners1[5]).x, ((BlockVector)coners1[5]).z,
                                            ((BlockVector)coners2[3]).x, ((BlockVector)coners2[3]).z, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).z ) )
                     return true;
 
                 // is my far face touching the near face of the other
-                if ( ((((BlockVector)coners1[3]).y == ((BlockVector)coners2[0]).y + 1) ||
-                      (((BlockVector)coners1[3]).y == ((BlockVector)coners2[0]).y - 1) ) &&
+                if ( (eq(((BlockVector)coners1[3]).y, ((BlockVector)coners2[0]).y + 1) or
+                      eq(((BlockVector)coners1[3]).y, ((BlockVector)coners2[0]).y - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[3]).x, ((BlockVector)coners1[3]).z, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).z,
                                            ((BlockVector)coners2[0]).x, ((BlockVector)coners2[0]).z, ((BlockVector)coners2[5]).x, ((BlockVector)coners2[5]).z ) )
                     return true;
 
                 // is my far face touching the far face of the other
-                if ( ((((BlockVector)coners1[3]).y == ((BlockVector)coners2[3]).y + 1) ||
-                      (((BlockVector)coners1[3]).y == ((BlockVector)coners2[3]).y - 1) ) &&
+                if ( (eq(((BlockVector)coners1[3]).y, ((BlockVector)coners2[3]).y + 1) or
+                      eq(((BlockVector)coners1[3]).y, ((BlockVector)coners2[3]).y - 1) ) and
                         is_2DRectangleOverlap(((BlockVector)coners1[3]).x, ((BlockVector)coners1[3]).z, ((BlockVector)coners1[6]).x, ((BlockVector)coners1[6]).z,
                                            ((BlockVector)coners2[3]).x, ((BlockVector)coners2[3]).z, ((BlockVector)coners2[6]).x, ((BlockVector)coners2[6]).z ) )
                     return true;
@@ -444,7 +447,7 @@ namespace opencog
 
             inline bool operator==(const BlockMaterial& other) const
             {
-                if(other.materialType == materialType && other.color == color)
+                if (other.materialType == materialType and other.color == color)
                     return true;
                 else
                     return false;
@@ -452,10 +455,7 @@ namespace opencog
 
             inline bool operator!=(const BlockMaterial& other) const
             {
-                if(other.materialType != materialType || other.color != color)
-                    return true;
-                else
-                    return false;
+                return not this->operator==(other);
             }
         };
 
