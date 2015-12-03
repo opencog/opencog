@@ -49,7 +49,7 @@ public:
 
     void testAddSolidUnitBlock__PositionOverBorder__GetBlockFailed()
     {
-        unsigned border = 32768;
+        unsigned border = 32767;
         BlockVector testpos1(border, 8, 9);
         Handle testHandle1(100);
         testOctree->addSolidUnitBlock(testHandle1, testpos1);
