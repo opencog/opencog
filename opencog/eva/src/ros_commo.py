@@ -28,6 +28,8 @@ from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
 from blender_api_msgs.msg import EmotionState
 from blender_api_msgs.msg import SetGesture
 from blender_api_msgs.msg import Target
+from blender_api_msgs.msg import BlinkCycle
+from blender_api_msgs.msg import SaccadeCycle
 
 
 # This class publishes various ROS messages to various locations.
@@ -172,6 +174,13 @@ class EvaControl():
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)
+		self.blink_pub = rospy.Publisher("/blender_api/set_blink_randomly",
+		                                   BlinkCycle, queue_size=1)
+		self.saccade_pub = rospy.Publisher("/blender_api/set_saccade",
+		                                   SaccadeCycle, queue_size=1)
+
+		self.affect_pub = rospy.Publisher("chatbot_affect_express",
+		                                   EmotionState, queue_size=1)
 
 		# XYZ coordinates of where to turn and look.
 		self.turn_pub = rospy.Publisher("/blender_api/set_face_target",
