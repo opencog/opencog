@@ -43,7 +43,8 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     // Convert MAXLTI to a string for storing in the configuration
     buf << AttentionValue::MAXLTI;
     defaultForgetThreshold = buf.str();
-    
+    config().set("ECAN_FORGET_THRESHOLD",defaultForgetThreshold);
+
     forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
 
     forgetThreshold = (AttentionValue::lti_t)
