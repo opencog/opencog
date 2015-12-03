@@ -91,7 +91,7 @@ class FaceTrack:
 		self.glance_howlong = -1
 
 		# How often we update the look-at target.
-		self.LOOKAT_INTERVAL = 1
+		self.LOOKAT_INTERVAL = 0.1
 		self.last_lookat = 0
 
 		# Last time that the list of active faces was vacuumed out.
@@ -190,6 +190,12 @@ class FaceTrack:
 		self.glance_howlong = howlong
 		self.first_glance = -1
 
+	def study_face(self, faceid, howlong):
+		print("study: " + str(faceid) + " for " + str(howlong) + " seconds")
+		self.glance_at = faceid
+		self.glance_howlong = howlong
+		self.first_glance = -1
+
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 
@@ -212,7 +218,7 @@ class FaceTrack:
 
 		self.visible_faces.append(faceid)
 
-		print("New face detected: " +
+		print("New face added to visibile faces: " +
 			str(self.visible_faces))
 		self.atomo.add_face_to_atomspace(faceid)
 
@@ -250,7 +256,7 @@ class FaceTrack:
 				self.first_glance = now
 			if (now - self.first_glance < self.glance_howlong):
 
-				# Find latest known postion
+				# Find latest position known
 				try:
 					trg = self.face_target(self.glance_at)
 					self.gaze_pub.publish(trg)
@@ -271,7 +277,7 @@ class FaceTrack:
 			# is also a pending look-at to perform.
 
 			if 0 < self.gaze_at and self.look_at <= 0:
-				print("Gaze at id " + str(self.gaze_at))
+				# print("Gaze at id " + str(self.gaze_at))
 				try:
 					if not self.gaze_at in self.visible_faces:
 						raise Exception("Face not visible")
