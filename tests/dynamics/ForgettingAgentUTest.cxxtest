@@ -31,6 +31,7 @@
 #include <opencog/dynamics/attention/ForgettingAgent.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Agent.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace std;
@@ -106,6 +107,11 @@ public:
     static void destroySuite(ForgettingAgentUTest* suite) { delete suite; }
 
     ForgettingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
+        try {
+            config().load("opencog.conf");
+        } catch (RuntimeException &e) {
+            std::cerr << e.getMessage() << std::endl;
+        }
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);
         agent = cogserver.createAgent<ForgettingAgent>(true);
         logger().setLevel(Logger::FINE);
