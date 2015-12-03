@@ -125,3 +125,8 @@ Resources:
 
 * Psi Theory
   http://en.wikipedia.org/wiki/Psi-Theory
+
+TODO
+----
+* face_track.py has some new code for both face study, and current-face.
+  merge this code.

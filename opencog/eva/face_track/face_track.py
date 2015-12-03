@@ -21,11 +21,16 @@ import time
 
 import rospy
 import tf
+import math
+import logging
+
 from std_msgs.msg import Int32
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
 from face_atomic import FaceAtomic
+
+logger = logging.getLogger('hr.eva_behavior.face_track')
 
 # A Face. Currently consists only of an ID number, a 3D location,
 # and the time it was last seen.  Should be extended to include
@@ -67,7 +72,7 @@ class FaceTrack:
 	def __init__(self):
 
 		rospy.init_node("OpenCog_Facetracker")
-		print("Starting OpenCog Face Tracker ROS Node")
+		logger.info("Starting OpenCog Face Tracker ROS Node")
 
 		# The OpenCog API. This is used to send face data to OpenCog.
 		self.atomo = FaceAtomic()
@@ -102,6 +107,11 @@ class FaceTrack:
 		self.TOPIC_FACE_EVENT = "/camera/face_event"
 		self.EVENT_NEW_FACE = "new_face"
 		self.EVENT_LOST_FACE = "lost_face"
+		# Overrides current face being tracked by WebUI
+		self.EVENT_TRACK_FACE = "track_face"
+
+		# Publishes the current tracked face
+		self.TOPIC_LOOK_AT_FACE = "look_at_face"
 
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
 
@@ -127,11 +137,14 @@ class FaceTrack:
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
 
 		# Where to look
-		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET, \
+		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
 			Target, queue_size=10)
 
-		self.gaze_pub = rospy.Publisher(self.TOPIC_GAZE_TARGET, \
+		self.gaze_pub = rospy.Publisher(self.TOPIC_GAZE_TARGET,
 			Target, queue_size=10)
+
+		self.look_at_face_pub = rospy.Publisher(self.TOPIC_LOOK_AT_FACE,
+			Int32, queue_size=10)
 
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
@@ -144,7 +157,7 @@ class FaceTrack:
 
 	# Turn only the eyes towards the given target face; track that face.
 	def gaze_at_face(self, faceid):
-		print ("gaze at: " + str(faceid))
+		logger.info("gaze at: " + str(faceid))
 
 		# Look at neutral position, 1 meter in front
 		if 0 == faceid :
@@ -167,7 +180,7 @@ class FaceTrack:
 	# to make the head move again.
 	#
 	def look_at_face(self, faceid):
-		print ("look at: " + str(faceid))
+		logger.info("look at: " + str(faceid))
 
 		# Look at neutral position, 1 meter in front
 		if 0 == faceid :
@@ -185,13 +198,13 @@ class FaceTrack:
 		self.look_at = faceid
 
 	def glance_at_face(self, faceid, howlong):
-		print("glance at: " + str(faceid) + " for " + str(howlong) + " seconds")
+		logger.info("glance at: " + str(faceid) + " for " + str(howlong) + " seconds")
 		self.glance_at = faceid
 		self.glance_howlong = howlong
 		self.first_glance = -1
 
 	def study_face(self, faceid, howlong):
-		print("study: " + str(faceid) + " for " + str(howlong) + " seconds")
+		logger.info("study: " + str(faceid) + " for " + str(howlong) + " seconds")
 		self.glance_at = faceid
 		self.glance_howlong = howlong
 		self.first_glance = -1
@@ -218,7 +231,7 @@ class FaceTrack:
 
 		self.visible_faces.append(faceid)
 
-		print("New face added to visibile faces: " +
+		logger.info("New face added to visibile faces: " +
 			str(self.visible_faces))
 		self.atomo.add_face_to_atomspace(faceid)
 
@@ -230,7 +243,7 @@ class FaceTrack:
 		if faceid in self.visible_faces:
 			self.visible_faces.remove(faceid)
 
-		print("Lost face; visibile faces now: " + str(self.visible_faces))
+		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
 	# ----------------------------------------------------------
 	# Main look-at action driver.  Should be called at least a few times
@@ -261,7 +274,7 @@ class FaceTrack:
 					trg = self.face_target(self.glance_at)
 					self.gaze_pub.publish(trg)
 				except:
-					print("Error: no face to glance at!")
+					logger.info("Error: no face to glance at!")
 					self.glance_at = 0
 					self.first_glance = -1
 			else :
@@ -277,38 +290,38 @@ class FaceTrack:
 			# is also a pending look-at to perform.
 
 			if 0 < self.gaze_at and self.look_at <= 0:
-				# print("Gaze at id " + str(self.gaze_at))
+				# logger.info("Gaze at id " + str(self.gaze_at))
 				try:
 					if not self.gaze_at in self.visible_faces:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.gaze_at)
 					self.gaze_pub.publish(trg)
 				except tf.LookupException as lex:
-					print("Warning: TF has forgotten about face id:" +
+					logger.info("Warning: TF has forgotten about face id:" +
 						str(self.look_at))
 					self.remove_face(self.look_at)
 					self.look_at_face(0)
 					return
 				except Exception as ex:
-					print("Error: no gaze-at target: ", ex)
+					logger.info("Error: no gaze-at target: ", ex)
 					self.gaze_at_face(0)
 					return
 
 			if 0 < self.look_at:
-				print("Look at id: " + str(self.look_at))
+				logger.info("Look at id: " + str(self.look_at))
 				try:
 					if not self.look_at in self.visible_faces:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.look_at)
 					self.look_pub.publish(trg)
 				except tf.LookupException as lex:
-					print("Warning: TF has forgotten about face id: " +
+					logger.info("Warning: TF has forgotten about face id: " +
 						str(self.look_at))
 					self.remove_face(self.look_at)
 					self.look_at_face(0)
 					return
 				except Exception as ex:
-					print("Error: no look-at target: ", ex)
+					logger.info("Error: no look-at target: ", ex)
 					self.look_at_face(0)
 					return
 
