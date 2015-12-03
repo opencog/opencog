@@ -43,13 +43,13 @@
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
 (emo-expr-spec "frustrated" "sad"         0.4 0.6 0.8 5 15)
-(emo-expr-spec "frustrated" "confused"    0.4 0.6 0.8 5 15)
-(emo-expr-spec "frustrated" "recoil"      0.1 0.1 0.2 5 15)
-(emo-expr-spec "frustrated" "surprised"   0.1 0.1 0.2 5 15)
+(emo-expr-spec "frustrated" "confused"    0.1 0.4 0.6 5 15)
+(emo-expr-spec "frustrated" "recoil"      0.2 0.1 0.2 5 15)
+(emo-expr-spec "frustrated" "surprised"   0.2 0.1 0.2 5 15)
 
-(emo-expr-spec "positive" "happy"         0.4 0.6 0.8 10 15)
-(emo-expr-spec "positive" "comprehending" 0.2 0.5 0.8 10 15)
-(emo-expr-spec "positive" "engaged"       0.2 0.5 0.8 10 15)
+(emo-expr-spec "positive" "happy"         0.2 0.6 0.8 10 15)
+(emo-expr-spec "positive" "comprehending" 0.3 0.5 0.8 10 15)
+(emo-expr-spec "positive" "engaged"       0.4 0.5 0.8 10 15)
 
 (emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
