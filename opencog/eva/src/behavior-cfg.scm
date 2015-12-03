@@ -61,6 +61,9 @@
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
 (emo-expr-spec "wake-up"  "irritated"     0.6  0.1 0.4 1  4)
 
+(emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
+(emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
+(emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
@@ -102,5 +105,9 @@
 (emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
+
+(emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
 ; --------------------------------------------------------
