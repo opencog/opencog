@@ -121,7 +121,7 @@ CogServer::~CogServer()
     global_python_finalize();
 #endif /* HAVE_CYTHON */
 
-    // Clear the system activity table here because it relies on the 
+    // Clear the system activity table here because it relies on the
     // atom table's existence.
     _systemActivityTable.clearActivity();
 
@@ -347,7 +347,7 @@ AgentPtr CogServer::createAgent(const std::string& id, const bool start)
     return a;
 }
 
-void CogServer::startAgent(AgentPtr agent)
+void CogServer::startAgent(AgentPtr agent, bool dedicated_thread)
 {
     std::unique_lock<std::mutex> lock(agentsMutex);
     agents.push_back(agent);

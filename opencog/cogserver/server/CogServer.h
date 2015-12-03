@@ -28,9 +28,10 @@
 #define _OPENCOG_COGSERVER_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <vector>
-#include <tr1/memory>
+#include <thread>
 
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -300,7 +301,7 @@ public:
     }
 
     /** Adds agent 'a' to the list of scheduled agents. */
-    virtual void startAgent(AgentPtr a);
+    virtual void startAgent(AgentPtr a, bool dedicated_thread = false);
 
     /** Removes agent 'a' from the list of scheduled agents. */
     virtual void stopAgent(AgentPtr a);
