@@ -47,6 +47,13 @@ namespace opencog
 
             inline bool operator == (const BlockVector& other) const
             {
+// XXX FIXME here and below!   These are floating-point numbers!
+// you cannot use the == compare for floating-point numbers, as
+// you will almost always get a mis-compare, due to rounding errors!
+// You MUST create a compare that does this:
+// fabs(x - other.x) < EPSILON
+// to see if two points are "close enough"!
+// XXX also, the unit tests are probably failing for the same reason!
                 if((other.x == x) && (other.y == y) && (other.z == z) )
                     return true;
                 else
