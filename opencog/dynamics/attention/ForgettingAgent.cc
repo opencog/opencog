@@ -44,14 +44,6 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     buf << AttentionValue::MAXLTI;
     defaultForgetThreshold = buf.str();
     
-    static const std::string defaultConfig[] = {
-        // forget 0.1% of atoms
-        "ECAN_FORGET_PERCENTAGE", "0.001",
-        "ECAN_FORGET_THRESHOLD", defaultForgetThreshold,
-        "", ""
-    };
-    setParameters(defaultConfig);
-
     forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
 
     forgetThreshold = (AttentionValue::lti_t)
