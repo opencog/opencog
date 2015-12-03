@@ -32,7 +32,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
