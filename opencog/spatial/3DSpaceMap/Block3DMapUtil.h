@@ -257,7 +257,7 @@ namespace opencog
                 size_y = round(farRightUp.y - nearLeftBottomConer.y);
                 size_z = round(farRightUp.z - nearLeftBottomConer.z);
 
-					 if ((size_x == size_y) and (size_x == size_z))
+                if ((size_x == size_y) and (size_x == size_z))
                     size = size_x;
                 else
                     size = 0;
