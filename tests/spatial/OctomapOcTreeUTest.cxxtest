@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
@@ -33,10 +33,14 @@ public:
     void testBinaryAddandRemove_NormalUnitBlock_AllGetFunctionWork()
     {
         BlockVector testpos1(7, 8, 9);
-        Handle testHandle1(100);
+        Handle testHandle1(createNode(NODE, "bogus"));
         testOctree->addSolidUnitBlock(testHandle1, testpos1);
         Handle testHandle2 = testOctree->getBlock(testpos1);
         TS_ASSERT(testHandle2 == testHandle1);
+
+        printf("Found at %s\n",
+            testOctree->getBlockLocation(testHandle1).toString().c_str());
+        printf("Expected %s\n", testpos1.toString().c_str());
         TS_ASSERT(testOctree->getBlockLocation(testHandle1) == testpos1);
 
         testOctree->removeSolidUnitBlock(testHandle1);
@@ -60,7 +64,7 @@ public:
     void testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb()
     {
         BlockVector testpos1(7,8,9);
-        Handle testHandle1(100);
+        Handle testHandle1(createNode(NODE, "yabadabadoo"));
         float logOddThreshold = testOctree->getOccupancyThresLog();
 
         testOctree->setUnitBlock(testHandle1, testpos1, logOddThreshold);
