@@ -160,6 +160,33 @@ class EvaControl():
 	def get_emotion_states_cb(self, msg):
 		print("Available Emotion States:" + str(msg.data))
 
+	def chat_event_cb(self,chat_event):
+		rospy.loginfo('chat_event, type ' + chat_event.data)
+		# XXX FIXME -- implement in behavior tree.
+		#if chat_event.data == "speechstart":
+		#	self.chatbot_speech_start()
+		#elif chat_event.data == "speechend":
+		#	self.chatbot_speech_end()
+
+	# Chatbot requests blink.
+	def chatbot_blink_cb(self, blink):
+		rospy.loginfo(blink.data + ' says blink')
+		# XXX Implement in behavior tree.
+		# blink_probabilities = {
+		# 	'chat_heard' : 'chat_heard_probability',
+		#	'chat_saying' : 'chat_saying_probability',
+		#	'tts_end' : 'tts_end_probability'}
+		# If we get a string not in the dictionary, return 1.0.
+		# blink_probability = self.blackboard[blink_probabilities[blink.data]]
+		# if random.random() < blink_probability:
+		#	self.show_gesture('blink', 1.0, 1, 1.0, blink)
+
+	# The perceived emotional content in the message.
+	# emo is of type EmotionState
+	def chatbot_affect_perceive_cb(self, emo):
+		rospy.loginfo('chatbot perceived emo class =' + emo.data)
+		# XXX TODO -- this goes into the behavior tree.
+
 	def __init__(self):
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
@@ -169,6 +196,22 @@ class EvaControl():
 
 		rospy.Subscriber("/blender_api/available_gestures",
 		       AvailableGestures, self.get_gestures_cb)
+
+		# Emotional content that the chatbot perceived i.e. did it hear
+		# (or reply with) angry words, polite words, etc?
+		# Currently chatbot supplies string rather than specific
+		# EmotionState with timing, allowing that to be handled here where
+		# timings have been tuned.
+		rospy.logwarn("setting up chatbot affect perceive and express links")
+		rospy.Subscriber("chatbot_affect_perceive", String,
+			self.chatbot_affect_perceive_cb)
+
+		# Chatbot can request blinks correlated with hearing and speaking.
+		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
+
+		# Handle messages from incoming speech to simulate listening
+		# engagement.
+		rospy.Subscriber("chat_events", String, self.chat_event_cb)
 
 		self.emotion_pub = rospy.Publisher("/blender_api/set_emotion_state",
 		                                   EmotionState, queue_size=1)

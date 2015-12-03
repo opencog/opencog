@@ -130,3 +130,6 @@ TODO
 ----
 * face_track.py has some new code for both face study, and current-face.
   merge this code.
+
+* implement remainder of chatbot_blink_cb, chatbot_affect_perceive_cb,
+  chat_event_cb
