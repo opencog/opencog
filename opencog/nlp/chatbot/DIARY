@@ -375,6 +375,12 @@ opencog/rule-engine/forwardchainer/ForwardChainer.cc:396
 ====================================================
 
 state connected
+IRC::disconnect()
+
+dataout....
+
+ret_len==SOCKET_ERROR
+setsockopt (SO_KEEPALIVE
 
 ====================================================
 bugs:
