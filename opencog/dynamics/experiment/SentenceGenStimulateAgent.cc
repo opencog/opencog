@@ -25,6 +25,7 @@ SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
 {
     _scm_eval = new SchemeEval(&_as);
     _scm_eval->eval("(load-r2l-rulebase)");
+    _scm_eval->eval("(load \"opencog/nlp/types/nlp_types.scm\")");
 }
 
 const ClassInfo& SentenceGenStimulateAgent::classinfo() const
