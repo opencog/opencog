@@ -16,9 +16,6 @@ set(ATOMSPACE_LIBPATH
 find_library(ATOMSPACE_LIBRARY atomspace
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
-find_library(ATOMSPACE_truthvalue_LIBRARY truthvalue
-   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
-
 find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -43,9 +40,6 @@ find_library(ATOMSPACE_persist-sql_LIBRARY persist-sql
 find_library(ATOMSPACE_persist-zmq_LIBRARY persist-zmq
 	PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
-find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
-   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
-
 find_library(ATOMSPACE_PythonEval_LIBRARY PythonEval
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -56,6 +50,12 @@ find_library(ATOMSPACE_ruleengine_LIBRARY ruleengine
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 find_library(ATOMSPACE_smob_LIBRARY smob
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+
+find_library(ATOMSPACE_truthvalue_LIBRARY truthvalue
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+
+find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
 set(ATOMSPACE_LIBRARIES
