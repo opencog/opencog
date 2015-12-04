@@ -190,40 +190,6 @@ IF (HAVE_SERVER)
 		DESTINATION "${DATADIR}/python/opencog")
 ENDIF(HAVE_SERVER)
 
-IF (HAVE_MOSES)
-	CYTHON_ADD_MODULE_PYX(pymoses
-		# "<moses/moses/main/moses_exec.h>"
-	)
-
-	# opencog.pymoses Python bindings
-	ADD_LIBRARY(moses_cython SHARED
-		pymoses.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(moses_cython
-		${MOSES_LIBRARIES}
-		${COGUTIL_LIBRARY}
-		${PYTHON_LIBRARIES}
-		${Boost_PROGRAM_OPTIONS_LIBRARY}
-		${Boost_THREAD_LIBRARY}
-	)
-
-	IF (HAVE_MPI)
-		TARGET_LINK_LIBRARIES (moses_cython
-			# These two work for both MPICH2 and OpenMPI, for me.
-			${MPI_LIBRARY}
-			${MPI_EXTRA_LIBRARY}
-		)
-	ENDIF (HAVE_MPI)
-
-	SET_TARGET_PROPERTIES(moses_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME pymoses)
-
-	INSTALL (TARGETS moses_cython
-		DESTINATION "${DATADIR}/python/opencog")
-ENDIF (HAVE_MOSES)
-
 IF (HAVE_STATISTICS)
 	CYTHON_ADD_MODULE_PYX(statistics
 		"../../learning/statistics/DataProvider.h"

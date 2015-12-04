@@ -21,7 +21,6 @@ Currently the package structure looks like this:
  opencog.atomspace
  opencog.atomspace.types
  opencog.cogserver
- opencog.pymoses
 
 Eventually, when other components of OpenCog are accessible, they'll
 follow a similar pattern:

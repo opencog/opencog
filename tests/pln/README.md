@@ -22,4 +22,4 @@ some build files to get a clean rebuild.  Basically, the CMakefiles
 for cython/python are buggy, and fail to rebuild when changes are made.
 So:
 
-rm build/opencog/cython/opencog/pymoses.cpp
+rm build/opencog/cython/opencog/cogserver.cpp
