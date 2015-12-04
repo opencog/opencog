@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_PATH}
 )
 
-# The PythonModuleUTest is derived from the CogServer class, and so 
+# The PythonModuleUTest is derived from the CogServer class, and so
 # cannot be tested unless the cogserver is actually being built!
 IF (HAVE_SERVER)
 	ADD_CXXTEST(PythonModuleUTest)
@@ -25,7 +25,7 @@ IF (HAVE_SERVER)
 ENDIF (HAVE_SERVER)
 
 
-# The PyEvalUTest is derived from the CogServer class, and so 
+# The PyEvalUTest is derived from the CogServer class, and so
 # cannot be tested unless the cogserver is actually being built!
 IF (HAVE_SERVER)
 	ADD_CXXTEST(PyEvalUTest)
@@ -53,13 +53,6 @@ IF (HAVE_NOSETESTS)
 			PROPERTIES ENVIRONMENT
 			"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents")
 	ENDIF(HAVE_SERVER)
-
-	IF (HAVE_MOSES)
-		ADD_TEST(CythonMoses ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/moses/)
-		SET_TESTS_PROPERTIES(CythonMoses
-			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
-	ENDIF (HAVE_MOSES)
 
 	IF (HAVE_STATISTICS)
 		ADD_TEST(CythonStatistics ${NOSETESTS_EXECUTABLE} -vs
