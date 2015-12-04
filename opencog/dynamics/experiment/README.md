@@ -1,7 +1,7 @@
 
 ECAN/PLN experimentation
 -----------------------
-The purpose of this experiments are:
+The purposes of this experiment are:
 
 - Test HebbianLink creation between co-occuring atoms
 
@@ -9,7 +9,7 @@ The purpose of this experiments are:
 
 - Implementing Forgetting of atoms based on a threshold of memory for the atomspace
 
-Once we are we satisfied with the behaviour of the ECAN system, we might extend the experiment
+Once we are satisfied with the behaviour of the ECAN system, we might extend the experiment
 to see how interaction with other opencog agents works out.
 
 
