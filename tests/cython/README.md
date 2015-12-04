@@ -13,7 +13,6 @@ export LD_LIBRARY_PATH=build/opencog/cython
 
 Then, from the project root directory:
 
-nosetests -vs tests/cython/moses/
 nosetests -vs tests/cython/server/
 nosetests -vs tests/nlp/anaphora
 
@@ -23,4 +22,4 @@ some build files to get a clean rebuild.  Basically, the CMakefiles
 for cython/python are buggy, and fail to rebuild when changes are made.
 So, for example:
 
-rm build/opencog/cython/opencog/pymoses.cpp
+rm build/opencog/cython/opencog/cogserver.cpp
