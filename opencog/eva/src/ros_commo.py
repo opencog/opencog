@@ -31,6 +31,7 @@ from blender_api_msgs.msg import Target
 from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 
+from put_atoms import PutAtoms
 
 # This class publishes various ROS messages to various locations.
 # Class members are meant to be invoked from within the cogserver.
@@ -162,11 +163,10 @@ class EvaControl():
 
 	def chat_event_cb(self,chat_event):
 		rospy.loginfo('chat_event, type ' + chat_event.data)
-		# XXX FIXME -- implement in behavior tree.
-		#if chat_event.data == "speechstart":
-		#	self.chatbot_speech_start()
-		#elif chat_event.data == "speechend":
-		#	self.chatbot_speech_end()
+		if chat_event.data == "speechstart":
+			self.puta.chatbot_speech_start()
+		elif chat_event.data == "speechend":
+			self.puta.chatbot_speech_end()
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
@@ -188,6 +188,9 @@ class EvaControl():
 		# XXX TODO -- this goes into the behavior tree.
 
 	def __init__(self):
+
+		puta = PutAtoms()
+
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 

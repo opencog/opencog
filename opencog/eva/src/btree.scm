@@ -80,6 +80,12 @@
 (define glance-state (AnchorNode "Glance State"))
 (StateLink glance-state no-interaction)
 
+; Chat state. Is the robot talking, or not, right now?
+(define chat-state (AnchorNode "Chat State"))
+(define chat-listen (ConceptNode "Listening"))
+(define chat-talk (ConceptNode "Talking"))
+(StateLink chat-state chat-listen)
+
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
 (StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
