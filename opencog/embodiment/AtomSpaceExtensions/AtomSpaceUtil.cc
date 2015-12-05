@@ -835,19 +835,20 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
 //    }
     atomSpace.setTV(el, tv);
 
-    Handle result;
+
     // if not undefined temporal then  a time information should be inserted
     // inserted into AtomSpace.
-    if (t != UNDEFINED_TEMPORAL) {
-        result = timeServer().addTimeInfo(el, t);
-    } else {
-        result = el;
+    if (t != UNDEFINED_TEMPORAL)
+    {
+        timeServer().addTimeInfo(el, t);
     }
-    if (permanent) { atomSpace.setLTI(result, 1); }
+
+
+    if (permanent) { atomSpace.setLTI(el, 1); }
 
     // debug
     // cout << "\n" << atomSpace.atomAsString(result) << std::endl;
-    return result;
+    return el;
 }
 
 Handle AtomSpaceUtil::getMostRecentEvaluationLink(AtomSpace& atomSpace,

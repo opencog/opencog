@@ -1574,7 +1574,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     // Add this action to timelink
     Handle atTimeLink = timeServer().addTimeInfo(actionInstanceNode, tsValue);
     AtomSpaceUtil::updateLatestAgentActionDone(atomSpace, atTimeLink, agentNode);
-    actionConcernedHandles.push_back(atTimeLink);
+    // actionConcernedHandles.push_back(atTimeLink);
 
     // If this is a statechage action, add the new value of this state
     // into the atomspace
@@ -3704,17 +3704,20 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
     {
         objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType.c_str()), internalEntityId.c_str());
         // add an inheritance link
-        Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType.c_str());
+        Handle typeNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityType.c_str());
         typeInherlink = addInheritanceLink(typeNode, objectNode);
-    } else {
+    }
+    else
+    {
         objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
     }
 
-    if (typeInherlink != Handle::UNDEFINED)
-        entityRelatedLinks.push_back(typeInherlink);
+//    if (typeInherlink != Handle::UNDEFINED)
+//        entityRelatedLinks.push_back(typeInherlink);
 
     // Add entity name in atomspace
-    if (entityName != "") {
+    if (entityName != "")
+    {
         if (isSelfObject)  {
             avatarInterface.setName(entityName);
         }
@@ -3921,8 +3924,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
  //   bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
  //   bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
-    const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
-    const std::string& color = getStringProperty(properties, "color");
+ //   const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
+//    const std::string& color = getStringProperty(properties, "color");
 
    // const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
@@ -3986,41 +3989,41 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 //    } // if
 
     // Add holder property predicate
-    if (holder != NULL_ATTRIBUTE)
-    {
-        // Add a reference link
-        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
-       /* Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
-            holderConceptNode,
-            atomSpace.addNode(WORD_NODE, holder));
+//    if (holder != NULL_ATTRIBUTE)
+//    {
+//        // Add a reference link
+//        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
+//       /* Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+//            holderConceptNode,
+//            atomSpace.addNode(WORD_NODE, holder));
 
-        referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
-       */
-        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
-                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
+//        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+//        atomSpace.setLTI(referenceLink, 1);
+//       */
+//        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
+//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
 
-        if (propertyLink != Handle::UNDEFINED)
-            entityRelatedLinks.push_back(propertyLink);
-    }
+//        if (propertyLink != Handle::UNDEFINED)
+//            entityRelatedLinks.push_back(propertyLink);
+//    }
 
-    // Add color property predicate
-    if (color != NULL_ATTRIBUTE)
-    {
-        // Add a reference link
-        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, color);
-      /*  Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
-            holderConceptNode,
+//    // Add color property predicate
+//    if (color != NULL_ATTRIBUTE)
+//    {
+//        // Add a reference link
+//        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, color);
+//      /*  Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+//            holderConceptNode,
 
-        referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
-        */
-        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "color",
-                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
+//        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+//        atomSpace.setLTI(referenceLink, 1);
+//        */
+//        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "color",
+//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
 
-        if (propertyLink != Handle::UNDEFINED)
-            entityRelatedLinks.push_back(propertyLink);
-    }
+//        if (propertyLink != Handle::UNDEFINED)
+//            entityRelatedLinks.push_back(propertyLink);
+//    }
 /*
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){

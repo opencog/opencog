@@ -122,7 +122,7 @@ void PatternMiningAgent::run()
         this->init();
 
     // test, only run once
-    static bool hasRun = true;
+    static bool hasRun = false;
     if (hasRun)
         return;
 
