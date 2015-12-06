@@ -1635,11 +1635,14 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
 {
     waitingToFeedToPatternMinerLock.lock();
-    perceptionWaitingForPatternMiner.insert(perceptionWaitingForPatternMiner.end(), newLinks.begin(), newLinks.end());
-    waitingToFeedToPatternMinerLock.unlock();
-    // debug
+
     for (unsigned int i = 0; i < newLinks.size(); ++ i)
+    {
+        perceptionWaitingForPatternMiner.push_back(newLinks[i]);
         std::cout << "\nPerceived new links:\n" << atomSpace.atomAsString (newLinks[i]) << std::endl;
+    }
+
+    waitingToFeedToPatternMinerLock.unlock();
 }
 
 void PAI::processAgentActionPlanResult(char* agentID,
@@ -3054,12 +3057,12 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
 Handle PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, bool propertyValue, bool permanent)
 {
 
-    TruthValuePtr tv(SimpleTruthValue::createTV(0.0, 1.0));
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     // if predicate is true set its TV to 1.0, otherwise leave it 0.0
-    if (propertyValue) {
-        tv = SimpleTruthValue::createTV(1.0, 1.0);
-    }
+//    if (propertyValue) {
+//        tv = SimpleTruthValue::createTV(1.0, 1.0);
+//    }
 
     logger().fine("PAI - Adding predName: %s, value: %d, obj: %s",
                  predicateName.c_str(), (int)propertyValue,
@@ -3925,7 +3928,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
  //   bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
  //   const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
-//    const std::string& color = getStringProperty(properties, "color");
+    const std::string& color = getStringProperty(properties, "color");
 
    // const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
@@ -4007,77 +4010,77 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 //            entityRelatedLinks.push_back(propertyLink);
 //    }
 
-//    // Add color property predicate
-//    if (color != NULL_ATTRIBUTE)
-//    {
-//        // Add a reference link
-//        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, color);
-//      /*  Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
-//            holderConceptNode,
+    // Add color property predicate
+    if (color != NULL_ATTRIBUTE)
+    {
+        // Add a reference link
+        Handle colorConceptNode = atomSpace.addNode(CONCEPT_NODE, color);
+      /*  Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+            holderConceptNode,
 
+        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+        */
+        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "color",
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
+
+        if (propertyLink != Handle::UNDEFINED)
+            entityRelatedLinks.push_back(propertyLink);
+    }
+
+//    // Add material property predicate
+//    if (material != NULL_ATTRIBUTE){
+//       // printf("Material found: %s\n",material.c_str());
+
+//        Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
+//        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
+
+//        HandleSeq referenceLinkOutgoing;
+//        referenceLinkOutgoing.push_back(materialConceptNode);
+//        referenceLinkOutgoing.push_back(materialWordNode);
+
+//        // Add a reference link
+//        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing);
 //        referenceLink->setTruthValue(TruthValue::TRUE_TV());
 //        atomSpace.setLTI(referenceLink, 1);
-//        */
-//        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "color",
-//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorConceptNode);
 
-//        if (propertyLink != Handle::UNDEFINED)
-//            entityRelatedLinks.push_back(propertyLink);
-//    }
-/*
-    // Add material property predicate
-    if (material != NULL_ATTRIBUTE){
-       // printf("Material found: %s\n",material.c_str());
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "material",
+//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
+//    } // if
 
-        Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
-        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
+//    // Add color property predicate
+//    if (color_name != NULL_ATTRIBUTE){
+//       // printf("color_name found: %s\n",color_name.c_str());
 
-        HandleSeq referenceLinkOutgoing;
-        referenceLinkOutgoing.push_back(materialConceptNode);
-        referenceLinkOutgoing.push_back(materialWordNode);
+//        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
+//        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
 
-        // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing);
-        referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+//        // Add a reference link
+//        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+//            colorNameConceptNode, colorNameWordNode);
+//        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+//        atomSpace.setLTI(referenceLink, 1);
 
-        AtomSpaceUtil::setPredicateValue(atomSpace, "material",
-                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
-    } // if
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
+//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorNameConceptNode);
+//    } // if
 
-    // Add color property predicate
-    if (color_name != NULL_ATTRIBUTE){
-       // printf("color_name found: %s\n",color_name.c_str());
+//    // Add texture property predicate
+//    if (texture != NULL_ATTRIBUTE) {
+//        printf("Texture found: %s\n", texture.c_str());
+//        Handle textureWordNode = atomSpace.addNode(WORD_NODE, texture);
+//        Handle textureConceptNode = atomSpace.addNode(CONCEPT_NODE, texture);
 
-        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
-        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
+//        // Add a reference link
+//        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
+//            textureConceptNode, textureWordNode);
+//        referenceLink->setTruthValue(TruthValue::TRUE_TV());
+//        atomSpace.setLTI(referenceLink, 1);
 
-        // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
-            colorNameConceptNode, colorNameWordNode);
-        referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
+//        AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
+//                                          SimpleTruthValue::createTV(1.0f, 1.0f), objectNode, textureConceptNode);
+//    } // if
 
-        AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
-                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorNameConceptNode);
-    } // if
-
-    // Add texture property predicate
-    if (texture != NULL_ATTRIBUTE) {
-        printf("Texture found: %s\n", texture.c_str());
-        Handle textureWordNode = atomSpace.addNode(WORD_NODE, texture);
-        Handle textureConceptNode = atomSpace.addNode(CONCEPT_NODE, texture);
-
-        // Add a reference link
-        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK,
-            textureConceptNode, textureWordNode);
-        referenceLink->setTruthValue(TruthValue::TRUE_TV());
-        atomSpace.setLTI(referenceLink, 1);
-
-        AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
-                                          SimpleTruthValue::createTV(1.0f, 1.0f), objectNode, textureConceptNode);
-    } // if
-*/
     /* TODO
     // Add color properties predicate
     std::map<std::string, float>::const_iterator it;

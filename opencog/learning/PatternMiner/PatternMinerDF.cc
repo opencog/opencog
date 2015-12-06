@@ -189,76 +189,65 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
     {
         cout << "\nMinging tick." << std::endl;
         miningOrEvaluatingLock.lock();
-        waitingToFeedQueueLock.lock();
+        pai->waitingToFeedToPatternMinerLock.lock();
 
-        if (waitingForProcessLinksQueue.size() > 0)
+        if (pai->perceptionWaitingForPatternMiner.size() > processedLinkNum)
         {
 
-            Handle& cur_link = waitingForProcessLinksQueue.front();
-            waitingForProcessLinksQueue.pop();
+            Handle& cur_link = pai->perceptionWaitingForPatternMiner[processedLinkNum];
+            // pai->perceptionWaitingForPatternMiner.pop();
 
             string curLinkStr = originalAtomSpace->atomAsString(cur_link);
+
+            processedLinkNum ++;
 
 
             std::cout << "Current processing link:\n" << curLinkStr << std::endl;
 
-
-//            if ( (curLinkStr.find("is_pickupable") != std::string::npos ) &&
-//                 (curLinkStr.find("id_NPC_Robot11654") != std::string::npos)
-//               )
-//            {
-//                // debug
-//                int xxx = 0;
-//                xxx ++;
-
-//            }
-
-
-
             // if this link is listlink, ignore it
             if ( (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK) || (originalAtomSpace->getType(cur_link) == opencog::AT_TIME_LINK))
             {
-                waitingToFeedQueueLock.unlock();
+                pai->waitingToFeedToPatternMinerLock.unlock();
 
                 miningOrEvaluatingLock.unlock();
                 continue;
             }
 
-            processedLinkNum ++;
-            waitingToFeedQueueLock.unlock();
 
-//            // Add this link into observingAtomSpace
-//            HandleSeq outgoingLinks,outVariableNodes;
+            pai->waitingToFeedToPatternMinerLock.unlock();
 
-//            swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+            // Add this link into observingAtomSpace
+            HandleSeq outgoingLinks,outVariableNodes;
 
-//            Handle existLink = observingAtomSpace->getLink(originalAtomSpace->getType(cur_link), outgoingLinks);
-//            if (existLink != Handle::UNDEFINED)
-//            {
-//                cout << "This link is dupicated! Skip it." << std::endl;
-//                miningOrEvaluatingLock.unlock();
-//                continue;
-//            }
+            swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
 
-//            Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
-//            newLink->merge(originalAtomSpace->getTV(cur_link));
+            Handle existLink = observingAtomSpace->getLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+            if (existLink != Handle::UNDEFINED)
+            {
+                cout << "This link is dupicated! Skip it." << std::endl;
+                miningOrEvaluatingLock.unlock();
+                continue;
+            }
+
+            Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+            newLink->merge(originalAtomSpace->getTV(cur_link));
 
 
-//            // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
-//            HandleSeq lastGramLinks;
-//            map<Handle,Handle> lastGramValueToVarMap;
-//            map<Handle,Handle> patternVarMap;
+            // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+            HandleSeq lastGramLinks;
+            map<Handle,Handle> lastGramValueToVarMap;
+            map<Handle,Handle> patternVarMap;
 
-//            extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+            extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
 
-//            cout << "\nFinshed current link mining." << std::endl;
+            cout << "\nFinshed current link mining." << std::endl;
             miningOrEvaluatingLock.unlock();
 
             sleep (1);
         }
         else
         {
-            waitingToFeedQueueLock.unlock();
+            pai->waitingToFeedToPatternMinerLock.unlock();
             miningOrEvaluatingLock.unlock();
             sleep (8);
         }

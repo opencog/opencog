@@ -33,6 +33,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 using namespace std;
 
@@ -328,14 +329,15 @@ namespace PatternMining
 
         /////////////////////////////------Start for embodiment ----/////////////////////////////
  public:
-     void runPatternMinerForEmbodiment(unsigned int _thresholdFrequency = 4,  unsigned int _evaluatePatternsEveryXSeconds = 120);
+     void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 4,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
-     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
-     std::mutex waitingToFeedQueueLock;
+//     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
+//     std::mutex waitingToFeedQueueLock;
 
  protected:
+     pai::PAI * pai;
      unsigned int evaluatePatternsEveryXSeconds;
-     queue<Handle> waitingForProcessLinksQueue;
+//    queue<Handle> waitingForProcessLinksQueue;
      std::mutex miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time
      std::thread miningFromEmbodimentThread, evaluatingForEmbodimentThread;
 

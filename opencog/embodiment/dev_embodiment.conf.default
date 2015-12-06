@@ -288,12 +288,12 @@ MAP_YDIM                        = 256
 # false - disable
 # true - enable
 #
-IMPORTANCE_DECAY_ENABLED        = true
+IMPORTANCE_DECAY_ENABLED        = false
 ACTION_SELECTION_ENABLED        = false
 COMBO_INTERPRETER_ENABLED       = true
 SCHEMA_GOAL_MINING_ENABLED      = false
 PROCEDURE_INTERPRETER_ENABLED   = true
-ENTITY_EXPERIENCE_ENABLED	= true
+ENTITY_EXPERIENCE_ENABLED	= false
 
 # true - disable
 # false - enable
@@ -328,7 +328,7 @@ UNREAD_MESSAGES_CHECK_INTERVAL  = 1
 UNREAD_MESSAGES_RETRIEVAL_LIMIT = -1
 NO_ACK_MESSAGES                 = true
 # Old messages exceed this limit would be discarded
-MAX_MESSAGE_QUEUE_SIZE          = 60
+MAX_MESSAGE_QUEUE_SIZE          = 160
 
 # options(tangentbug, astar, hpa, astar3d). Default is tangentbug 
 # tangengbug generates smoother paths than hpa's in Multiverse (did not try astart yet...)

@@ -56,7 +56,7 @@ private:
 
     void init();
 
-    void feedingNewAtomsToPatternMiner();
+//    void feedingNewAtomsToPatternMiner();
 
 public:
 

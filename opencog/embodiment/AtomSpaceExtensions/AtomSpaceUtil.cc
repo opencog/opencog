@@ -1604,7 +1604,7 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
     atomSpace.setTV(evalLinkHandle, tv);
 
     // debug
-    cout << "\n" << atomSpace.atomAsString(evalLinkHandle) << std::endl;
+    // cout << "\n" << atomSpace.atomAsString(evalLinkHandle) << std::endl;
 
     return evalLinkHandle;
 }

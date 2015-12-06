@@ -2250,35 +2250,36 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
 }
 
-// need to lock waitingToFeedQueueLock when calling this function
-void PatternMiner::feedNewLinksToPatternMiner (HandleSeq &_newLinks)
-{
+//// need to lock waitingToFeedQueueLock when calling this function
+//void PatternMiner::feedNewLinksToPatternMiner (HandleSeq &_newLinks)
+//{
 
-    for(Handle h :_newLinks)
-    {
+//    for(Handle h :_newLinks)
+//    {
 
-        if (h == Handle::UNDEFINED)
-            cout << "Fedding a undefined link!";
-        else
-            waitingForProcessLinksQueue.push(h);
+//        if (h == Handle::UNDEFINED)
+//            cout << "Fedding a undefined link!";
+//        else
+//            waitingForProcessLinksQueue.push(h);
 
-        try
-        {
-            cout << "Fed new link: \n" << originalAtomSpace->atomAsString(h) << std::endl;
-        }
-        catch(exception e)
-        {
-            cout << "\natomAsString failed! "<< e.what() <<std::endl;
-        }
-    }
+//        try
+//        {
+//            cout << "Fed new link: \n" << originalAtomSpace->atomAsString(h) << std::endl;
+//        }
+//        catch(exception e)
+//        {
+//            cout << "\natomAsString failed! "<< e.what() <<std::endl;
+//        }
+//    }
 
-}
+//}
 
-void PatternMiner::runPatternMinerForEmbodiment(unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
+void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
 {
 
     thresholdFrequency = _thresholdFrequency;
     evaluatePatternsEveryXSeconds = _evaluatePatternsEveryXSeconds;
+    pai = _pai;
 
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));

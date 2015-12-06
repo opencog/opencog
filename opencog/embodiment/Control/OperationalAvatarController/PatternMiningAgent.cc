@@ -128,32 +128,39 @@ void PatternMiningAgent::run()
 
     hasRun = true;
 
-    this->patternMiner->runPatternMinerForEmbodiment();
+    this->patternMiner->runPatternMinerForEmbodiment(pai);
 
-    std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
-    feedingthread.detach();
+//    std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
+//    feedingthread.detach();
 
 
 }
 
 
-void PatternMiningAgent::feedingNewAtomsToPatternMiner()
-{
+//void PatternMiningAgent::feedingNewAtomsToPatternMiner()
+//{
 
-    sleep(30);
+//    sleep(20);
 
-    while (true)
-    {
+////    cout << std::endl;
 
-        this->patternMiner->waitingToFeedQueueLock.lock();
-        pai->waitingToFeedToPatternMinerLock.lock();
-        if (pai->perceptionWaitingForPatternMiner.size() != 0)
-        {
-            this->patternMiner->feedNewLinksToPatternMiner(pai->perceptionWaitingForPatternMiner);
-            pai->perceptionWaitingForPatternMiner.clear();
-        }
-        pai->waitingToFeedToPatternMinerLock.unlock();
-        this->patternMiner->waitingToFeedQueueLock.unlock();
-        sleep(5);
-    }
-}
+////    for(Handle h : pai->perceptionWaitingForPatternMiner)
+////        cout << pai->getAtomSpace().atomAsString(h) << std::endl;
+
+////    return;
+
+//    while (true)
+//    {
+
+//        this->patternMiner->waitingToFeedQueueLock.lock();
+//        pai->waitingToFeedToPatternMinerLock.lock();
+//        if (pai->perceptionWaitingForPatternMiner.size() != 0)
+//        {
+//            this->patternMiner->feedNewLinksToPatternMiner(pai->perceptionWaitingForPatternMiner);
+//            pai->perceptionWaitingForPatternMiner.clear();
+//        }
+//        pai->waitingToFeedToPatternMinerLock.unlock();
+//        this->patternMiner->waitingToFeedQueueLock.unlock();
+//        sleep(5);
+//    }
+//}
