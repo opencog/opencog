@@ -17,7 +17,9 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from opencog.atomspace import AtomSpace
 from opencog.scheme_wrapper import scheme_eval_h
+from opencog.cogserver import get_server_atomspace
 
 # Simple API to isolate opencog atoms and imports from the ROS code,
 # so that we don't hack both ROS and Opencog in the same module.
@@ -25,10 +27,13 @@ from opencog.scheme_wrapper import scheme_eval_h
 #
 class PutAtoms:
 
+	def __init__(self):
+		self.atomspace = get_server_atomspace()
+
 	# Put a marker in the AtomSpace to indicate that the robot is
 	# talking now.
 	def chatbot_speech_start(self):
-		scheme_eval_h("(State chat-state chat-talk)")
+		scheme_eval_h(self.atomspace, "(State chat-state chat-talk)")
 
 	def chatbot_speech_stop(self):
-		scheme_eval_h("(State chat-state chat-listen)")
+		scheme_eval_h(self.atomspace, "(State chat-state chat-listen)")
