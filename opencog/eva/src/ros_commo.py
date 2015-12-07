@@ -192,6 +192,7 @@ class EvaControl():
 		elif chat_event.data == "speechend":
 			self.puta.chatbot_speech_end()
 			rospy.loginfo("webui ending speech")
+			# XXX there is nothing to turn off saccade!
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):

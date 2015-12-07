@@ -86,6 +86,18 @@
 (define chat-talk (ConceptNode "Talking"))
 (StateLink chat-state chat-listen)
 
+(DefineLink
+	(DefinedPredicate "chatbot is talking")
+	(Equal
+		(Set chat-talk)
+		(Get (State chat-state (Variable "$x")))))
+
+(DefineLink
+	(DefinedPredicate "chatbot is listening")
+	(Equal
+		(Set chat-listen)
+		(Get (State chat-state (Variable "$x")))))
+
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
 (StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
@@ -729,6 +741,11 @@
 			(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 				(ListLink (VariableNode "$face")))
 			(GetLink (StateLink interaction-state (VariableNode "$x")))))
+
+		;; Show random expressions only if NOT talking
+		; aka "do_pub_emotions=False" in the new owyl tree.
+		(DefinedPredicate "chatbot is listening")
+
 		;; line 768
 		(SequentialOrLink
 			(NotLink (DefinedPredicateNode "Time to change expression"))
@@ -989,9 +1006,7 @@
 	(DefinedPredicateNode "Speech started?")
 	(SequentialAndLink
 		; If the chatbot started talking ...
-		(EqualLink
-			(SetLink chat-talk)
-			(GetLink (StateLink chat-state (VariableNode "$x"))))
+		(DefinedPredicate "chatbot is talking")
 		; ... then show a random gesture from "listening" set.
 		(PutLink (DefinedPredicateNode "Show random gesture")
 			(ConceptNode "listening"))
@@ -1004,9 +1019,7 @@
 	(DefinedPredicateNode "Speech ended?")
 	(SequentialAndLink
 		; If the chatbot stopped talking ...
-		(EqualLink
-			(SetLink chat-listen)
-			(GetLink (StateLink chat-state (VariableNode "$x"))))
+		(DefinedPredicate "chatbot is listening")
 
 		; XXX do nothing!? (The current Owly tree does notthing
 		; here! Should it?
