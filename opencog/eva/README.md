@@ -134,4 +134,6 @@ TODO
 * implement remainder of chatbot_blink_cb, chatbot_affect_perceive_cb
   (blink speed changes of affect)
 
+* blink_update
+
 * Search for and address the XXX in file
