@@ -1096,7 +1096,13 @@
 
 		; ... then switch back to exploration saccade ...
 		(Evaluationk (GroundedPredicate "py:explore_saccade")
-				(ListLink))
+			(ListLink))
+
+		; ... switch to normal blink rate...
+		(Evaluationk (GroundedPredicate "py:blink_rate")
+			(ListLink
+				(DefinedSchema "blink normal mean")
+				(DefinedSchema "blink normal var")))
 
 		; ... and switch state to "listening"
 		(Put (State chat-state (Variable "$x")) chat-listen)
