@@ -2290,12 +2290,13 @@ void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _t
     observingAtomSpace = new AtomSpace();
 
     processedLinkNum = 0;
+    lastTimeEvaluatedNumber = 0;
 
     miningFromEmbodimentThread = std::thread([this]{this->growPatternsDepthFirstTaskForEmbodiment();});
     miningFromEmbodimentThread.detach();
 
-//    evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
-//    evaluatingForEmbodimentThread.detach();
+    evaluatingForEmbodimentThread = std::thread([this]{this->runEvaluatePatternTaskForEmbodiment();});
+    evaluatingForEmbodimentThread.detach();
 
 
 }
@@ -2308,9 +2309,10 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
     while (true)
     {
         sleep(evaluatePatternsEveryXSeconds);
+
         miningOrEvaluatingLock.lock();
 
-        if(processedLinkNum == 0)
+        if ((processedLinkNum == 0) || (lastTimeEvaluatedNumber == processedLinkNum))
         {
             miningOrEvaluatingLock.unlock();
             continue;
@@ -2326,13 +2328,12 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
         std::cout<<"\nDebug: PatternMiner: output all the perception atoms to file " + fileName << std::endl;
 
         corpusFile.open(fileName.c_str());
-        HandleSeq allPerceptionLinks;
-        observingAtomSpace->getHandlesByType(back_inserter(allPerceptionLinks), (Type) LINK, true );
-        corpusFile << "Total perception link number = " << allPerceptionLinks.size() << std::endl;
-        for (Handle ph : allPerceptionLinks)
+//        HandleSeq allPerceptionLinks;
+//        observingAtomSpace->getHandlesByType(back_inserter(allPerceptionLinks), (Type) LINK, true );
+        corpusFile << "Total perception link number = " << processedLinkNum << std::endl;
+        for (Handle ph : pai->perceptionWaitingForPatternMiner)
         {
-            if (observingAtomSpace->getType(ph) != opencog::LIST_LINK)
-                corpusFile << observingAtomSpace->atomAsString(ph) << std::endl;
+            corpusFile << originalAtomSpace->atomAsString(ph) << std::endl;
         }
 
         corpusFile.close();
@@ -2431,6 +2432,7 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
             std::cout<< std::endl;
         }
 
+        lastTimeEvaluatedNumber = processedLinkNum;
         printf("Pattern Mining Finish one evaluation! \n");
         miningOrEvaluatingLock.unlock();
     }

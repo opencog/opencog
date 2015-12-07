@@ -32,6 +32,7 @@
 #include <vector>
 #include <sstream>
 #include <thread>
+#include <chrono>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Handle.h>
@@ -243,7 +244,7 @@ void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
             cout << "\nFinshed current link mining." << std::endl;
             miningOrEvaluatingLock.unlock();
 
-            sleep (1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         else
         {

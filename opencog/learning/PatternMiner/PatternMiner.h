@@ -340,6 +340,7 @@ namespace PatternMining
 //    queue<Handle> waitingForProcessLinksQueue;
      std::mutex miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time
      std::thread miningFromEmbodimentThread, evaluatingForEmbodimentThread;
+     unsigned int lastTimeEvaluatedNumber;
 
      void growPatternsDepthFirstTaskForEmbodiment();
 
