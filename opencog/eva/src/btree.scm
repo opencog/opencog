@@ -1039,7 +1039,7 @@
 		; If the chatbot started talking ...
 		(DefinedPredicate "chatbot started talking")
 		; ... then switch to face-study saccade ...
-		(Evaluationk (GroundedPredicate "py:conversational_saccade")
+		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
 		; ... and show a random gesture from "listening" set.
 		(Put (DefinedPredicate "Show random gesture")
@@ -1071,6 +1071,11 @@
 				; ... raise eyebrows ...
 				(Put (DefinedPredicate "Show random gesture")
 					(ConceptNode "chat-pos-think"))
+				; ... switch to chat fast blink rate...
+				(Evaluation (GroundedPredicate "py:blink_rate")
+					(ListLink
+						(DefinedSchema "blink chat fast mean")
+						(DefinedSchema "blink chat fast var")))
 			)
 			(SequentialAnd
 				; If chatbot is not happy ...
@@ -1084,8 +1089,12 @@
 				; ... furrow brows ...
 				(Put (DefinedPredicate "Show random gesture")
 					(ConceptNode "chat-neg-think"))
+				; ... switch to chat slow blink rate...
+				(Evaluation (GroundedPredicate "py:blink_rate")
+					(ListLink
+						(DefinedSchema "blink chat slow mean")
+						(DefinedSchema "blink chat slow var")))
 			))))
-; xxxxxxxxxxx
 
 ; Things to do, if the chattbot stopped talking.
 (DefineLink
@@ -1095,11 +1104,11 @@
 		(DefinedPredicate "chatbot stopped talking")
 
 		; ... then switch back to exploration saccade ...
-		(Evaluationk (GroundedPredicate "py:explore_saccade")
+		(Evaluation (GroundedPredicate "py:explore_saccade")
 			(ListLink))
 
 		; ... switch to normal blink rate...
-		(Evaluationk (GroundedPredicate "py:blink_rate")
+		(Evaluation (GroundedPredicate "py:blink_rate")
 			(ListLink
 				(DefinedSchema "blink normal mean")
 				(DefinedSchema "blink normal var")))

@@ -129,4 +129,12 @@
 (DefineLink (DefinedSchema "blink normal mean") (Number 3.5))
 (DefineLink (DefinedSchema "blink normal var")  (Number 0.2))
 
+; blink_chat_faster_mean
+(DefineLink (DefinedSchema "blink chat fast mean") (Number 2.0))
+(DefineLink (DefinedSchema "blink chat fast var")  (Number 0.12))
+
+; blink_chat_slower_mean
+(DefineLink (DefinedSchema "blink chat slow mean") (Number 4.5))
+(DefineLink (DefinedSchema "blink chat slow var")  (Number 0.12))
+
 ; --------------------------------------------------------
