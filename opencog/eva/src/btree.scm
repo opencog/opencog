@@ -319,7 +319,7 @@
 	(PutLink (DefinedPredicateNode "Show random expression")
 		(ConceptNode "frustrated")))
 
-;; Pick random positive  gesture
+;; Pick random positive gesture
 (DefineLink
 	(DefinedPredicateNode "Pick random positive gesture")
 	(PutLink (DefinedPredicateNode "Show random gesture")
@@ -981,6 +981,21 @@
 ))
 
 ;; ------------------------------------------------------------------
+;; Chat-related behaviors.
+
+(DefineLink
+	; owyl "chatbot_speech_start()" method
+	(DefinedPredicateNode "Speech started?")
+	(SequentialAndLink
+		; If the chatbot started talking ...
+		(EqualLink
+			(SetLink chat-listen)
+			(GetLink (StateLink chat-state (VariableNode "$x"))))
+		; ... then show a random gesture from "listening" set.
+		(PutLink (DefinedPredicateNode "Show random gesture")
+			(ConceptNode "listening"))))
+
+;; ------------------------------------------------------------------
 ;; Main loop diagnostics
 ;; line 988 - idle_spin()
 (define loop-count 0)
@@ -1002,6 +1017,7 @@
 				(DefinedPredicateNode "Someone left")
 				(DefinedPredicateNode "Interact with people")
 				(DefinedPredicateNode "Nothing is happening")
+				(DefinedPredicateNode "Speech started?")
 				(TrueLink)
 			)
 			(EvaluationLink
