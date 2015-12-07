@@ -1069,6 +1069,15 @@
 			(SequentialAnd
 				; If chatbot is not happy ...
 				(DefinedPredicate "chatbot is negative")
+				; ... show one of the frustrated expressions
+				(PutLink (DefinedPredicateNode "Show random expression")
+					(ConceptNode "frustrated"))
+				; ... shake head quickly ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-negative-shake"))
+				; ... furrow brows ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-neg-think"))
 			))))
 ; xxxxxxxxxxx
 
