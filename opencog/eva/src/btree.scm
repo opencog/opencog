@@ -85,7 +85,14 @@
 (define chat-state (AnchorNode "Chat State"))
 (define chat-listen (ConceptNode "Listening"))
 (define chat-talk (ConceptNode "Talking"))
+(define chat-start (ConceptNode "Start Talking"))
 (StateLink chat-state chat-listen)
+
+(DefineLink
+	(DefinedPredicate "chatbot started talking")
+	(Equal
+		(Set chat-start)
+		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is talking")
@@ -1021,22 +1028,37 @@
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
 
-; Things to do, if the chattbot started talking.
+; Things to do, if the chatbot started talking.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
-	(DefinedPredicateNode "Speech started?")
-	(SequentialAndLink
+	(DefinedPredicate "Speech started?")
+	(SequentialAnd
 		; If the chatbot started talking ...
-		(DefinedPredicate "chatbot is talking")
+		(DefinedPredicate "chatbot started talking")
 		; ... then show a random gesture from "listening" set.
-		(PutLink (DefinedPredicateNode "Show random gesture")
+		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
-		(PutLink (DefinedPredicateNode "Show random gesture")
+		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "chat-positive-nod"))
-
-		(DefinedPredicate "chatbot is happy")
+		; ... and switch state to "talking"
+		(Put (State chat-state (Variable "$x")) chat-talk)
 ))
+
+;; Things to do, if the chatbot is currently talking.
+(DefineLink
+	(DefinedPredicate "Speech ongoing?")
+	(SequentialAnd
+		; If the chatbot currently talking ...
+		(DefinedPredicate "chatbot is talking")
+		; ... then handle the various affect states.
+		(SequentialOr
+			(SequentialAnd
+				(DefinedPredicate "chatbot is happy")
+			)
+			(SequentialAnd
+				(DefinedPredicate "chatbot is negative")
+			))))
 ; xxxxxxxxxxx
 
 ; Things to do, if the chattbot stopped talking.
@@ -1069,23 +1091,26 @@
 ;; Main loop. Uses tail recursion optimizatio to form the loop.
 ;; line 556 -- build_tree()
 (DefineLink
-	(DefinedPredicateNode "main loop")
+	(DefinedPredicate "main loop")
 	(SatisfactionLink
-		(SequentialAndLink
-			(SequentialOrLink
-				(DefinedPredicateNode "New arrival sequence")
-				(DefinedPredicateNode "Someone left")
-				(DefinedPredicateNode "Interact with people")
-				(DefinedPredicateNode "Nothing is happening")
-				(DefinedPredicateNode "Speech started?")
-				(DefinedPredicateNode "Speech ended?")
-				(TrueLink)
+		(SequentialAnd
+			(SequentialOr
+				(DefinedPredicate "New arrival sequence")
+				(DefinedPredicate "Someone left")
+				(DefinedPredicate "Interact with people")
+				(DefinedPredicate "Nothing is happening")
+				(DefinedPredicate "Speech started?")
+				(DefinedPredicate "Speech ongoing?")
+				(DefinedPredicate "Speech ended?")
+				(True)
 			)
-			(EvaluationLink
-				(GroundedPredicateNode "scm:idle-loop") (ListLink))
-			(EvaluationLink
-				(GroundedPredicateNode "py:ros_is_running") (ListLink))
-			(DefinedPredicateNode "main loop")
+			(Evaluation
+				(GroundedPredicate "scm:idle-loop") (ListLink))
+			(Evaluation
+				(GroundedPredicate "py:ros_is_running") (ListLink))
+
+			;; Call self -- tail-recurse.
+			(DefinedPredicate "main loop")
 		)))
 
 ;; Run the loop (in a new thread)
