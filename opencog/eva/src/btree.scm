@@ -1054,9 +1054,20 @@
 		; ... then handle the various affect states.
 		(SequentialOr
 			(SequentialAnd
+				; If chatbot is happy ...
 				(DefinedPredicate "chatbot is happy")
+				; ... show one of the neutral-speech expressions
+				(PutLink (DefinedPredicateNode "Show random expression")
+					(ConceptNode "neutral-speech"))
+				; ... nod slowly ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-positive-nod"))
+				; ... raise eyebrows ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-pos-think"))
 			)
 			(SequentialAnd
+				; If chatbot is not happy ...
 				(DefinedPredicate "chatbot is negative")
 			))))
 ; xxxxxxxxxxx

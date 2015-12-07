@@ -114,4 +114,8 @@
 ; New beavior.cfg line 149
 (emo-gest-spec "chat-positive-nod" "nod-6"  0.5 0.8 0.9 1 1 0.2 0.4)
 
+; line 160 plus lines 1351ff of new general_behavior.py
+; aka stuff for "chatbot_positive_reply_think"
+(emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
+
 ; --------------------------------------------------------
