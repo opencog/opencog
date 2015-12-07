@@ -86,24 +86,27 @@
 (define chat-listen (ConceptNode "Listening"))
 (define chat-talk (ConceptNode "Talking"))
 (define chat-start (ConceptNode "Start Talking"))
-(StateLink chat-state chat-listen)
+(define chat-stop (ConceptNode "Stop Talking"))
+(StateLink chat-state chat-stop)
 
 (DefineLink
 	(DefinedPredicate "chatbot started talking")
-	(Equal
-		(Set chat-start)
+	(Equal (Set chat-start)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is talking")
-	(Equal
-		(Set chat-talk)
+	(Equal (Set chat-talk)
+		(Get (State chat-state (Variable "$x")))))
+
+(DefineLink
+	(DefinedPredicate "chatbot stopped talking")
+	(Equal (Set chat-stop)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is listening")
-	(Equal
-		(Set chat-listen)
+	(Equal (Set chat-listen)
 		(Get (State chat-state (Variable "$x")))))
 
 ; Chat affect. Is the robot happy about what its saying?
@@ -1086,15 +1089,27 @@
 
 ; Things to do, if the chattbot stopped talking.
 (DefineLink
-	(DefinedPredicateNode "Speech ended?")
-	(SequentialAndLink
+	(DefinedPredicate "Speech ended?")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+		(DefinedPredicate "chatbot stopped talking")
+
+		; ... then switch back to exploration saccade ...
+		(Evaluationk (GroundedPredicate "py:explore_saccade")
+				(ListLink))
+
+		; ... and switch state to "listening"
+		(Put (State chat-state (Variable "$x")) chat-listen)
+	))
+
+; Things to do, if the chattbot is listening.
+(DefineLink
+	(DefinedPredicate "Speech listening?")
+	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
 
-		; ... then switch back to exploration saccade ...
-		; XXX do this only once.
-		(Evaluationk (GroundedPredicate "py:explore_saccade")
-				(ListLink))
+		; No-op. The current owyl tree does nothing here.
 		(TrueLink)
 	))
 
@@ -1127,6 +1142,7 @@
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
+				; (DefinedPredicate "Speech listening?") ; no-op
 				(True)
 			)
 			(Evaluation
