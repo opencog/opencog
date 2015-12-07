@@ -1035,7 +1035,10 @@
 	(SequentialAnd
 		; If the chatbot started talking ...
 		(DefinedPredicate "chatbot started talking")
-		; ... then show a random gesture from "listening" set.
+		; ... then switch to face-study saccade ...
+		(Evaluationk (GroundedPredicate "py:conversational_saccade")
+				(ListLink))
+		; ... and show a random gesture from "listening" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
@@ -1088,8 +1091,10 @@
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
 
-		; XXX do nothing!? (The current Owly tree does notthing
-		; here! Should it?
+		; ... then switch back to exploration saccade ...
+		; XXX do this only once.
+		(Evaluationk (GroundedPredicate "py:explore_saccade")
+				(ListLink))
 		(TrueLink)
 	))
 

@@ -67,8 +67,8 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	intensity = float(intensity_node.name)
 	duration = float(duration_node.name)
-	evl.expression(emotion, intensity, duration)
 	# print "Python emotion: ", emotion, " for ", duration, " int ", intensity
+	evl.expression(emotion, intensity, duration)
 	return TruthValue(1, 1)
 
 def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
@@ -76,9 +76,17 @@ def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 	intensity = float(intensity_node.name)
 	repeat = float(repeat_node.name)
 	speed = float(speed_node.name)
-	evl.gesture(gesture, intensity, repeat, speed)
-	#print "Python gesture: ", gesture, ", int: ", intensity, \
+	# print "Python gesture: ", gesture, ", int: ", intensity, \
 	#	", rep: ", repeat, ", speed: ", speed
+	evl.gesture(gesture, intensity, repeat, speed)
+	return TruthValue(1, 1)
+
+def explore_saccade():
+	evl.explore_saccade()
+	return TruthValue(1, 1)
+
+def conversational_saccade():
+	evl.conversational_saccade()
 	return TruthValue(1, 1)
 
 # Return true as long as ROS is running.

@@ -207,11 +207,10 @@ class EvaControl():
 		if chat_event.data == "speechstart":
 			rospy.loginfo("webui starting speech")
 			self.puta.chatbot_speech_start()
-			self.conversational_saccade()
+
 		elif chat_event.data == "speechend":
 			self.puta.chatbot_speech_end()
 			rospy.loginfo("webui ending speech")
-			self.explore_saccade()
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
