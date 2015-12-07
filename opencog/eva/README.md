@@ -133,5 +133,4 @@ TODO
 
 * implement remainder of chatbot_blink_cb, chatbot_affect_perceive_cb
 
-* chatbot_event_cb: implement
- self.pick_random_gesture("listening_gestures", "chat_perceived")
+* Search for and address the XXX in file

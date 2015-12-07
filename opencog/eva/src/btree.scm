@@ -993,7 +993,10 @@
 			(GetLink (StateLink chat-state (VariableNode "$x"))))
 		; ... then show a random gesture from "listening" set.
 		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "listening"))))
+			(ConceptNode "listening"))
+		; ... and also, sometimes, the "chatbot_positive_nod"
+		(PutLink (DefinedPredicateNode "Show random gesture")
+			(ConceptNode "chat-positive-nod"))))
 
 ;; ------------------------------------------------------------------
 ;; Main loop diagnostics
