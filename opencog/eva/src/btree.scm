@@ -1048,7 +1048,7 @@
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "chat-positive-nod"))
 		; ... and switch state to "talking"
-		(Put (State chat-state (Variable "$x")) chat-talk)
+		(True (Put (State chat-state (Variable "$x")) chat-talk))
 ))
 
 ;; Things to do, if the chatbot is currently talking.
@@ -1063,7 +1063,7 @@
 				; If chatbot is happy ...
 				(DefinedPredicate "chatbot is happy")
 				; ... show one of the neutral-speech expressions
-				(PutLink (DefinedPredicateNode "Show random expression")
+				(Put (DefinedPredicateNode "Show random expression")
 					(ConceptNode "neutral-speech"))
 				; ... nod slowly ...
 				(Put (DefinedPredicate "Show random gesture")
@@ -1081,7 +1081,7 @@
 				; If chatbot is not happy ...
 				(DefinedPredicate "chatbot is negative")
 				; ... show one of the frustrated expressions
-				(PutLink (DefinedPredicateNode "Show random expression")
+				(Put (DefinedPredicateNode "Show random expression")
 					(ConceptNode "frustrated"))
 				; ... shake head quickly ...
 				(Put (DefinedPredicate "Show random gesture")
@@ -1114,7 +1114,7 @@
 				(DefinedSchema "blink normal var")))
 
 		; ... and switch state to "listening"
-		(Put (State chat-state (Variable "$x")) chat-listen)
+		(True (Put (State chat-state (Variable "$x")) chat-listen))
 	))
 
 ; Things to do, if the chattbot is listening.
