@@ -983,13 +983,14 @@
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
 
+; Things to do, if the chattbot started talking.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
 	(DefinedPredicateNode "Speech started?")
 	(SequentialAndLink
 		; If the chatbot started talking ...
 		(EqualLink
-			(SetLink chat-listen)
+			(SetLink chat-talk)
 			(GetLink (StateLink chat-state (VariableNode "$x"))))
 		; ... then show a random gesture from "listening" set.
 		(PutLink (DefinedPredicateNode "Show random gesture")
@@ -997,6 +998,20 @@
 		; ... and also, sometimes, the "chatbot_positive_nod"
 		(PutLink (DefinedPredicateNode "Show random gesture")
 			(ConceptNode "chat-positive-nod"))))
+
+; Things to do, if the chattbot stopped talking.
+(DefineLink
+	(DefinedPredicateNode "Speech ended?")
+	(SequentialAndLink
+		; If the chatbot stopped talking ...
+		(EqualLink
+			(SetLink chat-listen)
+			(GetLink (StateLink chat-state (VariableNode "$x"))))
+
+		; XXX do nothing!? (The current Owly tree does notthing
+		; here! Should it?
+		(TrueLink)
+	))
 
 ;; ------------------------------------------------------------------
 ;; Main loop diagnostics
@@ -1021,6 +1036,7 @@
 				(DefinedPredicateNode "Interact with people")
 				(DefinedPredicateNode "Nothing is happening")
 				(DefinedPredicateNode "Speech started?")
+				(DefinedPredicateNode "Speech ended?")
 				(TrueLink)
 			)
 			(EvaluationLink
