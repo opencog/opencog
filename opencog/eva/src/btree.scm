@@ -100,10 +100,24 @@
 		(Get (State chat-state (Variable "$x")))))
 
 ; Chat affect. Is the robot happy about what its saying?
+; Right now, there are only two affects: happy and not happy.
 ; NB the python code uses these defines!
 (define chat-affect (AnchorNode "Chat Affect"))
 (define chat-happy (ConceptNode "Happy"))
 (define chat-negative (ConceptNode "Negative"))
+(StateLink chat-affect chat-happy)
+
+(DefineLink
+	(DefinedPredicate "chatbot is happy")
+	(Equal
+		(Set chat-happy)
+		(Get (State chat-affect (Variable "$x")))))
+
+(DefineLink
+	(DefinedPredicate "chatbot is negative")
+	(Equal
+		(Set chat-negative)
+		(Get (State chat-affect (Variable "$x")))))
 
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
@@ -936,8 +950,8 @@
 	(DefinedPredicateNode "Continue sleeping")
 	(SequentialAndLink
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Continue sleeping.")))
+		;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+		;	(ListLink (Node "--- Continue sleeping.")))
 	))
 
 ; Wake-up sequence
@@ -1019,7 +1033,11 @@
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
 		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "chat-positive-nod"))))
+			(ConceptNode "chat-positive-nod"))
+
+		(DefinedPredicate "chatbot is happy")
+))
+; xxxxxxxxxxx
 
 ; Things to do, if the chattbot stopped talking.
 (DefineLink
@@ -1040,8 +1058,12 @@
 (define do-run-loop #t)
 (define (idle-loop)
 	(set! loop-count (+ loop-count 1))
-	(format #t "Main loop: ~a\n" loop-count)
-	(usleep 1001000)
+
+	(if (eq? 0 (modulo loop-count 30))
+		(format #t "Main loop: ~a\n" loop-count))
+
+	; Pause for one-tenth of a second... 101 millisecs
+	(usleep 101000)
 	(if do-run-loop (stv 1 1) (stv 0 1)))
 
 ;; Main loop. Uses tail recursion optimizatio to form the loop.

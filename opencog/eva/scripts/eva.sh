@@ -46,11 +46,12 @@ tmux new-window -n 'geo' 'roslaunch robots_config geometry.launch gui:=false; $S
 tmux new-window -n 'eva' 'cd $BLENDIR && blender -y Eva.blend -P autostart.py; $SHELL'
 
 # Start the cogserver.
+# It seems to take more than 5 seconds to load all scripts!?
 cd $OCBHAVE/src
 tmux new-window -n 'cog' 'guile -l btree.scm; $SHELL'
+sleep 10
 
 # Run the new face-tracker.
-sleep 5
 # tmux new-window -n 'face' '$OCBHAVE/face_track/main.py; $SHELL'
 tmux new-window -n 'fce' '../face_track/main.py; $SHELL'
 
