@@ -222,16 +222,18 @@ class EvaControl():
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
+
+		# XXX currently, this by-passes the OC behaviro tree.
+		# Does that matter?  Currently, probably not.
 		rospy.loginfo(blink.data + ' says blink')
-		# XXX Implement in behavior tree.
-		# blink_probabilities = {
-		# 	'chat_heard' : 'chat_heard_probability',
-		#	'chat_saying' : 'chat_saying_probability',
-		#	'tts_end' : 'tts_end_probability'}
+		blink_probabilities = {
+			'chat_heard' : 0.4,
+			'chat_saying' : 0.7,
+			'tts_end' : 0.7 }
 		# If we get a string not in the dictionary, return 1.0.
-		# blink_probability = self.blackboard[blink_probabilities[blink.data]]
-		# if random.random() < blink_probability:
-		#	self.show_gesture('blink', 1.0, 1, 1.0, blink)
+		blink_probability = blink_probabilities[blink.data]
+		if random.random() < blink_probability:
+			self.gesture('blink', 1.0, 1, 1.0)
 
 	# The perceived emotional content in the message.
 	# emo is of type EmotionState

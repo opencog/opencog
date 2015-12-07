@@ -131,8 +131,10 @@ TODO
 * face_track.py has some new code for both face study, and current-face.
   merge this code.
 
-* implement remainder of chatbot_blink_cb
-
 * stage mode
 
 * Search for and address the XXX in file
+
+* Finish implementing the room-is-empty mode.
+
+* Fine-tune the random-choice stuff.
