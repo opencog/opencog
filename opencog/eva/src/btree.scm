@@ -208,7 +208,7 @@
 					(SchemaNode max-name)) (VariableNode "$int-max")))
 		)))
 
-; Get a random intensity value forthe indicated emotion-expression.
+; Get a random intensity value for the indicated emotion-expression.
 ; That is, given an emotion-expression pair, this wil look up the
 ; min and max allowed intensity levels, and return a random number
 ; betwee these min and max values.
@@ -221,6 +221,11 @@
 (DefineLink
 	(DefinedSchemaNode "get random intensity")
 	(pick-value-in-range "intensity-min" "intensity-max"))
+
+; As above, but for gestures. Avoids a name-space collision.
+(DefineLink
+	(DefinedSchemaNode "get random gest intensity")
+	(pick-value-in-range "gest intensity-min" "gest intensity-max"))
 
 ; Similar to above, but for duration. See explanation above.
 (DefineLink
@@ -285,7 +290,7 @@
 				(ListLink
 					(VariableNode "$gest")
 					(PutLink
-						(DefinedSchemaNode "get random intensity")
+						(DefinedSchemaNode "get random gest intensity")
 						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
 					(PutLink
 						(DefinedSchemaNode "get random repeat")

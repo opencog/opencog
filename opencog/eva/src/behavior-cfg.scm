@@ -85,9 +85,9 @@
 (define (emo-gest-spec emo-state gesture prob
 		int-min int-max rep-min rep-max spd-min spd-max)
 	(emo-gest-set emo-state gesture)
-	(emo-gest-map emo-state gesture "probability" prob)
-	(emo-gest-map emo-state gesture "intensity-min" int-min)
-	(emo-gest-map emo-state gesture "intensity-max" int-max)
+	(emo-gest-map emo-state gesture "gest probability" prob)
+	(emo-gest-map emo-state gesture "gest intensity-min" int-min)
+	(emo-gest-map emo-state gesture "gest intensity-max" int-max)
 	(emo-gest-map emo-state gesture "repeat-min" rep-min)
 	(emo-gest-map emo-state gesture "repeat-max" rep-max)
 	(emo-gest-map emo-state gesture "speed-min" spd-min)
