@@ -152,11 +152,11 @@ class EvaControl():
 		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------
-	# Wrapper for face-study saccade.
+	# Wrapper for saccade generator.
 	# This is setup entirely in python, and not in the AtomSpace,
 	# as, at this time, there are no knobs worth twiddling.
 
-	# Explore saccade when not conversing.
+	# Explore-the-room saccade when not conversing.
 	def explore_saccade(self):
 
 		# Switch to conversational (micro) saccade parameters
@@ -174,7 +174,7 @@ class EvaControl():
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
 
-	# Used during conversation.
+	# Used during conversation to study face being looked at.
 	def conversational_saccade(self):
 
 		# Switch to conversational (micro) saccade parameters
@@ -191,6 +191,14 @@ class EvaControl():
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
 
+
+	# ----------------------------------------------------------
+	# Wrapper for controlling the blink rate.
+	def blink_rate(self, mean, variation):
+		msg = BlinkCycle()
+		msg.mean = mean
+		msg.variation = variation
+		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
 	# Subscription callbacks

@@ -84,11 +84,20 @@ def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 	return TruthValue(1, 1)
 
 def explore_saccade():
-	print "Explore Saccade"
+	print "Python: Explore Saccade"
+	# evl.explore_saccade()
 	return TruthValue(1, 1)
 
 def conversational_saccade():
-	print "Conversational Saccade"
+	print "Python: Conversational Saccade"
+	# evl.conversational_saccade()
+	return TruthValue(1, 1)
+
+def blink_rate(mean_node, var_node):
+	mean = float(mean_node.name)
+	var  = float(var_node.name)
+	print "Python: blink-rate: ", mean, " variation ", var
+	# evl.blink_rate(mean, var)
 	return TruthValue(1, 1)
 
 # Return true as long as ROS is running.

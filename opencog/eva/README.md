@@ -136,4 +136,6 @@ TODO
 
 * blink_update
 
+* stage mode
+
 * Search for and address the XXX in file
