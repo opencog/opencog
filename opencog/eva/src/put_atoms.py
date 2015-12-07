@@ -37,3 +37,11 @@ class PutAtoms:
 
 	def chatbot_speech_stop(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-listen)")
+
+	# Put a marker in the StomSpace to indicate that the robot is
+	# happy, enthsed about what its saying.
+	def chatbot_affect_happy(self):
+		scheme_eval_h(self.atomspace, "(State chat-affect chat-happy)")
+
+	def chatbot_affect_negative(self):
+		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")

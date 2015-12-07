@@ -211,7 +211,10 @@ class EvaControl():
 	# emo is of type EmotionState
 	def chatbot_affect_perceive_cb(self, emo):
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
-		# XXX TODO -- this goes into the behavior tree.
+		if emo.data == "happy":
+			self.puta.chatbot_affect_happy()
+		else:
+			self.puta.chatbot_affect_negative()
 
 	def __init__(self):
 

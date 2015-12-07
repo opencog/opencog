@@ -81,6 +81,7 @@
 (StateLink glance-state no-interaction)
 
 ; Chat state. Is the robot talking, or not, right now?
+; NB the python code uses these defines!
 (define chat-state (AnchorNode "Chat State"))
 (define chat-listen (ConceptNode "Listening"))
 (define chat-talk (ConceptNode "Talking"))
@@ -97,6 +98,12 @@
 	(Equal
 		(Set chat-listen)
 		(Get (State chat-state (Variable "$x")))))
+
+; Chat affect. Is the robot happy about what its saying?
+; NB the python code uses these defines!
+(define chat-affect (AnchorNode "Chat Affect"))
+(define chat-happy (ConceptNode "Happy"))
+(define chat-negative (ConceptNode "Negative"))
 
 ; line 115 of behavior.cfg - time_to_change_face_target_min
 (StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
