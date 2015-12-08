@@ -55,7 +55,7 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
     std::vector<std::string> sentences;
     int sw_end = special_words.size() - 1;
     int nsw_end = nspecial_words.size() - 1;
-    int i = 0;
+    static int i = 0;
 
     HandleSeq hwords;
     HandleSeq hword_instances;
