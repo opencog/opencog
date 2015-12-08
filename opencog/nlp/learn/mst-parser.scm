@@ -119,7 +119,7 @@
 			(cog-link 'EvaluationLink lg_rel wpr)
 			'()))
 	(if (not (null? evl))
-		(tv-conf (cog-tv evl))
+		(cog-tv-confidence evl)
 		bad-mi
 	)
 )

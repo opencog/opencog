@@ -137,22 +137,22 @@
         )
 
     (/ (+ (modulator_to_feeling_dimension
-              (tv-mean (cog-tv (ConceptNode "OpenPsi: Activation")))
+              (cog-tv-mean (ConceptNode "OpenPsi: Activation"))
               activation_indicator
           )
 
           (modulator_to_feeling_dimension
-              (tv-mean (cog-tv (ConceptNode "OpenPsi: Resolution")))
+              (cog-tv-mean (ConceptNode "OpenPsi: Resolution"))
               resolution_indicator
           )
 
           (modulator_to_feeling_dimension
-              (tv-mean (cog-tv (ConceptNode "OpenPsi: SecuringThreshold")))
+              (cog-tv-mean (ConceptNode "OpenPsi: SecuringThreshold"))
               securing_threshold_indicator
           )
 
           (modulator_to_feeling_dimension
-              (tv-mean (cog-tv (ConceptNode "OpenPsi: SelectionThreshold")))
+              (cog-tv-mean (ConceptNode "OpenPsi: SelectionThreshold"))
               selection_threshold_indicator
           )
 ; pleasure seem to be a measure of success of achieving a goal.

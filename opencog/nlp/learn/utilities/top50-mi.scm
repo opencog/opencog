@@ -8,7 +8,7 @@
 (define (create-conf-list lst)
   (define (helper ls acc)
     (define wp (car ls))
-    (define confidence (tv-conf (cog-tv wp)))
+    (define confidence (cog-tv-confidence wp))
     (if (null? (cdr ls))
         (reverse acc)
       	(helper (cdr ls) (cons confidence acc))))
@@ -28,7 +28,7 @@
 
 (define (get-wordpair mi wordpairs)
 	(define current-wp (car wordpairs))
-	(define confidence (tv-conf (cog-tv current-wp)))
+	(define confidence (cog-tv-confidence current-wp))
 	(if (equal? confidence mi)
 		current-wp
 		(get-wordpair mi (cdr wordpairs))))
@@ -44,7 +44,7 @@
             (loop right (cdr right))))))
 
 (define (mi-filter mi wordpairs) (filter (lambda (e)
-          (equal? (tv-conf (cog-tv e)) mi))
+          (equal? (cog-tv-confidence e) mi))
         wordpairs))
 
 ;This function will remove duplicate elements from a list.
@@ -66,7 +66,7 @@
 	(cdr (car (cddr (cog-tv->alist (cog-tv wordpair))))))
 
 (define (get-mi wp)
-	(tv-conf (cog-tv wp)))
+	(cog-tv-confidence wp))
 
 (define sorted-wp (sort wordpairs (lambda (x y) (> (get-mi x) (get-mi y)))))
 

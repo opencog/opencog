@@ -171,9 +171,9 @@
     (if (equal? (stv 0 1) (psi-demand? atom))
         (error "Expected argument to be a demand-node, got: " atom))
 
-    (let ((atom-strength (tv-mean (cog-tv atom)))
+    (let ((atom-strength (cog-tv-mean atom))
           (lowest-demand-value (car (list-sort < (delete-duplicates
-              (map (lambda (x) (tv-mean (cog-tv x))) (psi-get-demands))))))
+              (map (lambda (x) (cog-tv-mean x)) (psi-get-demands))))))
          )
          (if (<= atom-strength lowest-demand-value)
             (stv 1 1)
