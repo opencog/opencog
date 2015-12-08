@@ -32,6 +32,7 @@
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Agent.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace std;
@@ -139,6 +140,11 @@ public:
     static void destroySuite(HebbianUpdatingAgentUTest* suite) { delete suite; }
 
     HebbianUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
+        try {
+            config().load("opencog.conf");
+        } catch (RuntimeException &e) {
+            std::cerr << e.getMessage() << std::endl;
+        }
         cogserver.registerAgent(HebbianUpdatingAgent::info().id, &factory);
         agent = cogserver.createAgent<HebbianUpdatingAgent>(true);
         logger().setLevel(Logger::FINE);

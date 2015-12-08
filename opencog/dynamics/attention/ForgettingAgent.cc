@@ -43,14 +43,7 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     // Convert MAXLTI to a string for storing in the configuration
     buf << AttentionValue::MAXLTI;
     defaultForgetThreshold = buf.str();
-    
-    static const std::string defaultConfig[] = {
-        // forget 0.1% of atoms
-        "ECAN_FORGET_PERCENTAGE", "0.001",
-        "ECAN_FORGET_THRESHOLD", defaultForgetThreshold,
-        "", ""
-    };
-    setParameters(defaultConfig);
+    config().set("ECAN_FORGET_THRESHOLD",defaultForgetThreshold);
 
     forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
 

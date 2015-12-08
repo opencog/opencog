@@ -14,7 +14,3 @@ const BlockVector BlockVector::NEG_Y_UNIT(0,-1,0);
 const BlockVector BlockVector::NEG_Z_UNIT(0,0,-1);
 
 const AxisAlignedBox AxisAlignedBox::ZERO((BlockVector&)BlockVector::ZERO,0);
-
-
-
-
