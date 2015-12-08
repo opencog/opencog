@@ -194,8 +194,6 @@ void CogServer::serverLoop()
     gettimeofday(&timer_start, NULL);
     for (running = true; running;)
     {
-        // Because cycleCount may or may not get incremented
-        long currentCycle = this->cycleCount;
         runLoopStep();
 
         gettimeofday(&timer_end, NULL);
@@ -233,11 +231,10 @@ void CogServer::runLoopStep(void)
     }
 
     // Process mind agents
-    if (agentsRunning) {
+    if (0 < agents.size() and agentsRunning) {
         // Run custom loop
-        timer_start = timer_end;
+        gettimeofday(&timer_start, NULL);
         bool runCycle = customLoopRun();
-
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
 
