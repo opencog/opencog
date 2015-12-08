@@ -231,35 +231,19 @@ void CogServer::runLoopStep(void)
     }
 
     // Process mind agents
-    if (0 < agents.size() and agentsRunning) {
-        // Run custom loop
-        gettimeofday(&timer_start, NULL);
-        bool runCycle = customLoopRun();
+    if (0 < agents.size() and agentsRunning and customLoopRun())
+    {
+        processAgents();
+
+        cycleCount++;
+        if (cycleCount < 0) cycleCount = 0;
+
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
-
-        logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
-                   currentCycle,
-                   elapsed_time.tv_usec/1000000.0
-                  );
-
-        timer_start = timer_end;
-        if (runCycle) {
-            processAgents();
-
-            cycleCount++;
-            if (cycleCount < 0) cycleCount = 0;
-
-            gettimeofday(&timer_end, NULL);
-            timersub(&timer_end, &timer_start, &elapsed_time);
-            logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
-                       currentCycle,
-                       elapsed_time.tv_usec/1000000.0, currentCycle
-                      );
-        } else {
-            // Skipping MindAgents, and not incremented cycle counter.
-            logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
-        }
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
+               currentCycle,
+               elapsed_time.tv_usec/1000000.0, currentCycle
+              );
     }
 }
 
