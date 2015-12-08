@@ -171,9 +171,15 @@
 (define truthquery-name (Node "truthquery"))
 (DefineLink truthquery-name truthquery)
 (MemberLink (stv 1 1) truthquery-name (ConceptNode "R2L-en-RuleBase"))
+
 (define interrogative-name (Node "interrogative"))
 (DefineLink interrogative-name interrogative)
 (MemberLink (stv 1 1) interrogative-name (ConceptNode "R2L-en-RuleBase"))
+
+(define interrogative-LG-name (Node "interrogative-LG"))
+(DefineLink interrogative-LG-name interrogative-LG)
+(MemberLink (stv 1 1) interrogative-LG-name (ConceptNode "R2L-en-RuleBase"))
+
 (define imperative-name (Node "imperative"))
 (DefineLink imperative-name imperative)
 (MemberLink (stv 1 1) imperative-name (ConceptNode "R2L-en-RuleBase"))

@@ -20,6 +20,7 @@ INSTALL (FILES
 	howquant-q.scm
 	imperative.scm
 	interrogative.scm
+	interrogative2.scm
 	neg.scm
 	nn.scm
 	passive.scm
