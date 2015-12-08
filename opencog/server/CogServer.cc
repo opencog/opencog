@@ -171,7 +171,6 @@ void CogServer::enableNetworkServer()
     // be added later, though.
     _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
     _networkServer.start();
-
 }
 
 void CogServer::disableNetworkServer()
@@ -186,103 +185,66 @@ SystemActivityTable& CogServer::systemActivityTable()
 
 void CogServer::serverLoop()
 {
-    struct timeval timer_start, timer_end;
-    time_t elapsed_time;
+    struct timeval timer_start, timer_end, elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
 //    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("Starting CogServer loop.");
 
     gettimeofday(&timer_start, NULL);
-    for (running = true; running;) {
-        // Because cycleCount may or may not get incremented
-        long currentCycle = this->cycleCount;
+    for (running = true; running;)
+    {
         runLoopStep();
 
         gettimeofday(&timer_end, NULL);
-        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &elapsed_time);
 
-//        if (!externalTickMode) {
-            // sleep long enough so that the next cycle will only start
-            // after config["SERVER_CYCLE_DURATION"] milliseconds
-            if ((cycle_duration - elapsed_time) > 0)
-                usleep((unsigned int) (cycle_duration - elapsed_time));
-//        }
-
-        if (currentCycle != this->cycleCount) {
-            logger().fine("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
-                            currentCycle,
-                           elapsed_time/1000000.0
-                          );
-        }
-
+        // sleep long enough so that the next cycle will only start
+        // after config["SERVER_CYCLE_DURATION"] milliseconds
+        long delta = cycle_duration;
+        delta -= 1000.0*elapsed_time.tv_sec + elapsed_time.tv_usec/1000.0;
+        if (delta > 0)
+            usleep((unsigned int) delta);
         timer_start = timer_end;
-
     }
 }
 
 void CogServer::runLoopStep(void)
 {
-    struct timeval timer_start, timer_end;
-    time_t elapsed_time;
-    time_t requests_time;
+    struct timeval timer_start, timer_end, elapsed_time, requests_time;
     // this refers to the current cycle, so that logging reports correctly
     // regardless of whether cycle is incremented.
     long currentCycle = this->cycleCount;
 
     // Process requests
-    gettimeofday(&timer_start, NULL);
-
-    if (getRequestQueueSize() != 0) {
+    if (0 < getRequestQueueSize())
+    {
+        gettimeofday(&timer_start, NULL);
         processRequests();
         gettimeofday(&timer_end, NULL);
-        requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                   (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &requests_time);
 
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
                    currentCycle,
-                   requests_time/1000000.0
+                   requests_time.tv_usec/1000000.0
                   );
-    } else {
-        gettimeofday(&timer_end, NULL);
     }
-
-    // Run custom loop
-    timer_start = timer_end;
-    bool runCycle = customLoopRun();
-
-    gettimeofday(&timer_end, NULL);
-    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                   (timer_end.tv_usec - timer_start.tv_usec);
-
-    logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
-                   currentCycle,
-                   elapsed_time/1000000.0
-                  );
 
     // Process mind agents
-    timer_start = timer_end;
-    if (runCycle) {
-        if (agentsRunning) {
-            processAgents();
-        }
-
-        cycleCount++;
-        if (cycleCount < 0) cycleCount = 0;
+    if (customLoopRun() and agentsRunning and 0 < agents.size())
+    {
+        processAgents();
 
         gettimeofday(&timer_end, NULL);
-        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &elapsed_time);
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
-                   currentCycle,
-                   elapsed_time/1000000.0, currentCycle
-                  );
-    } else {
-        // Skipping MindAgents, and not incremented cycle counter.
-        logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
+               currentCycle,
+               elapsed_time.tv_usec/1000000.0, currentCycle
+              );
     }
 
+    cycleCount++;
+    if (cycleCount < 0) cycleCount = 0;
 }
 
 bool CogServer::customLoopRun(void)
@@ -307,7 +269,6 @@ void CogServer::runAgent(AgentPtr agent)
     size_t mem_start, mem_end;
     size_t atoms_start, atoms_end;
     size_t mem_used, atoms_used;
-    time_t time_used;
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
@@ -323,11 +284,7 @@ void CogServer::runAgent(AgentPtr agent)
     mem_end = getMemUsage();
     atoms_end = atomSpace->get_size();
 
-    time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
-                (timer_start.tv_sec*1000000  + timer_start.tv_usec);
-
-    elapsed_time.tv_sec = time_used/1000000;
-    elapsed_time.tv_usec = time_used - elapsed_time.tv_sec*1000000;
+    timersub(&timer_end, &timer_start, &elapsed_time);
 
     if (mem_start > mem_end)
         mem_used = 0;
@@ -339,7 +296,7 @@ void CogServer::runAgent(AgentPtr agent)
         atoms_used = atoms_end - atoms_start;
 
     logger().debug("[CogServer] running mind agent: %s, elapsed time (sec): %f, memory used: %d, atom used: %d [cycle = %d]",
-                   agent->classinfo().id.c_str(), 1.0*time_used/1000000, mem_used, atoms_used, this->cycleCount
+                   agent->classinfo().id.c_str(), elapsed_time.tv_usec/1000000.0, mem_used, atoms_used, this->cycleCount
                   );
 
     _systemActivityTable.logActivity(agent, elapsed_time, mem_used,
