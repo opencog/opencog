@@ -171,7 +171,6 @@ void CogServer::enableNetworkServer()
     // be added later, though.
     _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
     _networkServer.start();
-
 }
 
 void CogServer::disableNetworkServer()
@@ -194,7 +193,8 @@ void CogServer::serverLoop()
     logger().info("Starting CogServer loop.");
 
     gettimeofday(&timer_start, NULL);
-    for (running = true; running;) {
+    for (running = true; running;)
+    {
         // Because cycleCount may or may not get incremented
         long currentCycle = this->cycleCount;
         runLoopStep();
@@ -209,16 +209,7 @@ void CogServer::serverLoop()
             if ((cycle_duration - elapsed_time) > 0)
                 usleep((unsigned int) (cycle_duration - elapsed_time));
 //        }
-
-        if (currentCycle != this->cycleCount) {
-            logger().fine("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
-                            currentCycle,
-                           elapsed_time/1000000.0
-                          );
-        }
-
         timer_start = timer_end;
-
     }
 }
 
@@ -232,9 +223,8 @@ void CogServer::runLoopStep(void)
     long currentCycle = this->cycleCount;
 
     // Process requests
-    gettimeofday(&timer_start, NULL);
-
     if (getRequestQueueSize() != 0) {
+        gettimeofday(&timer_start, NULL);
         processRequests();
         gettimeofday(&timer_end, NULL);
         requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
@@ -244,45 +234,42 @@ void CogServer::runLoopStep(void)
                    currentCycle,
                    requests_time/1000000.0
                   );
-    } else {
-        gettimeofday(&timer_end, NULL);
     }
 
-    // Run custom loop
-    timer_start = timer_end;
-    bool runCycle = customLoopRun();
-
-    gettimeofday(&timer_end, NULL);
-    elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                   (timer_end.tv_usec - timer_start.tv_usec);
-
-    logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
-                   currentCycle,
-                   elapsed_time/1000000.0
-                  );
-
     // Process mind agents
-    timer_start = timer_end;
-    if (runCycle) {
-        if (agentsRunning) {
-            processAgents();
-        }
-
-        cycleCount++;
-        if (cycleCount < 0) cycleCount = 0;
+    if (agentsRunning) {
+        // Run custom loop
+        timer_start = timer_end;
+        bool runCycle = customLoopRun();
 
         gettimeofday(&timer_end, NULL);
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
-        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
-                   currentCycle,
-                   elapsed_time/1000000.0, currentCycle
-                  );
-    } else {
-        // Skipping MindAgents, and not incremented cycle counter.
-        logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
-    }
 
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
+                   currentCycle,
+                   elapsed_time/1000000.0
+                  );
+
+        timer_start = timer_end;
+        if (runCycle) {
+            processAgents();
+
+            cycleCount++;
+            if (cycleCount < 0) cycleCount = 0;
+
+            gettimeofday(&timer_end, NULL);
+            elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
+                           (timer_end.tv_usec - timer_start.tv_usec);
+            logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
+                       currentCycle,
+                       elapsed_time/1000000.0, currentCycle
+                      );
+        } else {
+            // Skipping MindAgents, and not incremented cycle counter.
+            logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
+        }
+    }
 }
 
 bool CogServer::customLoopRun(void)
