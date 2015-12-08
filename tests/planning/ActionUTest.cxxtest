@@ -42,47 +42,48 @@ private:
 public:
     ActionUTest() : _scm(&_as)
     {
-        // Print output to standard
         logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
         logger().setPrintLevelFlag(true);
+        logger().setPrintToStdoutFlag(true);
     }
 
     ~ActionUTest()
     {
-        // erase the log file if no assertions failed
-        //if (!CxxTest::TestTracker::tracker().suiteFailed())
-        //    std::remove(logger().getFilename().c_str());
+        // Erase the log file if no assertions failed
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
     }
 
     void setUp()
     {
-        /* uncommenting seems to have no difference
-        config().set("SCM_PRELOAD",
-                     "opencog/atomspace/core_types.scm");
-        load_scm_files_from_config(_as);
-        */
-
-        cout <<_scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        cout << _scm.eval("(use-modules (opencog) (opencog rule-engine))");
-        cout << _scm.eval("(load \"test-rbs.scm\")");
+        _scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        _scm.eval("(load-from-path \"opencog.scm\")");
+        _scm.eval("(load-from-path \"rule-engine.scm\")");
     }
 
 
     // Why this check? B/c PatternLink api's behavior might change.
     // What is being checked? That the derived rule doesn't have any form of
-    // virtual-terms.
+    // virtual-terms. This is necessary beacause the derived rule is used
+    // during action selection and terms that might have side effect should
+    // not exist in the derived rule, which maybe run multiple times during
+    // the action-selection/planning/simulation.
     void test_constuctor() {
-    /*
-        cout << _scm.eval("(cog-prt-atomspace)");
+        logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+        config().set("SCM_PRELOAD", PROJECT_SOURCE_DIR
+                     "/tests/planning/test-rbs.scm");
+        load_scm_files_from_config(_as);
+
+        /*
         // Simple BindLink with an AndLink or SequentialAndLink
         Handle alias = _as.get_node(NODE, "initial-rule"),
                rbs = _as.get_node(CONCEPT_NODE, "initial-rbs"),
                ml = _as.get_link(MEMBER_LINK, HandleSeq {alias, rbs});
         Rule rule(ml);
         Action a(rule);
-
-        TS_ASSERT_EQUALS(a.get_derived_rule()->get_virtual().size(), 0);
-    */
+        cout << a.get_derived_rule()->get_virtual().size() ;
+        TS_ASSERT_EQUALS(0, a.get_derived_rule()->get_virtual().size());
+        */
     }
 };
