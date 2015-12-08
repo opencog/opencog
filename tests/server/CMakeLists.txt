@@ -13,6 +13,5 @@ LINK_LIBRARIES(#CogServerUTest
 	server
 )
 
-# CogserverUTest hangs, now that time is computed correctly :-(
-# ADD_CXXTEST(CogServerUTest)
+ADD_CXXTEST(CogServerUTest)
 ADD_CXXTEST(AgentUTest)

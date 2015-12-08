@@ -200,12 +200,17 @@ public:
 
     /* test tick-based server */
     void testTickBasedCogServer() {
-        // Make it use external tick so that it does not call sleep inside serverLoop
+        // Make it use external tick so that it does not call
+        // sleep inside serverLoop
+        // Ahem cough cough. The external tick code was
+        // commented out and removed from cogserver maybe 5-10 years
+        // ago.  So this test doesn't do what it claims to do.
         config().set("EXTERNAL_TICK_MODE", "true");
         CustomCogServer cogserver;
         cogserver.setTickBased(true);
-        cogserver.setMaxCount(998);
+        cogserver.setMaxCount(9);
         cogserver.serverLoop();
+        printf("Got %ld ticks\n", cogserver.getCycleCount());
         TS_ASSERT(cogserver.getCycleCount() == 10);
     }
 

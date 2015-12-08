@@ -235,9 +235,6 @@ void CogServer::runLoopStep(void)
     {
         processAgents();
 
-        cycleCount++;
-        if (cycleCount < 0) cycleCount = 0;
-
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
@@ -245,6 +242,9 @@ void CogServer::runLoopStep(void)
                elapsed_time.tv_usec/1000000.0, currentCycle
               );
     }
+
+    cycleCount++;
+    if (cycleCount < 0) cycleCount = 0;
 }
 
 bool CogServer::customLoopRun(void)
