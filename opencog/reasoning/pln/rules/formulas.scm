@@ -21,9 +21,37 @@
 ;;
 ;; Preconditions:
 ;;
-;;   0 <= sAB-max((sA+sB-1)/sA, 0), 0<= min(1, sB/sA)-max((sA+sB-1)/sA, 0)
+;;   1. Check that P(B|A) makes sense
 ;;
-;;   0 <= sBC-max((sB+sC-1)/sB, 0), 0<= min(1, sC/sB)-max((sB+sC-1)/sB, 0)
+;;      1.a P(B|A) is defined
+;;
+;;         0.0 < sA
+;;
+;;      1.b P(B|A) is greater than P(A,B)/P(A) considering the
+;;      smallest possible intersection between A and B
+;;
+;;         max((sA+sB-1)/sA, 0) <= sAB
+;;
+;;      1.c P(B|A) is greater than P(A,B)/P(A) considering the
+;;      largest possible intersection between A and B
+;;
+;;         sAB <= min(1, sB/sA)
+;;
+;;   2. Check that P(C|B) makes sense
+;;
+;;      1.a P(C|B) is defined
+;;
+;;         0.0 < sB
+;;
+;;      1.b P(C|B) is greater than P(B,C)/P(B) considering the
+;;      smallest possible intersection between B and C
+;;
+;;         max((sB+sC-1)/sB, 0) <= sBC
+;;
+;;      1.c P(C|B) is greater than P(B,C)/P(B) considering the
+;;      largest possible intersection between B and C
+;;
+;;         sBC <= min(1, sC/sB)
 ;;
 ;; Calculation:
 ;;
@@ -45,46 +73,32 @@
 ;; -----------------------------------------------------------------------------
 
 ; Consistency Conditions
-(define (deduction-consistency-max sA sB)
+(define (deduction-smallest-intersection sA sB)
   (max (/ (+ sA sB -1) sA) 0))
 
-(define (deduction-consistency-min sA sB)
+(define (deduction-largest-intersection sA sB)
   (min (/ sB sA) 1))
 
-(define (deduction-consistency-1 sA sB sAB)
-  (- sAB (deduction-consistency-max sA sB)))
-
-(define (deduction-consistency-2 sA sB sAB)
-  (- (deduction-consistency-min sA sB) (deduction-consistency-max sA sB)))
+(define (deduction-consistency sA sB sAB)
+  (and (< 0 sA)
+       (<= (deduction-smallest-intersection sA sB) sAB)
+       (<= sAB (deduction-largest-intersection sA sB))))
 
 ; Main Formula
 
 (define (simple-deduction-strength-formula sA sB sC sAB sBC)
-  (let* ((cons-1-AB (deduction-consistency-1 sA sB sAB))
-         (cons-2-AB (deduction-consistency-2 sA sB sAB))
-         (cons-1-BC (deduction-consistency-1 sB sC sBC))
-         (cons-2-BC (deduction-consistency-2 sB sC sBC)))
-    (if
-		(and
-           (>= cons-1-AB 0)
-           (>= cons-2-AB 0)
-           (>= cons-1-BC 0)
-           (>= cons-2-BC 0))
-        ;; Preconditions are met
-        (if (< 0.99 sB)
-            ;; sB tends to 1
-            sC
-            ;; otherwise
-            (+
-               (* sAB sBC)
-               (/
-				  (*
-                     (- 1 sAB)
-                     (- sC
-						(* sB sBC)))
-                  (- 1 sB))))
-        ;; Preconditions are not met
-		0)))
+  (if
+     (and
+        (deduction-consistency sA sB sAB)
+        (deduction-consistency sB sC sBC))
+     ;; Preconditions are met
+     (if (< 0.99 sB)
+        ;; sB tends to 1
+        sC
+        ;; otherwise
+        (+ (* sAB sBC) (/ (* (- 1 sAB) (- sC (* sB sBC))) (- 1 sB))))
+     ;; Preconditions are not met
+     0))
 
 ;; =============================================================================
 ;; Basic find and replace formula
