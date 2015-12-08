@@ -185,8 +185,7 @@ SystemActivityTable& CogServer::systemActivityTable()
 
 void CogServer::serverLoop()
 {
-    struct timeval timer_start, timer_end;
-    time_t elapsed_time;
+    struct timeval timer_start, timer_end, elapsed_time;
     time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
 //    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
@@ -200,39 +199,36 @@ void CogServer::serverLoop()
         runLoopStep();
 
         gettimeofday(&timer_end, NULL);
-        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &elapsed_time);
 
-//        if (!externalTickMode) {
-            // sleep long enough so that the next cycle will only start
-            // after config["SERVER_CYCLE_DURATION"] milliseconds
-            if ((cycle_duration - elapsed_time) > 0)
-                usleep((unsigned int) (cycle_duration - elapsed_time));
-//        }
+        // sleep long enough so that the next cycle will only start
+        // after config["SERVER_CYCLE_DURATION"] milliseconds
+        long delta = cycle_duration;
+        delta -= 1000.0*elapsed_time.tv_sec + elapsed_time.tv_usec/1000.0;
+        if (delta > 0)
+            usleep((unsigned int) delta);
         timer_start = timer_end;
     }
 }
 
 void CogServer::runLoopStep(void)
 {
-    struct timeval timer_start, timer_end;
-    time_t elapsed_time;
-    time_t requests_time;
+    struct timeval timer_start, timer_end, elapsed_time, requests_time;
     // this refers to the current cycle, so that logging reports correctly
     // regardless of whether cycle is incremented.
     long currentCycle = this->cycleCount;
 
     // Process requests
-    if (getRequestQueueSize() != 0) {
+    if (0 < getRequestQueueSize())
+    {
         gettimeofday(&timer_start, NULL);
         processRequests();
         gettimeofday(&timer_end, NULL);
-        requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                   (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &requests_time);
 
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
                    currentCycle,
-                   requests_time/1000000.0
+                   requests_time.tv_usec/1000000.0
                   );
     }
 
@@ -243,12 +239,11 @@ void CogServer::runLoopStep(void)
         bool runCycle = customLoopRun();
 
         gettimeofday(&timer_end, NULL);
-        elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                       (timer_end.tv_usec - timer_start.tv_usec);
+        timersub(&timer_end, &timer_start, &elapsed_time);
 
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
                    currentCycle,
-                   elapsed_time/1000000.0
+                   elapsed_time.tv_usec/1000000.0
                   );
 
         timer_start = timer_end;
@@ -259,11 +254,10 @@ void CogServer::runLoopStep(void)
             if (cycleCount < 0) cycleCount = 0;
 
             gettimeofday(&timer_end, NULL);
-            elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
-                           (timer_end.tv_usec - timer_start.tv_usec);
+            timersub(&timer_end, &timer_start, &elapsed_time);
             logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
                        currentCycle,
-                       elapsed_time/1000000.0, currentCycle
+                       elapsed_time.tv_usec/1000000.0, currentCycle
                       );
         } else {
             // Skipping MindAgents, and not incremented cycle counter.
