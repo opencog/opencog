@@ -231,7 +231,7 @@ void CogServer::runLoopStep(void)
     }
 
     // Process mind agents
-    if (0 < agents.size() and agentsRunning and customLoopRun())
+    if (customLoopRun() and agentsRunning and 0 < agents.size())
     {
         processAgents();
 
