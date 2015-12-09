@@ -139,10 +139,6 @@
 
 (StateLink (SchemaNode "time_to_wake_up") (NumberNode 25))
 
-(StateLink (SchemaNode "glance_probability") (NumberNode 0.7))
-(StateLink (SchemaNode "sleep_probability") (NumberNode 0.1))
-(StateLink (SchemaNode "wake_up_probability") (NumberNode 0.5))
-
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
@@ -388,38 +384,6 @@
 	(DefinedPredicateNode "Pick random positive gesture")
 	(PutLink (DefinedPredicateNode "Show random gesture")
 		(ConceptNode "positive")))
-
-; ------------------------------------------------------
-; TODO --
-;
-; grep for NumberNode below, and make these (more easily) configurable.
-; ------------------------------------------------------
-
-;; line 599 -- kwargs["event"] == "group_interaction"
-(DefineLink
-	(DefinedPredicateNode "dice-roll: group interaction")
-	(GreaterThanLink
-		(GetLink (StateLink (SchemaNode "glance_probability")
-				(VariableNode "$x")))
-		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
-
-;; line 609 -- kwargs["event"] == "go_to_sleep"
-;; XXX incomplete, should depend on "bored-since" time
-;; if bored for 5 minutes, go to sleep.
-(DefineLink
-	(DefinedPredicateNode "dice-roll: go to sleep")
-	(GreaterThanLink
-		(GetLink (StateLink (SchemaNode "sleep_probability")
-				(VariableNode "$x")))
-		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
-
-;; line 619 -- kwargs["event"] == "wake_up"
-(DefineLink
-	(DefinedPredicateNode "dice-roll: wake up")
-	(GreaterThanLink
-		(GetLink (StateLink (SchemaNode "wake_up_probability")
-				(VariableNode "$x")))
-		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
 
 ; ------------------------------------------------------
 ; Basic utilities for working with newly-visible faces.
@@ -1003,6 +967,8 @@
 				(SequentialOrLink  ; line 513
 					; ##### Go To Sleep #####
 					(SequentialAndLink  ; line 515
+;; XXX incomplete, should depend on "bored-since" time
+;; if bored for 5 minutes, go to sleep.
 						(DefinedPredicateNode "dice-roll: go to sleep")
 						(DefinedPredicateNode "Go to sleep"))
 					; ##### Search For Attention #####

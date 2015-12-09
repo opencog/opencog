@@ -104,8 +104,11 @@
 ; --------------------------------------------------------
 ; Dice-roll.  Perform some action some fraction of the time.
 
-(dice-roll "glance new face" 0.5)
-(dice-roll "glance lost face" 0.5)
+(dice-roll "glance new face"   0.5)
+(dice-roll "glance lost face"  0.5)
+(dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
+(dice-roll "go to sleep"       0.1) ; line 699 -- sleep_probability
+(dice-roll "wake up"           0.5) ; line 619 -- wake_up_probability
 
 ; --------------------------------------------------------
 ; Misc other config parameters
