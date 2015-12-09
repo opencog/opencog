@@ -136,5 +136,3 @@ TODO
 * Search for and address the XXX in file
 
 * Finish implementing the room-is-empty mode.
-
-* Fine-tune the random-choice stuff.

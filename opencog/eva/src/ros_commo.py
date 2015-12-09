@@ -88,6 +88,8 @@ class EvaControl():
 	# ----------------------------------------------------------
 	# Wrapper for emotional expressions
 	def expression(self, name, intensity, duration):
+		if 'noop' == name :
+			return
 		# Create the message
 		exp = EmotionState()
 		exp.name = name
@@ -99,6 +101,8 @@ class EvaControl():
 
 	# Wrapper for gestures
 	def gesture(self, name, intensity, repeat, speed):
+		if 'noop' == name :
+			return
 		# Create the message
 		ges = SetGesture()
 		ges.name = name

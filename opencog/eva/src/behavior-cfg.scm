@@ -96,8 +96,10 @@
 ; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
+(emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
 
 (emo-gest-spec "bored"   "yawn-1"  0.01 0.6 0.9 1 1 1 1)
+(emo-gest-spec "bored"   "noop"    0.99 0   0   1 1 1 1)
 
 (emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
@@ -112,14 +114,18 @@
 
 ; New beavior.cfg line 149
 (emo-gest-spec "chat-positive-nod" "nod-6"  0.5 0.8 0.9 1 1 0.2 0.4)
+(emo-gest-spec "chat-positive-nod" "noop"   0.5 0   0   1 1 0   0)
 
 (emo-gest-spec "chat-negative-shake" "shake-3"  0.9 0.9 0.9 1 1 0.4 0.7)
+(emo-gest-spec "chat-negative-shake" "noop"     0.1 0   0   1 1 0   0  )
 
 ; line 160 plus lines 1351ff of new general_behavior.py
 ; aka stuff for "chatbot_positive_reply_think"
 (emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
+(emo-gest-spec "chat-pos-think" "noop"           0.2 0   0   1 1 0   0  )
 
 (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
+(emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
 ; --------------------------------------------------------
 ; Misc other config parameters
