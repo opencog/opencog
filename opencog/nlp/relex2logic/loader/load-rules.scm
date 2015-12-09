@@ -57,7 +57,6 @@
 (load "../rules/declarative.scm")
 (load "../rules/truthquery.scm")
 (load "../rules/interrogative.scm")
-(load "../rules/interrogative2.scm")
 (load "../rules/imperative.scm")
 (load "../rules/det.scm")
 (load "../rules/nn.scm")
