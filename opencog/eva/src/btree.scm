@@ -129,9 +129,6 @@
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
 
-; current_emotion_duration set to default_emotion_duration
-(StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
-
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
@@ -205,7 +202,7 @@
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
-	"current expression duration" "current expression duration")
+	"default_emotion_duration" "default_emotion_duration")
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.

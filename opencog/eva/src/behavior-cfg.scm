@@ -121,7 +121,11 @@
 (State (Schema "time_to_make_gesture_min") (Number 6))
 (State (Schema "time_to_make_gesture_max") (Number 10))
 
+; Wake up after 25 seconds ...
 (State (Schema "time_to_wake_up") (Number 25))
+
+; line 4 default_emotion_duration is 1 second but that's nuts.
+(State (Schema "default_emotion_duration") (Number 6.0))
 
 ; --------------------------------------------------------
 ; Misc other config parameters
