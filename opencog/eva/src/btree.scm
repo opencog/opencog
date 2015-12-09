@@ -139,8 +139,42 @@
 (define neutral-face (ConceptNode "0"))
 
 ; current_emotion_duration set to default_emotion_duration
-; (StateLink (SchemaNode "current expression duration") (TimeNode 1.0)) ; in seconds
 (StateLink (SchemaNode "current expression duration") (NumberNode 6.0)) ; in seconds
+
+; --------------------------------------------------------
+; Time-stamp-related stuff.
+
+;; Define setters and getters for timestamps. Perhaps this should
+;; be replaced by the timeserver??
+;; line 757, record_start_time
+
+(define (timestamp-template name)
+
+	; The name of state node holding the timestamp.
+	(define ts-name (string-append "start-" name "-timestamp")
+
+	; The state node actually holding the timestamp.
+	(State (Schema ts-name) (Number 0))
+
+	; timestamp setter
+	(DefineLink
+		(DefinedSchemaNode (string-append "set " name " timestamp"))
+		(Put (State (Schema ts-name) (Variable "$x")) (Time)))
+
+	; timestamp getter
+	(DefineLink
+		(DefinedSchemaNode (string-append "get " name " timestamp"))
+		(Get (State (Schema ts-name) (Variable "$x"))))
+)
+
+; "interaction" -- record the start time of an interaction.
+(timestamp-template "interaction")
+; "expression" -- time when a new expression started being shown.
+(timestamp-template "expression")
+; "bored" -- when Eva last got bored.
+(timestamp-template "bored")
+(timestamp-template "sleep")
+(timestamp-template "gesture")
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -307,10 +341,7 @@
 						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
 			))
 			;; Log the time.
-			(TrueLink (PutLink
-					(StateLink (SchemaNode "gesture-timestamp")
-						(VariableNode "$x"))
-					(TimeLink)))
+			(True (DefinedSchema "set gesture timestamp"))
 		)
 	))
 
@@ -614,55 +645,22 @@
 ; ------------------------------------------------------
 ; Time-stamp-related stuff.
 
-;; Define setters and getters for timestamps. Perhaps this should
-;; be replaced by the timeserver??
-;; line 757, record_start_time
-
-(define (timestamp-template name)
-	(define ts-name (string-append "start-" name "-timestamp")
-
-	(State (Schema ts-name) (Number 0))
-
-	(DefineLink
-		(DefinedSchemaNode (string-append "set " name " timestamp"))
-		(Put (State (Schema ts-name) (Variable "$x")) (Time)))
-
-	(DefineLink
-		(DefinedSchemaNode (string-append "get " name " timestamp"))
-		(Get (State (Schema ts-name) (Variable "$x"))))
-)
-
-; "interaction" -- record the start time of an interaction.
-(timestamp-template "interaction")
-; "expression" -- time when a new expression started being shown.
-(timestamp-template "expression")
-; "bored" -- when Eva last got bored.
-(timestamp-template "bored")
-(timestamp-template "sleep")
-(timestamp-template "gesture")
-
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
 (DefineLink
 	(DefinedPredicateNode "Time to change expression")
-	(GreaterThanLink
-		(MinusLink
-			(TimeLink)
-			(DefinedSchemaNode "get expression timestamp"))
-		(GetLink (StateLink (SchemaNode "current expression duration")
-			(VariableNode "$x"))) ; in seconds
+	(GreaterThan
+		(Minus (Time) (DefinedSchema "get expression timestamp"))
+		(Get (State (Schema "current expression duration")
+			(Variable "$x"))) ; in seconds
 	))
 
 (DefineLink
 	(DefinedPredicateNode "Time to make gesture")
 	(GreaterThanLink
 		; Minus lik computes number of seconds since interaction start.
-		(MinusLink
-			(TimeLink)
-			(GetLink
-				(StateLink (SchemaNode "gesture-timestamp")
-					(VariableNode "$x"))))
+		(Minus (Time) (DefinedSchema "get gesture timestamp")
 		; Random number in the configured range.
 		(RandomNumberLink
 			(GetLink (StateLink (SchemaNode "time_to_make_gesture_min")
@@ -678,9 +676,7 @@
 	(DefinedPredicateNode "Time to change interaction")
 	(GreaterThanLink
 		; Minus lik computes number of seconds since interaction start.
-		(MinusLink
-			(TimeLink)
-			(DefinedSchemaNode "get interaction timestamp"))
+		(Minus (Time) (DefinedSchema "get interaction timestamp"))
 		; Random number in the configured range.
 		(RandomNumberLink
 			(GetLink (StateLink (SchemaNode "time_to_change_face_target_min")
@@ -695,9 +691,7 @@
 (DefineLink
 	(DefinedPredicateNode "Time to wake up")
 	(GreaterThanLink
-		(MinusLink
-			(TimeLink)
-			(DefinedSchemaNode "get sleep timestamp"))
+		(Minus (Time) (DefinedSchema "get sleep timestamp"))
 		(GetLink (StateLink (SchemaNode "time_to_wake_up")
 			(VariableNode "$x"))) ; in seconds
 	))
