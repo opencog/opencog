@@ -796,6 +796,9 @@
 
 ;; Respond to a new face becoming visible.
 ;; line 389 -- Selector
+;
+;; XXX TODO -- need to also do line 590, if interacting for a while
+;; this alters probability of glance...
 (DefineLink
 	(DefinedPredicateNode "Respond to new arrival")
 	(SequentialOrLink
