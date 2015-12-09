@@ -36,7 +36,7 @@
                 (WordNode "###LEFT-WALL###")
             )
 
-            ;; If left wal is linked with any of Wq, Ws, Wj or Ww
+            ;; If left wall is linked with any of Wq, Ws, Wj or Ww
             ;; or Qd, Qe, Qw then its interrogative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wq")
@@ -75,7 +75,7 @@
                     (VariableNode "$wh-word-inst")))
             )
         )
-        ; Mark this as a question
+        ; Mark this as a question.
         (InheritanceLink
             (VariableNode "$interp")
             (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
