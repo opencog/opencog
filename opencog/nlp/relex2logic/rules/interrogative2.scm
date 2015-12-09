@@ -40,39 +40,39 @@
             ;; or Qd, Qe, Qw then its interrogative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wq")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Ws")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Wj")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Ww")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Qd")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Qe")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Qw")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$wh-word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$wh-word-inst")))
             )
         )
         ; Mark this as a question.

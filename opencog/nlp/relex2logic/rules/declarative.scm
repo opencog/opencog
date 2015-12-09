@@ -40,25 +40,25 @@
             ;; then its interrogative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wd")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Wt")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Wa")
-                (ListLink
-                    (VariableNode "$wall-inst")
-                    (VariableNode "$word-inst")))
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
             )
         )
 
         ; Mark this as declarative.
         (InheritanceLink
-            (VariableNode "$interp-node")
+            (VariableNode "$interp")
             (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
     )
 )
