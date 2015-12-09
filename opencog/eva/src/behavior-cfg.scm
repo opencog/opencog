@@ -111,6 +111,19 @@
 (dice-roll "wake up"           0.5) ; line 619 -- wake_up_probability
 
 ; --------------------------------------------------------
+; Time-related conf paramters
+
+; All numbers are in seconds.
+; line 115 of behavior.cfg - time_to_change_face_target_min
+(State (Schema "time_to_change_face_target_min") (Number 8))
+(State (Schema "time_to_change_face_target_max") (Number 10))
+
+(State (Schema "time_to_make_gesture_min") (Number 6))
+(State (Schema "time_to_make_gesture_max") (Number 10))
+
+(State (Schema "time_to_wake_up") (Number 25))
+
+; --------------------------------------------------------
 ; Misc other config parameters
 
 ; blink_randomly_interval_mean and blink_randomly_interval_var

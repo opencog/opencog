@@ -125,15 +125,6 @@
 		(Set chat-negative)
 		(Get (State chat-affect (Variable "$x")))))
 
-; line 115 of behavior.cfg - time_to_change_face_target_min
-(StateLink (SchemaNode "time_to_change_face_target_min") (NumberNode 8))
-(StateLink (SchemaNode "time_to_change_face_target_max") (NumberNode 10))
-
-(StateLink (SchemaNode "time_to_make_gesture_min") (NumberNode 6))
-(StateLink (SchemaNode "time_to_make_gesture_max") (NumberNode 10))
-
-(StateLink (SchemaNode "time_to_wake_up") (NumberNode 25))
-
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
