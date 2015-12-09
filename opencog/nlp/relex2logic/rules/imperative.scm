@@ -1,36 +1,51 @@
+;
+; Determine imperatives, based on LG link types.
+;
 (define imperative
     (BindLink
         (VariableList
             (TypedVariableLink
-                (VariableNode "$word-inst-node")
-                (TypeNode "WordInstanceNode")
+                (VariableNode "$interp")
+                (TypeNode "InterpretationNode")
             )
             (TypedVariableLink
-                (VariableNode "$parse-node")
+                (VariableNode "$parse")
                 (TypeNode "ParseNode")
             )
             (TypedVariableLink
-                (VariableNode "$interp-node")
-                (TypeNode "InterpretationNode")
+                (VariableNode "$wall-inst")
+                (TypeNode "WordInstanceNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$word-inst")
+                (TypeNode "WordInstanceNode")
             )
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$word-inst-node")
-                (VariableNode "$parse-node")
-            )
-            (InheritanceLink
-                (VariableNode "$word-inst-node")
-                (DefinedLinguisticConceptNode "imperative")
-            )
             (InterpretationLink
-                (VariableNode "$interp-node")
-                (VariableNode "$parse-node")
+                (VariableNode "$interp")
+                (VariableNode "$parse")
             )
+            (WordInstanceLink
+                (VariableNode "$wall-inst")
+                (VariableNode "$parse")
+            )
+
+            (ReferenceLink
+                (VariableNode "$wall-inst")
+                (WordNode "###LEFT-WALL###")
+            )
+
+            ;; If left wall is linked with Wi,
+            ;; then its imperative.
+            (EvaluationLink (LinkGrammarRelationshipNode "Wi")
+                (ListLink
+                    (VariableNode "$wall-inst")
+                    (VariableNode "$word-inst")))
         )
         ; Mark this as an imperative.
         (InheritanceLink
-            (VariableNode "$interp-node")
+            (VariableNode "$interp")
             (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
     )
 )
