@@ -395,20 +395,6 @@
 ; grep for NumberNode below, and make these (more easily) configurable.
 ; ------------------------------------------------------
 
-; line 588 -- dice_roll("glance_new_face")
-; XXX incomplete, needs refinement
-(DefineLink
-	(DefinedPredicateNode "dice-roll: glance new face")
-	(GreaterThanLink
-		(NumberNode "0.5")
-		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
-
-(DefineLink
-	(DefinedPredicateNode "dice-roll: glance lost face")
-	(GreaterThanLink
-		(NumberNode "0.5")
-		(RandomNumberLink (NumberNode 0) (NumberNode 1))))
-
 ;; line 599 -- kwargs["event"] == "group_interaction"
 (DefineLink
 	(DefinedPredicateNode "dice-roll: group interaction")

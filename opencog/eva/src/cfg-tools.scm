@@ -63,3 +63,15 @@
 	(emo-gest-map emo-state gesture "speed-max" spd-max))
 
 ; --------------------------------------------------------
+;
+; Dice-roll conditionals. Return true or false, some fraction of the
+; time.
+; line 588 -- dice_roll("glance_new_face") etc.
+
+(define (dice-roll action probability)
+	(DefineLink
+		(DefinedPredicateNode action)
+		(GreaterThan
+			(Number probability) (RandomNumber (Number 0) (Number 1)))))
+
+; --------------------------------------------------------
