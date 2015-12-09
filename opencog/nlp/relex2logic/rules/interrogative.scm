@@ -37,7 +37,7 @@
             )
 
             ;; If left wall is linked with any of Wq, Ws, Wj or Ww
-            ;; or Qd, Qe, Qw then its interrogative.
+            ;; or Qe, Qw then its interrogative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wq")
                     (ListLink
@@ -55,11 +55,6 @@
                         (VariableNode "$wh-word-inst")))
 
                 (EvaluationLink (LinkGrammarRelationshipNode "Ww")
-                    (ListLink
-                        (VariableNode "$wall-inst")
-                        (VariableNode "$wh-word-inst")))
-
-                (EvaluationLink (LinkGrammarRelationshipNode "Qd")
                     (ListLink
                         (VariableNode "$wall-inst")
                         (VariableNode "$wh-word-inst")))
