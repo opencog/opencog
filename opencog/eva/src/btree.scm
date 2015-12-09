@@ -166,30 +166,45 @@
 ;
 ; This will pick out one of the "positive" emotions (defined above).
 ;
-; XXX TODO: currently, this selects with uniform weighting; instead,
-; the selection should be based on the "probability" parameter.
 (DefineLink
-	(DefinedSchemaNode "Pick random expression")
+	(DefinedSchema "Pick random expression")
 	(LambdaLink
-		(VariableNode "$emo")
-		(RandomChoiceLink
+		(Variable "$emo")
+		(RandomChoice
 			(GetLink
-				(VariableNode "$expr")
-				(EvaluationLink
-					(PredicateNode "Emotion-expression")
-					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
+				; Return a bunch of probability-expr pairs.
+				(VariableList (Variable "$prob") (Variable "$expr"))
+				(AndLink
+					(Evaluation
+						(Predicate "Emotion-expression")
+						(ListLink (Variable "$emo") (Variable "$expr")))
+					(State
+						(ListLink
+							(Variable "$emo")
+							(Variable "$expr")
+							(Schema "probability"))
+						(Variable "$prob"))
+				)))))
 
 ; As above, but for gestures.
 (DefineLink
-	(DefinedSchemaNode "Pick random gesture")
+	(DefinedSchema "Pick random gesture")
 	(LambdaLink
-		(VariableNode "$emo")
-		(RandomChoiceLink
+		(Variable "$emo")
+		(RandomChoice
 			(GetLink
-				(VariableNode "$expr")
-				(EvaluationLink
-					(PredicateNode "Emotion-gesture")
-					(ListLink (VariableNode "$emo") (VariableNode "$expr")))))))
+				(VariableList (Variable "$prob") (Variable "$expr"))
+				(AndLink
+					(Evaluation
+						(Predicate "Emotion-gesture")
+						(ListLink (Variable "$emo") (Variable "$expr")))
+					(State
+						(ListLink
+							(Variable "$emo")
+							(Variable "$expr")
+							(Schema "gest probability"))
+						(Variable "$prob"))
+				)))))
 
 ; Pick a random numeric value, lying in the range between min and max.
 ; The range min and max depends on an emotion-expression pair. For an
