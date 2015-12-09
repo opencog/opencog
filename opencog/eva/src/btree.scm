@@ -139,7 +139,7 @@
 (define (timestamp-template name)
 
 	; The name of state node holding the timestamp.
-	(define ts-name (string-append "start-" name "-timestamp")
+	(define ts-name (string-append "start-" name "-timestamp"))
 
 	; The state node actually holding the timestamp.
 	(State (Schema ts-name) (Number 0))
