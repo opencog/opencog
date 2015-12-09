@@ -165,9 +165,11 @@
 (define why-q-name (Node "why-q"))
 (DefineLink why-q-name why-q)
 (MemberLink (stv 1 1) why-q-name (ConceptNode "R2L-en-RuleBase"))
+
 (define declarative-name (Node "declarative"))
 (DefineLink declarative-name declarative)
 (MemberLink (stv 1 1) declarative-name (ConceptNode "R2L-en-RuleBase"))
+
 (define truthquery-name (Node "truthquery"))
 (DefineLink truthquery-name truthquery)
 (MemberLink (stv 1 1) truthquery-name (ConceptNode "R2L-en-RuleBase"))
@@ -176,13 +178,10 @@
 (DefineLink interrogative-name interrogative)
 (MemberLink (stv 1 1) interrogative-name (ConceptNode "R2L-en-RuleBase"))
 
-(define interrogative-LG-name (Node "interrogative-LG"))
-(DefineLink interrogative-LG-name interrogative-LG)
-(MemberLink (stv 1 1) interrogative-LG-name (ConceptNode "R2L-en-RuleBase"))
-
 (define imperative-name (Node "imperative"))
 (DefineLink imperative-name imperative)
 (MemberLink (stv 1 1) imperative-name (ConceptNode "R2L-en-RuleBase"))
+
 (define det-name (Node "det"))
 (DefineLink det-name det)
 (MemberLink (stv 1 1) det-name (ConceptNode "R2L-en-RuleBase"))

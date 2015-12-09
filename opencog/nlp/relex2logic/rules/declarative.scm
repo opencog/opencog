@@ -1,76 +1,64 @@
+;
+; Determine declaratives, based on LG link types.
+;
 (define declarative
     (BindLink
         (VariableList
-;            (TypedVariableLink
-;                (VariableNode "$word-inst-node")
-;                (TypeNode "WordInstanceNode")
-;            )
             (TypedVariableLink
-                (VariableNode "$parse-node")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$interp-node")
+                (VariableNode "$interp")
                 (TypeNode "InterpretationNode")
             )
             (TypedVariableLink
-                (VariableNode "$word-inst-node-1")
+                (VariableNode "$parse")
+                (TypeNode "ParseNode")
+            )
+            (TypedVariableLink
+                (VariableNode "$wall-inst")
                 (TypeNode "WordInstanceNode")
             )
             (TypedVariableLink
-                (VariableNode "$word-inst-node-2")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$word-inst-node-3")
+                (VariableNode "$word-inst")
                 (TypeNode "WordInstanceNode")
             )
         )
         (AndLink
-;
-; Looking for a period at the end of a sentence is far too
-; strong a requirement -- most people on IRC chat will not
-; be punctuating correctly, and certainly, speech-to-text will
-; not be generating correctly-punctuated sentences.
-;
-;            (LemmaLink
-;                (VariableNode "$word-inst-node")
-;                (WordNode ".")
-;            )
-;            (PartOfSpeechLink
-;                (VariableNode "$word-inst-node")
-;                (DefinedLinguisticConceptNode "punctuation")
-;            )
-;            (WordInstanceLink
-;                (VariableNode "$word-inst-node")
-;                (VariableNode "$parse-node")
-;            )
             (InterpretationLink
-                (VariableNode "$interp-node")
-                (VariableNode "$parse-node")
+                (VariableNode "$interp")
+                (VariableNode "$parse")
             )
-            (AbsentLink
-                (InheritanceLink
-                    (VariableNode "$word-inst-node-1")
-                    (DefinedLinguisticConceptNode "imperative")
-                )
+            (WordInstanceLink
+                (VariableNode "$wall-inst")
+                (VariableNode "$parse")
             )
-            (AbsentLink
-                (InheritanceLink
-                    (VariableNode "$word-inst-node-2")
-                    (DefinedLinguisticConceptNode "interrogative")
-                )
+
+            (ReferenceLink
+                (VariableNode "$wall-inst")
+                (WordNode "###LEFT-WALL###")
             )
-            (AbsentLink
-                (InheritanceLink
-                    (VariableNode "$word-inst-node-3")
-                    (DefinedLinguisticConceptNode "truth-query")
-                )
+
+            ;; If left wall is linked with any of Wd, Wt or Wa,
+            ;; then its declarative.
+            (ChoiceLink
+                (EvaluationLink (LinkGrammarRelationshipNode "Wd")
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
+
+                (EvaluationLink (LinkGrammarRelationshipNode "Wt")
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
+
+                (EvaluationLink (LinkGrammarRelationshipNode "Wa")
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
             )
         )
-        ; mark this as declarative
+
+        ; Mark this as declarative.
         (InheritanceLink
-            (VariableNode "$interp-node")
+            (VariableNode "$interp")
             (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
     )
 )
