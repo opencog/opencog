@@ -227,7 +227,7 @@ class EvaControl():
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
 
-		# XXX currently, this by-passes the OC behaviro tree.
+		# XXX currently, this by-passes the OC behavior tree.
 		# Does that matter?  Currently, probably not.
 		rospy.loginfo(blink.data + ' says blink')
 		blink_probabilities = {

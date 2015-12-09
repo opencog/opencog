@@ -2,42 +2,24 @@
 ; behavior-cfg.scm
 ;
 ; Behavior Tree configuration parameters.
-; Under construction.
 ;
 ; This is (meant to be) a verbatim translation of the contents of the
-; old `behavior.cfg` file.  However, a more elegant design should now be
-; possible, so this is ... mae not he best way to do things.
+; old `behavior.cfg` file.
 ;
-
-; default_emotion_duration aka current_emotion_duration
-; (StateLink (SchemaNode "current_emotion_duration") (TimeNode 1.0)) ; in seconds
-
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
 ; expressions to display for that emotional state, as well as the
-; intensities and durations.  `emo-set` adds an expression to an
-; emotional state, while `emo-map` is used to set parameters.
-(define (emo-expr-set emo-state expression)
-	(EvaluationLink
-		(PredicateNode "Emotion-expression")
-		(ListLink (ConceptNode emo-state) (ConceptNode expression))))
+; intensities and durations.
 
-(define (emo-expr-map emo-state expression param value)
-	(StateLink (ListLink
-		(ConceptNode emo-state) (ConceptNode expression) (SchemaNode param))
-		(NumberNode value)))
-
-; Shorthand utility, takes probability, intensity min and max, duration min
-; and max.
-(define (emo-expr-spec emo-state expression
-		prob int-min int-max dur-min dur-max)
-	(emo-expr-set emo-state expression)
-	(emo-expr-map emo-state expression "probability" prob)
-	(emo-expr-map emo-state expression "intensity-min" int-min)
-	(emo-expr-map emo-state expression "intensity-max" int-max)
-	(emo-expr-map emo-state expression "duration-min" dur-min)
-	(emo-expr-map emo-state expression "duration-max" dur-max))
+; Columns (in order) are:
+; * expression (emotion) class
+; * blender emotion animation name
+; * probability of selecting this animation from this class
+; * min intensity of expression
+; * max intensity of expression
+; * min duration of expression
+; * max duration of expression
 
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
@@ -68,30 +50,22 @@
 ; Emotional-state to gesture mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
 ; gestures to display for that emotional state, as well as the
-; intensities and durations.  `ges-set` adds a gesture to an
-; emotional state, while `ges-map` is used to set parameters.
-(define (emo-gest-set emo-state gesture)
-	(EvaluationLink
-		(PredicateNode "Emotion-gesture")
-		(ListLink (ConceptNode emo-state) (ConceptNode gesture))))
-
-(define (emo-gest-map emo-state gesture param value)
-	(StateLink (ListLink
-		(ConceptNode emo-state) (ConceptNode gesture) (SchemaNode param))
-		(NumberNode value)))
-
-; Shorthand utility, takes probability, intensity min and max, duration min
-; and max, repeat min and max.
-(define (emo-gest-spec emo-state gesture prob
-		int-min int-max rep-min rep-max spd-min spd-max)
-	(emo-gest-set emo-state gesture)
-	(emo-gest-map emo-state gesture "gest probability" prob)
-	(emo-gest-map emo-state gesture "gest intensity-min" int-min)
-	(emo-gest-map emo-state gesture "gest intensity-max" int-max)
-	(emo-gest-map emo-state gesture "repeat-min" rep-min)
-	(emo-gest-map emo-state gesture "repeat-max" rep-max)
-	(emo-gest-map emo-state gesture "speed-min" spd-min)
-	(emo-gest-map emo-state gesture "speed-max" spd-max))
+; intensities and durations.
+;
+; Columns (in order) are:
+; * expression (emotion) class
+; * blender gesture animation name
+; * probability of selecting this animation from this class
+; * min intensity of gesture
+; * max intensity of gesture
+; * min number of repetitions of this gesture
+; * max number of repetitions of this gesture
+; * min speed of gesture
+; * max speed of gesture
+;
+; The "noop" gesture is a special no-operation gesture; if selected,
+; then nothing is done. This allows gestures to be generated only some
+; of the time; the "noop" is what is "done" the rest of the time.
 
 ; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
