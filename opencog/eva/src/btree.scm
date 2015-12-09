@@ -71,11 +71,6 @@
 (define no-interaction (ConceptNode "none"))
 
 (StateLink interaction-state no-interaction)
-(StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
-(StateLink (SchemaNode "start-expression-timestamp") (NumberNode 0))
-(StateLink (SchemaNode "gesture-timestamp") (NumberNode 0))
-(StateLink (SchemaNode "start-sleep-timestamp") (NumberNode 0))
-(StateLink (SchemaNode "start-boredom-timestamp") (NumberNode 0))
 
 ; The face to glance at.
 (define glance-state (AnchorNode "Glance State"))
@@ -619,53 +614,33 @@
 ; ------------------------------------------------------
 ; Time-stamp-related stuff.
 
-;; Set a timestamp. XXX todo replace this with timeserver.
+;; Define setters and getters for timestamps. Perhaps this should
+;; be replaced by the timeserver??
 ;; line 757, record_start_time
-(DefineLink
-	(DefinedSchemaNode "set interaction timestamp")
-	(PutLink
-		(StateLink (SchemaNode "start-interaction-timestamp")
-			(VariableNode "$x"))
-		(TimeLink)))
 
-(DefineLink
-	(DefinedSchemaNode "get interaction timestamp")
-	(GetLink
-		(StateLink (SchemaNode "start-interaction-timestamp")
-			(VariableNode "$x"))))
+(define (timestamp-template name)
+	(define ts-name (string-append "start-" name "-timestamp")
 
-(DefineLink
-	(DefinedSchemaNode "set expression timestamp")
-	(PutLink
-		(StateLink (SchemaNode "start-expression-timestamp")
-			(VariableNode "$x"))
-		(TimeLink)))
+	(State (Schema ts-name) (Number 0))
 
-(DefineLink
-	(DefinedSchemaNode "get expression timestamp")
-	(GetLink
-		(StateLink (SchemaNode "start-expression-timestamp")
-			(VariableNode "$x"))))
+	(DefineLink
+		(DefinedSchemaNode (string-append "set " name " timestamp"))
+		(Put (State (Schema ts-name) (Variable "$x")) (Time)))
 
-(DefineLink
-	(DefinedSchemaNode "set bored timestamp")
-	(PutLink
-		(StateLink (SchemaNode "start-boredom-timestamp")
-			(VariableNode "$x"))
-		(TimeLink)))
+	(DefineLink
+		(DefinedSchemaNode (string-append "get " name " timestamp"))
+		(Get (State (Schema ts-name) (Variable "$x"))))
+)
 
-(DefineLink
-	(DefinedSchemaNode "set sleep timestamp")
-	(PutLink
-		(StateLink (SchemaNode "start-sleep-timestamp")
-			(VariableNode "$x"))
-		(TimeLink)))
+; "interaction" -- record the start time of an interaction.
+(timestamp-template "interaction")
+; "expression" -- time when a new expression started being shown.
+(timestamp-template "expression")
+; "bored" -- when Eva last got bored.
+(timestamp-template "bored")
+(timestamp-template "sleep")
+(timestamp-template "gesture")
 
-(DefineLink
-	(DefinedSchemaNode "get sleep timestamp")
-	(GetLink
-		(StateLink (SchemaNode "start-sleep-timestamp")
-			(VariableNode "$x"))))
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
