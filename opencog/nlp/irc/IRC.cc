@@ -260,6 +260,7 @@ int IRC::message_loop()
 		ret_len=recv(irc_socket, buffer, 1023, 0);
 		if (ret_len==SOCKET_ERROR || !ret_len)
 		{
+			perror("Exit main loop");
 			return 1;
 		}
 		buffer[ret_len]='\0';
