@@ -37,7 +37,7 @@
             )
 
             ;; If left wall is linked with any of Wd, Wt or Wa,
-            ;; then its interrogative.
+            ;; then its declarative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wd")
                     (ListLink
