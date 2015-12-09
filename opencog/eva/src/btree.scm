@@ -167,6 +167,58 @@
 (timestamp-template "sleep")
 (timestamp-template "gesture")
 
+;
+
+(DefineLink
+	(DefinedPredicateNode "Time to make gesture")
+	(GreaterThanLink
+		; Minus lik computes number of seconds since interaction start.
+		(Minus (Time) (DefinedSchema "get gesture timestamp")
+		; Random number in the configured range.
+		(RandomNumberLink
+			(GetLink (StateLink (SchemaNode "time_to_make_gesture_min")
+				(VariableNode "$min")))
+			(GetLink (StateLink (SchemaNode "time_to_make_gesture_max")
+				(VariableNode "$max"))))
+	))
+
+
+; Return true if it is time to interact with someone else.
+;; line 697 -- is_time_to_change_face_target()
+(DefineLink
+	(DefinedPredicateNode "Time to change interaction")
+	(GreaterThanLink
+		; Minus lik computes number of seconds since interaction start.
+		(Minus (Time) (DefinedSchema "get interaction timestamp"))
+		; Random number in the configured range.
+		(RandomNumberLink
+			(GetLink (StateLink (SchemaNode "time_to_change_face_target_min")
+				(VariableNode "$min")))
+			(GetLink (StateLink (SchemaNode "time_to_change_face_target_max")
+				(VariableNode "$max"))))
+	))
+
+; Return true if we've been sleeping for long enough (i.e. longer than
+; the time_to_wake_up parameter.)
+; line 707 -- is_time_to_wake_up()
+(DefineLink
+	(DefinedPredicateNode "Time to wake up")
+	(GreaterThanLink
+		(Minus (Time) (DefinedSchema "get sleep timestamp"))
+		(GetLink (StateLink (SchemaNode "time_to_wake_up")
+			(VariableNode "$x"))) ; in seconds
+	))
+
+;; Evaluate to true, if an expression should be shown.
+;; line 933, should_show_expression()
+(DefineLink
+	(DefinedPredicateNode "Time to change expression")
+	(GreaterThan
+		(Minus (Time) (DefinedSchema "get expression timestamp"))
+		(Get (State (Schema "current expression duration")
+			(Variable "$x"))) ; in seconds
+	))
+
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
 
@@ -631,60 +683,6 @@
 	(SequentialAndLink
 		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink neutral-face))
-	))
-
-; ------------------------------------------------------
-; Time-stamp-related stuff.
-
-
-;; Evaluate to true, if an expression should be shown.
-;; line 933, should_show_expression()
-(DefineLink
-	(DefinedPredicateNode "Time to change expression")
-	(GreaterThan
-		(Minus (Time) (DefinedSchema "get expression timestamp"))
-		(Get (State (Schema "current expression duration")
-			(Variable "$x"))) ; in seconds
-	))
-
-(DefineLink
-	(DefinedPredicateNode "Time to make gesture")
-	(GreaterThanLink
-		; Minus lik computes number of seconds since interaction start.
-		(Minus (Time) (DefinedSchema "get gesture timestamp")
-		; Random number in the configured range.
-		(RandomNumberLink
-			(GetLink (StateLink (SchemaNode "time_to_make_gesture_min")
-				(VariableNode "$min")))
-			(GetLink (StateLink (SchemaNode "time_to_make_gesture_max")
-				(VariableNode "$max"))))
-	))
-
-
-; Return true if it is time to interact with someone else.
-;; line 697 -- is_time_to_change_face_target()
-(DefineLink
-	(DefinedPredicateNode "Time to change interaction")
-	(GreaterThanLink
-		; Minus lik computes number of seconds since interaction start.
-		(Minus (Time) (DefinedSchema "get interaction timestamp"))
-		; Random number in the configured range.
-		(RandomNumberLink
-			(GetLink (StateLink (SchemaNode "time_to_change_face_target_min")
-				(VariableNode "$min")))
-			(GetLink (StateLink (SchemaNode "time_to_change_face_target_max")
-				(VariableNode "$max"))))
-	))
-
-; Return true if we've been sleeping for long enough (i.e. longer than
-; the time_to_wake_up parameter.)
-; line 707 -- is_time_to_wake_up()
-(DefineLink
-	(DefinedPredicateNode "Time to wake up")
-	(GreaterThanLink
-		(Minus (Time) (DefinedSchema "get sleep timestamp"))
-		(GetLink (StateLink (SchemaNode "time_to_wake_up")
-			(VariableNode "$x"))) ; in seconds
 	))
 
 ; ------------------------------------------------------
