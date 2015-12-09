@@ -146,12 +146,12 @@
 
 	; timestamp setter
 	(DefineLink
-		(DefinedSchemaNode (string-append "set " name " timestamp"))
+		(DefinedSchema (string-append "set " name " timestamp"))
 		(Put (State (Schema ts-name) (Variable "$x")) (Time)))
 
 	; timestamp getter
 	(DefineLink
-		(DefinedSchemaNode (string-append "get " name " timestamp"))
+		(DefinedSchema (string-append "get " name " timestamp"))
 		(Get (State (Schema ts-name) (Variable "$x"))))
 )
 
@@ -178,7 +178,7 @@
 		(GreaterThan
 			; Minus computes number of seconds since interaction start.
 			(Minus (Time)
-				(DefinedSchema (string-append "start-" ts-name "-timestamp")))
+				(DefinedSchema (string-append "get " ts-name " timestamp")))
 			; Random number in the configured range.
 			(RandomNumber
 				(Get (State (Schema min-name) (Variable "$min")))
