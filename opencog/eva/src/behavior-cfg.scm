@@ -104,8 +104,8 @@
 ; --------------------------------------------------------
 ; Dice-roll.  Perform some action some fraction of the time.
 
-(dice-roll "dice-roll: glance new face" 0.5)
-(dice-roll "dice-roll: glance lost face" 0.5)
+(dice-roll "glance new face" 0.5)
+(dice-roll "glance lost face" 0.5)
 
 ; --------------------------------------------------------
 ; Misc other config parameters

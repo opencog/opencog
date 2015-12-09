@@ -65,13 +65,26 @@
 ; --------------------------------------------------------
 ;
 ; Dice-roll conditionals. Return true or false, some fraction of the
-; time.
+; time.  The define here sets up an initial value for the probability;
+; it can be changed later, at run-time.
+;
+; The probability is stored in a StateLink; the GetLink performs a
+; lookup of the current State value.  The value can be changed simply
+; by using the StateLink as normal.
+;
+; Two strings are auto-generated: the action defnition, by pre-pending
+; "dice-roll: " to the action name, and the probability state name,
+; by appending " probability" to the action name.
+;
 ; line 588 -- dice_roll("glance_new_face") etc.
 
 (define (dice-roll action probability)
+	(define prob-name (string-append action " probability"))
+	(State (Schema prob-name) (Number probability))
 	(DefineLink
-		(DefinedPredicateNode action)
+		(DefinedPredicateNode (string-append "dice-roll: " action))
 		(GreaterThan
-			(Number probability) (RandomNumber (Number 0) (Number 1)))))
+			(Get (State (Schema prob-name) (Variable "$x")))
+			(RandomNumber (Number 0) (Number 1)))))
 
 ; --------------------------------------------------------
