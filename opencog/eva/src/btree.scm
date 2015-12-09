@@ -461,6 +461,7 @@
 		)))
 
 ;; Return the set of newly-arrived faces.
+;; Will return a SetLink holding zero, one or more face id's
 (DefineLink
 	(DefinedSchemaNode "New arrivals")
 	(GetLink
@@ -473,7 +474,7 @@
 					(ListLink (VariableNode "$face-id"))))
 	)))
 
-;; Return he person with whom we are currently interacting.
+;; Return the person with whom we are currently interacting.
 ;; aka "current_face_target" in Owyl.
 (DefineLink
 	(DefinedSchemaNode "Current interaction target")
@@ -590,13 +591,14 @@
 ;; faces.
 ;; line 973 -- clear_new_face_target()
 (DefineLink
-	(DefinedPredicateNode "Update status")
-	(SequentialAndLink
-		(DefinedPredicateNode "Update room state")
-		(TrueLink (PutLink
-				(EvaluationLink (PredicateNode "acked face")
-						(ListLink (VariableNode "$face-id")))
-				(DefinedSchemaNode "New arrivals")))
+	(DefinedPredicate "Update status")
+	(SequentialAnd
+		(DefinedPredicate "Update room state")
+		(True (Put
+				(Evaluation (Predicate "acked face")
+						(ListLink (Variable "$face-id")))
+				; If more than one new arrival, pick one randomly.
+				(RandomChoice (DefinedSchema "New arrivals"))))
 	))
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
@@ -645,11 +647,12 @@
 
 ;; line 818 -- glance_at_new_face()
 (DefineLink
-	(DefinedSchemaNode "glance at new person")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (VariableNode "$face")))
-		(DefinedSchemaNode "New arrivals")
+	(DefinedSchema "glance at new person")
+	(Put
+		(Evaluation (GroundedPredicate "py:glance_at_face")
+			(ListLink (Variable "$face")))
+		; If more than one new arrival, pick one randomly.
+		(RandomChoice (DefinedSchema "New arrivals"))
 	))
 
 ;; line 827 -- glance_at_lost_face()
@@ -677,7 +680,7 @@
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 ;; XXX Almost a complete implementation of whats in owyl...  but
-;; XXX The owyl pick_instant code is insane...
+;; the owyl pick_instant code is insane... punt here.
 (DefineLink
 	(DefinedPredicateNode "Interact with face")
 	(SequentialAndLink
@@ -707,8 +710,8 @@
 ;; line 391 -- owyl.sequence
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
-	(DefinedPredicateNode "Was Empty Sequence")
-	(SequentialAndLink
+	(DefinedPredicate "Was Empty Sequence")
+	(SequentialAnd
 		;; line 392
 		(DefinedPredicateNode "was room empty?")
 		(TrueLink (DefinedSchemaNode "interact with new person"))
@@ -723,7 +726,8 @@
 (DefineLink
 	(DefinedSchemaNode "interact with new person")
 	(PutLink (StateLink interaction-state (VariableNode "$x"))
-		(DefinedSchemaNode "New arrivals")))
+		; If more than one new arrival, pick one randomly.
+		(RandomChoice (DefinedSchemaNode "New arrivals"))))
 
 ;; line 399 -- Sequence - Currently interacting with someone
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
