@@ -31,19 +31,19 @@ class FaceAtomic:
 		self.hostname = "localhost"
 		self.port = 17020
 
-	# Add a face to the atomspace.
+	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
 		face = self.define_face(faceid)
 		netcat(self.hostname, self.port, face + "\n")
-		print "Defined face in atomspace: ", faceid
+		print "New visible face in atomspace: ", faceid
 
-	# Add a face to the atomspace.
+	# Focus attention on specific face.
 	def add_tracked_face_to_atomspace(self, faceid):
 		face = self.set_tracked_face(faceid)
 		netcat(self.hostname, self.port, face + "\n")
-		print "Assigned requested face in atomspace: ", faceid
+		print "Force focus of attention on face: ", faceid
 
-	# Remove a face from the atomspace.
+	# Remove a face (make it no longer visible).
 	def remove_face_from_atomspace(self, faceid):
 
 		# AtomSpace cog-delete takes handle as an argument.
@@ -51,24 +51,27 @@ class FaceAtomic:
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
 
-	# Define simple string to define a face
+	# Build a simple string to define a face
 	def define_face(self, faceid):
 		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
 		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
 		return face
 
-	# Define commands to delete the face, and also to garbage-collect
+	# Build string to delete the face, and also to garbage-collect
 	# the ListLink NumberNode.
 	def delete_face(self, faceid):
 		face = "(cog-delete " + \
 		       "(EvaluationLink (PredicateNode \"visible face\") " + \
 		       "(ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
 		       "(cog-delete " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n" +\
+		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n" + \
 		       "(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
 		return face
 
-	# Defines commands to assign requested face in atomspace 
+	# Build string to force attention to focus on the requested face.
+	# This bypasses the normal "new face is visible" sequence, and
+	# immediately shifts Eva's attention to this face.
 	def set_tracked_face(self, faceid):
-		face = 	'(StateLink new-interaction-state (NumberNode "'+str(faceid)+'"))'
+		face = '(StateLink request-interaction-state (NumberNode "' + \
+		       str(faceid) + '"))'
 		return face

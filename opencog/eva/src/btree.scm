@@ -78,17 +78,17 @@
 
 ;; Linked to face-id that needs immediate interaction.
 ;; Currently it is set from ROS
-(define new-interaction-state (AnchorNode "New Interaction State"))
-(StateLink new-interaction-state no-interaction)
+(define request-interaction-state (AnchorNode "Request Interaction"))
+(StateLink request-interaction-state no-interaction)
 
 
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
 (define chat-state (AnchorNode "Chat State"))
 (define chat-listen (ConceptNode "Listening"))
-(define chat-talk (ConceptNode "Talking"))
-(define chat-start (ConceptNode "Start Talking"))
-(define chat-stop (ConceptNode "Stop Talking"))
+(define chat-talk   (ConceptNode "Talking"))
+(define chat-start  (ConceptNode "Start Talking"))
+(define chat-stop   (ConceptNode "Stop Talking"))
 (StateLink chat-state chat-stop)
 
 (DefineLink
@@ -219,7 +219,7 @@
 ; Print message, and print the current interaction face-id
 (define (print-msg-face node)
 	(display (cog-name node))
-	(display " ")
+	(display " with face id: ")
 	(display (cog-name (car (cog-outgoing-set (cog-execute!
 			(DefinedSchemaNode "Current interaction target"))))))
 	(newline)
@@ -636,19 +636,20 @@
 ;; line 650, is_interacting_with_someone
 ;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
 (DefineLink
-	(DefinedPredicateNode "is interacting with someone?")
-	(NotLink (EqualLink
+	(DefinedPredicate "is interacting with someone?")
+	(NotLink (Equal
 		(SetLink no-interaction)
-		(GetLink (StateLink interaction-state (VariableNode "$x"))))
+		(Get (State interaction-state (Variable "$x"))))
 	))
 
 
-; Return true if someone request interaction.
+;; Return true if someone requests interaction.  This person will
+;; become the new focus of attention.
 (DefineLink
-	(DefinedPredicateNode "Someone requests interaction?")
-	(NotLink (EqualLink
+	(DefinedPredicate "Someone requests interaction?")
+	(NotLink (Equal
 		(SetLink no-interaction)
-		(GetLink (StateLink new-interaction-state (VariableNode "$x"))))
+		(Get (State request-interaction-state (Variable "$x"))))
 	))
 
 
@@ -749,17 +750,35 @@
 	))
 
 (DefineLink
-	(DefinedSchemaNode "interact with new person")
-	(PutLink (StateLink interaction-state (VariableNode "$x"))
+	(DefinedSchema "interact with new person")
+	(Put (State interaction-state (Variable "$x"))
 		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchemaNode "New arrivals"))))
+		(RandomChoice (DefinedSchema "New arrivals"))))
 
-;; Set interaction face to requested face
+;; Set current-interaction face to the requested face
 (DefineLink
-	(DefinedSchemaNode "interact with requested person")
-	(PutLink
-		(StateLink interaction-state (VariableNode "$face-id"))
-		(GetLink (StateLink new-interaction-state (VariableNode "$x")))))
+	(DefinedSchema "interact with requested person")
+	(Put (State interaction-state (Variable "$face-id"))
+		(Get (State request-interaction-state (Variable "$x")))))
+
+(DefineLink
+	(DefinedSchema "clear requested face")
+	(Put (State request-interaction-state (Variable "$face-id"))
+		no-interaction))
+
+;; If interaction is requested, then interact wwith that person.
+;; Make sure we look at that person and restart the interaction timer.
+(DefineLink
+	(DefinedPredicate "Interaction requested")
+	(SequentialAnd
+		(DefinedPredicate "Someone requests interaction?")
+		(True (DefinedSchema "interact with requested person"))
+		(True (DefinedSchema "clear requested face"))
+		(True (DefinedSchema "look at person"))
+		(True (DefinedSchema "set interaction timestamp"))
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
+			(ListLink (Node "--- Looking at requested face")))
+	))
 
 ;; line 399 -- Sequence - Currently interacting with someone
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
@@ -1082,26 +1101,6 @@
 
 		; No-op. The current owyl tree does nothing here.
 		(TrueLink)
-	))
-
-
-(DefineLink
-	(DefinedSchemaNode "clear requested face")
-	(PutLink
-		(StateLink new-interaction-state (VariableNode "$face-id"))
-		no-interaction))
-
-;; If interaction is requested make sure we look at person and make sure the interaction timer reset
-(DefineLink
-	(DefinedPredicate "Interaction requested")
-	(SequentialAndLink
-		(DefinedPredicateNode "Someone requests interaction?")
-		(TrueLink (DefinedSchemaNode "interact with requested person"))
-		(TrueLink (DefinedSchemaNode "clear requested face"))
-		(TrueLink (DefinedSchemaNode "look at person"))
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Looking at requested face")))
 	))
 
 ;; ------------------------------------------------------------------
