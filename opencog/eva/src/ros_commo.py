@@ -119,15 +119,16 @@ class EvaControl():
 	# Glance_t is a momentary eye movement towards the face target.
 
 	def look_at(self, face_id):
-		print "----- Looking at face:" + str(face_id)
+		# Can get called 10x/second, don't print.
+		# print "----- Looking at face: " + str(face_id)
 		self.look_at_pub.publish(face_id)
 
 	def gaze_at(self, face_id):
-		print "----- Gazing at face:" + str(face_id)
+		print "----- Gazing at face: " + str(face_id)
 		self.gaze_at_pub.publish(face_id)
 
 	def glance_at(self, face_id):
-		print "----- Glancing at face:" + str(face_id)
+		print "----- Glancing at face: " + str(face_id)
 		self.glance_at_pub.publish(face_id)
 
 	# ----------------------------------------------------------

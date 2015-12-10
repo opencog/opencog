@@ -53,7 +53,7 @@ def glance_at_face(face_id_node):
 
 def look_at_face(face_id_node):
 	face_id = int(float(face_id_node.name))
-	print "Python look at face id", face_id
+	# print "Python look at face id", face_id
 	evl.look_at(face_id)
 	return TruthValue(1, 1)
 

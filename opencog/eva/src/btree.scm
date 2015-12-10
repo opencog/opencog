@@ -831,8 +831,9 @@
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
 			(SequentialAndLink ; line 476
-				(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-					(ListLink (Node "--- Continue interaction")))
+				; Gets called 10x/second; don't print.
+				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				;	(ListLink (Node "--- Continue interaction")))
 				(SequentialOrLink  ; line 478
 					(SequentialAndLink ; line 479
 						(DefinedPredicateNode "More than one face visible")

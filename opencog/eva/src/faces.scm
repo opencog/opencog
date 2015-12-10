@@ -81,6 +81,9 @@
 
 
 ; Quick hack to fill the room.
+; Call this function to trick opencog into thinking there is a new
+; visible face.  There will not be any corresponding 3D coords, so
+; the ROS tf2 will not be able to make the robot turn to look...
 (define (make-new-face id)
 	(EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id))))
