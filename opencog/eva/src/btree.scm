@@ -208,7 +208,11 @@
 ; temp scaffolding and junk.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (print-atom atom) (format #t "Triggered: ~a \n" atom) (stv 1 1))
+(define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
+(define (print-msg-set node set)
+	(display (cog-name node))
+	(format #t "~a\n" set)
+	(stv 1 1))
 
 ; --------------------------------------------------------
 ; Given the name of a emotion, pick one of the allowed emotional
@@ -627,11 +631,11 @@
 ;; Send ROS message to look at the person we are interacting with.
 ;; line 742, assign_face_target
 (DefineLink
-	(DefinedSchemaNode "look at person")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
-			(ListLink (VariableNode "$face")))
-		(GetLink (StateLink interaction-state (VariableNode "$x")))
+	(DefinedSchema "look at person")
+	(Put
+		(Evaluation (GroundedPredicate "py:look_at_face")
+			(ListLink (Variable "$face")))
+		(Get (State interaction-state (Variable "$x")))
 	))
 
 ;; line 809 + line 483 -- glance_at(id="current_glance_target")
@@ -685,10 +689,7 @@
 	(DefinedPredicateNode "Interact with face")
 	(SequentialAndLink
 		;; Look at the interaction face - line 765
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:look_at_face")
-				(ListLink (VariableNode "$face")))
-			(GetLink (StateLink interaction-state (VariableNode "$x")))))
+		(TrueLink (DefinedSchemaNode "look at person"))
 
 		;; Show random expressions only if NOT talking
 		; aka "do_pub_emotions=False" in the new owyl tree.
@@ -719,8 +720,9 @@
 		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "new-arrival"))
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Look at newly arrived person")))
+		(Evaluation (GroundedPredicate "scm: print-msg-set")
+			(ListLink (Node "--- Look at newly arrived person")
+				(Get (State interaction-state (Variable "$x")))))
 	))
 
 (DefineLink
@@ -747,13 +749,13 @@
 ;; XXX TODO -- need to also do line 590, if interacting for a while
 ;; this alters probability of glance...
 (DefineLink
-	(DefinedPredicateNode "Respond to new arrival")
-	(SequentialOrLink
-		(DefinedPredicateNode "Was Empty Sequence")
-		(DefinedPredicateNode "Interacting Sequence")
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+	(DefinedPredicate "Respond to new arrival")
+	(SequentialOr
+		(DefinedPredicate "Was Empty Sequence")
+		(DefinedPredicate "Interacting Sequence")
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Ignoring new person"))) ; line 406
-			(TrueLink)
+		(True)
 	))
 
 ;; Check to see if a new face has become visible.
