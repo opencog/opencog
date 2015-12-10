@@ -209,9 +209,14 @@
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
-(define (print-msg-set node set)
+
+; Print message, and print the current interaction face-id
+(define (print-msg-face node)
 	(display (cog-name node))
-	(format #t "~a\n" set)
+	(display " ")
+	(display (cog-name (car (cog-outgoing-set (cog-execute!
+			(DefinedSchemaNode "Current interaction target"))))))
+	(newline)
 	(stv 1 1))
 
 ; --------------------------------------------------------
@@ -589,6 +594,9 @@
 			(DefinedSchemaNode "Select random face")))
 		; Record a timestamp
 		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+		; Diagnostic print
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
+			(ListLink (Node "--- Start new interaction")))
 	))
 
 ;; Update the room empty/full status; update the list of acknowledged
@@ -720,9 +728,8 @@
 		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "new-arrival"))
-		(Evaluation (GroundedPredicate "scm: print-msg-set")
-			(ListLink (Node "--- Look at newly arrived person")
-				(Get (State interaction-state (Variable "$x")))))
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
+			(ListLink (Node "--- Look at newly arrived person")))
 	))
 
 (DefineLink
