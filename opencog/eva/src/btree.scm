@@ -78,17 +78,17 @@
 
 ;; Linked to face-id that needs immediate interaction.
 ;; Currently it is set from ROS
-(define new-interaction-state (AnchorNode "New Interaction State"))
-(StateLink new-interaction-state no-interaction)
+(define request-interaction-state (AnchorNode "Request Interaction"))
+(StateLink request-interaction-state no-interaction)
 
 
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
 (define chat-state (AnchorNode "Chat State"))
 (define chat-listen (ConceptNode "Listening"))
-(define chat-talk (ConceptNode "Talking"))
-(define chat-start (ConceptNode "Start Talking"))
-(define chat-stop (ConceptNode "Stop Talking"))
+(define chat-talk   (ConceptNode "Talking"))
+(define chat-start  (ConceptNode "Start Talking"))
+(define chat-stop   (ConceptNode "Stop Talking"))
 (StateLink chat-state chat-stop)
 
 (DefineLink
@@ -649,7 +649,7 @@
 	(DefinedPredicate "Someone requests interaction?")
 	(NotLink (Equal
 		(SetLink no-interaction)
-		(Get (State new-interaction-state (Variable "$x"))))
+		(Get (State request-interaction-state (Variable "$x"))))
 	))
 
 
@@ -759,11 +759,11 @@
 (DefineLink
 	(DefinedSchema "interact with requested person")
 	(Put (State interaction-state (Variable "$face-id"))
-		(Get (State new-interaction-state (Variable "$x")))))
+		(Get (State request-interaction-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedSchema "clear requested face")
-	(Put (State new-interaction-state (Variable "$face-id"))
+	(Put (State request-interaction-state (Variable "$face-id"))
 		no-interaction))
 
 ;; If interaction is requested, then interact wwith that person.
@@ -776,7 +776,7 @@
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
 		(True (DefinedSchema "set interaction timestamp"))
-		(Evaluation (GroundedPredicate "scm: print-msg")
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Looking at requested face")))
 	))
 
