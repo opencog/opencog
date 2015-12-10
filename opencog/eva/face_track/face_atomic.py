@@ -37,6 +37,12 @@ class FaceAtomic:
 		netcat(self.hostname, self.port, face + "\n")
 		print "Defined face in atomspace: ", faceid
 
+	# Add a face to the atomspace.
+	def add_tracked_face_to_atomspace(self, faceid):
+		face = self.set_tracked_face(faceid)
+		netcat(self.hostname, self.port, face + "\n")
+		print "Assigned requested face in atomspace: ", faceid
+
 	# Remove a face from the atomspace.
 	def remove_face_from_atomspace(self, faceid):
 
@@ -60,4 +66,9 @@ class FaceAtomic:
 		       "(cog-delete " + \
 		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n" +\
 		       "(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
+		return face
+
+	# Defines commands to assign requested face in atomspace 
+	def set_tracked_face(self, faceid):
+		face = 	'(StateLink new-interaction-state (NumberNode "'+str(faceid)+'"))'
 		return face
