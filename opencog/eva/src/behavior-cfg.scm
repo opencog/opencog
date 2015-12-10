@@ -86,7 +86,7 @@
 (emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
 (emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
-; New beavior.cfg line 149
+; New behavior.cfg line 149
 (emo-gest-spec "chat-positive-nod" "nod-6"  0.5 0.8 0.9 1 1 0.2 0.4)
 (emo-gest-spec "chat-positive-nod" "noop"   0.5 0   0   1 1 0   0)
 

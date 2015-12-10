@@ -219,7 +219,7 @@
 ; Print message, and print the current interaction face-id
 (define (print-msg-face node)
 	(display (cog-name node))
-	(display " ")
+	(display " with face id: ")
 	(display (cog-name (car (cog-outgoing-set (cog-execute!
 			(DefinedSchemaNode "Current interaction target"))))))
 	(newline)
