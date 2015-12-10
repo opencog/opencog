@@ -76,6 +76,12 @@
 (define glance-state (AnchorNode "Glance State"))
 (StateLink glance-state no-interaction)
 
+;; Linked to face-id that needs immediate interaction.
+;; Currently it is set from ROS
+(define new-interaction-state (AnchorNode "New Interaction State"))
+(StateLink new-interaction-state no-interaction)
+
+
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
 (define chat-state (AnchorNode "Chat State"))
@@ -636,6 +642,16 @@
 		(GetLink (StateLink interaction-state (VariableNode "$x"))))
 	))
 
+
+; Return true if someone request interaction.
+(DefineLink
+	(DefinedPredicateNode "Someone requests interaction?")
+	(NotLink (EqualLink
+		(SetLink no-interaction)
+		(GetLink (StateLink new-interaction-state (VariableNode "$x"))))
+	))
+
+
 ;; Send ROS message to look at the person we are interacting with.
 ;; line 742, assign_face_target
 (DefineLink
@@ -737,6 +753,13 @@
 	(PutLink (StateLink interaction-state (VariableNode "$x"))
 		; If more than one new arrival, pick one randomly.
 		(RandomChoice (DefinedSchemaNode "New arrivals"))))
+
+;; Set interaction face to requested face
+(DefineLink
+	(DefinedSchemaNode "interact with requested person")
+	(PutLink
+		(StateLink interaction-state (VariableNode "$face-id"))
+		(GetLink (StateLink new-interaction-state (VariableNode "$x")))))
 
 ;; line 399 -- Sequence - Currently interacting with someone
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
@@ -1061,6 +1084,26 @@
 		(TrueLink)
 	))
 
+
+(DefineLink
+	(DefinedSchemaNode "clear requested face")
+	(PutLink
+		(StateLink new-interaction-state (VariableNode "$face-id"))
+		no-interaction))
+
+;; If interaction is requested make sure we look at person and make sure the interaction timer reset
+(DefineLink
+	(DefinedPredicate "Interaction requested")
+	(SequentialAndLink
+		(DefinedPredicateNode "Someone requests interaction?")
+		(TrueLink (DefinedSchemaNode "interact with requested person"))
+		(TrueLink (DefinedSchemaNode "clear requested face"))
+		(TrueLink (DefinedSchemaNode "look at person"))
+		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(ListLink (Node "--- Looking at requested face")))
+	))
+
 ;; ------------------------------------------------------------------
 ;; Main loop diagnostics
 ;; line 988 - idle_spin()
@@ -1083,6 +1126,7 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
+				(DefinedPredicate "Interaction requested")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")
 				(DefinedPredicate "Interact with people")

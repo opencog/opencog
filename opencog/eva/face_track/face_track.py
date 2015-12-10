@@ -110,9 +110,6 @@ class FaceTrack:
 		# Overrides current face being tracked by WebUI
 		self.EVENT_TRACK_FACE = "track_face"
 
-		# Publishes the current tracked face
-		self.TOPIC_LOOK_AT_FACE = "look_at_face"
-
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
 
 		# Subscribed OpenCog commands
@@ -142,9 +139,6 @@ class FaceTrack:
 
 		self.gaze_pub = rospy.Publisher(self.TOPIC_GAZE_TARGET,
 			Target, queue_size=10)
-
-		self.look_at_face_pub = rospy.Publisher(self.TOPIC_LOOK_AT_FACE,
-			Int32, queue_size=10)
 
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
@@ -303,7 +297,7 @@ class FaceTrack:
 					self.look_at_face(0)
 					return
 				except Exception as ex:
-					logger.info("Error: no gaze-at target: ", ex)
+					logger.info("Error: no gaze-at target: ")
 					self.gaze_at_face(0)
 					return
 
@@ -330,6 +324,13 @@ class FaceTrack:
 				self.gaze_at = self.look_at
 				self.look_at = -1
 
+	# Adds given face to atomspace as requested face
+	def track_face(self, faceid):
+		if faceid in self.visible_faces:
+			logger.info("Face requested interaction: " + str(faceid))
+			self.atomo.add_tracked_face_to_atomspace(faceid)
+		return 
+
 	# ----------------------------------------------------------
 	# pi_vision ROS callbacks
 
@@ -344,6 +345,8 @@ class FaceTrack:
 		elif data.face_event == self.EVENT_LOST_FACE:
 			self.remove_face(data.face_id)
 
+		elif data.face_event == self.EVENT_TRACK_FACE:
+			self.track_face(data.face_id)
 	# pi_vision ROS callback, called when pi_vision has new face
 	# location data for us. Because this happens frequently (10x/second)
 	# we also use this as the main update loop, and drive all look-at
