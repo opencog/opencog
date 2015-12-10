@@ -31,6 +31,10 @@
 ; (make-new-face "42")  ; Should start showing expressions, gestures.
 ; (remove-face "42")  ; Should retur to neutral.
 ; (halt) ; Pause the loop iteration; (run) will start it again.
+;
+; Unit test chatbot:
+; (State chat-state chat-start) ; to simulate having it talk.
+; (State chat-state chat-stop)  ; to signal that talking has stopped.
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -81,6 +85,15 @@
 (define request-interaction-state (AnchorNode "Request Interaction"))
 (StateLink request-interaction-state no-interaction)
 
+;; The "look at neutral position" face. Used to tell the eye/head
+;; movemet subsystem to move to a neutral position.
+(define neutral-face (ConceptNode "0"))
+
+; --------------------------------------------------------
+; Chatbot-related stuff.  In the curent design, the chatbot talks
+; whenever it feels like it; we are simply told when it is talking
+; when it has stopped talking, and what emotions we should display,
+; so that it's consistent with the speech emotions.
 
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
@@ -130,10 +143,6 @@
 	(Equal
 		(Set chat-negative)
 		(Get (State chat-affect (Variable "$x")))))
-
-;; The "look at neutral position" face. Used to tell the eye/head
-;; movemet subsystem to move to a neutral position.
-(define neutral-face (ConceptNode "0"))
 
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
