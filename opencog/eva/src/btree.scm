@@ -56,6 +56,12 @@
 
 ; ------------------------------------------------------
 ; State variables
+;; Behavior tree state
+(define btree-state (AnchorNode "Behavior Tree State"))
+(define tree-running (ConceptNode "Running"))
+(define tree-paused (ConceptNode "Paused"))
+; Tree is rtunning at first
+(StateLink btree-state tree-running)
 
 ; Soma: awake, agitated, excited, tired, manic, depressed
 (define soma-state (AnchorNode "Soma State"))
@@ -702,6 +708,15 @@
 			(ListLink neutral-face))
 	))
 
+;; Returns true if behavior tree is paused
+;; 
+(DefineLink
+	(DefinedPredicate "Is tree paused?")
+	(Equal
+		(SetLink tree-paused)
+		(Get (State btree-state (Variable "$x")))
+	))
+
 ; ------------------------------------------------------
 ; More complex interaction sequences.
 
@@ -1125,6 +1140,7 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
+				(DefinedPredicate "Is tree paused?")
 				(DefinedPredicate "Interaction requested")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")

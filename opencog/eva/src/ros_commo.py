@@ -21,6 +21,7 @@
 import rospy
 import roslib
 import time
+import logging
 
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
@@ -32,7 +33,7 @@ from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 
 from put_atoms import PutAtoms
-
+logger = logging.getLogger('hr.OpenCog_Eva')
 # This class publishes various ROS messages to various locations.
 # Class members are meant to be invoked from within the cogserver.
 # Note that it ONLY publishes, it does not listen; currently listening
@@ -249,10 +250,18 @@ class EvaControl():
 		else:
 			self.puta.chatbot_affect_negative()
 
+	# Turn behaviors on and off.
+	# Do not to clean visible faces as these can still be added/removed while tree is paused
+	def behavior_switch_callback(self, data):
+		if data.data == "btree_on":
+			self.puta.btree_state_running()
+		if data.data == "btree_off":
+			self.puta.btree_state_paused()
+
+
 	def __init__(self):
 
-		puta = PutAtoms()
-
+		self.puta = PutAtoms()
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
@@ -306,3 +315,5 @@ class EvaControl():
 
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
+
+		rospy.Subscriber("/behavior_switch", String, self.behavior_switch_callback)
