@@ -329,7 +329,7 @@ namespace PatternMining
 
         /////////////////////////////------Start for embodiment ----/////////////////////////////
  public:
-     void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 4,  unsigned int _evaluatePatternsEveryXSeconds = 120);
+     void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 3,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
 //     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
 //     std::mutex waitingToFeedQueueLock;

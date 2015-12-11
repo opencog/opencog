@@ -315,7 +315,7 @@ struct TmpParamCandidate
 class OCPlanner
 {
 public:
-     OCPlanner(AtomSpace* _atomspace,string _selfID, string _selfType);
+     OCPlanner(AtomSpace* _atomspace,string _selfID, string _selfType, bool _ENABLE_MINING_RULES = false);
 
      ~OCPlanner();
 
@@ -333,6 +333,8 @@ public:
      ActionPlanID doPlanning(const vector<State*> &goal, const vector<State *> &knownStates, CogServer *server);
 
      ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle, opencog::CogServer *server);
+
+     ActionPlanID doPlanningForGivenGoal(opencog::CogServer * server);
 
 protected:
 
@@ -378,6 +380,8 @@ protected:
 
      int removedHypotheticalLinkCount;
 
+     bool ENABLE_MINING_RULES;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -393,6 +397,8 @@ protected:
      void cleanUpContextBeforeRollBackToPreviousStep();
 
      void cleanUpEverythingAfterPlanning();
+
+     Rule* mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode);
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan

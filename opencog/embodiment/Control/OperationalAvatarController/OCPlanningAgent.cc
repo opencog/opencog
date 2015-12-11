@@ -64,8 +64,9 @@ void OCPlanningAgent::init()
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
+    bool _ENABLE_MINING_RULES = config().get_bool("OCPLANNING_ENABLE_MINING_RULES");
 
-    ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getPetId(),oac->getPet().getType());
+    ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getPetId(),oac->getPet().getType(), _ENABLE_MINING_RULES);
     logger().debug("OCPlanningAgent::init - using OCPlanner! ");
 
     this->currentOCPlanID = "";
@@ -76,46 +77,47 @@ void OCPlanningAgent::init()
 
     this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
 
+
     // init the demanding goal list
 
-    psi_demand_goal_list.clear();
+//    psi_demand_goal_list.clear();
 
-    // Get demand names from the configuration file
-    std::string demandNames = config()["PSI_DEMANDS"];
+//    // Get demand names from the configuration file
+//    std::string demandNames = config()["PSI_DEMANDS"];
 
-    // Process Demands one by one
-    boost::tokenizer<> demandNamesTok (demandNames);
+//    // Process Demands one by one
+//    boost::tokenizer<> demandNamesTok (demandNames);
 
-    std::string demandPredicateName;
-    std::vector<Handle> outgoings;
+//    std::string demandPredicateName;
+//    std::vector<Handle> outgoings;
 
-    outgoings.clear();
+//    outgoings.clear();
 
-    for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
-          iDemandName != demandNamesTok.end();
-          ++ iDemandName ) {
+//    for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
+//          iDemandName != demandNamesTok.end();
+//          ++ iDemandName ) {
 
-        demandPredicateName = (*iDemandName) + "DemandGoal";
+//        demandPredicateName = (*iDemandName) + "DemandGoal";
 
-        // Get EvaluationLink to the demand goal
-        outgoings.clear();
-        outgoings.push_back( oac->getAtomSpace().addNode(PREDICATE_NODE, demandPredicateName) );
+//        // Get EvaluationLink to the demand goal
+//        outgoings.clear();
+//        outgoings.push_back( oac->getAtomSpace().addNode(PREDICATE_NODE, demandPredicateName) );
 
-        this->psi_demand_goal_list.push_back( oac->getAtomSpace().addLink(EVALUATION_LINK, outgoings) );
+//        this->psi_demand_goal_list.push_back( oac->getAtomSpace().addLink(EVALUATION_LINK, outgoings) );
 
-    }// for
+//    }// for
 
-    // Create an ReferenceLink holding all the demand goals (EvaluationLink)
-    outgoings.clear();
-    outgoings.push_back(oac->getAtomSpace().addNode(CONCEPT_NODE, "psi_demand_goal_list") );
-    outgoings.push_back(oac->getAtomSpace().addLink(LIST_LINK, this->psi_demand_goal_list) );
-    Handle referenceLink = AtomSpaceUtil::addLink(oac->getAtomSpace(), REFERENCE_LINK, outgoings, true);
+//    // Create an ReferenceLink holding all the demand goals (EvaluationLink)
+//    outgoings.clear();
+//    outgoings.push_back(oac->getAtomSpace().addNode(CONCEPT_NODE, "psi_demand_goal_list") );
+//    outgoings.push_back(oac->getAtomSpace().addLink(LIST_LINK, this->psi_demand_goal_list) );
+//    Handle referenceLink = AtomSpaceUtil::addLink(oac->getAtomSpace(), REFERENCE_LINK, outgoings, true);
 
-    logger().debug("PsiActionSelectionAgent::%s - "
-                   "Add the list of demand goals to AtomSpace: %s [cycle = %d]",
-                   __FUNCTION__,
-                   oac->getAtomSpace().atomAsString(referenceLink).c_str(), this->cycleCount
-                  );
+//    logger().debug("PsiActionSelectionAgent::%s - "
+//                   "Add the list of demand goals to AtomSpace: %s [cycle = %d]",
+//                   __FUNCTION__,
+//                   oac->getAtomSpace().atomAsString(referenceLink).c_str(), this->cycleCount
+//                  );
 
 
     std::cout<<"OCPlanningAgent finished init..."<<std::endl;
@@ -148,8 +150,9 @@ void OCPlanningAgent::run()
 
     if (! startPlanning)
     {
-        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption()) &&
-             ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime()))
+        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption())
+             // && ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime())
+            )
         {
             // to wait for the PAI to finish more perception processing
             waitToStart ++;
@@ -281,39 +284,40 @@ void OCPlanningAgent::run()
 
 #endif // HAVE_GUILE
 
-        hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
-                                        oac->getAtomSpace().getHandle(CONCEPT_NODE,
-                                                            "plan_selected_demand_goal"));
+//        hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
+//                                        oac->getAtomSpace().getHandle(CONCEPT_NODE,
+//                                                            "plan_selected_demand_goal"));
 
-        // Update the pet's previously/ currently Demand Goal
-        PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(),
-                                          this->hSelectedDemandGoal);
+//        // Update the pet's previously/ currently Demand Goal
+//        PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(),
+//                                          this->hSelectedDemandGoal);
 
-        logger().debug("OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
-                       __FUNCTION__,
-                       oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
-                       this->cycleCount);
+//        logger().debug("OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
+//                       __FUNCTION__,
+//                       oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
+//                       this->cycleCount);
 
-        std::cout << "OCPlanner is doing planning for :"
-                  << oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
-                  << std::endl;
+//        std::cout << "OCPlanner is doing planning for :"
+//                  << oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+//                  << std::endl;
 
-        // the demand goal is something like "EnergyDemandGoal"
-        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal, &_cogserver);
+//        // the demand goal is something like "EnergyDemandGoal"
+
+        currentOCPlanID = ocplanner->doPlanningForGivenGoal(&_cogserver);
 
         // if planning failed
         if (currentOCPlanID == "")
         {
             std::cout<<std::endl;
-            std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
-                     <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+            std::cout<<"OCPlanner can not find any suitable plan for the given goal."
+                     // <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
             std::cout<<std::endl;
         }
         else
         {
-            std::cout<<"OCPlanner found a plan: "<< currentOCPlanID << " for the selected demand goal:"
-                     <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+            std::cout<<"OCPlanner found a plan: "<< currentOCPlanID << " for the given goal:"
+                    // <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
 
             // get all the current plan action sequence, contain the actionId of each action.
