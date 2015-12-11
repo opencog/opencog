@@ -44,20 +44,36 @@ int special_word_occurence_period = 2;
 
 class ExperimentSetupModule: public Module {
 private:
-    struct ECANValue {
+    struct AValues {
         AttentionValue::sti_t _sti;
         AttentionValue::lti_t _lti;
         AttentionValue::vlti_t _vlti;
         long _cycle;
 
-        ECANValue() :
+        AValues() :
                 _sti(0), _lti(0),_vlti(0), _cycle(0)
         {
         }
 
-        ECANValue(AttentionValue::sti_t sti, AttentionValue::lti_t lti,
+        AValues(AttentionValue::sti_t sti, AttentionValue::lti_t lti,
                   AttentionValue::vlti_t vlti, long cycle) :
                 _sti(sti), _lti(lti), _vlti(vlti), _cycle(cycle)
+        {
+        }
+    };
+
+    struct HebTValues {
+        strength_t _strength;
+        confidence_t _confidence;
+        long _cycle;
+
+        HebTValues() :
+                _strength(0.0), _confidence(0.0), _cycle(0)
+        {
+        }
+
+        HebTValues(strength_t strength, confidence_t confidence, long cycle) :
+                _strength(strength), _confidence(confidence), _cycle(cycle)
         {
         }
     };
@@ -79,11 +95,16 @@ private:
     Logger * _log;
     SchemeEval * _scmeval;
 
-    std::map<Handle, std::vector<ECANValue>> _data;
-    boost::signals2::connection _AVChangedSignalConnection;
+    std::map<Handle, std::vector<AValues>> _av_data;
+    std::map<Handle, std::vector<HebTValues>> _hebtv_data;
+
+    boost::signals2::connection _AVChangedSignalConnection,_TVChangedSignalConnection;
 
     void AVChangedCBListener(const Handle& h, const AttentionValuePtr& av_old,
                              const AttentionValuePtr& av_new);
+
+    void TVChangedCBListener(const Handle& h, const TruthValuePtr& av_old,
+                             const TruthValuePtr& tv_new);
 
     //Start stop ECAN agents commands
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-load", do_ecan_load,
@@ -128,9 +149,9 @@ private:
             false, true)
 
     //Dump all STI,LTI changes recorded till now to a file.
-    DECLARE_CMD_REQUEST(ExperimentSetupModule, "dump-tseries", do_dump_data,
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "dump", do_dump_data,
             "Dumps ECAN time series data to file\n",
-            "Usage: dump-tseries [FILE_NAME]\n"
+            "Usage: dump [av|heb] [FILE_NAME]\n"
             "Dump time serise ECAN data\n",
             false, true)
 

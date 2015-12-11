@@ -16,6 +16,7 @@
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/dynamics/experiment/ExperimentSetupModule.h>
 
@@ -41,20 +42,43 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
     _AVChangedSignalConnection = _as->AVChangedSignal(
             boost::bind(&ExperimentSetupModule::AVChangedCBListener, this, _1,
                         _2, _3));
+    _AVChangedSignalConnection = _as->TVChangedSignal(
+            boost::bind(&ExperimentSetupModule::TVChangedCBListener, this, _1,
+                        _2, _3));
 }
 
 ExperimentSetupModule::~ExperimentSetupModule()
 {
     unregisterAgentRequests();
-    delete(_scmeval);
+    delete (_scmeval);
 }
 
 void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
                                                 const AttentionValuePtr& av_old,
                                                 const AttentionValuePtr& av_new)
 {
-    ECANValue ecanval(av_new->getSTI(), av_new->getLTI(),av_new->getVLTI(), _cs.getCycleCount());
-    _data[h].push_back(ecanval);
+    AValues ecanval(av_new->getSTI(), av_new->getLTI(), av_new->getVLTI(),
+                    _cs.getCycleCount());
+    _av_data[h].push_back(ecanval);
+}
+
+void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
+                                                const TruthValuePtr& av_old,
+                                                const TruthValuePtr& tv_new)
+{
+    if (h->getType() == ASYMMETRIC_HEBBIAN_LINK) {
+        HandleSeq outg = _as->get_outgoing(h);
+        assert(outg.size() == 2);
+        auto end = hspecial_word_nodes.end();
+
+        if (hspecial_word_nodes.find(outg[0]) != end  and hspecial_word_nodes.find(
+                outg[1]) != end) {
+            HebTValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
+                              _cs.getCycleCount());
+            _hebtv_data[h].push_back(hebtvv);
+        }
+    }
+
 }
 
 void ExperimentSetupModule::registerAgentRequests()
@@ -83,9 +107,9 @@ void ExperimentSetupModule::unregisterAgentRequests()
 void ExperimentSetupModule::init(void)
 {
     //Load params
-    //_as->set_attentional_focus_boundary(
-    //        (stim_t) config().get_int("AF_BOUNDARY"));
-
+    //_as->set_attentional_focus_boundary((stim_t) config().get_int("AF_BOUNDARY"));
+    std::cout << "AF_BOUNDARY = " << _as->get_attentional_focus_boundary()
+              << std::endl;
     registerAgentRequests();
 }
 
@@ -94,8 +118,9 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 {
     //These mind agents have already been made registered by the attention module.So no need to register them.
     _forgetting_agentptr = _cs.createAgent(ForgettingAgent::info().id, false);
-    _hebbianupdating_agentptr = _cs.createAgent(SimpleHebbianUpdatingAgent::info().id,
-    false);
+    _hebbianupdating_agentptr = _cs.createAgent(
+            SimpleHebbianUpdatingAgent::info().id,
+            false);
     _importanceupdating_agentptr = _cs.createAgent(
             ImportanceUpdatingAgent::info().id, false);
     _simpleimportancediffusion_agentptr = _cs.createAgent(
@@ -181,14 +206,15 @@ std::string ExperimentSetupModule::do_stimulate(Request *req,
 std::string ExperimentSetupModule::do_dump_data(Request *req,
                                                 std::list<std::string> args)
 {
-    std::string file_name = args.back();
+    std::string what_to_dump = *(args.begin());
+    std::string file_name = *(++args.begin());
     // cycle,uuid,sti,lti
 
     auto swprint = [this](const UnorderedHandleSet & uhs) {
         std::stringstream sstream;
-        for (const auto & p : _data) {
+        for (const auto & p : _av_data) {
             if(uhs.find(p.first) != uhs.end()) {
-                for (const ECANValue& ev : p.second) {
+                for (const AValues& ev : p.second) {
                     sstream << std::to_string(p.first.value()) << ","
                     << std::to_string(ev._sti) << ","
                     << std::to_string(ev._lti) << ","
@@ -202,9 +228,9 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
 
     auto nswprint = [this](const UnorderedHandleSet & uhs) {
         std::stringstream sstream;
-        for (const auto & p : _data) {
+        for (const auto & p : _av_data) {
             if(uhs.find(p.first) == uhs.end()) {
-                for (const ECANValue& ev : p.second) {
+                for (const AValues& ev : p.second) {
                     sstream << std::to_string(p.first.value()) << ","
                     << std::to_string(ev._sti) << ","
                     << std::to_string(ev._lti) << ","
@@ -216,21 +242,48 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
         return sstream.str();
     };
 
-    std::ofstream outf(file_name+"-sw.data",
-                       std::ofstream::out | std::ofstream::trunc);
-    //Print ecan  values of special word nodes
-    outf << swprint(hspecial_word_nodes);
-    outf.flush();
-    outf.close();
+    auto hebprint = [this]() {
+        std::stringstream sstream;
+        for (const auto & p : _hebtv_data) {
+                for (const HebTValues& hebtv : p.second) {
+                    sstream << std::to_string(p.first.value()) << ","
+                    << std::to_string(hebtv._strength) << ","
+                    << std::to_string(hebtv._confidence) << ","
+                    << std::to_string(hebtv._cycle) << "\n";
+                }
+        }
+        return sstream.str();
+    };
 
-    std::ofstream outf2(file_name+"-nsw.data",
-                         std::ofstream::out | std::ofstream::trunc);
-    outf2 << nswprint(hspecial_word_nodes);
-    outf2.flush();
-    outf2.close();
+    if (what_to_dump == "av") {
+        std::ofstream outf(file_name + "-sw.data",
+                           std::ofstream::out | std::ofstream::trunc);
+        //Print ecan  values of special word nodes
+        outf << swprint(hspecial_word_nodes);
+        outf.flush();
+        outf.close();
 
-    return "Time series data dumped in to " + file_name + ".\n";
+        std::ofstream outf2(file_name + "-nsw.data",
+                            std::ofstream::out | std::ofstream::trunc);
+        outf2 << nswprint(hspecial_word_nodes);
+        outf2.flush();
+        outf2.close();
 
+        return "Time series data dumped in to " + file_name + "-sw.data and"
+               + file_name + "-snw.data" + ".\n";
+    }
+
+    if (what_to_dump == "heb") {
+        std::ofstream outf(file_name + "-hebtv.data",
+                           std::ofstream::out | std::ofstream::trunc);
+        //Print ecan  values of special word nodes
+        outf << hebprint();
+        outf.flush();
+        outf.close();
+        return "Hebbian TV dumped in to " + file_name + ".\n";
+    }
+
+    return "";
 }
 
 std::string ExperimentSetupModule::do_load_word_dict(
@@ -262,5 +315,4 @@ std::string ExperimentSetupModule::do_load_word_dict(
 
     return "Loading successful.\n";
 }
-
 
