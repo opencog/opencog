@@ -50,6 +50,5 @@ class PutAtoms:
 	def btree_state_running(self):
 		scheme_eval_h(self.atomspace, "(State btree-state tree-running)")
 
-
 	def btree_state_paused(self):
-		scheme_eval_h(self.atomspace, "(State btree-state tree-paused)")
+		scheme_eval_h(self.atomspace, "(State btree-state tree-stopping)")

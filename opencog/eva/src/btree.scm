@@ -59,6 +59,8 @@
 ;; Behavior tree state
 (define btree-state (AnchorNode "Behavior Tree State"))
 (define tree-running (ConceptNode "Running"))
+; Tree is requested to pause but still running
+(define tree-stopping (ConceptNode "Stopping"))
 (define tree-paused (ConceptNode "Paused"))
 ; Tree is rtunning at first
 (StateLink btree-state tree-running)
@@ -716,9 +718,32 @@
 		(SetLink tree-paused)
 		(Get (State btree-state (Variable "$x")))
 	))
+;; Returns true if behavior tree is stopping
+;; 
+(DefineLink
+	(DefinedPredicate "Is tree stopping?")
+	(Equal
+		(SetLink tree-stopping)
+		(Get (State btree-state (Variable "$x")))
+	))
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
+
+;; Handles stopping and blocking the tree from running
+(DefineLink 
+	(DefinedPredicate "Tree not running?")
+	(SequentialOrLink
+		(DefinedPredicate "Is tree paused?")
+		(SequentialAndLink
+			(DefinedPredicate "Is tree stopping?")
+			(Evaluation (GroundedPredicate "py:stop_tracking")
+				(ListLink))
+			;(TrueLink (StateLink btree-state tree-paused))
+			(TrueLink (PutLink (StateLink btree-state (VariableNode "$x"))
+				(SetLink tree-paused)))
+		)
+	))
 
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
@@ -1140,7 +1165,7 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
-				(DefinedPredicate "Is tree paused?")
+				(DefinedPredicate "Tree not running?")
 				(DefinedPredicate "Interaction requested")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")

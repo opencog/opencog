@@ -63,6 +63,12 @@ def gaze_at_face(face_id_node):
 	evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
+def stop_tracking():
+	print "----- Stop Tracking "
+	evl.look_at(0)
+	evl.gaze_at(0)
+	return TruthValue(1, 1)
+
 def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	intensity = float(intensity_node.name)
