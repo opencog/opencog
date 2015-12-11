@@ -241,14 +241,27 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# The perceived emotional content in the message.
-	# emo is of type EmotionState
+	# The perceived emotional content of speech in the message.
+	# emo is of type std_msgs/String
+	# TODO best would be probably specify required behavior and see how that could be implemented
+	# TODO Make use of config values
+	# Currently this is workaround so chatbot provides answers fot those queries with emotional content
 	def chatbot_affect_perceive_cb(self, emo):
+		exp = EmotionState()
+		exp.magnitude = random.choice([0.3,0.4,0.5])
+		exp.duration.secs = random.choice([2,3,4])
+		exp.duration.nsecs = 0
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
 			self.puta.chatbot_affect_happy()
+			exp.name = random.choice(["happy","comprehending","engaged"])
 		else:
 			self.puta.chatbot_affect_negative()
+			exp.name = random.choice(["confused","recoil","surprised"])
+		# Only publish to chatbot. Emotoin should be controlled in opencog.
+		# TODO replace expression name from behavior tree state
+		self.affect_pub.publish(exp)
+
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed while tree is paused
