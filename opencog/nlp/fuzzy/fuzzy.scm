@@ -1,6 +1,8 @@
 
 (define-module (opencog nlp fuzzy))
 
+(load-extension "libnlp-fuzzy" "opencog_nlp_fuzzy_init")
+
 (use-modules (srfi srfi-1)
              (opencog)
              (opencog query)  ; for cog-fuzzy-match
