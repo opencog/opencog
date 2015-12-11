@@ -37,14 +37,15 @@ public:
     Action(Rule a_rule);
 
     Rule get_rule();
-    BindLinkPtr get_derived_rule();
+    LinkPtr get_derived_state();
 
 private:
     // An action is  a rule with some more conditions.
     Rule _rule;
 
-    // This is used for action-selction, planning, or simulation.
-    BindLinkPtr _derived_rule;
+    // This is used for action-selction. It is equivalent (Since it
+    // doesn't have any of the VIRTUAL_LINKS) to the state being checked.
+    LinkPtr _derived_state;
 
     // Function for helping construct
     void init();

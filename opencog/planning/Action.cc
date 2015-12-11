@@ -36,14 +36,18 @@ Action::Action(Rule a_rule) : _rule(a_rule)
 
 void Action::init()
 {
+    PatternLinkPtr state(PatternLinkCast(_rule.get_handle()));
 
-    PatternLinkPtr pattern(PatternLinkCast(_rule.get_handle()));
-    if(NULL == pattern) {
+    if (NULL == state) {
         throw InvalidParamException(TRACE_INFO,
-			"[Action::init()] Expecting a PatternLink type or ",
+            "[Action::init()] Expecting a PatternLink type or ",
             "sub-type for Rule handle, got %s",
              _rule.get_handle()->toString().c_str());
     }
+
+    Handle var_decl;
+    Handle implicant = state->get_body();
+    Type implicant_type = implicant->getType();
 
     // Construct the derived rule. Assuming the body is wrapped in an
     // AndLink or SequentialAndLink. The variable declaration isn't modified
@@ -53,10 +57,20 @@ void Action::init()
     // SequentailOrLink, RandomChoiceLink or ....
     // create a separate rule for each. Will require breaking the variable
     // declaration as the a variable declared must occur in the body.
-    auto temp_hs = pattern->get_fixed();
-    temp_hs.insert(temp_hs.begin(), pattern->get_vardecl());
+    if (not (classserver().isA(implicant_type, AND_LINK) or
+             classserver().isA(implicant_type, SEQUENTIAL_AND_LINK)))
+        throw InvalidParamException(TRACE_INFO,
+            "[Action::init()] Expecting a AndLink/SequentialAndLink type as",
+            "the implicant, got %s", classserver().getTypeName(implicant_type).c_str());
 
-    _derived_rule = createBindLink(temp_hs);
+    // Check if variable-declaration has been made and create
+    if (state->get_vardecl()) {
+        _derived_state = createLink(SATISFACTION_LINK, HandleSeq {
+                            state->get_vardecl(),
+                            implicant});
+    } else {
+        _derived_state = createLink(SATISFACTION_LINK, implicant);
+    }
 }
 
 /**
@@ -68,9 +82,9 @@ Rule Action::get_rule()
 }
 
 /**
- * @return The derived rules associated with an action.
+ * @return The derived state associated with an action.
  */
-BindLinkPtr Action::get_derived_rule()
+LinkPtr Action::get_derived_state()
 {
-    return _derived_rule;
+    return _derived_state;
 }
