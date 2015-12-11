@@ -22,7 +22,7 @@ import rospy
 import roslib
 import time
 import logging
-
+import random
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
