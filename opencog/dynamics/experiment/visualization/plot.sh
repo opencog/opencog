@@ -3,6 +3,7 @@
 if [ $# -ne 2 ]
 then
 	echo "plot.sh  usage: plot [sw|nsw] [sti|lti|vlti]"
+	     "\n plot hebtv hebst"
 	exit
 fi
 
