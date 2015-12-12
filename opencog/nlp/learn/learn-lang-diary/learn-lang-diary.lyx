@@ -1677,7 +1677,7 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
 \end_layout
 
 \begin_layout Itemize
-Dependency-length minimzation is universal: Richard Futrell1, Kyle Mahowald,
+Dependency-length minimzation is universal: Richard Futrell, Kyle Mahowald,
  and Edward Gibson, 
 \begin_inset Quotes eld
 \end_inset
@@ -15687,6 +15687,47 @@ Instead of working with words, we could work with word-pairs, which is a
  stand-in for working with (named) entities.
  Thus, we can identify if a named entity occurs in a document more often
  than average.
+\end_layout
+
+\begin_layout Section*
+Unsupervised Morphology Learning References
+\end_layout
+
+\begin_layout Standard
+Here's some:
+\end_layout
+
+\begin_layout Itemize
+John Goldsmith, 
+\begin_inset Quotes eld
+\end_inset
+
+The unsupervised learning of natural language morphology
+\begin_inset Quotes erd
+\end_inset
+
+, Journal Computational Linguistics archive Volume 27 Issue 2, June 2001
+ Pages 153-198 MIT Press http://delivery.acm.org/10.1145/980000/972668/p153-goldsmi
+th.pdf
+\end_layout
+
+\begin_layout Itemize
+John Goldsmith, 
+\begin_inset Quotes eld
+\end_inset
+
+An algorithm for unsupervised learning of morphology
+\begin_inset Quotes erd
+\end_inset
+
+ Natural Language Engineering Volume 12 / Issue 04 / December 2006, pp 353-371
+ Cambridge University Press DOI: http://dx.doi.org/10.1017/S1351324905004055
+ http://people.cs.uchicago.edu/~jagoldsm/Papers/algorithm.pdf
+\end_layout
+
+\begin_layout Itemize
+Survey Article Unsupervised Learning of Morphology Harald Hammarström Lars
+ Borin http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00050
 \end_layout
 
 \begin_layout Section*
