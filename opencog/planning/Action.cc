@@ -45,7 +45,6 @@ void Action::init()
              _rule.get_handle()->toString().c_str());
     }
 
-    Handle var_decl;
     Handle implicant = state->get_body();
     Type implicant_type = implicant->getType();
 
@@ -63,7 +62,8 @@ void Action::init()
             "[Action::init()] Expecting a AndLink/SequentialAndLink type as",
             "the implicant, got %s", classserver().getTypeName(implicant_type).c_str());
 
-    // Check if variable-declaration has been made and create
+    // Check if variable-declaration has been made before extracting the
+    // derived state.
     if (state->get_vardecl()) {
         _derived_state = createLink(SATISFACTION_LINK, HandleSeq {
                             state->get_vardecl(),
