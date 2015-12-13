@@ -25,6 +25,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
@@ -75,15 +76,18 @@ public:
                      "/tests/planning/test-rbs.scm");
         load_scm_files_from_config(_as);
 
-        /*
         // Simple BindLink with an AndLink or SequentialAndLink
         Handle alias = _as.get_node(NODE, "initial-rule"),
                rbs = _as.get_node(CONCEPT_NODE, "initial-rbs"),
                ml = _as.get_link(MEMBER_LINK, HandleSeq {alias, rbs});
+
         Rule rule(ml);
-        Action a(rule);
-        cout << a.get_derived_rule()->get_virtual().size() ;
-        TS_ASSERT_EQUALS(0, a.get_derived_rule()->get_virtual().size());
-        */
+        Action action(rule);
+        PatternLinkPtr p = PatternLinkCast(action.get_derived_state());
+
+        if (p == nullptr)
+            p = createPatternLink(*action.get_derived_state());
+
+        TS_ASSERT_EQUALS(0, p->get_virtual().size());
     }
 };
