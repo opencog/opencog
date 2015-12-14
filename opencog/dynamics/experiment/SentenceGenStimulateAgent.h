@@ -4,26 +4,15 @@
  *  Created on: 10 Nov 2015
  *      Author: misgana
  */
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/server/Agent.h>
+#include <opencog/server/CogServer.h>
 
 #ifndef _SENTENCEGENAGENT_H_
 #define _SENTENCEGENAGENT_H_
 
 namespace opencog {
-class Agent;
-class SchemeEval;
-class CogServer;
 namespace ECANExperiment {
-
-//extern std::vector<std::string> generated_sentences;
-//extern std::vector<HandleSeq> sent_wordnodes;
-//extern std::vector<HandleSeq> wordinstancenodes;
-//
-//extern UnorderedHandleSet hspecial_word_nodes;
-//
-//extern std::vector<std::string> special_words;
-//extern std::vector<std::string> nspecial_words;
-//extern int sent_size;
-//extern int special_word_occurence_period;
 
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.

@@ -31,18 +31,6 @@ static std::string ECAN_EXP_AGENTS = "opencog::SimpleHebbianUpdatingAgent\n"
                                      "opencog::ArtificilaStimulatorAgent\n";
                                      //"opencog::SurprisingnessEvaluatorAgent\n";
 
-extern std::vector<std::string> generated_sentences;
-extern std::vector<HandleSeq> sent_wordnodes;
-extern std::vector<HandleSeq> wordinstancenodes;
-
-extern UnorderedHandleSet hspecial_word_nodes;
-
-extern std::vector<std::string> special_words;
-extern std::vector<std::string> nspecial_words;
-extern int sent_size;
-
-extern int special_word_occurence_period;
-
 class ExperimentSetupModule: public Module {
 private:
     struct AValues {

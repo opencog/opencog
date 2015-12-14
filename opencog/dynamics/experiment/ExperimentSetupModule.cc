@@ -17,8 +17,6 @@
 #include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/dynamics/experiment/ArtificialStimulatorAgent.h>
-#include <opencog/dynamics/experiment/ExperimentSetupModule.h>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Module.h>
@@ -26,12 +24,17 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "ArtificialStimulatorAgent.h"
+#include "Globals.h"
+#include "ExperimentSetupModule.h"
+
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
-int special_word_occurence_period = 2;
-
 DECLARE_MODULE(ExperimentSetupModule);
+
+std::map<Handle, std::vector<ExperimentSetupModule::AValues>> ExperimentSetupModule::_av_data;
+std::map<Handle, std::vector<ExperimentSetupModule::HebTValues>> ExperimentSetupModule::_hebtv_data;
 
 ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
         Module(cs), _cs(cs)
@@ -39,7 +42,10 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
     _log = new Logger(); //new Logger("ecanexpe.log");
     _log->fine("uuid,cycle,sti_old,sti_new,lti,vlti,wage,rent,agent_name");
     _as = &_cs.getAtomSpace();
+
     _scmeval = new SchemeEval(_as);
+    _scmeval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    _scmeval->eval("(use-modules  (opencog)");
 
     _AVChangedSignalConnection = _as->AVChangedSignal(
             boost::bind(&ExperimentSetupModule::AVChangedCBListener, this, _1,
@@ -52,7 +58,7 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
 ExperimentSetupModule::~ExperimentSetupModule()
 {
     unregisterAgentRequests();
-    delete (_scmeval);
+    //delete (_scmeval);
 }
 
 void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
@@ -212,7 +218,7 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
     std::string what_to_dump = *(args.begin());
     std::string file_name = *(++args.begin());
 
-    dump_ecan_data(what_to_dump, file_name);
+    ExperimentSetupModule::dump_ecan_data(what_to_dump, file_name);
 
     return "";
 }
