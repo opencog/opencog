@@ -267,9 +267,15 @@ class EvaControl():
 	# Do not to clean visible faces as these can still be added/removed while tree is paused
 	def behavior_switch_callback(self, data):
 		if data.data == "btree_on":
-			self.puta.btree_state_running()
+			if not self.running:
+				self.puta.btree_run()
+				self.running = True
 		if data.data == "btree_off":
-			self.puta.btree_state_paused()
+			if self.running:
+				self.puta.btree_stop()
+				self.look_at(0)
+				self.gaze_at(0)
+				self.running = False
 
 
 	def __init__(self):
@@ -330,3 +336,4 @@ class EvaControl():
 			Int32, queue_size=1)
 
 		rospy.Subscriber("/behavior_switch", String, self.behavior_switch_callback)
+		self.running = True
