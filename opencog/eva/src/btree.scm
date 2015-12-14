@@ -858,7 +858,7 @@
 		)
 		;; Clear the lost face target
 		(DefinedPredicateNode "Clear lost face")
-		(DefinedPredicateNode "Update status")
+		(DefinedPredicateNode "Update room state")
 	))
 
 ;; Interact with people
