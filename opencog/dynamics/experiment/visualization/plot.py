@@ -82,7 +82,7 @@ def set_heb_data(file_path, uuids):
         uuid = line[0]
         if uuid in uuids:
             if uuid not in heb_data.keys():
-                heb_data[uuid] = [[0.0],[0.0],[0.0]]
+                heb_data[uuid] = [[],[],[]]
                 continue
             else:
                 heb_data[uuid][0].append(float(line[1]))
