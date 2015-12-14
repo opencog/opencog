@@ -36,10 +36,20 @@
                 (WordNode "###LEFT-WALL###")
             )
 
-            ;; If left wall is linked with any of Wd, Wt or Wa,
+            ;; If left wall is linked with any of Wd, Wp, Wr, Wt or Wa,
             ;; then its declarative.
             (ChoiceLink
                 (EvaluationLink (LinkGrammarRelationshipNode "Wd")
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
+
+                (EvaluationLink (LinkGrammarRelationshipNode "Wp")
+                    (ListLink
+                        (VariableNode "$wall-inst")
+                        (VariableNode "$word-inst")))
+
+                (EvaluationLink (LinkGrammarRelationshipNode "Wr")
                     (ListLink
                         (VariableNode "$wall-inst")
                         (VariableNode "$word-inst")))
