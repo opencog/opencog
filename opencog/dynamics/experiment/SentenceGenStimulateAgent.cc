@@ -11,6 +11,7 @@
 #include <opencog/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
 
+#include "ExperimentSetupModule.h"
 #include "SentenceGenStimulateAgent.h"
 
 using namespace opencog;
@@ -46,6 +47,11 @@ void SentenceGenStimulateAgent::run(void)
     if (ssize > 0) {
         generate_stimuate_sentence();
         ssize--;
+    }
+
+    if(_cogserver.getCycleCount() % 100 == 0){
+        std::string file_name= "dump"+std::to_string(_cogserver.getCycleCount());
+        ExperimentSetupModule::dump_ecan_data(file_name, "all");
     }
 }
 

@@ -11,7 +11,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>
 
-#include <opencog/dynamics/experiment/SentenceGenStimulateAgent.h>
+#include "ArtificialStimulatorAgent.h"
+#include "SentenceGenStimulateAgent.h"
 
 namespace opencog {
 
@@ -30,17 +31,17 @@ static std::string ECAN_EXP_AGENTS = "opencog::SimpleHebbianUpdatingAgent\n"
                                      "opencog::ArtificilaStimulatorAgent\n";
                                      //"opencog::SurprisingnessEvaluatorAgent\n";
 
-std::vector<std::string> generated_sentences={};
-std::vector<HandleSeq> sent_wordnodes;
-std::vector<HandleSeq> wordinstancenodes;
+extern std::vector<std::string> generated_sentences;
+extern std::vector<HandleSeq> sent_wordnodes;
+extern std::vector<HandleSeq> wordinstancenodes;
 
-UnorderedHandleSet hspecial_word_nodes;
+extern UnorderedHandleSet hspecial_word_nodes;
 
-std::vector<std::string> special_words;
-std::vector<std::string> nspecial_words;
-int sent_size;
+extern std::vector<std::string> special_words;
+extern std::vector<std::string> nspecial_words;
+extern int sent_size;
 
-int special_word_occurence_period = 2;
+extern int special_word_occurence_period;
 
 class ExperimentSetupModule: public Module {
 private:
@@ -95,8 +96,8 @@ private:
     Logger * _log;
     SchemeEval * _scmeval;
 
-    std::map<Handle, std::vector<AValues>> _av_data;
-    std::map<Handle, std::vector<HebTValues>> _hebtv_data;
+    static std::map<Handle, std::vector<AValues>> _av_data;
+    static std::map<Handle, std::vector<HebTValues>> _hebtv_data;
 
     boost::signals2::connection _AVChangedSignalConnection,_TVChangedSignalConnection;
 
@@ -172,6 +173,8 @@ public:
     virtual ~ExperimentSetupModule();
     static inline const char* id();
     virtual void init(void);
+
+    static std::string dump_ecan_data(std::string what_to_dump, std::string file_name);
 };
 }
 

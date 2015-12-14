@@ -29,6 +29,8 @@
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
+int special_word_occurence_period = 2;
+
 DECLARE_MODULE(ExperimentSetupModule);
 
 ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
@@ -71,8 +73,9 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
         assert(outg.size() == 2);
         auto end = hspecial_word_nodes.end();
 
-        if (hspecial_word_nodes.find(outg[0]) != end  and hspecial_word_nodes.find(
-                outg[1]) != end) {
+        if (hspecial_word_nodes.find(outg[0]) != end and hspecial_word_nodes.find(
+                outg[1])
+                                                         != end) {
             HebTValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
                               _cs.getCycleCount());
             _hebtv_data[h].push_back(hebtvv);
@@ -208,9 +211,16 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
 {
     std::string what_to_dump = *(args.begin());
     std::string file_name = *(++args.begin());
-    // cycle,uuid,sti,lti
 
-    auto swprint = [this](const UnorderedHandleSet & uhs) {
+    dump_ecan_data(what_to_dump, file_name);
+
+    return "";
+}
+
+std::string ExperimentSetupModule::dump_ecan_data(std::string what_to_dump,
+                                                  std::string file_name)
+{
+    auto swprint = [=](const UnorderedHandleSet & uhs) {
         std::stringstream sstream;
         for (const auto & p : _av_data) {
             if(uhs.find(p.first) != uhs.end()) {
@@ -226,7 +236,7 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
         return sstream.str();
     };
 
-    auto nswprint = [this](const UnorderedHandleSet & uhs) {
+    auto nswprint = [=](const UnorderedHandleSet & uhs) {
         std::stringstream sstream;
         for (const auto & p : _av_data) {
             if(uhs.find(p.first) == uhs.end()) {
@@ -242,20 +252,20 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
         return sstream.str();
     };
 
-    auto hebprint = [this]() {
+    auto hebprint = [=]() {
         std::stringstream sstream;
         for (const auto & p : _hebtv_data) {
-                for (const HebTValues& hebtv : p.second) {
-                    sstream << std::to_string(p.first.value()) << ","
-                    << std::to_string(hebtv._strength) << ","
-                    << std::to_string(hebtv._confidence) << ","
-                    << std::to_string(hebtv._cycle) << "\n";
-                }
+            for (const HebTValues& hebtv : p.second) {
+                sstream << std::to_string(p.first.value()) << ","
+                << std::to_string(hebtv._strength) << ","
+                << std::to_string(hebtv._confidence) << ","
+                << std::to_string(hebtv._cycle) << "\n";
+            }
         }
         return sstream.str();
     };
 
-    if (what_to_dump == "av") {
+    if (what_to_dump == "av" or what_to_dump == "all") {
         std::ofstream outf(file_name + "-sw.data",
                            std::ofstream::out | std::ofstream::trunc);
         //Print ecan  values of special word nodes
@@ -273,7 +283,7 @@ std::string ExperimentSetupModule::do_dump_data(Request *req,
                + file_name + "-snw.data" + ".\n";
     }
 
-    if (what_to_dump == "heb") {
+    if (what_to_dump == "heb" or what_to_dump == "all") {
         std::ofstream outf(file_name + "-hebtv.data",
                            std::ofstream::out | std::ofstream::trunc);
         //Print ecan  values of special word nodes
