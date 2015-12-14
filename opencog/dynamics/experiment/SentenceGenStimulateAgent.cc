@@ -5,9 +5,6 @@
  *      Author: misgana
  */
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -17,14 +14,31 @@
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
+namespace opencog{namespace ECANExperiment{
+//extern std::vector<std::string> generated_sentences;
+extern std::vector<HandleSeq> sent_wordnodes;
+extern std::vector<HandleSeq> wordinstancenodes;
+
+extern UnorderedHandleSet hspecial_word_nodes;
+
+extern std::vector<std::string> special_words;
+extern std::vector<std::string> nspecial_words;
+extern int sent_size;
+extern int special_word_occurence_period;
+}
+}
+
 SentenceGenStimulateAgent::~SentenceGenStimulateAgent()
 {
-    delete _scm_eval;
+    //delete _scm_eval;
 }
 SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
         Agent(cs), _as(cs.getAtomSpace())
 {
     _scm_eval = new SchemeEval(&_as);
+    _scm_eval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    _scm_eval->eval("(use-modules  (opencog)");
+
     _scm_eval->eval("(load-r2l-rulebase)");
     _scm_eval->eval("(load \"opencog/nlp/types/nlp_types.scm\")");
 }
