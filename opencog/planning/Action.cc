@@ -45,15 +45,14 @@ void Action::init()
              _rule.get_handle()->toString().c_str());
     }
 
-    Handle implicant = state->get_body();
-    Type implicant_type = implicant->getType();
+    Type implicant_type = state->get_body()->getType();
 
     // Construct the derived rule. Assuming the body is wrapped in an
     // AndLink or SequentialAndLink. The variable declaration isn't modified
     // because the variables in virtual-links must also be part of the body
     // of the pattern independent of the virtual-links.
     // TODO: If the body is wrapped in an OrLink, ChoiceLink,
-    // SequentailOrLink, RandomChoiceLink or ....
+    // SequentailOrLink, RandomChoiceLink or their derivatives
     // create a separate rule for each. Will require breaking the variable
     // declaration as the a variable declared must occur in the body.
     if (not (classserver().isA(implicant_type, AND_LINK) or
@@ -62,14 +61,16 @@ void Action::init()
             "[Action::init()] Expecting a AndLink/SequentialAndLink type as",
             "the implicant, got %s", classserver().getTypeName(implicant_type).c_str());
 
+    auto derived_body = Handle(createLink(implicant_type, state->get_fixed()));
+
     // Check if variable-declaration has been made before extracting the
     // derived state.
     if (state->get_vardecl()) {
         _derived_state = createLink(SATISFACTION_LINK, HandleSeq {
                             state->get_vardecl(),
-                            implicant});
+                            derived_body});
     } else {
-        _derived_state = createLink(SATISFACTION_LINK, implicant);
+        _derived_state = createLink(SATISFACTION_LINK, derived_body);
     }
 }
 
