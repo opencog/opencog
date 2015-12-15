@@ -4,7 +4,12 @@
  *  Created on: 10 Nov 2015
  *      Author: misgana
  */
+#include <sstream>
+#include <fstream>
+#include <boost/filesystem.hpp>
+
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -36,11 +41,6 @@ SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
         Agent(cs), _as(cs.getAtomSpace())
 {
     _scm_eval = new SchemeEval(&_as);
-    _scm_eval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-    _scm_eval->eval("(use-modules  (opencog)");
-
-    _scm_eval->eval("(load-r2l-rulebase)");
-    _scm_eval->eval("(load \"opencog/nlp/types/nlp_types.scm\")");
 }
 
 const ClassInfo& SentenceGenStimulateAgent::classinfo() const
@@ -63,9 +63,32 @@ void SentenceGenStimulateAgent::run(void)
         ssize--;
     }
 
-    if(_cogserver.getCycleCount() % 100 == 0){
-        std::string file_name= "dump"+std::to_string(_cogserver.getCycleCount());
-        ExperimentSetupModule::dump_ecan_data(file_name, "all");
+    if(_cogserver.getCycleCount() % 50 == 0){
+        std::string dir_path = std::string(PROJECT_SOURCE_DIR)
+                + "/opencog/dynamics/experiment/visualization/" + "cycle"
+                + std::to_string(_cogserver.getCycleCount());
+
+        boost::filesystem::path dir(dir_path);
+
+        if (boost::filesystem::create_directory(dir)) {
+            std::string file_name = dir_path + "/dump";
+
+            //dump hebbian strength of between special word nodes
+            ExperimentSetupModule::dump_ecan_data("heb", file_name);
+            std::cout << "[INFO ]" << file_name << " written." << std::endl;
+
+            std::ofstream outf(dir_path + "/atom_count.txt",
+                               std::ofstream::out | std::ofstream::trunc);
+
+            //Print counts
+            outf <<"WORD_NODE = "<< _as.get_num_atoms_of_type(WORD_NODE);
+            outf <<"WORD_INSTANCE_NODE = "<< _as.get_num_atoms_of_type(WORD_INSTANCE_NODE);
+            outf <<"ASYMMETRIC_HEBBIAN_LINK = "<< _as.get_num_atoms_of_type(ASYMMETRIC_HEBBIAN_LINK);
+
+            outf.flush();
+            outf.close();
+        }
+
     }
 }
 
