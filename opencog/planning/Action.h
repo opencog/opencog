@@ -40,7 +40,10 @@ public:
     LinkPtr get_derived_state();
 
 private:
-    // An action is  a rule with some more conditions.
+    // An action is  a URE rule  that inherits from
+    // (ConceptNode "opencog: action").
+    static const std::string main_action_name;
+
     Rule _rule;
 
     // This is used for action-selction. It is equivalent (Since it

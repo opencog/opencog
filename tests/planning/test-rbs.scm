@@ -48,4 +48,7 @@
                  (VariableNode "z"))))
 )
 
-(ure-add-rule initial-rbs "initial-rule" initial-rule 1)
+(define rule-alias (ure-add-rule initial-rbs "initial-rule" initial-rule 1))
+
+; Make an action out of a rule.
+(InheritanceLink rule-alias (ConceptNode "opencog: action"))

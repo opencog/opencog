@@ -22,9 +22,13 @@
  */
 
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomutils/FollowLink.h>
+
 #include "Action.h"
 
 using namespace opencog;
+
+const std::string Action::main_action_name = "opencog: action";
 
 /**
  * Main Constructor
@@ -44,6 +48,15 @@ void Action::init()
             "sub-type for Rule handle, got %s",
              _rule.get_handle()->toString().c_str());
     }
+
+    FollowLink fl;
+    // NOTE:  Assuming only one InheritanceLink
+    auto oc_node = fl.follow_binary_link(_rule.get_alias(), INHERITANCE_LINK);
+    auto oc_node_ptr = NodeCast(oc_node);
+
+    if (not oc_node_ptr or (main_action_name != oc_node_ptr->getName()))
+        throw InvalidParamException(TRACE_INFO,
+            "[Action::init()] the rule is not an action type");
 
     Type implicant_type = state->get_body()->getType();
 

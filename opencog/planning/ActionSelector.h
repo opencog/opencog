@@ -43,8 +43,6 @@
  private:
      AtomSpace& _as;
 
-     // An action is a URE rule that inherits from
-     // (ConceptNode "OpenCog: Action").
      std::vector<Action> _actions;
 
      // Initial rulebase
