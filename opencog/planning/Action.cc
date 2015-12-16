@@ -28,6 +28,9 @@
 
 using namespace opencog;
 
+/**
+ * Fully abstracted action node name.
+ */
 const std::string Action::main_action_name = "opencog: action";
 
 /**

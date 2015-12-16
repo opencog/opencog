@@ -23,20 +23,18 @@
 
 //#include <algorithm>
 
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/atomspaceutils/AtomSpaceUtils.h>
-
 
 #include "ActionSelector.h"
-
 
 using namespace opencog;
 
 /**
  * Default action rulebase name.
  */
-const std::string ActionSelector::action_rbs_name = "OpenCog: Action";
+const std::string ActionSelector::action_rbs_name = "opencog: action-rbs";
 
 /**
  * ActionSelector Constructor.
@@ -48,8 +46,8 @@ const std::string ActionSelector::action_rbs_name = "OpenCog: Action";
 ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
 {
     if (Handle::UNDEFINED == rbs)
-    throw RuntimeException(TRACE_INFO,
-        "[ActionSelector] - invalid action rulebase specified!");
+        throw RuntimeException(TRACE_INFO,
+            "[ActionSelector] - invalid action rulebase specified!");
 
     auto temp_actions(fetch_actions());
 

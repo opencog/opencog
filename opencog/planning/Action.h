@@ -27,10 +27,12 @@
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/rule-engine/Rule.h>
 
-namespace opencog {
+namespace opencog
+ {
 /** \addtogroup planning
  * @{
  */
+
 class Action
 {
 public:
@@ -40,7 +42,7 @@ public:
     LinkPtr get_derived_state();
 
 private:
-    // An action is  a URE rule  that inherits from
+    // An action is  a URE rule that inherits from
     // (ConceptNode "opencog: action").
     static const std::string main_action_name;
 
@@ -52,8 +54,7 @@ private:
 
     // Function for helping construct
     void init();
-
-}; // class Action
+};
 
 /** @}*/
 } // namespace opencog

@@ -26,30 +26,33 @@
 
  #include <vector>
 
-
  #include "Action.h"
 
- namespace opencog
- {
+namespace opencog
+{
+/** \addtogroup planning
+* @{
+*/
 
- class ActionSelector
- {
- public:
-     ActionSelector(AtomSpace& as, Handle rbs);
-     ~ActionSelector();
+class ActionSelector
+{
+public:
+    ActionSelector(AtomSpace& as, Handle rbs);
+    ~ActionSelector();
 
-     static const std::string action_rbs_name;
+    static const std::string action_rbs_name;
 
- private:
-     AtomSpace& _as;
+private:
+    AtomSpace& _as;
 
-     std::vector<Action> _actions;
+    std::vector<Action> _actions;
 
-     // Initial rulebase
-     Handle _rbs;
-     HandleSeq fetch_actions();
- }; // class ActionSelector
+    // Initial rulebase
+    Handle _rbs;
+    HandleSeq fetch_actions();
+};
 
- } // namespace opencog
+/** @}*/
+} // namespace opencog
 
- #endif  // _OPENCOG_PLANNING_UTILITIES_H
+ #endif  // _OPENCOG_PLANNING_ACTION_SELECTOR_H
