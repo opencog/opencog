@@ -268,10 +268,10 @@
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
-	"default_emotion_duration" "default_emotion_duration")
+	"time_since_last_expr_min" "time_since_last_expr_max")
 
 (change-template "Time to make gesture" "gesture"
-	"time_to_make_gesture_min" "time_to_make_gesture_max")
+	"time_since_last_gesture_min" "time_since_last_gesture_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
