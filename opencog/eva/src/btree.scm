@@ -156,6 +156,7 @@
 
 	; The name of state node holding the timestamp.
 	(define ts-name (string-append "start-" name "-timestamp"))
+	(define prev-ts (string-append "previous-" name "-call"))
 
 	; The state node actually holding the timestamp.
 	(State (Schema ts-name) (Number 0))
@@ -169,6 +170,10 @@
 	(DefineLink
 		(DefinedSchema (string-append "get " name " timestamp"))
 		(Get (State (Schema ts-name) (Variable "$x"))))
+
+	; Additional state, used for computing integral, for probabilities.
+	; See below, in the time-to-change template.
+	(State (Schema prev-ts) (Number 0))
 )
 
 ; "interaction" -- record the start time of an interaction.
@@ -189,17 +194,49 @@
 ; since the timestamp is less than MIN, then return false; if the
 ; elapsed time is greater than MAX then return true; else return a
 ; with increasing random liklihood.
+;
+; To compute the likelihood correctly, we have to compute the
+; integral since the last time that this check was made. Thus,
+; if we are calling this predicate 10 times a second, the probability
+; of a transition will be failry small; but if we call it once a second,
+; the probability will be ten times greater... computing even this
+; simple integral in atomese is painful. Yuck. But we have to do it.
 (define (change-template pred-name ts-name min-name max-name)
+	(define get-ts (string-append "get " ts-name " timestamp"))
+	(define prev-ts (string-append "previous-" ts-name "-call"))
+	(define delta-ts (string-append "delta-" ts-name "-time"))
 	(DefineLink
 		(DefinedPredicate pred-name)
-		(GreaterThan
-			; Minus computes number of seconds since interaction start.
-			(Minus (Time)
-				(DefinedSchema (string-append "get " ts-name " timestamp")))
-			; Random number in the configured range.
-			(RandomNumber
-				(Get (State (Schema min-name) (Variable "$min")))
-				(Get (State (Schema max-name) (Variable "$max"))))
+		(SequentialOr
+			; If elapsed time greater than max, then true.
+			(GreaterThan
+				; Minus computes number of seconds since interaction start.
+				(Minus (Time) (DefinedSchema get-ts))
+				(Get (State (Schema max-name) (Variable "$max")))
+			)
+			(SequentialAnd
+				; If elapsed time less than min, then false.
+				(GreaterThan
+					(Get (State (Schema min-name) (Variable "$min")))
+					; Minus computes number of seconds since interaction start.
+					(Minus (Time) (DefinedSchema get-ts))
+				)
+				; Compute integral: how long since last check?
+				; Delta is the time since the last check.
+				(True (Put (State (Schema delta-ts) (Variable "$x"))
+						(Minus (Time) (Get (State (Schema prev-ts))))))
+				; Update time of last check to now.
+				(True (Put (State (Schema prev-ts) (Variable "$x")) (Time)))
+				(GreaterThan
+					; Random number in the configured range.
+					(RandomNumber
+						(Number 0)
+						(Minus
+							(Get (State (Schema max-name) (Variable "$max")))
+							(Get (State (Schema min-name) (Variable "$min")))))
+					(Get (State (Schema delta-ts) (Variable "$delta")))
+				)
+			)
 	)))
 
 ; Return true if it is time to interact with someone else.
@@ -217,7 +254,7 @@
 ; the time_bored_to_sleep parameter).
 ; line 611 -- bored_since, sleep probability.
 (change-template "Bored too long" "bored"
-	"time_bored_to_sleep" "time_bored_to_sleep")
+	"time_to_sleep_min" "time_to_sleep_max")
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
@@ -1012,7 +1049,6 @@
 					; ##### Go To Sleep #####
 					(SequentialAnd  ; line 515
 						(DefinedPredicate "Bored too long")
-						(DefinedPredicate "dice-roll: go to sleep")
 						(DefinedPredicate "Go to sleep"))
 
 					; ##### Search For Attention #####
