@@ -171,13 +171,14 @@
 )
 
 ; "interaction" -- record the start time of an interaction.
+; defines (DefinedSchema "set-interaction-timestamp") etc.
 (timestamp-template "interaction")
 ; "expression" -- time when a new expression started being shown.
 (timestamp-template "expression")
+(timestamp-template "gesture")
 ; "bored" -- when Eva last got bored.
 (timestamp-template "bored")
 (timestamp-template "sleep")
-(timestamp-template "gesture")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,
@@ -205,9 +206,6 @@
 (change-template "Time to change interaction" "interaction"
 	"time_to_change_face_target_min" "time_to_change_face_target_max")
 
-(change-template "Time to make gesture" "gesture"
-	"time_to_make_gesture_min" "time_to_make_gesture_max")
-
 ; Return true if we've been sleeping for long enough (i.e. longer than
 ; the time_to_wake_up parameter.)
 ; line 707 -- is_time_to_wake_up()
@@ -218,6 +216,9 @@
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
 	"default_emotion_duration" "default_emotion_duration")
+
+(change-template "Time to make gesture" "gesture"
+	"time_to_make_gesture_min" "time_to_make_gesture_max")
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -1025,7 +1026,7 @@
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
-		; ... and show a random gesture from "listening" set.
+		; ... and show one random gesture from "listening" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
@@ -1047,37 +1048,52 @@
 				; If chatbot is happy ...
 				(DefinedPredicate "chatbot is happy")
 				; ... show one of the neutral-speech expressions
-				(Put (DefinedPredicateNode "Show random expression")
-					(ConceptNode "neutral-speech"))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to change expression"))
+					(Put (DefinedPredicateNode "Show random expression")
+						(ConceptNode "neutral-speech")))
+
 				; ... nod slowly ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-positive-nod"))
-				; ... raise eyebrows ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-pos-think"))
-				; ... switch to chat fast blink rate...
-				(Evaluation (GroundedPredicate "py:blink_rate")
-					(ListLink
-						(DefinedSchema "blink chat fast mean")
-						(DefinedSchema "blink chat fast var")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to make gesture"))
+					(SequentialAnd
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-positive-nod"))
+
+						; ... raise eyebrows ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-pos-think"))
+
+						; ... switch to chat fast blink rate...
+						(Evaluation (GroundedPredicate "py:blink_rate")
+							(ListLink
+								(DefinedSchema "blink chat fast mean")
+								(DefinedSchema "blink chat fast var")))
+				))
 			)
 			(SequentialAnd
 				; If chatbot is not happy ...
 				(DefinedPredicate "chatbot is negative")
 				; ... show one of the frustrated expressions
-				(Put (DefinedPredicateNode "Show random expression")
-					(ConceptNode "frustrated"))
-				; ... shake head quickly ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-negative-shake"))
-				; ... furrow brows ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-neg-think"))
-				; ... switch to chat slow blink rate...
-				(Evaluation (GroundedPredicate "py:blink_rate")
-					(ListLink
-						(DefinedSchema "blink chat slow mean")
-						(DefinedSchema "blink chat slow var")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to change expression"))
+					(Put (DefinedPredicateNode "Show random expression")
+						(ConceptNode "frustrated")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to make gesture"))
+					(SequentialAnd
+						; ... shake head quickly ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-negative-shake"))
+						; ... furrow brows ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-neg-think"))
+						; ... switch to chat slow blink rate...
+						(Evaluation (GroundedPredicate "py:blink_rate")
+							(ListLink
+								(DefinedSchema "blink chat slow mean")
+								(DefinedSchema "blink chat slow var")))
+				))
 			))))
 
 ; Things to do, if the chattbot stopped talking.
