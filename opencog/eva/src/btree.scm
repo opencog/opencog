@@ -208,10 +208,16 @@
 	"time_to_change_face_target_min" "time_to_change_face_target_max")
 
 ; Return true if we've been sleeping for long enough (i.e. longer than
-; the time_to_wake_up parameter.)
+; the time_to_wake_up parameter).
 ; line 707 -- is_time_to_wake_up()
 (change-template "Time to wake up" "sleep"
 	"time_to_wake_up" "time_to_wake_up")
+
+; Return true if we've been bored for a long time (i.e. longer than
+; the time_bored_to_sleep parameter).
+; line 611 -- bored_since, sleep probability.
+(change-template "Bored too long" "bored"
+	"time_bored_to_sleep" "time_bored_to_sleep")
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
@@ -998,28 +1004,28 @@
 				(Not (Equal (SetLink soma-sleeping)
 					(Get (State soma-state (Variable "$x")))))
 
-				(SequentialOrLink  ; line 513
+				(SequentialOr  ; line 513
 					; ##### Go To Sleep #####
-					(SequentialAndLink  ; line 515
-;; XXX incomplete, should depend on "bored-since" time
-;; if bored for 5 minutes, go to sleep.
-						(DefinedPredicateNode "dice-roll: go to sleep")
-						(DefinedPredicateNode "Go to sleep"))
+					(SequentialAnd  ; line 515
+						(DefinedPredicate "Bored too long")
+						(DefinedPredicate "dice-roll: go to sleep")
+						(DefinedPredicate "Go to sleep"))
+
 					; ##### Search For Attention #####
 					; If we didn't fall asleep above, then search for attention.
-					(DefinedPredicateNode "Search for attention")
+					(DefinedPredicate "Search for attention")
 				))
 			; ##### Is Sleeping #####
-			(SequentialOrLink  ; line 528
+			(SequentialOr  ; line 528
 				; ##### Wake Up #####
-				(SequentialAndLink  ; line 530
-					(DefinedPredicateNode "dice-roll: wake up")
+				(SequentialAnd  ; line 530
+					(DefinedPredicate "dice-roll: wake up")
 					; did we sleep for long enough?
-					(DefinedPredicateNode "Time to wake up")
-					(DefinedPredicateNode "Wake up")
+					(DefinedPredicate "Time to wake up")
+					(DefinedPredicate "Wake up")
 				)
 				; ##### Continue To Sleep #####
-				(DefinedPredicateNode "Continue sleeping")
+				(DefinedPredicate "Continue sleeping")
 			)
 		)
 

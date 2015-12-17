@@ -125,6 +125,8 @@
 
 ; Wake up after 25 seconds ...
 (State (Schema "time_to_wake_up") (Number 25))
+; After 25 seconds of boredom, maybe fall asleep.
+(State (Schema "time_bored_to_sleep") (Number 25))
 
 ; line 4 default_emotion_duration is 1 second but that's nuts.
 (State (Schema "default_emotion_duration") (Number 6.0))
