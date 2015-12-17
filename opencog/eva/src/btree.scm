@@ -886,11 +886,12 @@
 ;; line 545
 (DefineLink
 	(DefinedPredicate "If sleeping then wake")
-	(True (SequentialAnd
+	(SequentialOr
+		(SequentialAnd
 			(Equal (SetLink soma-sleeping)
 				(Get (State soma-state (Variable "$x"))))
-			(DefinedPredicateNode "Wake up")
-		)))
+			(DefinedPredicateNode "Wake up"))
+		(True)))
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
