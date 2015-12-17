@@ -1125,6 +1125,10 @@
 
 		; ... and switch state to "listening"
 		(True (Put (State chat-state (Variable "$x")) chat-listen))
+
+		; ... and print some tracing output
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Finished talking")))
 	))
 
 ; Things to do, if the chattbot is listening.
