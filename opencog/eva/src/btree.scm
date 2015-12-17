@@ -781,8 +781,6 @@
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
-;; XXX Almost a complete implementation of whats in owyl...  but
-;; the owyl pick_instant code is insane... punt here.
 (DefineLink
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
@@ -883,14 +881,25 @@
 		(True)
 	))
 
+;; ##### If Interruption && Sleeping -> Wake Up #####
+;; line 545
+(DefineLink
+	(DefinedPredicate "If sleeping then wake")
+	(True (SequentialAnd
+			(Equal (SetLink soma-sleeping)
+				(Get (State soma-state (Variable "$x"))))
+			(DefinedPredicateNode "Wake up")
+		)))
+
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
 (DefineLink
-	(DefinedPredicateNode "New arrival sequence")
-	(SequentialAndLink
-		(DefinedPredicateNode "Did someone arrive?")
-		(DefinedPredicateNode "Respond to new arrival")
-		(DefinedPredicateNode "Update status")
+	(DefinedPredicate "New arrival sequence")
+	(SequentialAnd
+		(DefinedPredicate "Did someone arrive?")
+		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "Respond to new arrival")
+		(DefinedPredicate "Update status")
 	))
 
 ;; Check to see if someone left.
@@ -1089,17 +1098,6 @@
 				; ##### Continue To Sleep #####
 				(DefinedPredicate "Continue sleeping")
 			)
-		)
-
-		; ##### If Interruption && Sleeping -> Wake Up #####
-		;; XXX This never runs, since the face-detected code is
-		;; triggered before we can get to here. Thus, the wake-up
-		;; sequence never runs, and the soma-state is incorrect...
-		(SequentialAndLink  ; line 545
-			(EqualLink (SetLink soma-sleeping)
-				(GetLink (StateLink soma-state (VariableNode "$x"))))
-			(DefinedPredicateNode "Did someone arrive?")
-			(DefinedPredicateNode "Wake up")
 		)
 ))
 
