@@ -721,23 +721,26 @@
 ;; XXX Almost a complete implementation of whats in owyl...  but
 ;; the owyl pick_instant code is insane... punt here.
 (DefineLink
-	(DefinedPredicateNode "Interact with face")
-	(SequentialAndLink
+	(DefinedPredicate "Interact with face")
+	(SequentialAnd
 		;; Look at the interaction face - line 765
-		(TrueLink (DefinedSchemaNode "look at person"))
+		(True (DefinedSchema "look at person"))
 
 		;; Show random expressions only if NOT talking
 		; aka "do_pub_emotions=False" in the new owyl tree.
-		(DefinedPredicate "chatbot is listening")
+		(SequentialOr
+			(Not (DefinedPredicate "chatbot is listening"))
+			(SequentialAnd
 
-		;; line 768
-		(SequentialOrLink
-			(NotLink (DefinedPredicateNode "Time to change expression"))
-			(DefinedPredicateNode "Show positive expression")
-		)
-		(SequentialOrLink
-			(NotLink (DefinedPredicateNode "Time to make gesture"))
-			(DefinedPredicateNode "Pick random positive gesture"))
+				;; line 768
+				(SequentialOrLink
+					(NotLink (DefinedPredicateNode "Time to change expression"))
+					(DefinedPredicateNode "Show positive expression")
+				)
+				(SequentialOrLink
+					(NotLink (DefinedPredicateNode "Time to make gesture"))
+					(DefinedPredicateNode "Pick random positive gesture"))
+		))
 	))
 
 ; ------------------------------------------------------
