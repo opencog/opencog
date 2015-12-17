@@ -228,14 +228,20 @@
 							(Get (State (Schema prev-ts) (Variable "$p"))))))
 				; Update time of last check to now.
 				(True (Put (State (Schema prev-ts) (Variable "$x")) (Time)))
+
+				; Perform a pro-rated coin flip. If it is only a very short
+				; time since we were last called, it is very unlikely that
+				; well the random number will come up heads.  But if its
+				; been a long time, then very likely the coin will come up
+				; heads.
 				(GreaterThan
+					(Get (State (Schema delta-ts) (Variable "$delta")))
 					; Random number in the configured range.
 					(RandomNumber
 						(Number 0)
 						(Minus
 							(Get (State (Schema max-name) (Variable "$max")))
 							(Get (State (Schema min-name) (Variable "$min")))))
-					(Get (State (Schema delta-ts) (Variable "$delta")))
 				)
 			)
 	)))
