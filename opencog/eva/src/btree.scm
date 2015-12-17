@@ -987,15 +987,19 @@
 
 		; If we are not bored already, we are bored now...
 		(SequentialOr
-			(Not (Equal (SetLink soma-bored)
-				(Get (State soma-state (Variable "$x")))))
+			(Equal (SetLink soma-bored)
+				(Get (State soma-state (Variable "$x"))))
 
-			; ... print output.
-			(False (Evaluation (GroundedPredicate "scm: print-msg")
-				(ListLink (Node "--- Bored! nothing is happening!"))))
+			(SequentialAnd
+				(True (Put (State soma-state (Variable "$x"))
+					(SetLink soma-bored)))
 
-			(True (DefinedSchema "set bored timestamp"))
-		)
+				(True (DefinedSchema "set bored timestamp"))
+
+				; ... print output.
+				(Evaluation (GroundedPredicate "scm: print-msg")
+					(ListLink (Node "--- Bored! nothing is happening!")))
+			))
 
 		(SequentialOr  ; line 509
 			; ##### Is Not Sleeping #####
