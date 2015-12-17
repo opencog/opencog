@@ -1040,6 +1040,10 @@
 			(ConceptNode "chat-positive-nod"))
 		; ... and switch state to "talking"
 		(True (Put (State chat-state (Variable "$x")) chat-talk))
+
+		; ... print output.
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Start talking")))
 ))
 
 ;; Things to do, if the chatbot is currently talking.
