@@ -31,6 +31,10 @@
 ; (make-new-face "42")  ; Should start showing expressions, gestures.
 ; (remove-face "42")  ; Should retur to neutral.
 ; (halt) ; Pause the loop iteration; (run) will start it again.
+;
+; Unit test chatbot:
+; (State chat-state chat-start) ; to simulate having it talk.
+; (State chat-state chat-stop)  ; to signal that talking has stopped.
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -81,6 +85,15 @@
 (define request-interaction-state (AnchorNode "Request Interaction"))
 (StateLink request-interaction-state no-interaction)
 
+;; The "look at neutral position" face. Used to tell the eye/head
+;; movemet subsystem to move to a neutral position.
+(define neutral-face (ConceptNode "0"))
+
+; --------------------------------------------------------
+; Chatbot-related stuff.  In the curent design, the chatbot talks
+; whenever it feels like it; we are simply told when it is talking
+; when it has stopped talking, and what emotions we should display,
+; so that it's consistent with the speech emotions.
 
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
@@ -131,10 +144,6 @@
 		(Set chat-negative)
 		(Get (State chat-affect (Variable "$x")))))
 
-;; The "look at neutral position" face. Used to tell the eye/head
-;; movemet subsystem to move to a neutral position.
-(define neutral-face (ConceptNode "0"))
-
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
@@ -162,13 +171,14 @@
 )
 
 ; "interaction" -- record the start time of an interaction.
+; defines (DefinedSchema "set-interaction-timestamp") etc.
 (timestamp-template "interaction")
 ; "expression" -- time when a new expression started being shown.
 (timestamp-template "expression")
+(timestamp-template "gesture")
 ; "bored" -- when Eva last got bored.
 (timestamp-template "bored")
 (timestamp-template "sleep")
-(timestamp-template "gesture")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,
@@ -196,9 +206,6 @@
 (change-template "Time to change interaction" "interaction"
 	"time_to_change_face_target_min" "time_to_change_face_target_max")
 
-(change-template "Time to make gesture" "gesture"
-	"time_to_make_gesture_min" "time_to_make_gesture_max")
-
 ; Return true if we've been sleeping for long enough (i.e. longer than
 ; the time_to_wake_up parameter.)
 ; line 707 -- is_time_to_wake_up()
@@ -209,6 +216,9 @@
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
 	"default_emotion_duration" "default_emotion_duration")
+
+(change-template "Time to make gesture" "gesture"
+	"time_to_make_gesture_min" "time_to_make_gesture_max")
 
 ; --------------------------------------------------------
 ; temp scaffolding and junk.
@@ -713,23 +723,26 @@
 ;; XXX Almost a complete implementation of whats in owyl...  but
 ;; the owyl pick_instant code is insane... punt here.
 (DefineLink
-	(DefinedPredicateNode "Interact with face")
-	(SequentialAndLink
+	(DefinedPredicate "Interact with face")
+	(SequentialAnd
 		;; Look at the interaction face - line 765
-		(TrueLink (DefinedSchemaNode "look at person"))
+		(True (DefinedSchema "look at person"))
 
 		;; Show random expressions only if NOT talking
 		; aka "do_pub_emotions=False" in the new owyl tree.
-		(DefinedPredicate "chatbot is listening")
+		(SequentialOr
+			(Not (DefinedPredicate "chatbot is listening"))
+			(SequentialAnd
 
-		;; line 768
-		(SequentialOrLink
-			(NotLink (DefinedPredicateNode "Time to change expression"))
-			(DefinedPredicateNode "Show positive expression")
-		)
-		(SequentialOrLink
-			(NotLink (DefinedPredicateNode "Time to make gesture"))
-			(DefinedPredicateNode "Pick random positive gesture"))
+				;; line 768
+				(SequentialOrLink
+					(NotLink (DefinedPredicateNode "Time to change expression"))
+					(DefinedPredicateNode "Show positive expression")
+				)
+				(SequentialOrLink
+					(NotLink (DefinedPredicateNode "Time to make gesture"))
+					(DefinedPredicateNode "Pick random positive gesture"))
+		))
 	))
 
 ; ------------------------------------------------------
@@ -861,45 +874,47 @@
 		(DefinedPredicateNode "Update room state")
 	))
 
-;; Interact with people
+;; Collection of things to while interacting with people
+;; Evalutes to true if there is an ongoing interaction with
+;; someone.
 ;; line 457 -- interact_with_people()
 (DefineLink
-	(DefinedPredicateNode "Interact with people")
-	(SequentialAndLink ; line 458
+	(DefinedPredicate "Interact with people")
+	(SequentialAnd ; line 458
 		; True, if there is anyone visible.
-		(DefinedPredicateNode "Someone visible") ; line 459
-		; This or-link is true if we're not interacting with anyone,
+		(DefinedPredicate "Someone visible") ; line 459
+		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
-		(SequentialOrLink ; line 460
+		(SequentialOr ; line 460
 			; ##### Start A New Interaction #####
-			(SequentialAndLink ; line 462
-				(SequentialOrLink ; line 463
-					(NotLink (DefinedPredicateNode "is interacting with someone?"))
-					(SequentialAndLink ; line 465
-						(DefinedPredicateNode "More than one face visible")
-						(DefinedPredicateNode "Time to change interaction")))
+			(SequentialAnd ; line 462
+				(SequentialOr ; line 463
+					(Not (DefinedPredicate "is interacting with someone?"))
+					(SequentialAnd ; line 465
+						(DefinedPredicate "More than one face visible")
+						(DefinedPredicate "Time to change interaction")))
 				; Select a new face target
-				(DefinedPredicateNode "Start new interaction")
-				(DefinedPredicateNode "Interact with face"))
+				(DefinedPredicate "Start new interaction")
+				(DefinedPredicate "Interact with face"))
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
-			(SequentialAndLink ; line 476
+			(SequentialAnd ; line 476
 				; Gets called 10x/second; don't print.
 				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
-				(SequentialOrLink  ; line 478
-					(SequentialAndLink ; line 479
-						(DefinedPredicateNode "More than one face visible")
-						(DefinedPredicateNode "dice-roll: group interaction")
-						(DefinedPredicateNode "glance at random face"))
-					(TrueLink)) ; line 485
+				(SequentialOr  ; line 478
+					(SequentialAnd ; line 479
+						(DefinedPredicate "More than one face visible")
+						(DefinedPredicate "dice-roll: group interaction")
+						(DefinedPredicate "glance at random face"))
+					(True)) ; line 485
 				(DefinedPredicateNode "Interact with face")
-				(SequentialOrLink  ; line 488
-					(SequentialAndLink ; line 489
+				(SequentialOr  ; line 488
+					(SequentialAnd ; line 489
 ; XXX incomplete!  need the face study saccade stuff...
-						(FalseLink)
+						(False)
 					)
-					(TrueLink))  ; line 493
+					(True))  ; line 493
 			))
 	))
 
@@ -955,7 +970,8 @@
 			(ConceptNode "wake-up"))
 	))
 
-;; Nothing is happening (no faces are visibile)
+;; Collection of things to do if nothing is happening (no faces
+;; are visibile)
 ;; Go to sleep after a while, and wake up every now and then.
 ;; line 507 -- nothing_is_happening()
 (DefineLink
@@ -1018,7 +1034,7 @@
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
-		; ... and show a random gesture from "listening" set.
+		; ... and show one random gesture from "listening" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
@@ -1026,6 +1042,10 @@
 			(ConceptNode "chat-positive-nod"))
 		; ... and switch state to "talking"
 		(True (Put (State chat-state (Variable "$x")) chat-talk))
+
+		; ... print output.
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Start talking")))
 ))
 
 ;; Things to do, if the chatbot is currently talking.
@@ -1040,37 +1060,52 @@
 				; If chatbot is happy ...
 				(DefinedPredicate "chatbot is happy")
 				; ... show one of the neutral-speech expressions
-				(Put (DefinedPredicateNode "Show random expression")
-					(ConceptNode "neutral-speech"))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to change expression"))
+					(Put (DefinedPredicateNode "Show random expression")
+						(ConceptNode "neutral-speech")))
+
 				; ... nod slowly ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-positive-nod"))
-				; ... raise eyebrows ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-pos-think"))
-				; ... switch to chat fast blink rate...
-				(Evaluation (GroundedPredicate "py:blink_rate")
-					(ListLink
-						(DefinedSchema "blink chat fast mean")
-						(DefinedSchema "blink chat fast var")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to make gesture"))
+					(SequentialAnd
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-positive-nod"))
+
+						; ... raise eyebrows ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-pos-think"))
+
+						; ... switch to chat fast blink rate...
+						(Evaluation (GroundedPredicate "py:blink_rate")
+							(ListLink
+								(DefinedSchema "blink chat fast mean")
+								(DefinedSchema "blink chat fast var")))
+				))
 			)
 			(SequentialAnd
 				; If chatbot is not happy ...
 				(DefinedPredicate "chatbot is negative")
 				; ... show one of the frustrated expressions
-				(Put (DefinedPredicateNode "Show random expression")
-					(ConceptNode "frustrated"))
-				; ... shake head quickly ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-negative-shake"))
-				; ... furrow brows ...
-				(Put (DefinedPredicate "Show random gesture")
-					(ConceptNode "chat-neg-think"))
-				; ... switch to chat slow blink rate...
-				(Evaluation (GroundedPredicate "py:blink_rate")
-					(ListLink
-						(DefinedSchema "blink chat slow mean")
-						(DefinedSchema "blink chat slow var")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to change expression"))
+					(Put (DefinedPredicateNode "Show random expression")
+						(ConceptNode "frustrated")))
+				(SequentialOr
+					(Not (DefinedPredicate "Time to make gesture"))
+					(SequentialAnd
+						; ... shake head quickly ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-negative-shake"))
+						; ... furrow brows ...
+						(Put (DefinedPredicate "Show random gesture")
+							(ConceptNode "chat-neg-think"))
+						; ... switch to chat slow blink rate...
+						(Evaluation (GroundedPredicate "py:blink_rate")
+							(ListLink
+								(DefinedSchema "blink chat slow mean")
+								(DefinedSchema "blink chat slow var")))
+				))
 			))))
 
 ; Things to do, if the chattbot stopped talking.
@@ -1092,6 +1127,10 @@
 
 		; ... and switch state to "listening"
 		(True (Put (State chat-state (Variable "$x")) chat-listen))
+
+		; ... and print some tracing output
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Finished talking")))
 	))
 
 ; Things to do, if the chattbot is listening.
@@ -1132,6 +1171,9 @@
 				(DefinedPredicate "Someone left")
 				(DefinedPredicate "Interact with people")
 				(DefinedPredicate "Nothing is happening")
+				(True))
+
+			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
