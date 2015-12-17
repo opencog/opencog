@@ -1023,9 +1023,13 @@
 	(DefinedPredicate "Nothing is happening")
 	(SequentialAnd  ; line 508
 
-		; If we are not bored already, we are bored now...
+		; If we are not bored already, and we are not sleeping,
+		; then we are bored now...
 		(SequentialOr
 			(Equal (SetLink soma-bored)
+				(Get (State soma-state (Variable "$x"))))
+
+			(Equal (SetLink soma-sleeping)
 				(Get (State soma-state (Variable "$x"))))
 
 			(SequentialAnd
