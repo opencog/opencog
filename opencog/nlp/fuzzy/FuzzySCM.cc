@@ -30,12 +30,10 @@
 //#include <opencog/nlp/types/atom_types.h>
 
 #include "FuzzySCM.h"
-#include "FuzzyPMCB.h"
-
+#include "Fuzzy.h"
 
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * The constructor for FuzzySCM.
@@ -101,7 +99,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 #ifdef HAVE_GUILE
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
 
-    FuzzyPMCB fpmcb(as, rtn_type, excl_list);
+    Fuzzy fpm(as, rtn_type, excl_list);
 
     HandleSeq terms;
     terms.push_back(pat);
@@ -109,7 +107,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     std::set<Handle> no_vars;
 
     PatternLinkPtr slp(createPatternLink(no_vars, terms));
-    slp->satisfy(fpmcb);
+    slp->satisfy(fpm);
 
 //    LAZY_LOG_FINE << "---------- solns ----------";
 //    for (Handle h : fpm.get_solns())
@@ -117,7 +115,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
-    Handle results = as->add_link(LIST_LINK, fpmcb.get_solns());
+    Handle results = as->add_link(LIST_LINK, fpm.get_solns());
 
     // XXX
     std::cout << "\nResults:\n";

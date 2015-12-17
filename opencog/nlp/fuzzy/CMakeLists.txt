@@ -2,16 +2,17 @@
 #	${CMAKE_BINARY_DIR}
 #)
 
-ADD_LIBRARY (nlp-fuzzy SHARED
+ADD_LIBRARY (nlpfz SHARED
+    Fuzzy
 	FuzzySCM
-	FuzzyPMCB
 )
 
-TARGET_LINK_LIBRARIES (nlp-fuzzy
+TARGET_LINK_LIBRARIES (nlpfz
+	nlp-types
 	${ATOMSPACE_LIBRARIES}
 )
 
-INSTALL (TARGETS nlp-fuzzy DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS nlpfz DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	fuzzy.scm

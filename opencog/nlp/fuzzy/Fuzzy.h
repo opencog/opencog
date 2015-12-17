@@ -1,5 +1,5 @@
 /*
- * FuzzyPMCB.h
+ * Fuzzy.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FUZZYPMCB_H
-#define FUZZYPMCB_H
+#ifndef FUZZY_H
+#define FUZZY_H
 
 #include <opencog/query/FuzzyPatternMatch.h>
 
@@ -31,25 +31,34 @@ namespace opencog
 namespace nlp
 {
 
-class FuzzyPMCB :
+class Fuzzy :
     public FuzzyPatternMatch
 {
     public:
-        FuzzyPMCB(AtomSpace*, Type, const HandleSeq&);
-        ~FuzzyPMCB();
+        Fuzzy(AtomSpace*, Type, const HandleSeq&);
+        ~Fuzzy();
 
-        virtual void similarity_match(const Handle&, const Handle&, HandleSeq&);
-//    virtual bool link_match(const LinkPtr&, const LinkPtr&);
+        virtual void set_pattern(const Variables&, const Pattern&);
 
-//    virtual void set_pattern(const Variables& vars,
-//                             const Pattern& pat)
-//    {
-//       InitiateSearchCB::set_pattern(vars, pat);
-//        DefaultPatternMatchCB::set_pattern(vars, pat);
-//    }
+        virtual bool accept_starter(const NodePtr);
+
+        virtual void similarity_match(const Handle&, const Handle&);
+
+        virtual HandleSeq get_solns();
+
+    private:
+       Handle pattern;
+
+       HandleSeq pat_nodes;
+
+       Type rtn_type;
+
+       HandleSeq excl_list;
+
+       std::map<Handle, std::pair<double, size_t>> solns;
 };
 
 }
 }
 
-#endif  // FUZZYPMCB_H
+#endif  // FUZZY_H
