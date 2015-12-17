@@ -45,3 +45,10 @@ class PutAtoms:
 
 	def chatbot_affect_negative(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
+
+	# manages the behavior trees state
+	def btree_stop(self):
+		scheme_eval_h(self.atomspace, "(halt)")
+
+	def btree_run(self):
+		scheme_eval_h(self.atomspace, "(run)")

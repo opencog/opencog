@@ -63,6 +63,7 @@ def gaze_at_face(face_id_node):
 	evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
+
 def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	intensity = float(intensity_node.name)

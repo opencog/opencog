@@ -702,8 +702,10 @@
 			(ListLink neutral-face))
 	))
 
+
 ; ------------------------------------------------------
 ; More complex interaction sequences.
+
 
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
@@ -856,7 +858,7 @@
 		)
 		;; Clear the lost face target
 		(DefinedPredicateNode "Clear lost face")
-		(DefinedPredicateNode "Update status")
+		(DefinedPredicateNode "Update room state")
 	))
 
 ;; Interact with people
