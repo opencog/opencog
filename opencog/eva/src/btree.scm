@@ -272,7 +272,7 @@
 	"time_to_make_gesture_min" "time_to_make_gesture_max")
 
 ; --------------------------------------------------------
-; temp scaffolding and junk.
+; Some debug prints.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
@@ -284,6 +284,14 @@
 	(display (cog-name (car (cog-outgoing-set (cog-execute!
 			(DefinedSchemaNode "Current interaction target"))))))
 	(newline)
+	(stv 1 1))
+
+; Print message, then print elapsed time
+(define (print-msg-time node time)
+	(display (cog-name node))
+	(display " Elapsed: ")
+	(display (cog-name time))
+	(display " seconds\n")
 	(stv 1 1))
 
 ; --------------------------------------------------------
@@ -985,8 +993,9 @@
 (DefineLink
 	(DefinedPredicateNode "Go to sleep")
 	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Go to sleep.")))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+			(ListLink (Node "--- Go to sleep.")
+				(Minus (Time) (DefinedSchema "get bored timestamp"))))
 		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "sleep"))
