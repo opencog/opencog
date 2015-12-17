@@ -846,6 +846,7 @@
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
+		(DefinedPredicate "If sleeping then wake")
 		(True (DefinedSchema "interact with requested person"))
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
