@@ -61,13 +61,17 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
     if (soln->getType() != rtn_type)
         return;
 
+    // HandleSeq interp = get_neighbors(soln, true, false, REFERENCE_LINK, false);
+    // if (std::all_of(interp.begin(), interp.end(),
+    //                 [&](Handle& i) { return i->getType() != INTERPRETATION_NODE; }))
+    //     return;
+
     HandleSeq soln_nodes = get_all_nodes(soln);
 
-    auto checker = [&] (Handle& h) {
-        return std::find(excl_list.begin(), excl_list.end(), h) != excl_list.end();
-    };
-
-    if (std::any_of(soln_nodes.begin(), soln_nodes.end(), checker))
+    if (std::any_of(soln_nodes.begin(), soln_nodes.end(),
+        [&](Handle& h) {
+            return std::find(excl_list.begin(), excl_list.end(), h)
+                             != excl_list.end(); }))
         return;
 
     // Find out how many nodes it has in common with the pattern
@@ -79,7 +83,8 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
 
     // Remove duplicates
     std::sort(common_nodes.begin(), common_nodes.end());
-    common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()), common_nodes.end());
+    common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()),
+                       common_nodes.end());
 
     double similarity = 0.0;
 
@@ -93,24 +98,18 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
 
         double weight = 0;
 
-        std::string cn_name = NodeCast(common_node)->getName();
-        Type type = common_node->getType();
-
-        auto get_instance = [&] (Handle n) {
-            std::string name = NodeCast(n)->getName();
-
-            if (name.length() < cn_name.length()+1)
+        auto find_instance = [&] (Handle n) {
+            if (NodeCast(n)->getName().find("@") == std::string::npos)
                 return false;
 
-            // e.g. Getting (ConceptNode "cat@123") from (ConceptNode "cat")
-            if (n->getType() == type and name.compare(0, cn_name.length()+1, cn_name+'@') == 0)
-                return true;
-
-            // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
-            if (type == PREDICATE_NODE) {
-                for (const Handle& ll : LinkCast(pattern)->getOutgoingSet()) {
-                    if (ll->getType() == IMPLICATION_LINK and
-                        is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n))
+            for (const Handle& ll : LinkCast(pattern)->getOutgoingSet()) {
+                if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
+                    // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
+                    // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
+                    if ((common_node->getType() == PREDICATE_NODE and
+                         ll->getType() == IMPLICATION_LINK) or
+                        (common_node->getType() == CONCEPT_NODE and
+                         ll->getType() == INHERITANCE_LINK))
                         return true;
                 }
             }
@@ -118,7 +117,7 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
             return false;
         };
 
-        auto inst = std::find_if(pat_nodes.begin(), pat_nodes.end(), get_instance);
+        auto inst = std::find_if(pat_nodes.begin(), pat_nodes.end(), find_instance);
 
         if (inst != pat_nodes.end()) {
             // Get the WordInstanceNode from ReferenceLink
@@ -134,7 +133,7 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
                         weight += 2.0;
                     else if (ling_rel.compare("_obj") == 0)
                         weight += 2.0;
-                    else if (ling_rel.compare("_adj") == 0)
+                    else if (ling_rel.compare("_predadj") == 0)
                         weight += 2.0;
                     else
                         weight += 1.0;
@@ -142,12 +141,14 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
             }
         }
 
-        // similarity += (weight / common_node->getIncomingSetSize());
-        similarity += weight;
+        similarity += (weight / common_node->getIncomingSetSize());
+        // similarity += weight;
     }
 
     // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)(pat_nodes.size() - soln_nodes.size()));
+
+    // TODO: Remove "duplicate" solns
 
     solns[soln] = std::make_pair(similarity, diff);
 }
@@ -171,3 +172,4 @@ HandleSeq Fuzzy::get_solns()
 
     return rtn_solns;
 }
+

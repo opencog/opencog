@@ -109,17 +109,13 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     PatternLinkPtr slp(createPatternLink(no_vars, terms));
     slp->satisfy(fpm);
 
-//    LAZY_LOG_FINE << "---------- solns ----------";
-//    for (Handle h : fpm.get_solns())
-//        LAZY_LOG_FINE << h->toShortString();
+    LAZY_LOG_FINE << "---------- solns ----------";
+    for (Handle h : fpm.get_solns())
+        LAZY_LOG_FINE << h->toShortString();
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
     Handle results = as->add_link(LIST_LINK, fpm.get_solns());
-
-    // XXX
-    std::cout << "\nResults:\n";
-    for (Handle h : LinkCast(results)->getOutgoingSet()) std::cout << h->toShortString();
 
     return results;
 #else
