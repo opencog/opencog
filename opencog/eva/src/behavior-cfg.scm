@@ -74,8 +74,10 @@
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
 (emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
 
-(emo-gest-spec "bored"   "yawn-1"  0.01 0.6 0.9 1 1 1 1)
-(emo-gest-spec "bored"   "noop"    0.99 0   0   1 1 1 1)
+; If bored, then 1/10th of the time, yawn.
+; Rest of the time, don't do anything.
+(emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
 (emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 

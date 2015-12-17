@@ -999,6 +999,16 @@
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
+; XXX Need to add search-for-attention targets...
+		; Pick a bored expression, gesture
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change expression"))
+			(PutLink (DefinedPredicateNode "Show random expression")
+				(ConceptNode "bored")))
+		(SequentialOr
+			(Not (DefinedPredicate "Time to make gesture"))
+			(PutLink (DefinedPredicateNode "Show random gesture")
+				(ConceptNode "bored")))
 	))
 
 ; Call once, to fall asleep.
@@ -1036,6 +1046,8 @@
 			(ListLink (Node "--- Wake up!")
 				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+
+		; Change soma state to being awake.
 		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
 			soma-awake))
 		(PutLink (DefinedPredicateNode "Show random expression")
