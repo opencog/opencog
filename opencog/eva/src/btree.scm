@@ -217,14 +217,15 @@
 			(SequentialAnd
 				; If elapsed time less than min, then false.
 				(GreaterThan
-					(Get (State (Schema min-name) (Variable "$min")))
 					; Minus computes number of seconds since interaction start.
 					(Minus (Time) (DefinedSchema get-ts))
+					(Get (State (Schema min-name) (Variable "$min")))
 				)
 				; Compute integral: how long since last check?
 				; Delta is the time since the last check.
 				(True (Put (State (Schema delta-ts) (Variable "$x"))
-						(Minus (Time) (Get (State (Schema prev-ts))))))
+						(Minus (Time)
+							(Get (State (Schema prev-ts) (Variable "$p"))))))
 				; Update time of last check to now.
 				(True (Put (State (Schema prev-ts) (Variable "$x")) (Time)))
 				(GreaterThan
