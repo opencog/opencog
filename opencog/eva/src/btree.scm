@@ -869,45 +869,47 @@
 		(DefinedPredicateNode "Update status")
 	))
 
-;; Interact with people
+;; Collection of things to while interacting with people
+;; Evalutes to true if there is an ongoing interaction with
+;; someone.
 ;; line 457 -- interact_with_people()
 (DefineLink
-	(DefinedPredicateNode "Interact with people")
-	(SequentialAndLink ; line 458
+	(DefinedPredicate "Interact with people")
+	(SequentialAnd ; line 458
 		; True, if there is anyone visible.
-		(DefinedPredicateNode "Someone visible") ; line 459
-		; This or-link is true if we're not interacting with anyone,
+		(DefinedPredicate "Someone visible") ; line 459
+		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
-		(SequentialOrLink ; line 460
+		(SequentialOr ; line 460
 			; ##### Start A New Interaction #####
-			(SequentialAndLink ; line 462
-				(SequentialOrLink ; line 463
-					(NotLink (DefinedPredicateNode "is interacting with someone?"))
-					(SequentialAndLink ; line 465
-						(DefinedPredicateNode "More than one face visible")
-						(DefinedPredicateNode "Time to change interaction")))
+			(SequentialAnd ; line 462
+				(SequentialOr ; line 463
+					(Not (DefinedPredicate "is interacting with someone?"))
+					(SequentialAnd ; line 465
+						(DefinedPredicate "More than one face visible")
+						(DefinedPredicate "Time to change interaction")))
 				; Select a new face target
-				(DefinedPredicateNode "Start new interaction")
-				(DefinedPredicateNode "Interact with face"))
+				(DefinedPredicate "Start new interaction")
+				(DefinedPredicate "Interact with face"))
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
-			(SequentialAndLink ; line 476
+			(SequentialAnd ; line 476
 				; Gets called 10x/second; don't print.
 				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
-				(SequentialOrLink  ; line 478
-					(SequentialAndLink ; line 479
-						(DefinedPredicateNode "More than one face visible")
-						(DefinedPredicateNode "dice-roll: group interaction")
-						(DefinedPredicateNode "glance at random face"))
-					(TrueLink)) ; line 485
+				(SequentialOr  ; line 478
+					(SequentialAnd ; line 479
+						(DefinedPredicate "More than one face visible")
+						(DefinedPredicate "dice-roll: group interaction")
+						(DefinedPredicate "glance at random face"))
+					(True)) ; line 485
 				(DefinedPredicateNode "Interact with face")
-				(SequentialOrLink  ; line 488
-					(SequentialAndLink ; line 489
+				(SequentialOr  ; line 488
+					(SequentialAnd ; line 489
 ; XXX incomplete!  need the face study saccade stuff...
-						(FalseLink)
+						(False)
 					)
-					(TrueLink))  ; line 493
+					(True))  ; line 493
 			))
 	))
 
@@ -963,7 +965,8 @@
 			(ConceptNode "wake-up"))
 	))
 
-;; Nothing is happening (no faces are visibile)
+;; Collection of things to do if nothing is happening (no faces
+;; are visibile)
 ;; Go to sleep after a while, and wake up every now and then.
 ;; line 507 -- nothing_is_happening()
 (DefineLink
@@ -1155,6 +1158,9 @@
 				(DefinedPredicate "Someone left")
 				(DefinedPredicate "Interact with people")
 				(DefinedPredicate "Nothing is happening")
+				(True))
+
+			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
