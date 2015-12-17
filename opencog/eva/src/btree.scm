@@ -65,6 +65,7 @@
 (define soma-state (AnchorNode "Soma State"))
 (define soma-sleeping (ConceptNode "Sleeping"))
 (define soma-awake (ConceptNode "Awake"))
+(define soma-bored (ConceptNode "Bored"))
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
@@ -975,14 +976,27 @@
 ;; Go to sleep after a while, and wake up every now and then.
 ;; line 507 -- nothing_is_happening()
 (DefineLink
-	(DefinedPredicateNode "Nothing is happening")
-	(SequentialAndLink  ; line 508
-		(SequentialOrLink  ; line 509
+	(DefinedPredicate "Nothing is happening")
+	(SequentialAnd  ; line 508
+
+		; If we are not bored already, we are bored now...
+		(SequentialOr
+			(Not (Equal (SetLink soma-bored)
+				(Get (State soma-state (Variable "$x")))))
+
+			; ... print output.
+			(False (Evaluation (GroundedPredicate "scm: print-msg")
+				(ListLink (Node "--- Bored! nothing is happening!"))))
+
+			(True (DefinedSchema "set bored timestamp"))
+		)
+
+		(SequentialOr  ; line 509
 			; ##### Is Not Sleeping #####
-			(SequentialAndLink ; line 511
-				(NotLink (EqualLink
-					(SetLink soma-sleeping)
-					(GetLink (StateLink soma-state (VariableNode "$x")))))
+			(SequentialAnd ; line 511
+				; Proceed only if not sleeping ...
+				(Not (Equal (SetLink soma-sleeping)
+					(Get (State soma-state (Variable "$x")))))
 
 				(SequentialOrLink  ; line 513
 					; ##### Go To Sleep #####

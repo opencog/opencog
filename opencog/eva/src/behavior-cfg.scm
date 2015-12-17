@@ -24,6 +24,7 @@
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
+; Used when chatbot is not happy; also, when someone leaves.
 (emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 3 7)
 (emo-expr-spec "frustrated" "recoil"      0.3 0.4 0.6 3 7)
 (emo-expr-spec "frustrated" "surprised"   0.3 0.1 0.2 3 7)
@@ -42,6 +43,7 @@
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
 (emo-expr-spec "wake-up"  "irritated"     0.6  0.1 0.4 1  4)
 
+; Used when chatbot is happy
 (emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
