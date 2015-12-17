@@ -24,6 +24,7 @@
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
+; Used when chatbot is not happy; also, when someone leaves.
 (emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 3 7)
 (emo-expr-spec "frustrated" "recoil"      0.3 0.4 0.6 3 7)
 (emo-expr-spec "frustrated" "surprised"   0.3 0.1 0.2 3 7)
@@ -42,6 +43,7 @@
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
 (emo-expr-spec "wake-up"  "irritated"     0.6  0.1 0.4 1  4)
 
+; Used when chatbot is happy
 (emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
@@ -102,13 +104,16 @@
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
 ; --------------------------------------------------------
-; Dice-roll.  Perform some action some fraction of the time.
+; Dice-roll.  Probability of performing some action as the result of
+;    some event.
 
+; Probability of looking at someone who entered the room.
 (dice-roll "glance new face"   0.5) ; line 590 -- glance_probability_for_new_faces
+
+; Probability of looking at spot where someone was last seen.
 (dice-roll "glance lost face"  0.5) ; -- glance_probability_for_lost_faces
+
 (dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
-(dice-roll "go to sleep"       0.1) ; line 699 -- sleep_probability
-(dice-roll "wake up"           0.5) ; line 619 -- wake_up_probability
 
 ; --------------------------------------------------------
 ; Time-related conf paramters
@@ -121,8 +126,14 @@
 (State (Schema "time_to_make_gesture_min") (Number 6))
 (State (Schema "time_to_make_gesture_max") (Number 10))
 
-; Wake up after 25 seconds ...
-(State (Schema "time_to_wake_up") (Number 25))
+; Sleep at least 25 seconds ... at most 160
+(State (Schema "time_sleeping_min") (Number 25))
+(State (Schema "time_sleeping_max") (Number 160))
+
+; After 25 seconds of boredom, maybe fall asleep.
+; Fall asleep for sure after 125 seconds.
+(State (Schema "time_boredom_min") (Number 25))
+(State (Schema "time_boredom_max") (Number 125))
 
 ; line 4 default_emotion_duration is 1 second but that's nuts.
 (State (Schema "default_emotion_duration") (Number 6.0))

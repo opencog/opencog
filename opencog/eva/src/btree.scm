@@ -65,6 +65,7 @@
 (define soma-state (AnchorNode "Soma State"))
 (define soma-sleeping (ConceptNode "Sleeping"))
 (define soma-awake (ConceptNode "Awake"))
+(define soma-bored (ConceptNode "Bored"))
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
@@ -155,6 +156,7 @@
 
 	; The name of state node holding the timestamp.
 	(define ts-name (string-append "start-" name "-timestamp"))
+	(define prev-ts (string-append "previous-" name "-call"))
 
 	; The state node actually holding the timestamp.
 	(State (Schema ts-name) (Number 0))
@@ -168,6 +170,10 @@
 	(DefineLink
 		(DefinedSchema (string-append "get " name " timestamp"))
 		(Get (State (Schema ts-name) (Variable "$x"))))
+
+	; Additional state, used for computing integral, for probabilities.
+	; See below, in the time-to-change template.
+	(State (Schema prev-ts) (Number 0))
 )
 
 ; "interaction" -- record the start time of an interaction.
@@ -188,17 +194,58 @@
 ; since the timestamp is less than MIN, then return false; if the
 ; elapsed time is greater than MAX then return true; else return a
 ; with increasing random liklihood.
+;
+; To compute the likelihood correctly, we have to compute the
+; integral since the last time that this check was made. Thus,
+; if we are calling this predicate 10 times a second, the probability
+; of a transition will be failry small; but if we call it once a second,
+; the probability will be ten times greater... computing even this
+; simple integral in atomese is painful. Yuck. But we have to do it.
 (define (change-template pred-name ts-name min-name max-name)
+	(define get-ts (string-append "get " ts-name " timestamp"))
+	(define prev-ts (string-append "previous-" ts-name "-call"))
+	(define delta-ts (string-append "delta-" ts-name "-time"))
 	(DefineLink
 		(DefinedPredicate pred-name)
-		(GreaterThan
-			; Minus computes number of seconds since interaction start.
-			(Minus (Time)
-				(DefinedSchema (string-append "get " ts-name " timestamp")))
-			; Random number in the configured range.
-			(RandomNumber
-				(Get (State (Schema min-name) (Variable "$min")))
-				(Get (State (Schema max-name) (Variable "$max"))))
+		(SequentialOr
+			; If elapsed time greater than max, then true.
+			(GreaterThan
+				; Minus computes number of seconds since interaction start.
+				(Minus (Time) (DefinedSchema get-ts))
+				(Get (State (Schema max-name) (Variable "$max")))
+			)
+			(SequentialAnd
+				; Delta is the time since the last check.
+				(True (Put (State (Schema delta-ts) (Variable "$x"))
+						(Minus (Time)
+							(Get (State (Schema prev-ts) (Variable "$p"))))))
+				; Update time of last check to now. Must record this
+				; timestamp before the min-time rejection, below.
+				(True (Put (State (Schema prev-ts) (Variable "$x")) (Time)))
+
+				; If elapsed time less than min, then false.
+				(GreaterThan
+					; Minus computes number of seconds since interaction start.
+					(Minus (Time) (DefinedSchema get-ts))
+					(Get (State (Schema min-name) (Variable "$min")))
+				)
+
+				; Compute integral: how long since last check?
+				; Perform a pro-rated coin flip. If it is only a very short
+				; time since we were last called, it is very unlikely that
+				; well the random number will come up heads.  But if its
+				; been a long time, then very likely the coin will come up
+				; heads.
+				(GreaterThan
+					(Get (State (Schema delta-ts) (Variable "$delta")))
+					; Random number in the configured range.
+					(RandomNumber
+						(Number 0)
+						(Minus
+							(Get (State (Schema max-name) (Variable "$max")))
+							(Get (State (Schema min-name) (Variable "$min")))))
+				)
+			)
 	)))
 
 ; Return true if it is time to interact with someone else.
@@ -207,10 +254,16 @@
 	"time_to_change_face_target_min" "time_to_change_face_target_max")
 
 ; Return true if we've been sleeping for long enough (i.e. longer than
-; the time_to_wake_up parameter.)
+; the time_to_wake_up parameter).
 ; line 707 -- is_time_to_wake_up()
 (change-template "Time to wake up" "sleep"
-	"time_to_wake_up" "time_to_wake_up")
+	"time_sleeping_min" "time_sleeping_max")
+
+; Return true if we've been bored for a long time (i.e. longer than
+; the time_bored_to_sleep parameter).
+; line 611 -- bored_since, sleep probability.
+(change-template "Bored too long" "bored"
+	"time_boredom_min" "time_boredom_max")
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
@@ -221,7 +274,7 @@
 	"time_to_make_gesture_min" "time_to_make_gesture_max")
 
 ; --------------------------------------------------------
-; temp scaffolding and junk.
+; Some debug prints.
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
@@ -233,6 +286,14 @@
 	(display (cog-name (car (cog-outgoing-set (cog-execute!
 			(DefinedSchemaNode "Current interaction target"))))))
 	(newline)
+	(stv 1 1))
+
+; Print message, then print elapsed time
+(define (print-msg-time node time)
+	(display (cog-name node))
+	(display " Elapsed: ")
+	(display (cog-name time))
+	(display " seconds\n")
 	(stv 1 1))
 
 ; --------------------------------------------------------
@@ -934,8 +995,9 @@
 (DefineLink
 	(DefinedPredicateNode "Go to sleep")
 	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Go to sleep.")))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+			(ListLink (Node "--- Go to sleep.")
+				(Minus (Time) (DefinedSchema "get bored timestamp"))))
 		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
 		(PutLink (DefinedPredicateNode "Show random expression")
 			(ConceptNode "sleep"))
@@ -959,8 +1021,9 @@
 (DefineLink
 	(DefinedPredicateNode "Wake up")
 	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Wake up!")))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+			(ListLink (Node "--- Wake up!")
+				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
 		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
 			soma-awake))
@@ -975,37 +1038,56 @@
 ;; Go to sleep after a while, and wake up every now and then.
 ;; line 507 -- nothing_is_happening()
 (DefineLink
-	(DefinedPredicateNode "Nothing is happening")
-	(SequentialAndLink  ; line 508
-		(SequentialOrLink  ; line 509
-			; ##### Is Not Sleeping #####
-			(SequentialAndLink ; line 511
-				(NotLink (EqualLink
-					(SetLink soma-sleeping)
-					(GetLink (StateLink soma-state (VariableNode "$x")))))
+	(DefinedPredicate "Nothing is happening")
+	(SequentialAnd  ; line 508
 
-				(SequentialOrLink  ; line 513
+		; If we are not bored already, and we are not sleeping,
+		; then we are bored now...
+		(SequentialOr
+			(Equal (SetLink soma-bored)
+				(Get (State soma-state (Variable "$x"))))
+
+			(Equal (SetLink soma-sleeping)
+				(Get (State soma-state (Variable "$x"))))
+
+			(SequentialAnd
+				(True (Put (State soma-state (Variable "$x"))
+					(SetLink soma-bored)))
+
+				(True (DefinedSchema "set bored timestamp"))
+
+				; ... print output.
+				(Evaluation (GroundedPredicate "scm: print-msg")
+					(ListLink (Node "--- Bored! nothing is happening!")))
+			))
+
+		(SequentialOr  ; line 509
+			; ##### Is Not Sleeping #####
+			(SequentialAnd ; line 511
+				; Proceed only if not sleeping ...
+				(Not (Equal (SetLink soma-sleeping)
+					(Get (State soma-state (Variable "$x")))))
+
+				(SequentialOr  ; line 513
 					; ##### Go To Sleep #####
-					(SequentialAndLink  ; line 515
-;; XXX incomplete, should depend on "bored-since" time
-;; if bored for 5 minutes, go to sleep.
-						(DefinedPredicateNode "dice-roll: go to sleep")
-						(DefinedPredicateNode "Go to sleep"))
+					(SequentialAnd  ; line 515
+						(DefinedPredicate "Bored too long")
+						(DefinedPredicate "Go to sleep"))
+
 					; ##### Search For Attention #####
 					; If we didn't fall asleep above, then search for attention.
-					(DefinedPredicateNode "Search for attention")
+					(DefinedPredicate "Search for attention")
 				))
 			; ##### Is Sleeping #####
-			(SequentialOrLink  ; line 528
+			(SequentialOr  ; line 528
 				; ##### Wake Up #####
-				(SequentialAndLink  ; line 530
-					(DefinedPredicateNode "dice-roll: wake up")
-					; did we sleep for long enough?
-					(DefinedPredicateNode "Time to wake up")
-					(DefinedPredicateNode "Wake up")
+				(SequentialAnd  ; line 530
+					; Did we sleep for long enough?
+					(DefinedPredicate "Time to wake up")
+					(DefinedPredicate "Wake up")
 				)
 				; ##### Continue To Sleep #####
-				(DefinedPredicateNode "Continue sleeping")
+				(DefinedPredicate "Continue sleeping")
 			)
 		)
 
