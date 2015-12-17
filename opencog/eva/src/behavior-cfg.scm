@@ -114,8 +114,6 @@
 (dice-roll "glance lost face"  0.5) ; -- glance_probability_for_lost_faces
 
 (dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
-(dice-roll "go to sleep"       0.1) ; line 699 -- sleep_probability
-(dice-roll "wake up"           0.5) ; line 619 -- wake_up_probability
 
 ; --------------------------------------------------------
 ; Time-related conf paramters
@@ -128,13 +126,14 @@
 (State (Schema "time_to_make_gesture_min") (Number 6))
 (State (Schema "time_to_make_gesture_max") (Number 10))
 
-; Wake up after 25 seconds ...
-(State (Schema "time_to_wake_up") (Number 25))
+; Sleep at least 25 seconds ... at most 160
+(State (Schema "time_sleeping_min") (Number 25))
+(State (Schema "time_sleeping_max") (Number 160))
 
 ; After 25 seconds of boredom, maybe fall asleep.
 ; Fall asleep for sure after 125 seconds.
-(State (Schema "time_to_sleep_min") (Number 25))
-(State (Schema "time_to_sleep_max") (Number 125))
+(State (Schema "time_boredom_min") (Number 25))
+(State (Schema "time_boredom_max") (Number 125))
 
 ; line 4 default_emotion_duration is 1 second but that's nuts.
 (State (Schema "default_emotion_duration") (Number 6.0))

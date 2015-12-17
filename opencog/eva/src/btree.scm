@@ -257,13 +257,13 @@
 ; the time_to_wake_up parameter).
 ; line 707 -- is_time_to_wake_up()
 (change-template "Time to wake up" "sleep"
-	"time_to_wake_up" "time_to_wake_up")
+	"time_sleeping_min" "time_sleeping_max")
 
 ; Return true if we've been bored for a long time (i.e. longer than
 ; the time_bored_to_sleep parameter).
 ; line 611 -- bored_since, sleep probability.
 (change-template "Bored too long" "bored"
-	"time_to_sleep_min" "time_to_sleep_max")
+	"time_boredom_min" "time_boredom_max")
 
 ;; Evaluate to true, if an expression should be shown.
 ;; line 933, should_show_expression()
@@ -1021,8 +1021,9 @@
 (DefineLink
 	(DefinedPredicateNode "Wake up")
 	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-			(ListLink (Node "--- Wake up!")))
+		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+			(ListLink (Node "--- Wake up!")
+				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
 		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
 			soma-awake))
@@ -1081,8 +1082,7 @@
 			(SequentialOr  ; line 528
 				; ##### Wake Up #####
 				(SequentialAnd  ; line 530
-					(DefinedPredicate "dice-roll: wake up")
-					; did we sleep for long enough?
+					; Did we sleep for long enough?
 					(DefinedPredicate "Time to wake up")
 					(DefinedPredicate "Wake up")
 				)
