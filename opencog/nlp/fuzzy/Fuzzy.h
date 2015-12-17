@@ -56,6 +56,8 @@ class Fuzzy :
        HandleSeq excl_list;
 
        std::map<Handle, std::pair<double, size_t>> solns;
+
+       HandleSeqSeq dup_check;
 };
 
 }

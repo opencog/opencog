@@ -124,10 +124,12 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
             HandleSeq word_inst = get_neighbors(*inst, false, true, REFERENCE_LINK, false);
 
             if (word_inst.size() > 0) {
-                HandleSeq eval_links = get_predicates(word_inst[0], DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
+                HandleSeq eval_links =
+                    get_predicates(word_inst[0], DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
 
                 for (const Handle& el : eval_links) {
-                    std::string ling_rel = NodeCast(LinkCast(el)->getOutgoingSet()[0])->getName();
+                    std::string ling_rel =
+                        NodeCast(LinkCast(el)->getOutgoingSet()[0])->getName();
 
                     if (ling_rel.compare("_subj") == 0)
                         weight += 2.0;
@@ -141,15 +143,23 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
             }
         }
 
-        similarity += (weight / common_node->getIncomingSetSize());
         // similarity += weight;
+        similarity += (weight / common_node->getIncomingSetSize());
     }
 
     // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)(pat_nodes.size() - soln_nodes.size()));
 
-    // TODO: Remove "duplicate" solns
+    // Check the content of the soln to see if we've accepted something similar before
+    soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
+                     [](Handle& h) {
+                         return NodeCast(h)->getName().find("@") != std::string::npos; }),
+                     soln_nodes.end());
 
+    if (std::find(dup_check.begin(), dup_check.end(), soln_nodes) != dup_check.end())
+        return;
+
+    dup_check.push_back(soln_nodes);
     solns[soln] = std::make_pair(similarity, diff);
 }
 
