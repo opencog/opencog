@@ -849,6 +849,7 @@
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
 		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "If bored then alert")
 		(True (DefinedSchema "interact with requested person"))
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
@@ -895,6 +896,15 @@
 			(DefinedPredicateNode "Wake up"))
 		(True)))
 
+;; If soma state was bored, change state to alert.
+;; If we don't do this, the bored state makes us narcoleptic.
+(DefineLink
+	(DefinedPredicate "If bored then alert")
+	(SequentialOr
+		(Equal (SetLink soma-bored)
+			(Get (State soma-state (Variable "$x"))))
+		(True (Put (State soma-state (Variable "$x")) soma-awake))))
+
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
 (DefineLink
@@ -902,6 +912,7 @@
 	(SequentialAnd
 		(DefinedPredicate "Did someone arrive?")
 		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "If bored then alert")
 		(DefinedPredicate "Respond to new arrival")
 		(DefinedPredicate "Update status")
 	))
@@ -1015,18 +1026,17 @@
 ; Call once, to fall asleep.
 ; line 941 -- go_to_sleep
 (DefineLink
-	(DefinedPredicateNode "Go to sleep")
-	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+	(DefinedPredicate "Go to sleep")
+	(SequentialAnd
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (Time) (DefinedSchema "get bored timestamp"))))
-		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
-		(PutLink (DefinedPredicateNode "Show random expression")
-			(ConceptNode "sleep"))
-		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "sleep"))
-		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
-			(SetLink soma-sleeping)))
+		(True (DefinedSchema "set sleep timestamp"))
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "sleep"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "sleep"))
+		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
 ; line 537 -- Continue To Sleep
@@ -1041,20 +1051,19 @@
 ; Wake-up sequence
 ; line 957 -- wake_up()
 (DefineLink
-	(DefinedPredicateNode "Wake up")
-	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+	(DefinedPredicate "Wake up")
+	(SequentialAnd
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
-		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+		(TrueLink (DefinedSchema "set bored timestamp"))
 
 		; Change soma state to being awake.
-		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
-			soma-awake))
-		(PutLink (DefinedPredicateNode "Show random expression")
-			(ConceptNode "wake-up"))
-		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "wake-up"))
+		(True (Put (State soma-state (Variable "$x")) soma-awake))
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "wake-up"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "wake-up"))
 	))
 
 ;; Collection of things to do if nothing is happening (no faces
@@ -1075,8 +1084,7 @@
 				(Get (State soma-state (Variable "$x"))))
 
 			(SequentialAnd
-				(True (Put (State soma-state (Variable "$x"))
-					(SetLink soma-bored)))
+				(True (Put (State soma-state (Variable "$x")) soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
 
