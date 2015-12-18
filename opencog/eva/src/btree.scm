@@ -1299,7 +1299,7 @@
 	(usleep 101000)
 	(if do-run-loop (stv 1 1) (stv 0 1)))
 
-;; Main loop. Uses tail recursion optimizatio to form the loop.
+;; Main loop. Uses tail recursion optimization to form the loop.
 ;; line 556 -- build_tree()
 (DefineLink
 	(DefinedPredicate "main loop")
@@ -1340,6 +1340,22 @@
 	(call-with-new-thread
 		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
 (define (halt) (set! do-run-loop #f))
+
+; Sigh. Perform manual garbage collection. This really should be
+; automated. XXX TODO. (Can we get ECAN to do this for us?)
+(define (run-atomspace-gc)
+	(define (free-stuff)
+		(sleep 1)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
+		(free-stuff)
+	)
+	(call-with-new-thread free-stuff)
+)
+
+; Run the gc too...
+(run-atomspace-gc)
 
 ;
 ; Silence the output.
