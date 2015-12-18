@@ -179,12 +179,19 @@
 ; "interaction" -- record the start time of an interaction.
 ; defines (DefinedSchema "set-interaction-timestamp") etc.
 (timestamp-template "interaction")
+
 ; "expression" -- time when a new expression started being shown.
 (timestamp-template "expression")
+; "gesture" -- time when the last gesture was made.
 (timestamp-template "gesture")
+
 ; "bored" -- when Eva last got bored.
 (timestamp-template "bored")
+; "sleep" -- when Eva fell asleep.
 (timestamp-template "sleep")
+
+; "attn-search" -- when Eva started searching for attention.
+(timestamp-template "attn-search")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,
@@ -274,6 +281,9 @@
 
 (change-template "Time to make gesture" "gesture"
 	"time_since_last_gesture_min" "time_since_last_gesture_max")
+
+(change-template "Time to change gaze" "attn-search"
+	"time_search_attn_min" "time_search_attn_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
@@ -1012,7 +1022,6 @@
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
-; XXX Need to add search-for-attention targets...
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
@@ -1022,6 +1031,18 @@
 			(Not (DefinedPredicate "Time to make gesture"))
 			(PutLink (DefinedPredicateNode "Show random gesture")
 				(ConceptNode "bored")))
+
+		;; Search for attention -- change gaze evry so often.
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change gaze"))
+			(SequentialAnd
+				(Evaluation (GroundedPredicate "py:look_at_point")
+					(ListLink ;; three numbers: x,y,z
+						(Number 1)
+						(RandomNumber (Number -0.5) (Number 0.5))
+						(Number 0)))
+				(TrueLink (DefinedSchemaNode "set attn-search timestamp"))
+			))
 	))
 
 ; Call once, to fall asleep.
@@ -1277,6 +1298,9 @@
 				(DefinedPredicate "Nothing is happening")
 				(True))
 
+			;; XXX FIXME chatbot is disengaged from everything else.
+			;; The room can be empty, the head is bored or even sleep,
+			;; but the chatbot is still smiling and yabbering.
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")

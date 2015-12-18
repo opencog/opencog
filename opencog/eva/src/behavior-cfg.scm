@@ -144,6 +144,12 @@
 (State (Schema "time_boredom_min") (Number 25))
 (State (Schema "time_boredom_max") (Number 125))
 
+; How long to look in one direction, before changing gaze,
+; when searching for atention in an empty room.
+; line 134 -- search_for_attention_duration_min
+(State (Schema "time_search_attn_min") (Number 1.0))
+(State (Schema "time_search_attn_max") (Number 4.0))
+
 ; --------------------------------------------------------
 ; Misc other config parameters
 
