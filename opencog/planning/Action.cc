@@ -31,7 +31,8 @@ using namespace opencog;
 /**
  * Fully abstracted action node name.
  */
-const std::string Action::main_action_name = "opencog: action";
+const NodePtr Action::main_action_node =
+            createNode(CONCEPT_NODE, "opencog: action");
 
 /**
  * Main Constructor
@@ -54,10 +55,11 @@ void Action::init()
 
     FollowLink fl;
     // NOTE:  Assuming only one InheritanceLink
+    // (Inheritance (Node "action-alias") (Concept "opencog: action"))
     auto oc_node = fl.follow_binary_link(_rule.get_alias(), INHERITANCE_LINK);
     auto oc_node_ptr = NodeCast(oc_node);
 
-    if (not oc_node_ptr or (main_action_name != oc_node_ptr->getName()))
+    if (not oc_node_ptr or (*main_action_node != *oc_node_ptr))
         throw InvalidParamException(TRACE_INFO,
             "[Action::init()] the rule is not an action type");
 

@@ -42,9 +42,8 @@ public:
     LinkPtr get_derived_state();
 
 private:
-    // An action is  a URE rule that inherits from
-    // (ConceptNode "opencog: action").
-    static const std::string main_action_name;
+    // An action is  a URE rule that inherits from this node.
+    static const NodePtr main_action_node;
 
     Rule _rule;
 
