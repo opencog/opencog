@@ -107,6 +107,12 @@ cdef class EntityRecorder:
         #SpaceServer will handle this
         pass
 
+    @classmethod
+    def init_new_entity_recorder(cls):
+        cdef cEntityRecorder* cer = new cEntityRecorder()
+        newer = cls(PyLong_FromVoidPtr(cer))
+        return newer
+
     def get_self_agent_entity(self):
         return Handle(self.c_entity_recorder.getSelfAgentEntity().value())
 
