@@ -66,17 +66,17 @@ def gaze_at_face(face_id_node):
 	return TruthValue(1, 1)
 
 def gaze_at_point(x_node, y_node, z_node):
-	x = int(float(x_node.name))
-	y = int(float(y_node.name))
-	z = int(float(z_node.name))
+	x = float(x_node.name)
+	y = float(y_node.name)
+	z = float(z_node.name)
 	print "Python gaze at point", x, y, z
 	# evl.gaze_at_point(x, y, z)
 	return TruthValue(1, 1)
 
 def look_at_point(x_node, y_node, z_node):
-	x = int(float(x_node.name))
-	y = int(float(y_node.name))
-	z = int(float(z_node.name))
+	x = float(x_node.name)
+	y = float(y_node.name)
+	z = float(z_node.name)
 	print "Python look at point", x, y, z
 	# evl.look_at_point(x, y, z)
 	return TruthValue(1, 1)
