@@ -31,6 +31,8 @@ from blender_api_msgs.msg import SetGesture
 from blender_api_msgs.msg import Target
 from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
+from blender_api_msgs.msg import SomaState
+
 
 from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
@@ -86,6 +88,13 @@ class EvaControl():
 		self.gesture_pub.publish(ges)
 		print "Just published gesture: ", ges.name
 
+	def go_sleep(self):
+		self.soma_state('sleep', 1, 1, 3)
+		self.soma_state('normal.001', 0, 1, 0)
+
+	def wake_up(self):
+		self.soma_state('sleep', 0, 1, 0)
+		self.soma_state('normal.001', 0.1, 1, 3)
 	# ----------------------------------------------------------
 	# Wrapper for emotional expressions
 	def expression(self, name, intensity, duration):
@@ -99,6 +108,20 @@ class EvaControl():
 		exp.duration.nsecs = 1000000000 * (duration - int(duration))
 		self.emotion_pub.publish(exp)
 		print "Publish expression: ", exp.name
+
+	# Wrapper for Soma state expressions
+	def soma_state(self, name, intensity, rate, ease_in=0.0):
+		if 'noop' == name :
+			return
+		# Create the message
+		soma = SomaState()
+		soma.name = name
+		soma.magnitude = intensity
+		soma.rate = rate
+		soma.ease_in.secs = int(ease_in)
+		soma.ease_in.nsecs = 1000000000 * (ease_in - int(ease_in))
+		self.soma_pub.publish(soma)
+		print "Publish soma state: ", soma.name
 
 	# Wrapper for gestures
 	def gesture(self, name, intensity, repeat, speed):
@@ -297,6 +320,8 @@ class EvaControl():
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)
+		self.soma_pub = rospy.Publisher("/blender_api/set_soma_state",
+		                                   SomaState, queue_size=2)
 		self.blink_pub = rospy.Publisher("/blender_api/set_blink_randomly",
 		                                   BlinkCycle, queue_size=1)
 		self.saccade_pub = rospy.Publisher("/blender_api/set_saccade",
