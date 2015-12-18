@@ -266,12 +266,14 @@
 	"time_boredom_min" "time_boredom_max")
 
 ;; Evaluate to true, if an expression should be shown.
+;; (if it is OK to show a new expression). Prevents system from
+;; showing new facial expressions too frequently.
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
-	"default_emotion_duration" "default_emotion_duration")
+	"time_since_last_expr_min" "time_since_last_expr_max")
 
 (change-template "Time to make gesture" "gesture"
-	"time_to_make_gesture_min" "time_to_make_gesture_max")
+	"time_since_last_gesture_min" "time_since_last_gesture_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
@@ -469,7 +471,7 @@
 ;    (cog-evaluate!
 ;       (PutLink (DefinedPredicateNode "Show random expression")
 ;          (ConceptNode "positive")))
-; will pick one of te "positive" emotions, and send it off.
+; will pick one of the "positive" emotions, and send it off to ROS.
 ;
 ;; line 305 -- pick_random_expression()
 (DefineLink
@@ -781,8 +783,6 @@
 ;; Interact with the curent face target.
 ;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
-;; XXX Almost a complete implementation of whats in owyl...  but
-;; the owyl pick_instant code is insane... punt here.
 (DefineLink
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
@@ -848,6 +848,7 @@
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
+		(DefinedPredicate "If sleeping then wake")
 		(True (DefinedSchema "interact with requested person"))
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
@@ -883,14 +884,26 @@
 		(True)
 	))
 
+;; ##### If Interruption && Sleeping -> Wake Up #####
+;; line 545
+(DefineLink
+	(DefinedPredicate "If sleeping then wake")
+	(SequentialOr
+		(SequentialAnd
+			(Equal (SetLink soma-sleeping)
+				(Get (State soma-state (Variable "$x"))))
+			(DefinedPredicateNode "Wake up"))
+		(True)))
+
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
 (DefineLink
-	(DefinedPredicateNode "New arrival sequence")
-	(SequentialAndLink
-		(DefinedPredicateNode "Did someone arrive?")
-		(DefinedPredicateNode "Respond to new arrival")
-		(DefinedPredicateNode "Update status")
+	(DefinedPredicate "New arrival sequence")
+	(SequentialAnd
+		(DefinedPredicate "Did someone arrive?")
+		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "Respond to new arrival")
+		(DefinedPredicate "Update status")
 	))
 
 ;; Check to see if someone left.
@@ -984,10 +997,19 @@
 ; or we wake up.
 
 ; line 898 -- search_for_attention.
-; XXX not done.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
+; XXX Need to add search-for-attention targets...
+		; Pick a bored expression, gesture
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change expression"))
+			(PutLink (DefinedPredicateNode "Show random expression")
+				(ConceptNode "bored")))
+		(SequentialOr
+			(Not (DefinedPredicate "Time to make gesture"))
+			(PutLink (DefinedPredicateNode "Show random gesture")
+				(ConceptNode "bored")))
 	))
 
 ; Call once, to fall asleep.
@@ -1025,6 +1047,8 @@
 			(ListLink (Node "--- Wake up!")
 				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+
+		; Change soma state to being awake.
 		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
 			soma-awake))
 		(PutLink (DefinedPredicateNode "Show random expression")
@@ -1089,17 +1113,6 @@
 				; ##### Continue To Sleep #####
 				(DefinedPredicate "Continue sleeping")
 			)
-		)
-
-		; ##### If Interruption && Sleeping -> Wake Up #####
-		;; XXX This never runs, since the face-detected code is
-		;; triggered before we can get to here. Thus, the wake-up
-		;; sequence never runs, and the soma-state is incorrect...
-		(SequentialAndLink  ; line 545
-			(EqualLink (SetLink soma-sleeping)
-				(GetLink (StateLink soma-state (VariableNode "$x"))))
-			(DefinedPredicateNode "Did someone arrive?")
-			(DefinedPredicateNode "Wake up")
 		)
 ))
 

@@ -74,8 +74,10 @@
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
 (emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
 
-(emo-gest-spec "bored"   "yawn-1"  0.01 0.6 0.9 1 1 1 1)
-(emo-gest-spec "bored"   "noop"    0.99 0   0   1 1 1 1)
+; If bored, then 1/10th of the time, yawn.
+; Rest of the time, don't do anything.
+(emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
 (emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
@@ -123,8 +125,15 @@
 (State (Schema "time_to_change_face_target_min") (Number 8))
 (State (Schema "time_to_change_face_target_max") (Number 10))
 
-(State (Schema "time_to_make_gesture_min") (Number 6))
-(State (Schema "time_to_make_gesture_max") (Number 10))
+; Specify how long to hold off between making gestures.
+; This prevents gestures from occuring too often.
+(State (Schema "time_since_last_gesture_min") (Number 6))
+(State (Schema "time_since_last_gesture_max") (Number 10))
+
+; Specify how long to hold off between making facial expressions.
+; line 4 default_emotion_duration is 1 second but that's nuts.
+(State (Schema "time_since_last_expr_min") (Number 6.0))
+(State (Schema "time_since_last_expr_max") (Number 10.0))
 
 ; Sleep at least 25 seconds ... at most 160
 (State (Schema "time_sleeping_min") (Number 25))
@@ -134,9 +143,6 @@
 ; Fall asleep for sure after 125 seconds.
 (State (Schema "time_boredom_min") (Number 25))
 (State (Schema "time_boredom_max") (Number 125))
-
-; line 4 default_emotion_duration is 1 second but that's nuts.
-(State (Schema "default_emotion_duration") (Number 6.0))
 
 ; --------------------------------------------------------
 ; Misc other config parameters
