@@ -153,8 +153,8 @@
 ;; During search-for-attention, how far to look to left or right.
 ;; XXX Right now, search for attention turns the whole head;
 ;; perhaps only the eyes should move?
-(DefineLink (DefinedSchema "gaze left max") (Number 0.5))
-(DefineLink (DefinedSchema "gaze right max") (Number -0.5))
+(DefineLink (DefinedSchema "gaze left max") (Number 0.35))
+(DefineLink (DefinedSchema "gaze right max") (Number -0.4))
 
 ; --------------------------------------------------------
 ; Misc other config parameters
