@@ -57,9 +57,9 @@ scaffolding", to simplify initial phases of integration with OpenCog.
 
 Status
 ------
-This is version 0.8.0 of the scripts. The basic behavior tree is
-implemented. Some brand-new stuff as not bee integrated.  Some parts
-are still klunky. Future plans are not started.
+This is version 0.9.0 of the scripts. All of the old Owyl behavior
+tree has been implemented. Some brand-new stuff has not been integrated.
+Future plans are not started.
 
 The `notes` directory contains a copy of the original owyl code,
 (in `general_behavior.py`, for line-by-line reference), as well
@@ -129,10 +129,8 @@ Resources:
 TODO
 ----
 * face_track.py has some new code for both face study, and current-face.
-  merge this code.
+  Finish merging this code.
 
 * stage mode
 
-* Search for and address the XXX in file
-
-* Finish implementing the room-is-empty mode.
+* Search for and address the XXX's that appear in the various files.
