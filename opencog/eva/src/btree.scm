@@ -1032,14 +1032,19 @@
 			(PutLink (DefinedPredicateNode "Show random gesture")
 				(ConceptNode "bored")))
 
-		;; Search for attention -- change gaze evry so often.
+		;; Search for attention -- change gaze every so often.
+		;; Coordinate system: x forward; y side-to-side, z up.
+		;; XXX question: This is turning the whole head; perhaps we
+		;; should be moving eyes only?
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change gaze"))
 			(SequentialAnd
 				(Evaluation (GroundedPredicate "py:look_at_point")
 					(ListLink ;; three numbers: x,y,z
 						(Number 1)
-						(RandomNumber (Number -0.5) (Number 0.5))
+						(RandomNumber
+							(DefinedSchema "gaze right max")
+							(DefinedSchema "gaze left max"))
 						(Number 0)))
 				(TrueLink (DefinedSchemaNode "set attn-search timestamp"))
 			))

@@ -150,6 +150,10 @@
 (State (Schema "time_search_attn_min") (Number 1.0))
 (State (Schema "time_search_attn_max") (Number 4.0))
 
+;; During search-for-attention, how far to look to left or right.
+(DefineLink (DefinedSchema "gaze left max") (Number 0.5))
+(DefineLink (DefinedSchema "gaze right max") (Number -0.5))
+
 ; --------------------------------------------------------
 ; Misc other config parameters
 
