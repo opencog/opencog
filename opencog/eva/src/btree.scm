@@ -1063,6 +1063,7 @@
 			(Concept "sleep"))
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "sleep"))
+		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
 		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
@@ -1091,6 +1092,7 @@
 			(Concept "wake-up"))
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "wake-up"))
+		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
 	))
 
 ;; Collection of things to do if nothing is happening (no faces
