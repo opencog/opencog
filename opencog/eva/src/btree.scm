@@ -897,12 +897,13 @@
 		(True)))
 
 ;; If soma state was bored, change state to alert.
-;; If we don't do this, the bored state makes us narcoleptic.
+;; If we don't do this, then being bored while also talking
+;; can make us narcoleptic.
 (DefineLink
 	(DefinedPredicate "If bored then alert")
 	(SequentialOr
-		(Equal (SetLink soma-bored)
-			(Get (State soma-state (Variable "$x"))))
+		(NotLink (Equal (SetLink soma-bored)
+			(Get (State soma-state (Variable "$x")))))
 		(True (Put (State soma-state (Variable "$x")) soma-awake))))
 
 ;; Check to see if a new face has become visible.
