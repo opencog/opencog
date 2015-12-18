@@ -117,6 +117,9 @@
 
 (dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
 
+; Probability of performing the face-study saccade.
+(dice-roll "face study" 0.2) ; line 122 -- face_study_probabilities
+
 ; --------------------------------------------------------
 ; Time-related conf paramters
 

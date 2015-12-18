@@ -1007,7 +1007,10 @@
 				(DefinedPredicateNode "Interact with face")
 				(SequentialOr  ; line 488
 					(SequentialAnd ; line 489
+						(DefinedPredicateNode "dice-roll: face study")
 ; XXX incomplete!  need the face study saccade stuff...
+; I am confused ... has this been superceeded by the ROS-saccades,
+; or is this still means to be used?
 						(False)
 					)
 					(True))  ; line 493
