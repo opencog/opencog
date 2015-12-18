@@ -39,6 +39,16 @@ def prt_msg(face_id_node):
 	print "Python face id", face_id
 	return TruthValue(1, 1)
 
+def do_wake_up():
+	# evl.wake_up()
+	print "Python wake up"
+	return TruthValue(1, 1)
+
+def do_go_sleep():
+	# evl.go_sleep()
+	print "Python go to sleep"
+	return TruthValue(1, 1)
+
 def do_look_left():
 	# evl.look_left()
 	return TruthValue(1, 1)
