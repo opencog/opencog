@@ -179,12 +179,19 @@
 ; "interaction" -- record the start time of an interaction.
 ; defines (DefinedSchema "set-interaction-timestamp") etc.
 (timestamp-template "interaction")
+
 ; "expression" -- time when a new expression started being shown.
 (timestamp-template "expression")
+; "gesture" -- time when the last gesture was made.
 (timestamp-template "gesture")
+
 ; "bored" -- when Eva last got bored.
 (timestamp-template "bored")
+; "sleep" -- when Eva fell asleep.
 (timestamp-template "sleep")
+
+; "attn-search" -- when Eva started searching for attention.
+(timestamp-template "attn-search")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,
@@ -274,6 +281,9 @@
 
 (change-template "Time to make gesture" "gesture"
 	"time_since_last_gesture_min" "time_since_last_gesture_max")
+
+(change-template "Time to change gaze" "attn-search"
+	"time_search_attn_min" "time_search_attn_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
@@ -849,6 +859,7 @@
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
 		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "If bored then alert")
 		(True (DefinedSchema "interact with requested person"))
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
@@ -895,6 +906,16 @@
 			(DefinedPredicateNode "Wake up"))
 		(True)))
 
+;; If soma state was bored, change state to alert.
+;; If we don't do this, then being bored while also talking
+;; can make us narcoleptic.
+(DefineLink
+	(DefinedPredicate "If bored then alert")
+	(SequentialOr
+		(NotLink (Equal (SetLink soma-bored)
+			(Get (State soma-state (Variable "$x")))))
+		(True (Put (State soma-state (Variable "$x")) soma-awake))))
+
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
 (DefineLink
@@ -902,6 +923,7 @@
 	(SequentialAnd
 		(DefinedPredicate "Did someone arrive?")
 		(DefinedPredicate "If sleeping then wake")
+		(DefinedPredicate "If bored then alert")
 		(DefinedPredicate "Respond to new arrival")
 		(DefinedPredicate "Update status")
 	))
@@ -1000,7 +1022,6 @@
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
-; XXX Need to add search-for-attention targets...
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
@@ -1010,23 +1031,39 @@
 			(Not (DefinedPredicate "Time to make gesture"))
 			(PutLink (DefinedPredicateNode "Show random gesture")
 				(ConceptNode "bored")))
+
+		;; Search for attention -- change gaze every so often.
+		;; Coordinate system: x forward; y side-to-side, z up.
+		;; XXX question: This is turning the whole head; perhaps we
+		;; should be moving eyes only?
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change gaze"))
+			(SequentialAnd
+				(Evaluation (GroundedPredicate "py:look_at_point")
+					(ListLink ;; three numbers: x,y,z
+						(Number 1)
+						(RandomNumber
+							(DefinedSchema "gaze right max")
+							(DefinedSchema "gaze left max"))
+						(Number 0)))
+				(TrueLink (DefinedSchemaNode "set attn-search timestamp"))
+			))
 	))
 
 ; Call once, to fall asleep.
 ; line 941 -- go_to_sleep
 (DefineLink
-	(DefinedPredicateNode "Go to sleep")
-	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+	(DefinedPredicate "Go to sleep")
+	(SequentialAnd
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (Time) (DefinedSchema "get bored timestamp"))))
-		(TrueLink (DefinedSchemaNode "set sleep timestamp"))
-		(PutLink (DefinedPredicateNode "Show random expression")
-			(ConceptNode "sleep"))
-		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "sleep"))
-		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
-			(SetLink soma-sleeping)))
+		(True (DefinedSchema "set sleep timestamp"))
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "sleep"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "sleep"))
+		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
 ; line 537 -- Continue To Sleep
@@ -1041,20 +1078,19 @@
 ; Wake-up sequence
 ; line 957 -- wake_up()
 (DefineLink
-	(DefinedPredicateNode "Wake up")
-	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg-time")
+	(DefinedPredicate "Wake up")
+	(SequentialAnd
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
-		(TrueLink (DefinedSchemaNode "set bored timestamp"))
+		(TrueLink (DefinedSchema "set bored timestamp"))
 
 		; Change soma state to being awake.
-		(TrueLink (PutLink (StateLink soma-state (VariableNode "$x"))
-			soma-awake))
-		(PutLink (DefinedPredicateNode "Show random expression")
-			(ConceptNode "wake-up"))
-		(PutLink (DefinedPredicateNode "Show random gesture")
-			(ConceptNode "wake-up"))
+		(True (Put (State soma-state (Variable "$x")) soma-awake))
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "wake-up"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "wake-up"))
 	))
 
 ;; Collection of things to do if nothing is happening (no faces
@@ -1075,8 +1111,7 @@
 				(Get (State soma-state (Variable "$x"))))
 
 			(SequentialAnd
-				(True (Put (State soma-state (Variable "$x"))
-					(SetLink soma-bored)))
+				(True (Put (State soma-state (Variable "$x")) soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
 
@@ -1268,6 +1303,9 @@
 				(DefinedPredicate "Nothing is happening")
 				(True))
 
+			;; XXX FIXME chatbot is disengaged from everything else.
+			;; The room can be empty, the head is bored or even sleep,
+			;; but the chatbot is still smiling and yabbering.
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")

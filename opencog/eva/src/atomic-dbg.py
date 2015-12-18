@@ -65,6 +65,22 @@ def gaze_at_face(face_id_node):
 	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
+def gaze_at_point(x_node, y_node, z_node):
+	x = float(x_node.name)
+	y = float(y_node.name)
+	z = float(z_node.name)
+	print "Python gaze at point", x, y, z
+	# evl.gaze_at_point(x, y, z)
+	return TruthValue(1, 1)
+
+def look_at_point(x_node, y_node, z_node):
+	x = float(x_node.name)
+	y = float(y_node.name)
+	z = float(z_node.name)
+	print "Python look at point", x, y, z
+	# evl.look_at_point(x, y, z)
+	return TruthValue(1, 1)
+
 def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	duration = float(duration_node.name)
