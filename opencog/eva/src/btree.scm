@@ -266,6 +266,8 @@
 	"time_boredom_min" "time_boredom_max")
 
 ;; Evaluate to true, if an expression should be shown.
+;; (if it is OK to show a new expression). Prevents system from
+;; showing new facial expressions too frequently.
 ;; line 933, should_show_expression()
 (change-template "Time to change expression" "expression"
 	"time_since_last_expr_min" "time_since_last_expr_max")
@@ -469,7 +471,7 @@
 ;    (cog-evaluate!
 ;       (PutLink (DefinedPredicateNode "Show random expression")
 ;          (ConceptNode "positive")))
-; will pick one of te "positive" emotions, and send it off.
+; will pick one of the "positive" emotions, and send it off to ROS.
 ;
 ;; line 305 -- pick_random_expression()
 (DefineLink
@@ -995,7 +997,6 @@
 ; or we wake up.
 
 ; line 898 -- search_for_attention.
-; XXX not done.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
