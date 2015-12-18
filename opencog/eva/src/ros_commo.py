@@ -163,6 +163,7 @@ class EvaControl():
 	# as, at this time, there are no knobs worth twiddling.
 
 	# Explore-the-room saccade when not conversing.
+	# ??? Is this exploring the room, or someone's face? I'm confused.
 	def explore_saccade(self):
 
 		# Switch to conversational (micro) saccade parameters
