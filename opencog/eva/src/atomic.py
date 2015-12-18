@@ -54,12 +54,10 @@ def do_look_right():
 	return TruthValue(1, 1)
 
 def do_wake_up():
-	print "Python wake up"
 	evl.wake_up()
 	return TruthValue(1, 1)
 
 def do_go_sleep():
-	print "Python go to sleep"
 	evl.go_sleep()
 	return TruthValue(1, 1)
 
