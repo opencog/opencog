@@ -53,6 +53,14 @@ def do_look_right():
 	evl.look_right()
 	return TruthValue(1, 1)
 
+def do_wake_up():
+	evl.wake_up()
+	return TruthValue(1, 1)
+
+def do_go_sleep():
+	evl.go_sleep()
+	return TruthValue(1, 1)
+
 def glance_at_face(face_id_node):
 	face_id = int(float(face_id_node.name))
 	print "Python glance at face id", face_id
@@ -75,7 +83,6 @@ def gaze_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "Python gaze at point", x, y, z
 	evl.gaze_at_point(x, y, z)
 	return TruthValue(1, 1)
 
@@ -83,7 +90,6 @@ def look_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "Python look at point", x, y, z
 	evl.look_at_point(x, y, z)
 	return TruthValue(1, 1)
 

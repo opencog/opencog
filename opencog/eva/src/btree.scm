@@ -1059,10 +1059,15 @@
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (Time) (DefinedSchema "get bored timestamp"))))
 		(True (DefinedSchema "set sleep timestamp"))
+
+		; First, show some yawns ...
 		(Put (DefinedPredicate "Show random expression")
 			(Concept "sleep"))
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "sleep"))
+
+		; Finally, play the go-to-sleep animation.
+		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
 		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
@@ -1087,6 +1092,11 @@
 
 		; Change soma state to being awake.
 		(True (Put (State soma-state (Variable "$x")) soma-awake))
+
+		; Run the wake animation.
+		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
+
+		; Also show the wake-up expression (head shake, etc.)
 		(Put (DefinedPredicate "Show random expression")
 			(Concept "wake-up"))
 		(Put (DefinedPredicate "Show random gesture")

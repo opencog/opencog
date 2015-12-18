@@ -95,6 +95,7 @@ class EvaControl():
 	def wake_up(self):
 		self.soma_state('sleep', 0, 1, 0)
 		self.soma_state('normal.001', 0.1, 1, 3)
+
 	# ----------------------------------------------------------
 	# Wrapper for emotional expressions
 	def expression(self, name, intensity, duration):
@@ -107,7 +108,7 @@ class EvaControl():
 		exp.duration.secs = int(duration)
 		exp.duration.nsecs = 1000000000 * (duration - int(duration))
 		self.emotion_pub.publish(exp)
-		print "Publish expression: ", exp.name
+		print "Publish expression:", exp.name
 
 	# Wrapper for Soma state expressions
 	def soma_state(self, name, intensity, rate, ease_in=0.0):
@@ -121,7 +122,7 @@ class EvaControl():
 		soma.ease_in.secs = int(ease_in)
 		soma.ease_in.nsecs = 1000000000 * (ease_in - int(ease_in))
 		self.soma_pub.publish(soma)
-		print "Publish soma state: ", soma.name
+		print "Publish soma state:", soma.name, "intensity:", intensity
 
 	# Wrapper for gestures
 	def gesture(self, name, intensity, repeat, speed):
