@@ -473,3 +473,10 @@ bugs:
 
 ====================================================
 (process-query "luser" "Look left")
+
+truthquery.scm
+passive.scm
+imperative.scm
+how-q.scm
+
+PrepositionalRelationshipNode

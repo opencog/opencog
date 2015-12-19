@@ -16,11 +16,11 @@
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$qVar" "$a-parse")
 			(EvaluationLink
-     			(PrepositionalRelationshipNode "how")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
+				(PrepositionalRelationshipNode "how")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$qVar")
+				)
  			)
 		)
 		(ExecutionOutputLink
