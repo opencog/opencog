@@ -1,11 +1,13 @@
-; NB: there seems to be a bit of a bug in Relex for assigning multiple adjectives to the same noun,
-; which works partially -- it seems to get some of the multiple adjectives but not necessarily all
-; of them.
+; NB: there seems to be a bit of a bug in Relex for assigning multiple
+; adjectives to the same noun, which works partially -- it seems to get
+; some of the multiple adjectives but not necessarily all of them.
 ;
-; This rule treats adjectival phrases as well as adjectives, because I rigged relex that way.  So,
-; amod handles "The tall man" and "the man in the hat."  'in the hat' is an adjectival phrase here.
-; this is why I changed the individual triadic prepositional relations into two rules, one to assign
-; the role of the prepositional phrase and the other to assign the object of the preposition.
+; This rule treats adjectival phrases as well as adjectives, because
+; I rigged relex that way.  So, amod handles "The tall man" and
+; "the man in the hat."  'in the hat' is an adjectival phrase here.
+; this is why I changed the individual triadic prepositional
+; relations into two rules, one to assign the role of the prepositional
+; phrase and the other to assign the object of the preposition.
 ; (AN June 2015)
 
 (define amod

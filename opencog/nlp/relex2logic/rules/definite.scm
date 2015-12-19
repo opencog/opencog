@@ -3,28 +3,28 @@
 ; (AN June 2015)
 
 (define definite
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$noun" "WordInstanceNode")
 			(var-decl "$lemma" "WordNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$noun" "$a-parse")
-            (LemmaLink
-                (VariableNode "$noun")
-                (VariableNode "$lemma")
-            )
-            (InheritanceLink
-                (VariableNode "$noun")
-                (DefinedLinguisticConceptNode "definite")
-            )
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: definite-rule")
-            (ListLink
-                (VariableNode "$lemma")
-                (VariableNode "$noun"))
-        )
-    )
+			(LemmaLink
+				(VariableNode "$noun")
+				(VariableNode "$lemma")
+			)
+			(InheritanceLink
+				(VariableNode "$noun")
+				(DefinedLinguisticConceptNode "definite")
+			)
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: definite-rule")
+			(ListLink
+				(VariableNode "$lemma")
+				(VariableNode "$noun"))
+		)
+	)
 )

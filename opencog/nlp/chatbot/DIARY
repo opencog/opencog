@@ -479,4 +479,9 @@ passive.scm
 imperative.scm
 how-q.scm
 
+declarative borked!
+
+
 PrepositionalRelationshipNode
+PartOfSpeechLink
+InheritanceLink
