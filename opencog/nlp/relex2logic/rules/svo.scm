@@ -3,8 +3,8 @@
 ; (AN June 2015)
 
 (define svo
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$W" "WordInstanceNode")
 			(var-decl "$X" "WordInstanceNode")
@@ -13,43 +13,31 @@
 			(var-decl "$subj-lemma" "WordNode")
 			(var-decl "$verb-lemma" "WordNode")
 			(var-decl "$obj-lemma" "WordNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$X" "$a-parse")
 			(word-in-parse "$Y" "$a-parse")
 			(word-in-parse "$Z" "$a-parse")
 			(dependency "_subj" "$Y" "$X")
 			(dependency "_obj" "$Y" "$Z")
-            (LemmaLink
-               (VariableNode "$X")
-               (VariableNode "$subj-lemma")
-            )
-            (LemmaLink
-               (VariableNode "$Y")
-               (VariableNode "$verb-lemma")
-            )
-            (LemmaLink
-               (VariableNode "$Z")
-               (VariableNode "$obj-lemma")
-            )
-            (AbsentLink
-			(dependency "_iobj" "$Y" "$W")
-            )
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: SVO-rule")
-            (ListLink
-                (VariableNode "$subj-lemma")
-                (VariableNode "$X")
-                (VariableNode "$verb-lemma")
-                (VariableNode "$Y")
-                (VariableNode "$obj-lemma")
-                (VariableNode "$Z")
-            )
-        )
-    )
+			(lemma-of-word "$X" "$subj-lemma")
+			(lemma-of-word "$Y" "$verb-lemma")
+			(lemma-of-word "$Z" "$obj-lemma")
+
+			(AbsentLink
+				(dependency "_iobj" "$Y" "$W")
+			)
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: SVO-rule")
+			(ListLink
+				(VariableNode "$subj-lemma")
+				(VariableNode "$X")
+				(VariableNode "$verb-lemma")
+				(VariableNode "$Y")
+				(VariableNode "$obj-lemma")
+				(VariableNode "$Z")
+			)
+		)
+	)
 )
-
-;;(InheritanceLink (stv 1 .99) (ConceptNode "SVO-Rule") (ConceptNode "Rule"))
-
-;;(ReferenceLink (stv 1 .99) (ConceptNode "SVO-Rule") svo)

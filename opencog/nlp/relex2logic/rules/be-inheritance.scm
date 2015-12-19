@@ -4,42 +4,36 @@
 ; (AN June 2015)
 
 (define be-inheritance
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$X" "WordInstanceNode")
 			(var-decl "$Y" "WordInstanceNode")
 			(var-decl "$Z" "WordInstanceNode")
 			(var-decl "$subj-lemma" "WordNode")
 			(var-decl "$obj-lemma" "WordNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$X" "$a-parse")
 			(word-in-parse "$Y" "$a-parse")
 			(word-in-parse "$Z" "$a-parse")
 			(dependency "_subj" "$Y" "$X")
 			(dependency "_obj" "$Y" "$Z")
-            (LemmaLink
-                (VariableNode "$Y")
-                (WordNode "be")
-            )
-            (LemmaLink
-               (VariableNode "$X")
-               (VariableNode "$subj-lemma")
-            )
-            (LemmaLink
-               (VariableNode "$Z")
-               (VariableNode "$obj-lemma")
-            )
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: be-inheritance-rule")
-            (ListLink
-                (VariableNode "$subj-lemma")
-                (VariableNode "$X")
-                (VariableNode "$obj-lemma")
-                (VariableNode "$Z")
-            )
-        )
-    )
+			(LemmaLink
+				(VariableNode "$Y")
+				(WordNode "be")
+			)
+			(lemma-of-word "$X" "$subj-lemma")
+			(lemma-of-word "$Z" "$obj-lemma")
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: be-inheritance-rule")
+			(ListLink
+				(VariableNode "$subj-lemma")
+				(VariableNode "$X")
+				(VariableNode "$obj-lemma")
+				(VariableNode "$Z")
+			)
+		)
+	)
 )

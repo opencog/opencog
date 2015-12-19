@@ -11,10 +11,15 @@
 (define look-rule
 	(BindLink
 		(VariableList
-			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$sent" "SentenceNode")
 			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
 		)
+		(parse-of-sent   "$parse" "$sent")
 		(interp-of-parse "$interp" "$parse")
+		(word-in-parse   "$verb-inst" "$parse")
+		(LemmaLink (VariableNode "$verb-inst") (Word "look"))
 		(ExecutionOutput
 			(GroundedSchema "py: hola")
 			(ListLink)

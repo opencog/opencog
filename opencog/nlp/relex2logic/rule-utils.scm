@@ -9,13 +9,22 @@
 (define (var-decl var type)
    (TypedVariableLink (VariableNode var) (TypeNode type)))
 
-(define (word-in-parse word parse)
+(define (word-in-parse word-inst parse)
 "  The WordInstanceNode WORD is in ParseNode PARSE. "
-	(WordInstanceLink (VariableNode word) (VariableNode parse)))
+	(WordInstanceLink (VariableNode word-inst) (VariableNode parse)))
 
 (define (interp-of-parse interp parse)
 "  The InterpretationNode INTERP is in ParseNode PARSE. "
 	(InterpretationLink (VariableNode interp) (VariableNode parse)))
+
+(define (parse-of-sent parse sent)
+"  The ParseNode PARSE of rht SentenceNode SENTENCE. "
+	(ParseLink (VariableNode parse) (VariableNode sent)))
+
+(define (lemma-of-word word-inst lemma)
+"  The WordInstanceNode WORD hass lemma LEMMA. "
+	(LemmaLink (VariableNode word-inst) (VariableNode lemma)))
+
 
 (define (dependency rel head dep)
 "  RelEx dependency relation REL(HEAD, DEP) "
