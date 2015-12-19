@@ -9,6 +9,7 @@
 		)
 		(AndLink
 			(word-in-parse "$word" "$a-parse")
+			(lemma-of-word "$word" "$lemma")
 			(InheritanceLink
 				(VariableNode "$word")
 				(VariableNode "$gtype")
@@ -16,10 +17,6 @@
 			(InheritanceLink
 				(VariableNode "$word")
 				(DefinedLinguisticConceptNode "person")
-			)
-			(LemmaLink
-				(VariableNode "$word")
-				(VariableNode "$lemma")
 			)
 			(OrLink
 				(EqualLink

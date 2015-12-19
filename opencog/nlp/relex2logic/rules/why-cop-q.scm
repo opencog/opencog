@@ -18,14 +18,14 @@
 			(dependency "_%because" "$verb" "$qVar")
 			(ChoiceLink
 				(AndLink
-			(dependency "_subj" "$verb" "$subj")
+					(dependency "_subj" "$verb" "$subj")
 					(LemmaLink
 						(VariableNode "$verb")
 						(WordNode "be")
 					)
 				)
-			(dependency "_predadj" "$verb" "$subj")
-			(dependency "_psubj" "$subj" "$verb")
+				(dependency "_predadj" "$verb" "$subj")
+				(dependency "_psubj" "$subj" "$verb")
 			)
 		)
 		(ExecutionOutputLink
