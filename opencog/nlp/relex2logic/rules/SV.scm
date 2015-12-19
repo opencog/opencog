@@ -5,36 +5,15 @@
 (define SV
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb-lemma")
-				(TypeNode "WordNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb-lemma" "WordNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")
@@ -43,13 +22,7 @@
 				(VariableNode "$verb")
 				(VariableNode "$verb-lemma")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
+			(dependency "_subj" "$verb" "$subj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SV-rule")

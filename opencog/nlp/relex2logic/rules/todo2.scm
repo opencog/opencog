@@ -7,80 +7,23 @@
 (define todo2
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj2")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb2")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$obj")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj1" "WordInstanceNode")
+			(var-decl "$subj2" "WordInstanceNode")
+			(var-decl "$verb1" "WordInstanceNode")
+			(var-decl "$verb2" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$subj1")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$subj2")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$verb1")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$verb2")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$obj")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb1")
-                    (VariableNode "$subj1")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb2")
-                    (VariableNode "$subj2")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$verb2")
-                    (VariableNode "$obj")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_to-do")
-                (ListLink
-                    (VariableNode "$verb1")
-                    (VariableNode "$verb2")
-                )
-            )
+			(word-in-parse "$subj1" "$a-parse")
+			(word-in-parse "$subj2" "$a-parse")
+			(word-in-parse "$verb1" "$a-parse")
+			(word-in-parse "$verb2" "$a-parse")
+			(word-in-parse "$obj" "$a-parse")
+			(dependency "_subj" "$verb1" "$subj1")
+			(dependency "_subj" "$verb2" "$subj2")
+			(dependency "_obj" "$verb2" "$obj")
+			(dependency "_to-do" "$verb1" "$verb2")
         )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo2-rule")

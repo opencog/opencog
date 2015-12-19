@@ -3,50 +3,17 @@
 (define adverbialpp
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$prep")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$prep" "WordInstanceNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$prep")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$verb")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$noun")
-                )
-            )
-           (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_advmod")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$prep")
-                )
-           )
+			(word-in-parse "$prep" "$a-parse")
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
+			(dependency "_pobj" "$prep" "$noun")
+			(dependency "_advmod" "$verb" "$prep")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-adverbialpp-rule")

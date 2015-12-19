@@ -6,61 +6,19 @@
 (define whichsubjpobjQ
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$prep")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pobj")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$qVar")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$prep" "WordInstanceNode")
+			(var-decl "$pobj" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$subj")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$prep")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$pobj")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_predadj")
-                (ListLink
-                    (VariableNode "$subj")
-		    (VariableNode "$prep")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$pobj")
-                )
-            )
-		(EvaluationLink
-   			(DefinedLinguisticRelationshipNode "_det")
-  			 (ListLink
-   				(VariableNode "$subj")
-      				(VariableNode "$qVar")
-			)
-		)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$prep" "$a-parse")
+			(word-in-parse "$pobj" "$a-parse")
+			(dependency "_predadj" "$subj" "$prep")
+			(dependency "_pobj" "$prep" "$pobj")
+			(dependency "_det" "$subj" "$qVar")
 		(InheritanceLink
 			(VariableNode "$qVar")
 			(DefinedLinguisticConceptNode "which")

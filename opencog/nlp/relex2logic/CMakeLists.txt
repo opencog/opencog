@@ -6,6 +6,7 @@ INSTALL (FILES
 INSTALL (FILES
 	post-processing.scm
 	rule-helpers.scm
+	rule-utils.scm
 	r2l-utilities.scm
 	DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic"
 )

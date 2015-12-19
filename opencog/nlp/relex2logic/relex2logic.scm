@@ -5,6 +5,7 @@
 
 (use-modules (opencog) (opencog atom-types) (opencog nlp))
 
+(load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")
 
 ; -----------------------------------------------------------------------
@@ -13,6 +14,7 @@
 
 	; "." in case the cogserver is started from in-source build directory.
 	(add-to-load-path ".")
+	(load "relex2logic/rule-utils.scm")
 	(load "relex2logic/rule-helpers.scm")
 	(load "relex2logic/loader/load-rules.scm")
 	(load "relex2logic/loader/gen-r2l-en-rulebase.scm")

@@ -5,50 +5,17 @@
 (define where-cop-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$subj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_%atLocation")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
- 			)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_subj")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$subj")
-     			)
-			)
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$qVar" "$a-parse")
+			(word-in-parse "$subj" "$a-parse")
+			(dependency "_%atLocation" "$verb" "$qVar")
+			(dependency "_subj" "$verb" "$subj")
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")

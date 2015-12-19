@@ -4,35 +4,14 @@
 (define howdeg-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$pred")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$pred" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$pred")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-           	(DefinedLinguisticRelationshipNode "_%howdeg")
-           	(ListLink
-           		(VariableNode "$pred")
-           		(VariableNode "$qVar")
-           	)
-     		)
+			(word-in-parse "$qVar" "$a-parse")
+			(word-in-parse "$pred" "$a-parse")
+			(dependency "_%howdeg" "$pred" "$qVar")
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")

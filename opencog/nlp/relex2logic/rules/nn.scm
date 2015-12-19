@@ -2,35 +2,14 @@
 (define nn
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$N1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$N2")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$N1" "WordInstanceNode")
+			(var-decl "$N2" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$N1")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$N2")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_nn")
-                (ListLink
-                    (VariableNode "$N1")
-                    (VariableNode "$N2")
-                )
-            )
+			(word-in-parse "$N1" "$a-parse")
+			(word-in-parse "$N2" "$a-parse")
+			(dependency "_nn" "$N1" "$N2")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-nn-rule")

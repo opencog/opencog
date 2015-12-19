@@ -5,20 +5,11 @@
 (define neg
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pred")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$pred" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$pred")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$pred" "$a-parse")
             (InheritanceLink
                 (VariableNode "$pred")
                 (DefinedLinguisticConceptNode "negative")

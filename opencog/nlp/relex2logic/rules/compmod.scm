@@ -9,35 +9,14 @@
 (define compmod
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pred")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$comp")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$pred" "WordInstanceNode")
+			(var-decl "$comp" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$pred")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$comp")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_compmod")
-                (ListLink
-                    (VariableNode "$pred")
-                    (VariableNode "$comp")
-                )
-            )
+			(word-in-parse "$pred" "$a-parse")
+			(word-in-parse "$comp" "$a-parse")
+			(dependency "_compmod" "$pred" "$comp")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-compmod-rule")

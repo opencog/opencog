@@ -7,35 +7,14 @@
 (define quantity
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$quant")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$quant" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$quant")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_quantity")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$quant")
-                )
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$quant" "$a-parse")
+			(dependency "_quantity" "$noun" "$quant")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-quantity-rule")

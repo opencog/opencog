@@ -3,50 +3,17 @@
 (define to-do-rule-3
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$adj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-		    (TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-		    )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$adj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$subj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$adj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-		 	(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_to-do")
-				(ListLink
-					(VariableNode "$adj")
-					(VariableNode "$verb")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_predadj")
-				(ListLink
-					(VariableNode "$subj")
-					(VariableNode "$adj")
-				)
-			)
+			(word-in-parse "$adj" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$subj" "$a-parse")
+			(dependency "_to-do" "$adj" "$verb")
+			(dependency "_predadj" "$subj" "$adj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-todo3-rule")

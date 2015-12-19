@@ -5,50 +5,17 @@
 (define howpredadj1-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_%how")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
-     		)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_subj")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$subj")
-     			)
-     		)
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$qVar" "$a-parse")
+			(dependency "_%how" "$verb" "$qVar")
+			(dependency "_subj" "$verb" "$subj")
 			(LemmaLink
 				(WordInstanceNode "$verb")
 				(WordNode "be")

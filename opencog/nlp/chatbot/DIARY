@@ -390,3 +390,98 @@ bugs:
 * typoes fool the fuzzy matcher... e.g.
   "Linas eats banannas. "Who eats bannanas?"  note variable nn
 
+====================================================
+
+(use-modules (opencog) (opencog nlp chatbot))
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+
+(nlp-parse "Ronald ate the apple.")
+(nlp-parse "Ronald ate some fruit.")
+(microplanning lap "declarative" *default_chunks_option* #f)
+
+(process-query 'luser "Joe ate a pie.")
+(process-query 'luser "Joe is eating a pie.")
+(process-query 'luser "Who ate a cookie?")
+(process-query "luser" "Joe ate a pear.")
+(process-query "luser" "Who ate a pear?")
+
+(process-query "luser" "Linas ate an apple.")
+(process-query "luser" "Who ate an apple?")
+
+(process-query "luser" "John Kennedy died.")
+(process-query "luser" "Who died?")
+
+(process-query "luser" "What is the color of the ball? ")
+(process-query "luser" "What is the color of the book? ")
+(process-query "luser" "Who died?")
+
+(nlp-parse "My name is Raymond Reddington.")
+(process-query "luser" "What is your name?")
+
+(process-query "luser" "I sent the money to your boss.")
+(process-query "luser" "Who sent money to your boss?")
+(process-query "luser" "Who did you send the money to?")
+
+(process-query "luser" "I sang a song to her")
+
+
+(process-query "luser" "I sang a beautiful song to Mary")
+(process-query "luser" "Who did I sing to?")
+(process-query "luser" "I sang to Joan")
+(process-query "luser" "Who did I sing to?")
+(process-query "luser" "Who did I sing a beautiful song to?")
+
+(process-query "luser" "Who did I sing to?")
+(process-query "luser" "The ball is red")
+(process-query "luser" "The book is blue")
+
+(process-query "luser" "The ball is under the couch")
+
+(process-query "luser" "John threw a green ball.")
+(process-query "luser" "Mike threw a red ball.")
+
+(process-query "luser" "Who threw a red ball?")
+(process-query "luser" "Who threw a green ball?")
+(process-query "luser" "Where is the ball?")
+
+(process-query "luser" "I had two chocolates")
+(process-query "luser" "how many chocolates do I have")
+
+(process-query "luser" "what's your name")
+(process-query "luser" "who is Raymond?")
+
+(EvaluationLink (stv 1.0 1.0)
+   (LinkGrammarRelationshipNode "Wq")
+   (ListLink
+      (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+      (WordInstanceNode "how@a3499630-bbe8-4802-acbe-8a8f1213c714")
+   )
+)
+
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+   (WordNode "###LEFT-WALL###")
+)
+(WordInstanceLink (stv 1.0 1.0)
+   (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+   (ParseNode "sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+)
+
+
+====================================================
+(process-query "luser" "Look left")
+
+truthquery.scm
+passive.scm
+imperative.scm
+how-q.scm
+
+declarative borked!
+
+
+PrepositionalRelationshipNode
+PartOfSpeechLink
+InheritanceLink

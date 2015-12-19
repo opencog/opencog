@@ -6,35 +6,14 @@
 (define where-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_%atLocation")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
-	 		)
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$qVar" "$a-parse")
+			(dependency "_%atLocation" "$verb" "$qVar")
 			(AbsentLink
 				(LemmaLink
 					(VariableNode "$verb")

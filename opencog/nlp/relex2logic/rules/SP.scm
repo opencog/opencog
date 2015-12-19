@@ -6,36 +6,15 @@
 (define SP
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$predadj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$predadj-lemma")
-				(TypeNode "WordNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$predadj" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$predadj-lemma" "WordNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$predadj")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$predadj" "$a-parse")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")
@@ -44,13 +23,7 @@
 				(VariableNode "$predadj")
 				(VariableNode "$predadj-lemma")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_predadj")
-				(ListLink
-					(VariableNode "$subj")
-					(VariableNode "$predadj")
-				)
-			)
+			(dependency "_predadj" "$subj" "$predadj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SV-rule")

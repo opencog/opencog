@@ -7,93 +7,30 @@
 (define SVIO2
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$iobj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$to")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$iobj-lemma")
-				(TypeNode "WordNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
+			(var-decl "$iobj" "WordInstanceNode")
+			(var-decl "$to" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb-lemma" "WordNode")
+			(var-decl "$obj-lemma" "WordNode")
+			(var-decl "$iobj-lemma" "WordNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$obj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$iobj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$to")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$obj" "$a-parse")
+			(word-in-parse "$iobj" "$a-parse")
+			(word-in-parse "$to" "$a-parse")
 			(LemmaLink
 				(VariableNode "$to")
 				(WordNode "to")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_obj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$obj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_pobj")
-				(ListLink
-					(VariableNode "$to")
-					(VariableNode "$iobj")
-				)
-			)
+			(dependency "_subj" "$subj" "$verb")
+			(dependency "_obj" "$obj" "$verb")
+			(dependency "_pobj" "$iobj" "$to")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")

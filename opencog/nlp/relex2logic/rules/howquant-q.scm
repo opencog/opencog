@@ -4,35 +4,14 @@
 (define howquant-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$noun")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$noun" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$noun")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_quantity")
-     			(ListLink
-        			(VariableNode "$noun")
-        			(VariableNode "$qVar")
-     			)
-	 		)
+			(word-in-parse "$qVar" "$a-parse")
+			(word-in-parse "$noun" "$a-parse")
+			(dependency "_quantity" "$noun" "$qVar")
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")

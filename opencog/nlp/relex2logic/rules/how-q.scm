@@ -8,34 +8,19 @@
 (define how-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$qVar" "$a-parse")
 			(EvaluationLink
-     			(PrepositionalRelationshipNode "how")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
+				(PrepositionalRelationshipNode "how")
+				(ListLink
+					(VariableNode "$verb")
+					(VariableNode "$qVar")
+				)
  			)
 		)
 		(ExecutionOutputLink

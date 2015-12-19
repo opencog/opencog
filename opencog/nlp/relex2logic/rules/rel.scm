@@ -6,35 +6,14 @@
 (define rel
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pred")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$rel")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$pred" "WordInstanceNode")
+			(var-decl "$rel" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$pred")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$rel")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_rel")
-                (ListLink
-                    (VariableNode "$rel")
-                    (VariableNode "$pred")
-                )
-            )
+			(word-in-parse "$pred" "$a-parse")
+			(word-in-parse "$rel" "$a-parse")
+			(dependency "_rel" "$rel" "$pred")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-rel-rule")

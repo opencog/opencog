@@ -4,46 +4,16 @@
 (define copula-ynq
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$obj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_obj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$obj")
-				)
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$obj" "$a-parse")
+			(dependency "_subj" "$verb" "$subj")
+			(dependency "_obj" "$verb" "$obj")
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")

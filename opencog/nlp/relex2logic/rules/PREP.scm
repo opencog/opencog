@@ -8,50 +8,17 @@
 (define PREP
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$prep")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$prep" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$prep")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$obj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_psubj")
-				(ListLink
-					(VariableNode "$prep")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_pobj")
-				(ListLink
-					(VariableNode "$prep")
-					(VariableNode "$obj")
-				)
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$prep" "$a-parse")
+			(word-in-parse "$obj" "$a-parse")
+			(dependency "_psubj" "$prep" "$subj")
+			(dependency "_pobj" "$prep" "$obj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-prep-rule")

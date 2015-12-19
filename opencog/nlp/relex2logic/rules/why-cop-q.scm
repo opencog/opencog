@@ -6,71 +6,26 @@
 (define why-cop-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$subj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%because")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$qVar" "$a-parse")
+			(word-in-parse "$subj" "$a-parse")
+			(dependency "_%because" "$verb" "$qVar")
 			(ChoiceLink
 				(AndLink
-					(EvaluationLink
-            	    				(DefinedLinguisticRelationshipNode "_subj")
-            	    				(ListLink
-            	        				(VariableNode "$verb")
-            	        				(VariableNode "$subj")
-            	    				)
-            				)
+			(dependency "_subj" "$verb" "$subj")
 					(LemmaLink
 						(VariableNode "$verb")
 						(WordNode "be")
 					)
 				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_predadj")
-					(ListLink
-						(VariableNode "$subj")
-						(VariableNode "$verb")
-					)
-				)
-				(EvaluationLink
-					(DefinedLinguisticRelationshipNode "_psubj")
-					(ListLink
-						(VariableNode "$verb")
-						(VariableNode "$subj")
-					)
-				)
+			(dependency "_predadj" "$verb" "$subj")
+			(dependency "_psubj" "$subj" "$verb")
 			)
 		)
 		(ExecutionOutputLink

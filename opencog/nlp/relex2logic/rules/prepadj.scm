@@ -6,35 +6,14 @@
 (define prepadj
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$adj")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$adj" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$adj")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_prepadj")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$adj")
-                )
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$adj" "$a-parse")
+			(dependency "_prepadj" "$noun" "$adj")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-prepadj-rule")

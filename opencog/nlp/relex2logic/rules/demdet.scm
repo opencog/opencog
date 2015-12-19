@@ -6,35 +6,14 @@
 (define demdet
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$demdet")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$demdet" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$demdet")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-               (DefinedLinguisticRelationshipNode "_det")
-               (ListLink
-                   (VariableNode "$noun")
-                   (VariableNode "$demdet")
-               )
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$demdet" "$a-parse")
+			(dependency "_det" "$noun" "$demdet")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-demdet-rule")

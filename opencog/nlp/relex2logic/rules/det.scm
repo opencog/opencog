@@ -2,35 +2,14 @@
 (define det
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$det")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$det" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$det")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_det")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$det")
-                )
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$det" "$a-parse")
+			(dependency "_det" "$noun" "$det")
             (InheritanceLink
                 (VariableNode "$noun")
                 (DefinedLinguisticConceptNode "definite")

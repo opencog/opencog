@@ -11,50 +11,17 @@
 (define TOBE
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$adj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$adj" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$adj")
-				(VariableNode "$a-parse")
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_to-be")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$adj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$adj" "$a-parse")
+			(dependency "_to-be" "$verb" "$adj")
+			(dependency "_subj" "$verb" "$subj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")

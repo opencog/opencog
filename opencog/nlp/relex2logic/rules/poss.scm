@@ -5,35 +5,14 @@
 (define poss
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$poss")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$poss" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$poss")
-                (VariableNode "$a-parse")
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_poss")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$poss")
-                )
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$poss" "$a-parse")
+			(dependency "_poss" "$noun" "$poss")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-poss-rule")
