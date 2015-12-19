@@ -480,8 +480,14 @@ imperative.scm
 how-q.scm
 
 declarative borked!
+interrogative
 
 
 PrepositionalRelationshipNode
 PartOfSpeechLink
 InheritanceLink
+LemmaLink
+
+LinkGrammarRelationshipNode
+InterpretationLink
+ReferenceLink

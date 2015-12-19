@@ -10,10 +10,7 @@
 			(var-decl "$wh-word-inst" "WordInstanceNode")
 		)
 		(AndLink
-			(InterpretationLink
-				(VariableNode "$interp")
-				(VariableNode "$parse")
-			)
+			(interp-of-parse "$interp" "$parse")
 			(word-in-parse "$wall-inst" "$parse")
 
 			(ReferenceLink
