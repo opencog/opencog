@@ -1352,6 +1352,7 @@
 		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
 		(cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
 		(cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
 		(free-stuff)
 	)
 	(call-with-new-thread free-stuff)
