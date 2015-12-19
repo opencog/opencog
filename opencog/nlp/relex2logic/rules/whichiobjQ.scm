@@ -20,20 +20,8 @@
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
 			(word-in-parse "$iobj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_iobj")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$iobj")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_det")
-                (ListLink
-                    (VariableNode "$iobj")
-                    (VariableNode "$qVar")
-                )
-            )
+			(dependency "_iobj" "$verb" "$iobj")
+			(dependency "_det" "$iobj" "$qVar")
             (InheritanceLink
                 (VariableNode "$qVar")
                 (DefinedLinguisticConceptNode "which")

@@ -16,34 +16,10 @@
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$prep" "$a-parse")
 			(word-in-parse "$pobj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$be")
-                    (VariableNode "$subj")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$pobj")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_advmod")
-                (ListLink
-                    (VariableNode "$be")
-                    (VariableNode "$prep")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_det")
-                (ListLink
-                    (VariableNode "$pobj")
-                    (VariableNode "$qVar")
-                )
-            )
+			(dependency "_subj" "$be" "$subj")
+			(dependency "_obj" "$prep" "$pobj")
+			(dependency "_advmod" "$be" "$prep")
+			(dependency "_det" "$pobj" "$qVar")
             (InheritanceLink
                 (VariableNode "$qVar")
                 (DefinedLinguisticConceptNode "which")

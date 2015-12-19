@@ -18,13 +18,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$adj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_amod")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$adj")
-                )
-            )
+			(dependency "_amod" "$noun" "$adj")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-amod-rule")

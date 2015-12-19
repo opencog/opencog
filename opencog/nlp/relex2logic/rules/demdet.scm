@@ -13,13 +13,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$demdet" "$a-parse")
-            (EvaluationLink
-               (DefinedLinguisticRelationshipNode "_det")
-               (ListLink
-                   (VariableNode "$noun")
-                   (VariableNode "$demdet")
-               )
-            )
+			(dependency "_det" "$noun" "$demdet")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-demdet-rule")

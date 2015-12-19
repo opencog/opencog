@@ -9,13 +9,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$det" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_det")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$det")
-                )
-            )
+			(dependency "_det" "$noun" "$det")
             (InheritanceLink
                 (VariableNode "$noun")
                 (DefinedLinguisticConceptNode "definite")

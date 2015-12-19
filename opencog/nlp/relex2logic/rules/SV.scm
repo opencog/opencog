@@ -22,13 +22,7 @@
 				(VariableNode "$verb")
 				(VariableNode "$verb-lemma")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
+			(dependency "_subj" "$verb" "$subj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SV-rule")

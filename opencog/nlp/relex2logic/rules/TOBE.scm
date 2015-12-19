@@ -20,20 +20,8 @@
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$adj" "$a-parse")
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_to-be")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$adj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
+			(dependency "_to-be" "$verb" "$adj")
+			(dependency "_subj" "$verb" "$subj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-tobe-rule")

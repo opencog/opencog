@@ -28,27 +28,9 @@
 				(VariableNode "$to")
 				(WordNode "to")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_obj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$obj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_pobj")
-				(ListLink
-					(VariableNode "$to")
-					(VariableNode "$iobj")
-				)
-			)
+			(dependency "_subj" "$subj" "$verb")
+			(dependency "_obj" "$obj" "$verb")
+			(dependency "_pobj" "$iobj" "$to")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")

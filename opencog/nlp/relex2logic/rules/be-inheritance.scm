@@ -17,20 +17,8 @@
 			(word-in-parse "$X" "$a-parse")
 			(word-in-parse "$Y" "$a-parse")
 			(word-in-parse "$Z" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$Y")
-                    (VariableNode "$X")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$Y")
-                    (VariableNode "$Z")
-                )
-            )
+			(dependency "_subj" "$Y" "$X")
+			(dependency "_obj" "$Y" "$Z")
             (LemmaLink
                 (VariableNode "$Y")
                 (WordNode "be")

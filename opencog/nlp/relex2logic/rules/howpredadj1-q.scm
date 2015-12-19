@@ -14,20 +14,8 @@
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$qVar" "$a-parse")
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_%how")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$qVar")
-     			)
-     		)
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_subj")
-     			(ListLink
-        			(VariableNode "$verb")
-        			(VariableNode "$subj")
-     			)
-     		)
+			(dependency "_%how" "$verb" "$qVar")
+			(dependency "_subj" "$verb" "$subj")
 			(LemmaLink
 				(WordInstanceNode "$verb")
 				(WordNode "be")

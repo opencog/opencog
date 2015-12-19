@@ -16,29 +16,11 @@
         (AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$subj")
-                )
-            )
+			(dependency "_subj" "$verb" "$subj")
 		(AbsentLink
-			(EvaluationLink
-        	        	(DefinedLinguisticRelationshipNode "_obj")
-        	       		 (ListLink
-        	           		 (VariableNode "$verb")
-        	           		 (VariableNode "$obj")
-        	        	)
-        	   	 )
+			(dependency "_obj" "$verb" "$obj")
 		)
-			(EvaluationLink
-   				(DefinedLinguisticRelationshipNode "_det")
-  			 	(ListLink
-     					(VariableNode "$subj")
-      					(VariableNode "$qVar")
-				)
-			)
+			(dependency "_det" "$subj" "$qVar")
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "which")

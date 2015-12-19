@@ -20,34 +20,10 @@
 			(word-in-parse "$verb1" "$a-parse")
 			(word-in-parse "$verb2" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb1")
-                    (VariableNode "$subj1")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_subj")
-                (ListLink
-                    (VariableNode "$verb2")
-                    (VariableNode "$subj2")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$verb2")
-                    (VariableNode "$obj")
-                )
-            )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_to-do")
-                (ListLink
-                    (VariableNode "$verb1")
-                    (VariableNode "$verb2")
-                )
-            )
+			(dependency "_subj" "$verb1" "$subj1")
+			(dependency "_subj" "$verb2" "$subj2")
+			(dependency "_obj" "$verb2" "$obj")
+			(dependency "_to-do" "$verb1" "$verb2")
         )
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: pre-todo2-rule")

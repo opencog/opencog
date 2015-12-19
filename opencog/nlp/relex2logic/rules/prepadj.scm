@@ -13,13 +13,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$adj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_prepadj")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$adj")
-                )
-            )
+			(dependency "_prepadj" "$noun" "$adj")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-prepadj-rule")

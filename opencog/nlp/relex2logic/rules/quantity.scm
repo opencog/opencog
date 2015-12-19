@@ -14,13 +14,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$quant" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_quantity")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$quant")
-                )
-            )
+			(dependency "_quantity" "$noun" "$quant")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-quantity-rule")

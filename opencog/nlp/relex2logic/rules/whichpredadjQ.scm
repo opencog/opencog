@@ -14,20 +14,8 @@
         (AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$predadj" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_predadj")
-                (ListLink
-					(VariableNode "$subj")
-					(VariableNode "$predadj")
-                )
-            )
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_det")
-				(ListLink
- 					(VariableNode "$subj")
-  					(VariableNode "$qVar")
-				)
-			)
+			(dependency "_predadj" "$subj" "$predadj")
+			(dependency "_det" "$subj" "$qVar")
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "which")

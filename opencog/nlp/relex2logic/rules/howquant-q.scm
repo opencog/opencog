@@ -11,13 +11,7 @@
 		(AndLink
 			(word-in-parse "$qVar" "$a-parse")
 			(word-in-parse "$noun" "$a-parse")
-			(EvaluationLink
-     			(DefinedLinguisticRelationshipNode "_quantity")
-     			(ListLink
-        			(VariableNode "$noun")
-        			(VariableNode "$qVar")
-     			)
-	 		)
+			(dependency "_quantity" "$noun" "$qVar")
 			(InheritanceLink
 				(VariableNode "$qVar")
 				(DefinedLinguisticConceptNode "how_much")

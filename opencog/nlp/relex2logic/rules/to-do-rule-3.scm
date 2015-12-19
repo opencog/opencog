@@ -12,20 +12,8 @@
 			(word-in-parse "$adj" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$subj" "$a-parse")
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_to-do")
-				(ListLink
-					(VariableNode "$adj")
-					(VariableNode "$verb")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_predadj")
-				(ListLink
-					(VariableNode "$subj")
-					(VariableNode "$adj")
-				)
-			)
+			(dependency "_to-do" "$adj" "$verb")
+			(dependency "_predadj" "$subj" "$adj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-todo3-rule")

@@ -17,20 +17,8 @@
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$prep" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_psubj")
-				(ListLink
-					(VariableNode "$prep")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_pobj")
-				(ListLink
-					(VariableNode "$prep")
-					(VariableNode "$obj")
-				)
-			)
+			(dependency "_psubj" "$prep" "$subj")
+			(dependency "_pobj" "$prep" "$obj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-prep-rule")

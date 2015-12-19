@@ -22,27 +22,9 @@
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
 			(word-in-parse "$iobj" "$a-parse")
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_obj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$obj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_iobj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$iobj")
-				)
-			)
+			(dependency "_subj" "$verb" "$subj")
+			(dependency "_obj" "$verb" "$obj")
+			(dependency "_iobj" "$verb" "$iobj")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")

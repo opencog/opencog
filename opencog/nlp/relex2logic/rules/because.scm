@@ -12,13 +12,7 @@
         (AndLink
 			(word-in-parse "$pred" "$a-parse")
 			(word-in-parse "$comp" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_%because")
-                (ListLink
-                    (VariableNode "$pred")
-					(VariableNode "$comp")
-                )
-            )
+			(dependency "_%because" "$pred" "$comp")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-because-rule")

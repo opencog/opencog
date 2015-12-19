@@ -19,13 +19,7 @@
                 (VariableNode "$var2")
                 (VariableNode "$pos")
             )
-            (EvaluationLink
-                (VariableNode "$var3")		
-                    (ListLink
-                        (VariableNode "$var1")
-                        (VariableNode "$var2")
-                    )
-            )
+			(dependency  "$var2" "$var1")
             (OrLink
                 (EqualLink
                     (VariableNode "$var3")

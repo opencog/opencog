@@ -12,20 +12,8 @@
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_subj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$subj")
-				)
-			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_obj")
-				(ListLink
-					(VariableNode "$verb")
-					(VariableNode "$obj")
-				)
-			)
+			(dependency "_subj" "$verb" "$subj")
+			(dependency "_obj" "$verb" "$obj")
 			(LemmaLink
 				(VariableNode "$verb")
 				(WordNode "be")

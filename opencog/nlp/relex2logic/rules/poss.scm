@@ -12,13 +12,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$poss" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_poss")
-                (ListLink
-                    (VariableNode "$noun")
-                    (VariableNode "$poss")
-                )
-            )
+			(dependency "_poss" "$noun" "$poss")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-poss-rule")

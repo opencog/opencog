@@ -23,13 +23,7 @@
 				(VariableNode "$predadj")
 				(VariableNode "$predadj-lemma")
 			)
-			(EvaluationLink
-				(DefinedLinguisticRelationshipNode "_predadj")
-				(ListLink
-					(VariableNode "$subj")
-					(VariableNode "$predadj")
-				)
-			)
+			(dependency "_predadj" "$subj" "$predadj")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SV-rule")

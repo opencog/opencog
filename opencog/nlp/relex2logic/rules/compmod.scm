@@ -16,13 +16,7 @@
         (AndLink
 			(word-in-parse "$pred" "$a-parse")
 			(word-in-parse "$comp" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_compmod")
-                (ListLink
-                    (VariableNode "$pred")
-                    (VariableNode "$comp")
-                )
-            )
+			(dependency "_compmod" "$pred" "$comp")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-compmod-rule")

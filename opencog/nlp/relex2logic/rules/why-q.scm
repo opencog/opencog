@@ -12,13 +12,7 @@
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$qVar" "$a-parse")
-			(EvaluationLink
-                			(DefinedLinguisticRelationshipNode "_%because")
-                			(ListLink
-                    			(VariableNode "$verb")
-                    			(VariableNode "$qVar")
-                			)
-            		)
+			(dependency "_%because" "$verb" "$qVar")
 			(AbsentLink
 				(LemmaLink
 					(VariableNode "$verb")

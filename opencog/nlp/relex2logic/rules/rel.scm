@@ -13,13 +13,7 @@
         (AndLink
 			(word-in-parse "$pred" "$a-parse")
 			(word-in-parse "$rel" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_rel")
-                (ListLink
-                    (VariableNode "$rel")
-                    (VariableNode "$pred")
-                )
-            )
+			(dependency "_rel" "$rel" "$pred")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-rel-rule")

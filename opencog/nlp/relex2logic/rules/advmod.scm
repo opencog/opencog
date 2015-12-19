@@ -14,13 +14,7 @@
         (AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$adv" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_advmod")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$adv")
-                )
-            )
+			(dependency "_advmod" "$verb" "$adv")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-advmod-rule")

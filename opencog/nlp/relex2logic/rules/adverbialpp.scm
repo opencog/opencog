@@ -12,20 +12,8 @@
 			(word-in-parse "$prep" "$a-parse")
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$noun")
-                )
-            )
-           (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_advmod")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$prep")
-                )
-           )
+			(dependency "_pobj" "$prep" "$noun")
+			(dependency "_advmod" "$verb" "$prep")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-adverbialpp-rule")

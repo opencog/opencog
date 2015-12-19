@@ -9,13 +9,7 @@
         (AndLink
 			(word-in-parse "$N1" "$a-parse")
 			(word-in-parse "$N2" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_nn")
-                (ListLink
-                    (VariableNode "$N1")
-                    (VariableNode "$N2")
-                )
-            )
+			(dependency "_nn" "$N1" "$N2")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-nn-rule")

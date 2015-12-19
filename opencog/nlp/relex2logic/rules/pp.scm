@@ -13,13 +13,7 @@
         (AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-in-parse "$prep" "$a-parse")
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_pobj")
-                (ListLink
-                    (VariableNode "$prep")
-                    (VariableNode "$noun")
-                )
-            )
+			(dependency "_pobj" "$prep" "$noun")
         )
         (ExecutionOutputLink
        	   (GroundedSchemaNode "scm: pre-pp-rule")
