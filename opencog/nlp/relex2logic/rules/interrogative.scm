@@ -14,10 +14,7 @@
                 (VariableNode "$interp")
                 (VariableNode "$parse")
             )
-            (WordInstanceLink
-                (VariableNode "$wall-inst")
-                (VariableNode "$parse")
-            )
+			(word-in-parse "$wall-inst" "$parse")
 
             (ReferenceLink
                 (VariableNode "$wall-inst")

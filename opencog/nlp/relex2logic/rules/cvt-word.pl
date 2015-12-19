@@ -18,7 +18,7 @@ while(<>)
 
 	if (0 == $prt and /\s+\)$/)
 	{
-		print "\t\t\t(word-inst $word $parse)\n";
+		print "\t\t\t(word-in-parse $word $parse)\n";
 		$prt = 1;
 		next;
 	}

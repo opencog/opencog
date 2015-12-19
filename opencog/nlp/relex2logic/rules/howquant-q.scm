@@ -9,14 +9,8 @@
 			(var-decl "$noun" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$qVar")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$noun")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$qVar" "$a-parse")
+			(word-in-parse "$noun" "$a-parse")
 			(EvaluationLink
      			(DefinedLinguisticRelationshipNode "_quantity")
      			(ListLink

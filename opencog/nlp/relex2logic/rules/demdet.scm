@@ -11,14 +11,8 @@
 			(var-decl "$demdet" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$demdet")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$demdet" "$a-parse")
             (EvaluationLink
                (DefinedLinguisticRelationshipNode "_det")
                (ListLink

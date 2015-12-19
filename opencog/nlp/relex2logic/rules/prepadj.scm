@@ -11,14 +11,8 @@
 			(var-decl "$adj" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$noun")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$adj")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$noun" "$a-parse")
+			(word-in-parse "$adj" "$a-parse")
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_prepadj")
                 (ListLink

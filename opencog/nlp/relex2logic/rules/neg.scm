@@ -9,10 +9,7 @@
 			(var-decl "$pred" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$pred")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$pred" "$a-parse")
             (InheritanceLink
                 (VariableNode "$pred")
                 (DefinedLinguisticConceptNode "negative")

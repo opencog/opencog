@@ -10,14 +10,8 @@
 			(var-decl "$comp" "WordInstanceNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$pred")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$comp")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$pred" "$a-parse")
+			(word-in-parse "$comp" "$a-parse")
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_comp")
                 (ListLink

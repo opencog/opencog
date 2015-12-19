@@ -13,14 +13,8 @@
 			(var-decl "$tense" "DefinedLinguisticConceptNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$verb")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$obj")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$verb" "$a-parse")
+			(word-in-parse "$obj" "$a-parse")
             (InheritanceLink 
                 (VariableNode "$verb")
                 (VariableNode "$tense")

@@ -8,10 +8,7 @@
 			(var-decl "$lemma" "WordNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$verb")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$verb" "$a-parse")
             (PartOfSpeechLink
                 (VariableNode "$verb")
                 (DefinedLinguisticConceptNode "verb")

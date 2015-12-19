@@ -8,10 +8,7 @@
 			(var-decl "$lemma" "WordNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$word")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$word" "$a-parse")
             (InheritanceLink
                 (VariableNode "$word")
                 (VariableNode "$gtype")

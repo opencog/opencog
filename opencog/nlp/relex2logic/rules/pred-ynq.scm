@@ -10,10 +10,7 @@
 			(var-decl "$verb" "WordInstanceNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$verb" "$a-parse")
 			(InheritanceLink
 				(VariableNode "$verb")
 				(DefinedLinguisticConceptNode "truth-query")

@@ -13,14 +13,8 @@
 			(var-decl "$predadj-lemma" "WordNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$predadj")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$predadj" "$a-parse")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")

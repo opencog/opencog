@@ -9,5 +9,5 @@
 (define (var-decl var type)
    (TypedVariableLink (VariableNode var) (TypeNode type)))
 
-(define (word-inst word parse)
+(define (word-in-parse word parse)
 	(WordInstanceLink (VariableNode word) (VariableNode parse))

@@ -14,18 +14,9 @@
 			(var-decl "$obj-lemma" "WordNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$X")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$Y")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$Z")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$X" "$a-parse")
+			(word-in-parse "$Y" "$a-parse")
+			(word-in-parse "$Z" "$a-parse")
             (EvaluationLink
                 (DefinedLinguisticRelationshipNode "_subj")
                 (ListLink

@@ -9,14 +9,8 @@
 			(var-decl "$var3" "PrepositionalRelationshipNode")
         )
         (AndLink
-            (WordInstanceLink
-                (VariableNode "$var1")
-                (VariableNode "$a-parse")
-            )
-            (WordInstanceLink
-                (VariableNode "$var2")
-                (VariableNode "$a-parse")
-            )
+			(word-in-parse "$var1" "$a-parse")
+			(word-in-parse "$var2" "$a-parse")
             (PartOfSpeechLink
                 (VariableNode "$var1")
                 (VariableNode "$pos")

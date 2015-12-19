@@ -12,14 +12,8 @@
 			(var-decl "$verb-lemma" "WordNode")
 		)
 		(AndLink
-			(WordInstanceLink
-				(VariableNode "$subj")
-				(VariableNode "$a-parse")
-			)
-			(WordInstanceLink
-				(VariableNode "$verb")
-				(VariableNode "$a-parse")
-			)
+			(word-in-parse "$subj" "$a-parse")
+			(word-in-parse "$verb" "$a-parse")
 			(LemmaLink
 				(VariableNode "$subj")
 				(VariableNode "$subj-lemma")
