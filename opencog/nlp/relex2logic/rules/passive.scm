@@ -19,13 +19,7 @@
                 (VariableNode "$verb")
                 (VariableNode "$tense")
             )
-            (EvaluationLink
-                (DefinedLinguisticRelationshipNode "_obj")
-                (ListLink
-                    (VariableNode "$verb")
-                    (VariableNode "$obj")
-                )
-            )
+			(dependency "_obj" "$verb" "$obj")
             (EvaluationLink
                 (GroundedPredicateNode "scm: check-tense")
                 (ListLink
