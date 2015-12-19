@@ -11,3 +11,8 @@
 
 (define (word-in-parse word parse)
 	(WordInstanceLink (VariableNode word) (VariableNode parse))
+
+(define (dependency rel head dep)
+	(EvaluationLink
+		(DefinedLinguisticRelationshipNode rel)
+		(ListLink (VariableNode head) (VariableNode dep))))

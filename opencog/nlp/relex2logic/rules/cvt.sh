@@ -4,6 +4,8 @@ FILES=*.scm
 
 for f in $FILES; do
 	echo "Processing $f..."
-	cat $f | ./cvt-word.pl > xxx
+	# cat $f | ./cvt-type.pl > xxx
+	# cat $f | ./cvt-word.pl > xxx
+	cat $f | ./cvt-eval.pl > xxx
 	mv xxx $f
 done
