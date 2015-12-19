@@ -3,22 +3,10 @@
 (define adverbialpp
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$prep")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$prep" "WordInstanceNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

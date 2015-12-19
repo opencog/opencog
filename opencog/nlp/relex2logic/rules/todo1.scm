@@ -7,30 +7,12 @@
 (define todo1
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj2")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb2")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$obj")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$subj2" "WordInstanceNode")
+			(var-decl "$verb1" "WordInstanceNode")
+			(var-decl "$verb2" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

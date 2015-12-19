@@ -7,18 +7,9 @@
 (define quantity
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$quant")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$quant" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

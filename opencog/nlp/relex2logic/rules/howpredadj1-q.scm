@@ -5,22 +5,10 @@
 (define howpredadj1-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

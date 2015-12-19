@@ -2,18 +2,9 @@
 (define nn
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$N1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$N2")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$N1" "WordInstanceNode")
+			(var-decl "$N2" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

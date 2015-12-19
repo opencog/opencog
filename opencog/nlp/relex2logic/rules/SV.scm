@@ -5,26 +5,11 @@
 (define SV
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb-lemma")
-				(TypeNode "WordNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb-lemma" "WordNode")
 		)
 		(AndLink
 			(WordInstanceLink

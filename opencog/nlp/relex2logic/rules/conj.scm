@@ -2,26 +2,11 @@
 (define conj
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$var1")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$var2")
-                (TypeNode "WordInstanceNode")
-            )
-		    (TypedVariableLink
-                (VariableNode "$pos")
-                (TypeNode "DefinedLinguisticConceptNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$var3")
-                (TypeNode "PrepositionalRelationshipNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$var1" "WordInstanceNode")
+			(var-decl "$var2" "WordInstanceNode")
+			(var-decl "$pos" "DefinedLinguisticConceptNode")
+			(var-decl "$var3" "PrepositionalRelationshipNode")
         )
         (AndLink
             (WordInstanceLink

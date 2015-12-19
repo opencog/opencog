@@ -9,22 +9,8 @@
 (define passive
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$verb")
-                (TypeNode "WordInstanceNode")
-            ) 
-            (TypedVariableLink
-                (VariableNode "$obj")
-                (TypeNode "WordInstanceNode")
-            ) 
-            (TypedVariableLink
-                (VariableNode "$tense")
-                (TypeNode "DefinedLinguisticConceptNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$tense" "DefinedLinguisticConceptNode")
         )
         (AndLink
             (WordInstanceLink

@@ -2,18 +2,9 @@
 (define det
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$det")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$det" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

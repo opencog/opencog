@@ -4,18 +4,9 @@
 (define howquant-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$noun")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$noun" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

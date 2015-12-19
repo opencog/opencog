@@ -11,18 +11,9 @@
 (define amod
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$adj")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$adj" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

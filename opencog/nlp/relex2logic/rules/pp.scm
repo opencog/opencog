@@ -6,18 +6,9 @@
 (define pp
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$noun")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$prep")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$noun" "WordInstanceNode")
+			(var-decl "$prep" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

@@ -6,30 +6,12 @@
 (define be-inheritance
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$X")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$Y")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$Z")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-               (VariableNode "$subj-lemma")
-               (TypeNode "WordNode")
-            )
-            (TypedVariableLink
-               (VariableNode "$obj-lemma")
-               (TypeNode "WordNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$X" "WordInstanceNode")
+			(var-decl "$Y" "WordInstanceNode")
+			(var-decl "$Z" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$obj-lemma" "WordNode")
         )
         (AndLink
             (WordInstanceLink

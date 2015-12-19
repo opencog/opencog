@@ -6,26 +6,11 @@
 (define whichsubjpobjQ
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$subj")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$prep")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pobj")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$qVar")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$prep" "WordInstanceNode")
+			(var-decl "$pobj" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

@@ -4,22 +4,10 @@
 (define interrogative
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$interp")
-                (TypeNode "InterpretationNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$wall-inst")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$wh-word-inst")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$wall-inst" "WordInstanceNode")
+			(var-decl "$wh-word-inst" "WordInstanceNode")
         )
         (AndLink
             (InterpretationLink

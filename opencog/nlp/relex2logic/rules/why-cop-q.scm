@@ -6,22 +6,10 @@
 (define why-cop-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$subj" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

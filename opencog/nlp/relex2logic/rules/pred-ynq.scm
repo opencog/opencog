@@ -6,14 +6,8 @@
 (define pred-ynq
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

@@ -3,22 +3,10 @@
 (define to-do-rule-3
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$adj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-		    (TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-		    )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$adj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$subj" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

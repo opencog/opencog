@@ -2,22 +2,10 @@
 (define gender
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$word")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$gtype")
-                (TypeNode "DefinedLinguisticConceptNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$lemma")
-                (TypeNode "WordNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$word" "WordInstanceNode")
+			(var-decl "$gtype" "DefinedLinguisticConceptNode")
+			(var-decl "$lemma" "WordNode")
         )
         (AndLink
             (WordInstanceLink

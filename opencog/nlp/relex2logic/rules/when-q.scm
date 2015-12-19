@@ -6,18 +6,9 @@
 (define when-q
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$qVar")
-				(TypeNode "WordInstanceNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$qVar" "WordInstanceNode")
 		)
 		(AndLink
 			(WordInstanceLink

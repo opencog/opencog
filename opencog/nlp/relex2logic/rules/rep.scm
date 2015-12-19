@@ -11,18 +11,9 @@
 (define rep
     (BindLink
         (VariableList
-            (TypedVariableLink
-                (VariableNode "$a-parse")
-                (TypeNode "ParseNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$pred")
-                (TypeNode "WordInstanceNode")
-            )
-            (TypedVariableLink
-                (VariableNode "$comp")
-                (TypeNode "WordInstanceNode")
-            )
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$pred" "WordInstanceNode")
+			(var-decl "$comp" "WordInstanceNode")
         )
         (AndLink
             (WordInstanceLink

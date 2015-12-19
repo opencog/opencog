@@ -7,46 +7,16 @@
 (define SVIO2
 	(BindLink
 		(VariableList
-			(TypedVariableLink
-				(VariableNode "$a-parse")
-				(TypeNode "ParseNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$iobj")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$to")
-				(TypeNode "WordInstanceNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$subj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$verb-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$obj-lemma")
-				(TypeNode "WordNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$iobj-lemma")
-				(TypeNode "WordNode")
-			)
+			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$subj" "WordInstanceNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
+			(var-decl "$iobj" "WordInstanceNode")
+			(var-decl "$to" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb-lemma" "WordNode")
+			(var-decl "$obj-lemma" "WordNode")
+			(var-decl "$iobj-lemma" "WordNode")
 		)
 		(AndLink
 			(WordInstanceLink
