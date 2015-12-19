@@ -5,22 +5,24 @@
 ; Probably does not belong in this directory.
 
 ;--------------------------------------------------------------------
-(define (var-decl var type)
-	(TypedVariable (VariableNode var) (TypeNode type)))
+(use-modules (opencog) (opencog nlp))
+(load "../relex2logic/rule-utils.scm")
 
 (define look-rule
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
-			(var-decl "$a-parse" "ParseNode")
+			(var-decl "$parse" "ParseNode")
 			(var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 		)
-		(parse-of-sent   "$parse" "$sent")
-		(interp-of-parse "$interp" "$parse")
-		(word-in-parse   "$verb-inst" "$parse")
-		(LemmaLink (VariableNode "$verb-inst") (Word "look"))
-		(word-pos "$verb-inst" "verb")
+		(AndLink
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+			(word-pos "$verb-inst" "verb")
+		)
 		(ExecutionOutput
 			(GroundedSchema "py: hola")
 			(ListLink)
