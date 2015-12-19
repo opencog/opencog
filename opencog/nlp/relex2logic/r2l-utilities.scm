@@ -71,7 +71,9 @@
 
   Return #t or #f depends on whether the node has a WordInstanceNode.
 "
-	(not (null? (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
+	(if (cog-node? node)
+		(not (null? (cog-chase-link 'ReferenceLink 'WordInstanceNode node)))
+		#f)
 )
 
 ; -----------------------------------------------------------------------
