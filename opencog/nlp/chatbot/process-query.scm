@@ -11,10 +11,10 @@
 ;--------------------------------------------------------------------
 (define (wh_query_process query)
 "
-  Process wh-question using the fuzzy hyper graph Matcher
-  QUERY should be a SentenceNode
+  Process wh-question using the fuzzy hypergraph Matcher
+  QUERY should be a SentenceNode.
 
-  Wrapper around get-ansers provided by (opencog nlp fuzzy)
+  Wrapper around get-answers provided by (opencog nlp fuzzy)
 "
     (define temp (get-answers query))
     (cond
@@ -32,7 +32,7 @@
   string holding what the user said.
 "
     ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
-    (define querySentence (car (nlp-parse query)))
+    (define sent-node (car (nlp-parse query)))
 
     ;; XXX FIXME -- remove the IRC debug response below.
     (display "Hello ")
@@ -44,18 +44,18 @@
     ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
-    (let* ((gutr (sentence-get-utterance-type querySentence))
+    (let* ((gutr (sentence-get-utterance-type sent-node))
            (utr (if (equal? '() gutr) '() (car gutr)))
         )
     (cond
         ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
             (display "You asked a Truth Query\n")
-            ; (truth_query_process querySentence)
+            ; (truth_query_process sent-node)
             (display "I can't process truth query for now\n")
         )
         ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
             (display "You made an Interrogative SpeechAct\n")
-            (wh_query_process querySentence)
+            (wh_query_process sent-node)
         )
         ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
             (display "You made a Declarative SpeechAct\n")
@@ -64,6 +64,7 @@
         ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
             (display "You made a Imperative SpeechAct\n")
             ; Make the robot do whatever ...
+				(imperative_process sent-node)
             ; XXX Use AIML here to say something snarky.
         )
         (else
@@ -94,7 +95,7 @@
 ; Used by 'truth_query_process' to find the input for the backward
 ; chaining.
 ; XXX FIXME This also definitely requires change after the backward
-; chaning is completed.
+; chaining is completed.
 ;-------------------------------------------------------------------
 (define (fAtom querySentence)
     (define x (cog-filter 'EvaluationLink (cog-outgoing-set
