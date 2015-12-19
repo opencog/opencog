@@ -9,7 +9,7 @@
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
-			(lemma-of-word "$verb" "$lemma")
+			(word-lemma "$verb" "$lemma")
 			(PartOfSpeechLink
 				(VariableNode "$verb")
 				(DefinedLinguisticConceptNode "verb")

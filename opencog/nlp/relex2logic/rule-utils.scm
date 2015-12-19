@@ -21,8 +21,8 @@
 "  The ParseNode PARSE of rht SentenceNode SENTENCE. "
 	(ParseLink (VariableNode parse) (VariableNode sent)))
 
-(define (lemma-of-word word-inst lemma)
-"  The WordInstanceNode WORD hass lemma LEMMA. "
+(define (word-lemma word-inst lemma)
+"  The WordInstanceNode WORD has lemma LEMMA. "
 	(LemmaLink (VariableNode word-inst) (VariableNode lemma)))
 
 
@@ -37,3 +37,9 @@
 	(EvaluationLink
 		(LinkGrammarRelationshipNode rel)
 		(ListLink (VariableNode left) (VariableNode right))))
+
+
+(define (word-pos word-inst pos)
+"  The WordInstanceNode WORD has PartOfSpeechLink POS. "
+	(PartOfSpeechLink (VariableNode word-inst)
+		(DefinedLinguisticConceptNode pos)))

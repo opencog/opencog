@@ -23,8 +23,8 @@
 				(VariableNode "$Y")
 				(WordNode "be")
 			)
-			(lemma-of-word "$X" "$subj-lemma")
-			(lemma-of-word "$Z" "$obj-lemma")
+			(word-lemma "$X" "$subj-lemma")
+			(word-lemma "$Z" "$obj-lemma")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: be-inheritance-rule")

@@ -20,9 +20,9 @@
 			(word-in-parse "$Z" "$a-parse")
 			(dependency "_subj" "$Y" "$X")
 			(dependency "_obj" "$Y" "$Z")
-			(lemma-of-word "$X" "$subj-lemma")
-			(lemma-of-word "$Y" "$verb-lemma")
-			(lemma-of-word "$Z" "$obj-lemma")
+			(word-lemma "$X" "$subj-lemma")
+			(word-lemma "$Y" "$verb-lemma")
+			(word-lemma "$Z" "$obj-lemma")
 
 			(AbsentLink
 				(dependency "_iobj" "$Y" "$W")

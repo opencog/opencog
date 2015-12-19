@@ -15,8 +15,8 @@
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$predadj" "$a-parse")
-			(lemma-of-word "$subj" "$subj-lemma")
-			(lemma-of-word "$predadj" "$predadj-lemma")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$predadj" "$predadj-lemma")
 			(dependency "_predadj" "$subj" "$predadj")
 		)
 		(ExecutionOutputLink

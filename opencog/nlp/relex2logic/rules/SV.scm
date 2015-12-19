@@ -14,8 +14,8 @@
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
-			(lemma-of-word "$subj" "$subj-lemma")
-			(lemma-of-word "$verb" "$verb-lemma")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb" "$verb-lemma")
 			(dependency "_subj" "$verb" "$subj")
 		)
 		(ExecutionOutputLink

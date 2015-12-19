@@ -20,6 +20,7 @@
 		(interp-of-parse "$interp" "$parse")
 		(word-in-parse   "$verb-inst" "$parse")
 		(LemmaLink (VariableNode "$verb-inst") (Word "look"))
+		(word-pos "$verb-inst" "verb")
 		(ExecutionOutput
 			(GroundedSchema "py: hola")
 			(ListLink)

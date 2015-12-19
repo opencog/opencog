@@ -9,7 +9,7 @@
 		)
 		(AndLink
 			(word-in-parse "$word" "$a-parse")
-			(lemma-of-word "$word" "$lemma")
+			(word-lemma "$word" "$lemma")
 			(InheritanceLink
 				(VariableNode "$word")
 				(VariableNode "$gtype")
