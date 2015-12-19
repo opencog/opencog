@@ -10,7 +10,7 @@
    (TypedVariableLink (VariableNode var) (TypeNode type)))
 
 (define (word-in-parse word parse)
-	(WordInstanceLink (VariableNode word) (VariableNode parse))
+	(WordInstanceLink (VariableNode word) (VariableNode parse)))
 
 (define (dependency rel head dep)
 	(EvaluationLink
