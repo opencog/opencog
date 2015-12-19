@@ -24,35 +24,12 @@
 			;; If left wall is linked with any of Wq, Ws, Wj or Ww
 			;; or Qe, Qw then its interrogative.
 			(ChoiceLink
-				(EvaluationLink (LinkGrammarRelationshipNode "Wq")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Ws")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Wj")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Ww")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Qe")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Qw")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$wh-word-inst")))
+				(lg-link "Wq" "$wall-inst" "$wh-word-inst")
+				(lg-link "Ws" "$wall-inst" "$wh-word-inst")
+				(lg-link "Wj" "$wall-inst" "$wh-word-inst")
+				(lg-link "Ww" "$wall-inst" "$wh-word-inst")
+				(lg-link "Qe" "$wall-inst" "$wh-word-inst")
+				(lg-link "Qw" "$wall-inst" "$wh-word-inst")
 			)
 		)
 		; Mark this as a question.

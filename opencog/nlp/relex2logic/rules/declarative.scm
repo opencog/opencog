@@ -24,30 +24,11 @@
 			;; If left wall is linked with any of Wd, Wp, Wr, Wt or Wa,
 			;; then its declarative.
 			(ChoiceLink
-				(EvaluationLink (LinkGrammarRelationshipNode "Wd")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Wp")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Wr")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Wt")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$word-inst")))
-
-				(EvaluationLink (LinkGrammarRelationshipNode "Wa")
-					(ListLink
-						(VariableNode "$wall-inst")
-						(VariableNode "$word-inst")))
+				(lg-link "Wd" "$wall-inst" "$word-inst")
+				(lg-link "Wp" "$wall-inst" "$word-inst")
+				(lg-link "Wr" "$wall-inst" "$word-inst")
+				(lg-link "Wt" "$wall-inst" "$word-inst")
+				(lg-link "Wa" "$wall-inst" "$word-inst")
 			)
 		)
 

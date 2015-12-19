@@ -23,10 +23,7 @@
 
 			;; If left wall is linked with Wi,
 			;; then its imperative.
-			(EvaluationLink (LinkGrammarRelationshipNode "Wi")
-				(ListLink
-					(VariableNode "$wall-inst")
-					(VariableNode "$word-inst")))
+			(lg-link "Wi" "$wall-inst" "$word-inst")
 		)
 		; Mark this as an imperative.
 		(InheritanceLink

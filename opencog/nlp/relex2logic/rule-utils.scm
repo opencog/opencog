@@ -16,3 +16,8 @@
 	(EvaluationLink
 		(DefinedLinguisticRelationshipNode rel)
 		(ListLink (VariableNode head) (VariableNode dep))))
+
+(define (lg-link rel head dep)
+	(EvaluationLink
+		(LinkGrammarRelationshipNode rel)
+		(ListLink (VariableNode head) (VariableNode dep))))
