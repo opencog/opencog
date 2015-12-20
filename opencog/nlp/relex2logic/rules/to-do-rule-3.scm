@@ -17,9 +17,9 @@
 			(word-in-parse "$subj" "$a-parse")
 			(dependency "_to-do" "$adj" "$verb")
 			(dependency "_predadj" "$subj" "$adj")
-			(lemma-of-word "$subj" "$subj-lemma")
-			(lemma-of-word "$verb" "$verb-lemma")
-			(lemma-of-word "$adj" "$adj-lemma")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb" "$verb-lemma")
+			(word-lemma "$adj" "$adj-lemma")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: to-do-rule-3")

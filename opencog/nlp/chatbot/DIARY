@@ -492,12 +492,6 @@ LinkGrammarRelationshipNode
 InterpretationLink
 ReferenceLink
 
-(lemma-of-word word-inst lemma)
-(lemma-of-word "$subj" "$subj-lemma")
-(lemma-of-word "$verb" "$verb-lemma")
-(lemma-of-word "$obj" "$obj-lemma")
-         (lemma-of-word "$iobj" "$iobj-lemma")
-
 
 who are you
 Who are you?

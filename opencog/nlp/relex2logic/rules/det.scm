@@ -13,8 +13,8 @@
 			(word-in-parse "$det" "$a-parse")
 			(dependency "_det" "$noun" "$det")
 			(word-feat "$noun" "definite")
-			(lemma-of-word "$det" "$det-lemma")
-			(lemma-of-word "$noun" "$noun-lemma")
+			(word-lemma "$det" "$det-lemma")
+			(word-lemma "$noun" "$noun-lemma")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: det-rule")

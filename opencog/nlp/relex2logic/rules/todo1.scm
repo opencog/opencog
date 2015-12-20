@@ -29,10 +29,10 @@
 			(AbsentLink
 				(dependency "_subj" "$verb2" "$subj2")
 			)
-			(lemma-of-word "$subj" "$subj-lemma")
-			(lemma-of-word "$verb1" "$verb1-lemma")
-			(lemma-of-word "$verb2" "$verb2-lemma")
-			(lemma-of-word "$obj" "$obj-lemma")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb1" "$verb1-lemma")
+			(word-lemma "$verb2" "$verb2-lemma")
+			(word-lemma "$obj" "$obj-lemma")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: to-do-rule-1")
