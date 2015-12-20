@@ -11,6 +11,7 @@ behaviors.
 * [MicroPsi publications](http://micropsi.com/publications/publications.html)
 * [MicroPsi source code]()
 * Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2012 ed.)
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
 * [Wikipedia - Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some similarities.
 
 Then the cognitive schematic
