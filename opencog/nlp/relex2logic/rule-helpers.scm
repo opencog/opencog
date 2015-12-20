@@ -851,7 +851,13 @@
 ; Example: "She is nice to help with the project." -- the scheme output
 ; for this rule is a logical mess
 ;
-(define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
+(define (to-do-rule-3 adj_lemma adj_inst verb_lemma verb_inst subj_lemma subj_inst)
+	(define v1 (cog-name adj_lemma))
+	(define v1_instance (cog-name adj_inst))
+	(define v2 (cog-name verb_lemma))
+	(define v2_instance (cog-name verb_inst))
+	(define v3 (cog-name subj_lemma))
+	(define v3_instance (cog-name subj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode v1_instance) (ConceptNode v1))
 		(ImplicationLink (PredicateNode v2_instance) (PredicateNode v2))
