@@ -1,5 +1,5 @@
 INSTALL (FILES
-	chat-eva.scm
+	chatbot-eva.scm
    DESTINATION "${DATADIR}/scm/opencog/nlp"
 )
 
