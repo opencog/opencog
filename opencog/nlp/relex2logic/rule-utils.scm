@@ -43,3 +43,8 @@
 "  The WordInstanceNode WORD has PartOfSpeechLink POS. "
 	(PartOfSpeechLink (VariableNode word-inst)
 		(DefinedLinguisticConceptNode pos)))
+
+(define (word-feat word-inst feat)
+"  The WordInstanceNode WORD has InheritanceLink FEAT. "
+	(InheritanceLink (VariableNode word-inst)
+		(DefinedLinguisticConceptNode feat)))
