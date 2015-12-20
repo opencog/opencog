@@ -64,7 +64,7 @@
         ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
             (display "You made a Imperative SpeechAct\n")
             ; Make the robot do whatever ...
-				(imperative_process sent-node)
+				; (imperative_process sent-node)
             ; XXX Use AIML here to say something snarky.
         )
         (else
