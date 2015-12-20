@@ -1,21 +1,27 @@
 # OpenPsi
 
-Work is progressing on this, so is not fully functional. The main task that is
-being performed on it is refactoring, so as to make it run independent of the
-embodiment code. When the refactoring is finalized it would be possible to use
-OpenPsi to drive the goal driven dynamics of mind-agents/process, embodiment
-agents as well as other opencog modules/components.
+OpenPsi is an implementation of Jscha Bach's MicroPsi. It is designed
+in such a way that it works well with the OpenCog atomspace
+architecture.  It is intended to provide top-level control for robot
+behaviors.
 
 ### References
-* http://wiki.opencog.org/w/OpenPsi_%28Embodiment%29
-* http://wiki.hansonrobotics.com/w/Emotion_modeling
+* [OpenCog Wiki - OpenPsi](http://wiki.opencog.org/w/OpenPsi_%28Embodiment%29)
+* [Hanson Robotics wiki - Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
 * [MicroPsi publications](http://micropsi.com/publications/publications.html)
 * [MicroPsi source code]()
-* [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf)
-* https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model#BDI_agents has some similarities.
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2012 ed.)
+* [Wikipedia - Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some similarities.
 
 Then the cognitive schematic
      Contex & Procedure ==> Goal
+
+### Status
+Work is progressing on this, but it is not fully functional. The main
+task is refactoring, so as to make it run independently of the
+embodiment code. When the refactoring is finalized, it will be possible
+to use OpenPsi to drive the goal driven dynamics of mind-agents/process,
+embodiment agents as well as other OpenCog modules/components.
 
 ### Usage
 coming soon
