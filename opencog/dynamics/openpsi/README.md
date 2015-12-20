@@ -6,13 +6,13 @@ architecture.  It is intended to provide top-level control for robot
 behaviors.
 
 ### References
-* [OpenCog Wiki - OpenPsi](http://wiki.opencog.org/w/OpenPsi_%28Embodiment%29)
-* [Hanson Robotics wiki - Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
+* OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
+* Hanson Robotics Wiki - [Emotion modelling](http://wiki.hansonrobotics.com/w/Emotion_modeling)
 * [MicroPsi publications](http://micropsi.com/publications/publications.html)
 * [MicroPsi source code]()
-* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2012 ed.)
+* Joscha Bach's book -- [Principles of Synthetic Intelligence](http://wiki.humanobs.org/_media/public:events:agi-summerschool-2012:psi-oup-version-draft-jan-08.pdf) (2008 ed.)
 * Joscha Bach's book -- [Principles of Synthetic Intelligence](http://micropsi.com/publications/assets/Draft-MicroPsi-JBach-07-03-30.pdf) (2007 ed.)
-* [Wikipedia - Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some similarities.
+* Wikipedia - [Belief–desire–intention software model](https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model) has some similarities.
 
 Then the cognitive schematic
      Contex & Procedure ==> Goal
