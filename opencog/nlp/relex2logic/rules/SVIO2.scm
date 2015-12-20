@@ -31,22 +31,10 @@
 			(dependency "_subj" "$subj" "$verb")
 			(dependency "_obj" "$obj" "$verb")
 			(dependency "_pobj" "$iobj" "$to")
-			(LemmaLink
-				(VariableNode "$subj")
-				(VariableNode "$subj-lemma")
-			)
-			(LemmaLink
-				(VariableNode "$verb")
-				(VariableNode "$verb-lemma")
-			)
-			(LemmaLink
-				(VariableNode "$obj")
-				(VariableNode "$obj-lemma")
-			)
-			(LemmaLink
-				(VariableNode "$iobj")
-				(VariableNode "$iobj-lemma")
-			)
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb" "$verb-lemma")
+			(word-lemma "$obj" "$obj-lemma")
+			(word-lemma "$iobj" "$iobj-lemma")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: SVIO-rule")

@@ -11,10 +11,7 @@
 		)
 		(AndLink
 			(word-in-parse "$noun" "$a-parse")
-			(LemmaLink
-				(VariableNode "$noun")
-				(VariableNode "$lemma")
-			)
+			(word-lemma "$noun" "$lemma")
 			(InheritanceLink
 				(VariableNode "$noun")
 				(DefinedLinguisticConceptNode "definite")

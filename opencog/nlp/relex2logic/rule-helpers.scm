@@ -419,7 +419,13 @@
 ; it only gets called on the second parse. With the verb "looks" not
 ; at all.
 ;
-(define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
+(define (to-be-rule verb_lemma verb_inst adj_lemma adj_inst subj_lemma subj_inst)
+	(define verb (cog-name verb_lemma))
+	(define verb_ins (cog-name verb_inst))
+	(define adj (cog-name adj_lemma))
+	(define adj_ins (cog-name adj_inst))
+	(define subj (cog-name subj_lemma))
+	(define subj_ins (cog-name subj_inst))
 	(ListLink
 		(ImplicationLink (PredicateNode verb_ins) (PredicateNode verb))
 		(InheritanceLink (ConceptNode subj_ins) (ConceptNode subj))
@@ -657,22 +663,27 @@
 	))
 )
 
-(define (det-rule concept instance var_name determiner)
+(define (det-rule noun_lemma noun_inst det_lemma)
+	(define concept (cog-name noun_lemma))
+	(define instance (cog-name noun_inst))
+	(define determiner (cog-name det_lemma))
+	(define var_name (choose-var-name))
 	(cond
-      ((or (string=? determiner "those") (string=? determiner "these"))
-		(ListLink
-      (ImplicationLink
-			(MemberLink (VariableNode var_name) (ConceptNode instance))
-			(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
+		((or (string=? determiner "those") (string=? determiner "these"))
+			(ListLink
+				(ImplicationLink
+					(MemberLink (VariableNode var_name) (ConceptNode instance))
+					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)
 		)
 		((or (string=? determiner "this") (string=? determiner "that"))
-		(ListLink
-         (r2l-wordinst-concept instance)
-         (InheritanceLink (VariableNode var_name) (ConceptNode concept)))
+			(ListLink
+				(r2l-wordinst-concept instance)
+				(InheritanceLink (VariableNode var_name) (ConceptNode concept)))
 		)
 	)
 )
+
 (define (negative-rule verb instance)
 	(ListLink
 		(r2l-wordinst-Predicate instance)
@@ -770,7 +781,19 @@
 ;
 ; Example: "She wants to help John."
 ;
-(define (to-do-rule-1 v1 v1_instance v2 v2_instance s s_instance o o_instance)
+(define (to-do-rule-1
+                verb1_lemma verb1_inst
+                verb2_lemma verb2_inst
+                subj_lemma subj_inst
+                obj_lemma obj_inst)
+	(define v1 (cog-name verb1_lemma))
+	(define v1_instance (cog-name verb1_inst))
+	(define v2 (cog-name verb2_lemma))
+	(define v2_instance (cog-name verb2_inst))
+	(define s (cog-name subj_lemma))
+	(define s_instance (cog-name subj_inst))
+	(define o (cog-name obj_lemma))
+	(define o_instance (cog-name obj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode s_instance) (ConceptNode s))
 		(InheritanceLink (ConceptNode o_instance) (ConceptNode o))
@@ -828,7 +851,13 @@
 ; Example: "She is nice to help with the project." -- the scheme output
 ; for this rule is a logical mess
 ;
-(define (to-do-rule-3 v1 v1_instance v2 v2_instance v3 v3_instance)
+(define (to-do-rule-3 adj_lemma adj_inst verb_lemma verb_inst subj_lemma subj_inst)
+	(define v1 (cog-name adj_lemma))
+	(define v1_instance (cog-name adj_inst))
+	(define v2 (cog-name verb_lemma))
+	(define v2_instance (cog-name verb_inst))
+	(define v3 (cog-name subj_lemma))
+	(define v3_instance (cog-name subj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode v1_instance) (ConceptNode v1))
 		(ImplicationLink (PredicateNode v2_instance) (PredicateNode v2))

@@ -5,46 +5,47 @@
 ; (AN June 2015)
 
 (define todo1
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$subj" "WordInstanceNode")
 			(var-decl "$subj2" "WordInstanceNode")
 			(var-decl "$verb1" "WordInstanceNode")
 			(var-decl "$verb2" "WordInstanceNode")
 			(var-decl "$obj" "WordInstanceNode")
-        )
-        (AndLink
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb1-lemma" "WordNode")
+			(var-decl "$verb2-lemma" "WordNode")
+			(var-decl "$obj-lemma" "WordNode")
+		)
+		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb1" "$a-parse")
 			(word-in-parse "$verb2" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
 			(dependency "_subj" "$verb1" "$subj")
-            (AbsentLink
-			(dependency "_subj" "$verb2" "$subj2")
-            )
 			(dependency "_obj" "$verb2" "$obj")
 			(dependency "_to-do" "$verb1" "$verb2")
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pre-todo1-rule")
-            (ListLink
-                (VariableNode "$subj")
-                (VariableNode "$verb1")
-                (VariableNode "$verb2")
-                (VariableNode "$obj")
-            )
-        )
-    )
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-todo1-rule subj verb1 verb2 obj)
-  (to-do-rule-1
-    (cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
-    (cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
-    (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-    (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
-  )
+			(AbsentLink
+				(dependency "_subj" "$verb2" "$subj2")
+			)
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb1" "$verb1-lemma")
+			(word-lemma "$verb2" "$verb2-lemma")
+			(word-lemma "$obj" "$obj-lemma")
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: to-do-rule-1")
+			(ListLink
+				(VariableNode "$verb1-lemma")
+				(VariableNode "$verb1")
+				(VariableNode "$verb2-lemma")
+				(VariableNode "$verb2")
+				(VariableNode "$subj-lemma")
+				(VariableNode "$subj")
+				(VariableNode "$obj-lemma")
+				(VariableNode "$obj")
+			)
+		)
+	)
 )

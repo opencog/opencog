@@ -480,8 +480,32 @@ imperative.scm
 how-q.scm
 
 declarative borked!
+interrogative
 
 
 PrepositionalRelationshipNode
 PartOfSpeechLink
 InheritanceLink
+LemmaLink
+
+LinkGrammarRelationshipNode
+InterpretationLink
+ReferenceLink
+
+
+who are you
+Who are you?
+Who is cobita-bot?
+I am 33 years old
+how old am I?
+I am french
+What nationality am I?
+ nationality is the country a person is from
+I am a person
+France is a country
+ I am from France
+Where am I from?
+
+(process-query 'luser "What nationality am I?")
+
+cog-atom? says #t for deleted handle...
