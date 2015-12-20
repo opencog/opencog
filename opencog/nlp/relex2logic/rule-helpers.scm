@@ -781,7 +781,19 @@
 ;
 ; Example: "She wants to help John."
 ;
-(define (to-do-rule-1 v1 v1_instance v2 v2_instance s s_instance o o_instance)
+(define (to-do-rule-1
+                verb1_lemma verb1_inst
+                verb2_lemma verb2_inst
+                subj_lemma subj_inst
+                obj_lemma obj_inst)
+	(define v1 (cog-name verb1_lemma))
+	(define v1_instance (cog-name verb1_inst))
+	(define v2 (cog-name verb2_lemma))
+	(define v2_instance (cog-name verb2_inst))
+	(define s (cog-name subj_lemma))
+	(define s_instance (cog-name subj_inst))
+	(define o (cog-name obj_lemma))
+	(define o_instance (cog-name obj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode s_instance) (ConceptNode s))
 		(InheritanceLink (ConceptNode o_instance) (ConceptNode o))
