@@ -5,46 +5,46 @@
 ; (AN June 2015)
 
 (define todo1
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$subj" "WordInstanceNode")
 			(var-decl "$subj2" "WordInstanceNode")
 			(var-decl "$verb1" "WordInstanceNode")
 			(var-decl "$verb2" "WordInstanceNode")
 			(var-decl "$obj" "WordInstanceNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb1" "$a-parse")
 			(word-in-parse "$verb2" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
 			(dependency "_subj" "$verb1" "$subj")
-            (AbsentLink
-			(dependency "_subj" "$verb2" "$subj2")
-            )
 			(dependency "_obj" "$verb2" "$obj")
 			(dependency "_to-do" "$verb1" "$verb2")
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pre-todo1-rule")
-            (ListLink
-                (VariableNode "$subj")
-                (VariableNode "$verb1")
-                (VariableNode "$verb2")
-                (VariableNode "$obj")
-            )
-        )
-    )
+			(AbsentLink
+				(dependency "_subj" "$verb2" "$subj2")
+			)
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-todo1-rule")
+			(ListLink
+				(VariableNode "$subj")
+				(VariableNode "$verb1")
+				(VariableNode "$verb2")
+				(VariableNode "$obj")
+			)
+		)
+	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-todo1-rule subj verb1 verb2 obj)
   (to-do-rule-1
-    (cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
-    (cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
-    (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-    (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
+	(cog-name (word-inst-get-lemma  verb1)) (cog-name verb1)
+	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
+	(cog-name (word-inst-get-lemma subj)) (cog-name subj)
+	(cog-name (word-inst-get-lemma  obj)) (cog-name obj)
   )
 )
