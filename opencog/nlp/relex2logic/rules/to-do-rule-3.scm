@@ -20,7 +20,7 @@
 			(ListLink
 				(VariableNode "$subj")
 				(VariableNode "$verb")
-			 	(VariableNode "$adj")
+				(VariableNode "$adj")
 			)
 		)
    )
