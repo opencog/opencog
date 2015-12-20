@@ -419,7 +419,13 @@
 ; it only gets called on the second parse. With the verb "looks" not
 ; at all.
 ;
-(define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
+(define (to-be-rule verb_lemma verb_inst adj_lemma adj_inst subj_lemma subj_inst)
+	(define verb (cog-name verb_lemma))
+	(define verb_ins (cog-name verb_inst))
+	(define adj (cog-name adj_lemma))
+	(define adj_ins (cog-name adj_inst))
+	(define subj (cog-name subj_lemma))
+	(define subj_ins (cog-name subj_inst))
 	(ListLink
 		(ImplicationLink (PredicateNode verb_ins) (PredicateNode verb))
 		(InheritanceLink (ConceptNode subj_ins) (ConceptNode subj))
