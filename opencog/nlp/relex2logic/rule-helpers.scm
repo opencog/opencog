@@ -657,22 +657,27 @@
 	))
 )
 
-(define (det-rule concept instance var_name determiner)
+(define (det-rule noun_lemma noun_inst det_lemma)
+	(define concept (cog-name noun_lemma))
+	(define instance (cog-name noun_inst))
+	(define determiner (cog-name det_lemma))
+	(define var_name (choose-var-name))
 	(cond
-      ((or (string=? determiner "those") (string=? determiner "these"))
-		(ListLink
-      (ImplicationLink
-			(MemberLink (VariableNode var_name) (ConceptNode instance))
-			(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
+		((or (string=? determiner "those") (string=? determiner "these"))
+			(ListLink
+				(ImplicationLink
+					(MemberLink (VariableNode var_name) (ConceptNode instance))
+					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)
 		)
 		((or (string=? determiner "this") (string=? determiner "that"))
-		(ListLink
-         (r2l-wordinst-concept instance)
-         (InheritanceLink (VariableNode var_name) (ConceptNode concept)))
+			(ListLink
+				(r2l-wordinst-concept instance)
+				(InheritanceLink (VariableNode var_name) (ConceptNode concept)))
 		)
 	)
 )
+
 (define (negative-rule verb instance)
 	(ListLink
 		(r2l-wordinst-Predicate instance)
