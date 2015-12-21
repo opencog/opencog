@@ -77,5 +77,5 @@
 		(if (< 100 a-cnt)
 			(display (format "type: ~A total ~A  top ~A\n" x a-cnt t-cnt)))
 	)
-	(map cnt-type (cog-get-types))
+	(for-each cnt-type (cog-get-types))
 )

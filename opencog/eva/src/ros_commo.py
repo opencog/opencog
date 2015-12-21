@@ -47,47 +47,6 @@ class EvaControl():
 		print "step once"
 		return not rospy.is_shutdown()
 
-	def look_left(self):
-		self.look_at_point(1.0, 0.5, 0.0)
-		return
-
-	def look_right(self):
-		self.look_at_point(1.0, -0.5, 0.0)
-		return
-
-	def look_center(self):
-		self.look_at_point(1.0, 0.0, 0.0)
-		return
-
-	def happy(self):
-		# Create the message
-		exp = EmotionState()
-		exp.name = 'happy'
-		exp.magnitude = 1.0
-		exp.duration.secs = 5
-		exp.duration.nsecs = 250*1000000
-		self.emotion_pub.publish(exp)
-		print "Just published: ", exp.name
-
-	def sad(self):
-		# Create the message
-		exp = EmotionState()
-		exp.name = 'sad'
-		exp.magnitude = 1.0
-		exp.duration.secs = 5
-		exp.duration.nsecs = 250*1000000
-		self.emotion_pub.publish(exp)
-		print "Just published: ", exp.name
-
-	def nod(self):
-		ges = SetGesture()
-		ges.name = 'nod-2'
-		ges.magnitude = 1.0
-		ges.repeat = False
-		ges.speed = 1.0
-		self.gesture_pub.publish(ges)
-		print "Just published gesture: ", ges.name
-
 	def go_sleep(self):
 		self.soma_state('sleep', 1, 1, 3)
 		self.soma_state('normal.001', 0, 1, 0)

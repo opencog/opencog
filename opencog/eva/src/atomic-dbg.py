@@ -49,14 +49,6 @@ def do_go_sleep():
 	print "Python go to sleep"
 	return TruthValue(1, 1)
 
-def do_look_left():
-	# evl.look_left()
-	return TruthValue(1, 1)
-
-def do_look_right():
-	# evl.look_right()
-	return TruthValue(1, 1)
-
 def glance_at_face(face_id_node):
 	face_id = int(float(face_id_node.name))
 	print "Python glance at face id", face_id
