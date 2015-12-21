@@ -59,22 +59,6 @@ A number of cmake support files and other components (better name, anyone?).
 Main source directory.
 <DL>
 
-<DT>atomspace</DT>
-<DD>
-has the sources for atomspace library and a 
-tester program (atomspace_async target); a separate target 
-is provided for opencog_atom_types; see \ref libatomspace "its page"
-</DD>
-
-<DT>benchmark</DT>
-<DD>this is tool developed by Joel Pitt, in order to 
-assess the impact of changes to the AtomSpace API; it produces a 
-single target - \b atomspace_bm </DD>
-
-<DT>comboreduct</DT>
-<DD>has \b comboreduct library and a host of executables in 
-comboreduct/main; see \ref libcomboreduct "its page"</DD>
-
 <DT>cycl-import (stub)</DT>
 <DD>has a readme with infos about 
 <a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> - a prototype opencyc-chatbot
@@ -89,30 +73,6 @@ all mindagents involved with the dynamic evolution of the OpenCog
 system (only attention for now)
 </DD>
 
-<DT>embodiment</DT>
-<DD>
-Embodiment is a system of components for OpenCog that 
-are designed to control an avatar.
-</DD>
-
-<DT>guile</DT>
-<DD>
-contains an implementation of the 
-<a href="http://en.wikipedia.org/wiki/Scheme_%28programming_language%29">Scheme</a>
-shell for the OpenCog server. Scheme is a dialect of 
-<a href="http://en.wikipedia.org/wiki/Lisp_%28programming_language%29">Lisp</a>;
-the shell allows scheme code to manipulate the contents of 
-an OpenCog AtomSpace.  The shell is
-implemented in <a href="http://www.gnu.org/software/guile/guile.html">guile</a>.
-</DD>
-
-<DT>implication (stub)</DT>
-<DD>
-The goal of the ideas in this
-directory is to provide a more "human-friendly" way to write
-ImplicationLinks for many common usage scenarios.
-</DD>
-
 <DT>learning</DT>
 <DD>
 code that relate to learning; contains moses, pleasure
@@ -121,24 +81,10 @@ code that relate to learning; contains moses, pleasure
 <DT>nlp</DT>
 <DD>all code related to natural language processing code</DD>
 
-<DT>persist</DT>
-<DD>
-persistent storage; completed in various degrees for
-sql, xml, hypertable
-</DD>
-
 <DT>python</DT>
 <DD>
 a series of Python scripts to be used with the 
 Gephi Graph Streaming Plugin
-</DD>
-
-<DT>query</DT>
-<DD>
-Query Processing/Pattern Matching - contains code 
-that implements a subgraph isomorphism
-algorithm, and then uses this algorithm to support several functions,
-including query processing and a first-order-logic forward chainer
 </DD>
 
 <DT>reasoning</DT>
@@ -178,9 +124,6 @@ simplified representation of a given environment. MapTools is a
 tool that allows to "see" what the agent is perceiving in real
 time
 </DD>
-
-<DT>util</DT>
-<DD>Various code relevant to entire project; see \ref libcogutil "its page"</DD>
 
 <DT>visualization</DT>
 <DD>Graphics and Visualization Tools including gtk-visualizer,
