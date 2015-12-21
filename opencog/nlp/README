@@ -25,6 +25,9 @@ more about language learning. See the wsd directory for more about wsd.
 
 A general sketch
 ================
+A detailed sketch of the desired dialog system can be found in the PDF
+file in the "dialog_system" directory.
+
 A general sketch of the desired system:
 
  * Every sentence has one or more parses. (e.g. "I saw the man with the
@@ -90,6 +93,10 @@ processing to chat systems, and particularly, to IRC chat.  Provides
 a high-level implementation of a simple, hard-coded question-answering
 system, resting on the foundations of "seme" and "triples".  It worked,
 but had some design difficulties.
+
+dialog_system
+-------------
+A PDF discussing the structure of the desired dialog system.
 
 diary
 -----
