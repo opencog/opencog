@@ -3,4 +3,6 @@
 ;
 (define-module (opencog nlp chat-eva))
 
-(load "chat-eva/eva.scm")
+(load "chatbot/chat-utils.scm")
+(load "chatbot-eva/process-query.scm")
+(load "chatbot-eva/eva.scm")
