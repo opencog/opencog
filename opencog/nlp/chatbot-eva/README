@@ -35,3 +35,14 @@ Goals for this chatbot are:
  * Remember things.  e.g. "My name is X"
 
  * Conduct a reasonably pleasant conversation.
+
+
+Issues
+------
+Linguistic issues abound.  Consider these sentences: "She looks good",
+"She looks left".  Both have essentially the same syntactic parse, but
+have very different semantics: the first should generate the dependency
+relation _to-be(look, good) while the second should generate the active
+_to-do(look, left). We cannot distinguish these from the syntax alone.
+What should we do?  The only answer I can think of is to learn by
+mutating rules ...

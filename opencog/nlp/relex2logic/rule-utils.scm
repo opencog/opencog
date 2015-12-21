@@ -18,7 +18,7 @@
 	(InterpretationLink (VariableNode interp) (VariableNode parse)))
 
 (define (parse-of-sent parse sent)
-"  The ParseNode PARSE of rht SentenceNode SENTENCE. "
+"  The ParseNode PARSE of SentenceNode SENTENCE. "
 	(ParseLink (VariableNode parse) (VariableNode sent)))
 
 (define (word-lemma word-inst lemma)
