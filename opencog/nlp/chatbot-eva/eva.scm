@@ -4,11 +4,14 @@
 ; Hacky scaffolding for talking with Hanson Robotics Eva.
 
 ;--------------------------------------------------------------------
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog query))
 (load "../relex2logic/rule-utils.scm")
 
+; Global state for the current sentence.
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (show-arg node) (display node) node)
+(define-public (show-arg node) (display node) node)
 
 ; Handle short commands, such as "look up", "look left".
 ; Relex behaves very inconsistently, sometimes returning
@@ -27,6 +30,7 @@
 			(var-decl "$direction" "WordNode")
 		)
 		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
 			(interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
@@ -49,11 +53,13 @@
 (export look-rule-1)
 
 ;--------------------------------------------------------------------
-(define (imperative_process imp)
+
+(define (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
 
 "
-	(display imp)
+	(StateLink current-sentence imp)
+	(display (cog-bind look-rule-1))
 	(newline)
 )
