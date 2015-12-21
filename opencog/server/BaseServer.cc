@@ -33,15 +33,13 @@ AtomSpace* BaseServer::atomSpace = NULL;
 
 static BaseServer* serverInstance = NULL;
 
-BaseServer* BaseServer::createInstance()
+BaseServer* BaseServer::createInstance(AtomSpace* as)
 {
     OC_ASSERT(0,
         "Accidentally called the base class!\n"
         "To fix this bug, be sure to make the following call in your code:\n"
         "   server(MyServer::MyCreateInstance);\n"
-        "So, for example:\n"
-        "   server(OAC::createInstance);\n"
-        "or maybe this:\n"
+        "maybe this:\n"
         "   server(CogServer::createInstance);\n"
         "depending on which you want.  You only need to do this once,\n"
         "early during the initialization of your program.\n"
@@ -50,8 +48,11 @@ BaseServer* BaseServer::createInstance()
 }
 
 
-BaseServer::BaseServer()
+// There might already be an atomspace, whose management we should
+// take over.  The user can specify this atomspace.
+BaseServer::BaseServer(AtomSpace* as)
 {
+    atomSpace = as;
     // Set this server as the current server.
     set_current_server(this);
 }
@@ -67,12 +68,13 @@ AtomSpace& BaseServer::getAtomSpace()
     return *atomSpace;
 }
 
-BaseServer& opencog::server(BaseServer* (*factoryFunction)())
+BaseServer& opencog::server(BaseServer* (*factoryFunction)(AtomSpace*),
+                            AtomSpace* as)
 {
     // Create a new instance using the factory function if we don't
     // already have one.
     if (!serverInstance)
-        serverInstance = (*factoryFunction)();
+        serverInstance = (*factoryFunction)(as);
     
     // Return a reference to our server instance.
     return *serverInstance;

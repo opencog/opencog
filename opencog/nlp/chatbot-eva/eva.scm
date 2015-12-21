@@ -11,7 +11,7 @@
 (define (show-arg node) (display node) node)
 
 ; Handle short commands, such as "look up", "look left".
-; Relex behaves very inconsistently, soemtimes returning
+; Relex behaves very inconsistently, sometimes returning
 ; _advmod(look,left) and sometimes _to-be(look, right)
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
@@ -32,7 +32,9 @@
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
 			; (dependency "_advmod" "$verb-inst" "$direct-inst")
+			; (dependency "_to-be" "$verb-inst" "$direct-inst")
 			(lg-link "Pa" "$verb-inst" "$direct-inst")
 			(word-lemma "$direct-inst" "$direction")
 		)

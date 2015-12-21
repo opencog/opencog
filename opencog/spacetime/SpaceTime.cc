@@ -29,7 +29,7 @@ namespace opencog {
 SpaceServer* SpaceTimeCogServer::spacer = NULL;
 TimeServer* SpaceTimeCogServer::timeser = NULL;
 
-BaseServer* SpaceTimeCogServer::createInstance(void)
+BaseServer* SpaceTimeCogServer::createInstance(AtomSpace* as)
 {
     return new SpaceTimeCogServer();
 }
