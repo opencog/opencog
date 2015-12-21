@@ -11,6 +11,8 @@
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
 
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
+
+; XXX needs to be public, so that cog-bind can find this...
 (define-public (show-arg node) (display node) node)
 
 ; Handle short commands, such as "look up", "look left".
@@ -43,7 +45,6 @@
 			(word-lemma "$direct-inst" "$direction")
 		)
 		(ExecutionOutput
-			; (GroundedSchema "py: hola")
 			(GroundedSchema "scm: show-arg")
 			(ListLink (Variable "$direction"))
 		)
@@ -51,6 +52,45 @@
 )
 
 (export look-rule-1)
+
+;--------------------------------------------------------------------
+; Behaviors
+
+(DefineLink
+	(DefinedPredicate "look right")
+	(Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink ;; three numbers: x,y,z
+			(Number 1)    ; x is forward
+			(Number -0.5) ; y is right
+			(Number 0)    ; z is up
+		)))
+
+(DefineLink
+	(DefinedPredicate "look left")
+	(Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink ;; three numbers: x,y,z
+			(Number 1)    ; x is forward
+			(Number 0.5)  ; y is right
+			(Number 0)    ; z is up
+		)))
+
+(DefineLink
+	(DefinedPredicate "look up")
+	(Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink ;; three numbers: x,y,z
+			(Number 1)    ; x is forward
+			(Number 0)    ; y is right
+			(Number 0.3)  ; z is up
+		)))
+
+(DefineLink
+	(DefinedPredicate "look down")
+	(Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink ;; three numbers: x,y,z
+			(Number 1)    ; x is forward
+			(Number 0)    ; y is right
+			(Number -0.3) ; z is up
+		)))
 
 ;--------------------------------------------------------------------
 
