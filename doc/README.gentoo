@@ -4,7 +4,7 @@ Instalation and dependency resolution for Gentoo (circa Sep. 2008)
 
 Opencog depends on the following packages:
 
-  dev-util/cmake dev-libs/boost sci-libs/gsl
+  dev-util/cmake dev-libs/boost
 
 You might need to eselect the right boost version as well.
 

@@ -4,7 +4,7 @@ Instalation and dependency resolution for OpenSUSE 11.2 users
 
 Opencog depends on the following packages:
 
-   gcc-c++ make cmake boost-devel gsl-devel
+   gcc-c++ make cmake boost-devel
 
 -------------------------------------------------------------------------------
 
