@@ -48,3 +48,8 @@
 "  The WordInstanceNode WORD has InheritanceLink FEAT. "
 	(InheritanceLink (VariableNode word-inst)
 		(DefinedLinguisticConceptNode feat)))
+
+(define (verb-tense verb-inst tense)
+"  The WordInstanceNode VERB has Tense TENSE. "
+	(TenseLink (VariableNode verb-inst)
+		(DefinedLinguisticConceptNode tense)))
