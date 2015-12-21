@@ -9,6 +9,9 @@
 
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
 
+;; Server falls over if the atom types are not loaded.
+(use-modules (opencog) (opencog atom-types))
+
 ; config path name is optional.
 (define* (start-cogserver #:optional (config-path ""))
 "
@@ -17,9 +20,7 @@
   Start the cogserver, optionally specifying the config file to use.
   To stop the cogserver, just say stop-cogserver.
 "
-	;; Server falls over if the atom types are not loaded.
-	(use-modules (opencog atom-types))
-	(c-start-cogserver config-path)
+	(c-start-cogserver (cog-atomspace) config-path)
 )
 
 ; to stop the repl server..
