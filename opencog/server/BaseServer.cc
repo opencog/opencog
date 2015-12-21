@@ -48,6 +48,8 @@ BaseServer* BaseServer::createInstance(AtomSpace* as)
 }
 
 
+// There might already be an atomspace, whose management we should
+// take over.  The user can specify this atomspace.
 BaseServer::BaseServer(AtomSpace* as)
 {
     atomSpace = as;
