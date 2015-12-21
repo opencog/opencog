@@ -581,3 +581,40 @@ WTF!!
 MVa
 Pa
 
+scheme@(guile-user)> (cog-handle look-rule-x)
+$7 = 3239
+scheme@(guile-user)> (cog-handle look-rule-1)
+$8 = 799
+
+scheme@(guile-user)> (cog-as look-rule-1)
+$9 = #<atomspace 0x140ede0>
+scheme@(guile-user)> (cog-as look-rule-x)
+$10 = #<atomspace 0x25fa3a0>
+
+
+WTF.
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-1))
+$11 = 1
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-x))
+$12 = 800
+
+
+Need to -- list all atomspaces ....
+print atomspace inheritance
+
+Argh starting the cogserver changes the atomspace. Fuck.
+
+c-start-cogserver
+
+&CogServerSCM::start_server
+
+srvr = &cogserver();
+
+// Handy dandy utility
+inline CogServer& cogserver(void)
+{
+    return dynamic_cast<CogServer&>(server(CogServer::createInstance));
+}
+
+
+

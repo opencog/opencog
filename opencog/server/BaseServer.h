@@ -59,10 +59,10 @@ public:
     static AtomSpace& getAtomSpace();
 
     /** Returns a new BaseServer instance. */
-    static BaseServer* createInstance(void);
+    static BaseServer* createInstance(AtomSpace* = nullptr);
 
-    BaseServer(void);
-    virtual ~BaseServer(void);
+    BaseServer(AtomSpace* = nullptr);
+    virtual ~BaseServer();
 }; // class
 
 // Singleton instance (following meyer's design pattern) NOTE: There are
@@ -99,12 +99,16 @@ public:
 // - Curtis Faith <curtis.m.faith@gmail.com>
 //
 // I dunno, this whole singleton instance idea is whack. What's wrong
-// with just doing it right? The number of problems that singleton
-// instances create exceeds the number of problems they solve. They
-// should be eliminated from the code.
+// with just doing it right? That is, letting the user manage one
+// or more instances of the server, as desired? The number of problems
+// that singleton instances create exceeds the number of problems they
+// solve. They should be eliminated from the code.
 //
 // - Linas
-BaseServer& server(BaseServer* (*)() = BaseServer::createInstance);
+
+BaseServer& server(BaseServer* (*)(AtomSpace*) = BaseServer::createInstance,
+                   AtomSpace* = nullptr);
+
 void set_current_server(BaseServer* currentServer);
 
 inline AtomSpace& atomspace(void)
