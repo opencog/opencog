@@ -39,7 +39,7 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    const std::string& start_server(const std::string&);
+    const std::string& start_server(AtomSpace*, const std::string&);
     const std::string& stop_server(void);
 
     CogServer* srvr = NULL;
@@ -115,10 +115,11 @@ void opencog_cogserver_init(void)
 
 // --------------------------------------------------------------
 
-const std::string& CogServerSCM::start_server(const std::string& cfg)
+const std::string& CogServerSCM::start_server(AtomSpace* as,
+                                              const std::string& cfg)
 {
     static std::string rc;
-    // Singleton instance
+    // Singleton instance. Maybe we should throw, here?
     if (srvr) { rc = "CogServer already running!"; return rc; }
 
     // The default config file is installed from
@@ -130,7 +131,7 @@ const std::string& CogServerSCM::start_server(const std::string& cfg)
     else
         config().load("cogserver.conf", true);
 
-    srvr = &cogserver();
+    srvr = &cogserver(as);
 
     // Open database *before* loading modules, since the modules
     // might create atoms, and we can't have that happen until

@@ -354,9 +354,9 @@ public:
 }; // class
 
 // Handy dandy utility
-inline CogServer& cogserver(void)
+inline CogServer& cogserver(AtomSpace* as = nullptr)
 {
-    return dynamic_cast<CogServer&>(server(CogServer::createInstance));
+    return dynamic_cast<CogServer&>(server(CogServer::createInstance, as));
 }
 
 /** @}*/
