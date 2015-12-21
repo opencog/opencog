@@ -25,8 +25,8 @@ class TestMap(unittest.TestCase):
         self.assertTrue(test_handle.is_undefined())
 
     def testBinaryAddandRemove_NormalUnitBlock_AllGetFunctionWork(self):
-        test_pos1 = (7, 8, 9)
-        test_handle1 = Handle(100)
+        test_pos1 = (7.0, 8.0, 9.0)
+        test_handle1 = self.atomspace.add_node(types.Node,"bogus").h
 
         self.testmap.add_solid_unit_block(test_handle1, test_pos1)
         test_handle2 = self.testmap.get_block(test_pos1)
@@ -41,7 +41,7 @@ class TestMap(unittest.TestCase):
     def testAddSolidUnitBlock__PositionOverBorder__GetBlockFailed(self):
         border = 32768
         test_pos1 = (border, 8, 9)
-        test_handle1 = Handle(100)
+        test_handle1 = self.atomspace.add_node(types.Node,"bogus").h
 
         self.testmap.add_solid_unit_block(test_handle1, test_pos1)
         test_handle2 = self.testmap.get_block(test_pos1)
@@ -49,8 +49,8 @@ class TestMap(unittest.TestCase):
         self.assertTrue(test_handle2.is_undefined())
 
     def testSetBlock_AddBlockWithProbabilityControl_GetFunctionsWorkWithProb(self):
-        test_pos1 = (7, 8, 9)
-        test_handle1 = Handle(100)
+        test_pos1 = (7.0, 8.0, 9.0)
+        test_handle1 = self.atomspace.add_node(types.Node,"bogus").h
         log_odds_threshold = self.testmap.get_occupancy_thres_log()
 
         self.testmap.set_unit_block(test_handle1, test_pos1, log_odds_threshold)

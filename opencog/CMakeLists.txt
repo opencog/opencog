@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-# The build order used here is loosely in terms of 
+# The build order used here is loosely in terms of
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
@@ -11,6 +11,7 @@ ADD_SUBDIRECTORY (learning)
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (nlp)
     ADD_SUBDIRECTORY (persist)
+    ADD_SUBDIRECTORY (planning)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
