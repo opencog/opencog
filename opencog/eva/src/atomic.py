@@ -45,14 +45,6 @@ except:
 #
 # Must return TruthValue, since EvaluationLinks expect TruthValues.
 
-def do_look_left():
-	evl.look_left()
-	return TruthValue(1, 1)
-
-def do_look_right():
-	evl.look_right()
-	return TruthValue(1, 1)
-
 def do_wake_up():
 	evl.wake_up()
 	return TruthValue(1, 1)
@@ -92,7 +84,6 @@ def look_at_point(x_node, y_node, z_node):
 	z = float(z_node.name)
 	evl.look_at_point(x, y, z)
 	return TruthValue(1, 1)
-
 
 def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
