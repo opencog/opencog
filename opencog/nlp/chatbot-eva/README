@@ -6,7 +6,7 @@ Prototype tht attaches the chatbot to the behavior trees that
 control the Hanson Robotics Eva robot emulator.
 
 The Eva simulator emulates an animated human head, able to see
-listen and respond.  There is a fair amount of setup needed to 
+listen and respond.  There is a fair amount of setup needed to
 run this thing:
 
  * The animation is done in blender; you have to install blender
@@ -46,3 +46,9 @@ relation _to-be(look, good) while the second should generate the active
 _to-do(look, left). We cannot distinguish these from the syntax alone.
 What should we do?  The only answer I can think of is to learn by
 mutating rules ...
+
+Generalizations: for example, look-rule-1 explicitly looks for the verb
+"look". This needs to be replaced by some word-sense disambiguation WSD
+stage, so that any synonym of "look" is sufficient.  Even more: any
+synonymous command should be enough, nt just on the word level, but
+generally.
