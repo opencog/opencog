@@ -11,7 +11,7 @@
 
 (load-r2l-rulebase)
 
-(start-cogserver "../lib/opencog-chatbot.conf")
+(start-cogserver "../../lib/opencog-chatbot.conf")
 
 ; Load the ROS stubs ...
-(system "echo \"py\\n\" | cat - atomic-dbg.py |netcat localhost 17004")
+(system "echo \"py\\n\" | cat - chatbot-eva/atomic-dbg.py |netcat localhost 17004")
