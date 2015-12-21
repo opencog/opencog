@@ -1,7 +1,3 @@
-#INCLUDE_DIRECTORIES (
-#	${CMAKE_BINARY_DIR}
-#)
-
 ADD_LIBRARY (nlpfz SHARED
 	Fuzzy
 	FuzzySCM
@@ -16,5 +12,5 @@ INSTALL (TARGETS nlpfz DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	fuzzy.scm
-	DESTINATION "${DATADIR}/scm/opencog/nlp"
+   DESTINATION "${DATADIR}/scm/opencog/nlp"
 )

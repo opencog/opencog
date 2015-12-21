@@ -21,10 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//#include <opencog/util/Logger.h>
-//#include <opencog/atomutils/AtomUtils.h>
-//#include <opencog/atomutils/FindUtils.h>
-//#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -51,8 +47,7 @@ FuzzySCM::FuzzySCM()
  *
  * Creates the fuzzy scheme module and uses it by default.
  *
- * @param self   pointer to the FuzzySCM object
- * @return       null
+ * @param self  pointer to the FuzzySCM object
  */
 void* FuzzySCM::init_in_guile(void* self)
 {
@@ -64,17 +59,12 @@ void* FuzzySCM::init_in_guile(void* self)
 /**
  * The main function for defining stuff in the fuzzy scheme module.
  *
- * @param data   pointer to the FuzzySCM object
+ * @param data  pointer to the FuzzySCM object
  */
 void FuzzySCM::init_in_module(void* data)
 {
     FuzzySCM* self = (FuzzySCM*) data;
     self->init();
-}
-
-void opencog_nlp_fuzzy_init(void)
-{
-    static FuzzySCM fuzzy;
 }
 
 /**
@@ -83,15 +73,20 @@ void opencog_nlp_fuzzy_init(void)
 void FuzzySCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("nlp-fuzzy-match", &FuzzySCM::do_nlp_fuzzy_match, this, "nlp fuzzy");
+    define_scheme_primitive("nlp-fuzzy-match", &FuzzySCM::do_nlp_fuzzy_match,
+                            this, "nlp fuzzy");
 #endif
 }
 
 /**
- * Implement the "nlp-fuzzy-match" scheme primitive.
+ * Implement the "nlp-fuzzy-match" scheme primitive. It calls the nlp fuzzy
+ * matcher to search for potential solutions.
  *
- * @param
- * @return
+ * @param pat        The input pattern
+ * @param rtn_type   The return type (the type of atom we are looking for)
+ * @param excl_list  The exclude-list, containing a list of atoms that we
+ *                   don't want in the result set
+ * @return           A list of solutions and their similarity scores
  */
 Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
                                     const HandleSeq& excl_list)
@@ -109,17 +104,19 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     PatternLinkPtr slp(createPatternLink(no_vars, terms));
     slp->satisfy(fpm);
 
+    // A vector of solutions sorted in descending order of similarity
     std::vector<std::pair<Handle, double>> solns = fpm.get_solns();
     HandleSeq rtn_solns;
 
+    // Create NumberNodes to store the similarity scores, wrap together
+    // with the Handles of the solutions in ReferenceLinks
     for (auto soln : solns) {
         Handle l = as->add_link(REFERENCE_LINK, soln.first,
-                                as->add_node(NUMBER_NODE, std::to_string(soln.second)));
+                       as->add_node(NUMBER_NODE, std::to_string(soln.second)));
         rtn_solns.push_back(l);
     }
 
-    // The result_list contains a list of the grounded expressions.
-    // Turn it into a true list, and return it.
+    // Wrap everything in a ListLink and then return it
     Handle results = as->add_link(LIST_LINK, rtn_solns);
 
     return results;
@@ -128,3 +125,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 #endif
 }
 
+void opencog_nlp_fuzzy_init(void)
+{
+    static FuzzySCM fuzzy;
+}

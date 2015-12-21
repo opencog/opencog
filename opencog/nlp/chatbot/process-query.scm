@@ -19,10 +19,9 @@
     (define temp (get-answers query))
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
-        ; TODO: Let's just return all of them for now until
-        ;       results-merging is ready
-        ; (else (string-join (car temp)))
+        ; Return all of them, for now
         (else (map string-join temp))
+        ; (else (string-join (car temp)))
 
 ))
 ;--------------------------------------------------------------------

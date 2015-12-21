@@ -42,22 +42,29 @@ class Fuzzy :
 
         virtual bool accept_starter(const NodePtr);
 
-        virtual void similarity_match(const Handle&, const Handle&);
+        virtual void accept_solution(const Handle&, const Handle&);
 
         std::vector<std::pair<Handle, double>> get_solns();
 
     private:
-       Handle pattern;
+        // The input pattern
+        Handle pattern;
 
-       HandleSeq pat_nodes;
+        // All the nodes in the input pattern
+        HandleSeq pat_nodes;
 
-       Type rtn_type;
+        // The type of atom that we want
+        Type rtn_type;
 
-       HandleSeq excl_list;
+        // The atoms that we don't want in the solutions
+        HandleSeq excl_list;
 
-       std::vector<std::pair<Handle, double>> solns;
+        // The solutions
+        std::vector<std::pair<Handle, double>> solns;
 
-       HandleSeqSeq dup_check;
+        // A vector for storing the "contents" of the accepted solutions
+        // mainly to avoid returning duplicate solutions
+        HandleSeqSeq dup_check;
 };
 
 }

@@ -34,13 +34,13 @@ using namespace opencog;
  * The constructor.
  *
  * @param as  The AtomSpace that we are using
- * @param t   The type of atoms we are looking for
- * @param l   A list of atoms that we don't want them to exist in the results
+ * @param tt  The type of atoms we are looking for
+ * @param ll  A list of atoms that we don't want them to exist in the results
  */
-Fuzzy::Fuzzy(AtomSpace* as, Type t, const HandleSeq& l) :
+Fuzzy::Fuzzy(AtomSpace* as, Type tt, const HandleSeq& ll) :
     FuzzyPatternMatch(as),
-    rtn_type(t),
-    excl_list(l)
+    rtn_type(tt),
+    excl_list(ll)
 {
 }
 
@@ -68,11 +68,12 @@ void Fuzzy::set_pattern(const Variables& vars, const Pattern& pat)
 
 /**
  * Determine whether or not to accept a node as a starter node for fuzzy
- * pattern matching. Currently not allowing variables and instances to be
- * starters, and they should be either ConceptNode or PredicateNode as they
- * are likely to be words in sentences.
+ * pattern matching. By default it doesn't allow variables or instances to
+ * be starters, and they should also be either ConceptNodes or PredicateNodes
+ * as these type of atoms are likely to be some actual words in sentences.
  *
  * @param np  A NodePtr pointing to a node in the pattern
+ * @return    True if the node is accepted, false otherwise
  */
 bool Fuzzy::accept_starter(const NodePtr np)
 {
@@ -85,24 +86,21 @@ bool Fuzzy::accept_starter(const NodePtr np)
  * pattern matcher.
  *
  * The potential solution has to be of the same type as the rtn_type, and
- * does not contain any unwanted atoms listed in the excl_list. Nodes in common
- * with the pattern with certain linguistic relations in a sentence will be assigned
- * different weights. Nodes with no linguistic relation are ignored at the moment
- * along with those that are not in common with the pattern.
+ * does not contain any unwanted atoms listed in the excl_list. To calculate
+ * a similarity score, a list of common nodes will be obtained. Different weights
+ * will be assigned to those with certain linguistic relations in a sentence.
+ * Nodes with no linguistic relation will have a weight of zero at the moment,
+ * along with those that are not in common with the pattern. The accepted
+ * solutions will be stored in the solns vector.
  *
  * @param pat   The pattern
  * @param soln  The potential solution
  */
-void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
+void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
 {
     // Check if this is the type of atom that we want
     if (soln->getType() != rtn_type)
         return;
-
-    // HandleSeq interp = get_neighbors(soln, true, false, REFERENCE_LINK, false);
-    // if (std::all_of(interp.begin(), interp.end(),
-    //                 [&](Handle& i) { return i->getType() != INTERPRETATION_NODE; }))
-    //     return;
 
     HandleSeq soln_nodes = get_all_nodes(soln);
 
@@ -132,15 +130,15 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
     for (const Handle& common_node : common_nodes) {
         // If both the pattern and the potential solution share some "instance"
         // node, that probably means the potential solution is a sub-pattern
-        // of the input pattern, or is other related atoms that is generated
-        // with the pattern, which is pretty much not what we want here
+        // of the input pattern, or is some related atoms that is generated
+        // with the pattern, which is pretty likely not what we want here
         if (NodeCast(common_node)->getName().find("@") != std::string::npos)
             return;
 
         double weight = 0;
 
         // Helper function for getting the instance of a ConceptNode or a
-        // PredicateNode from the pattern.
+        // PredicateNode from the input pattern.
         // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
         // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
         auto find_instance = [&] (Handle n) {
@@ -196,6 +194,7 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
 
     size_t max_size = std::max(pat_nodes.size(), soln_nodes.size());
 
+    // Also take the size into account
     similarity /= max_size;
 
     // Check the content of the soln to see if we've accepted something similar before
@@ -214,11 +213,13 @@ void Fuzzy::similarity_match(const Handle& pat, const Handle& soln)
 }
 
 /**
+ * Get method for getting the solutions sorted in descending order of similarity.
  *
+ * @return  A vector of solutions
  */
 std::vector<std::pair<Handle, double>> Fuzzy::get_solns()
 {
-    // Sort the solutions based on their similarity scores
+    // Sort the solutions by their similarity scores
     std::sort(solns.begin(), solns.end(),
         [] (std::pair<Handle, double> s1, std::pair<Handle, double> s2) {
             return s1.second > s2.second;

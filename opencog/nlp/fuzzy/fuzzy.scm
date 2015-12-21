@@ -58,7 +58,7 @@
                     "declarative"
                 )
             )
-        )        
+        )
 
         (append-map (lambda (r)
             ; Send each of the SetLinks found by the fuzzy matcher to
@@ -88,7 +88,7 @@
     )
 
     ; Post processing for the results found by the fuzzy pattern matcher
-    ; We can do whatever that are needed such as filtering/merging etc
+    ; We can do whatever that is needed such as filtering/merging etc
     ; Currently it returns the top ones that are having the same similarity score
     (define (post-process fset)
         (let ( (max-score 0)
@@ -101,6 +101,7 @@
                             (set! max-score score))
                         #f)))
             (cog-outgoing-set fset))
+            (cog-purge fset)
             results))
 
     (let* ( ; parse is the ParseNode for the sentence
