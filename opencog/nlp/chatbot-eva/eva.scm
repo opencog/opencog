@@ -12,8 +12,12 @@
 (StateLink current-sentence (SentenceNode "foobar"))
 
 ; Current imperative
-(define current-imperative (AnchorNode "imperative"))
+(define current-imperative (AnchorNode "*-imperative-*"))
 (StateLink current-imperative (WordNode "foobar"))
+
+; Current action to be taken
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
 
 ; ---------
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
@@ -54,6 +58,7 @@
 	)
 )
 
+; XXX temproary hack ...
 (export look-rule-1)
 
 ;--------------------------------------------------------------------
@@ -110,9 +115,10 @@
 (ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
 ;--------------------------------------------------------------------
-; Action schema
+; Semantic disambiguation
+; See if we know the meanings of things
 
-(define look-action-rule-1
+(define look-semantics-rule-1
 	(BindLink
 		(VariableList
 			(var-decl "$direction" "WordNode")
@@ -122,8 +128,22 @@
 			(StateLink current-imperative (Variable "$direction"))
 			(ReferenceLink (Variable "$direction") (Variable "$phys-ground"))
 		)
-		(Variable "$phys-ground")
-	;(Evaluation (GroundedPredicate "py:look_at_point")
+		(State current-action (Variable "$phys-ground"))
+))
+
+;--------------------------------------------------------------------
+; Action schema
+
+(define look-action-rule-1
+	(BindLink
+		(VariableList
+			(var-decl "$action" "DefinedSchemaNode")
+		)
+		(AndLink
+			(StateLink current-action (Variable "$action"))
+		)
+		(Evaluation (GroundedPredicate "py:look_at_point")
+			(Variable "$action"))
 ))
 
 ;--------------------------------------------------------------------
@@ -135,6 +155,7 @@
 "
 	(StateLink current-sentence imp)
 	(display (cog-bind look-rule-1))
+	(display (cog-bind look-semantics-rule-1))
 	(display (cog-bind look-action-rule-1))
 	(newline)
 )
