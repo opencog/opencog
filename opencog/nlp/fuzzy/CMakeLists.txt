@@ -3,7 +3,7 @@
 #)
 
 ADD_LIBRARY (nlpfz SHARED
-    Fuzzy
+	Fuzzy
 	FuzzySCM
 )
 

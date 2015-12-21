@@ -27,7 +27,7 @@
 //#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
-//#include <opencog/nlp/types/atom_types.h>
+#include <opencog/nlp/types/atom_types.h>
 
 #include "FuzzySCM.h"
 #include "Fuzzy.h"
@@ -109,13 +109,18 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     PatternLinkPtr slp(createPatternLink(no_vars, terms));
     slp->satisfy(fpm);
 
-    LAZY_LOG_FINE << "---------- solns ----------";
-    for (Handle h : fpm.get_solns())
-        LAZY_LOG_FINE << h->toShortString();
+    std::vector<std::pair<Handle, double>> solns = fpm.get_solns();
+    HandleSeq rtn_solns;
+
+    for (auto soln : solns) {
+        Handle l = as->add_link(REFERENCE_LINK, soln.first,
+                                as->add_node(NUMBER_NODE, std::to_string(soln.second)));
+        rtn_solns.push_back(l);
+    }
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
-    Handle results = as->add_link(LIST_LINK, fpm.get_solns());
+    Handle results = as->add_link(LIST_LINK, rtn_solns);
 
     return results;
 #else

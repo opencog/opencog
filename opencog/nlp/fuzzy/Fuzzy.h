@@ -44,7 +44,7 @@ class Fuzzy :
 
         virtual void similarity_match(const Handle&, const Handle&);
 
-        virtual HandleSeq get_solns();
+        std::vector<std::pair<Handle, double>> get_solns();
 
     private:
        Handle pattern;
@@ -55,7 +55,7 @@ class Fuzzy :
 
        HandleSeq excl_list;
 
-       std::map<Handle, std::pair<double, size_t>> solns;
+       std::vector<std::pair<Handle, double>> solns;
 
        HandleSeqSeq dup_check;
 };
@@ -64,3 +64,4 @@ class Fuzzy :
 }
 
 #endif  // FUZZY_H
+
