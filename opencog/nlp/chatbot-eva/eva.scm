@@ -56,41 +56,65 @@
 ;--------------------------------------------------------------------
 ; Behaviors
 
+(define neutral-gaze
+	(ListLink (Number 0) (Number 0) (Number 0)))
+
+; Global state for the current look-at point
+(StateLink (AnchorNode "head-pointing direction") neutral-gaze)
+(StateLink (AnchorNode "gaze direction") neutral-gaze)
+
+; Global knowledge about spatial directions
+(DefineLink
+	(DefinedSchema "rightwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number -0.5) ; y is right
+		(Number 0)    ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "leftwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0.5)  ; y is right
+		(Number 0)    ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "upwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0)    ; y is right
+		(Number 0.3)  ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "downwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0)    ; y is right
+		(Number -0.3) ; z is up
+	))
+
 (DefineLink
 	(DefinedPredicate "look right")
 	(Evaluation (GroundedPredicate "py:look_at_point")
-		(ListLink ;; three numbers: x,y,z
-			(Number 1)    ; x is forward
-			(Number -0.5) ; y is right
-			(Number 0)    ; z is up
-		)))
+		(DefinedSchema "rightwards")))
 
 (DefineLink
 	(DefinedPredicate "look left")
 	(Evaluation (GroundedPredicate "py:look_at_point")
-		(ListLink ;; three numbers: x,y,z
-			(Number 1)    ; x is forward
-			(Number 0.5)  ; y is right
-			(Number 0)    ; z is up
-		)))
+		(DefinedSchema "leftwards")))
 
 (DefineLink
 	(DefinedPredicate "look up")
 	(Evaluation (GroundedPredicate "py:look_at_point")
-		(ListLink ;; three numbers: x,y,z
-			(Number 1)    ; x is forward
-			(Number 0)    ; y is right
-			(Number 0.3)  ; z is up
-		)))
+		(DefinedSchema "upwards")))
 
 (DefineLink
 	(DefinedPredicate "look down")
 	(Evaluation (GroundedPredicate "py:look_at_point")
-		(ListLink ;; three numbers: x,y,z
-			(Number 1)    ; x is forward
-			(Number 0)    ; y is right
-			(Number -0.3) ; z is up
-		)))
+		(DefinedSchema "downwards")))
 
 ;--------------------------------------------------------------------
 
