@@ -65,11 +65,11 @@ IF (HAVE_NOSETESTS)
 		ADD_TEST(CythonSpatial ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/spatial/)
 		SET_TESTS_PROPERTIES(CythonSpatial
-			PROPERTIES ENVIRONMENT "PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython")
+			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:/usr/local/share/opencog/python")
 		ADD_TEST(CythonSpacetime ${NOSETESTS_EXECUTABLE} -vs
 			${CMAKE_SOURCE_DIR}/tests/cython/spacetime/)
 		SET_TESTS_PROPERTIES(CythonSpacetime
-			PROPERTIES ENVIRONMENT "PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython")
+			PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:/usr/local/share/opencog/python")
 
 	ENDIF (HAVE_OCTOMAP)
 
