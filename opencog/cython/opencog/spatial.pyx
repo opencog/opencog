@@ -100,15 +100,21 @@ cdef class EntityRecorder:
     def __cinit__(self):
         pass
 
-    def __init__(self):
-        self.c_entity_recorder = new cEntityRecorder()
+    def __init__(self, long addr):
+        self.c_entity_recorder = <cEntityRecorder*> PyLong_AsVoidPtr(addr)
 
     def __dealloc__(self):
         #SpaceServer will handle this
         pass
 
+    @classmethod
+    def init_new_entity_recorder(cls):
+        cdef cEntityRecorder* cer = new cEntityRecorder()
+        newer = cls(PyLong_FromVoidPtr(cer))
+        return newer
+
     def get_self_agent_entity(self):
-        return Handle(self.c_octree_map.getSelfAgentEntity().value())
+        return Handle(self.c_entity_recorder.getSelfAgentEntity().value())
 
     def add_none_block_entity(self, Handle handle, pos, isSelfObject, isAvatarEntity, timestamp):
         assert len(pos) == 3

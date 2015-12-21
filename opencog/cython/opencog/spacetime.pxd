@@ -3,7 +3,7 @@ from libcpp cimport bool
 from libcpp.string cimport string
 
 from opencog.atomspace cimport cAtomSpace, cHandle, tv_ptr
-from opencog.spatial cimport cOctomapOcTree
+from opencog.spatial cimport cOctomapOcTree, cEntityRecorder
 
 cdef extern from "opencog/spacetime/Temporal.h":
     ctypedef uint64_t octime_t
@@ -21,6 +21,7 @@ cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         cSpaceServer(cAtomSpace&)
         const cSpaceMap& getMap(cHandle)
+        const cEntityRecorder& getEntityRecorder(cHandle)
         cHandle addOrGetSpaceMap(octime_t, string, double, string)
         bool addSpaceInfo(cHandle, cHandle, bool, bool, octime_t, double, double, double, string)
         void removeSpaceInfo(cHandle, cHandle, octime_t, string)

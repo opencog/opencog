@@ -7,7 +7,7 @@ class TestEntityRecorder(unittest.TestCase):
 
     def setUp(self):
         self.atomspace = AtomSpace()
-        self.test_entity_recorder = EntityRecorder()
+        self.test_entity_recorder = EntityRecorder.init_new_entity_recorder()
 
     def tearDown(self):
         del self.test_entity_recorder
