@@ -36,7 +36,7 @@ package in directories and files.
 <DD>A high level overview of the project, various information</DD>
 
 <DT>Vagrantfile</DT>
-<DD>Control file for 
+<DD>Control file for
 <a href="http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant">Vagrant</a>.
 This is virtualization thechnology that runs on top of existing programs,
 allowing an easy set-up of the development environment.
@@ -60,7 +60,7 @@ Main source directory.
 <DL>
 
 <DT>cycl-import (stub)</DT>
-<DD>has a readme with infos about 
+<DD>has a readme with infos about
 <a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> - a prototype opencyc-chatbot
 </DD>
 
@@ -83,26 +83,26 @@ code that relate to learning; contains moses, pleasure
 
 <DT>python</DT>
 <DD>
-a series of Python scripts to be used with the 
+a series of Python scripts to be used with the
 Gephi Graph Streaming Plugin
 </DD>
 
 <DT>reasoning</DT>
-various reasoning and inference systems currently 
-implemented in OpenCog. Currently this is only 
+various reasoning and inference systems currently
+implemented in OpenCog. Currently this is only
 PLN, but in future this might include NARS and others.
 <DD></DD>
 
 <DT>scm</DT>
 <DD>
-This repository contains assorted routines, 
+This repository contains assorted routines,
 written in scheme, for manipulating
 OpenCog atoms and systems, in various general ways
 </DD>
 
 <DT>server</DT>
 <DD>
-The CogServer provides a simple network shell server interface to the 
+The CogServer provides a simple network shell server interface to the
 various functions in the opencog system.
 </DD>
 
@@ -120,7 +120,7 @@ space & time related code and atoms.
 <DT>spatial</DT>
 <DD>
 This module contains several tools for creating and managing a
-simplified representation of a given environment. MapTools is a 
+simplified representation of a given environment. MapTools is a
 tool that allows to "see" what the agent is perceiving in real
 time
 </DD>
@@ -151,7 +151,7 @@ Support scripts for various tasks.
 Source code for tests.
 
 \section sect_vagrant_configs vagrant-configs directory
-Contains a single file: vagrant-vm-setup.sh. It is run inside 
+Contains a single file: vagrant-vm-setup.sh. It is run inside
 <a href="http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant">Vagrant</a>
 virtual machine on the first run to install prerequisites and build
 the package.
