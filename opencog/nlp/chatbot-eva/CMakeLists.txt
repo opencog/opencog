@@ -6,5 +6,5 @@ INSTALL (FILES
 INSTALL (FILES
 	eva.scm
 	process-query.scm
-   DESTINATION "${DATADIR}/scm/opencog/nlp/chat-eva"
+   DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot-eva"
 )
