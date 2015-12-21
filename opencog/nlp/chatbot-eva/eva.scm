@@ -9,7 +9,13 @@
 
 ; Global state for the current sentence.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
+(StateLink current-sentence (SentenceNode "foobar"))
 
+; Current imperative
+(define current-imperative (AnchorNode "imperative"))
+(StateLink current-imperative (WordNode "foobar"))
+
+; ---------
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 
 ; XXX needs to be public, so that cog-bind can find this...
@@ -44,22 +50,21 @@
 			(lg-link "Pa" "$verb-inst" "$direct-inst")
 			(word-lemma "$direct-inst" "$direction")
 		)
-		(ExecutionOutput
-			(GroundedSchema "scm: show-arg")
-			(ListLink (Variable "$direction"))
-		)
+		(State current-imperative (Variable "$direction"))
 	)
 )
 
 (export look-rule-1)
 
 ;--------------------------------------------------------------------
-; Behaviors
+; Global semantic knowledge
 
 (define neutral-gaze
 	(ListLink (Number 0) (Number 0) (Number 0)))
 
 ; Global state for the current look-at point
+; This state records the direction that Eva is looking at,
+; right now.
 (StateLink (AnchorNode "head-pointing direction") neutral-gaze)
 (StateLink (AnchorNode "gaze direction") neutral-gaze)
 
@@ -96,25 +101,30 @@
 		(Number -0.3) ; z is up
 	))
 
-(DefineLink
-	(DefinedPredicate "look right")
-	(Evaluation (GroundedPredicate "py:look_at_point")
-		(DefinedSchema "rightwards")))
+;--------------------------------------------------------------------
+; Global knowledge about word-meaning
 
-(DefineLink
-	(DefinedPredicate "look left")
-	(Evaluation (GroundedPredicate "py:look_at_point")
-		(DefinedSchema "leftwards")))
+(ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
+(ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
+(ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
+(ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
-(DefineLink
-	(DefinedPredicate "look up")
-	(Evaluation (GroundedPredicate "py:look_at_point")
-		(DefinedSchema "upwards")))
+;--------------------------------------------------------------------
+; Action schema
 
-(DefineLink
-	(DefinedPredicate "look down")
-	(Evaluation (GroundedPredicate "py:look_at_point")
-		(DefinedSchema "downwards")))
+(define look-action-rule-1
+	(BindLink
+		(VariableList
+			(var-decl "$direction" "WordNode")
+			(var-decl "$phys-ground" "DefinedSchemaNode")
+		)
+		(AndLink
+			(StateLink current-imperative (Variable "$direction"))
+			(ReferenceLink (Variable "$direction") (Variable "$phys-ground"))
+		)
+		(Variable "$phys-ground")
+	;(Evaluation (GroundedPredicate "py:look_at_point")
+))
 
 ;--------------------------------------------------------------------
 
@@ -125,5 +135,6 @@
 "
 	(StateLink current-sentence imp)
 	(display (cog-bind look-rule-1))
+	(display (cog-bind look-action-rule-1))
 	(newline)
 )
