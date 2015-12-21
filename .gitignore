@@ -71,6 +71,7 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
+*.gch
 
 # quilt
 .pc
