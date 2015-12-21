@@ -509,3 +509,75 @@ Where am I from?
 (process-query 'luser "What nationality am I?")
 
 cog-atom? says #t for deleted handle...
+
+(define (show-arg node) (display node) node)
+
+
+(define look-rule-1
+   (BindLink
+      (VariableList
+         (var-decl "$sent" "SentenceNode")
+         (var-decl "$parse" "ParseNode")
+         (var-decl "$interp" "InterpretationNode")
+         (var-decl "$verb-inst" "WordInstanceNode")
+         (var-decl "$direct-inst" "WordInstanceNode")
+         (var-decl "$direction" "WordNode")
+      )
+      (AndLink
+         (parse-of-sent   "$parse" "$sent")
+         (interp-of-parse "$interp" "$parse")
+         (word-in-parse   "$verb-inst" "$parse")
+         (LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+         (word-pos "$verb-inst" "verb")
+         (dependency "_advmod" "$verb-inst" "$direct-inst")
+         (word-lemma "$direct-inst" "$direction")
+      )
+      (ExecutionOutput
+         (GroundedSchema "scm: show-arg")
+         (ListLink (Variable "$direction"))
+      )
+   )
+)
+
+(define look-rule-c
+   (BindLink
+      (VariableList
+         (var-decl "$sent" "SentenceNode")
+         (var-decl "$parse" "ParseNode")
+         (var-decl "$interp" "InterpretationNode")
+         (var-decl "$verb-inst" "WordInstanceNode")
+         (var-decl "$direct-inst" "WordInstanceNode")
+         (var-decl "$direction" "WordNode")
+      )
+      (AndLink
+         (parse-of-sent   "$parse" "$sent")
+         (interp-of-parse "$interp" "$parse")
+         (word-in-parse   "$verb-inst" "$parse")
+         (LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+         (word-pos "$verb-inst" "verb")
+         ; (dependency "_to-be" "$verb-inst" "$direct-inst")
+         ; (dependency "_advmod" "$verb-inst" "$direct-inst")
+         (lg-link "Pa" "$verb-inst" "$direct-inst")
+         ; (lg-link "MVa" "$verb-inst" "$direct-inst")
+         (word-lemma "$direct-inst" "$direction")
+      )
+      (ExecutionOutput
+         (GroundedSchema "scm: show-arg")
+         (ListLink (Variable "$direction")))))
+
+(cog-bind look-rule-1)
+
+(process-query 'luser "look up")
+(process-query 'luser "look right")
+
+   (DefinedLinguisticRelationshipNode "_to-be")
+   (ListLink
+      (WordInstanceNode "look@9a098e05-0afa-46e6-bd07-c6d83d58ee77")
+      (WordInstanceNode "right@b2a9d004-4057-4613-a10b-0be7aea6c33e")
+   )
+
+WTF!!
+
+MVa
+Pa
+

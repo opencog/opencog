@@ -23,6 +23,43 @@ the chatbot process, the language-learning process, and the
 word-sense-disambiguation (WSD) process.  See the "learn" directory for
 more about language learning. See the wsd directory for more about wsd.
 
+A general sketch
+================
+A general sketch of the desired system:
+
+ * Every sentence has one or more parses. (e.g. "I saw the man with the
+   telescope") -> "the man was carrying a telescope" or "I used to
+   telescope to look".  This works, multiple parses are returned by
+   relex2logic.
+
+ * A given parse may have multiple, different "interpretations"  (e.g.
+   "I saw" -> "I  use a saw-blade to cut..." or "I use my eyes to
+   look-at...")
+
+ * Rank interpretations according to likelihood.  The simplest algo is
+   the google page-rank algo ("Mihalcea") which simply says
+   "saw-looking and telescope are similar but saw-cutting and
+   telescope are not similar, therefor saw-looking is much more likely"
+   Code for this is in nlp/wsd directory, but it is *very very old* and
+   not compatible with current infrastructure.
+
+ * Anaphora resolution.  "My name is Romain. "I saw..." deduce "I" is
+  "Romain".  Code in nlp/anaphora directory. Should kind-of-ish work,
+   hasn't been tested for a year. Its not hooked up.
+
+ * Reference resolution "saw the man" ->  "the man" is actually a
+   creeper in the minecraft world. We don't have code for that. The
+   minecraft code is being hacked now.  Also, HR "eva/sophia" has a
+   web-cam eye, and can see people.  Under active development.
+
+ * PLN does not only logic, but helps clarify interpretations and
+   reference resolution, and disambiguates word-meanings.  So its a
+   mess, for now.  Its not just "hooking up PLN", its hooking it up
+   so that these other parts might eventually work right.
+
+ * Finally, there is the rheme/theme structure,  (I am saying X about Y)
+   and more generally dialectics (how will I get my point accross)
+
 
 Subdirectories (in alphabetical order)
 ======================================
@@ -39,7 +76,20 @@ plausible candidates that these might refer to.
 
 chatbot
 -------
-Scripts for running a chatbot.  Prototypes, incomplete.
+Scripts for running the current IRC-based chatbot.
+
+chatbot-eva
+-----------
+Scripts for running a mashup of the IRC chatbot, attached to the
+Hanson Robotics Sophia head.
+
+chatbot-old
+-----------
+The chatbot-old directory contains some code to tie opencog NLP
+processing to chat systems, and particularly, to IRC chat.  Provides
+a high-level implementation of a simple, hard-coded question-answering
+system, resting on the foundations of "seme" and "triples".  It worked,
+but had some design difficulties.
 
 diary
 -----
@@ -67,15 +117,6 @@ dependency-grammar relations. That is, given a set of dependencies
 that express an idea, the planner will create a series of sentences that
 express the idea, are syntactically correct, are of appropriate length,
 and use pronouns in an appropriate way.
-
-
-old-chatbot
------------
-The old-chatbot directory contains some code to tie opencog NLP
-processing to chat systems, and particularly, to IRC chat.  Provides
-a high-level implementation of a simple, hard-coded question-answering
-system, resting on the foundations of "seme" and "triples".  It worked,
-but had some design difficulties.
 
 relex2logic
 -----------

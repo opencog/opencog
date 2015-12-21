@@ -1,8 +1,8 @@
 ;
 ; process-query.scm
 ;
-; Top-level question-answering routines.
-; Somewhat generic, somewhat IRC-specific.
+; Top-level Eva chatbot handling.
+; Its a modified fork of ../chatbot/process-query.scm
 ;
 
 (use-modules (opencog nlp) (opencog nlp fuzzy))
@@ -64,7 +64,7 @@
         ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
             (display "You made a Imperative SpeechAct\n")
             ; Make the robot do whatever ...
-				; (imperative_process sent-node)
+				(imperative_process sent-node)
             ; XXX Use AIML here to say something snarky.
         )
         (else
