@@ -655,3 +655,23 @@ inline CogServer& cogserver(void)
 
 (define reply (gen-sentences (cog-outgoing-set fzset)))
 (delete-duplicates reply)
+
+=---------------------------------------------------
+https://github.com/ivmai/bdwgc/blob/master/mark_rts.c#L245
+if (n_root_sets == MAX_ROOT_SETS) {
+        ABORT("Too many root sets");
+    }
+
+https://github.com/ivmai/bdwgc/blob/master/include/private/gc_priv.h#L1037
+#   define MAX_ROOT_SETS 8192
+
+want LARGE_CONFIG
+
+--enable-large-config
+
+./configure --enable-cplusplus --enable-large-config
+
+
+./configure --enable-cplusplus --enable-gc-assertions --enable-large-config
+
+Assertion failure: reclaim.c:314
