@@ -76,6 +76,17 @@ Running
 * Start the opencog face-tracking node in the `face_track` directory.
 
 
+Unit Testing
+------------
+There is a simple test driver in `src/unit-test.scm`. It emulates the
+appearance and disappearance of two faces every few minutes. It also
+emulates chat-start and chat-stop.  It does not need or use the regular
+face-tracker or vision system nor the chatbot.  If everything is
+working, the blender head should wak up, smile, react appropriately,
+and then fall asleep every 3-4 minutes.  This test runs in an infinite
+loop.
+
+
 GUI Requirements
 ----------------
 A GUI is needed to edit the beavior tree. Some notes about the

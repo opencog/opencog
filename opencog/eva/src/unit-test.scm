@@ -1,8 +1,12 @@
 ;
-; Random under-documented unit-test scriptlets.
+; Random under-documented unit-test scriptlet.
 ;
-
-
+; Neither the vision subsystem, nor the chat subsystem needs to be
+; started to run this test. Just start the behavior tree, then
+; `rlwrap telnet localhost 17020` then
+; `(load "unit-test.scm")`  and then
+; `(run-face-test)`
+;
 ; Run a unit test in a separate thread: add faces, chat, remove faces.
 ; These faces don't have corresponding 3D coords, the face-tracker will
 ; not know about them, so you can't use the facetracker while runing
