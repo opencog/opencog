@@ -9,6 +9,63 @@
              (opencog nlp microplanning))
 
 ; ----------------------------------------------------------
+
+(define-public (gen-sentences setlinks)
+"
+  Generate sentences from each of the R2L-SetLinks
+
+  Typically, the SetLinks are those found by the fuzzy matcher;
+  howevr, they could be from other sources.
+  TODO: May need to filter out some of the contents of the SetLinks
+  before sending each of them to Microplanner
+"
+
+    ; Find the speech act from the SetLink and use it for Microplanning
+    ; XXX FIXME the Microplanner should use the same speech-act types as
+    ; everyone else, so that we don't have to do this horrific string
+    ; manginling.
+    (define (get-speech-act setlink)
+        (define speech-act-node-name
+            (filter (lambda (name)
+                (if (string-suffix? "SpeechAct" name) #t #f))
+                     (map cog-name (cog-filter 'DefinedLinguisticConceptNode (cog-get-all-nodes setlink)))))
+
+        ; If no speech act was found, return "declarative" as default
+        (if (> (length speech-act-node-name) 0)
+            (string-downcase (substring (car speech-act-node-name) 0 (string-contains (car speech-act-node-name) "SpeechAct")))
+            "declarative"
+        )
+    )
+
+    (append-map (lambda (r)
+        ; Send each of the SetLinks to Microplanner to see if
+        ; they are good
+        (let* ( (spe-act (get-speech-act r))
+                (seq-and (AndLink (cog-outgoing-set r)))
+                (m-results (microplanning seq-and spe-act
+                     *default_chunks_option* #f)))
+(trace-msg "gen-sentences spe-act is ")
+(trace-msg spe-act)
+(trace-msg "\ngen-sentences m-results are ")
+(trace-msg m-results)
+(trace-msg "\n")
+            ; Don't send it to SuReal in case it's not good
+            ; (i.e. Microplanner returns #f)
+            (if m-results
+                (append-map
+                    ; Send each of the SetLinks returned by
+                    ; Microplanning to SuReal for sentence generation
+                    (lambda (m) (sureal (car m)))
+                    m-results
+                )
+                '()
+            )
+        ))
+        setlinks
+    )
+)
+
+; ----------------------------------------------------------
 (define-public (get-answers sent-node)
 "
   Find answers (i.e., similar sentences that share some keyword) from
@@ -38,56 +95,6 @@
   Returns one or more sentences that are similar to the input one but
   contain no atoms that are listed in the exclude-list.
 "
-    ; Generate sentences from each of the R2L-SetLinks
-    ; (define (generate-sentences r2l-setlinks) (if (> (length r2l-setlinks) 0) (map sureal r2l-setlinks) '()))
-
-    ; Generate sentences for each of the SetLinks found by the fuzzy matcher
-    ; TODO: May need to filter out some of the contents of the SetLinks
-    ; before sending each of them to Microplanner
-
-    (define (gen-sentences setlinks)
-
-        ; Find the speech act from the SetLink and use it for Microplanning
-        (define (get-speech-act setlink)
-            (let* ((speech-act-node-name
-                        (filter (lambda (name)
-                            (if (string-suffix? "SpeechAct" name) #t #f))
-                                (map cog-name (cog-filter 'DefinedLinguisticConceptNode (cog-get-all-nodes setlink))))))
-
-                ; If no speech act was found, return "declarative" as default
-                (if (> (length speech-act-node-name) 0)
-                    (string-downcase (substring (car speech-act-node-name) 0 (string-contains (car speech-act-node-name) "SpeechAct")))
-                    "declarative"
-                )
-            )
-        )
-
-        (append-map (lambda (r)
-            ; Send each of the SetLinks found by the fuzzy matcher to
-            ; Microplanner to see if they are good
-            (let* ( (spe-act (get-speech-act r))
-                    (seq-and (AndLink (cog-outgoing-set r)))
-                    (m-results (microplanning seq-and spe-act
-                         *default_chunks_option* #f)))
-(trace-msg "duuude sp-act is ")
-(trace-msg spe-act)
-(trace-msg "duuude m-res is ")
-(trace-msg m-results)
-                ; Don't send it to SuReal in case it's not good
-                ; (i.e. Microplanner returns #f)
-                (if m-results
-                    (append-map
-                        ; Send each of the SetLinks returned by
-                        ; Microplanning to SuReal for sentence generation
-                        (lambda (m) (sureal (car m)))
-                        m-results
-                    )
-                    '()
-                )
-            ))
-            setlinks
-        )
-    )
 
     (let* ( ; parse is the ParseNode for the sentence
             (parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
