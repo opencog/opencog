@@ -1,5 +1,5 @@
 /*
- * @file opencog/dynamics/openpsi/OpenPsiAgent.h
+ * @file opencog/openpsi/OpenPsiAgent.h
  * @author Amen Belayneh <amenbelayneh@gmail.com> August 2015
  *
  * Copyright (C) 2015 OpenCog Foundation
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DYNAMICS_OPENPSIAGENT_H
-#define _OPENCOG_DYNAMICS_OPENPSIAGENT_H
+#ifndef _OPENCOG_OPENPSIAGENT_H
+#define _OPENCOG_OPENPSIAGENT_H
 
 #include <opencog/server/Agent.h>
 
@@ -53,4 +53,4 @@ public:
 
 } // namespace
 
-#endif // _OPENCOG_DYNAMICS_OPENPSIAGENT_H
+#endif // _OPENCOG_OPENPSIAGENT_H

@@ -1,5 +1,5 @@
 /*
- * @file opencog/dynamics/openpsi/OpenPsiModule.cc
+ * @file opencog/openpsi/OpenPsiModule.cc
  * @author Amen Belayneh <amenbelayneh@gmail.com> June 2015
  *
  * Copyright (C) 2015 OpenCog Foundation

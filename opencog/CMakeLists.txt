@@ -44,3 +44,9 @@ ADD_SUBDIRECTORY (embodiment)
 
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (visualization)
+
+IF (HAVE_GUILE)
+    # Guile is needed because the functionalities are mostly implemented in
+    # guile
+    ADD_SUBDIRECTORY(openpsi)
+ENDIF (HAVE_GUILE)

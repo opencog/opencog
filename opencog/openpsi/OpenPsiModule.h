@@ -1,5 +1,5 @@
 /*
- * @file opencog/dynamics/openpsi/OpenPsiModule.h
+ * @file opencog/openpsi/OpenPsiModule.h
  * @author Amen Belayneh <amenbelayneh@gmail.com> June 2015
  *
  * Copyright (C) 2015 OpenCog Foundation
@@ -25,7 +25,7 @@
 #define _OPENCOG_DYNAMICS_OPENPSI_H
 
 #include <opencog/server/Module.h>
-#include <opencog/dynamics/openpsi/OpenPsiAgent.h>
+#include <opencog/openpsi/OpenPsiAgent.h>
 
 namespace opencog
 {
@@ -50,4 +50,4 @@ public:
 
 } // namespace
 
-#endif // _OPENCOG_DYNAMICS_OPENPSI_H
+#endif // _OPENCOG_OPENPSI_H
