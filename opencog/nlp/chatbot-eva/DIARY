@@ -617,4 +617,15 @@ inline CogServer& cogserver(void)
 }
 
 
+(define la
+   (BindLink
+      (VariableList
+         (var-decl "$action" "ListLink")
+      )
+      (AndLink
+         (StateLink current-action (Variable "$action"))
+      )
+      (Evaluation (GroundedPredicate "py:look_at_point")
+         (Variable "$action"))
+))
 
