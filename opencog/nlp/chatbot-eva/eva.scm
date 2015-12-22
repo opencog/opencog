@@ -4,14 +4,29 @@
 ; Hacky scaffolding for talking with Hanson Robotics Eva.
 
 ;--------------------------------------------------------------------
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
 (load "../relex2logic/rule-utils.scm")
 
+; Global state for the current sentence.
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+(StateLink current-sentence (SentenceNode "foobar"))
+
+; Current imperative
+(define current-imperative (AnchorNode "*-imperative-*"))
+(StateLink current-imperative (WordNode "foobar"))
+
+; Current action to be taken
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
+; ---------
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (show-arg node) (display node) node)
+
+; XXX needs to be public, so that cog-bind can find this...
+(define-public (show-arg node) (display node) node)
 
 ; Handle short commands, such as "look up", "look left".
-; Relex behaves very inconsistently, soemtimes returning
+; Relex behaves very inconsistently, sometimes returning
 ; _advmod(look,left) and sometimes _to-be(look, right)
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
@@ -27,31 +42,133 @@
 			(var-decl "$direction" "WordNode")
 		)
 		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
 			(interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
 			; (dependency "_advmod" "$verb-inst" "$direct-inst")
+			; (dependency "_to-be" "$verb-inst" "$direct-inst")
 			(lg-link "Pa" "$verb-inst" "$direct-inst")
 			(word-lemma "$direct-inst" "$direction")
 		)
-		(ExecutionOutput
-			; (GroundedSchema "py: hola")
-			(GroundedSchema "scm: show-arg")
-			(ListLink (Variable "$direction"))
-		)
+		(State current-imperative (Variable "$direction"))
 	)
 )
 
+; XXX temproary hack ...
 (export look-rule-1)
 
 ;--------------------------------------------------------------------
-(define (imperative_process imp)
+; Global semantic knowledge
+
+(define neutral-gaze
+	(ListLink (Number 0) (Number 0) (Number 0)))
+
+; Global state for the current look-at point
+; This state records the direction that Eva is looking at,
+; right now.
+(StateLink (AnchorNode "head-pointing direction") neutral-gaze)
+(StateLink (AnchorNode "gaze direction") neutral-gaze)
+
+; Global knowledge about spatial directions
+(DefineLink
+	(DefinedSchema "rightwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number -0.5) ; y is right
+		(Number 0)    ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "leftwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0.5)  ; y is right
+		(Number 0)    ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "upwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0)    ; y is right
+		(Number 0.3)  ; z is up
+	))
+
+(DefineLink
+	(DefinedSchema "downwards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0)    ; y is right
+		(Number -0.3) ; z is up
+	))
+
+;--------------------------------------------------------------------
+; Global knowledge about word-meaning
+
+(ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
+(ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
+(ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
+(ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
+
+;--------------------------------------------------------------------
+; Semantic disambiguation
+; See if we know the meanings of things
+
+(define look-semantics-rule-1
+	(BindLink
+		(VariableList
+			(var-decl "$direction" "WordNode")
+			(var-decl "$phys-ground" "DefinedSchemaNode")
+		)
+		(AndLink
+			(StateLink current-imperative (Variable "$direction"))
+			(ReferenceLink (Variable "$direction") (Variable "$phys-ground"))
+		)
+		(State current-action (Variable "$phys-ground"))
+))
+
+;--------------------------------------------------------------------
+; Action schema
+; This is wrong, but a hack for now.
+
+(define look-action-rule-1
+	(BindLink
+		(VariableList
+			; (var-decl "$action" "DefinedSchemaNode")
+			(var-decl "$action" "ListLink")
+		)
+		(AndLink
+			(StateLink current-action (Variable "$action"))
+		)
+		(Evaluation (GroundedPredicate "py:look_at_point")
+			(Variable "$action"))
+))
+
+;--------------------------------------------------------------------
+
+(define (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
 
 "
-	(display imp)
-	(newline)
+	(StateLink current-sentence imp)
+	(cog-bind look-rule-1)
+	(cog-bind look-semantics-rule-1)
+	(let* ((act-do-do (cog-bind look-action-rule-1))
+			(action-list (cog-outgoing-set act-do-do))
+		)
+		(display act-do-do)
+		(newline)
+		(for-each cog-evaluate! action-list)
+
+		; XXX replace this by AIML or something.
+		(if (eq? '() action-list)
+			(display "I don't know how to do that.\n"))
+	)
 )
+
+;--------------------------------------------------------------------

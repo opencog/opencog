@@ -47,7 +47,7 @@ public:
     SpaceServer& getSpaceServer();
     TimeServer& getTimeServer();
 
-    static BaseServer* createInstance(void);
+    static BaseServer* createInstance(AtomSpace*);
 };
 
 SpaceServer& spaceServer();

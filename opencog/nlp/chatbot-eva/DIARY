@@ -581,3 +581,58 @@ WTF!!
 MVa
 Pa
 
+scheme@(guile-user)> (cog-handle look-rule-x)
+$7 = 3239
+scheme@(guile-user)> (cog-handle look-rule-1)
+$8 = 799
+
+scheme@(guile-user)> (cog-as look-rule-1)
+$9 = #<atomspace 0x140ede0>
+scheme@(guile-user)> (cog-as look-rule-x)
+$10 = #<atomspace 0x25fa3a0>
+
+
+WTF.
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-1))
+$11 = 1
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-x))
+$12 = 800
+
+
+Need to -- list all atomspaces ....
+print atomspace inheritance
+
+Argh starting the cogserver changes the atomspace. Fuck.
+
+c-start-cogserver
+
+&CogServerSCM::start_server
+
+srvr = &cogserver();
+
+// Handy dandy utility
+inline CogServer& cogserver(void)
+{
+    return dynamic_cast<CogServer&>(server(CogServer::createInstance));
+}
+
+
+(define la
+   (BindLink
+      (VariableList
+         (var-decl "$action" "ListLink")
+      )
+      (AndLink
+         (StateLink current-action (Variable "$action"))
+      )
+      (Evaluation (GroundedPredicate "py:look_at_point")
+         (Variable "$action"))
+))
+
+(use-modules (opencog nlp fuzzy))
+(define s (nlp-parse "I don't know how to do that"))
+(define r2l-set (get-r2l-set-of-sent (car s)))
+(define reply (gen-sentences (cog-outgoing-set r2l-set)))
+(delete-duplicates reply)
+
+

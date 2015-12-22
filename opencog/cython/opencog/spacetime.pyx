@@ -2,6 +2,7 @@ from cython.operator cimport dereference as deref
 
 from opencog.atomspace cimport AtomSpace, Handle, TruthValue
 from opencog.spatial import OctomapOcTree as SpaceMap
+from opencog.spatial import EntityRecorder
 
 cdef class TimeServer:
     cdef cTimeServer* c_time_server
@@ -39,6 +40,11 @@ cdef class SpaceServer:
         cdef cHandle c_handle = deref((<Handle>handle).h)
         map_instance = SpaceMap(<long>(&(self.c_space_server.getMap(c_handle))))
         return map_instance
+
+    def get_entity_recorder(self,Handle handle):
+        cdef cHandle c_handle = deref((<Handle>handle).h)
+        er_instance = EntityRecorder(<long>(&(self.c_space_server.getEntityRecorder(c_handle))))
+        return er_instance
 
     def add_map(self, timestamp, map_name, resolution, time_domain = None):
         cdef string c_map_name = map_name.encode('UTF-8')

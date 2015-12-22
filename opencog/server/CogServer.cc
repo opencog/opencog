@@ -63,7 +63,8 @@
 using namespace opencog;
 
 namespace opencog {
-struct equal_to_id : public std::binary_function<AgentPtr, const std::string&, bool>
+struct equal_to_id :
+    public std::binary_function<AgentPtr, const std::string&, bool>
 {
     bool operator()(AgentPtr a, const std::string& cid) const {
         return (a->classinfo().id != cid);
@@ -71,9 +72,9 @@ struct equal_to_id : public std::binary_function<AgentPtr, const std::string&, b
 };
 }
 
-BaseServer* CogServer::createInstance()
+BaseServer* CogServer::createInstance(AtomSpace* as)
 {
-    return new CogServer();
+    return new CogServer(as);
 }
 
 CogServer::~CogServer()
@@ -129,17 +130,21 @@ CogServer::~CogServer()
     logger().debug("[CogServer] exit destructor");
 }
 
-CogServer::CogServer() : cycleCount(1)
+CogServer::CogServer(AtomSpace* as) :
+    cycleCount(1)
 {
     // We shouldn't get called with a non-NULL atomSpace static global as
     // that's indicative of a missing call to CogServer::~CogServer.
     if (atomSpace) {
         throw (RuntimeException(TRACE_INFO,
-                "Found non-NULL atomSpace. CogServer::~CogServer not called!"));
+               "Found non-NULL atomSpace. CogServer::~CogServer not called!"));
     }
 
-    // Create the new atomspace.
-    atomSpace = new AtomSpace();
+    if (nullptr == as)
+        atomSpace = new AtomSpace();
+    else
+        atomSpace = as;
+
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
     SchemeEval::init_scheme();

@@ -18,7 +18,7 @@
 	(InterpretationLink (VariableNode interp) (VariableNode parse)))
 
 (define (parse-of-sent parse sent)
-"  The ParseNode PARSE of rht SentenceNode SENTENCE. "
+"  The ParseNode PARSE of SentenceNode SENTENCE. "
 	(ParseLink (VariableNode parse) (VariableNode sent)))
 
 (define (word-lemma word-inst lemma)
@@ -48,3 +48,8 @@
 "  The WordInstanceNode WORD has InheritanceLink FEAT. "
 	(InheritanceLink (VariableNode word-inst)
 		(DefinedLinguisticConceptNode feat)))
+
+(define (verb-tense verb-inst tense)
+"  The WordInstanceNode VERB has Tense TENSE. "
+	(TenseLink (VariableNode verb-inst)
+		(DefinedLinguisticConceptNode tense)))

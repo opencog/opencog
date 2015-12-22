@@ -30,7 +30,7 @@ class TestCogServer : public CogServer
     int maxCount;
     public: 
 
-        static BaseServer* createInstance() {
+        static BaseServer* createInstance(AtomSpace* as) {
             return new TestCogServer();
         }
 

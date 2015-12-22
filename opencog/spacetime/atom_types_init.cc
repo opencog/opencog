@@ -21,10 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
+#include <opencog/server/Module.h>
 #include "opencog/spacetime/atom_types.definitions"
 
 #define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
 #define INITNAME spacetime_types_init
 
 #include <opencog/atomspace/atom_types.cc>
+
+using namespace opencog;
+TRIVIAL_MODULE(SpacetimeTypesModule)
+DECLARE_MODULE(SpacetimeTypesModule)

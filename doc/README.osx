@@ -4,7 +4,7 @@ Instructions for Apple Mac OSX users
 
 The MacPorts installer does not include /opt/local/lib into the shared
 library search path. Thus, any libraries installed there will fail to
-be found.  The search path needs to be fixed manually.  This can be done 
+be found.  The search path needs to be fixed manually.  This can be done
 by editing ~/.profile and specifying
 
   export DYLD_LIBRARY_PATH=/opt/local/lib:$DYLD_LIBRARY_PATH
