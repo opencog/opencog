@@ -1,3 +1,4 @@
+; Copyright (C) 2015 OpenCog Foundation
 
 (define psi-modulator-updater-rule
     (BindLink
