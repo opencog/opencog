@@ -4,7 +4,7 @@
 ; Hacky scaffolding for talking with Hanson Robotics Eva.
 
 ;--------------------------------------------------------------------
-(use-modules (opencog) (opencog nlp) (opencog query))
+(use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
 (load "../relex2logic/rule-utils.scm")
 
 ; Global state for the current sentence.
@@ -133,11 +133,13 @@
 
 ;--------------------------------------------------------------------
 ; Action schema
+; This is wrong, but a hack for now.
 
 (define look-action-rule-1
 	(BindLink
 		(VariableList
-			(var-decl "$action" "DefinedSchemaNode")
+			; (var-decl "$action" "DefinedSchemaNode")
+			(var-decl "$action" "ListLink")
 		)
 		(AndLink
 			(StateLink current-action (Variable "$action"))
@@ -154,8 +156,19 @@
 
 "
 	(StateLink current-sentence imp)
-	(display (cog-bind look-rule-1))
-	(display (cog-bind look-semantics-rule-1))
-	(display (cog-bind look-action-rule-1))
-	(newline)
+	(cog-bind look-rule-1)
+	(cog-bind look-semantics-rule-1)
+	(let* ((act-do-do (cog-bind look-action-rule-1))
+			(action-list (cog-outgoing-set act-do-do))
+		)
+		(display act-do-do)
+		(newline)
+		(for-each cog-evaluate! action-list)
+
+		; XXX replace this by AIML or something.
+		(if (eq? '() action-list)
+			(display "I don't know how to do that.\n"))
+	)
 )
+
+;--------------------------------------------------------------------

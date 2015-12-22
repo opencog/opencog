@@ -617,4 +617,22 @@ inline CogServer& cogserver(void)
 }
 
 
+(define la
+   (BindLink
+      (VariableList
+         (var-decl "$action" "ListLink")
+      )
+      (AndLink
+         (StateLink current-action (Variable "$action"))
+      )
+      (Evaluation (GroundedPredicate "py:look_at_point")
+         (Variable "$action"))
+))
+
+(use-modules (opencog nlp fuzzy))
+(define s (nlp-parse "I don't know how to do that"))
+(define r2l-set (get-r2l-set-of-sent (car s)))
+(define reply (gen-sentences (cog-outgoing-set r2l-set)))
+(delete-duplicates reply)
+
 
