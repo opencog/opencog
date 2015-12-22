@@ -636,3 +636,17 @@ inline CogServer& cogserver(void)
 (delete-duplicates reply)
 
 
+(nlp-parse "I don't know how to do that")
+(nlp-parse "Look left")
+(nlp-parse "Look right")
+(nlp-parse "Look up")
+(nlp-parse "Look down")
+
+(define s (nlp-parse "look to the left"))
+(define r2l-set (get-r2l-set-of-sent (car s)))
+
+(define fzset (cog-fuzzy-match r2l-set 'SetLink '()))
+
+(define reply (gen-sentences (cog-outgoing-set fzset)))
+(delete-duplicates reply)
+

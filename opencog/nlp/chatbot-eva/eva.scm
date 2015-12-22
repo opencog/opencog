@@ -58,11 +58,50 @@
 	)
 )
 
-; XXX temproary hack ...
-(export look-rule-1)
-
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
+
+(define (get-interp-node sent-node)
+" Given a sentnces, get the likliest interpretation node for it.
+  Yes, this is a quick hack, needs fixing. XXX FIXME.
+"
+	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
+	(car (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
+
+; These are English-langauge sentences that I understand.
+(define known-directives
+	(list
+		(get-interp-node (car (nlp-parse "look left")))
+		(get-interp-node (car (nlp-parse "look right")))
+		(get-interp-node (car (nlp-parse "look up")))
+		(get-interp-node (car (nlp-parse "look down")))))
+
+(define (get-interp-of-r2l r2l-set-list)
+
+	; find-interp takes a single SetLink
+	(define (find-interp r2l-set)
+		; find-inh returns #f if inh-link is not an InheritanceLink
+		; It also returns #f if it is an InheritanceLink, but
+		; its first member is not an InterpretationNode
+		(define (find-inh inh-link)
+			(if (eq? (cog-type inh-link) 'InheritanceLink)
+				(eq? 'InterpretationNode
+					(cog-type (car (cog-outgoing-set inh-link))))
+				#f
+			)
+		)
+
+		; The find returns (should return) a single InheritanceLink
+		; and the first member should be the desired InterpretationNode
+		(car (cog-outgoing-set
+			(find find-inh (cog-outgoing-set r2l-set))))
+	)
+
+	(map find-interp (cog-outgoing-set r2l-set-list))
+)
+
+;--------------------------------------------------------------------
+; Global semantic interpretation
 
 (define neutral-gaze
 	(ListLink (Number 0) (Number 0) (Number 0)))
