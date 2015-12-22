@@ -629,3 +629,5 @@ inline CogServer& cogserver(void)
          (Variable "$action"))
 ))
 
+(use-modules (opencog nlp fuzzy))
+
