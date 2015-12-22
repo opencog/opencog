@@ -1,3 +1,5 @@
+; Copyright (C) 2015 OpenCog Foundation
+
 ; Define the OpenPsi-Demand Affiliation
 (define-psi-demand "Affiliation" .6 .8 1)
 

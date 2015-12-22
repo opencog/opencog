@@ -1,3 +1,5 @@
+; Copyright (C) 2015 OpenCog Foundation
+
 ; Define the OpenPsi-Modulator Activation.
 (define-psi-modulator "Activation" 0.5 )
 
