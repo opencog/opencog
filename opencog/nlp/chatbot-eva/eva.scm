@@ -156,8 +156,19 @@
 
 "
 	(StateLink current-sentence imp)
-	(display (cog-bind look-rule-1))
-	(display (cog-bind look-semantics-rule-1))
-	(display (cog-evaluate! (gar (cog-bind look-action-rule-1))))
-	(newline)
+	(cog-bind look-rule-1)
+	(cog-bind look-semantics-rule-1)
+	(let* ((act-do-do (cog-bind look-action-rule-1))
+			(action-list (cog-outgoing-set act-do-do))
+		)
+		(display act-do-do)
+		(newline)
+		(for-each cog-evaluate! action-list)
+
+		; XXX replace this by AIML or something.
+		(if (eq? '() action-list)
+			(display "I don't know how to do that.\n"))
+	)
 )
+
+;--------------------------------------------------------------------
