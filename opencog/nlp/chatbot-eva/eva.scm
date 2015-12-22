@@ -62,22 +62,18 @@
 ; Global semantic knowledge
 
 (define (get-interp-node sent-node)
-" Given a sentnces, get the likliest interpretation node for it.
+"
+  Given a sentnces, get the likliest interpretation node for it.
   Yes, this is a quick hack, needs fixing. XXX FIXME.
 "
 	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
 	(car (cog-chase-link 'InterpretationLink 'InterpretationNode parse)))
 
-; These are English-langauge sentences that I understand.
-(define known-directives
-	(list
-		(get-interp-node (car (nlp-parse "look left")))
-		(get-interp-node (car (nlp-parse "look right")))
-		(get-interp-node (car (nlp-parse "look up")))
-		(get-interp-node (car (nlp-parse "look down")))))
-
 (define (get-interp-of-r2l r2l-set-list)
-
+"
+  Given a list of r2l-sets, pick out the InterpetationNode from each,
+  and return those (as a list).
+"
 	; find-interp takes a single SetLink
 	(define (find-interp r2l-set)
 		; find-inh returns #f if inh-link is not an InheritanceLink
@@ -99,6 +95,14 @@
 
 	(map find-interp (cog-outgoing-set r2l-set-list))
 )
+
+; These are English-langauge sentences that I understand.
+(define known-directives
+	(list
+		(get-interp-node (car (nlp-parse "look left")))
+		(get-interp-node (car (nlp-parse "look right")))
+		(get-interp-node (car (nlp-parse "look up")))
+		(get-interp-node (car (nlp-parse "look down")))))
 
 ;--------------------------------------------------------------------
 ; Global semantic interpretation
@@ -189,14 +193,25 @@
 
 ;--------------------------------------------------------------------
 
+; First quick stove-pipe hack to perform an action.
 (define (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
-
 "
+	; Make the current sentence visible to everyone.
 	(StateLink current-sentence imp)
+
+	; apply rule-1 -- if the sentence is a command to look,
+	; this will find the WordNode direction and glue it onto
+	; the current-imperative anchor.
 	(cog-bind look-rule-1)
+
+	; Apply semantics-rule-1 -- if the current-imperaitve
+	; anchor is a word we understand in a physical grounded
+	; sense, then attach that sense to the current-action anchor.
 	(cog-bind look-semantics-rule-1)
+
+	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind look-action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
@@ -208,6 +223,32 @@
 		(if (eq? '() action-list)
 			(display "I don't know how to do that.\n"))
 	)
+)
+
+;--------------------------------------------------------------------
+
+(define (imperative-process-v2 imp)
+"
+  Process imperative IMP, which should be a SentenceNode.
+"
+
+	; Get the r2l-set of the sentence
+	(define r2l-set (get-r2l-set-of-sent imp))
+
+	; Get the sentences that are similar to it.
+	(define fzset (cog-fuzzy-match r2l-set 'SetLink '()))
+
+	; Get the InterpretationNode's out of that set.
+	(define interp (car (get-interp-of-r2l fzset)))
+
+	; See if it is an interpretation that we know
+	(define known (find (lambda (inp) (eq? interp inp)) known-directives))
+
+	(if (eq? #f known)
+		(display "I don't know how to do that.\n")
+	)
+
+	known
 )
 
 ;--------------------------------------------------------------------
