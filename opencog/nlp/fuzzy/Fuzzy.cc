@@ -198,15 +198,15 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
     similarity /= max_size;
 
     // Check the content of the soln to see if we've accepted something similar before
-    soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
-                     [](Handle& h) {
-                         return NodeCast(h)->getName().find("@") != std::string::npos; }),
-                     soln_nodes.end());
+    // soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
+    //                  [](Handle& h) {
+    //                      return NodeCast(h)->getName().find("@") != std::string::npos; }),
+    //                  soln_nodes.end());
 
-    if (std::find(dup_check.begin(), dup_check.end(), soln_nodes) != dup_check.end())
-        return;
+    // if (std::find(dup_check.begin(), dup_check.end(), soln_nodes) != dup_check.end())
+    //     return;
 
-    dup_check.push_back(soln_nodes);
+    // dup_check.push_back(soln_nodes);
 
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));

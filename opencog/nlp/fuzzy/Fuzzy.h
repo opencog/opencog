@@ -64,7 +64,7 @@ class Fuzzy :
 
         // A vector for storing the "contents" of the accepted solutions
         // mainly to avoid returning duplicate solutions
-        HandleSeqSeq dup_check;
+        // HandleSeqSeq dup_check;
 };
 
 }
