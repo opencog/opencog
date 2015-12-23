@@ -1,6 +1,11 @@
 # 
 # Test Functions preloaded into the CogServer
 
+# Modify PYTHON_PATH so that test_helpers module gets registered.
+from sys import path 
+from os.path import realpath
+path.append(realpath('..')+"/opencog/python")
+
 from opencog.atomspace import types, Atom, TruthValue
 from opencog.type_constructors import *
 from test_helpers.bind_helpers import increment_green, increment_red
