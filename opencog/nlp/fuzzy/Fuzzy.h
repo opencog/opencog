@@ -35,7 +35,7 @@ class Fuzzy :
     public FuzzyPatternMatch
 {
     public:
-        Fuzzy(AtomSpace*, Type, const HandleSeq&);
+        Fuzzy(AtomSpace*, Type, const HandleSeq&, bool);
         ~Fuzzy();
 
         virtual void set_pattern(const Variables&, const Pattern&);
@@ -59,12 +59,15 @@ class Fuzzy :
         // The atoms that we don't want in the solutions
         HandleSeq excl_list;
 
+        // A flag to decide whether or not to accept duplicate solutions
+        bool dup_check;
+
         // The solutions
         std::vector<std::pair<Handle, double>> solns;
 
         // A vector for storing the "contents" of the accepted solutions
         // mainly to avoid returning duplicate solutions
-        // HandleSeqSeq dup_check;
+        HandleSeqSeq solns_contents;
 };
 
 }

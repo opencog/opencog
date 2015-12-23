@@ -38,7 +38,7 @@ class FuzzySCM
         static void init_in_module(void*);
         void init(void);
 
-        Handle do_nlp_fuzzy_match(Handle, Type t = 0, const HandleSeq& v = {});
+        Handle do_nlp_fuzzy_match(Handle, Type, const HandleSeq&, bool);
 
     public:
         FuzzySCM();

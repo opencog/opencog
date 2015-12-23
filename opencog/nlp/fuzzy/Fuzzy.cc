@@ -36,11 +36,13 @@ using namespace opencog;
  * @param as  The AtomSpace that we are using
  * @param tt  The type of atoms we are looking for
  * @param ll  A list of atoms that we don't want them to exist in the results
+ * @param dd  A flag indicating if duplicate solns should be returned
  */
-Fuzzy::Fuzzy(AtomSpace* as, Type tt, const HandleSeq& ll) :
+Fuzzy::Fuzzy(AtomSpace* as, Type tt, const HandleSeq& ll, bool dd) :
     FuzzyPatternMatch(as),
     rtn_type(tt),
-    excl_list(ll)
+    excl_list(ll),
+    dup_check(dd)
 {
 }
 
@@ -89,9 +91,7 @@ bool Fuzzy::accept_starter(const NodePtr np)
  * does not contain any unwanted atoms listed in the excl_list. To calculate
  * a similarity score, a list of common nodes will be obtained. Different weights
  * will be assigned to those with certain linguistic relations in a sentence.
- * Nodes with no linguistic relation will have a weight of zero at the moment,
- * along with those that are not in common with the pattern. The accepted
- * solutions will be stored in the solns vector.
+ * The accepted solutions will be stored in the solns vector.
  *
  * @param pat   The pattern
  * @param soln  The potential solution
@@ -135,7 +135,7 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
         if (NodeCast(common_node)->getName().find("@") != std::string::npos)
             return;
 
-        double weight = 0;
+        double weight = 0.25;
 
         // Helper function for getting the instance of a ConceptNode or a
         // PredicateNode from the input pattern.
@@ -197,16 +197,18 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
     // Also take the size into account
     similarity /= max_size;
 
-    // Check the content of the soln to see if we've accepted something similar before
-    // soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
-    //                  [](Handle& h) {
-    //                      return NodeCast(h)->getName().find("@") != std::string::npos; }),
-    //                  soln_nodes.end());
+    if (dup_check) {
+        // Check the content of the soln to see if we've accepted something similar before
+        soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
+                        [](Handle& h) {
+                            return NodeCast(h)->getName().find("@") != std::string::npos; }),
+                        soln_nodes.end());
 
-    // if (std::find(dup_check.begin(), dup_check.end(), soln_nodes) != dup_check.end())
-    //     return;
+        if (std::find(solns_contents.begin(), solns_contents.end(), soln_nodes) != solns_contents.end())
+            return;
 
-    // dup_check.push_back(soln_nodes);
+        solns_contents.push_back(soln_nodes);
+    }
 
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));
