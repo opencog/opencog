@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/SpreadDecider.h
+ * opencog/attention/SpreadDecider.h
  *
  * Copyright (C) 2008, 2014 OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>

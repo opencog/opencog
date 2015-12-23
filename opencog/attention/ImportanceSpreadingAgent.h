@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/ImportanceSpreadingAgent.h
+ * opencog/attention/ImportanceSpreadingAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>

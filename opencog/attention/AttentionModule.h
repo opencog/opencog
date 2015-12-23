@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/AttentionModule.h
+ * opencog/attention/AttentionModule.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -25,13 +25,13 @@
 #ifndef _OPENCOG_ATTENTION_MODULE_H
 #define _OPENCOG_ATTENTION_MODULE_H
 
-#include <opencog/dynamics/attention/ForgettingAgent.h>
-#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
-#include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
-#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
-#include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/attention/ForgettingAgent.h>
+#include <opencog/attention/HebbianUpdatingAgent.h>
+#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
+#include <opencog/attention/ImportanceSpreadingAgent.h>
+#include <opencog/attention/ImportanceDiffusionAgent.h>
+#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
+#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
 

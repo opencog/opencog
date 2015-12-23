@@ -1,5 +1,5 @@
 /*
-* opencog/dynamics/attention/HebbianCreationModule.h
+* opencog/attention/HebbianCreationModule.h
 *
 * Copyright (C) 2014 Cosmo Harrigan
 * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * src/dynamics/attention/atnom_types_init.cc
+ * attention/atom_types_init.cc
  *
  * Copyright (C) 2014 Linas Vepstas
  * All Rights Reserved
@@ -22,9 +22,9 @@
 
 #include <opencog/server/Module.h>
 
-#include "opencog/dynamics/attention/atom_types.definitions"
+#include "opencog/attention/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/dynamics/attention/atom_types.inheritance"
+#define INHERITANCE_FILE "opencog/attention/atom_types.inheritance"
 #define INITNAME attention_types_init
 
 #include <opencog/atomspace/atom_types.cc>

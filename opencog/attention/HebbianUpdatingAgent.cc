@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/HebbianUpdatingAgent.cc
+ * opencog/attention/HebbianUpdatingAgent.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -26,7 +26,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 

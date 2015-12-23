@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/ImportanceUpdatingAgent.h
+ * opencog/attention/ImportanceUpdatingAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>

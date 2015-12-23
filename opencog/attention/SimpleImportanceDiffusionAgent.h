@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h
+ * opencog/attention/SimpleImportanceDiffusionAgent.h
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved

@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/HebbianUpdatingAgent.h
+ * opencog/attention/HebbianUpdatingAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>

@@ -1,33 +1,33 @@
 /*
-* opencog/dynamics/attention/HebbianCreationModule.cc
-*
-* Copyright (C) 2014 Cosmo Harrigan
-* All Rights Reserved
-*
-* Written by Cosmo Harrigan
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License v3 as
-* published by the Free Software Foundation and including the exceptions
-* at http://opencog.org/wiki/Licenses
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program; if not, write to:
-* Free Software Foundation, Inc.,
-* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+ * opencog/attention/HebbianCreationModule.cc
+ *
+ * Copyright (C) 2014 Cosmo Harrigan
+ * All Rights Reserved
+ *
+ * Written by Cosmo Harrigan
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include <tbb/task.h>
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Config.h>

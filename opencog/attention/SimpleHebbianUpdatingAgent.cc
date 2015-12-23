@@ -23,7 +23,7 @@
  */
 
 #include "SimpleHebbianUpdatingAgent.h"
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 
 using namespace opencog;
 

@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/ForgettingAgent.h
+ * opencog/attention/ForgettingAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>

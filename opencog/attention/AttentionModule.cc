@@ -1,5 +1,5 @@
 /*
- * src/server/AttentionModule.cc
+ * attention/AttentionModule.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -26,7 +26,7 @@
 
 #include <opencog/server/CogServer.h>
 
-#include "opencog/dynamics/attention/atom_types.definitions"
+#include "opencog/attention/atom_types.definitions"
 
 using namespace opencog;
 

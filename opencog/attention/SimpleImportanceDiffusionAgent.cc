@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/SimpleImportanceDiffusionAgent.cc
+ * opencog/attention/SimpleImportanceDiffusionAgent.cc
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -28,7 +28,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
