@@ -6,7 +6,7 @@
  * Copyright (c) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 #include "opencog/nlp/viterbi/atom_types.definitions"
 
 using namespace opencog;

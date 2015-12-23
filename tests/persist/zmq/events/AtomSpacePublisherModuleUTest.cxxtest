@@ -22,21 +22,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cxxtest/TestSuite.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/Module.h>
-#include <opencog/util/Logger.h>
 #include <iostream>
-#include <opencog/util/Config.h>
-#include <lib/zmq/zhelpers.hpp>
 #include <sstream>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <lib/zmq/zhelpers.hpp>
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
+
 using boost::property_tree::ptree;
 using boost::property_tree::read_json;
 using boost::property_tree::write_json;

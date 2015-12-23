@@ -21,8 +21,8 @@
 #include <time.h>
 #include <sstream>
 
-#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "TulipWriter.h"
 

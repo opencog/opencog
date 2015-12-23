@@ -24,15 +24,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/load-file.h>
-#include <opencog/util/Config.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 using namespace std;

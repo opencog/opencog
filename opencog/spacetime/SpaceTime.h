@@ -24,9 +24,9 @@
 #ifndef _EMBODIMENT_SPACETIME_H
 #define _EMBODIMENT_SPACETIME_H
 
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
-#include <opencog/server/CogServer.h>
 
 namespace opencog {
 

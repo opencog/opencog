@@ -2,28 +2,24 @@
                   OpenCog Source Code
                   -------------------
 
-This directory contains core OpenCog code.  Tests, example and demo 
-programs have their own directories.
+This directory contains core OpenCog code.  Tests and examples
+are located one directory up from this.
 
 Source code overview:
 
-scm             -- Scheme language bindings to cogserver.
-python,cython   -- Python langauge bindings.  
-shell           -- Command-line shell interface.
-
-server          -- CogServer main server.
+scm             -- Scheme language bindings.
+python,cython   -- Python language bindings.
 
 nlp             -- English language processing
-reasoning       -- PLN reasoner.
-dynamics        -- Attention allocation.
+pln             -- Probabilistic logic reasoner.
+attention       -- ECAN Attention allocation.
+
+cogserver       -- Multi-user network server.
 
 spatial, spacetime -- Space and time matrix for avatars.
-persist         -- Save/restore timserer to file.
 
-learning        -- Misc supervised learning.
+learning        -- Misc supervised learning algorithms.
 
 visualization   -- Visualization, graphics.
 
 cycl-import     -- Import OpenCyc datasets
-
-@todo Create doxygen filter to parse scm files.

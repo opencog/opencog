@@ -17,7 +17,7 @@
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;

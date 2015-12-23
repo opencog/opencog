@@ -27,12 +27,12 @@
 #include <string>
 #include <vector>
 
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Agent.h>
 #include <opencog/util/Config.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/attention/ImportanceDiffusionAgent.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
 
 using namespace std;
 using namespace opencog;

@@ -30,8 +30,8 @@
 #include <vector>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Cover_Tree.h>
 #include "CoverTreePoint.h"
 

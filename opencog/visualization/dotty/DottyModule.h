@@ -27,10 +27,10 @@
 
 #include <string>
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/Request.h>
 
 namespace opencog
 {
