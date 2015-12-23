@@ -15,8 +15,7 @@ ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
 	ADD_SUBDIRECTORY (attention)
-	ADD_SUBDIRECTORY (modules)
-	ADD_SUBDIRECTORY (server)
+	ADD_SUBDIRECTORY (cogserver)
 	# Octomap checking will be done inside
 	# Will always build types
 	ADD_SUBDIRECTORY (spacetime)
@@ -27,7 +26,6 @@ ENDIF(HAVE_SERVER)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (scm)
-	ADD_SUBDIRECTORY (shell)
 	ADD_SUBDIRECTORY (openpsi)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
