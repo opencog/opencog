@@ -1,5 +1,5 @@
 /*
- * @file opencog/dynamics/openpsi/OpenPsiModule.cc
+ * @file opencog/openpsi/OpenPsiModule.h
  * @author Amen Belayneh <amenbelayneh@gmail.com> June 2015
  *
  * Copyright (C) 2015 OpenCog Foundation
@@ -21,34 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "OpenPsiModule.h"
+#ifndef _OPENCOG_DYNAMICS_OPENPSI_H
+#define _OPENCOG_DYNAMICS_OPENPSI_H
 
-#include <opencog/server/CogServer.h>
+#include <opencog/server/Module.h>
+#include <opencog/openpsi/OpenPsiAgent.h>
 
-using namespace opencog;
-
-DECLARE_MODULE(OpenPsiModule);
+namespace opencog
+{
 
 /**
- * The constructor for OpenPsiModule.
- *
- * @param cs   A cogserver
- */
-OpenPsiModule::OpenPsiModule(CogServer& cs) : Module(cs)
-{
-    logger().info("[OpenPsiModule] Entering constructor");
-    _cogserver.registerAgent(OpenPsiAgent::info().id,
-                                &openPsiAgentFactory);
-}
+ * OpenCog Module for OpenPsi
+*/
 
-OpenPsiModule::~OpenPsiModule()
+class OpenPsiModule : public Module
 {
-    logger().info("[OpenPsiModule] Entering destructor");
-    _cogserver.unregisterAgent(OpenPsiAgent::info().id);
-}
+private:
+    Factory<OpenPsiAgent, Agent> openPsiAgentFactory;
+
+public:
+    OpenPsiModule(CogServer&);
+    virtual ~OpenPsiModule();
+    virtual void init();
+    virtual const char * id(void);
 
 
-void OpenPsiModule::init()
-{
-    logger().info("[OpenPsiModule] Initializing OpenPsiModule.");
-}
+}; // class
+
+} // namespace
+
+#endif // _OPENCOG_OPENPSI_H

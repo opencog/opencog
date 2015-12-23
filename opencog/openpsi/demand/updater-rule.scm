@@ -1,3 +1,5 @@
+; Copyright (C) 2015 OpenCog Foundation
+
 (define psi-demand-updater-rule
     (BindLink
         (VariableList (assoc-ref (psi-demand-pattern) "var"))
