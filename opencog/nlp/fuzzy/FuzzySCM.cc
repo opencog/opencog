@@ -72,10 +72,8 @@ void FuzzySCM::init_in_module(void* data)
  */
 void FuzzySCM::init()
 {
-#ifdef HAVE_GUILE
     define_scheme_primitive("nlp-fuzzy-match", &FuzzySCM::do_nlp_fuzzy_match,
                             this, "nlp fuzzy");
-#endif
 }
 
 /**
@@ -89,11 +87,11 @@ void FuzzySCM::init()
  * @return           A list of solutions and their similarity scores
  */
 Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
-                                    const HandleSeq& excl_list,
-                                    bool dup_check)
+                                    const HandleSeq& excl_list)
 {
-#ifdef HAVE_GUILE
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
+
+bool dup_check = false;
 
     Fuzzy fpm(as, rtn_type, excl_list, dup_check);
 
@@ -121,9 +119,6 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     Handle results = as->add_link(LIST_LINK, rtn_solns);
 
     return results;
-#else
-    return Handle::UNDEFINED;
-#endif
 }
 
 void opencog_nlp_fuzzy_init(void)
