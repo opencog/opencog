@@ -19,7 +19,10 @@
     (define temp (get-answers query))
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
-        (else (string-join (car temp)))
+        ; Return all of them, for now
+        (else (map string-join temp))
+        ; (else (string-join (car temp)))
+
 ))
 ;--------------------------------------------------------------------
 (define-public (process-query user query)

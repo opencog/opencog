@@ -1,3 +1,15 @@
+ADD_LIBRARY (nlpfz SHARED
+	Fuzzy
+	FuzzySCM
+)
+
+TARGET_LINK_LIBRARIES (nlpfz
+	nlp-types
+	${ATOMSPACE_LIBRARIES}
+)
+
+INSTALL (TARGETS nlpfz DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
 INSTALL (FILES
 	fuzzy.scm
    DESTINATION "${DATADIR}/scm/opencog/nlp"
