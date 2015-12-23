@@ -675,3 +675,14 @@ want LARGE_CONFIG
 ./configure --enable-cplusplus --enable-gc-assertions --enable-large-config
 
 Assertion failure: reclaim.c:314
+
+tests/nlp/anaphora/test_anaphora.py
+========================================================
+(use-modules (opencog) (opencog nlp chatbot) (opencog nlp fuzzy))
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+
+
+(get-r2l-set-of-sent (car (nlp-parse "look right")))
+
+Yay it works
+

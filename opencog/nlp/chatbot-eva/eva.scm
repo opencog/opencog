@@ -60,6 +60,8 @@
 
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
+; See farther down below; we build a ReferenceLink attaching
+; specific parsed sentences to specific actions.
 
 (define (get-interp-node sent-node)
 "
@@ -95,14 +97,6 @@
 
 	(map find-interp (cog-outgoing-set r2l-set-list))
 )
-
-; These are English-langauge sentences that I understand.
-(define known-directives
-	(list
-		(get-interp-node (car (nlp-parse "look left")))
-		(get-interp-node (car (nlp-parse "look right")))
-		(get-interp-node (car (nlp-parse "look up")))
-		(get-interp-node (car (nlp-parse "look down")))))
 
 ;--------------------------------------------------------------------
 ; Global semantic interpretation
@@ -173,6 +167,14 @@
 		)
 		(State current-action (Variable "$phys-ground"))
 ))
+
+; These are English-language sentences that I understand.
+(define known-directives
+	(list
+		(get-interp-node (car (nlp-parse "look left")))
+		(get-interp-node (car (nlp-parse "look right")))
+		(get-interp-node (car (nlp-parse "look up")))
+		(get-interp-node (car (nlp-parse "look down")))))
 
 ;--------------------------------------------------------------------
 ; Action schema
