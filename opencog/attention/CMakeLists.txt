@@ -69,7 +69,7 @@ INSTALL (TARGETS attention
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/attention_types.scm
-	DESTINATION "${DATADIR}/scm/dynamics/attention"
+	DESTINATION "${DATADIR}/scm/attention"
 )
 
 INSTALL (FILES
@@ -83,7 +83,7 @@ INSTALL (FILES
 	SpreadDecider.h
 	SimpleImportanceDiffusionAgent.h
 	ImportanceUpdatingAgent.h
-	DESTINATION "include/${PROJECT_NAME}/dynamics/attention"
+	DESTINATION "include/${PROJECT_NAME}/attention"
 )
 
 INSTALL (TARGETS attention-types
