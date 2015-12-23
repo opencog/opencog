@@ -1,5 +1,5 @@
 /*
- * opencog/server/BuiltinRequestsModule.h
+ * opencog/cogserver/server/BuiltinRequestsModule.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -25,17 +25,17 @@
 #ifndef _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 #define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
-#include <opencog/server/SleepRequest.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/ListRequest.h>
-#include <opencog/server/LoadModuleRequest.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/ShutdownRequest.h>
-#include <opencog/server/UnloadModuleRequest.h>
-#include <opencog/server/ListModulesRequest.h>
+#include <opencog/cogserver/server/SleepRequest.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/ListRequest.h>
+#include <opencog/cogserver/server/LoadModuleRequest.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/ShutdownRequest.h>
+#include <opencog/cogserver/server/UnloadModuleRequest.h>
+#include <opencog/cogserver/server/ListModulesRequest.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog
 {

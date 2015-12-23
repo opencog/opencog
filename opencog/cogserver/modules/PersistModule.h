@@ -1,5 +1,5 @@
 /*
- * opencog/persist/sql/PersistModule.h
+ * opencog/cogserver/module/PersistModule.h
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
@@ -26,9 +26,9 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/persist/sql/SQLPersistSCM.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/Request.h>
 
 namespace opencog
 {

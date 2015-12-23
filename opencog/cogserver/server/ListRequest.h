@@ -1,5 +1,5 @@
 /*
- * opencog/server/ListRequest.h
+ * opencog/cogserver/server/ListRequest.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -30,8 +30,8 @@
 #include <vector>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/RequestClassInfo.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

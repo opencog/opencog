@@ -22,7 +22,7 @@
 
 #include <thread>
 
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 

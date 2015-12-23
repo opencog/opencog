@@ -1,5 +1,5 @@
 /*
- * opencog/server/BaseServer.cc
+ * opencog/cogserver/server/BaseServer.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

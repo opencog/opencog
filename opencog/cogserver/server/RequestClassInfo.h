@@ -1,5 +1,5 @@
 /*
- * opencog/server/RequestClassInfo.h
+ * opencog/cogserver/server/RequestClassInfo.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

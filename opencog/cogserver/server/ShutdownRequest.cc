@@ -1,5 +1,5 @@
 /*
- * opencog/server/ShutdownRequest.cc
+ * opencog/cogserver/server/ShutdownRequest.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -26,7 +26,7 @@
 
 #include <sstream>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 

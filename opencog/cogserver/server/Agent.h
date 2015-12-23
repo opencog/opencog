@@ -1,5 +1,5 @@
 /*
- * opencog/server/Agent.h
+ * opencog/cogserver/server/Agent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -28,9 +28,10 @@
 #include <string>
 #include <unordered_map>
 
-#include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
+
+#include <opencog/cogserver/server/Factory.h>
 
 namespace opencog
 {

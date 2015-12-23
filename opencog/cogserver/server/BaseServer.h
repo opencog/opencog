@@ -1,5 +1,5 @@
 /*
- * opencog/server/BaseServer.h
+ * opencog/cogserver/server/BaseServer.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

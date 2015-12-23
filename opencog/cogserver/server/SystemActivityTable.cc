@@ -1,5 +1,5 @@
 /*
- * opencog/server/SystemActivityTable.cc
+ * opencog/cogserver/server/SystemActivityTable.cc
  *
  * Copyright (C) 2009 by OpenCog Foundation
  * Copyright (C) 2010-2011 OpenCog Foundation
@@ -27,7 +27,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 

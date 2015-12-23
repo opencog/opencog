@@ -1,5 +1,5 @@
 /*
- * LGDictMoudle.h
+ * LGDictModule.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -25,7 +25,7 @@
 #define _OPENCOG_LG_DICT_MODULE_H
 
 #include <link-grammar/dict-api.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 #include <opencog/atomspace/Handle.h>
 
 #include <opencog/nlp/lg-dict/LGDictSCM.h>

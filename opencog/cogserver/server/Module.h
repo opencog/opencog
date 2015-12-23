@@ -1,5 +1,5 @@
 /*
- * opencog/CogServer/Module.h
+ * opencog/cogserver/server/Module.h
  *
  * Copyright (C) 2008, 2011 OpenCog Foundation
  * Copyright (C) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
@@ -104,7 +104,7 @@ namespace opencog
  *
  * @code
  * // DerivedModule.h
- * #include <opencog/server/Module.h>
+ * #include <opencog/cogserver/server/Module.h>
  * class DerivedModule : public opencog::Module
  * {
  *     static const char* id = "DerivedModule"

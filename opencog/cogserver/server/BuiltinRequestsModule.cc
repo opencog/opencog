@@ -1,5 +1,5 @@
 /*
- * opencog/server/BuiltinRequestsModule.cc
+ * opencog/cogserver/server/BuiltinRequestsModule.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -24,7 +24,7 @@
 
 #include <iomanip>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/ansi.h>
 
 #include "BuiltinRequestsModule.h"

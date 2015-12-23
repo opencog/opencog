@@ -9,7 +9,7 @@
 #define _OPENCOG_QUERY_MODULE_H
 
 #include <vector>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 #include <opencog/query/PatternSCM.h>
 
 namespace opencog {

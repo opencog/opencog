@@ -25,8 +25,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/ConsoleSocket.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "SchemeShell.h"
 

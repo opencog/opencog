@@ -1,5 +1,5 @@
 /*
- * src/server/IHasMimeType.h
+ * opencog/cogserver/server/IHasMimeType.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

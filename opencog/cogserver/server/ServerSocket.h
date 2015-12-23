@@ -1,5 +1,5 @@
 /*
- * opencog/server/ServerSocket.h
+ * opencog/cogserver/server/ServerSocket.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

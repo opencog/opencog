@@ -1,5 +1,5 @@
 /*
- * opencog/server/SleepRequest.cc
+ * opencog/cogserver/server/SleepRequest.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

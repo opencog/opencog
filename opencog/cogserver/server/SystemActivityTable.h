@@ -1,5 +1,5 @@
 /*
- * opencog/server/SystemActivityTable.h
+ * opencog/cogserver/server/SystemActivityTable.h
  *
  * Copyright (C) 2009 by OpenCog Foundation
  * All Rights Reserved
@@ -30,8 +30,8 @@
 #include <map>
 #include <vector>
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/SystemActivityTable.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/SystemActivityTable.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog

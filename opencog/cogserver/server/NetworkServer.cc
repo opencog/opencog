@@ -1,5 +1,5 @@
 /*
- * opencog/server/NetworkServer.cc
+ * opencog/cogserver/server/NetworkServer.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation

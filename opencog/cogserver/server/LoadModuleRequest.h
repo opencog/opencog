@@ -1,5 +1,5 @@
 /*
- * opencog/server/LoadModuleRequest.h
+ * opencog/cogserver/server/LoadModuleRequest.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -28,8 +28,8 @@
 #include <vector>
 #include <string>
 
-#include <opencog/server/Request.h>
-#include <opencog/server/RequestClassInfo.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

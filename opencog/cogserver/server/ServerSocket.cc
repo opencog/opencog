@@ -1,5 +1,5 @@
 /*
- * opencog/server/ServerSocket.cc
+ * opencog/cogserver/server/ServerSocket.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2010 Linas Vepstas <linasvepstas@gmail.com>
@@ -25,8 +25,8 @@
 
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
-#include <opencog/server/ServerSocket.h>
 #include <opencog/util/Logger.h>
+#include <opencog/cogserver/server/ServerSocket.h>
 
 using namespace opencog; 
 

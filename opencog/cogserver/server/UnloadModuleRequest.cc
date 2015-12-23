@@ -1,5 +1,5 @@
 /*
- * opencog/server/UnloadModuleRequest.cc
+ * opencog/cogserver/server/UnloadModuleRequest.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -27,7 +27,7 @@
 #include <vector>
 #include <sstream>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 

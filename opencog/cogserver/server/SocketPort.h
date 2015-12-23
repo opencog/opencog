@@ -1,5 +1,5 @@
 /*
- * opencog/server/SocketPort.h
+ * opencog/cogserver/server/SocketPort.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

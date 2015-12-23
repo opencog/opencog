@@ -1,5 +1,5 @@
 /*
- * opencog/server/Request.h
+ * opencog/cogserver/server/Request.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -30,8 +30,8 @@
 #include <list>
 #include <string>
 
-#include <opencog/server/Factory.h>
-#include <opencog/server/RequestResult.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/RequestResult.h>
 
 namespace opencog
 {

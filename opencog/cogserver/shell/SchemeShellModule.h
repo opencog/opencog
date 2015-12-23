@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/server/Request.h>
+#include <opencog/cogserver/server/Request.h>
 #include <opencog/server/CogServer.h>
 
 namespace opencog {

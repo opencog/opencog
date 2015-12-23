@@ -38,8 +38,8 @@
 #include <string>
 
 #include <opencog/shell/PythonShell.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog
 {

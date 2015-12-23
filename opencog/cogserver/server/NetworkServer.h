@@ -1,5 +1,5 @@
 /*
- * opencog/server/NetworkServer.h
+ * opencog/cogserver/server/NetworkServer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -30,7 +30,7 @@
 
 #include <pthread.h>
 
-#include <opencog/server/SocketListener.h>
+#include <opencog/cogserver/server/SocketListener.h>
 
 #include <opencog/util/Logger.h>
 

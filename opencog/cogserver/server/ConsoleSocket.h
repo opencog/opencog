@@ -1,5 +1,5 @@
 /*
- * opencog/server/ConsoleSocket.h
+ * opencog/cogserver/server/ConsoleSocket.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -28,9 +28,9 @@
 #include <string>
 #include <tr1/memory>
 
-#include <opencog/server/RequestResult.h>
-#include <opencog/shell/GenericShell.h>
-#include <opencog/server/ServerSocket.h>
+#include <opencog/cogserver/server/RequestResult.h>
+#include <opencog/cogserver/shell/GenericShell.h>
+#include <opencog/cogserver/server/ServerSocket.h>
 
 namespace opencog
 {

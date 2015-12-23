@@ -1,5 +1,5 @@
 /*
- * opencog/server/CogServer.cc
+ * opencog/cogserver/server/CogServer.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -35,26 +35,29 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/atomspace/AtomSpace.h>
-#ifdef HAVE_CYTHON
-#include <opencog/cython/PythonEval.h>
-#endif
-#include <opencog/guile/load-file.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/ConsoleSocket.h>
-#include <opencog/server/NetworkServer.h>
-#include <opencog/server/SystemActivityTable.h>
-#include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/files.h>
 #include <opencog/util/misc.h>
-#include <opencog/util/platform.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+
+#ifdef HAVE_CYTHON
+#include <opencog/cython/PythonEval.h>
+#endif
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/NetworkServer.h>
+#include <opencog/cogserver/server/SystemActivityTable.h>
+#include <opencog/cogserver/server/Request.h>
 
 #ifdef HAVE_PERSIST_SQL
-#include <opencog/modules/PersistModule.h>
+#include <opencog/cogserver/modules/PersistModule.h>
 #endif
 
 #include "CogServer.h"

@@ -1,5 +1,5 @@
 /*
- * src/server/IRequestComplete.h
+ * opencog/cogserver/server/IRequestComplete.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved

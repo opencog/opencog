@@ -1,5 +1,5 @@
 /*
- * opencog/server/ConsoleSocket.cc
+ * opencog/cogserver/server/ConsoleSocket.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -24,12 +24,13 @@
 
 #include <string>
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/ConsoleSocket.h>
-#include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
+
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/Request.h>
 
 using namespace opencog;
 

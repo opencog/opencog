@@ -1,5 +1,5 @@
 /*
- * opencog/server/Request.cc
+ * opencog/cogserver/server/Request.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

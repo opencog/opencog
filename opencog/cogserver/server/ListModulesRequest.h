@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/RequestClassInfo.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

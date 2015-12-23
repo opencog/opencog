@@ -1,5 +1,5 @@
 /*
- * opencog/server/SleepRequest.h
+ * opencog/cogserver/server/SleepRequest.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -29,8 +29,8 @@
 #include <string>
 
 #include <opencog/atomspace/types.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/RequestClassInfo.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

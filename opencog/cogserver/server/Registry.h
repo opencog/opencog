@@ -1,5 +1,5 @@
 /*
- * opencog/server/Registry.h
+ * opencog/cogserver/server/Registry.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -28,11 +28,11 @@
 #include <string>
 #include <list>
 
-#include <opencog/server/Factory.h>
-#include <opencog/server/RequestClassInfo.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc.h>
 #include <opencog/util/exceptions.h>
+
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

@@ -1,5 +1,5 @@
 /*
- * opencog/server/CogServer.h
+ * opencog/cogserver/server/CogServer.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -33,13 +33,13 @@
 #include <tr1/memory>
 
 #include <opencog/util/concurrent_queue.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/BaseServer.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/NetworkServer.h>
-#include <opencog/server/SystemActivityTable.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/Registry.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/BaseServer.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/NetworkServer.h>
+#include <opencog/cogserver/server/SystemActivityTable.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/Registry.h>
 
 namespace opencog
 {

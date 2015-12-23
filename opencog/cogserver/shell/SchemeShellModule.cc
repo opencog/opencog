@@ -23,7 +23,7 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 
 #include "SchemeShell.h"

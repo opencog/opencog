@@ -1,5 +1,5 @@
 /*
- * src/server/Factory.h
+ * opencog/cogserver/server/Factory.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

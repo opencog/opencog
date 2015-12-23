@@ -1,5 +1,5 @@
 /*
- * opencog/modules/PersistZmqModule.h
+ * opencog/cogserver/modules/PersistZmqModule.h
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
@@ -27,9 +27,9 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/persist/zmq/atomspace/ZMQPersistSCM.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/Request.h>
 
 namespace opencog
 {

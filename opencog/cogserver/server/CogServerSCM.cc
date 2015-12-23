@@ -27,7 +27,7 @@
 #define _OPENCOG_COGSERVER_SCM_H
 
 #include <thread>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog
 {

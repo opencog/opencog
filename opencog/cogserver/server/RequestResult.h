@@ -1,5 +1,5 @@
 /*
- * opencog/server/RequestResult.h
+ * opencog/cogserver/server/RequestResult.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -29,8 +29,8 @@
 #include <mutex>
 #include <string>
 
-#include <opencog/server/IHasMimeType.h>
-#include <opencog/server/IRequestComplete.h>
+#include <opencog/cogserver/server/IHasMimeType.h>
+#include <opencog/cogserver/server/IRequestComplete.h>
 
 namespace opencog
 {

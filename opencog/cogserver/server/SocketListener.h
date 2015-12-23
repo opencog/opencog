@@ -1,5 +1,5 @@
 /*
- * opencog/server/SocketListener.h
+ * opencog/cogserver/server/SocketListener.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <opencog/server/SocketPort.h>
+#include <opencog/cogserver/server/SocketPort.h>
 #include <opencog/util/Logger.h>
 
 using boost::asio::ip::tcp;

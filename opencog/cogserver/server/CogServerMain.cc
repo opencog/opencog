@@ -1,5 +1,5 @@
 /*
- * opencog/server/CogServerMain.cc
+ * opencog/cogserver/server/CogServerMain.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -37,12 +37,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/files.h>
 #include <opencog/util/misc.h>
+
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 using namespace std;
