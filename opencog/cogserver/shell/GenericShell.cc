@@ -26,7 +26,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/cogserver/server/ConsoleSocket.h>
-#include "GenericEval.h"
+#include <opencog/eval/GenericEval.h>
 #include "GenericShell.h"
 
 using namespace opencog;

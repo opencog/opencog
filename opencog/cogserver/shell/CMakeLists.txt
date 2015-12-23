@@ -9,7 +9,6 @@ IF (HAVE_CYTHON)
 	)
 
 	ADD_LIBRARY (py-shell SHARED
-		GenericEval
 		GenericShell
 		PythonShell
 		PythonShellModule
@@ -25,7 +24,6 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (scheme-shell SHARED
-	GenericEval
 	GenericShell
 	SchemeShell
 	SchemeShellModule
@@ -44,11 +42,10 @@ IF (HAVE_CYTHON)
 		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 ENDIF (HAVE_CYTHON)
 
-	INSTALL (TARGETS scheme-shell
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+INSTALL (TARGETS scheme-shell
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 
 INSTALL (FILES
-	GenericEval.h
 	GenericShell.h
-	DESTINATION "include/${PROJECT_NAME}/shell"
+	DESTINATION "include/${PROJECT_NAME}/cogserver/shell"
 )

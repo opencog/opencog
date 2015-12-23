@@ -127,5 +127,5 @@ INSTALL (FILES
 	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
-	DESTINATION "include/${PROJECT_NAME}/server"
+	DESTINATION "include/${PROJECT_NAME}/cogserver/server"
 )
