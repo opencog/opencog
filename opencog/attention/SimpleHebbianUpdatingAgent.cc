@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SimpleHebbianUpdatingAgent.h"
 #include <opencog/attention/atom_types.h>
+#include "SimpleHebbianUpdatingAgent.h"
 
 using namespace opencog;
 

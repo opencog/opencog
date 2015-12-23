@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_OPENPSIAGENT_H
 #define _OPENCOG_OPENPSIAGENT_H
 
-#include <opencog/server/Agent.h>
+#include <opencog/cogserver/server/Agent.h>
 
 namespace opencog
 {
@@ -33,6 +33,8 @@ namespace opencog
  * OpenCog Agent for OpenPsi
 */
 
+// XXX FIXME OpenCog Agents are deprecated. Brand-new code should
+// not be creating agents!
 class OpenPsiAgent : public Agent
 {
 public:

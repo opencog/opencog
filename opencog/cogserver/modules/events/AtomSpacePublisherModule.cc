@@ -22,22 +22,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpacePublisherModule.h"
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Logger.h>
+#include <iomanip>
+#include <iostream>
+#include <thread>
+#include <time.h>
+
+#include <lib/json_spirit/json_spirit.h>
+#include <lib/zmq/zhelpers.hpp>
+#include <tbb/task.h>
+#include <tbb/concurrent_queue.h>
+
 #include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/tbb.h>
+
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/FuzzyTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <lib/zmq/zhelpers.hpp>
-#include <lib/json_spirit/json_spirit.h>
-#include <tbb/task.h>
-#include <tbb/concurrent_queue.h>
-#include <opencog/util/tbb.h>
-#include <iostream>
-#include <thread>
-#include <iomanip>
-#include <time.h>
+
+#include <opencog/cogserver/server/CogServer.h>
+#include "AtomSpacePublisherModule.h"
 
 using namespace std;
 using namespace json_spirit;

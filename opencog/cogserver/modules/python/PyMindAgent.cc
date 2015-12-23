@@ -1,7 +1,7 @@
 
-#include <opencog/modules/python/PyMindAgent.h>
+#include <opencog/cogserver/modules/python/PyMindAgent.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include <opencog/cython/opencog/agent_finder_types.h>
 #include <opencog/cython/opencog/agent_finder_api.h>

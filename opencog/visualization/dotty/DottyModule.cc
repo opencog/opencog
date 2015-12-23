@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 #include "DottyModule.h"

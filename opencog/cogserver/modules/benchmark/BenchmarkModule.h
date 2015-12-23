@@ -27,8 +27,8 @@
 
 #include <string>
 
-#include <opencog/server/Module.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog
 {

@@ -26,9 +26,9 @@
 #include <algorithm>
 #include <sstream>
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;

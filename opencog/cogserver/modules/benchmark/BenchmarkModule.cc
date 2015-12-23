@@ -30,13 +30,14 @@
 
 #include <boost/range/irange.hpp>
 
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/oc_omp.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "BenchmarkModule.h"
 

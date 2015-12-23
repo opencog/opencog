@@ -20,15 +20,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "HebbianUpdatingAgent.h"
+#include <opencog/util/Config.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Config.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+#include "HebbianUpdatingAgent.h"
 
 using namespace opencog;
 

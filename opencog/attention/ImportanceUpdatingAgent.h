@@ -28,13 +28,14 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/recent_val.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
 
 class ImportanceUpdatingAgentUTest;
 

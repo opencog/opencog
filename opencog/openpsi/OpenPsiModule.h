@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_DYNAMICS_OPENPSI_H
 #define _OPENCOG_DYNAMICS_OPENPSI_H
 
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 #include <opencog/openpsi/OpenPsiAgent.h>
 
 namespace opencog

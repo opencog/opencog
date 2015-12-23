@@ -8,11 +8,11 @@
 
 #include <string>
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include <opencog/cython/PyIncludeWrapper.h> // Needed for PyThreadState
 

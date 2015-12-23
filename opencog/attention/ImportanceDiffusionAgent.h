@@ -35,7 +35,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/Agent.h>
+#include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include "SpreadDecider.h"

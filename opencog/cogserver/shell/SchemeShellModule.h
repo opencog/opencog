@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/cogserver/server/Request.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog {
 /** \addtogroup grp_server

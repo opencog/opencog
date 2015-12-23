@@ -25,9 +25,8 @@
 #ifndef SIMPLEHEBBIANPDATINGAGENT_H_
 #define SIMPLEHEBBIANPDATINGAGENT_H_
 
+#include <opencog/cogserver/server/CogServer.h>
 #include "HebbianUpdatingAgent.h"
-
-#include <opencog/server/CogServer.h>
 
 namespace opencog
 {

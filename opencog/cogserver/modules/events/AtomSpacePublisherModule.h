@@ -1,5 +1,5 @@
 /*
- * opencog/persist/zmq/events/AtomSpacePublisherModule.h
+ * opencog/cogserver/modules/events/AtomSpacePublisherModule.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved
@@ -26,14 +26,17 @@
 #define _OPENCOG_ATOMSPACE_PUBLISHER_MODULE_H
 
 #include <string>
-#include <opencog/server/Agent.h>
-#include <opencog/server/Module.h>
-#include <opencog/server/CogServer.h>
+#include <lib/zmq/zhelpers.hpp>
+
 #include <lib/json_spirit/json_spirit.h>
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
+
 #include <opencog/util/tbb.h>
-#include <lib/zmq/zhelpers.hpp>
+
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace json_spirit;
 

@@ -28,9 +28,9 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Request.h>
-#include <opencog/server/RequestClassInfo.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Request.h>
+#include <opencog/cogserver/server/RequestClassInfo.h>
 
 namespace opencog
 {

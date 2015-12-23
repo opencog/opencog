@@ -34,7 +34,7 @@
 #ifndef PYTHONSHELL_H
 #define PYTHONSHELL_H
 
-#include <opencog/shell/GenericShell.h>
+#include <opencog/cogserver/shell/GenericShell.h>
 
 namespace opencog
 {

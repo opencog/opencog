@@ -40,6 +40,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/files.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 

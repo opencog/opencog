@@ -26,11 +26,11 @@
 #define _OPENCOG_HEBBIAN_CREATION_MODULE_H
 
 #include <algorithm>
-
-#include <opencog/server/Module.h>
-#include <opencog/server/CogServer.h>
 #include <tbb/task.h>
 #include <opencog/util/tbb.h>
+
+#include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 namespace opencog
 {

@@ -24,7 +24,7 @@
 
 #include "AttentionModule.h"
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "opencog/attention/atom_types.definitions"
 
@@ -63,4 +63,3 @@ AttentionModule::~AttentionModule()
 void AttentionModule::init()
 {
 }
-

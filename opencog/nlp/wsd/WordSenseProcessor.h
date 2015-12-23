@@ -13,8 +13,8 @@
 
 #include <pthread.h>
 #include <opencog/nlp/wsd/Mihalcea.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
 
 namespace opencog {
 

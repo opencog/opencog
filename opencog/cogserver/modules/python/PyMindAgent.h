@@ -27,10 +27,10 @@
 
 #include <opencog/cython/PyIncludeWrapper.h>
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Factory.h>
 
 class PythonModuleUTest;
 

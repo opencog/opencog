@@ -20,7 +20,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "WordSenseProcessor.h"
 

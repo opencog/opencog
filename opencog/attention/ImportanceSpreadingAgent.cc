@@ -25,7 +25,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
 

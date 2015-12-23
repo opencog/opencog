@@ -25,14 +25,15 @@
 
 #include <tbb/task.h>
 
-#include <opencog/atomutils/AtomUtils.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/tbb.h>
+
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianCreationModule.h"
 

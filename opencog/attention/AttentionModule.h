@@ -32,8 +32,8 @@
 #include <opencog/attention/ImportanceDiffusionAgent.h>
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/ImportanceUpdatingAgent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Module.h>
 
 namespace opencog
 {

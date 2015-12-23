@@ -25,15 +25,16 @@
 #include <time.h>
 #include <math.h>
 
+#include <opencog/util/algorithm.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/platform.h>
+
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/platform.h>
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/algorithm.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "SimpleImportanceDiffusionAgent.h"
 #include "SpreadDecider.h"

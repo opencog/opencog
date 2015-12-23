@@ -23,7 +23,7 @@
 
 #include "OpenPsiAgent.h"
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/guile/SchemeEval.h>

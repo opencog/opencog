@@ -20,7 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "ImportanceDiffusionAgent.h"
 
 #include <time.h>
 #include <math.h>
@@ -28,12 +27,15 @@
 //#include <gsl/gsl_linalg.h>
 //#include <gsl/gsl_blas.h>
 
-#include <opencog/atomspace/Link.h>
-#include <opencog/attention/atom_types.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
+
+#include <opencog/atomspace/Link.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+#include "ImportanceDiffusionAgent.h"
 
 #define DEBUG
 namespace opencog

@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include <opencog/shell/PythonShell.h>
+#include <opencog/cogserver/shell/PythonShell.h>
 #include <opencog/cogserver/server/Request.h>
 #include <opencog/cogserver/server/CogServer.h>
 

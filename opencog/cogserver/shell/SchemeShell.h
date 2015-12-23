@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/shell/GenericShell.h>
+#include <opencog/cogserver/shell/GenericShell.h>
 
 namespace opencog {
 /** \addtogroup grp_server

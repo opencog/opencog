@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 
 #include "opencog/attention/atom_types.definitions"
 

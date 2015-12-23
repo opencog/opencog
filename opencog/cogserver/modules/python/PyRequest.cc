@@ -1,6 +1,6 @@
 #include "PyRequest.h"
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include <opencog/cython/opencog/agent_finder_types.h>
 #include <opencog/cython/opencog/agent_finder_api.h>

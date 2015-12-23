@@ -28,8 +28,9 @@
 #include <string>
 #include <list>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/misc.h>
 
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/RequestClassInfo.h>
