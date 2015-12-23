@@ -9,44 +9,33 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_SUBDIRECTORY (learning)
 
 IF (HAVE_ATOMSPACE)
-    ADD_SUBDIRECTORY (nlp)
-    ADD_SUBDIRECTORY (persist)
-    ADD_SUBDIRECTORY (planning)
+	ADD_SUBDIRECTORY (nlp)
+	ADD_SUBDIRECTORY (planning)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
-    ADD_SUBDIRECTORY (attention)
-    ADD_SUBDIRECTORY (modules)
-    ADD_SUBDIRECTORY (server)
+	ADD_SUBDIRECTORY (attention)
+	ADD_SUBDIRECTORY (modules)
+	ADD_SUBDIRECTORY (server)
+	# Octomap checking will be done inside
+	# Will always build types
+	ADD_SUBDIRECTORY (spacetime)
+	IF (HAVE_OCTOMAP)
+		ADD_SUBDIRECTORY (spatial)
+	ENDIF (HAVE_OCTOMAP)
 ENDIF(HAVE_SERVER)
 
-# Extension language support
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (shell)
+	ADD_SUBDIRECTORY (openpsi)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-IF (HAVE_SERVER)
-    #Octomap checking will be done inside
-    #Will always build types
-    ADD_SUBDIRECTORY (spacetime)
-    IF (HAVE_OCTOMAP)
-        ADD_SUBDIRECTORY (spatial)
-    ENDIF (HAVE_OCTOMAP)
-ENDIF (HAVE_SERVER)
-
-# build unconditionally; a check is made there.
 ADD_SUBDIRECTORY (embodiment)
 
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (visualization)
-
-IF (HAVE_GUILE)
-    # Guile is needed because the functionalities are mostly implemented in
-    # guile
-    ADD_SUBDIRECTORY(openpsi)
-ENDIF (HAVE_GUILE)
