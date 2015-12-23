@@ -1,6 +1,17 @@
+;
 ; A simple demo for SuReal
+;
+; Prior to running this, the RelEx parse server needs to be set up,
+; so that the `nlp-parse` call succeeds. The directory containing the
+; chatbot has detailed instructions on how to do this.
 
-; The contents of the AtomSpace
+; Load the needed modules!
+(use-modules (opencog)
+             (opencog nlp)
+             (opencog nlp sureal)
+             (opencog nlp chatbot)) ; the chatbot defines nlp-parse
+
+; Populate the contents AtomSpace with various parses.
 (nlp-parse "Madonna wrote the song.")
 (nlp-parse "John and Batman saved the city.")
 (nlp-parse "The dog ate that smelly cake.")

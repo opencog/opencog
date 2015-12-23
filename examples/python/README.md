@@ -41,7 +41,7 @@ all the various cogserver features, you have to use it as a server, not
 a library.
 
 The server has a single, global built-in AtomSpace. It can be obtained
-with the python call `get_server_atomspace()`.  This is teh atomspace
+with the python call `get_server_atomspace()`.  This is the atomspace
 that should be used for all processing; failure to use it will lead to
 you to ask: "where have all my atoms gone?".
 
@@ -81,9 +81,3 @@ rlwrap telnet localhost 17001
 ```
 This should display `(ConceptNode "green light")` indicating that the
 atom created by python is visible to scheme.
-
-
-## moses
-
-Example usage of the Python wrapper for the MOSES evolutionary program
-learning system

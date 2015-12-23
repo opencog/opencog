@@ -1,19 +1,30 @@
-This directory contains various examples that use the OpenCog framework.
 
-guile           - Guile (scheme) usage examples
-                  >>>> MOVED TO github.com/opencog/atomspace <<<<<<
+                  OpenCog Examples
+                  ----------------
 
-pattern-matcher - Provides example scheme code that defines a search
-                  pattern (using BindLink and SatisfactionLink).
-                  >>>> MOVED TO github.com/opencog/atomspace <<<<<<
+This directory contains various examples that demonstrate various tasks.
+Be sure to explore the github.com/opencog/atomspace/examples directory
+first, as that provides most of the simpler examples, as well as showing
+how to use the core infrastructure.  The examples here domonstrate
+mostly higher-level systems.
 
-python          - Python usage examples
+
+python          - Python usage examples.  Most of these are probably
+                  obsolete, or mis-categorized, or unmaintained. Needs
+                  cleanup.
+
 atomtypes       - Shows how to define custom atom types.
 
+sureal          - Demonstrates how to use the Surface Realization
+                  system, for generating grammatically valid English
+                  language sentences from abstract conceptual
+                  diagrams.
+
+conceptual_blending - Blending together of similar concepts.
+
 hopfield        - Provides a toy example for Economic Attention
-                  Allocation Networks, using OpenCog to emulate a
-                  associate memory neural network known as a
-                  'Hopfield network'.
+                  Allocation Networks, emulating a type of associative
+                  memory neural network called a 'Hopfield network'.
 
 visual_demos    - A number of demos to visually represent the dynamics
                   of OpenCog.
