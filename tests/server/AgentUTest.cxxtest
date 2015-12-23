@@ -26,11 +26,11 @@
 #include <iostream>
 #include <fstream>
 
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 using namespace std;

@@ -28,10 +28,10 @@
 
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Config.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Factory.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/attention/ImportanceUpdatingAgent.h>
 
 using namespace opencog;
 using namespace std;

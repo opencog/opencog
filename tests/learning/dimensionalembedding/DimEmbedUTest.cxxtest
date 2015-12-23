@@ -28,7 +28,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 

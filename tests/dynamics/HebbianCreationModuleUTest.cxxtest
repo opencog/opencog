@@ -24,17 +24,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
 #include <opencog/atomspace/types.h>
-#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/algorithm.h>
-//#include <iostream>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 using namespace std;

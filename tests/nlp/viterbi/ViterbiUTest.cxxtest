@@ -22,12 +22,13 @@
 
 #include <link-grammar/dict-api.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
 #include <opencog/guile/load-file.h>
 #include <opencog/nlp/viterbi/atom_types.h>
 #include <opencog/nlp/viterbi/parser.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/Logger.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 using namespace viterbi;
