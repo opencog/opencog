@@ -14,8 +14,9 @@ IF (HAVE_ATOMSPACE)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
-	ADD_SUBDIRECTORY (attention)
 	ADD_SUBDIRECTORY (cogserver)
+	# attention builds *after* cogserver.
+	ADD_SUBDIRECTORY (attention)
 	# Octomap checking will be done inside
 	# Will always build types
 	ADD_SUBDIRECTORY (spacetime)
