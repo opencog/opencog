@@ -29,11 +29,11 @@
 
 #include <math.h>
 
-#include <opencog/dynamics/attention/ForgettingAgent.h>
-#include <opencog/dynamics/attention/HebbianUpdatingAgent.h>
-#include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
+#include <opencog/attention/ForgettingAgent.h>
+#include <opencog/attention/HebbianUpdatingAgent.h>
+#include <opencog/attention/ImportanceSpreadingAgent.h>
+#include <opencog/attention/ImportanceUpdatingAgent.h>
+#include <opencog/attention/ImportanceDiffusionAgent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/RandGen.h>
 

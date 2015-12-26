@@ -32,7 +32,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 
 #include "HopfieldServer.h"
 
