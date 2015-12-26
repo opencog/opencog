@@ -24,7 +24,7 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
-#include <opencog/query/FuzzyPatternMatch.h>
+#include <opencog/atomutils/FuzzyMatch.h>
 
 namespace opencog
 {
@@ -32,19 +32,17 @@ namespace nlp
 {
 
 class Fuzzy :
-    public FuzzyPatternMatch
+    public FuzzyMatch
 {
     public:
-        Fuzzy(AtomSpace*, Type, const HandleSeq&, bool);
-        ~Fuzzy();
+        Fuzzy(Type, const HandleSeq&, bool);
+        virtual ~Fuzzy();
 
-        virtual void set_pattern(const Variables&, const Pattern&);
+        std::vector<std::pair<Handle, double>> get_solns(const Handle&);
 
-        virtual bool accept_starter(const NodePtr);
-
-        virtual void accept_solution(const Handle&, const Handle&);
-
-        std::vector<std::pair<Handle, double>> get_solns();
+    protected:
+        virtual bool accept_starter(const NodePtr&);
+        virtual void accept_solution(const Handle&);
 
     private:
         // The input pattern

@@ -38,8 +38,7 @@ using namespace opencog;
  * @param ll  A list of atoms that we don't want them to exist in the results
  * @param dd  A flag indicating if duplicate solns should be returned
  */
-Fuzzy::Fuzzy(AtomSpace* as, Type tt, const HandleSeq& ll, bool dd) :
-    FuzzyPatternMatch(as),
+Fuzzy::Fuzzy(Type tt, const HandleSeq& ll, bool dd) :
     rtn_type(tt),
     excl_list(ll),
     dup_check(dd)
@@ -51,24 +50,6 @@ Fuzzy::~Fuzzy()
 }
 
 /**
- * Override the set_pattern method.
- *
- * Set the pattern, extract all the nodes and sort them. This will be useful
- * in later stages.
- *
- * @param vars  The variables in the pattern
- * @param pat   The pattern
- */
-void Fuzzy::set_pattern(const Variables& vars, const Pattern& pat)
-{
-    FuzzyPatternMatch::set_pattern(vars, pat);
-
-    pattern = pat.mandatory[0];
-    pat_nodes = get_all_nodes(pattern);
-    std::sort(pat_nodes.begin(), pat_nodes.end());
-}
-
-/**
  * Determine whether or not to accept a node as a starter node for fuzzy
  * pattern matching. By default it doesn't allow variables or instances to
  * be starters, and they should also be either ConceptNodes or PredicateNodes
@@ -77,10 +58,10 @@ void Fuzzy::set_pattern(const Variables& vars, const Pattern& pat)
  * @param np  A NodePtr pointing to a node in the pattern
  * @return    True if the node is accepted, false otherwise
  */
-bool Fuzzy::accept_starter(const NodePtr np)
+bool Fuzzy::accept_starter(const NodePtr& np)
 {
-    return FuzzyPatternMatch::accept_starter(np) and
-           (np->getType() == CONCEPT_NODE or np->getType() == PREDICATE_NODE);
+    return FuzzyMatch::accept_starter(np) and
+       (np->getType() == CONCEPT_NODE or np->getType() == PREDICATE_NODE);
 }
 
 /**
@@ -96,7 +77,7 @@ bool Fuzzy::accept_starter(const NodePtr np)
  * @param pat   The pattern
  * @param soln  The potential solution
  */
-void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
+void Fuzzy::accept_solution(const Handle& soln)
 {
     // Check if this is the type of atom that we want
     if (soln->getType() != rtn_type)
@@ -115,13 +96,15 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
     std::sort(soln_nodes.begin(), soln_nodes.end());
 
     // Find out how many nodes it has in common with the pattern
-    std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
+    std::set_intersection(target_nodes.begin(), target_nodes.end(),
                           soln_nodes.begin(), soln_nodes.end(),
                           std::back_inserter(common_nodes));
 
     std::sort(common_nodes.begin(), common_nodes.end());
 
     // Remove duplicate common_nodes
+// XXX  FIXME .. how can there possibly be duplicates ???
+// All target nodes are unique ... !?
     common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()),
                        common_nodes.end());
 
@@ -158,9 +141,9 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
             return false;
         };
 
-        auto inst = std::find_if(pat_nodes.begin(), pat_nodes.end(), find_instance);
+        auto inst = std::find_if(target_nodes.begin(), target_nodes.end(), find_instance);
 
-        if (inst != pat_nodes.end()) {
+        if (inst != target_nodes.end()) {
             // Get the WordInstanceNode from the ReferenceLink that connects both
             // WordInstanceNode and the instance ConceptNode / PredicateNode
             HandleSeq word_inst = get_neighbors(*inst, false, true, REFERENCE_LINK, false);
@@ -192,7 +175,7 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
         // similarity += (weight / common_node->getIncomingSetSize());
     }
 
-    size_t max_size = std::max(pat_nodes.size(), soln_nodes.size());
+    size_t max_size = std::max(target_nodes.size(), soln_nodes.size());
 
     // Also take the size into account
     similarity /= max_size;
@@ -219,8 +202,10 @@ void Fuzzy::accept_solution(const Handle& pat, const Handle& soln)
  *
  * @return  A vector of solutions
  */
-std::vector<std::pair<Handle, double>> Fuzzy::get_solns()
+std::vector<std::pair<Handle, double>> Fuzzy::get_solns(const Handle& pat)
 {
+    perform_search(pat);
+
     // Sort the solutions by their similarity scores
     std::sort(solns.begin(), solns.end(),
         [] (std::pair<Handle, double> s1, std::pair<Handle, double> s2) {
@@ -229,4 +214,3 @@ std::vector<std::pair<Handle, double>> Fuzzy::get_solns()
 
     return solns;
 }
-
