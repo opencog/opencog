@@ -15,7 +15,9 @@ ENDIF (HAVE_REST)
 
 # Place a default config file in a default location
 # CONFDIR normally expands to /usr/local/etc/
+# XXX: why is cogserver.conf installed if the default file name is opencog.conf?
 INSTALL (FILES
 	cogserver.conf
+    opencog.conf
 	DESTINATION "${CONFDIR}"
 )
