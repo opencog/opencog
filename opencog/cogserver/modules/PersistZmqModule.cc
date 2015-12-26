@@ -1,5 +1,5 @@
 /*
- * opencog/modules/PersistZmqModule.cc
+ * opencog/cogserver/modules/PersistZmqModule.cc
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>

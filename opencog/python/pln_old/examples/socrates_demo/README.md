@@ -54,7 +54,7 @@ Run ```socrates_example.py```.
 
 Include the MindAgent as a preloaded module in the cogserver by adding its
 path, ```../opencog/python/pln_old/examples/socrates_demo```, to ```PYTHON_EXTENSION_DIRS```.
-Start the cogserver at ```/opencog/build``` with ```./opencog/cogserver/server/cogserver```.
+Start the cogserver at ```/opencog/build``` with ```./opencog/cogserver/server/cogserver -c ../lib/development.conf```.
 Telnet into the cogserver with ```rlwrap telnet localhost 17001```.
 Start the relex server at ```/relex``` with ```./opencog-server-sh```.
 Make sure that the RelEx2Logic output is turned on in ```opencog-server.sh```.
@@ -174,7 +174,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ##### 2) MemberToInheritance Rule
 
 ###### Input is previous output
- 
+
 ###### Output
 ```
 (InheritanceLink (stv 1.000000 1.000000)
@@ -200,7 +200,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
   (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
   (ConceptNode "man") ; [284]
 ) ; [354]
- 
+
 (InheritanceLink (stv 1.000000 0.990000)
   (ConceptNode "man@fbc51aff-8074-46d8-b3ba-1ccaeb1adb34") ; [283]
   (ConceptNode "man") ; [284]

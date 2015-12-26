@@ -133,4 +133,3 @@ void ViterbiUTest::test_hello(void)
 	dictionary_delete(dict);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-

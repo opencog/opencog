@@ -52,7 +52,7 @@ Before starting the CogServer, the opencog.conf file needs to include the **../o
 
 Make sure you're in your opencog's build directory. In its lib directory should be the opencog.conf file which is mandatory for the CogServer.
 
-Run cogserver now with ./opencog/cogserver/server/cogserver from your build directory.
+Run cogserver now with ./opencog/cogserver/server/cogserver -c ../lib/development.conf from your build directory.
 
 Switch to a second terminal and type 'telnet localhost 17001'. The opencog shell should now open.
 
