@@ -1,12 +1,12 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
 (use-modules (rnrs sorting)) ; needed for sorting demands by their values.
-(use-modules (opencog exec))
+(use-modules (opencog exec) (opencog rule-engine))
 
 (load-from-path "openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
-(define (psi-demand-pattern)
+(define-public (psi-demand-pattern)
 "
   Returns an alist used to define the psi demand pattern. The key strings are,
   - 'var': its value is a list containing the VariableNodes and their type
@@ -55,7 +55,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-demands)
+(define-public (psi-get-demands)
 "
   Returns a list containing the ConceptNode that carry the demand-value. The
   strength of their stv is the demand value.
@@ -67,7 +67,8 @@
 )
 
 ; --------------------------------------------------------------
-(define (define-psi-demand  demand-name default-value min-value max-value)
+(define-public (define-psi-demand  demand-name default-value
+                                   min-value max-value)
 "
   Define an OpenPsi demand. By default an in-born drive/action that aims to
   maintain the goal of keeping the demand-value within the given range is
@@ -87,10 +88,11 @@
     - The maximum acceptable demand-value.
 
 "
-    (let ((demand (string-append (psi-prefix-str) demand-name)))
-        (list
+    (let* ((demand-str (string-append (psi-prefix-str) demand-name))
+           (demand-node (ConceptNode demand-str (stv default-value 1))))
+        (begin
             (InheritanceLink
-                (ConceptNode demand (stv default-value 1))
+                demand-node
                 (ConceptNode (string-append (psi-prefix-str) "Demand"))
             )
 
@@ -98,7 +100,7 @@
             (EvaluationLink
                 (PredicateNode "must_have_value_within")
                 (ListLink
-                    (ConceptNode demand)
+                    demand-node
                     (NumberNode min-value)
                     (NumberNode max-value)
                 )
@@ -109,9 +111,12 @@
                 (PredicateNode (string-append (psi-prefix-str) "acts-on"))
                 (ListLink
                     (GroundedSchemaNode "scm: psi-demand-updater")
-                    (ConceptNode demand)
+                    demand-node
                 )
             )
+
+            ; Each demand is also a rulebase
+            (ure-define-rbs demand-node 1)
         )
     )
 )
@@ -163,15 +168,14 @@
 (define (define-psi-action vars context action demand-name effect-type)
 "
   It associates an action and context in which the action has to be taken
-  to an OpenPsi-demand. It returns a BindLink, structured as
+  to an OpenPsi-demand. It returns a node that defines/aliases the BindLink
+  structured as,
     (BindLink
         (VariableList (vars))
         (AndLink
             (context)
             (clauses required for linking with the demand named demand-name))
         (action))
-  If the action, context, and effect-type have already been defined in the
-  atomspace then the previous defined BindLink is returned.
 
   A single action-rule could only have a either of the effect-types, thus
   changing the effect-type will not have any effect if the action-rule has
@@ -227,9 +231,6 @@
             action))
 
     (define (link-with-demand)
-        ; For finding the rule. The atom is not part of the rule because if
-        ; rule-name is randomely generated, as such unless by chance all the
-        ; rules will not much even if the context and Variable types match.
         (EvaluationLink
             (PredicateNode (string-append (psi-prefix-str) effect-type))
             (ListLink
@@ -247,20 +248,8 @@
         (error (string-append "Expected fourth argument to be either"
             "`Increase` or `Decrease` got: ") effect-type))
 
-    ; 1. Get all nodes that define the BindLink as a ure recognizable rule.
-    ; 2. Check if the rule has already been defined, and return the rule or
-    ;    define the rule if it hasn't, or throw an error if it has been defined
-    ;    more than once.
-    (let ((node (cog-chase-link 'DefineLink 'Node (rule))))
-        (cond ((and (equal? 1 (length node))
-                    (string-prefix? rule-name-prefix (cog-name (car node))))
-                     (rule))
-              ((equal? 0 (length node))
-                    (begin (DefineLink (Node rule-name) (rule))
-                        (link-with-demand) (rule)))
-              (else (error "The rule has been defined multiple times"))
-        )
-    )
+    (link-with-demand)
+    (ure-add-rule demand-node rule-name (rule))
 )
 
 ; --------------------------------------------------------------
