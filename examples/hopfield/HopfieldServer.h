@@ -88,7 +88,7 @@ private:
     HandleSeq recentlyAddedLinks;
 public:
 
-    static opencog::BaseServer* derivedCreateInstance(void);
+    static opencog::BaseServer* derivedCreateInstance(AtomSpace* as = nullptr);
 
     //! Amount of stimulus to apply across a pattern
     stim_t patternStimulus;

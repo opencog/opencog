@@ -62,7 +62,7 @@ using namespace std;
 #define SHOW_CUE_PATTERN_DELAY 5
 
 // factory method
-BaseServer* HopfieldServer::derivedCreateInstance()
+BaseServer* HopfieldServer::derivedCreateInstance(AtomSpace* as)
 {
     ::logger().debug("[HopfieldServer] createInstance");
     return new HopfieldServer();
