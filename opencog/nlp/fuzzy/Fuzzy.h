@@ -24,7 +24,7 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
-#include <opencog/atomutils/FuzzyMatch.h>
+#include <opencog/atomutils/FuzzyMatchBasic.h>
 
 namespace opencog
 {
@@ -32,25 +32,19 @@ namespace nlp
 {
 
 class Fuzzy :
-    public FuzzyMatch
+    public FuzzyMatchBasic
 {
     public:
         Fuzzy(Type, const HandleSeq&, bool);
         virtual ~Fuzzy();
 
-        std::vector<std::pair<Handle, double>> get_solns(const Handle&);
-
     protected:
-        virtual bool accept_starter(const NodePtr&);
-        virtual void accept_solution(const Handle&);
+        virtual void start_search(const Handle&);
+        virtual bool accept_starter(const Handle&);
+        virtual bool try_match(const Handle&, int);
+        virtual RankedHandleSeq finished_search(void);
 
     private:
-        // The input pattern
-        Handle pattern;
-
-        // All the nodes in the input pattern
-        HandleSeq pat_nodes;
-
         // The type of atom that we want
         Type rtn_type;
 
@@ -61,7 +55,7 @@ class Fuzzy :
         bool dup_check;
 
         // The solutions
-        std::vector<std::pair<Handle, double>> solns;
+        RankedHandleSeq solns;
 
         // A vector for storing the "contents" of the accepted solutions
         // mainly to avoid returning duplicate solutions
