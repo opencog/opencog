@@ -16,6 +16,8 @@
 ; A higher activation would lead to few details and less schematic depth.
 ;
 
+(use-modules (srfi srfi-1))   ; For `remove!`
+
 ; This replaces what was done by the different StimulusUpdaterAgent
 ; If the factor is < 1 then the modulator values will continuesely decrease.
 ; XXX: What is the criteria for choosing the default factor value??

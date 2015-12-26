@@ -1,6 +1,9 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
 (use-modules (rnrs sorting)) ; needed for sorting demands by their values.
+(use-modules (opencog exec))
+
+(load-from-path "openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
 (define (psi-demand-pattern)

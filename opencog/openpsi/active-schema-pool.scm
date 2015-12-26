@@ -1,39 +1,27 @@
-;(load "utilities.scm")
+(use-modules (opencog rule-engine))
+
+(load-from-path "openpsi/demand/updater-rule.scm")
+(load-from-path "openpsi/modulator/updater-rule.scm")
 
 (define psi-active-schema-pool
     (ConceptNode (string-append (psi-prefix-str) "active-schema-pool")))
 
-(InheritanceLink  ; Defining a rule base
-    psi-active-schema-pool
-    (ConceptNode "URE"))
+; Define OpenPsi active-schema-pool as the ure rulebase. The iternation
+; has no effect as all rules are run.
+(define openpsi-rbs (ure-define-rbs psi-active-schema-pool 1))
 
-(ExecutionLink
-    (SchemaNode "URE:maximum-iterations")
-    psi-active-schema-pool
-    (NumberNode "10"))
+; Add default rules
+(ure-add-rule openpsi-rbs "psi-demand-updater-rule"
+    psi-demand-updater-rule 1)
 
-; Reminder : 1. When ure has the capability to forward chain over only a subset
-; of atoms (either defined by ecan or just passed to it) then if a rule doesn't
-; apply it may be removed from asm.
-;            2. openpsi can be thought of one of the levels descibed in
-; https://en.wikipedia.org/wiki/Subsumption_architecture. The dialogue system
-; with it's own pool another. Then there will be a need for a central action
-; selection that ensures that the individual action-selectors associated with
-; each
-; pool don't choose an action that is in conflict with that found in another.
-; The relations between actions could be hard coded or learnt.
-;            3. A rule could be defined to affect a single demand/modulator
-; value. For e.g. a rule that tries
+(ure-add-rule openpsi-rbs "psi-modulator-updater-rule"
+    psi-modulator-updater-rule 1)
 
-(MemberLink (stv 1 1)
-    (Node "psi-demand-updater-rule")
-    psi-active-schema-pool)
-
-(MemberLink (stv 1 1)
-    (Node "psi-modulator-updater-rule")
-    psi-active-schema-pool)
-
+#!
+; the intention is to use atomese to define the function to be used for
+; goal and action selection.
 (DefineLink
     (ConceptNode
         (string-append (psi-prefix-str) "default-asp-goal-selector-gpn"))
     (GroundedPredicateNode "scm: psi-lowest-demand?"))
+!#

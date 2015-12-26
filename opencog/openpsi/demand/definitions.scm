@@ -1,5 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(load-from-path "openpsi/demand/utilities.scm")
+
 ; Define the OpenPsi-Demand Affiliation
 (define-psi-demand "Affiliation" .6 .8 1)
 
