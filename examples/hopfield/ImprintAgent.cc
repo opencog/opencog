@@ -27,7 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -92,6 +92,3 @@ void ImprintAgent::run()
         stimulateAtom( hs->hGrid[i], stimulusAmount * epsilon[i] );
     }
 }
-
-
-

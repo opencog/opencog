@@ -34,7 +34,7 @@
 #include <opencog/dynamics/attention/ImportanceSpreadingAgent.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 #include <opencog/dynamics/attention/ImportanceDiffusionAgent.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/RandGen.h>
 
 #include "StorkeyAgent.h"
@@ -134,11 +134,11 @@ public:
      * @param stimulus amount of stimulus to multiply values in pattern by
      */
     void encodePattern(Pattern pattern, stim_t stimulus);
-    
+
     /** Calculate the total energy of the network.
      *
      * Total energy is calculated from STI values and Hebbian Link weights...
-     * thus the energy is in terms of STI 
+     * thus the energy is in terms of STI
      *
      * @return total energy.
      * @todo implement as an AtomSpace function or AtomTable statistic for total

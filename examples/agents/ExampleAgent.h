@@ -27,9 +27,9 @@
 
 #include <string>
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Module.h>
 
 namespace opencog
 {

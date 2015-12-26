@@ -70,8 +70,8 @@ class CogServer;
  *
  * \code
  * // MyAgent.h
- * #include <opencog/server/Agent.h>
- * #include <opencog/server/Factory.h>
+ * #include <opencog/cogserver/server/Agent.h>
+ * #include <opencog/cogserver/server/Factory.h>
  * class CogServer;
  * class MyAgent : public opencog::Agent {
  *     virtual const ClassInfo& classinfo() const { return info(); }
@@ -88,8 +88,8 @@ class CogServer;
  *
  * // application/module code
  * #include "MyAgent.h"
- * #include <opencog/server/Agent.h>
- * #include <opencog/server/CogServer.h>
+ * #include <opencog/cogserver/server/Agent.h>
+ * #include <opencog/cogserver/server/CogServer.h>
  * ...
  * Factory<MyAgent, Agent> factory;
  * CogServer& cogserver = static_cast<CogServer&>(server());

@@ -210,8 +210,8 @@ class CogServer;
  *
  * @code
  * // MyRequest.h
- * #include <opencog/server/Request.h>
- * #include <opencog/server/Factory.h>
+ * #include <opencog/cogserver/server/Request.h>
+ * #include <opencog/cogserver/server/Factory.h>
  * class CogServer;
  * class MyRequest : public opencog::Request {
  *     static inline const RequestClassInfo& info() {
@@ -238,8 +238,8 @@ class CogServer;
  *
  * // application/module code
  * #include "MyRequest.h"
- * #include <opencog/server/Request.h>
- * #include <opencog/server/CogServer.h>
+ * #include <opencog/cogserver/server/Request.h>
+ * #include <opencog/cogserver/server/CogServer.h>
  * ...
  * Factory<MyRequest, Request> factory;
  * CogServer& cogserver = static_cast<CogServer&>(server());
