@@ -21,9 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/nlp/types/atom_types.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/nlp/types/atom_types.h>
 
 #include "Fuzzy.h"
 
@@ -49,6 +50,11 @@ Fuzzy::~Fuzzy()
 {
 }
 
+void Fuzzy::start_search(const Handle& trg)
+{
+    FuzzyMatchBasic::start_search(trg);
+}
+
 /**
  * Determine whether or not to accept a node as a starter node for fuzzy
  * pattern matching. By default it doesn't allow variables or instances to
@@ -58,10 +64,14 @@ Fuzzy::~Fuzzy()
  * @param np  A NodePtr pointing to a node in the pattern
  * @return    True if the node is accepted, false otherwise
  */
-bool Fuzzy::accept_starter(const NodePtr& np)
+bool Fuzzy::accept_starter(const Handle& hp)
 {
-    return FuzzyMatch::accept_starter(np) and
-       (np->getType() == CONCEPT_NODE or np->getType() == PREDICATE_NODE);
+    NodePtr np(NodeCast(hp));
+    if (nullptr == np) return false;
+
+    return
+       (np->getType() == CONCEPT_NODE or np->getType() == PREDICATE_NODE)
+       and (np->getName().find("@") == std::string::npos);
 }
 
 /**
@@ -77,11 +87,20 @@ bool Fuzzy::accept_starter(const NodePtr& np)
  * @param pat   The pattern
  * @param soln  The potential solution
  */
-void Fuzzy::accept_solution(const Handle& soln)
+bool Fuzzy::try_match(const Handle& soln, int depth)
 {
+    if (target == soln) return false;
+
+    // For some reason, this algo only wnts to compare proposed
+    // solutions that are exactly the same size as the target.
+    // Why? I dunno. Might not a similar tree be slightly bigger or
+    // smaller?  XXX Maybe FIXME ?
+    if (0 < depth) return true;
+    if (0 > depth) return false;
+
     // Check if this is the type of atom that we want
     if (soln->getType() != rtn_type)
-        return;
+        return false;
 
     HandleSeq soln_nodes = get_all_nodes(soln);
 
@@ -90,7 +109,7 @@ void Fuzzy::accept_solution(const Handle& soln)
         [&](Handle& h) {
             return std::find(excl_list.begin(), excl_list.end(), h)
                              != excl_list.end(); }))
-        return;
+        return false;
 
     HandleSeq common_nodes;
     std::sort(soln_nodes.begin(), soln_nodes.end());
@@ -116,7 +135,7 @@ void Fuzzy::accept_solution(const Handle& soln)
         // of the input pattern, or is some related atoms that is generated
         // with the pattern, which is pretty likely not what we want here
         if (NodeCast(common_node)->getName().find("@") != std::string::npos)
-            return;
+            return false;
 
         double weight = 0.25;
 
@@ -128,7 +147,7 @@ void Fuzzy::accept_solution(const Handle& soln)
             if (NodeCast(n)->getName().find("@") == std::string::npos)
                 return false;
 
-            for (const Handle& ll : LinkCast(pattern)->getOutgoingSet()) {
+            for (const Handle& ll : LinkCast(target)->getOutgoingSet()) {
                 if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
                     if ((common_node->getType() == PREDICATE_NODE and
                          ll->getType() == IMPLICATION_LINK) or
@@ -188,13 +207,20 @@ void Fuzzy::accept_solution(const Handle& soln)
                         soln_nodes.end());
 
         if (std::find(solns_contents.begin(), solns_contents.end(), soln_nodes) != solns_contents.end())
-            return;
+            return false;
 
         solns_contents.push_back(soln_nodes);
     }
 
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));
+
+    return false;
+}
+
+HandleSeq Fuzzy::finished_search(void)
+{
+    return HandleSeq();
 }
 
 /**
