@@ -88,7 +88,7 @@ Atom object
                 "attentionvalue": ATTENTIONVALUETYPE,
 	        "truthvalue": {
 	            "type": TRUTHVALUETYPE,
-	            "details": TRUTHVALUEDETAILS 
+	            "details": TRUTHVALUEDETAILS
 	        },
 	        "outgoing": "[ UUID1, UUID2 ... ]",
 	        "incoming": "[ UUID1, UUID2 ... ]"
@@ -201,13 +201,13 @@ float
 Event types
 ===========
 
-The AtomSpace change event publisher binds to Boost Signals2 signals generated 
-by the AtomSpace class. The signals are processed and serialized using a 
+The AtomSpace change event publisher binds to Boost Signals2 signals generated
+by the AtomSpace class. The signals are processed and serialized using a
 multithreaded task scheduler implemented using Intel TBB.
 
 ##### Timestamp
-Each of the following event types contains a **timestamp** field, which provides 
-a timestamp of the atomspace event expressed as a UTC UNIX timestamp of seconds 
+Each of the following event types contains a **timestamp** field, which provides
+a timestamp of the atomspace event expressed as a UTC UNIX timestamp of seconds
 since epoch.
 
 **The following event types are available:**
@@ -379,11 +379,11 @@ For historical purposes, the performance of the previous version was also tested
 
 Benchmark procedure:
 ```
-./opencog/cogserver/server/cogserver
+./opencog/cogserver/server/cogserver -c ../lib/development.conf
 > benchmark-fully-connected reset
 > benchmark-fully-connected concurrent 2000 2
 > shutdown
-./opencog/cogserver/server/cogserver
+./opencog/cogserver/server/cogserver -c ../lib/development.conf
 > publisher-disable-signals
 > benchmark-fully-connected reset
 > benchmark-fully-connected concurrent 2000 2

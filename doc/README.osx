@@ -12,7 +12,7 @@ by editing ~/.profile and specifying
 A dynamic library search path failure will manifest itself with this
 error message:
 
-    ./opencog/cogserver/server/cogserver
+    ./opencog/cogserver/server/cogserver -c ../lib/development.conf
     Searching for config in default locations...
     Found ../lib/opencog.conf
     loaded configuration from file "../lib/opencog.conf"

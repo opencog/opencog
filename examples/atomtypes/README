@@ -13,7 +13,8 @@ The new atom types are loaded into the cogserver when the example module
 is loaded.  To load this module, and use the atom types, do this:
 
 *) Start the cogserver: From a shell prompt, issue the command
-   ./opencog/cogserver/server/cogserver from the build directory
+   ./opencog/cogserver/server/cogserver -c ../lib/development.conf from the
+   build directory
 
 *) Connect to the server: telnet localhost 17001
 
@@ -50,4 +51,3 @@ is loaded.  To load this module, and use the atom types, do this:
    guile>
 
 That's all folks .. the rest is up to you.
-

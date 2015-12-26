@@ -10,7 +10,8 @@ how an agent can be written in C++.
 To test this agent, do the following:
 
 *) Start the cogserver: From a shell prompt, issue the command
-   ./opencog/cogserver/server/cogserver from the build directory
+   ./opencog/cogserver/server/cogserver -c ../lib/development.conf from the
+   build directory
 
 *) Connect to the server: telnet localhost 17001
 
@@ -49,4 +50,3 @@ To test this agent, do the following:
    time that it's run method is called.
 
 That's all folks!  The rest is up to you!
-
