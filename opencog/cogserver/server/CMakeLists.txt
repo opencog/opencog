@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(builtinreqs
 )
 
 INSTALL (TARGETS builtinreqs
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
 
 # ------------------------------------------------------------
 

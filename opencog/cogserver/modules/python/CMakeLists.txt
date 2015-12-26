@@ -23,4 +23,4 @@ TARGET_LINK_LIBRARIES(PythonModule
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
 INSTALL (TARGETS PythonModule DESTINATION
-	"lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules")
+	"lib${LIB_DIR_SUFFIX}/opencog/modules")
