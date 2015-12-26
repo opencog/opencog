@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -94,14 +93,6 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 bool dup_check = false;
 
     Fuzzy fpm(as, rtn_type, excl_list, dup_check);
-
-    HandleSeq terms;
-    terms.push_back(pat);
-
-    std::set<Handle> no_vars;
-
-    PatternLinkPtr slp(createPatternLink(no_vars, terms));
-    slp->satisfy(fpm);
 
     // A vector of solutions sorted in descending order of similarity
     std::vector<std::pair<Handle, double>> solns = fpm.get_solns();
