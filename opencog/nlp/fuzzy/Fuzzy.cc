@@ -202,8 +202,10 @@ void Fuzzy::accept_solution(const Handle& soln)
  *
  * @return  A vector of solutions
  */
-std::vector<std::pair<Handle, double>> Fuzzy::get_solns()
+std::vector<std::pair<Handle, double>> Fuzzy::get_solns(const Handle& pat)
 {
+    perform_search(pat);
+
     // Sort the solutions by their similarity scores
     std::sort(solns.begin(), solns.end(),
         [] (std::pair<Handle, double> s1, std::pair<Handle, double> s2) {
@@ -212,4 +214,3 @@ std::vector<std::pair<Handle, double>> Fuzzy::get_solns()
 
     return solns;
 }
-

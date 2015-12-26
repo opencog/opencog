@@ -95,7 +95,7 @@ bool dup_check = false;
     Fuzzy fpm(as, rtn_type, excl_list, dup_check);
 
     // A vector of solutions sorted in descending order of similarity
-    std::vector<std::pair<Handle, double>> solns = fpm.get_solns();
+    std::vector<std::pair<Handle, double>> solns = fpm.get_solns(pat);
     HandleSeq rtn_solns;
 
     // Create NumberNodes to store the similarity scores, wrap together
