@@ -9,7 +9,7 @@ valgrind --suppressions=../lib/valgrind.guile.suppressions      \
          --suppressions=../lib/valgrind.boost.suppressions      \
          --suppressions=../lib/valgrind.logger.suppressions   <program_to_debug>
 
-where <program_to_debug> is probably opencog/server/cogserver
+where <program_to_debug> is probably opencog/cogserver/server/cogserver
 
 
 Memory leaks:      valgrind --leak-check=full

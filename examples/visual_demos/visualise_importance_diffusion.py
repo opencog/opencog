@@ -51,7 +51,7 @@ def printHeader():
 
     print """loadmodule opencog/ubigraph/libubigraph.so
 ubigraph --compact
-loadmodule opencog/dynamics/attention/libattention.so
+loadmodule opencog/attention/libattention.so
 agents-stop-loop
 agents-start opencog::ImportanceDiffusionAgent
 """

@@ -54,7 +54,7 @@ Run ```socrates_example.py```.
 
 Include the MindAgent as a preloaded module in the cogserver by adding its
 path, ```../opencog/python/pln_old/examples/socrates_demo```, to ```PYTHON_EXTENSION_DIRS```.
-Start the cogserver at ```/opencog/build``` with ```./opencog/server/cogserver```.
+Start the cogserver at ```/opencog/build``` with ```./opencog/cogserver/server/cogserver```.
 Telnet into the cogserver with ```rlwrap telnet localhost 17001```.
 Start the relex server at ```/relex``` with ```./opencog-server-sh```.
 Make sure that the RelEx2Logic output is turned on in ```opencog-server.sh```.

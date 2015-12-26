@@ -113,7 +113,7 @@ needed to develop programs that use the Open Cognition Framework.
 %files server-devel
 %defattr(-,root,root,-)
 %doc LICENSE README
-/%{_includedir}/opencog/server/*
+/%{_includedir}/opencog/cogserver/server/*
 /%{_includedir}/opencog/persist/*
 /%{_datadir}/opencog/cmake
 

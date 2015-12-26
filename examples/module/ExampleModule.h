@@ -26,7 +26,7 @@
 #ifndef _OPENCOG_EXAMPLE_MODULE_H
 #define _OPENCOG_EXAMPLE_MODULE_H
 
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Module.h>
 
 namespace opencog
 {

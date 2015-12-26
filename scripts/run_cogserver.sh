@@ -22,5 +22,5 @@ fi
 
 build_dir="${branch_dir}/${build_dir_name}"
 
-"${build_dir}/opencog/server/cogserver" \
+"${build_dir}/opencog/cogserver/server/cogserver" \
     -c "${branch_dir}/lib/opencog.conf"

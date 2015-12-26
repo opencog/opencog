@@ -35,8 +35,8 @@
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/platform.h>
@@ -59,10 +59,10 @@ using namespace std;
 #define AFTER_SPREAD_DELAY 2
 #define AFTER_RETRIEVAL_DELAY 5
 #define AFTER_IMPRINT_DELAY 2
-#define SHOW_CUE_PATTERN_DELAY 5 
+#define SHOW_CUE_PATTERN_DELAY 5
 
 // factory method
-BaseServer* HopfieldServer::derivedCreateInstance()
+BaseServer* HopfieldServer::derivedCreateInstance(AtomSpace* as)
 {
     ::logger().debug("[HopfieldServer] createInstance");
     return new HopfieldServer();
@@ -78,7 +78,7 @@ float HopfieldServer::totalEnergy()
     for (int j = 1; j < N; j++) {
         for (int i = 0; i < N; i++) {
             if (i==j) continue;
-            
+
             Handle ret(a.get_handle(HEBBIAN_LINK, hGrid[i], hGrid[j]));
             // If no links then skip
             if (NULL == ret) { continue; }
@@ -322,7 +322,7 @@ void HopfieldServer::init(int width, int height, int numLinks)
         ubi = new HopfieldUbigrapher();
     }
 #endif //HAVE_UBIGRAPH
-    
+
     // Create nodes
     for (int i = 0; i < this->width; i++) {
         for (int j = 0; j < this->height; j++) {
@@ -487,7 +487,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
 
     // get all links from key node
     HandleSeq neighbours = get_neighbors(keyHandle,true,true,HEBBIAN_LINK);
-    
+
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
         // check that the position isn't a keyNode
@@ -498,7 +498,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
             // it doesn't, so add it.
             a.add_link(SYMMETRIC_HEBBIAN_LINK, keyHandle, hGrid[i]);
         }
-    
+
     }
     // randomly remove other links from other key nodes if # links > max
     HandleSeq links;
@@ -553,7 +553,7 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
         for (HandleSeq::iterator k=lseq.begin();
                 k < lseq.end() && destH == Handle::UNDEFINED; ++k) {
             if (*k != src) {
-                destH = *k; 
+                destH = *k;
             }
         }
         result[destH] = lh;
@@ -572,7 +572,7 @@ Handle HopfieldServer::findKeyNode()
         // and hopefully quicker way is just to sum the weights * stimulus
         //
         // Also, there is a formula for selection in the glocal paper...
-        
+
         // find closest matching key node (or unused key node)
         HandleSeq::iterator i;
         float maxSim = -1;
@@ -585,7 +585,7 @@ Handle HopfieldServer::findKeyNode()
             for(j = links.begin(); j != links.end(); ++j) {
                 Handle lh = *j;
                 Handle patternH;
-                Type lt = a.get_type(lh); 
+                Type lt = a.get_type(lh);
                 HandleSeq lseq = a.get_outgoing(lh);
                 // get handle at other end of the link
                 // TODO: create AtomSpace utility method that returns a map
@@ -593,10 +593,10 @@ Handle HopfieldServer::findKeyNode()
                 for (HandleSeq::iterator k=lseq.begin();
                         k < lseq.end() && patternH == Handle::UNDEFINED; ++k) {
                     if (*k != iHandle) {
-                        patternH = *k; 
+                        patternH = *k;
                     }
                 }
-                // check type of link 
+                // check type of link
                 if (lt == SYMMETRIC_HEBBIAN_LINK) {
                     sim += a.get_TV(lh)->getMean() * a.get_normalised_STI(patternH,false);
                     break;
@@ -615,7 +615,7 @@ Handle HopfieldServer::findKeyNode()
                 keyHandle = iHandle;
                 maxSim = sim;
             }
-            
+
         }
     } else {
         float minDiff = FLT_MAX;
@@ -626,7 +626,7 @@ Handle HopfieldServer::findKeyNode()
             float diff = 0.0f;
             for (uint j = 0; j < hGrid.size(); j++) {
                 if (hGridKey[j]) continue;
-                
+
                 diff += fabs(ska.h(i,j,w) * a.get_normalised_STI(hGrid[j],false)) +
                     fabs(ska.h(j,i,w) * a.get_normalised_STI(hGrid[i],false));
             }
@@ -678,7 +678,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             //unsigned char endRGB[3] = { 100, 255, 80 };
             ubi->applyStyleToTypeGreaterThan(CONCEPT_NODE, ubi->patternStyle, Ubigrapher::STI, 0.5);
             /*for (int j=0; j < hGrid.size(); j++) {
-                if (pattern[j]) 
+                if (pattern[j])
                     ubi->updateSizeOfHandle(hGrid[j], Ubigrapher::STI, 2.0);
             }*/
         }
@@ -764,7 +764,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 {
 	//int activity;
-	
+
 	// Avoid floating point exception if blank pattern
 	//activity = pattern.activity();
 	//if (activity == 0)
@@ -779,7 +779,7 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 //        getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
 //    }
     // getAtomSpace().setSTI(imprintAgent, patternStimulus);
-    
+
     getAtomSpace().update_STI_funds(-patternStimulus);
 
     AttentionValuePtr old_av = imprintAgent->getAV();
@@ -920,7 +920,7 @@ void HopfieldServer::updateAtomSpaceForRetrieval(int spreadCycles = 1,
 
     logger().info("---Retreive:Spreading Importance %d times", spreadCycles);
     //float temp = 1.0;
-    //-- 
+    //--
     //diffuseAgent->diffuseTemperature = 1.0f;
     //--
     float temp = 30.0;
@@ -929,7 +929,7 @@ void HopfieldServer::updateAtomSpaceForRetrieval(int spreadCycles = 1,
 // Experimenting with some form of self-annealing...
 //        diffuseAgent->setMaxSpreadPercentage(temp);
 //        cout << "set max spread \% to " << temp << endl;
-//--        
+//--
 //        diffuseAgent->diffuseTemperature *= (spreadCycles - i)/( (float) spreadCycles + 1 );
 //--
         diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,temp);
@@ -969,7 +969,7 @@ void HopfieldServer::printStatus()
     std::vector<stim_t> nodeStim = getGridStimVector();
 
     int i;
-	
+
 
     int col;
     if (!options->verboseLevel) return;
@@ -1007,7 +1007,7 @@ std::string HopfieldServer::printMatrixResult(std::vector< Pattern > patterns)
                 else if (j == (patterns.size()-1) &&
                         current[index] != patterns[0][index])
                     printf(" X");
-                else 
+                else
                     printf("%2d", current[i*width + col]);
             }
             if (j != (patterns.size() - 1)) cout << " | ";
@@ -1025,7 +1025,7 @@ void HopfieldServer::printLinks()
 
     // Get all atoms (and subtypes) of type t
     getAtomSpace().get_handles_by_type(out_hi, LINK, true);
-    // For each, get prop, scale... and 
+    // For each, get prop, scale... and
 //    for (Handle h: hs) {
 //        cout << getAtomSpace->atomAsString(h) << endl;
 //    }

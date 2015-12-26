@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/ImprintAgent.cc
+ * opencog/attention/ImprintAgent.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -27,7 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -92,6 +92,3 @@ void ImprintAgent::run()
         stimulateAtom( hs->hGrid[i], stimulusAmount * epsilon[i] );
     }
 }
-
-
-

@@ -183,14 +183,14 @@ void testHopfieldNetworkPalimpsestNeighbours()
 
             foreach (bool b, stableBit) {
             //    cout << b << " ";
-                if (b) rSim += 1; 
+                if (b) rSim += 1;
             }
             //cout << endl;
             rSim /= stableBit.size();
             //cout << "rSim = " << rSim << endl;
 
             //logger().debug(" Similarity %.2f ( diff: %.2f )", rSim, rSim - patterns[j].hammingSimilarity(cuePatterns[j]));
-            
+
             if ( rSim < 1) {
                 break;
             }
@@ -262,7 +262,7 @@ void testHopfieldNetworkPalimpsest()
             cycleResults.push_back(rSim);
 
             logger().debug(" Similarity %.2f ( diff: %.2f )", rSim, rSim - patterns[j].hammingSimilarity(cuePatterns[j]));
-            
+
             if ( (rSim * 100) < (100 - o->palimpsestTolerance) ) break;
             memory++;
 
@@ -399,4 +399,3 @@ void testHopfieldNetworkRolling()
     }
 
 }
-

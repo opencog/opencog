@@ -60,7 +60,7 @@ class ViterbiUTest: public CxxTest::TestSuite
 			// Load the required data
 			config().set("MODULES",
 				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/modules/libQueryModule.so");
+				"opencog/cogserver/modules/libQueryModule.so");
 
 			cogserver().loadModules();
 

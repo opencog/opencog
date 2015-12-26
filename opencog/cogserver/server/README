@@ -7,7 +7,7 @@ The CogServer provides a simple network shell server interface to the
 various functions in the opencog system.
 
 To access the shell server, build everything and execute 
-bin/opencog/server/cogserver.  From another terminal, run 
+bin/opencog/cogserver/server/cogserver.  From another terminal, run 
 "telnet localhost 17001"; this will connect to the shell.
 Alternately, "netcat localhost 17001" can be used. Long or
 complex sequences of commands may be loaded by saying

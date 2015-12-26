@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/StorkeyAgent.cc
+ * opencog/attention/StorkeyAgent.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -28,11 +28,11 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/atom_types.h>
 
 #include "HopfieldServer.h"
 
@@ -285,5 +285,3 @@ void StorkeyAgent::storkeyUpdate()
 
 
 }
-
-

@@ -122,7 +122,7 @@ Running the server
 ------------------
 The cogserver provides a network server interface to the various
 components and agents.  After building everything, change directory
-to your `opencog/build` folder and execute `opencog/server/cogserver`.
+to your `opencog/build` folder and execute `opencog/cogserver/server/cogserver`.
 Then, from another terminal, run `rlwrap telnet localhost 17001`
 The `help` command will list all of the other available commands.
 Notable among these are teh commands to attach to a (Postgres) database,

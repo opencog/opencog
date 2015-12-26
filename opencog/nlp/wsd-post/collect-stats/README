@@ -19,7 +19,7 @@ Steps to run WSD:  (See also detailed instuctions in main NLP readme)
    stats-collection.scm to suit.
 2) create the tables by running src/sql/disjunct.sql from the 
    lexat package.
-3) Start opencog: opencog/server/cogserver -c ../lib/opencog-wsd.conf
+3) Start opencog: opencog/cogserver/server/cogserver -c ../lib/opencog-wsd.conf
 4) telnet localhost 17001 
 5) sql-load, sql-close to load up word-sense hypergraphs
 6) go to the scheme shell.

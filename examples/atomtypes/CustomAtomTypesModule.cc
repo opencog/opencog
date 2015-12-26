@@ -26,7 +26,7 @@
 
 #include <time.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 #include "CustomAtomTypesTester.h"

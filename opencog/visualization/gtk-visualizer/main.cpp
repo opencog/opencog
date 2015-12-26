@@ -58,7 +58,7 @@
 		cmake ..
 		make -k (skip things that can't be compiled)
 	-launch cogserver
-		cd $HOME/ochack; bin/opencog/server/cogserver -c lib/opencog.conf
+		cd $HOME/ochack; bin/opencog/cogserver/server/cogserver -c lib/opencog.conf
    	-location of schema file
    	 	~/ochack/opencog/scm/febcorpus_updated.scm
 	-telnet to cogserver

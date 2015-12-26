@@ -25,9 +25,9 @@
 #ifndef DISTRIBUTEDPATTERNMINERSERVER_H
 #define DISTRIBUTEDPATTERNMINERSERVER_H
 
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/Module.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
 using namespace opencog::PatternMining;

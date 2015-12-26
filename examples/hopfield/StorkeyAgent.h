@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/server/Agent.h>
+#include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 
 #include "Pattern.h"
@@ -42,7 +42,7 @@ class CogServer;
  *
  * Only supports SYMMETRIC_HEBBIAN_LINKs and SYMMETRIC_INVERSE_HEBBIAN_LINKs.
  * If other Hebbian links exist, they are ignored.
- * 
+ *
  */
 class StorkeyAgent : public Agent
 {

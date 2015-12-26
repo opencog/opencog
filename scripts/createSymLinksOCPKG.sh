@@ -95,17 +95,17 @@ if ! [ -z $GITROOT ]; then
 		echo "Creating folders for symbolic links..."
 
 		# Let's create the folders first
-		mkdir -p bin/opencog/server
+		mkdir -p bin/opencog/cogserver/server
 		mkdir -p bin/opencog/persist/sql
 		mkdir -p bin/opencog/query
-		mkdir -p bin/opencog/shell
+		mkdir -p bin/opencog/cogserver/shell
 		mkdir -p bin/opencog/web
 		mkdir -p bin/opencog/learning/dimensionalembedding
 		mkdir -p bin/opencog/cython
 		mkdir -p bin/opencog/util
 		mkdir -p bin/opencog/nlp/types
 #		mkdir -p bin/opencog/viterbi
-		mkdir -p bin/opencog/dynamics/attention
+		mkdir -p bin/opencog/attention
 		mkdir -p bin/opencog/atomspace
 		mkdir -p bin/opencog/spacetime
 
@@ -113,7 +113,7 @@ if ! [ -z $GITROOT ]; then
 
 		# And then the symbolic links
 		# BUILDROOT = /tmp/opencog/build
-		# ln -s ../../../../build/opencog/server/cogserver bin/opencog/server/cogserver
+		# ln -s ../../../../build/opencog/cogserver/server/cogserver bin/opencog/cogserver/server/cogserver
 
 		#echo "GITROOT=$GITROOT"			
 
@@ -132,12 +132,12 @@ if ! [ -z $GITROOT ]; then
 
 		ln -s $BUILDROOT/opencog/scm/core_types.scm bin/opencog/scm/core_types.scm
 
-		ln -s $BUILDROOT/opencog/server/cogserver bin/opencog/server/cogserver
-		ln -s $BUILDROOT/opencog/server/libbuiltinreqs.so bin/opencog/server/libbuiltinreqs.so
+		ln -s $BUILDROOT/opencog/cogserver/server/cogserver bin/opencog/cogserver/server/cogserver
+		ln -s $BUILDROOT/opencog/cogserver/server/libbuiltinreqs.so bin/opencog/cogserver/server/libbuiltinreqs.so
 		ln -s $BUILDROOT/opencog/persist/sql/libpersist.so bin/opencog/persist/sql/libpersist.so
 		ln -s $BUILDROOT/opencog/query/libquery.so bin/opencog/query/libquery.so
-		ln -s $BUILDROOT/opencog/shell/libscheme-shell.so bin/opencog/shell/libscheme-shell.so
-		ln -s $BUILDROOT/opencog/shell/libpy-shell.so bin/opencog/shell/libpy-shell.so
+		ln -s $BUILDROOT/opencog/cogserver/shell/libscheme-shell.so bin/opencog/cogserver/shell/libscheme-shell.so
+		ln -s $BUILDROOT/opencog/cogserver/shell/libpy-shell.so bin/opencog/cogserver/shell/libpy-shell.so
 		ln -s $BUILDROOT/opencog/web/libocweb.so bin/opencog/web/libocweb.so
 
 
@@ -151,8 +151,8 @@ if ! [ -z $GITROOT ]; then
 		ln -s $BUILDROOT/opencog/nlp/types/nlp_types.scm bin/opencog/nlp/types/nlp_types.scm
 
 #		ln -s $BUILDROOT/opencog/viterbi/libviterbi.so bin/opencog/viterbi/libviterbi.so
-		ln -s $BUILDROOT/opencog/dynamics/attention/libattention.so bin/opencog/dynamics/attention/libattention.so
-		ln -s $BUILDROOT/opencog/dynamics/attention/attention_types.scm bin/opencog/dynamics/attention/attention_types.scm
+		ln -s $BUILDROOT/opencog/attention/libattention.so bin/opencog/attention/libattention.so
+		ln -s $BUILDROOT/opencog/attention/attention_types.scm bin/opencog/attention/attention_types.scm
 
 		echo "Symbolic link creation complete!"
 	fi

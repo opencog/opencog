@@ -83,8 +83,8 @@ void SuRealUTest::setUp(void)
     // Load the required data
     config().set("MODULES",
                  "opencog/nlp/types/libnlp-types.so,"
-                 "opencog/modules/libLGDictModule.so,"
-                 "opencog/modules/libSuRealModule.so");
+                 "opencog/cogserver/modules/libLGDictModule.so,"
+                 "opencog/cogserver/modules/libSuRealModule.so");
 
     cogserver().loadModules();
 

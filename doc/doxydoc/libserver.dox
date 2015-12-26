@@ -3,7 +3,7 @@ namespace opencog {
 
 \page libserver server library
 
-This library (<em>opencog/server</em>) is the active core of the project.
+This library (<em>opencog/cogserver/server</em>) is the active core of the project.
 It is used by \ref progcogserver "cogserver" program to do most
 of its functions.  To build it use:
 @code
@@ -167,7 +167,7 @@ ignored by doxygen; used as markers for update-links.py;
 /**
 \defgroup grp_server server library
 
-This library (<em>opencog/server</em>) is the active core of the project.
+This library (<em>opencog/cogserver/server</em>) is the active core of the project.
 It is used by \ref progcogserver "cogserver" program to do most
 of its functions.  To build it use:
 @code
