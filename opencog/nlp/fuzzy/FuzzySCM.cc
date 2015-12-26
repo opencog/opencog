@@ -92,7 +92,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 
 bool dup_check = false;
 
-    Fuzzy fpm(as, rtn_type, excl_list, dup_check);
+    Fuzzy fpm(rtn_type, excl_list, dup_check);
 
     // A vector of solutions sorted in descending order of similarity
     std::vector<std::pair<Handle, double>> solns = fpm.get_solns(pat);

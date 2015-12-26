@@ -35,10 +35,10 @@ class Fuzzy :
     public FuzzyMatch
 {
     public:
-        Fuzzy(AtomSpace*, Type, const HandleSeq&, bool);
-        ~Fuzzy();
+        Fuzzy(Type, const HandleSeq&, bool);
+        virtual ~Fuzzy();
 
-        std::vector<std::pair<Handle, double>> get_solns();
+        std::vector<std::pair<Handle, double>> get_solns(const Handle&);
 
     protected:
         virtual bool accept_starter(const NodePtr&);

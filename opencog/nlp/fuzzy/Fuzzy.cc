@@ -38,7 +38,7 @@ using namespace opencog;
  * @param ll  A list of atoms that we don't want them to exist in the results
  * @param dd  A flag indicating if duplicate solns should be returned
  */
-Fuzzy::Fuzzy(AtomSpace* as, Type tt, const HandleSeq& ll, bool dd) :
+Fuzzy::Fuzzy(Type tt, const HandleSeq& ll, bool dd) :
     rtn_type(tt),
     excl_list(ll),
     dup_check(dd)
