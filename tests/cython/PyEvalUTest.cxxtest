@@ -82,7 +82,7 @@ public:
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
 
-        config().set("MODULES", "opencog/shell/libpy-shell.so");
+        config().set("MODULES", "opencog/cogserver/shell/libpy-shell.so");
         cogserver.loadModules();
     }
 

@@ -1,5 +1,5 @@
 /*
- * opencog/dynamics/attention/StorkeyAgent.cc
+ * opencog/attention/StorkeyAgent.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * Written by Joel Pitt <joel@fruitionnz.com>

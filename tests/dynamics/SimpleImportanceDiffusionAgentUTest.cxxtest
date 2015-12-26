@@ -56,7 +56,7 @@ public:
         load_scm_files_from_config(*as);
         
         config().set("MODULES",
-            "opencog/dynamics/attention/libattention.so");
+            "opencog/attention/libattention.so");
         
         cogserver().loadModules();
         

@@ -13,7 +13,7 @@ This directory provides an example of a very basic module.
 To test this module, do the following:
 
 *) Start the cogserver: From a shell prompt, issue the command
-   ./opencog/server/cogserver from the build directory
+   ./opencog/cogserver/server/cogserver from the build directory
 
 *) Connect to the server: telnet localhost 17001
 

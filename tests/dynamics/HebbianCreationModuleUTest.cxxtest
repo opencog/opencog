@@ -62,7 +62,7 @@ public:
         }
 
         config().set("MODULES",
-                     "opencog/dynamics/attention/libhebbiancreation.so");
+                     "opencog/attention/libhebbiancreation.so");
 
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));

@@ -379,11 +379,11 @@ For historical purposes, the performance of the previous version was also tested
 
 Benchmark procedure:
 ```
-./opencog/server/cogserver
+./opencog/cogserver/server/cogserver
 > benchmark-fully-connected reset
 > benchmark-fully-connected concurrent 2000 2
 > shutdown
-./opencog/server/cogserver
+./opencog/cogserver/server/cogserver
 > publisher-disable-signals
 > benchmark-fully-connected reset
 > benchmark-fully-connected concurrent 2000 2

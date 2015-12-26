@@ -9,7 +9,7 @@ bin
 bin-debug
 build
 build-debug
-opencog/server/cogserver
+opencog/cogserver/server/cogserver
 opencog/atomspace/type-definer
 opencog/persist/sniff
 examples/extending/derivedserver

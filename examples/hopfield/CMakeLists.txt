@@ -5,7 +5,7 @@ LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/atomspace
 	${PROJECT_BINARY_DIR}/opencog/truthvalue
 	${PROJECT_BINARY_DIR}/opencog/cogserver/server
-	${PROJECT_BINARY_DIR}/opencog/dynamics/attention
+	${PROJECT_BINARY_DIR}/opencog/attention
 )
 
 # The atom_types.h file is written to the build directory

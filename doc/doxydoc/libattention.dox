@@ -3,7 +3,7 @@ namespace opencog {
 
 \page libattention attention library
 
-The library (<em>opencog/dynamics/attention</em>) carry out the functions required for attention
+The library (<em>opencog/attention</em>) carry out the functions required for attention
 allocation among atoms within OpenCog.
 To build it, use:
 @code
@@ -56,7 +56,7 @@ ignored by doxygen; used as markers for update-links.py;
 /**
 \defgroup grp_attention attention library
 
-This library (<em>opencog/dynamics/attention</em>) carry out the functions required for attention
+This library (<em>opencog/attention</em>) carry out the functions required for attention
 allocation among atoms within OpenCog.
 To build it type:
 @code

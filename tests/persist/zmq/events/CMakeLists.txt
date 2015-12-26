@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES (
 )
 
 LINK_DIRECTORIES(
-	${PROJECT_BINARY_DIR}/opencog/server
+	${PROJECT_BINARY_DIR}/opencog/cogserver/server
 	${TBB_INCLUDE_DIR}
 	${TBB_LIBRARY_DIRS}
 )
