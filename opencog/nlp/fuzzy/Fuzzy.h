@@ -38,13 +38,11 @@ class Fuzzy :
         Fuzzy(Type, const HandleSeq&, bool);
         virtual ~Fuzzy();
 
-        std::vector<std::pair<Handle, double>> get_solns(const Handle&);
-
     protected:
         virtual void start_search(const Handle&);
         virtual bool accept_starter(const Handle&);
         virtual bool try_match(const Handle&, int);
-        virtual HandleSeq finished_search(void);
+        virtual RankedHandleSeq finished_search(void);
 
     private:
         // The type of atom that we want
@@ -57,7 +55,7 @@ class Fuzzy :
         bool dup_check;
 
         // The solutions
-        std::vector<std::pair<Handle, double>> solns;
+        RankedHandleSeq solns;
 
         // A vector for storing the "contents" of the accepted solutions
         // mainly to avoid returning duplicate solutions

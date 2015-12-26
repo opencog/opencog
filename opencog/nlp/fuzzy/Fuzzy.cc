@@ -218,20 +218,14 @@ bool Fuzzy::try_match(const Handle& soln, int depth)
     return false;
 }
 
-HandleSeq Fuzzy::finished_search(void)
-{
-    return HandleSeq();
-}
-
 /**
- * Get method for getting the solutions sorted in descending order of similarity.
+ * Get method for getting the solutions sorted in descending order
+ * of similarity.
  *
  * @return  A vector of solutions
  */
-std::vector<std::pair<Handle, double>> Fuzzy::get_solns(const Handle& pat)
+RankedHandleSeq Fuzzy::finished_search(void)
 {
-    perform_search(pat);
-
     // Sort the solutions by their similarity scores
     std::sort(solns.begin(), solns.end(),
         [] (std::pair<Handle, double> s1, std::pair<Handle, double> s2) {
