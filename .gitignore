@@ -78,7 +78,6 @@ GTAGS
 patches
 
 cscope.out
-lib/opencog-test.conf
 # opencog/embodiment/embodiment.conf
 # opencog/embodiment/dev_embodiment.conf
 
