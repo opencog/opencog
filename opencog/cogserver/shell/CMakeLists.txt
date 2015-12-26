@@ -39,11 +39,11 @@ TARGET_LINK_LIBRARIES(scheme-shell
 
 IF (HAVE_CYTHON)
 	INSTALL (TARGETS py-shell
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules")
 ENDIF (HAVE_CYTHON)
 
 INSTALL (TARGETS scheme-shell
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules")
 
 INSTALL (FILES
 	GenericShell.h

@@ -21,7 +21,7 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	TARGET_LINK_LIBRARIES (LGDictModule lg-dict server)
 
 	INSTALL (TARGETS LGDictModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 	)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
@@ -34,7 +34,7 @@ TARGET_LINK_LIBRARIES(QueryModule
 )
 
 INSTALL (TARGETS QueryModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 )
 # ----------------------------------------
 # The SQL persistence module
@@ -50,7 +50,7 @@ IF (HAVE_PERSIST_SQL)
 	)
 
 	INSTALL (TARGETS PersistModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 	)
 ENDIF (HAVE_PERSIST_SQL)
 
@@ -68,7 +68,7 @@ IF (HAVE_ZMQ AND HAVE_PROTOBUF)
 	)
 	
 	INSTALL (TARGETS PersistZmqModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 	)
 	
 ENDIF (HAVE_ZMQ AND HAVE_PROTOBUF)
@@ -85,7 +85,7 @@ TARGET_LINK_LIBRARIES(RuleEngineModule
 )
 
 INSTALL (TARGETS RuleEngineModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 )
 # ----------------------------------------
 # Surface realization cogserver module
@@ -104,6 +104,6 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	)
 
 	INSTALL (TARGETS SuRealModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules"
 	)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)

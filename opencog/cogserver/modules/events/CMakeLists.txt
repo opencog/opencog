@@ -25,4 +25,4 @@ TARGET_LINK_LIBRARIES(atomspacepublishermodule
 )
 
 INSTALL (TARGETS atomspacepublishermodule
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/cogserver/modules")

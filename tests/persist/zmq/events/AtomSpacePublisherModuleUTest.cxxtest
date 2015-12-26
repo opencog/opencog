@@ -74,8 +74,8 @@ public:
         url = "tcp://localhost:" + config()["ZMQ_EVENT_PORT"];
 
         config().set("MODULES",
-                     "opencog/modules/events/libatomspacepublishermodule.so");
-        
+                     "opencog/cogserver/modules/events/libatomspacepublishermodule.so");
+
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
@@ -87,7 +87,7 @@ public:
     void testAtomSpaceEvents(void)
     {
         InitCogServer();
-        
+
         //  Prepare the ZeroMQ event subscribers
         zmq::context_t context(1);
         zmq::socket_t subscriberAdd (context, ZMQ_SUB);
@@ -113,7 +113,7 @@ public:
 
         // Wait for the subscribers to initialize to avoid the 'slow joiner' syndrome
         sleep(5);
-        
+
         std::stringstream ss;
         std::string handle;
         ptree pt;
@@ -141,7 +141,7 @@ public:
 
         ptAtom = pt.get_child("atom");
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'add' event
         TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
         TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
@@ -169,7 +169,7 @@ public:
         ptTVOld = pt.get_child("tvOld");
         ptTVNew = pt.get_child("tvNew");
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'tvChanged' event
         TS_ASSERT(handle == std::to_string(h.value()));
 
@@ -206,7 +206,7 @@ public:
         ptAVOld = pt.get_child("avOld");
         ptAVNew = pt.get_child("avNew");
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'avChanged' event
         TS_ASSERT(handle == std::to_string(h.value()))
 
@@ -243,7 +243,7 @@ public:
         ptAVOld = pt.get_child("avOld");
         ptAVNew = pt.get_child("avNew");
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'addAF' event
         TS_ASSERT(handle == std::to_string(h.value()))
 
@@ -279,7 +279,7 @@ public:
         ptAVOld = pt.get_child("avOld");
         ptAVNew = pt.get_child("avNew");
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'removeAF' event
         TS_ASSERT(handle == std::to_string(h.value()))
 
@@ -310,7 +310,7 @@ public:
         address = s_recv (subscriberRemove);
         contents = s_recv (subscriberRemove);
 
-        // Assert that the subscriber socket received the properly formatted 
+        // Assert that the subscriber socket received the properly formatted
         // atomspace 'remove' event
         TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
         TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
@@ -321,7 +321,7 @@ public:
                         ("truthvalue.details.count", 0), 7.1, precision);
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "900");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
-        
+
         // Shutdown ZeroMQ
         subscriberAdd.close();
         subscriberRemove.close();
