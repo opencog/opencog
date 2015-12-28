@@ -17,14 +17,13 @@
 )
 
 ; --------------------------------------------------------------
-;
 ; Fuzzy logic related functions
-;
-
+; --------------------------------------------------------------
 ; Return the probability of x equals to t (the target number)
 ; fuzzy_equal(x,t,a) = 1/(1+a(x-t)^2)
 ; a is the  parameter, the bigger a, the closer to crisp set
-; After plotting via gnuplot for a while, it seems for t falls in [0,1], a=100 is a good choice
+; After plotting via gnuplot for a while, it seems for t falls in [0,1], a=100
+; is a good choice
 (define (fuzzy_equal x t a)
     (/ 1
         (+ 1
@@ -33,7 +32,7 @@
     )
 )
 
-; Ruturn the probability x falls in [min, max]
+; Return the probability x falls in [min, max]
 ; a is the parameter, the bigger a, the closer to crisp set
 ; For x falls in [0,1], a=100 seems a good choice
 (define (fuzzy_within x min_value max_value a)
@@ -146,10 +145,9 @@
     )
 )
 
-; --------------------------------------------------------------;
+; --------------------------------------------------------------
 ; Miscellaneous
-;
-
+; --------------------------------------------------------------
 ; Return a random member of the given list,
 ; return an empty list, if the given list is empty.
 (define (random_select selection_list)
@@ -210,6 +208,7 @@
     "OpenPsi: "
 )
 
+; --------------------------------------------------------------
 (define (psi-suffix-str a-string)
 "
   Returns the suffix of that follows `psi-prefix-str` sub-string.
@@ -297,6 +296,8 @@
     (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
         (error "Expected DefinedPredicateNode got: " gpn))
 
+    ; TODO: 1. deal with multiple returns
+    ;       2. check if the demadns have ben correctly tagged  instead add psi-register-goal-selector
     (get-demand)
 )
 
@@ -367,8 +368,6 @@
   Select the actions that should be added to the active-schema-pool depending
   on the present goal, by using the plan choosen by the GroundedPredicateNode.
 
-  XXX should it modify the member action-rules of the active-schema-pool.
-
   demand-node:
     - A ConceptNode that represents a demand
 
@@ -381,9 +380,26 @@
     ; isn't being used now thus each plan is in effect a single action choosen,
     ; this has to be improved but is good for starters.
 
+    ; Check arguments
+    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " gpn))
 
-    ;(psi-get-actions demand-node gpn)
-    (display "WIP")
+    (cog-outgoing-set (cog-execute!
+        (GetLink
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "Node"))
+             (AndLink
+                 (EvaluationLink
+                     gpn
+                     (ListLink  (VariableNode "x")))
+                 (MemberLink
+                     (VariableNode "x")
+                     demand-node)
+                 (InheritanceLink
+                     (VariableNode "x")
+                     (ConceptNode "opencog: action"))))
+    ))
 )
 
 ; --------------------------------------------------------------
