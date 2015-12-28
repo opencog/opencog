@@ -1,5 +1,6 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(use-modules (ice-9 optargs)) ; for optional arguments in define-psi-demand
 (use-modules (rnrs sorting)) ; needed for sorting demands by their values.
 (use-modules (opencog exec) (opencog rule-engine))
 
@@ -41,16 +42,10 @@
             ; This is equivalent to an in-born drive/goal. When
             ; the value goes out of range then urge occurs
             (EvaluationLink
-                (PredicateNode "must_have_value_within")
+                (PredicateNode (string-append (psi-prefix-str) "default_value"))
                 (ListLink
                     (VariableNode "Demand")
-                    (VariableNode "min_acceptable_value")
-                    (VariableNode "max_acceptable_value")))
-            (EvaluationLink
-                (PredicateNode (string-append (psi-prefix-str) "acts-on"))
-                (ListLink
-                    (GroundedSchemaNode "scm: psi-demand-updater")
-                    (VariableNode "Demand")))))
+                    (VariableNode "default_value")))))
     (acons "pat" dpn z-alist)
 )
 
@@ -67,27 +62,22 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (define-psi-demand  demand-name default-value
-                                   min-value max-value)
+(define-public (define-psi-demand  demand-name default-value default-action)
 "
-  Define an OpenPsi demand. By default an in-born drive/action that aims to
-  maintain the goal of keeping the demand-value within the given range is
-  defined.
+  Define an OpenPsi demand, that will have a default behavior defined by the
+  the action passed.
 
   demand-name:
-    - The name of the demand that is created.
+  - The name of the demand that is created.
 
   default-value:
-    - The initial demand-value. This is the strength of the demand's
-      ConceptNode stv. The confidence of the stv is always 1.
+  - The initial demand-value. This is the strength of the demand's
+    ConceptNode stv. The confidence of the stv is always 1.
 
-  min-value:
-    - The minimum acceptable demand-value. On going lower tha
-
-  max-value:
-    - The maximum acceptable demand-value.
-
+  default-action:
+  - The default action that modifies the demand-value.
 "
+
     (let* ((demand-str (string-append (psi-prefix-str) demand-name))
            (demand-node (ConceptNode demand-str (stv default-value 1))))
         (begin
@@ -98,11 +88,10 @@
 
             ; This is the goal of the demand
             (EvaluationLink
-                (PredicateNode "must_have_value_within")
+                (PredicateNode (string-append (psi-prefix-str) "default_value"))
                 (ListLink
                     demand-node
-                    (NumberNode min-value)
-                    (NumberNode max-value)
+                    (NumberNode default-value)
                 )
             )
 
@@ -115,6 +104,13 @@
                 )
             )
 
+            ; Add the default action. URE uses BindLinks for rules so action
+            (define-psi-action
+                (assoc-ref (psi-demand-pattern) "var")
+                (assoc-ref (psi-demand-pattern) "pat")
+                default-action
+                demand-name
+                "Default")
             ; Each demand is also a rulebase
             (ure-define-rbs demand-node 1)
         )
@@ -165,6 +161,24 @@
 )
 
 ; --------------------------------------------------------------
+(define (psi-action-types)
+"
+  Returns a list of the default action types, that are used to describe how
+  an action affects the demands it is associated with. The availabe action
+  types are,
+
+  Increase: increases the demand-value.
+  Decrease: decreases the demand-value.
+  Default: depends on the default-action associated with it. And is used
+           to define how the demand-value should change independent of context.
+
+"
+    ; NOTE: Update psi-update-asp and psi-get-all-actions
+    ; when adding other effect types.
+    (list "Increase" "Decrease" "Default")
+)
+
+; --------------------------------------------------------------
 (define (define-psi-action vars context action demand-name effect-type)
 "
   It associates an action and context in which the action has to be taken
@@ -205,7 +219,7 @@
 
   effect-type:
     - A string that describes the effect the particualr action would have on
-      the demand value. The only options are `Increase` and `Decrease`.
+      the demand value. See `(psi-action-types)` for available options.
 
 "
     (define rule-name-prefix
@@ -251,9 +265,10 @@
         (error "Expected second argument to be a list, got: " context))
     (if (not (cog-atom? action))
         (error "Expected third argument to be an atom, got: " action))
-    (if (not (member effect-type (list "Increase" "Decrease")))
-        (error (string-append "Expected fourth argument to be either"
-            "`Increase` or `Decrease` got: ") effect-type))
+    (if (not (member effect-type (psi-action-types)))
+        (error (string-append "Expected fourth argument to be one of the "
+            "action types listed when running `(psi-action-types)`, got: ")
+            effect-type))
 
     ; Check if the rule has already been defined as a member of
     ; TODO: this needs improvement not exaustive enough, it isn't considering
@@ -279,12 +294,13 @@
 
   effect-type:
     - A string that describes the effect the particualr action would have on
-      the demand value. The only options are `Increase` and `Decrease`.
+      the demand value. See `(psi-action-types)` for available options.
 "
     ; Check arguments
-    (if (not (member effect-type (list "Increase" "Decrease")))
-        (error (string-append "Expected second argument to be either"
-            "`Increase` or `Decrease` got: ") effect-type))
+    (if (not (member effect-type (psi-action-types)))
+        (error (string-append "Expected fourth argument to be one of the "
+            "action types listed when running `(psi-action-types)`, got: ")
+            effect-type))
 
     (cog-outgoing-set (cog-execute!
         (GetLink

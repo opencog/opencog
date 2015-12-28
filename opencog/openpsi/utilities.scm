@@ -379,8 +379,9 @@
 (define (psi-update-asp asp actions)
 "
   It modifies the member action-rules of OpenPsi's active-schema-pool(asp),
-  by removing all actions that are members of the known demand
-  rule-bases from the asp and replaces them by the list of actions passed.
+  by removing all actions that are members of the known demand rule-bases,
+  with the exception of default-actions, from the asp and replaces them by the
+  list of actions passed.
 
   asp:
   - The ConceptNode for the active-schema-pool.
