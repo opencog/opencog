@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -207,8 +207,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
 
             // get the NumberNodes from the WordSequenceLinks
-            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
             // compare their word sequences
             return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
@@ -226,8 +226,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
 
             // get the NumberNodes from the WordSequenceLinks
-            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
             // compare their word sequences
             return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
@@ -264,12 +264,13 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         // disjuncts of the hPatWordNode
         HandleSeq qDisjuncts;
 
-        // check if we got the disjuncts of the hPatWordNode already, otherwise
-        // store them in a map so that we only need to do this disjuncts-getting procedure once
+        // check if we got the disjuncts of the hPatWordNode already,
+        // otherwise store them in a map so that we only need to do
+        // this disjuncts-getting procedure once
         auto iter = m_disjuncts.find(hPatWordNode);
         if (iter == m_disjuncts.end())
         {
-            HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+            HandleSeq qOr = get_target_neighbors(hPatWordNode, LG_WORD_CSET);
 
             auto insertHelper = [&](const Handle& h)
             {
@@ -443,7 +444,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // get the R2L-SetLinks that are related to these InterpretationNodes
     for (Handle& hItprNode : qItprNode)
     {
-        HandleSeq qN = get_neighbors(hItprNode, false, true, REFERENCE_LINK, false);
+        HandleSeq qN = get_target_neighbors(hItprNode, REFERENCE_LINK);
         qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qN.end());
 
         // just in case... make sure all the pred_solns exist in the SetLink
@@ -479,7 +480,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         //     WordInstanceNode "water@123"
         auto checker = [] (Handle& h)
         {
-            HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
+            HandleSeq qN = get_target_neighbors(h, REFERENCE_LINK);
             return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
         };
 

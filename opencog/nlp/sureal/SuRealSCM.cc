@@ -22,8 +22,8 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -149,7 +149,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
 
         // if no LG dictionary entry
-        if (get_neighbors(hWordNode, false, true, LG_WORD_CSET, false).empty())
+        if (get_target_neighbors(hWordNode, LG_WORD_CSET).empty())
             continue;
 
         sVars.insert(n);
@@ -171,8 +171,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     auto itprComp = [&pAS](const Handle& hi, const Handle& hj)
     {
         // get the corresponding SetLink
-        HandleSeq qi = get_neighbors(hi, false, true, REFERENCE_LINK, false);
-        HandleSeq qj = get_neighbors(hj, false, true, REFERENCE_LINK, false);
+        HandleSeq qi = get_target_neighbors(hi, REFERENCE_LINK);
+        HandleSeq qj = get_target_neighbors(hj, REFERENCE_LINK);
         qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
         qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
 

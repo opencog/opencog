@@ -22,8 +22,8 @@
  */
 
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "Fuzzy.h"
@@ -74,6 +74,19 @@ bool Fuzzy::accept_starter(const Handle& hp)
        and (np->getName().find("@") == std::string::npos);
 }
 
+static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+{
+   LinkPtr lll(LinkCast(h));
+   if (nullptr == lll)
+   {
+      node_list.emplace_back(h);
+      return;
+   }
+
+   for (const Handle& o : lll->getOutgoingSet())
+      get_all_nodes(o, node_list);
+}
+
 /**
  * Determine whether or not to accept a potential solution found by the fuzzy
  * pattern matcher.
@@ -102,7 +115,8 @@ bool Fuzzy::try_match(const Handle& soln, int depth)
     if (soln->getType() != rtn_type)
         return false;
 
-    HandleSeq soln_nodes = get_all_nodes(soln);
+    HandleSeq soln_nodes;
+    get_all_nodes(soln, soln_nodes);
 
     // Check if it contains any unwanted atoms
     if (std::any_of(soln_nodes.begin(), soln_nodes.end(),
@@ -165,7 +179,7 @@ bool Fuzzy::try_match(const Handle& soln, int depth)
         if (inst != target_nodes.end()) {
             // Get the WordInstanceNode from the ReferenceLink that connects both
             // WordInstanceNode and the instance ConceptNode / PredicateNode
-            HandleSeq word_inst = get_neighbors(*inst, false, true, REFERENCE_LINK, false);
+            HandleSeq word_inst = get_target_neighbors(*inst, REFERENCE_LINK);
 
             if (word_inst.size() > 0) {
                 // Get the DefinedLinguisticRelationshipNode from the EvaluationLink

@@ -569,6 +569,7 @@ cog-atom? says #t for deleted handle...
 
 (process-query 'luser "look up")
 (process-query 'luser "look right")
+de
 
    (DefinedLinguisticRelationshipNode "_to-be")
    (ListLink
@@ -685,4 +686,177 @@ tests/nlp/anaphora/test_anaphora.py
 (get-r2l-set-of-sent (car (nlp-parse "look right")))
 
 Yay it works
+
+========================================================
+
+(use-modules (opencog) (opencog query) (opencog exec))
+(Inheritance (Concept "foo") (Concept "baz"))
+(Inheritance (Concept "bar") (Concept "baz"))
+
+(define x
+	(GetLink
+		(Variable "$x")
+		(AndLink
+			(PresentLink
+				(Inheritance (Concept "foo") (Variable "$x")))
+			(FuzzyLink
+				(Inheritance (Concept "bar") (Variable "$x")))
+		)))
+
+(cog-execute! x)
+
+(define y
+		(Inheritance (Concept "foo") (Concept "baz"))
+	)
+
+(cog-fuzzy-match y)
+
+
+(use-modules (opencog) (opencog query) (opencog exec))
+(Inheritance (Concept "foo") (Concept "baz"))
+(Inheritance (Concept "bar") (Concept "baz"))
+
+(define x
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+
+		(AndLink (Variable "$x"))))
+
+(define b
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(TypeChoice
+				(Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+				(Signature (Inheritance (Concept "bar") (Type "ConceptNode")))))
+
+		(AndLink (Variable "$x"))))
+
+(cog-execute! x)
+
+_type_restrictions = &vars._simple_typemap
+
+(EvaluationLink
+	(PredicateNode "foo")
+	(ListLink (ConceptNode "bingo") (ConceptNode "yes!")))
+
+(EvaluationLink
+	(AnchorNode "bar")
+	(ListLink (ConceptNode "hurrah") (ConceptNode "yay!")))
+
+(EvaluationLink
+	(ConceptNode "baz")
+	(ListLink (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
+
+(define pred
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(Signature 
+				(EvaluationLink
+					(TypeChoice
+						(TypeNode "PredicateNode")
+						(TypeNode "AnchorNode"))
+					(ListLink
+						(Type "ConceptNode") (Type "ConceptNode")))))
+		(Variable "$x")))
+
+;--------------------------
+
+(define b
+   (BindLink
+		(VariableList (Variable "$x") (Variable "$y"))
+		(And
+			(Inheritance (Concept "foo") (Variable "$x"))
+			(Equal (Variable "$x") (Variable "$y"))
+		)
+		(Variable "$y")))
+
+ERROR: Throw to key `C++-EXCEPTION' with args `("cog-new-link" "Variable
+not groundable: (VariableNode \"$y\") ; [782][1]\n\n
+(/home/linas/src/novamente/src/atomspace-git/opencog/atoms/pattern/PatternLink.cc:776)")'.
+
+
+;--------------------------
+
+Given four parsed sent with sent node,  and link from that to grounded action.
+Given new sent, return most similar one(s)
+
+(use-modules (opencog) (opencog query) (opencog exec))
+
+(Member (InterpretationNode "1") (Anchor "look-actions"))
+(Member (InterpretationNode "2") (Anchor "look-actions"))
+(Member (InterpretationNode "3") (Anchor "look-actions"))
+
+(State (Anchor "curr-interp") (InterpretationNode "55"))
+
+run set-to-member conversion such that
+(Member foo (SetLink ... foo ...))
+is-member-link
+
+
+(define x
+	(GetLink
+		(VariableList
+			(TypedVariable (Variable "$likely-interp") (Type "InterpretationNode"))
+			(TypedVariable (Variable "$curr-interp") (Type "InterpretationNode"))
+			(TypedVariable (Variable "$curr-set") (Type "SetLink"))
+			(TypedVariable (Variable "$likely-set") (Type "SetLink"))
+		)
+		(AndLink
+			(Member (Variable "$likely-interp") (Anchor "look-actions"))
+			(State (Anchor "curr-interp") (Variable "$curr-interp"))
+			; (Evaluation (Predicate "scm: is-member")
+			;	(List (Variable "$curr-interp") (Variable "$curr-set")))
+			(Member (Variable "$curr-interp") (Variable "$curr-set"))
+			(Member (Variable "$likely-interp") (Variable "$likely-set"))
+			; (FuzzyLink (Variable "$curr-set"))
+			(EvaluationLink
+				(Predicate "scm is-similar")
+				(List (Variable "$curr-set") (Variable "$likely-set")))
+
+		)))
+
+(cog-execute! x)
+
+
+DefinedType in DefineLink
+TypedAtomLink
+RightArrowLink
+
+chaining is parsing.
+
+variadic? optional?
+
+/ If its a user-defined type, replace by it's defintion.
++       if (DEFINED_TYPE_NODE == dpt)
++       {
++               deep = DefineLink::get_definition(deep);
++               dpt = deep->getType();
++       }
+variadic
+
+
+bisect
+c1b9599be42c3fffb9b59bc25fc2b3d67854a112 is good
+
+c481d24449ac7a3be9057fea59bd8bcd32c08709 is bad
+
+HandleSeq q = get_neighbors(htarget, false, true, SET_LINK, false);
+
+Fuzzy.cc:167:90: error: ‘get_neighbors’ was not declared in this scope
+             HandleSeq word_inst = get_neighbors(*inst, false, true,
+REFERENCE_LINK, false);
+
+
+nlp/sureal/SuRealPMCB.cc needs get_predicates
+nlp/fuzzy/Fuzzy.cc needs get_predicates
+
+todo -- true false
+true true
+
+isTarget -- if h occurs anywher in an unordered link, or occurs 
+in non-first-place in ordered link.
 
