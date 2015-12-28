@@ -84,6 +84,27 @@ void SuRealSCM::init()
 #endif
 }
 
+
+/**
+ * Get all the nodes within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of nodes
+ */
+static void get_all_unique_nodes(const Handle& h,
+                                 UnorderedHandleSet& node_set)
+{
+   LinkPtr lll(LinkCast(h));
+   if (nullptr == lll)
+   {
+      node_set.insert(h);
+      return;
+   }
+
+   for (const Handle& o : lll->getOutgoingSet())
+      get_all_unique_nodes(o, node_set);
+}
+
 /**
  * Implement the "sureal-match" scheme primitive.
  *
@@ -118,7 +139,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
     //     a scm list to HandleSeq, so can just use the scheme utilities?
-    UnorderedHandleSet allNodes = get_all_unique_nodes(h);
+    UnorderedHandleSet allNodes;
+    get_all_unique_nodes(h, allNodes);
 
     // isolate which nodes are actually words, and which are not; all words
     // need to become variable for the Pattern Matcher
