@@ -249,7 +249,10 @@
             "`Increase` or `Decrease` got: ") effect-type))
 
     (link-with-demand)
-    (ure-add-rule demand-node rule-name (rule))
+
+    (InheritanceLink
+        (ure-add-rule demand-node rule-name (rule))
+        (ConceptNode "opencog: action"))
 )
 
 ; --------------------------------------------------------------
@@ -275,11 +278,16 @@
              (TypedVariableLink
                  (VariableNode "x")
                  (TypeNode "Node"))
-             (EvaluationLink
-                 (PredicateNode (string-append (psi-prefix-str) effect-type))
-                 (ListLink
-                    (VariableNode "x")
-                    demand-node)))
+             (AndLink
+                 (EvaluationLink
+                     (PredicateNode
+                         (string-append (psi-prefix-str) effect-type))
+                     (ListLink
+                        (VariableNode "x")
+                        demand-node))
+                 (InheritanceLink
+                     (VariableNode "x")
+                     (ConceptNode "opencog: action"))))
     ))
 )
 
