@@ -120,7 +120,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // and see if it's one of the targets we are looking for, given SetLink
     auto hasInterpretation = [&](Handle& h)
     {
-        HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = get_source_neighbors(h, REFERENCE_LINK);
         return std::any_of(qN.begin(), qN.end(), [&](Handle& hn) {
                 bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
                 bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
@@ -244,7 +244,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_any_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the first LG connector
             qTargetConns.push_back(qLGConns[0]);
@@ -255,7 +255,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_any_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the second LG connector
             qTargetConns.push_back(qLGConns[1]);
@@ -390,7 +390,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_source_neighbors(hSetLink, REFERENCE_LINK);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -609,7 +609,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         {
             if (h->getType() != SET_LINK) return true;
 
-            HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_source_neighbors(h, REFERENCE_LINK);
             return not std::any_of(qN.begin(), qN.end(),
                 [&](Handle& hn) {
                     bool isInterpNode = hn->getType() == INTERPRETATION_NODE;

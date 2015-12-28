@@ -110,7 +110,7 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     HandleSeq existingAsSource =
             get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
     HandleSeq existingAsTarget =
-            get_neighbors(source, true, false, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_source_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
     // Get the set differences between the AttentionalFocus
     // and the sets of existing sources and targets
