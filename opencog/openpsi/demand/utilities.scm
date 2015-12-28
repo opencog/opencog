@@ -230,12 +230,19 @@
                     (ListLink (demand-node))))
             action))
 
-    (define (link-with-demand)
-        (EvaluationLink
-            (PredicateNode (string-append (psi-prefix-str) effect-type))
-            (ListLink
-                (Node rule-name)
-                (demand-node))))
+    (define (create-psi-action)
+        (let ((alias (ure-add-rule demand-node rule-name (rule))))
+            (InheritanceLink
+                alias
+                (ConceptNode "opencog: action"))
+
+            (EvaluationLink
+                (PredicateNode (string-append (psi-prefix-str) effect-type))
+                (ListLink
+                    (Node rule-name)
+                    (demand-node)))
+            alias
+        ))
 
     ; Check arguments
     (if (not (list? vars))
@@ -248,11 +255,17 @@
         (error (string-append "Expected fourth argument to be either"
             "`Increase` or `Decrease` got: ") effect-type))
 
-    (link-with-demand)
-
-    (InheritanceLink
-        (ure-add-rule demand-node rule-name (rule))
-        (ConceptNode "opencog: action"))
+    ; Check if the rule has already been defined as a member of
+    ; TODO: this needs improvement not exaustive enough, it isn't considering
+    ;       other differentiating graphs.
+    (let ((node (cog-chase-link 'DefineLink 'Node (rule))))
+        (cond ((and (= 1 (length node))
+                    (string-prefix? rule-name-prefix (cog-name (car node))))
+                     node)
+              ((= 0 (length node)) (create-psi-action))
+              (else (error "The rule has been defined multiple times"))
+        )
+    )
 )
 
 ; --------------------------------------------------------------
