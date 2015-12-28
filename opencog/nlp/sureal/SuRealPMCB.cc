@@ -519,7 +519,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             HandleSeq qNodes;
             get_all_nodes(l, qNodes);
 
-            for (Handle& n : qNodes)
+            for (const Handle& n : qNodes)
             {
                 auto matchWordInst = [&](Handle& w)
                 {
