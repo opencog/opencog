@@ -30,8 +30,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/platform.h>
 
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FollowLink.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -415,7 +415,7 @@ HandleSeq SimpleImportanceDiffusionAgent::hebbianAdjacentAtoms(Handle h)
     // Chase the hebbian links originating at this atom and obtain the 
     // adjacent atoms that are found by traversing those links
     HandleSeq resultSet = 
-            get_neighbors(h, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_target_neighbors(h, ASYMMETRIC_HEBBIAN_LINK);
     
     return resultSet;
 }

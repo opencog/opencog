@@ -30,8 +30,9 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/tbb.h>
 
-#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -107,9 +108,9 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
     HandleSeq existingAsSource =
-            get_neighbors(source, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
     HandleSeq existingAsTarget =
-            get_neighbors(source, true, false, ASYMMETRIC_HEBBIAN_LINK, false);
+            get_source_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
     // Get the set differences between the AttentionalFocus
     // and the sets of existing sources and targets

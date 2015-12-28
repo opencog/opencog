@@ -192,6 +192,25 @@ HandleSeq DimEmbedModule::kNearestNeighbors(Handle h, Type l, int k, bool fanin)
     return results;
 }
 
+static bool is_source(const Handle& source, const Handle& link)
+{
+    LinkPtr lptr(LinkCast(link));
+    // On ordered links, only the first position in the outgoing set
+    // is a source of this link. So, if the handle given is equal to
+    // the first position, true is returned.
+    Arity arity = lptr->getArity();
+    if (classserver().isA(lptr->getType(), ORDERED_LINK)) {
+        return arity > 0 and lptr->getOutgoingAtom(0) == source;
+    } else if (classserver().isA(lptr->getType(), UNORDERED_LINK)) {
+        // If the link is unordered, the outgoing set is scanned;
+        // return true if any position is equal to the source.
+        for (const Handle& h : lptr->getOutgoingSet())
+            if (h == source) return true;
+        return false;
+    }
+    return false;
+}
+
 void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
 {
     if (!classserver().isLink(linkType))
@@ -249,9 +268,9 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             HandleSeq::iterator it2=newNodes.begin();
             //if !fanin, we're following the "outward" links, so it's only a
             //valid link if u is the source
-            if (!symmetric && !fanin && !as->is_source(u,*it)) continue;
+            if (!symmetric && !fanin && !is_source(u,*it)) continue;
             if (!symmetric && fanin) {
-                if (as->is_source(u,*it)) {
+                if (is_source(u,*it)) {
                     continue;
                 }
                 else {

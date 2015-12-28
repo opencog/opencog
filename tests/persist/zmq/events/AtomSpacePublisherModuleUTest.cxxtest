@@ -194,7 +194,7 @@ public:
                         ("details.count", 0), 7.1, precision);
 
         // Modify the atom's AttentionValue
-        as->set_AV(h, createAV(30, 50, 0));
+        h->setAttentionValue(createAV(30, 50, 0));
 
         address = s_recv (subscriberAVChanged);
         contents = s_recv (subscriberAVChanged);
@@ -231,7 +231,7 @@ public:
         TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
 
         // Add the atom to the AttentionalFocus
-        as->set_AV(h, createAV(1100, 0, 0));
+        h->setAttentionValue(createAV(1100, 0, 0));
 
         address = s_recv (subscriberAddAF);
         contents = s_recv (subscriberAddAF);
@@ -267,7 +267,7 @@ public:
         TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
 
         // Remove the atom from the AttentionalFocus
-        as->set_AV(h, createAV(900, 0, 0));
+        h->setAttentionValue(createAV(900, 0, 0));
 
         address = s_recv (subscriberRemoveAF);
         contents = s_recv (subscriberRemoveAF);

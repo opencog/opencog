@@ -33,6 +33,7 @@
 #include <opencog/attention/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -146,11 +147,9 @@ public:
         // them: "Kermit", "Frog", "Animal", "alive"
         for (Handle node : attentionalFocus) {
             HandleSeq existingAsSource =
-                    get_neighbors(node, false, true,
-                                  ASYMMETRIC_HEBBIAN_LINK, false);
+                    get_target_neighbors(node, ASYMMETRIC_HEBBIAN_LINK);
             HandleSeq existingAsTarget =
-                    get_neighbors(node, true, false,
-                                  ASYMMETRIC_HEBBIAN_LINK, false);
+                    get_source_neighbors(node, ASYMMETRIC_HEBBIAN_LINK);
             TS_ASSERT(existingAsSource.size() == 3);
             TS_ASSERT(existingAsTarget.size() == 3);
         }

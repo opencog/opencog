@@ -23,6 +23,7 @@
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
@@ -88,6 +89,25 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 }
 
 /**
+ * Get all the nodes within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of nodes
+ */
+static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+{
+   LinkPtr lll(LinkCast(h));
+   if (nullptr == lll)
+   {
+      node_list.emplace_back(h);
+      return;
+   }
+
+   for (const Handle& o : lll->getOutgoingSet())
+      get_all_nodes(o, node_list);
+}
+
+/**
  * Override the clause_match callback.
  *
  * Reject a clause match if the matched link is not in a SetLink linked to an
@@ -120,7 +140,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // and see if it's one of the targets we are looking for, given SetLink
     auto hasInterpretation = [&](Handle& h)
     {
-        HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
+        HandleSeq qN = get_source_neighbors(h, REFERENCE_LINK);
         return std::any_of(qN.begin(), qN.end(), [&](Handle& hn) {
                 bool isInterpNode = hn->getType() == INTERPRETATION_NODE;
                 bool isTarget = m_targets.size() > 0? (m_targets.find(hn) != m_targets.end()) : true;
@@ -133,15 +153,17 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation))
         return false;
 
-    // get all the nodes from the pattern and the potential solution
-    HandleSeq qAllPatNodes = get_all_nodes(pattrn_link_h);
-    HandleSeq qAllSolnNodes = get_all_nodes(grnd_link_h);
+    // Get all the nodes from the pattern and the potential solution.
+    HandleSeq qAllPatNodes;
+    get_all_nodes(pattrn_link_h, qAllPatNodes);
+    HandleSeq qAllSolnNodes;
+    get_all_nodes(grnd_link_h, qAllSolnNodes);
 
-    // just in case if their sizes are not the same, reject the match
+    // Just in case if their sizes are not the same, reject the match.
     if (qAllPatNodes.size() != qAllSolnNodes.size())
         return false;
 
-    // compare the disjuncts for each of the nodes
+    // Compare the disjuncts for each of the nodes.
     for (size_t i = 0; i < qAllPatNodes.size(); i++)
     {
         Handle& hPatNode = qAllPatNodes[i];
@@ -207,8 +229,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
 
             // get the NumberNodes from the WordSequenceLinks
-            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
             // compare their word sequences
             return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
@@ -226,8 +248,8 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
 
             // get the NumberNodes from the WordSequenceLinks
-            Handle hNumNode1 = get_neighbors(hWordInst1, false, true, WORD_SEQUENCE_LINK)[0];
-            Handle hNumNode2 = get_neighbors(hWordInst2, false, true, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
+            Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
             // compare their word sequences
             return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
@@ -244,7 +266,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the first LG connector
             qTargetConns.push_back(qLGConns[0]);
@@ -255,7 +277,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_neighbors(hLinkInstNode, true, true, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the second LG connector
             qTargetConns.push_back(qLGConns[1]);
@@ -264,12 +286,13 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         // disjuncts of the hPatWordNode
         HandleSeq qDisjuncts;
 
-        // check if we got the disjuncts of the hPatWordNode already, otherwise
-        // store them in a map so that we only need to do this disjuncts-getting procedure once
+        // check if we got the disjuncts of the hPatWordNode already,
+        // otherwise store them in a map so that we only need to do
+        // this disjuncts-getting procedure once
         auto iter = m_disjuncts.find(hPatWordNode);
         if (iter == m_disjuncts.end())
         {
-            HandleSeq qOr = get_neighbors(hPatWordNode, false, true, LG_WORD_CSET, false);
+            HandleSeq qOr = get_target_neighbors(hPatWordNode, LG_WORD_CSET);
 
             auto insertHelper = [&](const Handle& h)
             {
@@ -389,7 +412,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
         for (auto& hSetLink : qISet)
         {
-            HandleSeq qN = get_neighbors(hSetLink, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_source_neighbors(hSetLink, REFERENCE_LINK);
             qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != INTERPRETATION_NODE; }), qN.end());
 
             results.insert(results.end(), qN.begin(), qN.end());
@@ -443,7 +466,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // get the R2L-SetLinks that are related to these InterpretationNodes
     for (Handle& hItprNode : qItprNode)
     {
-        HandleSeq qN = get_neighbors(hItprNode, false, true, REFERENCE_LINK, false);
+        HandleSeq qN = get_target_neighbors(hItprNode, REFERENCE_LINK);
         qN.erase(std::remove_if(qN.begin(), qN.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qN.end());
 
         // just in case... make sure all the pred_solns exist in the SetLink
@@ -479,11 +502,12 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         //     WordInstanceNode "water@123"
         auto checker = [] (Handle& h)
         {
-            HandleSeq qN = get_neighbors(h, false, true, REFERENCE_LINK, false);
+            HandleSeq qN = get_target_neighbors(h, REFERENCE_LINK);
             return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
         };
 
-        HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
+        HandleSeq qWordInstNodes;
+        get_all_nodes(hSetLink, qWordInstNodes);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
                                             checker), qWordInstNodes.end());
 
@@ -492,9 +516,10 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         for (Handle& l : qLeftover)
         {
             std::set<UUID> sWordFound;
-            HandleSeq qNodes = get_all_nodes(l);
+            HandleSeq qNodes;
+            get_all_nodes(l, qNodes);
 
-            for (Handle& n : qNodes)
+            for (const Handle& n : qNodes)
             {
                 auto matchWordInst = [&](Handle& w)
                 {
@@ -608,7 +633,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         {
             if (h->getType() != SET_LINK) return true;
 
-            HandleSeq qN = get_neighbors(h, true, false, REFERENCE_LINK, false);
+            HandleSeq qN = get_source_neighbors(h, REFERENCE_LINK);
             return not std::any_of(qN.begin(), qN.end(),
                 [&](Handle& hn) {
                     bool isInterpNode = hn->getType() == INTERPRETATION_NODE;

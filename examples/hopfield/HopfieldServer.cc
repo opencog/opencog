@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attention/ImportanceUpdatingAgent.h>
@@ -486,7 +487,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     HandleSeq tempGrid(hGrid);
 
     // get all links from key node
-    HandleSeq neighbours = get_neighbors(keyHandle,true,true,HEBBIAN_LINK);
+    HandleSeq neighbours = get_all_neighbors(keyHandle,HEBBIAN_LINK);
 
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
