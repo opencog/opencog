@@ -854,9 +854,13 @@ REFERENCE_LINK, false);
 nlp/sureal/SuRealPMCB.cc needs get_predicates
 nlp/fuzzy/Fuzzy.cc needs get_predicates
 
-todo -- true false
+todo -- true false  source
 true true
 
 isTarget -- if h occurs anywher in an unordered link, or occurs 
 in non-first-place in ordered link.
 
+SuRealUTest
+MicroplanningUTest
+
+isSource ... true if atom0 or is in oset.

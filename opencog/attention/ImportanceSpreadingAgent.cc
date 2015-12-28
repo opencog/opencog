@@ -110,6 +110,26 @@ int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links
     return totalDifference;
 }
 
+static bool is_source(const Handle& source, const Handle& link)
+{
+    LinkPtr lptr(LinkCast(link));
+    // On ordered links, only the first position in the outgoing set
+    // is a source of this link. So, if the handle given is equal to
+    // the first position, true is returned.
+    Arity arity = lptr->getArity();
+    if (classserver().isA(lptr->getType(), ORDERED_LINK)) {
+        return arity > 0 and lptr->getOutgoingAtom(0) == source;
+    } else if (classserver().isA(lptr->getType(), UNORDERED_LINK)) {
+        // If the link is unordered, the outgoing set is scanned;
+        // return true if any position is equal to the source.
+        for (const Handle& h : lptr->getOutgoingSet())
+            if (h == source) return true;
+        return false;
+    }
+    return false;
+}
+
+
 #define toFloat getMean
 // For one link
 int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
@@ -122,7 +142,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     AttentionValue::sti_t targetSTI;
     
     // If this link doesn't have source as a source return 0
-    if (! a->is_source(source,link)) {
+    if (! is_source(source, link)) {
         log->debug("Skipping link because link doesn't have this source as a source: " + std::to_string(link.value()));
         return 0;
     }
@@ -241,7 +261,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         TruthValuePtr linkTV = a->get_TV(lh);
 
         // For the case of an asymmetric link without this atom as a source
-        if (!a->is_source(h,lh)) {
+        if (!is_source(h, lh)) {
             log->fine("Skipping link due to assymetric link without this atom as a source: " + h.value());
             continue;
         }
