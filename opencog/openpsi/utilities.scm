@@ -6,6 +6,8 @@
 ; @date   2011-11-25
 ;
 
+(use-modules (opencog rule-engine))
+
 ; Initialize seed of pseudo-random generator using current time
 (let ( (time (gettimeofday) )
      )
@@ -360,46 +362,6 @@
           (cog-delete set-link)
           result
     )
-)
-
-; --------------------------------------------------------------
-(define (psi-select-actions demand-node gpn)
-"
-  Select the actions that should be added to the active-schema-pool depending
-  on the present goal, by using the plan choosen by the GroundedPredicateNode.
-
-  demand-node:
-    - A ConceptNode that represents a demand
-
-  gpn:
-   - GroundedPredicateNode that refers to a function that checks the actions
-     for constraints.
-"
-    ;TODO: I think the planner is kind of a behavior tree genrator (assuming
-    ; there is no change of a preset plan) .URE's random selection policy
-    ; isn't being used now thus each plan is in effect a single action choosen,
-    ; this has to be improved but is good for starters.
-
-    ; Check arguments
-    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " gpn))
-
-    (cog-outgoing-set (cog-execute!
-        (GetLink
-             (TypedVariableLink
-                 (VariableNode "x")
-                 (TypeNode "Node"))
-             (AndLink
-                 (EvaluationLink
-                     gpn
-                     (ListLink  (VariableNode "x")))
-                 (MemberLink
-                     (VariableNode "x")
-                     demand-node)
-                 (InheritanceLink
-                     (VariableNode "x")
-                     (ConceptNode "opencog: action"))))
-    ))
 )
 
 ; --------------------------------------------------------------
