@@ -266,7 +266,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_any_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the first LG connector
             qTargetConns.push_back(qLGConns[0]);
@@ -277,7 +277,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         {
             const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
 
-            HandleSeq qLGConns = get_any_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
+            HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
             // get the second LG connector
             qTargetConns.push_back(qLGConns[1]);
