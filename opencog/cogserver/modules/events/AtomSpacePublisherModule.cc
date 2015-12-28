@@ -288,12 +288,12 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string handle = std::to_string(h.value());
 
     // AttentionValue
-    AttentionValuePtr av = as->get_AV(h);
+    AttentionValuePtr av = h->getAttentionValue();
     Object jsonAV;
     jsonAV = avToJSON(av);
 
     // TruthValue
-    TruthValuePtr tvp = as->get_TV(h);
+    TruthValuePtr tvp = h->getTruthValue();
     Object jsonTV;
     jsonTV = tvToJSON(tvp);
 

@@ -126,8 +126,8 @@ struct ForgettingLTIThenTVAscendingSort {
         AttentionValue::lti_t lti1, lti2;
         float tv1, tv2;
 
-        lti1 = a->get_AV(h1)->getLTI();
-        lti2 = a->get_AV(h2)->getLTI();
+        lti1 = h1->getAttentionValue()->getLTI();
+        lti2 = h2->getAttentionValue()->getLTI();
 
         tv1 = fabs(a->get_mean(h1));
         tv2 = fabs(a->get_mean(h2));

@@ -130,13 +130,13 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                         // swap inverse hebbian link direction
                         log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", a->atom_as_string(h).c_str());
                         // save STI/LTI
-                        AttentionValuePtr backupAV = a->get_AV(h);
+                        AttentionValuePtr backupAV = h->getAttentionValue();
                         a->remove_atom(h);
                         outgoing = moveSourceToFront(outgoing);
                         h = a->add_link(INVERSE_HEBBIAN_LINK, outgoing);
                         h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                         // restore STI/LTI
-                        a->set_AV(h,backupAV);
+                        h->setAttentionValue(backupAV);
                     }
                 // else source is +ve, as it should be
                 } else {
@@ -149,12 +149,12 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                         // change to symmetric hebbian link
                         log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", a->atom_as_string(h).c_str());
                         // save STI/LTI
-                        AttentionValuePtr backupAV = a->get_AV(h);
+                        AttentionValuePtr backupAV = h->getAttentionValue();
                         a->remove_atom(h);
                         h = a->add_link(SYMMETRIC_HEBBIAN_LINK, outgoing);
                         h->setTruthValue(SimpleTruthValue::createTV(-tc, 1));
                         // restore STI/LTI
-                        a->set_AV(h,backupAV);
+                        h->setAttentionValue(backupAV);
                     } else {
                         // link type is fine, just update TV
                         setMean(h, tc);
@@ -167,13 +167,13 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     // change to inverse hebbian link
                     log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", a->atom_as_string(h).c_str());
                     // save STI/LTI
-                    AttentionValuePtr backupAV = a->get_AV(h);
+                    AttentionValuePtr backupAV = h->getAttentionValue();
                     a->remove_atom(h);
                     outgoing = moveSourceToFront(outgoing);
                     h = a->add_link(INVERSE_HEBBIAN_LINK, outgoing);
                     h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                     // restore STI/LTI
-                    a->set_AV(h,backupAV);
+                    h->setAttentionValue(backupAV);
                 } else {
                     // link type is fine, just update TV
                     setMean(h, tc);

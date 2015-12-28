@@ -864,3 +864,8 @@ SuRealUTest
 MicroplanningUTest
 
 isSource ... true if atom0 or is in oset.
+
+get_type
+get_mean
+get_confidence
+set_TV
