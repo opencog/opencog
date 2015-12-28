@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -88,6 +89,25 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 }
 
 /**
+ * Get all the nodes within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of nodes
+ */
+static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+{
+   LinkPtr lll(LinkCast(h));
+   if (nullptr == lll)
+   {
+      node_list.emplace_back(h);
+      return;
+   }
+
+   for (const Handle& o : lll->getOutgoingSet())
+      get_all_nodes(o, node_list);
+}
+
+/**
  * Override the clause_match callback.
  *
  * Reject a clause match if the matched link is not in a SetLink linked to an
@@ -133,15 +153,17 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation))
         return false;
 
-    // get all the nodes from the pattern and the potential solution
-    HandleSeq qAllPatNodes = get_all_nodes(pattrn_link_h);
-    HandleSeq qAllSolnNodes = get_all_nodes(grnd_link_h);
+    // Get all the nodes from the pattern and the potential solution.
+    HandleSeq qAllPatNodes;
+    get_all_nodes(pattrn_link_h, qAllPatNodes);
+    HandleSeq qAllSolnNodes;
+    get_all_nodes(grnd_link_h, qAllSolnNodes);
 
-    // just in case if their sizes are not the same, reject the match
+    // Just in case if their sizes are not the same, reject the match.
     if (qAllPatNodes.size() != qAllSolnNodes.size())
         return false;
 
-    // compare the disjuncts for each of the nodes
+    // Compare the disjuncts for each of the nodes.
     for (size_t i = 0; i < qAllPatNodes.size(); i++)
     {
         Handle& hPatNode = qAllPatNodes[i];
@@ -484,7 +506,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             return qN.size() != 1 or qN[0]->getType() != WORD_INSTANCE_NODE;
         };
 
-        HandleSeq qWordInstNodes = get_all_nodes(hSetLink);
+        HandleSeq qWordInstNodes;
+        get_all_nodes(hSetLink, qWordInstNodes);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
                                             checker), qWordInstNodes.end());
 
@@ -493,7 +516,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         for (Handle& l : qLeftover)
         {
             std::set<UUID> sWordFound;
-            HandleSeq qNodes = get_all_nodes(l);
+            HandleSeq qNodes;
+            get_all_nodes(l, qNodes);
 
             for (Handle& n : qNodes)
             {
