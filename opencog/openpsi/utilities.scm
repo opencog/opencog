@@ -7,6 +7,9 @@
 ;
 
 (use-modules (opencog rule-engine))
+(use-modules (srfi srfi-1)) ; for set-difference
+
+(load-from-path "openpsi/demand/utilities.scm")
 
 ; Initialize seed of pseudo-random generator using current time
 (let ( (time (gettimeofday) )
@@ -185,6 +188,15 @@
 ; --------------------------------------------------------------
 ; Helper Functions
 ; --------------------------------------------------------------
+(define (list-merge list-of-list)
+"
+  A helper function for merging list of lists into a single list. Specially for
+  results of `par-map`. For single threaded map use `append-map`.
+"
+    (fold append '() list-of-list)
+)
+
+; --------------------------------------------------------------
 (define (psi-clean-demand-gets set-link)
 "
   Returns a list aftering removing the 'SetLink + 'ListLink + 'NumberNode
@@ -196,10 +208,9 @@
       wrapping psi-demand-pattern.
 "
 ; TODO: Make this generic for pattern gets
-    (define (list-merge list-of-list) (fold append '() list-of-list))
     (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
     (remove! is-nn?
-        (list-merge (map cog-outgoing-set (cog-outgoing-set set-link))))
+        (list-merge (par-map cog-outgoing-set (cog-outgoing-set set-link))))
 )
 
 ; --------------------------------------------------------------
@@ -365,14 +376,41 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-update-asp demand-node gpn)
+(define (psi-update-asp asp actions)
 "
-  It modifies the member action-rules of the active-schema-pool.
-"
-;not sure if should be part of psi-select-actions, why separate them?
-    ;(let ((choosen-actions (psi-select-actions demand-node gpn)))
-    ;    ()
-    ;)
+  It modifies the member action-rules of OpenPsi's active-schema-pool(asp),
+  by removing all actions that are members of the known demand
+  rule-bases from the asp and replaces them by the list of actions passed.
 
-(display "WIP")
+  asp:
+  - The ConceptNode for the active-schema-pool.
+
+  actions:
+  - A list of actions nodes. The nodes are the alias nodes for the actions.
+"
+    (define (remove-node node)
+        (cog-delete (MemberLink node asp)))
+    (define (add-node) node
+        (MemberLink node asp))
+
+    (let* ((current-actions (ure-rbs-rules asp))
+           (all-actions
+               (list-merge (par-map psi-get-all-actions (psi-get-demands))))
+           ; Because there might be rules added that aren't member of any demand
+           ; like the default/in-born rule that updates the rules.
+           (actions-to-keep (lset-difference current-actions all-actions)))
+
+           ; Remove actions except those that should be kept and those that
+           ; are to be added from the asp
+           (par-map
+                (lambda (x)
+                    (if (or (member x actions-to-keep) (member x actions)
+                        x
+                        (remove-node x)))
+                )
+                current-actions)
+
+            ; Add the actions that are not member of the asp.
+            (par-mpa add-node actions)
+    )
 )
