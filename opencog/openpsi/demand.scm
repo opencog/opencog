@@ -193,7 +193,8 @@
     - GroundedPredicateNode that names an goal-selection function that will
       choose the demands . Its function should take a single demand-ConceptNode
       and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
-      in addition to tagging the demand-ConceptNodes as either,
+      in addition to tagging the demand-ConceptNodes as one of the action-types.
+      For example,
 
       (StateLink
           (Node (string-append (psi-prefix-str) \"action-on-demand\"))
