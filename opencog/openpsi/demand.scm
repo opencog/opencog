@@ -121,7 +121,7 @@
                     (EqualLink demand-var demand-node)
                 )
                 default-action
-                demand-name
+                demand-node
                 "Default")
             ; Each demand is also a rulebase
             (ure-define-rbs demand-node 1)
@@ -286,7 +286,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-action vars context action demand-name effect-type)
+(define-public (psi-action vars context action demand-node effect-type)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. The action is also a member rule of the demand it
@@ -316,25 +316,16 @@
     - The Implicand of the rule. It should be an atom that uses the groundings
       of the context to do something.
 
-  demand-name:
-    - The name of the demand that is affected by the execution of the function
-      associated with the action.
-    - Shouldn't include `psi-prefix-str`
-    - It is case sensetive, that is, a demand named `Energy` is not equal
-      to a demand named `energy`. If you pass a name of a not defined node,
-      since it's unrecognized it won't be run, eventhough a BindLink is
-      returned.
+  demand-node:
+  - The ConceptNode representing the demand.
 
   effect-type:
     - A string that describes the effect the particualr action would have on
       the demand value. See `(psi-action-types)` for available options.
 
 "
-    (define rule-name-prefix
-        (string-append (psi-prefix-str) demand-name "-rule-"))
+    (define rule-name-prefix (string-append (cog-name demand-node) "-rule-"))
     (define rule-name (string-append rule-name-prefix (random-string 5)))
-    (define (demand-node) ; To prevent addition of node until needed.
-        (ConceptNode (string-append (psi-prefix-str) demand-name)))
 
     (define (rule)
         ; Is function to avoid  insertion into the atomspace if argument check
@@ -349,11 +340,11 @@
                 context
                 (EvaluationLink ; Act only if their is such a demand.
                     (GroundedPredicateNode "scm: psi-demand?")
-                    (ListLink (demand-node))))
+                    (ListLink demand-node)))
             action))
 
     (define (create-psi-action)
-        (let ((alias (ure-add-rule (demand-node) rule-name (rule) 1)))
+        (let ((alias (ure-add-rule demand-node rule-name (rule) 1)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))
@@ -362,7 +353,7 @@
                 (PredicateNode (string-append (psi-prefix-str) effect-type))
                 (ListLink
                     (Node rule-name)
-                    (demand-node)))
+                    demand-node))
             alias
         ))
 
@@ -440,6 +431,8 @@
   demand-node:
     - A ConceptNode that represents a demand.
 "
+    ; NOTE: Not using (ure-rbs-rules demand-node) so as to not include 'Default'
+    ; action-types, as this function is used by psi-update-asp.
     (append
         (psi-get-actions demand-node "Increase")
         (psi-get-actions demand-node "Decrease")
@@ -512,10 +505,10 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-action-maximize rate)
+(define-public (psi-effect-maximize rate)
 "
-  Returns an ExecutionOutputLink(the action) that increases the demand-value.
-  It has a increasing effect-type.
+  Returns an ExecutionOutputLink that increases the demand-value. This is
+  the effect of the action. It has a increasing effect-type.
 
   rate:
   - A number for the percentage of change that a demand-value be updated with,
@@ -533,12 +526,37 @@
     (let ((strength (tv-mean (cog-tv  demand)))
           (conf (tv-conf (cog-tv demand)))
           (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand (stv (+ strength (* strength rate))) conf)
+        (cog-set-tv! demand (stv (+ strength (* strength rate)) conf))
     )
 )
 
+(define-public (psi-action-maximize demand-node rate)
+"
+  Creates an action with the effect of increasing the demand-value for the
+  given demand.
+
+  demand-node:
+  - The ConceptNode representing the demand.
+
+  rate:
+  - A number for the percentage of change that a demand-value be updated with,
+    on each step.
+"
+
+    (psi-action
+        (assoc-ref (psi-demand-pattern) "var")
+        (list
+            (assoc-ref (psi-demand-pattern) "pat")
+            ; Filter out all other demands
+            (EqualLink demand-var demand-node)
+        )
+        (psi-effect-maximize rate)
+        demand-node
+        "Increase")
+)
+
 ; --------------------------------------------------------------
-(define-public (psi-action-minimize rate)
+(define-public (psi-effect-minimize rate)
 "
   Returns an ExecutionOutputLink(the action) that decreases the demand-value.
   It has a decreasing effect-type.
@@ -563,41 +581,33 @@
     )
 )
 
-; --------------------------------------------------------------
-(define-public (psi-value-range demand min-node max-node rate-node)
+(define-public (psi-action-minimize demand-node rate)
 "
-  Increases or decreases the strength of the demand depending on whether it is
-  in between the range specified. The range is taken as an open-interval, that
-  must be a subset of (0, 1) interval.
+  Creates an action with the effect of decreasing the demand-value for the
+  given demand.
 
-  demand:
-  - The ConceptNode that represents the demand.
+  demand-node:
+  - The ConceptNode representing the demand.
 
-  min-node:
-  - A NumberNode for the lower boundary of the range.
-
-  max-node:
-  - A NumberNode for the upper boundary of the range.
-
-  rate-node:
-  - A NumberNode for the percentage of change that a demand-value be updated
-    with, should it pass the boundaries. Must be greater than zero.
+  rate:
+  - A number for the percentage of change that a demand-value be updated with,
+    on each step.
 "
 
-    (let ((mean (tv-mean (cog-tv  demand)))
-          (min-value (string->number (cog-name min-node)))
-          (max-value (string->number (cog-name max-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-
-         ; Maximize or minmize
-         (cond ((strength > max-value) (psi-value-minimize demand rate-node))
-               ((strength < min-value) (psi-value-maximize demand rate-node))
-         )
-    )
+    (psi-action
+        (assoc-ref (psi-demand-pattern) "var")
+        (list
+            (assoc-ref (psi-demand-pattern) "pat")
+            ; Filter out all other demands
+            (EqualLink demand-var demand-node)
+        )
+        (psi-effect-minimize rate)
+        demand-node
+        "Decrease")
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-action-keep-within min-value max-value rate)
+(define-public (psi-effect-keep-within min-value max-value rate)
 "
   Returns an ExecutionOutputLink(the action) that tries to maintain the value
   within the specified range. If the demand-value is within range then it does
@@ -633,4 +643,37 @@
             (NumberNode min-value)
             (NumberNode max-value)
             (NumberNode rate)))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-value-range demand min-node max-node rate-node)
+"
+  Increases or decreases the strength of the demand depending on whether it is
+  in between the range specified. The range is taken as an open-interval, that
+  must be a subset of (0, 1) interval.
+
+  demand:
+  - The ConceptNode that represents the demand.
+
+  min-node:
+  - A NumberNode for the lower boundary of the range.
+
+  max-node:
+  - A NumberNode for the upper boundary of the range.
+
+  rate-node:
+  - A NumberNode for the percentage of change that a demand-value be updated
+    with, should it pass the boundaries. Must be greater than zero.
+"
+
+    (let ((mean (tv-mean (cog-tv  demand)))
+          (min-value (string->number (cog-name min-node)))
+          (max-value (string->number (cog-name max-node)))
+          (rate (/ (string->number (cog-name rate-node)) 100)))
+
+         ; Maximize or minmize
+         (cond ((strength > max-value) (psi-value-minimize demand rate-node))
+               ((strength < min-value) (psi-value-maximize demand rate-node))
+         )
+    )
 )
