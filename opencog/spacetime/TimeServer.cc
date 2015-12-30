@@ -205,7 +205,7 @@ bool TimeServer::removeTimeInfo(Handle h,
 	    Handle timeNode = atomspace->get_outgoing(atTimeLink, 0);
             DPRINTF("Got timeNode = %lu\n", timeNode.value());
             OC_ASSERT(atomspace->is_valid_handle(timeNode)
-                      && atomspace->get_type(timeNode) == TIME_NODE,
+                      and timeNode->getType() == TIME_NODE,
                       "TimeServer::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
             int arityOfTimeLink = atomspace->get_arity(atTimeLink);
 

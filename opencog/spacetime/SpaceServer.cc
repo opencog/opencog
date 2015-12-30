@@ -238,7 +238,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 
     opencog::spatial::BlockVector pos(objX, objY, objZ);
 
-    if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
+    if (objectNode->getType() == STRUCTURE_NODE) {
         // it's a block
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.addSolidUnitBlock(objectNode, pos);
@@ -283,7 +283,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
     }
 
-    if (atomspace->get_type(objectNode) == STRUCTURE_NODE) {
+    if (objectNode->getType() == STRUCTURE_NODE) {
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.removeSolidUnitBlock(objectNode);
     } else {

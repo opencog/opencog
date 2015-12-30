@@ -148,13 +148,14 @@ void TulipWriter::writeNodeNames()
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {
-        myfile << "(node " << h << " \"" << classserver().getTypeName(a.get_type(h)) 
+        myfile << "(node " << h << " \"" << classserver().getTypeName(h->getType()) 
             << "\" )" << endl;
     }
     myfile << ")" << endl;
 }
 
-void TulipWriter::writeDefaultColouring() {
+void TulipWriter::writeDefaultColouring()
+{
     // Define default colouring
     myfile << "(property  0 color \"viewColor\"" << endl;
     myfile << "(default \"(35,0,235,255)\" \"(0,0,0,128)\" )" << endl;
