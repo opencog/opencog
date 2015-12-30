@@ -381,7 +381,7 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
 
     for (Handle handle : hs) {
         afterTax = a->get_LTI(handle) - getTaxAmount(taxAmount);
-        a->set_LTI(handle, afterTax);
+        handle->setLTI(afterTax);
     }
 
     log->info("AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.",
@@ -699,7 +699,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a,
         agents[n]->setAV(new_av);
     }
 
-    a->set_LTI(h, current + exchangeAmount);
+    h->setLTI(current + exchangeAmount);
 
     log->fine("Atom %s LTI old = %d, new = %d", a->get_name(h).c_str(), current,
               a->get_LTI(h));
@@ -730,12 +730,12 @@ bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
 
     current = a->get_LTI(h);
     if (current > LTICap) {
-        a->set_LTI(h, LTICap);
+        h->setLTI(LTICap);
         log->fine("Atom LTI too high - old = %d, new = %d", current,
                   a->get_STI(h));
         return true;
     } else if (current < -LTICap) {
-        a->set_LTI(h, -LTICap);
+        h->setLTI(-LTICap);
         log->fine("Atom LTI too low - old = %d, new = %d", current,
                   a->get_STI(h));
         return true;

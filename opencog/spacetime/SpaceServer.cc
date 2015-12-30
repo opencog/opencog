@@ -256,7 +256,7 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
     // There is not a space map node for this map in the atomspace, so create a new one
     if (spaceMapHandle == Handle::UNDEFINED) {
         spaceMapHandle = atomspace->add_node(SPACE_MAP_NODE,_mapName);
-        atomspace->set_LTI(spaceMapHandle, 1);
+        spaceMapHandle->setLTI(1);
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
         scenes.emplace(std::piecewise_construct, std::make_tuple(spaceMapHandle),
                        std::make_tuple(_mapName, _resolution));
@@ -305,7 +305,7 @@ void SpaceServer::mapPersisted(Handle mapId)
 {
     // set LTI to a value that prevents the corresponding atom to be removed
     // from AtomSpace
-    atomspace->set_LTI(mapId, 1);
+    mapId->setLTI(1);
 }
 
 std::string SpaceServer::getMapIdString(Handle mapHandle) const
@@ -342,20 +342,9 @@ Handle SpaceServer::addPropertyPredicate(
         TruthValuePtr tv)
 {
     Handle ph = atomspace->add_node(PREDICATE_NODE, predicateName);
+    Handle ll =  atomspace->add_link(LIST_LINK, a, b);
+    Handle result = atomspace->add_link(EVALUATION_LINK, ph, ll);
+    result->setTruthValue(tv);
 
-    HandleSeq ll_out;
-    ll_out.push_back(a);
-    ll_out.push_back(b);
-
-    Handle ll =  atomspace->add_link(LIST_LINK, ll_out);
-
-    HandleSeq hs2;
-    hs2.push_back(ph);
-    hs2.push_back(ll);
-    Handle result = atomspace->add_link(EVALUATION_LINK, hs2);
-
-    atomspace->set_TV(result, tv);
-
-    //atomspace->set_LTI(result, 1);
     return result;
 }

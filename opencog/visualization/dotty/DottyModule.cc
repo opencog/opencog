@@ -61,7 +61,7 @@ public:
             // don't make nodes for binary links with no incoming
             LinkPtr l(LinkCast(a));
             if (l and l->getOutgoingSet().size() == 2 and
-                     space->get_incoming(h).size() == 0)
+                     h->getIncomingSetSize() == 0)
                 return false;
         }
 
@@ -94,9 +94,9 @@ public:
         LinkPtr l(LinkCast(a));
         if (l)
         {
-            const std::vector<Handle> &out = l->getOutgoingSet();
+            const HandleSeq &out = l->getOutgoingSet();
 
-            if (compact && out.size() == 2 and space->get_incoming(h).size() == 0)
+            if (compact and out.size() == 2 and h->getIncomingSetSize() == 0)
             {
                 ost << out[0] << " -> " << out[1] << " [label=\""
                     << classserver().getTypeName(a->getType()) << "\"];\n";
@@ -110,9 +110,10 @@ public:
         }
 
         if (withIncoming) {
-            HandleSeq hs = space->get_incoming(h);
+            HandleSeq hs;
+            h->getIncomingSet(back_inserter(hs));
             int i = 0;
-            for (Handle h : hs) {
+            for (const Handle& h : hs) {
                 ost << h << "->" << h << " [style=\"dotted\" label=\"" << i << "\"];\n";
                 i++;
             }
