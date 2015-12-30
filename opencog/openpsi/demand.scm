@@ -333,7 +333,7 @@
     (define rule-name-prefix
         (string-append (psi-prefix-str) demand-name "-rule-"))
     (define rule-name (string-append rule-name-prefix (random-string 5)))
-    (define (demand-node)
+    (define (demand-node) ; To prevent addition of node until needed.
         (ConceptNode (string-append (psi-prefix-str) demand-name)))
 
     (define (rule)
@@ -353,7 +353,7 @@
             action))
 
     (define (create-psi-action)
-        (let ((alias (ure-add-rule demand-node rule-name (rule) 1)))
+        (let ((alias (ure-add-rule (demand-node) rule-name (rule) 1)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))
@@ -385,8 +385,11 @@
         (cond ((and (= 1 (length node))
                     (string-prefix? rule-name-prefix (cog-name (car node))))
                      node)
-              ((= 0 (length node)) (create-psi-action))
-              (else (error "The rule has been defined multiple times"))
+              ((= 0 (length node))
+               (create-psi-action))
+              (else ; cleanup TODO: Make exaustive
+                  (cog-delete (rule))
+                  (error "The rule has been defined multiple times"))
         )
     )
 )
@@ -512,6 +515,7 @@
 (define-public (psi-action-maximize rate)
 "
   Returns an ExecutionOutputLink(the action) that increases the demand-value.
+  It has a increasing effect-type.
 
   rate:
   - A number for the percentage of change that a demand-value be updated with,
@@ -537,6 +541,7 @@
 (define-public (psi-action-minimize rate)
 "
   Returns an ExecutionOutputLink(the action) that decreases the demand-value.
+  It has a decreasing effect-type.
 
   rate:
   - A number for the percentage of change that a demand-value be updated with,
@@ -597,6 +602,9 @@
   Returns an ExecutionOutputLink(the action) that tries to maintain the value
   within the specified range. If the demand-value is within range then it does
   nothing.
+
+  It is mainily to be used as a default effect-type, as it can increase or
+  decrease the demand value.
 
   min-value:
   - A number for the minimum acceptable demand-value.
