@@ -22,7 +22,7 @@ For sample implementation of the framework see [here](main.scm).
 ### How are OpenPsi components represented in Atomese?
 1. Demand:
   * The representation is specified in the function `psi-demand-pattern` and
-    `define-psi-demand` that is defined [here](demand.scm).
+    `psi-demand` that is defined [here](demand.scm).
   * Each Demand is a URE rule-base as well. The actions that affect its values
     (demand-values) are a member of the rule-base.
   * It must have one default action-type, during definition, that characterizes
@@ -32,7 +32,7 @@ For sample implementation of the framework see [here](main.scm).
 2. Action:
   * An action is a URE rule for the demand it affects, with additional atoms
     specifying its effect-type and that it is an opencog-action. See the
-    function `define-psi-action` [here](demand.scm).
+    function `psi-action` [here](demand.scm).
   * It can have the effect type listed in `(psi-action-types)`
 
 3. Goal:
