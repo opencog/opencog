@@ -111,10 +111,10 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
         HandleSeq outgoing = a->get_outgoing(h);
         new_tc = targetConjunction(outgoing);
         // old link strength decays
-        old_tc = a->get_mean(h);
+        old_tc = h->getTruthValue()->getMean();
 		if (new_tc != old_tc) isDifferent = true;
 
-        if (convertLinks && a->get_LTI(h) < conversionThreshold) {
+        if (convertLinks and h->getAttentionValue()->getLTI() < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
             // inverse and symmetric links will convert between one
             // another when conjunction between sti values is correct
@@ -239,8 +239,8 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
 	log->fine("HebbianUpdatingAgent::targetConjunction");
 
-    for (Handle h: handles) {
-        sti = a->get_STI(h);
+    for (const Handle& h: handles) {
+        sti = h->getAttentionValue()->getSTI();
 
         // if none in attention return 0 at end
         if (sti > a->get_attentional_focus_boundary()) {
@@ -267,13 +267,12 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
     if (!inAttention) return 0.0f;
 
-
     // cap conjunction to range [-1,1]
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
+    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f",
+        normsti_v[0], normsti_v[1], tc);
 
     return tc;
-
 }

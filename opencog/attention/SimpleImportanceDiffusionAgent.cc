@@ -615,8 +615,8 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
 float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
         Handle h)
 {
-    strength_t strength = as->get_mean(h);
-    confidence_t confidence = as->get_confidence(h);
+    strength_t strength = h->getTruthValue()->getMean();
+    confidence_t confidence = h->getTruthValue()->getConfidence();
     
     return strength * confidence;
 }

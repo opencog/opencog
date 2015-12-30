@@ -59,7 +59,7 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
         new_tc = targetConjunction(outgoing);
 
         // old link strength decays
-        old_tc = a->get_mean(h);
+        old_tc = h->getTruthValue()->getMean();
         tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
         if (tc < 0.0f)
             tc = 0.0f;
