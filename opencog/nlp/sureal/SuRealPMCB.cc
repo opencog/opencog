@@ -126,14 +126,14 @@ static void get_all_nodes(const Handle& h, HandleSeq& node_list)
  */
 bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_link_h)
 {
-    logger().debug("[SuReal] In clause_match, looking at %s", grnd_link_h->toShortString().c_str());
+    logger().debug("[SuReal] In clause_match, looking at %s",
+        grnd_link_h->toShortString().c_str());
 
-    HandleSeq qISet = m_as->get_incoming(grnd_link_h);
+    HandleSeq qISet;
+    grnd_link_h->getIncomingSetByType(back_inserter(qISet), SET_LINK);
 
-    // keep only SetLink, and check if any of the SetLink has an InterpretationNode as neightbor
-    qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
-
-    // store the InterpretationNodes, will be needed if this grounding is accepted
+    // Store the InterpretationNodes, will be needed if this grounding
+    // is accepted.
     HandleSeq qTempInterpNodes;
 
     // helper lambda function to check for linkage to an InterpretationNode,
