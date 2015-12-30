@@ -405,11 +405,10 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     // helper to get the InterpretationNode
     auto getInterpretation = [&](const Handle& h)
     {
-        HandleSeq qISet = m_as->get_incoming(h);
-        qISet.erase(std::remove_if(qISet.begin(), qISet.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qISet.end());
+        HandleSeq qISet;
+        h->getIncomingSetByType(back_inserter(qISet), SET_LINK);
 
         HandleSeq results;
-
         for (auto& hSetLink : qISet)
         {
             HandleSeq qN = get_source_neighbors(hSetLink, REFERENCE_LINK);
@@ -642,7 +641,8 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
                 });
         };
 
-        HandleSeq qISet = m_as->get_incoming(c);
+        HandleSeq qISet;
+        c->getIncomingSet(back_inserter(qISet));
 
         // erase atoms that are neither a SetLink nor a target
         qISet.erase(std::remove_if(qISet.begin(), qISet.end(), rm), qISet.end());
