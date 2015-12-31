@@ -21,14 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ImportanceUpdatingAgent.h"
-
 #include <algorithm>
 #include <math.h>
 #include <time.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
+#include "ImportanceUpdatingAgent.h"
 
 #define DEBUG
 
@@ -380,8 +382,8 @@ void ImportanceUpdatingAgent::adjustLTIFunds(AtomSpace* a)
     taxAmount = (double) diff / (double) hs.size();
 
     for (Handle handle : hs) {
-        afterTax = a->get_LTI(handle) - getTaxAmount(taxAmount);
-        a->set_LTI(handle, afterTax);
+        afterTax = handle->getAttentionValue()->getLTI() - getTaxAmount(taxAmount);
+        handle->setLTI(afterTax);
     }
 
     log->info("AtomSpace LTI Funds were %d, now %d. All atoms taxed %.2f.",
@@ -677,7 +679,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a,
                                             const AgentSeq &agents, Handle h)
 {
     /* collect LTI */
-    AttentionValue::lti_t current = a->get_LTI(h);
+    AttentionValue::lti_t current = h->getAttentionValue()->getLTI();
     AttentionValue::lti_t exchangeAmount = -LTIAtomRent;
 
     for (size_t n = 0; n < agents.size(); n++) {
@@ -699,10 +701,10 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a,
         agents[n]->setAV(new_av);
     }
 
-    a->set_LTI(h, current + exchangeAmount);
+    h->setLTI(current + exchangeAmount);
 
     log->fine("Atom %s LTI old = %d, new = %d", a->get_name(h).c_str(), current,
-              a->get_LTI(h));
+              h->getAttentionValue()->getLTI());
 }
 
 bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
@@ -728,14 +730,14 @@ bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
 {
     AttentionValue::lti_t current;
 
-    current = a->get_LTI(h);
+    current = h->getAttentionValue()->getLTI();
     if (current > LTICap) {
-        a->set_LTI(h, LTICap);
+        h->setLTI(LTICap);
         log->fine("Atom LTI too high - old = %d, new = %d", current,
                   a->get_STI(h));
         return true;
     } else if (current < -LTICap) {
-        a->set_LTI(h, -LTICap);
+        h->setLTI(-LTICap);
         log->fine("Atom LTI too low - old = %d, new = %d", current,
                   a->get_STI(h));
         return true;

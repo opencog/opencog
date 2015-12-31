@@ -34,6 +34,10 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
+
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianCreationModule.h"

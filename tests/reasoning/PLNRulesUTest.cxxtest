@@ -92,6 +92,8 @@ void PLNRulesUTest::setUp()
 	eval.eval("(use-modules (opencog logger))");
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
+
 /**
  * Tests the deduction rule (deduction-rule) defined in:
  * opencog/reasoning/pln/rules/deduction-rule.scm
@@ -111,7 +113,7 @@ void PLNRulesUTest::test_deduction()
     
 	// To start with, it should only know that men are humans
 	results = eval.eval_h("(cog-bind find-humans)");
-	TS_ASSERT_EQUALS(1, as.get_arity(results));
+	TS_ASSERT_EQUALS(1, getarity(results));
     
 	// Apply the deduction rule
 	eval.eval_h("(cog-bind deduction-inheritance-rule)");
@@ -121,7 +123,7 @@ void PLNRulesUTest::test_deduction()
 	results = eval.eval_h("(cog-bind find-humans)");
 
 	// 4 in total, man, Peirce, Einstein, Socrates
-	TS_ASSERT_EQUALS(4, as.get_arity(results));
+	TS_ASSERT_EQUALS(4, getarity(results));
 }
 
 /**
@@ -143,7 +145,7 @@ void PLNRulesUTest::test_and_construction()
 	Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
 
 	// It should contain 1 groundings, and(A, B)
-	TS_ASSERT_EQUALS(1, as.get_arity(results));
+	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
@@ -165,7 +167,7 @@ void PLNRulesUTest::test_or_construction()
 	Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
 
 	// It should contain 1 groundings, or(A, B)
-	TS_ASSERT_EQUALS(1, as.get_arity(results));
+	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
@@ -187,7 +189,7 @@ void PLNRulesUTest::test_not_construction()
 	Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
 
 	// It should contain 2 groundings, not(A), not(B)
-	TS_ASSERT_EQUALS(2, as.get_arity(results));
+	TS_ASSERT_EQUALS(2, getarity(results));
 }
 
 /**
@@ -226,7 +228,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	 *          <some-concept>
 	 *          <some-predicate>
 	 */
-	TS_ASSERT_EQUALS(4, as.get_arity(results));
+	TS_ASSERT_EQUALS(4, getarity(results));
 }
 
 /**
@@ -259,7 +261,7 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 	 *             <some-concept>
 	 *             <some-predicate>
 	 */
-	TS_ASSERT_EQUALS(1, as.get_arity(results));
+	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 void PLNRulesUTest::test_forall_implication_to_higher_order()

@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>

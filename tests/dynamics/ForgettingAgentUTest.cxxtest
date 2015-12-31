@@ -29,6 +29,8 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/attention/ForgettingAgent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -166,7 +168,7 @@ public:
         count = 10;
         atoms = createNodes(&cogserver.getAtomSpace(), "forgetPercent", count);
         for (int i = 0; i < count; i++) {
-            cogserver.getAtomSpace().set_LTI(atoms[i], (AttentionValue::lti_t) i);
+            atoms[i]->setLTI(i);
         }
 
         agent->forgetPercentage = 0.20;
@@ -210,8 +212,7 @@ public:
         // threshold - 10 LTI)
         // Result: 90 left, first 10 handles in array invalid
         for (int i = 0; i < 10; i++) {
-            cogserver.getAtomSpace().set_LTI(atoms[i], (AttentionValue::lti_t)
-                agent->forgetThreshold - i);
+            atoms[i]->setLTI(agent->forgetThreshold - i);
         }
         count = 90;
 
@@ -252,8 +253,7 @@ public:
         // Case: 100 atoms, only 5 below threshold
         // Result: only 5 lost, first five invalid
         for (int i = 0; i < 5; i++) {
-            cogserver.getAtomSpace().set_LTI(atoms[i], (AttentionValue::lti_t)
-                agent->forgetThreshold);
+            atoms[i]->setLTI(agent->forgetThreshold);
         }
         count = 95;
         cogserver.runLoopStep();
@@ -275,8 +275,7 @@ public:
         // Case: 95 atoms, 15 below threshold
         // Result: 9 removed, 86 left, first 14 handles in array invalid
         for (int i = 5; i < 20; i++) {
-            cogserver.getAtomSpace().set_LTI(atoms[i], (AttentionValue::lti_t)
-                agent->forgetThreshold);
+            atoms[i]->setLTI(agent->forgetThreshold);
         }
         count = 86;
         cogserver.runLoopStep();

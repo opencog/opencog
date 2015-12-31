@@ -33,6 +33,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/attention/atom_types.h>
@@ -157,7 +158,7 @@ public:
 
         // Modify the atom's TruthValue
         TruthValuePtr newTV = SimpleTruthValue::createTV(5.1, 7.1);
-        as->set_TV(h, newTV);
+        h->setTruthValue(newTV);
 
         // Receive the event
         address = s_recv (subscriberTVChanged);

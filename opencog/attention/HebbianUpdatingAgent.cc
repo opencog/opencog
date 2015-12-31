@@ -22,11 +22,13 @@
  */
 #include <opencog/util/Config.h>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianUpdatingAgent.h"
@@ -111,16 +113,16 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
         HandleSeq outgoing = a->get_outgoing(h);
         new_tc = targetConjunction(outgoing);
         // old link strength decays
-        old_tc = a->get_mean(h);
+        old_tc = h->getTruthValue()->getMean();
 		if (new_tc != old_tc) isDifferent = true;
 
-        if (convertLinks && a->get_LTI(h) < conversionThreshold) {
+        if (convertLinks and h->getAttentionValue()->getLTI() < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
             // inverse and symmetric links will convert between one
             // another when conjunction between sti values is correct
             // (initially for hopfield emulation, but could
             // be useful in other cases)
-            if (a->get_type(h) == INVERSE_HEBBIAN_LINK) {
+            if (h->getType() == INVERSE_HEBBIAN_LINK) {
                 // if inverse normalised sti of source is negative
                 // (i.e. hebbian link is pointing in the wrong direction)
                 if (a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
@@ -128,7 +130,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", a->atom_as_string(h).c_str());
+                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", h->toString().c_str());
                         // save STI/LTI
                         AttentionValuePtr backupAV = h->getAttentionValue();
                         a->remove_atom(h);
@@ -184,9 +186,9 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // otherwise just update link weights
             // if inverse normalised sti of source is positive
             // (i.e. hebbian link is pointing in the right direction)
-            if (a->get_type(h) == INVERSE_HEBBIAN_LINK &&
+            if (h->getType() == INVERSE_HEBBIAN_LINK &&
                     a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
-				new_tc = -new_tc;
+					new_tc = -new_tc;
             }
             tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;
@@ -239,8 +241,8 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
 	log->fine("HebbianUpdatingAgent::targetConjunction");
 
-    for (Handle h: handles) {
-        sti = a->get_STI(h);
+    for (const Handle& h: handles) {
+        sti = h->getAttentionValue()->getSTI();
 
         // if none in attention return 0 at end
         if (sti > a->get_attentional_focus_boundary()) {
@@ -267,13 +269,12 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
     if (!inAttention) return 0.0f;
 
-
     // cap conjunction to range [-1,1]
     if (tc > 1.0f) tc = 1.0f;
     if (tc < -1.0f) tc = -1.0f;
 
-    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f", normsti_v[0], normsti_v[1], tc);
+    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f",
+        normsti_v[0], normsti_v[1], tc);
 
     return tc;
-
 }

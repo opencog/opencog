@@ -34,6 +34,9 @@
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "SimpleImportanceDiffusionAgent.h"
@@ -615,8 +618,8 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
 float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
         Handle h)
 {
-    strength_t strength = as->get_mean(h);
-    confidence_t confidence = as->get_confidence(h);
+    strength_t strength = h->getTruthValue()->getMean();
+    confidence_t confidence = h->getTruthValue()->getConfidence();
     
     return strength * confidence;
 }

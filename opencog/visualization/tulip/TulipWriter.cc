@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sstream>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -148,13 +149,14 @@ void TulipWriter::writeNodeNames()
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {
-        myfile << "(node " << h << " \"" << classserver().getTypeName(a.get_type(h)) 
+        myfile << "(node " << h << " \"" << classserver().getTypeName(h->getType()) 
             << "\" )" << endl;
     }
     myfile << ")" << endl;
 }
 
-void TulipWriter::writeDefaultColouring() {
+void TulipWriter::writeDefaultColouring()
+{
     // Define default colouring
     myfile << "(property  0 color \"viewColor\"" << endl;
     myfile << "(default \"(35,0,235,255)\" \"(0,0,0,128)\" )" << endl;
@@ -175,8 +177,9 @@ void TulipWriter::writeTruthValue()
     // Output strength component of truth value
     myfile << "(property  0 double \"strength\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
-    for (Handle h : handles) {
-        myfile << "  (node " << h << " \"" << a.get_mean(h) << "\")" << endl;
+    for (const Handle& h : handles) {
+        myfile << "  (node " << h << " \"" <<
+          h->getTruthValue()->getMean() << "\")" << endl;
     }
     myfile << ")" << endl;
 
@@ -191,8 +194,9 @@ void TulipWriter::writeTruthValue()
     for (Handle h : linkHandles) {
         // get outgoing set, for each destination add a link
         HandleSeq out = a.get_outgoing(h);
-        for (Handle d : out) {
-            myfile << "(edge " << h << d << " \"" << 1.0 / (a.get_mean(h)+0.0000001) << "\")" << endl;
+        for (const Handle& d : out) {
+            myfile << "(edge " << h << d << " \"" << 1.0 /
+              (h->getTruthValue()->getMean()+0.0000001) << "\")" << endl;
         }
     }
     myfile << ")" << endl;
@@ -200,11 +204,11 @@ void TulipWriter::writeTruthValue()
     // Output count component of truth value
     myfile << "(property  0 double \"count\"" << endl;
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
-    for (Handle h : handles) {
-        myfile << "  (node " << h << " \"" << a.get_confidence(h) << "\")" << endl;
+    for (const Handle& h : handles) {
+        myfile << "  (node " << h << " \"" <<
+           h->getTruthValue()->getConfidence() << "\")" << endl;
     }
     myfile << ")" << endl;
-   
 }
 
 void TulipWriter::writeShapes()

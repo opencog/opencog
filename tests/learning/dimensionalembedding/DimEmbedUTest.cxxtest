@@ -24,6 +24,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -199,7 +200,7 @@ public:
         TS_ASSERT(dimEmbed.isEmbedded(SIMILARITY_LINK));
         //Every node is a pivot, so every node should be nondisposable
         for(int i=0;i<7;i++) {
-            TS_ASSERT(atomSpace->get_VLTI(handles[i])
+            TS_ASSERT(handles[i]->getAttentionValue()->getVLTI()
                       != AttentionValue::DISPOSABLE);
         }
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
@@ -313,7 +314,7 @@ public:
         //We cleared the embedding, so the VLTI of each pivot should be back
         //to normal
         for (int i=0; i<7; i++) {
-            TS_ASSERT(atomSpace->get_VLTI(handles[i])
+            TS_ASSERT(handles[i]->getAttentionValue()->getVLTI()
                       ==AttentionValue::DISPOSABLE);
         }
     }

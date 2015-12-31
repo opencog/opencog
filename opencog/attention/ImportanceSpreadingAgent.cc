@@ -21,13 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ImportanceSpreadingAgent.h"
+#include <opencog/util/Config.h>
+#include <opencog/util/platform.h>
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
+
 #include <opencog/cogserver/server/CogServer.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/platform.h>
+
+#include "ImportanceSpreadingAgent.h"
 
 using namespace opencog;
 

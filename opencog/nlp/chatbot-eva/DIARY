@@ -838,6 +838,92 @@ variadic? optional?
 +       }
 variadic
 
+>>> connector match
+>>> arrow
+>>> typed atom of grounded schema. 
+
+(use-modules (opencog) (opencog query) (opencog exec))
+
+;; Create a type defintion for function `foo`.
+(TypedAtom
+	(GroundedSchema "scm: foo")
+	(Arrow
+		(ListLink (Type "ConceptNode") (Type "NumberNode"))
+		(EvaluationLink
+			(Type "PredicateNode")
+			(ListLink (Type "ConceptNode") (Type "ConceptNode")))))
+
+;; Create a conflicting type description. This should throw an error,
+;; since a type is already assigned.
+(TypedAtom
+	(GroundedSchema "scm: foo")
+	(Arrow
+		(ListLink (Type "ConceptNode") (Type "NumberNode"))
+		(EvaluationLink
+			(Type "PredicateNode")
+			(ListLink (Type "NumberNode") (Type "ConceptNode")))))
+
+(define (foo x y)
+	(display "Function `foo` got these args:\n")
+	(display x)
+	(display y)
+	(newline)
+	; Return an atom; however, the returned value is not what the
+	; type description is promising it to be.
+	(ConceptNode "Garbage return value!")
+)
+
+
+(define beta-form
+	(Put
+		(ExecutionOutput (GroundedSchema "scm: foo")
+			(ListLink (Variable "$x") (Variable "$y")))
+		(ListLink (NumberNode 13) (NumberNode 42))
+	))
+
+(cog-execute! beta-form)
+
+(define ev-t-nc
+	(SignatureLink
+		(EvaluationLink
+			(Type "PredicateNode")
+			(ListLink (Type "NumberNode") (Type "ConceptNode")))))
+
+(define ev-nc
+	(EvaluationLink (PredicateNode "foo")
+		(ListLink (NumberNode 13) (ConceptNode "bar"))))
+
+(define ev-cc
+	(EvaluationLink (PredicateNode "foo")
+		(ListLink (ConceptNode "fiddle") (ConceptNode "bar"))))
+
+(cog-value-is-type? ev-t-nc ev-nc)
+(cog-value-is-type? ev-t-nc ev-cc)
+
+==========================
+   // Blocking slave mode
+   define_scheme_primitive("set-slave-mode", &DistSCM::slave_mode,
+                           this, "dist-gearman");
+
+DistSCM::DistSCM(void)
+{
+   scm_with_guile(init_in_guile, this);
+}
+
+void* DistSCM::init_in_guile(void* self)
+{
+   scm_c_define_module("opencog dist-gearman", init_in_module, self);
+   scm_c_use_module("opencog dist-gearman");
+   return NULL;
+}
+
+
+instead, of above, just inherit from ModuleWrap
+
+ModuleWrap("opencog dist-gearman")
+
+
+==================================================
 
 bisect
 c1b9599be42c3fffb9b59bc25fc2b3d67854a112 is good
@@ -869,3 +955,27 @@ get_type
 get_mean
 get_confidence
 set_TV
+
+=====================================
+sureal: 8.57
+micro: 24.12
+
+0m8.365s   0m11.491s
+0m8.585s   0m11.591s
+0m8.512s   0m11.421s
+
+micro:
+0m23.651s 0m27.487s
+0m23.446s 0m27.582s
+
+
+
+R"( (WordNode "she") )")
+
+
+get_confidence
+get_mean
+
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
++#define getarity(hand) hand->getArity()
+

@@ -21,15 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ForgettingAgent.h"
-
 #include <algorithm>
 #include <sstream>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Config.h>
+#include "ForgettingAgent.h"
 
 using namespace opencog;
 
@@ -93,9 +95,9 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size(); i++) {
-        if (a->get_LTI(atomsVector[i]) <= forgetThreshold
+        if (atomsVector[i]->getAttentionValue()->getLTI() <= forgetThreshold
                 && count < removalAmount) {
-            if (a->get_VLTI(atomsVector[i]) == AttentionValue::DISPOSABLE ) {
+            if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE ) {
                 std::string atomName = a->atom_as_string(atomsVector[i]);
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important

@@ -116,27 +116,24 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  * Returns them with ascending LTI and if equal in LTI,
  * then sorted ascending by TruthValue.
  */
-struct ForgettingLTIThenTVAscendingSort {
+struct ForgettingLTIThenTVAscendingSort
+{
+    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
 
-    AtomSpace* a;
-
-    ForgettingLTIThenTVAscendingSort(AtomSpace* _a): a(_a) {};
-
-    bool operator()(const Handle& h1, const Handle& h2) {
+    bool operator()(const Handle& h1, const Handle& h2)
+    {
         AttentionValue::lti_t lti1, lti2;
-        float tv1, tv2;
 
         lti1 = h1->getAttentionValue()->getLTI();
         lti2 = h2->getAttentionValue()->getLTI();
-
-        tv1 = fabs(a->get_mean(h1));
-        tv2 = fabs(a->get_mean(h2));
-
         if (lti1 != lti2) return lti1 < lti2;
-
-        else return tv1 < tv2;
+        else {
+            float tv1, tv2;
+            tv1 = fabs(h1->getTruthValue()->getMean());
+            tv2 = fabs(h2->getTruthValue()->getMean());
+            return tv1 < tv2;
+        }
     }
-
 };
 
 /** @}*/

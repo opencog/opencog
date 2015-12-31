@@ -25,6 +25,8 @@
 #ifndef SIMPLEHEBBIANPDATINGAGENT_H_
 #define SIMPLEHEBBIANPDATINGAGENT_H_
 
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include "HebbianUpdatingAgent.h"
 
