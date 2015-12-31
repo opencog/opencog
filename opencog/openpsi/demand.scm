@@ -239,8 +239,9 @@
 "
   Returns the demand-ConceptNode that has been choosen for action presently.
 "
-    (define (get-psi-goal) (cog-execute!
-        (GetLink
+
+    (define (get-psi-goal) (cog-bind
+        (BindLink
             (VariableList (assoc-ref (psi-demand-pattern) "var"))
             (AndLink
                 (assoc-ref (psi-demand-pattern) "pat")
@@ -258,14 +259,15 @@
                 (EvaluationLink ; Act only if their is such a demand.
                     (GroundedPredicateNode "scm: psi-demand?")
                     (ListLink
-                        demand-var))))
+                        demand-var)))
+            demand-var)
     ))
 
     (let* ((set-link (get-psi-goal))
            (result (cog-outgoing-set set-link)))
 
           (cog-delete set-link)
-          (if (null? result) result (car result))
+          (if (null? result) result  (car result))
     )
 )
 
@@ -285,7 +287,7 @@
            decreasing of the demand-value as well, but wouldn't be known as
            such.
 "
-    ; NOTE: Update psi-update-asp and psi-get-all-actions
+    ; NOTE: Update psi-update-asp and psi-get-actions-all
     ; when adding other effect types.
     (list "Increase" "Decrease" "Default")
 )
@@ -428,10 +430,10 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-actions demand-node)
+(define-public (psi-get-actions-all demand-node)
 "
   Returns a list containing the 'Node atom-type atoms that name the action-rules
-  for the given demand-node.
+  for the given demand-node, with the exeception of the Default action.
 
   demand-node:
     - A ConceptNode that represents a demand.
@@ -545,7 +547,8 @@
 
   rate:
   - A number for the percentage of change that a demand-value be updated with,
-    on each step.
+    on each step. If an action with the same rate of has been defined for the
+    given demand a new action isn't created, but the old one returned.
 "
 
     (psi-action
@@ -596,7 +599,8 @@
 
   rate:
   - A number for the percentage of change that a demand-value be updated with,
-    on each step.
+    on each step. If an action with the same rate of has been defined for the
+    given demand a new action isn't created, but the old one returned.
 "
 
     (psi-action
