@@ -43,33 +43,33 @@ void CustomAtomTypesTester::createAtoms()
 
     Handle number_handle = as.add_node(NUMBER_NODE,"1");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atom_as_string(number_handle).c_str(), number_handle.value());
+            number_handle->toString().c_str(), number_handle.value());
 
     Handle foo_handle = as.add_node(FOO_NODE, "foo");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atom_as_string(foo_handle).c_str(), foo_handle.value());
+            foo_handle->toString().c_str(), foo_handle.value());
 
     Handle bar_handle = as.add_node(BAR_NODE, "bar");
     logger().info("[CustomAtomTypesTester] new node: %s (%d)",
-            as.atom_as_string(bar_handle).c_str(), bar_handle.value());
+            bar_handle->toString().c_str(), bar_handle.value());
 
     std::vector<Handle> v;
     v.push_back(foo_handle);
     v.push_back(bar_handle);
     Handle foobar_handle = as.add_link(FOOBAR_LINK, v);
     logger().info("[CustomAtomTypesTester] new link: %s (%d)",
-            as.atom_as_string(foobar_handle).c_str(), foobar_handle.value());
+            foobar_handle->toString().c_str(), foobar_handle.value());
 
     Handle list_handle = as.add_link(LIST_LINK, v);
     logger().info("[CustomAtomTypesTester] new link: %s (%d)",
-            as.atom_as_string(list_handle).c_str(), list_handle.value());
+            list_handle->toString().c_str(), list_handle.value());
 }
 
 static void dumpHandleSeq(HandleSeq& hs, const char *id)
 {
-    for( Handle handle: hs) {
+    for (const Handle& handle: hs) {
         logger().info("[CustomAtomTypesTester] %s: %s",
-                id, server().getAtomSpace().atom_as_string(handle).c_str());
+                id, handle->toString().c_str());
     }
 }
 
