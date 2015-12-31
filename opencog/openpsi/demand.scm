@@ -447,6 +447,15 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-get-actions-default)
+"
+  Returns the default actions for all the defined demands
+"
+    (append-map (lambda (x) (psi-get-actions x "Default"))
+        (psi-get-demands))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-select-actions demand-node gpn)
 "
   Select the actions that should be added to the active-schema-pool depending

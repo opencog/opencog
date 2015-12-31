@@ -11,10 +11,6 @@
   Create the active-schema-pool as a URE rulebase and return the ConceptNode
   representing it.
 "
-    (define (default-actions)
-        (append-map (lambda (x) (psi-get-actions x "Default"))
-            (psi-get-demands)))
-
     (let ((asp (ConceptNode (string-append (psi-prefix-str) "asp"))))
 
         (ure-define-rbs asp 1)
@@ -22,7 +18,7 @@
         ; Load all default actions because they should always run. If they
         ; aren't always.
         (if (null? (ure-rbs-rules asp))
-            (ure-add-rules asp (map (lambda (x) (cons x 1)) (default-actions))))
+            (ure-add-rules asp (map (lambda (x) (cons x 1)) (psi-get-actions-default))))
 
         asp
     )
@@ -54,6 +50,9 @@
   by removing all actions that are members of the known demand rule-bases,
   with the exception of default-actions, from the asp and replaces them by the
   list of actions passed.
+
+  If the action list passed is empty the asp isn't modified, because the policy
+  is that no change occurs without it being explicitly specified.
 
   asp:
   - The ConceptNode for the active-schema-pool.
@@ -147,7 +146,7 @@
 "
   Selects all actions for the set goal
 "
-    ;TODO Use psi-select-actions, and port as much as possible to atomes.
+    ;TODO Use psi-select-actions, and port as much as possible to atomese.
     (let ((goal (psi-current-goal))
           (selected-actions
               (psi-get-actions (psi-current-goal) (psi-current-effect-type))))
