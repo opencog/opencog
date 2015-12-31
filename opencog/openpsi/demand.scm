@@ -235,7 +235,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-current-goal)
+(define-public (psi-current-goal)
 "
   Returns the demand-ConceptNode that has been choosen for action presently.
 "
@@ -500,7 +500,7 @@
                 (Node (string-append (psi-prefix-str) "action-on-demand"))
                 (ListLink
                     (VariableNode "effect-type")
-                    (psi-get-current-goal))))
+                    (psi-current-goal))))
     ))
 
     (let* ((set-link (get-psi-action-type))
