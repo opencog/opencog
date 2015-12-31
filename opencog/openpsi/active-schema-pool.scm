@@ -52,7 +52,8 @@
   list of actions passed.
 
   If the action list passed is empty the asp isn't modified, because the policy
-  is that no change occurs without it being explicitly specified.
+  is that no change occurs without it being explicitly specified. This doesn't
+  and must not check to what goal is selected.
 
   asp:
   - The ConceptNode for the active-schema-pool.
@@ -60,20 +61,13 @@
   actions:
   - A list of actions nodes. The nodes are the alias nodes for the actions.
 "
-    (define (remove-node node) (cog-delete (MemberLink node asp)))
+    (define (remove-node node) (cog-delete-recursive (MemberLink node asp)))
     (define (add-node node) (begin (MemberLink node asp) node))
 
     (let* ((current-actions (ure-rbs-rules asp))
-           (all-actions
-               ;TODO update psi-get-actions-all  on replacing with appropriate
-               ; filter
-               (list-merge (par-map psi-get-actions-all (psi-get-demands))))
-           ; Because there might be rules added that aren't member of any
-           ; demand action-base and we don't want to remove the default actions.
-           (actions-to-keep
-                (lset-difference equal? current-actions all-actions))
+           (actions-to-keep (psi-get-actions-default))
            (actions-to-add
-                (lset-difference equal? actions actions-to-keep))
+                (lset-difference equal? actions current-actions))
            (final-asp (lset-union equal? actions-to-keep actions)))
 
            ; Remove actions except those that should be kept and those that
@@ -144,13 +138,17 @@
 ; --------------------------------------------------------------
 (define (psi-action-select)
 "
-  Selects all actions for the set goal
+  Selects all actions of current effect type and update the psi-asp.
 "
     ;TODO Use psi-select-actions, and port as much as possible to atomese.
     (let ((goal (psi-current-goal))
-          (selected-actions
-              (psi-get-actions (psi-current-goal) (psi-current-effect-type))))
+          (effect-type (psi-current-effect-type))
+          (asp (psi-asp)))
 
-    (psi-update-asp (psi-asp) selected-actions)
+        ; If default effect-type then add only the default actions.
+        (if (equal? effect-type "Default")
+            (psi-update-asp  asp (psi-get-actions-default))
+            (psi-update-asp  asp (psi-get-actions goal effect-type))
+        )
     )
 )
