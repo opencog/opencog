@@ -31,6 +31,7 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/oc_assert.h>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/TruthValue.h>
 

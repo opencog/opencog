@@ -28,6 +28,7 @@
 #include <string>
 #include <utility>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>

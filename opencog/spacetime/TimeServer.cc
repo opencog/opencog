@@ -202,12 +202,12 @@ bool TimeServer::removeTimeInfo(Handle h,
         Handle atTimeLink = getAtTimeLink(*itr, timeDomain);
         DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
         if (atomspace->is_valid_handle(atTimeLink)) {
-	    Handle timeNode = atomspace->get_outgoing(atTimeLink, 0);
+	    Handle timeNode = LinkCast(atTimeLink)->getOutgoingAtom(0);
             DPRINTF("Got timeNode = %lu\n", timeNode.value());
             OC_ASSERT(atomspace->is_valid_handle(timeNode)
                       and timeNode->getType() == TIME_NODE,
                       "TimeServer::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
-            int arityOfTimeLink = atomspace->get_arity(atTimeLink);
+            int arityOfTimeLink = LinkCast(atTimeLink)->getArity();
 
             if (timeDomain == DEFAULT_TIMEDOMAIN) {
                 //single time domain; should have 2 arities

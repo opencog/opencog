@@ -34,6 +34,9 @@
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "SimpleImportanceDiffusionAgent.h"

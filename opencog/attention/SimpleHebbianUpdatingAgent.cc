@@ -23,6 +23,7 @@
  */
 
 #include <opencog/attention/atom_types.h>
+
 #include "SimpleHebbianUpdatingAgent.h"
 
 using namespace opencog;
@@ -53,7 +54,7 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
 
     // for each hebbian link, find targets, work out conjunction and convert
     // that into truthvalue change. the change should be based on existing TV.
-    for (Handle h : links) {
+    for (const Handle& h : links) {
         // get out going set
         HandleSeq outgoing = a->get_outgoing(h);
         new_tc = targetConjunction(outgoing);

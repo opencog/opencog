@@ -66,17 +66,20 @@ SuRealPMCB::~SuRealPMCB()
  */
 bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
-    logger().debug("[SuReal] In variable_match, looking at %s", hSoln->toShortString().c_str());
+    logger().debug("[SuReal] In variable_match, looking at %s",
+          hSoln->toShortString().c_str());
 
-    // reject if the solution is not of the same type
+    // Reject if the solution is not of the same type.
     if (hPat->getType() != hSoln->getType())
         return false;
 
-    // VariableNode can be matched to any VariableNode, similarly for InterpretationNode
-    if (hPat->getType() == VARIABLE_NODE || hPat->getType() == INTERPRETATION_NODE)
+    // VariableNode can be matched to any VariableNode, similarly
+    // for InterpretationNode
+    if (hPat->getType() == VARIABLE_NODE or
+        hPat->getType() == INTERPRETATION_NODE)
         return true;
 
-    std::string sSoln = m_as->get_name(hSoln);
+    std::string sSoln = NodeCast(hSoln)->getName();
 
     // get the corresponding WordInstanceNode for hSoln
     Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
@@ -178,10 +181,11 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         auto it = m_words.find(hPatNode);
         if (it == m_words.end())
         {
-            std::string sPat = m_as->get_name(hPatNode);
+            std::string sPat = NodeCast(hPatNode)->getName();
             std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
 
-            // get the WordNode associated with the word (extracted from "word@1234" convention)
+            // Get the WordNode associated with the word
+            // (extracted from "word@1234" convention).
             hPatWordNode = m_as->get_handle(WORD_NODE, sPatWord);
 
             m_words.insert({hPatNode, hPatWordNode});
@@ -189,7 +193,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         else hPatWordNode = it->second;
 
         // get the corresponding WordInstanceNode of the solution node
-        std::string sSoln = m_as->get_name(hSolnNode);
+        std::string sSoln = NodeCast(hSolnNode)->getName();
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
         // if the node is a variable, it would have matched to a node with
@@ -296,8 +300,12 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
 
             auto insertHelper = [&](const Handle& h)
             {
-                HandleSeq q = m_as->get_outgoing(h);
-                qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+                LinkPtr lp(LinkCast(h));
+                if (lp)
+                {
+                    const HandleSeq& q = lp->getOutgoingSet();
+                    qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
+                }
             };
 
             std::for_each(qOr.begin(), qOr.end(), insertHelper);
@@ -317,7 +325,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
             // check if hDisjunct is LgAnd or just a lone connector
             if (hDisjunct->getType() == LG_AND)
             {
-                HandleSeq q = m_as->get_outgoing(hDisjunct);
+                const HandleSeq& q = LinkCast(hDisjunct)->getOutgoingSet();
                 sourceConns = std::list<Handle>(q.begin(), q.end());
             }
             else
@@ -350,15 +358,17 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
                     return false;
                 }
 
-                // pop only the target connector if we were repeating a multi-conn
+                // pop only the target connector if we were repeating
+                // a multi-conn.
                 if (hMultiConn != Handle::UNDEFINED)
                 {
                     targetConns.pop_front();
                     continue;
                 }
 
-                // dumb hacky way of checking of the connector is a multi-connector
-                if (m_as->get_outgoing(sourceConns.front()).size() == 3)
+                // dumb hacky way of checking of the connector is
+                // a multi-connector
+                if (LinkCast(sourceConns.front())->getArity() == 3)
                     hMultiConn = sourceConns.front();
 
                 sourceConns.pop_front();

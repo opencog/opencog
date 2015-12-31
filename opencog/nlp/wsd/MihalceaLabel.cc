@@ -145,7 +145,7 @@ bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 
 bool MihalceaLabel::have_sense(const Handle& h)
 {
-	if (atom_space->get_type(h) == WORD_SENSE_LINK) return true;
+	if (h->getType() == WORD_SENSE_LINK) return true;
 	return false;
 }
 

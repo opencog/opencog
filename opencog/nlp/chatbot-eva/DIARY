@@ -972,3 +972,10 @@ micro:
 
 R"( (WordNode "she") )")
 
+
+get_confidence
+get_mean
+
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
++#define getarity(hand) hand->getArity()
+

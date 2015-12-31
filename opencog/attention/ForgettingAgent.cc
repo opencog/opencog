@@ -21,15 +21,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ForgettingAgent.h"
-
 #include <algorithm>
 #include <sstream>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Config.h>
+#include "ForgettingAgent.h"
 
 using namespace opencog;
 

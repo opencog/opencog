@@ -114,10 +114,17 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        as.get_handles_by_name
-            (std::back_inserter(_handles), name.c_str(), type, subtypes);
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                 Handle h(as.get_handle(t, name));
+                 if (h) _handles.push_back(h); }, type);
+
     } else if (name != "") {     // filter by name
-        as.get_handles_by_name(std::back_inserter(_handles), name.c_str(), ATOM, true);
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                 Handle h(as.get_handle(t, name));
+                 if (h) _handles.push_back(h); }, NODE);
+
     } else if (type != NOTYPE) { // filter by type
         as.get_handles_by_type(std::back_inserter(_handles), type, subtypes);
     } else {
@@ -139,7 +146,7 @@ void ListRequest::sendOutput()
     if (_mimeType == "text/plain") {
         AtomSpace& as = _cogserver.getAtomSpace();
         for (Handle& h : _handles) {
-            oss << as.atom_as_string(h) << std::endl;
+            oss << h->toString() << std::endl;
         }
     } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
             _mimeType.c_str());

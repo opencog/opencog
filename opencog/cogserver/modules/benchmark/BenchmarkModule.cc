@@ -112,7 +112,7 @@ int BenchmarkModule::updateSTITestConcurrent()
         [this](Handle handle)
     {
         int newSTI = rand() % 1000;
-        as->set_STI(handle, newSTI);
+        handle->setSTI(newSTI);
     });
 
     return atoms.size();

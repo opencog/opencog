@@ -22,11 +22,13 @@
  */
 #include <opencog/util/Config.h>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianUpdatingAgent.h"
@@ -120,7 +122,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // another when conjunction between sti values is correct
             // (initially for hopfield emulation, but could
             // be useful in other cases)
-            if (a->get_type(h) == INVERSE_HEBBIAN_LINK) {
+            if (h->getType() == INVERSE_HEBBIAN_LINK) {
                 // if inverse normalised sti of source is negative
                 // (i.e. hebbian link is pointing in the wrong direction)
                 if (a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
@@ -128,7 +130,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", a->atom_as_string(h).c_str());
+                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", h->toString().c_str());
                         // save STI/LTI
                         AttentionValuePtr backupAV = h->getAttentionValue();
                         a->remove_atom(h);
@@ -184,9 +186,9 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // otherwise just update link weights
             // if inverse normalised sti of source is positive
             // (i.e. hebbian link is pointing in the right direction)
-            if (a->get_type(h) == INVERSE_HEBBIAN_LINK &&
+            if (h->getType() == INVERSE_HEBBIAN_LINK &&
                     a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
-				new_tc = -new_tc;
+					new_tc = -new_tc;
             }
             tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
             if (tc < 0.0f) tc = 0.0f;

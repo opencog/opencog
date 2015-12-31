@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sstream>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 

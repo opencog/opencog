@@ -134,7 +134,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
     // It is possible to keep the clauses in a SetLink and override the PM's
     // link_match() callback to skip SetLink's arity check , but that would
     // be assuming R2L will never use SetLink for other purposes.
-    HandleSeq qClauses = pAS->get_outgoing(h);
+    const HandleSeq& qClauses = LinkCast(h)->getOutgoingSet();
 
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
@@ -159,10 +159,11 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         // special treatment for DefinedLinguisticConceptNode and
         // DefinedLinguisticPredicateNode, do not treat them as variables
         // because they are not actual words of a sentence.
-        if (n->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE || n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
+        if (n->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE or
+            n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = pAS->get_name(n);
+        std::string sName = NodeCast(n)->getName();
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
 
@@ -200,7 +201,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return pAS->get_arity(qi[0]) < pAS->get_arity(qj[0]);
+        return LinkCast(qi[0])->getArity() < LinkCast(qj[0])->getArity();
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);
