@@ -1,6 +1,8 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
-(use-modules (rnrs sorting)) ; needed for sorting demands by their values.
+(use-modules (ice-9 threads)) ; For `par-map`
+(use-modules (rnrs sorting)) ; For sorting demands by their values.
+
 (use-modules (opencog) (opencog exec) (opencog rule-engine))
 
 (load-from-path "openpsi/utilities.scm")
@@ -187,7 +189,7 @@
 
   gpn:
     - GroundedPredicateNode that names an goal-selection function that will
-      choose the demands . Its function should take a single demand-ConceptNode
+      choose the demands. Its function should take a single demand-ConceptNode
       and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
       in addition to tagging the demand-ConceptNodes as one of the action-types.
       For example,
@@ -216,8 +218,7 @@
     ; demand-value could possibly be used for that.
     (define (get-demand) (psi-clean-demand-gets (cog-execute!
         (GetLink
-            (VariableList
-                (assoc-ref (psi-demand-pattern) "var"))
+            (VariableList (assoc-ref (psi-demand-pattern) "var"))
             (AndLink
                 (assoc-ref (psi-demand-pattern) "pat")
                 (EvaluationLink
@@ -226,7 +227,7 @@
 
     ; check arguments
     (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " gpn))
+        (error "Expected GroundedPredicateNode got: " gpn))
 
     ; TODO: 1. deal with multiple returns
     ;       2. check if the demadns have ben correctly tagged  instead add psi-register-goal-selector
@@ -238,32 +239,33 @@
 "
   Returns the demand-ConceptNode that has been choosen for action presently.
 "
-   (define (get-psi-goal) (cog-execute!
-      (GetLink
-        demand-type
-        (AndLink
-            (StateLink
-                (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ChoiceLink
+    (define (get-psi-goal) (cog-execute!
+        (GetLink
+            (VariableList (assoc-ref (psi-demand-pattern) "var"))
+            (AndLink
+                (assoc-ref (psi-demand-pattern) "pat")
+                (StateLink
+                    (Node (string-append (psi-prefix-str) "action-on-demand"))
+                    (ChoiceLink
+                        (ListLink
+                            (ConceptNode
+                                (string-append (psi-prefix-str) "Decrease"))
+                            demand-var)
+                        (ListLink
+                            (ConceptNode
+                                (string-append (psi-prefix-str) "Increase"))
+                            demand-var)))
+                (EvaluationLink ; Act only if their is such a demand.
+                    (GroundedPredicateNode "scm: psi-demand?")
                     (ListLink
-                        (ConceptNode
-                            (string-append (psi-prefix-str) "Decrease"))
-                        demand-var)
-                    (ListLink
-                        (ConceptNode
-                            (string-append (psi-prefix-str) "Increase"))
-                        demand-var)))
-            (EvaluationLink ; Act only if their is such a demand.
-                (GroundedPredicateNode "scm: psi-demand?")
-                (ListLink
-                    demand-var))))
+                        demand-var))))
     ))
 
     (let* ((set-link (get-psi-goal))
-          (result (car (cog-outgoing-set set-link)))
-          )
+           (result (cog-outgoing-set set-link)))
+
           (cog-delete set-link)
-          result
+          (if (null? result) result (car result))
     )
 )
 
@@ -459,7 +461,7 @@
 
     ; Check arguments
     (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " gpn))
+        (error "Expected GroundedPredicateNode got: " gpn))
 
     (cog-outgoing-set (cog-execute!
         (GetLink
@@ -607,7 +609,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-effect-keep-within min-value max-value rate)
+(define-public (psi-effect-keep-range min-value max-value rate)
 "
   Returns an ExecutionOutputLink(the action) that tries to maintain the value
   within the specified range. If the demand-value is within range then it does

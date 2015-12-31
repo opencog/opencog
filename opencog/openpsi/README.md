@@ -19,7 +19,7 @@ is similar to `Belief + Intention ==> Desire`.
 ### Usage
 For sample implementation of the framework see [here](main.scm).
 
-### How are OpenPsi components represented in Atomese?
+### OpenPsi components
 1. Demand:
   * The representation is specified in the function `psi-demand-pattern` and
     `psi-demand` that is defined [here](demand.scm).
@@ -30,10 +30,14 @@ For sample implementation of the framework see [here](main.scm).
     could act on it.
 
 2. Action:
-  * An action is a URE rule for the demand it affects, with additional atoms
-    specifying its effect-type and that it is an opencog-action. See the
-    function `psi-action` [here](demand.scm).
-  * It can have the effect type listed in `(psi-action-types)`
+  * An action is a URE rule for the demand it affects, or is dependent on for
+    being driven. In addtion it has additional atoms for the purpose of
+    specifying its action-type and that it is an opencog-action. See the
+    function `psi-action` for defining a new action [here](demand.scm).
+  * It can have the effect types listed in `(psi-action-types)`.
+  * Three action-effects are pre-defined and they are `psi-effect-maximize`,
+    `psi-effect-minimize` and `psi-effect-keep-range` see [here](demand.scm).
+    You can define
 
 3. Goal:
   * A goal is a demand chosen for a particular action effect-type. See the
@@ -41,7 +45,6 @@ For sample implementation of the framework see [here](main.scm).
   * For goal-selection, you can choose what the criteria for choosing a goal by
     defining a function in a GroundedPredicateNode and passing to
     `psi-select-goal`.
-
 
 4. OpenPsi's active-schema-pool:
   * This is a separate URE rule-base, and not a demand rule-base. It is
@@ -52,4 +55,3 @@ For sample implementation of the framework see [here](main.scm).
 
 5. Modulator and Feeling representation:
 Coming soon :-)
-```

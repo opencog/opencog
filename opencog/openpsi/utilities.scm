@@ -6,10 +6,11 @@
 ; @date   2011-11-25
 ;
 
-(use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1)) ; for set-difference
 
+(use-modules (opencog) (opencog rule-engine))
 
+; --------------------------------------------------------------
 ; Initialize seed of pseudo-random generator using current time
 (let ( (time (gettimeofday) )
      )
@@ -121,21 +122,21 @@
              )
              (previous_demand_satisfaction (random:uniform) ) ; initialize with random values
              (current_demand_satisfaction (random:uniform) )
-             (energy (get_truth_value_mean (cog-tv EnergyDemandGoal)) )
-             (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
+             (energy (tv-mean (cog-tv EnergyDemandGoal)) )
+             (integrity (tv-mean (cog-tv IntegrityDemandGoal)) )
           )
 
           ; set previous demand satisfaction (if available)
           (if (not (null? previous_demand_evaluation_link) )
               (set! previous_demand_satisfaction
-                  (get_truth_value_mean (cog-tv previous_demand_evaluation_link))
+                  (tv-mean (cog-tv previous_demand_evaluation_link))
               )
           )
 
           ; set current demand satisfaction (if available)
           (if (not (null? current_demand_evaluation_link) )
               (set! current_demand_satisfaction
-                  (get_truth_value_mean (cog-tv current_demand_evaluation_link))
+                  (tv-mean (cog-tv current_demand_evaluation_link))
               )
           )
 
@@ -153,30 +154,30 @@
 ; --------------------------------------------------------------
 ; Return a random member of the given list,
 ; return an empty list, if the given list is empty.
-(define (random_select selection_list)
-    (if (null? selection_list)
+(define (random-select selection-list)
+    (if (null? selection-list)
         (list)
 
-        (list-ref selection_list
-            (random (length selection_list) )
+        (list-ref selection-list
+            (random (length selection-list) )
         )
     )
 )
 
 ; Given a list of atoms l return the atom with the lowest TV strengh
 (define (atom_with_lowest_tv_mean l)
-  (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv atom))))
+  (min-element-by-key l (lambda (atom) (tv-mean (cog-tv atom))))
 )
 
 ; Given a list of atoms l return the atom with the lowest TV strengh
 (define (atom_with_highest_tv_mean l)
-  (max-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  (max-element-by-key l (lambda (atom) (tv-mean (cog-tv))))
 )
 
 ; Given a list of atoms l return them sorted by TVs (ascending order)
 (define (sort_by_tv l)
-  (sort l (lambda (a1 a2) (>=  (get_truth_value_mean (cog-tv a1))
-                               (get_truth_value_mean (cog-tv a2))
+  (sort l (lambda (a1 a2) (>=  (tv-mean (cog-tv a1))
+                               (tv-mean (cog-tv a2))
                                )
                   )
         )
@@ -191,6 +192,21 @@
   results of `par-map`. For single threaded map use `append-map`.
 "
     (fold append '() list-of-list)
+)
+
+; --------------------------------------------------------------
+(define (cog-tv-mean> mean1 mean2)
+    (if (> mean1 mean2)
+        (stv 1 1)
+        (stv 1 0)
+    )
+)
+
+(define (cog-tv-mean< mean1 mean2)
+    (if (< mean1 mean2)
+        (stv 1 1)
+        (stv 1 0)
+    )
 )
 
 ; --------------------------------------------------------------
