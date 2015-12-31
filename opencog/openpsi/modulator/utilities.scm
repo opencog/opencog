@@ -16,6 +16,8 @@
 ; A higher activation would lead to few details and less schematic depth.
 ;
 
+(use-modules (srfi srfi-1))   ; For `remove!`
+
 ; This replaces what was done by the different StimulusUpdaterAgent
 ; If the factor is < 1 then the modulator values will continuesely decrease.
 ; XXX: What is the criteria for choosing the default factor value??
@@ -29,8 +31,8 @@
 )
 
 (define (ActivationModulatorUpdater)
-;    (* (get_truth_value_mean (cog-tv CertaintyDemandGoal))
-;           (expt (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.5)
+;    (* (tv-mean (cog-tv CertaintyDemandGoal))
+;           (expt (tv-mean (cog-tv CompetenceDemandGoal)) 0.5)
 ;    )
     (let ((competence (tv-mean (cog-tv (ConceptNode "OpenPsi: Competence"))))
            (energy (tv-mean (cog-tv (ConceptNode "OpenPsi: Energy"))))
@@ -72,8 +74,8 @@
 ; concerns more about background changes, that is lower securing threshold.
 
 (define (SecuringThresholdModulatorUpdater)
-;    (* (expt (get_truth_value_mean (cog-tv CertaintyDemandGoal)) 0.5)
-;       (expt (get_truth_value_mean (cog-tv IntegrityDemandGoal)) 2)
+;    (* (expt (tv-mean (cog-tv CertaintyDemandGoal)) 0.5)
+;       (expt (tv-mean (cog-tv IntegrityDemandGoal)) 2)
 ;    )
     (let ( (certainty (tv-mean (cog-tv (ConceptNode "OpenPsi: Certainty"))))
            (integrity (tv-mean (cog-tv (ConceptNode "OpenPsi: Integrity"))))
@@ -97,7 +99,7 @@
 ; Lower competence causes lower selection threshold, that is tend to more random behaviour.
 
 (define (SelectionThresholdModulatorUpdater)
-;    (clip_within (* (+ (get_truth_value_mean (cog-tv CompetenceDemandGoal)) 0.1)
+;    (clip_within (* (+ (tv-mean (cog-tv CompetenceDemandGoal)) 0.1)
 ;                    (+ (get_latest_predicate_truth_value_mean "ActivationModulator") 0.3)
 ;                 )
 ;
@@ -105,7 +107,7 @@
 ;                 1
 ;    )
 
-;    (let ( (competence (get_truth_value_mean (cog-tv CompetenceDemandGoal)) )
+;    (let ( (competence (tv-mean (cog-tv CompetenceDemandGoal)) )
 ;           (activation (get_latest_predicate_truth_value_mean "ActivationModulator") )
 ;         )
 ;         (* (/ activation (+ activation 0.05) )

@@ -1,5 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(load-from-path "openpsi/modulator/utilities.scm")
+
 ; Define the OpenPsi-Modulator Activation.
 (define-psi-modulator "Activation" 0.5 )
 

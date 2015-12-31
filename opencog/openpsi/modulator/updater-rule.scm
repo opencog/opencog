@@ -1,5 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(load-from-path "openpsi/modulator/utilities.scm")
+
 (define psi-modulator-updater-rule
     (BindLink
         (VariableList
@@ -31,9 +33,6 @@
         )
     )
 )
-
-; Rule Name
-(DefineLink (Node "psi-modulator-updater-rule") psi-modulator-updater-rule)
 
 (define (psi-modulator-updater modulator)
     ; The strength of the stv is the stimulus level, & confidence is always 1.

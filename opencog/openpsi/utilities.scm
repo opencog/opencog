@@ -6,6 +6,12 @@
 ; @date   2011-11-25
 ;
 
+(use-modules (ice-9 regex)) ; For string-match
+(use-modules (srfi srfi-1)) ; For set-difference
+
+(use-modules (opencog) (opencog rule-engine))
+
+; --------------------------------------------------------------
 ; Initialize seed of pseudo-random generator using current time
 (let ( (time (gettimeofday) )
      )
@@ -17,14 +23,13 @@
 )
 
 ; --------------------------------------------------------------
-;
 ; Fuzzy logic related functions
-;
-
+; --------------------------------------------------------------
 ; Return the probability of x equals to t (the target number)
 ; fuzzy_equal(x,t,a) = 1/(1+a(x-t)^2)
 ; a is the  parameter, the bigger a, the closer to crisp set
-; After plotting via gnuplot for a while, it seems for t falls in [0,1], a=100 is a good choice
+; After plotting via gnuplot for a while, it seems for t falls in [0,1], a=100
+; is a good choice
 (define (fuzzy_equal x t a)
     (/ 1
         (+ 1
@@ -33,7 +38,7 @@
     )
 )
 
-; Ruturn the probability x falls in [min, max]
+; Return the probability x falls in [min, max]
 ; a is the parameter, the bigger a, the closer to crisp set
 ; For x falls in [0,1], a=100 seems a good choice
 (define (fuzzy_within x min_value max_value a)
@@ -107,7 +112,6 @@
 )
 
 ; --------------------------------------------------------------
-
 ; Get pleasure based on previously/ currently selected demand goal
 ;
 (define (get_pleasure_value)
@@ -119,21 +123,21 @@
              )
              (previous_demand_satisfaction (random:uniform) ) ; initialize with random values
              (current_demand_satisfaction (random:uniform) )
-             (energy (get_truth_value_mean (cog-tv EnergyDemandGoal)) )
-             (integrity (get_truth_value_mean (cog-tv IntegrityDemandGoal)) )
+             (energy (tv-mean (cog-tv EnergyDemandGoal)) )
+             (integrity (tv-mean (cog-tv IntegrityDemandGoal)) )
           )
 
           ; set previous demand satisfaction (if available)
           (if (not (null? previous_demand_evaluation_link) )
               (set! previous_demand_satisfaction
-                  (get_truth_value_mean (cog-tv previous_demand_evaluation_link))
+                  (tv-mean (cog-tv previous_demand_evaluation_link))
               )
           )
 
           ; set current demand satisfaction (if available)
           (if (not (null? current_demand_evaluation_link) )
               (set! current_demand_satisfaction
-                  (get_truth_value_mean (cog-tv current_demand_evaluation_link))
+                  (tv-mean (cog-tv current_demand_evaluation_link))
               )
           )
 
@@ -146,71 +150,76 @@
     )
 )
 
-; --------------------------------------------------------------;
+; --------------------------------------------------------------
 ; Miscellaneous
-;
-
+; --------------------------------------------------------------
 ; Return a random member of the given list,
 ; return an empty list, if the given list is empty.
-(define (random_select selection_list)
-    (if (null? selection_list)
+(define (random-select selection-list)
+    (if (null? selection-list)
         (list)
 
-        (list-ref selection_list
-            (random (length selection_list) )
+        (list-ref selection-list
+            (random (length selection-list) )
         )
     )
 )
 
 ; Given a list of atoms l return the atom with the lowest TV strengh
 (define (atom_with_lowest_tv_mean l)
-  (min-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv atom))))
+  (min-element-by-key l (lambda (atom) (tv-mean (cog-tv atom))))
 )
 
 ; Given a list of atoms l return the atom with the lowest TV strengh
 (define (atom_with_highest_tv_mean l)
-  (max-element-by-key l (lambda (atom) (get_truth_value_mean (cog-tv))))
+  (max-element-by-key l (lambda (atom) (tv-mean (cog-tv))))
 )
 
 ; Given a list of atoms l return them sorted by TVs (ascending order)
 (define (sort_by_tv l)
-  (sort l (lambda (a1 a2) (>=  (get_truth_value_mean (cog-tv a1))
-                               (get_truth_value_mean (cog-tv a2))
+  (sort l (lambda (a1 a2) (>=  (tv-mean (cog-tv a1))
+                               (tv-mean (cog-tv a2))
                                )
                   )
         )
 )
 
-
 ; --------------------------------------------------------------
 ; Helper Functions
 ; --------------------------------------------------------------
-(define (psi-clean-demand-gets set-link)
+(define (list-merge list-of-list)
 "
-  Returns a list aftering removing the 'SetLink + 'ListLink + 'NumberNode
-  from result of `cog-execute!` of 'GetLink wrapping psi-demand-pattern with or
-  without additional clauses.
-
-  set-link:
-    - A 'SetLink that is a result of running `cog-execute!` of 'GetLink
-      wrapping psi-demand-pattern.
+  A helper function for merging list of lists into a single list. Specially for
+  results of `par-map`. For single threaded map use `append-map`.
 "
-; TODO: Make this generic for pattern gets
-    (define (list-merge list-of-list) (fold append '() list-of-list))
-    (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
-    (remove! is-nn?
-        (list-merge (map cog-outgoing-set (cog-outgoing-set set-link))))
+    (fold append '() list-of-list)
 )
 
 ; --------------------------------------------------------------
-(define (psi-prefix-str)
+(define (cog-tv-mean> mean1 mean2)
+    (if (> mean1 mean2)
+        (stv 1 1)
+        (stv 1 0)
+    )
+)
+
+(define (cog-tv-mean< mean1 mean2)
+    (if (< mean1 mean2)
+        (stv 1 1)
+        (stv 1 0)
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-prefix-str)
 "
   Returns the string used as a prefix to all OpenPsi realted atom definition
 "
     "OpenPsi: "
 )
 
-(define (psi-suffix-str a-string)
+; --------------------------------------------------------------
+(define-public (psi-suffix-str a-string)
 "
   Returns the suffix of that follows `psi-prefix-str` sub-string.
 
@@ -225,176 +234,4 @@
                 "\"" (psi-prefix-str) "\"") )
         )
     )
-)
-
-; --------------------------------------------------------------
-; Functions for OpenPsi active-schema-pool
-; --------------------------------------------------------------
-(define (psi-run)
-"
-  The main function that runs OpenPsi active-schema-pool. The active-schema-pool
-  is a rulebase, that is modified depending on the demand-values, on every
-  cogserver cycle.
-"
-
-    (cog-fc (SetLink)
-        (ConceptNode (string-append (psi-prefix-str) "active-schema-pool"))
-        (SetLink))
-)
-
-; --------------------------------------------------------------
-(define (psi-select-goal gpn)
-"
-  Goal are defined as demands choosen for either increase or decrease in
-  their demand values. The choice for being the current-goal is made by pattern
-  matching over the demands by using the GroundedPredicateNode passed as a
-  constraint.
-
-  The GroundedPredicateNode passed should tag the demands for increase or
-  decrease by evaluating the demands that satisfy the conditions set through
-  its goal-selection function. The function should tag the goal representing
-  atom (the demand-ConceptNode) for being increased or decreased.
-
-  gpn:
-    - GroundedPredicateNode that names an goal-selection function that will
-      choose the demands . Its function should take a single demand-ConceptNode
-      and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
-      in addition to tagging the demand-ConceptNodes as either,
-
-      (StateLink
-          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
-          (ListLink
-              (ConceptNode (string-append (psi-prefix-str) \"Increase\"))
-              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
-
-      (StateLink
-          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
-          (ListLink
-              (ConceptNode (string-append (psi-prefix-str) \"Decrease\"))
-              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
-
-      The tags are necessary because, that is the means for signaling what type
-      of actions should be taken, in effect it is the demand-goal. For example,
-      if the action-on-demand is Increase, then only the actions of type
-      Increase would be choosen.
-
-"
-
-    ; XXX: Should there be weight b/n the different demand-goals? For now a
-    ; a random choice of demands is assumed. In subsequent steps. The
-    ; demand-value could possibly be used for that.
-    (define (get-demand) (psi-clean-demand-gets (cog-execute!
-        (GetLink
-            (VariableList
-                (assoc-ref (psi-demand-pattern) "var"))
-            (AndLink
-                (assoc-ref (psi-demand-pattern) "pat")
-                (EvaluationLink
-                    gpn
-                    (ListLink (VariableNode "Demand"))))))))
-
-    ; check arguments
-    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " gpn))
-
-    (get-demand)
-)
-
-; --------------------------------------------------------------
-(define (psi-get-current-goal)
-"
-  Returns the demand-ConceptNode that has been choosen for action presently.
-"
-   (define (get-psi-goal) (cog-execute!
-      (GetLink
-        (TypedVariableLink
-            (VariableNode "demand")
-            (TypeNode "ConceptNode"))
-        (AndLink
-            (StateLink
-                (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ChoiceLink
-                    (ListLink
-                        (ConceptNode
-                            (string-append (psi-prefix-str) "Decrease"))
-                        (VariableNode "demand"))
-                    (ListLink
-                        (ConceptNode
-                            (string-append (psi-prefix-str) "Increase"))
-                        (VariableNode "demand"))))
-            (EvaluationLink ; Act only if their is such a demand.
-                (GroundedPredicateNode "scm: psi-demand?")
-                (ListLink
-                    (VariableNode "demand")))))
-    ))
-
-    (let* ((set-link (get-psi-goal))
-          (result (car (cog-outgoing-set set-link)))
-          )
-          (cog-delete set-link)
-          result
-    )
-)
-
-; --------------------------------------------------------------
-(define (psi-get-current-action-type)
-"
-  This returns a node of the type of effect that the current-goal have.
-"
-   (define (get-psi-action-type) (cog-execute!
-        (GetLink
-            (TypedVariableLink
-                (VariableNode "effect-type")
-                (TypeNode "ConceptNode"))
-            (StateLink
-                (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ListLink
-                    (VariableNode "effect-type")
-                    (psi-get-current-goal))))
-    ))
-
-    (let* ((set-link (get-psi-action-type))
-          (result (car (cog-outgoing-set set-link)))
-          )
-          (cog-delete set-link)
-          result
-    )
-)
-
-; --------------------------------------------------------------
-(define (psi-select-actions demand-node gpn)
-"
-  Select the actions that should be added to the active-schema-pool depending
-  on the present goal, by using the plan choosen by the GroundedPredicateNode.
-
-  XXX should it modify the member action-rules of the active-schema-pool.
-
-  demand-node:
-    - A ConceptNode that represents a demand
-
-  gpn:
-   - GroundedPredicateNode that refers to a function that checks the actions
-     for constraints.
-"
-    ;TODO: I think the planner is kind of a behavior tree genrator (assuming
-    ; there is no change of a preset plan) .URE's random selection policy
-    ; isn't being used now thus each plan is in effect a single action choosen,
-    ; this has to be improved but is good for starters.
-
-
-    ;(psi-get-actions demand-node gpn)
-    (display "WIP")
-)
-
-; --------------------------------------------------------------
-(define (psi-update-asp demand-node gpn)
-"
-  It modifies the member action-rules of the active-schema-pool.
-"
-;not sure if should be part of psi-select-actions, why separate them?
-    ;(let ((choosen-actions (psi-select-actions demand-node gpn)))
-    ;    ()
-    ;)
-
-(display "WIP")
 )

@@ -29,6 +29,9 @@ hopfield        - Provides a toy example for Economic Attention
 visual_demos    - A number of demos to visually represent the dynamics
                   of OpenCog.
 
+openppsi        - An example implementation of openpsi to control a simple
+                  agent.
+
 Deprecated examples:
 --------------------
 The strategic direction for opencog is to move away from the current
@@ -38,4 +41,3 @@ agents using these deprecated C++ interfaces.
 
 module          - Provides a template for creating a custom module.
 agents          - Provides a template for creating a custom agent.
-
