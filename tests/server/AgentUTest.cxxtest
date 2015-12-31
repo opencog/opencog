@@ -58,18 +58,18 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
     h1->setTruthValue(tv1);
-    atomSpace->set_STI(h1, AV1_STI);
-    atomSpace->set_LTI(h1, AV1_LTI);
+    h1->setSTI(AV1_STI);
+    h1->setLTI(AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
     h2->setTruthValue(tv2);
-    atomSpace->set_STI(h2, AV2_STI);
-    atomSpace->set_LTI(h2, AV2_LTI);
+    h2->setSTI(AV2_STI);
+    h2->setLTI(AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
     h3->setTruthValue(tv3);
-    atomSpace->set_STI(h3, AV3_STI);
-    atomSpace->set_LTI(h3, AV3_LTI);
+    h3->setSTI(AV3_STI);
+    h3->setLTI(AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);

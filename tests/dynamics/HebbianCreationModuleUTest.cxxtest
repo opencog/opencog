@@ -31,6 +31,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/attention/atom_types.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/Neighbors.h>

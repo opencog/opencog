@@ -29,6 +29,8 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/attention/HebbianUpdatingAgent.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -231,12 +233,12 @@ public:
         i.clear();
         TS_ASSERT(in_out_norm[2] != Handle::UNDEFINED);
 
-        TS_ASSERT_DELTA(a->get_mean(in_in_norm[2]), 0.145f, 0.001);
-        TS_ASSERT_DELTA(a->get_mean(in_in_inv[2]), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->get_mean(out_in_inv[2]), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->get_mean(out_in_norm[2]), 0.01f, 0.001);
-        TS_ASSERT_DELTA(a->get_mean(in_out_inv[2]), 0.145f, 0.001);
-        TS_ASSERT_DELTA(a->get_mean(in_out_norm[2]), 0.01f, 0.001);
+        TS_ASSERT_DELTA(in_in_norm[2]->getTruthValue()->getMean(), 0.145f, 0.001);
+        TS_ASSERT_DELTA(in_in_inv[2]->getTruthValue()->getMean(), 0.01f, 0.001);
+        TS_ASSERT_DELTA(out_in_inv[2]->getTruthValue()->getMean(), 0.01f, 0.001);
+        TS_ASSERT_DELTA(out_in_norm[2]->getTruthValue()->getMean(), 0.01f, 0.001);
+        TS_ASSERT_DELTA(in_out_inv[2]->getTruthValue()->getMean(), 0.145f, 0.001);
+        TS_ASSERT_DELTA(in_out_norm[2]->getTruthValue()->getMean(), 0.01f, 0.001);
 
        
     }
