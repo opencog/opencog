@@ -281,6 +281,9 @@
   Decrease: decreases the demand-value.
   Default: depends on the default-action associated with it. And is used
            to define how the demand-value should change independent of context.
+           Remember that the effect of this rule could be either increasing or
+           decreasing of the demand-value as well, but wouldn't be known as
+           such.
 "
     ; NOTE: Update psi-update-asp and psi-get-all-actions
     ; when adding other effect types.
