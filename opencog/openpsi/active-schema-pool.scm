@@ -1,5 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(use-modules (opencog rule-engine))
+
 (load-from-path "openpsi/demand.scm")
 (load-from-path "openpsi/utilities.scm")
 
@@ -9,22 +11,40 @@
   Create the active-schema-pool as a URE rulebase and return the ConceptNode
   representing it.
 "
+    (define (default-actions)
+        (append-map (lambda (x) (psi-get-actions x "Default"))
+            (psi-get-demands)))
+
     (let ((asp (ConceptNode (string-append (psi-prefix-str) "asp"))))
-        ; Define OpenPsi active-schema-pool as the ure rulebase. The iternation
-        ; has no effect as all rules are run once per cycle by the agent.
+
         (ure-define-rbs asp 1)
+
+        ; Load all default actions because they should always run. If they
+        ; aren't always.
+        (if (null? (ure-rbs-rules asp))
+            (ure-add-rules asp (map (lambda (x) (cons x 1)) (default-actions))))
+
+        asp
     )
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-run)
+(define-public (psi-step)
 "
-  The main function that runs OpenPsi active-schema-pool. The active-schema-pool
+  The main function that steps OpenPsi active-schema-pool(asp). The asp
   is a rulebase, that is modified depending on the demand-values, on every
   cogserver cycle.
-"
 
-    (cog-fc (SetLink) (psi-asp) (SetLink))
+  Returns a list of results from the step.
+"
+    ;TODO: Move logic to atomese, so as to simply life for everyone.
+    (let* ((asp (psi-asp))
+         (result (cog-fc (SetLink) asp (SetLink)))
+         (result-list (cog-outgoing-set result)))
+
+         (cog-delete result)
+         result-list
+    )
 )
 
 ; --------------------------------------------------------------
@@ -41,32 +61,34 @@
   actions:
   - A list of actions nodes. The nodes are the alias nodes for the actions.
 "
-    (define (remove-node node)
-        (cog-delete (MemberLink node asp)))
-    (define (add-node) node
-        (MemberLink node asp))
+    (define (remove-node node) (cog-delete (MemberLink node asp)))
+    (define (add-node node) (begin (MemberLink node asp) node))
 
     (let* ((current-actions (ure-rbs-rules asp))
            (all-actions
-               ;TODO update psi-get-all-actions  on replacing with appropriate
+               ;TODO update psi-get-actions-all  on replacing with appropriate
                ; filter
-               (list-merge (par-map psi-get-all-actions (psi-get-demands))))
-           ; Because there might be rules added that aren't member of any demand
-           ; like the default/in-born rule that updates the rules.
-           (actions-to-keep (lset-difference current-actions all-actions)))
+               (list-merge (par-map psi-get-actions-all (psi-get-demands))))
+           ; Because there might be rules added that aren't member of any
+           ; demand action-base and we don't want to remove the default actions.
+           (actions-to-keep
+                (lset-difference equal? current-actions all-actions))
+           (actions-to-add
+                (lset-difference equal? actions actions-to-keep))
+           (final-asp (lset-union equal? actions-to-keep actions)))
 
            ; Remove actions except those that should be kept and those that
-           ; are to be added from the asp
+           ; are to be added.
            (par-map
                 (lambda (x)
-                    (if (or (member x actions-to-keep) (member x actions))
+                    (if (member x final-asp)
                         x
                         (remove-node x))
                 )
                 current-actions)
 
-            ; Add the actions that are not member of the asp.
-            (par-mpa add-node actions)
+           ; Add the actions that are not member of the asp.
+           (par-map add-node actions-to-add)
     )
 )
 
@@ -82,11 +104,22 @@
   - The kind of effect the actions should have for being selected by the
     action-selector.
 "
-    (StateLink
-        (Node (string-append (psi-prefix-str) "action-on-demand"))
-        (ListLink
-            (ConceptNode (string-append (psi-prefix-str) effect))
+    (define (choose-demand)
+        (if (null? demand)
+            ; XXX Remeber to deal with the defaults when moving to
+            ; psi-select-goal.
+            (random-select (psi-get-demands))
             demand))
+
+    (let ((z-demand (choose-demand)))
+        (StateLink
+            (Node (string-append (psi-prefix-str) "action-on-demand"))
+            (ListLink
+                (ConceptNode (string-append (psi-prefix-str) effect))
+                z-demand))
+
+        z-demand
+    )
 )
 
 ; --------------------------------------------------------------
@@ -100,6 +133,25 @@
 
     (define (select-demand x) (< (tv-mean (cog-tv x)) threshold))
     (let* ((demand (random-select (filter select-demand (psi-get-demands)))))
-        (psi-set-goal demand "Increase")
+
+        ; If there are no demands that satisfy the condition then choose one
+        (if (null? demand)
+            (psi-set-goal demand "Default")
+            (psi-set-goal demand "Increase")
+        )
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-action-select)
+"
+  Selects all actions for the set goal
+"
+    ;TODO Use psi-select-actions, and port as much as possible to atomes.
+    (let ((goal (psi-current-goal))
+          (selected-actions
+              (psi-get-actions (psi-current-goal) (psi-current-effect-type))))
+
+    (psi-update-asp (psi-asp) selected-actions)
     )
 )

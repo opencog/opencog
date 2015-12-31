@@ -77,7 +77,7 @@ void OpenPsiAgent::run()
 
     SchemeEval evaluator(&as);
     std::string scheme_expression, scheme_returned_value;
-    scheme_expression = "(psi-run)";
+    scheme_expression = "(psi-step)";
 
     scheme_returned_value = evaluator.eval(scheme_expression);
 

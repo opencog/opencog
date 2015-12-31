@@ -6,7 +6,8 @@
 ; @date   2011-11-25
 ;
 
-(use-modules (srfi srfi-1)) ; for set-difference
+(use-modules (ice-9 regex)) ; For string-match
+(use-modules (srfi srfi-1)) ; For set-difference
 
 (use-modules (opencog) (opencog rule-engine))
 

@@ -487,9 +487,9 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-current-action-type)
+(define-public (psi-current-effect-type)
 "
-  This returns a node of the type of effect that the current-goal have.
+  This returns a string of the type of effect that the current-goal have.
 "
    (define (get-psi-action-type) (cog-execute!
         (GetLink
@@ -504,10 +504,14 @@
     ))
 
     (let* ((set-link (get-psi-action-type))
-          (result (car (cog-outgoing-set set-link)))
-          )
+          (result (cog-outgoing-set set-link)))
+
           (cog-delete set-link)
-          result
+
+          (if (null? result)
+              "Default"
+              (psi-suffix-str (cog-name (car result)))
+          )
     )
 )
 
