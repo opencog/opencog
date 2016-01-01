@@ -234,7 +234,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
     for (std::vector<std::string>::const_iterator it = agents.begin();
          it != agents.end(); ++it)
     {
-        _cogserver.destroyAllAgents(*it);
+        _cogserver.stopAllAgents(*it);
     }
 
     return "Successfully stopped agents\n";
@@ -268,7 +268,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
                 agent = AgentPtr(_cogserver.createAgent(*it, false));
                 if (agent) {
                     agent->run();
-                    _cogserver.destroyAgent(agent);
+                    _cogserver.stopAgent(agent);
                     numberAgentsRun++;
                 } else {
                     unknownAgents.push_back(*it);

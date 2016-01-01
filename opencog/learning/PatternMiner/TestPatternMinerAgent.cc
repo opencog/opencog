@@ -41,7 +41,7 @@ TestPatternMinerModule::TestPatternMinerModule(CogServer& cs) : Module(cs)
 TestPatternMinerModule::~TestPatternMinerModule()
 {
     logger().info("[TestPatternMinerModule] destructor");
-    _cogserver.destroyAllAgents(TestPatternMinerAgent::info().id);
+    _cogserver.stopAllAgents(TestPatternMinerAgent::info().id);
 }
 
 void TestPatternMinerModule::init()

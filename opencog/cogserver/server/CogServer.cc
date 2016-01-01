@@ -331,7 +331,7 @@ bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> cons
 bool CogServer::unregisterAgent(const std::string& id)
 {
     logger().debug("[CogServer] unregister agent \"%s\"", id.c_str());
-    destroyAllAgents(id);
+    stopAllAgents(id);
     return Registry<Agent>::unregister(id);
 }
 
@@ -363,13 +363,7 @@ void CogServer::stopAgent(AgentPtr agent)
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
-void CogServer::destroyAgent(AgentPtr agent)
-{
-    stopAgent(agent);
-    logger().debug("[CogServer] deleting agent \"%s\"", agent->to_string().c_str());
-}
-
-void CogServer::destroyAllAgents(const std::string& id)
+void CogServer::stopAllAgents(const std::string& id)
 {
     // TODO: This will need to be changed for MindAgents that are not
     // constrained to only running every N cognitive cycles. I.e. when
@@ -393,7 +387,7 @@ void CogServer::destroyAllAgents(const std::string& id)
 
     // delete the selected agents; NOTE: we must ensure that this is executed
     // after the 'agents.erase' call above, because the agent's destructor might
-    // include a recursive call to destroyAllAgents
+    // include a recursive call to stopAllAgents
     // std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
 }
 

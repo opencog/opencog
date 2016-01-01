@@ -306,12 +306,8 @@ public:
     /** Removes agent 'a' from the list of scheduled agents. */
     virtual void stopAgent(AgentPtr a);
 
-    /** Removes agent 'a' from the list of scheduled agents and destroys the
-     * instance. This is just a short-cut to 'stopAgent(a); delete a'. */
-    virtual void destroyAgent(AgentPtr);
-
     /** Destroys all agents from class 'id' */
-    virtual void destroyAllAgents(const std::string& id);
+    virtual void stopAllAgents(const std::string& id);
 
     /** Starts running agents as part of the serverLoop (enabled by default) */
     virtual void startAgentLoop(void);

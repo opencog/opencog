@@ -41,7 +41,7 @@ ExampleModule::ExampleModule(CogServer& cs) : Module(cs)
 ExampleModule::~ExampleModule()
 {
     logger().info("[ExampleModule] destructor");
-    _cogserver.destroyAllAgents(ExampleAgent::info().id);
+    _cogserver.stopAllAgents(ExampleAgent::info().id);
 }
 
 void ExampleModule::init()
