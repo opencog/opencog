@@ -35,6 +35,7 @@
 
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/AgentRunnerBase.h>
 #include <opencog/cogserver/server/BaseServer.h>
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/NetworkServer.h>
@@ -47,8 +48,6 @@ namespace opencog
 /** \addtogroup grp_server
  *  @{
  */
-
-typedef std::vector<AgentPtr> AgentSeq;
 
 /**
  * This class implements a network and agent server. It provides shared
@@ -153,17 +152,15 @@ protected:
     // and agents
     ModuleMap modules;
     std::map<const std::string, Request*> requests;
-    AgentSeq agents;
 
     long cycleCount;
     bool running;
     // Used to start and stop the Agents loop via shell commands
     bool agentsRunning;
 
-    void processAgents();
+    SimpleRunner agentScheduler;
 
     std::mutex processRequestsMutex;
-    std::mutex agentsMutex;
     concurrent_queue<Request*> requestQueue;
 
     NetworkServer _networkServer;
@@ -183,9 +180,6 @@ public:
     /** CogServer's destructor. Disables the network server and
      * unloads all modules. */
     virtual ~CogServer(void);
-
-    /** Run an Agent and log its activity. */
-    virtual void runAgent(AgentPtr);
 
     /** Server's main loop. Executed while the 'running' flag is set
      *  to true. It processes the request queue, then the scheduled
@@ -286,7 +280,7 @@ public:
     virtual std::list<const char*> agentIds(void) const;
 
     /** Returns a list of all the currently running agent instances. */
-    virtual const AgentSeq &runningAgents(void) { return agents; }
+    virtual AgentSeq runningAgents(void);
 
     /** Creates and returns a new instance of an agent of class 'id'.
      *  If 'start' is true, then the agent will be automatically added

@@ -135,7 +135,7 @@ CogServer::~CogServer()
 }
 
 CogServer::CogServer(AtomSpace* as) :
-    cycleCount(1)
+    cycleCount(1), running(false)
 {
     // We shouldn't get called with a non-NULL atomSpace static global as
     // that's indicative of a missing call to CogServer::~CogServer.
@@ -242,7 +242,7 @@ void CogServer::runLoopStep(void)
     // Process mind agents
     if (customLoopRun() and agentsRunning and 0 < agents.size())
     {
-        processAgents();
+        agentScheduler.processAgents();
 
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
@@ -271,58 +271,6 @@ void CogServer::processRequests(void)
     }
 }
 
-void CogServer::runAgent(AgentPtr agent)
-{
-    struct timeval timer_start, timer_end;
-    struct timeval elapsed_time;
-    size_t mem_start, mem_end;
-    size_t atoms_start, atoms_end;
-    size_t mem_used, atoms_used;
-
-    gettimeofday(&timer_start, NULL);
-    mem_start = getMemUsage();
-    atoms_start = atomSpace->get_size();
-
-    logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
-                   agent->classinfo().id.c_str(),  this->cycleCount);
-
-    agent->resetUtilizedHandleSets();
-    agent->run();
-
-    gettimeofday(&timer_end, NULL);
-    mem_end = getMemUsage();
-    atoms_end = atomSpace->get_size();
-
-    timersub(&timer_end, &timer_start, &elapsed_time);
-
-    if (mem_start > mem_end)
-        mem_used = 0;
-    else
-        mem_used = mem_end - mem_start;
-    if (atoms_start > atoms_end)
-        atoms_used = 0;
-    else
-        atoms_used = atoms_end - atoms_start;
-
-    logger().debug("[CogServer] running mind agent: %s, elapsed time (sec): %f, memory used: %d, atom used: %d [cycle = %d]",
-                   agent->classinfo().id.c_str(), elapsed_time.tv_usec/1000000.0, mem_used, atoms_used, this->cycleCount
-                  );
-
-    _systemActivityTable.logActivity(agent, elapsed_time, mem_used,
-                                            atoms_used);
-}
-
-void CogServer::processAgents(void)
-{
-    std::unique_lock<std::mutex> lock(agentsMutex);
-    AgentSeq::const_iterator it;
-    for (it = agents.begin(); it != agents.end(); ++it) {
-        AgentPtr agent = *it;
-        if ((cycleCount % agent->frequency()) == 0)
-            runAgent(agent);
-    }
-}
-
 bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)
 {
     return Registry<Agent>::register_(id, factory);
@@ -340,6 +288,11 @@ std::list<const char*> CogServer::agentIds() const
     return Registry<Agent>::all();
 }
 
+AgentSeq CogServer::runningAgents(void)
+{
+    return agentScheduler.getAgents();
+}
+
 AgentPtr CogServer::createAgent(const std::string& id, const bool start)
 {
     AgentPtr a(Registry<Agent>::create(*this, id));
@@ -349,41 +302,22 @@ AgentPtr CogServer::createAgent(const std::string& id, const bool start)
 
 void CogServer::startAgent(AgentPtr agent, bool dedicated_thread)
 {
-    std::unique_lock<std::mutex> lock(agentsMutex);
-    agents.push_back(agent);
+    assert(dedicated_thread == false);
+    agentScheduler.addAgent(agent);
 }
 
 void CogServer::stopAgent(AgentPtr agent)
 {
-    std::unique_lock<std::mutex> lock(agentsMutex);
-    AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent);
-    if (ai != agents.end())
-        agents.erase(ai);
-    lock.unlock();
+    agentScheduler.removeAgent(agent);
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
 void CogServer::stopAllAgents(const std::string& id)
 {
-    // TODO: This will need to be changed for MindAgents that are not
-    // constrained to only running every N cognitive cycles. I.e. when
-    // they have their own thread they'll have to be stopped and their threads
-    // "joined"
-    std::unique_lock<std::mutex> lock(agentsMutex);
-    // place agents with classinfo().id == id at the end of the container
-    AgentSeq::iterator last =
-        std::partition(agents.begin(), agents.end(),
-                       boost::bind(equal_to_id(), _1, id));
-
-    // save the agents that should be deleted on a temporary container
-    AgentSeq to_delete(last, agents.end());
-
-    // remove those agents from the main container
-    agents.erase(last, agents.end());
-
-    // remove statistical record of their activities
-    for (size_t n = 0; n < to_delete.size(); n++)
-        _systemActivityTable.clearActivity(to_delete[n]);
+    agentScheduler.removeAllAgents(id);
+//    // remove statistical record of their activities
+//    for (size_t n = 0; n < to_delete.size(); n++)
+//        _systemActivityTable.clearActivity(to_delete[n]);
 
     // delete the selected agents; NOTE: we must ensure that this is executed
     // after the 'agents.erase' call above, because the agent's destructor might

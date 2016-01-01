@@ -28,6 +28,7 @@ INSTALL (TARGETS builtinreqs
 
 ADD_LIBRARY (server SHARED
 	Agent
+	AgentRunnerBase
 	BaseServer
 	CogServer
 	Request
