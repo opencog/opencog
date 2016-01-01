@@ -18,7 +18,7 @@
         ; Load all default actions because they should always run. If they
         ; aren't always.
         (if (null? (ure-rbs-rules asp))
-            (ure-add-rules asp (map (lambda (x) (cons x 1)) (psi-get-actions-default))))
+            (map (lambda (x) (MemberLink x asp)) (psi-get-actions-default)))
 
         asp
     )
