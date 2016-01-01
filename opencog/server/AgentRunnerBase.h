@@ -71,6 +71,14 @@ class SimpleRunner: public AgentRunnerBase
     public:
         SimpleRunner(const std::string &name = "[simple]"): AgentRunnerBase(name), running(false) {}
 
+        /** Put runner into 'running' state, so that agents will be run when
+         * processAgents() is called */
+        void start() { running = true; }
+
+        /** Put runner into 'stopped' state, so that nothing happens when
+         * processAgents() is called */
+        void stop() { running = false; }
+
         /** Adds agent 'a' to the list of scheduled agents. */
         void addAgent(AgentPtr a) { AgentRunnerBase::addAgent(a); }
 
@@ -83,9 +91,6 @@ class SimpleRunner: public AgentRunnerBase
         const AgentSeq &getAgents() const { return agents; }
 
         void processAgents() { if (running) AgentRunnerBase::processAgents(); }
-
-        void start() { running = true; }
-        void stop() { running = false; }
 
     private:
         bool running;
