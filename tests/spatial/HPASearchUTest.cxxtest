@@ -28,7 +28,7 @@
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 
 #include <opencog/spatial/LocalSpaceMap2D.h>
 #include <opencog/spatial/HPASearch.h>

@@ -1,9 +1,0 @@
-// =====================================================================
-// Custom atom types for test purposes only.
-// =====================================================================
-ATOM
-NODE
-LINK
-SAVING_LOADING_TEST_LINK <- LINK
-SAVING_LOADING_TEST_NODE <- NODE
-

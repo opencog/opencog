@@ -26,7 +26,7 @@
 
 #include <sys/types.h>
 
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/RandGen.h>
 
 namespace opencog

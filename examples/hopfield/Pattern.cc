@@ -32,7 +32,7 @@
 #endif
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/mt19937ar.h>
 
 using namespace std;

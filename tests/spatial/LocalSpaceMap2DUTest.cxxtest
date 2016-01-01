@@ -25,7 +25,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
