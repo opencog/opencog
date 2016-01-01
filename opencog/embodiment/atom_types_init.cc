@@ -28,7 +28,7 @@
 #define INHERITANCE_FILE2 "opencog/embodiment/atom_types.inheritance"
 #define INITNAME embodiment_types_init
 
-#include <opencog/atomspace/atom_types.cc>
+#include <opencog/atoms/base/atom_types.cc>
 
 using namespace opencog;
 TRIVIAL_MODULE(EmbodimentTypesModule)

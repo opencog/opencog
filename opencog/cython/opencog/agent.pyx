@@ -6,7 +6,7 @@ from opencog.cogserver cimport cAgent, stim_t, string
 from cython.operator cimport dereference as deref
 
 # Handle
-cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)

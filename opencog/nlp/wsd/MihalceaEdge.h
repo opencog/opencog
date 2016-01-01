@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "EdgeUtils.h"

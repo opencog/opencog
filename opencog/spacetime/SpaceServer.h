@@ -52,7 +52,7 @@
 
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>

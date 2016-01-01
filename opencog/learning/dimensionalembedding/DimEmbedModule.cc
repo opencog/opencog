@@ -30,7 +30,7 @@
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>

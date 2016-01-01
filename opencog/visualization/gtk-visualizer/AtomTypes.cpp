@@ -33,9 +33,10 @@ AtomTypes::AtomTypes()
     string path = buffer;
     size_t positionLastSlash = path.find_last_of('/');
 
-    // XXX this is wrong, there are in fact 5 or 6 different atom types script files
+    // XXX FIXME this is wrong, there are in fact 5 or 6 different
+    // atom types script files
     // Each one contains types for each of the different subsystems ...
-    atomTypesScriptPath = path.substr(0,positionLastSlash) + "/../../../../opencog/atomspace/atom_types.script";
+    atomTypesScriptPath = path.substr(0,positionLastSlash) + "/../../../../opencog/atoms/base/atom_types.script";
 }
 
 AtomTypes::~AtomTypes()

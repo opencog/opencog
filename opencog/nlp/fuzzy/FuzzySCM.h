@@ -24,7 +24,7 @@
 #ifndef FUZZYSCM_H
 #define FUZZYSCM_H
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

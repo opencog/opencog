@@ -10,9 +10,9 @@
 #ifndef _OPENCOG_SENSE_RANK_H
 #define _OPENCOG_SENSE_RANK_H
 
-#include <opencog/atomspace/Handle.h>
-
 #include <deque>
+
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
 

@@ -15,8 +15,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/ForeachChaseLink.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>

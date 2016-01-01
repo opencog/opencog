@@ -22,7 +22,7 @@
  */
 #include <opencog/util/Config.h>
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>

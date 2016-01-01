@@ -49,7 +49,7 @@
 #include <vector>
 #include <octomap/OcTreeNode.h>
 #include <octomap/OccupancyOcTreeBase.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include "Block3DMapUtil.h"
 
 using namespace std;

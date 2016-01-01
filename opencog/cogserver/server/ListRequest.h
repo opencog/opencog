@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/cogserver/server/Request.h>
 #include <opencog/cogserver/server/RequestClassInfo.h>
 

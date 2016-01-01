@@ -11,7 +11,7 @@
 
 #include <set>
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 namespace opencog {
 

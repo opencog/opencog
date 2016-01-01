@@ -14,12 +14,12 @@
 #ifndef _OPENCOG_FOREACH_WORD_H
 #define _OPENCOG_FOREACH_WORD_H
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomutils/ForeachChaseLink.h>
 #include <opencog/atomutils/FollowLink.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/atom_types.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/nlp/types/atom_types.h>
 
 namespace opencog {

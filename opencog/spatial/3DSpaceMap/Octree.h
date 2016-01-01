@@ -26,7 +26,7 @@
 
 #include <vector>
 #include "Octree3DMapManager.h"
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

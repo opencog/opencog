@@ -33,9 +33,9 @@
 #include <sstream>
 #include <thread>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>

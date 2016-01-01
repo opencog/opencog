@@ -24,7 +24,7 @@
 
 #include "HandleTemporalPair.h"
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 using namespace opencog;
 

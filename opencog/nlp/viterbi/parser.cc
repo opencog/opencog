@@ -21,7 +21,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 #if LATER
 #include "compile.h"

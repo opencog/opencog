@@ -14,7 +14,7 @@
 #include <math.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/nlp/wsd/SenseSimilarityLCH.h>

@@ -34,7 +34,7 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
