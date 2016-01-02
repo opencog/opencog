@@ -1,49 +1,5 @@
-; TODO Notes: random-string, random-node-name and choose-var-name can be moved
-; to utilities.scm
-
 (use-modules (srfi srfi-1))
-
-;------------------------------------------------------------------------
-; Returns a random string of length 'str-length'.
-(define (random-string str-length)
-	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	(define str "")
-	(while (> str-length 0)
-		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
-		(set! str-length (- str-length 1))
-	)
-	str
-)
-
-; -----------------------------------------------------------------------
-; Return #t if there is a node of type node-type with a name "node-name".
-(define (check-name? node-name node-type)
-        (not (null? (cog-node node-type node-name)))
-)
-
-; -----------------------------------------------------------------------
-; Creates a possible name 'node-name' of length 'random-length' for a node
-; of type 'node-type'. The 'node-name' is not used with any other node
-; of type 'node-type'. Prepend 'prepend-text' to the front.
-(define (random-node-name node-type random-length prepend-text)
-	(define node-name (random-string random-length))
-	(define prepend-length (string-length prepend-text))
-	(if (> prepend-length 0)
-		(set! node-name (string-append prepend-text node-name))
-	)
-	(while (check-name? node-name node-type)
-		(if (> prepend-length 0)
-			(set! node-name (string-append prepend-text (random-string random-length)))
-			(set! node-name (random-string random-length))
-		)
-	)
-	node-name
-)
-
-; -----------------------------------------------------------------------
-; Creates name for VariableNodes after checking whether the name is being
-; used by other VariableNode.
-(define (choose-var-name) (random-node-name 'VariableNode 36 "$"))
+(use-modules (opencog))
 
 ; -----------------------------------------------------------------------
 ; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
