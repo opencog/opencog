@@ -6,7 +6,7 @@
  * Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 
 #include "EdgeThin.h"
 #include "ForeachWord.h"

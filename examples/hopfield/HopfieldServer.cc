@@ -35,7 +35,7 @@
 
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/Neighbors.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/util/Logger.h>

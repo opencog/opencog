@@ -26,7 +26,7 @@
 #include <iostream>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
 #include <opencog/spacetime/atom_types.h>

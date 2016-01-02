@@ -26,7 +26,6 @@
 
 #include <link-grammar/dict-api.h>
 #include <opencog/cogserver/server/Module.h>
-#include <opencog/atomspace/Handle.h>
 
 #include <opencog/nlp/lg-dict/LGDictSCM.h>
 

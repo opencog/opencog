@@ -24,11 +24,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>

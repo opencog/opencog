@@ -4,7 +4,7 @@
 #include <string>
 #include <set>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include "OctomapOcTree.h"
 #include "Block3DMapUtil.h"
 #include "EntityRecorder.h"

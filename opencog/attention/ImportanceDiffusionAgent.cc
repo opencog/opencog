@@ -28,7 +28,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS

@@ -6,7 +6,7 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include "Block3DMapUtil.h"
 
 using namespace opencog;

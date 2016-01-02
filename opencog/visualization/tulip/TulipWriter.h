@@ -25,9 +25,10 @@
 #include <iostream>
 #include <string>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
-namespace opencog {
+namespace opencog
+{
 // Caution, will generate invalid tulip files if edges have arity > 2
 // or if edges link to other edges
 class TulipWriter {

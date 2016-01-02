@@ -25,8 +25,8 @@
 #include "ListRequest.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;

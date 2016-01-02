@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>

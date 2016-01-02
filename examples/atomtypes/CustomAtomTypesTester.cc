@@ -25,9 +25,9 @@
 #include "CustomAtomTypesTester.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 

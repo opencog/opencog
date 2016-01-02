@@ -27,7 +27,7 @@
 #define INHERITANCE_FILE "opencog/attention/atom_types.inheritance"
 #define INITNAME attention_types_init
 
-#include <opencog/atomspace/atom_types.cc>
+#include <opencog/atoms/base/atom_types.cc>
 
 using namespace opencog;
 TRIVIAL_MODULE(AttentionTypesModule)

@@ -19,7 +19,7 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/persist/sql/odbcxx.h>
 #include <opencog/nlp/wsd/ForeachWord.h>

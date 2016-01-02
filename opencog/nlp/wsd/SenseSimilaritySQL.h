@@ -15,7 +15,7 @@
 
 #ifdef HAVE_SQL_STORAGE
 
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/SenseSimilarity.h>
 #include <opencog/persist/sql/odbcxx.h>
 

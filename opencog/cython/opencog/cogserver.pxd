@@ -10,7 +10,7 @@ cdef extern from "<string>" namespace "std":
 # Handle
 ctypedef public long UUID
 
-cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)

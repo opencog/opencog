@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_PERSIST_ZMQ_MODULE_H
 #define _OPENCOG_PERSIST_ZMQ_MODULE_H
 
-#include <opencog/atomspace/Handle.h>
 #include <opencog/persist/zmq/atomspace/ZMQPersistSCM.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Module.h>

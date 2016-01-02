@@ -27,7 +27,7 @@ extern "C" {
     #include <opencog/visualization/ubigraph/UbigraphAPI.h>
 }
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 #include "HopfieldUbigrapher.h"
 

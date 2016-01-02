@@ -25,9 +25,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/util/Config.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/types.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/base/Handle.h>
 
 #include <opencog/guile/load-file.h>
 

@@ -30,7 +30,7 @@
 #include "Octree3DMapManager.h"
 #include <opencog/spatial/math/Quaternion.h>
 #include <vector>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

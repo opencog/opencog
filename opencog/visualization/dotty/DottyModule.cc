@@ -29,8 +29,8 @@
 #include <boost/pointer_cast.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Logger.h>
 

@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/nlp/wsd/MihalceaEdge.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>

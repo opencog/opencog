@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>

@@ -13,7 +13,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atomutils/ForeachChaseLink.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 using namespace opencog;

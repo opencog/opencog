@@ -32,7 +32,7 @@
 
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomutils/Neighbors.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS
