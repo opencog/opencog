@@ -2884,7 +2884,7 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
             if (isIgnoredContent(content))
                 continue;
 
-            set<Handle> newConnectedLinks;                    
+            set<Handle> newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
             allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -2969,6 +2969,3 @@ bool PatternMiner::containIgnoredContent(Handle link )
 
     return false;
 }
-
-
-

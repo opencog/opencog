@@ -26,8 +26,11 @@
 #define _OPENCOG_PATTERNMINER_HTREE_H
 #include <map>
 #include <vector>
-#include "Pattern.h"
+
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
+
+#include "Pattern.h"
 
 using namespace std;
 

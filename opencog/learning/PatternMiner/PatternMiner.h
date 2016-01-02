@@ -24,17 +24,19 @@
 
 #ifndef _OPENCOG_PATTERNMINER_PATTERNMINER_H
 #define _OPENCOG_PATTERNMINER_PATTERNMINER_H
+#include <cstdio>
 #include <map>
+#include <mutex>
+#include <thread>
 #include <vector>
+#include <cpprest/http_client.h>
+#include <cpprest/http_listener.h>
+
+#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atomspace/AtomSpace.h>
+
 #include "Pattern.h"
 #include "HTree.h"
-#include <cstdio>
-#include <opencog/atomspace/AtomSpace.h>
-#include <thread>
-#include <mutex>
-
-#include <cpprest/http_listener.h>
-#include <cpprest/http_client.h>
 
 using namespace std;
 using namespace web;
