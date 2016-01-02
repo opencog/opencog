@@ -720,7 +720,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
 
                 // check if the current gram is already the MAX_GRAM
-                if(cur_pattern_gram >= MAX_GRAM)        
+                if(cur_pattern_gram >= MAX_GRAM)
                 {
                     if ( (var_num == 0) || (isLastNElementsAllTrue(indexes, n_max, var_num)))
                         break;
