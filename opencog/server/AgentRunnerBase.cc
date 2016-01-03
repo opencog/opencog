@@ -48,6 +48,7 @@ AgentRunnerBase::~AgentRunnerBase()
 
 void AgentRunnerBase::setName(std::string new_name)
 {
+    name = new_name;
 }
 
 const std::string& AgentRunnerBase::getName() const
