@@ -321,8 +321,9 @@ void CogServer::startAgent(AgentPtr agent, bool dedicated_thread,
                 runner->setName(thread_name);
                 threadNameMap[thread_name] = runner;
             }
-            runner->start();
         }
+        runner->addAgent(agent);
+        runner->start();
     }
     else
         agentScheduler.addAgent(agent);
