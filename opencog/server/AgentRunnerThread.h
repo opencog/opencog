@@ -71,7 +71,13 @@ class AgentRunnerThread: public AgentRunnerBase
         std::condition_variable runAgentsCond;
 
         std::thread runThread;
+
+        std::atomic_bool agentsModified;
         mutable std::mutex agentsMutex;
+        std::vector<AgentPtr> agentsAddQ;
+        std::vector<AgentPtr> agentsRemoveQ;
+        std::vector<std::string> idsRemoveQ;
+        bool clearAll;
 
     private:
         void processAgentsThread();

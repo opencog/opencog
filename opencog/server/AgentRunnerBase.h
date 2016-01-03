@@ -60,7 +60,8 @@ class AgentRunnerBase
         /** Removes all agents from class 'id' */
         void removeAllAgents(const std::string &id);
 
-//        void processAgents();
+        /** Removes all agents */
+        void removeAllAgents();
 
         /** Run an Agent and log its activity. */
         void runAgent(AgentPtr a);

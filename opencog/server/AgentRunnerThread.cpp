@@ -26,7 +26,8 @@ namespace opencog
 {
 
 AgentRunnerThread::AgentRunnerThread(const std::string &name) :
-        AgentRunnerBase(name), runAgents(false)
+        AgentRunnerBase(name), runAgents(false), agentsModified(false),
+        clearAll(false)
 {
 }
 
@@ -55,30 +56,43 @@ void AgentRunnerThread::addAgent(AgentPtr a)
 {
     if (!hasAgents()) {
         joinRunThread();
+        /*
+         * processAgentsThread() will exit immediately if no agents are available,
+         * so we add the first one immediately
+         */
+        {
+            lock_guard<mutex> lock(agentsMutex);
+            AgentRunnerBase::addAgent(a);
+        }
         runThread = thread(&AgentRunnerThread::processAgentsThread, this);
         // todo: set thread name when using pthreads
     }
-
-    lock_guard<mutex> lock(agentsMutex);
-    AgentRunnerBase::addAgent(a);
+    else {
+        lock_guard<mutex> lock(agentsMutex);
+        agentsAddQ.push_back(a);
+        agentsModified = true;
+    }
 }
 
 void AgentRunnerThread::removeAgent(AgentPtr a)
 {
     lock_guard<mutex> lock(agentsMutex);
-    AgentRunnerBase::removeAgent(a);
+    agentsRemoveQ.push_back(a);
+    agentsModified = true;
 }
 
 void AgentRunnerThread::removeAllAgents(const std::string& id)
 {
     lock_guard<mutex> lock(agentsMutex);
-    AgentRunnerBase::removeAllAgents(id);
+    idsRemoveQ.push_back(id);
+    agentsModified = true;
 }
 
 void AgentRunnerThread::removeAllAgents()
 {
     lock_guard<mutex> lock(agentsMutex);
-    agents.clear();
+    clearAll = true;
+    agentsModified = true;
 }
 
 const AgentSeq& AgentRunnerThread::getAgents() const
@@ -95,25 +109,44 @@ bool AgentRunnerThread::hasAgents() const
 
 void AgentRunnerThread::processAgentsThread()
 {
+    /*
+     * 'agents' is only modified in this function, so there is no need to
+     * protect read accesses to this container in it.
+     */
     logger().debug("[CogServer::%s] Agent thread started", name.c_str());
-    while (hasAgents()) {
+    while (!agents.empty()) {
         if (!runAgents) {
             unique_lock<mutex> lock(runAgentsMutex);
             runAgentsCond.wait(lock, [this] { return runAgents.load(); });
-            if (!hasAgents())
-                return;
         }
 
 
-        unique_lock<mutex> agentsLock(agentsMutex);
         AgentSeq::const_iterator it;
         for (it = agents.begin(); it != agents.end(); ++it) {
             AgentPtr agent = *it;
-            agentsLock.unlock();
             // todo: can frequency() be still useful?
 //            if ((cycleCount % agent->frequency()) == 0)
             runAgent(agent);
-            agentsLock.lock();
+        }
+
+        if (agentsModified) {
+            logger().debug("[CogServer::%s] Updating active agents",
+                name.c_str());
+            lock_guard<mutex> agentsLock(agentsMutex);
+            agentsModified = false;
+            if (clearAll) {
+                clearAll = false;
+                AgentRunnerBase::removeAllAgents();
+                agentsRemoveQ.clear();
+                idsRemoveQ.clear();
+            } else {
+                for (const auto &a : agentsRemoveQ)
+                    AgentRunnerBase::removeAgent(a);
+                for (const auto &id : idsRemoveQ)
+                    AgentRunnerBase::removeAllAgents(id);
+            }
+            for (const auto &a : agentsAddQ)
+                AgentRunnerBase::addAgent(a);
         }
         ++cycleCount;
     }

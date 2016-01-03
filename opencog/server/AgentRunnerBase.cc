@@ -84,6 +84,15 @@ void AgentRunnerBase::removeAllAgents(const std::string& id)
 
     // remove those agents from the main container
     agents.erase(last, agents.end());
+
+    logger().debug("[CogServer::%s] stopped all agents of type \"%s\"",
+        name.c_str(), id.c_str());
+}
+
+void AgentRunnerBase::removeAllAgents()
+{
+    agents.clear();
+    logger().debug("[CogServer::%s] stopped all agents", name.c_str());
 }
 
 void AgentRunnerBase::runAgent(AgentPtr a)
