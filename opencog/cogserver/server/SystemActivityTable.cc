@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100)
+SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
+        _cogServer(nullptr)
 {
     logger().debug("[SystemActivityTable] constructor");
 }
@@ -86,11 +87,11 @@ void SystemActivityTable::atomRemoved(AtomPtr atom)
     }
 }
 
-void SystemActivityTable::logActivity(AgentPtr agent, struct timeval &elapsedTime, 
+void SystemActivityTable::logActivity(AgentPtr agent, struct timeval &elapsedTime,
                                       size_t memUsed, size_t atomsUsed)
 {
     ActivitySeq& as = _agentActivityTable[agent];
-    as.insert(as.begin(), 
+    as.insert(as.begin(),
         new Activity(_cogServer->getCycleCount(), elapsedTime, memUsed,
                  atomsUsed,
                  agent->getUtilizedHandleSets()));
