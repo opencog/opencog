@@ -36,6 +36,7 @@
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/AgentRunnerBase.h>
+#include <opencog/cogserver/server/AgentRunnerThread.h>
 #include <opencog/cogserver/server/BaseServer.h>
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/NetworkServer.h>
@@ -147,6 +148,7 @@ protected:
         void*                   handle;
     } ModuleData;
     typedef std::map<const std::string, ModuleData> ModuleMap;
+    typedef std::unique_ptr<AgentRunnerThread> AgentRunnerThreadPtr;
 
     // Containers used to store references to the modules, requests
     // and agents
@@ -159,6 +161,8 @@ protected:
     bool agentsRunning;
 
     SimpleRunner agentScheduler;
+    std::vector<AgentRunnerThreadPtr> agentThreads;
+    std::map<std::string, AgentRunnerThread*> threadNameMap;
 
     std::mutex processRequestsMutex;
     concurrent_queue<Request*> requestQueue;
@@ -295,7 +299,8 @@ public:
     }
 
     /** Adds agent 'a' to the list of scheduled agents. */
-    virtual void startAgent(AgentPtr a, bool dedicated_thread = false);
+    virtual void startAgent(AgentPtr a, bool dedicated_thread = false,
+        const std::string &thread_name = "");
 
     /** Removes agent 'a' from the list of scheduled agents. */
     virtual void stopAgent(AgentPtr a);

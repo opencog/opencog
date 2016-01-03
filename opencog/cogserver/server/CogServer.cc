@@ -290,7 +290,12 @@ std::list<const char*> CogServer::agentIds() const
 
 AgentSeq CogServer::runningAgents(void)
 {
-    return agentScheduler.getAgents();
+    AgentSeq agents = agentScheduler.getAgents();
+    for (auto &runner: agentThreads) {
+        auto t = runner->getAgents();
+        agents.insert(agents.end(), t.begin(), t.end());
+    }
+    return agents;
 }
 
 AgentPtr CogServer::createAgent(const std::string& id, const bool start)
@@ -300,39 +305,59 @@ AgentPtr CogServer::createAgent(const std::string& id, const bool start)
     return a;
 }
 
-void CogServer::startAgent(AgentPtr agent, bool dedicated_thread)
+void CogServer::startAgent(AgentPtr agent, bool dedicated_thread,
+    const std::string &thread_name)
 {
-    assert(dedicated_thread == false);
-    agentScheduler.addAgent(agent);
+    if (dedicated_thread) {
+        AgentRunnerThread *runner;
+        auto runner_ptr = threadNameMap.find(thread_name);
+        if (runner_ptr != threadNameMap.end())
+            runner = runner_ptr->second;
+        else {
+            agentThreads.emplace_back(new AgentRunnerThread);
+            runner = agentThreads.back().get();
+            if (!thread_name.empty())
+            {
+                runner->setName(thread_name);
+                threadNameMap[thread_name] = runner;
+            }
+            runner->start();
+        }
+    }
+    else
+        agentScheduler.addAgent(agent);
 }
 
 void CogServer::stopAgent(AgentPtr agent)
 {
     agentScheduler.removeAgent(agent);
+    for (auto &runner: agentThreads)
+        runner->removeAgent(agent);
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
 void CogServer::stopAllAgents(const std::string& id)
 {
     agentScheduler.removeAllAgents(id);
+    for (auto &runner: agentThreads)
+        runner->removeAllAgents(id);
 //    // remove statistical record of their activities
 //    for (size_t n = 0; n < to_delete.size(); n++)
 //        _systemActivityTable.clearActivity(to_delete[n]);
-
-    // delete the selected agents; NOTE: we must ensure that this is executed
-    // after the 'agents.erase' call above, because the agent's destructor might
-    // include a recursive call to stopAllAgents
-    // std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
 }
 
 void CogServer::startAgentLoop(void)
 {
     agentsRunning = true;
+    for (auto &runner: agentThreads)
+        runner->start();
 }
 
 void CogServer::stopAgentLoop(void)
 {
     agentsRunning = false;
+    for (auto &runner: agentThreads)
+        runner->stop();
 }
 
 bool CogServer::registerRequest(const std::string& name, AbstractFactory<Request> const* factory)
