@@ -105,7 +105,7 @@ void AgentRunnerBase::runAgent(AgentPtr a)
     a->run();
 
     auto timer_end = system_clock::now();
-    auto elapsed = duration_cast<seconds>(timer_end - timer_start).count();
+    auto elapsed = duration_cast<duration<float>>(timer_end - timer_start).count();
     logger().debug("[CogServer::%s] running mind agent: %s, elapsed time (sec): %f "
             "[cycle = %d]", name.c_str(), a->classinfo().id.c_str(), elapsed,
             cycleCount);
