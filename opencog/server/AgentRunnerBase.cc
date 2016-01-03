@@ -70,7 +70,8 @@ void AgentRunnerBase::removeAgent(AgentPtr a)
     AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), a);
     if (ai != agents.end())
         agents.erase(ai);
-    logger().debug("[CogServer] stopped agent \"%s\"", a->to_string().c_str());
+    logger().debug("[CogServer::%s] stopped agent \"%s\"", name.c_str(),
+        a->to_string().c_str());
 }
 
 void AgentRunnerBase::removeAllAgents(const std::string& id)
@@ -80,40 +81,37 @@ void AgentRunnerBase::removeAllAgents(const std::string& id)
         std::partition(agents.begin(), agents.end(),
                        boost::bind(equal_to_id(), _1, id));
 
-    // save the agents that should be deleted on a temporary container
-    AgentSeq to_delete(last, agents.end());
-
     // remove those agents from the main container
     agents.erase(last, agents.end());
-}
-
-void AgentRunnerBase::processAgents()
-{
-    AgentSeq::const_iterator it;
-    for (it = agents.begin(); it != agents.end(); ++it) {
-        AgentPtr agent = *it;
-        if ((cycleCount % agent->frequency()) == 0)
-            runAgent(agent);
-    }
-    ++cycleCount;
 }
 
 void AgentRunnerBase::runAgent(AgentPtr a)
 {
     auto timer_start = system_clock::now();
-
-    logger().debug("[CogServer] begin to run mind agent: %s, [cycle = %d]",
-                   a->classinfo().id.c_str(), cycleCount);
+    logger().debug("[CogServer::%s] begin to run mind agent: %s, [cycle = %d]",
+                   name.c_str(), a->classinfo().id.c_str(), cycleCount);
 
     a->resetUtilizedHandleSets();
     a->run();
 
     auto timer_end = system_clock::now();
-
     auto elapsed = duration_cast<seconds>(timer_end - timer_start).count();
+    logger().debug("[CogServer::%s] running mind agent: %s, elapsed time (sec): %f "
+            "[cycle = %d]", name.c_str(), a->classinfo().id.c_str(), elapsed,
+            cycleCount);
+}
 
-    logger().debug("[CogServer] running mind agent: %s, elapsed time (sec): %f "
-            "[cycle = %d]", a->classinfo().id.c_str(), elapsed, cycleCount);
+void SimpleRunner::processAgents()
+{
+    if (running) {
+        AgentSeq::const_iterator it;
+        for (it = agents.begin(); it != agents.end(); ++it) {
+            AgentPtr agent = *it;
+            if ((cycleCount % agent->frequency()) == 0)
+                runAgent(agent);
+        }
+        ++cycleCount;
+    }
 }
 
 } /* namespace opencog */

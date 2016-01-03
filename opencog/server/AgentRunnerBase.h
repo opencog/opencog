@@ -34,7 +34,8 @@ typedef std::vector<AgentPtr> AgentSeq;
 class AgentRunnerBase
 {
     public:
-        AgentRunnerBase(std::string runner_name = "[unnamed]");
+        AgentRunnerBase(std::string runner_name = "unnamed");
+        AgentRunnerBase(AgentRunnerBase &&tmp) = default;
         ~AgentRunnerBase();
 
         void setName(std::string new_name);
@@ -59,7 +60,7 @@ class AgentRunnerBase
         /** Removes all agents from class 'id' */
         void removeAllAgents(const std::string &id);
 
-        void processAgents();
+//        void processAgents();
 
         /** Run an Agent and log its activity. */
         void runAgent(AgentPtr a);
@@ -69,7 +70,7 @@ class AgentRunnerBase
 class SimpleRunner: public AgentRunnerBase
 {
     public:
-        SimpleRunner(const std::string &name = "[simple]"): AgentRunnerBase(name), running(false) {}
+        SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name), running(false) {}
 
         /** Put runner into 'running' state, so that agents will be run when
          * processAgents() is called */
@@ -90,7 +91,7 @@ class SimpleRunner: public AgentRunnerBase
 
         const AgentSeq &getAgents() const { return agents; }
 
-        void processAgents() { if (running) AgentRunnerBase::processAgents(); }
+        void processAgents();
 
     private:
         bool running;

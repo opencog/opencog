@@ -39,6 +39,7 @@ AgentRunnerThread::~AgentRunnerThread()
 void AgentRunnerThread::start()
 {
     {
+        // locking is required, to prevent dead-lock in condition_variable wait()
         lock_guard<mutex> lock(runAgentsMutex);
         runAgents = true;
     }
@@ -52,10 +53,10 @@ void AgentRunnerThread::stop()
 
 void AgentRunnerThread::addAgent(AgentPtr a)
 {
-    if (!hasActiveAgents())
-    {
+    if (!hasAgents()) {
         joinRunThread();
         runThread = thread(&AgentRunnerThread::processAgentsThread, this);
+        // todo: set thread name when using pthreads
     }
 
     lock_guard<mutex> lock(agentsMutex);
@@ -86,7 +87,7 @@ const AgentSeq& AgentRunnerThread::getAgents() const
     return agents;
 }
 
-inline bool AgentRunnerThread::hasActiveAgents() const
+bool AgentRunnerThread::hasAgents() const
 {
     lock_guard<mutex> lock(agentsMutex);
     return !agents.empty();
@@ -94,13 +95,12 @@ inline bool AgentRunnerThread::hasActiveAgents() const
 
 void AgentRunnerThread::processAgentsThread()
 {
-    while (hasActiveAgents())
-    {
-        if (!runAgents)
-        {
+    logger().debug("[CogServer::%s] Agent thread started", name.c_str());
+    while (hasAgents()) {
+        if (!runAgents) {
             unique_lock<mutex> lock(runAgentsMutex);
             runAgentsCond.wait(lock, [this] { return runAgents.load(); });
-            if (!hasActiveAgents())
+            if (!hasAgents())
                 return;
         }
 
@@ -110,19 +110,20 @@ void AgentRunnerThread::processAgentsThread()
         for (it = agents.begin(); it != agents.end(); ++it) {
             AgentPtr agent = *it;
             agentsLock.unlock();
-            if ((cycleCount % agent->frequency()) == 0)
-                runAgent(agent);
+            // todo: can frequency() be still useful?
+//            if ((cycleCount % agent->frequency()) == 0)
+            runAgent(agent);
             agentsLock.lock();
         }
         ++cycleCount;
     }
+    logger().debug("[CogServer::%s] Agent thread stopped", name.c_str());
 }
 
 inline void AgentRunnerThread::joinRunThread()
 {
-    if (runThread.joinable())
-    {
-        start();
+    if (runThread.joinable()) {
+        start(); // unlock processAgentsThread() if stopped
         runThread.join();
     }
 }

@@ -36,7 +36,12 @@ namespace opencog
 class AgentRunnerThread: public AgentRunnerBase
 {
     public:
-        AgentRunnerThread(const std::string &name = "[agent_thread]");
+        AgentRunnerThread(const std::string &name = "agent_thread");
+        /**
+         * AgentRunnerThread is not movable anyway, because mutex &
+         * condition_variable are not. We just make it explicit.
+         */
+        AgentRunnerThread(AgentRunnerThread &&tmp) = delete;
         ~AgentRunnerThread();
 
         /** Start runAgents agents */
@@ -58,6 +63,8 @@ class AgentRunnerThread: public AgentRunnerBase
 
         const AgentSeq &getAgents() const;
 
+        bool hasAgents() const;
+
     private:
         std::atomic_bool runAgents;
         std::mutex runAgentsMutex;
@@ -67,7 +74,6 @@ class AgentRunnerThread: public AgentRunnerBase
         mutable std::mutex agentsMutex;
 
     private:
-        bool hasActiveAgents() const;
         void processAgentsThread();
         void joinRunThread();
 };
