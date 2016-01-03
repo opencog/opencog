@@ -69,10 +69,12 @@ void AgentRunnerBase::addAgent(AgentPtr a)
 void AgentRunnerBase::removeAgent(AgentPtr a)
 {
     AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), a);
-    if (ai != agents.end())
+    if (ai != agents.end()) {
         agents.erase(ai);
-    logger().debug("[CogServer::%s] stopped agent \"%s\"", name.c_str(),
-        a->to_string().c_str());
+        a->stop();
+        logger().debug("[CogServer::%s] stopped agent \"%s\"", name.c_str(),
+            a->to_string().c_str());
+    }
 }
 
 void AgentRunnerBase::removeAllAgents(const std::string& id)
@@ -81,6 +83,8 @@ void AgentRunnerBase::removeAllAgents(const std::string& id)
     AgentSeq::iterator last =
         std::partition(agents.begin(), agents.end(),
                        boost::bind(equal_to_id(), _1, id));
+
+    std::for_each(last, agents.end(), [] (AgentPtr &a) { a->stop(); });
 
     // remove those agents from the main container
     agents.erase(last, agents.end());
@@ -91,6 +95,8 @@ void AgentRunnerBase::removeAllAgents(const std::string& id)
 
 void AgentRunnerBase::removeAllAgents()
 {
+    for (auto &a: agents)
+        a->stop();
     agents.clear();
     logger().debug("[CogServer::%s] stopped all agents", name.c_str());
 }

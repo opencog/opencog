@@ -159,6 +159,10 @@ public:
      *  actual agent's behavior. */
     virtual void run() = 0;
 
+    /** Agent stop() method, called when the agent is stopped
+     */
+    virtual void stop() {}
+
     /** Returns the agent's frequency. */
     virtual int frequency(void) const { return _frequency; }
 
