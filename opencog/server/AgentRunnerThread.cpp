@@ -137,16 +137,17 @@ void AgentRunnerThread::processAgentsThread()
             if (clearAll) {
                 clearAll = false;
                 AgentRunnerBase::removeAllAgents();
-                agentsRemoveQ.clear();
-                idsRemoveQ.clear();
             } else {
                 for (const auto &a : agentsRemoveQ)
                     AgentRunnerBase::removeAgent(a);
                 for (const auto &id : idsRemoveQ)
                     AgentRunnerBase::removeAllAgents(id);
             }
+            agentsRemoveQ.clear();
+            idsRemoveQ.clear();
             for (const auto &a : agentsAddQ)
                 AgentRunnerBase::addAgent(a);
+            agentsAddQ.clear();
         }
         ++cycleCount;
     }
