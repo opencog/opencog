@@ -25,6 +25,8 @@
 #ifndef _OPENCOG_AGENT_H
 #define _OPENCOG_AGENT_H
 
+#include <atomic>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -105,9 +107,14 @@ class CogServer;
 class Agent
 {
 
+private:
+    boost::signals2::connection conn;
+
 protected:
     CogServer& _cogserver;
 
+    /** Note: AttentionValue itself is read-only, so no need to protect, but
+     * the pointer needs and is protected */
     AttentionValuePtr _attentionValue;
 
     /** The agent's frequency. Determines how often the opencog server should
@@ -118,7 +125,9 @@ protected:
 
     /** Sets the list of parameters for this agent and their default values.
      * If any parameter values are unspecified in the Config singleton, sets
-     * them to the default values. */
+     * them to the default values.
+     * Note: it is assumed to be called only during initialization, so it is not
+     * thread safe and shouldn't be called from multiple threads */
     void setParameters(const std::string* params);
 
     const std::string* PARAMETERS;
@@ -126,14 +135,14 @@ protected:
     /** The atoms utilized by the Agent in a single cycle, to be used by the
      *  System Activity Table to assign credit to this agent. */
     std::vector<UnorderedHandleSet> _utilizedHandleSets;
+    mutable std::mutex _handleSetMutex;
 
     /** Total stimulus given out to atoms */
-    stim_t totalStimulus;
+    std::atomic<stim_t> totalStimulus;
 
     /** Hash table of atoms given stimulus since reset */
     AtomStimHashMap* stimulatedAtoms;
-
-    boost::signals2::connection conn;
+    mutable std::mutex stimulatedAtomsMutex;
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
@@ -165,8 +174,9 @@ public:
 
     /** Returns the sequence of handle sets for this cycle that the agent
      *  would like to claim credit for in the System Activity Table. */
-    virtual const std::vector<UnorderedHandleSet>& getUtilizedHandleSets() const
+    virtual std::vector<UnorderedHandleSet> getUtilizedHandleSets() const
     {
+        std::lock_guard<std::mutex> lock(_handleSetMutex);
         return _utilizedHandleSets;
     }
 
@@ -221,11 +231,11 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
-    /** The following two are NOT thread-safe! Neither can be called
-     * safely from multiple threads!
-     */
-    AttentionValuePtr getAV() { return _attentionValue; }
-    void setAV(AttentionValuePtr new_av) { _attentionValue = new_av; }
+    AttentionValuePtr getAV() { return std::atomic_load(&_attentionValue); }
+    void setAV(AttentionValuePtr new_av)
+    {
+        std::atomic_store(&_attentionValue, new_av);
+    }
 }; // class
 
 typedef std::shared_ptr<Agent> AgentPtr;

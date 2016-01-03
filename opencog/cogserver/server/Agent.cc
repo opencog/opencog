@@ -88,13 +88,17 @@ std::string Agent::to_string() const
 void Agent::atomRemoved(AtomPtr atom)
 {
     Handle h = atom->getHandle();
-    for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
-        _utilizedHandleSets[i].erase(h);
+    {
+        std::lock_guard<std::mutex> lock(_handleSetMutex);
+        for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
+            _utilizedHandleSets[i].erase(h);
+    }
     removeAtomStimulus(h);
 }
 
 void Agent::resetUtilizedHandleSets()
 {
+    std::lock_guard<std::mutex> lock(_handleSetMutex);
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         _utilizedHandleSets[i].clear();
     _utilizedHandleSets.clear();
@@ -103,35 +107,42 @@ void Agent::resetUtilizedHandleSets()
 
 stim_t Agent::stimulateAtom(Handle h, stim_t amount)
 {
-    // Add atom to the map of atoms with stimulus
-    // and add stimulus to it
-    (*stimulatedAtoms)[h] += amount;
+    {
+        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+
+        // Add atom to the map of atoms with stimulus
+        // and add stimulus to it
+        (*stimulatedAtoms)[h] += amount;
+    }
 
     // update record of total stimulus given out
     totalStimulus += amount;
-    
-    logger().fine("Atom %d received stimulus of %d, total now %d", 
-                  h.value(), 
-                  amount, 
-                  totalStimulus);
 
-#ifdef DEBUG    
+    logger().fine("Atom %d received stimulus of %d, total now %d",
+                  h.value(),
+                  amount,
+                  totalStimulus.load());
+
+#ifdef DEBUG
     std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
                  ", total now " << totalStimulus << "\n";
 #endif
-    
+
     return totalStimulus;
 }
 
 void Agent::removeAtomStimulus(Handle h)
 {
     stim_t amount;
-    // if handle not in map then return
-    if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
-        return;
+    {
+        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+        // if handle not in map then return
+        if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
+            return;
 
-    amount = (*stimulatedAtoms)[h];
-    stimulatedAtoms->erase(h);
+        amount = (*stimulatedAtoms)[h];
+        stimulatedAtoms->erase(h);
+    }
 
     // update record of total stimulus given out
     totalStimulus -= amount;
@@ -153,7 +164,10 @@ stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
 
 stim_t Agent::resetStimulus()
 {
-    stimulatedAtoms->clear();
+    {
+        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+        stimulatedAtoms->clear();
+    }
     // reset stimulus counter
     totalStimulus = 0;
     return totalStimulus;
@@ -166,6 +180,7 @@ stim_t Agent::getTotalStimulus() const
 
 stim_t Agent::getAtomStimulus(Handle h) const
 {
+    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
     if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
         return 0;
     } else {
