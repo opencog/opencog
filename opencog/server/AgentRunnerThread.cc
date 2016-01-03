@@ -1,5 +1,5 @@
 /*
- * opencog/server/AgentRunnerThread.cpp
+ * opencog/server/AgentRunnerThread.cc
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -18,6 +18,7 @@
  */
 
 #include <opencog/server/AgentRunnerThread.h>
+#include <opencog/util/Logger.h>
 
 using namespace std;
 

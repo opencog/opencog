@@ -21,6 +21,7 @@
 #define OPENCOG_SERVER_AGENTRUNNERBASE_H_
 
 #include <string>
+#include <vector>
 #include <opencog/server/Agent.h>
 
 namespace opencog
