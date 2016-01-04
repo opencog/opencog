@@ -20,7 +20,7 @@ ADD_DEPENDENCIES(embodiment-types spacetime_atom_types)
 ADD_DEPENDENCIES(embodiment-types embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (embodiment-types
-	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_atombase_LIBRARY}
 )
 
 INSTALL (FILES

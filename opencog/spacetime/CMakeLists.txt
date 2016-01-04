@@ -11,7 +11,7 @@ ADD_LIBRARY (spacetime-types SHARED
 )
 
 TARGET_LINK_LIBRARIES(spacetime-types
-	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_atombase_LIBRARY}
 )
 
 ADD_DEPENDENCIES(spacetime-types opencog_atom_types)
