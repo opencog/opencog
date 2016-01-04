@@ -22,7 +22,7 @@ ADD_DEPENDENCIES(attention-types opencog_atom_types)
 ADD_DEPENDENCIES(attention-types attention_atom_types)
 
 TARGET_LINK_LIBRARIES(attention-types
-	${ATOMSPACE_LIBRARY}
+	${ATOMSPACE_atombase_LIBRARY}
 )
 
 # --------------------------------------------------
