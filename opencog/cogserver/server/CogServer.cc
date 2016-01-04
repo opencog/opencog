@@ -240,7 +240,7 @@ void CogServer::runLoopStep(void)
     }
 
     // Process mind agents
-    if (customLoopRun() and agentsRunning and 0 < agents.size())
+    if (customLoopRun() and agentsRunning and 0 < agentScheduler.getAgents().size())
     {
         agentScheduler.processAgents();
 
@@ -323,7 +323,8 @@ void CogServer::startAgent(AgentPtr agent, bool dedicated_thread,
             }
         }
         runner->addAgent(agent);
-        runner->start();
+        if (agentsRunning)
+            runner->start();
     }
     else
         agentScheduler.addAgent(agent);

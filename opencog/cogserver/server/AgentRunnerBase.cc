@@ -19,7 +19,7 @@
 
 #include <algorithm>
 #include <chrono>
-#include <opencog/server/AgentRunnerBase.h>
+#include <opencog/cogserver/server/AgentRunnerBase.h>
 #include <opencog/util/Logger.h>
 
 using namespace std;
@@ -119,15 +119,13 @@ void AgentRunnerBase::runAgent(AgentPtr a)
 
 void SimpleRunner::processAgents()
 {
-    if (running) {
-        AgentSeq::const_iterator it;
-        for (it = agents.begin(); it != agents.end(); ++it) {
-            AgentPtr agent = *it;
-            if ((cycleCount % agent->frequency()) == 0)
-                runAgent(agent);
-        }
-        ++cycleCount;
+    AgentSeq::const_iterator it;
+    for (it = agents.begin(); it != agents.end(); ++it) {
+        AgentPtr agent = *it;
+        if ((cycleCount % agent->frequency()) == 0)
+            runAgent(agent);
     }
+    ++cycleCount;
 }
 
 } /* namespace opencog */

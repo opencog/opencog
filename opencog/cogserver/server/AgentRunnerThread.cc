@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/server/AgentRunnerThread.h>
+#include <opencog/cogserver/server/AgentRunnerThread.h>
 #include <opencog/util/Logger.h>
 
 using namespace std;

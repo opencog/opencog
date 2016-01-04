@@ -22,7 +22,7 @@
 
 #include <string>
 #include <vector>
-#include <opencog/server/Agent.h>
+#include <opencog/cogserver/server/Agent.h>
 
 namespace opencog
 {
@@ -72,15 +72,7 @@ class AgentRunnerBase
 class SimpleRunner: public AgentRunnerBase
 {
     public:
-        SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name), running(false) {}
-
-        /** Put runner into 'running' state, so that agents will be run when
-         * processAgents() is called */
-        void start() { running = true; }
-
-        /** Put runner into 'stopped' state, so that nothing happens when
-         * processAgents() is called */
-        void stop() { running = false; }
+        SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name) {}
 
         /** Adds agent 'a' to the list of scheduled agents. */
         void addAgent(AgentPtr a) { AgentRunnerBase::addAgent(a); }
@@ -94,9 +86,6 @@ class SimpleRunner: public AgentRunnerBase
         const AgentSeq &getAgents() const { return agents; }
 
         void processAgents();
-
-    private:
-        bool running;
 };
 
 } /* namespace opencog */

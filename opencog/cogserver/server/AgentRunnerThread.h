@@ -25,7 +25,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <opencog/server/AgentRunnerBase.h>
+#include <opencog/cogserver/server/AgentRunnerBase.h>
 
 
 namespace opencog
