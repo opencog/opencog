@@ -47,7 +47,7 @@ void HebbianUpdatingAgent::setMean(Handle h, float tc)
 		}
 		case INDEFINITE_TRUTH_VALUE: {
 			IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
-			newtv->setMean(tc);
+			// newtv->setMean(tc);
 			h->merge(newtv);
 			break;
 		}
