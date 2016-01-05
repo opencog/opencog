@@ -310,15 +310,20 @@ int main (int argc, char * argv[])
 
 	const char *login = getlogin();
 
-	// The login-name, nick, etc. are there only to make it look
-	// pretty on IRC ident.
-	conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
-	            "La Cogita OpenCog chatbot", "asdf");
+	// Loop forever. When the IRC network burps and closes our
+	// connection, just log in again.
+	while (true)
+	{
+		// The login-name, nick, etc. are there only to make it look
+		// pretty on IRC ident.
+		conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
+		            "La Cogita OpenCog chatbot", "asdf");
 
-	conn.message_loop();
+		conn.message_loop();
 
-	fprintf(stderr, "%s: Fatal Error: Remote side closed socket\n",
-		argv[0]);
+		fprintf(stderr, "%s: Fatal Error: Remote side closed socket\n",
+			argv[0]);
+	}
 
 	return 1;
 }
