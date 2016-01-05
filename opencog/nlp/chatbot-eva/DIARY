@@ -6,7 +6,11 @@ Would like to use continuations for the chat pipe ...
 However, it seems that scm_with_guile() has a continuation barrier
 in it. It appears that the barrier is overly pessimistic.
 
-(define *myk* #f)
+(defiemaNode "x+y*10")
+      (ListLink
+         (NumberNode "2")
+         (NumberNode "4"))))
+e *myk* #f)
 
 (call/cc (lambda (k) (set! *myk* k)))
 
@@ -968,14 +972,76 @@ micro:
 0m23.651s 0m27.487s
 0m23.446s 0m27.582s
 
-
-
 R"( (WordNode "she") )")
+=============================================================
 
 
-get_confidence
-get_mean
+(use-modules (opencog) (opencog exec))
 
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
-+#define getarity(hand) hand->getArity()
+(define (show-arg a b c) 
+	(display "Ola El Mundo!\n")
+	(display a)  (display b) (display c) a)
 
+(cog-execute!
+	(ExecutionOutput
+		(GroundedSchema "scm: show-arg")
+		(ListLink
+			(Concept "a") (Concept "b") (Number 5))))
+
+(cog-execute!
+	(PutLink
+		(ExecutionOutput
+			(GroundedSchema "scm: show-arg")
+			(ListLink
+				(Variable "x") (Variable "y") (Variable "z")))
+		(ListLink
+			(Concept "a") (Concept "b") (Number 5))))
+
+
+(DefineLink
+	(DefinedSchema "foo")
+	(LambdaLink
+		(VariableList (Variable "x") (Variable "y") (Variable "z"))
+		(ExecutionOutput
+			(GroundedSchema "scm: show-arg")
+			(ListLink
+				(Variable "x") (Variable "y") (Variable "z")))))
+
+(cog-execute!
+	(PutLink
+		(DefinedSchema "foo")
+		(ListLink
+			(Concept "a") (Concept "b") (Number 5))))
+	
+(cog-execute!
+	
+		(DefinedSchema "foo")
+		(ListLink
+			(Concept "a") (Concept "b") (Number 5))))
+	
+(DefineLink
+	(DefinedSchema "bar")
+	(LambdaLink
+		(VariableList (Variable "x") (Variable "y"))
+		(ExecutionOutput
+			(GroundedSchema "scm: show-arg")
+			(ListLink
+				(Variable "x") (Variable "y") (Number 5)))))
+
+(cog-execute!
+	(PutLink
+		(DefinedSchema "bar")
+		(ListLink
+			(Concept "a") (Concept "b"))))
+
+
+execute.scm is borken
+===============================================
+
+ExtractLink
+    ScopeLink or ImplicatinLink
+    values
+
+
+Exit main loop: Connection reset by peer
+opencog/nlp/irc/cogita: Fatal Error: Remote side closed socket
