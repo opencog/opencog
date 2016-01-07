@@ -176,9 +176,10 @@ static void setMean(Handle h, float mean)
             break;
         }
         case INDEFINITE_TRUTH_VALUE: {
-            IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
-            newtv->setMean(mean);
-            h->setTruthValue(newtv);
+	        OC_ASSERT(false, "Not implemented");
+            // IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
+            // newtv->setMean(mean);
+            // h->setTruthValue(newtv);
             break;
         }
         default:
