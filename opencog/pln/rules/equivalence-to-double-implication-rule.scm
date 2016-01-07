@@ -65,7 +65,7 @@
 
 ;; Name the rule
 (define equivalence-to-double-implication-rule-name
-  (Node "equivalence-to-double-implication-rule"))
+  (DefinedSchemaNode "equivalence-to-double-implication-rule"))
 (DefineLink
   equivalence-to-double-implication-rule-name
   equivalence-to-double-implication-rule)

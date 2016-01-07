@@ -45,5 +45,5 @@
     (stv (/ sAB (- 1 sA)) (min cAB cA))))
 
 ; Name the rule
-(define or-breakdown-rule-name (Node "or-breakdown-rule"))
+(define or-breakdown-rule-name (DefinedSchemaNode "or-breakdown-rule"))
 (DefineLink or-breakdown-rule-name or-breakdown-rule)

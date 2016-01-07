@@ -65,5 +65,5 @@
             (stv (- sSAB sSnAB) (min cSAB cSnAB)))))
 
 ; Name the rule
-(define attraction-rule-name (Node "attraction-rule"))
+(define attraction-rule-name (DefinedSchemaNode "attraction-rule"))
 (DefineLink attraction-rule-name attraction-rule)

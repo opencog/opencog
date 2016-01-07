@@ -256,7 +256,7 @@
 
 ; Name the rule
 (define contextualize-inheritance-rule-name
-  (Node "contextualize-inheritance-rule"))
+  (DefinedSchemaNode "contextualize-inheritance-rule"))
 (DefineLink
   contextualize-inheritance-rule-name
   contextualize-inheritance-rule)

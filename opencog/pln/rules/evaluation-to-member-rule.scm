@@ -238,19 +238,19 @@
 
 ; Name the rule
 (define evaluation-to-member-0-rule-name
-  (Node "evaluation-to-member-0-rule"))
+  (DefinedSchemaNode "evaluation-to-member-0-rule"))
 (DefineLink
   evaluation-to-member-0-rule-name
   evaluation-to-member-0-rule)
 
 (define evaluation-to-member-1-rule-name
-  (Node "evaluation-to-member-1-rule"))
+  (DefinedSchemaNode "evaluation-to-member-1-rule"))
 (DefineLink
   evaluation-to-member-1-rule-name
   evaluation-to-member-1-rule)
 
 (define evaluation-to-member-2-rule-name
-  (Node "evaluation-to-member-2-rule"))
+  (DefinedSchemaNode "evaluation-to-member-2-rule"))
 (DefineLink
   evaluation-to-member-2-rule-name
   evaluation-to-member-2-rule)

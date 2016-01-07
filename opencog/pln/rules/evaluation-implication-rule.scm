@@ -72,7 +72,7 @@
                     (* 0.9 (cog-stv-confidence AB)))))))
 
 ; Name the rule
-(define evaluation-implication-rule-name (Node "evaluation-implication-rule"))
+(define evaluation-implication-rule-name (DefinedSchemaNode "evaluation-implication-rule"))
 (DefineLink evaluation-implication-rule-name evaluation-implication-rule)
 
 

@@ -38,7 +38,7 @@
 
 ; Name the rule
 (define not-simplification-rule-name
-  (Node "not-simplification-rule"))
+  (DefinedSchemaNode "not-simplification-rule"))
 (DefineLink
   not-simplification-rule-name
   not-simplification-rule)

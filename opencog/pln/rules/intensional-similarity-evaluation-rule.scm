@@ -61,7 +61,7 @@
 
 ; Name the rule
 (define intensional-similarity-evaluation-rule-name
-  (Node "intensional-similarity-evaluation-rule"))
+  (DefinedSchemaNode "intensional-similarity-evaluation-rule"))
 (DefineLink
   intensional-similarity-evaluation-rule-name
   intensional-similarity-evaluation-rule)

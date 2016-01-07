@@ -63,16 +63,16 @@
 
 ;; Name the rules
 (define inversion-inheritance-rule-name
-  (Node "inversion-inheritance-rule"))
+  (DefinedSchemaNode "inversion-inheritance-rule"))
 (DefineLink inversion-inheritance-rule-name
   inversion-inheritance-rule)
 
 (define inversion-implication-rule-name
-  (Node "inversion-implication-rule"))
+  (DefinedSchemaNode "inversion-implication-rule"))
 (DefineLink inversion-implication-rule-name
   inversion-implication-rule)
 
 (define inversion-subset-rule-name
-  (Node "inversion-subset-rule"))
+  (DefinedSchemaNode "inversion-subset-rule"))
 (DefineLink inversion-subset-rule-name
   inversion-subset-rule)

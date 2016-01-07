@@ -52,5 +52,5 @@
 		
 
 ; Name the rule
-(define and-to-context-rule-name (Node "and-to-context-rule"))
+(define and-to-context-rule-name (DefinedSchemaNode "and-to-context-rule"))
 (DefineLink and-to-context-rule-name and-to-context-rule)

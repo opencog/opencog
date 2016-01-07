@@ -61,6 +61,6 @@
 
 ; Name the rule
 (define extensional-similarity-evaluation-rule-name
-  (Node "extensional-similarity-evaluation-rule"))
+  (DefinedSchemaNode "extensional-similarity-evaluation-rule"))
 (DefineLink extensional-similarity-evaluation-rule-name
   extensional-similarity-evaluation-rule)

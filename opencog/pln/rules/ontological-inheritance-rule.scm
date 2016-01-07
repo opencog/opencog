@@ -62,7 +62,7 @@
 
 ; Name the rule
 (define ontological-inheritance-rule-name
-  (Node "ontological-inheritance-rule"))
+  (DefinedSchemaNode "ontological-inheritance-rule"))
 (DefineLink
   ontological-inheritance-rule-name
   ontological-inheritance-rule)

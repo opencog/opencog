@@ -77,7 +77,7 @@ public:
         load_scm_files_from_config(_as);
 
         // Simple BindLink with an AndLink or SequentialAndLink
-        Handle alias = _as.get_node(NODE, "initial-rule"),
+        Handle alias = _as.get_node(DEFINED_SCHEMA_NODE, "initial-rule"),
                rbs = _as.get_node(CONCEPT_NODE, "initial-rbs"),
                ml = _as.get_link(MEMBER_LINK, HandleSeq {alias, rbs});
 

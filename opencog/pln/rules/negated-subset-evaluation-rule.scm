@@ -63,7 +63,7 @@
 
 ; Name the rule
 (define negated-subset-evaluation-rule-name
-  (Node "negated-subset-evaluation-rule"))
+  (DefinedSchemaNode "negated-subset-evaluation-rule"))
 (DefineLink
   negated-subset-evaluation-rule-name
   negated-subset-evaluation-rule)

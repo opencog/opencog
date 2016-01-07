@@ -34,5 +34,5 @@
     (stv (- 1 sNA) cAB )))
 
 ; Name the rule
-(define not-elimination-rule-name (Node "not-elimination-rule"))
+(define not-elimination-rule-name (DefinedSchemaNode "not-elimination-rule"))
 (DefineLink not-elimination-rule-name not-elimination-rule)

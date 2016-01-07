@@ -44,6 +44,10 @@ Action::Action(Rule a_rule) : _rule(a_rule)
 
 void Action::init()
 {
+    if (NULL == _rule.get_handle()) {
+        throw InvalidParamException(TRACE_INFO, "Bad rule");
+    }
+
     PatternLinkPtr state(PatternLinkCast(_rule.get_handle()));
 
     if (NULL == state) {

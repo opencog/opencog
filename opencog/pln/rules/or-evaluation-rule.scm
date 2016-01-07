@@ -57,5 +57,5 @@
             (stv 1 1))))
 
 ; Name the rule
-(define or-evaluation-rule-name (Node "or-evaluation-rule"))
+(define or-evaluation-rule-name (DefinedSchemaNode "or-evaluation-rule"))
 (DefineLink or-evaluation-rule-name or-evaluation-rule)

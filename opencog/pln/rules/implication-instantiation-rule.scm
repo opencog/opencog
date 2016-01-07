@@ -95,7 +95,7 @@
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name
-  (Node "implication-full-instantiation-rule"))
+  (DefinedSchemaNode "implication-full-instantiation-rule"))
 (DefineLink implication-full-instantiation-rule-name
   implication-full-instantiation-rule)
 
@@ -196,6 +196,6 @@
 
 ;; Name the rule
 (define implication-partial-instantiation-rule-name
-  (Node "implication-partial-instantiation-rule"))
+  (DefinedSchemaNode "implication-partial-instantiation-rule"))
 (DefineLink implication-partial-instantiation-rule-name
   implication-partial-instantiation-rule)

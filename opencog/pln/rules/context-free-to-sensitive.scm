@@ -53,7 +53,7 @@
 
 ; Name the rule
 (define context-free-to-sensitive-rule-name
-  (Node "context-free-to-sensitive-rule"))
+  (DefinedSchemaNode "context-free-to-sensitive-rule"))
 (DefineLink
   context-free-to-sensitive-rule-name
   context-free-to-sensitive-rule)

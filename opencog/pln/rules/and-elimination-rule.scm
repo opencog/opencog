@@ -46,5 +46,5 @@
     (stv (expt sAB 0.5) (/ cAB 1.42))))
 
 ; Name the rule
-(define and-elimination-rule-name (Node "and-elimination-rule"))
+(define and-elimination-rule-name (DefinedSchemaNode "and-elimination-rule"))
 (DefineLink and-elimination-rule-name and-elimination-rule)

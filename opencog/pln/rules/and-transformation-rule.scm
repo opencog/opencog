@@ -44,5 +44,5 @@
     (stv sAB cAB)))
 
 ; Name the rule
-(define and-transformation-rule-name (Node "and-transformation-rule"))
+(define and-transformation-rule-name (DefinedSchemaNode "and-transformation-rule"))
 (DefineLink and-transformation-rule-name and-transformation-rule)
