@@ -167,14 +167,14 @@
 
 
 ; Name the rule
-(define member-to-evaluation-0-rule-name (Node "member-to-evaluation-0-rule"))
+(define member-to-evaluation-0-rule-name (DefinedSchemaNode "member-to-evaluation-0-rule"))
 (DefineLink member-to-evaluation-0-rule-name member-to-evaluation-0-rule)
 
-(define member-to-evaluation-1-rule-name (Node "member-to-evaluation-1-rule"))
+(define member-to-evaluation-1-rule-name (DefinedSchemaNode "member-to-evaluation-1-rule"))
 (DefineLink member-to-evaluation-1-rule-name member-to-evaluation-1-rule)
 
-(define member-to-evaluation-2-1-rule-name (Node "member-to-evaluation-2-1-rule"))
+(define member-to-evaluation-2-1-rule-name (DefinedSchemaNode "member-to-evaluation-2-1-rule"))
 (DefineLink member-to-evaluation-2-1-rule-name member-to-evaluation-2-1-rule)
 
-(define member-to-evaluation-2-2-rule-name (Node "member-to-evaluation-2-2-rule"))
+(define member-to-evaluation-2-2-rule-name (DefinedSchemaNode "member-to-evaluation-2-2-rule"))
 (DefineLink member-to-evaluation-2-2-rule-name member-to-evaluation-2-2-rule)

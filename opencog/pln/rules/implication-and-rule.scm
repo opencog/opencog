@@ -62,5 +62,5 @@
     (stv 1 1))
 
 ; Name the rule
-(define implication-and-rule-name (Node "implication-and-rule"))
+(define implication-and-rule-name (DefinedSchemaNode "implication-and-rule"))
 (DefineLink implication-and-rule-name implication-and-rule)

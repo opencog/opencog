@@ -1045,3 +1045,166 @@ ExtractLink
 
 Exit main loop: Connection reset by peer
 opencog/nlp/irc/cogita: Fatal Error: Remote side closed socket
+
+(use-modules (opencog) (opencog exec))
+
+(define m
+	(MapLink
+		(ScopeLink
+			(Variable "$x")
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Variable "$x"))))
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Concept "baz"))))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ScopeLink
+			(Variable "$x")
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ScopeLink
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ScopeLink
+			(TypedVariable (Variable "$x")
+				(SignatureLink
+					(EvaluationLink
+						(Predicate "foo")
+						(ListLink (Concept "bar") (Type "ConceptNode")))))
+			(Variable "$x"))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ScopeLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "NumberNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ImplicationLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "ConceptNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y")))
+			(EvaluationLink
+				(Predicate "reverse-foo")
+				(ListLink (Variable "$y") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(cog-execute! m)
+	
+(define m
+	(MapLink
+		(ExtensionalImplicationLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "NumberNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y")))
+			(EvaluationLink
+				(Predicate "reverse-foo")
+				(ListLink (Variable "$y") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Plus (Number 3) (Number 2))))
+		))
+)
+
+(cog-execute! m)
+	

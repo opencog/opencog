@@ -81,16 +81,16 @@
 
 ;; Name the rules
 (define abduction-inheritance-rule-name
-  (Node "abduction-inheritance-rule"))
+  (DefinedSchemaNode "abduction-inheritance-rule"))
 (DefineLink abduction-inheritance-rule-name
   abduction-inheritance-rule)
 
 (define abduction-implication-rule-name
-  (Node "abduction-implication-rule"))
+  (DefinedSchemaNode "abduction-implication-rule"))
 (DefineLink abduction-implication-rule-name
   abduction-implication-rule)
 
 (define abduction-subset-rule-name
-  (Node "abduction-subset-rule"))
+  (DefinedSchemaNode "abduction-subset-rule"))
 (DefineLink abduction-subset-rule-name
   abduction-subset-rule)

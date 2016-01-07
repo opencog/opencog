@@ -60,5 +60,5 @@
                 (stv 1 1)))))
 
 ; Name the rule
-(define subset-evaluation-rule-name (Node "subset-evaluation-rule"))
+(define subset-evaluation-rule-name (DefinedSchemaNode "subset-evaluation-rule"))
 (DefineLink subset-evaluation-rule-name subset-evaluation-rule)

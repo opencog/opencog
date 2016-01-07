@@ -102,7 +102,7 @@
 
 ;; Name the rule
 (define forall-full-instantiation-rule-name
-  (Node "forall-full-instantiation-rule"))
+  (DefinedSchemaNode "forall-full-instantiation-rule"))
 (DefineLink forall-full-instantiation-rule-name
   forall-full-instantiation-rule)
 
@@ -171,6 +171,6 @@
 
 ;; Name the rule
 (define forall-partial-instantiation-rule-name
-  (Node "forall-partial-instantiation-rule"))
+  (DefinedSchemaNode "forall-partial-instantiation-rule"))
 (DefineLink forall-partial-instantiation-rule-name
   forall-partial-instantiation-rule)

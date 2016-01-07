@@ -59,7 +59,7 @@
 
 ; Name the rule
 (define or-construction-rule-name
-  (Node "or-construction-rule"))
+  (DefinedSchemaNode "or-construction-rule"))
 (DefineLink
    or-construction-rule-name
    or-construction-rule)

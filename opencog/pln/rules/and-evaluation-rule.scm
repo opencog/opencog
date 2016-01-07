@@ -57,5 +57,5 @@
             (stv 0 1))))
 
 ; Name the rule
-(define and-evaluation-rule-name (Node "and-evaluation-rule"))
+(define and-evaluation-rule-name (DefinedSchemaNode "and-evaluation-rule"))
 (DefineLink and-evaluation-rule-name and-evaluation-rule)

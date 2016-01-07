@@ -61,16 +61,16 @@
 
 ;; Name the rules
 (define modus-ponens-inheritance-rule-name
-  (Node "modus-ponens-inheritance-rule"))
+  (DefinedSchemaNode "modus-ponens-inheritance-rule"))
 (DefineLink modus-ponens-inheritance-rule-name
   modus-ponens-inheritance-rule)
 
 (define modus-ponens-implication-rule-name
-  (Node "modus-ponens-implication-rule"))
+  (DefinedSchemaNode "modus-ponens-implication-rule"))
 (DefineLink modus-ponens-implication-rule-name
   modus-ponens-implication-rule)
 
 (define modus-ponens-subset-rule-name
-  (Node "modus-ponens-subset-rule"))
+  (DefinedSchemaNode "modus-ponens-subset-rule"))
 (DefineLink modus-ponens-subset-rule-name
   modus-ponens-subset-rule)

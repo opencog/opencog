@@ -59,7 +59,7 @@
 
 ; Name the rule
 (define and-construction-rule-name
-  (Node "and-construction-rule"))
+  (DefinedSchemaNode "and-construction-rule"))
 (DefineLink
    and-construction-rule-name
    and-construction-rule)

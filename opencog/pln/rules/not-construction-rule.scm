@@ -42,7 +42,7 @@
 
 ; Name the rule
 (define not-construction-rule-name
-  (Node "not-construction-rule"))
+  (DefinedSchemaNode "not-construction-rule"))
 (DefineLink
    not-construction-rule-name
    not-construction-rule)

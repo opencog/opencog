@@ -61,7 +61,7 @@
 
 ; Name the rule
 (define intensional-inheritance-evaluation-rule-name
-  (Node "intensional-inheritance-evaluation-rule"))
+  (DefinedSchemaNode "intensional-inheritance-evaluation-rule"))
 (DefineLink
   intensional-inheritance-evaluation-rule-name
   intensional-inheritance-evaluation-rule)

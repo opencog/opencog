@@ -51,5 +51,5 @@
     (stv sAABC cAABC)))
 
 ; Name the rule
-(define or-simplification-rule-name (Node "or-simplification-rule"))
+(define or-simplification-rule-name (DefinedSchemaNode "or-simplification-rule"))
 (DefineLink or-simplification-rule-name or-simplification-rule)

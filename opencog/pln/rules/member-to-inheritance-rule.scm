@@ -57,7 +57,7 @@
 
 ; Name the rule
 (define member-to-inheritance-rule-name
-  (Node "member-to-inheritance-rule"))
+  (DefinedSchemaNode "member-to-inheritance-rule"))
 (DefineLink
   member-to-inheritance-rule-name
   member-to-inheritance-rule)

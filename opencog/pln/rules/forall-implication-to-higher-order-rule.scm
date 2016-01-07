@@ -72,6 +72,6 @@
 
 ;; Name the rule
 (define forall-implication-to-higher-order-rule-name
-  (Node "forall-implication-to-higher-order-rule"))
+  (DefinedSchemaNode "forall-implication-to-higher-order-rule"))
 (DefineLink forall-implication-to-higher-order-rule-name
   forall-implication-to-higher-order-rule)

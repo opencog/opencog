@@ -42,5 +42,5 @@
     (stv sOAB cOAB)))
 
 ; Name the rule
-(define or-transformation-rule-name (Node "or-transformation-rule"))
+(define or-transformation-rule-name (DefinedSchemaNode "or-transformation-rule"))
 (DefineLink or-transformation-rule-name or-transformation-rule)

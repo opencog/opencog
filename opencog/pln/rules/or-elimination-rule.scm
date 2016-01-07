@@ -47,5 +47,5 @@
     (stv (/ sAB 2) 1)))
 
 ; Name the rule
-(define or-elimination-rule-name (Node "or-elimination-rule"))
+(define or-elimination-rule-name (DefinedSchemaNode "or-elimination-rule"))
 (DefineLink or-elimination-rule-name or-elimination-rule)

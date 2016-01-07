@@ -136,11 +136,11 @@
 ;; =============================================================================
 
 ;; Name the rules
-(define induction-inheritance-rule-name (Node "induction-inheritance-rule"))
+(define induction-inheritance-rule-name (DefinedSchemaNode "induction-inheritance-rule"))
 (DefineLink induction-inheritance-rule-name induction-inheritance-rule)
 
-(define induction-implication-rule-name (Node "induction-implication-rule"))
+(define induction-implication-rule-name (DefinedSchemaNode "induction-implication-rule"))
 (DefineLink induction-implication-rule-name induction-implication-rule)
 
-(define induction-subset-rule-name (Node "induction-subset-rule"))
+(define induction-subset-rule-name (DefinedSchemaNode "induction-subset-rule"))
 (DefineLink induction-subset-rule-name induction-subset-rule)

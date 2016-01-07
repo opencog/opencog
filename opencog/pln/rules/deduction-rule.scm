@@ -94,16 +94,16 @@
 
 ;; Name the rules
 (define deduction-inheritance-rule-name
-  (Node "deduction-inheritance-rule"))
+  (DefinedSchemaNode "deduction-inheritance-rule"))
 (DefineLink deduction-inheritance-rule-name
   deduction-inheritance-rule)
 
 (define deduction-implication-rule-name
-  (Node "deduction-implication-rule"))
+  (DefinedSchemaNode "deduction-implication-rule"))
 (DefineLink deduction-implication-rule-name
   deduction-implication-rule)
 
 (define deduction-subset-rule-name
-  (Node "deduction-subset-rule"))
+  (DefinedSchemaNode "deduction-subset-rule"))
 (DefineLink deduction-subset-rule-name
   deduction-subset-rule)
