@@ -1208,3 +1208,34 @@ opencog/nlp/irc/cogita: Fatal Error: Remote side closed socket
 
 (cog-execute! m)
 	
+
+ure-add-rule
+
+6b4b5e0077bcef5cd62e82431d12167c8db25cd3 is OK
+264608017c7b4992fc21d65f9daf27e3ee82781d is bad
+
+(use-modules (opencog))
+(use-modules (opencog exec))
+(use-modules (opencog query))
+(use-modules (opencog atom-types))
+
+
+(AtTimeLink 
+  (TimeNode "8000")
+  (EvaluationLink
+     (PredicateNode "shower")
+  )
+)
+
+(define find-shower
+	(GetLink
+		(VariableList (Variable "$t") (Variable "$X"))
+		(And
+			(GreaterThan (Time 8300) (Variable "$t"))
+			(GreaterThan (Variable "$t") (Time 7700))
+			(AtTime (Variable "$t") (Evaluation (Variable "$X")))
+		)
+	)
+)
+
+(cog-execute! find-shower)
