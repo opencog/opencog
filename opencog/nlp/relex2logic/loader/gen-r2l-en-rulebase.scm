@@ -2,7 +2,7 @@
 
 ; Define r2l-rulebase for english.
 (define-public r2l-rules (ConceptNode "R2L-en-RuleBase"))
-(ure-define-rbs r2l-rules (NumberNode "100"))
+(ure-define-rbs r2l-rules 100)
 
 ; Add rules to rulebase
 ; NOTE: The weight is chosen to be equal for all rules as the mode ure is
