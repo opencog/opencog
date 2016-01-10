@@ -616,3 +616,114 @@ is-member-link
 
 (cog-execute! x)
 
+
+===========================================
+Implication
+	And
+		Evaluation Preceeds $x $y
+		Evaluation During  $x $z
+	And
+		Evaluation Overlaps $x $z    ; wtf??
+		CompositionRule ...
+
+
+; Utility defintion.
+(define (less a b) (GreaterThanLink b a))
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList 
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(less (Variable "$a-") (Variable "$b-"))
+		(less (Variable "$b-") (Variable "$a-"))
+		(less (Variable "$a+") (Variable "$b+"))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Overlaps")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+
+
+      
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList 
+		(TypedVariable (Variable "$x") (Type "TimeNode"))
+		(TypedVariable (Variable "$y") (Type "TimeNode"))
+	)
+	; If the following holds
+	(AndLink
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$x") (Variable "$y")))
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$y") (Variable "$x")))
+	)
+	; Then create the following predicate:
+	(Evaluation
+		(PredicateNode "happened in the same minute")
+		(ListLink (Variable "$y") (Variable "$x")))
+)
+
+
+(define (Meets a- a+ b- b+)
+ (EqualLink a+ b-))
+ 
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList 
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(Evaluation
+			(PredicateNode "happened in the same minute")
+			(ListLink (Variable "$a+") (Variable "$b-")))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Meets")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+
+(TimeNode 3000)    ;set atom for getter2 to find
+
+(define getter2 (BindLink
+            (VariableList
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            )
+	(AndLink
+		(PresentLink (Variable "$x"))
+            (EqualLink (Time 3000) (Variable "$x"))
+	)
+            (Variable "$x")))
+
+(cog-bind getter2)
+
+
+(use-modules (opencog logger))
+(cog-logger-set-stdout #t)
+(cog-logger-set-level "fine")
+
+There were no type restrictions! That must be wrong!
+
+
