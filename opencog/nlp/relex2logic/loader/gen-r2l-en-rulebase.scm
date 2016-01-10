@@ -1,202 +1,145 @@
-(use-modules (opencog))
+(use-modules (opencog) (opencog rule-engine))
 
-(InheritanceLink (stv 1 1) (ConceptNode "R2L-en-RuleBase") (ConceptNode "RuleBase"))
+; NOTE: Temporary Hack around cogservers scheme module loading issue
+; See https://github.com/opencog/atomspace/issues/508 for details
+(load-from-path "opencog/rule-engine.scm")
+
+; Load rule files. The order of the load matters
+(load "../rule-utils.scm")
+(load "load-rules.scm")
+
+; Define r2l-rulebase for english.
 (define-public r2l-rules (ConceptNode "R2L-en-RuleBase"))
-(ExecutionLink (SchemaNode "URE:maximum-iterations") (ConceptNode "R2L-en-RuleBase") (NumberNode "100") )
-(define advmod-name (DefinedSchemaNode "advmod"))
-(DefineLink advmod-name advmod)
-(MemberLink (stv 1 1) advmod-name (ConceptNode "R2L-en-RuleBase"))
-(define adverbialpp-name (DefinedSchemaNode "adverbialpp"))
-(DefineLink adverbialpp-name adverbialpp)
-(MemberLink (stv 1 1) adverbialpp-name (ConceptNode "R2L-en-RuleBase"))
-(define amod-name (DefinedSchemaNode "amod"))
-(DefineLink amod-name amod)
-(MemberLink (stv 1 1) amod-name (ConceptNode "R2L-en-RuleBase"))
-(define atTime-name (DefinedSchemaNode "atTime"))
-(DefineLink atTime-name atTime)
-(MemberLink (stv 1 1) atTime-name (ConceptNode "R2L-en-RuleBase"))
-(define because-name (DefinedSchemaNode "because"))
-(DefineLink because-name because)
-(MemberLink (stv 1 1) because-name (ConceptNode "R2L-en-RuleBase"))
-(define be-inheritance-name (DefinedSchemaNode "be-inheritance"))
-(DefineLink be-inheritance-name be-inheritance)
-(MemberLink (stv 1 1) be-inheritance-name (ConceptNode "R2L-en-RuleBase"))
-(define compmod-name (DefinedSchemaNode "compmod"))
-(DefineLink compmod-name compmod)
-(MemberLink (stv 1 1) compmod-name (ConceptNode "R2L-en-RuleBase"))
-(define comp-name (DefinedSchemaNode "comp"))
-(DefineLink comp-name comp)
-(MemberLink (stv 1 1) comp-name (ConceptNode "R2L-en-RuleBase"))
-(define copula-ynq-name (DefinedSchemaNode "copula-ynq"))
-(DefineLink copula-ynq-name copula-ynq)
-(MemberLink (stv 1 1) copula-ynq-name (ConceptNode "R2L-en-RuleBase"))
-(define definite-name (DefinedSchemaNode "definite"))
-(DefineLink definite-name definite)
-(MemberLink (stv 1 1) definite-name (ConceptNode "R2L-en-RuleBase"))
-;;(define demdet-name (DefinedSchemaNode "demdet"))
-;;(DefineLink demdet-name demdet)
-;;(MemberLink (stv 1 1) demdet-name (ConceptNode "R2L-en-RuleBase"))
-(define howdeg-q-name (DefinedSchemaNode "howdeg-q"))
-(DefineLink howdeg-q-name howdeg-q)
-(MemberLink (stv 1 1) howdeg-q-name (ConceptNode "R2L-en-RuleBase"))
-(define howpredadj1-q-name (DefinedSchemaNode "howpredadj1-q"))
-(DefineLink howpredadj1-q-name howpredadj1-q)
-(MemberLink (stv 1 1) howpredadj1-q-name (ConceptNode "R2L-en-RuleBase"))
-(define how-q-name (DefinedSchemaNode "how-q"))
-(DefineLink how-q-name how-q)
-(MemberLink (stv 1 1) how-q-name (ConceptNode "R2L-en-RuleBase"))
-(define howquant-q-name (DefinedSchemaNode "howquant-q"))
-(DefineLink howquant-q-name howquant-q)
-(MemberLink (stv 1 1) howquant-q-name (ConceptNode "R2L-en-RuleBase"))
-;(define IMPERATIVE-name (DefinedSchemaNode "IMPERATIVE"))
-;(DefineLink IMPERATIVE-name IMPERATIVE)
-;(MemberLink (stv 1 1) IMPERATIVE-name (ConceptNode "R2L-en-RuleBase"))
-(define neg-name (DefinedSchemaNode "neg"))
-(DefineLink neg-name neg)
-(MemberLink (stv 1 1) neg-name (ConceptNode "R2L-en-RuleBase"))
-(define poss-name (DefinedSchemaNode "poss"))
-(DefineLink poss-name poss)
-(MemberLink (stv 1 1) poss-name (ConceptNode "R2L-en-RuleBase"))
-;;(define post-processing-name (DefinedSchemaNode "post-processing"))
-;;(DefineLink post-processing-name post-processing)
-;;(MemberLink (stv 1 1) post-processing-name (ConceptNode "R2L-en-RuleBase"))
-(define pp-name (DefinedSchemaNode "pp"))
-(DefineLink pp-name pp)
-(MemberLink (stv 1 1) pp-name (ConceptNode "R2L-en-RuleBase"))
-(define pred-ynq-name (DefinedSchemaNode "pred-ynq"))
-(DefineLink pred-ynq-name pred-ynq)
-(MemberLink (stv 1 1) pred-ynq-name (ConceptNode "R2L-en-RuleBase"))
-;;(define prepadj-name (DefinedSchemaNode "prepadj"))
-;;(DefineLink prepadj-name prepadj)
-;;(MemberLink (stv 1 1) prepadj-name (ConceptNode "R2L-en-RuleBase"))
-(define PREP-name (DefinedSchemaNode "PREP"))
-(DefineLink PREP-name PREP)
-(MemberLink (stv 1 1) PREP-name (ConceptNode "R2L-en-RuleBase"))
-(define quantity-name (DefinedSchemaNode "quantity"))
-(DefineLink quantity-name quantity)
-(MemberLink (stv 1 1) quantity-name (ConceptNode "R2L-en-RuleBase"))
-(define rel-name (DefinedSchemaNode "rel"))
-(DefineLink rel-name rel)
-(MemberLink (stv 1 1) rel-name (ConceptNode "R2L-en-RuleBase"))
-(define rep-name (DefinedSchemaNode "rep"))
-(DefineLink rep-name rep)
-(MemberLink (stv 1 1) rep-name (ConceptNode "R2L-en-RuleBase"))
-;;(define rule-helpers-name (DefinedSchemaNode "rule-helpers"))
-;;(DefineLink rule-helpers-name rule-helpers)
-;;(MemberLink (stv 1 1) rule-helpers-name (ConceptNode "R2L-en-RuleBase"))
-(define SP-name (DefinedSchemaNode "SP"))
-(DefineLink SP-name SP)
-(MemberLink (stv 1 1) SP-name (ConceptNode "R2L-en-RuleBase"))
-(define SVIO1-name (DefinedSchemaNode "SVIO1"))
-(DefineLink SVIO1-name SVIO1)
-(MemberLink (stv 1 1) SVIO1-name (ConceptNode "R2L-en-RuleBase"))
-(define SVIO2-name (DefinedSchemaNode "SVIO2"))
-(DefineLink SVIO2-name SVIO2)
-(MemberLink (stv 1 1) SVIO2-name (ConceptNode "R2L-en-RuleBase"))
-(define svo-name (DefinedSchemaNode "svo"))
-(DefineLink svo-name svo)
-(MemberLink (stv 1 1) svo-name (ConceptNode "R2L-en-RuleBase"))
-(define SV-name (DefinedSchemaNode "SV"))
-(DefineLink SV-name SV)
-(MemberLink (stv 1 1) SV-name (ConceptNode "R2L-en-RuleBase"))
-(define TOBE-name (DefinedSchemaNode "TOBE"))
-(DefineLink TOBE-name TOBE)
-(MemberLink (stv 1 1) TOBE-name (ConceptNode "R2L-en-RuleBase"))
-(define todo1-name (DefinedSchemaNode "todo1"))
-(DefineLink todo1-name todo1)
-(MemberLink (stv 1 1) todo1-name (ConceptNode "R2L-en-RuleBase"))
-(define todo2-name (DefinedSchemaNode "todo2"))
-(DefineLink todo2-name todo2)
-(MemberLink (stv 1 1) todo2-name (ConceptNode "R2L-en-RuleBase"))
-(define todo5-name (DefinedSchemaNode "todo5"))
-(DefineLink todo5-name todo5)
-(MemberLink (stv 1 1) todo5-name (ConceptNode "R2L-en-RuleBase"))
-(define todo3-name (DefinedSchemaNode "todo3"))
-(DefineLink todo3-name to-do-rule-3)
-(MemberLink (stv 1 1) todo3-name (ConceptNode "R2L-en-RuleBase"))
-;;(define utilities-name (DefinedSchemaNode "utilities"))
-;;(DefineLink utilities-name utilities)
-;;(MemberLink (stv 1 1) utilities-name (ConceptNode "R2L-en-RuleBase"))
-(define when-cop-q-name (DefinedSchemaNode "when-cop-q"))
-(DefineLink when-cop-q-name when-cop-q)
-(MemberLink (stv 1 1) when-cop-q-name (ConceptNode "R2L-en-RuleBase"))
-(define when-q-name (DefinedSchemaNode "when-q"))
-(DefineLink when-q-name when-q)
-(MemberLink (stv 1 1) when-q-name (ConceptNode "R2L-en-RuleBase"))
-(define where-cop-q-name (DefinedSchemaNode "where-cop-q"))
-(DefineLink where-cop-q-name where-cop-q)
-(MemberLink (stv 1 1) where-cop-q-name (ConceptNode "R2L-en-RuleBase"))
-(define where-q-name (DefinedSchemaNode "where-q"))
-(DefineLink where-q-name where-q)
-(MemberLink (stv 1 1) where-q-name (ConceptNode "R2L-en-RuleBase"))
-(define whichiobjQ-name (DefinedSchemaNode "whichiobjQ"))
-(DefineLink whichiobjQ-name whichiobjQ)
-(MemberLink (stv 1 1) whichiobjQ-name (ConceptNode "R2L-en-RuleBase"))
-(define whichobjQ-name (DefinedSchemaNode "whichobjQ"))
-(DefineLink whichobjQ-name whichobjQ)
-(MemberLink (stv 1 1) whichobjQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichobjSVIOQ-name (DefinedSchemaNode "whichobjSVIOQ"))
-;;(DefineLink whichobjSVIOQ-name whichobjSVIOQ)
-;;(MemberLink (stv 1 1) whichobjSVIOQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichpobjQ-name (DefinedSchemaNode "whichpobjQ"))
-;;(DefineLink whichpobjQ-name whichpobjQ)
-;;(MemberLink (stv 1 1) whichpobjQ-name (ConceptNode "R2L-en-RuleBase"))
-(define whichpredadjQ-name (DefinedSchemaNode "whichpredadjQ"))
-(DefineLink whichpredadjQ-name whichpredadjQ)
-(MemberLink (stv 1 1) whichpredadjQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichsubjpobjQ-name (DefinedSchemaNode "whichsubjpobjQ"))
-;;(DefineLink whichsubjpobjQ-name whichsubjpobjQ)
-;;(MemberLink (stv 1 1) whichsubjpobjQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichsubjQ-name (DefinedSchemaNode "whichsubjQ"))
-;;(DefineLink whichsubjQ-name whichsubjQ)
-;;(MemberLink (stv 1 1) whichsubjQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichsubjSVIOQ-name (DefinedSchemaNode "whichsubjSVIOQ"))
-;;(DefineLink whichsubjSVIOQ-name whichsubjSVIOQ)
-;;(MemberLink (stv 1 1) whichsubjSVIOQ-name (ConceptNode "R2L-en-RuleBase"))
-(define whichsubjSVOQ-name (DefinedSchemaNode "whichsubjSVOQ"))
-(DefineLink whichsubjSVOQ-name whichsubjSVOQ)
-(MemberLink (stv 1 1) whichsubjSVOQ-name (ConceptNode "R2L-en-RuleBase"))
-;;(define whichsubjSVQ-name (DefinedSchemaNode "whichsubjSVQ"))
-;;(DefineLink whichsubjSVQ-name whichsubjSVQ)
-;;(MemberLink (stv 1 1) whichsubjSVQ-name (ConceptNode "R2L-en-RuleBase"))
-(define why-cop-q-name (DefinedSchemaNode "why-cop-q"))
-(DefineLink why-cop-q-name why-cop-q)
-(MemberLink (stv 1 1) why-cop-q-name (ConceptNode "R2L-en-RuleBase"))
-(define why-q-name (DefinedSchemaNode "why-q"))
-(DefineLink why-q-name why-q)
-(MemberLink (stv 1 1) why-q-name (ConceptNode "R2L-en-RuleBase"))
+(ure-define-rbs r2l-rules 100)
 
-(define declarative-name (DefinedSchemaNode "declarative"))
-(DefineLink declarative-name declarative)
-(MemberLink (stv 1 1) declarative-name (ConceptNode "R2L-en-RuleBase"))
+; Add rules to rulebase
+; NOTE: The weight is chosen to be equal for all rules as the mode ure is
+; being run in doesn't require it.
 
-(define truthquery-name (DefinedSchemaNode "truthquery"))
-(DefineLink truthquery-name truthquery)
-(MemberLink (stv 1 1) truthquery-name (ConceptNode "R2L-en-RuleBase"))
+(ure-add-rule r2l-rules "advmod" advmod 1)
 
-(define interrogative-name (DefinedSchemaNode "interrogative"))
-(DefineLink interrogative-name interrogative)
-(MemberLink (stv 1 1) interrogative-name (ConceptNode "R2L-en-RuleBase"))
+(ure-add-rule r2l-rules "adverbialpp" adverbialpp 1)
 
-(define imperative-name (DefinedSchemaNode "imperative"))
-(DefineLink imperative-name imperative)
-(MemberLink (stv 1 1) imperative-name (ConceptNode "R2L-en-RuleBase"))
+(ure-add-rule r2l-rules "amod" amod 1)
 
-(define det-name (DefinedSchemaNode "det"))
-(DefineLink det-name det)
-(MemberLink (stv 1 1) det-name (ConceptNode "R2L-en-RuleBase"))
-(define nn-name (DefinedSchemaNode "nn"))
-(DefineLink nn-name nn)
-(MemberLink (stv 1 1) nn-name (ConceptNode "R2L-en-RuleBase"))
-(define gender-name (DefinedSchemaNode "gender"))
-(DefineLink gender-name gender)
-(MemberLink (stv 1 1) gender-name (ConceptNode "R2L-en-RuleBase"))
-(define conj-name (DefinedSchemaNode "conj"))
-(DefineLink conj-name conj)
-(MemberLink (stv 1 1) conj-name (ConceptNode "R2L-en-RuleBase"))
-(define tense-name (DefinedSchemaNode "tense"))
-(DefineLink tense-name tense)
-(MemberLink (stv 1 1) tense-name (ConceptNode "R2L-en-RuleBase"))
-(define passive-name (DefinedSchemaNode "passive"))
-(DefineLink passive-name passive)
-(MemberLink (stv 1 1) passive-name (ConceptNode "R2L-en-RuleBase"))
+(ure-add-rule r2l-rules "atTime" atTime 1)
+
+(ure-add-rule r2l-rules "because" because 1)
+
+(ure-add-rule r2l-rules "be-inheritance" be-inheritance 1)
+
+(ure-add-rule r2l-rules "compmod" compmod 1)
+
+(ure-add-rule r2l-rules "comp" comp 1)
+
+(ure-add-rule r2l-rules "copula-ynq" copula-ynq 1)
+
+(ure-add-rule r2l-rules "definite" definite 1)
+
+;(ure-add-rule r2l-rules "demdet" demdet 1)
+
+(ure-add-rule r2l-rules "howdeg-q" howdeg-q 1)
+
+(ure-add-rule r2l-rules "howpredadj1-q" howpredadj1-q 1)
+
+(ure-add-rule r2l-rules "how-q" how-q 1)
+
+(ure-add-rule r2l-rules "howquant-q" howquant-q 1)
+
+;(ure-add-rule r2l-rules "IMPERATIVE" IMPERATIVE 1)
+
+(ure-add-rule r2l-rules "neg" neg 1)
+
+(ure-add-rule r2l-rules "poss" poss 1)
+
+;(ure-add-rule r2l-rules "post-processing" post-processing 1)
+
+(ure-add-rule r2l-rules "pp" pp 1)
+
+(ure-add-rule r2l-rules "pred-ynq" pred-ynq 1)
+
+;(ure-add-rule r2l-rules "prepadj" prepadj 1)
+
+(ure-add-rule r2l-rules "PREP" PREP 1)
+
+(ure-add-rule r2l-rules "quantity" quantity 1)
+
+(ure-add-rule r2l-rules "rel" rel 1)
+
+(ure-add-rule r2l-rules "rep" rep 1)
+
+;(ure-add-rule r2l-rules "rule-helpers" rule-helpers 1)
+
+(ure-add-rule r2l-rules "SP" SP 1)
+
+(ure-add-rule r2l-rules "SVIO1" SVIO1 1)
+
+(ure-add-rule r2l-rules "SVIO2" SVIO2 1)
+
+(ure-add-rule r2l-rules "svo" svo 1)
+
+(ure-add-rule r2l-rules "SV" SV 1)
+
+(ure-add-rule r2l-rules "TOBE" TOBE 1)
+
+(ure-add-rule r2l-rules "todo1" todo1 1)
+
+(ure-add-rule r2l-rules "todo2" todo2 1)
+
+(ure-add-rule r2l-rules "todo5" todo5 1)
+
+(ure-add-rule r2l-rules "todo3" to-do-rule-3 1)
+
+;(ure-add-rule r2l-rules "utilities" utilities 1)
+
+(ure-add-rule r2l-rules "when-cop-q" when-cop-q 1)
+
+(ure-add-rule r2l-rules "when-q" when-q 1)
+
+(ure-add-rule r2l-rules "where-cop-q" where-cop-q 1)
+
+(ure-add-rule r2l-rules "where-q" where-q 1)
+
+(ure-add-rule r2l-rules "whichiobjQ" whichiobjQ 1)
+
+(ure-add-rule r2l-rules "whichobjQ" whichobjQ 1)
+
+;(ure-add-rule r2l-rules "whichobjSVIOQ" whichobjSVIOQ 1)
+
+;(ure-add-rule r2l-rules "whichpobjQ" whichpobjQ 1)
+
+(ure-add-rule r2l-rules "whichpredadjQ" whichpredadjQ 1)
+
+;(ure-add-rule r2l-rules "whichsubjpobjQ" whichsubjpobjQ 1)
+
+;(ure-add-rule r2l-rules "whichsubjQ" whichsubjQ 1)
+
+;(ure-add-rule r2l-rules "whichsubjSVIOQ" whichsubjSVIOQ 1)
+
+(ure-add-rule r2l-rules "whichsubjSVOQ" whichsubjSVOQ 1)
+
+;(ure-add-rule r2l-rules "whichsubjSVQ" whichsubjSVQ 1)
+
+(ure-add-rule r2l-rules "why-cop-q" why-cop-q 1)
+
+(ure-add-rule r2l-rules "why-q" why-q 1)
+
+(ure-add-rule r2l-rules "declarative" declarative 1)
+
+(ure-add-rule r2l-rules "truthquery" truthquery 1)
+
+(ure-add-rule r2l-rules "interrogative" interrogative 1)
+
+(ure-add-rule r2l-rules "imperative" imperative 1)
+
+(ure-add-rule r2l-rules "det" det 1)
+
+(ure-add-rule r2l-rules "nn" nn 1)
+
+(ure-add-rule r2l-rules "gender" gender 1)
+
+(ure-add-rule r2l-rules "conj" conj 1)
+
+(ure-add-rule r2l-rules "tense" tense 1)
+
+(ure-add-rule r2l-rules "passive" passive 1)

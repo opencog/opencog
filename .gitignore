@@ -1,6 +1,5 @@
 *.a
-opencog.log
-opencog-python.log
+*.log
 .vagrant
 .DS_Store
 
