@@ -49,6 +49,10 @@ IF (HAVE_OCTOMAP)
 		server
 		${ATOMSPACE_LIBRARIES})
 
+	INSTALL (TARGETS spacetime
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+
 	INSTALL (FILES
 		HandleToTemporalEntryMap.h
 		HandleTemporalPairEntry.h
