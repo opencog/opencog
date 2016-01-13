@@ -28,6 +28,7 @@
 #include <string>
 #include <queue>
 #include <map>
+#include <mutex>
 #include <vector>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -46,8 +47,8 @@ namespace opencog
 class Activity
 {
 public:
-    Activity(long cycleCount, struct timeval &elapsedTime, size_t memUsed,
-                              size_t atomsUsed,
+    Activity(long cycleCount, std::chrono::system_clock::duration elapsedTime,
+                              size_t memUsed, size_t atomsUsed,
                               const std::vector<UnorderedHandleSet>& utilized) :
             cycleCount(cycleCount),
             elapsedTime(elapsedTime),
@@ -57,7 +58,7 @@ public:
             utilizedHandleSets.push_back(utilized[n]);
     }
     long cycleCount;
-    struct timeval elapsedTime;
+    std::chrono::system_clock::duration elapsedTime;
     size_t memUsed;
     size_t atomsUsed;
     std::vector<UnorderedHandleSet> utilizedHandleSets;
@@ -81,6 +82,10 @@ protected:
     CogServer* _cogServer;
     boost::signals2::connection _conn;
 
+    /** Protects _agentActivityTable from concurrent access. It is possible to
+     * implement fine grained locking per agent. */
+    std::mutex _activityTableMutex;
+
     /** called by AtomSpace via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
@@ -98,9 +103,10 @@ public:
     /** initialize the SystemActivityTable */
     virtual void init(CogServer*);
 
-    /** Returns a reference to the agent activity table
+    /** Returns the agent activity table
      *  Activities will be listed with the most recent first. */
-    AgentActivityTable& agentActivityTable() {
+    AgentActivityTable agentActivityTable() {
+        std::lock_guard<std::mutex> lock(_activityTableMutex);
         return _agentActivityTable;
     }
 
@@ -117,7 +123,8 @@ public:
      *  This will call agent->getUtilizedHandleSets() to get a list of handle
      *  sets utilized in the activity that has just been completed.
      */
-    void logActivity(AgentPtr, struct timeval&, size_t memUsed, size_t atomsUsed);
+    void logActivity(AgentPtr, std::chrono::system_clock::duration,
+        size_t memUsed, size_t atomsUsed);
 
     /** Clear activity of a specified Agent. */
     void clearActivity(AgentPtr);
