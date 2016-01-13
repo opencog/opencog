@@ -121,14 +121,15 @@ stim_t Agent::stimulateAtom(Handle h, stim_t amount)
     logger().fine("Atom %d received stimulus of %d, total now %d",
                   h.value(),
                   amount,
-                  totalStimulus.load());
+                  totalStimulus.load(std::memory_order_relaxed));
 
 #ifdef DEBUG
     std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
-                 ", total now " << totalStimulus << "\n";
+                 ", total now " << totalStimulus.load(std::memory_order_relaxed)
+                 << "\n";
 #endif
 
-    return totalStimulus;
+    return totalStimulus.load(std::memory_order_relaxed);
 }
 
 void Agent::removeAtomStimulus(Handle h)
@@ -170,7 +171,7 @@ stim_t Agent::resetStimulus()
     }
     // reset stimulus counter
     totalStimulus = 0;
-    return totalStimulus;
+    return totalStimulus.load(std::memory_order_relaxed);
 }
 
 stim_t Agent::getTotalStimulus() const

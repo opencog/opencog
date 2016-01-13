@@ -43,14 +43,14 @@ void AgentRunnerThread::start()
     {
         // locking is required, to prevent dead-lock in condition_variable wait()
         lock_guard<mutex> lock(runAgentsMutex);
-        runAgents = true;
+        runAgents.store(true, memory_order_relaxed);
     }
     runAgentsCond.notify_one();
 }
 
 void AgentRunnerThread::stop()
 {
-    runAgents = false;
+    runAgents.store(false, memory_order_relaxed);
 }
 
 void AgentRunnerThread::addAgent(AgentPtr a)
@@ -71,7 +71,7 @@ void AgentRunnerThread::addAgent(AgentPtr a)
     else {
         lock_guard<mutex> lock(agentsMutex);
         agentsAddQ.push_back(a);
-        agentsModified = true;
+        agentsModified.store(true, memory_order_relaxed);
     }
 }
 
@@ -79,21 +79,21 @@ void AgentRunnerThread::removeAgent(AgentPtr a)
 {
     lock_guard<mutex> lock(agentsMutex);
     agentsRemoveQ.push_back(a);
-    agentsModified = true;
+    agentsModified.store(true, memory_order_relaxed);
 }
 
 void AgentRunnerThread::removeAllAgents(const std::string& id)
 {
     lock_guard<mutex> lock(agentsMutex);
     idsRemoveQ.push_back(id);
-    agentsModified = true;
+    agentsModified.store(true, memory_order_relaxed);
 }
 
 void AgentRunnerThread::removeAllAgents()
 {
     lock_guard<mutex> lock(agentsMutex);
     clearAll = true;
-    agentsModified = true;
+    agentsModified.store(true, memory_order_relaxed);
 }
 
 const AgentSeq& AgentRunnerThread::getAgents() const
@@ -116,9 +116,10 @@ void AgentRunnerThread::processAgentsThread()
      */
     logger().debug("[CogServer::%s] Agent thread started", name.c_str());
     while (!agents.empty()) {
-        if (!runAgents) {
+        if (!runAgents.load(memory_order_relaxed)) {
             unique_lock<mutex> lock(runAgentsMutex);
-            runAgentsCond.wait(lock, [this] { return runAgents.load(); });
+            runAgentsCond.wait(lock,
+                [this] {return runAgents.load(memory_order_relaxed);});
         }
 
 
@@ -130,11 +131,11 @@ void AgentRunnerThread::processAgentsThread()
             runAgent(agent);
         }
 
-        if (agentsModified) {
+        if (agentsModified.load(memory_order_relaxed)) {
             logger().debug("[CogServer::%s] Updating active agents",
                 name.c_str());
             lock_guard<mutex> agentsLock(agentsMutex);
-            agentsModified = false;
+            agentsModified.store(false, memory_order_relaxed);
             if (clearAll) {
                 clearAll = false;
                 AgentRunnerBase::removeAllAgents();
