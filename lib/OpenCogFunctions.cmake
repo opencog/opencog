@@ -52,18 +52,28 @@ FUNCTION(ADD_GUILE_MODULE MODULE_FILE)
     SET(MODULE_NAME ${CMAKE_MATCH_3})
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_FILES_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
+    SET(GUILE_SYMLINK_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
+    SET(GUILE_INSTALL_DIR "${DATADIR}/scm")
 
-    # Create symlinks in build directory mirroring what the install path
-    # structure.
+    # Create symlinks in build directory mirroring the install path structure.
+    # Also configure for install.
     IF ("${MODULE_NAME}.scm" STREQUAL "${MODULE_FILE}")
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
+        )
+        INSTALL (FILES
+            ${MODULE_FILE}
+            DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILE_DIR_PATH}"
         )
     ELSE()
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILES_DIR_PATH}
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
+        )
+        INSTALL (FILES
+            ${MODULE_FILE}
+            DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILES_DIR_PATH}"
         )
     ENDIF()
 
