@@ -40,7 +40,7 @@ struct equal_to_id: public std::binary_function<AgentPtr, const std::string&, bo
 };
 
 AgentRunnerBase::AgentRunnerBase(std::string runner_name): name(runner_name),
-        cycleCount(0)
+        cycleCount(1)
 {
 }
 
