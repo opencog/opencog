@@ -1,4 +1,4 @@
-INSTALL (FILES
+ADD_GUILE_MODULE (
 	adverbialpp.scm
 	advmod.scm
 	amod.scm
@@ -59,5 +59,4 @@ INSTALL (FILES
 	whichsubjSVQ.scm
 	why-cop-q.scm
 	why-q.scm
-	DESTINATION "${DATADIR}/scm/opencog/nlp/relex2logic/rules"
 )
