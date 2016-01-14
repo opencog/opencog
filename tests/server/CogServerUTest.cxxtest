@@ -153,7 +153,7 @@ public:
         TS_ASSERT(a[4]->count() == 10);
 
         SystemActivityTable &sat = cogserver.systemActivityTable();
-        AgentActivityTable &aat = sat.agentActivityTable();
+        AgentActivityTable aat = sat.agentActivityTable();
         TS_ASSERT(aat[a[0]].size() == 50);
         TS_ASSERT(aat[a[1]].size() == 25);
         TS_ASSERT(aat[a[2]].size() == 16);
@@ -165,7 +165,7 @@ public:
             {
                 Activity *act = aat[a[i]][j];
                 // check nothing takes zero time
-                TS_ASSERT(act->elapsedTime.tv_usec > 0 || act->elapsedTime.tv_sec > 0);
+                TS_ASSERT(act->elapsedTime.count() > 0);
                 // or memory (disabled: current implementation not accurate).
                 //TS_ASSERT(act->memUsed > 0);
                 // or atoms
@@ -193,7 +193,7 @@ public:
 
         // Destroy all the agents.
         for (int i = 0; i < 5; ++i) {
-            cogserver.destroyAgent(a[i]);
+            cogserver.stopAgent(a[i]);
         }
 
     } // testProcessAgents
