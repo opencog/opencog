@@ -11,15 +11,24 @@
 # 3. The same logic would apply for python
 # 4. Everything should be explicit
 
-FUNCTION(ADD_GUILE_MODULE MODULE_FILE)
+FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
 # MODULE_FILE: The name of the file that defines the module. It has the same
 #       name as the directory it is in, or the name of the parent directory of
 #       current directory if it is in a folder named 'scm' and used to define
 #       the module.
 
+FOREACH(FILE_NAME ${ARGV})
+    # NOTE: Directory paths are not allowed as module names.
+    STRING(REGEX MATCH "([a-z0-9/-]+)/([a-z0-9/-]*)" "" ${FILE_NAME})
+    IF(CMAKE_MATCH_2)
+        MESSAGE(FATAL_ERROR "Only files found in "
+            "${CMAKE_CURRENT_SOURCE_DIR} are allowed")
+    ENDIF()
+    SET(MODULE_FILE ${FILE_NAME})
+
     # Check if the file exists
     IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE})
-        MESSAGE(FATAL_ERROR "${MODULE_FILE} file does not exist in"
+        MESSAGE(FATAL_ERROR "${MODULE_FILE} file does not exist in "
             ${CMAKE_CURRENT_SOURCE_DIR})
     ENDIF()
 
@@ -62,7 +71,7 @@ FUNCTION(ADD_GUILE_MODULE MODULE_FILE)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}
             COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
         )
-        INSTALL (FILES
+        INSTALL(FILES
             ${MODULE_FILE}
             DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILE_DIR_PATH}"
         )
@@ -76,5 +85,6 @@ FUNCTION(ADD_GUILE_MODULE MODULE_FILE)
             DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILES_DIR_PATH}"
         )
     ENDIF()
+ENDFOREACH(FILE_NAME)
 
 ENDFUNCTION(ADD_GUILE_MODULE)
