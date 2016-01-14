@@ -53,11 +53,18 @@ FUNCTION(ADD_GUILE_MODULE MODULE_FILE)
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_FILES_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
 
-    # Check if the file has the same name as the module_name
+    # Create symlinks in build directory mirroring what the install path
+    # structure.
     IF ("${MODULE_NAME}.scm" STREQUAL "${MODULE_FILE}")
-        MESSAGE("they are equal time to symlink------------")
+        EXECUTE_PROCESS(
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
+        )
     ELSE()
-        MESSAGE(WARNING "they are not equal symlinking anyways")
+        EXECUTE_PROCESS(
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILES_DIR_PATH}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
+        )
     ENDIF()
 
 ENDFUNCTION(ADD_GUILE_MODULE)
