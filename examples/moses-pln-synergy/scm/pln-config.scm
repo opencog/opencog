@@ -42,7 +42,7 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../../../opencog/reasoning/pln/rules/")
+(define pln-rules-dir "../../../opencog/pln/rules/")
 (define rule-files
   (list (string-append pln-rules-dir "deduction-rule.scm")
         (string-append pln-rules-dir "modus-ponens-rule.scm")
