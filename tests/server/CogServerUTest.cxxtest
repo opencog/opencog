@@ -185,6 +185,7 @@ public:
 
         // test max size of activity seq
         sat.setMaxAgentActivityTableSeqSize(13);
+        aat = sat.agentActivityTable();
         TS_ASSERT(aat[a[0]].size() == 13);
         TS_ASSERT(aat[a[1]].size() == 13);
         TS_ASSERT(aat[a[2]].size() == 13);
