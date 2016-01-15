@@ -20,5 +20,5 @@ TARGET_LINK_LIBRARIES(sureal
 INSTALL (TARGETS sureal DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 ADD_GUILE_MODULE (sureal.scm
-                  surface-realization.scm
+	surface-realization.scm
 )
