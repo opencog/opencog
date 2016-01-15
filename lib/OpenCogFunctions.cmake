@@ -69,7 +69,7 @@ FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
 
         # Specify the module paths.
         STRING(REGEX MATCH
-            "^(${CMAKE_HOME_DIRECTORY})/([a-z0-9/-]+)+/([a-z0-9-]+)" ""
+            "^(${CMAKE_HOME_DIRECTORY})([a-z0-9/-]+)*/([a-z0-9-]+)" ""
             ${CLEAN_PATH})
 
         # MODULE_NAME: it is equal to the current directory name, or the current
