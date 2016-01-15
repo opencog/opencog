@@ -1,9 +1,5 @@
-INSTALL (FILES
+ADD_GUILE_MODULE (
 	nlp.scm
-   DESTINATION "${DATADIR}/scm/opencog"
-)
-
-INSTALL (FILES
 	config.scm
 	disjunct-list.scm
 	file-utils.scm
@@ -11,5 +7,4 @@ INSTALL (FILES
 	parse-rank.scm
 	processing-utils.scm
 	type-definitions.scm
-   DESTINATION "${DATADIR}/scm/opencog/nlp"
 )
