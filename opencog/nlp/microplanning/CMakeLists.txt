@@ -1,10 +1,4 @@
-
-INSTALL (FILES
-	microplanning.scm
-	DESTINATION "${DATADIR}/scm/opencog/nlp"
-)
-
-INSTALL (FILES
+ADD_GUILE_MODULE (microplanning.scm
 	anaphora-noun-item.scm
 	anaphora-nouns-list.scm
 	anaphora.scm
@@ -14,6 +8,4 @@ INSTALL (FILES
 	helpers.scm
 	main.scm
 	sentence-forms.scm
-
-	DESTINATION "${DATADIR}/scm/opencog/nlp/microplanning"
 )
