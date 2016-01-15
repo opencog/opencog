@@ -39,7 +39,7 @@ scheme@(guile-user)> (load "pln-config.scm")
 
 ## Apply rules iteratively
 
-### (1) Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
+### (1) - Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
 
 Semi-formally
 ```
@@ -84,7 +84,7 @@ And search for the following
 ...
 ```
 
-### (2) Distribute the lambda in the implicant and implicand of (1)
+### (2) - Distribute the lambda in the implicant and implicand of (1)
 
 Semi-formally
 ```
@@ -135,7 +135,7 @@ scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
 ...
 ```
 
-### (3) Distribute the lambda in the conjunction of the implicant of (2)
+### (3) - Distribute the lambda in the conjunction of the implicant of (2)
 
 Semi-formally
 ```
@@ -176,7 +176,7 @@ scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
 ...
 ```
 
-### (4) Calculate the TV of the constant predicate obtained in (3)
+### (4) - Calculate the TV of the constant predicate obtained in (3)
 
 Semi-formally
 ```
@@ -202,7 +202,7 @@ $5 = (SetLink
 )
 ```
 
-### (5) Build the tautology that if X takes treatment-1, then treatment-1 contains compound-A
+### (5) - Build the tautology that if X takes treatment-1, then treatment-1 contains compound-A
 
 Semi-formally
 ```
@@ -243,7 +243,7 @@ scheme@(guile-user)> (cog-bind implication-construction-rule)
 ...
 ```
 
-### (6) Distribute the implicant in the implication (5)
+### (6) - Distribute the implicant in the implication (5)
 
 Semi-formally
 ```
@@ -300,7 +300,7 @@ scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
 ...
 ```
 
-### (7) Factorize the lambda in the implicand of (6)
+### (7) - Factorize the lambda in the implicand of (6)
 
 Semi-formally
 ```
@@ -366,7 +366,7 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
 ...
 ```
 
-### (8) Using (6) and (7) deduce that if X takes treatment-1 then X takes treatment-1 and treatment-1 contains compound-A
+### (8) - Using (6) and (7) deduce that if X takes treatment-1 then X takes treatment-1 and treatment-1 contains compound-A
 
 Semi-formally
 ```
@@ -417,7 +417,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (9) Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
+### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
 
 Semi-formally
 
@@ -461,7 +461,7 @@ scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (10) Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
+### (10) - Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
@@ -473,7 +473,7 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
 ```
 
-### (11) Turn equivalence between `\x take(x, treatment-1)` and `take-treatment-1` into implications
+### (11) - Turn equivalence between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
 scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
@@ -514,7 +514,7 @@ scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
 ...
 ```
 
-### (12) Use (11) and (9) to deduce that take-treatment-1 implies taking compound-A
+### (12) - Use (11) and (9) to deduce that take-treatment-1 implies taking compound-A
 
 Semi-formally
 ```
@@ -543,7 +543,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (13) Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
+### (13) - Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -555,14 +555,12 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (14) Use (13) and background knowledge that taking compound-A tends to speed-up recovery of injury alpha to deduce that take-treatment-1 implies recovery-speed-of-injury-alpha
+### (14) - Use (13) and background knowledge that taking compound-A tends to speed-up recovery of injury alpha to deduce that take-treatment-1 implies recovery-speed-of-injury-alpha
 
 Semi-formally
 ```
 take-treatment-1 -> recovery-speed-of-injury-alpha
 ```
-
-TODO: not correct TV
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -574,7 +572,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ```
 ```
 
-### (15) Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
+### (15) - Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
 
 Semi-formally
 ```
@@ -593,7 +591,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ```
 ```
 
-### (16) Using (15) and (14) with the implication-or rule
+### (16) - Using (15) and (14) with the implication-or rule
 
 ```
 $10 = (SetLink
