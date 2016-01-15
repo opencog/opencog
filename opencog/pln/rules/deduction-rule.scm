@@ -80,7 +80,7 @@
         (cog-merge-hi-conf-tv!
             AC
             (stv
-                (if (< 0.99 (* sAB sBC cAB cBC))
+                (if (or (< 0.99 (* sAB cAB)) (< 0.99 (* sBC cBC)))
                     ;; Hack to make it up for the lack of
                     ;; distributional TV. This cover the case where
                     ;; little is known about A and B (i.e. their
