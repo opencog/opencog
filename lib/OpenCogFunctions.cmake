@@ -1,15 +1,35 @@
-# 1. The name of the directory is the name of the module
+# Copyright (C) 2016 OpenCog Foundation
+#
+# 1. The name of the directory and the name is the name of the module
 # 2. There must be a .scm file in the same directory as the module. This file
 #    on installation will be copied one directory above its current directory.
-# Types of scm modules
-# 1. Modules that doen't have any c++ code like the nlp modules can
-#    exist in their separte directory and the directory structure implies the
-#    module structure.
-# 2. If there is a c++ code then the scheme moduel will be under `scm/`
+#
+# Types of scm module directory structures
+# 1. Modules that doen't have any c++ code modules can exist in their separate
+#    directory. Examples,
+#    * `/repo-name/opencog/some-module/some-module.scm` is imported by
+#      `(use-modules (opencog some-module ))` if `some-module.scm` has an
+#      expression `(define-module (opencog some-module))`
+#    * `/repo-name/opencog/some-module/sub-module/sub-module.scm` is imported
+#      by `(use-modules (opencog some-module sub-module))` if `sub-module.scm`
+#      has an expression `(define-module (opencog some-module sub-module))`
+# 2. If there is a c++ code then the scheme module should be under `scm/`
 #    directory. And on installation or symlinking the `scm/` directory is
-#    escaped.
-# 3. The same logic would apply for python
-# 4. Everything should be explicit
+#    escaped. If there are more than one `scm/` directories only the first in
+#    the hierarchy is escaped. As the need arises multiple `scm/` directory
+#    escpaes maybe be added in the future. Examples,
+#    * `/repo-name/opencog/some-module/scm/some-module.scm` is imported by
+#      `(use-modules (opencog some-module ))` if `some-module.scm` has an
+#      expression `(define-module (opencog some-module))`
+#    * `/repo-name/opencog/some-module/scm/sub-module/sub-module.scm` is
+#      imported by `(use-modules (opencog some-module sub-module))` if
+#      `sub-module.scm` has an expression `(define-module (opencog some-module
+#      sub-module))`
+
+# References:
+# https://www.gnu.org/software/guile/manual/guile.html#Modules-and-the-File-System
+# https://www.gnu.org/software/guile/manual/guile.html#Creating-Guile-Modules
+
 
 FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
     FOREACH(FILE_NAME ${ARGV})
@@ -21,8 +41,10 @@ FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
         ENDIF()
         # MODULE_FILE: The name of the file that defines the module. It has
         #   the same name as the directory it is in, or the name of the parent
-        #   directory of current directory if it is in a folder named 'scm'
-        #   and used to define the module.
+        #   directory of current directory if it is in a folder named 'scm'.
+        #   In addition this file shoule have a define-module expression
+        #   for it be importable, as per guile's specification. See reference
+        #   links above.
         SET(MODULE_FILE ${FILE_NAME})
 
         # Check if the file exists
@@ -67,7 +89,7 @@ FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
         # Also configure for install.
         IF ("${MODULE_NAME}.scm" STREQUAL "${MODULE_FILE}")
             EXECUTE_PROCESS(
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILE_DIR_PATH}
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}
                 COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
             )
             INSTALL(FILES
@@ -76,7 +98,7 @@ FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
             )
         ELSE()
             EXECUTE_PROCESS(
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/opencog/scm/${MODULE_FILES_DIR_PATH}
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}
                 COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
             )
             INSTALL (FILES
