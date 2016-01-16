@@ -134,7 +134,7 @@ public:
         TS_ASSERT(pythonTestAgent != NULL);
 
         // run agent with test exception
-        TS_ASSERT_THROWS_ANYTHING(cogserver.runAgent(pythonTestAgent));
+        TS_ASSERT_THROWS_ANYTHING(pythonTestAgent->run());
     }
 
     void testPreloadAgent () {

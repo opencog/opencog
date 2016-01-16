@@ -179,28 +179,43 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
 {
     std::list<const char*> availableAgents = _cogserver.agentIds();
 
-    std::vector<std::string> agents;
+    std::vector<std::tuple<std::string, bool, std::string>> agents;
 
     if (args.empty())
         return "Error: No agents to start specified\n";
 
     for (std::list<std::string>::const_iterator it = args.begin();
          it != args.end(); ++it) {
-        std::string agent_type = *it;
+        auto p1 = it->find(',');
+        std::string agent_type = it->substr(0, p1);
         // check that this is a valid type; give an error and return otherwise
         if (availableAgents.end() ==
-         find(availableAgents.begin(), availableAgents.end(), *it)) {
+         find(availableAgents.begin(), availableAgents.end(), agent_type)) {
             std::ostringstream oss;
-            oss << "Invalid Agent ID \"" << *it << "\"\n";
+            oss << "Invalid Agent ID \"" << agent_type << "\"\n";
             return oss.str();
         }
 
-        agents.push_back(agent_type);
+        bool threaded = false;
+        std::string thread_name;
+        if (p1 != std::string::npos) {
+            auto p2 = it->find(',', p1 + 1);
+            auto dedicated_str = it->substr(p1 + 1, p2 - p1 - 1);
+            threaded = (dedicated_str == "yes");
+            if (!threaded && dedicated_str != "no")
+                return "Invalid dedicated parameter: " + dedicated_str + '\n';
+
+            if (p2 != std::string::npos)
+                thread_name = it->substr(p2 + 1);
+        }
+
+        agents.push_back(std::make_tuple(agent_type, threaded, thread_name));
      }
 
-    for (std::vector<std::string>::const_iterator it = agents.begin();
-         it != agents.end(); ++it) {
-        _cogserver.createAgent(*it, true);
+    for (auto it = agents.cbegin();
+         it != agents.cend(); ++it) {
+        auto agent = _cogserver.createAgent(std::get<0>(*it));
+        _cogserver.startAgent(agent, std::get<1>(*it), std::get<2>(*it));
     }
 
     return "Successfully started agents\n";
@@ -234,7 +249,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
     for (std::vector<std::string>::const_iterator it = agents.begin();
          it != agents.end(); ++it)
     {
-        _cogserver.destroyAllAgents(*it);
+        _cogserver.stopAllAgents(*it);
     }
 
     return "Successfully stopped agents\n";
@@ -268,7 +283,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
                 agent = AgentPtr(_cogserver.createAgent(*it, false));
                 if (agent) {
                     agent->run();
-                    _cogserver.destroyAgent(agent);
+                    _cogserver.stopAgent(agent);
                     numberAgentsRun++;
                 } else {
                     unknownAgents.push_back(*it);

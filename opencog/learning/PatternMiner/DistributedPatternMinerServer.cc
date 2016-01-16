@@ -41,7 +41,7 @@ DistributedPatternMinerServerModule::DistributedPatternMinerServerModule(CogServ
 DistributedPatternMinerServerModule::~DistributedPatternMinerServerModule()
 {
     logger().info("[DistributedPatternMinerServerModule] destructor");
-    _cogserver.destroyAllAgents(DistributedPatternMinerServer::info().id);
+    _cogserver.stopAllAgents(DistributedPatternMinerServer::info().id);
 }
 
 void DistributedPatternMinerServerModule::init()

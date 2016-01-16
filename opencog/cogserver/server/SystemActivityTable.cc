@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100)
+SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
+        _cogServer(nullptr)
 {
     logger().debug("[SystemActivityTable] constructor");
 }
@@ -40,6 +41,7 @@ SystemActivityTable::~SystemActivityTable()
 {
     logger().debug("[SystemActivityTable] enter destructor");
     _conn.disconnect();
+    clearActivity();
     logger().debug("[SystemActivityTable] exit destructor");
 }
 
@@ -53,6 +55,7 @@ void SystemActivityTable::init(CogServer *cogServer)
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
 {
+    std::lock_guard<std::mutex> lock(_activityTableMutex);
     _maxAgentActivityTableSeqSize = n;
 
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
@@ -74,6 +77,7 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
 void SystemActivityTable::atomRemoved(AtomPtr atom)
 {
     Handle h = atom->getHandle();
+    std::lock_guard<std::mutex> lock(_activityTableMutex);
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); ++it) {
         ActivitySeq &seq = it->second;
@@ -86,11 +90,13 @@ void SystemActivityTable::atomRemoved(AtomPtr atom)
     }
 }
 
-void SystemActivityTable::logActivity(AgentPtr agent, struct timeval &elapsedTime, 
-                                      size_t memUsed, size_t atomsUsed)
+void SystemActivityTable::logActivity(AgentPtr agent,
+    std::chrono::system_clock::duration elapsedTime, size_t memUsed,
+    size_t atomsUsed)
 {
+    std::lock_guard<std::mutex> lock(_activityTableMutex);
     ActivitySeq& as = _agentActivityTable[agent];
-    as.insert(as.begin(), 
+    as.insert(as.begin(),
         new Activity(_cogServer->getCycleCount(), elapsedTime, memUsed,
                  atomsUsed,
                  agent->getUtilizedHandleSets()));
@@ -99,6 +105,7 @@ void SystemActivityTable::logActivity(AgentPtr agent, struct timeval &elapsedTim
 
 void SystemActivityTable::clearActivity(AgentPtr agent)
 {
+    std::lock_guard<std::mutex> lock(_activityTableMutex);
     AgentActivityTable::iterator it = _agentActivityTable.find(agent);
     if (it == _agentActivityTable.end())
         return;
@@ -110,6 +117,7 @@ void SystemActivityTable::clearActivity(AgentPtr agent)
 
 void SystemActivityTable::clearActivity()
 {
+    std::lock_guard<std::mutex> lock(_activityTableMutex);
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); ++it) {
         ActivitySeq& seq = it->second;

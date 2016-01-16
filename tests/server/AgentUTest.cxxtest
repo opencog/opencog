@@ -182,7 +182,7 @@ public:
         TS_ASSERT(config()["MYAGENT_MOOD"] == "happy");
 
         // destroy the MyAgentWithDefaults instance
-        cogserver.destroyAllAgents(MyAgentWithDefaults::info().id);
+        cogserver.stopAllAgents(MyAgentWithDefaults::info().id);
 
         logger().debug("END TEST: Agent default parameters");
     }
@@ -229,7 +229,7 @@ public:
         TS_ASSERT(config()["MYAGENT_MOOD"] == "sad");
 
         // destroy the MyAgentWithDefaults instance
-        cogserver.destroyAllAgents(MyAgentWithDefaults::info().id);
+        cogserver.stopAllAgents(MyAgentWithDefaults::info().id);
 
         // finally, remove the temporary file and free the string with its name
         std::remove(config_file_name);

@@ -28,12 +28,15 @@
 #define _OPENCOG_COGSERVER_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <vector>
-#include <tr1/memory>
+#include <thread>
 
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/AgentRunnerBase.h>
+#include <opencog/cogserver/server/AgentRunnerThread.h>
 #include <opencog/cogserver/server/BaseServer.h>
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/NetworkServer.h>
@@ -46,8 +49,6 @@ namespace opencog
 /** \addtogroup grp_server
  *  @{
  */
-
-typedef std::vector<AgentPtr> AgentSeq;
 
 /**
  * This class implements a network and agent server. It provides shared
@@ -147,22 +148,23 @@ protected:
         void*                   handle;
     } ModuleData;
     typedef std::map<const std::string, ModuleData> ModuleMap;
+    typedef std::unique_ptr<AgentRunnerThread> AgentRunnerThreadPtr;
 
     // Containers used to store references to the modules, requests
     // and agents
     ModuleMap modules;
     std::map<const std::string, Request*> requests;
-    AgentSeq agents;
 
     long cycleCount;
     bool running;
     // Used to start and stop the Agents loop via shell commands
     bool agentsRunning;
 
-    void processAgents();
+    SimpleRunner agentScheduler;
+    std::vector<AgentRunnerThreadPtr> agentThreads;
+    std::map<std::string, AgentRunnerThread*> threadNameMap;
 
     std::mutex processRequestsMutex;
-    std::mutex agentsMutex;
     concurrent_queue<Request*> requestQueue;
 
     NetworkServer _networkServer;
@@ -182,9 +184,6 @@ public:
     /** CogServer's destructor. Disables the network server and
      * unloads all modules. */
     virtual ~CogServer(void);
-
-    /** Run an Agent and log its activity. */
-    virtual void runAgent(AgentPtr);
 
     /** Server's main loop. Executed while the 'running' flag is set
      *  to true. It processes the request queue, then the scheduled
@@ -285,7 +284,7 @@ public:
     virtual std::list<const char*> agentIds(void) const;
 
     /** Returns a list of all the currently running agent instances. */
-    virtual const AgentSeq &runningAgents(void) { return agents; }
+    virtual AgentSeq runningAgents(void);
 
     /** Creates and returns a new instance of an agent of class 'id'.
      *  If 'start' is true, then the agent will be automatically added
@@ -300,17 +299,14 @@ public:
     }
 
     /** Adds agent 'a' to the list of scheduled agents. */
-    virtual void startAgent(AgentPtr a);
+    virtual void startAgent(AgentPtr a, bool dedicated_thread = false,
+        const std::string &thread_name = "");
 
     /** Removes agent 'a' from the list of scheduled agents. */
     virtual void stopAgent(AgentPtr a);
 
-    /** Removes agent 'a' from the list of scheduled agents and destroys the
-     * instance. This is just a short-cut to 'stopAgent(a); delete a'. */
-    virtual void destroyAgent(AgentPtr);
-
     /** Destroys all agents from class 'id' */
-    virtual void destroyAllAgents(const std::string& id);
+    virtual void stopAllAgents(const std::string& id);
 
     /** Starts running agents as part of the serverLoop (enabled by default) */
     virtual void startAgentLoop(void);
