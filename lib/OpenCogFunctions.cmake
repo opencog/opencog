@@ -30,22 +30,21 @@
 # https://www.gnu.org/software/guile/manual/guile.html#Modules-and-the-File-System
 # https://www.gnu.org/software/guile/manual/guile.html#Creating-Guile-Modules
 
-FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR FILE_NAME)
+# ----------------------------------------------------------------------------
+# MODULE_FILE: The name of the file that defines the module. It has
+#   the same name as the directory it is in, or the name of the parent
+#   directory of current directory if it is in a folder named 'scm'.
+#   In addition this file shoule have a define-module expression
+#   for it be importable, as per guile's specification. See reference
+#   links above.
+FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR BUILD_DIR MODULE_FILE)
     # NOTE: Directory paths are not allowed as module names.
     # Check if directory path was passed as a file name.
-    STRING(REGEX MATCH "([a-z0-9/-]+)/([a-z0-9/-]*)" "" ${FILE_NAME})
+    STRING(REGEX MATCH "([a-z0-9/-]+)/([a-z0-9/-]*)" "" ${MODULE_FILE})
     IF(CMAKE_MATCH_2)
         MESSAGE(FATAL_ERROR "Only files found in "
             "${CURRENT_SRC_DIR} are allowed")
     ENDIF()
-
-    # MODULE_FILE: The name of the file that defines the module. It has
-    #   the same name as the directory it is in, or the name of the parent
-    #   directory of current directory if it is in a folder named 'scm'.
-    #   In addition this file shoule have a define-module expression
-    #   for it be importable, as per guile's specification. See reference
-    #   links above.
-    SET(MODULE_FILE ${FILE_NAME})
 
     # Check if the file exists
     IF(NOT EXISTS ${CURRENT_SRC_DIR}/${MODULE_FILE})
@@ -82,7 +81,7 @@ FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR FILE_NAME)
     SET(MODULE_NAME ${CMAKE_MATCH_3})
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
     SET(MODULE_FILES_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
-    SET(GUILE_SYMLINK_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
+    SET(GUILE_SYMLINK_DIR "${BUILD_DIR}/opencog/scm")
     SET(GUILE_INSTALL_DIR "${DATADIR}/scm")
 
     # Create symlinks in build directory mirroring the install path structure.
@@ -92,18 +91,16 @@ FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR FILE_NAME)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}
             COMMAND ${CMAKE_COMMAND} -E create_symlink "${CURRENT_SRC_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILE_DIR_PATH}/${MODULE_FILE}"
         )
-        INSTALL(FILES
-            ${MODULE_FILE}
-            DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILE_DIR_PATH}"
+        SET(FILE_INSTALL_PATH "${GUILE_INSTALL_DIR}/${MODULE_FILE_DIR_PATH}"
+            PARENT_SCOPE
         )
     ELSE()
         EXECUTE_PROCESS(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}
             COMMAND ${CMAKE_COMMAND} -E create_symlink "${CURRENT_SRC_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
         )
-        INSTALL (FILES
-            ${MODULE_FILE}
-            DESTINATION "${GUILE_INSTALL_DIR}/${MODULE_FILES_DIR_PATH}"
+        SET(FILE_INSTALL_PATH "${GUILE_INSTALL_DIR}/${MODULE_FILES_DIR_PATH}"
+            PARENT_SCOPE
         )
     ENDIF()
 ENDFUNCTION(PROCESS_GUILE_PATH)
@@ -111,7 +108,16 @@ ENDFUNCTION(PROCESS_GUILE_PATH)
 FUNCTION(ADD_GUILE_MODULE SCHEME_FILE)
     FOREACH(FILE_NAME ${ARGV})
         PROCESS_GUILE_PATH(${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR} ${FILE_NAME}
+        )
+
+        # The install configuration isn't part of PROCESS_GUILE_PATH function
+        # so as to avoid "Command INSTALL() is not scriptable" error, when
+        # using it in symlinking scheme files during code-generation
+        # by the OPENCOG_ADD_ATOM_TYPES macro.
+        INSTALL (FILES
             ${FILE_NAME}
+            DESTINATION ${FILE_INSTALL_PATH}
         )
     ENDFOREACH(FILE_NAME)
 ENDFUNCTION(ADD_GUILE_MODULE)
