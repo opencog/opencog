@@ -35,6 +35,10 @@
 
 #include <opencog/cogserver/server/Factory.h>
 
+#if __GNUC__ >= 5
+#define SHARED_PTR_ATOMIC_OPS
+#endif
+
 namespace opencog
 {
 /** \addtogroup grp_server
@@ -116,6 +120,10 @@ protected:
     /** Note: AttentionValue itself is read-only, so no need to protect, but
      * the pointer needs and is protected */
     AttentionValuePtr _attentionValue;
+
+#if !defined SHARED_PTR_ATOMIC_OPS
+    mutable std::mutex _attentionValueMutex;
+#endif
 
     /** The agent's frequency. Determines how often the opencog server should
      *  schedule this agent. A value of 1 (the default) means that the agent
@@ -235,10 +243,23 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
-    AttentionValuePtr getAV() { return std::atomic_load(&_attentionValue); }
+    AttentionValuePtr getAV()
+    {
+#ifdef SHARED_PTR_ATOMIC_OPS
+        return std::atomic_load(&_attentionValue);
+#else
+        std::lock_guard<std::mutex> lock(_attentionValueMutex);
+        return _attentionValue;
+#endif
+    }
     void setAV(AttentionValuePtr new_av)
     {
+#ifdef SHARED_PTR_ATOMIC_OPS
         std::atomic_store(&_attentionValue, new_av);
+#else
+        std::lock_guard<std::mutex> lock(_attentionValueMutex);
+        _attentionValue = new_av;
+#endif
     }
 }; // class
 
