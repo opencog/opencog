@@ -1,6 +1,1 @@
-
-INSTALL (FILES
-   opencog/atom-types.scm
-   opencog/cogserver.scm
-   DESTINATION "${DATADIR}/scm/opencog"
-)
+ADD_GUILE_MODULE (atom-types.scm)

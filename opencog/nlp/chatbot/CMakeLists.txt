@@ -1,10 +1,4 @@
-INSTALL (FILES
-	chatbot.scm
-   DESTINATION "${DATADIR}/scm/opencog/nlp"
-)
-
-INSTALL (FILES
+ADD_GUILE_MODULE (chatbot.scm
 	chat-utils.scm
 	process-query.scm
-   DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot"
 )

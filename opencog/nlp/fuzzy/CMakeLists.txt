@@ -10,7 +10,4 @@ TARGET_LINK_LIBRARIES (nlpfz
 
 INSTALL (TARGETS nlpfz DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-INSTALL (FILES
-	fuzzy.scm
-   DESTINATION "${DATADIR}/scm/opencog/nlp"
-)
+ADD_GUILE_MODULE (fuzzy.scm)
