@@ -1,20 +1,19 @@
-; =====================================================================
-; ImplicationOrRule
-;
-; ImplicationLink <TV1>
-;    A
-;    C
-; ImplicationLink <TV2>
-;    B
-;    C
-; |-
-; ImplicationLink <TV>
-;    OrLink
-;       A
-;       B
-;    C
-;----------------------------------------------------------------------
-
+;; =====================================================================
+;; ImplicationImplicantDisjunctionRule
+;;
+;; ImplicationLink <TV1>
+;;    A
+;;    C
+;; ImplicationLink <TV2>
+;;    B
+;;    C
+;; |-
+;; ImplicationLink <TV>
+;;    OrLink
+;;       A
+;;       B
+;;    C
+;;----------------------------------------------------------------------
 
 (define pln-rule-implication-or
   (BindLink
