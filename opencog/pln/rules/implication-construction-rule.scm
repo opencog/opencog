@@ -10,6 +10,11 @@
 ;;
 ;; To properly deal with this we should support deep type and infer
 ;; that P and Q are over the same domain.
+;;
+;; Overlaps:
+;;
+;; - can probably be replaced by a deduction rule with B == Universe
+;;
 ;; ----------------------------------------------------------------------
 
 (define implication-construction-variables
@@ -49,23 +54,22 @@
 
 (define (implication-construction-formula P Q)
   (let* (
-         (P-tv-s (cog-stv-strength P))
-         (P-tv-c (cog-stv-confidence P))
-         (Q-tv-s (cog-stv-strength Q))
-         (Q-tv-c (cog-stv-confidence Q))
+         (P-s (cog-stv-strength P))
+         (P-c (cog-stv-confidence P))
+         (Q-s (cog-stv-strength Q))
+         (Q-c (cog-stv-confidence Q))
          ; Compute the implication TV
-         (Impl-tv-s Q-tv-s)
-         (Impl-tv-c (if (< 0.9 (* Q-tv-s Q-tv-c)) ; Hack to overcome
-                                                  ; the lack of
-                                                  ; distributional TV
-                        Q-tv-c
-                        (* P-tv-c Q-tv-c)))) ; Big hack because the
-                                             ; naive formula sucks
-    (if (= Impl-tv-c 0) ; Try to avoid constructing informationless
-                        ; knowledge
+         (Impl-s Q-s)
+         (Impl-c (if (< 0.9 (* Q-s Q-c)) ; Hack to overcome the lack
+                                         ; of distributional TV
+                        Q-c
+                        (* P-c Q-c)))) ; Big hack because the naive
+                                       ; formula sucks
+    (if (= Impl-c 0) ; Try to avoid constructing informationless
+                     ; knowledge
         (cog-undefined-handle)
         (cog-merge-hi-conf-tv!
          (ImplicationLink
             P
             Q)
-         (cog-new-stv Impl-tv-s Impl-tv-c)))))
+         (cog-new-stv Impl-s Impl-c)))))
