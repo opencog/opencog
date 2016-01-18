@@ -30,11 +30,11 @@
 ;; (5)
 (cog-bind implication-construction-rule)
 
-;; ;; (6)
-;; (cog-bind implication-implicant-distribution-rule)
+;; (6)
+(cog-bind implication-implicant-distribution-rule)
 
-;; ;; (7)
-;; (cog-bind implication-and-lambda-factorization-rule)
+;; (7)
+(cog-bind implication-and-lambda-factorization-rule)
 
 ;; (8)
 (cog-bind deduction-implication-rule)
@@ -61,7 +61,12 @@
 ;; (14)
 (cog-bind deduction-implication-rule)
 
-;; ;; (15)
+;; (15)
+;;
+;; Actually the previous deduction step took care of that too, so no
+;; need to run it
+;;
 ;; (cog-bind deduction-implication-rule)
 
-;; ;; (16)
+;; (16)
+(cog-bind pln-rule-implication-or)
