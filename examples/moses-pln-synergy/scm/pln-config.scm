@@ -54,7 +54,7 @@
         (string-append pln-rules-dir "implication-construction-rule.scm")
         (string-append pln-rules-dir "implication-implicant-distribution-rule.scm")
         (string-append pln-rules-dir "equivalence-to-double-implication-rule.scm")
-        "pln-rules/implication-or.scm"
+        "pln-rules/implication-implicant-disjunction-rule.scm"
         )
 )
 (for-each load rule-files)
