@@ -42,7 +42,7 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../../../opencog/reasoning/pln/rules/")
+(define pln-rules-dir "../../../opencog/pln/rules/")
 (define rule-files
   (list (string-append pln-rules-dir "deduction-rule.scm")
         (string-append pln-rules-dir "modus-ponens-rule.scm")
@@ -54,7 +54,7 @@
         (string-append pln-rules-dir "implication-construction-rule.scm")
         (string-append pln-rules-dir "implication-implicant-distribution-rule.scm")
         (string-append pln-rules-dir "equivalence-to-double-implication-rule.scm")
-        "pln-rules/implication-or.scm"
+        "pln-rules/implication-implicant-disjunction-rule.scm"
         )
 )
 (for-each load rule-files)

@@ -1,20 +1,19 @@
-; =====================================================================
-; ImplicationOrRule
-;
-; ImplicationLink <TV1>
-;    A
-;    C
-; ImplicationLink <TV2>
-;    B
-;    C
-; |-
-; ImplicationLink <TV>
-;    OrLink
-;       A
-;       B
-;    C
-;----------------------------------------------------------------------
-
+;; =====================================================================
+;; ImplicationImplicantDisjunctionRule
+;;
+;; ImplicationLink <TV1>
+;;    A
+;;    C
+;; ImplicationLink <TV2>
+;;    B
+;;    C
+;; |-
+;; ImplicationLink <TV>
+;;    OrLink
+;;       A
+;;       B
+;;    C
+;;----------------------------------------------------------------------
 
 (define pln-rule-implication-or
   (BindLink
@@ -107,5 +106,5 @@
          (min cAC cBC))))
 
 ; Name the rule
-(define pln-rule-implication-or-name (Node "pln-rule-implication-or"))
+(define pln-rule-implication-or-name (DefinedSchemaNode "pln-rule-implication-or"))
 (DefineLink pln-rule-implication-or-name pln-rule-implication-or)

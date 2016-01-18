@@ -171,7 +171,7 @@
 )
 
 ;; Being well hydrated tends to speed up injury recovery
-(ImplicationLink (stv 0.7 0.6)
+(ImplicationLink (stv 0.7 0.7)
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "PredicateNode"))

@@ -4,7 +4,14 @@ Simple demo showing how PLN reasoning can be used to overcome the
 uncertainties resulting from the low number of samples during
 learning.
 
-## Run MOSES with the following command
+## Obtain MOSES model
+
+A MOSES has been pre-learned and included in the parent folder
+`../moses-model.scm`. The confidence over the model has been completely
+made up, but it doesn't matter, we just want to convey the idea that
+the use of background knowledge can improve that confidence.
+
+Alternatively you may run the learning yourself
 
 ```bash
 $ moses \
@@ -18,31 +25,44 @@ $ moses \
       --output-format scheme
 ```
 
-## Load the models and the background knowledge in guile
+## Batch mode
 
-`moses-model.scm` is actually provided containing the model (with
-indentation + confidence). The confidence over the model is completely
-made up, but it doesn't matter, we just want to convey the idea that
-the use of background knowledge can improve that confidence.
+You may choose to run the inference all at once. For that just load
+`moses-pln-synergy.scm` in guile
+
+```
+$ guile
+scheme@(guile-user)> (load "moses-pln-synergy.scm")
+```
+
+Which will load the MOSES model, the background knowledge, the PLN
+configuration for that inference and execute it step by step (by using
+the pattern matcher function `cog-bind`).
+
+## Step-by-step mode
+
+Alternatively you may run it step by step. First you need to run guile
+and load the models, the background knowledge and the PLN
+configuration.
 
 ```
 $ guile
 scheme@(guile-user)> (load "moses-model.scm")
 scheme@(guile-user)> (load "background-knowledge.scm")
-```
-
-## Load the rule-based system (here PLN)
-
-```scheme
 scheme@(guile-user)> (load "pln-config.scm")
 ```
 
-## Apply rules iteratively
+## Apply rules
 
-### (1) Partially instantiate if X takes Y and Y contains Z, then X takes Z,
-    with Y = treatment-1 and Z = compound-A. Semi-formally
-    \x (take(x, treatment-1) and contain(treatment-1, compound-A))
-       -> take(x, compound-A)
+Then apply the following rules step by step.
+
+### (1) - Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
+
+Semi-formally
+```
+\x (take(x, treatment-1) and contain(treatment-1, compound-A))
+-> take(x, compound-A)
+```
 
 ```scheme
 scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instantiation-rule)) (iota 2))
@@ -81,9 +101,13 @@ And search for the following
 ...
 ```
 
-### (2) Distribute the lambda in the implicant and implicand of (1). Semi-formally
-    (\x take(x, treatment-1) and contain(treatment-1, compound-A))
-    -> (\x take(x, compound-A))
+### (2) - Distribute the lambda in the implicant and implicand of (1)
+
+Semi-formally
+```
+(\x take(x, treatment-1) and contain(treatment-1, compound-A))
+-> (\x take(x, compound-A))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
@@ -128,9 +152,12 @@ scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
 ...
 ```
 
-### (3) Distribute the lambda in the conjunction of the implicant of (2).
-    Semi-formally
-    (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+### (3) - Distribute the lambda in the conjunction of the implicant of (2)
+
+Semi-formally
+```
+(\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
@@ -166,8 +193,12 @@ scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
 ...
 ```
 
-### (4) Calculate the TV of the constant predicate obtained in (3).
-    Semi-formally \x contain(treatment-1, compound-A)
+### (4) - Calculate the TV of the constant predicate obtained in (3)
+
+Semi-formally
+```
+\x contain(treatment-1, compound-A)
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
@@ -188,9 +219,12 @@ $5 = (SetLink
 )
 ```
 
-### (5) Build the tautology that if X takes treatment-1, then
-    treatment-1 contains compound-A. Semi-formally
-    (\x take(x, treatment-1)) -> (\x contain(treatment-1, compound-A))
+### (5) - Build the tautology that if X takes treatment-1, then treatment-1 contains compound-A
+
+Semi-formally
+```
+(\x take(x, treatment-1)) -> (\x contain(treatment-1, compound-A))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-construction-rule)
@@ -226,9 +260,13 @@ scheme@(guile-user)> (cog-bind implication-construction-rule)
 ...
 ```
 
-### (6) Distribute the implicant in the implication (5). Semi-formally
-    (\x take(x, treatment-1))
-    -> (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+### (6) - Distribute the implicant in the implication (5)
+
+Semi-formally
+```
+(\x take(x, treatment-1))
+-> (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
@@ -279,9 +317,13 @@ scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
 ...
 ```
 
-### (7) Factorize the lambda in the implicand of (6). Semi-formally
-    (\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
-    -> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+### (7) - Factorize the lambda in the implicand of (6)
+
+Semi-formally
+```
+(\x take(x, treatment-1)) and (\x contain(treatment-1, compound-A))
+-> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
@@ -341,10 +383,13 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
 ...
 ```
 
-### (8) Using (6) and (7) deduce that if X takes treatment-1 then X
-    takes treatment-1 and treatment-1 contains compound-A. Semi-formally
-    (\x take(x, treatment-1))
-    -> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+### (8) - Using (6) and (7) deduce that if X takes treatment-1 then X takes treatment-1 and treatment-1 contains compound-A
+
+Semi-formally
+```
+(\x take(x, treatment-1))
+-> (\x (take(x, treatment-1) and contain(treatment-1, compound-A)))
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -389,9 +434,14 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (9) Using (2) and (8) deduce that if X takes treatment-1 then X
-    takes compound-A. Semi-formally
-    (\x takes(x, treatment-1)) -> (\x takes(x, compound-A))
+### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
+
+Semi-formally
+
+```
+(\x takes(x, treatment-1))
+-> (\x takes(x, compound-A))
+```
 
 ```scheme
 scheme@(guile-user)> ;; Actually the previous deduction step took care of that too
@@ -428,22 +478,19 @@ scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (10) Fully instantiate that if a predicate is in the
-    injury-recovery-speed-predicates class, then is-well-hydrated
-    implies it.
+### (10) - Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
-   (ImplicationLink (stv 0.69999999 0.60000002)
+   (ImplicationLink (stv 0.69999999 0.69999999)
       (PredicateNode "is-well-hydrated")
       (PredicateNode "recovery-speed-of-injury-alpha")
    )
 ...
 ```
 
-### (11) Turn equivalence between \x take(x, treatment-1) and
-    take-treatment-1 into implications
+### (11) - Turn equivalence between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
 scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
@@ -484,8 +531,12 @@ scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
 ...
 ```
 
-### (12) Using (11) and (9) deduce
-    take-treatment-1 -> \x take(x, compound-A)
+### (12) - Use (11) and (9) to deduce that take-treatment-1 implies taking compound-A
+
+Semi-formally
+```
+take-treatment-1 -> \x take(x, compound-A)
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -509,8 +560,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (13) Use (12) and (11) to deduce
-    take-treatment-1 -> take-compound-A
+### (13) - Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -522,41 +572,54 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (14) Use (13) and background knowledge that taking compound-A
-    tends to speed-up recovery of injury alpha to deduce
-    take-treatment-1 -> recovery-speed-of-injury-alpha
+### (14) - Use (13) and background knowledge that taking compound-A tends to speed-up recovery of injury alpha to deduce that take-treatment-1 implies recovery-speed-of-injury-alpha
+
+Semi-formally
+```
+take-treatment-1 -> recovery-speed-of-injury-alpha
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
-```
+...
    (ImplicationLink (stv 0.55000001 0.89999998)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
-```
+...
 ```
 
-### (15) Using (10) and the background knowledge that eating a lot of
-    fruits and vegetables hydrates well.
+### (15) - Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
+
+Semi-formally
+```
+eat-lost-fruits-vegetables -> recovery-speed-of-injury-alpha
+```
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
-```
-   (ImplicationLink ???
-      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.8))
+...
+   (ImplicationLink (stv 0.62 0.69999999)
+      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
-```
+...
 ```
 
-### (16) Using (15) and (14) with the implication or rule.
+### (16) - Using (15) and (14) with the implication-or rule
 
+```
+scheme@(guile-user)> (cog-bind pln-rule-implication-or)
 $10 = (SetLink
-   (ImplicationLink (stv 0.6447677 0.60000002)
+   (ImplicationLink (stv 0.60357851 0.69999999)
       (OrLink
          (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
          (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
       )
-      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.80000001 0))
+      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
-   ...
+...
+```
+
+This is our MOSES model! By reasoning we managed to change update TV,
+the strength is lower for good since the confidence is higher.

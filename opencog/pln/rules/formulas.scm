@@ -27,13 +27,13 @@
 ;;
 ;;         0.0 < sA
 ;;
-;;      1.b P(B|A) is greater than P(A,B)/P(A) considering the
-;;      smallest possible intersection between A and B
+;;      1.b P(B|A) is greater than or equal to P(A,B)/P(A) considering
+;;      the smallest possible intersection between A and B
 ;;
 ;;         max((sA+sB-1)/sA, 0) <= sAB
 ;;
-;;      1.c P(B|A) is greater than P(A,B)/P(A) considering the
-;;      largest possible intersection between A and B
+;;      1.c P(B|A) is smaller than P(A,B)/P(A) considering the largest
+;;      possible intersection between A and B
 ;;
 ;;         sAB <= min(1, sB/sA)
 ;;
