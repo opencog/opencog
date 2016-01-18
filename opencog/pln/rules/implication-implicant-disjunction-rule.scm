@@ -15,7 +15,7 @@
 ;;    C
 ;;----------------------------------------------------------------------
 
-(define pln-rule-implication-or
+(define implication-implicant-disjunction-rule
   (BindLink
      (VariableList
         (VariableNode "$A")
@@ -45,7 +45,7 @@
         ;; (NotLink (ImplicationLink (VariableNode "$B") (VariableNode "$A")))
      )
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: pln-formula-implication-or")
+        (GroundedSchemaNode "scm: implication-implicant-disjunction-formula")
         (ListLink
            (ImplicationLink
               (OrLink
@@ -70,9 +70,9 @@
   )
 )
 
-(define (pln-formula-implication-or ABC AC BC A B C)
+(define (implication-implicant-disjunction-formula ABC AC BC A B C)
   (cog-set-tv! ABC
-   (pln-formula-implication-or-side-effect-free AC BC A B C))
+   (implication-implicant-disjunction-side-effect-free-formula AC BC A B C))
 )
 
 ;; Computing the strength is based on
@@ -90,7 +90,7 @@
 ;; P(C|A U B) = (P(C|A)*P(A) + P(C|B)*P(B) - P(C|A)*P(A)*P(C|B)*P(B)
 ;;            / (P(A) + P(B) - P(A)*P(B))
 ;;
-(define (pln-formula-implication-or-side-effect-free AC BC A B C)
+(define (implication-implicant-disjunction-side-effect-free-formula AC BC A B C)
   (let* 
       ((sAC (cog-stv-strength AC))
        (sBC (cog-stv-strength BC))
@@ -106,5 +106,7 @@
          (min cAC cBC))))
 
 ; Name the rule
-(define pln-rule-implication-or-name (DefinedSchemaNode "pln-rule-implication-or"))
-(DefineLink pln-rule-implication-or-name pln-rule-implication-or)
+(define implication-implicant-disjunction-rule-name
+  (DefinedSchemaNode "implication-implicant-disjunction-rule"))
+(DefineLink implication-implicant-disjunction-rule-name
+  implication-implicant-disjunction-rule)

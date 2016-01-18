@@ -606,10 +606,10 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (16) - Using (15) and (14) with the implication-or rule
+### (16) - Using (15) and (14) with the implication-implicant-disjunction rule we can infer a new TV for the MOSES model
 
 ```
-scheme@(guile-user)> (cog-bind pln-rule-implication-or)
+scheme@(guile-user)> (cog-bind implication-implicant-disjunction-rule)
 $10 = (SetLink
    (ImplicationLink (stv 0.60357851 0.69999999)
       (OrLink
@@ -621,5 +621,7 @@ $10 = (SetLink
 ...
 ```
 
-This is our MOSES model! By reasoning we managed to change update TV,
-the strength is lower for good since the confidence is higher.
+This is our MOSES model! By reasoning we managed to update its TV, the
+strength is lower but most important we managed to increase its
+confidence, in other words reasoning can make it up for a poor
+dataset.

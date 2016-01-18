@@ -69,4 +69,4 @@
 ;; (cog-bind deduction-implication-rule)
 
 ;; (16)
-(cog-bind pln-rule-implication-or)
+(cog-bind implication-implicant-disjunction-rule)
