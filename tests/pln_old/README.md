@@ -2,7 +2,9 @@ Remarks
 -------
 
 This test is soon to be obsolete as the Python version of PLN is being
-replaced by the URE-based version.
+replaced by the URE-based version. Ideally, it should be removed after
+all its unit tests have been ported to the new URE-based PLN (under
+tests/pln).
 
 HOWTO run these tests by hand:
 ------------------------------

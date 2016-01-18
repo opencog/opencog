@@ -96,7 +96,7 @@ void PLNRulesUTest::setUp()
 
 /**
  * Tests the deduction rule (deduction-rule) defined in:
- * opencog/reasoning/pln/rules/deduction-rule.scm
+ * opencog/pln/rules/deduction-rule.scm
  */
 void PLNRulesUTest::test_deduction()
 {
@@ -105,7 +105,7 @@ void PLNRulesUTest::test_deduction()
 	as.clear();
     
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-assertions.scm, "
+	             "tests/pln/simple-assertions.scm, "
 	             "opencog/pln/rules/deduction-rule.scm");
 	load_scm_files_from_config(as);
     
@@ -137,7 +137,7 @@ void PLNRulesUTest::test_and_construction()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-predicates.scm, "
+	             "tests/pln/simple-predicates.scm, "
 	             "opencog/pln/rules/and-construction-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -159,7 +159,7 @@ void PLNRulesUTest::test_or_construction()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-predicates.scm, "
+	             "tests/pln/simple-predicates.scm, "
 	             "opencog/pln/rules/or-construction-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -181,7 +181,7 @@ void PLNRulesUTest::test_not_construction()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-predicates.scm, "
+	             "tests/pln/simple-predicates.scm, "
 	             "opencog/pln/rules/not-construction-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -203,7 +203,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-forall.scm, "
+	             "tests/pln/simple-forall.scm, "
 	             "opencog/pln/rules/forall-instantiation-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -242,7 +242,7 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-forall.scm, "
+	             "tests/pln/simple-forall.scm, "
 	             "opencog/pln/rules/forall-instantiation-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -271,7 +271,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-forall.scm, "
+	             "tests/pln/simple-forall.scm, "
 	             "opencog/pln/rules/forall-implication-to-higher-order-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -313,7 +313,7 @@ void PLNRulesUTest::test_implication_full_instantiation()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-implication.scm, "
+	             "tests/pln/simple-implication.scm, "
 	             "opencog/pln/rules/implication-instantiation-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -348,7 +348,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-implication.scm, "
+	             "tests/pln/simple-implication.scm, "
 	             "opencog/pln/rules/implication-instantiation-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -406,7 +406,7 @@ void PLNRulesUTest::test_implication_lambda_distribution()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-implication.scm, "
+	             "tests/pln/simple-implication.scm, "
 	             "opencog/pln/rules/implication-lambda-distribution-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -490,7 +490,7 @@ void PLNRulesUTest::test_and_lambda_distribution()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-lambda.scm, "
+	             "tests/pln/simple-lambda.scm, "
 	             "opencog/pln/rules/and-lambda-distribution-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -528,7 +528,7 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-implication.scm, "
+	             "tests/pln/simple-implication.scm, "
 	             "opencog/pln/rules/implication-implicant-distribution-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -560,7 +560,7 @@ void PLNRulesUTest::test_implication_construction()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-predicates.scm, "
+	             "tests/pln/simple-predicates.scm, "
 	             "opencog/pln/rules/implication-construction-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -593,7 +593,7 @@ void PLNRulesUTest::test_lambda_grounded_construction()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-lambda.scm, "
+	             "tests/pln/simple-lambda.scm, "
 	             "opencog/pln/rules/lambda-grounded-construction-rule.scm");
 	load_scm_files_from_config(as);
 
@@ -625,7 +625,7 @@ void PLNRulesUTest::test_equivalence_to_double_implication()
 	as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/reasoning/simple-equivalence.scm, "
+	             "tests/pln/simple-equivalence.scm, "
 	             "opencog/pln/rules/equivalence-to-double-implication-rule.scm");
 	load_scm_files_from_config(as);
 

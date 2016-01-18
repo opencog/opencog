@@ -35,7 +35,7 @@ IF (CXXTEST_FOUND)
 
 		ADD_SUBDIRECTORY (pln)
 
-		ADD_SUBDIRECTORY (reasoning)
+		ADD_SUBDIRECTORY (pln_old)
 
 		ADD_SUBDIRECTORY (planning)
 
