@@ -4,7 +4,14 @@ Simple demo showing how PLN reasoning can be used to overcome the
 uncertainties resulting from the low number of samples during
 learning.
 
-## Run MOSES with the following command
+## Obtain MOSES model
+
+A MOSES has been pre-learned and included in the parent folder
+`../moses-model.scm`. The confidence over the model has been completely
+made up, but it doesn't matter, we just want to convey the idea that
+the use of background knowledge can improve that confidence.
+
+Alternatively you may run the learning yourself
 
 ```bash
 $ moses \
@@ -18,26 +25,36 @@ $ moses \
       --output-format scheme
 ```
 
-## Load the models and the background knowledge in guile
+## Batch mode
 
-`moses-model.scm` is actually provided containing the model (with
-indentation + confidence). The confidence over the model is completely
-made up, but it doesn't matter, we just want to convey the idea that
-the use of background knowledge can improve that confidence.
+You may choose to run the inference all at once. For that just load
+`moses-pln-synergy.scm` in guile
+
+```
+$ guile
+scheme@(guile-user)> (load "moses-pln-synergy.scm")
+```
+
+Which will load the MOSES model, the background knowledge, the PLN
+configuration for that inference and execute it step by step (by using
+the pattern matcher function `cog-bind`).
+
+## Step-by-step mode
+
+Alternatively you may run it step by step. First you need to run guile
+and load the models, the background knowledge and the PLN
+configuration.
 
 ```
 $ guile
 scheme@(guile-user)> (load "moses-model.scm")
 scheme@(guile-user)> (load "background-knowledge.scm")
-```
-
-## Load the rule-based system (here PLN)
-
-```scheme
 scheme@(guile-user)> (load "pln-config.scm")
 ```
 
-## Apply rules iteratively
+## Apply rules
+
+Then apply the following rules step by step.
 
 ### (1) - Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
 
@@ -466,7 +483,7 @@ scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
 ```scheme
 scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
-   (ImplicationLink (stv 0.69999999 0.60000002)
+   (ImplicationLink (stv 0.69999999 0.69999999)
       (PredicateNode "is-well-hydrated")
       (PredicateNode "recovery-speed-of-injury-alpha")
    )
@@ -564,12 +581,12 @@ take-treatment-1 -> recovery-speed-of-injury-alpha
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
-```
+...
    (ImplicationLink (stv 0.55000001 0.89999998)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
-```
+...
 ```
 
 ### (15) - Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
@@ -579,28 +596,30 @@ Semi-formally
 eat-lost-fruits-vegetables -> recovery-speed-of-injury-alpha
 ```
 
-TODO: can't infer that at all
-
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
-```
-   (ImplicationLink ???
-      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.8))
+...
+   (ImplicationLink (stv 0.62 0.69999999)
+      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
-```
+...
 ```
 
 ### (16) - Using (15) and (14) with the implication-or rule
 
 ```
+scheme@(guile-user)> (cog-bind pln-rule-implication-or)
 $10 = (SetLink
-   (ImplicationLink (stv 0.6447677 0.60000002)
+   (ImplicationLink (stv 0.60357851 0.69999999)
       (OrLink
          (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
          (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
       )
-      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.80000001 0))
+      (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
 ...
 ```
+
+This is our MOSES model! By reasoning we managed to change update TV,
+the strength is lower for good since the confidence is higher.
