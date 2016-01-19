@@ -75,12 +75,12 @@ FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR BUILD_DIR MODULE_FIL
     #   directory's parent-directory name if the current directory is scm.
     # MODULE_FILE_DIR_PATH: the directory path where the MODULE_FILE is
     #   installed.
-    # MODULE_FILES_DIR_PATH: the directory path where the files associated
+    # MODULE_DIR_PATH: the directory path where the files associated
     #   with the module are installed/symlinked at, with the exception of
     #   the MODULE_FILE.
     SET(MODULE_NAME ${CMAKE_MATCH_3})
     SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2})
-    SET(MODULE_FILES_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
+    SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
     SET(GUILE_SYMLINK_DIR "${BUILD_DIR}/opencog/scm")
     SET(GUILE_INSTALL_DIR "${DATADIR}/scm")
 
@@ -96,10 +96,10 @@ FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR BUILD_DIR MODULE_FIL
         )
     ELSE()
         EXECUTE_PROCESS(
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CURRENT_SRC_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_FILES_DIR_PATH}/${MODULE_FILE}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${GUILE_SYMLINK_DIR}/${MODULE_DIR_PATH}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${CURRENT_SRC_DIR}/${MODULE_FILE}" "${GUILE_SYMLINK_DIR}/${MODULE_DIR_PATH}/${MODULE_FILE}"
         )
-        SET(FILE_INSTALL_PATH "${GUILE_INSTALL_DIR}/${MODULE_FILES_DIR_PATH}"
+        SET(FILE_INSTALL_PATH "${GUILE_INSTALL_DIR}/${MODULE_DIR_PATH}"
             PARENT_SCOPE
         )
     ENDIF()
