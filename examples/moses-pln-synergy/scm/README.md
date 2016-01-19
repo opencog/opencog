@@ -622,6 +622,5 @@ $10 = (SetLink
 ```
 
 This is our MOSES model! By reasoning we managed to update its TV, the
-strength is lower but most important we managed to increase its
-confidence, in other words reasoning can make it up for a poor
-dataset.
+strength is lower but most importantly its confidence is higher. In
+other words, with reasoning we could make it up for a poor dataset.
