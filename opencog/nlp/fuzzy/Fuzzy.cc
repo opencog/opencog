@@ -107,7 +107,7 @@ bool Fuzzy::try_match(const Handle& soln)
 
     // Check if this is the type of atom that we want
     if (soln->getType() != rtn_type)
-        return false;
+        return true;
 
     HandleSeq soln_nodes;
     get_all_nodes(soln, soln_nodes);
@@ -223,7 +223,7 @@ bool Fuzzy::try_match(const Handle& soln)
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));
 
-    return false;
+    return true;
 }
 
 /**
