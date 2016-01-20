@@ -230,9 +230,21 @@ class EvaControl():
 	def chatbot_affect_perceive_cb(self, emo):
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
+                        # behavior tree will use these predicates
 			self.puta.chatbot_affect_happy()
+			
+			
 		else:
 			self.puta.chatbot_affect_negative()
+		exp = EmotionState()
+		# publish so that chatbot publishes response to tts if in wait_emo
+		exp.name = emo.data
+		exp.magnitude = 0.8
+		# use zero for duration, tts can compute if needed
+		exp.duration.secs = 4.0
+		exp.duration.nsecs = 0
+		rospy.logwarn('publishing affect to chatbot '+exp.name)
+		self.affect_pub.publish(exp)	
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed while tree is paused
