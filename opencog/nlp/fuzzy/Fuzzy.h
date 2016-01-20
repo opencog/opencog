@@ -41,7 +41,7 @@ class Fuzzy :
     protected:
         virtual void start_search(const Handle&);
         virtual bool accept_starter(const Handle&);
-        virtual bool try_match(const Handle&, int);
+        virtual bool try_match(const Handle&);
         virtual RankedHandleSeq finished_search(void);
 
     private:
