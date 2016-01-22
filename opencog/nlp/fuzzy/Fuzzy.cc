@@ -101,20 +101,13 @@ static void get_all_nodes(const Handle& h, HandleSeq& node_list)
  * @param pat   The pattern
  * @param soln  The potential solution
  */
-bool Fuzzy::try_match(const Handle& soln, int depth)
+bool Fuzzy::try_match(const Handle& soln)
 {
     if (target == soln) return false;
 
-    // For some reason, this algo only wnts to compare proposed
-    // solutions that are exactly the same size as the target.
-    // Why? I dunno. Might not a similar tree be slightly bigger or
-    // smaller?  XXX Maybe FIXME ?
-    if (0 < depth) return true;
-    if (0 > depth) return false;
-
     // Check if this is the type of atom that we want
     if (soln->getType() != rtn_type)
-        return false;
+        return true;
 
     HandleSeq soln_nodes;
     get_all_nodes(soln, soln_nodes);
@@ -230,7 +223,7 @@ bool Fuzzy::try_match(const Handle& soln, int depth)
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));
 
-    return false;
+    return true;
 }
 
 /**
