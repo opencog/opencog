@@ -16,6 +16,7 @@
 ; --------------------------------------------------------------
 ; Guile related configurations
 ; --------------------------------------------------------------
+(add-to-load-path (string-append (getcwd) "/opencog/scm"))
 (define (add-to-ltdl-path path)
 "
   Adds the the given path to `LTDL_LIBRARY_PATH` environment variable. For
@@ -32,10 +33,16 @@
     )
 )
 
+; New atom types
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/types"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/spacetime"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/attention"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/embodiment"))
+
+; Scheme wrappers for c++ code
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/fuzzy"))
-(add-to-load-path (string-append (getcwd) "/opencog/nlp/sureal"))
-(add-to-load-path (string-append (getcwd) "/opencog/nlp/lg-dict"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/sureal"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/lg-dict"))
 
 ; --------------------------------------------------------------
 ; Default guile modules loaded
