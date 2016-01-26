@@ -9,10 +9,9 @@
 ; https://github.com/opencog/atomspace/issues/87#issuecomment-111267545
 ;
 ; Usage:
-; 1. Start cogserver using 'lib/developement.conf' file
-; 2. In the scheme shell run
-;    `(add-to-load-path (string-append (getcwd) "/opencog/scm"))`
-
+; * Start cogserver from the build directory using 'lib/developement.conf' for
+;   for configuration file.
+;
 ; --------------------------------------------------------------
 ; Guile related configurations
 ; --------------------------------------------------------------
