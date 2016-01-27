@@ -66,3 +66,9 @@
   (if (rec-fully-grounded atom)
       (stv 1 1)
       (stv 0 1)))
+
+;; Name the rule
+(define lambda-grounded-construction-rule-name
+  (DefinedSchemaNode "lambda-grounded-construction-rule"))
+(DefineLink lambda-grounded-construction-rule-name
+  lambda-grounded-construction-rule)
