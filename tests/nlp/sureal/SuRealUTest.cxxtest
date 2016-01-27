@@ -67,6 +67,7 @@ public:
     void test_disconnected(void);
     void test_multiconn(void);
     void test_negative(void);
+    void test_good_enough(void);
 };
 
 void SuRealUTest::setUp(void)
@@ -257,6 +258,34 @@ void SuRealUTest::test_negative(void)
                      )");
     std::string result = _evaluator->eval(R"( (null? s-result) )");
     TSM_ASSERT("Failed to have sureal return '() on bad matches!", result == "#t\n");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SuRealUTest::test_good_enough(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD",
+                 "tests/nlp/sureal/r2l-atomspace1.scm,"
+                 "tests/nlp/sureal/r2l-atomspace6.scm");
+    cogserver().loadSCMModules();
+
+    // Sentences in r2l-atomspace1.scm and r2l-atomspace6.scm
+    // - He runs.
+    // - She eats quickly.
+
+    // add the needed WordNode not yet in the testing atomspace
+    _evaluator->eval(R"( (WordNode "it") )");
+    _evaluator->eval(R"( (WordNode "jumps") )");
+
+    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "jumps") (ListLink (ConceptNode "it")))))) )");
+    bool eval_err = _evaluator->eval_error();
+    _evaluator->clear_pending();
+    TSM_ASSERT("Failed to run sureal!", !eval_err);
+
+    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "it" "jumps" "."))) )");
+    TSM_ASSERT("Failed to return the best/good enough result!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
