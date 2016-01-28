@@ -1,5 +1,5 @@
 from opencog.spacetime import SpaceServer, TimeServer
-from opencog.atomspace import AtomSpace, Handle, types
+from opencog.atomspace import AtomSpace, types
 
 class TestSpaceServer:
 
@@ -14,21 +14,20 @@ class TestSpaceServer:
         del self._atomspace
 
     def test_addMap(self):
-        handle = self.space_server.add_map(123456, "testmap", 1)
-        assert self._atomspace.get_name(handle) == "testmap"
+        map_atom = self.space_server.add_map(123456, "testmap", 1)
+        assert self._atomspace.get_name(map_atom) == "testmap"
     
     def test_getMap(self):
-        handle = self.space_server.add_map(123456, "testmap", 1)
-        mapinstance = self.space_server.get_map(handle)
+        map_atom = self.space_server.add_map(123456, "testmap", 1)
+        mapinstance = self.space_server.get_map(map_atom)
         assert mapinstance.get_map_name() == "testmap"
 
-    
     def test_addAndRemoveMapInfo(self):
-        map_handle = self.space_server.add_map(123456, "testmap", 1)
-        obj_node = self._atomspace.add_node(types.StructureNode,"object111")
-        assert self.space_server.add_map_info(obj_node.h, map_handle,
+        map_atom = self.space_server.add_map(123456, "testmap", 1)
+        object_atom = self._atomspace.add_node(types.StructureNode,"object111")
+        assert self.space_server.add_map_info(object_atom, map_atom,
                                              False, False, 123456, 4, 5, 6) == True
-        map_instance = self.space_server.get_map(map_handle) 
-        assert map_instance.get_block_location(obj_node.h) == (4, 5, 6)
-        self.space_server.remove_map_info(obj_node.h, map_handle, 234567)
-        assert map_instance.get_block_location(obj_node.h) == None    
+        map_instance = self.space_server.get_map(map_atom) 
+        assert map_instance.get_block_location(object_atom) == (4, 5, 6)
+        self.space_server.remove_map_info(object_atom, map_atom, 234567)
+        assert map_instance.get_block_location(object_atom) == None    

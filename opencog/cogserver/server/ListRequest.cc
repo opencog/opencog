@@ -144,7 +144,6 @@ void ListRequest::sendOutput()
     std::ostringstream oss;
 
     if (_mimeType == "text/plain") {
-        AtomSpace& as = _cogserver.getAtomSpace();
         for (Handle& h : _handles) {
             oss << h->toString() << std::endl;
         }
