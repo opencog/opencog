@@ -1,0 +1,116 @@
+/*
+ * tests/pln/MOSESPLNSynergyUTest.cxxtest
+ *
+ * Copyright (C) 2014 Cosmo Harrigan
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define gl as.get_link
+#define gn as.get_node
+
+class MOSESPLNSynergyUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+	SchemeEval eval;
+
+public:
+	MOSESPLNSynergyUTest() : eval(&as)
+	{
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	~MOSESPLNSynergyUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_moses_pln_synergy();
+};
+
+void MOSESPLNSynergyUTest::tearDown()
+{
+}
+
+void MOSESPLNSynergyUTest::setUp()
+{
+	config().set("SCM_PRELOAD",
+	             "opencog/scm/core_types.scm, "
+	             "opencog/scm/utilities.scm, "
+	             "opencog/scm/av-tv.scm");
+	load_scm_files_from_config(as);
+
+	eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+
+	eval.eval("(use-modules (opencog))");
+	eval.eval("(use-modules (opencog query))");
+	eval.eval("(use-modules (opencog logger))");
+}
+
+void MOSESPLNSynergyUTest::test_moses_pln_synergy()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "examples/moses-pln-synergy/scm/moses-pln-synergy.scm");
+	load_scm_files_from_config(as);
+
+	// Query the TV of the inference target, which should be
+	// 
+	// (ImplicationLink (stv 0.60357851 0.69999999)
+	//    (OrLink
+	//       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
+	//       (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
+	//    )
+	//    (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
+	// )
+	Handle target = gl(IMPLICATION_LINK,
+	                   gl(OR_LINK,
+	                      gn(PREDICATE_NODE, "take-treatment-1"),
+	                      gn(PREDICATE_NODE, "eat-lots-fruits-vegetables")),
+	                   gn(PREDICATE_NODE, "recovery-speed-of-injury-alpha"));
+	std::cout << "target = " << target->toString() << std::endl;
+
+	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
+
+	strength_t expected_strength = 0.603579;
+	count_t expected_count = SimpleTruthValue::confidenceToCount(0.7);
+	SimpleTruthValue expected_tv(expected_strength, expected_count);
+	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
+}
+
+#undef gl
+#undef gn

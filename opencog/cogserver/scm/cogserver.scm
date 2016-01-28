@@ -1,11 +1,17 @@
 ;
 ; Opencog cogserver module
 ;
+
+(setenv "LTDL_LIBRARY_PATH"
+    (if (getenv "LTDL_LIBRARY_PATH")
+        (string-append (getenv "LTDL_LIBRARY_PATH")
+            ":/usr/local/lib/opencog:/usr/local/lib/opencog/modules")
+        "/usr/local/lib/opencog:/usr/local/lib/opencog/modules"))
+
 (define-module (opencog cogserver))
 
 ; libguile-cogserver.so is located in /usr/local/lib/opencog
 ; libnlp-types.so is in /usr/local/lib/opencog/modules
-(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog:/usr/local/lib/opencog/modules")
 
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
 
