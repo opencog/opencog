@@ -42,10 +42,10 @@
 ; Also load the test cases
 (load-from-path "nlp/microplanning/test-atomspace.scm")
 
-; Then we can run Microplanner to produce declarative utterances with no anaphora.
+; Firstly we can run Microplanner to produce declarative utterances with no anaphora.
 (microplanning test-declarative-sal "declarative" *default_chunks_option* #f)
 
-; The outputs of the above is a long list full of SetLinks, to make it easier
+; The output of the above is a long list SetLinks, to make it easier
 ; to read, we can call SuReal to generate the actual sentences.
 ; Expected outputs:
 ; (the green robot climbs the tree .) (robot grabs the apple .)
@@ -53,8 +53,8 @@
 ; (Bob plants the seeds .) (apple 's seeds grow .)
 (map sureal (car (microplanning test-declarative-sal "declarative" *default_chunks_option* #f)))
 
-; Let's run with anaphora this time by changing the flag to #t, or just like
-; ignore the last two (optional) arguments.
+; Let's run with anaphora this time by changing the flag to #t, or just ignore
+; the last two optional arguments.
 ; Expected outputs:
 ; (the green robot climbs the tree .) (robot grabs the apple .)
 ; (Bob steals the apple .) (he eats it .) (he collects the tiny seeds .)

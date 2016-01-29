@@ -33,7 +33,7 @@ generation (NLG) pipeline.
 
     Templates for defining the most basic structures for each utterance
     type.  Utterance type can be **declarative**, **interrogative**,
-    and **imperative**.  OpenCog links that do not
+    **imperative**, and **interjective**.  OpenCog links that do not
     satisfy one of the structures are considered not well-formed
     (i.e. not enough information to form a sentence).
 
@@ -136,11 +136,13 @@ If you want to use the testing atomspace, you also need
 ```
 (use-modules (opencog atom-types))
 (load "../tests/nlp/microplanning/test-atomspace.scm")
+(load "../tests/nlp/microplanning/r2l-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with
 sample sentences of how you want the final output to look like. Some
-examples would be those in `test-atomspace.scm`.
+examples would be those in `test-atomspace.scm` (and `r2l-atomspace.scm`
+contains the atoms of those sentences generated via `nlp-parse`.)
 
 
 After this, you can running microplanning as either:
