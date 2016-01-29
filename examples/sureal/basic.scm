@@ -9,6 +9,12 @@
 ; Prior to running this, the RelEx parse server needs to be set up,
 ; so that the `nlp-parse` call succeeds. The directory containing the
 ; chatbot has detailed instructions on how to do this.
+;
+; On the other hand, if you are running this from the OpenCog docker container,
+; you can skip this step as the RelEx parse server will be started automatically
+; along with the container. You may need to set the `relex-server-host` if you
+; get a "Connection refused" error. For more information:
+; https://github.com/opencog/docker/tree/master/opencog/README.md
 
 ; Load the needed modules!
 (use-modules (opencog)
