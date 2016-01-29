@@ -26,6 +26,7 @@
 (use-modules (opencog)
              (opencog nlp)
              (opencog nlp microplanning)
+             (opencog nlp sureal) ; for sentence generation
              (opencog nlp chatbot)) ; the chatbot defines nlp-parse
 
 ; To begin with, let's populate the AtomSpace with some sentences, they are:
