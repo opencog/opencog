@@ -126,7 +126,7 @@ def find_duplicate_links(a, decided_atoms):
     atom_link_pairs = {}
 
     for atom in decided_atoms:
-        original_links = a.get_atoms_by_target_atom(types.Link, atom)
+        original_links = atom.incoming_by_type(types.Link)
         equal_links = link_to_keys(a, original_links, atom)
         atom_link_pairs[atom.handle_uuid()] = equal_links
 
@@ -192,9 +192,8 @@ def find_related_links(
         for related_node in inheritance_node_set:
             # Manually throw away the links have low strength.
             target_links = filter(
-                lambda link:
-                    (link.tv.mean > inter_info_strength_above_limit),
-                a.get_atoms_by_target_atom(types.Link, related_node)
+                lambda link: (link.tv.mean > inter_info_strength_above_limit),
+                related_node.incoming_by_type(types.Link)
             )
             related_node_target_links.append(
                 link_to_keys(a, target_links, related_node)
