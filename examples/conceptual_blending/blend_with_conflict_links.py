@@ -178,8 +178,8 @@ print "Detail information of selected conflict links:"
 for node in result:
     print "-----"
     print node
-    for sim_link in a.xget_atoms_by_target_atom(types.SimilarityLink, node):
-        for out_node in a.xget_outgoing(sim_link.h):
+    for sim_link in node.xincoming_by_type(types.SimilarityLink):
+        for out_node in sim_link.out:
             if out_node.name == "vehicle" or out_node.name == 'person':
                 print str(out_node.name) + "=> " + \
                       str(sim_link.type_name) + " " + \
