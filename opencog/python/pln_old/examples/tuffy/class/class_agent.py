@@ -39,8 +39,7 @@ class InferenceAgent(MindAgent):
 
             implications = atomspace.get_atoms_by_type(types.ImplicationLink)
             for implication in implications:
-                outgoing = atomspace.get_outgoing(implication.h)
-                and_link = outgoing[0]
+                and_link = implication.out[0]
                 self.antecedents.append(and_link)
 
             return
@@ -54,7 +53,7 @@ class InferenceAgent(MindAgent):
         # of the antecedents of the defined "domain rules" so as to
         # successfully ground the variables.
         for antecedent in self.antecedents:
-            num_predicates = len(atomspace.get_outgoing(antecedent.h))
+            num_predicates = len(antecedent.out)
             self.chainer.backward_step(
                 AndCreationRule(self.chainer, num_predicates), [antecedent])
 

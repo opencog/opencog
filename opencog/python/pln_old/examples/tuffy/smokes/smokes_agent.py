@@ -96,10 +96,10 @@ class InferenceAgent(MindAgent):
                     types.PredicateNode, "CONFIG-StimulusAmount")
                 if list is not None:
                     # Given the PredicateNode, walk to the NumberNode
-                    list = atomspace.get_incoming(list[0].h)  # EvaluationLink
-                    list = atomspace.get_outgoing(list[0].h)  # ListLink
-                    list = atomspace.get_outgoing(list[1].h)  # NumberNode
-                    value = atomspace.get_name(list[0].h)
+                    list = list[0].incoming  # EvaluationLink
+                    list = list[0].out  # ListLink
+                    list = list[1].out  # NumberNode
+                    value = list[0].name
                     TARGET_STIMULUS = int(value)
                     print "Target stimulus amount updated to {0}".\
                         format(TARGET_STIMULUS)
@@ -120,11 +120,11 @@ def check_result(atomspace):
 
     num_results = 0
     for eval_link in eval_links:
-        out = [atom for atom in atomspace.get_outgoing(eval_link.h)
+        out = [atom for atom in eval_link.out
                if atom.is_a(types.PredicateNode) and atom.name == "cancer"]
         if out:
-            list_link = atomspace.get_outgoing(eval_link.h)[1]
-            argument = atomspace.get_outgoing(list_link.h)[0]
+            list_link = eval_link.out[1]
+            argument = list_link.out[0]
             if argument.is_a(types.ConceptNode):
                 num_results += 1
 

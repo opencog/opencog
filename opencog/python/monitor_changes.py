@@ -35,8 +35,8 @@ def monitor_changes(atomspace):
 
     for latest in at_times_latest:
         for previous in at_times_previous:
-            eval_latest = atomspace.get_outgoing(latest.h)[1]
-            eval_previous = atomspace.get_outgoing(previous.h)[1]
+            eval_latest = latest.out[1]
+            eval_previous = previous.out[1]
             if eval_latest.t != t.EvaluationLink or eval_previous.t != t.EvaluationLink: 
                 continue
 
@@ -53,13 +53,13 @@ def monitor_changes(atomspace):
 
     old_changes_with_tv = pred_change_with_tv.incoming_by_type(t.ReferenceLink, subtype = False)
     for old_change_with_tv in old_changes_with_tv:
-        list_link = atomspace.get_outgoing(old_change_with_tv.h)[1]
+        list_link = old_change_with_tv.out[1]
         atomspace.remove(old_change_with_tv, recursive = False)
         atomspace.remove(list_link, recursive = False)
 
     old_changes_with_arg = pred_change_with_arg.incoming_by_type(t.ReferenceLink, subtype = False)
     for old_change_with_arg in old_changes_with_arg:
-        list_link = atomspace.get_outgoing(old_change_with_arg.h)[1]
+        list_link = old_change_with_arg.out[1]
         atomspace.remove(old_change_with_arg, recursive = False)
         atomspace.remove(list_link, recursive = False)
 
