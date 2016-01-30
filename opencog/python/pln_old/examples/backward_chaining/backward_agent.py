@@ -43,7 +43,7 @@ def check_result(atomspace):
     result_found = False
 
     for inh_link in inh_links:
-        args = atomspace.get_outgoing(inh_link.h)
+        args = inh_link.out
         if args[0].is_a(types.ConceptNode) and args[1].name == "criminal":
             criminal = args[0].name
             evidence = inh_link

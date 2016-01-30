@@ -75,7 +75,7 @@ void TulipWriter::writeCluster(Handle setLink)
     // Output setLink as a cluster
     std::set<Handle> inSet;
     if (setLink != Handle::UNDEFINED) {
-        HandleSeq setLinks = a.get_outgoing(setLink);
+        HandleSeq setLinks = setLink->getOutgoingSet();
         for (Handle h : setLinks) {
             inSet.insert(h);
         }
@@ -123,7 +123,7 @@ void TulipWriter::writeEdges()
     // Output Edge numbers/ids, source, and target
     for (Handle l : linkHandles) {
         // get outgoing set, for each destination add a link
-        HandleSeq out = a.get_outgoing(l);
+        HandleSeq out = l->getOutgoingSet();
         for (Handle d : out) {
             myfile << "(edge " << l << d << " " << l << " " << d;
             myfile << ")" << endl;
@@ -193,7 +193,7 @@ void TulipWriter::writeTruthValue()
     myfile << "(default \"0.0\" \"0.0\" )" << endl;
     for (Handle h : linkHandles) {
         // get outgoing set, for each destination add a link
-        HandleSeq out = a.get_outgoing(h);
+        HandleSeq out = h->getOutgoingSet();
         for (const Handle& d : out) {
             myfile << "(edge " << h << d << " \"" << 1.0 /
               (h->getTruthValue()->getMean()+0.0000001) << "\")" << endl;

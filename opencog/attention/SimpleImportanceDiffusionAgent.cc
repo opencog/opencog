@@ -98,11 +98,11 @@ void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
     if (resultSet.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = resultSet.front();
-        resultSet = as->get_incoming(h);
+        h->getIncomingSet(back_inserter(resultSet));
         h = resultSet.front();
-        resultSet = as->get_outgoing(h);
+        resultSet = h->getOutgoingSet();
         h = resultSet.back();
-        resultSet = as->get_outgoing(h);
+        resultSet = h->getOutgoingSet();
         h = resultSet.front();
         float value = std::atof(as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
@@ -398,10 +398,10 @@ HandleSeq SimpleImportanceDiffusionAgent::incidentAtoms(Handle h)
     HandleSeq resultSet;
     
     // Add the incoming set
-    resultSet = as->get_incoming(h);
+    h->getIncomingSet(back_inserter(resultSet));
     
     // Calculate and append the outgoing set
-    HandleSeq outgoing = as->get_outgoing(h);
+    HandleSeq outgoing = h->getOutgoingSet();
     resultSet.insert(resultSet.end(), outgoing.begin(), outgoing.end());
     
     return resultSet;

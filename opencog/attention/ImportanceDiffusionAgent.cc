@@ -152,7 +152,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
             continue;
         }
 
-        targets = a->get_outgoing(linkHandle);
+        targets = linkHandle->getOutgoingSet();
 
         for (targetItr = targets.begin(); targetItr != targets.end();
                 ++targetItr) {
@@ -235,7 +235,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         //val *= diffuseTemperature;
         type = a->get_type(*hi); 
 
-        targets = a->get_outgoing(*hi);
+        targets = (*hi)->getOutgoingSet();
         if (classserver().isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 

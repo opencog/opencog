@@ -56,7 +56,7 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
     // that into truthvalue change. the change should be based on existing TV.
     for (const Handle& h : links) {
         // get out going set
-        HandleSeq outgoing = a->get_outgoing(h);
+        HandleSeq outgoing = h->getOutgoingSet();
         new_tc = targetConjunction(outgoing);
 
         // old link strength decays

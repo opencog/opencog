@@ -155,7 +155,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     // Get outgoing set and sum difference for all non source atoms
     linkWeight = a->get_TV(link)->toFloat();
     sourceSTI = a->get_STI(source);
-    targets = a->get_outgoing(link);
+    targets = link->getOutgoingSet();
 
     if (a->get_type(link) == INVERSE_HEBBIAN_LINK) {
         for (t = targets.begin(); t != targets.end(); ++t) {
@@ -230,7 +230,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
     log->fine("+Spreading importance for atom %s", a->atom_as_string(h, false).c_str());
 
-    linksVector = a->get_incoming(h);
+    h->getIncomingSet(back_inserter(linksVector));
     IsHebbianLink isHLPred(a);
     if (allLinksSpread) {
         log->fine("  +Spreading across all links. Found %d", linksVector.size());
@@ -271,7 +271,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
             continue;
         }
 
-        targets = a->get_outgoing(lh);
+        targets = lh->getOutgoingSet();
         transferWeight = linkTV->toFloat();
 
         log->fine("  +Link %s", a->atom_as_string(lh).c_str() );
