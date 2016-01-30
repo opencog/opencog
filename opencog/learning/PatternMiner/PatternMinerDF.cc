@@ -769,7 +769,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     }
 
                     // find what are the other links in the original Atomspace contain this variable
-                    HandleSeq incomings = _fromAtomSpace->get_incoming( (extendNode));
+                    HandleSeq incomings;
+                    extendNode->getIncomingSet(back_inserter(incomings));
 
                     // debug
                     // string curvarstr = _fromAtomSpace->atomAsString(extendNode);
@@ -883,7 +884,9 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         }
 
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings = _fromAtomSpace->get_incoming( (extendNode));
+        HandleSeq incomings;
+        extendNode->getIncomingSet(back_inserter(incomings));
+
         // debug
         // string curvarstr = _fromAtomSpace->atomAsString((Handle)(*varIt));
 

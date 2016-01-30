@@ -260,12 +260,13 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         pQueue.erase(--erase_it);
 
         if (distMap[u]==0) { break;}
-        HandleSeq newLinks = as->get_incoming(u);
+        HandleSeq newLinks;
+        u->getIncomingSet(back_inserter(newLinks));
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
             if (!classserver().isA(as->get_type(*it),linkType)) continue;
             TruthValuePtr linkTV = as->get_TV(*it);
-            HandleSeq newNodes = as->get_outgoing(*it);
+            HandleSeq newNodes = (*it)->getOutgoingSet();
             HandleSeq::iterator it2=newNodes.begin();
             //if !fanin, we're following the "outward" links, so it's only a
             //valid link if u is the source

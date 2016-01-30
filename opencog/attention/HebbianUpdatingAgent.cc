@@ -110,7 +110,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 		bool isDifferent = false;
 
         // get out going set
-        HandleSeq outgoing = a->get_outgoing(h);
+        HandleSeq outgoing = h->getOutgoingSet();
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = h->getTruthValue()->getMean();
