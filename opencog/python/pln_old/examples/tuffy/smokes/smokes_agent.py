@@ -92,12 +92,12 @@ class InferenceAgent(MindAgent):
             if self.query is not None:
                 # Allow the stimulus amount to be set dynamically by setting
                 # a configuration atom in the atomspace.
-                simulus_predicate = atomspace.add_node(types.PredicateNode, 
+                stimulus_predicate = atomspace.add_node(types.PredicateNode, 
                                                        'CONFIG-StimulusAmount')
 
                 # Only set TARGET_STIMULUS if this atom has been setup with
                 # an appropriate NumberNode with the value.
-                outgoing = simulus_predicate.out
+                outgoing = stimulus_predicate.out
                 if len(outgoing) > 0:
                   list = outgoing[0].incoming  # EvaluationLink
                   list = list[0].out  # ListLink
