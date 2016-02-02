@@ -1,7 +1,6 @@
 OpenCog
 =======
-[![Build Status](
-https://circleci.com/gh/opencog/opencog/tree/master.png?circle-token=:circle-token)](https://circleci.com/gh/opencog/opencog/tree/master)
+[![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-opencog)](http://61.92.69.43:8080/job/ci-opencog/)
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence
