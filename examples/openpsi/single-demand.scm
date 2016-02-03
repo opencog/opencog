@@ -1,7 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 ;
 ; Initial steps
-; 1. ./opencog/cogserver/server/cogserver -c ../lib/develment.conf
+; 1. ./opencog/cogserver/server/cogserver -c ../lib/development.conf
 ; 2. (add-to-load-path "/absolute/path/to/opencog/opencog")
 ; 3. (load "../examples/openpsi/single-demand.scm")
 
