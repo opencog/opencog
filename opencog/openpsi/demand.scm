@@ -94,7 +94,6 @@
   - The default action that modifies the demand-value.
 "
 
-;    (define (psi-action))
     (let* ((demand-str (string-append (psi-prefix-str) demand-name))
            (demand-node (ConceptNode demand-str (stv default-value 1))))
         (begin
@@ -359,7 +358,7 @@
             (EvaluationLink
                 (PredicateNode (string-append (psi-prefix-str) effect-type))
                 (ListLink
-                    (Node rule-name)
+                    alias
                     demand-node))
             alias
         ))
@@ -415,7 +414,7 @@
         (GetLink
              (TypedVariableLink
                  (VariableNode "x")
-                 (TypeNode "Node"))
+                 (TypeNode "DefinedSchemaNode"))
              (AndLink
                  (EvaluationLink
                      (PredicateNode
@@ -481,7 +480,7 @@
         (GetLink
              (TypedVariableLink
                  (VariableNode "x")
-                 (TypeNode "Node"))
+                 (DefinedSchemaNode "Node"))
              (AndLink
                  (EvaluationLink
                      gpn
