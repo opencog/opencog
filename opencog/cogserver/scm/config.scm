@@ -15,6 +15,7 @@
 ; --------------------------------------------------------------
 ; Guile related configurations
 ; --------------------------------------------------------------
+(add-to-load-path (string-append (getcwd)))
 (add-to-load-path (string-append (getcwd) "/opencog/scm"))
 (define (add-to-ltdl-path path)
 "
