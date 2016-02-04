@@ -17,41 +17,48 @@ that is,  the cognitive schematic `Context + Procedure/Actions ==> Goal`
 is similar to `Belief + Intention ==> Desire`.
 
 ### Usage
-For sample implementation of the framework see [here](main.scm).
+See [here](../../examples/openpsi) for some sample implementations of the
+framework.
 
 ### OpenPsi components
 1. Demand:
   * The representation is specified in the function `psi-demand-pattern` and
     `psi-demand` that is defined [here](demand.scm).
-  * Each Demand is a URE rule-base as well. The actions that affect its values
-    (demand-values) are a member of the rule-base.
-  * It must have one default action-type, during definition, that characterizes
-    its behavior(change in demand-value) independent of the other actions that
-    could act on it.
+  * Each Demand is a URE rule-base as well. The action-rules that affect its
+    value (demand-value) are a member of the rule-base.
+  * It must have one default action, during definition, that characterizes
+    its behavior(aka change in demand-value) independent of the other actions that could act on it. This default action becomes part of the single default
+    action-rule for the demand.
 
 2. Action:
-  * An action is a URE rule for the demand it affects, or is dependent on for
-    being driven. In addtion it has additional atoms for the purpose of
-    specifying its action-type and that it is an opencog-action. See the
-    function `psi-action` for defining a new action [here](demand.scm).
+  * An action is an `ExecutionOutputLink` that forms the implicand of a
+    BindLink that forms a URE rule. There actions are pre-defined, and they are
+    `psi-action-maximize`, `psi-action-minimize` and `psi-action-keep-range`.
+    See [here](demand.scm) for details on these and for defining your own
+    action behavior
+
+3. Action-rule:
+  * An action-rule is a URE rule for the demand it affects, or is dependent on
+    for being driven. In addition it has additional atoms for the purpose of
+    specifying its effect-type, and that it is an opencog-action. See the
+    function `psi-action-rule` for defining a new action [here](demand.scm).
   * It can have the effect types listed in `(psi-action-types)`.
-  * Three action-effects are pre-defined and they are `psi-effect-maximize`,
-    `psi-effect-minimize` and `psi-effect-keep-range` see [here](demand.scm).
-    You can define
+  * Two action-rules are pre-defined, and they are `psi-action-rule-maximize`,
+    and `psi-action-rule-minimize`. See [here](demand.scm).
 
-3. Goal:
+4. Goal:
   * A goal is a demand chosen for a particular action effect-type. See the
-    function `psi-select-goal` [here](demand.scm).
-  * For goal-selection, you can choose what the criteria for choosing a goal by
-    defining a function in a GroundedPredicateNode and passing to
-    `psi-select-goal`.
+    function `psi-set-goal` [here](demand.scm).
+  * __WIP__ For goal-selection, you can choose what the criteria for choosing a goal by
+    defining a function in a `GroundedPredicateNode` __that takes ??__ and
+    passing it to `psi-goal-selector`.
 
-4. OpenPsi's active-schema-pool:
-  * This is a separate URE rule-base, and not a demand rule-base. It is
+5. OpenPsi's active-schema-pool:
+  * This is a separate URE rule-base, that is not a demand rule-base. It is
     comprised of actions of demands that are added to it.
-  * The choice of actions(action-selection) can be made by specifying a function
-    in a GroundedPredicateNode and passing to `psi-select-actions` and for which
-    demand it does the selection. See the function `psi-selection-actions` [here](demand.scm).
+  * __WIP__ The choice of action-rules (aka action-selection) can be made by specifying
+    a function in a `GroundedPredicateNode` __that takes ??__ and passing it to
+    `psi-action-selector`.
 
-5. Modulator and Feeling representation:
+6. Modulator and Feeling representation:
 Coming soon :-)
