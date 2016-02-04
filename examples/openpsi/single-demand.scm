@@ -13,7 +13,7 @@
 ; Start defining an OpenPsi-Demand called Energy
 ; Specify what kind of default behavior the demand should have, using one of
 ; the 3 options provided. You can define your own behavior.
-(define energy-default-action  (psi-effect-minimize 5))
+(define energy-default-action  (psi-action-minimize 5))
 
 ; Associate the default behavior with your demand and set starting
 ; demand-value. Do this only once for each demand.
@@ -21,13 +21,13 @@
 
 ; Populate with some actions that affect the demand.
 ; * Add action for increasing the demand.
-(psi-action-maximize energy 10)
+(psi-action-rule-maximize energy 10)
 
 ; * Add action for decreasing the demand.
 ; NOTE: The rate of minimization is different from the default one above. If
 ; you define with the same rate as the default one above a new one will not
 ; be added as a different effect type.
-(psi-action-minimize energy 6)
+(psi-action-rule-minimize energy 6)
 
 (define (psi-example-step)
 ; NOTE: 1. This function is for simplifying runs.
@@ -53,7 +53,7 @@
     ; Select actions
     ; NOTE: You can define how actions should be selected. Just remember to
     ; define what happens when goal switches to default.
-    (format #t "* Action selection result = ~a \n" (psi-action-select))
+    (format #t "* Action selection result = ~a \n" (psi-action-rule-select))
 
     ; The number and types of actions in the asp should have changed, depending
     ; on the state of the atomspace.

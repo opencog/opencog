@@ -8,7 +8,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-asp)
 "
-  Create the active-schema-pool as a URE rulebase and return the ConceptNode
+  Create the active-schema-pool as a URE rulebase and return the node
   representing it.
 "
     (let ((asp (ConceptNode (string-append (psi-prefix-str) "asp"))))
@@ -18,7 +18,7 @@
         ; Load all default actions because they should always run. If they
         ; aren't always.
         (if (null? (ure-rbs-rules asp))
-            (map (lambda (x) (MemberLink x asp)) (psi-get-actions-default)))
+            (map (lambda (x) (MemberLink x asp)) (psi-get-action-rules-default)))
 
         asp
     )
@@ -44,31 +44,32 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-update-asp asp actions)
+(define-public (psi-update-asp asp action-rules)
 "
   It modifies the member action-rules of OpenPsi's active-schema-pool(asp),
-  by removing all actions that are members of the known demand rule-bases,
-  with the exception of default-actions, from the asp and replaces them by the
-  list of actions passed.
+  by removing all action-rules that are members of all the known demand
+  rule-bases, with the exception of default-actions, from the asp and replaces
+  them by the list of actions passed.
 
-  If the action list passed is empty the asp isn't modified, because the policy
-  is that no change occurs without it being explicitly specified. This doesn't
-  and must not check to what goal is selected.
+  If the action-rule list passed is empty the asp isn't modified, because the
+  policy is that no change occurs without it being explicitly specified. This
+  doesn't and must not check what goal is selected.
 
   asp:
-  - The ConceptNode for the active-schema-pool.
+  - The node for the active-schema-pool.
 
-  actions:
-  - A list of actions nodes. The nodes are the alias nodes for the actions.
+  action-rules:
+  - A list of action-rule nodes. The nodes are the alias nodes for the
+    action-rules.
 "
     (define (remove-node node) (cog-delete-recursive (MemberLink node asp)))
     (define (add-node node) (begin (MemberLink node asp) node))
 
     (let* ((current-actions (ure-rbs-rules asp))
-           (actions-to-keep (psi-get-actions-default))
+           (actions-to-keep (psi-get-action-rules-default))
            (actions-to-add
-                (lset-difference equal? actions current-actions))
-           (final-asp (lset-union equal? actions-to-keep actions)))
+                (lset-difference equal? action-rules current-actions))
+           (final-asp (lset-union equal? actions-to-keep action-rules)))
 
            ; Remove actions except those that should be kept and those that
            ; are to be added.
@@ -86,29 +87,29 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-goal demand effect)
+(define (psi-set-goal demand-node effect-type)
 "
   Set goal for the action-selector.
 
-  demand:
-  - The demand choosen to be a goal.
+  demand-node:
+  - The node for the demand choosen to be a goal.
 
-  effect:
+  effect-type:
   - The kind of effect the actions should have for being selected by the
     action-selector.
 "
     (define (choose-demand)
-        (if (null? demand)
-            ; XXX Remeber to deal with the defaults when moving to
+        (if (null? demand-node)
+            ; NOTE: Remember to deal with the defaults when moving to
             ; psi-select-goal.
             (random-select (psi-get-demands))
-            demand))
+            demand-node))
 
     (let ((z-demand (choose-demand)))
         (StateLink
             (Node (string-append (psi-prefix-str) "action-on-demand"))
             (ListLink
-                (ConceptNode (string-append (psi-prefix-str) effect))
+                (ConceptNode (string-append (psi-prefix-str) effect-type))
                 z-demand))
 
         z-demand
@@ -118,10 +119,10 @@
 ; --------------------------------------------------------------
 (define (psi-goal-random-maximize threshold)
 "
-  Sets the goal by randomly selecting a demand for maximization, should its demand-value below the given threshold.
+  Sets the goal by randomly selecting a demand for maximization, should its demand-value be below the given threshold.
 
   threshold:
-  - The boundary demand-value below which a demand will be choosen.
+  - The boundary of the demand-value below which a demand will be chosen.
 "
 
     (define (select-demand x) (< (tv-mean (cog-tv x)) threshold))
@@ -136,19 +137,19 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-select)
+(define (psi-action-rule-select)
 "
   Selects all actions of current effect type and update the psi-asp.
 "
-    ;TODO Use psi-select-actions, and port as much as possible to atomese.
+    ;TODO Use psi-select-action-rules, and port as much as possible to atomese.
     (let ((goal (psi-current-goal))
           (effect-type (psi-current-effect-type))
           (asp (psi-asp)))
 
         ; If default effect-type then add only the default actions.
         (if (equal? effect-type "Default")
-            (psi-update-asp  asp (psi-get-actions-default))
-            (psi-update-asp  asp (psi-get-actions goal effect-type))
+            (psi-update-asp  asp (psi-get-action-rules-default))
+            (psi-update-asp  asp (psi-get-action-rules goal effect-type))
         )
     )
 )
