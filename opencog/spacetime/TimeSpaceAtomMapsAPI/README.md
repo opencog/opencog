@@ -30,3 +30,9 @@
  */
  
 Needs -std=c++14 flag set. Currently place holder for Atom in int
+
+made pull request for the required Time space Atom Maps with API and example code.
+ A little problem due to map being accessed probabilistic-ally is that deletion acts probabilistic as well.
+ currently put a hack to change node value for full delete in case all atom references for particular atom need to be forgotten.
+ The aHandle type(currently int but will be changed) is supposed to hold atom reference.
+ RemoveAtomAtTime removes probabilistic while RemoveAtom to forget all atoms removes by changing value to UndefinedHandle
