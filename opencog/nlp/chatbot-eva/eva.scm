@@ -25,7 +25,10 @@
 ; XXX needs to be public, so that cog-bind can find this...
 (define-public (show-arg node) (display node) node)
 
-; Handle short commands, such as "look up", "look left".
+; Handle short imperative commands, such as "look up", "look left".
+; This is a rule, meant to be applied to the current sentence.
+; It will extract a direction to look at, and it will set
+; the current-imperative state to that direction.
 ;
 ; Relex behaves very inconsistently, sometimes returning
 ; _advmod(look,left) and sometimes _to-be(look, right)
@@ -67,6 +70,7 @@
 (define (get-interp-node sent-node)
 "
   Given a sentence, get the likliest interpretation node for it.
+  At this time, it simply returns the very first interpretation.
   Yes, this is a quick hack, needs fixing. XXX FIXME.
 "
 	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
@@ -111,7 +115,10 @@
 (StateLink (AnchorNode "head-pointing direction") neutral-gaze)
 (StateLink (AnchorNode "gaze direction") neutral-gaze)
 
-; Global knowledge about spatial directions
+; Global knowledge about spatial directions.  The coordinate system
+; is specific to the HR robot head.  Distance in meters, the origin
+; of the system is behind the eyes, middle of head.  "forward" is the
+; direction the chest is facing.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
@@ -145,7 +152,9 @@
 	))
 
 ;--------------------------------------------------------------------
-; Global knowledge about word-meaning
+; Global knowledge about word-meaning.
+; In this case, specific words have very concrete associations
+; with physical directions.
 
 (ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
 (ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
@@ -153,9 +162,14 @@
 (ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
 ;--------------------------------------------------------------------
-; Semantic disambiguation
-; See if we know the meanings of things
+; Semantic disambiguation.
+; See if we know the meaning of utterances.
+; These are rules to be applied to the current state: if the
+; current word/utterance has an explicit concrete grounding, then
+; alter the current state as given by the rule.
 
+; look-semantics-rule-1 -- if the current imperative is a direction
+; word, then set the current action.
 (define look-semantics-rule-1
 	(BindLink
 		(VariableList
@@ -169,7 +183,7 @@
 		(State current-action (Variable "$phys-ground"))
 ))
 
-; These are English-language sentences that I understand.
+; These are English-language sentences that I (Eva) understand.
 (define known-directives
 	(list
 		(get-interp-node (car (nlp-parse "look left")))
