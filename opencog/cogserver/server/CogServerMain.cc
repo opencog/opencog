@@ -74,7 +74,7 @@ static void usage(const char* progname)
 // Catch and report sigsegv
 void sighand(int sig)
 {
-    logger().setPrintToStdoutFlag(true);
+    logger().set_print_to_stdout_flag(true);
     logger().error() << "Caught signal " << sig << " (" << strsignal(sig)
         << ") on thread " << std::this_thread::get_id();
     logger().flush();
@@ -175,16 +175,16 @@ int main(int argc, char *argv[])
     }
 
     // setup global logger
-    if (logger().getFilename() != config()["LOG_FILE"]) {
+    if (logger().get_filename() != config()["LOG_FILE"]) {
 	    logger().info() << "Subsequent logging will be redirected to file: "
 	                    << config()["LOG_FILE"];
     }
-    logger().setFilename(config()["LOG_FILE"]);
-    logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-    auto level = Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]);
-    logger().setBackTraceLevel(level);
-    logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-    //logger().setLevel(Logger::DEBUG);
+    logger().set_filename(config()["LOG_FILE"]);
+    logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+    auto level = Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]);
+    logger().set_backtrace_level(level);
+    logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
+    //logger().set_level(Logger::DEBUG);
 
     // Start catching signals
     signal(SIGSEGV, sighand);
