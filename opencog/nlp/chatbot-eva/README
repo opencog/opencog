@@ -2,7 +2,7 @@
                      Eva Chatbot
                      -----------
 
-Prototype tht attaches the chatbot to the behavior trees that
+Prototype that attaches the chatbot to the behavior trees that
 control the Hanson Robotics Eva robot emulator.
 
 The Eva simulator emulates an animated human head, able to see
@@ -20,7 +20,10 @@ run this thing:
 See the directory
 https://github.com/opencog/ros-behavior-scripting
 for additional information.  It will give pointers as to how to
-install and cofigure the above pieces.
+install and configure the above pieces.
+
+There is also a debugging version that can be run in IRC only,
+without requiring a full hookup to the blender head.
 
 Goals
 -----
@@ -35,6 +38,13 @@ Goals for this chatbot are:
  * Remember things.  e.g. "My name is X"
 
  * Conduct a reasonably pleasant conversation.
+
+HOWTO
+-----
+ * Start the relex server on port 4444
+ * Start the cogita IRC bot
+ * Start a guile shell.
+ * Enter (load "run-chatbot.scm") at the guile prompt.
 
 
 Issues
