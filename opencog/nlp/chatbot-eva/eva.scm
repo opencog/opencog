@@ -26,6 +26,7 @@
 (define-public (show-arg node) (display node) node)
 
 ; Handle short commands, such as "look up", "look left".
+;
 ; Relex behaves very inconsistently, sometimes returning
 ; _advmod(look,left) and sometimes _to-be(look, right)
 ; when in both cases the correct result would be _to-do(look,left)
@@ -65,7 +66,7 @@
 
 (define (get-interp-node sent-node)
 "
-  Given a sentnces, get the likliest interpretation node for it.
+  Given a sentence, get the likliest interpretation node for it.
   Yes, this is a quick hack, needs fixing. XXX FIXME.
 "
 	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
