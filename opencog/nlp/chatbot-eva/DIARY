@@ -704,6 +704,7 @@ Implication
 			(ListLink (Variable "$b-") (Variable "$b+"))))
 )
 
+(use-modules (opencog) (opencog atom-types) (opencog query))
 
 (TimeNode 3000)    ;set atom for getter2 to find
 
@@ -711,13 +712,19 @@ Implication
             (VariableList
                 (TypedVariable (Variable "$x") (Type "TimeNode"))
             )
-	(AndLink
-		(PresentLink (Variable "$x"))
             (EqualLink (Time 3000) (Variable "$x"))
-	)
             (Variable "$x")))
 
 (cog-bind getter2)
+
+
+(define getter3 (BindLink
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            (GreaterThan (Time 3000) (Variable "$x"))
+           (Variable "$x")))
+
+(TimeNode 2000) ;set atom for getter3 to find
+(cog-bind getter3)
 
 
 (use-modules (opencog logger))
@@ -725,5 +732,23 @@ Implication
 (cog-logger-set-level "fine")
 
 There were no type restrictions! That must be wrong!
+
+
+after ... unbundle_virtual
+
+
+   (PutLink
+     (TypedVariable (Variable $x) 
+      (SignatureLink 
+
+      (EvaluationLink  (Variable $x))
+      (MemberLink (Concept "foo") (Concept "bar")))
+
+vertex
+
+str_to_vertex
+
+=========================================================
+
 
 
