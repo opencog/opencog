@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
             config().load(configFile.c_str(), false);
             break;
         } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
             exit(1);
         }
     }

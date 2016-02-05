@@ -69,7 +69,7 @@ public:
         }
         catch (RuntimeException &e)
         {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
         }
 
         url = "tcp://localhost:" + config()["ZMQ_EVENT_PORT"];

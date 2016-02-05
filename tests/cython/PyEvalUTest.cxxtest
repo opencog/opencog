@@ -69,7 +69,7 @@ public:
         try {
             config().load(configFile.c_str(), false);
         } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
             exit(1);
         }
         // Setup global logger

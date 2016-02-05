@@ -61,7 +61,7 @@ public:
         }
         catch (RuntimeException &e)
         {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
         }
 
         config().set("MODULES",
