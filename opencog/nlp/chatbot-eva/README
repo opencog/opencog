@@ -46,6 +46,9 @@ HOWTO
  * Start the cogita IRC bot
  * Start a guile shell.
  * Enter (load "run-chatbot.scm") at the guile prompt.
+ * Talk to her via IRC.  Alternately, use
+   (process-query "foo" "This is a test")
+
 
 
 Issues

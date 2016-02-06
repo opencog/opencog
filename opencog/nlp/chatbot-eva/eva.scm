@@ -35,7 +35,7 @@
 ; _advmod(look,left) and sometimes _to-be(look, right)
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
-; to link-grammar, and look for the Pa link instead.
+; to link-grammar, and look for the MVa/Pa link instead.
 (define look-rule-1
 	(BindLink
 		(VariableList
@@ -56,7 +56,9 @@
 			(verb-tense "$verb-inst" "imperative")
 			; (dependency "_advmod" "$verb-inst" "$direct-inst")
 			; (dependency "_to-be" "$verb-inst" "$direct-inst")
-			(lg-link "Pa" "$verb-inst" "$direct-inst")
+			(ChoiceLink
+				(lg-link "MVa" "$verb-inst" "$direct-inst")
+				(lg-link "Pa" "$verb-inst" "$direct-inst"))
 			(word-lemma "$direct-inst" "$direction")
 		)
 		(State current-imperative (Variable "$direction"))
@@ -85,7 +87,7 @@
 XXX this may be junk/obsolete, the format of r2l-sets seems to have
 changed recently.  I'm confused. Current structure seems to be this:
 
-(ReferenceLink (InterpretationNode "sentence@f2b..") (SetLink ...))
+(ReferenceLink (InterpretationNode \"sentence@f2b..\") (SetLink ...))
 
 but this is not what the code below looks for...
 "
