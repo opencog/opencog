@@ -782,3 +782,52 @@ scheme@(opencog nlp chatbot-eva) [1]>
 
 (nlp-parse "look left")
 ERROR: Unbound variable: pre-advmod-rule
+bug #2021
+
+(StateLink current-sentence
+
+(cog-incoming-set current-sentence)
+(SentenceNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093")
+
+(define (get-parse sent)
+
+(ParseNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0"
+(InterpretationNode
+"sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0_interpretation_$X")
+
+(WordInstanceNode "look@a08e7907-0098-498c-be5e-10df22714eb3")
+
+Its MVa not Pa and so look-rule-1 fails.
+
+general structure:
+  o
+(InheritanceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (DefinedLinguisticConceptNode "ImperativeSpeechAct")
+)
+ (ReferenceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (SetLink
+
+====================================================
+
+    +---Wi---+-MVa-+
+    |        |     |
+LEFT-WALL look.v up.e
+
+    +---Wi---+--Pa-+
+    |        |     |
+LEFT-WALL look.v up.a
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u
+
+
+
+
+
+

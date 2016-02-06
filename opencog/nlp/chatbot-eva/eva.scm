@@ -5,6 +5,7 @@
 
 ;--------------------------------------------------------------------
 (use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
+(use-modules (opencog nlp fuzzy))
 (load "../relex2logic/rule-utils.scm")
 
 ; Global state for the current sentence.
@@ -78,8 +79,15 @@
 
 (define (get-interp-of-r2l r2l-set-list)
 "
-  Given a list of r2l-sets, pick out the InterpetationNode from each,
-  and return those (as a list).
+  Given a ListLink of r2l-sets, pick out the InterpetationNode from
+  each, and return those (as a list).
+
+XXX this may be junk/obsolete, the format of r2l-sets seems to have
+changed recently.  I'm confused. Current structure seems to be this:
+
+(ReferenceLink (InterpretationNode "sentence@f2b..") (SetLink ...))
+
+but this is not what the code below looks for...
 "
 	; find-interp takes a single SetLink
 	(define (find-interp r2l-set)
@@ -253,7 +261,7 @@
 	(define r2l-set (get-r2l-set-of-sent imp))
 
 	; Get the sentences that are similar to it.
-	(define fzset (cog-fuzzy-match r2l-set 'SetLink '()))
+	(define fzset (cog-fuzzy-match r2l-set))
 
 	; Get the InterpretationNode's out of that set.
 	(define interp (car (get-interp-of-r2l fzset)))
