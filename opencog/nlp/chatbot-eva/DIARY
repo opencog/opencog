@@ -757,3 +757,28 @@ Fuzzy:
 
 * Or is it ore like PresentLink?  How do we indicate which parts are
   crisp, and which parts are not?  How do I specify matching affinity?
+
+
+WARNING: (opencog nlp chatbot-eva): `r2l-rules' imported from both
+(opencog rule-engine) and (opencog nlp relex2logic)
+opencog/nlp/chatbot/chat-utils.scm:61:39: In procedure
+(InterpretationNode
+"sentence@987adef9-1782-4ab7-b422-703a214ee0d5_parse_0_interpretation_$X")
+:
+opencog/nlp/chatbot/chat-utils.scm:61:39: Unbound variable: r2l-rules
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(opencog nlp chatbot-eva) [1]>
+
+======================================
+
+(use-modules (opencog) (opencog cogserver))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot))
+(use-modules (opencog nlp relex2logic))
+
+; (load "relex2logic/rule-utils.scm")
+(load "chatbot/chat-utils.scm")
+
+(nlp-parse "look left")
+ERROR: Unbound variable: pre-advmod-rule

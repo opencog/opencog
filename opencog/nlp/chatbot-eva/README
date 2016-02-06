@@ -41,6 +41,7 @@ Goals for this chatbot are:
 
 HOWTO
 -----
+ * make install -- important to get file path names correct!
  * Start the relex server on port 4444
  * Start the cogita IRC bot
  * Start a guile shell.

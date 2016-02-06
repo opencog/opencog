@@ -6,10 +6,14 @@
 ; Stuff actually needed to get the chatbot running...
 (use-modules (opencog) (opencog cogserver))
 
-(use-modules (opencog nlp) (opencog nlp chatbot-eva))
+(use-modules (opencog nlp))
 (use-modules (opencog nlp relex2logic))
 
+; Must load the rulebase before running eva; see bug
+; https://github.com/opencog/opencog/issues/2021 for details
+; XXX fixme
 (load-r2l-rulebase)
+(use-modules (opencog nlp chatbot-eva))
 
 (start-cogserver "../../lib/opencog-chatbot.conf")
 

@@ -1,5 +1,5 @@
 ;
-; The Hanson Robotics chatbot module.
+; The Hanson Robotics Eva chatbot module.
 ;
 (define-module (opencog nlp chatbot-eva))
 
