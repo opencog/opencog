@@ -89,7 +89,7 @@ class ConnectConflictRandom(BaseConnector):
         # Make the links between source nodes and newly blended node.
         # TODO: Give proper truth value, not average of truthvalue.
         for merged_atom in self.ret:
-            weighted_tv = get_weighted_tv(self.a.get_incoming(merged_atom.h))
+            weighted_tv = get_weighted_tv(merged_atom.incoming)
             for decided_atom in decided_atoms:
                 self.a.add_link(
                     types.AssociativeLink,

@@ -1,5 +1,5 @@
 from opencog.spacetime import SpaceServer, TimeServer
-from opencog.atomspace import AtomSpace, Handle, types
+from opencog.atomspace import AtomSpace, types
 
 class TestTimeServer:
 
@@ -15,5 +15,5 @@ class TestTimeServer:
 
     def test_addTimeInfo(self):
         objnode = self._atomspace.add_node(types.StructureNode, "object111")
-        at_time_link = self._timeserver.add_time_info(objnode.h, 123456)
-        assert objnode in self._atomspace.get_outgoing(at_time_link)
+        at_time_link = self._timeserver.add_time_info(objnode, 123456)
+        assert objnode in at_time_link.out

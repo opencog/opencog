@@ -300,14 +300,15 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     jsonTV = tvToJSON(tvp);
 
     // Incoming set
-    HandleSeq incomingHandles = as->get_incoming(h);
+    HandleSeq incomingHandles;
+    h->getIncomingSet(back_inserter(incomingHandles));
     Array incoming;
     for (uint i = 0; i < incomingHandles.size(); i++) {
         incoming.push_back(std::to_string(incomingHandles[i].value()));
     }
 
     // Outgoing set
-    HandleSeq outgoingHandles = as->get_outgoing(h);
+    HandleSeq outgoingHandles = h->getOutgoingSet();
     Array outgoing;
     for (uint i = 0; i < outgoingHandles.size(); i++) {
         outgoing.push_back(std::to_string(outgoingHandles[i].value()));

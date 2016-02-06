@@ -28,7 +28,7 @@ generation (NLG) pipeline.
     The code for handling anaphora generation.  Currently basic
     pronouns (he, she, it, etc) and basic lexical noun choices are
     handled.
-    
+
 - sentence-forms.scm
 
     Templates for defining the most basic structures for each utterance
@@ -36,7 +36,7 @@ generation (NLG) pipeline.
     **imperative**, and **interjective**.  OpenCog links that do not
     satisfy one of the structures are considered not well-formed
     (i.e. not enough information to form a sentence).
-  
+
 
 ## Algorithm
 
@@ -50,17 +50,17 @@ everything we want to say), based on several weighting factors:
     - **time-weight** (n..0): the time-sequential order within the set.
     - **link-weight** (n): the number of nodes in common with what is
       already said from the current incoming set.
-    
+
    Default weighting formula is `form-weight * (time-weight + link-weight)`
-    
+
 2. Choose the highest weighted link and check if it is 'say-able' from
    SuReal, and whether it is too complex.
     - A chunk is too complex if there are too many sentence-formed
       links (default: 3).  The idea is to limit the amount of complete
       "ideas" within a sentence.
-    
-    If a chunk is say-able, but ccould be longer:
-    
+
+    If a chunk is say-able, but could be longer:
+
     1. Re-rank the remaining set, but this time prefering a link `A` that
     does not satisfy a sentence form.  The reasoning is that since `A`
     cannot be said on its own, it is best to add it here as a support for
@@ -69,19 +69,19 @@ everything we want to say), based on several weighting factors:
         - **time-weight** (n..0): same as before.
         - **link-weight** (n): instead of weighting against what was said,
            weight against what we are trying to say.
-        
+
        Default weighting formula here is
        `(time-weights + link-weights) * (2 - form-weights)`
-        
+
     2. Add the highest weight one and try saying again.
-   
+
     If a chunk is not say-able:
-    
+
     1. Check the current chunk to see if any node appears only once.
     2. Try to add a link from the set that include that lone node.
     3. Try this up to 3 times, and give up the current chunk if still
        not say-able.
-        
+
 ### Insert Anaphora
 
 1. Look through all the chunks and find all the nouns to form a noun
@@ -111,7 +111,7 @@ everything we want to say), based on several weighting factors:
           "himself", "themselves", etc.
         - If the noun is different from the subject, then change to
           "me", "him", "them", etc.
-        
+
 5. If a noun cannot be changed to a pronoun, consider a lexical noun
    using the following algorithm:
     - Consider all InheritaneLink's with noun nodes that inherit from
@@ -121,7 +121,7 @@ everything we want to say), based on several weighting factors:
       (confidence of the InheritanceLink).
     - Randomly select one from the list with the highest weighted node
       being most likely.
-    
+
 
 ## Usage
 
@@ -136,11 +136,13 @@ If you want to use the testing atomspace, you also need
 ```
 (use-modules (opencog atom-types))
 (load "../tests/nlp/microplanning/test-atomspace.scm")
+(load "../tests/nlp/microplanning/r2l-atomspace.scm")
 ```
 
 Before running the example, you need to populate the atomspaces with
 sample sentences of how you want the final output to look like. Some
-examples would be those in `test-atomspace.scm`.
+examples would be those in `test-atomspace.scm` (and `r2l-atomspace.scm`
+contains the atoms of those sentences generated via `nlp-parse`.)
 
 
 After this, you can running microplanning as either:
@@ -161,10 +163,7 @@ the returned list is one result of the chunking algorithm, returned as a
 list of `SetLink`.  These `SetLink`'s can be passed to Surface
 Realization.  For example, to realize the first chunking result, we do:
 ```
-(map
-	(lambda (set-link) (sureal set-link))
-	(car (microplanning test-declarative-sal "declarative" *default_chunks_option* #t))
-)
+(map sureal (car (microplanning test-declarative-sal "declarative" *default_chunks_option* #t)))
 ```
 
 It is also possible to construct your own test using your own custom
@@ -182,8 +181,8 @@ corresponding RelEx grammer nodes.
     "Our car" -> "it" and "Our group" -> "we".  If we have "John's car"
     and we found that "John" can be a pronoun but not "car", changing
     the possession link to "his" will ended up as "His's car".
-    
-    
+
+
 2. Use external links that share a node to say extra stuff? how to
 determine what to include?
 

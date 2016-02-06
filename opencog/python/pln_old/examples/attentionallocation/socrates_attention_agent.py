@@ -58,7 +58,7 @@ def check_result(atomspace):
     eval_links = atomspace.get_atoms_by_type(types.EvaluationLink)
 
     for eval_link in eval_links:
-        out = atomspace.get_outgoing(eval_link.h)
+        out = eval_link.out
         if out[0].is_a(types.PredicateNode) and "breathe" in out[0].name\
             and out[1].is_a(types.ListLink)\
             and "Socrates" in out[1].out[0].name\

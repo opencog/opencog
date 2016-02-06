@@ -27,16 +27,16 @@ def monitor_changes(atomspace):
 #    print [str(latest_time), str(previous_time)]
 
     # Detect changes
-    at_times_latest = atomspace.get_atoms_by_target_atom(t.AtTimeLink, latest_time, subtype = False)
-    at_times_previous = atomspace.get_atoms_by_target_atom(t.AtTimeLink, previous_time, subtype = False)
+    at_times_latest = latest_time.incoming_by_type(t.AtTimeLink, subtype = False)
+    at_times_previous = previous_time.incoming_by_type(t.AtTimeLink, subtype = False)
 
     changes_with_tv = []
     changes_with_arg = []
 
     for latest in at_times_latest:
         for previous in at_times_previous:
-            eval_latest = atomspace.get_outgoing(latest.h)[1]
-            eval_previous = atomspace.get_outgoing(previous.h)[1]
+            eval_latest = latest.out[1]
+            eval_previous = previous.out[1]
             if eval_latest.t != t.EvaluationLink or eval_previous.t != t.EvaluationLink: 
                 continue
 
@@ -51,15 +51,15 @@ def monitor_changes(atomspace):
     pred_change_with_arg = atomspace.add_node(t.PredicateNode, "change_with_arg")
     pred_has_dramatic_changes = atomspace.add_node(t.PredicateNode, "has_dramatic_changes")
 
-    old_changes_with_tv = atomspace.get_atoms_by_target_atom(t.ReferenceLink, pred_change_with_tv, subtype = False)
+    old_changes_with_tv = pred_change_with_tv.incoming_by_type(t.ReferenceLink, subtype = False)
     for old_change_with_tv in old_changes_with_tv:
-        list_link = atomspace.get_outgoing(old_change_with_tv.h)[1]
+        list_link = old_change_with_tv.out[1]
         atomspace.remove(old_change_with_tv, recursive = False)
         atomspace.remove(list_link, recursive = False)
 
-    old_changes_with_arg = atomspace.get_atoms_by_target_atom(t.ReferenceLink, pred_change_with_arg, subtype = False)
+    old_changes_with_arg = pred_change_with_arg.incoming_by_type(t.ReferenceLink, subtype = False)
     for old_change_with_arg in old_changes_with_arg:
-        list_link = atomspace.get_outgoing(old_change_with_arg.h)[1]
+        list_link = old_change_with_arg.out[1]
         atomspace.remove(old_change_with_arg, recursive = False)
         atomspace.remove(list_link, recursive = False)
 

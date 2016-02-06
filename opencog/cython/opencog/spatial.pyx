@@ -1,5 +1,5 @@
 from cython.operator cimport dereference as deref, preincrement as inc
-from opencog.atomspace cimport Handle, AtomSpace
+from opencog.atomspace cimport Atom, AtomSpace
 
 cdef class OctomapOcTreeNode:
     cdef cOctomapOcTreeNode* c_node
@@ -19,22 +19,23 @@ cdef class OctomapOcTreeNode:
 
 cdef class OctomapOcTree:
     cdef cOctomapOcTree* c_octree_map
+    cdef AtomSpace atomspace
 
     def __cinit__(self):
         pass
 
-    def __init__(self, long addr):
+    def __init__(self, long addr, AtomSpace atomspace):
         self.c_octree_map = <cOctomapOcTree*> PyLong_AsVoidPtr(addr)
+        self.atomspace = atomspace
 
     def __dealloc__(self):
         #SpaceServer will handle this
         pass
 
     @classmethod
-    def init_new_map(cls, map_name, resolution):
+    def init_new_map(cls, atomspace, map_name, resolution):
         cdef cOctomapOcTree* cspmap = new cOctomapOcTree(map_name, resolution)
-
-        newmap = cls(PyLong_FromVoidPtr(cspmap))
+        newmap = cls(PyLong_FromVoidPtr(cspmap), atomspace)
         return newmap
 
     def get_occupancy_thres_log(self):
@@ -60,18 +61,18 @@ cdef class OctomapOcTree:
     def get_total_unit_block_num(self):
         return self.c_octree_map.getTotalUnitBlockNum()
 
-    def add_solid_unit_block(self, Handle handle, pos):
+    def add_solid_unit_block(self, Atom atom, pos):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_octree_map.addSolidUnitBlock(deref((<Handle>handle).h), c_pos)
+        self.c_octree_map.addSolidUnitBlock(deref((<Atom>atom).handle), c_pos)
 
-    def remove_solid_unit_block(self, Handle handle):
-        self.c_octree_map.removeSolidUnitBlock(deref((<Handle>handle).h))
+    def remove_solid_unit_block(self, Atom atom):
+        self.c_octree_map.removeSolidUnitBlock(deref((<Atom>atom).handle))
 
-    def set_unit_block(self,Handle handle, pos, update_log_odds_occupancy):
+    def set_unit_block(self,Atom atom, pos, update_log_odds_occupancy):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_octree_map.setUnitBlock(deref((<Handle>handle).h), c_pos,
+        self.c_octree_map.setUnitBlock(deref((<Atom>atom).handle), c_pos,
                                        update_log_odds_occupancy)
 
     def get_block(self, pos, log_odds_occupancy = None):
@@ -80,12 +81,15 @@ cdef class OctomapOcTree:
         if log_odds_occupancy is None:
             log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
         cdef cHandle cblock = self.c_octree_map.getBlock(c_pos, log_odds_occupancy)
-        return Handle(cblock.value())
+        if (cblock.is_undefined()):
+            return None
+        else:
+            return Atom(cblock.value(), self.atomspace)
 
-    def get_block_location(self, Handle handle, log_odds_occupancy = None):
+    def get_block_location(self, Atom atom, log_odds_occupancy = None):
         if log_odds_occupancy is None:
             log_odds_occupancy = self.c_octree_map.getOccupancyThresLog()
-        cdef cHandle c_handle = deref((<Handle>handle).h)
+        cdef cHandle c_handle = deref((<Atom>atom).handle)
         cdef cBlockVector c_pos = self.c_octree_map.getBlockLocation(c_handle,
                                                                      log_odds_occupancy)
         #TODO: in BlockVector it returns BlockVector::ZERO, which is (0,0,0)
@@ -96,43 +100,42 @@ cdef class OctomapOcTree:
 
 cdef class EntityRecorder:
     cdef cEntityRecorder* c_entity_recorder
+    cdef AtomSpace atomspace
 
     def __cinit__(self):
         pass
 
-    def __init__(self, long addr):
+    def __init__(self, long addr, AtomSpace atomspace):
         self.c_entity_recorder = <cEntityRecorder*> PyLong_AsVoidPtr(addr)
+        self.atomspace = atomspace
 
     def __dealloc__(self):
         #SpaceServer will handle this
         pass
 
     @classmethod
-    def init_new_entity_recorder(cls):
+    def init_new_entity_recorder(actual_class, AtomSpace atomspace):
         cdef cEntityRecorder* cer = new cEntityRecorder()
-        newer = cls(PyLong_FromVoidPtr(cer))
-        return newer
+        entity_recorder = actual_class(PyLong_FromVoidPtr(cer), atomspace)
+        return entity_recorder
 
-    def get_self_agent_entity(self):
-        return Handle(self.c_entity_recorder.getSelfAgentEntity().value())
-
-    def add_none_block_entity(self, Handle handle, pos, isSelfObject, isAvatarEntity, timestamp):
+    def add_none_block_entity(self, Atom atom, pos, isSelfObject, isAvatarEntity, timestamp):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_entity_recorder.addNoneBlockEntity(deref((<Handle>handle).h), c_pos,
+        self.c_entity_recorder.addNoneBlockEntity(deref((<Atom>atom).handle), c_pos,
                                              isSelfObject, isAvatarEntity, timestamp)
 
-    def remove_none_block_entity(self, Handle handle):
-        self.c_entity_recorder.removeNoneBlockEntity(deref((<Handle>handle).h))
+    def remove_none_block_entity(self, Atom atom):
+        self.c_entity_recorder.removeNoneBlockEntity(deref((<Atom>atom).handle))
 
-    def update_none_block_entity_location(self, Handle handle, pos, timestamp):
+    def update_none_block_entity_location(self, Atom atom, pos, timestamp):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
-        self.c_entity_recorder.updateNoneBlockEntityLocation(deref((<Handle>handle).h), c_pos,
+        self.c_entity_recorder.updateNoneBlockEntityLocation(deref((<Atom>atom).handle), c_pos,
                                                         timestamp)
 
-    def get_last_appeared_location(self, Handle handle):
-        cdef cHandle c_handle = deref((<Handle>handle).h)
+    def get_last_appeared_location(self, Atom atom):
+        cdef cHandle c_handle = deref((<Atom>atom).handle)
         cdef cBlockVector c_pos = self.c_entity_recorder.getLastAppearedLocation(c_handle)
         return (c_pos.x, c_pos.y, c_pos.z)
 
@@ -140,7 +143,10 @@ cdef class EntityRecorder:
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
         cdef cHandle c_handle = self.c_entity_recorder.getEntity(c_pos)
-        return Handle(c_handle.value())
+        if (c_handle.is_undefined()):
+            return None
+        else:
+            return Atom(c_handle.value(), self.atomspace)
 
 def check_standable(AtomSpace atomspace, OctomapOcTree space_map, pos, log_odds_occupancy = None):
     assert len(pos) == 3

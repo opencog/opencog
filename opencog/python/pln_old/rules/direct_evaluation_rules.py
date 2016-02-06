@@ -357,10 +357,8 @@ class GeneralEvaluationToMemberRule(Rule):
 
         if arg.type == types.ListLink:
             for i in arg.out:
-                # The arg.out is a list that must not be changed. If arg.out is
-                # used instead of the returned value of atomspace's get_outgoing
-                # method then the changes made to arg.out are permanent.
-                list_arg = self.chainer.atomspace.get_outgoing(arg.h)
+                # Make a copy so we don't change arg.out while iterating.
+                list_arg = arg.out
                 first_iter = True
 
                 for j in variables:
