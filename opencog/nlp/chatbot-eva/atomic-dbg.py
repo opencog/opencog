@@ -85,8 +85,18 @@ def look_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "Python look at point", x, y, z
+	# print "Python look at point", x, y, z
 	# evl.look_at_point(x, y, z)
+	if (y < 0):
+		print "(Eva looks to the right)"
+	elif (y > 0):
+		print "(Eva looks to the left)"
+
+	if (z < 0):
+		print "(Eva looks down)"
+	elif (z > 0):
+		print "(Eva looks up)"
+
 	return TruthValue(1, 1)
 
 def do_emotion(emotion_node, duration_node, intensity_node):
