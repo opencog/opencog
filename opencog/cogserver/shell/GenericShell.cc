@@ -167,6 +167,12 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 		socket = s;
 	}
 
+	// What used to be stdout will now go to the pipe.
+	int pipefd[2];
+	pipe2(pipefd, 0);  // O_NONBLOCK);
+	int stdout_backup = dup(fileno(stdout));
+	dup2(pipefd[1], fileno(stdout));
+
 	// Launch the evaluator, possibly in a different thread,
 	// and then send out whatever is reported back.
 	line_discipline(expr);
@@ -176,6 +182,26 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 		socket->Send(retstr);
 		retstr = poll_output();
 	}
+
+	// Restore stdout
+	fflush(stdout);
+	write(pipefd[1], "", 1); // null-terminated string!
+	close(pipefd[1]);
+	dup2(stdout_backup, fileno(stdout)); // restore stdout
+
+	// Drain the pipe
+	char buf[4996];
+	int nr = read(pipefd[0], buf, sizeof(buf));
+	while (0 < nr)
+	{
+		printf("duuuuude its %s\n", buf);
+		retstr = buf;
+		socket->Send(retstr);
+		nr = read(pipefd[0], buf, sizeof(buf));
+	}
+
+	// cleanup.
+	close(pipefd[0]);
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
