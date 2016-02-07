@@ -836,4 +836,15 @@ and forward back to here.
 	(cog-evaluate! (Evaluation (GroundedPredicate "py:look_at_point")
 		(ListLink (NumberNode 1) (NumberNode 0.5) (NumberNode 0)))))
 
-with-output-to-file "/tmp/foo"
+(with-output-to-file "/tmp/foo" bar)
+
+poll_result
+_result a string that apply_tv doesn't set...
+but f it did, we could get it via poll_result and .. then what?
+
+alt: guile shell couldgrab copy of stdout ...
+
+4 must be a pipe
+tee(STDOUT_FILENO, 4, INT_MAX, SPLICE_F_NONBLOCK);
+
+PyObject *pyOutput = NULL;
