@@ -23,6 +23,7 @@
 #include <thread>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/cogserver/server/ConsoleSocket.h>
@@ -169,9 +170,12 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
-	pipe2(pipefd, 0);  // O_NONBLOCK);
+	int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+	OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
 	int stdout_backup = dup(fileno(stdout));
-	dup2(pipefd[1], fileno(stdout));
+	OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+	rc = dup2(pipefd[1], fileno(stdout));
+	OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
 
 	// Launch the evaluator, possibly in a different thread,
 	// and then send out whatever is reported back.
@@ -185,19 +189,27 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 	// Restore stdout
 	fflush(stdout);
-	write(pipefd[1], "", 1); // null-terminated string!
-	close(pipefd[1]);
-	dup2(stdout_backup, fileno(stdout)); // restore stdout
+	rc = write(pipefd[1], "", 1); // null-terminated string!
+	OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
+	rc = close(pipefd[1]);
+	OC_ASSERT(0 == rc, "GenericShell pipe close failure");
+	rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+	OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
 
 	// Drain the pipe
-	char buf[4996];
-	int nr = read(pipefd[0], buf, sizeof(buf));
+	char buf[4097];
+	int nr = read(pipefd[0], buf, sizeof(buf)-1);
+	OC_ASSERT(0 < rc, "GenericShell pipe read failure");
 	while (0 < nr)
 	{
-		printf("duuuuude its %s\n", buf);
-		retstr = buf;
-		socket->Send(retstr);
-		nr = read(pipefd[0], buf, sizeof(buf));
+		buf[nr] = 0;
+		if (1 < nr or 0 != buf[0])
+		{
+			printf("%s", buf); // print to the cogservers stdout.
+			socket->Send(buf);
+		}
+		nr = read(pipefd[0], buf, sizeof(buf)-1);
+		OC_ASSERT(0 < rc, "GenericShell pipe read failure");
 	}
 
 	// cleanup.
