@@ -168,6 +168,22 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 		socket = s;
 	}
 
+	// Work-around some printing madness. See issue
+	// https://github.com/opencog/atomspace/issues/629
+	// This is kind of complicated to explain, so pay attention:
+	// When runnning scheme, or python, code from the cogserver
+	// shell, that could cause all sorts of things to happen, including
+	// possibly some printing to the stdout file descriptor. That
+	// would normally result in the output going to the terminal in
+	// which the cogserver is running. But we really, actually want
+	// that output to also go back to the shell, where the user can
+	// see it.  The code below, ifdefed PERFORM_STDOUT_DUPLICATION,
+	// does this. Its a bit of a trick: make a backup copy of stdout,
+	// then attach stdout to a pipe, perform the evaluation, then
+	// restore stdout from the backup. Finally, drain the pipe,
+	// printing both to stdout and to the shell socket.
+#define PERFORM_STDOUT_DUPLICATION 1
+#ifdef PERFORM_STDOUT_DUPLICATION
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
 	int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
@@ -176,6 +192,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
 	rc = dup2(pipefd[1], fileno(stdout));
 	OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+#endif // PERFORM_STDOUT_DUPLICATION
 
 	// Launch the evaluator, possibly in a different thread,
 	// and then send out whatever is reported back.
@@ -187,6 +204,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 		retstr = poll_output();
 	}
 
+#ifdef PERFORM_STDOUT_DUPLICATION
 	// Restore stdout
 	fflush(stdout);
 	rc = write(pipefd[1], "", 1); // null-terminated string!
@@ -212,8 +230,9 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 		OC_ASSERT(0 < rc, "GenericShell pipe read failure");
 	}
 
-	// cleanup.
+	// Cleanup.
 	close(pipefd[0]);
+#endif // PERFORM_STDOUT_DUPLICATION
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
@@ -301,7 +320,7 @@ void GenericShell::line_discipline(const std::string &expr)
 		}
 	}
 
-	/* 
+	/*
 	 * The newline is always cut. Re-insert it; otherwise, comments
 	 * within procedures will have the effect of commenting out the
 	 * rest of the procedure, leading to garbage.
