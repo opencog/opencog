@@ -35,6 +35,7 @@
 ; XXX needs to be public, so that cog-bind can find this...
 (define-public (show-arg node) (display node) node)
 
+; ---------------------------------------------------------------
 ; Handle short imperative commands, such as "look up", "look left".
 ; This is a rule, meant to be applied to the current sentence.
 ; It will extract a direction to look at, and it will set
@@ -73,6 +74,48 @@
 		(State current-imperative (Variable "$direction"))
 	)
 )
+
+; Matches sentences of the form "look to the right" and
+; "look to the left".
+(define look-rule-2
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$prep-inst" "WordInstanceNode")
+			(var-decl "$direct-inst" "WordInstanceNode")
+			(var-decl "$direction" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			; Specific LG linkage of
+			; look >-MVp-> to >-Ju-> direction
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+
+			(word-lemma "$direct-inst" "$direction")
+		)
+		(State current-imperative (Variable "$direction"))
+	)
+)
+
+; Design notes:
+; Rather than hand-crafting a bunch of rules like the above, we should
+; do two things:
+; (1) implement fuzzy matching, so that anything vaguely close to the
+;     desired imperative will get matched.
+; (2) implement automated learning of new rules, and refinement of
+;     existing rules.
 
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
@@ -241,6 +284,7 @@ but this is not what the code below looks for...
 	; this will find the WordNode direction and glue it onto
 	; the current-imperative anchor.
 	(cog-bind look-rule-1)
+	(cog-bind look-rule-2)
 
 	; Apply semantics-rule-1 -- if the current-imperaitve
 	; anchor is a word we understand in a physical grounded
