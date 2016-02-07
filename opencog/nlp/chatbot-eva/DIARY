@@ -827,7 +827,4 @@ LEFT-WALL look.v up.a
 LEFT-WALL look.v to.r the right.n-u
 
 
-
-
-
-
+(load "chatbot-eva/run-chatbot.scm")

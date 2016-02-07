@@ -8,6 +8,15 @@
 (use-modules (opencog nlp fuzzy))
 (load "../relex2logic/rule-utils.scm")
 
+; Must load the rulebase before running eva; see bug
+; https://github.com/opencog/opencog/issues/2021 for details
+; XXX fixme -- we should not need to load either relex2logic or
+; the rules right here, since the code in this module does not depend
+; directly on thes.
+(use-modules (opencog nlp relex2logic))
+(load-r2l-rulebase)
+
+
 ; Global state for the current sentence.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
 (StateLink current-sentence (SentenceNode "foobar"))
