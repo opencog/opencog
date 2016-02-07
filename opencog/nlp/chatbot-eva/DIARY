@@ -828,3 +828,12 @@ LEFT-WALL look.v to.r the right.n-u
 
 
 (load "chatbot-eva/run-chatbot.scm")
+
+cog-evaluate! when it runs python, does not pature the stdout
+and forward back to here.
+
+(define (bar)
+	(cog-evaluate! (Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink (NumberNode 1) (NumberNode 0.5) (NumberNode 0)))))
+
+with-output-to-file "/tmp/foo"

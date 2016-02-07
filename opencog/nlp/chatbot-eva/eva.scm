@@ -251,8 +251,7 @@ but this is not what the code below looks for...
 	(let* ((act-do-do (cog-bind look-action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		(display act-do-do)
-		(newline)
+		; (display act-do-do) (newline)
 		(for-each cog-evaluate! action-list)
 
 		; XXX replace this by AIML or something.
