@@ -109,6 +109,55 @@
 	)
 )
 
+(define (imperative-direction-rule-template VERB-WORD DECL LINKS)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			DECL
+			(var-decl "$direct-inst" "WordInstanceNode")
+			(var-decl "$direction" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			; Specific LG linkage
+			LINKS
+			(word-lemma "$direct-inst" "$direction")
+		)
+		(State current-imperative (Variable "$direction"))
+	)
+)
+
+; Same as look-rule-1 and look-rule-2 but with verb "turn"
+(define turn-rule-3
+	(imperative-direction-rule-template
+		(WordNode "turn")  ; VERB-WORD
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$direct-inst")
+			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+	))
+
+(define turn-rule-4
+	(imperative-direction-rule-template
+		(WordNode "turn")                           ; VERB-WORD
+		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
+		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+		)
+	))
+
 ; Design notes:
 ; Rather than hand-crafting a bunch of rules like the above, we should
 ; do two things:
@@ -251,7 +300,8 @@ but this is not what the code below looks for...
 		(get-interp-node (car (nlp-parse "look left")))
 		(get-interp-node (car (nlp-parse "look right")))
 		(get-interp-node (car (nlp-parse "look up")))
-		(get-interp-node (car (nlp-parse "look down")))))
+		(get-interp-node (car (nlp-parse "look down")))
+	))
 
 ;--------------------------------------------------------------------
 ; Action schema
@@ -285,6 +335,8 @@ but this is not what the code below looks for...
 	; the current-imperative anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
+	(cog-bind turn-rule-3)
+	(cog-bind turn-rule-4)
 
 	; Apply semantics-rule-1 -- if the current-imperaitve
 	; anchor is a word we understand in a physical grounded
