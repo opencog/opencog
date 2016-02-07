@@ -258,6 +258,15 @@ but this is not what the code below looks for...
 		(if (eq? '() action-list)
 			(display "I don't know how to do that.\n"))
 	)
+
+	; Reset the current-imperative state, as otherwise, any subsequent
+	; nonsense will get re-interpreted as the same action as before.
+	(StateLink current-imperative (WordNode "foobar"))
+	(StateLink current-action (WordNode "foobar"))
+
+	; Empty string resets the return value to be #<unspecified>
+	; which avoids printing of the return value.
+	(display "")
 )
 
 ;--------------------------------------------------------------------
