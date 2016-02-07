@@ -308,9 +308,9 @@ but this is not what the code below looks for...
 	(StateLink current-imperative (WordNode "foobar"))
 	(StateLink current-action (WordNode "foobar"))
 
-	; Empty string resets the return value to be #<unspecified>
-	; which avoids printing of the return value.
-	(display "")
+	; Set the return value to be #<unspecified>, which avoids printing
+	; of the return value.  (if #f #f) has the same effect.
+	*unspecified*
 )
 
 ;--------------------------------------------------------------------
