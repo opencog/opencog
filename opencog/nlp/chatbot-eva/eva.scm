@@ -315,10 +315,11 @@ but this is not what the code below looks for...
 ; See if we know the meaning of utterances.
 ; These are rules to be applied to the current state: if the
 ; current word/utterance has an explicit concrete grounding, then
-; alter the current state as given by the rule.
+; construct the grounded equivalent.
 
 ; look-semantics-rule-1 -- if the current imperative contains a verb
-; that we know, and a direction word, then set the current action.
+; that we know, and a direction word, then suggest a grounded action.
+;
 (define look-semantics-rule-1
 	(BindLink
 		(VariableList
@@ -335,7 +336,13 @@ but this is not what the code below looks for...
 			(ReferenceLink (Variable "$direction") (Variable "$dir-ground"))
 			(ReferenceLink (Variable "$verb") (Variable "$verb-ground"))
 		)
-		(State current-action
+
+		; We only "suggest" this as one possible action.  A later stage
+		; picks the most likely action, based on some semantic liklihood
+		; analysis... or soemthing like that.  Thus, we use a ListLink
+		; here, not a StateLink, since the ListLink allows multiple
+		; suggestions to be made.
+		(ListLink current-action
 			(EvaluationLink
 				(Variable "$verb-ground")
 				(Variable "$dir-ground")))
@@ -354,17 +361,15 @@ but this is not what the code below looks for...
 ; Action schema
 ; This is wrong, but a hack for now.
 
-(define look-action-rule-1
+(define action-rule-1
 	(BindLink
 		(VariableList
-			; (var-decl "$action" "DefinedSchemaNode")
-			(var-decl "$action" "ListLink")
+			(var-decl "$action" "EvaluationLink")
 		)
 		(AndLink
-			(StateLink current-action (Variable "$action"))
+			(ListLink current-action (Variable "$action"))
 		)
-		(Evaluation (GroundedPredicate "py:look_at_point")
-			(Variable "$action"))
+		(StateLink current-action (Variable "$action"))
 ))
 
 ;--------------------------------------------------------------------
@@ -391,7 +396,7 @@ but this is not what the code below looks for...
 	(cog-bind look-semantics-rule-1)
 
 	; Perform the action, and print a reply.
-	(let* ((act-do-do (cog-bind look-action-rule-1))
+	(let* ((act-do-do (cog-bind action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
 		; (display act-do-do) (newline)
