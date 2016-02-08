@@ -106,6 +106,39 @@ we fall back to some other, more vague understanding, picking the most
 precise one possible, and somehow combining it with any other partial
 understanding from other rules that recognize parts of a sentence.
 
+Context
+-------
+Rules should be applied only in relation to teh current context.  This
+is for two reasons: one is performance: if we know that a rule is not
+applicable in a certain context, then we don't waste CPU time in
+applying it.  A second resons is that rules can simplify, or factor,
+by not requring a context to be a part of its specification.  Its not
+clear that the URE can currently handle contexts in this sense. At this
+time, contextualized knowledge seems to be a slightly lower priority.
+
+ActionLink, GroundedActionLink
+------------------------------
+New, experimental link types. These will have the following format:
+
+    ActionLink
+       SchemaNode "some verb"   ;;; SchemaNode, or WordNode
+       ListLink
+          ConceptNode "slot value"   ;;; or a WordNode
+
+This is a kind-of flattened representation of a sentence; alternately, a
+simplified form of a sentence.  Some rule will take an input imperative
+sentence, and boil it down to this.   Another rule will then search for
+a grounding for this.  Groundings are of the form:
+
+
+    ReferenceLink
+       ActionLink
+          SchemaNode "some verb"   ;;; SchemaNode, or WordNode
+          ListLink
+             ConceptNode "slot value"   ;;; or a WordNode
+       ExecutionOutputLink
+        .....   
+
 
 Issues
 ------

@@ -71,7 +71,11 @@
 				(lg-link "Pa" "$verb-inst" "$direct-inst"))
 			(word-lemma "$direct-inst" "$direction")
 		)
-		(State current-imperative (Variable "$direction"))
+		(State current-imperative
+			(ActionLink
+				(WordNode "look") ;; SchemaNode, the verb.
+				(ListLink (Variable "$direction"))
+		))
 	)
 )
 
@@ -105,7 +109,11 @@
 
 			(word-lemma "$direct-inst" "$direction")
 		)
-		(State current-imperative (Variable "$direction"))
+		(State current-imperative
+			(ActionLink
+				(WordNode "look") ;; SchemaNode, the verb.
+				(ListLink (Variable "$direction"))
+		))
 	)
 )
 
@@ -132,7 +140,11 @@
 			LINKS
 			(word-lemma "$direct-inst" "$direction")
 		)
-		(State current-imperative (Variable "$direction"))
+		(State current-imperative
+			(ActionLink
+				VERB-WORD
+				(ListLink (Variable "$direction"))
+		))
 	)
 )
 
@@ -294,6 +306,10 @@ but this is not what the code below looks for...
 (ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
 (ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
+; Global knowledge about imperative verbs.
+(ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
+(ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
+
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
 ; See if we know the meaning of utterances.
@@ -301,19 +317,28 @@ but this is not what the code below looks for...
 ; current word/utterance has an explicit concrete grounding, then
 ; alter the current state as given by the rule.
 
-; look-semantics-rule-1 -- if the current imperative is a direction
-; word, then set the current action.
+; look-semantics-rule-1 -- if the current imperative contains a verb
+; that we know, and a direction word, then set the current action.
 (define look-semantics-rule-1
 	(BindLink
 		(VariableList
+			(var-decl "$verb" "WordNode")
 			(var-decl "$direction" "WordNode")
-			(var-decl "$phys-ground" "DefinedSchemaNode")
+			(var-decl "$verb-ground" "GroundedPredicateNode")
+			(var-decl "$dir-ground" "DefinedSchemaNode")
 		)
 		(AndLink
-			(StateLink current-imperative (Variable "$direction"))
-			(ReferenceLink (Variable "$direction") (Variable "$phys-ground"))
+			(StateLink current-imperative
+				(ActionLink
+					(Variable "$verb")
+					(ListLink (Variable "$direction"))))
+			(ReferenceLink (Variable "$direction") (Variable "$dir-ground"))
+			(ReferenceLink (Variable "$verb") (Variable "$verb-ground"))
 		)
-		(State current-action (Variable "$phys-ground"))
+		(State current-action
+			(EvaluationLink
+				(Variable "$verb-ground")
+				(Variable "$dir-ground")))
 ))
 
 ; These are English-language sentences that I (Eva) understand.

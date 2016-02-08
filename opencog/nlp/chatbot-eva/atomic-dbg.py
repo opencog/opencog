@@ -75,15 +75,9 @@ def gaze_at_face(face_id_node):
 	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
-def gaze_at_point(x_node, y_node, z_node):
-	x = float(x_node.name)
-	y = float(y_node.name)
-	z = float(z_node.name)
-	print "Python gaze at point", x, y, z
-	# evl.gaze_at_point(x, y, z)
-	return TruthValue(1, 1)
 
-def look_at_point(x_node, y_node, z_node):
+# Moves eyes only, not entire head.
+def gaze_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
@@ -98,6 +92,28 @@ def look_at_point(x_node, y_node, z_node):
 		print "(Eva looks down)"
 	elif (z > 0):
 		print "(Eva looks up)"
+
+	# print "Python gaze at point", x, y, z
+	# evl.gaze_at_point(x, y, z)
+	return TruthValue(1, 1)
+
+# Turns entire head.
+def look_at_point(x_node, y_node, z_node):
+	x = float(x_node.name)
+	y = float(y_node.name)
+	z = float(z_node.name)
+
+	# Plain-English description of the actions.
+	if (y < 0):
+		print "(Eva turns to the right)"
+	elif (y > 0):
+		print "(Eva turns to the left)"
+
+	if (z < 0):
+		print "(Eva turns her face downwards)"
+	elif (z > 0):
+		print "(Eva turns her face upwards)"
+
 
 	# print "Python look at point", x, y, z
 	# evl.look_at_point(x, y, z)
