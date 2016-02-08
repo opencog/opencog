@@ -22,3 +22,6 @@
 ; directly on thes.
 (use-modules (opencog nlp relex2logic))
 (load-r2l-rulebase)
+
+; Hush the output on load.
+*unspecified*
