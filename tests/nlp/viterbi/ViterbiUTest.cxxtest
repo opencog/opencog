@@ -50,9 +50,9 @@ class ViterbiUTest: public CxxTest::TestSuite
 			{
 				std::cerr << e.getMessage() << std::endl;
 			}
-			logger().setFilename(config()["LOG_FILE"]);
-			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+			logger().set_filename(config()["LOG_FILE"]);
+			logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+			logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
 
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
@@ -72,7 +72,7 @@ class ViterbiUTest: public CxxTest::TestSuite
 
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().getFilename().c_str());
+				std::remove(logger().get_filename().c_str());
 		}
 
 		void setUp(void);
