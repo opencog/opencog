@@ -405,8 +405,14 @@ but this is not what the code below looks for...
 	(let* ((act-do-do (cog-bind action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		(display act-do-do) (newline)
+		; (display act-do-do) (newline)
 		(for-each cog-evaluate! action-list)
+
+		; At this time, a ListLink is used to anchor suggested
+		; actions to the current-action anchor. Wipe these out.
+		(for-each (lambda (x)
+			(cog-delete-recursive (ListLink current-action x)))
+				action-list)
 
 		; XXX replace this by AIML or something.
 		(if (eq? '() action-list)
