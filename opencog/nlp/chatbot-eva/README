@@ -155,3 +155,29 @@ Generalizations: for example, look-rule-1 explicitly looks for the verb
 stage, so that any synonym of "look" is sufficient.  Even more: any
 synonymous command should be enough, not just on the word level, but
 generally.
+
+Bugs
+----
+Sometimes, imperatives get mis-classified as Declaratives. It seems
+random and intermittent and non-reproducible. Not sure what the issue
+is.  e.g. "Eva, turn to the right" "Eva, look up" "Eva, look up"
+after a few of these, on gets marked as delcarative.
+
+What works, currently
+---------------------
+Below are examples of sentences that Eva is currently able to
+understand and respond to.  Enter these at the IRC chatbot interface,
+alternately, say this at the guile prompt:
+
+   (process-query "nick" "Look up!")
+
+where "nick" is your chat nick, and "Look up!" is a typical sentence.
+
+   Eva, look to the right.
+   Look up!
+   Eva, turn to the right.
+   turn left
+	Look down.
+
+("looking" makes here move her eyes only; turning turns he whole head).
+
