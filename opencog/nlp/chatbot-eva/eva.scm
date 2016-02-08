@@ -136,6 +136,28 @@
 	)
 )
 
+; Re-implementation of look-rule-1 and 2, using the shorter template.
+(define look-rule-1
+	(imperative-direction-rule-template
+		(WordNode "look")  ; VERB-WORD
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$direct-inst")
+			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+	))
+
+(define look-rule-2
+	(imperative-direction-rule-template
+		(WordNode "look")                           ; VERB-WORD
+		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
+		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+		)
+	))
+
 ; Same as look-rule-1 and look-rule-2 but with verb "turn"
 (define turn-rule-3
 	(imperative-direction-rule-template
