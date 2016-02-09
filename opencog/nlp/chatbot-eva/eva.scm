@@ -400,6 +400,62 @@ but this is not what the code below looks for...
 		(Number 0.3)         ; intensity
 	))
 
+(DefineLink
+	(DefinedSchema "comprehending")
+	(ListLink
+		(Concept "comprehending") ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "engaged")
+	(ListLink
+		(Concept "engaged")  ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "bored")
+	(ListLink
+		(Concept "bored")    ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "irritated")
+	(ListLink
+		(Concept "irritated") ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "confused")
+	(ListLink
+		(Concept "confused") ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "recoil")
+	(ListLink
+		(Concept "recoil")   ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "surprised")
+	(ListLink
+		(Concept "surprised") ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
 ; -----
 ; Grounding of facial expressions by animations in the Eva blender model:
 ; happy, comprehending, engaged, bored, irritated
