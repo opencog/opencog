@@ -239,16 +239,6 @@
 (define recoil-rule
 	(imperative-express-verb-template (WordNode "recoil")))
 
-
-(define look-expression-rule
-	(imperative-object-rule-template
-		(WordNode "look")  ; VERB-WORD
-		'()                ; DECL
-		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
-	))
-
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
 ; See farther down below; we build a ReferenceLink attaching
@@ -347,6 +337,52 @@ but this is not what the code below looks for...
 	))
 
 ;--------------------------------------------------------------------
+; Global knowledge about word-meaning.
+; In this case, specific words have very concrete associations
+; with physical objects.
+
+(ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
+(ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
+(ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
+(ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
+
+; Syntactic category of schema.
+(InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-direction"))
+
+; Global knowledge about imperative verbs.
+(ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
+(ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
+
+; Syntactic category of imperative verbs
+(InheritanceLink (GroundedPredicate "py:gaze_at_point")
+	(ConceptNode "pred-direction"))
+(InheritanceLink (GroundedPredicate "py:look_at_point")
+	(ConceptNode "pred-direction"))
+
+; Allowed syntactic structure --
+;
+; There are several ways to think of this. One way is to think of
+; "pred-direction" to be a kind-of subroutine call, whose only valid
+; arguments are drections.  Another way of thinking about this is
+; as a connector-linkage: "pred-direction" is a connector that can
+; only link to the "schema-direction" connector.
+;
+; This is needed to disambiguate word senses. Consider, for example,
+; "look up" and "look sad".  One of these, as a grounded action, can
+; only take a direction; the other can only take an expression-name.
+; The syntax is used to guarantee that the grounded word-senses are
+; compatible.
+;
+(EvaluationLink
+	(PredicateNode "turn-action")
+	(ListLink
+		(ConceptNode "pred-direction")
+		(ConceptNode "schema-direction")))
+
+;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings)
 (DefineLink
 	(DefinedSchema "happy")
@@ -363,52 +399,6 @@ but this is not what the code below looks for...
 		(Number 4)           ; duration, seconds
 		(Number 0.3)         ; intensity
 	))
-
-;--------------------------------------------------------------------
-; Global knowledge about word-meaning.
-; In this case, specific words have very concrete associations
-; with physical objects.
-
-(ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
-(ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
-(ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
-(ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
-
-; Syntactic category of schema.
-(InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-object"))
-(InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-object"))
-(InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-object"))
-(InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-object"))
-
-; Global knowledge about imperative verbs.
-(ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
-(ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
-
-; Syntactic category of imperative verbs
-(InheritanceLink (GroundedPredicate "py:gaze_at_point")
-	(ConceptNode "pred-object"))
-(InheritanceLink (GroundedPredicate "py:look_at_point")
-	(ConceptNode "pred-object"))
-
-; Allowed syntactic structure --
-;
-; There are several ways to think of this. One way is to think of
-; "pred-object" to be a kind-of subroutine call, whose only valid
-; arguments are drections.  Another way of thinking about this is
-; as a connector-linkage: "pred-object" is a connector that can
-; only link to the "schema-object" connector.
-;
-; This is needed to disambiguate word senses. Consider, for example,
-; "look up" and "look sad".  One of these, as a grounded action, can
-; only take a object; the other can only take an expression-name.
-; The syntax is used to guarantee that the grounded word-senses are
-; compatible.
-;
-(EvaluationLink
-	(PredicateNode "turn-action")
-	(ListLink
-		(ConceptNode "pred-object")
-		(ConceptNode "schema-object")))
 
 ; -----
 ; Grounding of facial expressions by animations in the Eva blender model:
@@ -458,13 +448,14 @@ but this is not what the code below looks for...
 ; current word/utterance has an explicit concrete grounding, then
 ; construct the grounded equivalent.
 
-; adv-semantics-rule-1 -- if the current "simplified-English" imperative
-; contains a verb that we know, and an "adverbial" modifier, then suggest
-; a grounded action.  Here, 'adverbial' is used loosely: its more of an
-; 'object' or even a prepositional object, or evan an adjective. For
-; example, if the verb is "turn", then we expect the "adverb" to be a
-; object name.  If the verb is "express", then we expect the "adverb"
-; to be an emotion-adjective (sad, happy, etc.)
+; obj-semantics-rule-1 -- if the current "simplified-English" imperative
+; contains a verb that we know, and an "object" it refers to, then suggest
+; a grounded action.  Here, 'object' is used loosely: it can be a direct
+; object, a prepositional object, or even an adjective. For example,
+; if the verb is "turn", then we expect the "object" to be a 
+; predicative adjective; possibly a prepositional object.  If the verb
+; is "express", then we expect the "adverb" to be an emotion-adjective
+; (sad, happy, etc.)
 ;
 ; This rule combines two checks:
 ; 1) Do the words have groundings that we know of?
@@ -475,15 +466,15 @@ but this is not what the code below looks for...
 ; requires a object; in the second case, "look" is grounded in a
 ; different way, and can only take names of facial expressions.
 ;
-(define adv-semantics-rule-1
+(define obj-semantics-rule-1
 	(BindLink
 		(VariableList
 			(var-decl "$verb" "WordNode")
 			(var-decl "$object" "WordNode")
 			(var-decl "$verb-ground" "GroundedPredicateNode")
-			(var-decl "$dir-ground" "DefinedSchemaNode")
+			(var-decl "$obj-ground" "DefinedSchemaNode")
 			(var-decl "$ground-verb-type" "ConceptNode")
-			(var-decl "$ground-dir-type" "ConceptNode")
+			(var-decl "$ground-obj-type" "ConceptNode")
 			(var-decl "$linkage" "PredicateNode")
 		)
 		(AndLink
@@ -494,20 +485,20 @@ but this is not what the code below looks for...
 					(ListLink (Variable "$object"))))
 			; Candidate groundings for the words in the sentence.
 			(ReferenceLink (Variable "$verb") (Variable "$verb-ground"))
-			(ReferenceLink (Variable "$object") (Variable "$dir-ground"))
+			(ReferenceLink (Variable "$object") (Variable "$obj-ground"))
 
 			; Types (kinds) of the groundings
 			(InheritanceLink (Variable "$verb-ground")
 				(VariableNode "$ground-verb-type"))
-			(InheritanceLink (Variable "$dir-ground")
-				(VariableNode "$ground-dir-type"))
+			(InheritanceLink (Variable "$obj-ground")
+				(VariableNode "$ground-obj-type"))
 
 			; Allowed syntactic structure of the groundings.
 			(EvaluationLink
 				(VariableNode "$linkage")
 				(ListLink
 					(VariableNode "$ground-verb-type")
-					(VariableNode "$ground-dir-type")))
+					(VariableNode "$ground-obj-type")))
 		)
 
 		; We only "suggest" this as one possible action.  A later stage
@@ -518,7 +509,7 @@ but this is not what the code below looks for...
 		(ListLink current-action
 			(EvaluationLink
 				(Variable "$verb-ground")
-				(Variable "$dir-ground")))
+				(Variable "$obj-ground")))
 ))
 
 ; These are English-language sentences that I (Eva) understand.
@@ -574,12 +565,11 @@ but this is not what the code below looks for...
 	(cog-bind smile-rule)
 	(cog-bind frown-rule)
 	(cog-bind recoil-rule)
-	(cog-bind look-expression-rule)
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-	(cog-bind adv-semantics-rule-1)
+	(cog-bind obj-semantics-rule-1)
 
 	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind action-rule-1))
