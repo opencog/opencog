@@ -502,8 +502,17 @@ but this is not what the code below looks for...
 	(let* ((act-do-do (cog-bind action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		(display act-do-do) (newline)
-		(for-each cog-evaluate! action-list)
+		; (display act-do-do) (newline)
+
+		; Evaluate can throw if we give it bad args. Which happens during
+		; development. So report any errors.
+		(catch #t
+			(lambda ()
+				(for-each cog-evaluate! action-list))
+			(lambda (key . args)
+				(display "Exception: ") (display key) (newline)
+				(display args) (newline)
+				(display "Bad eval: ") (display act-do-do) (newline)))
 
 		; At this time, a ListLink is used to anchor suggested
 		; actions to the current-action anchor. Wipe these out.
