@@ -96,7 +96,7 @@ void AgentRunnerThread::removeAllAgents()
     agentsModified.store(true, memory_order_relaxed);
 }
 
-const AgentSeq& AgentRunnerThread::getAgents() const
+AgentSeq AgentRunnerThread::getAgents() const
 {
     lock_guard<mutex> lock(agentsMutex);
     return agents;
