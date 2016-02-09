@@ -48,7 +48,7 @@ the build, will be more precise as to which parts will not be built.
 
 ###### MOSES
 > MOSES Machine Learning
-> http://github/opencog/moses
+> http://github.com/opencog/moses
 > It uses exactly the same build proceedure as this pakcage. Be sure
   to `sudo make install` at the end.
 
