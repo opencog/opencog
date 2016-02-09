@@ -123,8 +123,11 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	duration = float(duration_node.name)
 	intensity = float(intensity_node.name)
+	print "(Eva expresses", emotion, "emotion for", duration, \
+		 "seconds, with intensity", intensity, ")"
+
+	# print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	# evl.expression(emotion, intensity, duration)
-	print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	return TruthValue(1, 1)
 
 def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):

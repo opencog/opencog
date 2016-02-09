@@ -364,8 +364,9 @@ but this is not what the code below looks for...
 ; Currently supported facial animations on the Eva blender model:
 ; happy, comprehending, engaged, bored, irratated
 ; sad, confused, recoil, surprised
-(ReferenceLink (WordNode "smile") (GroundedPredicate "py:do_emotion"))
-(ReferenceLink (WordNode "frown") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "smile") (DefinedSchema "smile"))
+(ReferenceLink (WordNode "frown") (DefinedSchema "frown"))
 
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
