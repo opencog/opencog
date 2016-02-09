@@ -884,3 +884,8 @@ look-semantics examins it.
 except we use WordNode, for now, to keep it simpler.
 
 current-action
+
+look engaged
+look happy  MVa
+look sad   Pa
+look bored Pa

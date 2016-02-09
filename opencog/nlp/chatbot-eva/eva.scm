@@ -201,6 +201,38 @@
 ;     existing rules.
 
 ;--------------------------------------------------------------------
+
+(define (imperative-express-verb-template VERB-WORD)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+		)
+		(State current-imperative
+			(ActionLink
+				(WordNode "express") ;; SchemaNode, the verb.
+				(ListLink VERB-WORD)
+		))
+	)
+)
+
+(define smile-rule
+	(imperative-express-verb-template (WordNode "smile")))
+(define frown-rule
+	(imperative-express-verb-template (WordNode "frown")))
+
+;--------------------------------------------------------------------
 ; Global semantic knowledge
 ; See farther down below; we build a ReferenceLink attaching
 ; specific parsed sentences to specific actions.
@@ -256,7 +288,8 @@ but this is not what the code below looks for...
 
 ; Global state for the current look-at point
 ; This state records the direction that Eva is looking at,
-; right now.
+; right now. This can be queried with appropriate questins
+; although, not yet ... XXX TODO.
 (StateLink (AnchorNode "head-pointing direction") neutral-gaze)
 (StateLink (AnchorNode "gaze direction") neutral-gaze)
 
@@ -297,6 +330,24 @@ but this is not what the code below looks for...
 	))
 
 ;--------------------------------------------------------------------
+; Emotional expression semantics (groundings)
+(DefineLink
+	(DefinedSchema "smile")
+	(ListLink
+		(Concept "happy")    ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+(DefineLink
+	(DefinedSchema "frown")
+	(ListLink
+		(Concept "sad")      ; blender animation name.
+		(Number 4)           ; duration, seconds
+		(Number 0.3)         ; intensity
+	))
+
+;--------------------------------------------------------------------
 ; Global knowledge about word-meaning.
 ; In this case, specific words have very concrete associations
 ; with physical directions.
@@ -309,6 +360,12 @@ but this is not what the code below looks for...
 ; Global knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
 (ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
+
+; Currently supported facial animations on the Eva blender model:
+; happy, comprehending, engaged, bored, irratated
+; sad, confused, recoil, surprised
+(ReferenceLink (WordNode "smile") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "frown") (GroundedPredicate "py:do_emotion"))
 
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
@@ -349,6 +406,9 @@ but this is not what the code below looks for...
 ))
 
 ; These are English-language sentences that I (Eva) understand.
+; XXX These are not being used right now; these are meant to be
+; fuzzy-matched, in a newer/different design,.... which is
+; maybe abandoned right now???
 (define known-directives
 	(list
 		(get-interp-node (car (nlp-parse "look left")))
@@ -395,6 +455,8 @@ but this is not what the code below looks for...
 	(cog-bind look-rule-2)
 	(cog-bind turn-rule-3)
 	(cog-bind turn-rule-4)
+	(cog-bind smile-rule)
+	(cog-bind frown-rule)
 
 	; Apply semantics-rule-1 -- if the current-imperaitve
 	; anchor is a word we understand in a physical grounded
