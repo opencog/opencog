@@ -429,7 +429,24 @@ but this is not what the code below looks for...
 ; Currently supported facial animations on the Eva blender model:
 ; happy, comprehending, engaged, bored, irratated
 ; sad, confused, recoil, surprised
+
+; Syntactic category of facial expression imperative
 (ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
+(InheritanceLink (GroundedPredicate "py:do_emotion")
+	(ConceptNode "pred-express"))
+
+; Syntactic category of facial-expression schema.
+(InheritanceLink (DefinedSchema "happy") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "sad") (ConceptNode "schema-express"))
+
+; Syntactic structure of facial-expression imperatives.
+(EvaluationLink
+	(PredicateNode "express-action")
+	(ListLink
+		(ConceptNode "pred-express")
+		(ConceptNode "schema-express")))
+
+; Gruoundings
 (ReferenceLink (WordNode "smile") (DefinedSchema "happy"))
 (ReferenceLink (WordNode "frown") (DefinedSchema "sad"))
 (ReferenceLink (WordNode "happy") (DefinedSchema "happy"))
