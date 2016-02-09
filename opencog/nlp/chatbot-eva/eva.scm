@@ -446,7 +446,7 @@ but this is not what the code below looks for...
 		(ConceptNode "pred-express")
 		(ConceptNode "schema-express")))
 
-; Gruoundings
+; Groundings
 (ReferenceLink (WordNode "smile") (DefinedSchema "happy"))
 (ReferenceLink (WordNode "frown") (DefinedSchema "sad"))
 (ReferenceLink (WordNode "happy") (DefinedSchema "happy"))
@@ -575,6 +575,8 @@ but this is not what the code below looks for...
 	(cog-bind turn-rule-4)
 	(cog-bind smile-rule)
 	(cog-bind frown-rule)
+	(cog-bind look-happy-rule)
+	(cog-bind look-sad-rule)
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
