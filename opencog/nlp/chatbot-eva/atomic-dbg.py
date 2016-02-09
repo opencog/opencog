@@ -27,8 +27,10 @@ from opencog.cogserver import get_server_atomspace
 ###############################################################
 # XXX FIXME This is a copy of the code in
 # ros-behavior-scripting/src/atomic-dbg.py
-# That code is authoritative; this is not.  Anyway, its for debugging
-# only, it stubs out the actual calls to ROS.
+# That code makes calls to ROS, to get the robot to actually
+# do things. This code prints responses back to the user.
+# It should be integrated, so that either ROS messages, or
+# printed feedback, or both are generated.
 ###############################################################
 
 # The atomspace where everything will live.
@@ -85,7 +87,19 @@ def look_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "Python look at point", x, y, z
+
+	# Plain-English description of the actions.
+	if (y < 0):
+		print "(Eva looks to the right)"
+	elif (y > 0):
+		print "(Eva looks to the left)"
+
+	if (z < 0):
+		print "(Eva looks down)"
+	elif (z > 0):
+		print "(Eva looks up)"
+
+	# print "Python look at point", x, y, z
 	# evl.look_at_point(x, y, z)
 	return TruthValue(1, 1)
 

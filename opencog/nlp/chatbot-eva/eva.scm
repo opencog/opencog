@@ -5,7 +5,17 @@
 
 ;--------------------------------------------------------------------
 (use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
+(use-modules (opencog nlp fuzzy))
 (load "../relex2logic/rule-utils.scm")
+
+; Must load the rulebase before running eva; see bug
+; https://github.com/opencog/opencog/issues/2021 for details
+; XXX fixme -- we should not need to load either relex2logic or
+; the rules right here, since the code in this module does not depend
+; directly on thes.
+(use-modules (opencog nlp relex2logic))
+(load-r2l-rulebase)
+
 
 ; Global state for the current sentence.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
@@ -25,12 +35,17 @@
 ; XXX needs to be public, so that cog-bind can find this...
 (define-public (show-arg node) (display node) node)
 
-; Handle short commands, such as "look up", "look left".
+; ---------------------------------------------------------------
+; Handle short imperative commands, such as "look up", "look left".
+; This is a rule, meant to be applied to the current sentence.
+; It will extract a direction to look at, and it will set
+; the current-imperative state to that direction.
+;
 ; Relex behaves very inconsistently, sometimes returning
 ; _advmod(look,left) and sometimes _to-be(look, right)
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
-; to link-grammar, and look for the Pa link instead.
+; to link-grammar, and look for the MVa/Pa link instead.
 (define look-rule-1
 	(BindLink
 		(VariableList
@@ -51,12 +66,127 @@
 			(verb-tense "$verb-inst" "imperative")
 			; (dependency "_advmod" "$verb-inst" "$direct-inst")
 			; (dependency "_to-be" "$verb-inst" "$direct-inst")
-			(lg-link "Pa" "$verb-inst" "$direct-inst")
+			(ChoiceLink
+				(lg-link "MVa" "$verb-inst" "$direct-inst")
+				(lg-link "Pa" "$verb-inst" "$direct-inst"))
 			(word-lemma "$direct-inst" "$direction")
 		)
 		(State current-imperative (Variable "$direction"))
 	)
 )
+
+; Matches sentences of the form "look to the right" and
+; "look to the left".
+(define look-rule-2
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$prep-inst" "WordInstanceNode")
+			(var-decl "$direct-inst" "WordInstanceNode")
+			(var-decl "$direction" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			; Specific LG linkage of
+			; look >-MVp-> to >-Ju-> direction
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+
+			(word-lemma "$direct-inst" "$direction")
+		)
+		(State current-imperative (Variable "$direction"))
+	)
+)
+
+(define (imperative-direction-rule-template VERB-WORD DECL LINKS)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			DECL
+			(var-decl "$direct-inst" "WordInstanceNode")
+			(var-decl "$direction" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			; Specific LG linkage
+			LINKS
+			(word-lemma "$direct-inst" "$direction")
+		)
+		(State current-imperative (Variable "$direction"))
+	)
+)
+
+; Re-implementation of look-rule-1 and 2, using the shorter template.
+(define look-rule-1
+	(imperative-direction-rule-template
+		(WordNode "look")  ; VERB-WORD
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$direct-inst")
+			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+	))
+
+(define look-rule-2
+	(imperative-direction-rule-template
+		(WordNode "look")                           ; VERB-WORD
+		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
+		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+		)
+	))
+
+; Same as look-rule-1 and look-rule-2 but with verb "turn"
+(define turn-rule-3
+	(imperative-direction-rule-template
+		(WordNode "turn")  ; VERB-WORD
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$direct-inst")
+			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+	))
+
+(define turn-rule-4
+	(imperative-direction-rule-template
+		(WordNode "turn")                           ; VERB-WORD
+		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
+		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+			(lg-link "MVp" "$verb-inst" "$prep-inst")
+			(ChoiceLink
+				(lg-link "Js" "$prep-inst" "$direct-inst")
+				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+		)
+	))
+
+; Design notes:
+; Rather than hand-crafting a bunch of rules like the above, we should
+; do two things:
+; (1) implement fuzzy matching, so that anything vaguely close to the
+;     desired imperative will get matched.
+; (2) implement automated learning of new rules, and refinement of
+;     existing rules.
 
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
@@ -65,7 +195,8 @@
 
 (define (get-interp-node sent-node)
 "
-  Given a sentnces, get the likliest interpretation node for it.
+  Given a sentence, get the likliest interpretation node for it.
+  At this time, it simply returns the very first interpretation.
   Yes, this is a quick hack, needs fixing. XXX FIXME.
 "
 	(define parse (car (cog-chase-link 'ParseLink 'ParseNode sent-node)))
@@ -73,8 +204,15 @@
 
 (define (get-interp-of-r2l r2l-set-list)
 "
-  Given a list of r2l-sets, pick out the InterpetationNode from each,
-  and return those (as a list).
+  Given a ListLink of r2l-sets, pick out the InterpetationNode from
+  each, and return those (as a list).
+
+XXX this may be junk/obsolete, the format of r2l-sets seems to have
+changed recently.  I'm confused. Current structure seems to be this:
+
+(ReferenceLink (InterpretationNode \"sentence@f2b..\") (SetLink ...))
+
+but this is not what the code below looks for...
 "
 	; find-interp takes a single SetLink
 	(define (find-interp r2l-set)
@@ -110,7 +248,10 @@
 (StateLink (AnchorNode "head-pointing direction") neutral-gaze)
 (StateLink (AnchorNode "gaze direction") neutral-gaze)
 
-; Global knowledge about spatial directions
+; Global knowledge about spatial directions.  The coordinate system
+; is specific to the HR robot head.  Distance in meters, the origin
+; of the system is behind the eyes, middle of head.  "forward" is the
+; direction the chest is facing.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
@@ -144,7 +285,9 @@
 	))
 
 ;--------------------------------------------------------------------
-; Global knowledge about word-meaning
+; Global knowledge about word-meaning.
+; In this case, specific words have very concrete associations
+; with physical directions.
 
 (ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
 (ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
@@ -152,9 +295,14 @@
 (ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
 ;--------------------------------------------------------------------
-; Semantic disambiguation
-; See if we know the meanings of things
+; Semantic disambiguation.
+; See if we know the meaning of utterances.
+; These are rules to be applied to the current state: if the
+; current word/utterance has an explicit concrete grounding, then
+; alter the current state as given by the rule.
 
+; look-semantics-rule-1 -- if the current imperative is a direction
+; word, then set the current action.
 (define look-semantics-rule-1
 	(BindLink
 		(VariableList
@@ -168,13 +316,14 @@
 		(State current-action (Variable "$phys-ground"))
 ))
 
-; These are English-language sentences that I understand.
+; These are English-language sentences that I (Eva) understand.
 (define known-directives
 	(list
 		(get-interp-node (car (nlp-parse "look left")))
 		(get-interp-node (car (nlp-parse "look right")))
 		(get-interp-node (car (nlp-parse "look up")))
-		(get-interp-node (car (nlp-parse "look down")))))
+		(get-interp-node (car (nlp-parse "look down")))
+	))
 
 ;--------------------------------------------------------------------
 ; Action schema
@@ -207,6 +356,9 @@
 	; this will find the WordNode direction and glue it onto
 	; the current-imperative anchor.
 	(cog-bind look-rule-1)
+	(cog-bind look-rule-2)
+	(cog-bind turn-rule-3)
+	(cog-bind turn-rule-4)
 
 	; Apply semantics-rule-1 -- if the current-imperaitve
 	; anchor is a word we understand in a physical grounded
@@ -217,14 +369,22 @@
 	(let* ((act-do-do (cog-bind look-action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		(display act-do-do)
-		(newline)
+		; (display act-do-do) (newline)
 		(for-each cog-evaluate! action-list)
 
 		; XXX replace this by AIML or something.
 		(if (eq? '() action-list)
 			(display "I don't know how to do that.\n"))
 	)
+
+	; Reset the current-imperative state, as otherwise, any subsequent
+	; nonsense will get re-interpreted as the same action as before.
+	(StateLink current-imperative (WordNode "foobar"))
+	(StateLink current-action (WordNode "foobar"))
+
+	; Set the return value to be #<unspecified>, which avoids printing
+	; of the return value.  (if #f #f) has the same effect.
+	*unspecified*
 )
 
 ;--------------------------------------------------------------------
@@ -238,7 +398,7 @@
 	(define r2l-set (get-r2l-set-of-sent imp))
 
 	; Get the sentences that are similar to it.
-	(define fzset (cog-fuzzy-match r2l-set 'SetLink '()))
+	(define fzset (cog-fuzzy-match r2l-set))
 
 	; Get the InterpretationNode's out of that set.
 	(define interp (car (get-interp-of-r2l fzset)))
