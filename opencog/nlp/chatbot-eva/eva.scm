@@ -202,6 +202,7 @@
 
 ;--------------------------------------------------------------------
 
+; Handle verbal expression imperatives, e.g. Smile! Frown!
 (define (imperative-express-verb-template VERB-WORD)
 	(BindLink
 		(VariableList
@@ -231,6 +232,37 @@
 	(imperative-express-verb-template (WordNode "smile")))
 (define frown-rule
 	(imperative-express-verb-template (WordNode "frown")))
+
+; Template for adjectival expressions: "Look surprised!" "Look sad!"
+(define (imperative-express-adj-template ADJ-WORD)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(word-pos "$verb-inst" "verb")
+			(verb-tense "$verb-inst" "imperative")
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+		)
+		(State current-imperative
+			(ActionLink
+				(WordNode "express") ;; SchemaNode, the verb.
+				(ListLink ADJ-WORD)
+		))
+	)
+)
+
+(define look-happy-rule
+	(imperative-express-adj-template (WordNode "happy")))
+(define look-sad-rule
+	(imperative-express-adj-template (WordNode "sad")))
 
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
@@ -332,7 +364,7 @@ but this is not what the code below looks for...
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings)
 (DefineLink
-	(DefinedSchema "smile")
+	(DefinedSchema "happy")
 	(ListLink
 		(Concept "happy")    ; blender animation name.
 		(Number 4)           ; duration, seconds
@@ -340,7 +372,7 @@ but this is not what the code below looks for...
 	))
 
 (DefineLink
-	(DefinedSchema "frown")
+	(DefinedSchema "sad")
 	(ListLink
 		(Concept "sad")      ; blender animation name.
 		(Number 4)           ; duration, seconds
@@ -365,8 +397,10 @@ but this is not what the code below looks for...
 ; happy, comprehending, engaged, bored, irratated
 ; sad, confused, recoil, surprised
 (ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
-(ReferenceLink (WordNode "smile") (DefinedSchema "smile"))
-(ReferenceLink (WordNode "frown") (DefinedSchema "frown"))
+(ReferenceLink (WordNode "smile") (DefinedSchema "happy"))
+(ReferenceLink (WordNode "frown") (DefinedSchema "sad"))
+(ReferenceLink (WordNode "happy") (DefinedSchema "happy"))
+(ReferenceLink (WordNode "sad")   (DefinedSchema "sad"))
 
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
@@ -468,7 +502,7 @@ but this is not what the code below looks for...
 	(let* ((act-do-do (cog-bind action-rule-1))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		; (display act-do-do) (newline)
+		(display act-do-do) (newline)
 		(for-each cog-evaluate! action-list)
 
 		; At this time, a ListLink is used to anchor suggested
