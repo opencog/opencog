@@ -117,7 +117,11 @@
 	)
 )
 
-(define (imperative-direction-rule-template VERB-WORD DECL LINKS)
+; Abstracted variant of the above BindLinks. Given an explicit
+; verb, this then picks out ways in which an object attaches to
+; the verb. The idea of 'object' is used loosely, here: it can
+; a prepostional object, direct object, predicative adjective, etc.
+(define (imperative-object-rule-template VERB-WORD DECL LINKS)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
@@ -125,8 +129,8 @@
 			(var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			DECL
-			(var-decl "$direct-inst" "WordInstanceNode")
-			(var-decl "$direction" "WordNode")
+			(var-decl "$obj-inst" "WordInstanceNode")
+			(var-decl "$object" "WordNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
@@ -138,57 +142,57 @@
 			(verb-tense "$verb-inst" "imperative")
 			; Specific LG linkage
 			LINKS
-			(word-lemma "$direct-inst" "$direction")
+			(word-lemma "$obj-inst" "$object")
 		)
 		(State current-imperative
 			(ActionLink
 				VERB-WORD
-				(ListLink (Variable "$direction"))
+				(ListLink (Variable "$object"))
 		))
 	)
 )
 
 ; Re-implementation of look-rule-1 and 2, using the shorter template.
 (define look-rule-1
-	(imperative-direction-rule-template
+	(imperative-object-rule-template
 		(WordNode "look")  ; VERB-WORD
 		'()                ; DECL
 		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$direct-inst")
-			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+			(lg-link "MVa" "$verb-inst" "$obj-inst")
+			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
 (define look-rule-2
-	(imperative-direction-rule-template
+	(imperative-object-rule-template
 		(WordNode "look")                           ; VERB-WORD
 		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+		(list ; turn --MVp-> to --Ju-> object    ; LINKS
 			(lg-link "MVp" "$verb-inst" "$prep-inst")
 			(ChoiceLink
-				(lg-link "Js" "$prep-inst" "$direct-inst")
-				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+				(lg-link "Js" "$prep-inst" "$obj-inst")
+				(lg-link "Ju" "$prep-inst" "$obj-inst"))
 		)
 	))
 
 ; Same as look-rule-1 and look-rule-2 but with verb "turn"
 (define turn-rule-3
-	(imperative-direction-rule-template
+	(imperative-object-rule-template
 		(WordNode "turn")  ; VERB-WORD
 		'()                ; DECL
 		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$direct-inst")
-			(lg-link "Pa" "$verb-inst" "$direct-inst"))
+			(lg-link "MVa" "$verb-inst" "$obj-inst")
+			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
 (define turn-rule-4
-	(imperative-direction-rule-template
+	(imperative-object-rule-template
 		(WordNode "turn")                           ; VERB-WORD
 		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		(list ; turn --MVp-> to --Ju-> direction    ; LINKS
+		(list ; turn --MVp-> to --Ju-> object    ; LINKS
 			(lg-link "MVp" "$verb-inst" "$prep-inst")
 			(ChoiceLink
-				(lg-link "Js" "$prep-inst" "$direct-inst")
-				(lg-link "Ju" "$prep-inst" "$direct-inst"))
+				(lg-link "Js" "$prep-inst" "$obj-inst")
+				(lg-link "Ju" "$prep-inst" "$obj-inst"))
 		)
 	))
 
@@ -232,37 +236,18 @@
 	(imperative-express-verb-template (WordNode "smile")))
 (define frown-rule
 	(imperative-express-verb-template (WordNode "frown")))
+(define recoil-rule
+	(imperative-express-verb-template (WordNode "recoil")))
 
-; Template for adjectival expressions: "Look surprised!" "Look sad!"
-(define (imperative-express-adj-template ADJ-WORD)
-	(BindLink
-		(VariableList
-			(var-decl "$sent" "SentenceNode")
-			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
-			(var-decl "$verb-inst" "WordInstanceNode")
-		)
-		(AndLink
-			(StateLink current-sentence (Variable "$sent"))
-			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
-			(word-in-parse   "$verb-inst" "$parse")
-			(word-pos "$verb-inst" "verb")
-			(verb-tense "$verb-inst" "imperative")
-			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
-		)
-		(State current-imperative
-			(ActionLink
-				(WordNode "express") ;; SchemaNode, the verb.
-				(ListLink ADJ-WORD)
-		))
-	)
-)
 
-(define look-happy-rule
-	(imperative-express-adj-template (WordNode "happy")))
-(define look-sad-rule
-	(imperative-express-adj-template (WordNode "sad")))
+(define look-expression-rule
+	(imperative-object-rule-template
+		(WordNode "look")  ; VERB-WORD
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$obj-inst")
+			(lg-link "Pa" "$verb-inst" "$obj-inst"))
+	))
 
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
@@ -319,16 +304,16 @@ but this is not what the code below looks for...
 	(ListLink (Number 0) (Number 0) (Number 0)))
 
 ; Global state for the current look-at point
-; This state records the direction that Eva is looking at,
+; This state records the object that Eva is looking at,
 ; right now. This can be queried with appropriate questins
 ; although, not yet ... XXX TODO.
-(StateLink (AnchorNode "head-pointing direction") neutral-gaze)
-(StateLink (AnchorNode "gaze direction") neutral-gaze)
+(StateLink (AnchorNode "head-pointing object") neutral-gaze)
+(StateLink (AnchorNode "gaze object") neutral-gaze)
 
-; Global knowledge about spatial directions.  The coordinate system
+; Global knowledge about spatial objects.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
 ; of the system is behind the eyes, middle of head.  "forward" is the
-; direction the chest is facing.
+; object the chest is facing.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
@@ -382,7 +367,7 @@ but this is not what the code below looks for...
 ;--------------------------------------------------------------------
 ; Global knowledge about word-meaning.
 ; In this case, specific words have very concrete associations
-; with physical directions.
+; with physical objects.
 
 (ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
 (ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
@@ -390,10 +375,10 @@ but this is not what the code below looks for...
 (ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
 
 ; Syntactic category of schema.
-(InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-object"))
+(InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-object"))
+(InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-object"))
+(InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-object"))
 
 ; Global knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
@@ -401,29 +386,29 @@ but this is not what the code below looks for...
 
 ; Syntactic category of imperative verbs
 (InheritanceLink (GroundedPredicate "py:gaze_at_point")
-	(ConceptNode "pred-direction"))
+	(ConceptNode "pred-object"))
 (InheritanceLink (GroundedPredicate "py:look_at_point")
-	(ConceptNode "pred-direction"))
+	(ConceptNode "pred-object"))
 
 ; Allowed syntactic structure --
 ;
 ; There are several ways to think of this. One way is to think of
-; "pred-direction" to be a kind-of subroutine call, whose only valid
+; "pred-object" to be a kind-of subroutine call, whose only valid
 ; arguments are drections.  Another way of thinking about this is
-; as a connector-linkage: "pred-direction" is a connector that can
-; only link to the "schema-direction" connector.
+; as a connector-linkage: "pred-object" is a connector that can
+; only link to the "schema-object" connector.
 ;
 ; This is needed to disambiguate word senses. Consider, for example,
 ; "look up" and "look sad".  One of these, as a grounded action, can
-; only take a direction; the other can only take an expression-name.
+; only take a object; the other can only take an expression-name.
 ; The syntax is used to guarantee that the grounded word-senses are
 ; compatible.
 ;
 (EvaluationLink
 	(PredicateNode "turn-action")
 	(ListLink
-		(ConceptNode "pred-direction")
-		(ConceptNode "schema-direction")))
+		(ConceptNode "pred-object")
+		(ConceptNode "schema-object")))
 
 ; -----
 ; Grounding of facial expressions by animations in the Eva blender model:
@@ -477,8 +462,8 @@ but this is not what the code below looks for...
 ; contains a verb that we know, and an "adverbial" modifier, then suggest
 ; a grounded action.  Here, 'adverbial' is used loosely: its more of an
 ; 'object' or even a prepositional object, or evan an adjective. For
-; example, if the verb is "turn", then we expect the "adverb" to be a 
-; direction name.  If the verb is "express", then we expect the "adverb"
+; example, if the verb is "turn", then we expect the "adverb" to be a
+; object name.  If the verb is "express", then we expect the "adverb"
 ; to be an emotion-adjective (sad, happy, etc.)
 ;
 ; This rule combines two checks:
@@ -487,14 +472,14 @@ but this is not what the code below looks for...
 ;
 ; Step (2) is important, because we have to distinguish "look left"
 ; from "look sad" -- in the first case, the grounding of "look"
-; requires a direction; in the second case, "look" is grounded in a
+; requires a object; in the second case, "look" is grounded in a
 ; different way, and can only take names of facial expressions.
 ;
 (define adv-semantics-rule-1
 	(BindLink
 		(VariableList
 			(var-decl "$verb" "WordNode")
-			(var-decl "$direction" "WordNode")
+			(var-decl "$object" "WordNode")
 			(var-decl "$verb-ground" "GroundedPredicateNode")
 			(var-decl "$dir-ground" "DefinedSchemaNode")
 			(var-decl "$ground-verb-type" "ConceptNode")
@@ -506,10 +491,10 @@ but this is not what the code below looks for...
 			(StateLink current-imperative
 				(ActionLink
 					(Variable "$verb")
-					(ListLink (Variable "$direction"))))
+					(ListLink (Variable "$object"))))
 			; Candidate groundings for the words in the sentence.
 			(ReferenceLink (Variable "$verb") (Variable "$verb-ground"))
-			(ReferenceLink (Variable "$direction") (Variable "$dir-ground"))
+			(ReferenceLink (Variable "$object") (Variable "$dir-ground"))
 
 			; Types (kinds) of the groundings
 			(InheritanceLink (Variable "$verb-ground")
@@ -579,17 +564,17 @@ but this is not what the code below looks for...
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence imp)
 
-	; apply rule-1 -- if the sentence is a command to look,
-	; this will find the WordNode direction and glue it onto
-	; the current-imperative anchor.
+	; apply rules that analyze sentences -- if the current sentence
+	; is an imperative of some sort, it will pick it apart into a
+	; simplfied form, and glue the simplified from to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
 	(cog-bind turn-rule-3)
 	(cog-bind turn-rule-4)
 	(cog-bind smile-rule)
 	(cog-bind frown-rule)
-	(cog-bind look-happy-rule)
-	(cog-bind look-sad-rule)
+	(cog-bind recoil-rule)
+	(cog-bind look-expression-rule)
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
