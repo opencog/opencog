@@ -406,7 +406,7 @@ but this is not what the code below looks for...
 ; sad, confused, recoil, surprised
 
 ; Syntactic category of facial expression imperative
-(ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
 (InheritanceLink (GroundedPredicate "py:do_emotion")
 	(ConceptNode "pred-express"))
 
@@ -569,7 +569,9 @@ but this is not what the code below looks for...
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
+(display
 	(cog-bind obj-semantics-rule-1)
+)
 
 	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind action-rule-1))
