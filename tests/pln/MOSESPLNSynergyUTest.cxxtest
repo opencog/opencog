@@ -49,6 +49,7 @@ public:
 		logger().setLevel(Logger::ERROR);
 		logger().setTimestampFlag(false);
 		logger().setPrintToStdoutFlag(true);
+		logger().setSyncFlag(true);
 	}
 
 	~MOSESPLNSynergyUTest()
