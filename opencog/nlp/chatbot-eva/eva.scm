@@ -426,8 +426,8 @@ but this is not what the code below looks for...
 		(ConceptNode "schema-direction")))
 
 ; -----
-; Currently supported facial animations on the Eva blender model:
-; happy, comprehending, engaged, bored, irratated
+; Grounding of facial expressions by animations in the Eva blender model:
+; happy, comprehending, engaged, bored, irritated
 ; sad, confused, recoil, surprised
 
 ; Syntactic category of facial expression imperative
@@ -446,11 +446,24 @@ but this is not what the code below looks for...
 		(ConceptNode "pred-express")
 		(ConceptNode "schema-express")))
 
+; Currently supported facial animations on the Eva blender model.
+; These must be *exactly* as named; these are sent directly to the
+; ROS beldner API: ; happy, comprehending, engaged, bored, irritated
+; sad, confused, recoil, surprised
+
 ; Groundings
-(ReferenceLink (WordNode "smile") (DefinedSchema "happy"))
-(ReferenceLink (WordNode "frown") (DefinedSchema "sad"))
-(ReferenceLink (WordNode "happy") (DefinedSchema "happy"))
-(ReferenceLink (WordNode "sad")   (DefinedSchema "sad"))
+(ReferenceLink (WordNode "smile")  (DefinedSchema "happy"))
+(ReferenceLink (WordNode "frown")  (DefinedSchema "sad"))
+(ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
+
+(ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
+(ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
+(ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
+(ReferenceLink (WordNode "engaged")      (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "bored")        (DefinedSchema "bored"))
+(ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "confused")     (DefinedSchema "confused"))
+(ReferenceLink (WordNode "surprised")    (DefinedSchema "surprised"))
 
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
