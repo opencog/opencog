@@ -294,9 +294,11 @@
 
 ;--------------------------------------------------------------------
 ; Global knowledge about word-meaning.
-; In this case, specific words have very concrete associations
-; with physical objects.
+; Specific words have very concrete associations with physical objects
+; or actions.
 
+; Knowledge about spatial directions. Pair up words and physical
+; directions.
 (ReferenceLink (WordNode "up")       (DefinedSchema "upwards"))
 (ReferenceLink (WordNode "down")     (DefinedSchema "downwards"))
 (ReferenceLink (WordNode "right")    (DefinedSchema "rightwards"))
@@ -304,22 +306,31 @@
 (ReferenceLink (WordNode "forward")  (DefinedSchema "forwards"))
 (ReferenceLink (WordNode "ahead")    (DefinedSchema "forwards"))
 
-; Syntactic category of schema.
+; Syntactic category of schema. Used for contextual understanding.
 (InheritanceLink (DefinedSchema "upwards")    (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "downwards")  (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "leftwards")  (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "forwards")   (ConceptNode "schema-direction"))
 
-; Global knowledge about imperative verbs.
+; Physical (motor control) knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
 (ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
 
-; Syntactic category of imperative verbs
+; Model (self-awareness) knowledge about imperative verbs.
+(ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
+(ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
+
+; Syntactic category of imperative verbs.
 (InheritanceLink (GroundedPredicate "py:gaze_at_point")
 	(ConceptNode "pred-direction"))
 (InheritanceLink (GroundedPredicate "py:look_at_point")
 	(ConceptNode "pred-direction"))
+
+(InheritanceLink (AnchorNode "*-gaze-direction-*")
+	(ConceptNode "model-direction"))
+(InheritanceLink (AnchorNode "*-head-direction-*")
+	(ConceptNode "model-direction"))
 
 ; Allowed syntactic structure --
 ;
@@ -335,11 +346,19 @@
 ; The syntax is used to guarantee that the grounded word-senses are
 ; compatible.
 ;
+; Specifies the syntactic structure for physical motor-control commands.
 (EvaluationLink
 	(PredicateNode "turn-action")
 	(ListLink
 		(ConceptNode "pred-direction")
 		(ConceptNode "schema-direction")))
+
+; Specifies the syntactic structure for self-model (self-awareness).
+(EvaluationLink
+	(PredicateNode "turn-model")
+	(ListLink
+		(ConceptNode "pred-direction")
+		(ConceptNode "model-direction")))
 
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings)
@@ -596,7 +615,9 @@
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
+(display
 	(cog-bind obj-semantics-rule-1)
+)
 
 	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind action-rule-1))

@@ -17,14 +17,10 @@
 
 ;--------------------------------------------------------------------
 
-
 (define neutral-gaze (DefinedSchema "forwards"))
 
-; Global state for the current look-at point
-; This state records the object that Eva is looking at,
-; right now. This can be queried with appropriate questins
-; although, not yet ... XXX TODO.
-(StateLink (AnchorNode "head-pointing object") neutral-gaze)
-(StateLink (AnchorNode "gaze object") neutral-gaze)
+; Global state for head and eye-position self-awareness.
+(StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
+(StateLink (AnchorNode "*-gaze-direction-*") neutral-gaze)
 
 
