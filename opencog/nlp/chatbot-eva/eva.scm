@@ -239,6 +239,20 @@
 (define recoil-rule
 	(imperative-express-verb-template (WordNode "recoil")))
 
+(define show-rule-1
+	(imperative-object-rule-template
+		(WordNode "show")         ; VERB-WORD
+		'()                       ; DECL
+		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
+	))
+
+(define show-rule-2
+	(imperative-object-rule-template
+		(WordNode "express")      ; VERB-WORD
+		'()                       ; DECL
+		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
+	))
+
 ;--------------------------------------------------------------------
 ; Global semantic knowledge
 ; See farther down below; we build a ReferenceLink attaching
@@ -464,6 +478,7 @@ but this is not what the code below looks for...
 ; Syntactic category of facial expression imperative
 ; "express" is used with "Smile!", "Frown!", etc.
 (ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "show") (GroundedPredicate "py:do_emotion"))
 ; "look" is used with "Look happy!"
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
 (InheritanceLink (GroundedPredicate "py:do_emotion")
@@ -497,6 +512,7 @@ but this is not what the code below looks for...
 (ReferenceLink (WordNode "frown")  (DefinedSchema "sad"))
 (ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
 
+; Look happy! -- adjectives
 (ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
 (ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
 (ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
@@ -505,6 +521,16 @@ but this is not what the code below looks for...
 (ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "confused")     (DefinedSchema "confused"))
 (ReferenceLink (WordNode "surprised")    (DefinedSchema "surprised"))
+
+; Show happiness! -- nouns
+(ReferenceLink (WordNode "happiness")    (DefinedSchema "happy"))
+(ReferenceLink (WordNode "sadness")      (DefinedSchema "sad"))
+(ReferenceLink (WordNode "comprehension")(DefinedSchema "comprehending"))
+(ReferenceLink (WordNode "engagement")   (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "boredom")      (DefinedSchema "bored"))
+(ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "confusion")    (DefinedSchema "confused"))
+(ReferenceLink (WordNode "surprise")     (DefinedSchema "surprised"))
 
 ;--------------------------------------------------------------------
 ; Semantic disambiguation.
@@ -631,6 +657,8 @@ but this is not what the code below looks for...
 	(cog-bind smile-rule)
 	(cog-bind frown-rule)
 	(cog-bind recoil-rule)
+	(cog-bind show-rule-1)
+	(cog-bind show-rule-2)
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
