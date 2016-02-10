@@ -25,6 +25,7 @@ install and configure the above pieces.
 There is also a debugging version that can be run in IRC only,
 without requiring a full hookup to the blender head.
 
+
 Goals
 -----
 Goals for this chatbot are:
@@ -38,6 +39,7 @@ Goals for this chatbot are:
  * Remember things.  e.g. "My name is X"
 
  * Conduct a reasonably pleasant conversation.
+
 
 HOWTO
 -----
@@ -106,15 +108,17 @@ we fall back to some other, more vague understanding, picking the most
 precise one possible, and somehow combining it with any other partial
 understanding from other rules that recognize parts of a sentence.
 
+
 Context
 -------
-Rules should be applied only in relation to teh current context.  This
+Rules should be applied only in relation to the current context.  This
 is for two reasons: one is performance: if we know that a rule is not
 applicable in a certain context, then we don't waste CPU time in
 applying it.  A second resons is that rules can simplify, or factor,
 by not requring a context to be a part of its specification.  Its not
 clear that the URE can currently handle contexts in this sense. At this
 time, contextualized knowledge seems to be a slightly lower priority.
+
 
 ActionLink, GroundedActionLink
 ------------------------------
@@ -140,6 +144,17 @@ a grounding for this.  Groundings are of the form:
         .....   
 
 
+Synonymous phrases
+------------------
+Need to add support for synonyms and synonymous phrases -- e.g. "make a
+happy expression" (which the chatbot currently does not understand) is
+synonymous to "show happiness" (which the chatbot does understand).
+
+Also -- right now "show happiness" and "express happiness" are both
+hard-coded; we would like to have "demonstrate" as a synonym for
+either of these.
+
+
 Issues
 ------
 Linguistic issues abound.  Consider these sentences: "She looks good",
@@ -155,6 +170,7 @@ Generalizations: for example, look-rule-1 explicitly looks for the verb
 stage, so that any synonym of "look" is sufficient.  Even more: any
 synonymous command should be enough, not just on the word level, but
 generally.
+
 
 Bugs
 ----
