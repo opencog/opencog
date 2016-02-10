@@ -103,12 +103,12 @@ in topology, is called a "filter".  Ideally, an utterance should be
 understood very precisely: every word in the sentence counts, every
 syntactic relation has an effect, every tense, mood and number plays a
 role in the understanding of that sentence.  In practice, the robot is
-stupid, and will be continually enountering sentences that it only
+stupid, and will be continually encountering sentences that it only
 partly understands.  Thus, the concept of a "filter": the filter is a
 collection of increasingly less-precise understandings of an utterance.
 All of these "understandings" enclose or wrap or encompass the "true"
 meaning of the utterance; just that some understandings are less precise
-than others.  The task is to find the most prcise understanding
+than others.  The task is to find the most precise understanding
 possible.
 
 For example: given an utterance, perhaps there is some rule that
@@ -127,7 +127,7 @@ If a precise interpretation of a sentence cannot be found, then the
 sentence should be factored into parts, and those parts be combined as
 best as possible.  If one rule recognizes one word, a verb in the
 utterance, and another rule recognizes one word, a noun, but there are
-no rules that recognize two words, then one does as est as one can:
+no rules that recognize two words, then one does as best as one can:
 the sentence is "factored" into parts.  A learning (guessing) subsystem
 does its best to combine the parts into a more precise whole: the more
 parts, the narrower and more refined the understanding.  XXX TODO
@@ -145,8 +145,8 @@ Context
 Rules should be applied only in relation to the current context.  This
 is for two reasons: one is performance: if we know that a rule is not
 applicable in a certain context, then we don't waste CPU time in
-applying it.  A second resons is that rules can simplify, or factor,
-by not requring a context to be a part of its specification.  Its not
+applying it.  A second reason is that rules can simplify, or factor,
+by not requiring a context to be a part of its specification.  Its not
 clear that the URE can currently handle contexts in this sense. At this
 time, contextualized knowledge seems to be a slightly lower priority.
 
@@ -160,7 +160,7 @@ architecture is sketched in `imperative-alt.scm`.
 At the center of the architecture is the ActionLink. Its a new,
 experimental link type used for holding simplified representations
 of imperatives, intermediate in form from the fully-parsed English
-langauge input, and the low-level physical motor commands.  That
+language input, and the low-level physical motor commands.  That
 is, parsed English is converted into these simplified action structures,
 and then these simplified structures are mapped to actual physical
 actions.
@@ -174,7 +174,7 @@ The ActionLink has (for example) the following format:
 
 This is a kind-of flattened or simplified representation of a sentence.
 The "slot value" here is maybe the object of the verb, maybe a
-prepositinal adjective, verb modifier, etc. The precisise linguistic
+prepositional adjective, verb modifier, etc. The precise linguistic
 category is not central to this simplified representation.
 
 Some rule will take an input imperative sentence, and boil it down to
@@ -200,14 +200,14 @@ Future possible enhancement: A given simplified sentence may suggest
 multiple different actions to be taken.  Which, if any of these should
 be taken?  A given input sentence may suggests multiple different
 simplified sentences, and each simplified sentences is suggesting
-multiple differente actions. This forms a network.  This network would
+multiple different actions. This forms a network.  This network would
 need to be a weighted network, so that, of the large choice of different
 actions, only a few might be selected as the "most likely" and
 performed.
 
 Out of this set of possible actions, some may be contradictory; these
 need to be sorted into subsets that are self-consistent with each other.
-I guess this is a glimmer of an action orchestrator.
+I guess this is a glimmer of an action orchestrater.
 
 
 Synonymous phrases
@@ -243,7 +243,7 @@ Bugs
 Sometimes, imperatives get mis-classified as Declaratives. It seems
 random and intermittent and non-reproducible. Not sure what the issue
 is.  e.g. "Eva, turn to the right" "Eva, look up" "Eva, look up"
-after a few of these, on gets marked as delcarative.
+after a few of these, on gets marked as declarative.
 
 What works, currently
 ---------------------
