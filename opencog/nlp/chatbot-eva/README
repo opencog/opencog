@@ -123,7 +123,7 @@ which case the third rule applies. The "filter" here is simply a chain
 of possible interpretations of an utterance, ordered from least to
 most precise.
 
-If a precise interpration of a sentence cannot be found, then the
+If a precise interpretation of a sentence cannot be found, then the
 sentence should be factored into parts, and those parts be combined as
 best as possible.  If one rule recognizes one word, a verb in the
 utterance, and another rule recognizes one word, a noun, but there are
@@ -151,12 +151,24 @@ clear that the URE can currently handle contexts in this sense. At this
 time, contextualized knowledge seems to be a slightly lower priority.
 
 
-ActionLink, GroundedActionLink
-------------------------------
-New, experimental link types. These will have the following format:
+Imperative Architecture
+-----------------------
+The current architecture for handling imperative sentences is in
+`imperative.scm`.  An alternative (failed, incomplete, better)
+architecture is sketched in `imperative-alt.scm`.
+
+At the center of the architecture is the ActionLink. Its a new,
+experimental link type used for holding simplified representations
+of imperatives, intermediate in form from the fully-parsed English
+langauge input, and the low-level physical motor commands.  That
+is, parsed English is converted into these simplified action structures,
+and then these simplified structures are mapped to actual physical
+actions.
+
+The ActionLink has (for example) the following format:
 
     ActionLink
-       SchemaNode "some verb"   ;;; SchemaNode, or WordNode
+       WordNode "some verb"        ;;; a proto-SchemaNode
        ListLink
           ConceptNode "slot value"   ;;; or a WordNode
 
@@ -168,7 +180,6 @@ category is not central to this simplified representation.
 Some rule will take an input imperative sentence, and boil it down to
 this simplified form.   Another rule will then search for a grounding
 for this.  Groundings are of the form:
-
 
     ReferenceLink
        ActionLink
