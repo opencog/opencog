@@ -14,3 +14,18 @@
 ; This is meant to be exemplary: there also needs to be a model of
 ; Eva's environment (including the people that she sees in that
 ; environment), so that she can also talk about that.
+
+;--------------------------------------------------------------------
+
+
+(define neutral-gaze
+   (ListLink (Number 0) (Number 0) (Number 0)))
+
+; Global state for the current look-at point
+; This state records the object that Eva is looking at,
+; right now. This can be queried with appropriate questins
+; although, not yet ... XXX TODO.
+(StateLink (AnchorNode "head-pointing object") neutral-gaze)
+(StateLink (AnchorNode "gaze object") neutral-gaze)
+
+

@@ -247,19 +247,7 @@
 
 
 ;--------------------------------------------------------------------
-; Global semantic interpretation
-
-(define neutral-gaze
-	(ListLink (Number 0) (Number 0) (Number 0)))
-
-; Global state for the current look-at point
-; This state records the object that Eva is looking at,
-; right now. This can be queried with appropriate questins
-; although, not yet ... XXX TODO.
-(StateLink (AnchorNode "head-pointing object") neutral-gaze)
-(StateLink (AnchorNode "gaze object") neutral-gaze)
-
-; Global knowledge about spatial objects.  The coordinate system
+; Global knowledge about spatial directions.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
 ; of the system is behind the eyes, middle of head.  "forward" is the
 ; object the chest is facing.
