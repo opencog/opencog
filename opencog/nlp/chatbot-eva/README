@@ -6,29 +6,11 @@ Prototype that attaches the chatbot to the behavior trees that
 control the Hanson Robotics Eva robot emulator.
 
 The Eva simulator emulates an animated human head, able to see
-listen and respond.  There is a fair amount of setup needed to
-run this thing:
-
- * The animation is done in blender; you have to install blender
-   and get the blender rig.
-
- * Communications is done using ROS. You have to install ROS and
-   catkin and catkin make to build the ROS messages.
-
- * Behavior control is done with OpenCog behavior trees.
-
-See the directory
-https://github.com/opencog/ros-behavior-scripting
-for additional information.  It will give pointers as to how to
-install and configure the above pieces.
-
-There is also a debugging version that can be run in IRC only,
-without requiring a full hookup to the blender head.
-
+listen and respond.
 
 Goals
 -----
-Goals for this chatbot are:
+Functional goals for this chatbot are:
 
  * Respond to verbal commands, such as "Turn left" or "Don't
    look at me." (she's always looking at you)
@@ -40,16 +22,65 @@ Goals for this chatbot are:
 
  * Conduct a reasonably pleasant conversation.
 
+Design goals for this chatbot are:
+
+ * Understand how to convert English sentences into grounded actions.
+   This should be done in some flexible way, by making use of high-level
+   syntactic analysis.
+
+ * Understand how synonymous phrases can be wired in, so that a
+   fairly large set of common expressions can be understood, without
+   having to hard-code each of these, manually.
+
+ * Understand how to perform fuzzy matching, so that at least some
+   basic sense can be picked out of larger, complicated sentences
+   that are not themselves fully understood.
+
+ * Understood how to implement learning, so that actions and responses
+   are refined, as the robot proceeds.  Understand how refinement works.
+
+
+Status
+------
+This is very highly experimental.  Its probably true that most design
+decisions made here are not appropriate, and miss the mark.  There's
+also a bunch of scaffolding, that is meant to be replaced.  Large parts
+may, or may not be redesigned in the (near-term?) future.
+
 
 HOWTO
 -----
- * make install -- important to get file path names correct!
+There are two ways to run this thing: embodied, and disembodied.
+The disembodied setup is simpler.
+
+## Disembodied HOWTO
+This version can be run in IRC only, or even at the guile prompt,
+without requiring a full hookup to the blender head.  It just prints
+(in parenthetical English) the actions that would be performed.
+
+ * make install -- This step is important!
  * Start the relex server on port 4444
  * Start the cogita IRC bot
  * Start a guile shell.
  * Enter (load "run-chatbot.scm") at the guile prompt.
  * Talk to her via IRC.  Alternately, use
    (process-query "foo" "This is a test")
+
+
+## Embodied HOWTO
+There is a fair amount of setup needed to run this thing:
+
+ * The animation is done in blender; you have to install blender
+   and get the blender rig.
+
+ * Communications is done using ROS. You have to install ROS and
+   catkin and catkin make to build the ROS messages.
+
+ * Behavior control is done with OpenCog behavior trees.
+
+See the directory https://github.com/opencog/ros-behavior-scripting
+for additional information.  It will give pointers as to how to
+install and configure the above pieces.
 
 
 General sketch
