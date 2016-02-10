@@ -228,6 +228,11 @@ Need to implement modifiers: e.g. "turn a little bit to the left"
 Not at all clear how to accomplish this.
 
 
+Face awareness
+--------------
+TODO: implement environment awareness: "look at me", "look at him".
+
+
 Issues
 ------
 Linguistic issues abound.  Consider these sentences: "She looks good",
@@ -267,6 +272,8 @@ where "nick" is your chat nick, and "Look up!" is a typical sentence.
    Eva, turn to the right.
    turn left
    Look down.
+   look straight ahead
+   turn forward
 
 ("looking" makes here move her eyes only; turning turns he whole head).
 
