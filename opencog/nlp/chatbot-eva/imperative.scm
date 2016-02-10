@@ -151,6 +151,7 @@
 		'()                ; DECL
 		(ChoiceLink        ; LINKS
 			(lg-link "MVa" "$verb-inst" "$obj-inst")
+			(lg-link "MVp" "$verb-inst" "$obj-inst")
 			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
@@ -284,7 +285,7 @@
 	))
 
 (DefineLink
-	(DefinedSchema "forewards")
+	(DefinedSchema "forwards")
 	(ListLink ;; three numbers: x,y,z
 		(Number 1)    ; x is forward
 		(Number 0) ; y is right
@@ -300,15 +301,15 @@
 (ReferenceLink (WordNode "down")     (DefinedSchema "downwards"))
 (ReferenceLink (WordNode "right")    (DefinedSchema "rightwards"))
 (ReferenceLink (WordNode "left")     (DefinedSchema "leftwards"))
-(ReferenceLink (WordNode "foreward") (DefinedSchema "forewards"))
-(ReferenceLink (WordNode "ahead")    (DefinedSchema "forewards"))
+(ReferenceLink (WordNode "forward")  (DefinedSchema "forwards"))
+(ReferenceLink (WordNode "ahead")    (DefinedSchema "forwards"))
 
 ; Syntactic category of schema.
-(InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "upwards")    (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "downwards")  (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-direction"))
-(InheritanceLink (DefinedSchema "forewards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "leftwards")  (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "forwards")   (ConceptNode "schema-direction"))
 
 ; Global knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))

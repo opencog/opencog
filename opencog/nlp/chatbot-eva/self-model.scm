@@ -18,7 +18,7 @@
 ;--------------------------------------------------------------------
 
 
-(define neutral-gaze (DefinedSchema "forewards"))
+(define neutral-gaze (DefinedSchema "forwards"))
 
 ; Global state for the current look-at point
 ; This state records the object that Eva is looking at,
