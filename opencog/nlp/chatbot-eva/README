@@ -160,10 +160,14 @@ New, experimental link types. These will have the following format:
        ListLink
           ConceptNode "slot value"   ;;; or a WordNode
 
-This is a kind-of flattened representation of a sentence; alternately, a
-simplified form of a sentence.  Some rule will take an input imperative
-sentence, and boil it down to this.   Another rule will then search for
-a grounding for this.  Groundings are of the form:
+This is a kind-of flattened or simplified representation of a sentence.
+The "slot value" here is maybe the object of the verb, maybe a
+prepositinal adjective, verb modifier, etc. The precisise linguistic
+category is not central to this simplified representation.
+
+Some rule will take an input imperative sentence, and boil it down to
+this simplified form.   Another rule will then search for a grounding
+for this.  Groundings are of the form:
 
 
     ReferenceLink
@@ -172,7 +176,27 @@ a grounding for this.  Groundings are of the form:
           ListLink
              ConceptNode "slot value"   ;;; or a WordNode
        ExecutionOutputLink
-        .....   
+          GroundedPredicateNode "py: some_action"
+          ListLink
+             ConceptNode "argument 1"
+             NumberNode  42
+
+The grounding associates the simplified schema with an explicit
+mechanical/physical action to be taken.  It is currently implemented
+as a one-to-one map.
+
+Future possible enhancement: A given simplified sentence may suggest
+multiple different actions to be taken.  Which, if any of these should
+be taken?  A given input sentence may suggests multiple different
+simplified sentences, and each simplified sentences is suggesting
+multiple differente actions. This forms a network.  This network would
+need to be a weighted network, so that, of the large choice of different
+actions, only a few might be selected as the "most likely" and
+performed.
+
+Out of this set of possible actions, some may be contradictory; these
+need to be sorted into subsets that are self-consistent with each other.
+I guess this is a glimmer of an action orchestrator.
 
 
 Synonymous phrases
@@ -224,7 +248,7 @@ where "nick" is your chat nick, and "Look up!" is a typical sentence.
    Look up!
    Eva, turn to the right.
    turn left
-	Look down.
+   Look down.
 
 ("looking" makes here move her eyes only; turning turns he whole head).
 
@@ -236,3 +260,7 @@ where "nick" is your chat nick, and "Look up!" is a typical sentence.
    Look bored
    Eva, express boredom
    Eva, show happiness!
+
+(Other expressions include comprehension, engagement, boredom,
+irritation, confusion, surprise and recoil.  This is the current
+hard-coded list of animations in the blender model.)
