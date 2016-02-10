@@ -221,6 +221,13 @@ hard-coded; we would like to have "demonstrate" as a synonym for
 either of these.
 
 
+Modifiers
+---------
+Need to implement modifiers: e.g. "turn a little bit to the left"
+"turn a little bit more", "turn a little bit less", "a little more".
+Not at all clear how to accomplish this.
+
+
 Issues
 ------
 Linguistic issues abound.  Consider these sentences: "She looks good",

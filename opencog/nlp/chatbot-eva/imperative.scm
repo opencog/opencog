@@ -283,21 +283,32 @@
 		(Number -0.3) ; z is up
 	))
 
+(DefineLink
+	(DefinedSchema "forewards")
+	(ListLink ;; three numbers: x,y,z
+		(Number 1)    ; x is forward
+		(Number 0) ; y is right
+		(Number 0)    ; z is up
+	))
+
 ;--------------------------------------------------------------------
 ; Global knowledge about word-meaning.
 ; In this case, specific words have very concrete associations
 ; with physical objects.
 
-(ReferenceLink (WordNode "up") (DefinedSchema "upwards"))
-(ReferenceLink (WordNode "down") (DefinedSchema "downwards"))
-(ReferenceLink (WordNode "right") (DefinedSchema "rightwards"))
-(ReferenceLink (WordNode "left") (DefinedSchema "leftwards"))
+(ReferenceLink (WordNode "up")       (DefinedSchema "upwards"))
+(ReferenceLink (WordNode "down")     (DefinedSchema "downwards"))
+(ReferenceLink (WordNode "right")    (DefinedSchema "rightwards"))
+(ReferenceLink (WordNode "left")     (DefinedSchema "leftwards"))
+(ReferenceLink (WordNode "foreward") (DefinedSchema "forewards"))
+(ReferenceLink (WordNode "ahead")    (DefinedSchema "forewards"))
 
 ; Syntactic category of schema.
 (InheritanceLink (DefinedSchema "upwards") (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "downwards") (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "rightwards") (ConceptNode "schema-direction"))
 (InheritanceLink (DefinedSchema "leftwards") (ConceptNode "schema-direction"))
+(InheritanceLink (DefinedSchema "forewards") (ConceptNode "schema-direction"))
 
 ; Global knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))

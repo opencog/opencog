@@ -18,8 +18,7 @@
 ;--------------------------------------------------------------------
 
 
-(define neutral-gaze
-   (ListLink (Number 0) (Number 0) (Number 0)))
+(define neutral-gaze (DefinedSchema "forewards"))
 
 ; Global state for the current look-at point
 ; This state records the object that Eva is looking at,
