@@ -462,6 +462,9 @@ but this is not what the code below looks for...
 ; sad, confused, recoil, surprised
 
 ; Syntactic category of facial expression imperative
+; "express" is used with "Smile!", "Frown!", etc.
+(ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
+; "look" is used with "Look happy!"
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
 (InheritanceLink (GroundedPredicate "py:do_emotion")
 	(ConceptNode "pred-express"))
