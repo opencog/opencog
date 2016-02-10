@@ -4,6 +4,9 @@
 ; Scaffolding for converting English-langauge imperatives into
 ; robot actions.
 
+; Rule-utils needed for defintion of var-decl, etc.
+(load "../relex2logic/rule-utils.scm")
+
 ;--------------------------------------------------------------------
 
 ; Global state for the current sentence.
