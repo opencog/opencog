@@ -73,3 +73,9 @@
             P
             Q)
          (cog-new-stv Impl-s Impl-c)))))
+
+;; Name the rule
+(define implication-construction-rule-name
+  (DefinedSchemaNode "implication-construction-rule"))
+(DefineLink implication-construction-rule-name
+  implication-construction-rule)
