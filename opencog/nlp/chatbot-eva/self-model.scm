@@ -17,6 +17,11 @@
 
 (use-modules  (opencog nlp sureal))
 
+; Rule-utils needed for defintion of var-decl, etc.
+(load "../relex2logic/rule-utils.scm")
+
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+
 ;--------------------------------------------------------------------
 
 (define neutral-gaze (DefinedSchema "forwards"))
@@ -28,6 +33,29 @@
 ; Word-associations with state are already hard-coded in imperative.scm
 ;--------------------------------------------------------------------
 
+(define where-look-rule
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			; (var-decl "$direct-inst" "WordInstanceNode")
+			; (var-decl "$direction" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+			(word-pos "$verb-inst" "verb")
+		)
+		(ListLink
+			(Variable "$verb-inst")
+		)
+	)
+)
 
 ;--------------------------------------------------------------------
 (define (self-wh-query QUERY)
@@ -38,6 +66,10 @@
 
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
+
+(display
+	(cog-bind where-look-rule)
+)
 
 	(list (list "foobar"))
 )

@@ -118,6 +118,13 @@
 ; verb, this then picks out ways in which an object attaches to
 ; the verb. The idea of 'object' is used loosely, here: it can
 ; a prepostional object, direct object, predicative adjective, etc.
+;
+; Note that there's a batch or repeated boilerplate: the SentenceNode,
+; ParseNode and InterpretationNode: this is all essentially junk and
+; cruft, used to make up for the fact that attention allocation does
+; not yet work correctly.  This boilerplate is merely trying to ensure
+; that all the words we look at are from the same sentence.  Surely,
+; there must be an easier way to ensure connectivity?
 (define (imperative-object-rule-template VERB-WORD DECL LINKS)
 	(BindLink
 		(VariableList
