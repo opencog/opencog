@@ -1058,7 +1058,7 @@ void TangentBug::test_look_along_ray() const
 #ifndef NDEBUG
     for (int i = 0;i < 1000;++i) {
         double lenx = rng.randdouble_one_excluded() * 100 * rng.rand_positive_negative();
-        double leny = rng.rand_double_one_excluded() * 100 * rng.rand_positive_negative();
+        double leny = rng.randdouble_one_excluded() * 100 * rng.rand_positive_negative();
         TBRay dir(lenx, leny);
         look_along_ray(curr_pos, dir, rng.randdouble_one_excluded()*10);
     }
