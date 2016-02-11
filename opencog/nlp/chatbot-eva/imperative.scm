@@ -8,6 +8,11 @@
 (load "../relex2logic/rule-utils.scm")
 
 ;--------------------------------------------------------------------
+; State and state anchors. These should be thought of as work-arounds,
+; to be replaced when a fine-tuned attention-allocation system is
+; working.  The anchors serve to define the center of what the
+; system is supposed to be "thinking about", right now -- the current
+; sentence, the current action to be taken.
 
 ; Global state for the current sentence.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
@@ -357,8 +362,8 @@
 (EvaluationLink
 	(PredicateNode "turn-model")
 	(ListLink
-		(ConceptNode "pred-direction")
-		(ConceptNode "model-direction")))
+		(ConceptNode "model-direction")
+		(ConceptNode "schema-direction")))
 
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings)
@@ -522,12 +527,12 @@
 ; requires a object; in the second case, "look" is grounded in a
 ; different way, and can only take names of facial expressions.
 ;
-(define obj-semantics-rule-1
+(define (obj-semantics-template VERB-GND-DECL ACTION)
 	(BindLink
 		(VariableList
 			(var-decl "$verb" "WordNode")
 			(var-decl "$object" "WordNode")
-			(var-decl "$verb-ground" "GroundedPredicateNode")
+			VERB-GND-DECL
 			(var-decl "$obj-ground" "DefinedSchemaNode")
 			(var-decl "$ground-verb-type" "ConceptNode")
 			(var-decl "$ground-obj-type" "ConceptNode")
@@ -539,6 +544,7 @@
 				(ActionLink
 					(Variable "$verb")
 					(ListLink (Variable "$object"))))
+
 			; Candidate groundings for the words in the sentence.
 			(ReferenceLink (Variable "$verb") (Variable "$verb-ground"))
 			(ReferenceLink (Variable "$object") (Variable "$obj-ground"))
@@ -557,16 +563,32 @@
 					(VariableNode "$ground-obj-type")))
 		)
 
+		ACTION
+))
+
+(define obj-semantics-rule-1
+	(obj-semantics-template
+		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
+
 		; We only "suggest" this as one possible action.  A later stage
 		; picks the most likely action, based on some semantic liklihood
 		; analysis... or soemthing like that.  Thus, we use a ListLink
 		; here, not a StateLink, since the ListLink allows multiple
 		; suggestions to be made.
-		(ListLink current-action
+		(ListLink current-action                         ; ACTION
 			(EvaluationLink
 				(Variable "$verb-ground")
 				(Variable "$obj-ground")))
-))
+	))
+
+(define obj-semantic-model-rule-1
+	(obj-semantics-template
+		(var-decl "$verb-ground" "AnchorNode") ; VERB-GND-DECL
+
+		(ListLink
+			(Variable "$verb-ground")
+			(Variable "$obj-ground"))
+	))
 
 ;--------------------------------------------------------------------
 ; Action schema
@@ -617,6 +639,9 @@
 	; sense, then attach that sense to the current-action anchor.
 (display
 	(cog-bind obj-semantics-rule-1)
+)
+(display
+	(cog-bind obj-semantic-model-rule-1)
 )
 
 	; Perform the action, and print a reply.
