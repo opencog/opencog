@@ -52,37 +52,37 @@ class AgentRunnerThread: public AgentRunnerBase
         void stop();
 
         /** Adds agent 'a' to the list of scheduled agents. */
-        void addAgent(AgentPtr a);
+        void add_agent(AgentPtr a);
 
         /** Removes agent 'a' from the list of scheduled agents. */
-        void removeAgent(AgentPtr a);
+        void remove_agent(AgentPtr a);
 
         /** Removes all agents from class 'id' */
-        void removeAllAgents(const std::string &id);
+        void remove_all_agents(const std::string &id);
 
-        void removeAllAgents();
+        void remove_all_agents();
 
-        AgentSeq getAgents() const;
+        AgentSeq get_agents() const;
 
-        bool hasAgents() const;
+        bool has_agents() const;
 
     private:
         std::atomic_bool running;
         std::mutex running_cond_mutex;
         std::condition_variable running_cond;
 
-        std::thread runThread;
+        std::thread run_thread;
 
-        std::atomic_bool agentsModified;
-        mutable std::mutex agentsMutex;
-        std::vector<AgentPtr> agentsAddQ;
-        std::vector<AgentPtr> agentsRemoveQ;
-        std::vector<std::string> idsRemoveQ;
-        bool clearAll;
+        std::atomic_bool agents_modified;
+        mutable std::mutex agents_mutex;
+        std::vector<AgentPtr> agents_add_q;
+        std::vector<AgentPtr> agents_remove_q;
+        std::vector<std::string> ids_remove_q;
+        bool clear_all;
 
     private:
-        void processAgentsThread();
-        void joinRunThread();
+        void process_agents_thread();
+        void join_run_thread();
 };
 
 } /* namespace opencog */

@@ -39,33 +39,33 @@ class AgentRunnerBase
         AgentRunnerBase(AgentRunnerBase &&tmp) = default;
         ~AgentRunnerBase();
 
-        void setName(std::string new_name);
-        const std::string &getName() const;
+        void set_name(std::string new_name);
+        const std::string &get_name() const;
 
-        unsigned long getCycleCount() const;
+        unsigned long get_cycle_count() const;
 
     protected:
         std::string name;
 
-        unsigned long cycleCount;
+        unsigned long cycle_count;
 
         AgentSeq agents;
 
     protected:
         /** Adds agent 'a' to the list of scheduled agents. */
-        void addAgent(AgentPtr a);
+        void add_agent(AgentPtr a);
 
         /** Removes agent 'a' from the list of scheduled agents. */
-        void removeAgent(AgentPtr a);
+        void remove_agent(AgentPtr a);
 
         /** Removes all agents from class 'id' */
-        void removeAllAgents(const std::string &id);
+        void remove_all_agents(const std::string &id);
 
         /** Removes all agents */
-        void removeAllAgents();
+        void remove_all_agents();
 
         /** Run an Agent and log its activity. */
-        void runAgent(AgentPtr a);
+        void run_agent(AgentPtr a);
 };
 
 
@@ -75,17 +75,17 @@ class SimpleRunner: public AgentRunnerBase
         SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name) {}
 
         /** Adds agent 'a' to the list of scheduled agents. */
-        void addAgent(AgentPtr a) { AgentRunnerBase::addAgent(a); }
+        void add_agent(AgentPtr a) { AgentRunnerBase::add_agent(a); }
 
         /** Removes agent 'a' from the list of scheduled agents. */
-        void removeAgent(AgentPtr a) { AgentRunnerBase::removeAgent(a); }
+        void remove_agent(AgentPtr a) { AgentRunnerBase::remove_agent(a); }
 
         /** Removes all agents from class 'id' */
-        void removeAllAgents(const std::string &id) { AgentRunnerBase::removeAllAgents(id); }
+        void remove_all_agents(const std::string &id) { AgentRunnerBase::remove_all_agents(id); }
 
-        const AgentSeq &getAgents() const { return agents; }
+        const AgentSeq &get_agents() const { return agents; }
 
-        void processAgents();
+        void process_agents();
 };
 
 } /* namespace opencog */
