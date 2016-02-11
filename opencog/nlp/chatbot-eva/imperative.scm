@@ -322,20 +322,11 @@
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
 (ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
 
-; Model (self-awareness) knowledge about imperative verbs.
-(ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
-(ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
-
 ; Syntactic category of imperative verbs.
 (InheritanceLink (GroundedPredicate "py:gaze_at_point")
 	(ConceptNode "pred-direction"))
 (InheritanceLink (GroundedPredicate "py:look_at_point")
 	(ConceptNode "pred-direction"))
-
-(InheritanceLink (AnchorNode "*-gaze-direction-*")
-	(ConceptNode "model-direction"))
-(InheritanceLink (AnchorNode "*-head-direction-*")
-	(ConceptNode "model-direction"))
 
 ; Allowed syntactic structure --
 ;
@@ -357,6 +348,38 @@
 	(ListLink
 		(ConceptNode "pred-direction")
 		(ConceptNode "schema-direction")))
+
+; ---------------------------------------------------------------
+; Duplicate of the above, except that this is for use in controlling
+; the self-model, rather than the physical motors.  We can't quite
+; recycle the above (I tried) because DefinedSchema mis-behaves
+; in various irritating ways, so we duplicate the above using
+; ConcpetNode, instead.
+
+; Knowledge about spatial directions. Pair up words and physical
+; directions.
+(ReferenceLink (WordNode "up")       (Concept "upwards"))
+(ReferenceLink (WordNode "down")     (Concept "downwards"))
+(ReferenceLink (WordNode "right")    (Concept "rightwards"))
+(ReferenceLink (WordNode "left")     (Concept "leftwards"))
+(ReferenceLink (WordNode "forward")  (Concept "forwards"))
+(ReferenceLink (WordNode "ahead")    (Concept "forwards"))
+
+; Syntactic category of schema. Used for contextual understanding.
+(InheritanceLink (Concept "upwards")    (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "downwards")  (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "rightwards") (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "leftwards")  (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "forwards")   (ConceptNode "schema-direction"))
+
+; Model (self-awareness) knowledge about imperative verbs.
+(ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
+(ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
+
+(InheritanceLink (AnchorNode "*-gaze-direction-*")
+	(ConceptNode "model-direction"))
+(InheritanceLink (AnchorNode "*-head-direction-*")
+	(ConceptNode "model-direction"))
 
 ; Specifies the syntactic structure for self-model (self-awareness).
 (EvaluationLink
@@ -527,13 +550,13 @@
 ; requires a object; in the second case, "look" is grounded in a
 ; different way, and can only take names of facial expressions.
 ;
-(define (obj-semantics-template VERB-GND-DECL ACTION)
+(define (obj-semantics-template VERB-GND-DECL OBJ-GND-DECL ACTION)
 	(BindLink
 		(VariableList
 			(var-decl "$verb" "WordNode")
 			(var-decl "$object" "WordNode")
 			VERB-GND-DECL
-			(var-decl "$obj-ground" "DefinedSchemaNode")
+			OBJ-GND-DECL
 			(var-decl "$ground-verb-type" "ConceptNode")
 			(var-decl "$ground-obj-type" "ConceptNode")
 			(var-decl "$linkage" "PredicateNode")
@@ -566,9 +589,11 @@
 		ACTION
 ))
 
+; See description above.
 (define obj-semantics-rule-1
 	(obj-semantics-template
 		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
+		(var-decl "$obj-ground"  "DefinedSchemaNode")      ; OBJ-GND-DECL
 
 		; We only "suggest" this as one possible action.  A later stage
 		; picks the most likely action, based on some semantic liklihood
@@ -581,11 +606,13 @@
 				(Variable "$obj-ground")))
 	))
 
+; Like above, but for the model.
 (define obj-semantic-model-rule-1
 	(obj-semantics-template
-		(var-decl "$verb-ground" "AnchorNode") ; VERB-GND-DECL
+		(var-decl "$verb-ground" "AnchorNode")  ; VERB-GND-DECL
+		(var-decl "$obj-ground"  "ConceptNode")  ; OBJ-GND-DECL
 
-		(ListLink
+		(StateLink
 			(Variable "$verb-ground")
 			(Variable "$obj-ground"))
 	))
@@ -637,9 +664,7 @@
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-(display
 	(cog-bind obj-semantics-rule-1)
-)
 (display
 	(cog-bind obj-semantic-model-rule-1)
 )
