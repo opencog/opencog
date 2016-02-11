@@ -46,7 +46,7 @@ private:
 public:
 	MOSESPLNSynergyUTest() : eval(&as)
 	{
-		logger().setLevel(Logger::ERROR);
+		logger().setLevel(Logger::DEBUG);
 		logger().setTimestampFlag(false);
 		logger().setPrintToStdoutFlag(true);
 		logger().setSyncFlag(true);
