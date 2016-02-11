@@ -49,7 +49,7 @@
   Generate sentences from each of the R2L-SetLinks
 
   Typically, the SetLinks are those found by the fuzzy matcher;
-  howevr, they could be from other sources.
+  however, they could be from other sources.
   TODO: May need to filter out some of the contents of the SetLinks
   before sending each of them to Microplanner
 "
@@ -155,11 +155,11 @@
   proper parse-ranking and confidence-ranking.
 "
 
-    ; Post processing for the results found by the fuzzy-matcher, may generally
-    ; be useful if we have multiple results and we want to merge or ignore some
-    ; of them.
-    ; TODO: Subject to change, currently it returns the top ones that are having
-    ; the same similarity score
+    ; Post processing for the results found by the fuzzy-matchers. May
+    ; be generally useful, if we have multiple results and we want to
+    ; merge or ignore some of them.
+    ; TODO: Subject to change, currently it returns the top ones that
+    ; have the same similarity score.
     (define (post-process fset)
         (let ( (max-score 0)
                (results '()))
