@@ -851,7 +851,17 @@
 ;
 ; Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 ;
-(define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
+(define (to-do-rule-5
+		verb1-node verb1-instance-node
+		verb2-node verb2-instance-node
+		subj-node subj-instance-node)
+
+	(define verb1 (cog-name verb1-node))
+	(define verb1_instance (cog-name verb1-instance-node))
+	(define verb2 (cog-name verb2-node))
+	(define verb2_instance (cog-name verb2-instance-node))
+	(define subj (cog-name subj-node))
+	(define subj_instance (cog-name subj-instance-node))
 	(ListLink
 		(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
 		(ImplicationLink (PredicateNode verb1_instance) (PredicateNode verb1))
