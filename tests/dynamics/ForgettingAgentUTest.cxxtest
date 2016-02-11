@@ -112,12 +112,12 @@ public:
         try {
             config().load("opencog.conf");
         } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
         }
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);
         agent = cogserver.createAgent<ForgettingAgent>(true);
-        logger().setLevel(Logger::FINE);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::FINE);
+        logger().set_print_to_stdout_flag(true);
     }
 
     ~ForgettingAgentUTest() {
