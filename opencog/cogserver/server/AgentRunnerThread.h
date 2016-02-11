@@ -62,7 +62,7 @@ class AgentRunnerThread: public AgentRunnerBase
 
         void removeAllAgents();
 
-        const AgentSeq &getAgents() const;
+        AgentSeq getAgents() const;
 
         bool hasAgents() const;
 
