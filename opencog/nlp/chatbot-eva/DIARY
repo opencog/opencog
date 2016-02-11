@@ -853,7 +853,7 @@ LEFT-WALL look.v to.r the right.n-u
                    +----Js---+
     +---Wi---+-MVp-+   +Ds**c+
     |        |     |   |     |
-LEFT-WALL look.v to.r the left.n 
+LEFT-WALL look.v to.r the left.n
 
 
 fuzzy vs. concrete:
@@ -861,6 +861,41 @@ fuzzy vs. concrete:
 verb is concrete, verb must be specific and must link by Wi
 direction is any of four words
 direction must link by Js or Ju or Pa or MVa
-everything else is variable .... 
+everything else is variable ....
 everything else is not precise
 
+
+meaning in relation to the current context.  ... apply rules in relation
+to the current context.
+
+current-imperative  stores look-at direction.
+look-semantics examins it.
+
+(1) determine if its a sentence I know.
+(2) if its a look or turn sentence, then extract direction.
+(3) create a simplified rendition, verb and direction.
+
+(ExecutionLink
+    (SchemaNode "turn")
+    (ListLink
+        (ConceptNode "left")
+    ))
+
+except we use WordNode, for now, to keep it simpler.
+
+current-action
+
+look engaged
+look happy  MVa
+look sad   Pa
+look bored Pa
+
+show happiness Ou
+express happiness
+Make a happy expression <---
+
+be happy!
+
+happiness sadness boredom
+
+synonymous words ....
