@@ -23,4 +23,18 @@
 (StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
 (StateLink (AnchorNode "*-gaze-direction-*") neutral-gaze)
 
+; Word-associations with state are already hard-coded in imperative.scm
+
+
+(define (self-wh-query QUERY)
+"
+  Process a query about self.  Return an answer, or else nil, if
+  no answer is known.  QUERY should be a SentenceNode.
+"
+
+	; Make the current sentence visible to everyone.
+	(StateLink current-sentence QUERY)
+
+	(list (list "foobar"))
+)
 

@@ -640,7 +640,7 @@
 
 ;--------------------------------------------------------------------
 
-; First quick stove-pipe hack to perform an action.
+; Stove-pipe hack to perform an action associated with an imperative.
 (define (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
@@ -648,7 +648,7 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence imp)
 
-	; apply rules that analyze sentences -- if the current sentence
+	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
 	; simplfied form, and glue the simplified from to an anchor.
 	(cog-bind look-rule-1)
