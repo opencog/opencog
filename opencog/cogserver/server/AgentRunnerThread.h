@@ -45,10 +45,10 @@ class AgentRunnerThread: public AgentRunnerBase
         AgentRunnerThread(AgentRunnerThread &&tmp) = delete;
         ~AgentRunnerThread();
 
-        /** Start runAgents agents */
+        /** Start running agents */
         void start();
 
-        /** Stop runAgents agents */
+        /** Stop running agents */
         void stop();
 
         /** Adds agent 'a' to the list of scheduled agents. */
@@ -67,9 +67,9 @@ class AgentRunnerThread: public AgentRunnerBase
         bool hasAgents() const;
 
     private:
-        std::atomic_bool runAgents;
-        std::mutex runAgentsMutex;
-        std::condition_variable runAgentsCond;
+        std::atomic_bool running;
+        std::mutex running_cond_mutex;
+        std::condition_variable running_cond;
 
         std::thread runThread;
 

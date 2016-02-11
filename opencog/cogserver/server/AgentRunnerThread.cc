@@ -27,7 +27,7 @@ namespace opencog
 {
 
 AgentRunnerThread::AgentRunnerThread(const std::string &name) :
-        AgentRunnerBase(name), runAgents(false), agentsModified(false),
+        AgentRunnerBase(name), running(false), agentsModified(false),
         clearAll(false)
 {
 }
@@ -42,15 +42,15 @@ void AgentRunnerThread::start()
 {
     {
         // locking is required, to prevent dead-lock in condition_variable wait()
-        lock_guard<mutex> lock(runAgentsMutex);
-        runAgents.store(true, memory_order_relaxed);
+        lock_guard<mutex> lock(running_cond_mutex);
+        running.store(true, memory_order_relaxed);
     }
-    runAgentsCond.notify_one();
+    running_cond.notify_one();
 }
 
 void AgentRunnerThread::stop()
 {
-    runAgents.store(false, memory_order_relaxed);
+    running.store(false, memory_order_relaxed);
 }
 
 void AgentRunnerThread::addAgent(AgentPtr a)
@@ -116,10 +116,10 @@ void AgentRunnerThread::processAgentsThread()
      */
     logger().debug("[CogServer::%s] Agent thread started", name.c_str());
     while (!agents.empty()) {
-        if (!runAgents.load(memory_order_relaxed)) {
-            unique_lock<mutex> lock(runAgentsMutex);
-            runAgentsCond.wait(lock,
-                [this] {return runAgents.load(memory_order_relaxed);});
+        if (!running.load(memory_order_relaxed)) {
+            unique_lock<mutex> lock(running_cond_mutex);
+            running_cond.wait(lock,
+                [this] {return running.load(memory_order_relaxed);});
         }
 
 
