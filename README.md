@@ -14,6 +14,10 @@ The main project site is at http://opencog.org
 An interactive tutorial for getting started is available at:
 https://github.com/opencog/opencog/blob/master/TUTORIAL.md
 
+For platform dependent instruction on dependencies and building the code as
+well as other options for setting up development environment more details are
+found at: http://wiki.opencog.org/wikihome/index.php/Building_OpenCog
+
 Prerequisites
 -------------
 To build and run OpenCog, the packages listed below are required.
