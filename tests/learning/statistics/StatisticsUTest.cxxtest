@@ -55,7 +55,7 @@ public:
     void setUp()
     {
         if(this->DEBUG)
-            logger().setPrintToStdoutFlag(true);
+            logger().set_print_to_stdout_flag(true);
         provider = new DataProvider<std::string>(N_GRAMS, ORDERED);
     }
     void tearDown()
