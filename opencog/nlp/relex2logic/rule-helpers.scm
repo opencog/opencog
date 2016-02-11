@@ -878,8 +878,11 @@
 ;
 ; Examples: "Where do you live?","Where did you eat dinner?" etc.
 ;
-(define (where-rule verb verb_instance)
-	(let ((var_name (choose-var-name)))
+(define (where-rule verb-node verb-instance-node)
+	(let ((var_name (choose-var-name))
+			(verb (cog-name verb-node))
+			(verb_instance (cog-name verb-instance-node))
+		)
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
