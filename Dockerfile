@@ -18,7 +18,7 @@ RUN apt-get -y install software-properties-common wget rlwrap \
 # Use the ocpkg tool to install repositories and dependencies.
 ADD https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg \
     /tmp/octool
-RUN chmod 755 /tmp/octool && /tmp/octool -rdpcalv
+RUN chmod 755 /tmp/octool && sleep 1 && /tmp/octool -rdpcalv
 
 # Environment Variables
 ## Set Locale
