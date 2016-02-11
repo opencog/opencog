@@ -53,9 +53,9 @@ public:
           std::cout << map.getNextHiddenTile( 8, 9 )->getCenter( ).toString( ) << std::endl;
           map.getNextHiddenTile( 11, 9 );
           } catch( opencog::NotFoundException& ex ) {
-          std::cout << ex.getMessage( ) << std::endl;
+          std::cout << ex.get_message( ) << std::endl;
           } catch( opencog::InvalidParamException& ex ) {
-          std::cout << ex.getMessage( ) << std::endl;
+          std::cout << ex.get_message( ) << std::endl;
           }
         */
 
@@ -125,7 +125,7 @@ public:
         TS_ASSERT( nearestTile == map.getTile( 19, 21 ) )
         //std::cout << nearestTile->getRow( ) << " " << nearestTile->getCol( ) << std::endl;
         //} catch( opencog::NotFoundException& ex ) {
-        //std::cerr << ex.getMessage( ) << std::endl;
+        //std::cerr << ex.get_message( ) << std::endl;
         //}
 
         try {
@@ -138,7 +138,7 @@ public:
             //       map2.getNearestVisibleTileToPosition( spatial::math::Vector3( -120272, 0, 220816 ) );
 
         } catch ( opencog::NotFoundException& ex ) {
-            std::cerr << ex.getMessage( ) << std::endl;
+            std::cerr << ex.get_message( ) << std::endl;
         } // catch
 
     }
@@ -185,7 +185,7 @@ public:
             map3.getNearestVisibleTileToPosition( tile2->getCenter( ) );
 
         } catch ( opencog::NotFoundException& ex ) {
-            std::cerr << ex.getMessage( ) << std::endl;
+            std::cerr << ex.get_message( ) << std::endl;
         } // catch
 
         VisibilityMap map4( Vector3( -134000.000, 0, 186000.0 ), Vector3( -70000, 0, 250000.0 ), 128 );

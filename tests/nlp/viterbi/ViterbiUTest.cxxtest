@@ -48,7 +48,7 @@ class ViterbiUTest: public CxxTest::TestSuite
 			}
 			catch (RuntimeException &e)
 			{
-				std::cerr << e.getMessage() << std::endl;
+				std::cerr << e.get_message() << std::endl;
 			}
 			logger().set_filename(config()["LOG_FILE"]);
 			logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
