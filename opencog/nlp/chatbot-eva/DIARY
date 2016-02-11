@@ -901,3 +901,17 @@ happiness sadness boredom
 synonymous words ....
 
 recent history for scripting
+---------------------------------------------------
+
+sureal -- assemble  from R2L
+
+   (sureal (SetLink
+      (Evaluation (Predicate "look") (ListLink (Concept "ahead"))) ))
+
+(use-modules  (opencog nlp sureal))
+(nlp-parse "Mike eats pizza")
+(nlp-parse "He went on a walk")
+(sureal (Set (Evaluation (Predicate "eats") (ListLink (Concept "he")))))
+(sureal (Set (Evaluation (Predicate "eat") (ListLink (Concept "he")))))
+
+(nlp-parse "I am going to eat")

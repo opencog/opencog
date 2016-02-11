@@ -15,6 +15,8 @@
 ; Eva's environment (including the people that she sees in that
 ; environment), so that she can also talk about that.
 
+(use-modules  (opencog nlp sureal))
+
 ;--------------------------------------------------------------------
 
 (define neutral-gaze (DefinedSchema "forwards"))
@@ -24,8 +26,10 @@
 (StateLink (AnchorNode "*-gaze-direction-*") neutral-gaze)
 
 ; Word-associations with state are already hard-coded in imperative.scm
+;--------------------------------------------------------------------
 
 
+;--------------------------------------------------------------------
 (define (self-wh-query QUERY)
 "
   Process a query about self.  Return an answer, or else nil, if
@@ -37,4 +41,3 @@
 
 	(list (list "foobar"))
 )
-

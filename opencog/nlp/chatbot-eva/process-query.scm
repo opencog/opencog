@@ -22,8 +22,8 @@
 	(cond
 		((not (equal? '() ans)) (string-join (car ans)))
 		(else (let
-			; get-answers provided by (opencog nlp fuzzy)
-			((temp (get-answers query)))
+			; get-fuzzy-answers provided by (opencog nlp fuzzy)
+			((temp (get-fuzzy-answers query)))
 			(cond
 				((equal? '() temp) "Sorry, I don't know the answer.")
 				(else (string-join (car temp)))))
