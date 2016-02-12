@@ -58,8 +58,8 @@ void AgentRunnerThread::add_agent(AgentPtr a)
     if (!has_agents()) {
         join_run_thread();
         /*
-         * process_agents_thread() will exit immediately if no agents are available,
-         * so we add the first one immediately
+         * process_agents_thread() will exit immediately if no agents are
+         * available, so we add the first one immediately
          */
         {
             lock_guard<mutex> lock(agents_mutex);
@@ -111,17 +111,17 @@ bool AgentRunnerThread::has_agents() const
 void AgentRunnerThread::process_agents_thread()
 {
     /*
-     * 'agents' is only modified in this function, so there is no need to
-     * protect read accesses to this container in it.
+     * 'agents' is only modified in this function while this thread is active,
+     * so there is no need to protect read accesses to it in this function.
      */
     logger().debug("[CogServer::%s] Agent thread started", name.c_str());
+
     while (!agents.empty()) {
         if (!running.load(memory_order_relaxed)) {
             unique_lock<mutex> lock(running_cond_mutex);
             running_cond.wait(lock,
                 [this] {return running.load(memory_order_relaxed);});
         }
-
 
         AgentSeq::const_iterator it;
         for (it = agents.begin(); it != agents.end(); ++it) {

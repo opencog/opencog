@@ -30,7 +30,8 @@ namespace opencog
 typedef std::vector<AgentPtr> AgentSeq;
 
 /**
- *
+ * This class provides the basic building blocks for classes who are responsible
+ * for running agents ('Runner' classes).
  */
 class AgentRunnerBase
 {
@@ -45,10 +46,13 @@ class AgentRunnerBase
         unsigned long get_cycle_count() const;
 
     protected:
+        /** The runner name; mainly used for logging purposes */
         std::string name;
 
+        /** Current cycle number (will reset to 0 if reaches max possible value) */
         unsigned long cycle_count;
 
+        /** Agents controlled by this runner */
         AgentSeq agents;
 
     protected:
@@ -69,10 +73,15 @@ class AgentRunnerBase
 };
 
 
+/**
+ * This class calls Agent::run() for its agents each time process_agents() is
+ * called. This provides the classical behavior of CogServer.
+ */
 class SimpleRunner: public AgentRunnerBase
 {
     public:
-        SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name) {}
+        SimpleRunner(const std::string &name = "simple"): AgentRunnerBase(name)
+        {}
 
         /** Adds agent 'a' to the list of scheduled agents. */
         void add_agent(AgentPtr a) { AgentRunnerBase::add_agent(a); }
@@ -81,10 +90,19 @@ class SimpleRunner: public AgentRunnerBase
         void remove_agent(AgentPtr a) { AgentRunnerBase::remove_agent(a); }
 
         /** Removes all agents from class 'id' */
-        void remove_all_agents(const std::string &id) { AgentRunnerBase::remove_all_agents(id); }
+        void remove_all_agents(const std::string &id)
+        { AgentRunnerBase::remove_all_agents(id); }
 
         const AgentSeq &get_agents() const { return agents; }
 
+        /**
+         * Runs a single step of contained agents and returns when they are
+         * finished.
+         *
+         * Each call to process_agents() is a processing cycle, and it selects
+         * agents to run in each cycle based on their \link Agent::_frequency
+         * frequency \endlink property.
+         */
         void process_agents();
 };
 

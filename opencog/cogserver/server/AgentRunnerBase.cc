@@ -101,8 +101,7 @@ void AgentRunnerBase::remove_all_agents(const std::string& id)
 
 void AgentRunnerBase::remove_all_agents()
 {
-    for (auto &a: agents)
-    {
+    for (auto &a : agents) {
         cogserver().systemActivityTable().clearActivity(a);
         a->stop();
     }
