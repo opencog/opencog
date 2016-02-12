@@ -33,6 +33,9 @@
 ; Word-associations with state are already hard-coded in imperative.scm
 ;--------------------------------------------------------------------
 
+; Recognize copular sentence "where are you looking?"
+; This is insane overkill for the mere task of recognizing a sentence.
+; The whole point of such complex analysis is to ...???
 (define where-look-rule
 	(BindLink
 		(VariableList
@@ -40,19 +43,24 @@
 			(var-decl "$parse" "ParseNode")
 			(var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
-			; (var-decl "$direct-inst" "WordInstanceNode")
-			; (var-decl "$direction" "WordNode")
+			(var-decl "$qvar-inst" "WordInstanceNode")
+			(var-decl "$subj-inst" "WordInstanceNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
 			(interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
+			(word-in-parse   "$qvar-inst" "$parse")
+			(LemmaLink (VariableNode "$qvar-inst") (WordNode "where"))
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
+			(dependency "_subj" "$verb-inst" "$subj-inst")
+			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
 		)
 		(ListLink
 			(Variable "$verb-inst")
+			(Variable "$subj-inst")
 		)
 	)
 )

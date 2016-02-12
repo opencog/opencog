@@ -917,3 +917,14 @@ sureal -- assemble  from R2L
 (nlp-parse "I am going to eat")
 
 (gen-sentences  for R2L
+
+(get-r2l-set-of-sent 
+
+Where are you looking?
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ? 
+
