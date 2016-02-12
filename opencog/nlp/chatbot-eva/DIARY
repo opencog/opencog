@@ -918,7 +918,7 @@ sureal -- assemble  from R2L
 
 (gen-sentences  for R2L
 
-(get-r2l-set-of-sent 
+(get-r2l-set-of-sent y
 
 Where are you looking?
 
@@ -927,4 +927,22 @@ Where are you looking?
     +---Wq--+--Qw-+SIpx+      |     |
     |       |     |    |      |     |
 LEFT-WALL where are.v you looking.v ? 
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "I")))
+   (InheritanceLink
+      (SatisfyingSet (Predicate "looking")) (Concept "up"))
+
+))
+
+(use-modules (opencog nlp fuzzy))
+
+(get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+
+(use-modules (opencog exec))
+(cog-execute!
+   (StateLink (AnchorNode "*-gaze-direction-*"))
 

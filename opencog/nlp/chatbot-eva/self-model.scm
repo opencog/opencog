@@ -15,7 +15,7 @@
 ; Eva's environment (including the people that she sees in that
 ; environment), so that she can also talk about that.
 
-(use-modules  (opencog nlp sureal))
+(use-modules (opencog nlp sureal))
 
 ; Rule-utils needed for defintion of var-decl, etc.
 (load "../relex2logic/rule-utils.scm")
@@ -45,6 +45,7 @@
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$qvar-inst" "WordInstanceNode")
 			(var-decl "$subj-inst" "WordInstanceNode")
+			(var-decl "$direction" "ConceptNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
@@ -57,13 +58,21 @@
 			(word-pos "$verb-inst" "verb")
 			(dependency "_subj" "$verb-inst" "$subj-inst")
 			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
+
+			(State (Anchor "*-gaze-direction-*") (Variable "$direction"))
 		)
-		(ListLink
-			(Variable "$verb-inst")
-			(Variable "$subj-inst")
+		(SetLink
+			(Evaluation (Predicate "looking") (ListLink (Concept "I")))
+			(InheritanceLink
+				(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
 		)
 	)
 )
+
+;--------------------------------------------------------------------
+(nlp-parse "I am looking to the left")
+(nlp-parse "I am looking to the right")
+(nlp-parse "I am looking up")
 
 ;--------------------------------------------------------------------
 (define (self-wh-query QUERY)
