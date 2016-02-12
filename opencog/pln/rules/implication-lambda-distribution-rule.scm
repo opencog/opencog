@@ -59,3 +59,9 @@
         (LambdaLink SV P)
         (LambdaLink SV Q))
      Impl-tv)))
+
+;; Name the rule
+(define implication-lambda-distribution-rule-name
+  (DefinedSchemaNode "implication-lambda-distribution-rule"))
+(DefineLink implication-lambda-distribution-rule-name
+  implication-lambda-distribution-rule)
