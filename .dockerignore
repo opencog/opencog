@@ -1,7 +1,0 @@
-bin*/*
-build*/*
-.git
-tags/*
-.pyc
-*~
-

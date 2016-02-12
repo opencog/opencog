@@ -98,7 +98,7 @@ public:
         map.addObject( "entity2", ObjectMetaData( 20.0, 20.0, 0.0, 1, 1, 1, 0 ), true );
         map.addObject( "entity3", ObjectMetaData( 3.5, 3.5, 0.0, 1, 1, 1, 0 ), true );
 //    } catch( opencog::InvalidParamException& ex ) {
-//        std::cout << ex.getMessage( ) << std::endl;
+//        std::cout << ex.get_message( ) << std::endl;
 //    } // catch
 
         SuperEntity spe8( s1, s4 );
