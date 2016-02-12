@@ -103,12 +103,12 @@ in topology, is called a "filter".  Ideally, an utterance should be
 understood very precisely: every word in the sentence counts, every
 syntactic relation has an effect, every tense, mood and number plays a
 role in the understanding of that sentence.  In practice, the robot is
-stupid, and will be continually enountering sentences that it only
+stupid, and will be continually encountering sentences that it only
 partly understands.  Thus, the concept of a "filter": the filter is a
 collection of increasingly less-precise understandings of an utterance.
 All of these "understandings" enclose or wrap or encompass the "true"
 meaning of the utterance; just that some understandings are less precise
-than others.  The task is to find the most prcise understanding
+than others.  The task is to find the most precise understanding
 possible.
 
 For example: given an utterance, perhaps there is some rule that
@@ -123,11 +123,11 @@ which case the third rule applies. The "filter" here is simply a chain
 of possible interpretations of an utterance, ordered from least to
 most precise.
 
-If a precise interpration of a sentence cannot be found, then the
+If a precise interpretation of a sentence cannot be found, then the
 sentence should be factored into parts, and those parts be combined as
 best as possible.  If one rule recognizes one word, a verb in the
 utterance, and another rule recognizes one word, a noun, but there are
-no rules that recognize two words, then one does as est as one can:
+no rules that recognize two words, then one does as best as one can:
 the sentence is "factored" into parts.  A learning (guessing) subsystem
 does its best to combine the parts into a more precise whole: the more
 parts, the narrower and more refined the understanding.  XXX TODO
@@ -145,26 +145,41 @@ Context
 Rules should be applied only in relation to the current context.  This
 is for two reasons: one is performance: if we know that a rule is not
 applicable in a certain context, then we don't waste CPU time in
-applying it.  A second resons is that rules can simplify, or factor,
-by not requring a context to be a part of its specification.  Its not
+applying it.  A second reason is that rules can simplify, or factor,
+by not requiring a context to be a part of its specification.  Its not
 clear that the URE can currently handle contexts in this sense. At this
 time, contextualized knowledge seems to be a slightly lower priority.
 
 
-ActionLink, GroundedActionLink
-------------------------------
-New, experimental link types. These will have the following format:
+Imperative Architecture
+-----------------------
+The current architecture for handling imperative sentences is in
+`imperative.scm`.  An alternative (failed, incomplete, better)
+architecture is sketched in `imperative-alt.scm`.
+
+At the center of the architecture is the ActionLink. Its a new,
+experimental link type used for holding simplified representations
+of imperatives, intermediate in form from the fully-parsed English
+language input, and the low-level physical motor commands.  That
+is, parsed English is converted into these simplified action structures,
+and then these simplified structures are mapped to actual physical
+actions.
+
+The ActionLink has (for example) the following format:
 
     ActionLink
-       SchemaNode "some verb"   ;;; SchemaNode, or WordNode
+       WordNode "some verb"        ;;; a proto-SchemaNode
        ListLink
           ConceptNode "slot value"   ;;; or a WordNode
 
-This is a kind-of flattened representation of a sentence; alternately, a
-simplified form of a sentence.  Some rule will take an input imperative
-sentence, and boil it down to this.   Another rule will then search for
-a grounding for this.  Groundings are of the form:
+This is a kind-of flattened or simplified representation of a sentence.
+The "slot value" here is maybe the object of the verb, maybe a
+prepositional adjective, verb modifier, etc. The precise linguistic
+category is not central to this simplified representation.
 
+Some rule will take an input imperative sentence, and boil it down to
+this simplified form.   Another rule will then search for a grounding
+for this.  Groundings are of the form:
 
     ReferenceLink
        ActionLink
@@ -172,7 +187,27 @@ a grounding for this.  Groundings are of the form:
           ListLink
              ConceptNode "slot value"   ;;; or a WordNode
        ExecutionOutputLink
-        .....   
+          GroundedPredicateNode "py: some_action"
+          ListLink
+             ConceptNode "argument 1"
+             NumberNode  42
+
+The grounding associates the simplified schema with an explicit
+mechanical/physical action to be taken.  It is currently implemented
+as a one-to-one map.
+
+Future possible enhancement: A given simplified sentence may suggest
+multiple different actions to be taken.  Which, if any of these should
+be taken?  A given input sentence may suggests multiple different
+simplified sentences, and each simplified sentences is suggesting
+multiple different actions. This forms a network.  This network would
+need to be a weighted network, so that, of the large choice of different
+actions, only a few might be selected as the "most likely" and
+performed.
+
+Out of this set of possible actions, some may be contradictory; these
+need to be sorted into subsets that are self-consistent with each other.
+I guess this is a glimmer of an action orchestrater.
 
 
 Synonymous phrases
@@ -184,6 +219,35 @@ synonymous to "show happiness" (which the chatbot does understand).
 Also -- right now "show happiness" and "express happiness" are both
 hard-coded; we would like to have "demonstrate" as a synonym for
 either of these.
+
+Expressive rigidity
+-------------------
+The current implementation for self-awareness questions ("where are you
+looking?") is extremely rigid: an equivalent response could be gotten
+much more easily by using a hard-coded AIML-style system.  This is a
+serious issue: how can we leverage the fancy infrastructure to provide
+broader support?
+
+Lack of lexical functions
+-------------------------
+Although the current sureal does a good job of assembling sentences,
+it completely lacks support for "lexicial functions":  there is no
+mechanism to convert infinitives into the proper tense; to take a
+noun and adjust the noun-number as needed, etc.  In other words, the
+input into sureal already has to have the correct tense, noun-number,
+etc. already specified. This severely limits expressiveness, and makes
+it difficult to formulate a good reply.
+
+Modifiers
+---------
+Need to implement modifiers: e.g. "turn a little bit to the left"
+"turn a little bit more", "turn a little bit less", "a little more".
+Not at all clear how to accomplish this.
+
+
+Face awareness
+--------------
+TODO: implement environment awareness: "look at me", "look at him".
 
 
 Issues
@@ -208,7 +272,7 @@ Bugs
 Sometimes, imperatives get mis-classified as Declaratives. It seems
 random and intermittent and non-reproducible. Not sure what the issue
 is.  e.g. "Eva, turn to the right" "Eva, look up" "Eva, look up"
-after a few of these, on gets marked as delcarative.
+after a few of these, on gets marked as declarative.
 
 What works, currently
 ---------------------
@@ -220,11 +284,15 @@ alternately, say this at the guile prompt:
 
 where "nick" is your chat nick, and "Look up!" is a typical sentence.
 
+Imperatives:
+
    Eva, look to the right.
    Look up!
    Eva, turn to the right.
    turn left
-	Look down.
+   Look down.
+   look straight ahead
+   turn forward
 
 ("looking" makes here move her eyes only; turning turns he whole head).
 
@@ -236,3 +304,11 @@ where "nick" is your chat nick, and "Look up!" is a typical sentence.
    Look bored
    Eva, express boredom
    Eva, show happiness!
+
+(Other expressions include comprehension, engagement, boredom,
+irritation, confusion, surprise and recoil.  This is the current
+hard-coded list of animations in the blender model.)
+
+Self-awareness questions:
+
+   Where are you looking?

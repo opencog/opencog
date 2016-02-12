@@ -11,16 +11,25 @@
 ;--------------------------------------------------------------------
 (define (wh_query_process query)
 "
-  Process wh-question using the fuzzy hypergraph Matcher
-  QUERY should be a SentenceNode.
+  Process wh-question in a cascade of attempts by different subsystems.
+  FIrst, try to see if its a self-awarenes question; if not, then use
+  the fuzzy hypergraph Matcher.
 
-  Wrapper around get-answers provided by (opencog nlp fuzzy)
+  QUERY should be a SentenceNode.
 "
-    (define temp (get-answers query))
-    (cond
-        ((equal? '() temp) "Sorry, I don't know the answer.")
-        (else (string-join (car temp)))
-))
+	; self-wh-query provided by self-model.scm
+	(define ans (self-wh-query query))
+	(cond
+		((not (equal? '() ans)) (string-join (car ans)))
+		(else (let
+			; get-fuzzy-answers provided by (opencog nlp fuzzy)
+			((temp (get-fuzzy-answers query)))
+			(cond
+				((equal? '() temp) "Sorry, I don't know the answer.")
+				(else (string-join (car temp)))))
+		)
+	)
+)
 ;--------------------------------------------------------------------
 (define-public (process-query user query)
 "

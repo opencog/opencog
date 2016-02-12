@@ -13,6 +13,9 @@
 			(var-decl "$subj2" "WordInstanceNode")
 			(var-decl "$verb1" "WordInstanceNode")
 			(var-decl "$verb2" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb1-lemma" "WordNode")
+			(var-decl "$verb2-lemma" "WordNode")
 			(var-decl "$obj" "WordInstanceNode")
 		)
 		(AndLink
@@ -20,31 +23,23 @@
 			(word-in-parse "$verb1" "$a-parse")
 			(word-in-parse "$verb2" "$a-parse")
 			(dependency "_subj" "$verb1" "$subj")
-			(AbsentLink
-			(dependency "_subj" "$verb2" "$subj2")
-			)
-			(AbsentLink
-			(dependency "_obj" "$verb2" "$obj")
-			)
+			(AbsentLink (dependency "_subj" "$verb2" "$subj2"))
+			(AbsentLink (dependency "_obj" "$verb2" "$obj"))
 			(dependency "_to-do" "$verb1" "$verb2")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb1" "$verb1-lemma")
+			(word-lemma "$verb2" "$verb2-lemma")
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-todo5-rule")
+			(GroundedSchemaNode "scm: to-do-rule-5")
 			(ListLink
-				(VariableNode "$subj")
+				(VariableNode "$verb1-lemma")
 				(VariableNode "$verb1")
+				(VariableNode "$verb2-lemma")
 				(VariableNode "$verb2")
+				(VariableNode "$subj-lemma")
+				(VariableNode "$subj")
 			)
 		)
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-todo5-rule subj verb1 verb2)
-  (to-do-rule-5
-	(cog-name (word-inst-get-lemma verb1)) (cog-name verb1)
-	(cog-name (word-inst-get-lemma  verb2)) (cog-name verb2)
-	(cog-name (word-inst-get-lemma  subj)) (cog-name subj)
-  )
 )

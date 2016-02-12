@@ -17,6 +17,7 @@
 ; being run in doesn't require it.
 
 (ure-add-rule r2l-rules "advmod" advmod 1)
+(ure-add-rule r2l-rules "advmod-maybe" advmod-maybe 1)
 
 (ure-add-rule r2l-rules "adverbialpp" adverbialpp 1)
 

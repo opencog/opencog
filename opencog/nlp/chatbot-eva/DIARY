@@ -899,3 +899,50 @@ be happy!
 happiness sadness boredom
 
 synonymous words ....
+
+recent history for scripting
+---------------------------------------------------
+
+sureal -- assemble  from R2L
+
+   (sureal (SetLink
+      (Evaluation (Predicate "look") (ListLink (Concept "ahead"))) ))
+
+(use-modules  (opencog nlp sureal))
+(nlp-parse "Mike eats pizza")
+(nlp-parse "He went on a walk")
+(sureal (Set (Evaluation (Predicate "eats") (ListLink (Concept "he")))))
+(sureal (Set (Evaluation (Predicate "eat") (ListLink (Concept "he")))))
+
+(nlp-parse "I am going to eat")
+
+(gen-sentences  for R2L
+
+(get-r2l-set-of-sent y
+
+Where are you looking?
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ? 
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "I")))
+   (InheritanceLink
+      (SatisfyingSet (Predicate "looking")) (Concept "up"))
+
+))
+
+(use-modules (opencog nlp fuzzy))
+
+(get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+
+(use-modules (opencog exec))
+(cog-execute!
+   (StateLink (AnchorNode "*-gaze-direction-*"))
+

@@ -14,9 +14,9 @@
   Process wh-question using the fuzzy hypergraph Matcher
   QUERY should be a SentenceNode.
 
-  Wrapper around get-answers provided by (opencog nlp fuzzy)
+  Wrapper around get-fuzzy-answers provided by (opencog nlp fuzzy)
 "
-    (define temp (get-answers query))
+    (define temp (get-fuzzy-answers query))
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
         ; Return all of them, for now

@@ -22,6 +22,17 @@
 ; directly on thes.
 (use-modules (opencog nlp relex2logic))
 (load-r2l-rulebase)
+;
+; Prime the atomspace. XXX This belongs in self-model.scm, but
+; screws up there for some insane reason. This needs to be fixed.
+(nlp-parse "I am looking to the left")
+(nlp-parse "I am looking to the right")
+(nlp-parse "I am looking up")
+(nlp-parse "I am looking upward")
+(nlp-parse "I am looking downward")
+(nlp-parse "I am looking leftwards")
+(nlp-parse "I am looking rightwards")
+(nlp-parse "I am looking forward")
 
 ; Hush the output on load.
 *unspecified*

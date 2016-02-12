@@ -83,14 +83,17 @@ def gaze_at_point(x_node, y_node, z_node):
 	z = float(z_node.name)
 
 	# Plain-English description of the actions.
-	if (y < 0):
+	if (y < -0.1):
 		print "(Eva looks to the right)"
-	elif (y > 0):
+	elif (y > 0.1):
 		print "(Eva looks to the left)"
 
-	if (z < 0):
+	elif (-0.1 < y and y < 0.1 and -0.1 < z and z < 0.1):
+		print "(Eva looks straight ahead)"
+
+	if (z < -0.1):
 		print "(Eva looks down)"
-	elif (z > 0):
+	elif (z > 0.1):
 		print "(Eva looks up)"
 
 	# print "Python gaze at point", x, y, z
@@ -104,14 +107,17 @@ def look_at_point(x_node, y_node, z_node):
 	z = float(z_node.name)
 
 	# Plain-English description of the actions.
-	if (y < 0):
+	if (y < -0.1):
 		print "(Eva turns to the right)"
-	elif (y > 0):
+	elif (y > 0.1):
 		print "(Eva turns to the left)"
 
-	if (z < 0):
+	elif (-0.1 < y and y < 0.1 and -0.1 < z and z < 0.1):
+		print "(Eva turns straight ahead)"
+
+	if (z < -0.1):
 		print "(Eva turns her face downwards)"
-	elif (z > 0):
+	elif (z > 0.1):
 		print "(Eva turns her face upwards)"
 
 
