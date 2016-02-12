@@ -116,6 +116,32 @@
     )
 )
 
+(define (psi-goal-selector)
+"
+  This returns the DefinedPredicateNode that specifies tha GroundedPredicateNode
+  that is used for goal selecting.
+"
+    (DefinedPredicateNode (string-append (psi-prefix-str) "goal-selector"))
+)
+
+; --------------------------------------------------------------
+(define (psi-goal-selector-set! gpn)
+"
+  Specifies the given GroundedPredicateNode to be used for selecting goals.
+
+  gpn:
+  - The GroundedPredicateNode that is used for selecting demand to be a goal.
+    The scheme or python function used for selecting the goals is expected to
+    only take the node representing the demand. There are no checks to enforce
+    the type of GroundedPredicateNode, for now.
+
+"
+    (StateLink
+        (psi-goal-selector)
+        gpn)
+    (psi-goal-selector)
+)
+
 ; --------------------------------------------------------------
 (define (psi-goal-random-maximize threshold)
 "
