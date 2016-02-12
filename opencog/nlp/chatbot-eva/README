@@ -220,6 +220,23 @@ Also -- right now "show happiness" and "express happiness" are both
 hard-coded; we would like to have "demonstrate" as a synonym for
 either of these.
 
+Expressive rigidity
+-------------------
+The current implementation for self-awareness questions ("where are you
+looking?") is extremely rigid: an equivalent response could be gotten
+much more easily by using a hard-coded AIML-style system.  This is a
+serious issue: how can we leverage the fancy infrastructure to provide
+broader support?
+
+Lack of lexical functions
+-------------------------
+Although the current sureal does a good job of assembling sentences,
+it completely lacks support for "lexicial functions":  there is no
+mechanism to convert infinitives into the proper tense; to take a
+noun and adjust the noun-number as needed, etc.  In other words, the
+input into sureal already has to have the correct tense, noun-number,
+etc. already specified. This severely limits expressiveness, and makes
+it difficult to formulate a good reply.
 
 Modifiers
 ---------
