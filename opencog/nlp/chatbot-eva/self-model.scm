@@ -88,6 +88,15 @@
 ;(nlp-parse "I am looking up")
 
 ;--------------------------------------------------------------------
+; XXX This is broken.
+;
+; This is where I wish I had lexical functions rather than just sureal.
+; The problem here is that sureal, all by itself, is unable to convert
+; "leftwards" to "to the left" as the appropriate response.
+;
+; Also: personality and randomization: I want her to sometimes say "I am
+; looking sideways".
+
 (define (self-wh-query QUERY)
 "
   Process a query about self.  Return an answer, or else nil, if
