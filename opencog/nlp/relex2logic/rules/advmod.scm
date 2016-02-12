@@ -5,40 +5,40 @@
 ; (AN June 2015)
 
 (define advmod
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$verb" "WordInstanceNode")
 			(var-decl "$adv" "WordInstanceNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$adv" "$a-parse")
 			(dependency "_advmod" "$verb" "$adv")
-        )
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-advmod-rule")
-       	      (ListLink
-       	         (VariableNode "$verb")
-       	         (VariableNode "$adv")
-            )
-        )
-    )
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-advmod-rule")
+			(ListLink
+				(VariableNode "$verb")
+				(VariableNode "$adv")
+			)
+		)
+	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-advmod-rule verb adv)
   (cond
-    ((or (string=? (cog-name (word-inst-get-lemma adv)) "maybe")
-     (string=? (cog-name (word-inst-get-lemma adv)) "possibly")
-     (string=? (cog-name (word-inst-get-lemma adv)) "perhaps")
-     (string=? (cog-name (word-inst-get-lemma adv)) "probably"))
-     (maybe-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
-     )
+	((or (string=? (cog-name (word-inst-get-lemma adv)) "maybe")
+	 (string=? (cog-name (word-inst-get-lemma adv)) "possibly")
+	 (string=? (cog-name (word-inst-get-lemma adv)) "perhaps")
+	 (string=? (cog-name (word-inst-get-lemma adv)) "probably"))
+	 (maybe-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb))
+	 )
   (else
-     (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
-             (cog-name (word-inst-get-lemma adv)) (cog-name adv)
-     )
+	 (advmod-rule (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
+			 (cog-name (word-inst-get-lemma adv)) (cog-name adv)
+	 )
   ))
 )
