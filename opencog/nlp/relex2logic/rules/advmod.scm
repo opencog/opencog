@@ -28,11 +28,33 @@
 	)
 )
 
+(define advmod-maybe
+	(advmod-template
+		(ChoiceLink
+			(Lemma (Variable "$adv") (Word "maybe"))
+			(Lemma (Variable "$adv") (Word "possibly"))
+			(Lemma (Variable "$adv") (Word "perhaps"))
+			(Lemma (Variable "$adv") (Word "probably"))
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: maybe-rule")
+			(ListLink
+				(VariableNode "$verb-lemma")
+				(VariableNode "$verb")
+			)
+		)
+	))
+
 (define advmod
 	(advmod-template
-		'()
+		(list
+			(Absent (Lemma (Variable "$adv") (Word "maybe")))
+			(Absent (Lemma (Variable "$adv") (Word "possibly")))
+			(Absent (Lemma (Variable "$adv") (Word "perhaps")))
+			(Absent (Lemma (Variable "$adv") (Word "probably")))
+		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-advmod-rule")
+			(GroundedSchemaNode "scm: advmod-rule")
 			(ListLink
 				(VariableNode "$verb-lemma")
 				(VariableNode "$verb")
@@ -41,20 +63,3 @@
 			)
 		)
 	))
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-advmod-rule verb-lemma verb adv-lemma adv)
-  (cond
-	((or (string=? (cog-name adv-lemma) "maybe")
-	 (string=? (cog-name adv-lemma) "possibly")
-	 (string=? (cog-name adv-lemma) "perhaps")
-	 (string=? (cog-name adv-lemma) "probably"))
-	 (maybe-rule (cog-name verb-lemma) (cog-name verb))
-	 )
-  (else
-	 (advmod-rule (cog-name verb-lemma) (cog-name verb)
-			 (cog-name adv-lemma) (cog-name adv)
-	 )
-  ))
-)

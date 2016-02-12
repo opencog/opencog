@@ -460,7 +460,11 @@
 		(InheritanceLink  (ConceptNode instance) (ConceptNode adj_instance))
 ))
 
-(define (advmod-rule verb instance adv adv_instance)
+(define (advmod-rule verb-node instance-node adv-node adv-instance-node)
+	(define verb (cog-name verb-node))
+	(define instance (cog-name instance-node))
+	(define adv (cog-name adv-node))
+	(define adv_instance (cog-name adv-instance-node))
 	(ListLink
 		(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
 			(ImplicationLink  (PredicateNode instance) (PredicateNode verb))
@@ -666,7 +670,9 @@
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
-(define (maybe-rule word word_instance)
+(define (maybe-rule word-node word-instance-node)
+	(define word (cog-name word-node))
+	(define word_instance (cog-name word-instance-node))
 	(ListLink
 		(ImplicationLink (PredicateNode word_instance) (PredicateNode word))
 		(r2l-wordinst-Predicate word_instance)
