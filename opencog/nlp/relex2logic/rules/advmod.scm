@@ -7,7 +7,7 @@
 ; adjectival or predicate, and the other to assign the object of the
 ; preposition. -- (AN June 2015)
 
-(define advmod
+(define (advmod-template EXTRA-STUFF RESULT)
 	(BindLink
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
@@ -22,7 +22,15 @@
 			(dependency "_advmod" "$verb" "$adv")
 			(word-lemma "$verb" "$verb-lemma")
 			(word-lemma "$adv" "$adv-lemma")
+			EXTRA-STUFF
 		)
+		RESULT
+	)
+)
+
+(define advmod
+	(advmod-template
+		'()
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-advmod-rule")
 			(ListLink
@@ -32,8 +40,7 @@
 				(VariableNode "$adv")
 			)
 		)
-	)
-)
+	))
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
