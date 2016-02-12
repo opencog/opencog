@@ -17,6 +17,7 @@
 
 (use-modules (opencog nlp sureal))
 
+
 ; Rule-utils needed for defintion of var-decl, etc.
 (load "../relex2logic/rule-utils.scm")
 
@@ -24,7 +25,7 @@
 
 ;--------------------------------------------------------------------
 
-(define neutral-gaze (DefinedSchema "forwards"))
+(define neutral-gaze (Concept "forwards"))
 
 ; Global state for head and eye-position self-awareness.
 (StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
@@ -70,9 +71,21 @@
 )
 
 ;--------------------------------------------------------------------
-(nlp-parse "I am looking to the left")
-(nlp-parse "I am looking to the right")
-(nlp-parse "I am looking up")
+
+; XXX We want to prime the atomspace with several response sentences,
+; and the way to do that is to nlp-parse them here. The only problem is
+; that this trips some crazy bug.  See bug #508
+; https://github.com/opencog/atomspace/issues/508
+; and so we have to do the load in run-chatbot.scm, instead. Arghhhh.
+; XXX FIXME .. fix the above.
+;
+;(use-modules (opencog nlp relex2logic))
+; (use-modules (opencog nlp chatbot))
+; (load "../chatbot/chat-utils.scm")
+;(load-r2l-rulebase)
+;(nlp-parse "I am looking to the left")
+;(nlp-parse "I am looking to the right")
+;(nlp-parse "I am looking up")
 
 ;--------------------------------------------------------------------
 (define (self-wh-query QUERY)
