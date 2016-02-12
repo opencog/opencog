@@ -267,6 +267,8 @@ alternately, say this at the guile prompt:
 
 where "nick" is your chat nick, and "Look up!" is a typical sentence.
 
+Imperatives:
+
    Eva, look to the right.
    Look up!
    Eva, turn to the right.
@@ -289,3 +291,7 @@ where "nick" is your chat nick, and "Look up!" is a typical sentence.
 (Other expressions include comprehension, engagement, boredom,
 irritation, confusion, surprise and recoil.  This is the current
 hard-coded list of animations in the blender model.)
+
+Self-awareness questions:
+
+   Where are you looking?

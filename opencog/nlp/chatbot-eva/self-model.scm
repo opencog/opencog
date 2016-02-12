@@ -25,7 +25,7 @@
 
 ;--------------------------------------------------------------------
 
-(define neutral-gaze (Concept "forwards"))
+(define neutral-gaze (Concept "forward"))
 
 ; Global state for head and eye-position self-awareness.
 (StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
@@ -97,9 +97,13 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-(display
-	(cog-bind where-look-rule)
-)
+	(let* ((r2l-set (cog-bind where-look-rule))
+			(string-seq (sureal (car (cog-outgoing-set r2l-set))))
+		)
+(display r2l-set)
+(display string-seq)
+(newline)
 
-	(list (list "foobar"))
+		string-seq
+	)
 )

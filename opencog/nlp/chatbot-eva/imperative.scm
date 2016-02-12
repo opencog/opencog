@@ -365,19 +365,19 @@
 
 ; Knowledge about spatial directions. Pair up words and physical
 ; directions.
-(ReferenceLink (WordNode "up")       (Concept "upwards"))
-(ReferenceLink (WordNode "down")     (Concept "downwards"))
+(ReferenceLink (WordNode "up")       (Concept "upward"))
+(ReferenceLink (WordNode "down")     (Concept "downward"))
 (ReferenceLink (WordNode "right")    (Concept "rightwards"))
 (ReferenceLink (WordNode "left")     (Concept "leftwards"))
-(ReferenceLink (WordNode "forward")  (Concept "forwards"))
-(ReferenceLink (WordNode "ahead")    (Concept "forwards"))
+(ReferenceLink (WordNode "forward")  (Concept "forward"))
+(ReferenceLink (WordNode "ahead")    (Concept "forward"))
 
 ; Syntactic category of schema. Used for contextual understanding.
-(InheritanceLink (Concept "upwards")    (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "downwards")  (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "upward")    (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "downward")  (ConceptNode "schema-direction"))
 (InheritanceLink (Concept "rightwards") (ConceptNode "schema-direction"))
 (InheritanceLink (Concept "leftwards")  (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "forwards")   (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "forward")   (ConceptNode "schema-direction"))
 
 ; Model (self-awareness) knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
