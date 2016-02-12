@@ -646,6 +646,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_BINARY_DIR}/opencog/cogserver/server/cogserver$"
 	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
 	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
+	"^${PROJECT_SOURCE_DIR}/opencog/python/__init__.py$"
 )
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
