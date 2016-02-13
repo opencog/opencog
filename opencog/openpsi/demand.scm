@@ -60,9 +60,18 @@
       wrapping psi-demand-pattern.
 "
 ; TODO: Make this generic for pattern gets
-    (define (is-nn? x) (equal? (cog-type x) 'NumberNode))
-    (remove! is-nn?
-        (list-merge (par-map cog-outgoing-set (cog-outgoing-set set-link))))
+    (cog-outgoing-set (cog-execute!
+        (MapLink
+            (ImplicationLink
+                (VariableList
+                    (TypedVariable (Variable "$x") (Type "ConceptNode"))
+                    (TypedVariable (Variable "$y") (Type "NumberNode")))
+                (ListLink
+                    (Variable "$x")
+                    (Variable "$y")
+                )
+                (Variable "$x"))
+            set-link)))
 )
 
 ; --------------------------------------------------------------
