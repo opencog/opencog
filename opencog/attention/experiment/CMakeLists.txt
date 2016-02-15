@@ -16,11 +16,13 @@ IF (TBB_FOUND)
 	ADD_LIBRARY(dynamicsexpsetupmodule SHARED
 		ExperimentSetupModule
 		SentenceGenStimulateAgent	
-		ArtificialStimulatorAgent	
+		ArtificialStimulatorAgent
+		SmokesDBFCAgent
 	)
 
 	TARGET_LINK_LIBRARIES(dynamicsexpsetupmodule
 		${ATOMSPACE_LIBRARIES}
+		attention
 		server
 		tbb
 	)

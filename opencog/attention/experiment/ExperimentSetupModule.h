@@ -8,11 +8,11 @@
 #ifndef PLNDYNAMICSEXPSETUPMODULE_H_
 #define PLNDYNAMICSEXPSETUPMODULE_H_
 
+#include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
+#include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>
 
-#include "ArtificialStimulatorAgent.h"
-#include "SentenceGenStimulateAgent.h"
 
 namespace opencog {
 

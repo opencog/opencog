@@ -9,12 +9,12 @@
 #include <boost/filesystem.hpp>
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/attention/experiment/ExperimentSetupModule.h>
+#include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
 
-#include "ExperimentSetupModule.h"
-#include "SentenceGenStimulateAgent.h"
 
 using namespace opencog;
 using namespace opencog::ECANExperiment;

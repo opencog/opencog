@@ -4,7 +4,7 @@
  *  Created on: 4 Aug, 2015
  *      Author: misgana
  */
-#include <opencog/dynamics/experiment/ArtificialStimulatorAgent.h>
+#include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/server/CogServer.h>
 
 
