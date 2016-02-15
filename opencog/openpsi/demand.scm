@@ -159,6 +159,42 @@
 )
 
 ; --------------------------------------------------------------
+(define (psi-demand-value< threshold)
+"
+  Returns a function that checks if a given demand node has value less than
+  the given threshold and returns True-TruthValue if it is and False-TruthValue
+  if not. This doesn't check if the node given actually defines a demand.
+
+  threshold:
+  - The boundary of the demand-value to be checked at.
+"
+    (lambda (x)
+        (if (< (tv-mean (cog-tv x)) threshold)
+            (stv 1 1)
+            (stv 0 1)
+        )
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-demand-value> threshold)
+"
+  Returns a function that checks if a given demand node has value greater than
+  the given threshold and returns True-TruthValue if it is and False-TruthValue
+  if not. This doesn't check if the node given actually defines a demand.
+
+  threshold:
+  - The boundary of the demand-value to be checked at.
+"
+    (lambda (x)
+        (if (> (tv-mean (cog-tv x)) threshold)
+            (stv 1 1)
+            (stv 0 1)
+        )
+    )
+)
+
+; --------------------------------------------------------------
 (define (psi-lowest-demand? atom)
 "
   Returns #t if the atom passed is a demand that has the lowest demand-value.
