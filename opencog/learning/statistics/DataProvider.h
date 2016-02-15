@@ -222,10 +222,10 @@ public:
     {
         std::vector<Metadata> rawData;
 
-        for (long i = 0; i < oneRawData.size(); i++){
-            Metadata* data = mDataSet->find(oneRawData[i]);
+        for (auto& mdata : oneRawData){
+            Metadata* data = mDataSet->find(mdata);
             if(data == NULL) {
-                data = &oneRawData[i];
+                data = &mdata;
                 mDataSet->insert(*data);
             }
             rawData.push_back(*data);
@@ -249,16 +249,18 @@ public:
 
         std::vector<long> result;
 
-        for (long i = 0; i < oneRawData.size(); i++)
-            if(combination_array) {
+        if (combination_array) {
+            int i = 0;
+            for (auto& mdata : oneRawData) {
                 if (combination_array[i])
-                    result.push_back(mDataSet->getKey(oneRawData[i]));
-                else
-                    continue;
+                    result.push_back(mDataSet->getKey(mdata));
+                ++i;
             }
-            else{
-                result.push_back(mDataSet->getKey(oneRawData[i]));
-            }
+        } else {
+            result.reserve(oneRawData.size());
+            for (auto& mdata : oneRawData)
+                result.push_back(mDataSet->getKey(mdata));
+        }
 
         return result;
     }
@@ -267,8 +269,10 @@ public:
     inline std::vector<Metadata> makeDataFromKey(std::vector<long> &indexes)
     {
         std::vector<Metadata> result;
-        for (long i = 0; i < indexes.size(); i++)
-            result.push_back(*(mDataSet->getValue(indexes[i])));
+        result.reserve(indexes.size());
+        for (auto& index : indexes)
+            result.push_back(*(mDataSet->getValue(index)));
+
         return result;
     }
 
