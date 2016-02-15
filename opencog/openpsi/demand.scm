@@ -221,17 +221,30 @@
 
 "
 
-    ; XXX: Should there be weight b/n the different demand-goals? For now a
+    ; NOTE: Should there be weight b/n the different demand-goals? For now a
     ; a random choice of demands is assumed. In subsequent steps. The
     ; demand-value could possibly be used for that.
-    (define (get-demand) (psi-clean-demand-gets (cog-execute!
-        (GetLink
-            (VariableList (assoc-ref (psi-demand-pattern) "var"))
-            (AndLink
-                (assoc-ref (psi-demand-pattern) "pat")
-                (EvaluationLink
-                    gpn
-                    (ListLink demand-var)))))))
+    (define (get-demand) (cog-execute!
+        ; Filter out the demand-nodes only
+        (MapLink
+            (ImplicationLink
+                (VariableList
+                    (TypedVariable (Variable "$x") (Type "ConceptNode"))
+                    (TypedVariable (Variable "$y") (Type "NumberNode")))
+                (ListLink
+                    (Variable "$x")
+                    (Variable "$y")
+                )
+                (Variable "$x"))
+
+            (GetLink
+                (VariableList (assoc-ref (psi-demand-pattern) "var"))
+                (AndLink
+                    (assoc-ref (psi-demand-pattern) "pat")
+                    (EvaluationLink
+                        gpn
+                        (ListLink demand-var)))))
+        ))
 
     ; check arguments
     (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
