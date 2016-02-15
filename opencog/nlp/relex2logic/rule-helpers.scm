@@ -475,19 +475,18 @@
 )
 
 (define (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
-    (ListLink
-    (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
-    (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
-    (ImplicationLink  (PredicateNode prep_instance) (PredicateNode prep))
-    (r2l-wordinst-Predicate instance)
-    (r2l-wordinst-concept noun_instance)
-    (r2l-wordinst-Predicate prep_instance)
-    (EvaluationLink
-        (PredicateNode prep_instance)
-        (ListLink
-            (PredicateNode verb)
-            (ConceptNode noun_instance))
-	))
+	(ListLink
+		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun))
+		(ImplicationLink (PredicateNode instance) (PredicateNode verb))
+		(ImplicationLink (PredicateNode prep_instance) (PredicateNode prep))
+		(r2l-wordinst-Predicate instance)
+		(r2l-wordinst-concept noun_instance)
+		(r2l-wordinst-Predicate prep_instance)
+		(EvaluationLink
+			(PredicateNode prep_instance)
+			(ListLink (PredicateNode verb) (ConceptNode noun_instance))
+		)
+	)
 )
 ;-----------------------------------------------------------------------
 ; prepositional phrase rule
@@ -1227,20 +1226,18 @@
 ; Example: "The books were written by Charles Dickens."
 ; XXX this rule is not used anywhere ...
 (define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
-    (ListLink
-	 (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-    (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
-    (InheritanceLink (ConceptNode passive_obj_instance) (ConceptNode passive_obj))
-	(r2l-wordinst-concept obj_instance)
-	(r2l-wordinst-concept passive_obj_instance)
-	(r2l-wordinst-Predicate verb_instance)
-    (EvaluationLink
-            (PredicateNode verb)
-            (ListLink
-                    (ConceptNode passive_obj_instance)
-                    (ConceptNode obj_instance)
-            )
-    ))
+	(ListLink
+		(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
+		(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
+		(InheritanceLink (ConceptNode passive_obj_instance) (ConceptNode passive_obj))
+		(r2l-wordinst-concept obj_instance)
+		(r2l-wordinst-concept passive_obj_instance)
+		(r2l-wordinst-Predicate verb_instance)
+		(EvaluationLink
+			(PredicateNode verb)
+			(ListLink (ConceptNode passive_obj_instance) (ConceptNode obj_instance))
+		)
+	)
 )
 
 ; Example: "The books are published."
@@ -1271,91 +1268,98 @@
 ;         "Joan is poor but happy."
 
 (define (and-rule var1 var1_instance var2 var2_instance pos)
-
-    (cond
-    [(equal? pos "verb")
-        (ListLink
-        (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
-        (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "and")
-            (ListLink
-                (PredicateNode var1)
-                (PredicateNode var2)
-            )
-        ))]
-    [else
-        (ListLink
-        (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
-        (InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
-        (r2l-wordinst-concept var1_instance)
-        (r2l-wordinst-concept var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "and")
-            (ListLink
-               (ConceptNode var1_instance)
-               (ConceptNode var2_instance)
-            )
-       ))])
+	(cond [(equal? pos "verb")
+		(ListLink
+			(ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+			(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+			(r2l-wordinst-Predicate var1_instance)
+			(r2l-wordinst-Predicate var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "and")
+				(ListLink
+					(PredicateNode var1)
+					(PredicateNode var2)
+				)
+			)
+		)]
+	[else
+		(ListLink
+			(InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+			(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+			(r2l-wordinst-concept var1_instance)
+			(r2l-wordinst-concept var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "and")
+				(ListLink
+					(ConceptNode var1_instance)
+					(ConceptNode var2_instance)
+				)
+			)
+		)
+	])
 )
 
 (define (but-rule var1 var1_instance var2 var2_instance pos)
-    (cond [(equal? pos "verb")
-        (ListLink
-        (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
-        (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "but")
-            (ListLink
-                (PredicateNode var1)
-                (PredicateNode var2)
-            )
-        ))]
-    [else
-        (ListLink
-        (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
-        (r2l-wordinst-concept var1_instance)
-        (r2l-wordinst-concept var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "but")
-            (ListLink
-                (ConceptNode var1_instance)
-                (ConceptNode var2_instance)
-            )
-        ))])
+	(cond [(equal? pos "verb")
+		(ListLink
+			(ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+			(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+			(r2l-wordinst-Predicate var1_instance)
+			(r2l-wordinst-Predicate var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "but")
+				(ListLink
+					(PredicateNode var1)
+					(PredicateNode var2)
+				)
+			)
+		)]
+	[else
+		(ListLink
+			(InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+			(r2l-wordinst-concept var1_instance)
+			(r2l-wordinst-concept var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "but")
+				(ListLink
+					(ConceptNode var1_instance)
+					(ConceptNode var2_instance)
+				)
+			)
+		)
+	])
 )
 
 (define (or-rule var1 var1_instance var2 var2_instance pos)
-    (cond [(equal? pos "verb")
-        (ListLink
-        (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
-        (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "or")
-            (ListLink
-                (PredicateNode var1)
-                (PredicateNode var2)
-            )
-        ))]
-    [else
-        (ListLink
-        (InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
-        (InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
-        (r2l-wordinst-concept var1_instance)
-        (r2l-wordinst-concept var2_instance)
-        (EvaluationLink
-            (DefinedLinguisticPredicateNode "or")
-            (ListLink
-                (ConceptNode var1_instance)
-                (ConceptNode var2_instance)
-            )
-        ))])
+	(cond [(equal? pos "verb")
+		(ListLink
+			(ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
+			(ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
+			(r2l-wordinst-Predicate var1_instance)
+			(r2l-wordinst-Predicate var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "or")
+				(ListLink
+					(PredicateNode var1)
+					(PredicateNode var2)
+				)
+			)
+		)]
+	[else
+		(ListLink
+			(InheritanceLink (ConceptNode var1_instance) (ConceptNode var1))
+			(InheritanceLink (ConceptNode var2_instance) (ConceptNode var2))
+			(r2l-wordinst-concept var1_instance)
+			(r2l-wordinst-concept var2_instance)
+			(EvaluationLink
+				(DefinedLinguisticPredicateNode "or")
+				(ListLink
+					(ConceptNode var1_instance)
+					(ConceptNode var2_instance)
+				)
+			)
+		)
+	])
 )
 
 ;-----------------------------------------------------------------------
@@ -1471,30 +1475,30 @@
 ; before he is tired"
 ; XXX before-after-rule is not used anywhere!
 (define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
-    (define y-node
-        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
-            (PredicateNode $y_instance)
-            (ConceptNode $y_instance)
-        )
-    )
-    (ListLink
-        (EvaluationLink
-            (PredicateNode $before_or_after)
-            (ListLink (PredicateNode $x_instance) y-node)
-        )
-    )
+	(define y-node
+		(if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
+			(PredicateNode $y_instance)
+			(ConceptNode $y_instance)
+		)
+	)
+	(ListLink
+		(EvaluationLink
+			(PredicateNode $before_or_after)
+			(ListLink (PredicateNode $x_instance) y-node)
+		)
+	)
 )
 
 ; Examples: "I had dinner at 6 pm", "I went to sleep at 1 am"
 ; XXX time-rule is not used anywhere!
 (define (time-rule $hour $period $v_instance)
-    (define time-node
-        (if (string=? $period "am")
-            (TimeNode $hour)
-            (TimeNode (number->string (+ (string->number $hour) 12)))
-        )
-    )
-    (ListLink (AtTimeLink time-node (PredicateNode $v_instance)))
+	(define time-node
+		(if (string=? $period "am")
+			(TimeNode $hour)
+			(TimeNode (number->string (+ (string->number $hour) 12)))
+		)
+	)
+	(ListLink (AtTimeLink time-node (PredicateNode $v_instance)))
 )
 
 
