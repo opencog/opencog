@@ -10,6 +10,8 @@
 #include <fstream>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
+#include <opencog/attention/experiment/ExperimentSetupModule.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/dynamics/attention/ForgettingAgent.h>
@@ -24,9 +26,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include "ArtificialStimulatorAgent.h"
 #include "Globals.h"
-#include "ExperimentSetupModule.h"
 
 using namespace opencog;
 using namespace opencog::ECANExperiment;
