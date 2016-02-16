@@ -159,20 +159,39 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-demand-value< threshold)
+(define (psi-demand-value-term< threshold)
 "
-  Returns a function that checks if a given demand node has value less than
-  the given threshold and returns True-TruthValue if it is and False-TruthValue
-  if not. This doesn't check if the node given actually defines a demand.
+  Returns an evaluatable term that checks if a demand has value less than
+  the given threshold number.
 
   threshold:
   - The boundary of the demand-value to be checked at.
 "
-    (lambda (x)
-        (if (< (tv-mean (cog-tv x)) threshold)
-            (stv 1 1)
-            (stv 0 1)
-        )
+    (EvaluationLink
+        (GroundedPredicateNode "scm: psi-demand-value<")
+        (ListLink
+            demand-var
+            (NumberNode threshold)))
+)
+
+(define (psi-demand-value< demand-node threshold-node)
+"
+  Returns True-TruthValue if a given demand-node has value less than the
+  given threshold-node number value else False-TruthValue. This doesn't
+  check if the node given actually defines a demand. And is primarily to be
+  used as evaluatable term.
+
+  demand-node:
+  - The node representing the demand.
+
+  threshold-node:
+  - A NumberNode representing the boundary of the demand-value to be checked
+    at.
+"
+    (if (< (tv-mean (cog-tv demand-node))
+           (string->number (cog-name threshold-node)))
+        (stv 1 1)
+        (stv 0 1)
     )
 )
 
@@ -219,20 +238,20 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-select-goal gpn)
+(define-public (psi-select-demand dpn)
 "
   Goal are defined as demands choosen for either increase or decrease in
   their demand values. The choice for being the current-goal is made by pattern
-  matching over the demands by using the GroundedPredicateNode passed as a
+  matching over the demands by using the DefinedPredicateNode passed as a
   constraint.
 
-  The GroundedPredicateNode passed should tag the demands for increase or
+  The DefinedPredicateNode passed should tag the demands for increase or
   decrease by evaluating the demands that satisfy the conditions set through
   its goal-selection function. The function should tag the goal representing
   atom (the demand-ConceptNode) for being increased or decreased.
 
-  gpn:
-    - GroundedPredicateNode that names an goal-selection function that will
+  dpn:
+    - DefinedPredicateNode that names a goal-selection function that will
       choose the demands. Its function should take a single demand-ConceptNode
       and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
       in addition to tagging the demand-ConceptNodes as one of the action-types.
@@ -277,14 +296,12 @@
                 (VariableList (assoc-ref (psi-demand-pattern) "var"))
                 (AndLink
                     (assoc-ref (psi-demand-pattern) "pat")
-                    (EvaluationLink
-                        gpn
-                        (ListLink demand-var)))))
+                    dpn)))
         ))
 
     ; check arguments
-    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected GroundedPredicateNode got: " gpn))
+    (if (not (equal? (cog-type gpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
 
     ; TODO: 1. deal with multiple returns
     ;       2. check if the demands have been correctly tagged or maybe add
