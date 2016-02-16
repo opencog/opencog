@@ -164,7 +164,7 @@
 	; timestamp setter
 	(DefineLink
 		(DefinedSchema (string-append "set " name " timestamp"))
-		(Put (State (Schema ts-name) (Variable "$x")) (Time)))
+		(Put (State (Schema ts-name) (Variable "$x")) (TimeLink)))
 
 	; timestamp getter
 	(DefineLink
@@ -218,22 +218,22 @@
 			; If elapsed time greater than max, then true.
 			(GreaterThan
 				; Minus computes number of seconds since interaction start.
-				(Minus (Time) (DefinedSchema get-ts))
+				(Minus (TimeLink) (DefinedSchema get-ts))
 				(Get (State (Schema max-name) (Variable "$max")))
 			)
 			(SequentialAnd
 				; Delta is the time since the last check.
 				(True (Put (State (Schema delta-ts) (Variable "$x"))
-						(Minus (Time)
+						(Minus (TimeLink)
 							(Get (State (Schema prev-ts) (Variable "$p"))))))
 				; Update time of last check to now. Must record this
 				; timestamp before the min-time rejection, below.
-				(True (Put (State (Schema prev-ts) (Variable "$x")) (Time)))
+				(True (Put (State (Schema prev-ts) (Variable "$x")) (TimeLink)))
 
 				; If elapsed time less than min, then false.
 				(GreaterThan
 					; Minus computes number of seconds since interaction start.
-					(Minus (Time) (DefinedSchema get-ts))
+					(Minus (TimeLink) (DefinedSchema get-ts))
 					(Get (State (Schema min-name) (Variable "$min")))
 				)
 
@@ -1060,7 +1060,7 @@
 	(SequentialAnd
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
-				(Minus (Time) (DefinedSchema "get bored timestamp"))))
+				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
 		(True (DefinedSchema "set sleep timestamp"))
 
 		; First, show some yawns ...
@@ -1090,7 +1090,7 @@
 	(SequentialAnd
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
-				(Minus (Time) (DefinedSchema "get sleep timestamp"))))
+				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchema "set bored timestamp"))
 
 		; Change soma state to being awake.
