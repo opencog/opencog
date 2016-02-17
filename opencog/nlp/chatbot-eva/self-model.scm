@@ -23,4 +23,9 @@
 (StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
 (StateLink (AnchorNode "*-gaze-direction-*") neutral-gaze)
 
+; Global state for current facial expression
+(define neutral-expression (Concept "neutral"))
+(StateLink (AnchorNode "*-facial-expression-*") neutral-expression)
+
+
 ;--------------------------------------------------------------------

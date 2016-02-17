@@ -72,7 +72,8 @@
 ;
 ; This is where I wish I had lexical functions rather than just sureal.
 ; The problem here is that sureal, all by itself, is unable to convert
-; "leftwards" to "to the left" as the appropriate response.
+; "leftwards" into the synonymous but more appropriate "to the left" as
+; the desired response.
 ;
 ; Also: personality and randomization: I want her to sometimes say "I am
 ; looking sideways".
@@ -89,10 +90,11 @@
 	(let* ((r2l-set (cog-bind where-look-rule))
 			(string-seq (sureal (car (cog-outgoing-set r2l-set))))
 		)
-(display r2l-set)
-(display string-seq)
-(newline)
+		; (display r2l-set)
+		; (display string-seq) (newline)
 
 		string-seq
 	)
 )
+
+;--------------------------------------------------------------------

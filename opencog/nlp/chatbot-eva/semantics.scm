@@ -30,6 +30,9 @@
 ; Rule-utils needed for defintion of var-decl, etc.
 (load "../relex2logic/rule-utils.scm")
 
+(define current-action (AnchorNode "*-action-*"))
+(define current-imperative (AnchorNode "*-imperative-*"))
+
 ;--------------------------------------------------------------------
 ; obj-semantics-rule-1 -- if the current "simplified-English" imperative
 ; contains a verb that we know, and an "object" it refers to, then suggest
@@ -61,7 +64,7 @@
 			(var-decl "$linkage" "PredicateNode")
 		)
 		(AndLink
-			; The simplified pseudo-English sentence we are anayzing.
+			; The simplified pseudo-English sentence we are analyzing.
 			(StateLink current-imperative
 				(ActionLink
 					(Variable "$verb")
@@ -92,7 +95,7 @@
 (define obj-semantics-rule-1
 	(obj-semantics-template
 		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
-		(var-decl "$obj-ground"  "DefinedSchemaNode")      ; OBJ-GND-DECL
+		(var-decl "$obj-ground"  "DefinedSchemaNode")     ; OBJ-GND-DECL
 
 		; We only "suggest" this as one possible action.  A later stage
 		; picks the most likely action, based on some semantic liklihood
@@ -109,9 +112,19 @@
 (define obj-semantic-model-rule-1
 	(obj-semantics-template
 		(var-decl "$verb-ground" "AnchorNode")  ; VERB-GND-DECL
-		(var-decl "$obj-ground"  "ConceptNode")  ; OBJ-GND-DECL
+		(var-decl "$obj-ground"  "ConceptNode") ; OBJ-GND-DECL
 
-		(StateLink
+		(StateLink                              ; ACTION
+			(Variable "$verb-ground")
+			(Variable "$obj-ground"))
+	))
+
+(define obj-semantic-model-rule-2
+	(obj-semantics-template
+		(var-decl "$verb-ground" "AnchorNode")         ; VERB-GND-DECL
+		(var-decl "$obj-ground"  "DefinedSchemaNode")  ; OBJ-GND-DECL
+
+		(StateLink                                     ; ACTION
 			(Variable "$verb-ground")
 			(Variable "$obj-ground"))
 	))
