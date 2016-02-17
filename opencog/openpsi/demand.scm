@@ -103,6 +103,7 @@
                 )
                 default-action
                 demand-node
+                "Default"
                 "Default")
             ; Each demand is also a rulebase
             (ure-define-rbs demand-node 1)
@@ -340,7 +341,8 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-action-rule vars context action demand-node effect-type)
+(define-public (psi-action-rule vars context action demand-node
+                                effect-type name)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. The action is also a member rule of the demand it
@@ -377,9 +379,14 @@
     - A string that describes the effect the particualr action would have on
       the demand value. See `(psi-action-types)` for available options.
 
+  name:
+  -  A string for naming the action rule. `OpenPsi: Demand-name-action-rule-`
+     will be prefixed to the name.
+
 "
-    (define rule-name-prefix (string-append (cog-name demand-node) "-rule-"))
-    (define rule-name (string-append rule-name-prefix (random-string 5)))
+    (define rule-name-prefix
+        (string-append (cog-name demand-node) "-action-rule-"))
+    (define rule-name (string-append rule-name-prefix name))
 
     (define (rule)
         ; Is function to avoid  insertion into the atomspace if argument check
@@ -637,7 +644,8 @@
         )
         (psi-action-maximize rate)
         demand-node
-        "Increase")
+        "Increase"
+        (string-append "maximize-" (number->string rate)))
 )
 
 ; --------------------------------------------------------------
@@ -700,7 +708,8 @@
         )
         (psi-action-minimize rate)
         demand-node
-        "Decrease")
+        "Decrease"
+        (string-append "minimize-" (number->string rate)))
 )
 
 ; --------------------------------------------------------------
