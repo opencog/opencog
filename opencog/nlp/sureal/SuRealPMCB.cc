@@ -290,7 +290,55 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         if (std::any_of(shrinked_soln.begin(), shrinked_soln.end(), checker))
             return false;
 
-        shrinked_soln[kv.first] = kv.second;
+        // do a disjunct match for PredicateNodes as well
+        if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
+        {
+            // TODO: If lemma -> find all and pick the one that matches
+            //       else -> only use that to match
+            Handle hPatWord = m_as->get_handle(WORD_NODE, NodeCast(kv.first)->getName());
+            Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, NodeCast(kv.second)->getName());
+            IncomingSet qLemmaLinks = hPatWord->getIncomingSetByType(LEMMA_LINK);
+
+            // if there is no LemmaLink conntecting to it, it's probably
+            // not a lemma, so just do a disjunct match for it
+            if (qLemmaLinks.size() == 0)
+            {
+                // reject it if disjuncts do not match
+                if (not disjunct_match(hPatWord, hSolnWordInst))
+                    return false;
+
+                // store the result
+                shrinked_soln[kv.first] = kv.second;
+            }
+
+            // if it's a lemma, trace all other "forms" of it via LemmaLink
+            // and do a disjunct match for each of them
+            else
+            {
+                for (LinkPtr lpll : qLemmaLinks)
+                {
+                    HandleSeq qOS = lpll->getOutgoingSet();
+
+                    // just in case... double checking
+                    if (qOS[0]->getType() != WORD_INSTANCE_NODE)
+                        continue;
+
+                    std::string sName = NodeCast(qOS[0])->getName();
+                    std::string sWord = sName.substr(0, sName.find_first_of('@'));
+                    Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
+
+                    // XXX TODO: LG dict entry is missing! Generate them in advance...
+
+                    if (disjunct_match(hWordNode, hSolnWordInst))
+                    {
+                        shrinked_soln[m_as->get_handle(PREDICATE_NODE, sWord)] = kv.second;
+                        break;
+                    }
+                }
+            }
+        }
+
+        else shrinked_soln[kv.first] = kv.second;
     }
 
     std::set<Handle> qSolnSetLinks;
