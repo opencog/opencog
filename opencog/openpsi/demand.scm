@@ -49,41 +49,12 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-clean-demand-gets set-link)
-"
-  Returns a list aftering removing the SetLink + ListLink + NumberNode
-  from result of `cog-execute!` of GetLink wrapping psi-demand-pattern with or
-  without additional clauses.
-
-  set-link:
-    - A SetLink that is a result of running `cog-execute!` of GetLink
-      wrapping psi-demand-pattern.
-"
-; TODO: Make this generic for pattern gets
-    (cog-outgoing-set (cog-execute!
-        (MapLink
-            (ImplicationLink
-                (VariableList
-                    (TypedVariable (Variable "$x") (Type "ConceptNode"))
-                    (TypedVariable (Variable "$y") (Type "NumberNode")))
-                (ListLink
-                    (Variable "$x")
-                    (Variable "$y")
-                )
-                (Variable "$x"))
-            set-link)))
-)
-
-; --------------------------------------------------------------
 (define-public (psi-get-demands)
 "
-  Returns a list containing The node that carry the demand-value. The
+  Returns a list containing the nodes that carry the demand-value. The
   strength of their stv is the demand value.
 "
-    (psi-clean-demand-gets (cog-execute!
-        (GetLink
-            (VariableList (assoc-ref (psi-demand-pattern) "var"))
-            (assoc-ref (psi-demand-pattern) "pat"))))
+    (cog-outgoing-set (psi-select-demand (TrueLink)))
 )
 
 ; --------------------------------------------------------------
@@ -300,8 +271,9 @@
         ))
 
     ; check arguments
-    (if (not (equal? (cog-type gpn) 'DefinedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " dpn))
+    (if (and (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+             (not (equal? (cog-type dpn) 'TrueLink)))
+        (error "Expected DefinedPredicateNode or TrueLink got: " dpn))
 
     ; TODO: 1. deal with multiple returns
     ;       2. check if the demands have been correctly tagged or maybe add
