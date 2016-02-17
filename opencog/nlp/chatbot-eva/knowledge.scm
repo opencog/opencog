@@ -2,9 +2,60 @@
 ; knowledge.scm
 ;
 ; Knowledge representation of grounded word meanings.
+; That is, a "domain ontology" for the robot domain.
 ;
-; This file encodes associations between words, 
-
+; This file encodes associations between words and ground truth.
+; Certain nouns are linked to certain physical objects; certain verbs
+; are linked to specific robot actions, while adjectives and adverbs
+; alter the interpretation of the nouns and verbs.
+;
+; This file contains not just one grounding, but two:  one grounding
+; is used to map words to physical robot movements.  Another grounding
+; is used to map words to a self-representation of the robot state.
+;
+; The first grounding results in movement commands that are transmitted
+; to the robot via python calls; these cause ROS messages to be sent to
+; the blender model, which in turn drives robot motors.
+;
+; The second grounding causes a self-representation of the robot to
+; change. The self-representation or self-model resides in the
+; atomspace, where it can be queried, examined by other opencog agents
+; and processes. In particular, the self model allows the chatbot to
+; answer questions about what it is doing: it makes the robot
+; "self-aware".
+;
+; The general knowledge representation used here has a strong linguistic
+; feel to it.  Its lexical at the single-word level, and its syntactic
+; at the multi-word level.  The general structure is as follows:
+;
+; Single words are associated with atomspace objects, typically numeric
+; values or the names of subroutines. For example, the direction adverbs
+; "right", "left" are associated with 3D numeric XYZ values, while verbs
+; such as "look", "turn" are associated with python function names.
+; Emotion adjectives such as "happy" are associated with blender
+; animation names and parameters.
+;
+; Not all subroutines can accept all possible arguments: the routine
+; used to turn the head (rotate the neck) of the robot only accepts
+; XYZ directions; it cannot take the names of animations as an argument.
+; Likewise, the facial animation driver can only take animation names;
+; it cannot take XYZ directions.  These constraints are implemented
+; by specifying a "syntax": actions (verbs) can link only to certain
+; parameters (adverbs, adjectives).  The syntax is link-grammar-like:
+; there is a link-name that links together a routine and its allowed
+; range of arguments.
+;
+; This "syntactic" structure then suggests that actions and paramters be
+; grouped into ontological (taxonomic) categories: all directions are
+; grouped together into a "direction" category; all facial animations
+; are grouped into an "emotion" category.  All verbs that can take a
+; direction are grouped into a direction-taking-verb category, and so
+; on.
+;
+; Word-to-object associations are done with a ReferenceLink
+; Taxonomic is-a relations are done with an InheritanceLink
+; Syntactic structure is encoded with an EvaluationLink.
+;
 ;--------------------------------------------------------------------
 ; Global knowledge about spatial directions.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
@@ -46,7 +97,7 @@
 	(DefinedSchema "forwards")
 	(ListLink ;; three numbers: x,y,z
 		(Number 1)    ; x is forward
-		(Number 0) ; y is right
+		(Number 0)    ; y is right
 		(Number 0)    ; z is up
 	))
 
