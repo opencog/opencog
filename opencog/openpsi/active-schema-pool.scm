@@ -103,7 +103,7 @@
         (if (null? demand-node)
             ; NOTE: Remember to deal with the defaults when moving to
             ; psi-select-demand
-            (random-select (psi-get-demands))
+            (random-select (cog-outgoing-set (psi-get-demands)))
             demand-node))
 
     (let ((z-demand (choose-demand)))
@@ -153,19 +153,30 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-add-goal-selector name eval-term effect-type)
+(define (psi-add-goal-selector eval-term effect-type name)
 "
-  Returns the DefinedPredicateNode after defining it as an opencog
-  goal-selector.
+  Returns the DefinedPredicateNode that represents the evaluatable term
+  after defining it as an opencog goal-selector.
+
+  eval-term:
+  - An evaluatable term.
+
+  effect-type:
+  - A string that describes the effect the particualr action would have on
+    the demand value. See `(psi-action-types)` for available options.
+
+  name:
+  -  A string for naming the goal selector.
 "
     ; Check arguments
     (if (not (string? name))
-        (error "Expected first argument to be a string, got: " name))
+        (error "Expected third argument to be a string, got: " name))
     (if (not (member effect-type (psi-action-types)))
-        (error (string-append "Expected third argument to be one of the "
+        (error (string-append "Expected second argument to be one of the "
             "action types listed when running `(psi-action-types)`, got: ")
             effect-type))
 
+    ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
     (let ((goal-selector-dpn (DefinedPredicateNode name)))
         ; This must be first so as to check if a DefinedPredicateNode of the
         ; same name is already defined.
@@ -207,12 +218,24 @@
 ; --------------------------------------------------------------
 (define (psi-select-random-goal)
 "
-   This runs the chosen goal-selector, and s
+  Returns the StateLink representing the goal. Goal are defined as demands
+  choosen for either increase or decrease in their demand values. For example,
 
-   Goal are defined as demands choosen for either increase or decrease in
-   their demand values. The choice for being the current-goal is made by pattern
-   matching over the demands by using the DefinedPredicateNode passed as a
-   constraint.
+   (StateLink
+       (Node (string-append (psi-prefix-str) \"action-on-demand\"))
+       (ListLink
+           (ConceptNode (string-append (psi-prefix-str) \"Increase\"))
+           (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
+  or
+
+   (StateLink
+       (Node (string-append (psi-prefix-str) \"action-on-demand\"))
+       (ListLink
+           (ConceptNode (string-append (psi-prefix-str) \"Decrease\"))
+           (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
+
+  The StateLink(aka goal) is the means for signaling what type of actions
+  should be selected.
 "
     (define (set-goal a-demand effect-type)
        (StateLink
@@ -245,7 +268,8 @@
 "
 
     (define (select-demand x) (< (tv-mean (cog-tv x)) threshold))
-    (let* ((demand (random-select (filter select-demand (psi-get-demands)))))
+    (let* ((demand (random-select (filter select-demand
+            (cog-outgoing-set (psi-get-demands))))))
 
         ; If there are no demands that satisfy the condition then choose one
         (if (null? demand)

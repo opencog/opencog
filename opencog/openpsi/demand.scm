@@ -54,7 +54,7 @@
   Returns a list containing the nodes that carry the demand-value. The
   strength of their stv is the demand value.
 "
-    (cog-outgoing-set (psi-select-demand (TrueLink)))
+    (psi-select-demand (TrueLink))
 )
 
 ; --------------------------------------------------------------
@@ -82,7 +82,7 @@
                 (ConceptNode (string-append (psi-prefix-str) "Demand"))
             )
 
-            ; XXX: Note sure this is needed. Possibly use is if one wants
+            ; NOTE: Not sure this is needed. Possibly use is if one wants
             ; to measure how changes or define a default-action that updates
             ; based on the rate of change.
             (EvaluationLink
@@ -122,7 +122,7 @@
   - The atom that is being checked to see if it is the Node that represents
     a demand type.
 "
-    (define demand-names (map cog-name (psi-get-demands)))
+    (define demand-names (map cog-name (cog-outgoing-set (psi-get-demands))))
     (if (and (member (cog-name atom) demand-names)
              (equal? (cog-type atom) 'ConceptNode))
         (stv 1 1)
@@ -200,7 +200,8 @@
 
     (let ((atom-strength (tv-mean (cog-tv atom)))
           (lowest-demand-value (car (list-sort < (delete-duplicates
-              (map (lambda (x) (tv-mean (cog-tv x))) (psi-get-demands))))))
+              (map (lambda (x) (tv-mean (cog-tv x)))
+                   (cog-outgoing-set (psi-get-demands)))))))
          )
          (if (<= atom-strength lowest-demand-value)
             (stv 1 1)
@@ -212,40 +213,15 @@
 ; --------------------------------------------------------------
 (define-public (psi-select-demand dpn)
 "
-  Goal are defined as demands choosen for either increase or decrease in
-  their demand values. The choice for being the current-goal is made by pattern
-  matching over the demands by using the DefinedPredicateNode passed as a
-  constraint.
-
-  The DefinedPredicateNode passed should tag the demands for increase or
-  decrease by evaluating the demands that satisfy the conditions set through
-  its goal-selection function. The function should tag the goal representing
-  atom (the demand-ConceptNode) for being increased or decreased.
+  Filters demands using the DefinedPredicateNode passed as argument and
+  returns a SetLink with the results.
 
   dpn:
-    - DefinedPredicateNode that names a goal-selection function that will
-      choose the demands. Its function should take a single demand-ConceptNode
-      and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`
-      in addition to tagging the demand-ConceptNodes as one of the action-types.
-      For example,
-
-      (StateLink
-          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
-          (ListLink
-              (ConceptNode (string-append (psi-prefix-str) \"Increase\"))
-              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
-
-      (StateLink
-          (Node (string-append (psi-prefix-str) \"action-on-demand\"))
-          (ListLink
-              (ConceptNode (string-append (psi-prefix-str) \"Decrease\"))
-              (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
-
-      The tags are necessary because, that is the means for signaling what type
-      of actions should be taken, in effect it is the demand-goal. For example,
-      if the action-on-demand is Increase, then only the actions of type
-      Increase would be choosen.
-
+  - DefinedPredicateNode that represents the evaluatable term that will filter
+    demands. The evaluatable term should take a single demand-ConceptNode and
+    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    (Optionaly the argument could be a TrueLink for returning all the demands
+    defined)
 "
 
     ; NOTE: Should there be weight b/n the different demand-goals? For now a
@@ -509,7 +485,7 @@
   Returns the default actions for all the defined demands
 "
     (append-map (lambda (x) (psi-get-action-rules x "Default"))
-        (psi-get-demands))
+        (cog-outgoing-set (psi-get-demands)))
 )
 
 ; --------------------------------------------------------------
