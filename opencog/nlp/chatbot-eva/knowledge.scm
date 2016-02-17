@@ -337,13 +337,15 @@
 		(ConceptNode "schema-express")))
 
 ;--------------------------------------------------------------------
-; Duplicate of teh aove, except that this is for use in controlling
+; Duplicate of the aove, except that this is for use in controlling
 ; the self-model, rather than the physical motors.
+
+(ReferenceLink (WordNode "express")
+	(AnchorNode "*-facial-expression-*"))
 
 ; Model (self-awareness) syntactic category of facial expression verbs
 (InheritanceLink (AnchorNode "*-facial-expression-*")
 	(ConceptNode "model-expression"))
-
 
 ; Syntactic structure of self-model facial-expression imperatives.
 (EvaluationLink
