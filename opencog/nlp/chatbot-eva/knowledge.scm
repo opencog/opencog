@@ -197,7 +197,8 @@
 		(ConceptNode "schema-direction")))
 
 ;--------------------------------------------------------------------
-; Emotional expression semantics (groundings)
+;--------------------------------------------------------------------
+; Emotional expression semantics (groundings) for robot control
 (DefineLink
 	(DefinedSchema "happy")
 	(ListLink
@@ -275,32 +276,11 @@
 ; happy, comprehending, engaged, bored, irritated
 ; sad, confused, recoil, surprised
 
-; Syntactic category of facial expression imperative
 ; "express" is used with "Smile!", "Frown!", etc.
 (ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
 (ReferenceLink (WordNode "show") (GroundedPredicate "py:do_emotion"))
 ; "look" is used with "Look happy!"
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
-(InheritanceLink (GroundedPredicate "py:do_emotion")
-	(ConceptNode "pred-express"))
-
-; Syntactic category of facial-expression schema.
-(InheritanceLink (DefinedSchema "happy") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "sad") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "engaged") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "bored") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "confused") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "recoil") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
-
-; Syntactic structure of facial-expression imperatives.
-(EvaluationLink
-	(PredicateNode "express-action")
-	(ListLink
-		(ConceptNode "pred-express")
-		(ConceptNode "schema-express")))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -331,5 +311,28 @@
 (ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "confusion")    (DefinedSchema "confused"))
 (ReferenceLink (WordNode "surprise")     (DefinedSchema "surprised"))
+
+; -----
+; Syntactic category of robot-control facial expression imperative
+(InheritanceLink (GroundedPredicate "py:do_emotion")
+	(ConceptNode "pred-express"))
+
+; Syntactic category of robot-control facial-expression schema.
+(InheritanceLink (DefinedSchema "happy") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "sad") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "engaged") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "bored") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "confused") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "recoil") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
+
+; Syntactic structure of robot-control facial-expression imperatives.
+(EvaluationLink
+	(PredicateNode "express-action")
+	(ListLink
+		(ConceptNode "pred-express")
+		(ConceptNode "schema-express")))
 
 ;--------------------------------------------------------------------
