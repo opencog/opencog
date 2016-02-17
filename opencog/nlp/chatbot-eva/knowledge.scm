@@ -162,7 +162,7 @@
 ; the self-model, rather than the physical motors.  We can't quite
 ; recycle the above (I tried) because DefinedSchema mis-behaves
 ; in various irritating ways, so we duplicate the above using
-; ConcpetNode, instead.
+; ConceptNode, instead.
 
 ; Knowledge about spatial directions. Pair up words and physical
 ; directions.
@@ -184,6 +184,7 @@
 (ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
 (ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
 
+; Model (self-awareness) syntactic category of head-pose verbs
 (InheritanceLink (AnchorNode "*-gaze-direction-*")
 	(ConceptNode "model-direction"))
 (InheritanceLink (AnchorNode "*-head-direction-*")
@@ -336,3 +337,17 @@
 		(ConceptNode "schema-express")))
 
 ;--------------------------------------------------------------------
+; Duplicate of teh aove, except that this is for use in controlling
+; the self-model, rather than the physical motors.
+
+; Model (self-awareness) syntactic category of facial expression verbs
+(InheritanceLink (AnchorNode "*-facial-expression-*")
+	(ConceptNode "model-expression"))
+
+
+; Syntactic structure of self-model facial-expression imperatives.
+(EvaluationLink
+	(PredicateNode "express-model")
+	(ListLink
+		(ConceptNode "model-expression")
+		(ConceptNode "schema-express")))
