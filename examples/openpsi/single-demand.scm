@@ -36,31 +36,31 @@
 
     (display "Start------------------------\n")
     ; Startup state
-    (format #t "* Initial state of demands = ~a \n" (psi-get-demands))
-    (format #t "* Initial actions in asp = ~a \n" (ure-rbs-rules (psi-asp)))
-    (format #t "* Initial goal = ~a \n" (psi-current-goal))
+    (format #t "* Initial state of demands =\n~a\n" (psi-get-demands))
+    (format #t "* Initial actions in asp =\n~a\n" (ure-rbs-rules (psi-asp)))
+    (format #t "* Initial goal =\n~a\n" (psi-current-goal))
 
     ; Select goal randomly.
     ; NOTE: 1. You can define how goal should be selected. Remeber to set
     ;          conditions to return back to default.
     ;       2. The threshold is lower than the default  energy value defined above.
-    (format #t "* Goal selection result = ~a \n" (psi-goal-random-maximize .65))
+    (format #t "* Goal selection result =\n~a\n" (psi-goal-random-maximize .65))
 
     ; If goal is selected then an effect-type is selected for the goal, if not
     ; the default actions are run.
-    (format #t "* Current effect type = ~a \n" (psi-current-effect-type))
+    (format #t "* Current effect type =\n~a\n" (psi-current-effect-type))
 
     ; Select actions
     ; NOTE: You can define how actions should be selected. Just remember to
     ; define what happens when goal switches to default.
-    (format #t "* Action selection result = ~a \n" (psi-action-rule-select))
+    (format #t "* Action selection result =\n~a\n" (psi-action-rule-select))
 
     ; The number and types of actions in the asp should have changed, depending
     ; on the state of the atomspace.
-    (format #t "* Final actions in asp = ~a \n"  (ure-rbs-rules (psi-asp)))
+    (format #t "* Final actions in asp =\n~a\n"  (ure-rbs-rules (psi-asp)))
 
     ; Single step through the asp resulting in all the actions being run once.
-    (format #t "* Result of steping through the asp = ~a \n" (psi-step))
+    (format #t "* Result of steping through the asp =\n~a\n" (psi-step))
     (display "End------------------------\n")
 )
 
