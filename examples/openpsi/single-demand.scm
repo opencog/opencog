@@ -29,6 +29,9 @@
 ; be added as a different effect type.
 (psi-action-rule-minimize energy 6)
 
+; Set the goal-selector to be used.
+(psi-goal-selector-set! (psi-goal-selector-maximize .65))
+
 (define (psi-example-step)
 ; NOTE: 1. This function is for simplifying runs.
 ;       2. The `display` and `format` commands are only used for presentation
@@ -44,11 +47,7 @@
     ; NOTE: 1. You can define how goal should be selected. Remeber to set
     ;          conditions to return back to default.
     ;       2. The threshold is lower than the default  energy value defined above.
-    (format #t "* Goal selection result =\n~a\n" (psi-goal-random-maximize .65))
-
-    ; If goal is selected then an effect-type is selected for the goal, if not
-    ; the default actions are run.
-    (format #t "* Current effect type =\n~a\n" (psi-current-effect-type))
+    (format #t "* Goal selection result =\n~a\n" (psi-select-random-goal))
 
     ; Select actions
     ; NOTE: You can define how actions should be selected. Just remember to

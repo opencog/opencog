@@ -137,10 +137,11 @@
 ; --------------------------------------------------------------
 (define (psi-goal-selector-set! dpn)
 "
-  Specifies the given GroundedPredicateNode to be used for selecting goals.
+  Sets the given DefinedPredicateNode to be used for selecting goals.
 
   dpn:
-  - The DefinedPredicateNode that is used for selecting demand to be a goal.
+  - The DefinedPredicateNode that represents the evaluatable-term used for
+    selecting demand to be a goal.
 "
     ; Check arguments
     (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
@@ -166,7 +167,8 @@
     the demand value. See `(psi-action-types)` for available options.
 
   name:
-  -  A string for naming the goal selector.
+  -  A string for naming the goal selector. `OpenPsi: goal-selector-`
+     will be prefixed to the name.
 "
     ; Check arguments
     (if (not (string? name))
@@ -177,7 +179,8 @@
             effect-type))
 
     ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
-    (let ((goal-selector-dpn (DefinedPredicateNode name)))
+    (let* ((z-name (string-append (psi-prefix-str) "goal-selector-" name))
+           (goal-selector-dpn (DefinedPredicateNode z-name)))
         ; This must be first so as to check if a DefinedPredicateNode of the
         ; same name is already defined.
         (DefineLink goal-selector-dpn eval-term)
@@ -194,6 +197,13 @@
 
 ; --------------------------------------------------------------
 (define (psi-goal-selector-effect-type dpn)
+"
+  Returns a node representing the effect type of the given goal-selector.
+
+  dpn:
+  - The DefinedPredicateNode that represents the evaluatable-term used for
+    selecting demand to be a goal.
+"
     ; Check arguments
     (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
         (error "Expected DefinedPredicateNode got: " dpn))
@@ -243,8 +253,17 @@
            (ListLink effect-type a-demand))
     )
 
-    (let* ((goal-selector (car (cog-outgoing-set
-                    (cog-execute! (GetLink (psi-goal-selector-pattern))))))
+    (define (get-goal-selector)
+        (let ((goal-selector (cog-outgoing-set (cog-execute!
+                    (GetLink (psi-goal-selector-pattern))))))
+            (if (null? goal-selector)
+                (error "A goal-selector hasn't been set for OpenPsi.")
+                (car goal-selector)
+            )
+        )
+    )
+
+    (let* ((goal-selector (get-goal-selector))
            (demands (psi-select-demand goal-selector))
            (effect (psi-goal-selector-effect-type goal-selector)))
 
@@ -252,31 +271,22 @@
         (if (null? (cog-outgoing-set demands))
             (set-goal
                 (cog-execute! (RandomChoiceLink (psi-select-demand (TrueLink))))
-                "Default")
+                (ConceptNode (string-append (psi-prefix-str) "Default")))
             (set-goal (cog-execute! (RandomChoiceLink demands)) effect)
         )
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-goal-random-maximize threshold)
+(define (psi-goal-selector-maximize threshold)
 "
   Sets the goal by randomly selecting a demand for maximization, should its demand-value be below the given threshold.
 
   threshold:
   - The boundary of the demand-value below which a demand will be chosen.
 "
-
-    (define (select-demand x) (< (tv-mean (cog-tv x)) threshold))
-    (let* ((demand (random-select (filter select-demand
-            (cog-outgoing-set (psi-get-demands))))))
-
-        ; If there are no demands that satisfy the condition then choose one
-        (if (null? demand)
-            (psi-set-goal demand "Default")
-            (psi-set-goal demand "Increase")
-        )
-    )
+    (psi-add-goal-selector
+        (psi-demand-value-term< threshold) "Increase" "maximize")
 )
 
 ; --------------------------------------------------------------
