@@ -48,10 +48,11 @@ framework.
 
 4. Goal:
   * A goal is a demand chosen for a particular action effect-type. See the
-    function `psi-set-goal` [here](demand.scm).
-  * __WIP__ For goal-selection, you can choose what the criteria for choosing a goal by
-    defining a function in a `GroundedPredicateNode` __that takes ??__ and
-    passing it to `psi-goal-selector`.
+    function `psi-select-random-goal` [here](demand.scm).
+  * For goal-selection, you can choose what the criteria for choosing a goal by
+    defining an evaluatable term using the function `psi-add-goal-selector` and
+    setting it to be the goal-selector using the function
+    `psi-goal-selector-set!`.
 
 5. OpenPsi's active-schema-pool:
   * This is a separate URE rule-base, that is not a demand rule-base. It is

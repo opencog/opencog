@@ -88,36 +88,6 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-goal demand-node effect-type)
-"
-  Set goal for the action-selector.
-
-  demand-node:
-  - The node for the demand choosen to be a goal.
-
-  effect-type:
-  - The kind of effect the actions should have for being selected by the
-    action-selector.
-"
-    (define (choose-demand)
-        (if (null? demand-node)
-            ; NOTE: Remember to deal with the defaults when moving to
-            ; psi-select-demand
-            (random-select (cog-outgoing-set (psi-get-demands)))
-            demand-node))
-
-    (let ((z-demand (choose-demand)))
-        (StateLink
-            (Node (string-append (psi-prefix-str) "action-on-demand"))
-            (ListLink
-                (ConceptNode (string-append (psi-prefix-str) effect-type))
-                z-demand))
-
-        z-demand
-    )
-)
-
-; --------------------------------------------------------------
 (define (psi-goal-selector-pattern)
 "
   This returns the StateLink that is used for specifying the goal selecting
