@@ -94,7 +94,9 @@
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1)
 
+(display
 	(cog-bind obj-semantic-model-rule-1)
+)
 (display
 	(cog-bind obj-semantic-model-rule-2)
 )

@@ -95,7 +95,7 @@
 (define obj-semantics-rule-1
 	(obj-semantics-template
 		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
-		(var-decl "$obj-ground"  "DefinedSchemaNode")      ; OBJ-GND-DECL
+		(var-decl "$obj-ground"  "DefinedSchemaNode")     ; OBJ-GND-DECL
 
 		; We only "suggest" this as one possible action.  A later stage
 		; picks the most likely action, based on some semantic liklihood
@@ -121,10 +121,10 @@
 
 (define obj-semantic-model-rule-2
 	(obj-semantics-template
-		(var-decl "$verb-ground" "AnchorNode")  ; VERB-GND-DECL
+		(var-decl "$verb-ground" "AnchorNode")         ; VERB-GND-DECL
 		(var-decl "$obj-ground"  "DefinedSchemaNode")  ; OBJ-GND-DECL
 
-		(StateLink
+		(StateLink                                     ; ACTION
 			(Variable "$verb-ground")
 			(Variable "$obj-ground"))
 	))

@@ -174,11 +174,11 @@
 (ReferenceLink (WordNode "ahead")    (Concept "forward"))
 
 ; Syntactic category of schema. Used for contextual understanding.
-(InheritanceLink (Concept "upward")    (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "downward")  (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "rightwards") (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "leftwards")  (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "forward")   (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "upward")     (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "downward")   (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "rightwards") (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "leftwards")  (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "forward")    (ConceptNode "concept-direction"))
 
 ; Model (self-awareness) knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
@@ -195,7 +195,7 @@
 	(PredicateNode "turn-model")
 	(ListLink
 		(ConceptNode "model-direction")
-		(ConceptNode "schema-direction")))
+		(ConceptNode "concept-direction")))
 
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
@@ -319,14 +319,14 @@
 	(ConceptNode "pred-express"))
 
 ; Syntactic category of robot-control facial-expression schema.
-(InheritanceLink (DefinedSchema "happy") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "sad") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "happy")     (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "sad")       (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "engaged") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "bored") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "engaged")   (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "bored")     (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "confused") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "recoil") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "confused")  (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "recoil")    (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
 
 ; Syntactic structure of robot-control facial-expression imperatives.
@@ -337,7 +337,7 @@
 		(ConceptNode "schema-express")))
 
 ;--------------------------------------------------------------------
-; Duplicate of the aove, except that this is for use in controlling
+; Duplicate of the above, except that this is for use in controlling
 ; the self-model, rather than the physical motors.
 
 (ReferenceLink (WordNode "express")
@@ -353,3 +353,5 @@
 	(ListLink
 		(ConceptNode "model-expression")
 		(ConceptNode "schema-express")))
+
+;--------------------------------------------------------------------
