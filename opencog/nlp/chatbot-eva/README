@@ -85,6 +85,11 @@ install and configure the above pieces.
 
 General sketch
 --------------
+The discussion here assumes familiarity with the simpler "generic"
+chatbot pipeline, in the `../chatbot` directory.  You should study that
+first; otherwise the discussion here will seem disconnected and
+incomplete.
+
 The general technical intent here is to somehow associate nouns and
 verbs with grounded objects and actions. At the most basic level, this
 is relatively "easy": a single word, verb or noun, is associated with a
@@ -210,6 +215,22 @@ need to be sorted into subsets that are self-consistent with each other.
 I guess this is a glimmer of an action orchestrater.
 
 
+Current defacto implementation
+------------------------------
+This is how the code is currently organized. It may or may not match
+what other parts of this readme file say.
+
+* imperative.scm -- end-to-end pipeline, converting sentence to action.
+* imperative-rules.scm -- rules to convert English sentences to an
+      intermediate form.
+* semantics.scm -- rules to compare the intermediate form to the
+      knowledgebase of grounded knowledge.
+* knowledge.scm -- ontology of grounded knowledge.
+
+* self-model.scm -- atomspace model of the robot-self.
+* model-query.scm -- querying of self-knowledge (self-awareness)
+
+
 Synonymous phrases
 ------------------
 Need to add support for synonyms and synonymous phrases -- e.g. "make a
@@ -248,6 +269,10 @@ Not at all clear how to accomplish this.
 Face awareness
 --------------
 TODO: implement environment awareness: "look at me", "look at him".
+
+TODO: she does not recognize he own name.
+
+TODO: she does not know the names of people.
 
 
 Issues
