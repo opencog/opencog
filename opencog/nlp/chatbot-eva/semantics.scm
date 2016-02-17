@@ -64,7 +64,7 @@
 			(var-decl "$linkage" "PredicateNode")
 		)
 		(AndLink
-			; The simplified pseudo-English sentence we are anayzing.
+			; The simplified pseudo-English sentence we are analyzing.
 			(StateLink current-imperative
 				(ActionLink
 					(Variable "$verb")
@@ -112,7 +112,17 @@
 (define obj-semantic-model-rule-1
 	(obj-semantics-template
 		(var-decl "$verb-ground" "AnchorNode")  ; VERB-GND-DECL
-		(var-decl "$obj-ground"  "ConceptNode")  ; OBJ-GND-DECL
+		(var-decl "$obj-ground"  "ConceptNode") ; OBJ-GND-DECL
+
+		(StateLink                              ; ACTION
+			(Variable "$verb-ground")
+			(Variable "$obj-ground"))
+	))
+
+(define obj-semantic-model-rule-2
+	(obj-semantics-template
+		(var-decl "$verb-ground" "AnchorNode")  ; VERB-GND-DECL
+		(var-decl "$obj-ground"  "DefinedSchemaNode")  ; OBJ-GND-DECL
 
 		(StateLink
 			(Variable "$verb-ground")

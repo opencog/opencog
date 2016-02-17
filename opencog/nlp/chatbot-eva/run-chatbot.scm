@@ -23,8 +23,9 @@
 (use-modules (opencog nlp relex2logic))
 (load-r2l-rulebase)
 ;
-; Prime the atomspace. XXX This belongs in self-model.scm, but
-; screws up there for some insane reason. This needs to be fixed.
+; Prime the atomspace with content that sureal can use to generate
+; sentences. XXX This belongs in self-model.scm, but it screws up
+; in there for some insane reason. This needs to be fixed.  FIXME.
 (nlp-parse "I am looking to the left")
 (nlp-parse "I am looking to the right")
 (nlp-parse "I am looking up")
