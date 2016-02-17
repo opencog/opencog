@@ -8,7 +8,7 @@
 #ifndef _ARTIFICIALSTIMULATORAGENT_H_
 #define _ARTIFICIALSTIMULATORAGENT_H_
 
-#include <opencog/server/Agent.h>
+#include <opencog/cogserver/server/Agent.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
