@@ -1,5 +1,4 @@
 ADD_GUILE_MODULE (chatbot-eva.scm
-	eva.scm
 	imperative.scm
 	imperative-rules.scm
 	knowledge.scm
