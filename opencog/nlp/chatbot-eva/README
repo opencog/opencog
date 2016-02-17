@@ -231,8 +231,8 @@ what other parts of this readme file say.
 * model-query.scm -- querying of self-knowledge (self-awareness)
 
 
-Synonymous phrases
-------------------
+Understanding synonymous phrases
+--------------------------------
 Need to add support for synonyms and synonymous phrases -- e.g. "make a
 happy expression" (which the chatbot currently does not understand) is
 synonymous to "show happiness" (which the chatbot does understand).
@@ -241,13 +241,18 @@ Also -- right now "show happiness" and "express happiness" are both
 hard-coded; we would like to have "demonstrate" as a synonym for
 either of these.
 
-Expressive rigidity
--------------------
-The current implementation for self-awareness questions ("where are you
-looking?") is extremely rigid: an equivalent response could be gotten
-much more easily by using a hard-coded AIML-style system.  This is a
-serious issue: how can we leverage the fancy infrastructure to provide
-broader support?
+
+Eloquent self-expression (with synonymous phrases)
+--------------------------------------------------
+Currently, any self-awareness queries get rather stiff replies.
+For example, the gaze-direction self-model has "leftwards", "rightwards"
+as possible gaze directions. When asked where she is looking, she
+responds with these self-model words directly.  It would be much
+better if she responded with some synonymous phrase, such as "to the
+left".  Such a choice of wording is part of personality, so the choice
+of synonymous phrases would need to be controlled by some personality
+module.
+
 
 Lack of lexical functions
 -------------------------
@@ -257,7 +262,11 @@ mechanism to convert infinitives into the proper tense; to take a
 noun and adjust the noun-number as needed, etc.  In other words, the
 input into sureal already has to have the correct tense, noun-number,
 etc. already specified. This severely limits expressiveness, and makes
-it difficult to formulate a good reply.
+it difficult to formulate a good reply.  (XXX This is being fixed by
+Man Hin right now).
+
+
+
 
 Modifiers
 ---------
