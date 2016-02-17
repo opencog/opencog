@@ -20,6 +20,8 @@
 ; All this needs to be revamped with some kind of more general mechanism
 ; to fuzzy-match parsed sentences to the grounded knowledge.
 ;
+; At this time, this file is primarily concerned with imperatives.
+;
 ; These are rules to be applied to the current state: if the
 ; current word/utterance has an explicit concrete grounding, then
 ; construct the grounded equivalent.
