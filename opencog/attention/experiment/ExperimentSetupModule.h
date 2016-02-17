@@ -10,8 +10,8 @@
 
 #include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/Factory.h>
 
 
 namespace opencog {
@@ -74,10 +74,11 @@ private:
 
     AgentPtr _sentencegenstim_agentptr;
     AgentPtr _artificialstimulatoragentptr;
+    AgentPtr _smokes_fc_agentptr;
 
     Factory<ArtificialStimulatorAgent, Agent> artificialStimulatorAgentFactory;
     Factory<SentenceGenStimulateAgent, Agent> sentenceGenStimulateFactory;
-
+    Factory<SentenceGenStimulateAgent, Agent> smokesFCAgnetFactory;
 
     AtomSpace * _as;
     CogServer& _cs;

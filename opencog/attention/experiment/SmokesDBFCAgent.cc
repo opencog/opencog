@@ -6,12 +6,14 @@
  */
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/random.h>
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
 
 #include <algorithm>
 
@@ -45,58 +47,65 @@ class SmokesDBFCAgent: public Agent {
 private:
     UnorderedHandleSet inference_result;
     AtomSpace& _atomspace;
-    SchemeEval _eval;
+    SchemeEval* _eval;
     Handle rule_base;
 
     std::set<float> dist_surprisingness;
     const int K_PERCENTILE = 5;
 
-    auto friends_mean =
-            []() {
-                Handle friends_predicate = _atomspace.add_node(PREDICATE_NODE,"friends");
-                Handle var_1 = _atomspace.add_node(VARIABLE_NODE,"$A");
-                Handle var_2 = _atomspace.add_node(VARIABLE_NODE,"$B");
-                Handle friend_list = _atomspace.add_link(LIST_LINK, {var_1,var_2});
-                Handle eval_link = _atomspace.add_link(EVALUATION_LINK, {friends_predicate,friend_list});
-                Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link,eval_link});
+    float friends_mean()
+    {
+        Handle friends_predicate = _atomspace.add_node(PREDICATE_NODE,
+                                                       "friends");
+        Handle var_1 = _atomspace.add_node(VARIABLE_NODE, "$A");
+        Handle var_2 = _atomspace.add_node(VARIABLE_NODE, "$B");
+        Handle friend_list = _atomspace.add_link(LIST_LINK, { var_1, var_2 });
+        Handle eval_link = _atomspace.add_link(EVALUATION_LINK, {
+                friends_predicate, friend_list });
+        Handle bind_link = _atomspace.add_link(BIND_LINK,
+                                               { eval_link, eval_link });
 
-                //BindLinkPtr bptr = BindLinkCast(bind_link);
-                Handle friends = satisfying_set(&_atomspace, bind_link);
+        //BindLinkPtr bptr = BindLinkCast(bind_link);
+        Handle friends = satisfying_set(&_atomspace, bind_link);
 
-                strength_t tv_sum = 0.0f; int count = 0;
-                for(const Handle& h : LinkCast(friends)->getOutgoingSet()) {
-                    tv_sum += _atomspace.get_TV(h)->getMean();
-                    count ++;
-                }
+        strength_t tv_sum = 0.0f;
+        int count = 0;
+        for (const Handle& h : LinkCast(friends)->getOutgoingSet()) {
+            tv_sum +=  (h->getTruthValue())->getMean();
+            count++;
+        }
 
-                return (tv_sum/count);
-            };
+        return (tv_sum / count);
+    }
 
-    auto smokes_mean =
-            []() {
-                Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE,"smokes");
-                Handle var = _atomspace.add_node(VARIABLE_NODE,"$A");
-                Handle smokes_list = _atomspace.add_link(LIST_LINK, {var});
-                Handle eval_link = _atomspace.add_link(EVALUATION_LINK, {smokes_predicate,smokes_list});
-                Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link,eval_link});
+    float smokes_mean()
+    {
+        Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE, "smokes");
+        Handle var = _atomspace.add_node(VARIABLE_NODE, "$A");
+        Handle smokes_list = _atomspace.add_link(LIST_LINK, HandleSeq{ var });
+        Handle eval_link = _atomspace.add_link(EVALUATION_LINK, {
+                smokes_predicate, smokes_list });
+        Handle bind_link = _atomspace.add_link(BIND_LINK,
+                                               { eval_link, eval_link });
 
-                //BindLinkPtr bptr = BindLinkCast(bind_link);
-                Handle friends = satisfying_set(&_atomspace, bind_link);
+        //BindLinkPtr bptr = BindLinkCast(bind_link);
+        Handle friends = satisfying_set(&_atomspace, bind_link);
 
-                remove_hypergraph(_atomspace, bind_link);
+        remove_hypergraph(_atomspace, bind_link);
 
-                strength_t tv_sum = 0.0f; int count = 0;
-                for(const Handle& h : LinkCast(friends)->getOutgoingSet()) {
-                    tv_sum += _atomspace.get_TV(h)->getMean();
-                    count ++;
-                }
+        strength_t tv_sum = 0.0f;
+        int count = 0;
+        for (const Handle& h : LinkCast(friends)->getOutgoingSet()) {
+            tv_sum += (h->getTruthValue())->getMean();
+            count++;
+        }
 
-                return (tv_sum/count);
-            };
+        return (tv_sum / count);
+    }
 
 public:
     SmokesDBFCAgent(CogServer& cs) :
-            _atomspace(cs.getAtomSpace())
+            Agent(cs), _atomspace(cs.getAtomSpace())
     {
         //Load core types
         config().set("SCM_PRELOAD",
@@ -105,11 +114,8 @@ public:
                      "/usr/local/share/opencog/scm/av-tv.scm, "
                      "opencog/dynamics/experiment/data/smokes/smokes_db.scm, "
                      "opencog/dynamics/experiment/data/smokes/rule_base.scm");
-
+        _eval = new SchemeEval(&_atomspace);
         load_scm_files_from_config(_atomspace);
-
-        _eval = SchemeEval(&_atomspace);
-
         rule_base = _atomspace.get_node(CONCEPT_NODE, "SMOKES_RB");
 
     }
@@ -176,14 +182,13 @@ public:
         Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE, "smokes");
         Handle var_1 = _atomspace.add_node(CONCEPT_NODE, "$0343O45FFEWW");
         Handle var_2 = _atomspace.add_node(CONCEPT_NODE, "$0343045FFEWY");
-        Handle friend_list = _atomspace.add_link(LIST_LINK, { var_1, var_2 });
-        Handle smokes_list = _atomspace.add_link(LIST_LINK, { var_1 });
+        Handle friend_list = _atomspace.add_link(LIST_LINK, HandleSeq{ var_1, var_2 });
+        Handle smokes_list = _atomspace.add_link(LIST_LINK, HandleSeq{ var_1 });
         Handle eval_link_1 = _atomspace.add_link(EVALUATION_LINK, {
                 friends_predicate, friend_list });
         Handle eval_link_2 = _atomspace.add_link(EVALUATION_LINK, {
                 smokes_predicate, smokes_list });
 
-        strength_t tv = _atomspace.get_TV(h)->getMean();
         strength_t mean_tv;
         if (are_similar(h, eval_link_1, true)) {
             mean_tv = friends_mean();
@@ -194,7 +199,7 @@ public:
         float mi; //TODO get the mi
         auto it = dist_surprisingness.begin();
         int top_k_percent = (K_PERCENTILE / 100) * dist_surprisingness.size();
-        if (mi >= *(it + top_k_percent)) {
+        if (mi >= * std::next(it,top_k_percent)) {
             dist_surprisingness.insert(mi);
             return true;
         } else {
@@ -211,7 +216,7 @@ public:
         if (NodeCast(h1) and NodeCast(h2))
             return !strict_type_match or h1->getType() == h2->getType();
 
-        Linktr lh1(LinkCast(h1));
+        LinkPtr lh1(LinkCast(h1));
         LinkPtr lh2(LinkCast(h2));
 
         if (lh1 and lh2) {
@@ -256,7 +261,5 @@ public:
 //TODO summary
 // - Integrate the haskell C binding here i.e statical linking in the make file
 // - Make sure rules are loaded properly
-// - Fix compilation issues if there is any
 // - Add log messages in the code
-// - Add the FC Agent in the module for running
 // - Start running it and experimenting

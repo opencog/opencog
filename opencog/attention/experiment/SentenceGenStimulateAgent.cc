@@ -11,8 +11,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/attention/experiment/ExperimentSetupModule.h>
 #include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/server/Factory.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/cogserver/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
 
 

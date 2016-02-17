@@ -5,8 +5,8 @@
  *      Author: misgana
  */
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/Agent.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #ifndef _SENTENCEGENAGENT_H_
 #define _SENTENCEGENAGENT_H_

@@ -5,7 +5,7 @@
  *      Author: misgana
  */
 #include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 
 using namespace opencog;

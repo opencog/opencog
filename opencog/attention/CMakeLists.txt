@@ -1,6 +1,8 @@
 # To make Boost ublas much more efficient.
 ADD_DEFINITIONS(-DNDEBUG)
 
+ADD_SUBDIRECTORY(experiment)
+
 # --------------------------------------------------
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h

@@ -10,22 +10,23 @@
 #include <fstream>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
-#include <opencog/attention/experiment/ExperimentSetupModule.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/dynamics/attention/ForgettingAgent.h>
-#include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
-#include <opencog/dynamics/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/dynamics/attention/SimpleImportanceDiffusionAgent.h>
-#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/attention/ForgettingAgent.h>
+#include <opencog/attention/ImportanceUpdatingAgent.h>
+#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
+#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
+#include <opencog/attention/atom_types.h>
 
-#include <opencog/server/CogServer.h>
-#include <opencog/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Module.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "ArtificialStimulatorAgent.h"
+#include "ExperimentSetupModule.h"
+#include "SmokesDBFCAgent.cc"
 #include "Globals.h"
 
 using namespace opencog;
@@ -75,7 +76,7 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
                                                 const TruthValuePtr& tv_new)
 {
     if (h->getType() == ASYMMETRIC_HEBBIAN_LINK) {
-        HandleSeq outg = _as->get_outgoing(h);
+        HandleSeq outg = LinkCast(h)->getOutgoingSet();
         assert(outg.size() == 2);
         auto end = hspecial_word_nodes.end();
 
@@ -136,11 +137,16 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
             SimpleImportanceDiffusionAgent::info().id, false);
 
     //Register experiment specific agents. Add more if you have here.
-    bool status = _cs.registerAgent(ArtificialStimulatorAgent::info().id,
-                                    &artificialStimulatorAgentFactory);
-    if (status) {
+    if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
+                          &artificialStimulatorAgentFactory)) {
         _artificialstimulatoragentptr = _cs.createAgent(
                 ArtificialStimulatorAgent::info().id, false);
+    }
+
+    if (_cs.registerAgent(SmokesDBFCAgent::info().id,
+                          &smokesFCAgnetFactory)) {
+        _smokes_fc_agentptr = _cs.createAgent(
+                SmokesDBFCAgent::info().id, false);
     }
 
     return "Loaded the following agents:\n" + ECAN_EXP_AGENTS;
