@@ -52,7 +52,7 @@
     ; Select actions
     ; NOTE: You can define how actions should be selected. Just remember to
     ; define what happens when goal switches to default.
-    (format #t "* Action selection result =\n~a\n" (psi-action-rule-select))
+    (format #t "* Action selection result =\n~a\n" (psi-select-action-rules))
 
     ; The number and types of actions in the asp should have changed, depending
     ; on the state of the atomspace.

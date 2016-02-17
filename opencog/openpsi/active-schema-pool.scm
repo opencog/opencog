@@ -260,7 +260,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-rule-select)
+(define (psi-select-action-rules)
 "
   Selects all actions of current effect type and update the psi-asp.
 "
