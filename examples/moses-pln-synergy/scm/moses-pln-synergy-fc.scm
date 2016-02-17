@@ -1,6 +1,11 @@
 ;; Like moses-pln-synergy-pm.scm but this version relies on the
 ;; forward chainer.
 
+;; Set logger to DEBUG
+(use-modules (opencog logger))
+;; (cog-logger-set-sync #t)
+(cog-logger-set-level "debug")
+
 ;; Load MOSES model
 (load "moses-model.scm")
 
@@ -9,9 +14,5 @@
 
 ;; Load the PLN configuration for this demo
 (load "pln-config.scm")
-
-;; Set logger to DEBUG
-(use-modules (opencog logger))
-(cog-logger-set-level "debug")
 
 (pln-fc if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z)
