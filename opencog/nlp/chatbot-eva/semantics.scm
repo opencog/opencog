@@ -30,6 +30,9 @@
 ; Rule-utils needed for defintion of var-decl, etc.
 (load "../relex2logic/rule-utils.scm")
 
+(define current-action (AnchorNode "*-action-*"))
+(define current-imperative (AnchorNode "*-imperative-*"))
+
 ;--------------------------------------------------------------------
 ; obj-semantics-rule-1 -- if the current "simplified-English" imperative
 ; contains a verb that we know, and an "object" it refers to, then suggest

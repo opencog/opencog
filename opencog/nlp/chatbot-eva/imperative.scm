@@ -32,6 +32,17 @@
 ; This is a hard-code ad-hoc pipeline. Subject to change.
 ;
 ;--------------------------------------------------------------------
+; State and state anchors. These should be thought of as work-arounds,
+; to be replaced when a fine-tuned attention-allocation system is
+; working.  The anchors serve to define the center of what the
+; system is supposed to be "thinking about", right now -- the current
+; sentence, the current action to be taken.
+
+; Current action to be taken
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
+;--------------------------------------------------------------------
 ; Action schema
 ; This is wrong, but a hack for now.
 
