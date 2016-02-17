@@ -10,4 +10,4 @@
 (load "chatbot-eva/imperative-rules.scm")
 (load "chatbot-eva/imperative.scm")
 (load "chatbot-eva/model-query.scm")
-(load "chatbot-eva/process-query.scm")
+(load "chatbot-eva/bot-api.scm")

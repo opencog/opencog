@@ -85,6 +85,11 @@ install and configure the above pieces.
 
 General sketch
 --------------
+The discussion here assumes familiarity with the simpler "generic"
+chatbot pipeline, in the `../chatbot` directory.  You should study that
+first; otherwise the discussion here will seem disconnected and
+incomplete.
+
 The general technical intent here is to somehow associate nouns and
 verbs with grounded objects and actions. At the most basic level, this
 is relatively "easy": a single word, verb or noun, is associated with a
