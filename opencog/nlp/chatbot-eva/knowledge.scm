@@ -9,6 +9,10 @@
 ; are linked to specific robot actions, while adjectives and adverbs
 ; alter the interpretation of the nouns and verbs.
 ;
+; The `semantics.scm` file (and other files) contain rules that try
+; to associate parsed natural-langauge sentences with the knowledge
+; that is represented here.
+;
 ; This file contains not just one grounding, but two:  one grounding
 ; is used to map words to physical robot movements.  Another grounding
 ; is used to map words to a self-representation of the robot state.
