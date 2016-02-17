@@ -1,5 +1,6 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(use-modules (opencog))
 (use-modules (opencog rule-engine))
 
 (load-from-path "openpsi/demand.scm")
@@ -101,7 +102,7 @@
     (define (choose-demand)
         (if (null? demand-node)
             ; NOTE: Remember to deal with the defaults when moving to
-            ; psi-select-goal.
+            ; psi-select-demand
             (random-select (psi-get-demands))
             demand-node))
 
@@ -116,30 +117,122 @@
     )
 )
 
-(define (psi-goal-selector)
+; --------------------------------------------------------------
+(define (psi-goal-selector-pattern)
 "
-  This returns the DefinedPredicateNode that specifies tha GroundedPredicateNode
-  that is used for goal selecting.
+  This returns the StateLink that is used for specifying the goal selecting
+  evaluatable term.
+
+  A StateLink is used instead of an InheritanceLink because there could only
+  be one active goal-selector at a time eventhough there could be multiple
+  possible goal-selectors. And this enables dynamically changing the
+  goal-selector through learning.
 "
-    (DefinedPredicateNode (string-append (psi-prefix-str) "goal-selector"))
+    (StateLink
+        (ConceptNode (string-append (psi-prefix-str) "goal-selector"))
+        (VariableNode "$dpn")
+    )
 )
 
 ; --------------------------------------------------------------
-(define (psi-goal-selector-set! gpn)
+(define (psi-goal-selector-set! dpn)
 "
   Specifies the given GroundedPredicateNode to be used for selecting goals.
 
-  gpn:
-  - The GroundedPredicateNode that is used for selecting demand to be a goal.
-    The scheme or python function used for selecting the goals is expected to
-    only take the node representing the demand. There are no checks to enforce
-    the type of GroundedPredicateNode, for now.
-
+  dpn:
+  - The DefinedPredicateNode that is used for selecting demand to be a goal.
 "
-    (StateLink
-        (psi-goal-selector)
-        gpn)
-    (psi-goal-selector)
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+    (cog-execute!
+        (PutLink
+            (psi-goal-selector-pattern)
+            dpn)
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-add-goal-selector name eval-term effect-type)
+"
+  Returns the DefinedPredicateNode after defining it as an opencog
+  goal-selector.
+"
+    ; Check arguments
+    (if (not (string? name))
+        (error "Expected first argument to be a string, got: " name))
+    (if (not (member effect-type (psi-action-types)))
+        (error (string-append "Expected third argument to be one of the "
+            "action types listed when running `(psi-action-types)`, got: ")
+            effect-type))
+
+    (let ((goal-selector-dpn (DefinedPredicateNode name)))
+        ; This must be first so as to check if a DefinedPredicateNode of the
+        ; same name is already defined.
+        (DefineLink goal-selector-dpn eval-term)
+
+        (EvaluationLink
+            (PredicateNode "selects-for-effect-type")
+            (ListLink
+                goal-selector-dpn
+                (ConceptNode (string-append (psi-prefix-str) effect-type))))
+
+        goal-selector-dpn
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-goal-selector-effect-type dpn)
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+
+    ; See https://github.com/opencog/atomspace/issues/646 why this doesn't
+    ; work
+    ;(GetLink
+    ;    (TypedVariableLink
+    ;        (VariableNode "$effect")
+    ;        (TypeNode "ConceptNode"))
+    ;        (EvaluationLink
+    ;            (PredicateNode "selects-for-effect-type")
+    ;            (ListLink
+    ;                (QuoteLink dpn)
+    ;                (VariableNode "$effect")))
+    ;)
+
+    ; NOTE: Assuming the dpn isn't part of any other similar pattern.
+    (car (cog-chase-link 'ListLink 'ConceptNode dpn))
+)
+
+; --------------------------------------------------------------
+(define (psi-select-random-goal)
+"
+   This runs the chosen goal-selector, and s
+
+   Goal are defined as demands choosen for either increase or decrease in
+   their demand values. The choice for being the current-goal is made by pattern
+   matching over the demands by using the DefinedPredicateNode passed as a
+   constraint.
+"
+    (define (set-goal a-demand effect-type)
+       (StateLink
+           (Node (string-append (psi-prefix-str) "action-on-demand"))
+           (ListLink effect-type a-demand))
+    )
+
+    (let* ((goal-selector (car (cog-outgoing-set
+                    (cog-execute! (GetLink (psi-goal-selector-pattern))))))
+           (demands (psi-select-demand goal-selector))
+           (effect (psi-goal-selector-effect-type goal-selector)))
+
+       ; If there are no demands that satisfy the condition then choose one
+        (if (null? (cog-outgoing-set demands))
+            (set-goal
+                (cog-execute! (RandomChoiceLink (psi-select-demand (TrueLink))))
+                "Default")
+            (set-goal (cog-execute! (RandomChoiceLink demands)) effect)
+        )
+    )
 )
 
 ; --------------------------------------------------------------
