@@ -31,6 +31,9 @@
 ;
 ; This is a hard-code ad-hoc pipeline. Subject to change.
 ;
+
+(use-modules (opencog) (opencog query) (opencog exec))
+
 ;--------------------------------------------------------------------
 ; State and state anchors. These should be thought of as work-arounds,
 ; to be replaced when a fine-tuned attention-allocation system is
