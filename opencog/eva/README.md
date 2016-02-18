@@ -1,7 +1,7 @@
 Robot Performance Scripting
 ===========================
 This repo contains performance, personality and self-awareness scripts
-for controling the Hanson Robotics Eva robot emulator.  The emulator
+for controlling the Hanson Robotics Eva robot emulator.  The emulator
 is a Blender animation of a female head.  These scripts unite, in one
 place, a visual subsystem, a chatbot, and an expressive face capable
 of a wide range of emotional expressions and facial gestures.
@@ -31,7 +31,7 @@ and conceptually flawed. It is also a focus of development.
 The goal is to have a robot that one can talk to, interact with, and
 have fun with. The robot should be smart: it should be able to recognize
 you, learn things about you, and remember them.  It should be capable of
-being your freind and companion.
+being your friend and companion.
 
 
 Current Architecture and Design
@@ -50,10 +50,10 @@ The this time, the code here integrates three subsystems:
    the human faces visible in the room). The goal of this model is
    two-fold:
 
-   ** Allow the robot to be self-aware, and engage in natural langauge
+   ** Allow the robot to be self-aware, and engage in natural language
       dialog about what it is doing.
 
-   ** Enable an "action orchestrator" to manage behaviors coming from
+   ** Enable an "action orchestrater" to manage behaviors coming from
       multiple sources.
 
 Some things it currently doesn't do, but should:
@@ -90,7 +90,7 @@ Summary of behaviors
 --------------------
 Below is a summary of the currently scripted behaviors.  Note that these
 were diligently hand-crafted; it is meant to be only a rough draft for
-a more sophisticated system that will incorporate more langauge
+a more sophisticated system that will incorporate more language
 functions, a better model of the world around it, and itself, a better
 model of emotional state, as well as automatic learning of new
 behaviors.
@@ -128,7 +128,7 @@ This is version 0.9.1 of the scripts. All of the old Owyl behavior
 tree has been implemented.  Some initial work towards future goals
 has been barely started.
 
-The `notes` directory contains a copy of the original owyl code,
+The `notes` directory contains a copy of the original Owyl code,
 (in `general_behavior.py`, for line-by-line reference), as well
 as some other sketches and ideas.
 

@@ -22,27 +22,27 @@ Demands
  * Answer questions
  * Recognize people
  * Greet people
- * Inquire about thier well-being
+ * Inquire about their well-being
 
 See Psi Theory http://en.wikipedia.org/wiki/Psi-Theory
 See also Amen's implementation.
 
 GUI Requirements
 ----------------
-A GUI is needed to edit the beavior tree. Some notes about the
-requiremets immediately below.
+A GUI is needed to edit the behavior tree. Some notes about the
+requirements immediately below.
 
 Goal: Create a Web UI that will allow theatrical performance artists
 to script theatrical performances for the Eva head.  An example of a
 simple theatrical performance might be ''When a someone enters the room,
-briefly glance thier way, give a faint smile, then resume with the
+briefly glance their way, give a faint smile, then resume with the
 previous activity.''
 
 The output of the script should be sequences of ROS messages that
 control the Eva head (turn, look, smile), as well as the timing, pitch
 and modulation of speech.
 
-Creating the above might be a relatively straight-forward prorammming
+Creating the above might be a relatively straight-forward programming
 task, were it not for one additional requirement: the scripts should be
 executable within the OpenCog AtomSpace framework. This is because we
 want, as a long-range goal, for OpenCog to be able to control the robot
@@ -74,14 +74,14 @@ Some possible visual programming tools:
 
 ===No
 * Alice (for teaching programming)
-* AgentSheets (proprietaary)
+* AgentSheets (proprietary)
 * Flowgarithm (too low level)
-* Hopscotch (propriuetary)
+* Hopscotch (proprietary)
 * LARP (flowcharts, too low-level)
 * Raptor (flowchart-based, too low-level, non-web)
 * Visual Logic (proprietary, flowchart, non-web)
 * ToonTalk (aimed at children, no web UI)
-* StarLog (programming langauge, not visual)
+* StarLog (programming language, not visual)
 * Cameleon (programming language, not visual)
 
 
