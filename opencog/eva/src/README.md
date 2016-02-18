@@ -134,3 +134,10 @@ A random list of ideas.
 * SatisfactionLink is kind-of not-needed; should be able to directly
   execute SequentialAndLink, SequentialOrLink. (when there are no
   actual query variables in it!?)
+
+--------
+
+* "Search for attention" is a state, need to record that in a state
+  variable. Ditto for "Interact with people"
+
+  (DefinedPredicateNode "is interacting with someone?")
