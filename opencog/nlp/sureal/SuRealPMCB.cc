@@ -345,6 +345,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                         if (hNewPred == Handle::UNDEFINED)
                             hNewPred = m_as->add_node(PREDICATE_NODE, sWord);
 
+                        // update the mapping by replacing the lemma
+                        // by the one that passed the disjunct match
                         shrinked_soln[hNewPred] = kv.second;
                         found = true;
                         break;
@@ -484,6 +486,13 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     return false;
 }
 
+/**
+ * Check the disjuncts between two words and see if they match.
+ *
+ * @param hPatWordNode   a WordNode from the input pattern
+ * @param hSolnWordInst  a WordInstanceNode from a potential solution
+ * @return               true if matches, false otherwise
+ */
 bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnWordInst)
 {
     // the source connectors for the solution
