@@ -1,7 +1,9 @@
 ;
-; btree.scm
+; btree-demo.scm
 ;
-; Experimental behavior tree in the atomspace.
+; A super-simplified example of a behavior tree, implemented
+; in the atomspace. This is built with the same general conceptual
+; design as the "real" behavior tree.
 ;
 
 (add-to-load-path "/usr/local/share/opencog/scm")

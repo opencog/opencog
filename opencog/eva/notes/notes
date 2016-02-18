@@ -1,0 +1,21 @@
+=======================================================================
+ (get-total-atoms-in-atomspace)
+
+ (print-toplevel-counts)
+type: NumberNode total 137  top 75
+type: ListLink total 313  top 1
+type: StateLink total 382  top 309
+
+guile>  (get-total-atoms-in-atomspace)
+1563
+
+(run-face-test)
+
+(get-total-atoms-in-atomspace)
+1565
+
+(print-toplevel-counts)
+type: ListLink total 310  top 0
+type: StateLink total 402  top 329
+
+=======================================================================
