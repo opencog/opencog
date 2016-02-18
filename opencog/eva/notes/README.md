@@ -9,6 +9,19 @@ just some random sketches, ideas and notes.
 * `behavior.cfg`: a copy of the original Owyl config file.
 * fsm: a finite state machine
 
+Some random notes about OpenPsi
+-------------------------------
+
+Demands
+ * Entertain people
+ * Make people smile
+ * Crack jokes
+ * Answer questions
+ * Recognize people
+ * Greet people
+ * Inquire about thier well-being
+
+
 GUI Requirements
 ----------------
 A GUI is needed to edit the beavior tree. Some notes about the
