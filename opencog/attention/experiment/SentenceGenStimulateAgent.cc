@@ -56,6 +56,7 @@ const ClassInfo& SentenceGenStimulateAgent::info()
 
 void SentenceGenStimulateAgent::run(void)
 {
+    return;
     static int ssize = sent_size;
 
     if (ssize > 0) {

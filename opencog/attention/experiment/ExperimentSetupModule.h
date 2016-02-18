@@ -10,6 +10,7 @@
 
 #include <opencog/attention/experiment/ArtificialStimulatorAgent.h>
 #include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
+#include <opencog/attention/experiment/SmokesDBFCAgent.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/Factory.h>
 
@@ -78,7 +79,7 @@ private:
 
     Factory<ArtificialStimulatorAgent, Agent> artificialStimulatorAgentFactory;
     Factory<SentenceGenStimulateAgent, Agent> sentenceGenStimulateFactory;
-    Factory<SentenceGenStimulateAgent, Agent> smokesFCAgnetFactory;
+    Factory<SmokesDBFCAgent, Agent> smokesFCAgnetFactory;
 
     AtomSpace * _as;
     CogServer& _cs;
