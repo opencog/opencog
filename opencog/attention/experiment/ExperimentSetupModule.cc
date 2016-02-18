@@ -17,6 +17,7 @@
 #include <opencog/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/atom_types.h>
+#include <opencog/attention/experiment/SmokesDBFCAgent.h>
 
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Module.h>
@@ -26,7 +27,6 @@
 
 #include "ArtificialStimulatorAgent.h"
 #include "ExperimentSetupModule.h"
-#include "SmokesDBFCAgent.cc"
 #include "Globals.h"
 
 using namespace opencog;
@@ -143,10 +143,9 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
                 ArtificialStimulatorAgent::info().id, false);
     }
 
-    if (_cs.registerAgent(SmokesDBFCAgent::info().id,
-                          &smokesFCAgnetFactory)) {
-        _smokes_fc_agentptr = _cs.createAgent(
-                SmokesDBFCAgent::info().id, false);
+    if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
+        _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,
+                                              false);
     }
 
     return "Loaded the following agents:\n" + ECAN_EXP_AGENTS;
@@ -159,7 +158,8 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
     _cs.startAgent(_hebbianupdating_agentptr);
     _cs.startAgent(_importanceupdating_agentptr);
     _cs.startAgent(_simpleimportancediffusion_agentptr);
-    _cs.startAgent(_artificialstimulatoragentptr);
+    //_cs.startAgent(_artificialstimulatoragentptr);
+    _cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
 }
