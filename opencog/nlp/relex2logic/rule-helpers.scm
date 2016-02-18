@@ -1415,9 +1415,10 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
-		(AtTimeLink)
+		(AtTimeLink
 			(PredicateNode pred_instance)
 			(ConceptNode comp_instance)
+		)
 	)
 )
 
