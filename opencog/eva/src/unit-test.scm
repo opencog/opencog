@@ -13,13 +13,19 @@
 ; this test.
 ;
 ; Infinite loop, runs forever.
+
+(define do-print-msg #f)  ; say (set! do-print-msg #t) to print
+(define keep-looping #t)  ; say (set! keep-looping #f) to halt unit test.
+
 (define (run-face-test)
 	(define face-id 0)
 
 	(define (chat-for-a-while n)
 		(do ((i 1 (1+ i))) ((> i n))
+			(if do-print-msg (display "chat start\n"))
 			(StateLink chat-state chat-start)
 			(sleep 1)
+			(if do-print-msg (display "chat stop\n"))
 			(StateLink chat-state chat-stop)
 			(sleep 2))
 	)
@@ -29,27 +35,31 @@
 		(set! face-id (+ 2 face-id))
 
 		; Add one face
+		(if do-print-msg (display "new face\n"))
 		(make-new-face (number->string face-id))
 		(sleep 3)
 		(chat-for-a-while 6)
 
 		; Add a second face
+		(if do-print-msg (display "second face\n"))
 		(make-new-face (number->string (+ 1 face-id)))
 		(chat-for-a-while 6)
 		(sleep 3)
 
 		; Remove first face
+		(if do-print-msg (display "first face exits\n"))
 		(remove-face (number->string face-id))
 		(chat-for-a-while 6)
 
 		; Remove second face
+		(if do-print-msg (display "second face exits\n"))
 		(remove-face (number->string (+ 1 face-id)))
 
 		; Let her get bored and look around and sleep.
 		(sleep 90)
 
 		; Loop forever.
-		(come-and-go)
+		(if keep-looping (come-and-go))
 	)
 
 	; Run in own thread.
