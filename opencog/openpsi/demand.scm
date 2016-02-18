@@ -438,7 +438,7 @@
             "action types listed when running `(psi-action-types)`, got: ")
             effect-type))
 
-    (cog-outgoing-set (cog-execute!
+    (cog-execute!
         (GetLink
              (TypedVariableLink
                  (VariableNode "x")
@@ -453,7 +453,7 @@
                  (InheritanceLink
                      (VariableNode "x")
                      (ConceptNode "opencog: action"))))
-    ))
+    )
 )
 
 ; --------------------------------------------------------------
@@ -471,8 +471,8 @@
     ; Could there be a reason one would want to change the default action-rule
     ; at runtime?
     (append
-        (psi-get-action-rules demand-node "Increase")
-        (psi-get-action-rules demand-node "Decrease")
+        (cog-outgoing-set (psi-get-action-rules demand-node "Increase"))
+        (cog-outgoing-set (psi-get-action-rules demand-node "Decrease"))
     )
 )
 
@@ -481,7 +481,8 @@
 "
   Returns the default actions for all the defined demands
 "
-    (append-map (lambda (x) (psi-get-action-rules x "Default"))
+    (append-map
+        (lambda (x) (cog-outgoing-set (psi-get-action-rules x "Default")))
         (cog-outgoing-set (psi-get-demands)))
 )
 

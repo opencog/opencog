@@ -272,7 +272,8 @@
         ; If default effect-type then add only the default actions.
         (if (equal? effect-type "Default")
             (psi-update-asp  asp (psi-get-action-rules-default))
-            (psi-update-asp  asp (psi-get-action-rules goal effect-type))
+            (psi-update-asp
+                asp (cog-outgoing-set (psi-get-action-rules goal effect-type)))
         )
     )
 )
