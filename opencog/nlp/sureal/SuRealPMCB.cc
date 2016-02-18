@@ -313,6 +313,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             // and do a disjunct match for each of them
             else
             {
+                std::set<std::string> qChkWords;
+
                 for (LinkPtr lpll : qLemmaLinks)
                 {
                     HandleSeq qOS = lpll->getOutgoingSet();
@@ -324,7 +326,10 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                     std::string sName = NodeCast(qOS[0])->getName();
                     std::string sWord = sName.substr(0, sName.find_first_of('@'));
 
-                    // TODO: Skip if we have seen it before
+                    // Skip if we have seen it before
+                    if (std::find(qChkWords.begin(), qChkWords.end(), sWord) != qChkWords.end())
+                        continue;
+                    else qChkWords.insert(sWord);
 
                     Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
