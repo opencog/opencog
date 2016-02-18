@@ -12,7 +12,8 @@
 ; not know about them, so you can't use the facetracker while runing
 ; this test.
 ;
-; Infinite loop, runs forever.
+; Infinite loop, runs forever, unless you halt it by saying
+; (set! keep-looping #f)
 
 (define do-print-msg #f)  ; say (set! do-print-msg #t) to print
 (define keep-looping #t)  ; say (set! keep-looping #f) to halt unit test.
@@ -20,12 +21,16 @@
 (define (run-face-test)
 	(define face-id 0)
 
+	(define (prt-msg x)
+		(if do-print-msg (begin (display x) (force-output)))
+	)
+
 	(define (chat-for-a-while n)
 		(do ((i 1 (1+ i))) ((> i n))
-			(if do-print-msg (display "chat start\n"))
+			(prt-msg "chat start\n")
 			(StateLink chat-state chat-start)
 			(sleep 1)
-			(if do-print-msg (display "chat stop\n"))
+			(prt-msg "chat stop\n")
 			(StateLink chat-state chat-stop)
 			(sleep 2))
 	)
@@ -35,24 +40,24 @@
 		(set! face-id (+ 2 face-id))
 
 		; Add one face
-		(if do-print-msg (display "new face\n"))
+		(prt-msg "new face\n")
 		(make-new-face (number->string face-id))
 		(sleep 3)
 		(chat-for-a-while 6)
 
 		; Add a second face
-		(if do-print-msg (display "second face\n"))
+		(prt-msg "second face\n")
 		(make-new-face (number->string (+ 1 face-id)))
 		(chat-for-a-while 6)
 		(sleep 3)
 
 		; Remove first face
-		(if do-print-msg (display "first face exits\n"))
+		(prt-msg "first face exits\n")
 		(remove-face (number->string face-id))
 		(chat-for-a-while 6)
 
 		; Remove second face
-		(if do-print-msg (display "second face exits\n"))
+		(prt-msg "second face exits\n")
 		(remove-face (number->string (+ 1 face-id)))
 
 		; Let her get bored and look around and sleep.
