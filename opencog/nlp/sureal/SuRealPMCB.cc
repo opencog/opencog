@@ -293,8 +293,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         // do a disjunct match for PredicateNodes as well
         if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
         {
-            // TODO: If lemma -> find all and pick the one that matches
-            //       else -> only use that to match
             Handle hPatWord = m_as->get_handle(WORD_NODE, NodeCast(kv.first)->getName());
             Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, NodeCast(kv.second)->getName());
             IncomingSet qLemmaLinks = hPatWord->getIncomingSetByType(LEMMA_LINK);
@@ -325,13 +323,19 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
                     std::string sName = NodeCast(qOS[0])->getName();
                     std::string sWord = sName.substr(0, sName.find_first_of('@'));
-                    Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
-                    // XXX TODO: LG dict entry is missing! Generate them in advance...
+                    // TODO: Skip if we have seen it before
+
+                    Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
                     if (disjunct_match(hWordNode, hSolnWordInst))
                     {
-                        shrinked_soln[m_as->get_handle(PREDICATE_NODE, sWord)] = kv.second;
+                        Handle hNewPred = m_as->get_handle(PREDICATE_NODE, sWord);
+
+                        if (hNewPred == Handle::UNDEFINED)
+                            hNewPred = m_as->add_node(PREDICATE_NODE, sWord);
+
+                        shrinked_soln[hNewPred] = kv.second;
                         break;
                     }
                 }
