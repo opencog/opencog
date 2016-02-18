@@ -50,7 +50,7 @@ Chat interfaces:
    I can't figure out how to start the frame server.
 
 -- screen-grab:
-   * VLC is supposed to beable to do this, but its
+   * VLC is supposed to be able to do this, but its
      slow/compute-intensive
 
    * http://www.maartenbaert.be/simplescreenrecorder/
