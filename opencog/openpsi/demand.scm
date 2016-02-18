@@ -7,9 +7,6 @@
 
 (load-from-path "openpsi/utilities.scm")
 
-; TODO: Temporary hack for accesing `random-string` function.
-(load-from-path "nlp/relex2logic/rule-helpers.scm")
-
 ; --------------------------------------------------------------
 ; Name of variables for common functions in this file-scope
 ; NOTE: Shouldn't be exported to prevent modification.
