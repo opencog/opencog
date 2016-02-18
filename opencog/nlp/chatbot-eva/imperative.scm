@@ -31,6 +31,20 @@
 ;
 ; This is a hard-code ad-hoc pipeline. Subject to change.
 ;
+
+(use-modules (opencog) (opencog query) (opencog exec))
+
+;--------------------------------------------------------------------
+; State and state anchors. These should be thought of as work-arounds,
+; to be replaced when a fine-tuned attention-allocation system is
+; working.  The anchors serve to define the center of what the
+; system is supposed to be "thinking about", right now -- the current
+; sentence, the current action to be taken.
+
+; Current action to be taken
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
 ;--------------------------------------------------------------------
 ; Action schema
 ; This is wrong, but a hack for now.
@@ -79,9 +93,14 @@
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1)
+
 (display
 	(cog-bind obj-semantic-model-rule-1)
 )
+(display
+	(cog-bind obj-semantic-model-rule-2)
+)
+
 
 	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind action-rule-1))

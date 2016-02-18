@@ -162,7 +162,7 @@
 ; the self-model, rather than the physical motors.  We can't quite
 ; recycle the above (I tried) because DefinedSchema mis-behaves
 ; in various irritating ways, so we duplicate the above using
-; ConcpetNode, instead.
+; ConceptNode, instead.
 
 ; Knowledge about spatial directions. Pair up words and physical
 ; directions.
@@ -174,16 +174,17 @@
 (ReferenceLink (WordNode "ahead")    (Concept "forward"))
 
 ; Syntactic category of schema. Used for contextual understanding.
-(InheritanceLink (Concept "upward")    (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "downward")  (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "rightwards") (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "leftwards")  (ConceptNode "schema-direction"))
-(InheritanceLink (Concept "forward")   (ConceptNode "schema-direction"))
+(InheritanceLink (Concept "upward")     (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "downward")   (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "rightwards") (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "leftwards")  (ConceptNode "concept-direction"))
+(InheritanceLink (Concept "forward")    (ConceptNode "concept-direction"))
 
 ; Model (self-awareness) knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
 (ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
 
+; Model (self-awareness) syntactic category of head-pose verbs
 (InheritanceLink (AnchorNode "*-gaze-direction-*")
 	(ConceptNode "model-direction"))
 (InheritanceLink (AnchorNode "*-head-direction-*")
@@ -194,10 +195,11 @@
 	(PredicateNode "turn-model")
 	(ListLink
 		(ConceptNode "model-direction")
-		(ConceptNode "schema-direction")))
+		(ConceptNode "concept-direction")))
 
 ;--------------------------------------------------------------------
-; Emotional expression semantics (groundings)
+;--------------------------------------------------------------------
+; Emotional expression semantics (groundings) for robot control
 (DefineLink
 	(DefinedSchema "happy")
 	(ListLink
@@ -275,32 +277,11 @@
 ; happy, comprehending, engaged, bored, irritated
 ; sad, confused, recoil, surprised
 
-; Syntactic category of facial expression imperative
 ; "express" is used with "Smile!", "Frown!", etc.
 (ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
 (ReferenceLink (WordNode "show") (GroundedPredicate "py:do_emotion"))
 ; "look" is used with "Look happy!"
 (ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
-(InheritanceLink (GroundedPredicate "py:do_emotion")
-	(ConceptNode "pred-express"))
-
-; Syntactic category of facial-expression schema.
-(InheritanceLink (DefinedSchema "happy") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "sad") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "engaged") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "bored") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "confused") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "recoil") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
-
-; Syntactic structure of facial-expression imperatives.
-(EvaluationLink
-	(PredicateNode "express-action")
-	(ListLink
-		(ConceptNode "pred-express")
-		(ConceptNode "schema-express")))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -331,5 +312,46 @@
 (ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "confusion")    (DefinedSchema "confused"))
 (ReferenceLink (WordNode "surprise")     (DefinedSchema "surprised"))
+
+; -----
+; Syntactic category of robot-control facial expression imperative
+(InheritanceLink (GroundedPredicate "py:do_emotion")
+	(ConceptNode "pred-express"))
+
+; Syntactic category of robot-control facial-expression schema.
+(InheritanceLink (DefinedSchema "happy")     (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "sad")       (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "engaged")   (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "bored")     (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "confused")  (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "recoil")    (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
+
+; Syntactic structure of robot-control facial-expression imperatives.
+(EvaluationLink
+	(PredicateNode "express-action")
+	(ListLink
+		(ConceptNode "pred-express")
+		(ConceptNode "schema-express")))
+
+;--------------------------------------------------------------------
+; Duplicate of the above, except that this is for use in controlling
+; the self-model, rather than the physical motors.
+
+(ReferenceLink (WordNode "express")
+	(AnchorNode "*-facial-expression-*"))
+
+; Model (self-awareness) syntactic category of facial expression verbs
+(InheritanceLink (AnchorNode "*-facial-expression-*")
+	(ConceptNode "model-expression"))
+
+; Syntactic structure of self-model facial-expression imperatives.
+(EvaluationLink
+	(PredicateNode "express-model")
+	(ListLink
+		(ConceptNode "model-expression")
+		(ConceptNode "schema-express")))
 
 ;--------------------------------------------------------------------

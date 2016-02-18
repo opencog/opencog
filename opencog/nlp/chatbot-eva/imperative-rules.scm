@@ -39,10 +39,6 @@
 (define current-imperative (AnchorNode "*-imperative-*"))
 (StateLink current-imperative (WordNode "foobar"))
 
-; Current action to be taken
-(define current-action (AnchorNode "*-action-*"))
-(StateLink current-action (WordNode "foobar"))
-
 ; ---------
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 
