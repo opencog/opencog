@@ -313,6 +313,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             // and do a disjunct match for each of them
             else
             {
+                bool found = false;
                 std::set<std::string> qChkWords;
 
                 for (LinkPtr lpll : qLemmaLinks)
@@ -341,9 +342,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                             hNewPred = m_as->add_node(PREDICATE_NODE, sWord);
 
                         shrinked_soln[hNewPred] = kv.second;
+                        found = true;
                         break;
                     }
                 }
+
+                // will not consider it as a match if none of them
+                // passed the disjunct match
+                if (not found) return false;
             }
         }
 
