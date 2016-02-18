@@ -1,9 +1,15 @@
 ;
 ; btree.scm
 ;
-; Behavior tree in the atomspace.
-; Under construction.
+; Behavior tree, implemented in the atomspace.
 ;
+; Defines a set of behaviors that express Eva's personality. The
+; currently-defined behaviors include acknowledging new people who enter
+; the room, rotating attention between multiple occupants of the room,
+; falling asleep when bored (i.e. the room is empty), and acting
+; surprised when someone leaves unexpectedly.
+;
+; HOWTO:
 ; Run the main loop:
 ;    (run)
 ; Pause the main loop:
