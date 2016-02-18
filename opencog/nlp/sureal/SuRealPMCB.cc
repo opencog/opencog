@@ -293,8 +293,12 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         // do a disjunct match for PredicateNodes as well
         if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
         {
-            Handle hPatWord = m_as->get_handle(WORD_NODE, NodeCast(kv.first)->getName());
+            std::string sName = NodeCast(kv.first)->getName();
+            std::string sWord = sName.substr(0, sName.find_first_of('@'));
+            Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
+
             Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, NodeCast(kv.second)->getName());
+
             IncomingSet qLemmaLinks = hPatWord->getIncomingSetByType(LEMMA_LINK);
 
             // if there is no LemmaLink conntecting to it, it's probably
