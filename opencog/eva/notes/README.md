@@ -5,9 +5,12 @@ Notes
 The files in this directory are non-essential to the system; they're
 just some random sketches, ideas and notes.
 
+* `btree-demo.scm`: a super-simplified example of a behavior tree,
+   implemented
 * `general_behavior.py`: a copy of the original Owyl behavior tree.
 * `behavior.cfg`: a copy of the original Owyl config file.
-* fsm: a finite state machine
+* `universal-fsm.scm`: a finite state machine
+
 
 Some random notes about OpenPsi
 -------------------------------
@@ -21,6 +24,8 @@ Demands
  * Greet people
  * Inquire about thier well-being
 
+See Psi Theory http://en.wikipedia.org/wiki/Psi-Theory
+See also Amen's implementation.
 
 GUI Requirements
 ----------------
@@ -118,6 +123,3 @@ Resources:
 ----------
 * The current Hanson robotics Web motors user interface:
   https://github.com/hansonrobotics/ros_motors_webui
-
-* Psi Theory
-  http://en.wikipedia.org/wiki/Psi-Theory
