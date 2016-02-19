@@ -54,7 +54,8 @@ example, we have to make sure the words "she" and "drinks" are there in advance.
 Similarily in the second example, we have to make sure "she" and "drank" exist.
 Otherwise SuReal will return nothing. The recommended way to "add the words"
 into the AtomSpace is to parse sentences that actually contain those words.
-In this case, they are "It drinks water." and "Nobody drank it." respectively.
+In this case, they are "She eats quickly.", "It drinks water." and
+"Nobody drank it." respectively.
 
 
 ## Algorithm
