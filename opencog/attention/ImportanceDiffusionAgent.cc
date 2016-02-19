@@ -152,7 +152,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
             continue;
         }
 
-        targets = a->get_outgoing(linkHandle);
+        targets = linkHandle->getOutgoingSet();
 
         for (targetItr = targets.begin(); targetItr != targets.end();
                 ++targetItr) {
@@ -197,7 +197,7 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     }
     
 #ifdef DEBUG
-    if (log->isFineEnabled()) {
+    if (log->is_fine_enabled()) {
         log->fine("Initial normalised STI values");
         printVector(stiVector);
     }
@@ -235,7 +235,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         //val *= diffuseTemperature;
         type = a->get_type(*hi); 
 
-        targets = a->get_outgoing(*hi);
+        targets = (*hi)->getOutgoingSet();
         if (classserver().isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 
@@ -335,7 +335,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     }
     
 #ifdef DEBUG
-    if (log->isFineEnabled()) {
+    if (log->is_fine_enabled()) {
         log->debug("Hebbian connection matrix:");
         printMatrix(connections_);
     }
@@ -390,7 +390,7 @@ void ImportanceDiffusionAgent::spreadImportance()
         logger().error("%s\n", gsl_strerror (errorNo)); // XXX
     }*/
 
-    if (log->isFineEnabled()) {
+    if (log->is_fine_enabled()) {
         float normAF;
         normAF = (a->get_attentional_focus_boundary() - a->get_min_STI(false)) / (float) ( a->get_max_STI(false) - a->get_min_STI(false) );
         log->fine("Result (AF at %.3f)\n",normAF);

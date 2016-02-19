@@ -78,7 +78,9 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings = originalAtomSpace->get_incoming( ((Handle)(*varIt)));
+        HandleSeq incomings;
+        ((Handle)(*varIt))->getIncomingSet(back_inserter(incomings));
+
         // debug
         string curvarstr = originalAtomSpace->atom_as_string((Handle)(*varIt));
 
@@ -568,7 +570,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
                                                   HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar )
 {
     containVar = false;
-    HandleSeq outgoingLinks = fromAtomSpace->get_outgoing(fromLink);
+    HandleSeq outgoingLinks = fromLink->getOutgoingSet();
 
     for (Handle h : outgoingLinks)
     {
@@ -687,7 +689,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    // Get result
    // Note: Don't forget to remove the hResultListLink and BindLink
-   HandleSeq resultSet = originalAtomSpace->get_outgoing(hResultListLink);
+   HandleSeq resultSet = hResultListLink->getOutgoingSet();
 
 //     std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
 
@@ -696,7 +698,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    for (Handle listH  : resultSet)
    {
-       HandleSeq instanceLinks = originalAtomSpace->get_outgoing(listH);
+       HandleSeq instanceLinks = listH->getOutgoingSet();
 
        if (cur_gram == 1)
        {

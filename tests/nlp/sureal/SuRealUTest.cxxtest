@@ -45,18 +45,18 @@ public:
         }
         catch (RuntimeException &e)
         {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
         }
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_filename(config()["LOG_FILE"]);
+        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
     }
 
     ~SuRealUTest()
     {
         // erase the log file if no assertions failed
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -68,6 +68,7 @@ public:
     void test_multiconn(void);
     void test_negative(void);
     void test_good_enough(void);
+    void test_tense(void);
 };
 
 void SuRealUTest::setUp(void)
@@ -286,6 +287,32 @@ void SuRealUTest::test_good_enough(void)
 
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "it" "jumps" "."))) )");
     TSM_ASSERT("Failed to return the best/good enough result!", result == "#t\n");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SuRealUTest::test_tense(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD",
+                 "tests/nlp/sureal/r2l-atomspace7.scm");
+    cogserver().loadSCMModules();
+
+    // Sentences in r2l-atomspace7.scm
+    // - "John drinks and she spoke."
+    // - "He ate the cakes."
+
+    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eat") (ListLink (ConceptNode "he")))
+                            (InheritanceLink (PredicateNode "eat") (DefinedLinguisticConceptNode "past"))
+                            (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))
+                            (InheritanceLink (PredicateNode "drink") (DefinedLinguisticConceptNode "present"))))))) )");
+    bool eval_err = _evaluator->eval_error();
+    _evaluator->clear_pending();
+    TSM_ASSERT("Failed to run sureal!", !eval_err);
+
+    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "drinks" "and" "he" "ate" "."))) )");
+    TSM_ASSERT("Failed to return the correct result on tense!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

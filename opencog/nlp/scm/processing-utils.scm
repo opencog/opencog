@@ -84,9 +84,9 @@
 
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
-			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+			; (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
 			(exec-scm-from-port s)
-			(system (string-join (list "echo Info: close socket to parser" )))
+			; (system (string-join (list "echo Info: close socket to parser" )))
 			(close-port s)
 		)
 	)
@@ -185,4 +185,38 @@
         )
         (close-pipe port)
     )
+)
+
+; -----------------------------------------------------------------------
+(define (parse-all proc path)
+"
+  Parse of all sentences in each of the files in 'path' using 'proc'. Assuming
+  each line of the files represents a sentence.
+
+  'proc': a scheme function for parsing the sentences.
+
+  'path': a string that points to the file or the directory containing the
+          sentences to be parsed.
+          Node: If it is a directory, all the files including those in its
+                sub-directories will be parsed
+
+  Example usage:
+      (parse-all nlp-parse \"/home/test/articles\")
+"
+    (let* ((cmd (string-append "find " path " -type f -exec cat {} \\;"))
+           (port (open-input-pipe cmd))
+           (line (get-line port)))
+
+        (while (not (eof-object? line))
+            ; Ignore empty lines
+            (if (= (string-length (string-trim line)) 0)
+                (set! line (get-line port))
+                (begin (catch #t
+                    (lambda ()
+                        (proc line))
+                    (lambda (key . parameters)
+                        (string-append "*** Unable to parse: " line)
+                        (newline)))
+                    (set! line (get-line port)))))
+        (close-pipe port))
 )

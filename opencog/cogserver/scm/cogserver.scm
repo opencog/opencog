@@ -29,7 +29,7 @@
 	(c-start-cogserver (cog-atomspace) config-path)
 )
 
-; to stop the repl server..
+; To stop the repl server..
 (use-modules (system repl server))
 
 ; Similar to above

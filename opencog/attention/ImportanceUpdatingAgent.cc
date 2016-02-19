@@ -404,7 +404,7 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
     base = (int) mean;
     mean = mean - base;
     // Calculates tax amount by sampling a Poisson distribution
-    p = getRandGen()->randDoubleOneExcluded();
+    p = getRandGen()->randdouble_one_excluded();
     prob = sum = exp(-mean);
 
     while (p > sum) {
@@ -810,11 +810,11 @@ void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
     if (wage.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = wage.front();
-        wage = a->get_incoming(h);
+        h->getIncomingSet(back_inserter(wage));
         h = wage.front();
-        wage = a->get_outgoing(h);
+        wage = h->getOutgoingSet();
         h = wage.back();
-        wage = a->get_outgoing(h);
+        wage = h->getOutgoingSet();
         h = wage.front();
         int value = std::stoi(a->get_name(h));
 
@@ -834,11 +834,11 @@ void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
     if (rent.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = rent.front();
-        rent = a->get_incoming(h);
+        h->getIncomingSet(back_inserter(rent));
         h = rent.front();
-        rent = a->get_outgoing(h);
+        rent = h->getOutgoingSet();
         h = rent.back();
-        rent = a->get_outgoing(h);
+        rent = h->getOutgoingSet();
         h = rent.front();
         int value = std::stoi(a->get_name(h));
 

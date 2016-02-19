@@ -43,16 +43,16 @@ private:
 public:
     ActionUTest() : _scm(&_as)
     {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintLevelFlag(true);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_level_flag(true);
+        logger().set_print_to_stdout_flag(true);
     }
 
     ~ActionUTest()
     {
         // Erase the log file if no assertions failed
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp()

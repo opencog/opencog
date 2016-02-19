@@ -13,12 +13,17 @@
 			(interp-of-parse "$interp" "$parse")
 			(word-in-parse "$wall-inst" "$parse")
 
-			(ReferenceLink
-				(VariableNode "$wall-inst")
-				(WordNode "###LEFT-WALL###")
+			; Comma: for example "Eva, look up" links Wi to comma.
+			(ChoiceLink
+				(ReferenceLink
+					(VariableNode "$wall-inst")
+					(WordNode "###LEFT-WALL###"))
+				(ReferenceLink
+					(VariableNode "$wall-inst")
+					(WordNode ","))
 			)
 
-			;; If left wall is linked with Wi,
+			;; If left wall (or a comma) is linked with Wi,
 			;; then its imperative.
 			(lg-link "Wi" "$wall-inst" "$word-inst")
 		)

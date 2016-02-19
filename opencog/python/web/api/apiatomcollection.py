@@ -326,10 +326,8 @@ class AtomCollectionAPI(Resource):
                     atoms = self.atomspace.get_atoms_by_type(
                         types.__dict__.get(type))
                 else:
-                    if type is None:
-                        type = 'Node'
-                    atoms = self.atomspace.get_atoms_by_name(
-                        t=types.__dict__.get(type), name=name)
+                    abort(400, 'Invalid request: get atoms by name no longer'
+                    		   ' supported')
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:

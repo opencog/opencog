@@ -59,8 +59,8 @@ class AnaphoraUnitTester(TestCase):
         del self.hobbsAgent
 
     def getWord(self,name,type=types.WordInstanceNode):
-        rv=self.atomspace.get_atoms_by_name(type,name)
-        return rv[0]
+        word = self.atomspace.add_node(type, name)
+        return word
 
     def compare(self,list_1,list_2):
         if len(list_1)==len(list_2):

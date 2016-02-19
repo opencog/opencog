@@ -16,4 +16,4 @@ class TestTimeServer:
     def test_addTimeInfo(self):
         objnode = self._atomspace.add_node(types.StructureNode, "object111")
         at_time_link = self._timeserver.add_time_info(objnode, 123456)
-        assert objnode in self._atomspace.get_outgoing(at_time_link)
+        assert objnode in at_time_link.out

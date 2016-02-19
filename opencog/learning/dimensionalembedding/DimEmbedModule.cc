@@ -171,18 +171,18 @@ HandleSeq DimEmbedModule::kNearestNeighbors(Handle h, Type l, int k, bool fanin)
     if (symmetric) {
         EmbedTreeMap::const_iterator it = embedTreeMap.find(l);
         points =
-            it->second.kNearestNeighbors(CoverTreePoint(h,atomMaps[l][h]),k);
+            it->second.k_nearest_neighbors(CoverTreePoint(h,atomMaps[l][h]),k);
     } else {
         AsymEmbedTreeMap::const_iterator it = asymEmbedTreeMap.find(l);
         if (fanin) {
             points =
                 it->second.second.
-                kNearestNeighbors(CoverTreePoint(h,asymAtomMaps[l].second[h]),k);
+                k_nearest_neighbors(CoverTreePoint(h,asymAtomMaps[l].second[h]),k);
         }
         else {
             points =
                 it->second.first.
-                kNearestNeighbors(CoverTreePoint(h,asymAtomMaps[l].first[h]),k);
+                k_nearest_neighbors(CoverTreePoint(h,asymAtomMaps[l].first[h]),k);
         }
     }
     HandleSeq results;
@@ -260,12 +260,13 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         pQueue.erase(--erase_it);
 
         if (distMap[u]==0) { break;}
-        HandleSeq newLinks = as->get_incoming(u);
+        HandleSeq newLinks;
+        u->getIncomingSet(back_inserter(newLinks));
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
             if (!classserver().isA(as->get_type(*it),linkType)) continue;
             TruthValuePtr linkTV = as->get_TV(*it);
-            HandleSeq newNodes = as->get_outgoing(*it);
+            HandleSeq newNodes = (*it)->getOutgoingSet();
             HandleSeq::iterator it2=newNodes.begin();
             //if !fanin, we're following the "outward" links, so it's only a
             //valid link if u is the source
@@ -985,8 +986,8 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         CoverTreePoint p1(Handle::UNDEFINED,newVec);
         newVec[i]=embedVec2[i];
         CoverTreePoint p2(Handle::UNDEFINED,newVec);
-        double dist1 = p1.distance(cTree.kNearestNeighbors(p1,1)[0]);
-        double dist2 = p2.distance(cTree.kNearestNeighbors(p2,1)[0]);
+        double dist1 = p1.distance(cTree.k_nearest_neighbors(p1,1)[0]);
+        double dist2 = p2.distance(cTree.k_nearest_neighbors(p2,1)[0]);
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
     std::string prefix("blend_"+as->get_name(n1)+"_"+as->get_name(n2)+"_");

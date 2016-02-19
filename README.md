@@ -1,7 +1,6 @@
 OpenCog
 =======
-[![Build Status](
-https://circleci.com/gh/opencog/opencog/tree/master.png?circle-token=:circle-token)](https://circleci.com/gh/opencog/opencog/tree/master)
+[![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-opencog)](http://61.92.69.43:8080/job/ci-opencog/)
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence
@@ -14,6 +13,10 @@ The main project site is at http://opencog.org
 
 An interactive tutorial for getting started is available at:
 https://github.com/opencog/opencog/blob/master/TUTORIAL.md
+
+For platform dependent instruction on dependencies and building the code as
+well as other options for setting up development environment more details are
+found at: http://wiki.opencog.org/wikihome/index.php/Building_OpenCog
 
 Prerequisites
 -------------
@@ -49,7 +52,7 @@ the build, will be more precise as to which parts will not be built.
 
 ###### MOSES
 > MOSES Machine Learning
-> http://github/opencog/moses
+> http://github.com/opencog/moses
 > It uses exactly the same build proceedure as this pakcage. Be sure
   to `sudo make install` at the end.
 

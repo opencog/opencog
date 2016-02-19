@@ -29,7 +29,7 @@ class ConceptNetWriter:
 
     def __write_py_file(self, output_atom, pre_space):
         if output_atom.is_link():
-            outgoing = self.a.get_outgoing(output_atom.h)
+            outgoing = output_atom.out
             self.__write_space(pre_space)
             self.output_file.write(
                 'a.add_link(\n'
@@ -79,7 +79,7 @@ class ConceptNetWriter:
     # This is more beautiful than above, but can't load in python file...
     def __write_py_beautiful_file(self, output_atom, pre_space):
         if output_atom.is_link():
-            outgoing = self.a.get_outgoing(output_atom.h)
+            outgoing = output_atom.out
             self.__write_space(pre_space)
             self.output_file.write(
                 '%s(\n' % output_atom.type_name

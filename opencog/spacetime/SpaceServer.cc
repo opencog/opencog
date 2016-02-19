@@ -313,7 +313,7 @@ std::string SpaceServer::getMapIdString(Handle mapHandle) const
 {
     // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
     // So, just get the name of the TimeNode as its string representation
-    // return atomspace->get_name(atomspace->get_outgoing(mapHandle, 0))->get_result();
+    // return atomspace->get_name(mapHandle->getOutgoingSet()[0])->get_result();
 
     return atomspace->get_name(mapHandle);
 }

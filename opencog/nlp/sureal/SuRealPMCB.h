@@ -64,6 +64,7 @@ public:
 
 private:
     virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&, size_t&);
+    bool disjunct_match(const Handle&, const Handle&);
 
     AtomSpace* m_as;
     std::set<Handle> m_vars;   // store nodes that are variables

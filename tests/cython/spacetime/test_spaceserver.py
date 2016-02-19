@@ -15,7 +15,7 @@ class TestSpaceServer:
 
     def test_addMap(self):
         map_atom = self.space_server.add_map(123456, "testmap", 1)
-        assert self._atomspace.get_name(map_atom) == "testmap"
+        assert map_atom.name == "testmap"
     
     def test_getMap(self):
         map_atom = self.space_server.add_map(123456, "testmap", 1)

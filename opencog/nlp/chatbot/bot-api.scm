@@ -1,8 +1,8 @@
 ;
-; process-query.scm
+; bot-api.scm
 ;
-; Top-level Eva chatbot handling.
-; Its a modified fork of ../chatbot/process-query.scm
+; Top-level question-answering API.
+; Somewhat generic, somewhat IRC-specific.
 ;
 
 (use-modules (opencog nlp) (opencog nlp fuzzy))
@@ -14,12 +14,15 @@
   Process wh-question using the fuzzy hypergraph Matcher
   QUERY should be a SentenceNode.
 
-  Wrapper around get-answers provided by (opencog nlp fuzzy)
+  Wrapper around get-fuzzy-answers provided by (opencog nlp fuzzy)
 "
-    (define temp (get-answers query))
+    (define temp (get-fuzzy-answers query))
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
-        (else (string-join (car temp)))
+        ; Return all of them, for now
+        (else (map string-join temp))
+        ; (else (string-join (car temp)))
+
 ))
 ;--------------------------------------------------------------------
 (define-public (process-query user query)
@@ -64,7 +67,7 @@
         ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
             (display "You made a Imperative SpeechAct\n")
             ; Make the robot do whatever ...
-				(imperative-process sent-node)
+				; (imperative_process sent-node)
             ; XXX Use AIML here to say something snarky.
         )
         (else

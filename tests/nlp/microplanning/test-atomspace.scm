@@ -70,6 +70,10 @@ For now, most of the results are in r2l-atomspace.scm
 (lg-get-dict-entry (WordNode "?"))
 |#
 
+; For anaphora
+(WordNode "he")
+(WordNode "them")
+
 
 ; =========================
 ; Inputs for microplanning
