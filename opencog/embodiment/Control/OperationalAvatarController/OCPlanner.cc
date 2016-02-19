@@ -35,6 +35,7 @@
 #include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/learning/PatternMiner/PatternMiner.h>
 
 #include <stdlib.h>
 #include <map>
@@ -46,6 +47,7 @@
 #include "OAC.h"
 
 using namespace opencog::oac;
+using namespace opencog::PatternMining;
 using namespace std;
 
 RuleNode OCPlanner::goalRuleNode = RuleNode();
@@ -621,7 +623,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 
 }
 
-ActionPlanID OCPlanner::doPlanningForGivenGoal(opencog::CogServer * server)
+ActionPlanID OCPlanner::doPlanningForGivenGoal(opencog::CogServer * server, PatternMiner* _patternMiner)
 {
     // need to translate the psi demanding goal Handle into vector<State*>
     vector<State*> goal,knownStates;
@@ -646,6 +648,12 @@ ActionPlanID OCPlanner::doPlanningForGivenGoal(opencog::CogServer * server)
 
     // test :
     // loadFacts(knownStates);
+
+    if ((patternMiner == NULL) && (ENABLE_MINING_RULES))
+    {
+        patternMiner = _patternMiner;
+
+    }
 
     return doPlanning(goal,knownStates,server);
 }
@@ -2605,6 +2613,20 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 
 Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 {
+    // Step 1: find out what kind of object the state ower is in this subgoal
+    vector<ParamValue> stateOwnerList = curSubgoalNode->state->stateOwnerList;
+
+    if (stateOwnerList.size() < 1)
+        return 0;
+
+    Handle stateOwnerHanlde = Handle::UNDEFINED;
+
+//    stateOwnerHanlde = getStateOwnerHandle(stateOwnerList[0]);
+
+//    if (stateOwnerHanlde == Handle::UNDEFINED)
+//        return 0;
+
+
 
 }
 

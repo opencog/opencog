@@ -303,7 +303,8 @@ void OCPlanningAgent::run()
 
 //        // the demand goal is something like "EnergyDemandGoal"
 
-        currentOCPlanID = ocplanner->doPlanningForGivenGoal(&_cogserver);
+
+        currentOCPlanID = ocplanner->doPlanningForGivenGoal(&_cogserver, oac->getPatternMiningAgent().get()->patternMiner);
 
         // if planning failed
         if (currentOCPlanID == "")

@@ -182,6 +182,44 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
     std::cout.flush();
 }
 
+// start from keyLinks, only mine patterns connecting to any of links in keyLinks
+// keyLinks are in originalAtomSpace. observingAtomSpace is not used in this mining.
+// It's a one time mining, just mine from the current originalAtomSpace. After return result, throw away the result and any middle data.
+void PatternMiner::mineRelatedPatternsOnQuery_OR(HandleSeq keyLinks, unsigned int _max_gram)
+{
+    MAX_GRAM = _max_gram;
+
+    initDataStructure();
+
+    isMineRelatedOnRequired = true;
+
+    alreadyMinedKeyLinks.clear();
+
+    pai->waitingToFeedToPatternMinerLock.lock();
+
+    for (Handle keyLink : keyLinks)
+    {
+        std::cout<<"Mine patterns related to: \n";
+        cout << originalAtomSpace->atomAsString(keyLink) << std::endl;
+
+        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+        HandleSeq lastGramLinks;
+        map<Handle,Handle> lastGramValueToVarMap;
+        map<Handle,Handle> patternVarMap;
+
+        extendAPatternForOneMoreGramRecursively(keyLink, originalAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+
+        alreadyMinedKeyLinks.insert(keyLink);
+
+        cout << "\nFinshed current link mining." << std::endl;
+
+    }
+
+
+    pai->waitingToFeedToPatternMinerLock.unlock();
+
+}
+
 void PatternMiner::growPatternsDepthFirstTaskForEmbodiment()
 {
     sleep (10);
@@ -793,7 +831,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             continue;
                         }
 
-                        // extract patterns from these child
+                        if (alreadyMinedKeyLinks.find(extendedHandle) != alreadyMinedKeyLinks.end())
+                            continue;
+
+                        // extract patterns from this child
                         extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode, valueToVarMap,patternVarMap,isNewExtendedFromVar);
                     }
 

@@ -2015,10 +2015,63 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 
 }
 
+void PatternMiner::initDataStructure()
+{
+    static bool alreadyInitDataStructure = false;
+
+    if (alreadyInitDataStructure)
+    {
+        if (htree)
+            delete htree;
+
+        if (atomSpace)
+            delete atomSpace;
+
+        if (observingAtomSpace)
+            delete observingAtomSpace;
+
+        for (unsigned int i = 0; i < MAX_GRAM; ++i)
+        {
+            (patternsForGram[i]).clear();
+            (finalPatternsForGram[i]).clear();
+        }
+
+        patternsForGram.clear();
+        finalPatternsForGram.clear();
+
+        map<string, HTreeNode*>::iterator iter;
+        for (iter = keyStrToHTreeNodeMap.begin(); iter != keyStrToHTreeNodeMap.end(); iter ++)
+        {
+            delete ((HTreeNode*)(iter->second));
+        }
+
+        keyStrToHTreeNodeMap.clear();
+
+    }
+
+    htree = new HTree();
+
+    atomSpace = new AtomSpace( originalAtomSpace);
+
+    // vector < vector<HTreeNode*> > patternsForGram
+    for (unsigned int i = 0; i < MAX_GRAM; ++i)
+    {
+        vector<HTreeNode*> patternVector;
+        patternsForGram.push_back(patternVector);
+
+        vector<HTreeNode*> finalPatternVector;
+        finalPatternsForGram.push_back(finalPatternVector);
+
+    }
+
+    alreadyInitDataStructure = true;
+}
+
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
-    htree = new HTree();
-    atomSpace = new AtomSpace( _originalAtomSpace);
+    initDataStructure();
+
+    isMineRelatedOnRequired = false;
 
 //    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
@@ -2039,6 +2092,9 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     cur_gram = 0;
 
     ignoredTypes[0] = LIST_LINK;
+
+    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
+    assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
     enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
     enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
@@ -2064,17 +2120,6 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
         {
             node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
         }
-    }
-
-    // vector < vector<HTreeNode*> > patternsForGram
-    for (unsigned int i = 0; i < max_gram; ++i)
-    {
-        vector<HTreeNode*> patternVector;
-        patternsForGram.push_back(patternVector);
-
-        vector<HTreeNode*> finalPatternVector;
-        finalPatternsForGram.push_back(finalPatternVector);
-
     }
 
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
@@ -2111,9 +2156,6 @@ PatternMiner::~PatternMiner()
 void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
     thresholdFrequency = _thresholdFrequency;
-
-    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
-    assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
 
@@ -2301,6 +2343,8 @@ void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _t
 
 }
 
+
+
 // this function is run evaluatePatternsEveryXSeconds
 void PatternMiner::runEvaluatePatternTaskForEmbodiment()
 {
@@ -2437,6 +2481,8 @@ void PatternMiner::runEvaluatePatternTaskForEmbodiment()
         miningOrEvaluatingLock.unlock();
     }
 }
+
+
 
 void PatternMiner::evaluateInterestingnessTask()
 {

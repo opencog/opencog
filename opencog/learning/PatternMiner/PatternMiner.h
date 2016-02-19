@@ -303,6 +303,7 @@ namespace PatternMining
 
      bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
+     void initDataStructure();
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
@@ -331,6 +332,9 @@ namespace PatternMining
  public:
      void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 3,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
+
+     void mineRelatedPatternsOnQuery_OR(HandleSeq keyLinks, unsigned int _max_gram);
+
 //     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
 //     std::mutex waitingToFeedQueueLock;
 
@@ -341,6 +345,9 @@ namespace PatternMining
      std::mutex miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time
      std::thread miningFromEmbodimentThread, evaluatingForEmbodimentThread;
      unsigned int lastTimeEvaluatedNumber;
+
+     bool isMineRelatedOnRequired;
+     set <Handle> alreadyMinedKeyLinks;
 
      void growPatternsDepthFirstTaskForEmbodiment();
 

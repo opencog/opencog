@@ -48,8 +48,6 @@ private:
 
     bool bInitialized; 
 
-    PatternMiner* patternMiner;
-
     pai::PAI * pai;
 
     // AtomSpace* corpusAtomSpace;
@@ -61,6 +59,9 @@ private:
 public:
 
     PatternMiningAgent(CogServer&);
+
+    PatternMiner* patternMiner;
+
     virtual ~PatternMiningAgent();
 
     virtual const ClassInfo& classinfo() const {

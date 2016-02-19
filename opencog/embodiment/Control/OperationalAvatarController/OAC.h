@@ -298,6 +298,11 @@ public:
         return psiFeelingUpdaterAgent;
     }
 
+    const PatternMiningAgentPtr getPatternMiningAgent()
+    {
+        return patternMiningAgent;
+    }
+
     /* Get the Procedure Interpreter associated with the OAC.
      *
      * @return The ProcedureInterpreter associated with the OAC.

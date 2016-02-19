@@ -94,6 +94,11 @@ namespace opencog
              rootNode = new HTreeNode(); // the rootNode with no parents
          }
 
+         ~HTree()
+         {
+             delete rootNode;
+         }
+
      };
 
 

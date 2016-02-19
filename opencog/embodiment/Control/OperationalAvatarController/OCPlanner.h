@@ -39,10 +39,12 @@
 #include "Strips.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/learning/PatternMiner/PatternMiner.h>
 
 using namespace std;
 using namespace opencog::pai;
 using namespace boost;
+using namespace opencog::PatternMining;
 
 // The Actions described in STRIPS format
 // Including the preconditions,effects,parameters of the action
@@ -334,7 +336,7 @@ public:
 
      ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle, opencog::CogServer *server);
 
-     ActionPlanID doPlanningForGivenGoal(opencog::CogServer * server);
+     ActionPlanID doPlanningForGivenGoal(opencog::CogServer * server, PatternMiner *_patternMiner = NULL);
 
 protected:
 
@@ -381,6 +383,8 @@ protected:
      int removedHypotheticalLinkCount;
 
      bool ENABLE_MINING_RULES;
+
+     PatternMiner* patternMiner;
 
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
