@@ -79,7 +79,27 @@ ANSI_ENABLED	       = true
 # if .so exists.
 MODULES               = opencog/cogserver/server/libbuiltinreqs.so,
                         opencog/cogserver/shell/libscheme-shell.so,
+<<<<<<< HEAD
                         opencog/cogserver/shell/libpy-shell.so
+
+# Optional modules, not enabled by default
+#                        opencog/modules/libPersistZmqModule.so,
+#                        opencog/modules/benchmark/libbenchmark.so,
+#                        opencog/moldules/events/libatomspacepublishermodule.so
+#                        opencog/attention/libhebbiancreation.so
+#                        opencog/learning/dimensionalembedding/libdimensionalembedding.so
+#                        opencog/viterbi/libviterbi.so
+=======
+                        opencog/cogserver/shell/libpy-shell.so,
+                        opencog/nlp/types/libnlp-types.so,
+                        opencog/modules/libLGDictModule.so,
+                        opencog/modules/libSuRealModule.so,
+                        opencog/learning/pln/libPLNTypes.so,
+                        opencog/attention/libattention-types.so,
+                        opencog/attention/libattention.so,
+                        opencog/embodiment/libembodiment-types.so,
+                        opencog/spacetime/libspacetime-types.so,
+                        opencog/modules/python/libPythonModule.so,
                         opencog/modules/libRuleEngineModule.so,
                         opencog/attention/experiment/libdynamicsexpsetupmodule.so,
 # Optional modules, not enabled by default
@@ -90,6 +110,17 @@ MODULES               = opencog/cogserver/server/libbuiltinreqs.so,
 #                       opencog/learning/dimensionalembedding/libdimensionalembedding.so
 #                       opencog/viterbi/libviterbi.so
                       
+SCM_PRELOAD           = scm/config.scm,
+                        scm/core_types.scm,
+                        scm/core-docs.scm,
+                        scm/utilities.scm,
+                        scm/apply.scm,
+                        scm/file-utils.scm,
+                        scm/persistence.scm,
+                        scm/repl-shell.scm,
+                        scm/av-tv.scm
+>>>>>>> ecan-wbench
+
 # Uncomment if Python extensions are not stored in these locations,
 # or the binary and source directories:
 #     /usr/local/share/opencog/python

@@ -1,0 +1,49 @@
+name:                TVToolBox
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            https://github.com/githubuser/TVToolBox#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2016 Author name here
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+--library
+--  hs-source-dirs:      src
+--  exposed-modules:     Lib
+--  build-depends:       base >= 4.7 && < 5
+--  default-language:    Haskell2010
+
+executable TVToolBox-exe
+  main-is:             TVToolBoxCInterface.hs
+  build-depends:       base
+                       , multimap
+                       , numbers
+                       , memoize
+                       , gamma
+                       , exact-combinatorics
+                       , text-format-simple
+                       , gnuplot
+                       , containers
+  ghc-options:         -shared -dynamic -fPIC -threaded -o libjsd.so -optl-Wl,-rpath
+  c-sources:           moduleinit.c
+  extra-libraries:     HSrts-ghc7.10.3
+  default-language:    Haskell2010
+
+--test-suite TVToolBox-test
+--  type:                exitcode-stdio-1.0
+--  hs-source-dirs:      test
+--  main-is:             Spec.hs
+--  build-depends:       base
+--                     , TVToolBox
+--  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+--  default-language:    Haskell2010
+--
+--source-repository head
+--  type:     git
+--  location: https://github.com/githubuser/TVToolBoxH
