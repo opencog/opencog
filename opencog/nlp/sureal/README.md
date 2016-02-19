@@ -17,22 +17,46 @@ For example, you can do
 
 ```
 (nlp-parse "He eats.")
-(nlp-parse "He eats quickly.")
-(WordNode "she")
-(WordNode "drinks")
-(sureal (SetLink (EvaluationLink (PredicateNode "drinks") (ListLink (ConceptNode "she")))))
+(nlp-parse "She eats quickly.")
+(nlp-parse "Nobody drank it.")
+(nlp-parse "It drinks water.")
+
+(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))))
 ```
-which will return all possible sentence is words list, like
+
+and it will return
 
 ```
-((she drinks quickly .) (she drinks .))
+(("she" "drinks" "."))
 ```
-or just
+
+which is the best match of the above.
+
+Also you can specify the tense of the verb by doing
+
 ```
-((she drinks .))
+(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))
+    (InheritanceLink (PredicateNode "drink") (DefinedLinguisticConceptNode "past"))))
 ```
-due to some internal algorithm that will stop if it find a "good enough"
-solution.
+
+which will return
+
+```
+(("she" "drank" "it" "."))
+```
+
+
+**Note:**
+Before generating sentences using SuReal, we have to make sure that the
+words we are expecting exist in the AtomSpace (and are in correct grammatical
+forms). For example, if we want to generate "she drinks" as in the above
+example, we have to make sure the words "she" and "drinks" are there in advance.
+Similarily in the second example, we have to make sure "she" and "drank" exist.
+Otherwise SuReal will return nothing. The recommended way to "add the words"
+into the AtomSpace is to parse sentences that actually contain those words.
+In this case, they are "She eats quickly.", "It drinks water." and
+"Nobody drank it." respectively.
+
 
 ## Algorithm
 
