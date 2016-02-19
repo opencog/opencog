@@ -23,20 +23,39 @@ For example, you can do
 
 (sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))))
 ```
+
 and it will return
+
 ```
 (("she" "drinks" "."))
 ```
+
 which is the best match of the above.
 
 Also you can specify the tense of the verb by doing
+
 ```
-(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she"))) (InheritanceLink (PredicateNode "drink") (DefinedLinguisticConceptNode "past"))))
+(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))
+    (InheritanceLink (PredicateNode "drink") (DefinedLinguisticConceptNode "past"))))
 ```
+
 which will return
+
 ```
 (("she" "drank" "it" "."))
 ```
+
+
+**Note:**
+Before generating sentences using SuReal, we have to make sure that the
+words we are expecting exist in the AtomSpace (and are in correct grammatical
+forms). For example, if we want to generate "she drinks" as in the above
+example, we have to make sure the words "she" and "drinks" are there in advance.
+Similarily in the second example, we have to make sure "she" and "drank" exist.
+Otherwise SuReal will return nothing. The recommended way to "add the words"
+into the AtomSpace is to parse sentences that actually contain those words.
+In this case, they are "It drinks water." and "Nobody drank it." respectively.
+
 
 ## Algorithm
 
