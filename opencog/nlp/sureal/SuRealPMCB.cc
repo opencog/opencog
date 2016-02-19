@@ -336,6 +336,44 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                         continue;
                     else qChkWords.insert(sWord);
 
+                    // make sure the tense matches
+                    // first get the tense of the solution instance node
+                    // from the InheritanceLink in this form, e.g.
+                    // (InheritanceLink
+                    //    (PredicateNode "eats@111")
+                    //    (DefinedLinguisticConceptNode "present"))
+                    std::string sTense;
+                    IncomingSet qSolnIS = kv.second->getIncomingSetByType(INHERITANCE_LINK);
+                    for (LinkPtr lpInhLk : qSolnIS)
+                    {
+                        HandleSeq qInhOS = lpInhLk->getOutgoingSet();
+                        if (qInhOS[0] == kv.second and
+                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE)
+                        {
+                            sTense = NodeCast(qInhOS[1])->getName();
+                            break;
+                        }
+                    }
+
+                    // then get the tense of the one in this LemmaLink and see if they match
+                    Handle hPatPredNode = m_as->get_handle(PREDICATE_NODE, sName);
+                    IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
+                    bool tense = false;
+                    for (LinkPtr lpInhLk : qPatIS)
+                    {
+                        HandleSeq qInhOS = lpInhLk->getOutgoingSet();
+                        if (qInhOS[0] == hPatPredNode and
+                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE and
+                                    sTense.compare(NodeCast(qInhOS[1])->getName()) == 0)
+                        {
+                            tense = true;
+                            break;
+                        }
+                    }
+
+                    // reject if their tenses don't match
+                    if (not tense) continue;
+
                     Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
                     if (disjunct_match(hWordNode, hSolnWordInst))
