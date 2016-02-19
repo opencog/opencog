@@ -39,6 +39,12 @@
             (VariableNode "$X")))
 ))
 
+; Associate a name to the rule
+(define smokes-rule-has-cancer-name (DefinedSchemaNode "smokes-rule-has-cancer"))
+(DefineLink
+  smokes-rule-has-cancer-name
+  smokes-rule-has-cancer)
+
 ;; In the case that X and Y are friends, if X smokes then so does Y.
 ;; ForAll(x,y) Friends(x,y) -> (Smokes(x) <-> Smokes(y))
 ; MLN Rule Weight: 0.4
@@ -74,7 +80,11 @@
                 (VariableNode "$Y")))
 ))
 
-
+; Associate a name to the rule
+(define smokes-rule-smokes-name (DefinedSchemaNode "smokes-rule-smokes"))
+(DefineLink
+  smokes-rule-smokes-name
+  smokes-rule-smokes)
 
 ; If X and Y are friends, then Y and X are friends.
 ; Note: this is not currently used.
@@ -100,4 +110,10 @@
             (VariableNode "$Y")
             (VariableNode "$X"))))
 )
+
+; Associate a name to the rule
+(define smokes-rule-friends-name (DefinedSchemaNode "smokes-rule-friends"))
+(DefineLink
+  smokes-rule-friends-name
+  smokes-rule-friends)
 

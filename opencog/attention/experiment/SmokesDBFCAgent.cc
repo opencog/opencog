@@ -109,14 +109,18 @@ void SmokesDBFCAgent::run()
 
     if (not af_set.empty()) {
         // Select a random source from the AF to start with FC.
+        std::cout << "LOOKING FOR A RANDOM ATOM IN AF\n";
         source = rand_element(af_set);
 
+        std::cout << "FORWARED CHAINER CALLED\n";
         ForwardChainer fc(_atomspace, rule_base, source, af_set);
         fc.do_step();
+        std::cout << "FORWARED CHAINER STEPPED\n";
         fc_result = fc.get_chaining_result();
     } else {
         // Select a random source from the atomspace to start with FC.
         HandleSeq hs;
+        std::cout << "LOOKING FOR A RANDOM ATOM IN AS\n";
         _atomspace.get_handles_by_type(hs, ATOM);
         if (hs.empty()) {
             std::cout << "EMPTY ATOMSPACE\n";
@@ -124,9 +128,10 @@ void SmokesDBFCAgent::run()
         }
 
         source = rand_element(hs);
-
+        std::cout << "FORWARED CHAINER CALLED\n";
         ForwardChainer fc(_atomspace, rule_base, source, { });
         fc.do_step();
+        std::cout << "FORWARED CHAINER STEPPED\n";
         fc_result = fc.get_chaining_result();
     }
 
