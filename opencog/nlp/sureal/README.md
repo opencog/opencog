@@ -17,22 +17,26 @@ For example, you can do
 
 ```
 (nlp-parse "He eats.")
-(nlp-parse "He eats quickly.")
-(WordNode "she")
-(WordNode "drinks")
-(sureal (SetLink (EvaluationLink (PredicateNode "drinks") (ListLink (ConceptNode "she")))))
-```
-which will return all possible sentence is words list, like
+(nlp-parse "She eats quickly.")
+(nlp-parse "Nobody drank it.")
+(nlp-parse "It drinks water.")
 
+(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she")))))
 ```
-((she drinks quickly .) (she drinks .))
+and it will return
 ```
-or just
+(("she" "drinks" "."))
 ```
-((she drinks .))
+which is the best match of the above.
+
+Also you can specify the tense of the verb by doing
 ```
-due to some internal algorithm that will stop if it find a "good enough"
-solution.
+(sureal (SetLink (EvaluationLink (PredicateNode "drink") (ListLink (ConceptNode "she"))) (InheritanceLink (PredicateNode "drink") (DefinedLinguisticConceptNode "past"))))
+```
+which will return
+```
+(("she" "drank" "it" "."))
+```
 
 ## Algorithm
 
