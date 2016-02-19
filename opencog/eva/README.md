@@ -158,3 +158,11 @@ TODO
 * stage mode
 
 * Search for and address the XXX's that appear in the various files.
+
+* Blender currently published this:
+```
+  rostopic echo /blender_api/available_emotion_states
+  data: ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+```
+but we are not actually using all of these at this time ...
