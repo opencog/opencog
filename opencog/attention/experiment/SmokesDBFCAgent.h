@@ -88,6 +88,6 @@ public:
 
 #endif
 //TODO summary
-// - Make sure rules are loaded properly
+// - Make sure rules are loaded properly/ NOTE: max-iter loading is causing a problem. Thats the only issue. besides just tidying the mv command. then ready to run.
 // - Add log messages in the code
 // - Start running it and experimenting
