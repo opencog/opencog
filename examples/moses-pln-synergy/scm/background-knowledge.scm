@@ -173,16 +173,17 @@
 )
 
 ;; Being well hydrated tends to speed up injury recovery
-(ImplicationLink (stv 0.7 0.7)
-   (TypedVariableLink
-      (VariableNode "$X")
-      (TypeNode "PredicateNode"))
-   (MemberLink
-      (VariableNode "$X")
-      (ConceptNode "injury-recovery-speed-predicates"))
-   (ImplicationLink
-      (PredicateNode "is-well-hydrated")
-      (VariableNode "$X")))
+(define being-well-hydrated-tends-to-speed-up-injury-recovery
+   (ImplicationLink (stv 0.7 0.7)
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "PredicateNode"))
+      (MemberLink
+         (VariableNode "$X")
+         (ConceptNode "injury-recovery-speed-predicates"))
+      (ImplicationLink
+         (PredicateNode "is-well-hydrated")
+         (VariableNode "$X"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about the target feature ;;

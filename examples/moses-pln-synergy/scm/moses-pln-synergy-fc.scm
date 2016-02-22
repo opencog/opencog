@@ -16,4 +16,5 @@
 ;; Load the PLN configuration for this demo
 (load "pln-config.scm")
 
-(pln-fc if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z)
+(pln-fc (SetLink if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z
+                 being-well-hydrated-tends-to-speed-up-injury-recovery))
