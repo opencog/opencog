@@ -104,7 +104,18 @@
                 (if (null? (r2l-get-word-inst n))
                     (if (null? (r2l-get-word n))
                         #f
-                        (r2l-get-word n)
+                        (begin
+                            (if (equal? (cog-type n) 'PredicateNode)
+                                (map
+                                    (lambda (p)
+                                        ; TODO: There could be too many... skip if seen before?
+                                        (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
+                                    )
+                                    (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
+                                )
+                            )
+                            (r2l-get-word n)
+                        )
                     )
                     (car (word-inst-get-word (r2l-get-word-inst n)))
                 )
