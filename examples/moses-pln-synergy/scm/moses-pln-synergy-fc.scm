@@ -4,6 +4,7 @@
 ;; Set logger to DEBUG
 (use-modules (opencog logger))
 ;; (cog-logger-set-sync #t)
+;; (cog-logger-set-stdout #t)
 (cog-logger-set-level "debug")
 
 ;; Load MOSES model
