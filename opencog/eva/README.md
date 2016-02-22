@@ -166,3 +166,9 @@ TODO
   'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
 ```
 but we are not actually using all of these at this time ...
+
+* Frustrated emotions are dialed down so much, they are invisible.
+  The following seems to have no effect:
+```
+  (cog-evaluate! (DefinedPredicateNode "Show frustrated expression"))
+```
