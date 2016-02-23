@@ -112,11 +112,14 @@ void SmokesDBFCAgent::run()
         std::cout << "LOOKING FOR A RANDOM ATOM IN AF\n";
         source = rand_element(af_set);
 
-        std::cout << "FORWARED CHAINER CALLED\n";
+        std::cout << "FORWARD CHAINER CALLED\n";
         ForwardChainer fc(_atomspace, rule_base, source, af_set);
         fc.do_step();
-        std::cout << "FORWARED CHAINER STEPPED\n";
+        std::cout << "FORWARD CHAINER STEPPED\n";
         fc_result = fc.get_chaining_result();
+        std::cout << "Found " << fc_result.size() << " results.\n";
+        for(const Handle& h : fc_result)
+            std::cout << "\t" << h->toShortString() << "\n";
     } else {
         // Select a random source from the atomspace to start with FC.
         HandleSeq hs;
@@ -128,17 +131,30 @@ void SmokesDBFCAgent::run()
         }
 
         source = rand_element(hs);
-        std::cout << "FORWARED CHAINER CALLED\n";
+        std::cout << "FORWARD CHAINER CALLED\n";
         ForwardChainer fc(_atomspace, rule_base, source, { });
         fc.do_step();
-        std::cout << "FORWARED CHAINER STEPPED\n";
+        std::cout << "FORWARD CHAINER STEPPED\n\t";
         fc_result = fc.get_chaining_result();
+        std::cout << "Found " << fc_result.size() << " results.\n";
+        for(const Handle& h : fc_result)
+                    std::cout << "\t" << h->toShortString() << "\n";
     }
 
     HandleSeq unique;
+
+    std::sort(fc_result.begin(),fc_result.end());
+    //Inference_result doesn't need to be sorted since set is ordered.
     std::set_difference(inference_result.begin(), inference_result.end(),
                         fc_result.begin(), fc_result.end(),
-                        std::inserter(unique, unique.end()));
+                        std::back_inserter(unique));
+
+    std::cout << "\tFound " << unique.size() << " unique inferences.\n\t";
+
+    if (unique.size() > 0)
+        for (const auto& u : unique)
+            std::cout << u->toShortString() << "\n\t";
+    cout << "\n";
 
     for (Handle& h : unique) {
         if (is_surprising(h)) {
@@ -174,14 +190,30 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
     float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
                            (h->getTruthValue())->getMean(), 100, 100);
     auto it = dist_surprisingness.begin();
-    int top_k_percent = (K_PERCENTILE / 100) * dist_surprisingness.size();
-    if (mi >= *std::next(it, top_k_percent)) {
+    int top_k = (K_PERCENTILE / 100) * dist_surprisingness.size();
+
+    // Consider the first top_k values as surprising. After we have enough
+    // data only consider those who have higher value of the lbound of the
+    // top_k as surprising.
+    std::cout << "Surprising result list:\n";
+    for(const auto& i : dist_surprisingness)
+        std::cout << i << ", ";
+    std::cout <<"\n" << h->toShortString() << "\n\t JSD_VAL=" << mi << "\n";
+
+    bool val;
+    if (top_k > dist_surprisingness.size()) {
         dist_surprisingness.insert(mi);
-        return true;
+        val=true;
+    } else if (mi >= *std::next(it, top_k)) {
+        dist_surprisingness.insert(mi);
+        val=true;
     } else {
         dist_surprisingness.insert(mi);
-        return false;
+        val=false;
     }
+
+    std::cout << "Found to be " << (val?"surprising" : "not surprising") << "\n";
+    return val;
 }
 
 bool SmokesDBFCAgent::are_similar(const Handle& h1, const Handle& h2,
