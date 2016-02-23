@@ -173,6 +173,7 @@ std::string ExperimentSetupModule::do_ecan_pause(Request *req,
     _cs.stopAgent(_simpleimportancediffusion_agentptr);
 
     _cs.stopAgent(_artificialstimulatoragentptr);
+    _cs.stopAgent(_smokes_fc_agentptr);
 
     return "The following agents were stopped:\n" + ECAN_EXP_AGENTS;
 }

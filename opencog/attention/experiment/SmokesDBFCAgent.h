@@ -50,12 +50,14 @@ using namespace opencog;
 
 class SmokesDBFCAgent: public Agent {
 private:
-    UnorderedHandleSet inference_result;
+    std::set<Handle> inference_result;
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
 
-    std::set<float> dist_surprisingness;
+    // A descending order sorted surprising result list.
+    std::set<float,std::greater<int>> dist_surprisingness;
+
     const int K_PERCENTILE = 5;
 
     float friends_mean();
