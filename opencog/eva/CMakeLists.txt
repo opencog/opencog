@@ -4,6 +4,8 @@
 # OpenCog behavior infrastructure as a guile module, so that other
 # dependent code can use it.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
 # Only list install files that have actually changed
 set( CMAKE_INSTALL_MESSAGE "LAZY" )
 
