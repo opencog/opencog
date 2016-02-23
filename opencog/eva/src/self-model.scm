@@ -15,6 +15,16 @@
 ; -- It is needed for self-awareness, so that the chatbot can respond to
 ;    questions about what Eva is doing.
 ;
+; Example usage:
+; Load the needed modules, start the cogserver.
+; (use-modules (opencog) (opencog query) (opencog exec))
+; (use-modules (opencog atom-types) (opencog cogserver))
+; (use-modules (opencog eva-model))
+; (start-cogserver "../scripts/opencog.conf")
+;;;; start roscore befoer doing the load below.
+; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
+;
+;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
 ; (cog-evaluate! (DefinedPredicate "chatbot is talking"))

@@ -652,7 +652,7 @@
 				(True))
 
 			;; XXX FIXME chatbot is disengaged from everything else.
-			;; The room can be empty, the head is bored or even sleep,
+			;; The room can be empty, the head is bored or even asleep,
 			;; but the chatbot is still smiling and yabbering.
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
