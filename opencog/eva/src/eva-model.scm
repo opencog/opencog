@@ -1,6 +1,6 @@
 ;
 ; Self-awareness scheme module for the Eva robot.
-; Alls the self-awareness code to be imported as a module.
+; Allows the self-awareness code to be imported as a module.
 
 (define-module (opencog eva-model))
 

@@ -36,11 +36,19 @@ from blender_api_msgs.msg import SomaState
 
 from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
-# This class publishes various ROS messages to various locations.
-# Class members are meant to be invoked from within the cogserver.
-# Note that it ONLY publishes, it does not listen; currently listening
-# must be done in some other ROS node, which must then convert those
-# messages to scheme commands, and netcat them to the cogserver.
+
+# ROS node for controlling the Eva blender model. Control messages
+# include turning, looking, smiling, frowning and so on.
+#
+# This is meant to be a convenience wrapper, allowing Eva to be
+# controlled from OpenCog Atomese.  Although it probably works as
+# a stand-alone ROS node, it was not designed to be used that way.
+#
+# It is meant only for control, and not for sensory (vision, audo)
+# input.  Thus, it does not subscribe to any sensory messages.
+# It does listen to one topic, `/behavior_switch`, which is used to
+# start and stop the the behavior tree.
+#
 class EvaControl():
 
 	def step(self):
@@ -235,7 +243,8 @@ class EvaControl():
 			self.puta.chatbot_affect_negative()
 
 	# Turn behaviors on and off.
-	# Do not to clean visible faces as these can still be added/removed while tree is paused
+	# Do not to clean visible faces as these can still be added/removed
+	# while tree is paused
 	def behavior_switch_callback(self, data):
 		if data.data == "btree_on":
 			if not self.running:
@@ -252,6 +261,8 @@ class EvaControl():
 	def __init__(self):
 
 		self.puta = PutAtoms()
+
+		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
@@ -308,5 +319,6 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
-		rospy.Subscriber("/behavior_switch", String, self.behavior_switch_callback)
+		rospy.Subscriber("/behavior_switch", String, \
+			self.behavior_switch_callback)
 		self.running = True
