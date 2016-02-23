@@ -15,6 +15,14 @@
 ; -- It is needed for self-awareness, so that the chatbot can respond to
 ;    questions about what Eva is doing.
 ;
+; Examples and debugging hints:
+; Some (but not all) state queries:
+; (cog-evaluate! (DefinedPredicate "chatbot is talking"))
+; (cog-evaluate! (DefinedPredicate "chatbot is listening"))
+; (cog-evaluate! (DefinedPredicate "chatbot is happy"))
+; (cog-evaluate! (DefinedPredicateNode "Did someone arrive?"))
+; (cog-evaluate! (DefinedPredicateNode "Someone visible"))
+; (cog-execute! (DefinedSchemaNode "Num visible faces"))
 ;
 (add-to-load-path "/usr/local/share/opencog/scm")
 
