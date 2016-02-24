@@ -42,13 +42,9 @@
 (load-from-path "utilities.scm")
 
 ; (display %load-path)
-(add-to-load-path "../src")
-(load-from-path "faces.scm")
-(load-from-path "cfg-tools.scm")
-(load-from-path "behavior-cfg.scm")
-
-; (use-modules (opencog logger))
-; (cog-logger-set-stdout #t)
+; (load-from-path "faces.scm")
+; (load-from-path "cfg-tools.scm")
+; (load-from-path "behavior-cfg.scm")
 
 ; ------------------------------------------------------
 ; State variables

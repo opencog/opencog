@@ -5,5 +5,6 @@ INSTALL (FILES
 
 INSTALL (FILES
 	self-model.scm
+	faces.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-model"
 )
