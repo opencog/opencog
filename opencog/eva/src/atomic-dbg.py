@@ -27,15 +27,15 @@
 
 
 from opencog.atomspace import AtomSpace, TruthValue
-from opencog.bindlink import satisfaction_link
-from opencog.type_constructors import *
 
-from opencog.cogserver import get_server_atomspace
+# from opencog.bindlink import satisfaction_link
+# from opencog.type_constructors import *
 
+# from opencog.cogserver import get_server_atomspace
 
 # The atomspace where everything will live.
-atomspace = get_server_atomspace()
-set_type_ctor_atomspace(atomspace)
+# atomspace = get_server_atomspace()
+# set_type_ctor_atomspace(atomspace)
 
 # Global functions, because that's what PythonEval expects.
 # Would be great if PythonEval was fixed to work smarter, not harder.
