@@ -60,7 +60,7 @@
 (load "../rules/imperative.scm")
 (load "../rules/det.scm")
 (load "../rules/nn.scm")
-(load "../rules/to-do-rule-3.scm")
+(load "../rules/todo3.scm")
 (load "../rules/gender.scm")
 (load "../rules/conj.scm")
 (load "../rules/tense.scm")
