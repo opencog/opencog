@@ -14,7 +14,12 @@
 ; This is meant to be exemplary: there also needs to be a model of
 ; Eva's environment (including the people that she sees in that
 ; environment), so that she can also talk about that.
+;--------------------------------------------------------------------
 
+; The primary physical self-model is in the ros-behavior-scripting
+; github repo. Use that.
+
+(use-modules (opencog eva-model))
 ;--------------------------------------------------------------------
 
 (define neutral-gaze (Concept "forward"))

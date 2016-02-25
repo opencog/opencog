@@ -58,6 +58,8 @@ This version can be run in IRC only, or even at the guile prompt,
 without requiring a full hookup to the blender head.  It just prints
 (in parenthetical English) the actions that would be performed.
 
+ * `git clone https://github.com/opencog/ros-behavior-scripting`
+   and `sudo make install` This is needed for the action orchestrator!
  * make install -- This step is important!
  * Start the relex server on port 4444
  * Start the cogita IRC bot

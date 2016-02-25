@@ -941,8 +941,51 @@ LEFT-WALL where are.v you looking.v ?
 (use-modules (opencog nlp fuzzy))
 
 (get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+(get-r2l-set-of-sent (car (nlp-parse "I am looking rightward")))
+
+:adv
 
 (use-modules (opencog exec))
 (cog-execute!
    (StateLink (AnchorNode "*-gaze-direction-*"))
+
+==============================================================
+
+td::pair<std::__detail::_Node_iterator<opencog::Atom*, 
+pencog::FixedIntegerIndex::size() const [20]
+
+tomTable.cc:    if (typeIndex.size() != 0) return false;
+mTable.cc:    if (importanceIndex.size() != 0) return false;
+
+getNumAtomsOfType
+_as->get_num_atoms_of_type
+
+_size_by_type
+oresize should take an arg 
+
+classserver().getNumberOfClasses() in the resize() method
+Also in the ctor too.
+
+Fix the stupid subtype miterator
+getSize()
+
+Simplify the TypeIndex iterator
+
+is currtype even used ????
+
+ maintain counts for num nodes, links
+
+isize++
+_size_by_type[atom->_type] ++
+size_t new_size = classserver().getNumberOfClasses();
++    _size_by_type.resize(new_size);
+
+Also: do NOT use NodeIndex::size() anywhere
+
+getNumNodes
+
+MultiSpaceUTest
+
+(python-eval "print 'ooooooooooooooooooolas'\nprint 'bar'")
+(python-eval "try:\n    do_wake_up()\nexcept NameError:\n    print 'ooooooooooooooooooolas'\n")
 

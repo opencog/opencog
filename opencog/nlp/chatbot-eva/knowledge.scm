@@ -59,7 +59,6 @@
 ; Word-to-object associations are done with a ReferenceLink
 ; Taxonomic is-a relations are done with an InheritanceLink
 ; Syntactic structure is encoded with an EvaluationLink.
-;
 ;--------------------------------------------------------------------
 ; Global knowledge about spatial directions.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
