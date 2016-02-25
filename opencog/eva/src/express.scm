@@ -127,7 +127,7 @@
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
 		;; Send it off to the action-orchestrator to actually do it.
-		(EvaluationLink (DefinedPredicate "Show expression")
+		(PutLink (DefinedPredicate "Show expression")
 			(ListLink
 				(VariableNode "$expr")
 				(PutLink
@@ -153,7 +153,7 @@
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$gest"))
 		;; Send it off to the action orchestrator to actually do it.
-		(EvaluationLink (DefinedPredicate "Show gesture")
+		(PutLink (DefinedPredicate "Show gesture")
 			(ListLink
 				(VariableNode "$gest")
 				(PutLink
