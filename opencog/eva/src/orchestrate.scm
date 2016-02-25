@@ -20,7 +20,10 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
-
+; Example usage:
+;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+;         (ListLink (Concept "happy") (Number 6) (Number 0.3))))
+;
 (DefineLink
 	(DefinedPredicate "Show expression")
 	(LambdaLink

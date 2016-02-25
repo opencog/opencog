@@ -10,6 +10,7 @@
 
 ; Load various parts....
 (load "eva-model/faces.scm")
+(load "eva-model/orchestrate.scm")
 (load "eva-model/self-model.scm")
 
 ; If the ROS node hasn't been loaded yet, then load the "debug"
