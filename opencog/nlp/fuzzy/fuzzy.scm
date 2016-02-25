@@ -10,7 +10,8 @@
 
 (use-modules (srfi srfi-1)
              (opencog)
-             (opencog query)  ; for nlp-fuzzy-match
+             (opencog query)      ; for fuzzy-match
+             (opencog atom-types) ; for WordNode, ParseNode, etc.
              (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))
