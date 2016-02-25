@@ -70,19 +70,53 @@ def gaze_at_face(face_id_node):
 	# evl.gaze_at(face_id)
 	return TruthValue(1, 1)
 
+
+# Moves eyes only, not entire head.
 def gaze_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "(Eva gazes at point", x, y, z, ")"
+
+	# Plain-English description of the actions.
+	if (y < -0.1):
+		print "(Eva looks to the right)"
+	elif (y > 0.1):
+		print "(Eva looks to the left)"
+
+	elif (-0.1 < y and y < 0.1 and -0.1 < z and z < 0.1):
+		print "(Eva looks straight ahead)"
+
+	if (z < -0.1):
+		print "(Eva looks down)"
+	elif (z > 0.1):
+		print "(Eva looks up)"
+
+	# print "(Eva gazes at point", x, y, z, ")"
 	# evl.gaze_at_point(x, y, z)
 	return TruthValue(1, 1)
 
+# Turns entire head.
 def look_at_point(x_node, y_node, z_node):
 	x = float(x_node.name)
 	y = float(y_node.name)
 	z = float(z_node.name)
-	print "(Eva looks at point", x, y, z, ")"
+
+	# Plain-English description of the actions.
+	if (y < -0.1):
+		print "(Eva turns to the right)"
+	elif (y > 0.1):
+		print "(Eva turns to the left)"
+
+	elif (-0.1 < y and y < 0.1 and -0.1 < z and z < 0.1):
+		print "(Eva turns straight ahead)"
+
+	if (z < -0.1):
+		print "(Eva turns her face downwards)"
+	elif (z > 0.1):
+		print "(Eva turns her face upwards)"
+
+
+	# print "(Eva looks at point", x, y, z, ")"
 	# evl.look_at_point(x, y, z)
 	return TruthValue(1, 1)
 
@@ -90,9 +124,11 @@ def do_emotion(emotion_node, duration_node, intensity_node):
 	emotion = emotion_node.name
 	duration = float(duration_node.name)
 	intensity = float(intensity_node.name)
+	print "(Eva expresses", emotion, "emotion for", duration, \
+		 "seconds, with intensity", intensity, ")"
+
+	# print "Python emotion: ", emotion, " for ", duration, " int ", intensity
 	# evl.expression(emotion, intensity, duration)
-	print "(Eva shows emotion:", emotion, "for", duration, \
-		"seconds, intensity=", intensity, ")"
 	return TruthValue(1, 1)
 
 def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
