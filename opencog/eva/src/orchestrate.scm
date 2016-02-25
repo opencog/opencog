@@ -38,3 +38,23 @@
 					(Variable "$duration")
 					(Variable "$intensity")))
 		)))
+
+(DefineLink
+	(DefinedPredicate "Show gesture")
+	(LambdaLink
+		(VariableList
+			(Variable "$gest")
+			(Variable "$insensity")
+			(Variable "$repeat")
+			(Variable "$speed"))
+		(SequentialAndLink
+			;; Log the time.
+			(True (DefinedSchema "set gesture timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicateNode "py:do_gesture")
+				(ListLink
+					(Variable "$gest")
+					(Variable "$insensity")
+					(Variable "$repeat")
+					(Variable "$speed")))
+		)))

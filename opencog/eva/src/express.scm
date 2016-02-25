@@ -113,8 +113,8 @@
 	(pick-value-in-range "speed-min" "speed-max"))
 
 ; Show a expression from a given emotional class. Sends the expression
-; to ROS for display.  Sets a timestamp as well.  The intensity and
-; duration of the expression is picked randomly from the configuration
+; to the action orchestrator for display.  The intensity and duration
+; of the expression is picked randomly from the configuration
 ; parameters for the emotion-expression class.
 ;
 ; Example usage:
@@ -145,38 +145,35 @@
 ;
 ; Example usage:
 ;    (cog-evaluate!
-;        (PutLink (DefinedPredicateNode "Show gesture")
+;        (PutLink (DefinedPredicateNode "Do show gesture")
 ;           (ListLink (ConceptNode "positive") (ConceptNode "nod-1"))))
 ;
 (DefineLink
-	(DefinedPredicateNode "Show gesture")
+	(DefinedPredicateNode "Do show gesture")
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$gest"))
-		(SequentialAndLink
-			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicateNode "py:do_gesture")
-				(ListLink
-					(VariableNode "$gest")
-					(PutLink
-						(DefinedSchemaNode "get random gest intensity")
-						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
-					(PutLink
-						(DefinedSchemaNode "get random repeat")
-						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
-					(PutLink
-						(DefinedSchemaNode "get random speed")
-						(ListLink (VariableNode "$emo") (VariableNode "$gest")))
-			))
-			;; Log the time.
-			(True (DefinedSchema "set gesture timestamp"))
-		)
+		;; Send it off to the action orchestrator to actually do it.
+		(EvaluationLink (DefinedPredicate "Show gesture")
+			(ListLink
+				(VariableNode "$gest")
+				(PutLink
+					(DefinedSchemaNode "get random gest intensity")
+					(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+				(PutLink
+					(DefinedSchemaNode "get random repeat")
+					(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+				(PutLink
+					(DefinedSchemaNode "get random speed")
+					(ListLink (VariableNode "$emo") (VariableNode "$gest")))
+		))
 	))
 
 ;
-; Pick an expression of the given, and send it to ROS for display.
+; Pick an expression out of the given emotional class, and send it to
+; the action orchestrator for display.
 ; The expression is picked randomly from the class of expressions for
 ; the given emotion.  Likewise, the strength of display, and the
-; duration are picked randomly.  The timestamp is recorded as well.
+; duration are picked randomly.
 ;
 ; Example usage:
 ;    (cog-evaluate!
@@ -206,7 +203,7 @@
 	(LambdaLink
 		(VariableNode "$emo")
 		(PutLink
-			(DefinedPredicateNode "Show gesture")
+			(DefinedPredicateNode "Do show gesture")
 			(ListLink
 				(VariableNode "$emo")
 				(PutLink
