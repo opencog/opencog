@@ -333,13 +333,15 @@ namespace PatternMining
      void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 3,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
 
-     void mineRelatedPatternsOnQuery_OR(HandleSeq keyLinks, unsigned int _max_gram);
+     void mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI *_pai);
+     void mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI *_pai);
 
 //     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
 //     std::mutex waitingToFeedQueueLock;
 
  protected:
      pai::PAI * pai;
+     bool alreadyInitDataStructure;
      unsigned int evaluatePatternsEveryXSeconds;
 //    queue<Handle> waitingForProcessLinksQueue;
      std::mutex miningOrEvaluatingLock; // mining and evaluating patterns cannot run at the same time

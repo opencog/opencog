@@ -109,6 +109,17 @@ void PatternMiningAgent::init()
     cout << "PatternMiningAgent: init finished!\n ";
 }
 
+void PatternMiningAgent::testMinePatternsOnQuery()
+{
+    sleep (100);
+    string keyword = "chest";
+    cout << "PatternMiningAgent: testMinePatternsOnQuery for keyword: " << keyword << std::endl;
+    Handle keywordNode = pai->getAtomSpace().addNode(opencog::CONCEPT_NODE,keyword);
+
+    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,4, pai);
+
+}
+
 void PatternMiningAgent::run()
 {
     this->cycleCount = _cogserver.getCycleCount();
@@ -128,11 +139,13 @@ void PatternMiningAgent::run()
 
     hasRun = true;
 
-    this->patternMiner->runPatternMinerForEmbodiment(pai);
+    // this->patternMiner->runPatternMinerForEmbodiment(pai);
 
 //    std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
 //    feedingthread.detach();
 
+    std::thread testMinePatternsOnQueryThread = std::thread([this]{this->testMinePatternsOnQuery();});
+    testMinePatternsOnQueryThread.detach();
 
 }
 

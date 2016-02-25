@@ -2017,7 +2017,6 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 
 void PatternMiner::initDataStructure()
 {
-    static bool alreadyInitDataStructure = false;
 
     if (alreadyInitDataStructure)
     {
@@ -2025,10 +2024,10 @@ void PatternMiner::initDataStructure()
             delete htree;
 
         if (atomSpace)
-            delete atomSpace;
+            atomSpace->clear();
 
         if (observingAtomSpace)
-            delete observingAtomSpace;
+            observingAtomSpace->clear();
 
         for (unsigned int i = 0; i < MAX_GRAM; ++i)
         {
@@ -2048,10 +2047,13 @@ void PatternMiner::initDataStructure()
         keyStrToHTreeNodeMap.clear();
 
     }
+    else
+    {
 
-    htree = new HTree();
+        htree = new HTree();
+        atomSpace = new AtomSpace( originalAtomSpace);
 
-    atomSpace = new AtomSpace( originalAtomSpace);
+    }
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < MAX_GRAM; ++i)
@@ -2069,7 +2071,7 @@ void PatternMiner::initDataStructure()
 
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
-    initDataStructure();
+    alreadyInitDataStructure = false;
 
     isMineRelatedOnRequired = false;
 
@@ -2155,6 +2157,8 @@ PatternMiner::~PatternMiner()
 
 void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 {
+    initDataStructure();
+
     thresholdFrequency = _thresholdFrequency;
 
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
@@ -2318,6 +2322,8 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 
 void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
 {
+
+    initDataStructure();
 
     thresholdFrequency = _thresholdFrequency;
     evaluatePatternsEveryXSeconds = _evaluatePatternsEveryXSeconds;
@@ -2559,6 +2565,86 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     }
 
     return answer.str();
+}
+
+void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI* _pai)
+{
+
+    HandleSeq keyLinks;
+    HandleSeq incomings = originalAtomSpace->getIncoming(keywordNode);
+
+    for (Handle incomingHandle : incomings)
+    {
+        Handle newh = incomingHandle;
+
+        // if this atom is a igonred type, get its first parent that is not in the igonred types
+        if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+        {
+            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+        }
+
+        if (newh != Handle::UNDEFINED)
+            keyLinks.push_back(newh);
+
+    }
+
+    mineRelatedPatternsOnQueryByLinks_OR(keyLinks, _max_gram, _pai);
+}
+
+
+
+
+// start from keyLinks, only mine patterns connecting to any of links in keyLinks
+// keyLinks are in originalAtomSpace. observingAtomSpace is not used in this mining.
+// It's a one time mining, just mine from the current originalAtomSpace. After return result, throw away the result and any middle data.
+void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI* _pai)
+{
+    MAX_GRAM = _max_gram;
+
+    pai = _pai;
+
+    initDataStructure();
+
+    isMineRelatedOnRequired = true;
+
+    alreadyMinedKeyLinks.clear();
+
+    pai->waitingToFeedToPatternMinerLock.lock();
+
+    for (Handle keyLink : keyLinks)
+    {
+        std::cout<<"Mine patterns related to: \n";
+        cout << originalAtomSpace->atomAsString(keyLink) << std::endl;
+
+        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+        HandleSeq lastGramLinks;
+        map<Handle,Handle> lastGramValueToVarMap;
+        map<Handle,Handle> patternVarMap;
+
+        extendAPatternForOneMoreGramRecursively(keyLink, originalAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+
+        alreadyMinedKeyLinks.insert(keyLink);
+
+        cout << "\nFinshed current link mining." << std::endl;
+
+    }
+
+    pai->waitingToFeedToPatternMinerLock.unlock();
+
+
+    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+    {
+        // sort by frequency
+        std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+
+        // Finished mining gram patterns; output to file
+        std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+
+        OutPutFrequentPatternsToFile(gram);
+
+        std::cout<< std::endl;
+    }
+
 }
 
 void PatternMiner::testPatternMatcher1()

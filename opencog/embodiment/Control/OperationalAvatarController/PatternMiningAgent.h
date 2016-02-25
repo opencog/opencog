@@ -54,6 +54,8 @@ private:
 
     void init();
 
+    void testMinePatternsOnQuery();
+
 //    void feedingNewAtomsToPatternMiner();
 
 public:
