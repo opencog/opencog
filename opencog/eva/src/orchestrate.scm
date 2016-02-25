@@ -20,3 +20,21 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
+
+(DefineLink
+	(DefinedPredicate "Show expression")
+	(LambdaLink
+		(VariableList
+			(Variable "$expr")
+			(Variable "$duration")
+			(Variable "$intensity"))
+		(SequentialAndLink
+			;; Record the time
+			(TrueLink (DefinedSchemaNode "set expression timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+				(ListLink
+					(Variable "$expr")
+					(Variable "$duration")
+					(Variable "$intensity")))
+		)))

@@ -62,6 +62,7 @@
 (load-from-path "cfg-tools.scm")
 (load-from-path "behavior-cfg.scm")
 (load-from-path "self-model.scm")
+(load-from-path "orchestrate.scm")
 (load-from-path "express.scm")
 
 ; (use-modules (opencog logger))
