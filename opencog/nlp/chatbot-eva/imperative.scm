@@ -110,7 +110,10 @@
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-	(cog-bind obj-semantics-rule-1)
+	(cog-bind obj-semantics-rule-1-py)
+(display
+	(cog-bind obj-semantics-rule-1-ao)
+)
 
 (display
 	(cog-bind obj-semantic-model-rule-1)
