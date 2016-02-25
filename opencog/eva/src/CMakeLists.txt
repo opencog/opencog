@@ -9,3 +9,8 @@ INSTALL (FILES
 	orchestrate.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-model"
 )
+
+INSTALL (FILES
+	atomic-dbg.py
+	DESTINATION "${DATADIR}/python/"
+)

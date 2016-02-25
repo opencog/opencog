@@ -17,5 +17,17 @@
 ; python backend. This is needed, so that various imperative
 ; commands don't crash. A later load of the ROS node will harmlessly
 ; over-write the python entry-points.
-(python-eval
- "try:\n    do_wake_up()\nexcept NameError:\n    execfile('atomic-dbg.py')\n")
+;
+; (python-eval
+;   "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
+;
+; (python-eval
+;   "try:\n    do_wake_up()\nexcept NameError:\n    execfile('/usr/local/share/opencog/python/atomic-dbg.py')\n")
+;
+; Hard-coded install path from CMakefile
+(python-eval "
+try:
+    do_wake_up()
+except NameError:
+    execfile('/usr/local/share/opencog/python/atomic-dbg.py')
+")
