@@ -277,10 +277,10 @@
 ; sad, confused, recoil, surprised
 
 ; "express" is used with "Smile!", "Frown!", etc.
-(ReferenceLink (WordNode "express") (GroundedPredicate "py:do_emotion"))
-(ReferenceLink (WordNode "show") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "express") (DefinedPredicate "Show expression"))
+(ReferenceLink (WordNode "show") (DefinedPredicate "Show expression"))
 ; "look" is used with "Look happy!"
-(ReferenceLink (WordNode "look") (GroundedPredicate "py:do_emotion"))
+(ReferenceLink (WordNode "look") (DefinedPredicate "Show expression"))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -314,7 +314,7 @@
 
 ; -----
 ; Syntactic category of robot-control facial expression imperative
-(InheritanceLink (GroundedPredicate "py:do_emotion")
+(InheritanceLink (DefinedPredicate "Show expression")
 	(ConceptNode "pred-express"))
 
 ; Syntactic category of robot-control facial-expression schema.

@@ -926,12 +926,12 @@ Where are you looking?
     +----->WV---->+----Pg*b---+     |
     +---Wq--+--Qw-+SIpx+      |     |
     |       |     |    |      |     |
-LEFT-WALL where are.v you looking.v ? 
+LEFT-WALL where are.v you looking.v ?
 
-(sureal (Set 
+(sureal (Set
    (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
 
-(sureal (Set 
+(sureal (Set
    (Evaluation (Predicate "looking") (ListLink (Concept "I")))
    (InheritanceLink
       (SatisfyingSet (Predicate "looking")) (Concept "up"))
@@ -951,7 +951,7 @@ LEFT-WALL where are.v you looking.v ?
 
 ==============================================================
 
-td::pair<std::__detail::_Node_iterator<opencog::Atom*, 
+std::pair<std::__detail::_Node_iterator<opencog::Atom*,
 pencog::FixedIntegerIndex::size() const [20]
 
 tomTable.cc:    if (typeIndex.size() != 0) return false;
@@ -961,7 +961,7 @@ getNumAtomsOfType
 _as->get_num_atoms_of_type
 
 _size_by_type
-oresize should take an arg 
+oresize should take an arg
 
 classserver().getNumberOfClasses() in the resize() method
 Also in the ctor too.
@@ -989,3 +989,12 @@ MultiSpaceUTest
 (python-eval "print 'ooooooooooooooooooolas'\nprint 'bar'")
 (python-eval "try:\n    do_wake_up()\nexcept NameError:\n    print 'ooooooooooooooooooolas'\n")
 
+==============================================================
+
+(use-modules (opencog exec))
+(cog-evaluate! (DefinedPredicate "chatbot is happy"))
+(cog-evaluate! (Put (DefinedPredicate "Show expression")
+   (ListLink (Concept "happy") (Number 6) (Number 0.3))))
+
+(process-query 'luser "Look left!")
+(process-query 'luser "Smile!")

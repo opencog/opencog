@@ -49,7 +49,25 @@
 ; Action schema
 ; This is wrong, but a hack for now.
 
-(define action-rule-1
+; action-rule-ao uses the Action Orchestrator (in orchestrate.scm)
+(define action-rule-ao
+	(BindLink
+		(VariableList
+			(TypedVariable
+				(Variable "$action")
+				(Signature
+					(PutLink
+						(Type "DefinedPredicateNode")
+						(Type "ListLink"))))
+		)
+		(AndLink
+			(ListLink current-action (Variable "$action"))
+		)
+		; (StateLink current-action (Variable "$action"))
+		(Variable "$action")
+))
+
+(define action-rule-py
 	(BindLink
 		(VariableList
 			(TypedVariable
@@ -103,7 +121,7 @@
 
 
 	; Perform the action, and print a reply.
-	(let* ((act-do-do (cog-bind action-rule-1))
+	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
 		; (display act-do-do) (newline)
