@@ -315,7 +315,7 @@ class FaceTrack:
 					self.look_at_face(0)
 					return
 				except Exception as ex:
-					logger.info("Error: no look-at target: ", ex)
+					logger.info("Error: no look-at target: " + str(ex))
 					self.look_at_face(0)
 					return
 

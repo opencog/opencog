@@ -1,5 +1,13 @@
 #
-# atomic.py - Simple atoms for simple Eva demo
+# atomic.py - OpenCog python schema to control Eva.
+#
+# This is a wrapper around a ROS node that is able to control the Eva
+# blender model. This wrapper is desined so that each function can be
+# called by OpenCog, from a GroundedPredicateNode. The functions are
+# simple, and correspond more-or-less directly to the Eva API: the
+# blender API can be told to play the smile animation, or the blink
+# animation, or frown, fall asleep, turn, look, and so on.
+#
 # Copyright (C) 2015  Linas Vepstas
 #
 # This program is free software; you can redistribute it and/or modify
@@ -34,6 +42,7 @@ evl = EvaControl()
 
 # Start RestAPI if it is available.
 # For some reason crashes if started from cog terminal
+# XXX Why is the RestAPI even needed? Who is using this?
 try:
 	from web.api.restapi import Start as RestAPI
 	RestAPI().run(None, atomspace=atomspace)

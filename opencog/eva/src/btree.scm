@@ -18,29 +18,31 @@
 ; Unit testing:
 ; The various predicates below can be manually unit tested by manually
 ; adding and removing new visible faces, and then manually invoking the
-; various rules. See faces.scm for utilities:
+; various rules. See faces.scm for utilities.
 ;
-; Manually insert a face: (make-new-face id)
-; Remove a face: (remove-face id)
-; Etc.: (show-room-state) (show-interaction-state) (show-visible-faces)
+; Basic examples:
+;    Manually insert a face: (make-new-face id)
+;    Remove a face: (remove-face id)
+;    Etc.: (show-room-state) (show-interaction-state) (show-visible-faces)
 ;
-; Unit test the new-arrival sequence:
-; (make-new-face "42")
-; (cog-evaluate! (DefinedPredicateNode "New arrival sequence"))
-; (show-acked-faces)
-; (show-room-state)
-; (show-interaction-state)
-; (cog-evaluate! (DefinedPredicateNode "Interact with people"))
+; Manually unit test the new-arrival sequence.  You can do this without
+; an attached camera; she won't track the face location, but should respond.
+;    (make-new-face "42")
+;    (cog-evaluate! (DefinedPredicateNode "New arrival sequence"))
+;    (show-acked-faces)
+;    (show-room-state)
+;    (show-interaction-state)
+;    (cog-evaluate! (DefinedPredicateNode "Interact with people"))
 ;
 ; Unit test the main interaction loop:
-; (run)  ; start the behavior tree running. Should print loop iteration.
-; (make-new-face "42")  ; Should start showing expressions, gestures.
-; (remove-face "42")  ; Should retur to neutral.
-; (halt) ; Pause the loop iteration; (run) will start it again.
+;    (run)  ; start the behavior tree running. Should print loop iteration.
+;    (make-new-face "42")  ; Should start showing expressions, gestures.
+;    (remove-face "42")  ; Should retur to neutral.
+;    (halt) ; Pause the loop iteration; (run) will start it again.
 ;
 ; Unit test chatbot:
-; (State chat-state chat-start) ; to simulate having it talk.
-; (State chat-state chat-stop)  ; to signal that talking has stopped.
+;    (State chat-state chat-start) ; to simulate having it talk.
+;    (State chat-state chat-stop)  ; to signal that talking has stopped.
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -60,6 +62,8 @@
 (load-from-path "cfg-tools.scm")
 (load-from-path "behavior-cfg.scm")
 (load-from-path "self-model.scm")
+(load-from-path "orchestrate.scm")
+(load-from-path "express.scm")
 
 ; (use-modules (opencog logger))
 ; (cog-logger-set-stdout #t)
@@ -650,7 +654,7 @@
 				(True))
 
 			;; XXX FIXME chatbot is disengaged from everything else.
-			;; The room can be empty, the head is bored or even sleep,
+			;; The room can be empty, the head is bored or even asleep,
 			;; but the chatbot is still smiling and yabbering.
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
