@@ -1642,8 +1642,29 @@ void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
 
     if (ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE)
     {
+        PatternMining::PatternMiner* patternMiner = PatternMining::PatternMiner::getInstance();
 
-        PatternMining::PatternMiner::getInstance()-> feedEmbodimentLinksToObservingAtomSpace(newLinks);
+        if (patternMiner != NULL)
+        {
+            cout << "PAI: patternMiner != NULL" << std::endl;
+            if (perceptionWaitingForPatternMiner.size() != 0)
+            {
+                patternMiner-> feedEmbodimentLinksToObservingAtomSpace(perceptionWaitingForPatternMiner);
+                perceptionWaitingForPatternMiner.clear();
+            }
+
+            patternMiner->feedEmbodimentLinksToObservingAtomSpace(newLinks);
+        }
+        else
+        {
+            cout << "PAI: patternMiner == NULL" << std::endl;
+            for (unsigned int i = 0; i < newLinks.size(); ++ i)
+            {
+                perceptionWaitingForPatternMiner.push_back(newLinks[i]);
+                std::cout << "\nPerceived new links:\n" << atomSpace.atomAsString (newLinks[i]) << std::endl;
+            }
+        }
+
     }
     else
     {

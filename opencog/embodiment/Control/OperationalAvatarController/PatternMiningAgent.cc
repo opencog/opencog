@@ -118,7 +118,7 @@ void PatternMiningAgent::testMinePatternsOnQuery()
     cout << "PatternMiningAgent: testMinePatternsOnQuery for keyword: " << keyword << std::endl;
     Handle keywordNode = pai->getAtomSpace().addNode(opencog::CONCEPT_NODE,keyword);
 
-    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,5, pai);
+    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,3, pai);
 
 }
 
@@ -145,6 +145,8 @@ void PatternMiningAgent::run()
 
 //    std::thread feedingthread = std::thread([this]{this->feedingNewAtomsToPatternMiner();});
 //    feedingthread.detach();
+
+    patternMiner->initDataStructure();
 
     std::thread testMinePatternsOnQueryThread = std::thread([this]{this->testMinePatternsOnQuery();});
     testMinePatternsOnQueryThread.detach();

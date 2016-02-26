@@ -305,13 +305,15 @@ namespace PatternMining
 
      bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
-     void initDataStructure();
+
 
  public:
      PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram = 3);
      ~PatternMiner();
 
      bool checkPatternExist(const string& patternKeyStr);
+
+     void OutPutCorpusToFile(AtomSpace* _corpusAtomSpace);
 
      void OutPutFrequentPatternsToFile(unsigned int n_gram);
 
@@ -333,6 +335,7 @@ namespace PatternMining
         /////////////////////////////------Start for embodiment ----/////////////////////////////
  public:
      static PatternMiner* getInstance();
+     void initDataStructure();
 
      void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 3,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();

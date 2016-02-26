@@ -916,6 +916,31 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
 
 }
 
+void PatternMiner::OutPutCorpusToFile(AtomSpace* _corpusAtomSpace)
+{
+
+    allLinks.clear();
+    _corpusAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+
+    allLinkNumber = (int)(allLinks.size());
+
+    ofstream resultFile;
+    string fileName = "CorpusAtomSpace.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing current corpus AtomSpace to file " + fileName << std::endl;
+
+    resultFile.open(fileName.c_str());
+
+    resultFile << allLinkNumber << " links in total: "<< endl;
+
+    for (Handle link : allLinks)
+    {
+        resultFile << _corpusAtomSpace->atomAsString(link) << endl;
+    }
+
+    resultFile.close();
+
+}
 
 
 void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram)
@@ -934,8 +959,8 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram)
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
-        if (htreeNode->count < 2)
-            continue;
+//        if (htreeNode->count < 2)
+//            continue;
 
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
@@ -2034,9 +2059,6 @@ void PatternMiner::initDataStructure()
         if (atomSpace)
             atomSpace->clear();
 
-        if (observingAtomSpace)
-            observingAtomSpace->clear();
-
         for (unsigned int i = 0; i < MAX_GRAM; ++i)
         {
             (patternsForGram[i]).clear();
@@ -2060,8 +2082,11 @@ void PatternMiner::initDataStructure()
 
         htree = new HTree();
         atomSpace = new AtomSpace( originalAtomSpace);
+        observingAtomSpace = new AtomSpace();
 
     }
+
+    allLinks.clear();
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < MAX_GRAM; ++i)
@@ -2336,6 +2361,7 @@ void PatternMiner::feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks
 
     for(Handle cur_link :_newLinks)
     {
+        cout << "Feeding new link: \n" << originalAtomSpace->atomAsString(cur_link) << std::endl;
         // Add this link into observingAtomSpace
         HandleSeq outgoingLinks,outVariableNodes;
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
@@ -2365,9 +2391,6 @@ void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _t
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
     std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
-
-    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    observingAtomSpace = new AtomSpace();
 
     processedLinkNum = 0;
     lastTimeEvaluatedNumber = 0;
@@ -2599,11 +2622,22 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     return answer.str();
 }
 
+
+
+// keywordNode is in originalAtomSpace, need to translate it in observingAtomSpace first
 void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI* _pai)
 {
+    cout << "Mining patterns on query for node: \n" << originalAtomSpace->atomAsString(keywordNode) << std::endl;
+
+    Handle keywordNodeInObserving = observingAtomSpace->getNode(originalAtomSpace->getType(keywordNode), originalAtomSpace->getName(keywordNode));
+    if (keywordNodeInObserving == Handle::UNDEFINED)
+    {
+        cout << "This keywordNode does not exist in observingAtomSpace." << std::endl;
+        return;
+    }
 
     HandleSeq keyLinks;
-    HandleSeq incomings = observingAtomSpace->getIncoming(keywordNode);
+    HandleSeq incomings = observingAtomSpace->getIncoming(keywordNodeInObserving);
 
     for (Handle incomingHandle : incomings)
     {
@@ -2676,6 +2710,8 @@ void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsi
 
         std::cout<< std::endl;
     }
+
+    OutPutCorpusToFile(observingAtomSpace);
 
 }
 
