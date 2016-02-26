@@ -110,26 +110,6 @@
 				(Variable "$obj-ground")))
 	))
 
-; See description above.
-; XXX Remove me later; this is using GroundedPredicateNode to call
-; directly into python code. It should not do that, it should call
-; the action orchestrator instead!
-(define obj-semantics-rule-1-py
-	(obj-semantics-template
-		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
-		(var-decl "$obj-ground"  "DefinedSchemaNode")     ; OBJ-GND-DECL
-
-		; We only "suggest" this as one possible action.  A later stage
-		; picks the most likely action, based on some semantic liklihood
-		; analysis... or soemthing like that.  Thus, we use a ListLink
-		; here, not a StateLink, since the ListLink allows multiple
-		; suggestions to be made.
-		(ListLink current-action                         ; ACTION
-			(EvaluationLink
-				(Variable "$verb-ground")
-				(Variable "$obj-ground")))
-	))
-
 ; Like above, but for the model.
 (define obj-semantic-model-rule-1
 	(obj-semantics-template

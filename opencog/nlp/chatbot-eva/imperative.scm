@@ -56,25 +56,8 @@
 			(TypedVariable
 				(Variable "$action")
 				(Signature
-					(PutLink
-						(Type "DefinedPredicateNode")
-						(Type "ListLink"))))
-		)
-		(AndLink
-			(ListLink current-action (Variable "$action"))
-		)
-		; (StateLink current-action (Variable "$action"))
-		(Variable "$action")
-))
-
-(define action-rule-py
-	(BindLink
-		(VariableList
-			(TypedVariable
-				(Variable "$action")
-				(Signature
 					(EvaluationLink
-						(Type "GroundedPredicateNode")
+						(Type "DefinedPredicateNode")
 						(Type "ListLink"))))
 		)
 		(AndLink
@@ -110,10 +93,7 @@
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-	(cog-bind obj-semantics-rule-1-py)
-(display
 	(cog-bind obj-semantics-rule-1-ao)
-)
 
 (display
 	(cog-bind obj-semantic-model-rule-1)
@@ -127,7 +107,8 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		; (display act-do-do) (newline)
+(display "the act llist is\n")
+		(display act-do-do) (newline)
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.

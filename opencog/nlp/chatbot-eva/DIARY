@@ -998,3 +998,8 @@ MultiSpaceUTest
 
 (process-query 'luser "Look left!")
 (process-query 'luser "Smile!")
+
+(cog-incoming-set   (DefinedPredicate "Show expression"))
+
+
+LambdaLink does not have subst but its easy ... 

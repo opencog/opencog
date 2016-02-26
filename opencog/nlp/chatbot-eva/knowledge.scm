@@ -126,13 +126,13 @@
 (InheritanceLink (DefinedSchema "forwards")   (ConceptNode "schema-direction"))
 
 ; Physical (motor control) knowledge about imperative verbs.
-(ReferenceLink (WordNode "look") (GroundedPredicate "py:gaze_at_point"))
-(ReferenceLink (WordNode "turn") (GroundedPredicate "py:look_at_point"))
+(ReferenceLink (WordNode "look") (DefinedPredicate "Gaze at point"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look at point"))
 
 ; Syntactic category of imperative verbs.
-(InheritanceLink (GroundedPredicate "py:gaze_at_point")
+(InheritanceLink (DefinedPredicate "Gaze at point")
 	(ConceptNode "pred-direction"))
-(InheritanceLink (GroundedPredicate "py:look_at_point")
+(InheritanceLink (DefinedPredicate "Look at point")
 	(ConceptNode "pred-direction"))
 
 ; Allowed syntactic structure of action-knowledge --
