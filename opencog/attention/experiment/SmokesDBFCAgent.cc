@@ -13,7 +13,10 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -101,65 +104,94 @@ SmokesDBFCAgent::~SmokesDBFCAgent()
 
 void SmokesDBFCAgent::run()
 {
+    static bool first_run = true;
     HandleSeq af_set;
-    _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));
+    Handle source = Handle::UNDEFINED;
+    HandleSeq targets = { _atomspace.add_node(PREDICATE_NODE, "friends"),
+                          _atomspace.add_node(PREDICATE_NODE, "smokes"),
+                          _atomspace.add_node(PREDICATE_NODE, "cancer") };
 
-    Handle source;
-    HandleSeq fc_result;
+    std::cout << "CYCLE:" << cogserver().getCycleCount() << std::endl;
 
-    if (not af_set.empty()) {
-        // Select a random source from the AF to start with FC.
-        std::cout << "LOOKING FOR A RANDOM ATOM IN AF\n";
-        source = rand_element(af_set);
-
-        std::cout << "FORWARD CHAINER CALLED\n";
-        ForwardChainer fc(_atomspace, rule_base, source, af_set);
-        fc.do_step();
-        std::cout << "FORWARD CHAINER STEPPED\n";
-        fc_result = fc.get_chaining_result();
-        std::cout << "Found " << fc_result.size() << " results.\n";
-        for(const Handle& h : fc_result)
-            std::cout << "\t" << h->toShortString() << "\n";
-    } else {
+    if (first_run) {
+        //Pull some atoms to the AF set
         // Select a random source from the atomspace to start with FC.
         HandleSeq hs;
-        std::cout << "LOOKING FOR A RANDOM ATOM IN AS\n";
         _atomspace.get_handles_by_type(hs, ATOM);
+
         if (hs.empty()) {
             std::cout << "EMPTY ATOMSPACE\n";
             return;
         }
+        // Choose a random source  and focus set from the AS with the ff type constraints.
+        // We are looking for atoms containing smokes,friends,cancer atoms so filter em out.
+        for (Handle& h : hs) {
+            //Choose associated atoms as focu_set
+            for (const Handle& t : targets) {
+                if (exists_in(h, t)
+                    and not opencog::contains_atomtype( h, VARIABLE_NODE)
+                    and not classserver().isA(h->getType(),HEBBIAN_LINK)){
+                          af_set.push_back(h);
+                }
+            }
+        }
 
-        source = rand_element(hs);
-        std::cout << "FORWARD CHAINER CALLED\n";
-        ForwardChainer fc(_atomspace, rule_base, source, { });
-        fc.do_step();
-        std::cout << "FORWARD CHAINER STEPPED\n\t";
-        fc_result = fc.get_chaining_result();
-        std::cout << "Found " << fc_result.size() << " results.\n";
-        for(const Handle& h : fc_result)
-                    std::cout << "\t" << h->toShortString() << "\n";
+        if (af_set.empty()) {
+            std::cout << "COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.\n";
+            return;
+        }
+
+        //Stimulate source and focus set
+        std::cout << "STIMULATING SOURCE FOR PULLING IT IN TO AF\n";
+        for (Handle& h : af_set) {
+            stimulateAtom(h,
+                          _atomspace.get_attentional_focus_boundary() + 10);
+        }
+
+        source = rand_element(af_set);
+
+        first_run = false;
     }
 
-    HandleSeq unique;
+    else {
+        af_set.clear();
+        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));
+        // Remove Hebbian links from focus set.
+        af_set.erase(std::remove_if(af_set.begin(), af_set.end(), [](Handle& h) {
+            return classserver().isA(h->getType(),HEBBIAN_LINK);
+        }),
+                   af_set.begin());
+        if (af_set.empty()) {
+            std::cout << "COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.\n";
+            return;
+        }
+        source = rand_element(af_set);
+    }
 
-    std::sort(fc_result.begin(),fc_result.end());
+    // Do one step forward chaining.
+    ForwardChainer fc(_atomspace, rule_base, source, { af_set });
+    fc.do_step();
+    std::cout << "FORWARD CHAINER STEPPED\n\t";
+
+
+    // Stimulate surprising unique results.
+    HandleSeq unique;
+    HandleSeq fc_result = fc.get_chaining_result();
+    std::cout << "Found " << fc_result.size() << " results.\n";
+    for (const Handle& h : fc_result)
+        std::cout << "\t" << h->toShortString() << "\n";
+    std::sort(fc_result.begin(), fc_result.end());
     //Inference_result doesn't need to be sorted since set is ordered.
     std::set_difference(inference_result.begin(), inference_result.end(),
                         fc_result.begin(), fc_result.end(),
                         std::back_inserter(unique));
-
     std::cout << "\tFound " << unique.size() << " unique inferences.\n\t";
-
-    if (unique.size() > 0)
-        for (const auto& u : unique)
-            std::cout << u->toShortString() << "\n\t";
-    cout << "\n";
 
     for (Handle& h : unique) {
         if (is_surprising(h)) {
             //xxx not sure what amount of stimulus should be provided.
-            stimulateAtom(h, 20);
+            std::cout << h->toShortString() << "\nWAS A SURPRISING RESULT\n";
+            stimulateAtom(h, _atomspace.get_attentional_focus_boundary() + 10);
         }
         inference_result.insert(h);
     }
@@ -168,22 +200,11 @@ void SmokesDBFCAgent::run()
 
 bool SmokesDBFCAgent::is_surprising(const Handle& h)
 {
-    Handle friends_predicate = _atomspace.add_node(PREDICATE_NODE, "friends");
-    Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE, "smokes");
-    Handle var_1 = _atomspace.add_node(CONCEPT_NODE, "$0343O45FFEWW");
-    Handle var_2 = _atomspace.add_node(CONCEPT_NODE, "$0343045FFEWY");
-    Handle friend_list = _atomspace.add_link(LIST_LINK,
-                                             HandleSeq { var_1, var_2 });
-    Handle smokes_list = _atomspace.add_link(LIST_LINK, HandleSeq { var_1 });
-    Handle eval_link_1 = _atomspace.add_link(EVALUATION_LINK, {
-            friends_predicate, friend_list });
-    Handle eval_link_2 = _atomspace.add_link(EVALUATION_LINK, {
-            smokes_predicate, smokes_list });
 
     strength_t mean_tv = 0.0f;
-    if (are_similar(h, eval_link_1, true)) {
+    if (is_friendship_reln(h)) {
         mean_tv = friends_mean();
-    } else if (are_similar(h, eval_link_2, true)) {
+    } else if (is_smokes_reln(h)) {
         mean_tv = smokes_mean();
     }
     // Calculate the Jensen Shanon distance bn mean_tv and h's tv
@@ -196,23 +217,24 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
     // data only consider those who have higher value of the lbound of the
     // top_k as surprising.
     std::cout << "Surprising result list:\n";
-    for(const auto& i : dist_surprisingness)
+    for (const auto& i : dist_surprisingness)
         std::cout << i << ", ";
-    std::cout <<"\n" << h->toShortString() << "\n\t JSD_VAL=" << mi << "\n";
+    std::cout << "\n" << h->toShortString() << "\n\t JSD_VAL=" << mi << "\n";
 
     bool val;
     if (top_k > dist_surprisingness.size()) {
         dist_surprisingness.insert(mi);
-        val=true;
+        val = true;
     } else if (mi >= *std::next(it, top_k)) {
         dist_surprisingness.insert(mi);
-        val=true;
+        val = true;
     } else {
         dist_surprisingness.insert(mi);
-        val=false;
+        val = false;
     }
 
-    std::cout << "Found to be " << (val?"surprising" : "not surprising") << "\n";
+    std::cout << "Found to be " << (val ? "surprising" : "not surprising")
+              << "\n";
     return val;
 }
 
@@ -265,4 +287,56 @@ bool strict_type_match)
 
     return false;
 }
+bool SmokesDBFCAgent::exists_in(const Handle& hlink, const Handle& h) const
+{
+    if (hlink == h) {
+        return true;
+    } else {
+        LinkPtr lp(LinkCast(hlink));
+        if (nullptr == lp)
+            return false;
 
+        auto outg = lp->getOutgoingSet();
+        if (std::find(outg.begin(), outg.end(), h) != outg.end())
+            return true;
+        else {
+            for (const Handle& hi : outg) {
+                if (LinkCast(hi) and exists_in(hi, h))
+                    return true;
+            }
+        }
+        return false;
+    }
+}
+
+bool SmokesDBFCAgent::is_friendship_reln(const Handle& h)
+{
+    AtomSpace as;
+    as.add_atom(h);
+    Handle friends_predicate = as.add_node(PREDICATE_NODE, "friends");
+    Handle var_1 = as.add_node(CONCEPT_NODE, "$0343O45FFEWW");
+    Handle var_2 = as.add_node(CONCEPT_NODE, "$0343045FFEWY");
+    Handle friend_list = as.add_link(LIST_LINK, HandleSeq { var_1, var_2 });
+    Handle eval_link = as.add_link(EVALUATION_LINK, { friends_predicate,
+                                                      friend_list });
+    if (are_similar(h, eval_link, true))
+        return true;
+    else
+        return false;
+
+}
+
+bool SmokesDBFCAgent::is_smokes_reln(const Handle& h)
+{
+    AtomSpace as;
+    as.add_atom(h);
+    Handle var_1 = as.add_node(CONCEPT_NODE, "$0343O45FFEWW");
+    Handle smokes_predicate = as.add_node(PREDICATE_NODE, "smokes");
+    Handle smokes_list = as.add_link(LIST_LINK, HandleSeq { var_1 });
+    Handle eval_link = as.add_link(EVALUATION_LINK, { smokes_predicate,
+                                                      smokes_list });
+    if (are_similar(h, eval_link, true))
+        return true;
+    else
+        return false;
+}
