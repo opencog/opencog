@@ -1,6 +1,7 @@
 # The atom_types.h file is written to the build directory
 
 # PLNDynamicExpSetupModule
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 IF (TBB_FOUND)
     
