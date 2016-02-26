@@ -114,11 +114,11 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
     {
 		// check if the dictionary entry is already in the atomspace
 		HandleSeq qExisting;
-		h->getIncomingSetByType(std::back_inserter(qExisting), LG_WORD_CSET, false);
+		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT, false);
 
 		// avoid the disjuncts building if entries exist
 		if (not qExisting.empty())
-			return pAS->add_link(SET_LINK, qExisting);
+			return Handle(createLink(SET_LINK, qExisting));
 
         LGDictReader reader(m_pDictionary, pAS);
 
