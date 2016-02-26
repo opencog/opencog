@@ -46,7 +46,7 @@ public:
     LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParamException);
     LGDictExpContainer(Exp_type t, std::vector<LGDictExpContainer> s) throw (InvalidParamException);
 
-    Handle to_handle(AtomSpace* as);
+    HandleSeq to_handle(AtomSpace* as, Handle h);
 
 private:
     void basic_flatten();

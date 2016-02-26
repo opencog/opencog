@@ -151,6 +151,7 @@ LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
 // In the case of WordInstanceNode, it should always be a
 // LgAnd disjunct used in the corresponding sentence.
 LG_WORD_CSET <- LIST_LINK
+LG_DISJUNCT <- LIST_LINK
 
 // For LG link instance of a specific parse of a sentence
 // LgLinkInstanceNode will be an instance of LinkGrammarRelationshipNode
