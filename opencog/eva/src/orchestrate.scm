@@ -37,9 +37,9 @@
 			(Variable "$intensity"))
 		(SequentialAndLink
 			;; Record the time
-			(TrueLink (DefinedSchemaNode "set expression timestamp"))
+			(TrueLink (DefinedSchema "set expression timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+			(EvaluationLink (GroundedPredicate "py:do_emotion")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -66,7 +66,7 @@
 			;; Log the time.
 			(True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicateNode "py:do_gesture")
+			(EvaluationLink (GroundedPredicate "py:do_gesture")
 				(ListLink
 					(Variable "$gest")
 					(Variable "$insensity")
@@ -74,4 +74,36 @@
 					(Variable "$speed")))
 		)))
 
-x
+; -------------------------------------------------------------
+; Request robot to look at a specific coordinate point.
+; Currently, a very thin wrapper around py:look_at_point
+
+(DefineLink
+	(DefinedPredicate "Look at point")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			;; Log the time.
+			; (True (DefinedSchema "set gesture timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicate "py:look_at_point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------
+; Request robot to turn eyes at a specific coordinate point.
+; Currently, a very thin wrapper around py:gaze_at_point
+
+(DefineLink
+	(DefinedPredicate "Gaze at point")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			;; Log the time.
+			; (True (DefinedSchema "set gesture timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicate "py:gaze_at_point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------
