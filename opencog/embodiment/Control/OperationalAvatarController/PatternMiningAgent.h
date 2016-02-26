@@ -62,6 +62,7 @@ public:
 
     PatternMiningAgent(CogServer&);
 
+
     PatternMiner* patternMiner;
 
     virtual ~PatternMiningAgent();
@@ -77,6 +78,9 @@ public:
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
     virtual void run();
+
+
+//    void feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks);
 
     // After calling this function, the Agent will invoke its "init" method firstly
     // in "run" function during its next cycle

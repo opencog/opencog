@@ -70,6 +70,8 @@
 #include "EmbodimentErrorHandler.h"
 #include "EventResponder.h"
 #include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
+#include <opencog/learning/PatternMiner/PatternMiner.h>
+
 
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
@@ -138,6 +140,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
     logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
 
     enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
+
+    ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE = config().get_bool("ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE");
 
     trueConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "true");
     falseConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "false");
@@ -1636,10 +1640,19 @@ void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
 {
     waitingToFeedToPatternMinerLock.lock();
 
-    for (unsigned int i = 0; i < newLinks.size(); ++ i)
+    if (ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE)
     {
-        perceptionWaitingForPatternMiner.push_back(newLinks[i]);
-        std::cout << "\nPerceived new links:\n" << atomSpace.atomAsString (newLinks[i]) << std::endl;
+
+        PatternMining::PatternMiner::getInstance()-> feedEmbodimentLinksToObservingAtomSpace(newLinks);
+    }
+    else
+    {
+        for (unsigned int i = 0; i < newLinks.size(); ++ i)
+        {
+
+            perceptionWaitingForPatternMiner.push_back(newLinks[i]);
+            std::cout << "\nPerceived new links:\n" << atomSpace.atomAsString (newLinks[i]) << std::endl;
+        }
     }
 
     waitingToFeedToPatternMinerLock.unlock();

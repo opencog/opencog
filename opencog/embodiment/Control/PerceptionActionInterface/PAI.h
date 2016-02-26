@@ -46,6 +46,7 @@
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 
+
 #include "EmbodimentErrorHandler.h"
 
 #ifdef HAVE_LIBPTHREAD
@@ -181,6 +182,8 @@ private:
     bool isFirstPerceptTerrian;
 
     int perceptTerrianBeginTime;
+
+    bool ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE;
 
     int blockNum;
 

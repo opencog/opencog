@@ -37,6 +37,7 @@ TARGET_LINK_LIBRARIES(PAI
 	embodiment-types
 	nlp-types
 	query
+        PatternMiner
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 
 	${Boost_REGEX_LIBRARY}

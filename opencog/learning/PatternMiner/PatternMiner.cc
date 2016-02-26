@@ -50,6 +50,14 @@ using namespace opencog;
 
 const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
 
+PatternMiner* PatternMiner::instance = NULL;
+
+PatternMiner* PatternMiner::getInstance()
+{
+    return PatternMiner::instance;
+}
+
+
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
@@ -2146,6 +2154,8 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
         ngram ++;
     }
 
+    PatternMiner::instance = this;
+
     std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
 }
 
@@ -2319,6 +2329,28 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
 //    }
 
 //}
+
+// need to lock waitingToFeedQueueLock when calling this function
+void PatternMiner::feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks)
+{
+
+    for(Handle cur_link :_newLinks)
+    {
+        // Add this link into observingAtomSpace
+        HandleSeq outgoingLinks,outVariableNodes;
+        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+        Handle existLink = observingAtomSpace->getLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+        if (existLink != Handle::UNDEFINED)
+        {
+            cout << "This link is dupicated! Skip it." << std::endl;
+            continue;
+        }
+
+        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link), outgoingLinks);
+        newLink->merge(originalAtomSpace->getTV(cur_link));
+    }
+
+}
 
 void PatternMiner::runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency, unsigned int _evaluatePatternsEveryXSeconds)
 {
@@ -2571,16 +2603,16 @@ void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigne
 {
 
     HandleSeq keyLinks;
-    HandleSeq incomings = originalAtomSpace->getIncoming(keywordNode);
+    HandleSeq incomings = observingAtomSpace->getIncoming(keywordNode);
 
     for (Handle incomingHandle : incomings)
     {
         Handle newh = incomingHandle;
 
         // if this atom is a igonred type, get its first parent that is not in the igonred types
-        if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+        if (isIgnoredType (observingAtomSpace->getType(incomingHandle)) )
         {
-            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+            newh = getFirstNonIgnoredIncomingLink(observingAtomSpace, incomingHandle);
         }
 
         if (newh != Handle::UNDEFINED)
@@ -2595,8 +2627,8 @@ void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigne
 
 
 // start from keyLinks, only mine patterns connecting to any of links in keyLinks
-// keyLinks are in originalAtomSpace. observingAtomSpace is not used in this mining.
-// It's a one time mining, just mine from the current originalAtomSpace. After return result, throw away the result and any middle data.
+// keyLinks are in observingAtomSpace.
+// It's a one time mining, just mine from the current observingAtomSpace. After return result, throw away the result and any middle data.
 void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI* _pai)
 {
     MAX_GRAM = _max_gram;
@@ -2614,14 +2646,14 @@ void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsi
     for (Handle keyLink : keyLinks)
     {
         std::cout<<"Mine patterns related to: \n";
-        cout << originalAtomSpace->atomAsString(keyLink) << std::endl;
+        cout << observingAtomSpace->atomAsString(keyLink) << std::endl;
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
         HandleSeq lastGramLinks;
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
-        extendAPatternForOneMoreGramRecursively(keyLink, originalAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
+        extendAPatternForOneMoreGramRecursively(keyLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, false);
 
         alreadyMinedKeyLinks.insert(keyLink);
 

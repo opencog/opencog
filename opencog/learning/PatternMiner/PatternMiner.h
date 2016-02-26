@@ -80,6 +80,8 @@ namespace PatternMining
  {
  private:
 
+     static PatternMiner* instance;
+
      HTree* htree;
      AtomSpace* atomSpace;
      AtomSpace* originalAtomSpace;
@@ -330,11 +332,15 @@ namespace PatternMining
 
         /////////////////////////////------Start for embodiment ----/////////////////////////////
  public:
+     static PatternMiner* getInstance();
+
      void runPatternMinerForEmbodiment(pai::PAI * _pai, unsigned int _thresholdFrequency = 3,  unsigned int _evaluatePatternsEveryXSeconds = 120);
      void runEvaluatePatternTaskForEmbodiment();
 
      void mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI *_pai);
      void mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI *_pai);
+
+     void feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks);
 
 //     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);
 //     std::mutex waitingToFeedQueueLock;

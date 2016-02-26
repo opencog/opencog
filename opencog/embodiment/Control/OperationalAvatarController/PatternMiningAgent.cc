@@ -35,6 +35,7 @@
 
 using namespace opencog::oac;
 
+
 PatternMiningAgent::~PatternMiningAgent()
 {
 }
@@ -106,6 +107,7 @@ void PatternMiningAgent::init()
     // Avoid initialize during next cycle
     this->bInitialized = true;
 
+
     cout << "PatternMiningAgent: init finished!\n ";
 }
 
@@ -116,7 +118,7 @@ void PatternMiningAgent::testMinePatternsOnQuery()
     cout << "PatternMiningAgent: testMinePatternsOnQuery for keyword: " << keyword << std::endl;
     Handle keywordNode = pai->getAtomSpace().addNode(opencog::CONCEPT_NODE,keyword);
 
-    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,4, pai);
+    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,5, pai);
 
 }
 
@@ -149,6 +151,11 @@ void PatternMiningAgent::run()
 
 }
 
+
+//void PatternMiningAgent::feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks)
+//{
+//    this->patternMiner->feedEmbodimentLinksToObservingAtomSpace(_newLinks);
+//}
 
 //void PatternMiningAgent::feedingNewAtomsToPatternMiner()
 //{
