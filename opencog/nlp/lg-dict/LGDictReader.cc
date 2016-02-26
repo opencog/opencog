@@ -95,7 +95,7 @@ Handle LGDictReader::getAtom(const std::string& word)
 
     free_lookup_list(_dictionary, dn_head);
 
-    return _as->add_link(SET_LINK, outgoing);
+    return Handle(createLink(SET_LINK, outgoing));
 }
 
 /**
