@@ -54,7 +54,7 @@ private:
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
-
+    std::unique_ptr<ForwardChainer> fc;
     // A descending order sorted surprising result list.
     std::set<float,std::greater<int>> dist_surprisingness;
 
@@ -84,8 +84,10 @@ public:
 
     bool is_surprising(const Handle& h);
 
+    bool is_friendship_reln(const Handle& h);
+    bool is_smokes_reln(const Handle& h);
     bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
-
+    bool exists_in(const Handle& hlink, const Handle& h) const;
 };
 
 #endif
