@@ -1,7 +1,7 @@
 ;
 ; behvaior.scm
 ;
-; Behavior tree, implemented in the atomspace.
+; Configurable robot behavior tree, implemented in Atomese.
 ;
 ; Defines a set of behaviors that express Eva's personality. The
 ; currently-defined behaviors include acknowledging new people who enter
@@ -11,9 +11,9 @@
 ;
 ; HOWTO:
 ; Run the main loop:
-;    (run)
+;    (behavior-tree-run)
 ; Pause the main loop:
-;    (halt)
+;    (behavior-tree-halt)
 ;
 ; Unit testing:
 ; The various predicates below can be manually unit tested by manually
@@ -668,10 +668,26 @@
 		)))
 
 ;; Run the loop (in a new thread)
-;; Call (run) to run the loop, (halt) to pause the loop.
+;; Call (behavior-tree-run) to run the loop, (behavior-tree-halt) to pause the loop.
 ;; line 297 -- self.tree.next()
 (define (behavior-tree-run)
 	(set! do-run-loop #t)
 	(call-with-new-thread
 		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
 (define (behavior-tree-halt) (set! do-run-loop #f))
+
+; ----------------------------------------------------------------------
+; Sigh. Perform manual garbage collection. This really should be
+; automated. XXX TODO. (Can we get ECAN to do this for us?)
+(define (run-behavior-tree-gc)
+	(define (free-stuff)
+		(sleep 1)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
+		(cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
+		(free-stuff)
+	)
+	(call-with-new-thread free-stuff)
+)
+; ----------------------------------------------------------------------
