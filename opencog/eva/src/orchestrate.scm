@@ -20,6 +20,10 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
+; -------------------------------------------------------------
+; Request a display of a facial expression (smile, frown, etc.)
+; The expression name should be one of the supported blender animations.
+;
 ; Example usage:
 ;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.3))))
@@ -42,6 +46,14 @@
 					(Variable "$intensity")))
 		)))
 
+; -------------------------------------------------------------
+; Request a display of a facial gesture (blink, nod, etc.)
+; The expression name should be one of the supported blender animations.
+;
+; Example usage:
+;    (cog-evaluate! (Put (DefinedPredicate "Show gesture")
+;         (ListLink (Concept "blink") (Number 0.8) (Number 3) (Number 1))))
+;
 (DefineLink
 	(DefinedPredicate "Show gesture")
 	(LambdaLink
@@ -61,3 +73,5 @@
 					(Variable "$repeat")
 					(Variable "$speed")))
 		)))
+
+x
