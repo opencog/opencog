@@ -60,7 +60,7 @@
 (add-to-load-path "../src")
 (load-from-path "faces.scm")
 (load-from-path "cfg-tools.scm")
-(load-from-path "behavior-cfg.scm")
+(load-from-path "sophia-cfg.scm")
 (load-from-path "self-model.scm")
 (load-from-path "orchestrate.scm")
 (load-from-path "express.scm")

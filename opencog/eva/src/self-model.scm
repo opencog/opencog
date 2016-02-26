@@ -21,7 +21,7 @@
 ; (use-modules (opencog atom-types) (opencog cogserver))
 ; (use-modules (opencog eva-model))
 ; (start-cogserver "../scripts/opencog.conf")
-;;;; start roscore befoer doing the load below.
+;;;; start roscore before doing the load below.
 ; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
 ;
 ;
@@ -40,11 +40,6 @@
 (use-modules (opencog atom-types))
 
 (load-from-path "utilities.scm")
-
-; (display %load-path)
-; (load-from-path "faces.scm")
-; (load-from-path "cfg-tools.scm")
-; (load-from-path "behavior-cfg.scm")
 
 ; ------------------------------------------------------
 ; State variables
