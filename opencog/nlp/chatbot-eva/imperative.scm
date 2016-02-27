@@ -107,8 +107,7 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-(display "the act llist is\n")
-		(display act-do-do) (newline)
+		; (display act-do-do) (newline)
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.
