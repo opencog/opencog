@@ -50,15 +50,25 @@ DECLARE_MODULE(PythonModule);
 
 Agent* PythonAgentFactory::create(CogServer& cs) const
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     logger().info() << "Creating python agent " << _pySrcModuleName << "." << _pyClassName;
     PyMindAgent* pma = new PyMindAgent(cs, _pySrcModuleName, _pyClassName);
+
+    PyGILState_Release(gstate);
     return pma;
 }
 
 Request* PythonRequestFactory::create(CogServer& cs) const
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     logger().info() << "Creating python request " << _pySrcModuleName << "." << _pyClassName;
     PyRequest* pma = new PyRequest(cs, _pySrcModuleName, _pyClassName, _cci);
+
+    PyGILState_Release(gstate);
     return pma;
 }
 
