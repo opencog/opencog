@@ -38,7 +38,12 @@ from opencog.scheme_wrapper import scheme_eval_h, scheme_eval_as
 # the btree running.  If the AtomSpace is borked, it will complain
 # that some DefinedPredicateNode is not defined, and will do nothing at
 # all (because, duhh, there's no DefinedPredicateNode in the bad
-# AtomSpace).
+# AtomSpace). Since you only have a guile prompt, and not a python
+# prompt, you'll need to actually do this:
+#
+#    (python-eval "from put_atoms import *")
+#    (python-eval "pat = PutAtoms()\npat.btree_stop()")
+#    (python-eval "pat = PutAtoms()\npat.btree_run()")
 #
 class PutAtoms:
 
