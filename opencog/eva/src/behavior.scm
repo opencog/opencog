@@ -56,9 +56,17 @@
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 
-; Try loading the python code from this directory; else go for the install
-; directory.
-(python-eval "execfile('atomic.py')")
+; Try loading the python code from this directory;
+; else go for the install directory. This is kind-of hacky;
+; is there a nicer way to load stuff?
+(python-eval "
+execfile('atomic.py')
+try:
+    do_wake_up()
+except NameError:
+    execfile('/usr/local/share/opencog/python/atomic.py')
+")
+
 
 (load-from-path "utilities.scm")
 
