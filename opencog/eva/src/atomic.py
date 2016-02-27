@@ -28,14 +28,6 @@
 import rospy
 from ros_commo import EvaControl
 from opencog.atomspace import TruthValue
-from opencog.bindlink import satisfaction_link
-from opencog.type_constructors import *
-
-from opencog.cogserver import get_server_atomspace
-
-# The atomspace where everything will live.
-atomspace = get_server_atomspace()
-set_type_ctor_atomspace(atomspace)
 
 # The ROS layer.
 evl = EvaControl()
