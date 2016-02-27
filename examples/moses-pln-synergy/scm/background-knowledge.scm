@@ -3,33 +3,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; If X takes Y and Y contains Z, then X takes Z
-(ImplicationLink (stv 1 1)
-   (VariableList
-      (TypedVariableLink
-         (VariableNode "$X")
-         (TypeNode "ConceptNode"))
-      (TypedVariableLink
-         (VariableNode "$Y")
-         (TypeNode "ConceptNode"))
-      (TypedVariableLink
-         (VariableNode "$Z")
-         (TypeNode "ConceptNode")))
-   (AndLink
+(define if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z
+   (ImplicationLink (stv 1 1)
+      (VariableList
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode"))
+         (TypedVariableLink
+            (VariableNode "$Y")
+            (TypeNode "ConceptNode"))
+         (TypedVariableLink
+            (VariableNode "$Z")
+            (TypeNode "ConceptNode")))
+      (AndLink
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (VariableNode "$Y")))
+         (EvaluationLink
+            (PredicateNode "contain")
+            (ListLink
+               (VariableNode "$Y")
+               (VariableNode "$Z"))))
       (EvaluationLink
          (PredicateNode "take")
          (ListLink
             (VariableNode "$X")
-            (VariableNode "$Y")))
-      (EvaluationLink
-         (PredicateNode "contain")
-         (ListLink
-            (VariableNode "$Y")
             (VariableNode "$Z"))))
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
-         (VariableNode "$X")
-         (VariableNode "$Z"))))
+   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about John ;;

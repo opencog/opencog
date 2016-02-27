@@ -1,4 +1,9 @@
 ADD_GUILE_MODULE (chatbot-eva.scm
-	eva.scm
-	process-query.scm
+	bot-api.scm
+	imperative.scm
+	imperative-rules.scm
+	knowledge.scm
+	model-query.scm
+	self-model.scm
+	semantics.scm
 )

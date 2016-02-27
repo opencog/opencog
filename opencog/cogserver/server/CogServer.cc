@@ -240,9 +240,9 @@ void CogServer::runLoopStep(void)
     }
 
     // Process mind agents
-    if (customLoopRun() and agentsRunning and 0 < agentScheduler.getAgents().size())
+    if (customLoopRun() and agentsRunning and 0 < agentScheduler.get_agents().size())
     {
-        agentScheduler.processAgents();
+        agentScheduler.process_agents();
 
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
@@ -290,9 +290,9 @@ std::list<const char*> CogServer::agentIds() const
 
 AgentSeq CogServer::runningAgents(void)
 {
-    AgentSeq agents = agentScheduler.getAgents();
+    AgentSeq agents = agentScheduler.get_agents();
     for (auto &runner: agentThreads) {
-        auto t = runner->getAgents();
+        auto t = runner->get_agents();
         agents.insert(agents.end(), t.begin(), t.end());
     }
     return agents;
@@ -318,31 +318,31 @@ void CogServer::startAgent(AgentPtr agent, bool dedicated_thread,
             runner = agentThreads.back().get();
             if (!thread_name.empty())
             {
-                runner->setName(thread_name);
+                runner->set_name(thread_name);
                 threadNameMap[thread_name] = runner;
             }
         }
-        runner->addAgent(agent);
+        runner->add_agent(agent);
         if (agentsRunning)
             runner->start();
     }
     else
-        agentScheduler.addAgent(agent);
+        agentScheduler.add_agent(agent);
 }
 
 void CogServer::stopAgent(AgentPtr agent)
 {
-    agentScheduler.removeAgent(agent);
+    agentScheduler.remove_agent(agent);
     for (auto &runner: agentThreads)
-        runner->removeAgent(agent);
+        runner->remove_agent(agent);
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
 void CogServer::stopAllAgents(const std::string& id)
 {
-    agentScheduler.removeAllAgents(id);
+    agentScheduler.remove_all_agents(id);
     for (auto &runner: agentThreads)
-        runner->removeAllAgents(id);
+        runner->remove_all_agents(id);
 //    // remove statistical record of their activities
 //    for (size_t n = 0; n < to_delete.size(); n++)
 //        _systemActivityTable.clearActivity(to_delete[n]);

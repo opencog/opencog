@@ -110,11 +110,11 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         case 'c':
             ircChannels.clear();
             channelsTemp = optarg;
-            st.setString(channelsTemp);
-            st.setDelimiter(string(","));
-            for (string channel = st.nextToken();
+            st.set_string(channelsTemp);
+            st.set_delimiter(string(","));
+            for (string channel = st.next_token();
                     channel.size() > 0;
-                    channel = st.nextToken()) {
+                    channel = st.next_token()) {
                 ircChannels.push_back("#" + channel);
             }
             break;

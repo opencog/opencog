@@ -28,11 +28,11 @@ $ moses \
 ## Batch mode
 
 You may choose to run the inference all at once. For that just load
-`moses-pln-synergy.scm` in guile
+`moses-pln-synergy-pm.scm` in guile
 
 ```
 $ guile
-scheme@(guile-user)> (load "moses-pln-synergy.scm")
+scheme@(guile-user)> (load "moses-pln-synergy-pm.scm")
 ```
 
 Which will load the MOSES model, the background knowledge, the PLN

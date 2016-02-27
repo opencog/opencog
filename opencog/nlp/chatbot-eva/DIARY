@@ -549,7 +549,7 @@ _type_restrictions = &vars._simple_typemap
 	(GetLink
 		(TypedVariable
 			(Variable "$x")
-			(Signature 
+			(Signature
 				(EvaluationLink
 					(TypeChoice
 						(TypeNode "PredicateNode")
@@ -615,4 +615,334 @@ is-member-link
 		)))
 
 (cog-execute! x)
+
+
+===========================================
+Implication
+	And
+		Evaluation Preceeds $x $y
+		Evaluation During  $x $z
+	And
+		Evaluation Overlaps $x $z    ; wtf??
+		CompositionRule ...
+
+
+; Utility defintion.
+(define (less a b) (GreaterThanLink b a))
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(less (Variable "$a-") (Variable "$b-"))
+		(less (Variable "$b-") (Variable "$a-"))
+		(less (Variable "$a+") (Variable "$b+"))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Overlaps")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$x") (Type "TimeNode"))
+		(TypedVariable (Variable "$y") (Type "TimeNode"))
+	)
+	; If the following holds
+	(AndLink
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$x") (Variable "$y")))
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$y") (Variable "$x")))
+	)
+	; Then create the following predicate:
+	(Evaluation
+		(PredicateNode "happened in the same minute")
+		(ListLink (Variable "$y") (Variable "$x")))
+)
+
+
+(define (Meets a- a+ b- b+)
+ (EqualLink a+ b-))
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(Evaluation
+			(PredicateNode "happened in the same minute")
+			(ListLink (Variable "$a+") (Variable "$b-")))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Meets")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+(use-modules (opencog) (opencog atom-types) (opencog query))
+
+(TimeNode 3000)    ;set atom for getter2 to find
+
+(define getter2 (BindLink
+            (VariableList
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            )
+            (EqualLink (Time 3000) (Variable "$x"))
+            (Variable "$x")))
+
+(cog-bind getter2)
+
+
+(define getter3 (BindLink
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            (GreaterThan (Time 3000) (Variable "$x"))
+           (Variable "$x")))
+
+(TimeNode 2000) ;set atom for getter3 to find
+(cog-bind getter3)
+
+
+(use-modules (opencog logger))
+(cog-logger-set-stdout #t)
+(cog-logger-set-level "fine")
+
+There were no type restrictions! That must be wrong!
+
+
+after ... unbundle_virtual
+
+
+   (PutLink
+     (TypedVariable (Variable $x)
+      (SignatureLink
+
+      (EvaluationLink  (Variable $x))
+      (MemberLink (Concept "foo") (Concept "bar")))
+
+vertex
+
+str_to_vertex
+
+=========================================================
+
+
+Fuzzy:
+
+* its a type.  Is it a kind of SignatueLink?
+
+* A VariableNodes can have it as a type. aget set to it.
+
+* Or is it ore like PresentLink?  How do we indicate which parts are
+  crisp, and which parts are not?  How do I specify matching affinity?
+
+
+WARNING: (opencog nlp chatbot-eva): `r2l-rules' imported from both
+(opencog rule-engine) and (opencog nlp relex2logic)
+opencog/nlp/chatbot/chat-utils.scm:61:39: In procedure
+(InterpretationNode
+"sentence@987adef9-1782-4ab7-b422-703a214ee0d5_parse_0_interpretation_$X")
+:
+opencog/nlp/chatbot/chat-utils.scm:61:39: Unbound variable: r2l-rules
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(opencog nlp chatbot-eva) [1]>
+
+======================================
+
+(use-modules (opencog) (opencog cogserver))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot))
+(use-modules (opencog nlp relex2logic))
+
+; (load "relex2logic/rule-utils.scm")
+(load "chatbot/chat-utils.scm")
+
+(nlp-parse "look left")
+ERROR: Unbound variable: pre-advmod-rule
+bug #2021
+
+(StateLink current-sentence
+
+(cog-incoming-set current-sentence)
+(SentenceNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093")
+
+(define (get-parse sent)
+
+(ParseNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0"
+(InterpretationNode
+"sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0_interpretation_$X")
+
+(WordInstanceNode "look@a08e7907-0098-498c-be5e-10df22714eb3")
+
+Its MVa not Pa and so look-rule-1 fails.
+
+general structure:
+  o
+(InheritanceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (DefinedLinguisticConceptNode "ImperativeSpeechAct")
+)
+ (ReferenceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (SetLink
+
+====================================================
+
+(load "chatbot-eva/run-chatbot.scm")
+
+cog-evaluate! when it runs python, does not pature the stdout
+and forward back to here.
+
+(define (bar)
+	(cog-evaluate! (Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink (NumberNode 1) (NumberNode 0.5) (NumberNode 0)))))
+
+(with-output-to-file "/tmp/foo" bar)
+
+poll_result
+_result a string that apply_tv doesn't set...
+but f it did, we could get it via poll_result and .. then what?
+
+alt: guile shell couldgrab copy of stdout ...
+
+4 must be a pipe
+tee(STDOUT_FILENO, 4, INT_MAX, SPLICE_F_NONBLOCK);
+
+PyObject *pyOutput = NULL;
+
+====================================================
+
+    +---Wi---+-MVa-+
+    |        |     |
+LEFT-WALL look.v up.e
+
+    +---Wi---+--Pa-+
+    |        |     |
+LEFT-WALL look.v up.a
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u
+
+                   +----Js---+
+    +---Wi---+-MVp-+   +Ds**c+
+    |        |     |   |     |
+LEFT-WALL look.v to.r the left.n
+
+
+fuzzy vs. concrete:
+
+verb is concrete, verb must be specific and must link by Wi
+direction is any of four words
+direction must link by Js or Ju or Pa or MVa
+everything else is variable ....
+everything else is not precise
+
+
+meaning in relation to the current context.  ... apply rules in relation
+to the current context.
+
+current-imperative  stores look-at direction.
+look-semantics examins it.
+
+(1) determine if its a sentence I know.
+(2) if its a look or turn sentence, then extract direction.
+(3) create a simplified rendition, verb and direction.
+
+(ExecutionLink
+    (SchemaNode "turn")
+    (ListLink
+        (ConceptNode "left")
+    ))
+
+except we use WordNode, for now, to keep it simpler.
+
+current-action
+
+look engaged
+look happy  MVa
+look sad   Pa
+look bored Pa
+
+show happiness Ou
+express happiness
+Make a happy expression <---
+
+be happy!
+
+happiness sadness boredom
+
+synonymous words ....
+
+recent history for scripting
+---------------------------------------------------
+
+sureal -- assemble  from R2L
+
+   (sureal (SetLink
+      (Evaluation (Predicate "look") (ListLink (Concept "ahead"))) ))
+
+(use-modules  (opencog nlp sureal))
+(nlp-parse "Mike eats pizza")
+(nlp-parse "He went on a walk")
+(sureal (Set (Evaluation (Predicate "eats") (ListLink (Concept "he")))))
+(sureal (Set (Evaluation (Predicate "eat") (ListLink (Concept "he")))))
+
+(nlp-parse "I am going to eat")
+
+(gen-sentences  for R2L
+
+(get-r2l-set-of-sent y
+
+Where are you looking?
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ? 
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
+
+(sureal (Set 
+   (Evaluation (Predicate "looking") (ListLink (Concept "I")))
+   (InheritanceLink
+      (SatisfyingSet (Predicate "looking")) (Concept "up"))
+
+))
+
+(use-modules (opencog nlp fuzzy))
+
+(get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+
+(use-modules (opencog exec))
+(cog-execute!
+   (StateLink (AnchorNode "*-gaze-direction-*"))
 

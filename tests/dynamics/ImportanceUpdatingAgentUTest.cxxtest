@@ -105,7 +105,7 @@ public:
 	void setUp() {
 	    agent = cogserver.createAgent<ImportanceUpdatingAgent>();
 
-	    agent->getLogger()->setLevel(opencog::Logger::FINE);
+	    agent->getLogger()->set_level(opencog::Logger::FINE);
 	    //agent->getLogger()->setPrintToStdoutFlag(true);
 	    
 	    cogserver.startAgent(agent);
@@ -115,7 +115,7 @@ public:
 	void tearDown() {
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(agent->getLogger()->getFilename().c_str());
+            std::remove(agent->getLogger()->get_filename().c_str());
 	    cogserver.stopAgent(agent);
     }
 

@@ -88,11 +88,9 @@ private:
 	void split_to_replies(char* data);
 	void insert_irc_command_hook(irc_command_hook* hook, const char* cmd_name, int (*function_ptr)(const char*, irc_reply_data*, void*));
 	void delete_irc_command_hook(irc_command_hook* cmd_hook);
+
 	int irc_socket;
 	bool connected;
-	bool sentnick;
-	bool sentpass;
-	bool sentuser;
 	char* cur_nick;
 	FILE* dataout;
 	FILE* datain;

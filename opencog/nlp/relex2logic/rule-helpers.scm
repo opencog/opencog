@@ -460,7 +460,11 @@
 		(InheritanceLink  (ConceptNode instance) (ConceptNode adj_instance))
 ))
 
-(define (advmod-rule verb instance adv adv_instance)
+(define (advmod-rule verb-node instance-node adv-node adv-instance-node)
+	(define verb (cog-name verb-node))
+	(define instance (cog-name instance-node))
+	(define adv (cog-name adv-node))
+	(define adv_instance (cog-name adv-instance-node))
 	(ListLink
 		(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
 			(ImplicationLink  (PredicateNode instance) (PredicateNode verb))
@@ -666,7 +670,9 @@
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
-(define (maybe-rule word word_instance)
+(define (maybe-rule word-node word-instance-node)
+	(define word (cog-name word-node))
+	(define word_instance (cog-name word-instance-node))
 	(ListLink
 		(ImplicationLink (PredicateNode word_instance) (PredicateNode word))
 		(r2l-wordinst-Predicate word_instance)
@@ -851,7 +857,17 @@
 ;
 ; Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 ;
-(define (to-do-rule-5 verb1 verb1_instance verb2 verb2_instance subj subj_instance)
+(define (to-do-rule-5
+		verb1-node verb1-instance-node
+		verb2-node verb2-instance-node
+		subj-node subj-instance-node)
+
+	(define verb1 (cog-name verb1-node))
+	(define verb1_instance (cog-name verb1-instance-node))
+	(define verb2 (cog-name verb2-node))
+	(define verb2_instance (cog-name verb2-instance-node))
+	(define subj (cog-name subj-node))
+	(define subj_instance (cog-name subj-instance-node))
 	(ListLink
 		(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
 		(ImplicationLink (PredicateNode verb1_instance) (PredicateNode verb1))
@@ -878,8 +894,11 @@
 ;
 ; Examples: "Where do you live?","Where did you eat dinner?" etc.
 ;
-(define (where-rule verb verb_instance)
-	(let ((var_name (choose-var-name)))
+(define (where-rule verb-node verb-instance-node)
+	(let ((var_name (choose-var-name))
+			(verb (cog-name verb-node))
+			(verb_instance (cog-name verb-instance-node))
+		)
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
@@ -896,8 +915,11 @@
 ;
 ; Examples: "Where is the party?", "Where will she be happy?" etc.
 ;
-(define (wherecop-Q-rule subj_concept subj_instance)
-	(let ((var_name (choose-var-name)))
+(define (wherecop-Q-rule subj-concept-node subj-instance-node)
+	(let ((var_name (choose-var-name))
+			(subj_concept (cog-name subj-concept-node))
+			(subj_instance (cog-name subj-instance-node))
+		)
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
@@ -1393,9 +1415,10 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
-		(AtTimeLink)
+		(AtTimeLink
 			(PredicateNode pred_instance)
 			(ConceptNode comp_instance)
+		)
 	)
 )
 

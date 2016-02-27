@@ -275,7 +275,7 @@ void StorkeyAgent::storkeyUpdate()
         }
         newWeights.push_back(iRow);
     }
-    if (getLogger()->isFineEnabled()) {
+    if (getLogger()->is_fine_enabled()) {
         getLogger()->fine("Weight matrix after Storkey update rule applied:");
         printWeights(newWeights);
     }

@@ -17,6 +17,7 @@
 ; being run in doesn't require it.
 
 (ure-add-rule r2l-rules "advmod" advmod 1)
+(ure-add-rule r2l-rules "advmod-maybe" advmod-maybe 1)
 
 (ure-add-rule r2l-rules "adverbialpp" adverbialpp 1)
 
@@ -88,7 +89,7 @@
 
 (ure-add-rule r2l-rules "todo5" todo5 1)
 
-(ure-add-rule r2l-rules "todo3" to-do-rule-3 1)
+(ure-add-rule r2l-rules "todo3" todo3 1)
 
 ;(ure-add-rule r2l-rules "utilities" utilities 1)
 

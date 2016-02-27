@@ -1057,10 +1057,10 @@ void TangentBug::test_look_along_ray() const
 {
 #ifndef NDEBUG
     for (int i = 0;i < 1000;++i) {
-        double lenx = rng.randDoubleOneExcluded() * 100 * rng.randPositiveNegative();
-        double leny = rng.randDoubleOneExcluded() * 100 * rng.randPositiveNegative();
+        double lenx = rng.randdouble_one_excluded() * 100 * rng.rand_positive_negative();
+        double leny = rng.randdouble_one_excluded() * 100 * rng.rand_positive_negative();
         TBRay dir(lenx, leny);
-        look_along_ray(curr_pos, dir, rng.randDoubleOneExcluded()*10);
+        look_along_ray(curr_pos, dir, rng.randdouble_one_excluded()*10);
     }
 #endif
 }
@@ -1228,7 +1228,7 @@ void TangentBug::print() const
 
 void TangentBug::printLocalSpaceMap() const {
     Logger::Level logLevel = opencog::Logger::FINE;
-    if (logger().isEnabled(logLevel)) {
+    if (logger().is_enabled(logLevel)) {
         std::string result = "\n";
         for (unsigned int x = 0; x < lsm->xDim(); x++) {
             for (unsigned int y = 0; y < lsm->yDim(); y++) {
@@ -1249,7 +1249,7 @@ bool TangentBug::random_walk(int min_number_steps) {
                  number_of_steps);
 
     for (int i = 0; i < number_of_steps; ++i) {
-        double angle = 2 * PI * rng.randDoubleOneExcluded();
+        double angle = 2 * PI * rng.randdouble_one_excluded();
         TBRay move_direction(cos(angle), sin(angle));
 
         // Free point in this direction:

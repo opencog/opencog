@@ -87,3 +87,9 @@
         (lamb (LambdaLink var (AndLink a1 a2))))
     (cog-set-tv! lamb (cog-tv and-lamb))
     (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))))
+
+;; Name the rule
+(define implication-and-lambda-factorization-rule-name
+  (DefinedSchemaNode "implication-and-lambda-factorization-rule"))
+(DefineLink implication-and-lambda-factorization-rule-name
+  implication-and-lambda-factorization-rule)
