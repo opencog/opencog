@@ -48,11 +48,17 @@
 
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
+(use-modules (opencog python))
+
+; We use the cogserver for only one reason: to communicate the current
+; atomspace to python.  At this time, there is no other way to tell
+; python which atomspace to use.
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 
-(system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
-; (system "echo \"py\\n\" | cat - atomic-dbg.py |netcat localhost 17020")
+; Try loading the python code from this directory; else go for the install
+; directory.
+(python-eval "execfile('atomic.py')")
 
 (load-from-path "utilities.scm")
 
