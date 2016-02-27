@@ -26,7 +26,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import TruthValue
 
 # Global functions, because that's what PythonEval expects.
 # Would be great if PythonEval was fixed to work smarter, not harder.

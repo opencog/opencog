@@ -19,11 +19,11 @@
 ; Load the needed modules, start the cogserver.
 ; (use-modules (opencog) (opencog query) (opencog exec))
 ; (use-modules (opencog atom-types) (opencog cogserver))
+; (use-modules (opencog python))
 ; (use-modules (opencog eva-model))
 ; (start-cogserver "../scripts/opencog.conf")
 ;;;; start roscore before doing the load below.
-; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
-;
+; (python-eval "execfile('atomic.py')")
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:

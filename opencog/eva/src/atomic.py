@@ -27,7 +27,7 @@
 
 import rospy
 from ros_commo import EvaControl
-from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import TruthValue
 from opencog.bindlink import satisfaction_link
 from opencog.type_constructors import *
 
