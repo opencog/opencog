@@ -172,7 +172,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             continue;
 
         // if no LG dictionary entry
-        if (get_target_neighbors(hWordNode, LG_WORD_CSET).empty())
+        if (get_target_neighbors(hWordNode, LG_DISJUNCT).empty())
             continue;
 
         sVars.insert(n);

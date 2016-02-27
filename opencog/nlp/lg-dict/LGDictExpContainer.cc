@@ -206,29 +206,32 @@ void LGDictExpContainer::basic_normal_order()
  * @param as   pointer to the AtomSpace
  * @return     handle to the atom
  */
-Handle LGDictExpContainer::to_handle(AtomSpace *as)
+HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
 {
     if (m_type == CONNECTOR_type)
     {
         if (m_string == "OPTIONAL")
-            return as->add_link(LG_CONNECTOR, as->add_node(LG_CONNECTOR_NODE, "0"));
+            return { as->add_link(LG_CONNECTOR, as->add_node(LG_CONNECTOR_NODE, "0")) };
 
         Handle connector = as->add_node(LG_CONNECTOR_NODE, m_string);
         Handle direction = as->add_node(LG_CONN_DIR_NODE, std::string(1, m_direction));
 
         if (m_multi)
-            return as->add_link(LG_CONNECTOR, connector, direction, as->add_node(LG_CONN_MULTI_NODE, "@"));
+            return { as->add_link(LG_CONNECTOR, connector, direction, as->add_node(LG_CONN_MULTI_NODE, "@")) };
         else
-            return as->add_link(LG_CONNECTOR, connector, direction);
+            return { as->add_link(LG_CONNECTOR, connector, direction) };
     }
 
     HandleSeq outgoing;
 
     for (auto& exp: m_subexps)
-        outgoing.push_back(exp.to_handle(as));
+    {
+        HandleSeq q = exp.to_handle(as, hWordNode);
+        outgoing.insert(outgoing.end(), q.begin(), q.end());
+    }
 
     if (m_type == AND_type)
-        return as->add_link(LG_AND, outgoing);
+        return { as->add_link(LG_AND, outgoing) };
 
     // remove repeated atoms from OR
     if (m_type == OR_type)
@@ -236,9 +239,13 @@ Handle LGDictExpContainer::to_handle(AtomSpace *as)
         std::sort(outgoing.begin(), outgoing.end());
         outgoing.erase(std::unique(outgoing.begin(), outgoing.end()), outgoing.end());
 
-        return as->add_link(LG_OR, outgoing);
+        HandleSeq qDisjuncts;
+        for (Handle& h : outgoing)
+            qDisjuncts.push_back(as->add_link(LG_DISJUNCT, hWordNode, h));
+
+        return qDisjuncts;
     }
 
     // should never get here
-    return Handle::UNDEFINED;
+    return HandleSeq();
 }

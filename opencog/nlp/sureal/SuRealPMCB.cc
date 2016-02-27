@@ -625,20 +625,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     auto iter = m_disjuncts.find(hPatWordNode);
     if (iter == m_disjuncts.end())
     {
-        HandleSeq qOr = get_target_neighbors(hPatWordNode, LG_WORD_CSET);
-
-        auto insertHelper = [&](const Handle& h)
-        {
-            LinkPtr lp(LinkCast(h));
-            if (lp)
-            {
-                const HandleSeq& q = lp->getOutgoingSet();
-                qDisjuncts.insert(qDisjuncts.end(), q.begin(), q.end());
-            }
-        };
-
-        std::for_each(qOr.begin(), qOr.end(), insertHelper);
-
+        qDisjuncts = get_target_neighbors(hPatWordNode, LG_DISJUNCT);
         m_disjuncts.insert({hPatWordNode, qDisjuncts});
     }
     else qDisjuncts = iter->second;

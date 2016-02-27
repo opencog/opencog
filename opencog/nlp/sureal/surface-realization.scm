@@ -108,8 +108,10 @@
                             (if (equal? (cog-type n) 'PredicateNode)
                                 (map
                                     (lambda (p)
-                                        ; TODO: There could be too many... skip if seen before?
-                                        (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
+                                        (if (> (length (word-inst-get-word p)) 0)
+                                            ; TODO: There could be too many... skip if seen before?
+                                            (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
+                                        )
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
