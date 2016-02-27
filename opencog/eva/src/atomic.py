@@ -32,15 +32,6 @@ from opencog.atomspace import TruthValue
 # The ROS layer.
 evl = EvaControl()
 
-# Start RestAPI if it is available.
-# For some reason crashes if started from cog terminal
-# XXX Why is the RestAPI even needed? Who is using this?
-try:
-	from web.api.restapi import Start as RestAPI
-	RestAPI().run(None, atomspace=atomspace)
-except:
-	print "Rest API can't be started. Check Python configuration"
-
 # Global functions, because that's what PythonEval expects.
 # Would be great if PythonEval was fixed to work smarter, not harder.
 #

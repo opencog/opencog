@@ -50,12 +50,6 @@
 (use-modules (opencog atom-types))
 (use-modules (opencog python))
 
-; We use the cogserver for only one reason: to communicate the current
-; atomspace to python.  At this time, there is no other way to tell
-; python which atomspace to use.
-(use-modules (opencog cogserver))
-(start-cogserver "../scripts/opencog.conf")
-
 ; Try loading the python code from this directory;
 ; else go for the install directory. This is kind-of hacky;
 ; is there a nicer way to load stuff?
@@ -66,7 +60,6 @@ try:
 except NameError:
     execfile('/usr/local/share/opencog/python/atomic.py')
 ")
-
 
 (load-from-path "utilities.scm")
 
