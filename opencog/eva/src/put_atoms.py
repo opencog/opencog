@@ -23,6 +23,23 @@ from opencog.scheme_wrapper import scheme_eval_h, scheme_eval_as
 # so that we don't hack both ROS and Opencog in the same module.
 # Why? Not sure, seems like a good idea.
 #
+# How to unit-test:
+# -----------------
+# This class pokes atoms into an AtomSpace. It should be the same
+# AtomSpace as the one that the rest of the system is using; in
+# particular, it should be the one that the behavior tree is defined
+# in. This can be manually tested like so:
+#
+#     pat = PutAtoms()
+#     pat.btree_stop()
+#     pat.btree_run()
+#
+# If everything is hooked up OK, then `pat.btree_run()` should start
+# the btree running.  If the AtomSpace is borked, it will complain
+# that some DefinedPredicateNode is not defined, and will do nothing at
+# all (because, duhh, there's no DefinedPredicateNode in the bad
+# AtomSpace).
+#
 class PutAtoms:
 
 	def __init__(self):
