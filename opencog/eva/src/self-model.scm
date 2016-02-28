@@ -16,12 +16,10 @@
 ;    questions about what Eva is doing.
 ;
 ; Example usage:
-; Load the needed modules, start the cogserver.
+; Load the needed modules.
 ; (use-modules (opencog) (opencog query) (opencog exec))
-; (use-modules (opencog atom-types) (opencog cogserver))
-; (use-modules (opencog python))
+; (use-modules (opencog atom-types) (opencog python))
 ; (use-modules (opencog eva-model))
-; (start-cogserver "../scripts/opencog.conf")
 ;;;; start roscore before doing the load below.
 ; (python-eval "execfile('atomic.py')")
 ;

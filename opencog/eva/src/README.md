@@ -62,7 +62,13 @@ Cython modules are installed here:
 `/usr/local/share/opencog/python/opencog`
 ```
 
-Get to the cogserver prompt like this:
+The code here does not use the cogserver. If you want to get a python
+command-line, you will have to edit `btree.scm` and add these lines:
+```
+(use-modules (opencog cogserver))
+(start-cogserver "../scripts/opencog.conf")
+```
+and restart the btree.  Next, get to the cogserver prompt like so:
 ```
 `rlwrap telnet localhost 17020`
 ```
