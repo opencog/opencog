@@ -33,22 +33,24 @@ export ROS_IP=127.0.0.1
 source devel/setup.sh
 echo "Starting... this will take 15-20 seconds..."
 
-# Use byobu so that the scroll bars actually work
+# Use byobu so that the scroll bars actually work.
 byobu new-session -d -n 'ros' 'roscore; $SHELL'
 sleep 4;
 
-# Single Video (body) camera and face tracker
+# Single Video (body) camera and face tracker.
 tmux new-window -n 'trk' 'roslaunch robots_config tracker-single-cam.launch; $SHELL'
-# Publish the geometry messages
+
+# Publish the geometry messages. This includes tf2 which holds
+# the face locations.
 tmux new-window -n 'geo' 'roslaunch robots_config geometry.launch gui:=false; $SHELL'
 
-### Start the blender GUI
+### Start the blender GUI.
 tmux new-window -n 'eva' 'cd $BLENDIR && blender -y Eva.blend -P autostart.py; $SHELL'
 
 # Start the cogserver.
 # It seems to take more than 5 seconds to load all scripts!?
 cd $OCBHAVE/src
-tmux new-window -n 'cog' 'guile -l btree.scm; $SHELL'
+tmux new-window -n 'cog' 'guile -l btree-eva.scm; $SHELL'
 sleep 10
 
 # Run the new face-tracker.
@@ -58,7 +60,10 @@ tmux new-window -n 'fce' '../face_track/main.py; $SHELL'
 # Telnet shell
 tmux new-window -n 'tel' 'rlwrap telnet localhost 17020; $SHELL'
 
-# Fix the annoying byobu display
+# Spare-usage shell
+tmux new-window -n 'bash' '$SHELL'
+
+# Fix the annoying byobu display.
 echo "tmux_left=\"session\"" > $HOME/.byobu/status
 echo "tmux_right=\"load_average disk_io\"" >> $HOME/.byobu/status
 tmux attach
