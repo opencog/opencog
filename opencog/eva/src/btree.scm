@@ -43,7 +43,7 @@ except:
 (add-to-load-path "../src")
 (load-from-path "cfg-tools.scm")
 (load-from-path "sophia-cfg.scm") ;;; <<<=== See, its Sophia here!
-(load-from-path "behavior.scm")
+(use-modules (opencog eva-behavior))
 
 ; (use-modules (opencog logger))
 ; (cog-logger-set-stdout #t)

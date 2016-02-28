@@ -75,12 +75,14 @@ except NameError:
 
 ; --------------------------------------------------------
 ; Some debug prints.
+; The are define-public, because otherwise the
+; `(GroundedPredicate "scm: print-msg")` won't work.
 
-(define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
+(define-public (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
 
 ; Print message, and print the current interaction face-id
-(define (print-msg-face node)
+(define-public (print-msg-face node)
 	(display (cog-name node))
 	(display " with face id: ")
 	(display (cog-name (car (cog-outgoing-set (cog-execute!
@@ -89,7 +91,7 @@ except NameError:
 	(stv 1 1))
 
 ; Print message, then print elapsed time
-(define (print-msg-time node time)
+(define-public (print-msg-time node time)
 	(display (cog-name node))
 	(display " Elapsed: ")
 	(display (cog-name time))
@@ -634,7 +636,7 @@ except NameError:
 ;; line 988 - idle_spin()
 (define loop-count 0)
 (define do-run-loop #t)
-(define (idle-loop)
+(define-public (idle-loop)
 	(set! loop-count (+ loop-count 1))
 
 	(if (eq? 0 (modulo loop-count 30))
@@ -680,16 +682,16 @@ except NameError:
 ;; Run the loop (in a new thread)
 ;; Call (behavior-tree-run) to run the loop, (behavior-tree-halt) to pause the loop.
 ;; line 297 -- self.tree.next()
-(define (behavior-tree-run)
+(define-public (behavior-tree-run)
 	(set! do-run-loop #t)
 	(call-with-new-thread
 		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
-(define (behavior-tree-halt) (set! do-run-loop #f))
+(define-public (behavior-tree-halt) (set! do-run-loop #f))
 
 ; ----------------------------------------------------------------------
 ; Sigh. Perform manual garbage collection. This really should be
 ; automated. XXX TODO. (Can we get ECAN to do this for us?)
-(define (run-behavior-tree-gc)
+(define-public (run-behavior-tree-gc)
 	(define (free-stuff)
 		(sleep 1)
 		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)

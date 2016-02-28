@@ -1,6 +1,12 @@
 INSTALL (FILES
+	eva-behavior.scm
 	eva-model.scm
 	DESTINATION "${DATADIR}/scm/opencog/"
+)
+
+INSTALL (FILES
+	behavior.scm
+	DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
 )
 
 INSTALL (FILES
