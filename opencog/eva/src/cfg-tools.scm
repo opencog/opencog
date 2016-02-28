@@ -4,7 +4,7 @@
 ; Behavior Tree configuration parameters utilities.
 ;
 ; Provide handy wrappers that simplify the declaration of configuration
-; parameters. Required by behavior-cfg.scm
+; parameters. Required by `cfg-sophia.scm` and `cfg-eva.scm`.
 ;
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state

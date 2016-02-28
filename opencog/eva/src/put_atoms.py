@@ -17,18 +17,39 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from opencog.atomspace import AtomSpace
-from opencog.scheme_wrapper import scheme_eval_h
-from opencog.cogserver import get_server_atomspace
+from opencog.scheme_wrapper import scheme_eval_h, scheme_eval_as
 
 # Simple API to isolate opencog atoms and imports from the ROS code,
 # so that we don't hack both ROS and Opencog in the same module.
 # Why? Not sure, seems like a good idea.
 #
+# How to unit-test:
+# -----------------
+# This class pokes atoms into an AtomSpace. It should be the same
+# AtomSpace as the one that the rest of the system is using; in
+# particular, it should be the one that the behavior tree is defined
+# in. This can be manually tested like so:
+#
+#     pat = PutAtoms()
+#     pat.btree_stop()
+#     pat.btree_run()
+#
+# If everything is hooked up OK, then `pat.btree_run()` should start
+# the btree running.  If the AtomSpace is borked, it will complain
+# that some DefinedPredicateNode is not defined, and will do nothing at
+# all (because, duhh, there's no DefinedPredicateNode in the bad
+# AtomSpace). Since you only have a guile prompt, and not a python
+# prompt, you'll need to actually do this:
+#
+#    (python-eval "from put_atoms import *")
+#    (python-eval "pat = PutAtoms()\npat.btree_stop()")
+#    (python-eval "pat = PutAtoms()\npat.btree_run()")
+#
 class PutAtoms:
 
 	def __init__(self):
-		self.atomspace = get_server_atomspace()
+		# Get the atomspace that the scheme is using at just this moment.
+		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
 	# Put a marker in the AtomSpace to indicate that the robot is
 	# talking now.

@@ -290,12 +290,14 @@ class FaceTrack:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.gaze_at)
 					self.gaze_pub.publish(trg)
+
 				except tf.LookupException as lex:
 					logger.info("Warning: TF has forgotten about face id:" +
 						str(self.look_at))
 					self.remove_face(self.look_at)
 					self.look_at_face(0)
 					return
+
 				except Exception as ex:
 					logger.info("Error: no gaze-at target: ")
 					self.gaze_at_face(0)
@@ -308,12 +310,14 @@ class FaceTrack:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.look_at)
 					self.look_pub.publish(trg)
+
 				except tf.LookupException as lex:
 					logger.info("Warning: TF has forgotten about face id: " +
 						str(self.look_at))
 					self.remove_face(self.look_at)
 					self.look_at_face(0)
 					return
+
 				except Exception as ex:
 					logger.info("Error: no look-at target: " + str(ex))
 					self.look_at_face(0)
@@ -347,6 +351,7 @@ class FaceTrack:
 
 		elif data.face_event == self.EVENT_TRACK_FACE:
 			self.track_face(data.face_id)
+
 	# pi_vision ROS callback, called when pi_vision has new face
 	# location data for us. Because this happens frequently (10x/second)
 	# we also use this as the main update loop, and drive all look-at

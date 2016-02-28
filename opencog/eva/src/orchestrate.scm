@@ -20,6 +20,10 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
+; -------------------------------------------------------------
+; Request a display of a facial expression (smile, frown, etc.)
+; The expression name should be one of the supported blender animations.
+;
 ; Example usage:
 ;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.3))))
@@ -33,15 +37,23 @@
 			(Variable "$intensity"))
 		(SequentialAndLink
 			;; Record the time
-			(TrueLink (DefinedSchemaNode "set expression timestamp"))
+			(TrueLink (DefinedSchema "set expression timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicateNode "py:do_emotion")
+			(EvaluationLink (GroundedPredicate "py:do_emotion")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
 					(Variable "$intensity")))
 		)))
 
+; -------------------------------------------------------------
+; Request a display of a facial gesture (blink, nod, etc.)
+; The expression name should be one of the supported blender animations.
+;
+; Example usage:
+;    (cog-evaluate! (Put (DefinedPredicate "Show gesture")
+;         (ListLink (Concept "blink") (Number 0.8) (Number 3) (Number 1))))
+;
 (DefineLink
 	(DefinedPredicate "Show gesture")
 	(LambdaLink
@@ -54,10 +66,44 @@
 			;; Log the time.
 			(True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicateNode "py:do_gesture")
+			(EvaluationLink (GroundedPredicate "py:do_gesture")
 				(ListLink
 					(Variable "$gest")
 					(Variable "$insensity")
 					(Variable "$repeat")
 					(Variable "$speed")))
 		)))
+
+; -------------------------------------------------------------
+; Request robot to look at a specific coordinate point.
+; Currently, a very thin wrapper around py:look_at_point
+
+(DefineLink
+	(DefinedPredicate "Look at point")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			;; Log the time.
+			; (True (DefinedSchema "set gesture timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicate "py:look_at_point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------
+; Request robot to turn eyes at a specific coordinate point.
+; Currently, a very thin wrapper around py:gaze_at_point
+
+(DefineLink
+	(DefinedPredicate "Gaze at point")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			;; Log the time.
+			; (True (DefinedSchema "set gesture timestamp"))
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicate "py:gaze_at_point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------

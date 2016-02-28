@@ -16,14 +16,12 @@
 ;    questions about what Eva is doing.
 ;
 ; Example usage:
-; Load the needed modules, start the cogserver.
+; Load the needed modules.
 ; (use-modules (opencog) (opencog query) (opencog exec))
-; (use-modules (opencog atom-types) (opencog cogserver))
+; (use-modules (opencog atom-types) (opencog python))
 ; (use-modules (opencog eva-model))
-; (start-cogserver "../scripts/opencog.conf")
-;;;; start roscore befoer doing the load below.
-; (system "echo \"py\\n\" | cat - atomic.py |netcat localhost 17020")
-;
+;;;; start roscore before doing the load below.
+; (python-eval "execfile('atomic.py')")
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
@@ -39,34 +37,29 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
-(load-from-path "utilities.scm")
-
-; (display %load-path)
-; (load-from-path "faces.scm")
-; (load-from-path "cfg-tools.scm")
-; (load-from-path "behavior-cfg.scm")
-
 ; ------------------------------------------------------
 ; State variables
+; XXX FIXME There are a bunch of define-publics in here, they probably
+; should not be; they're needed only by the behavior module.
 
 ; Soma: awake, agitated, excited, tired, manic, depressed
-(define soma-state (AnchorNode "Soma State"))
-(define soma-sleeping (ConceptNode "Sleeping"))
-(define soma-awake (ConceptNode "Awake"))
-(define soma-bored (ConceptNode "Bored"))
+(define-public soma-state (AnchorNode "Soma State"))
+(define-public soma-sleeping (ConceptNode "Sleeping"))
+(define-public soma-awake (ConceptNode "Awake"))
+(define-public soma-bored (ConceptNode "Bored"))
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
 
 ;; Currently, interaction-state will be linked to the face-id of
 ;; person with whom interaction is taking place. (current_face_target in owyl)
-(define interaction-state (AnchorNode "Interaction State"))
-(define no-interaction (ConceptNode "none"))
+(define-public interaction-state (AnchorNode "Interaction State"))
+(define-public no-interaction (ConceptNode "none"))
 
 (StateLink interaction-state no-interaction)
 
 ; The face to glance at.
-(define glance-state (AnchorNode "Glance State"))
+(define-public glance-state (AnchorNode "Glance State"))
 (StateLink glance-state no-interaction)
 
 ;; Linked to face-id that needs immediate interaction.
@@ -86,11 +79,11 @@
 
 ; Chat state. Is the robot talking, or not, right now?
 ; NB the python code uses these defines!
-(define chat-state (AnchorNode "Chat State"))
-(define chat-listen (ConceptNode "Listening"))
-(define chat-talk   (ConceptNode "Talking"))
-(define chat-start  (ConceptNode "Start Talking"))
-(define chat-stop   (ConceptNode "Stop Talking"))
+(define-public chat-state (AnchorNode "Chat State"))
+(define-public chat-listen (ConceptNode "Listening"))
+(define-public chat-talk   (ConceptNode "Talking"))
+(define-public chat-start  (ConceptNode "Start Talking"))
+(define-public chat-stop   (ConceptNode "Stop Talking"))
 (StateLink chat-state chat-stop)
 
 (DefineLink

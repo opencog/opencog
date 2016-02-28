@@ -21,11 +21,9 @@
 ; (python-eval
 ;   "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
 ;
-; (python-eval
-;   "try:\n    do_wake_up()\nexcept NameError:\n    execfile('/usr/local/share/opencog/python/atomic-dbg.py')\n")
-;
 ; Hard-coded install path from CMakefile
 (python-eval "
+# Throws an exception if do_wake_up() is not defined.
 try:
     do_wake_up()
 except NameError:

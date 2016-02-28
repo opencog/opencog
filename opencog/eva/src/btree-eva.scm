@@ -1,9 +1,9 @@
 ;
-; btree.scm
+; btree-eva.scm
 ;
-; Sophia behavior tree (for the Sophia belnder model animations).
+; Eva behavior tree (for the Eva blender model animations).
 ;
-; Defines a set of behaviors that express Sophia's personality. The
+; Defines a set of behaviors that express Eva's personality. The
 ; currently-defined behaviors include acknowledging new people who enter
 ; the room, rotating attention between multiple occupants of the room,
 ; falling asleep when bored (i.e. the room is empty), and acting
@@ -29,20 +29,6 @@
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
 
-; Start the cogserver's RestAPI.  I don't know why this is
-; needed; Vytas added this code earlier in a different file.
-(use-modules (opencog python))
-(python-eval "
-try:
-    from opencog.cogserver import get_server_atomspace
-    from web.api.restapi import Start as RestAPI
-    atspace = get_server_atomspace()
-    set_common_shared_atomspace(atspace)
-    RestAPI().run(None, atomspace=atspace)
-except:
-    print 'Rest API can't be started. Check Python configuration'
-")
-
 ; Load the behavior trees.
 (use-modules (opencog eva-behavior))
 
@@ -50,7 +36,7 @@ except:
 ; (display %load-path)
 (add-to-load-path "../src")
 (load-from-path "cfg-tools.scm")
-(load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
+(load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.

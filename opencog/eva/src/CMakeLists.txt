@@ -1,6 +1,13 @@
 INSTALL (FILES
+	eva-behavior.scm
 	eva-model.scm
 	DESTINATION "${DATADIR}/scm/opencog/"
+)
+
+INSTALL (FILES
+	behavior.scm
+	express.scm
+	DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
 )
 
 INSTALL (FILES
@@ -11,6 +18,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
+	atomic.py
 	atomic-dbg.py
 	DESTINATION "${DATADIR}/python/"
 )

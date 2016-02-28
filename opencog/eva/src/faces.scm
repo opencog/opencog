@@ -7,8 +7,6 @@
 (use-modules (opencog exec))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ;; XXX FIXME: This file defines a "Room State", which currently can
 ;; be "empty" or "non-empty", depending on whether faces are visible
 ;; or not.  But this is kind-of pointless: its probably easier to just
@@ -60,6 +58,9 @@
 			(DefinedPredicateNode "Check if room non-empty")
 			(DefinedPredicateNode "Check if room empty"))))
 
+; -----------------------------------------------------------------
+; Assorted debugging utilities.
+;
 ;; Display the current room state
 (define (show-visible-faces)
 	(define visible-face (PredicateNode "visible face"))
@@ -80,21 +81,31 @@
 	(car (cog-chase-link 'StateLink 'ConceptNode interaction-state)))
 
 
-; Quick hack to fill the room.
-; Call this function to trick opencog into thinking there is a new
-; visible face.  There will not be any corresponding 3D coords, so
-; the ROS tf2 will not be able to make the robot turn to look...
-(define (make-new-face id)
+; define-public because `unit-test.scm` uses it.
+(define-public (make-new-face id)
+"
+ make-new-face ID
+
+ Debug utility - Quick hack to fill the room.
+
+ Call this function to trick opencog into thinking there is a new
+ visible face.  There will not be any corresponding 3D coords, so
+ the ROS tf2 will not be able to make the robot turn to look...
+"
 	(EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id))))
 
-; Quick hack to clear the room
-(define (remove-face id)
+(define-public (remove-face id)
+"
+ remove-face ID
+
+ Quick hack to remove face ID from the room
+"
 	(cog-delete (EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id)))))
 
 (define (undefine def)
-	(cog-delete(car (cog-incoming-set def))))
+	(cog-delete (car (cog-incoming-set def))))
 
 #|
 ;; Example usage:
