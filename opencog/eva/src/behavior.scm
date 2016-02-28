@@ -53,6 +53,10 @@
 ; Try loading the python code from this directory;
 ; else go for the install directory. This is kind-of hacky;
 ; is there a nicer way to load stuff?
+;
+; (python-eval
+;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
+;
 (python-eval "
 execfile('atomic.py')
 try:
@@ -61,13 +65,12 @@ except NameError:
     execfile('/usr/local/share/opencog/python/atomic.py')
 ")
 
-(load-from-path "utilities.scm")
+; (load-from-path "utilities.scm")
+
+(use-modules (opencog eva-model))
 
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "faces.scm")
-(load-from-path "self-model.scm")
-(load-from-path "orchestrate.scm")
 (load-from-path "express.scm")
 
 ; --------------------------------------------------------

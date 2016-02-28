@@ -11,6 +11,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
+	atomic.py
 	atomic-dbg.py
 	DESTINATION "${DATADIR}/python/"
 )
