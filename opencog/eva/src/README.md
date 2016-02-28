@@ -1,22 +1,39 @@
-This is a functional and nearly complete implementation.  A few
-previously-supported features are missing, these are listed at the end.
-
 
 Design overview
 ===============
 
-* The main behavior tree is in `btree.scm`.  Many of the configurable
-  parameters are in `behavior-cfg.scm`.
+* The main behavior tree launcher is in `btree-eva.scm`.  The
+  configurable parameters are in `cfg-eva.scm`.
+
+* There are two scheme modules: `eva-model`, which implements a model
+  of the external world, and also a self-model of the robot.  This
+  module allows the robot to be "aware" of it's surroundings, and to be
+  "self-aware" during speech acts and during reasonsing.  The second
+  module is `eva-behavior`, which implements the personality and the
+  behaviors.
+
+* The `eva-model` module has several components. The `faces` component
+  models the visibile huan faces in the external environment. The
+  `orchestrate` component is a "behavior multiplexer", resolving
+  conflicting instructions for the robot to peform some action. The
+  `self-model` component implements a model of what the robot is
+  supposedly doing right now (so that the robot can be asked, e.g. "Are
+  you smiling right now?")
+
+* The `eva-behavior` module has several components.  The `express`
+  component consists of commands to make facial expressions and
+  gestures.  The `behavior` component contains the primary, full
+  behavior tree that contols the entire performance.
 
 * The OpenCog behaviors interface to ROS by calling the functions in
   `atomic.py`. This file is just a "thin" wrapper around the actual ROS
   code, which is in `ros_commo.py`.  A non-ROS, debugging-only interface
   is in `atomic-dbg.py`; it does not import ROS, and only prints to
-  stdout.
+  stdout. It can be used for a text-only chatbot.
 
-* The behavior tree works with visible faces beased on face ID's,
+* The behavior tree works with visible faces based on face ID's,
   and is only interested in the visible faces, and not thier locations.
-  It outputs commands such as "look at face ID 42". The actualy tracking
+  It outputs commands such as "look at face ID 42". The actual tracking
   of face locations, ad the visual servoing needed to maintain a
   steady, accurate gaze is in the `face_track` directory.
 
@@ -32,11 +49,12 @@ Design overview
   ```
   See `face_track/README.md` for details.
 
-* XXX The code currently uses a bogus design, where a "room state" is
-  set, to be either "empty" or "non-empty".  This is not really needed,
-  since one can also query if the number of visible faces is greater
-  than zero, or not.  The room-state stuff is in `faces.scm` and should
-  probably be removed.
+* XXX The code currently has a large variety of conficting and poor
+  design choices in it -- its in a state of morphing from "OK so-so code"
+  to "slightly better than before".  As a result of this hacking, varius
+  parts are being re-designed,  and bits of old, poor design still
+  infest the code, and new featues are incomplete and half-working.
+  It will be a good, long while before the code here settles down.
 
 
 Running
@@ -62,18 +80,13 @@ Cython modules are installed here:
 `/usr/local/share/opencog/python/opencog`
 ```
 
-The code here does not use the cogserver. If you want to get a python
-command-line, you will have to edit `btree.scm` and add these lines:
-```
-(use-modules (opencog cogserver))
-(start-cogserver "../scripts/opencog.conf")
-```
-and restart the btree.  Next, get to the cogserver prompt like so:
+You can get a python command-line from the cogserver, like so:
 ```
 `rlwrap telnet localhost 17020`
 ```
-and then enter the python interpreter by saying `py`, or the scheme
-interpreter by saying `scm`.
+and then enter the python interpreter by saying `py`.  YOu can get
+a scheme interpreter by saying `scm`.  You can telnet multiple times.
+You can also call python from scheme, and scheme from python.
 
 From the python prompt, the following should list the python
 opencog modules:
@@ -109,15 +122,11 @@ Grep for XXX in the code:
 
 * Implement the face-study saccade.
 
-* Implement the look-for-attention segment.
-
-* Implement the remaining new behaviors from `public_ws`.
-
-* Implement the non-uniform RandomChoice link.
-
 Enhancement TODO List
 =====================
-A random list of ideas.
+A list of random ideas.
+
+* Replace the vision processing code by something better.
 
 * Integrate with OpenPsi.
 
