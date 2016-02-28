@@ -7,8 +7,6 @@
 (use-modules (opencog exec))
 (use-modules (opencog query))
 
-; (load-from-path "utilities.scm")
-
 ;; XXX FIXME: This file defines a "Room State", which currently can
 ;; be "empty" or "non-empty", depending on whether faces are visible
 ;; or not.  But this is kind-of pointless: its probably easier to just

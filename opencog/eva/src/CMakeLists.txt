@@ -6,6 +6,7 @@ INSTALL (FILES
 
 INSTALL (FILES
 	behavior.scm
+	express.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
 )
 

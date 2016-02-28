@@ -65,13 +65,7 @@ except NameError:
     execfile('/usr/local/share/opencog/python/atomic.py')
 ")
 
-; (load-from-path "utilities.scm")
-
 (use-modules (opencog eva-model))
-
-; (display %load-path)
-(add-to-load-path "../src")
-(load-from-path "express.scm")
 
 ; --------------------------------------------------------
 ; Some debug prints.

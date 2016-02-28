@@ -1,7 +1,7 @@
 ;
 ; btree.scm
 ;
-; Sophia behavior tree, implemented in the atomspace.
+; Sophia behavior tree.
 ;
 ; Defines a set of behaviors that express Sophia's personality. The
 ; currently-defined behaviors include acknowledging new people who enter
@@ -15,7 +15,9 @@
 ; Pause the main loop:
 ;    (halt)
 ;
-; Unit testing:  See notes in `behavior.scm`.
+; Make sure that you did a `cmake` and `make install` first!
+;
+; Unit testing:  See `unit-test.scm` and also notes in `behavior.scm`.
 ;
 
 (add-to-load-path "/usr/local/share/opencog/scm")
