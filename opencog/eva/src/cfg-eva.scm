@@ -1,5 +1,5 @@
 ;
-; eva-cfg.scm
+; cfg-eva.scm
 ;
 ; Behavior Tree configuration parameters for the Eva blender model.
 ;

@@ -1,5 +1,5 @@
 ;
-; sophia-cfg.scm
+; cfg-sophia.scm
 ;
 ; Behavior Tree configuration parameters for the Sophia blender model.
 ;
