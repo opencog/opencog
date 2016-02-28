@@ -14,6 +14,12 @@ works by performing a fuzzy search, comparing the question to sentences
 in the atomspace: if a similar sentence is found, the fuzzy matcher
 will offer that up as an answer.  See below for additional details.
 
+A more sophisticated chatbot can be found in the `chatbot-eva`
+directory.  That chatbot can be used to control a Hanson Robotics
+animated head (via a blender animation rig), and pose self-awareness
+questions to it ('what are you doing?', 'where are you looking?' etc.)
+It builds on top of and extends the concepts described in this file.
+
 Running the chatbot requires three steps:
 
 1) Running the parse server.

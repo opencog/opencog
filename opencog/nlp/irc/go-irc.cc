@@ -316,13 +316,15 @@ int main (int argc, char * argv[])
 	{
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
-		conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
-		            "La Cogita OpenCog chatbot", "asdf");
+		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
+		           "La Cogita OpenCog chatbot", "asdf");
 
 		conn.message_loop();
 
 		fprintf(stderr, "%s: Fatal Error: Remote side closed socket\n",
 			argv[0]);
+
+		conn.disconnect();
 	}
 
 	return 1;

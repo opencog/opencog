@@ -1,6 +1,6 @@
 ;"She is nice to help with the project."
 
-(define to-do-rule-3
+(define todo3
 	(BindLink
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
