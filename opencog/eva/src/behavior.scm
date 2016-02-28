@@ -636,7 +636,7 @@ except NameError:
 ;; line 988 - idle_spin()
 (define loop-count 0)
 (define do-run-loop #t)
-(define-public (idle-loop)
+(define-public (idle-loop)  ; public only because its in a GPN
 	(set! loop-count (+ loop-count 1))
 
 	(if (eq? 0 (modulo loop-count 30))
@@ -679,14 +679,25 @@ except NameError:
 			(DefinedPredicate "main loop")
 		)))
 
-;; Run the loop (in a new thread)
-;; Call (behavior-tree-run) to run the loop, (behavior-tree-halt) to pause the loop.
 ;; line 297 -- self.tree.next()
 (define-public (behavior-tree-run)
+"
+ behavior-tree-run
+
+ Run the Eva behavior tree main loop (in a new thread),
+ Call (behavior-tree-halt) to exit the loop.
+"
 	(set! do-run-loop #t)
 	(call-with-new-thread
 		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
-(define-public (behavior-tree-halt) (set! do-run-loop #f))
+
+(define-public (behavior-tree-halt)
+"
+ behavior-tree-halt
+
+ Tell the Eva behavior tree main loop thread to exit.
+"
+(set! do-run-loop #f))
 
 ; ----------------------------------------------------------------------
 ; Sigh. Perform manual garbage collection. This really should be

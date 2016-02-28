@@ -15,7 +15,7 @@
 ; Infinite loop, runs forever, unless you halt it by saying
 ; (set! keep-looping #f)
 
-(use-modules (opencog eva-model)) ; for `make-new-face`
+(use-modules (opencog eva-model)) ; defines `make-new-face`
 
 (define do-print-msg #f)  ; say (set! do-print-msg #t) to print
 (define keep-looping #t)  ; say (set! keep-looping #f) to halt unit test.

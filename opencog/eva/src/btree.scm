@@ -38,18 +38,17 @@ except:
     print 'Rest API can't be started. Check Python configuration'
 ")
 
+; Load the behavior trees.
+(use-modules (opencog eva-behavior))
 
+; Load the Sophia personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
 (load-from-path "cfg-tools.scm")
 (load-from-path "sophia-cfg.scm") ;;; <<<=== See, its Sophia here!
-(use-modules (opencog eva-behavior))
 
-; (use-modules (opencog logger))
-; (cog-logger-set-stdout #t)
-
-;; Run the main loop (in a new thread)
-;; Call (run) to run the loop, (halt) to pause the loop.
+;; Call (run) to run the main loop, (halt) to pause the loop.
+;; The main loop runs in its own thread.
 (define (run) (behavior-tree-run))
 (define (halt) (behavior-tree-halt))
 
@@ -59,6 +58,6 @@ except:
 ; Silence the output.
 (TrueLink)
 
-;; Actually set it running
-(all-threads)
+;; Actually set it running, by default.
+(all-threads)  ; print out the curent threads.
 (run)
