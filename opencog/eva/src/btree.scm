@@ -24,10 +24,13 @@
 
 (use-modules (opencog))
 
-; Start the cogsserver and it's RestAPI.  I don't know why this is
-; needed; Vytas added this code earlier in a different file.
+; Start the cogsserver.  It is used by the face-tracker to poke data
+; into the atomspace.
 (use-modules (opencog cogserver))
 (start-cogserver "../scripts/opencog.conf")
+
+; Start the cogserver's RestAPI.  I don't know why this is
+; needed; Vytas added this code earlier in a different file.
 (use-modules (opencog python))
 (python-eval "
 try:
