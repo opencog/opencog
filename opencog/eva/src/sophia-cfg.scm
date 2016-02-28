@@ -3,11 +3,8 @@
 ;
 ; Behavior Tree configuration parameters for the Sophia blender model.
 ;
-; This is (meant to be) a verbatim translation of the contents of the
-; old `behavior.cfg` file.
-;
-; The configuration controls here "personality": the kinds of
-; expressions she shows on her face, how intensly she shows them,
+; The configuration controls her "personality": the kinds of
+; expressions she shows on her face, how intensely she shows them,
 ; how long she shows them for. It also controls the probability
 ; of her reacting in certain ways to situations, or doing certain
 ; things in given situations.

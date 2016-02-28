@@ -3,11 +3,8 @@
 ;
 ; Behavior Tree configuration parameters for the Eva blender model.
 ;
-; This is (meant to be) a verbatim translation of the contents of the
-; old `behavior.cfg` file.
-;
-; The configuration controls here "personality": the kinds of
-; expressions she shows on her face, how intensly she shows them,
+; The configuration controls her "personality": the kinds of
+; expressions she shows on her face, how intensely she shows them,
 ; how long she shows them for. It also controls the probability
 ; of her reacting in certain ways to situations, or doing certain
 ; things in given situations.
@@ -26,14 +23,26 @@
 ; * max intensity of expression
 ; * min duration of expression
 ; * max duration of expression
+;
+; rostopic echo /blender_api/available_emotion_states
+; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+;
+; Of the above, 'worry' and 'afraid' are not used, below.
+; 'worry' is interesting, but not clear when to use it...
+; 'afraid' ... when could we use this?
+;
+; Cheat sheet: to display just one of these:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
 ; Used when chatbot is not happy; also, when someone leaves.
-(emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 3 7)
+(emo-expr-spec "frustrated" "confused"    0.4 0.4 0.7 3 7)
 (emo-expr-spec "frustrated" "recoil"      0.3 0.4 0.6 3 7)
-(emo-expr-spec "frustrated" "surprised"   0.3 0.1 0.2 3 7)
+(emo-expr-spec "frustrated" "surprised"   0.3 0.4 0.6 3 7)
 
 (emo-expr-spec "positive" "happy"         0.2 0.6 0.8 10 15)
 (emo-expr-spec "positive" "comprehending" 0.3 0.5 0.8 10 15)
@@ -74,6 +83,15 @@
 ; The "noop" gesture is a special no-operation gesture; if selected,
 ; then nothing is done. This allows gestures to be generated only some
 ; of the time; the "noop" is what is "done" the rest of the time.
+;
+; rostopic echo /blender_api/available_gestures
+; ['all', 'amused', 'blink', 'blink-micro', 'blink-relaxed',
+;  'blink-sleepy', 'nod-1', 'nod-2', 'nod-3', 'shake-2', 'shake-3',
+;  'thoughtful', 'yawn-1']
+;
+; Cheat sheet:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
+;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
 
 ; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
@@ -92,12 +110,15 @@
 (emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
 
 ; New beavior.cfg line 120 "listening_gestures"
-(emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
-(emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
-(emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
+; "thoughtfule is very pronounced, so keep it light.
+(emo-gest-spec "listening" "thoughtful"  1.0 0.2 0.4 1 1 0.2 0.6)
+; none-such animations
+; (emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
+; (emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
+; (emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
 ; New behavior.cfg line 149
-(emo-gest-spec "chat-positive-nod" "nod-6"  0.5 0.8 0.9 1 1 0.2 0.4)
+(emo-gest-spec "chat-positive-nod" "nod-3"  0.5 0.8 0.9 2 2 0.2 0.4)
 (emo-gest-spec "chat-positive-nod" "noop"   0.5 0   0   1 1 0   0)
 
 (emo-gest-spec "chat-negative-shake" "shake-3"  0.9 0.9 0.9 1 1 0.4 0.7)
@@ -105,10 +126,15 @@
 
 ; line 160 plus lines 1351ff of new general_behavior.py
 ; aka stuff for "chatbot_positive_reply_think"
-(emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
+(emo-gest-spec "chat-pos-think" "thoughtful"  0.8 0.2 0.4 1 1 0.2 0.6)
+; This animation doesn't exist ...
+; (emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-pos-think" "noop"           0.2 0   0   1 1 0   0  )
 
-(emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
+; Will do negative by doig two repeats, subtle and fast.
+(emo-gest-spec "chat-neg-think" "thoughtful"  0.8 0.1 0.2 2 2 0.5 0.9)
+; This animation doesn't exist ...
+; (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
 ; --------------------------------------------------------
