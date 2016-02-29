@@ -46,12 +46,60 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-demands)
+(define-public (psi-get-demands dpn)
 "
-  Returns a list containing the nodes that carry the demand-value. The
+  Filters demands using the DefinedPredicateNode passed as argument and
+  returns a SetLink with the results.
+
+  dpn:
+  - DefinedPredicateNode that represents the evaluatable term that will filter
+    demands. The evaluatable term should take a single demand-ConceptNode and
+    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    (Optionaly the argument could be a TrueLink for returning all the demands
+    defined)
+"
+
+    ; NOTE: Should there be weight b/n the different demand-goals? For now a
+    ; a random choice of demands is assumed. In subsequent steps. The
+    ; demand-value could possibly be used for that.
+    (define (get-demand) (cog-execute!
+        ; Filter out the demand-nodes only
+        (MapLink
+            (ImplicationLink
+                (VariableList
+                    (TypedVariable (Variable "$x") (Type "ConceptNode"))
+                    (TypedVariable (Variable "$y") (Type "NumberNode")))
+                (ListLink
+                    (Variable "$x")
+                    (Variable "$y")
+                )
+                (Variable "$x"))
+
+            (GetLink
+                (VariableList (assoc-ref (psi-demand-pattern) "var"))
+                (AndLink
+                    (assoc-ref (psi-demand-pattern) "pat")
+                    dpn)))
+        ))
+
+    ; check arguments
+    (if (and (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+             (not (equal? (cog-type dpn) 'TrueLink)))
+        (error "Expected DefinedPredicateNode or TrueLink got: " dpn))
+
+    ; TODO: 1. deal with multiple returns
+    ;       2. check if the demands have been correctly tagged or maybe add
+    ;          psi-register-goal-selector
+    (get-demand)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-demands-all)
+"
+  Returns a SetLink containing the nodes that carry the demand-value. The
   strength of their stv is the demand value.
 "
-    (psi-select-demand (TrueLink))
+    (psi-get-demands (TrueLink))
 )
 
 ; --------------------------------------------------------------
@@ -119,7 +167,7 @@
   - The atom that is being checked to see if it is the Node that represents
     a demand type.
 "
-    (define demand-names (map cog-name (cog-outgoing-set (psi-get-demands))))
+    (define demand-names (map cog-name (cog-outgoing-set (psi-get-demands-all))))
     (if (and (member (cog-name atom) demand-names)
              (equal? (cog-type atom) 'ConceptNode))
         (stv 1 1)
@@ -198,61 +246,13 @@
     (let ((atom-strength (tv-mean (cog-tv atom)))
           (lowest-demand-value (car (list-sort < (delete-duplicates
               (map (lambda (x) (tv-mean (cog-tv x)))
-                   (cog-outgoing-set (psi-get-demands)))))))
+                   (cog-outgoing-set (psi-get-demands-all)))))))
          )
          (if (<= atom-strength lowest-demand-value)
             (stv 1 1)
             (stv 0 1)
          )
     )
-)
-
-; --------------------------------------------------------------
-(define-public (psi-select-demand dpn)
-"
-  Filters demands using the DefinedPredicateNode passed as argument and
-  returns a SetLink with the results.
-
-  dpn:
-  - DefinedPredicateNode that represents the evaluatable term that will filter
-    demands. The evaluatable term should take a single demand-ConceptNode and
-    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
-    (Optionaly the argument could be a TrueLink for returning all the demands
-    defined)
-"
-
-    ; NOTE: Should there be weight b/n the different demand-goals? For now a
-    ; a random choice of demands is assumed. In subsequent steps. The
-    ; demand-value could possibly be used for that.
-    (define (get-demand) (cog-execute!
-        ; Filter out the demand-nodes only
-        (MapLink
-            (ImplicationLink
-                (VariableList
-                    (TypedVariable (Variable "$x") (Type "ConceptNode"))
-                    (TypedVariable (Variable "$y") (Type "NumberNode")))
-                (ListLink
-                    (Variable "$x")
-                    (Variable "$y")
-                )
-                (Variable "$x"))
-
-            (GetLink
-                (VariableList (assoc-ref (psi-demand-pattern) "var"))
-                (AndLink
-                    (assoc-ref (psi-demand-pattern) "pat")
-                    dpn)))
-        ))
-
-    ; check arguments
-    (if (and (not (equal? (cog-type dpn) 'DefinedPredicateNode))
-             (not (equal? (cog-type dpn) 'TrueLink)))
-        (error "Expected DefinedPredicateNode or TrueLink got: " dpn))
-
-    ; TODO: 1. deal with multiple returns
-    ;       2. check if the demands have been correctly tagged or maybe add
-    ;          psi-register-goal-selector
-    (get-demand)
 )
 
 ; --------------------------------------------------------------
@@ -483,7 +483,7 @@
 "
     (append-map
         (lambda (x) (cog-outgoing-set (psi-get-action-rules x "Default")))
-        (cog-outgoing-set (psi-get-demands)))
+        (cog-outgoing-set (psi-get-demands-all)))
 )
 
 ; --------------------------------------------------------------

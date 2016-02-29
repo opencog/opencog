@@ -234,13 +234,13 @@
     )
 
     (let* ((goal-selector (get-goal-selector))
-           (demands (psi-select-demand goal-selector))
+           (demands (psi-get-demands goal-selector))
            (effect (psi-goal-selector-effect-type goal-selector)))
 
        ; If there are no demands that satisfy the condition then choose one
         (if (null? (cog-outgoing-set demands))
             (set-goal
-                (cog-execute! (RandomChoiceLink (psi-select-demand (TrueLink))))
+                (cog-execute! (RandomChoiceLink (psi-get-demands-all)))
                 (ConceptNode (string-append (psi-prefix-str) "Default")))
             (set-goal (cog-execute! (RandomChoiceLink demands)) effect)
         )

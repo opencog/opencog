@@ -39,7 +39,7 @@
 
     (display "Start------------------------\n")
     ; Startup state
-    (format #t "* Initial state of demands =\n~a\n" (psi-get-demands))
+    (format #t "* Initial state of demands =\n~a\n" (psi-get-demands-all))
     (format #t "* Initial actions in asp =\n~a\n" (ure-rbs-rules (psi-asp)))
     (format #t "* Initial goal =\n~a\n" (psi-current-goal))
 
