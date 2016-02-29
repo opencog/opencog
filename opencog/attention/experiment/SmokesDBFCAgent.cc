@@ -28,6 +28,7 @@
 #include <opencog/attention/experiment/tv-toolbox/TVToolBoxCInterface_stub.h>
 
 #include <algorithm>
+#include <fstream>
 
 #include "SmokesDBFCAgent.h"
 
@@ -201,6 +202,9 @@ void SmokesDBFCAgent::run()
     std::cerr << "\tFound " << unique.size() << " unique inferences.\n\t";
 
     for (Handle& h : unique) {
+        save("smokes-fc-resulut.data",HandleSeq {},"\ncycle="+std::to_string(cogserver().getCycleCount())+
+             " smokers mean_tv="+std::to_string(smokes_mean())+" friendship mean_tv="+std::to_string(friends_mean()));
+        save("smokes-fc-resulut.data", HandleSeq { h }, "FC_RESLUT");
         if (is_surprising(h)) {
             //xxx not sure what amount of stimulus should be provided.
             auto stimval = _atomspace.get_attentional_focus_boundary() + 10;
@@ -225,8 +229,12 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
         // Calculate the Jensen Shanon distance bn mean_tv and h's tv
         float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
                                (h->getTruthValue())->getMean(), 100, 100);
+
+        // Logging
         std::cerr << "JSD_VAL between result and the above mean= " << mi
                   << "\n";
+        save("smokes-fc-resulut.data",HandleSeq{},"JSD_VAL="+std::to_string(mi));
+
         auto it = dist_surprisingness_friends.begin();
         // Consider the first top_k values as surprising. After we have enough
         // data only consider those who have higher value than the lbound of the
@@ -248,8 +256,12 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
         // Calculate the Jensen Shanon distance bn mean_tv and h's tv
         float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
                                (h->getTruthValue())->getMean(), 100, 100);
+
+        // Logging
         std::cerr << "JSD_VAL between result and the above mean= " << mi
                   << "\n";
+        save("smokes-fc-resulut.data",HandleSeq{},"JSD_VAL="+std::to_string(mi));
+
         auto it = dist_surprisingness_smokes.begin();
         // Consider the first top_k values as surprising. After we have enough
         // data only consider those who have higher value than the lbound of the
@@ -268,6 +280,8 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
 
     std::cerr << "Result Found to be "
               << (val ? "surprising" : "not surprising") << "\n";
+    save("smokes-fc-resulut.data",HandleSeq{},(val ? "surprising" : "not surprising"));
+
     return val;
 }
 
@@ -372,4 +386,19 @@ bool SmokesDBFCAgent::is_smokes_reln(const Handle& h)
         return true;
     else
         return false;
+}
+
+void SmokesDBFCAgent::save(const string& filename, const HandleSeq& seq, const string& header)
+{
+    std::stringstream sstream;
+    sstream << header << std::endl;
+    for (const Handle& h : seq)
+        sstream << h->toShortString() << std::endl;
+
+    std::ofstream outf(filename, std::ofstream::out | std::ofstream::app);
+    outf << sstream.str();
+    outf.flush();
+    outf.close();
+
+    return;
 }

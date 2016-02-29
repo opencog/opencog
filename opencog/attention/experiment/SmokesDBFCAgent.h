@@ -67,6 +67,8 @@ private:
 
     float smokes_mean();
 
+    void save(const string& filename, const HandleSeq& seq, const string& header);
+
 
 public:
     SmokesDBFCAgent(CogServer& cs);
