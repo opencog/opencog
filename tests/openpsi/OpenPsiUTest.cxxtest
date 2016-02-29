@@ -67,7 +67,7 @@ public:
 
         // Configure scheme load-paths that are common for all tests.
         _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        CHKERR 
+        CHKERR
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
         CHKERR
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
@@ -112,11 +112,11 @@ public:
         CHKERR
 
         // Test for `psi-get-action-rules` for the 3 psi-effect-types
-        auto def_h = _scm->eval_h("(psi-get-action-rules energy \"Default\")");
-        auto inc_h = _scm->eval_h("(psi-get-action-rules energy \"Increase\")");
-        auto dec_h = _scm->eval_h("(psi-get-action-rules energy \"Decrease\")");
-        TS_ASSERT_EQUALS(def_h->getArity(), 1);
-        TS_ASSERT_EQUALS(inc_h->getArity(), 2);
-        TS_ASSERT_EQUALS(dec_h->getArity(), 2);
+        TSM_ASSERT_EQUALS("Not the expected 'Default' action-rule", \
+            _scm->eval_h("(test-def)"), _scm->eval_h("(test-def-result)"));
+        TSM_ASSERT_EQUALS("Not the expected 'Increase' action-rules", \
+            _scm->eval_h("(test-inc)"), _scm->eval_h("(test-inc-result)"));
+        TSM_ASSERT_EQUALS("Not the expected 'Decrease' action-rules", \
+            _scm->eval_h("(test-dec)"), _scm->eval_h("(test-dec-result)"));
     }
 };

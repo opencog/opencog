@@ -16,3 +16,24 @@
 ; Add action for decreasing the energy-demand.
 (psi-action-rule-minimize energy 6)
 (psi-action-rule-minimize energy 5)
+
+; For test_psi_get_action_rules
+(define (test-def) (psi-get-action-rules energy "Default"))
+(define (test-def-result)
+    (SetLink (DefinedSchemaNode "OpenPsi: Energy-action-rule-Default"))
+)
+
+(define (test-inc) (psi-get-action-rules energy "Increase"))
+(define (test-inc-result)
+    (SetLink
+      (DefinedSchemaNode "OpenPsi: Energy-action-rule-maximize-10")
+      (DefinedSchemaNode "OpenPsi: Energy-action-rule-maximize-5")
+    )
+)
+(define (test-dec) (psi-get-action-rules energy "Decrease"))
+(define (test-dec-result)
+    (SetLink
+      (DefinedSchemaNode "OpenPsi: Energy-action-rule-minimize-6")
+      (DefinedSchemaNode "OpenPsi: Energy-action-rule-minimize-5")
+    )
+)
