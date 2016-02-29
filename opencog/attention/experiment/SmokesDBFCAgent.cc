@@ -229,7 +229,7 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
                   << "\n";
         auto it = dist_surprisingness_friends.begin();
         // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value of the lbound of the
+        // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
         unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
 
@@ -252,7 +252,7 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
                   << "\n";
         auto it = dist_surprisingness_smokes.begin();
         // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value of the lbound of the
+        // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
         unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
 
