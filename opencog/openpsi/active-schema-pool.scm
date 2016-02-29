@@ -35,12 +35,8 @@
   Returns a list of results from the step.
 "
     ;TODO: Move logic to atomese, so as to simply life for everyone.
-    (let* ((asp (psi-asp))
-         (result (cog-fc (SetLink) asp (SetLink)))
-         (result-list (cog-outgoing-set result)))
-
-         (cog-delete result)
-         result-list
+    (let* ((asp (psi-asp)))
+        (cog-fc (SetLink) asp (SetLink))
     )
 )
 
