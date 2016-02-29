@@ -31,30 +31,29 @@
 using namespace opencog;
 
 #define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
 
 class OpenPsiUTest : public CxxTest::TestSuite
 {
 private:
-    AtomSpace _as;
-    SchemeEval _scm;
+    AtomSpace* _as;
+    SchemeEval* _scm;
 
 public:
-    OpenPsiUTest() : _scm(&_as)
+    OpenPsiUTest(): _as(NULL), _scm(NULL)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
         logger().set_print_to_stdout_flag(true);
-
-        // Configure scheme load-paths that are common for all tests.
-        _scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        _scm.eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
-        _scm.eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "/opencog/scm\")");
-        // TODO: Replace with use-modules when openpsi is modularized
-        _scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
     }
 
     ~OpenPsiUTest()
     {
+        delete _as;
+        delete _scm;
+
         // Erase the log file if no assertions failed
         if(!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().get_filename().c_str());
@@ -62,6 +61,22 @@ public:
 
     void setUp()
     {
+        // The scheme environment is reset between each test.
+        _as = new AtomSpace();
+        _scm = new SchemeEval(_as);
+
+        // Configure scheme load-paths that are common for all tests.
+        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        CHKERR 
+        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
+        CHKERR
+        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
+                   "/opencog/scm\")");
+       CHKERR
+        // TODO: Replace with use-modules when openpsi is modularized
+        _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
+       CHKERR
+
         // This is a copy of development.conf SCM_PRELOAD section after
         // removing files not associated with scheme  modules that are not
         // in use.
@@ -72,26 +87,34 @@ public:
                     "scm/utilities.scm,"
                     "scm/apply.scm,"
                     "scm/file-utils.scm,"
-                    "scm/persistence.scm,"
                     "scm/config.scm,"
                     "scm/repl-shell.scm,"
                     "scm/av-tv.scm,"
                     "scm/rule-engine-utils.scm");
 
-        load_scm_files_from_config(_as);
-        _as.clear();
+        load_scm_files_from_config(*_as);
+    }
+
+    void tearDown()
+    {
+        _as = NULL;
+        _scm = NULL;
     }
 
     void test_psi_get_action_rules()
     {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
         // Load function definition to be tested and populate the atomspace
-        _scm.eval("(load-from-path \"openpsi/demand.scm\")");
-        _scm.eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
+        _scm->eval("(load-from-path \"openpsi/demand.scm\")");
+        CHKERR
+        _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
+        CHKERR
 
         // Test for `psi-get-action-rules` for the 3 psi-effect-types
-        auto def_h = _scm.eval_h("(psi-get-action-rules energy \"Default\")");
-        auto inc_h = _scm.eval_h("(psi-get-action-rules energy \"Increase\")");
-        auto dec_h = _scm.eval_h("(psi-get-action-rules energy \"Decrease\")");
+        auto def_h = _scm->eval_h("(psi-get-action-rules energy \"Default\")");
+        auto inc_h = _scm->eval_h("(psi-get-action-rules energy \"Increase\")");
+        auto dec_h = _scm->eval_h("(psi-get-action-rules energy \"Decrease\")");
         TS_ASSERT_EQUALS(def_h->getArity(), 1);
         TS_ASSERT_EQUALS(inc_h->getArity(), 2);
         TS_ASSERT_EQUALS(dec_h->getArity(), 2);
