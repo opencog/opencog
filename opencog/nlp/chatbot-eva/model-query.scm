@@ -40,6 +40,9 @@
 			(dependency "_subj" "$verb-inst" "$subj-inst")
 			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
 
+; XXX FIXME This is wrong; this has been replaced by the eva-model
+; code in the ros-behavior-scripting tree. Unfortunately, it does
+; not offer any easy way of querying.
 			(State (Anchor "*-gaze-direction-*") (Variable "$direction"))
 		)
 		(SetLink

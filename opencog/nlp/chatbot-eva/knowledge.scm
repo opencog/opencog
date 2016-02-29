@@ -64,6 +64,14 @@
 ; is specific to the HR robot head.  Distance in meters, the origin
 ; of the system is behind the eyes, middle of head.  "forward" is the
 ; object the chest is facing.
+;
+; XXX This is incorrect, just right now; its too simple, and interacts
+; badly with the tf2 face tracker.  The directions need to be general
+; 2D areas.  For imperative commands, we need to pick some random point
+; out of the 2D area. To answer questions, we need to compare the 2D
+; extent to the current gaze direction.  Problem: the gaze direction
+; is buried in the tf2 tree for the chest-camera face detector, where
+; we cannot easily query it.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
