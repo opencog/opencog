@@ -18,6 +18,7 @@
 #include <opencog/util/random.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
 #include <opencog/attention/experiment/tv-toolbox/TVToolBoxCInterface_stub.h>
 
 #include <algorithm>
@@ -54,9 +55,11 @@ private:
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
-    std::unique_ptr<ForwardChainer> fc;
+    string loggername = "smokeslog.log";
+    Logger * smokes_logger;
     // A descending order sorted surprising result list.
-    std::set<float,std::greater<int>> dist_surprisingness;
+    std::set<float,std::greater<int>> dist_surprisingness_friends;
+    std::set<float,std::greater<int>> dist_surprisingness_smokes;
 
     const int K_PERCENTILE = 5;
 
