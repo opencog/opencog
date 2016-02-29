@@ -116,8 +116,8 @@ void SmokesDBFCAgent::run()
     std::cerr << "CYCLE:" << cogserver().getCycleCount() << std::endl;
 
     if (first_run) {
-        //Pull some atoms to the AF set
-        // Select a random source from the atomspace to start with FC.
+        // Pull some atoms to the AF set
+        // and select a random source from the pulled set for starting FC with.
         HandleSeq hs;
         _atomspace.get_handles_by_type(std::back_inserter(hs), ATOM, true);
 
