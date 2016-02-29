@@ -93,23 +93,24 @@ public:
                     "scm/rule-engine-utils.scm");
 
         load_scm_files_from_config(*_as);
-    }
-
-    void tearDown()
-    {
-        _as = NULL;
-        _scm = NULL;
-    }
-
-    void test_psi_get_action_rules()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        _as->clear();
 
         // Load function definition to be tested and populate the atomspace
         _scm->eval("(load-from-path \"openpsi/demand.scm\")");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
         CHKERR
+    }
+
+    void tearDown()
+    {
+        _as = nullptr;
+        _scm = nullptr;
+    }
+
+    void test_psi_get_action_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         // Test for `psi-get-action-rules` for the 3 psi-effect-types
         TSM_ASSERT_EQUALS("Not the expected 'Default' action-rule", \
@@ -118,5 +119,18 @@ public:
             _scm->eval_h("(test-inc)"), _scm->eval_h("(test-inc-result)"));
         TSM_ASSERT_EQUALS("Not the expected 'Decrease' action-rules", \
             _scm->eval_h("(test-dec)"), _scm->eval_h("(test-dec-result)"));
+
+        logger().info("END TEST: %s", __FUNCTION__);
     }
+
+    void test_psi_select_demand()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        TSM_ASSERT_EQUALS("Not the expected set of openpsi demands", \
+            _scm->eval_h("(test-select-all)"), \
+            _scm->eval_h("(test-select-all-result)"));
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
 };

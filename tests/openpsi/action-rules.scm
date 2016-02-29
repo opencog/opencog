@@ -41,3 +41,10 @@
 )
 
 ; --------------------------------------------------------------
+; For test_psi_select_demand
+(define (test-select-all) (psi-get-demands))
+(define (test-select-all-result)
+    (SetLink
+      (ConceptNode "OpenPsi: Energy" (stv 0.710000 1.000000))
+    )
+)
