@@ -302,6 +302,10 @@ stage, so that any synonym of "look" is sufficient.  Even more: any
 synonymous command should be enough, not just on the word level, but
 generally.
 
+"Keep smiling" needs to relaunch the smile animation every second or
+so, because it fades away.  Thus, we need some temporal thread to keep
+this going.
+
 
 Bugs
 ----

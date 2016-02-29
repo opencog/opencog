@@ -1134,3 +1134,11 @@ dbg(str(A))
 (load "run-chatbot.scm")
 (process-query 'luser "Look left!")
 (process-query 'luser "where are you looking?")
+
+wh_query_process
+
+self-wh-query
+where-look-rule
+
+orchestrate first, then model.
+(DefinedPredicate "Gaze at point")
