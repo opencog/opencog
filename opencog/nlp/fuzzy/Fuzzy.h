@@ -60,6 +60,8 @@ class Fuzzy :
         // A vector for storing the "contents" of the accepted solutions
         // mainly to avoid returning duplicate solutions
         HandleSeqSeq solns_contents;
+
+        std::set<Handle> solns_seen;
 };
 
 }
